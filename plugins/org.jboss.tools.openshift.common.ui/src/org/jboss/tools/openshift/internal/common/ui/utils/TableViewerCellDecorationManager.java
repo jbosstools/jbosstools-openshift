@@ -32,7 +32,7 @@ public class TableViewerCellDecorationManager {
 
 	private Image image;
 	private Table table;
-	private Map<ViewerCell, TableEditor> decorationByCell = new HashMap<ViewerCell, TableEditor>();
+	private Map<ViewerCell, TableEditor> decorationByCell = new HashMap<>();
 
 	/**
 	 * @param table

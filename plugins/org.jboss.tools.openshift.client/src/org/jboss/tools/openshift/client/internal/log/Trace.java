@@ -48,7 +48,7 @@ public class Trace {
 		if (context == null)
 			return null;
 		this.tracker = 
-				new ServiceTracker<DebugOptions, DebugOptions>(context, DebugOptions.class.getName(), null);
+				new ServiceTracker<>(context, DebugOptions.class.getName(), null);
 		tracker.open();
 		return tracker.getService();
 	}

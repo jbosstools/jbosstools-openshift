@@ -84,7 +84,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	private List<IApplication> createAllApplicationsList(IDomain domain, ICartridge... cartridges) {
-		List<IApplication> applications = new ArrayList<IApplication>();
+		List<IApplication> applications = new ArrayList<>();
 		if (cartridges != null) {
 			for (ICartridge cartridge : cartridges) {
 				applications.add(new ApplicationFake((IStandaloneCartridge) cartridge));
@@ -94,7 +94,7 @@ public class EmbedCartridgeStrategyTest {
 	}
 
 	private <C> List<C> createCartridgesList(C... cartridges) {
-		List<C> embeddableCartridges = new ArrayList<C>();
+		List<C> embeddableCartridges = new ArrayList<>();
 		if (cartridges != null) {
 			for (C cartridge : cartridges) {
 				embeddableCartridges.add(cartridge);
@@ -106,7 +106,7 @@ public class EmbedCartridgeStrategyTest {
 	@Test
 	public void shouldNotAddMySql() throws OpenShiftException {
 		// given
-		Set<ICartridge> currentCartridges = new HashSet<ICartridge>();
+		Set<ICartridge> currentCartridges = new HashSet<>();
 		currentCartridges.add(CARTRIDGE_MYSQL);
 
 		// when
@@ -156,7 +156,7 @@ public class EmbedCartridgeStrategyTest {
 	@Test
 	public void shouldRemovePhpMyAdmin() throws OpenShiftException {
 		// given
-		Set<ICartridge> currentCartridges = new HashSet<ICartridge>();
+		Set<ICartridge> currentCartridges = new HashSet<>();
 		currentCartridges.add(CARTRIDGE_MYSQL);
 		currentCartridges.add(CARTRIDGE_PHPMYADMIN);
 
@@ -175,7 +175,7 @@ public class EmbedCartridgeStrategyTest {
 	@Test
 	public void shouldRemovePhpMyAdminAndMySql() throws OpenShiftException {
 		// given
-		Set<ICartridge> currentCartridges = new HashSet<ICartridge>();
+		Set<ICartridge> currentCartridges = new HashSet<>();
 		currentCartridges.add(CARTRIDGE_MYSQL);
 		currentCartridges.add(CARTRIDGE_PHPMYADMIN);
 
@@ -211,7 +211,7 @@ public class EmbedCartridgeStrategyTest {
 	@Test
 	public void shouldRemoveRockmongoAnd10genAndMongoDb() throws OpenShiftException {
 		// given
-		Set<ICartridge> currentCartridges = new HashSet<ICartridge>();
+		Set<ICartridge> currentCartridges = new HashSet<>();
 		currentCartridges.add(CARTRIDGE_MONGODB);
 		currentCartridges.add(CARTRIDGE_ROCKMONGO);
 		currentCartridges.add(CARTRIDGE_10GEN_MMS_AGENT);

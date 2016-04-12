@@ -59,10 +59,10 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 			new StringsPreferenceValue('|', CONNECTIONS, UI_PLUGIN_ID);
 
 	private final StringsPreferenceValue tailFileOptionsPreferenceValues;
-	private final Map<String, String> tailOptionsByUUID = new HashMap<String, String>();
+	private final Map<String, String> tailOptionsByUUID = new HashMap<>();
 
 	private final StringsPreferenceValue snapshotFilesPreferenceValues;
-	private final Map<String, Snapshots> snapshotsByUUID = new HashMap<String, Snapshots>();
+	private final Map<String, Snapshots> snapshotsByUUID = new HashMap<>();
 	
 	private final StringsPreferenceValue downloadableStandaloneCartUrls =
 			new StringsPreferenceValue('|', 10, DOWNLOADABLE_STANDALONECART_URLS, ExpressCoreActivator.PLUGIN_ID);;
@@ -146,7 +146,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 	}
 
 	private void saveAllTailOptions() {
-		List<String> uuidsAndOptions = new ArrayList<String>();
+		List<String> uuidsAndOptions = new ArrayList<>();
 		for (Map.Entry<String, String> entry : tailOptionsByUUID.entrySet()) {
 			// TODO: remove/cleanup killed applications
 			String uuid = entry.getKey();
@@ -218,7 +218,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 	}
 	
 	private void saveAllSnapshots() {
-		List<String> uuidsAndSnapshots = new ArrayList<String>();
+		List<String> uuidsAndSnapshots = new ArrayList<>();
 		for (Map.Entry<String, Snapshots> entry : snapshotsByUUID.entrySet()) {
 			// TODO: remove/cleanup killed applications
 			String uuid = entry.getKey();

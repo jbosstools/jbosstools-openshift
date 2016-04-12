@@ -50,7 +50,7 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 	}
 
 	private String[] split(String string) {
-		ArrayList<String> values = new ArrayList<String>();
+		ArrayList<String> values = new ArrayList<>();
 		StringTokenizer tokenizer = new StringTokenizer(string, delimiter);
 		while (tokenizer.hasMoreTokens()) {
 			String value = tokenizer.nextToken();

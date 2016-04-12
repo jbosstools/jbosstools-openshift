@@ -32,7 +32,7 @@ public class URIUtils {
 	}
 	
 	public static Map<String, String> splitFragment(URI uri){
-		HashMap<String, String> fragments = new HashMap<String, String>();
+		HashMap<String, String> fragments = new HashMap<>();
 		String fragment = uri.getFragment();
 		if(fragment != null){
 			String [] entries = fragment.split("&");

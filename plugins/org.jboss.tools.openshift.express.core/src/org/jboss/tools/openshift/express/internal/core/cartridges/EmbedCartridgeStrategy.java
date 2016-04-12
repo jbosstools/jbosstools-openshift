@@ -76,9 +76,9 @@ public class EmbedCartridgeStrategy {
 
 	private void initDependencyMaps(Collection<ICartridge> allEmbeddableCartridges,
 			Collection<ICartridge> allCartridges, EmbeddableCartridgeRelations... dependencies) {
-		this.dependenciesByCartridge = new HashMap<ICartridge, EmbeddableCartridgeRelations>();
+		this.dependenciesByCartridge = new HashMap<>();
 
-		this.dependantsByCartridge = new HashMap<ICartridge, Set<ICartridge>>();
+		this.dependantsByCartridge = new HashMap<>();
 		for (EmbeddableCartridgeRelations dependency : dependencies) {
 			createDependency(allEmbeddableCartridges, dependency);
 			createDependants(allEmbeddableCartridges, dependency);
@@ -93,7 +93,7 @@ public class EmbedCartridgeStrategy {
 			if (dependantCartridge != null) {
 				dependantsByCartridge.put(
 						dependantCartridge,
-						dependants = new HashSet<ICartridge>());
+						dependants = new HashSet<>());
 			}
 		}
 		if (dependants != null) {
@@ -326,9 +326,9 @@ public class EmbedCartridgeStrategy {
 
 		protected EmbeddableCartridgeDiff(ICartridge cartridge) {
 			this.cartridge = cartridge;
-			this.removals = new ArrayList<ICartridge>();
-			this.additions = new ArrayList<ICartridge>();
-			this.applicationAdditions = new ArrayList<ICartridge>();
+			this.removals = new ArrayList<>();
+			this.additions = new ArrayList<>();
+			this.applicationAdditions = new ArrayList<>();
 		}
 
 		public ICartridge getCartridge() {

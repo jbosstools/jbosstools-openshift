@@ -41,7 +41,7 @@ public class ApplicationDetailsContentProviderTest {
 
 	private void assertApplicationDetails(String[] exp, Object[] elements) {
 		IProperty[] props = Arrays.copyOf(elements, elements.length, IProperty[].class);
-		List<String> actual = new ArrayList<String>(props.length);
+		List<String> actual = new ArrayList<>(props.length);
 		for (int i = 0; i < props.length; i++) {
 			actual.add(props[i].getName());
 		}

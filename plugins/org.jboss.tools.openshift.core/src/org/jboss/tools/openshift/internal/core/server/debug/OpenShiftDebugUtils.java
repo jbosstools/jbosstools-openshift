@@ -248,7 +248,7 @@ public class OpenShiftDebugUtils {
 		String portString = String.valueOf(debugPort);
 	    workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE, false);
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR, IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
-		Map<String, String> connectMap = new HashMap<String, String>(2);
+		Map<String, String> connectMap = new HashMap<>(2);
 		connectMap.put("port", portString); //$NON-NLS-1$
 		connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);

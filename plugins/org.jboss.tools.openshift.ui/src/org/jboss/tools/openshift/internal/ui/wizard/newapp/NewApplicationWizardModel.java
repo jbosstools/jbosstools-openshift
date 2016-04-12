@@ -62,10 +62,10 @@ public class NewApplicationWizardModel
 	private ITemplate selectedTemplate;
 	private ITemplate localTemplate;
 	private ITemplate serverTemplate;
-	private List<IParameter> parameters = new ArrayList<IParameter>();
+	private List<IParameter> parameters = new ArrayList<>();
 	private IParameter selectedParameter;
 	private Map<String, String> originalValueMap;
-	private Collection<IResource> items = new ArrayList<IResource>(); 
+	private Collection<IResource> items = new ArrayList<>(); 
 	private boolean useLocalTemplate = true;
 	private String localTemplateFilename;
 	private IResourceFactory resourceFactory;
@@ -167,7 +167,7 @@ public class NewApplicationWizardModel
 		if (template == null) {
 			return;
 		}
-		setParameters(new ArrayList<IParameter>(template.getParameters().values()));
+		setParameters(new ArrayList<>(template.getParameters().values()));
 		setItems(template.getItems());
 		setLabels(template.getObjectLabels());
 	}
@@ -291,7 +291,7 @@ public class NewApplicationWizardModel
 
 	private void setLabels(Map<String, String> labelMap) {
 		if(labelMap == null) return;
-		List<Label> labels =  new ArrayList<Label>(labelMap.size());
+		List<Label> labels =  new ArrayList<>(labelMap.size());
 		for (Entry<String,String> entry : labelMap.entrySet()) {
 			labels.add(new Label(entry.getKey(), entry.getValue()));
 		}

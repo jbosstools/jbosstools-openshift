@@ -123,7 +123,7 @@ public class ExpressServerWizardComposite {
 	private List<IDomain> domains;
 	private List<IApplication> applications;
 	private IServerWorkingCopy server;
-	private Map<IApplication, IProject[]> projectsByApplication = new HashMap<IApplication, IProject[]>();
+	private Map<IApplication, IProject[]> projectsByApplication = new HashMap<>();
 
 	public ExpressServerWizardComposite(Composite container, IServerModeUICallback callback) {
 		this.callback = callback;
@@ -666,7 +666,7 @@ public class ExpressServerWizardComposite {
 	}
 	
 	private Map<IApplication, IProject[]> createProjectsByApplication(List<IApplication> applications) {
-		Map<IApplication, IProject[]> projectsByApplication = new HashMap<IApplication, IProject[]>();
+		Map<IApplication, IProject[]> projectsByApplication = new HashMap<>();
 		if (applications != null) {
 			for (int i = 0; i < applications.size(); i++) {
 				projectsByApplication.put(applications.get(i),

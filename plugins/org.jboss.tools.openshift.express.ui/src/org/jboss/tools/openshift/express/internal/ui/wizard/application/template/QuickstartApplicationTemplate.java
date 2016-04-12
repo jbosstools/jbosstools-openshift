@@ -78,7 +78,7 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 	}
 
 	protected HashSet<ICartridge> getFirstAlternatives(List<AlternativeCartridges> allAlternatives) {
-		HashSet<ICartridge> cartridges = new HashSet<ICartridge>();
+		HashSet<ICartridge> cartridges = new HashSet<>();
 		for (AlternativeCartridges alternatives : allAlternatives) {
 			ICartridge firstAlternative = CollectionUtils.getFirstElement(alternatives.get());
 			if (firstAlternative != null) {

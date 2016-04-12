@@ -30,7 +30,7 @@ import com.openshift.client.OpenShiftException;
 public class LoadKeysJob extends Job {
 
 	private ExpressConnection user;
-	private List<IOpenShiftSSHKey> keys = new ArrayList<IOpenShiftSSHKey>();
+	private List<IOpenShiftSSHKey> keys = new ArrayList<>();
 
 	public LoadKeysJob(ExpressConnection user) {
 		super("Loading SSH keys... ");

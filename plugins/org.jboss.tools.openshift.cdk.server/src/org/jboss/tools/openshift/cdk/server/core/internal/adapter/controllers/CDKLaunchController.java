@@ -74,9 +74,9 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
     	
     	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map)null);
     	if( env == null ) {
-    		env = new HashMap<String, String>();
+    		env = new HashMap<>();
     	} else {
-    		env = new HashMap<String,String>(env); // no guarantee existing map is editable
+    		env = new HashMap<>(env); // no guarantee existing map is editable
     	}
     	if( passCredentials) {
     		// These environment variables are visible AND persisted in the launch configuration.
@@ -117,7 +117,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
     		// These environment variables are visible AND persisted in the launch configuration.
     		// It is not safe to persist the password here, but rather add it on-the-fly to the 
     		// program launch later on. 
-    		HashMap<String, String> env = new HashMap<String, String>();
+    		HashMap<String, String> env = new HashMap<>();
 			String userKey = server.getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
 			env.put(userKey, userName);
 			wc.setAttribute(ENVIRONMENT_VARS_KEY, env);

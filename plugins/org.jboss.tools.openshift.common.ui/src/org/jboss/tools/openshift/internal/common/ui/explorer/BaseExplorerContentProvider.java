@@ -44,8 +44,8 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	private IConnectionsRegistryListener connectionListener = new ConnectionsRegistryListener();
 
 	// Keep track of what's loading and what's finished
-	private Map<Object, LoadingStub> loadedElements = new ConcurrentHashMap<Object, LoadingStub>();
-	private Map<Object, LoadingStub> loadingElements = new ConcurrentHashMap<Object, LoadingStub>();
+	private Map<Object, LoadingStub> loadedElements = new ConcurrentHashMap<>();
+	private Map<Object, LoadingStub> loadingElements = new ConcurrentHashMap<>();
 	
 	/**
 	 * Get the root elements for the explorer.  This should provide what
@@ -276,7 +276,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	
 	public static class LoadingStub {
 		
-		private List<Object> children = new ArrayList<Object>();
+		private List<Object> children = new ArrayList<>();
 
 		public LoadingStub() {
 		}

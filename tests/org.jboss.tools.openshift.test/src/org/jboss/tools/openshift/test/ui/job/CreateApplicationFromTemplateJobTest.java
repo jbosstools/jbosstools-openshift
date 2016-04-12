@@ -55,11 +55,11 @@ public class CreateApplicationFromTemplateJobTest {
 	@Mock private ITemplate template;
 	@Mock private IProject project;
 	
-	private Collection<Label> labels = new ArrayList<Label>();
-	private Collection<IParameter> parameters = new ArrayList<IParameter>();
+	private Collection<Label> labels = new ArrayList<>();
+	private Collection<IParameter> parameters = new ArrayList<>();
 	
 	private CreateApplicationFromTemplateJobRunner job;
-	private Collection<IResource> resources = new ArrayList<IResource>();
+	private Collection<IResource> resources = new ArrayList<>();
 	
 	@SuppressWarnings("unchecked")
 	@Before

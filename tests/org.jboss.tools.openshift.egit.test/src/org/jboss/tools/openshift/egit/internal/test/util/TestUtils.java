@@ -212,7 +212,7 @@ public class TestUtils {
 	 */
 	private RepoDiff createRepoDiff(Repository repository, String... expectedPaths) throws Exception {
 		RepoDiff repoDiff = new RepoDiff();
-		Set<String> expectedFiles = new HashSet<String>(Arrays.asList(expectedPaths));
+		Set<String> expectedFiles = new HashSet<>(Arrays.asList(expectedPaths));
 
 		TreeWalk treeWalk = new TreeWalk(repository);
 		treeWalk.addTree(repository.resolve("HEAD^{tree}"));
@@ -231,8 +231,8 @@ public class TestUtils {
 
 	public class RepoDiff {
 
-		private List<String> unexpected = new ArrayList<String>();
-		private List<String> missing = new ArrayList<String>();
+		private List<String> unexpected = new ArrayList<>();
+		private List<String> missing = new ArrayList<>();
 
 		public void addMissing(String path) {
 			missing.add(path);
@@ -371,7 +371,7 @@ public class TestUtils {
 	private static HashMap<String, String> mkmap(String... args) {
 		if ((args.length % 2) > 0)
 			throw new IllegalArgumentException("needs to be filepath/content pairs");
-		HashMap<String, String> map = new HashMap<String, String>();
+		HashMap<String, String> map = new HashMap<>();
 		for (int i = 0; i < args.length; i += 2) {
 			map.put(args[i], args[i + 1]);
 		}

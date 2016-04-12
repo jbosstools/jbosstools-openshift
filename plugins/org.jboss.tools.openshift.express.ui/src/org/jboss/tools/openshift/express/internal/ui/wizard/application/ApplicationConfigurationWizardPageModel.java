@@ -62,8 +62,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	
 	private final OpenShiftApplicationWizardModel wizardModel;
 
-	private List<IApplication> existingApplications = new ArrayList<IApplication>();
-	private List<IGearProfile> gearProfiles = new ArrayList<IGearProfile>();
+	private List<IApplication> existingApplications = new ArrayList<>();
+	private List<IGearProfile> gearProfiles = new ArrayList<>();
 	private String existingApplicationName;
 	private boolean resourcesLoaded = false;
 	private ICartridge selectedCartridge;

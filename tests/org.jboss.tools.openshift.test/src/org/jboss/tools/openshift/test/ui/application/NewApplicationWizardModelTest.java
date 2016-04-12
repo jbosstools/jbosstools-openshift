@@ -231,7 +231,7 @@ public class NewApplicationWizardModelTest {
 	public void setTemplateShouldCopyParametersAndLabels() {
 		Map<String, IParameter> parameters = givenTheTemplateHasParameters();
 		HashMap<String, String> labels = givenTheTemplateHasObjectLabels();
-		Collection<IResourceLabelsPageModel.Label> modelLabels = new ArrayList<IResourceLabelsPageModel.Label>();
+		Collection<IResourceLabelsPageModel.Label> modelLabels = new ArrayList<>();
 		for (Entry<String, String> label : labels.entrySet()) {
 			modelLabels.add(new IResourceLabelsPageModel.Label(label.getKey(), label.getValue()));
 		}
@@ -243,7 +243,7 @@ public class NewApplicationWizardModelTest {
 	}
 	
 	private HashMap<String, String> givenTheTemplateHasObjectLabels() {
-		HashMap<String, String> labels = new HashMap<String, String>();
+		HashMap<String, String> labels = new HashMap<>();
 		labels.put("abc", "xyz");
 		when(template.getObjectLabels()).thenReturn(labels);
 		return labels;
@@ -289,7 +289,7 @@ public class NewApplicationWizardModelTest {
 		IParameter param = mock(IParameter.class);
 		when(param.getName()).thenReturn("foo");
 		when(param.clone()).thenReturn(param);
-		Map<String, IParameter> parameters = new HashMap<String, IParameter>();
+		Map<String, IParameter> parameters = new HashMap<>();
 		parameters.put(param.getName(), param );
 		when(template.getParameters()).thenReturn(parameters);
 		return parameters;

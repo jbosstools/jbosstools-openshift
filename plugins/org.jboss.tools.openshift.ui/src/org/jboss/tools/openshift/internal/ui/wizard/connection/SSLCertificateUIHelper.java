@@ -38,7 +38,7 @@ public class SSLCertificateUIHelper {
 		if(certificate == null) {
 			return;
 		}
-		List<StyleRange> styles = new ArrayList<StyleRange>();
+		List<StyleRange> styles = new ArrayList<>();
 		StringBuilder builder = new StringBuilder();
 		createTextAndStyle(certificate, builder, styles);
 		styledText.setText(builder.toString());
@@ -47,7 +47,7 @@ public class SSLCertificateUIHelper {
 
 	public void writeCertificate(String issuedBy, String validity, String fingerprint, StyledText styledText) {
 		clean(styledText);
-		List<StyleRange> styles = new ArrayList<StyleRange>();
+		List<StyleRange> styles = new ArrayList<>();
 		StringBuilder builder = new StringBuilder();
 		createTextAndStyle(issuedBy, validity, fingerprint, builder, styles);
 		styledText.setText(builder.toString());

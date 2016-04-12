@@ -226,7 +226,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 		private String id;
 		public VagrantStatus(String vmId) {
 			this.id = vmId;
-			this.kv = new HashMap<String, String>();
+			this.kv = new HashMap<>();
 		}
 		public void setProperty(String k, String v) {
 			kv.put(k, v);
@@ -238,7 +238,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 	
 	
 	protected IStatus parseOutput(String[] lines) {
-		HashMap<String, VagrantStatus> status = new HashMap<String, VagrantStatus>();
+		HashMap<String, VagrantStatus> status = new HashMap<>();
 		if( lines != null && lines.length > 0 ) {
 			for( int i = 0; i < lines.length; i++ ) {
 				String[] csv = lines[i].split(",");

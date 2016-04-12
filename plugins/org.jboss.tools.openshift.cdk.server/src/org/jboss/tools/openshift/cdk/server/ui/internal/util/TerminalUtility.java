@@ -41,7 +41,7 @@ public class TerminalUtility {
 	
 	public static Map<String, Object> getPropertiesForServer(IServer s) {
 
-		final Map<String, Object> props = new HashMap<String, Object>();
+		final Map<String, Object> props = new HashMap<>();
 		String workingDir = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);
 		props.put(ITerminalsConnectorConstants.PROP_PROCESS_WORKING_DIR, workingDir);
 		props.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID, "org.eclipse.tm.terminal.connector.local.LocalConnector"); //$NON-NLS-1$

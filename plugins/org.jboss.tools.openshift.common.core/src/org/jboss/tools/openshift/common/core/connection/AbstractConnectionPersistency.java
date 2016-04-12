@@ -26,7 +26,7 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 
 
 	public Collection<C> load() {
-		List<C> connections = new ArrayList<C>();
+		List<C> connections = new ArrayList<>();
 		String[] persistedConnections = loadPersisted();
         for (String connectionUrl : persistedConnections) {
         	addConnection(connectionUrl, connections);
@@ -64,7 +64,7 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 			return;
 		}
 
-		List<String> serializedConnections = new ArrayList<String>(connections.size());
+		List<String> serializedConnections = new ArrayList<>(connections.size());
 		for (C connection : connections) {
 			addConnection(connection, serializedConnections);
 		}

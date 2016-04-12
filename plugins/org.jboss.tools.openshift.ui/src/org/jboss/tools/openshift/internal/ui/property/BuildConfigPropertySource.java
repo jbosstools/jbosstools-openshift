@@ -38,7 +38,7 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
-		List<IPropertyDescriptor> all = new ArrayList<IPropertyDescriptor>();
+		List<IPropertyDescriptor> all = new ArrayList<>();
 		all.addAll(getBuildTriggerPropertyDescriptors());
 		switch(getResource().getBuildStrategy().getType()){
 		case BuildStrategyType.CUSTOM:

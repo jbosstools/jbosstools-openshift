@@ -197,7 +197,7 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 		private AtomicBoolean nag = new AtomicBoolean(true);
 		private static final String NAG_MESSAGE = "The resource {0} has been changed on the server.  Do you want to replace the editor contents with these changes.";
 		private DismissableNagDialog dialog;
-		private AtomicReference<IResource> resource = new AtomicReference<IResource>();
+		private AtomicReference<IResource> resource = new AtomicReference<>();
 		
 		ConnectionListener(OpenShiftResourceInput input, OpenShiftResourceDocumentProvider provider){
 			this.input = input;

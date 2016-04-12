@@ -37,7 +37,7 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 	public EmbeddedCartridgesWizardModel(Set<ICartridge> embeddedCartidges, List<ICartridge> availableCartridges, 
 			IApplicationProperties applicationProperties, IDomain domain, ExpressConnection connection) {
 		this.embeddedCartridges = embeddedCartidges;
-		this.checkedEmbeddedCartridges = new HashSet<ICartridge>();
+		this.checkedEmbeddedCartridges = new HashSet<>();
 		this.checkedEmbeddedCartridges.addAll(embeddedCartidges);
 		this.availableCartridges = availableCartridges;
 		this.applicationProperties = applicationProperties;

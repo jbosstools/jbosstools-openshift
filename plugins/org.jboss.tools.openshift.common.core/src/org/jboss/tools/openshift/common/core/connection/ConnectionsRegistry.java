@@ -47,8 +47,8 @@ public class ConnectionsRegistry {
 
 	/** The most recent user connected on OpenShift. */
 	private IConnection recentConnection = null;
-	private Map<ConnectionURL, IConnection> connectionsByUrl = new HashMap<ConnectionURL, IConnection>();
-	private List<IConnectionsRegistryListener> listeners = new ArrayList<IConnectionsRegistryListener>();
+	private Map<ConnectionURL, IConnection> connectionsByUrl = new HashMap<>();
+	private List<IConnectionsRegistryListener> listeners = new ArrayList<>();
 	private PropertyChangeListener connectionListener = new ConnectionListener();
 	
 	public ConnectionsRegistry() {
@@ -226,7 +226,7 @@ public class ConnectionsRegistry {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends IConnection> Collection<T> getAll(Class<T> clazz) {
-		List<T> connections = new ArrayList<T>();
+		List<T> connections = new ArrayList<>();
 		for (IConnection connection : connectionsByUrl.values()) {
 			if (connection != null
 					&& clazz.isAssignableFrom(connection.getClass())) {

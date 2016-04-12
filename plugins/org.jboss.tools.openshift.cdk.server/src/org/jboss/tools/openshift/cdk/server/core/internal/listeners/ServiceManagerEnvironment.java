@@ -100,7 +100,7 @@ public class ServiceManagerEnvironment {
 		
     	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
 
-		HashMap<String,String> adbEnv = new HashMap<String,String>();
+		HashMap<String,String> adbEnv = new HashMap<>();
 	    try {
 	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  CDKServerUtility.getWorkingDirectory(server), env);
 			String setEnvVarCommand = Platform.getOS().equals(Platform.OS_WIN32) ? "setx " : "export ";

@@ -99,7 +99,7 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 
 	private List<ICartridge> getAddedCartridges(List<ICartridge> selectedCartridges,
 			List<IEmbeddedCartridge> embeddedCartridges) {
-		List<ICartridge> cartridgesToAdd = new ArrayList<ICartridge>();
+		List<ICartridge> cartridgesToAdd = new ArrayList<>();
 		for (ICartridge cartridge : selectedCartridges) {
 			if (!embeddedCartridges.contains(cartridge)) {
 				cartridgesToAdd.add(cartridge);
@@ -110,7 +110,7 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 
 	private List<ICartridge> getRemovedCartridges(List<ICartridge> selectedCartridges,
 			List<IEmbeddedCartridge> embeddedCartridges) {
-		List<ICartridge> cartridgesToRemove = new ArrayList<ICartridge>();
+		List<ICartridge> cartridgesToRemove = new ArrayList<>();
 		for (ICartridge cartridge : embeddedCartridges) {
 			if (!selectedCartridges.contains(cartridge)) {
 				cartridgesToRemove.add(cartridge);

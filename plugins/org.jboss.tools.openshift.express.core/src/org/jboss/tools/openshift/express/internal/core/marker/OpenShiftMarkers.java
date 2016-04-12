@@ -32,7 +32,7 @@ public class OpenShiftMarkers {
 
 	public OpenShiftMarkers(IProject project) {
 		this.project = project;
-		this.allKnownMarkers = new ArrayList<IOpenShiftMarker>();
+		this.allKnownMarkers = new ArrayList<>();
 		allKnownMarkers.add(IOpenShiftMarker.DISABLE_AUTO_SCALING);
 		allKnownMarkers.add(IOpenShiftMarker.ENABLE_JPA);
 		allKnownMarkers.add(IOpenShiftMarker.FORCE_CLEAN_BUILD);
@@ -55,7 +55,7 @@ public class OpenShiftMarkers {
 	 * 
 	 */
 	public List<IOpenShiftMarker> getAll() throws CoreException {
-		final List<IOpenShiftMarker> allMarkers = new ArrayList<IOpenShiftMarker>();
+		final List<IOpenShiftMarker> allMarkers = new ArrayList<>();
 		allMarkers.addAll(getAllKnownMarkers());
 		final IFolder folder = OpenShiftProjectUtils.getMarkersFolder(project);
 		if (folder != null
@@ -97,7 +97,7 @@ public class OpenShiftMarkers {
 	 * @throws CoreException
 	 */
 	public List<IOpenShiftMarker> getPresent() throws CoreException {
-		final List<IOpenShiftMarker> allMarkers = new ArrayList<IOpenShiftMarker>();
+		final List<IOpenShiftMarker> allMarkers = new ArrayList<>();
 		final IFolder folder = OpenShiftProjectUtils.getMarkersFolder(project);
 		if (ResourceUtils.exists(folder)) {
 			folder.accept(new IResourceVisitor() {

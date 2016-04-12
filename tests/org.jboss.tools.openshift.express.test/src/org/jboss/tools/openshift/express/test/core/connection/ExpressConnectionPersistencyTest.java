@@ -48,7 +48,7 @@ public class ExpressConnectionPersistencyTest {
 			
 		};
 		// pre-condition
-		List<ExpressConnection> connections = new ArrayList<ExpressConnection>();
+		List<ExpressConnection> connections = new ArrayList<>();
 		connections.add(connection1);
 		connections.add(connection2);
 		

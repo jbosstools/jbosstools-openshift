@@ -18,7 +18,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 public class KeyValuePropertySource implements IPropertySource {
 
-	private Map<String, String> map = new HashMap<String, String>();
+	private Map<String, String> map = new HashMap<>();
 
 	public KeyValuePropertySource(Map<String, String> variables){
 		this.map = variables;
@@ -53,7 +53,7 @@ public class KeyValuePropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		List<IPropertyDescriptor> desc = new ArrayList<IPropertyDescriptor>(map.size());
+		List<IPropertyDescriptor> desc = new ArrayList<>(map.size());
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			desc.add(new UneditablePropertyDescriptor(entry.getKey(), entry.getKey()));
 		}

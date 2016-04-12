@@ -62,7 +62,7 @@ public class SSHSessionRepository extends JschConfigSessionFactory {
 
 	private OpenSshConfig config;
 
-	private final Map<URIish, Session> cache = new HashMap<URIish, Session>();
+	private final Map<URIish, Session> cache = new HashMap<>();
 
 	SSHSessionRepository() {
 		final BundleContext context = ExpressUIActivator.getDefault().getBundle().getBundleContext();

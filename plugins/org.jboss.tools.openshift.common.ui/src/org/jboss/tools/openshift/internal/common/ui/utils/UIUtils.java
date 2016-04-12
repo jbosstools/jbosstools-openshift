@@ -216,7 +216,7 @@ public class UIUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <E> E[] getElements(ISelection selection, Class<E> clazz) {
-			ArrayList<E> elements = new ArrayList<E>();
+			ArrayList<E> elements = new ArrayList<>();
 			
 			for(Object element: getElements(selection)) {
 				E adapted = Adapters.adapt(element, clazz);

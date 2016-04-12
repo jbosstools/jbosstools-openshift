@@ -25,7 +25,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
  */
 public class FireConnectionsChangedJob extends AbstractDelegatingMonitorJob {
 
-	protected List<IConnection> connections = new ArrayList<IConnection>();
+	protected List<IConnection> connections = new ArrayList<>();
 	
 	public FireConnectionsChangedJob(IConnection connection) {
 		super(NLS.bind("Refreshing connection {0}", connection.getHost()));

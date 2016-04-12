@@ -77,7 +77,7 @@ public class FireExpressConnectionsChangedJob extends FireConnectionsChangedJob 
 	}
 
 	private Collection<IConnection> createConnections(List<IUser> users) {
-		Set<IConnection> connections = new HashSet<IConnection>();
+		Set<IConnection> connections = new HashSet<>();
 		if (users == null) {
 			return connections;
 		}

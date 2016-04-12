@@ -164,7 +164,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 		}
 		Set<String> usedKeys = getUsedKeys();
 		usedKeys.remove(label.getKey());
-		IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<Label>(label)
+		IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<>(label)
 			.windowTitle(RESOURCE_LABEL)
 			.title("Edit Label")
 			.description("Edit the resource label.")
@@ -177,7 +177,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 			.build();
 		OkCancelButtonWizardDialog dialog =
 				new OkCancelButtonWizardDialog(getShell(),
-						new KeyValueWizard<Label>(label, dialogModel));
+						new KeyValueWizard<>(label, dialogModel));
 		if(OkCancelButtonWizardDialog.OK == dialog.open()) {
 			model.updateLabel(label, dialogModel.getKey(), dialogModel.getValue());
 		}
@@ -204,7 +204,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 						.build();
 				OkCancelButtonWizardDialog dialog =
 						new OkCancelButtonWizardDialog(getShell(),
-								new KeyValueWizard<Label>(UIUtils.getFirstElement(viewer.getSelection(),Label.class), dialogModel));
+								new KeyValueWizard<>(UIUtils.getFirstElement(viewer.getSelection(),Label.class), dialogModel));
 				if(OkCancelButtonWizardDialog.OK == dialog.open()) {
 					model.addLabel(dialogModel.getKey(), dialogModel.getValue());
 				}

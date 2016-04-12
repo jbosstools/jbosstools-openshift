@@ -33,8 +33,8 @@ public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_SELECTED_MARKER = "selectedMarker";
 	
 	private List<IOpenShiftMarker> availableMarkers;
-	private Set<IOpenShiftMarker> presentMarkers = new HashSet<IOpenShiftMarker>();
-	private Set<IOpenShiftMarker> checkedMarkers = new HashSet<IOpenShiftMarker>();
+	private Set<IOpenShiftMarker> presentMarkers = new HashSet<>();
+	private Set<IOpenShiftMarker> checkedMarkers = new HashSet<>();
 	private IOpenShiftMarker selectedMarker;
 	private IProject project;
 
@@ -50,7 +50,7 @@ public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 	}
 	
 	private Set<IOpenShiftMarker> toSet(List<IOpenShiftMarker> markers) {
-		Set<IOpenShiftMarker> markersSet = new HashSet<IOpenShiftMarker>();
+		Set<IOpenShiftMarker> markersSet = new HashSet<>();
 		markersSet.addAll(markers);
 		return markersSet; 
 	}

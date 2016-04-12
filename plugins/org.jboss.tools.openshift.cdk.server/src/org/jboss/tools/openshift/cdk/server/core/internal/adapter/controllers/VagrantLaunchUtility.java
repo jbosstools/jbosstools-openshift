@@ -77,7 +77,7 @@ public class VagrantLaunchUtility {
     	if( passCredentials) {
     		Map<String,String> existingEnvironment = startupConfig.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String,String>)null);
     		if( existingEnvironment == null ) {
-    			existingEnvironment = new HashMap<String,String>();
+    			existingEnvironment = new HashMap<>();
     		}
     		
     		if( userName == null ) {
@@ -87,7 +87,7 @@ public class VagrantLaunchUtility {
     					+ "and set your access.redhat.com credentials."));
     		}
     		
-    		HashMap<String,String> env = new HashMap<String,String>(existingEnvironment);
+    		HashMap<String,String> env = new HashMap<>(existingEnvironment);
     		String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
     		env.put(userKey, userName);
     		

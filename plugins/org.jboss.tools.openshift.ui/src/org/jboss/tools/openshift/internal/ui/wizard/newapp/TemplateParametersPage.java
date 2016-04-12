@@ -177,7 +177,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		Image decorationImage = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
-		final ObservableMap<String, IStatus> cellsValidationStatusObservable = new WritableMap<String, IStatus>(String.class, IStatus.class);
+		final ObservableMap<String, IStatus> cellsValidationStatusObservable = new WritableMap<>(String.class, IStatus.class);
 		final TableViewerCellDecorationManager decorations = new TableViewerCellDecorationManager(decorationImage, table);
 		parametersObservable.addListChangeListener(onParametersChanged(decorations, cellsValidationStatusObservable));
 		TableViewer viewer = new TableViewerBuilder(table, tableContainer)

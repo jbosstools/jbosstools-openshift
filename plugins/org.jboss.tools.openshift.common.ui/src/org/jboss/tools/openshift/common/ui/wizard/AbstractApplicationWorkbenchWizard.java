@@ -146,7 +146,7 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 	}
 	
 	protected Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> createWizards(String extensionId) {
-		HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection = new HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>>();
+		HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection = new HashMap<>();
  		for (IConfigurationElement configuration : ExtensionUtils.getExtensionConfigurations(extensionId)) {
 			createWizard(wizardsByConnection, configuration);
 		}

@@ -103,9 +103,9 @@ public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariables
 
 	private class EnvironmentVariablesDiff {
 
-		private List<String> removals = new ArrayList<String>();
-		private List<EnvironmentVariableItem> additions = new ArrayList<EnvironmentVariableItem>();
-		private List<EnvironmentVariableItem> updates = new ArrayList<EnvironmentVariableItem>();
+		private List<String> removals = new ArrayList<>();
+		private List<EnvironmentVariableItem> additions = new ArrayList<>();
+		private List<EnvironmentVariableItem> updates = new ArrayList<>();
 		
 		public EnvironmentVariablesDiff(List<EnvironmentVariableItem> editedVariables, Map<String, IEnvironmentVariable> existingVariables) {
 			init(editedVariables, existingVariables);

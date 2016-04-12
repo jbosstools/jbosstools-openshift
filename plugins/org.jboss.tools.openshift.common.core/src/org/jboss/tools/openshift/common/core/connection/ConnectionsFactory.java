@@ -26,7 +26,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 public class ConnectionsFactory implements IConnectionsFactory {
 
 	// TODO: replace by a concurrent map
-	private Set<IConnectionFactory> connectionFactories = new CopyOnWriteArraySet<IConnectionFactory>();
+	private Set<IConnectionFactory> connectionFactories = new CopyOnWriteArraySet<>();
 
 	public ConnectionsFactory() {
 	}
@@ -96,7 +96,7 @@ public class ConnectionsFactory implements IConnectionsFactory {
 
 	@Override
 	public Collection<IConnectionFactory> getAll() {
-		return new ArrayList<IConnectionFactory>(connectionFactories);
+		return new ArrayList<>(connectionFactories);
 	}
 
 	@Override

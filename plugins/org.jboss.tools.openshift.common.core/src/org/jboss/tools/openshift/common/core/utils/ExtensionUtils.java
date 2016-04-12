@@ -34,7 +34,7 @@ public class ExtensionUtils {
 	}
 
 	public static <T> Collection<T> getExtensions(String extensionId, String classAttribute) {
-		List<T> extensions = new ArrayList<T>();
+		List<T> extensions = new ArrayList<>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(extensionId);
 		for (IConfigurationElement configurationElement : config) {
 			T extension = safeCreateExtension(extensionId, classAttribute, configurationElement);

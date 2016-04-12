@@ -211,7 +211,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	}
 
 	private void updateLocalPortBindings(final boolean useFreePorts) {
-		final List<String> bindings = new ArrayList<String>();
+		final List<String> bindings = new ArrayList<>();
 		// update local bindings while avoiding duplicates
 		for (IPortForwardable.PortPair port : ports) {
 			if (useFreePorts) {

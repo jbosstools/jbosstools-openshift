@@ -56,7 +56,7 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 				case ResourceKind.SERVICE: 
 					return new ServicePropertySource((IService) resource);
 				default:
-					return new ResourcePropertySource<IResource>(resource);
+					return new ResourcePropertySource<>(resource);
 				}
 			}
 		}

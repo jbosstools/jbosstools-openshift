@@ -126,7 +126,7 @@ public class CommandLocationLookupStrategy {
 	 * @param folder
 	 */
 	public void ensureOnPath( Map<String, String> env, String folder) {
-		HashMap<String,String> processEnv = new HashMap<String,String>(System.getenv());
+		HashMap<String,String> processEnv = new HashMap<>(System.getenv());
 		if( env.get(pathvar) == null ) {
 			if( preferSystemPath ) {
 				String pathresult = runCommand(pathCommand);
@@ -150,7 +150,7 @@ public class CommandLocationLookupStrategy {
 	private String ensureFolderOnPath(String existingPath, String folder) {
 		existingPath = (existingPath == null ? "" : existingPath);
 		String[] roots = existingPath.split(delim);
-		ArrayList<String> list = new ArrayList<String>(Arrays.asList(roots));
+		ArrayList<String> list = new ArrayList<>(Arrays.asList(roots));
 		if( !list.contains(folder)) {
 			list.add(folder);
 		}
@@ -163,7 +163,7 @@ public class CommandLocationLookupStrategy {
 	 * @return
 	 */
 	private String[] getPossibleCommandNames(String commandName) {
-		ArrayList<String> ret = new ArrayList<String>(5);
+		ArrayList<String> ret = new ArrayList<>(5);
 		ret.add(commandName);
 		for( int i = 0; i < suffixes.length; i++ ) {
 			ret.add(commandName + suffixes[i]);

@@ -294,7 +294,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 	
 	public Collection<IConnection> getAllConnections() {
-		List<IConnection> connections = new ArrayList<IConnection>();
+		List<IConnection> connections = new ArrayList<>();
 		connections.add(NewConnectionMarker.getInstance());
 		connections.addAll(allConnections);
 		return connections;

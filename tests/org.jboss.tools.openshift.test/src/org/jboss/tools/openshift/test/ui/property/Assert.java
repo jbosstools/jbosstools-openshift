@@ -25,7 +25,7 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
 public class Assert {
 
 	public static void assertPropertyDescriptorsContains(IPropertyDescriptor[] expected, IPropertyDescriptor[] actual){
-		List<String> actualToString = new ArrayList<String>(actual.length);
+		List<String> actualToString = new ArrayList<>(actual.length);
 		for (IPropertyDescriptor descriptor : actual) {
 			actualToString.add(propertyDescriptorToString(descriptor));
 		}

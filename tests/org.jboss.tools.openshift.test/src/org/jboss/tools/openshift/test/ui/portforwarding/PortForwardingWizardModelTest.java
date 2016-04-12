@@ -45,7 +45,7 @@ public class PortForwardingWizardModelTest {
 		when(port.getContainerPort()).thenReturn(3436);
 		when(port.getProtocol()).thenReturn("TCP");
 		when(pod.getName()).thenReturn("apodname");
-		Set<IPort> ports = new HashSet<IPort>();
+		Set<IPort> ports = new HashSet<>();
 		ports.add(port);
 		
 		when(pod.getNamespace()).thenReturn("anamespace");
@@ -60,7 +60,7 @@ public class PortForwardingWizardModelTest {
 	
 	@Test
 	public void getForwardablePorts() {
-		List<IPortForwardable.PortPair> ports = new ArrayList<IPortForwardable.PortPair>();
+		List<IPortForwardable.PortPair> ports = new ArrayList<>();
 		ports.add(new IPortForwardable.PortPair(port));
 		assertArrayEquals(ports.toArray(), model.getForwardablePorts().toArray());
 	}

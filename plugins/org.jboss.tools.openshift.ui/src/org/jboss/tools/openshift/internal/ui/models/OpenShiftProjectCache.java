@@ -44,7 +44,7 @@ import com.openshift.restclient.model.IProject;
  */
 public class OpenShiftProjectCache implements IProjectCache, IConnectionsRegistryListener {
 
-	private Map<String, Set<IProjectAdapter>> cache = new ConcurrentHashMap<String, Set<IProjectAdapter>>();
+	private Map<String, Set<IProjectAdapter>> cache = new ConcurrentHashMap<>();
 	private Set<IProjectCacheListener> listeners = new CopyOnWriteArraySet<>();
 
 	public OpenShiftProjectCache() {

@@ -95,7 +95,7 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(
 				PROPERTY_GEAR_GROUPS, this.gearGroups, this.gearGroups = gearGroups);
 		// pre-select gear groups that contain the main (Standalone cartridge)
-		Set<IGearGroup> selectedGearGroups = new HashSet<IGearGroup>();
+		Set<IGearGroup> selectedGearGroups = new HashSet<>();
 		for(IGearGroup gearGroup : gearGroups) {
 			for(ICartridge cartridge : gearGroup.getCartridges()) {
 				if(cartridge instanceof IStandaloneCartridge) {
@@ -120,7 +120,7 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void selectAllGears() {
-		setSelectedGearGroups(new HashSet<IGearGroup>(getGearGroups()));
+		setSelectedGearGroups(new HashSet<>(getGearGroups()));
 	}
 
 	public void deselectAllGears() {

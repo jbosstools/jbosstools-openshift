@@ -38,7 +38,7 @@ import com.openshift.restclient.model.IPod;
 public class PortForwardingUtils {
 
 	/** Internal registry of {@link IPod}'s port-forwarding. */
-	private static final Map<IPod, IPortForwardable> REGISTRY = new HashMap<IPod, IPortForwardable>();
+	private static final Map<IPod, IPortForwardable> REGISTRY = new HashMap<>();
 
 	/**
 	 * Checks if the given port is already used

@@ -74,7 +74,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 	}
 
 	private List<IUser> getUsers(List<IApplication> applications) {
-		List<IUser> users = new ArrayList<IUser>();
+		List<IUser> users = new ArrayList<>();
 		if (applications == null
 				|| applications.size() == 0) {
 			return users;
@@ -138,7 +138,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 	}
 
 	private List<IApplication> getApplicationsToDelete(ISelection selection) {
-		final List<IApplication> appsToDelete = new ArrayList<IApplication>();
+		final List<IApplication> appsToDelete = new ArrayList<>();
 		if (!(selection instanceof IStructuredSelection)) {
 			return appsToDelete;
 		}

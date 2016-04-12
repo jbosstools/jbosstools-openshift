@@ -41,7 +41,7 @@ public class NewEnvironmentVariablesWizard extends AbstractEnvironmentVariablesW
 	}
 
 	private Map<String, String> toMap(List<EnvironmentVariableItem> variables) {
-		HashMap<String, String> environmentVariables = new LinkedHashMap<String, String>();
+		HashMap<String, String> environmentVariables = new LinkedHashMap<>();
 		for (EnvironmentVariableItem variable : variables) {
 			environmentVariables.put(variable.getName(), variable.getValue());
 		}

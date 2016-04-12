@@ -49,6 +49,6 @@ public class KeyValueWizard<T extends IKeyValueItem> extends Wizard {
 	}
 
 	public void addPages() {
-		addPage(new KeyValueWizardPage<T>(this, model));
+		addPage(new KeyValueWizardPage<>(this, model));
 	}
 }

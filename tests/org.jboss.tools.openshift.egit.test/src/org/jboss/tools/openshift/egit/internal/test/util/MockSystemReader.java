@@ -75,7 +75,7 @@ public class MockSystemReader extends SystemReader {
 		}
 	}
 
-	final Map<String, String> values = new HashMap<String, String>();
+	final Map<String, String> values = new HashMap<>();
 
 	FileBasedConfig userGitConfig;
 

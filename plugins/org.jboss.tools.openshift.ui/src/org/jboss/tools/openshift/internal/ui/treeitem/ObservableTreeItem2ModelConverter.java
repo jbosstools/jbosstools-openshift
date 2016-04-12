@@ -44,7 +44,7 @@ public class ObservableTreeItem2ModelConverter extends Converter {
 				|| items.size() == 0) {
 			return Collections.emptyList();
 		}
-		ArrayList<T> models = new ArrayList<T>();
+		ArrayList<T> models = new ArrayList<>();
 		for (ObservableTreeItem item : items) {
 			models.add((T) item.getModel());
 		}

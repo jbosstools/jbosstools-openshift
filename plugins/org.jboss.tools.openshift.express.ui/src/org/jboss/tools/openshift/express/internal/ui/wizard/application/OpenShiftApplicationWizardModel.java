@@ -56,7 +56,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShiftApplicationWizardModel {
 
-	protected HashMap<String, Object> dataModel = new HashMap<String, Object>();
+	protected HashMap<String, Object> dataModel = new HashMap<>();
 
 	public OpenShiftApplicationWizardModel(ExpressConnection connection, IDomain domain) {
 		this(connection, domain, null, null, false);
@@ -342,7 +342,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	private List<IOpenShiftMarker> getMarkers() {
-		List<IOpenShiftMarker> markers = new ArrayList<IOpenShiftMarker>();
+		List<IOpenShiftMarker> markers = new ArrayList<>();
 		if (isSkipMavenBuild()) {
 			markers.add(IOpenShiftMarker.SKIP_MAVEN_BUILD);
 		}
@@ -403,7 +403,7 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 
 	@Override
 	public Set<ICartridge> getCartridges() {
-		Set<ICartridge> allCartridges = new HashSet<ICartridge>(getEmbeddedCartridges());
+		Set<ICartridge> allCartridges = new HashSet<>(getEmbeddedCartridges());
 		if (getStandaloneCartridge() != null) {
 			allCartridges.add(getStandaloneCartridge());
 		}

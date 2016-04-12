@@ -43,9 +43,9 @@ public class BuildConfigPropertySourceTest {
 	
 	@Before
 	public void setup(){
-		Map<String, String> labels = new HashMap<String, String>();
+		Map<String, String> labels = new HashMap<>();
 		labels.put("foo","bar");
-		Map<String, String> annotations = new HashMap<String, String>();
+		Map<String, String> annotations = new HashMap<>();
 		annotations.put("xyz", "abc");
 		annotations.put("efg", "def");
 		
@@ -69,7 +69,7 @@ public class BuildConfigPropertySourceTest {
 		when(strategy.getType()).thenReturn(BuildStrategyType.SOURCE);
 		when(strategy.getScriptsLocation()).thenReturn("scriptlocation");
 		when(strategy.getImage()).thenReturn(new DockerImageURI("foobar"));
-		Map<String, String> env = new HashMap<String, String>();
+		Map<String, String> env = new HashMap<>();
 		env.put("foo", "bar");
 		when(strategy.getEnvironmentVariables()).thenReturn(env);
 		when(resource.getBuildStrategy()).thenReturn(strategy);
@@ -79,7 +79,7 @@ public class BuildConfigPropertySourceTest {
 	private ICustomBuildStrategy givenCustomBuildStrategy(){
 		ICustomBuildStrategy strategy = mock(ICustomBuildStrategy.class);
 		when(strategy.getType()).thenReturn(BuildStrategyType.CUSTOM);
-		Map<String, String> env = new HashMap<String, String>();
+		Map<String, String> env = new HashMap<>();
 		env.put("foo", "bar");
 		when(strategy.getEnvironmentVariables()).thenReturn(env);
 		when(strategy.exposeDockerSocket()).thenReturn(true);

@@ -24,7 +24,7 @@ public class ApplicationTemplateCategory extends AbstractApplicationTemplate imp
 
 	public ApplicationTemplateCategory(String name, String description, IApplicationTemplate... children) {
 		super(name, description, children);
-		this.children = new ArrayList<IApplicationTemplate>();
+		this.children = new ArrayList<>();
 	}
 
 	@Override

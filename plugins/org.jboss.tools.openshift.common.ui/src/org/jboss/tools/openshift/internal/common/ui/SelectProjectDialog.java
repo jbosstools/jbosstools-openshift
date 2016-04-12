@@ -45,7 +45,7 @@ public class SelectProjectDialog extends ElementListSelectionDialog {
 	}
 
 	protected Object[] getProjects() {
-		List<IProject> projects = new ArrayList<IProject>();
+		List<IProject> projects = new ArrayList<>();
 		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
 			if (isValid(project)) {
 				projects.add(project);

@@ -26,7 +26,7 @@ public class StringUtilsTest {
 	
 	@Test
 	public void testSerialize(){
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("first", "avalue");
 		map.put("second", "secondvalue");
 		

@@ -116,7 +116,7 @@ public class Deployment extends ResourcesUIModel
 	}
 
 	private Collection<IResource> handleBuildConfig(IResourceCache cache, IBuildConfig config) {
-		Collection<IResource> resources = new HashSet<IResource>();
+		Collection<IResource> resources = new HashSet<>();
 		final String imageRef = imageRef(config);
 		Collection<IDeploymentConfig> dcs = cache.getDeploymentConfigsBy(imageRef).stream()
 				.filter(dc->containsAll(service.getSelector(), dc.getReplicaSelector()))
@@ -148,7 +148,7 @@ public class Deployment extends ResourcesUIModel
 	
 	private Collection<IResource> handleImageStreamTag(IResourceCache cache, IResource istag) {
 		final String isTagName = istag.getName();
-		Collection<IResource> resources = new HashSet<IResource>();
+		Collection<IResource> resources = new HashSet<>();
 		Collection<IDeploymentConfig> dcs = cache.getDeploymentConfigsBy(isTagName).stream()
 				.filter(dc->containsAll(service.getSelector(), dc.getReplicaSelector()))
 				.collect(Collectors.toList());
@@ -183,7 +183,7 @@ public class Deployment extends ResourcesUIModel
 	}
 
 	private Collection<IResource> handleBuild(IResourceCache cache, IBuild build) {
-		Collection<IResource> resources = new HashSet<IResource>();
+		Collection<IResource> resources = new HashSet<>();
 		final String imageRef = imageRef(build);
 		Collection<IDeploymentConfig> dcs = cache.getDeploymentConfigsBy(imageRef).stream()
 				.filter(dc->containsAll(service.getSelector(), dc.getReplicaSelector()))
@@ -212,7 +212,7 @@ public class Deployment extends ResourcesUIModel
 	}
 	
 	private Collection<IResource> handleBuildPod(IResourceCache cache, IPod pod) {
-		Collection<IResource> resources = new HashSet<IResource>();
+		Collection<IResource> resources = new HashSet<>();
 		Collection<IBuild> builds = cache.getNamedResourcesByAnnotation(pod, ResourceKind.BUILD, BUILD_NAME);
 		
 		Collection<String> buildImageRefs = builds.stream().map(b->imageRef(b)).collect(Collectors.toList());
@@ -259,7 +259,7 @@ public class Deployment extends ResourcesUIModel
 	}
 	
 	private Collection<IResource> handleDeploymentConfig(IResourceCache cache, IDeploymentConfig dc) {
-		Collection<IResource> resources = new HashSet<IResource>();
+		Collection<IResource> resources = new HashSet<>();
 		if(containsAll(service.getSelector(), dc.getReplicaSelector())) {
 			resources.add(dc);
 			

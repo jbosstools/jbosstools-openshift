@@ -36,7 +36,6 @@ import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
-import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties.GetWelcomePageURLException;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -521,7 +520,7 @@ public class ExpressServerUtils {
 		if (application == null) {
 			return null;
 		}
-		final List<IProject> results = new ArrayList<IProject>();
+		final List<IProject> results = new ArrayList<>();
 		final String gitUri = application.getGitUrl();
 		final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
@@ -549,7 +548,7 @@ public class ExpressServerUtils {
 	 * @return
 	 */
 	public static IProject[] getAllOpenshiftProjects() {
-		final ArrayList<IProject> results = new ArrayList<IProject>();
+		final ArrayList<IProject> results = new ArrayList<>();
 		final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
 			if (EGitUtils.getRepository(projects[i]) != null

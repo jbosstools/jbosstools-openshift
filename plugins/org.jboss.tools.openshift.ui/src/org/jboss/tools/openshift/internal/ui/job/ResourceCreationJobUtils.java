@@ -56,7 +56,7 @@ public class ResourceCreationJobUtils {
 	 * MAYBE this should be part of Connection in an exists method?
 	 */
 	public static Collection<IResource> findExistingResources(Connection connection, Collection<IResource> resources) {
-		List<IResource> existing = new ArrayList<IResource>(resources.size());
+		List<IResource> existing = new ArrayList<>(resources.size());
 		for (IResource resource : resources) {
 			try {
 				IResource found = connection.getResource(resource);

@@ -55,7 +55,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	// start with a null value as a marker of non-initialized state (used during
 	// first pass validation)
 	private String existingApplicationName;
-	private List<IApplication> existingApplications = new ArrayList<IApplication>();
+	private List<IApplication> existingApplications = new ArrayList<>();
 	private boolean resourcesLoaded = false;
 	private List<IApplicationTemplate> applicationTemplates;
 	private IApplicationTemplateCategory basicCartridgesCathegory = 
@@ -129,7 +129,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected List<IApplicationTemplate> createApplicationTemplates(List<IApplicationTemplate> standaloneCartridges) {
-		List<IApplicationTemplate> applicationTemplates = new ArrayList<IApplicationTemplate>();
+		List<IApplicationTemplate> applicationTemplates = new ArrayList<>();
 
 		applicationTemplates.add(basicCartridgesCathegory);
 		applicationTemplates.add(quickstartsCathegory);
@@ -139,7 +139,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	private List<IApplicationTemplate> createCartridgeApplicationTemplates(List<IStandaloneCartridge> cartridges) {
-		List<IApplicationTemplate> cartridgeApplicationTemplates = new ArrayList<IApplicationTemplate>();
+		List<IApplicationTemplate> cartridgeApplicationTemplates = new ArrayList<>();
 		if (cartridges != null) {
 			for (IStandaloneCartridge cartridge : cartridges) {
 				cartridgeApplicationTemplates.add(new CartridgeApplicationTemplate(cartridge));
@@ -239,7 +239,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void setStandaloneCartridges(List<IStandaloneCartridge> cartridges) {
-		cartridges = new ArrayList<IStandaloneCartridge>(cartridges);
+		cartridges = new ArrayList<>(cartridges);
 		Collections.sort(cartridges, new CartridgeNameComparator());
 		wizardModel.setAvailableStandaloneCartridges(cartridges);
 		basicCartridgesCathegory.clearChildren();
@@ -247,14 +247,14 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void setQuickstarts(List<IQuickstart> quickstarts) {
-		quickstarts = new ArrayList<IQuickstart>(quickstarts);
+		quickstarts = new ArrayList<>(quickstarts);
 		Collections.sort(quickstarts, new QuickstartNameComparator());
 		quickstartsCathegory.clearChildren();
 		quickstartsCathegory.addChildren(createQuickstartApplicationTemplates(quickstarts));
 	}
 
 	protected List<IApplicationTemplate> createQuickstartApplicationTemplates(List<IQuickstart> quickstarts) {
-		List<IApplicationTemplate> templates = new ArrayList<IApplicationTemplate>();
+		List<IApplicationTemplate> templates = new ArrayList<>();
 		for (IQuickstart quickstart : quickstarts) {
 			templates.add(new QuickstartApplicationTemplate(quickstart));
 		}
@@ -290,7 +290,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void setExistingApplicationsFor(List<IDomain> domains) throws OpenShiftException {
-		List<IApplication> existingApplications = new ArrayList<IApplication>();
+		List<IApplication> existingApplications = new ArrayList<>();
 		if (domains != null) {
 			for (IDomain domain : domains) {
 				// long-running

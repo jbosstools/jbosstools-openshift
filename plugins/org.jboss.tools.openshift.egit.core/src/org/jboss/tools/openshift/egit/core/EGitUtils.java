@@ -93,6 +93,7 @@ import org.jboss.tools.openshift.egit.core.internal.utils.RegexUtils;
  * 
  * @author André Dietisheim
  */
+@SuppressWarnings("restriction")
 public class EGitUtils {
 
 	private static final String ORIGIN = "origin";
@@ -102,13 +103,11 @@ public class EGitUtils {
 	 */
 	private static final String REMOTE_CONNECTION_TIMEOUT = "remote_connection_timeout";
 	private static final int DEFAULT_TIMEOUT = 2 * 60 * 1000;
-	//	private static final RefSpec DEFAULT_PUSH_REF_SPEC = new RefSpec("refs/heads/*:refs/remotes/origin/*"); //$NON-NLS-1$
 	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD; // HEAD
 	private static final String DEFAULT_REFSPEC_DESTINATION = Constants.R_HEADS
 			+ Constants.MASTER; // refs/heads/master
 	private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core.GitProvider";
 
-//	private static final Pattern GIT_URL_PATTERN = Pattern.compile(".+://([^@]+)@*([^/]*)");
 	private static final Pattern GIT_URL_PATTERN =
 			Pattern.compile("(\\w+://)(([^@]+)@)*(([\\w\\d\\.-]+)(:[\\d]+){0,1}/*(.*))");
 	/* @see http://git-scm.com/book/it/v2/Git-on-the-Server-The-Protocols#The-SSH-Protocol */
@@ -192,7 +191,6 @@ public class EGitUtils {
 		connect(project, repository, monitor);
 		addToRepository(project, repository, monitor);
 		commit(project, monitor);
-		// checkout("master", repository);
 		return repository;
 	}
 
@@ -217,11 +215,7 @@ public class EGitUtils {
 			init.setBare(false).setDirectory(project.getLocation().toFile());
 			Git git = init.call();
 			return git.getRepository();
-		} catch (JGitInternalException e) {
-			throw new CoreException(EGitCoreActivator.createErrorStatus(NLS
-					.bind("Could not initialize a git repository at {0}: {1}",
-							getRepositoryPathFor(project), e.getMessage()), e));
-		} catch (GitAPIException e) {
+		} catch (JGitInternalException | GitAPIException e) {
 			throw new CoreException(EGitCoreActivator.createErrorStatus(NLS
 					.bind("Could not initialize a git repository at {0}: {1}",
 							getRepositoryPathFor(project), e.getMessage()), e));
@@ -323,10 +317,6 @@ public class EGitUtils {
 			cloneOperation.addPostCloneTask(postCloneTask);
 		}
 		cloneOperation.run(monitor);
-		// RepositoryUtil repositoryUtil =
-		// Activator.getDefault().getRepositoryUtil();
-		// repositoryUtil.addConfiguredRepository(new File(destination,
-		// Constants.DOT_GIT));
 	}
 
 	/**
@@ -510,7 +500,7 @@ public class EGitUtils {
 		if (remoteConfig != null) {
 			return remoteConfig.getURIs();
 		}
-		return new ArrayList<URIish>();
+		return new ArrayList<>();
 	}
 
 	/**
@@ -524,7 +514,7 @@ public class EGitUtils {
 	public static List<URIish> getAllRemoteURIs(IProject project)
 			throws CoreException {
 		List<RemoteConfig> remoteConfigs = getAllRemoteConfigs(getRepository(project));
-		List<URIish> uris = new ArrayList<URIish>();
+		List<URIish> uris = new ArrayList<>();
 		if (remoteConfigs != null) {
 			for (RemoteConfig remoteConfig : remoteConfigs) {
 				uris.addAll(remoteConfig.getURIs());
@@ -687,7 +677,7 @@ public class EGitUtils {
 	}
 
 	private static Collection<RemoteRefUpdate> copy(Collection<RemoteRefUpdate> refUpdates) throws IOException {
-		final Collection<RemoteRefUpdate> copy = new ArrayList<RemoteRefUpdate>(refUpdates.size());
+		final Collection<RemoteRefUpdate> copy = new ArrayList<>(refUpdates.size());
 		for (final RemoteRefUpdate rru : refUpdates)
 			copy.add(new RemoteRefUpdate(rru, null));
 		return copy;
@@ -701,7 +691,7 @@ public class EGitUtils {
 	 * @return the push ur is
 	 */
 	private static Collection<URIish> getPushURIs(RemoteConfig remoteConfig) {
-		List<URIish> pushURIs = new ArrayList<URIish>();
+		List<URIish> pushURIs = new ArrayList<>();
 		for (URIish uri : remoteConfig.getPushURIs()) {
 			pushURIs.add(uri);
 		}
@@ -721,7 +711,7 @@ public class EGitUtils {
 	 * @return the push specs to use for the given remote configuration.
 	 */
 	private static List<RefSpec> getPushRefSpecs(RemoteConfig config) {
-		List<RefSpec> pushRefSpecs = new ArrayList<RefSpec>();
+		List<RefSpec> pushRefSpecs = new ArrayList<>();
 		List<RefSpec> remoteConfigPushRefSpecs = config.getPushRefSpecs();
 		if (!remoteConfigPushRefSpecs.isEmpty()) {
 			pushRefSpecs.addAll(remoteConfigPushRefSpecs);
@@ -735,7 +725,7 @@ public class EGitUtils {
 
 	private static Collection<RefSpec> setForceUpdate(boolean forceUpdate,
 			Collection<RefSpec> refSpecs) {
-		List<RefSpec> newRefSpecs = new ArrayList<RefSpec>();
+		List<RefSpec> newRefSpecs = new ArrayList<>();
 		for (RefSpec refSpec : refSpecs) {
 			newRefSpecs.add(refSpec.setForceUpdate(forceUpdate));
 		}
@@ -749,7 +739,7 @@ public class EGitUtils {
 
 	public static Collection<RemoteRefUpdate> getFailedUpdates(
 			PushOperationResult pushOperationResult) {
-		List<RemoteRefUpdate> allFailedRefUpdates = new ArrayList<RemoteRefUpdate>();
+		List<RemoteRefUpdate> allFailedRefUpdates = new ArrayList<>();
 		for (URIish uri : pushOperationResult.getURIs()) {
 			allFailedRefUpdates.addAll(getFailedUpdates(uri,
 					pushOperationResult));
@@ -764,7 +754,7 @@ public class EGitUtils {
 
 	private static Collection<RemoteRefUpdate> getFailedUpdates(
 			PushResult pushResult) {
-		List<RemoteRefUpdate> failedRefUpdates = new ArrayList<RemoteRefUpdate>();
+		List<RemoteRefUpdate> failedRefUpdates = new ArrayList<>();
 		if (pushResult == null || pushResult.getRemoteUpdates() == null) {
 			return failedRefUpdates;
 		}
@@ -1462,7 +1452,7 @@ public class EGitUtils {
 		}
 		
 		public Collection<String> build(IProgressMonitor monitor) throws IOException {
-			Set<String> resources = new HashSet<String>();
+			Set<String> resources = new HashSet<>();
 			IndexDiff diff = getIndexChanges(repository, monitor);
 			if (diff != null) {
 				if (added) {

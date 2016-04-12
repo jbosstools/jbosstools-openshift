@@ -39,7 +39,7 @@ public class AddEmbeddableCartridgesWizard extends AbstractOpenShiftWizard<Embed
 								// remove embedded cartridges
 								(List<ICartridge>) CollectionUtils.removeAll(
 										wizardModel.getEmbeddedCartridges(),
-										new ArrayList<ICartridge>(wizardModel.getAvailableEmbeddableCartridges())))
+										new ArrayList<>(wizardModel.getAvailableEmbeddableCartridges())))
 						, new NewApplicationProperties(wizardModel)
 						, wizardModel.getDomain()
 						, wizardModel.getConnection()

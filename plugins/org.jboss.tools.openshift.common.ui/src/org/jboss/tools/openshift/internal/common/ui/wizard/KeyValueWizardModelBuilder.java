@@ -44,7 +44,7 @@ public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
 	}
 	
 	public  IKeyValueWizardModel<T> build(){
-		KeyValueWizardModel<T> model = new KeyValueWizardModel<T>(
+		KeyValueWizardModel<T> model = new KeyValueWizardModel<>(
 				windowTitle,
 				title,
 				keyLabel, 

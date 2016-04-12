@@ -56,7 +56,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 
 	private static final String PROPERTY_SELECTED_DETAIL_VIEW = "selectedDetailView";
 	
-	private Map<String,IConnectionEditorDetailView> detailViews = new HashMap<String, IConnectionEditorDetailView>();
+	private Map<String,IConnectionEditorDetailView> detailViews = new HashMap<>();
 	private ConnectionEditorStackedDetailViews stackedViews ;
 	private DetailViewModel detailViewModel = new DetailViewModel();
 

@@ -160,7 +160,7 @@ public class ResourceUtils {
 	 */
 	public static Collection<IResource> copy(File sourceFolder, String[] sourcePaths, IProject project,
 			IProgressMonitor monitor) throws IOException, CoreException {
-		List<IResource> resources = new ArrayList<IResource>();
+		List<IResource> resources = new ArrayList<>();
 		File projectFolder = project.getLocation().toFile();
 
 		for (String sourcePath : sourcePaths) {

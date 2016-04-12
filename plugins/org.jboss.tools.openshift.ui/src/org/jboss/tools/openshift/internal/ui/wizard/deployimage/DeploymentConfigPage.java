@@ -301,7 +301,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 					.build();
 			OkCancelButtonWizardDialog dialog =
 					new OkCancelButtonWizardDialog(getShell(),
-							new KeyValueWizard<IKeyValueItem>(var, dialogModel));
+							new KeyValueWizard<>(var, dialogModel));
 			if(OkCancelButtonWizardDialog.OK == dialog.open()) {
 				model.updateEnvironmentVariable(var, dialogModel.getKey(), dialogModel.getValue());
 			}
@@ -324,7 +324,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 						.build();
 				OkCancelButtonWizardDialog dialog =
 						new OkCancelButtonWizardDialog(getShell(),
-								new KeyValueWizard<KeyValueItem>(dialogModel));
+								new KeyValueWizard<>(dialogModel));
 				if(OkCancelButtonWizardDialog.OK == dialog.open()) {
 					model.addEnvironmentVariable(dialogModel.getKey(), dialogModel.getValue());
 				}

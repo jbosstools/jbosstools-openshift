@@ -70,6 +70,6 @@ public class ApplicationDetailsFake extends NoopApplicationFake {
 
 	@Override
 	public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {
-		return new ArrayList<IEmbeddedCartridge>();
+		return new ArrayList<>();
 	}
 }

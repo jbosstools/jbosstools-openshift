@@ -54,7 +54,7 @@ public class WebHooksPropertySource implements IPropertySource{
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		List<IPropertyDescriptor> descriptors = new ArrayList<IPropertyDescriptor>(2);
+		List<IPropertyDescriptor> descriptors = new ArrayList<>(2);
 		if(genericTrigger != null) descriptors.add(new PropertyDescriptor(GENERIC, "Generic URL"));
 		if(gitTrigger != null) descriptors.add(new PropertyDescriptor(GITHUB, "Github URL"));
 		return descriptors.toArray(new IPropertyDescriptor[]{});

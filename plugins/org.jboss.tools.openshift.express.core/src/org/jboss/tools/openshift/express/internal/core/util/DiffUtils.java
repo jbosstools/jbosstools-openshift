@@ -21,11 +21,11 @@ public class DiffUtils {
 	}
 	
 	public static <T> Diff<T> getDiff(Collection<T> source, Collection<T> target) {
-		return new Diff<T>(source, target);
+		return new Diff<>(source, target);
 	}
 	
 	public static <T> Collection<T> getAdditions(Collection<T> source, Collection<T> target) {
-		List<T> addedElements = new ArrayList<T>();
+		List<T> addedElements = new ArrayList<>();
 		for(T element : target) {
 			if (!source.contains(element)) {
 				addedElements.add(element);
@@ -35,7 +35,7 @@ public class DiffUtils {
 	}
 
 	public static <T> Collection<T> getRemovals(Collection<T> source, Collection<T> target) {
-		List<T> removedElement = new ArrayList<T>();
+		List<T> removedElement = new ArrayList<>();
 		for(T element : source) {
 			if (!target.contains(element)) {
 				removedElement.add(element);

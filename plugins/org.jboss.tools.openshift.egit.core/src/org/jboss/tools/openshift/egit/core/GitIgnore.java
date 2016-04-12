@@ -45,7 +45,7 @@ public class GitIgnore {
 	}
 
 	private void initEntries(IFile gitIgnore) throws IOException, CoreException {
-		this.entries = new LinkedHashSet<String>();
+		this.entries = new LinkedHashSet<>();
 		if (gitIgnore == null
 				|| !gitIgnore.isAccessible()) {
 			return;

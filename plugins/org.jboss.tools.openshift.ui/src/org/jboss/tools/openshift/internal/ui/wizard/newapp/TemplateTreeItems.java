@@ -47,7 +47,7 @@ public class TemplateTreeItems implements IModelFactory {
 					return templates;
 				}
 			}, Collections.<ITemplate> emptyList());
-			return (List<T>) new ArrayList<ITemplate>(templates);
+			return (List<T>) new ArrayList<>(templates);
 		}
 		return Collections.emptyList();
 	}

@@ -39,7 +39,7 @@ public class SecureStore {
 
 	public SecureStore(IStoreKey key) {
 		this.storeKey = key;
-		this.values = new HashMap<String, String>();
+		this.values = new HashMap<>();
 	}
 
 	public String get(String id) throws SecureStoreException {

@@ -65,7 +65,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		this.application = application;
 		this.remoteName = remoteName;
 		this.markers = markers;
-		this.modifiedResources = new ArrayList<IResource>();
+		this.modifiedResources = new ArrayList<>();
 		this.user = user;
 	}
 
@@ -264,7 +264,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	}
 
 	protected List<IResource> setupMarkers(IProject project, IProgressMonitor monitor) throws CoreException {
-		List<IResource> newMarkers = new ArrayList<IResource>(); 
+		List<IResource> newMarkers = new ArrayList<>(); 
 		for(IOpenShiftMarker marker : markers) {
 			IFile file = marker.addTo(project, monitor);
 			if (file != null) {

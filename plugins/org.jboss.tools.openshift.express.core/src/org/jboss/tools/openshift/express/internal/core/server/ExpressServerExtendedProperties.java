@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.core.server;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils.GetApplicationException;
 
 import com.openshift.client.IApplication;

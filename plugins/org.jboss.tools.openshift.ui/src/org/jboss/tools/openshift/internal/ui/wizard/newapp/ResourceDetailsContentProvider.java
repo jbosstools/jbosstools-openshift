@@ -42,7 +42,7 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 	public Object[] getChildren(Object node) {
 		if(node instanceof IResource) {
 			IResource resource = (IResource) node;
-			Collection<ResourceProperty> properties = new ArrayList<ResourceProperty>();
+			Collection<ResourceProperty> properties = new ArrayList<>();
 			properties.add(new ResourceProperty("labels", resource.getLabels()));
 			switch(resource.getKind()) {
 			case ResourceKind.BUILD_CONFIG:
@@ -108,7 +108,7 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		}
 		properties.add(new ResourceProperty("source URL", config.getSourceURI()));
 		properties.add(new ResourceProperty("output to", config.getOutputRepositoryName()));
-		Collection<String> triggers = new ArrayList<String>();
+		Collection<String> triggers = new ArrayList<>();
 		for (IBuildTrigger trigger : config.getBuildTriggers()) {
 			triggers.add(trigger.getType().toString());
 		}
@@ -119,7 +119,7 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 	@Override
 	public Object[] getElements(Object rootElements) {
 		if(!(rootElements instanceof Collection)) return new Object[] {};
-		List<IResource> resources = new ArrayList<IResource>( (Collection<IResource>)rootElements);
+		List<IResource> resources = new ArrayList<>( (Collection<IResource>)rootElements);
 		Collections.sort(resources, new Comparator<IResource>() {
 			@Override
 			public int compare(IResource first, IResource second) {

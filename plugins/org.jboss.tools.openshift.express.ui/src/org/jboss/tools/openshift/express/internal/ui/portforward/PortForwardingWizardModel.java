@@ -176,7 +176,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 
 	private void updateLocalPortBindings(final boolean useFreePorts) throws OpenShiftSSHOperationException {
 		final List<IApplicationPortForwarding> ports = application.getForwardablePorts();
-		final List<String> bindings = new ArrayList<String>();
+		final List<String> bindings = new ArrayList<>();
 		// update local bindings while avoiding duplicates
 		for (IApplicationPortForwarding port : ports) {
 			if (useFreePorts) {

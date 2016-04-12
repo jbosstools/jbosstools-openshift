@@ -28,7 +28,7 @@ public abstract class AbstractEnvironmentVariablesWizardModel extends Observable
 	public static final String PROPERTY_VARIABLES = "variables";
 	public static final String PROPERTY_SUPPORTED = "supported";
 	
-	private List<EnvironmentVariableItem> variables = new ArrayList<EnvironmentVariableItem>();
+	private List<EnvironmentVariableItem> variables = new ArrayList<>();
 	private EnvironmentVariableItem selected;
 	
 	public abstract void refreshEnvironmentVariables();

@@ -54,7 +54,7 @@ public class ConnectionPersistencyTest {
 			
 		};
 		// pre-condition
-		List<Connection> connections = new ArrayList<Connection>();
+		List<Connection> connections = new ArrayList<>();
 		connections.add(connection1);
 		connections.add(connection2);
 		

@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
@@ -110,7 +109,7 @@ public class ExpressServerFactory {
 
 	private List<IModule> getModules(List<IProject> importedProjects) {
 		Iterator<IProject> i = importedProjects.iterator();
-		ArrayList<IModule> toAdd = new ArrayList<IModule>();
+		ArrayList<IModule> toAdd = new ArrayList<>();
 		while (i.hasNext()) {
 			IProject p = i.next();
 			IModule[] m = ServerUtil.getModules(p);

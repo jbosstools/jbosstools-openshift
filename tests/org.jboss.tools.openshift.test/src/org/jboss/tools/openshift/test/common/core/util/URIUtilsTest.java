@@ -22,7 +22,7 @@ import org.junit.Test;
 public class URIUtilsTest {
 	
 	private String location = "https://10.0.2.15:8443/oauth/token/display#access_token=MmJiMTQzMGMtZjA0Mi00ODJmLTkzMDUtYzEyMTE5ODU1OGJh&expires_in=3600&token_type=bearer";
-	private Map<String, String> exp = new HashMap<String, String>();
+	private Map<String, String> exp = new HashMap<>();
 	
 	@Before
 	public void setup(){

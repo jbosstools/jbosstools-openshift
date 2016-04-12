@@ -59,7 +59,7 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 	}
 
 	private List<IProject> toProjects(List<IMavenProjectImportResult> importResults) {
-		List<IProject> projects = new ArrayList<IProject>();
+		List<IProject> projects = new ArrayList<>();
 		for (IMavenProjectImportResult importResult : importResults) {
 			IProject project = importResult.getProject();
 			if (project != null) {

@@ -74,7 +74,7 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 	 * The message consoles associated with the 'tail' workers that write the
 	 * output.
 	 */
-	private Map<String, TailServerLogWorker> consoleWorkers = new HashMap<String, TailServerLogWorker>();
+	private Map<String, TailServerLogWorker> consoleWorkers = new HashMap<>();
 
 	public TailFilesHandler() {
 		ConsoleUtils.registerConsoleListener(this);

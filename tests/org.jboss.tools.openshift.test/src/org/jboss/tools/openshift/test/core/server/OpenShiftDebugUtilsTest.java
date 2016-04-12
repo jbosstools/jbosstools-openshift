@@ -186,7 +186,7 @@ public class OpenShiftDebugUtilsTest {
 		
 		//pretty stoopid test
 		verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,name);
-		Map<String, String> connectMap = new HashMap<String, String>();
+		Map<String, String> connectMap = new HashMap<>();
 		connectMap.put("port", "1234"); //$NON-NLS-1$
 		connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
 		verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);

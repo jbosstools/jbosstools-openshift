@@ -34,7 +34,7 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 	public static final String PROPERTY_CHECKED_CARTRIDGES = "checkedCartridges";
 
 	private EmbeddedCartridgesWizardModel applicationCartridges;
-	private List<ICartridge> embeddableCartridges = new ArrayList<ICartridge>();
+	private List<ICartridge> embeddableCartridges = new ArrayList<>();
 	private ICartridge selectedCartridge;
 
 	public EmbeddedCartridgesWizardPageModel(EmbeddedCartridgesWizardModel applicationCartridges) {

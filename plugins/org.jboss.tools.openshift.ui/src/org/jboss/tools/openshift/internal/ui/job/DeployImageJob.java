@@ -40,7 +40,6 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IImageStream;
-import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
@@ -118,7 +117,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		final IProject project = parameters.getProject();
 		DockerImageURI sourceImage = new DockerImageURI(parameters.getImageName());
 		
-		Map<String, IResource> resources = new HashMap<String, IResource>(4);
+		Map<String, IResource> resources = new HashMap<>(4);
 
 		resources.put(ResourceKind.IMAGE_STREAM, stubImageStream(factory, name, project, sourceImage));
 		
@@ -148,7 +147,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		dc.setReplicaSelector(SELECTOR_KEY, name);
 		
 		Map<String, String> envs = getModifiedEnvVars(parameters.getEnvironmentVariables(), parameters.getImageEnvVars());
-		dc.addContainer(dc.getName(), imageUri, new HashSet<IPort>(parameters.getPortSpecs()), envs, parameters.getVolumes());
+		dc.addContainer(dc.getName(), imageUri, new HashSet<>(parameters.getPortSpecs()), envs, parameters.getVolumes());
 		
 		dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
 		IDeploymentImageChangeTrigger imageChangeTrigger = (IDeploymentImageChangeTrigger) dc.addTrigger(DeploymentTriggerType.IMAGE_CHANGE);

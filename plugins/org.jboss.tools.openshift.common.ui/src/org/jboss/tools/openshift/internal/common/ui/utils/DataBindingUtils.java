@@ -42,7 +42,7 @@ public class DataBindingUtils {
 	 * @see DataBindingContext
 	 */
 	public static void addValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
-		for (ValidationStatusProvider provider: new ArrayList<ValidationStatusProvider>(providers)) {
+		for (ValidationStatusProvider provider: new ArrayList<>(providers)) {
 			dbc.addValidationStatusProvider(provider);
 		}
 	}
@@ -57,7 +57,7 @@ public class DataBindingUtils {
 	 * @see DataBindingContext
 	 */
 	public static void removeValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
-		for (ValidationStatusProvider provider: new ArrayList<ValidationStatusProvider>(providers)) {
+		for (ValidationStatusProvider provider: new ArrayList<>(providers)) {
 			dbc.removeValidationStatusProvider(provider);
 		}
 	}

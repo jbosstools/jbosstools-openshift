@@ -70,8 +70,8 @@ public class LabelKeyValidator extends LabelValueValidator {
 	
 	public LabelKeyValidator(Collection<String> readonlykeys, Collection<String> usedKeys) {
 		super("label key");
-		this.readonlykeys = readonlykeys != null ? readonlykeys : new ArrayList<String>(0);
-		this.usedKeys = usedKeys != null ? usedKeys : new ArrayList<String>(0);
+		this.readonlykeys = readonlykeys != null ? readonlykeys : new ArrayList<>(0);
+		this.usedKeys = usedKeys != null ? usedKeys : new ArrayList<>(0);
 	}
 	
 	@Override

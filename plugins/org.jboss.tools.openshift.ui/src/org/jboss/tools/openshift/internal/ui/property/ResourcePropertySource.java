@@ -63,7 +63,7 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 	}
 	
 	private List<IPropertyDescriptor> buildPropertyDescriptors(String prefix, Map<String, String> values){
-		 List<IPropertyDescriptor> descriptors = new ArrayList<IPropertyDescriptor>(values.size()); 
+		 List<IPropertyDescriptor> descriptors = new ArrayList<>(values.size()); 
 		 for (Map.Entry<String, String> entry : values.entrySet()) {
 			descriptors.add(new ExtTextPropertyDescriptor(new PrefixPropertySourceKey(prefix, entry.getKey()), entry.getKey(), prefix));
 		}

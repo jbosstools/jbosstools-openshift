@@ -35,7 +35,6 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
-import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
@@ -72,7 +71,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	 */
 	protected static IControllableServerBehavior getServerBehavior(ILaunchConfiguration configuration) throws CoreException {
 		IServer server = ServerUtil.getServer(configuration);
-		IControllableServerBehavior behavior = (IControllableServerBehavior) server.getAdapter(IControllableServerBehavior.class);
+		IControllableServerBehavior behavior = server.getAdapter(IControllableServerBehavior.class);
 		return behavior;
 	}
 
@@ -158,6 +157,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 		IDebugListener listener = new IDebugListener() {
 			
+			@Override
 			public void onDebugChange(DebuggingContext debuggingContext, IProgressMonitor monitor)
 					throws CoreException {
 				if (debuggingContext.getPod() == null) {
@@ -188,6 +188,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			throws CoreException {
 		IDebugListener listener = new IDebugListener() {
 			
+			@Override
 			public void onDebugChange(DebuggingContext debuggingContext, IProgressMonitor monitor)
 					throws CoreException {
 				OpenShiftDebugUtils.get().terminateRemoteDebugger(getServer());

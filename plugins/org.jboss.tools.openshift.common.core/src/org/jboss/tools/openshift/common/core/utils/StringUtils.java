@@ -296,7 +296,7 @@ public class StringUtils {
 	 * @return String
 	 */
 	public static String serialize(Map<String, String> map){
-		List<String> out = new ArrayList<String>(map.size());
+		List<String> out = new ArrayList<>(map.size());
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			out.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
 		}

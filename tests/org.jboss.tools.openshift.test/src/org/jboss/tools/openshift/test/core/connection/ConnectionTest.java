@@ -83,7 +83,7 @@ public class ConnectionTest {
 				return visitor.visit(capability);
 			}
 		});
-		Map<String, Object> mocks = new HashMap<String, Object>();
+		Map<String, Object> mocks = new HashMap<>();
 		mocks.put("capability", capability);
 		mocks.put("resource", resource);
 		return mocks;

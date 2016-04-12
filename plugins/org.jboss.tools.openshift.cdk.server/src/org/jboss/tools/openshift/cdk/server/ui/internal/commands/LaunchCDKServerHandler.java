@@ -109,7 +109,7 @@ public class LaunchCDKServerHandler extends AbstractHandler {
 	}
 	
 	private ArrayList<IServer> findCDKServers() {
-		ArrayList<IServer> cdk = new ArrayList<IServer>();
+		ArrayList<IServer> cdk = new ArrayList<>();
 		IServer[] all = ServerCore.getServers();
 		for( int i = 0; i < all.length; i++ ) {
 			if( all[i].getServerType().getId().equals("org.jboss.tools.openshift.cdk.server.type")) {

@@ -37,7 +37,7 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		List<IProperty> elements = new ArrayList<IProperty>();
+		List<IProperty> elements = new ArrayList<>();
 		if (inputElement instanceof IApplication) {
 			final IApplication application = (IApplication) inputElement;
 			try {

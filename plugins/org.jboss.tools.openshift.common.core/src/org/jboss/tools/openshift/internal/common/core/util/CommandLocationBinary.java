@@ -24,8 +24,8 @@ public class CommandLocationBinary {
 	private boolean searchFailed = false;
 	
 	public CommandLocationBinary(String commandName) {
-		commandMap = new HashMap<String,String>();
-		defaultLocMap = new HashMap<String,String>();
+		commandMap = new HashMap<>();
+		defaultLocMap = new HashMap<>();
 		this.commandName = commandName;
 	}
 	

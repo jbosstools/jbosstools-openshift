@@ -50,7 +50,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 	public CreationLogDialog(Shell parentShell, LogEntry[] logEntries) {
 		super(parentShell);
 		this.logEntries = logEntries;
-		this.links = new ArrayList<Link>();
+		this.links = new ArrayList<>();
 		setHelpAvailable(false);
 	}
 	
@@ -121,7 +121,7 @@ public class CreationLogDialog extends TitleAreaDialog {
 	}
 
 	private void writeLogEntries(LogEntry[] logEntries, StyledText logText) {
-		List<StyleRange> styles = new ArrayList<StyleRange>();
+		List<StyleRange> styles = new ArrayList<>();
 		StringBuilder builder = new StringBuilder();
 
 		for (LogEntry logEntry : logEntries) {

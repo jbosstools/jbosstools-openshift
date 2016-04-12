@@ -47,7 +47,7 @@ public class VagrantPollerTest extends TestCase {
 	
 	@Test
 	public void testErrorStatus() {
-		final ArrayList<IStatus> statList = new ArrayList<IStatus>();
+		final ArrayList<IStatus> statList = new ArrayList<>();
 		ILogListener listener = new ILogListener() {
 			public void logging(IStatus status, String plugin) {
 				statList.add(status);

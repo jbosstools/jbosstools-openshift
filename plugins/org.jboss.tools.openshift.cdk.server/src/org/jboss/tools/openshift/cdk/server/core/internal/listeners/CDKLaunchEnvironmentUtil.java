@@ -52,7 +52,7 @@ public class CDKLaunchEnvironmentUtil {
 			CDKCoreActivator.pluginLog().logWarning(
 					"Unable to load environment for vagrant status call. System environment will be used instead.");
 		}
-		HashMap<String, String> systemEnv = new HashMap<String, String>(System.getenv());
+		HashMap<String, String> systemEnv = new HashMap<>(System.getenv());
 
 		if (launchEnv != null) {
 			Iterator<String> it = launchEnv.keySet().iterator();

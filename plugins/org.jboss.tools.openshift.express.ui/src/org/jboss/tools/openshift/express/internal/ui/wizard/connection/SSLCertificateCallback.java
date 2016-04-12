@@ -53,7 +53,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 	private boolean rememberDecision = REMEMBER_DECISION_DEFAULT;
 
 	// TODO: store certificates and decision in Eclipse preferences
-	private Map<X509Certificate, Boolean> allowByCertificate = new HashMap<X509Certificate, Boolean>();
+	private Map<X509Certificate, Boolean> allowByCertificate = new HashMap<>();
 	
 	@Override
 	public boolean allowCertificate(final X509Certificate[] certificateChain) {
@@ -142,7 +142,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 		}
 
 		private void writeCertificate(X509Certificate[] certificateChain, StyledText styledText) {
-			List<StyleRange> styles = new ArrayList<StyleRange>();
+			List<StyleRange> styles = new ArrayList<>();
 			StringBuilder builder = new StringBuilder();
 			if (certificateChain == null
 					|| certificateChain.length == 0) {

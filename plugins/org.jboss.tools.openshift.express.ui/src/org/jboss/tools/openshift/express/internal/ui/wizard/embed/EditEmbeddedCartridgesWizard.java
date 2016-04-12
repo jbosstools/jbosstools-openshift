@@ -54,7 +54,7 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 				, CollectionUtils.addTo(
 						// add code anything cartridge
 						(ICartridge) new CodeAnythingCartridge(),
-						new ArrayList<ICartridge>(
+						new ArrayList<>(
 								CollectionUtils.addAllTo(
 										// add downloadable cartridges embedded to application
 										new ArrayList<ICartridge>(application.getEmbeddedCartridges()),
@@ -76,7 +76,7 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 		try {
 			EmbedCartridgesJob job = 
 					new EmbedCartridgesJob(
-							new ArrayList<ICartridge>(wizardModel.getCheckedEmbeddableCartridges()),
+							new ArrayList<>(wizardModel.getCheckedEmbeddableCartridges()),
 							application);
 			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
 			if (!result.isOK()) {

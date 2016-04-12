@@ -21,7 +21,7 @@ import com.jcraft.jsch.Logger;
  */
 public class JschToEclipseLogger implements Logger {
 
-	static java.util.Hashtable<Integer, String> name = new java.util.Hashtable<Integer, String>();
+	static java.util.Hashtable<Integer, String> name = new java.util.Hashtable<>();
 	static {
 		name.put(new Integer(DEBUG), "DEBUG: ");
 		name.put(new Integer(INFO), "INFO: ");

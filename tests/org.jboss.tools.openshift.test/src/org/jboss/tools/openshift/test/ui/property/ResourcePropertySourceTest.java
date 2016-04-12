@@ -35,10 +35,10 @@ public class ResourcePropertySourceTest {
 	
 	@Before
 	public void setup(){
-		Map<String, String> labels = new HashMap<String, String>();
+		Map<String, String> labels = new HashMap<>();
 		labels.put("foo","bar");
 		labels.put("bar","bbar");
-		Map<String, String> annotations = new HashMap<String, String>();
+		Map<String, String> annotations = new HashMap<>();
 		annotations.put("xyz", "abc");
 		annotations.put("efg", "def");
 		
@@ -51,7 +51,7 @@ public class ResourcePropertySourceTest {
 		when(resource.getNamespace()).thenReturn("anamespace");
 		when(resource.getResourceVersion()).thenReturn("9999");
 
-		source = new ResourcePropertySource<IResource>(resource);
+		source = new ResourcePropertySource<>(resource);
 	}
 	
 	@Test

@@ -30,7 +30,7 @@ public class LogEntryFactory {
 	public static LogEntry[] create(IApplication application, boolean isTimeouted){
 		LogEntry[] logEntry = new LogEntry[]{};
 		if (application != null) {
-			List<LogEntry> entries = new ArrayList<LogEntry>();
+			List<LogEntry> entries = new ArrayList<>();
 			Collection<Message> messages = getMessages(application.getMessages());
 			if (messages != null) {
 				for(Message message : messages) {
@@ -64,7 +64,7 @@ public class LogEntryFactory {
 			return new LogEntry[] {};
 		}
 		
-		List<LogEntry> entries = new ArrayList<LogEntry>();
+		List<LogEntry> entries = new ArrayList<>();
 		for (IEmbeddedCartridge cartridge : cartridges) {
 			Collection<Message> messages = getMessages(cartridge.getMessages());
 			if (messages != null) {

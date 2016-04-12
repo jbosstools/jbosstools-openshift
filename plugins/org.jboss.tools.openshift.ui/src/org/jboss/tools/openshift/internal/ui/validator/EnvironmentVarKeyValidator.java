@@ -40,7 +40,7 @@ public class EnvironmentVarKeyValidator implements IValidator {
 	
 	public EnvironmentVarKeyValidator(String element, Collection<String> usedKeys) {
 		FAILED = ValidationStatus.error(NLS.bind(failureMessage, element));
-		this.usedKeys = usedKeys != null ? usedKeys : new ArrayList<String>(0);
+		this.usedKeys = usedKeys != null ? usedKeys : new ArrayList<>(0);
 	}
 
 	@Override

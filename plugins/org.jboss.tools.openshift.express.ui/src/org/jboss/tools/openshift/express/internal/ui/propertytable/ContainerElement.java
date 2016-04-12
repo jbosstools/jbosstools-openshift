@@ -25,7 +25,7 @@ public class ContainerElement implements IProperty {
 
 		public ContainerElement(String property, ContainerElement parent) {
 			this.property = property;
-			this.children = new ArrayList<Object>();
+			this.children = new ArrayList<>();
 			this.parent = parent;
 		}
 
