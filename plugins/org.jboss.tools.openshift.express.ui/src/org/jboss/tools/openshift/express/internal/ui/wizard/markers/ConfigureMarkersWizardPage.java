@@ -35,7 +35,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -139,7 +139,7 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 		viewer.setComparer(new EqualityComparer());
 		viewer.setContentProvider(new ArrayContentProvider());
 
-		viewer.setSorter(new ViewerSorter() {
+		viewer.setComparator(new ViewerComparator() {
 
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {

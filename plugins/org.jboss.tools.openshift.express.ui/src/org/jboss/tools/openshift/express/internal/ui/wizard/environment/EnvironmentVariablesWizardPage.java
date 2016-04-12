@@ -27,7 +27,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -87,7 +87,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
 				.to(BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
 				.in(dbc);
-		viewer.setSorter(new ViewerSorter());
+		viewer.setComparator(new ViewerComparator());
 		viewer.setContentProvider(new ObservableListContentProvider());
 		viewer.setInput(BeanProperties.list(
 				AbstractEnvironmentVariablesWizardModel.PROPERTY_VARIABLES).observe(model));

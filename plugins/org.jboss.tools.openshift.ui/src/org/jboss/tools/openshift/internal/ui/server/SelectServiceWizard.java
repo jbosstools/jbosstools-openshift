@@ -43,6 +43,7 @@ import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
@@ -189,6 +190,7 @@ public class SelectServiceWizard extends AbstractOpenShiftWizard<ServiceViewMode
 			applicationTemplatesViewer.setContentProvider(contentProvider);
 			applicationTemplatesViewer.setLabelProvider(new ServicesViewLabelProvider());
 			applicationTemplatesViewer.addFilter(new ServiceViewerFilter(selectorText));
+			applicationTemplatesViewer.setComparator(ProjectViewerComparator.createProjectTreeSorter());
 			applicationTemplatesViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
 			applicationTemplatesViewer.setInput(getModel());
 			return applicationTemplatesViewer;

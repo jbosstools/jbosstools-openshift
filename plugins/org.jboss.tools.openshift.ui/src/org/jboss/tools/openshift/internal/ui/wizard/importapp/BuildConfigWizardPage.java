@@ -32,7 +32,6 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -51,6 +50,8 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
+import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.server.BuildConfigDetailViews;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
@@ -175,7 +176,7 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 		buildConfigsViewer.setContentProvider(contentProvider);
 		buildConfigsViewer.setLabelProvider(new ObservableTreeItemStyledCellLabelProvider());
 		buildConfigsViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
-		buildConfigsViewer.setComparator(new ViewerComparator());
+		buildConfigsViewer.setComparator(ProjectViewerComparator.createProjectTreeSorter(new OpenShiftExplorerLabelProvider()));
 		buildConfigsViewer.setInput(model);
 		return buildConfigsViewer;
 	}

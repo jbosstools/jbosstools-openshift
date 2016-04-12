@@ -50,13 +50,9 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
-import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
@@ -98,13 +94,13 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog.RouteLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -732,67 +728,11 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		applicationTemplatesViewer.setContentProvider(contentProvider);
 		applicationTemplatesViewer.setLabelProvider(new ServicesViewLabelProvider());
 		applicationTemplatesViewer.addFilter(new ServiceViewerFilter(selectorText));
-		applicationTemplatesViewer.setSorter(new ViewerSorter() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				if(e1 instanceof ObservableTreeItem 
-						&& e2 instanceof ObservableTreeItem) {
-					ObservableTreeItem item1 = (ObservableTreeItem) e1;
-					ObservableTreeItem item2 = (ObservableTreeItem) e2;
-					if(item1.getModel() instanceof IResource 
-							&& item2.getModel() instanceof IResource) {
-						String name1 = ((IResource) item1.getModel()).getName();
-						String name2 = ((IResource) item2.getModel()).getName();
-						return getComparator().compare(name1, name2);
-					}
-				}
-				return super.compare(viewer, e1, e2);
-			}
-		});
+		applicationTemplatesViewer.setComparator(ProjectViewerComparator.createProjectTreeSorter());
 		applicationTemplatesViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
 		applicationTemplatesViewer.setInput(model);
 		return applicationTemplatesViewer;
 	}	
-
-	private class ServicesViewLabelProvider extends StyledCellLabelProvider {
-		@Override
-		public void update(ViewerCell cell) {
-			Object element = cell.getElement();
-			if (!(element instanceof ObservableTreeItem)) {
-				return;
-			} 
-			if (!(((ObservableTreeItem) element).getModel() instanceof IResource)) {
-					return;
-			}
-			
-			IResource resource = (IResource) ((ObservableTreeItem) element).getModel();
-			
-			StyledString text = new StyledString();
-			if (resource instanceof com.openshift.restclient.model.IProject) {
-				createProjectLabel(text, (com.openshift.restclient.model.IProject) resource);
-			} else if (resource instanceof IService) {
-				createServiceLabel(text, (IService) resource);
-			}
-
-			cell.setText(text.toString());
-			cell.setStyleRanges(text.getStyleRanges());
-			super.update(cell);
-		}
-	
-		private void createProjectLabel(StyledString text, com.openshift.restclient.model.IProject resource) {
-			text.append(resource.getName());
-		}
-
-		private void createServiceLabel(StyledString text, IService service) {
-			text.append(service.getName());
-			String selectorsDecoration = org.jboss.tools.openshift.common.core.utils.StringUtils.toString(service.getSelector());
-			if (!StringUtils.isEmpty(selectorsDecoration)) {
-				text.append(" ", StyledString.DECORATIONS_STYLER);
-				text.append(selectorsDecoration, StyledString.DECORATIONS_STYLER);
-			}
-		}
-	}
 
 	protected ModifyListener onFilterTextModified(final TreeViewer applicationTemplatesViewer) {
 		return new ModifyListener() {

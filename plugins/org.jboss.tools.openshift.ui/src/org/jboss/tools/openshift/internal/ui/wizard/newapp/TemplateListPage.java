@@ -106,7 +106,9 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
+import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
@@ -275,10 +277,12 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(projectsViewer.getControl());
 
+		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();
 		projectsViewer.setContentProvider(new ObservableListContentProvider());
 		projectsViewer.setLabelProvider(new ObservableTreeItemLabelProvider());
 		projectsViewer.setInput(
 				BeanProperties.list(ITemplateListPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
+		projectsViewer.setComparator(new ProjectViewerComparator(labelProvider));
 
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
 		Binding selectedProjectBinding =

@@ -11,14 +11,14 @@
 package org.jboss.tools.openshift.express.internal.ui.viewer;
 
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 
 import com.openshift.client.cartridge.IEmbeddableCartridge;
 
 /**
  * @author Andre Dietisheim
  */
-public class EmbeddableCartridgeViewerSorter extends ViewerSorter {
+public class EmbeddableCartridgeViewerSorter extends ViewerComparator {
 	@Override
 	public int compare(Viewer viewer, Object thisCartridge, Object thatCartridge) {
 		if (thisCartridge instanceof IEmbeddableCartridge

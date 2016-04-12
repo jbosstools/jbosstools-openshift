@@ -10,16 +10,27 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.comparators;
 
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 
 public class ProjectViewerComparator extends ViewerComparator {
 	
 	private static final int LAST = 1;
 	private static final String DEFAULT_PROJECT = "default";
 	private static final String OPENSHIFT_PROJECT = "openshift";
+
+	private ILabelProvider labelProvider;
+
+	public ProjectViewerComparator() {}
+
+	public ProjectViewerComparator(ILabelProvider labelProvider) {
+		this.labelProvider = labelProvider;
+	}
 	
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
@@ -44,9 +55,46 @@ public class ProjectViewerComparator extends ViewerComparator {
 		if(!name1.startsWith(OPENSHIFT_PROJECT) && name2.startsWith(OPENSHIFT_PROJECT)) {
 			return 1;
 		}
+
+		if(labelProvider != null) {
+			return labelProvider.getText(e1).compareTo(labelProvider.getText(e2));
+		}
 		
 		return name1.compareTo(name2);
 	}
 
+	public static ViewerComparator createProjectTreeSorter() {
+		return createProjectTreeSorter(null);
+	}
+
+	/**
+	 * Label provider is helpful for cases when viewer's label provider extends
+	 * StyledCellLabelProvider but does not implement ILabelProvider.
+	 * @param labelProvider
+	 * @return
+	 */
+	public static ViewerComparator createProjectTreeSorter(final ILabelProvider labelProvider) {
+		final ProjectViewerComparator projectComparator = new ProjectViewerComparator(labelProvider);
+		return new ViewerComparator() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				if(e1 instanceof ObservableTreeItem && e2 instanceof ObservableTreeItem) {
+					Object o1 = ((ObservableTreeItem) e1).getModel();
+					Object o2 = ((ObservableTreeItem) e2).getModel();
+					if(o1 instanceof IProject && o2 instanceof IProject) {
+						return projectComparator.compare(viewer, o1, o2);
+					} else if(labelProvider != null) {
+						return labelProvider.getText(o1).compareTo(labelProvider.getText(o2));
+					} else if(o1 instanceof IResource && o2 instanceof IResource) {
+						String name1 = ((IResource) o1).getName();
+						String name2 = ((IResource) o2).getName();
+						return getComparator().compare(name1, name2);
+					}
+				}
+				return super.compare(viewer, e1, e2);
+			}
+		};
+	}
 	
 }

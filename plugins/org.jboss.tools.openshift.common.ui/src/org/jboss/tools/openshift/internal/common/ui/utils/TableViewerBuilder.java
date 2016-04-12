@@ -21,7 +21,7 @@ import org.eclipse.jface.viewers.IToolTipProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
@@ -55,8 +55,8 @@ public class TableViewerBuilder {
 		return this;
 	}
 	
-	public TableViewerBuilder sorter(ViewerSorter sorter) {
-		viewer.setSorter(sorter);
+	public TableViewerBuilder sorter(ViewerComparator sorter) {
+		viewer.setComparator(sorter);
 		return this;
 	}
 

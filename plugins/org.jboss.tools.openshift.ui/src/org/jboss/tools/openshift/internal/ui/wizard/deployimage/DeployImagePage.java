@@ -39,8 +39,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
@@ -67,6 +65,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
@@ -243,13 +242,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		cmboProject.setLabelProvider(labelProvider);
 		cmboProject.setInput(
 				BeanProperties.list(IDeployImagePageModel.PROPERTY_PROJECTS).observe(model));
-		cmboProject.setSorter(new ViewerSorter() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				return labelProvider.getText(e1).compareTo(labelProvider.getText(e2));
-			}
-			
-		});
+		cmboProject.setComparator(new ProjectViewerComparator(labelProvider));
 	
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(cmboProject);
 		Binding selectedProjectBinding = 

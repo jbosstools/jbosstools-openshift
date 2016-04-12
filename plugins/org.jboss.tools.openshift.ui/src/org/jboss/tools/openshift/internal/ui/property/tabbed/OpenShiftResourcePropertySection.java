@@ -20,7 +20,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
@@ -215,9 +215,9 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	}
 	
 
-	protected ViewerSorter createCreatedBySorter() {
+	protected ViewerComparator createCreatedBySorter() {
 		final CreationTimestampComparator comparator = new CreationTimestampComparator();
-		return new ViewerSorter() {
+		return new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				return comparator.compare((IResourceUIModel)e1, (IResourceUIModel)e2);
@@ -225,8 +225,8 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		};
 	}
 	
-	protected ViewerSorter createNameSorter() {
-		return new ViewerSorter() {
+	protected ViewerComparator createNameSorter() {
+		return new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				IResource r1 = ((IResourceUIModel)e1).getResource();
