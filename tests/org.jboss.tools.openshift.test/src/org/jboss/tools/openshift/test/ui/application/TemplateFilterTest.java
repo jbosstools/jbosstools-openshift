@@ -45,6 +45,7 @@ public class TemplateFilterTest {
 	
 	@Test
 	public void elementsThatMatchTheNameShouldReturnTrue() {
+		whenResourceSupportsITagCapability();
 		assertTrue(ResourceUtils.isMatching("resource", resource));
 	}
 	
@@ -82,6 +83,7 @@ public class TemplateFilterTest {
 
 	@Test
 	public void nameThatMatchesAllElementsShouldReturnTrue() {
+		whenResourceSupportsITagCapability();
 		assertTrue(ResourceUtils.isMatching("mongo resource", resource));
 	}
 

@@ -52,30 +52,37 @@ public class ResourceUtils {
 	 * in name or tags.
 	 * 
 	 * @param filterText
-	 * @param template
+	 * @param resource
 	 * @return
 	 */
-	public static boolean isMatching(final String filterText, IResource template) {
+	public static boolean isMatching(final String filterText, IResource resource) {
+		if(resource == null || StringUtils.isBlank(filterText)) {
+			return true;
+		}
+
+		return resource.accept(new CapabilityVisitor<ITags, Boolean>() {
+			@Override
+			public Boolean visit(ITags capability) {
+				return isMatching(filterText, resource.getName(), capability.getTags());
+			}
+		}, Boolean.FALSE);
+	}
+
+	public static boolean isMatching(final String filterText, String name, Collection<String> tags) {
 		if (StringUtils.isBlank(filterText)) {
 			return true;
 		}
 		final Set<String> items = new HashSet<>(Arrays.asList(
 				filterText.replaceAll(",", " ").toLowerCase().split(" ")));
-		if (containsAll(template.getName(), items)) {
+		if (containsAll(name, items)) {
 			return true;
 		}
-
-		return template.accept(new CapabilityVisitor<ITags, Boolean>() {
-			@Override
-			public Boolean visit(ITags capability) {
-				for (String item : items) {
-					if (!inCollection(item, capability.getTags())) {
-						return false;
-					}
-				}
-				return true;
+		for (String item : items) {
+			if (!inCollection(item, tags)) {
+				return false;
 			}
-		}, Boolean.FALSE);
+		}
+		return true;
 	}
 
 	private static boolean containsAll(String text, final Collection<String> items) {
@@ -121,7 +128,7 @@ public class ResourceUtils {
 	 */
 	public static Collection<IService> getServicesForPod(IPod pod, Collection<IService> services){
 		return services.stream()
-				.filter(s->containsAll(((IService)s).getSelector(), pod.getLabels()))
+				.filter(s->containsAll(s.getSelector(), pod.getLabels()))
 				.collect(Collectors.toSet());
 	}
 	

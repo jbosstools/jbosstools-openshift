@@ -22,25 +22,25 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 
-import com.openshift.restclient.model.template.ITemplate;
-
 /**
- * A details view of templates
+ * A details view of an application source
  * 
  * @author jeff.cantrill
  *
  */
-public class TemplateDetailViews  extends AbstractStackedDetailViews {
+@SuppressWarnings("rawtypes")
+public class ApplicationSourceDetailViews  extends AbstractStackedDetailViews {
 	
-	private final IDetailView templateView = new TemplateDetailView();
+	private final IDetailView templateView = new ApplicationSourceDetailView();
 	
-	public TemplateDetailViews(IObservableValue detailViewModel, IObservableValue disabled, Composite parent, DataBindingContext dbc) {
+	public ApplicationSourceDetailViews(IObservableValue detailViewModel, IObservableValue disabled, Composite parent, DataBindingContext dbc) {
 		super(detailViewModel, null, parent, dbc);
 	}
 	
@@ -54,7 +54,7 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 		return new IDetailView[] {templateView };
 	}
 	
-	private class TemplateDetailView extends EmptyView {
+	private class ApplicationSourceDetailView extends EmptyView {
 		private Binding binding;
 		private StyledText txtDescription;
 		private CLabel classIcon;
@@ -90,16 +90,16 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 		public void onVisible(IObservableValue templateObservable, DataBindingContext dbc) {
 			Object value = templateObservable.getValue();
 			txtDescription.setText("");
-			if (!(value instanceof ITemplate) || DisposeUtils.isDisposed(txtDescription)) {
+			if (!(value instanceof IApplicationSource) || DisposeUtils.isDisposed(txtDescription)) {
 				return;
 			}
-			ITemplate template = (ITemplate) value;
-			if(template.isAnnotatedWith("provider")) {
-				txtDescription.append(NLS.bind("Provider: {0} \n", template.getAnnotation("provider")));
+			IApplicationSource source = (IApplicationSource) value;
+			if(source.isAnnotatedWith(OpenShiftAPIAnnotations.PROVIDER)) {
+				txtDescription.append(NLS.bind("Provider: {0} \n", source.getAnnotation(OpenShiftAPIAnnotations.PROVIDER)));
 			}
-			Map<String, String> annotations = template.getAnnotations();
-			addTextFor("description", annotations, txtDescription);
-			updateImage(annotations.get("iconClass"));
+			Map<String, String> annotations = source.getAnnotations();
+			addTextFor(OpenShiftAPIAnnotations.DESCRIPTION, annotations, txtDescription);
+			updateImage(annotations.get(OpenShiftAPIAnnotations.ICON_CLASS));
 		}
 		
 		private void updateImage(String iconClass) {
@@ -118,7 +118,7 @@ public class TemplateDetailViews  extends AbstractStackedDetailViews {
 		
 		@Override
 		public boolean isViewFor(Object object) {
-			return object instanceof ITemplate;
+			return object instanceof IApplicationSource;
 		}
 	}
 }

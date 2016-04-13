@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IStatus;
@@ -22,9 +23,9 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
@@ -38,11 +39,19 @@ import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
+import org.jboss.tools.openshift.internal.ui.job.IResourcesModelJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
+import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPage;
+import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeploymentConfigPage;
+import org.jboss.tools.openshift.internal.ui.wizard.deployimage.ServicesAndRoutingPage;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.ApplicationSourceFromImageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.BuildConfigPage;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.ApplicationSourceFromTemplateModel;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateParametersPage;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
@@ -54,14 +63,24 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  * @author Andre Dietisheim
  */
-public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
+public class NewApplicationWizard 
+	extends Wizard 
+	implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
 
-	private NewApplicationWizardModel model;
+	private NewApplicationWizardModel model = new NewApplicationWizardModel();
+	private ApplicationSourceFromTemplateModel fromTemplateModel = new ApplicationSourceFromTemplateModel();
+	private ApplicationSourceFromImageModel fromImageModel = new ApplicationSourceFromImageModel();
 
 	public NewApplicationWizard() {
 		setWindowTitle("New OpenShift Application");
 		setNeedsProgressMonitor(true);
-		this.model = new NewApplicationWizardModel();
+		
+		Stream.of(fromTemplateModel, fromImageModel).forEach(m->{
+			model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE, m);
+			model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT, m);
+			model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_PROJECT, m);
+			model.addPropertyChangeListener(IResourceLabelsPageModel.PROPERTY_LABELS, m);
+		});
 	}
 
 	@Override
@@ -70,12 +89,13 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 				|| selection.isEmpty()) {
 			return;
 		}
+		fromImageModel.setContainer(getContainer());
 		org.eclipse.core.resources.IProject selectedProject = UIUtils.getFirstElement(selection, org.eclipse.core.resources.IProject.class);
 		model.setEclipseProject(selectedProject);
 		
 		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
 		if (connection != null) {
-			model.setConnection(connection);
+			setConnection(connection);
 		} else {
 			IResource resource = UIUtils.getFirstElement(selection, IResource.class);
 			if (resource != null) {
@@ -91,18 +111,89 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 
 	@Override
 	public void addPages() {
-		addPage(new TemplateListPage(this, model));
-		addPage(new TemplateParametersPage(this, model));
-		addPage(new ResourceLabelsPage(this, model));
+		/*
+		 * list --> template params -------------------------------> labels -> done
+		 *   |                                                    |
+		 *    ----> buildconfig -> deployconfig -> serviceconfig -|
+		 */
+		
+		//app from image
+		BuildConfigPage bcPage = new BuildConfigPage(this, fromImageModel) {
+			@Override
+			public boolean isPageComplete() {
+				return isTemplateFlow() ? true : super.isPageComplete();
+			}
+		};
+
+		DeploymentConfigPage dcPage = new DeploymentConfigPage(this, fromImageModel) {
+			@Override
+			public boolean isPageComplete() {
+				return isTemplateFlow() ? true : super.isPageComplete();
+			}
+		};
+		ServicesAndRoutingPage servicesPage = new ServicesAndRoutingPage(this, fromImageModel) {
+			@Override
+			public boolean isPageComplete() {
+				return isTemplateFlow() ? true : super.isPageComplete();
+			}
+			
+		};
+
+		//app from template
+		TemplateParametersPage paramPage = new TemplateParametersPage(this, fromTemplateModel) {
+			
+			@Override
+			public boolean isPageComplete() {
+				return isTemplateFlow() ? super.isPageComplete() : true;
+			}
+
+			@Override
+			public IWizardPage getNextPage() {
+				return getPage(ResourceLabelsPage.PAGE_NAME);
+			}
+		};
+		
+		ResourceLabelsPage labelsPage = new ResourceLabelsPage(this, model);
+
+		ApplicationSourceListPage listPage = new ApplicationSourceListPage(this, model) {
+
+			@Override
+			public IWizardPage getNextPage() {
+				if(model.getSelectedAppSource() == null) {
+					return null;
+				}
+				if(isTemplateFlow()){
+					Stream.of(bcPage, dcPage, servicesPage).forEach(p->p.setPageComplete(true));
+					return getPage(TemplateParametersPage.PAGE_NAME);
+				}
+				return getPage(DeploymentConfigPage.PAGE_NAME);
+			}
+			
+		};
+
+		
+		addPage(listPage);
+		addPage(paramPage);
+		addPage(bcPage);
+		addPage(dcPage);
+		addPage(servicesPage);
+		addPage(labelsPage);
+
+	}
+	
+	private boolean isTemplateFlow() {
+		if(model.getSelectedAppSource() != null && model.getSelectedAppSource().getSource() != null) {
+			return ResourceKind.TEMPLATE.equals(model.getSelectedAppSource().getSource().getKind());
+		}
+		return true;
 	}
 
 	@Override
 	public boolean performFinish() {
-		final CreateApplicationFromTemplateJob createJob = new CreateApplicationFromTemplateJob(
-				model.getProject(),
-				model.getSelectedTemplate(),
-				model.getParameters(),
-				model.getLabels());
+
+		final IResourcesModelJob createJob = ResourceKind.TEMPLATE.equals(model.getSelectedAppSource().getKind()) 
+				? fromTemplateModel.createFinishJob() 
+				: fromImageModel.createFinishJob();
 		
 		createJob.addJobChangeListener(new JobChangeAdapter(){
 
@@ -111,15 +202,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 				IStatus status = event.getResult();
 				if(JobUtils.isOk(status) 
 						|| JobUtils.isWarning(status)) {
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							final String message = NLS.bind(
-									"Results of creating the resources from the {0} template.", 
-									model.getSelectedTemplate().getName());
-							new NewApplicationSummaryDialog(getShell(), createJob, message).open();
-						}
-					});
+					Display.getDefault().syncExec(createJob.getSummaryRunnable(getShell()));
 					OpenShiftUIUtils.showOpenShiftExplorerView();
 					if (model.getEclipseProject() != null) {
 						//No need to import the project from git, it's already here
@@ -160,7 +243,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 		});
 		boolean success = false;
 		try {
-			Job job = new JobChainBuilder(createJob)
+			Job job = new JobChainBuilder(createJob.getJob())
 					.runWhenSuccessfullyDone(new RefreshResourcesJob(createJob, true)).build();
 			IStatus status = runInWizard(
 					job, 
@@ -194,11 +277,11 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 	@Override
 	public void setConnection(Connection connection) {
 		model.setConnection(connection);
+		fromImageModel.setConnection(connection);
 	}
 
 	@Override
 	public Object getContext() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

@@ -60,6 +60,7 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageMo
  */
 public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 
+	public static final String PAGE_NAME = "Resource Labels Page";
 	private static final String LABEL = "Label";
 	private static final String RESOURCE_LABEL = "Resource Label";
 	private static final String PAGE_DESCRIPTION = "Add or edit the labels to be added to each resource. " + 
@@ -70,7 +71,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 	private TableViewer viewer;
 
 	public ResourceLabelsPage(IWizard wizard, IResourceLabelsPageModel model) {
-		super("Resource Labels", PAGE_DESCRIPTION, "Resource Labels Page", wizard);
+		super("Resource Labels", PAGE_DESCRIPTION, PAGE_NAME, wizard);
 		this.model = model;
 	}
 

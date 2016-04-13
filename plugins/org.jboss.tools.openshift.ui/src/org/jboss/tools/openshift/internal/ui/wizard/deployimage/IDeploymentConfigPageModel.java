@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.util.List;
 
-import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
+import org.jboss.tools.openshift.internal.ui.wizard.common.IEnvironmentVariablesPageModel;
 
 import com.openshift.restclient.model.IPort;
 
@@ -21,29 +21,15 @@ import com.openshift.restclient.model.IPort;
  * @author jeff.cantrill
  *
  */
-public interface IDeploymentConfigPageModel {
-	String PROPERTY_ENVIRONMENT_VARIABLES = "environmentVariables";
-	String PROPERTY_SELECTED_ENVIRONMENT_VARIABLE = "selectedEnvironmentVariable";
+public interface IDeploymentConfigPageModel extends IEnvironmentVariablesPageModel {
 
-	String PROPERTY_VOLUMES = "volumes";
-	String PROPERTY_SELECTED_VOLUME = "selectedVolume";
-
-	String PROPERTY_PORT_SPECS = "portSpecs";
-
-	String PROPERTY_REPLICAS = "replicas";
+	static final String PROPERTY_VOLUMES = "volumes";
+	static final String PROPERTY_SELECTED_VOLUME = "selectedVolume";
+	static final String PROPERTY_PORT_SPECS = "portSpecs";
+	static final String PROPERTY_REPLICAS = "replicas";
 	
 	String getResourceName();
 
-	List<EnvironmentVariable> getEnvironmentVariables();
-	void setEnvironmentVariables(List<EnvironmentVariable> envVars);
-	
-	void setSelectedEnvironmentVariable(EnvironmentVariable envVar);
-	EnvironmentVariable getSelectedEnvironmentVariable();
-	
-	void removeEnvironmentVariable(EnvironmentVariable envVar);
-	void resetEnvironmentVariable(EnvironmentVariable envVar);
-	void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value);
-	void addEnvironmentVariable(String key, String value);
 
 	void setVolumes(List<String> volumes);
 	List<String> getVolumes();

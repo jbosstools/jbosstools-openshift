@@ -13,13 +13,10 @@ package org.jboss.tools.openshift.test.ui.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createObservableTreeItems;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createResources;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -27,21 +24,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
-import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizardModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.NotATemplateException;
-import org.jboss.tools.openshift.test.util.ResourceMocks;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,8 +44,8 @@ import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.route.IRoute;
-import com.openshift.restclient.model.template.IParameter;
 import com.openshift.restclient.model.template.ITemplate;
+
 /**
  * @author jeff.cantrill
  */
@@ -72,6 +63,7 @@ public class NewApplicationWizardModelTest {
 	
 	@Before
 	public void setup() throws Exception {
+		when(template.getKind()).thenReturn(ResourceKind.TEMPLATE);
 		when(project.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
 		createProjectTemplateItems();
 		TestableNewApplicationWizardModel model = new TestableNewApplicationWizardModel();
@@ -193,7 +185,7 @@ public class NewApplicationWizardModelTest {
 
 		// operations
 		model.setProject(project2);
-		List<ObservableTreeItem> templates = model.getTemplates();
+		List<ObservableTreeItem> templates = model.getAppSources();
 		
 		// verification
 		assertThat(templates).containsAll(getTemplateItemsForProject(1));
@@ -202,13 +194,13 @@ public class NewApplicationWizardModelTest {
 	@Test
 	public void setServerTemplateShouldSetUseLocalTemplateToFalse() {
 		// pre-conditions
-		ITemplate template = ResourceMocks.createResource(ITemplate.class, null);
+		IApplicationSource template = mock(IApplicationSource.class);
 
 		// operations
-		model.setServerTemplate(template );
+		model.setServerAppSource(template );
 
 		// verification
-		assertThat(model.isUseLocalTemplate()).isFalse();
+		assertThat(model.isUseLocalAppSource()).isFalse();
 	}
 	
 	@Test
@@ -216,128 +208,33 @@ public class NewApplicationWizardModelTest {
 		// pre-conditions
 
 		// operations
-		model.setLocalTemplateFileName("test.json");
+		model.setLocalAppSourceFileName("test.json");
 
 		// verification
-		assertThat(model.isUseLocalTemplate()).isTrue();
+		assertThat(model.isUseLocalAppSource()).isTrue();
 	}
 
 	@Test
 	public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
 		when(factory.create(any(InputStream.class))).thenReturn(template);
-		model.setUseLocalTemplate(true);
-		model.setLocalTemplateFileName("resources/eap6-basic-sti.json");
+		model.setUseLocalAppSource(true);
+		model.setLocalAppSourceFileName("resources/eap6-basic-sti.json");
 		
 		verify(factory).create(any(InputStream.class));
-		assertEquals(template, model.getSelectedTemplate());
-	}
-
-	@Test
-	public void setTemplateShouldCopyParametersAndLabels() {
-		Map<String, IParameter> parameters = givenTheTemplateHasParameters();
-		HashMap<String, String> labels = givenTheTemplateHasObjectLabels();
-		Collection<IResourceLabelsPageModel.Label> modelLabels = new ArrayList<>();
-		for (Entry<String, String> label : labels.entrySet()) {
-			modelLabels.add(new IResourceLabelsPageModel.Label(label.getKey(), label.getValue()));
-		}
-		model.setUseLocalTemplate(false);
-		model.setServerTemplate(template);
-
-		assertArrayEquals(parameters.values().toArray(), model.getParameters().toArray());
-		assertArrayEquals(modelLabels.toArray(), model.getLabels().toArray());
+		assertEquals(TemplateApplicationSource.class, model.getSelectedAppSource().getClass());
 	}
 	
-	private HashMap<String, String> givenTheTemplateHasObjectLabels() {
-		HashMap<String, String> labels = new HashMap<>();
-		labels.put("abc", "xyz");
-		when(template.getObjectLabels()).thenReturn(labels);
-		return labels;
-	}
-
-	@Test
-	public void resetParameterShouldSetTheOriginalValue() {
-		IParameter param = mock(IParameter.class);
-		when(param.getName()).thenReturn("foo");
-		when(param.getValue()).thenReturn("abc");
-		when(param.clone()).thenReturn(param);
-		
-		model.setParameters(Arrays.asList(new IParameter[] {param}));
-		model.resetParameter(param);
-		
-		verify(param).setValue("abc");
-	}
-	
-	@Test
-	public void updateParameterValueShouldUpdateTheParameterValue() {
-		IParameter param = mock(IParameter.class);
-		model.updateParameterValue(param, "abc123");
-		
-		verify(param).setValue(eq("abc123"));
-	}
-	
-	@Test
-	public void getParametersShouldReturnAnEmptyMapWhenTemplateIsNull() {
-		model.setServerTemplate(null);
-		assertNotNull("Exp. an empty map",model.getParameters());
-	}
-	
-	@Test
-	public void getParametersShouldReturnAParameterMapWhenTemplateIsNotNull() {
-		Map<String, IParameter> parameters = givenTheTemplateHasParameters();
-		model.setUseLocalTemplate(false);
-		model.setServerTemplate(template);
-		
-		assertArrayEquals(parameters.values().toArray(), model.getParameters().toArray());
-	}
-
 	@Test
 	public void setWrongJsonAsTemplateFile() throws Exception {
 		IRoute route = Mockito.mock(IRoute.class);
 		when(route.getKind()).thenReturn(ResourceKind.ROUTE);
 		when(factory.create(any(InputStream.class))).thenReturn(route);
 		try {
-			model.setLocalTemplateFileName("resources/jboss_infinispan-server_ImageStreamImport.json");
+			model.setLocalAppSourceFileName("resources/jboss_infinispan-server_ImageStreamImport.json");
 			fail("No NotATemplateException occurred");
 		} catch (NotATemplateException e) {
 			assertEquals(ResourceKind.ROUTE, e.getResourceKind());
 		}
-	}
-
-	/**
-	 * Test that the model computes the default project as the first one
-	 * after sorting the list of project items in the same way as in the combo viewer.
-	 */
-	@Test
-	public void testDefaultProject() {
-		ObservableTreeItem p1 = new ObservableTreeItem(mockProject("zz", "z"));
-		ObservableTreeItem p2 = new ObservableTreeItem(mockProject("kk", "y"));
-		ObservableTreeItem p3 = new ObservableTreeItem(mockProject("a", "c"));
-		ObservableTreeItem p4 = new ObservableTreeItem(mockProject("b2", null));
-		ObservableTreeItem p5 = new ObservableTreeItem(mockProject("d", "b"));
-		List<ObservableTreeItem> projects = Arrays.asList(p1, p2, p3, p4, p5);
-		model.setProjectItems(projects);
-		model.setProject(null); //this call invokes computing default project.
-		IProject project = model.getProject();
-		assertEquals(p5.getModel(), project);
-	}
-
-	IProject mockProject(String name, String displayName) {
-		IProject p = Mockito.mock(IProject.class);
-		when(p.getName()).thenReturn(name);
-		if(displayName != null) {
-			when(p.getDisplayName()).thenReturn(displayName);
-		}
-		return p;
-	}
-
-	private Map<String, IParameter> givenTheTemplateHasParameters() {
-		IParameter param = mock(IParameter.class);
-		when(param.getName()).thenReturn("foo");
-		when(param.clone()).thenReturn(param);
-		Map<String, IParameter> parameters = new HashMap<>();
-		parameters.put(param.getName(), param );
-		when(template.getParameters()).thenReturn(parameters);
-		return parameters;
 	}
 	
 	private IProject getProject(int i) {

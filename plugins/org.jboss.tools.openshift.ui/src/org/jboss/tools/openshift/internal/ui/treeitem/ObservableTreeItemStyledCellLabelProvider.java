@@ -28,6 +28,7 @@ public class ObservableTreeItemStyledCellLabelProvider extends StyledCellLabelPr
 
 	public ObservableTreeItemStyledCellLabelProvider() {
 		this.explorerLabelProvider = new OpenShiftExplorerLabelProvider();
+		this.explorerLabelProvider.setLabelLimit(100);
 	}
 
 	@Override

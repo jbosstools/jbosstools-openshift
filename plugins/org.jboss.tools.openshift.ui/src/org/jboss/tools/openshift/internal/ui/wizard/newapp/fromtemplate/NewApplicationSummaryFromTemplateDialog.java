@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.newapp;
+package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +52,7 @@ import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryLabelProvider
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromTemplateJob;
 import org.jboss.tools.openshift.internal.ui.webhooks.WebHooksDialog;
 import org.jboss.tools.openshift.internal.ui.webhooks.WebhookUtil;
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterViewerUtils.ParameterNameViewerComparator;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateParameterViewerUtils.ParameterNameViewerComparator;
 
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IResource;
@@ -64,13 +64,13 @@ import com.openshift.restclient.model.template.IParameter;
  * @author Andre Dietisheim
  * @author Fred Bricon
  */
-public class NewApplicationSummaryDialog extends ResourceSummaryDialog {
+public class NewApplicationSummaryFromTemplateDialog extends ResourceSummaryDialog {
 
 	private static final int COPIED_NOTIFICATION_SHOW_DURATION = 2*1000;
 	
 	private CreateApplicationFromTemplateJob job;
 
-	public NewApplicationSummaryDialog(Shell parentShell, CreateApplicationFromTemplateJob job, String message) {
+	public NewApplicationSummaryFromTemplateDialog(Shell parentShell, CreateApplicationFromTemplateJob job, String message) {
 		super(parentShell, job.getResources(),  "Create Application Summary", message,  new ResourceSummaryLabelProvider(), new ResourceSummaryContentProvider());
 		this.job = job;
 	}
