@@ -94,7 +94,7 @@ public class ServiceManagerEnvironment {
 	 */
 	public static ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server) {
 		
-		String[] args = new String[]{CDKConstants.VAGRANT_CMD_SERVICE_MANAGER, CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV};
+		String[] args = new String[]{CDKConstants.VAGRANT_CMD_SERVICE_MANAGER, CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV, "docker"};
 
     	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
 		
@@ -103,12 +103,22 @@ public class ServiceManagerEnvironment {
 		HashMap<String,String> adbEnv = new HashMap<>();
 	    try {
 	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  CDKServerUtility.getWorkingDirectory(server), env);
-			String setEnvVarCommand = Platform.getOS().equals(Platform.OS_WIN32) ? "setx " : "export ";
-			String setEnvVarDelim = Platform.getOS().equals(Platform.OS_WIN32) ? " " : "=";
+	    	String setEnvWin = "setx ";
+	    	String setEnvNix = "export ";
+			
 			for(String oneAppend : lines) {
 				String[] allAppends = oneAppend.split("\n");
 				for( int i = 0; i < allAppends.length; i++ ) {
-					if( allAppends[i].trim().startsWith(setEnvVarCommand)) {
+					String setEnvVarCommand = null;
+					String setEnvVarDelim = null;
+					if( allAppends[i].trim().startsWith(setEnvWin)) {
+						setEnvVarCommand = setEnvWin;
+						setEnvVarDelim = " ";
+					} else if( allAppends[i].trim().startsWith(setEnvNix)) {
+						setEnvVarCommand = setEnvNix;
+						setEnvVarDelim = "=";
+					}
+					if( setEnvVarCommand != null ) {
 						String lineRemainder = allAppends[i].trim().substring(setEnvVarCommand.length());
 						int eq = lineRemainder.indexOf(setEnvVarDelim);
 						if( eq != -1 ) {

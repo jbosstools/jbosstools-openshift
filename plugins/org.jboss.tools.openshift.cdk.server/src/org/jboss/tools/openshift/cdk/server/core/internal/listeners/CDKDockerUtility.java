@@ -83,6 +83,12 @@ public class CDKDockerUtility {
 		boolean tlsVerify = tlsVerifyString == null ? false : (Integer.parseInt(tlsVerifyString) != 0);
 		if( tlsVerify ) {
 			String tlsCertPath = adb.env.get("DOCKER_CERT_PATH");
+			if( tlsCertPath != null ) {
+				tlsCertPath = tlsCertPath.trim();
+				if( tlsCertPath.startsWith("\'") && tlsCertPath.endsWith("\'") && tlsCertPath.length() > 1) {
+					tlsCertPath = tlsCertPath.substring(1, tlsCertPath.length()-1);
+				}
+			}
 			tcpConnectionBuilder.tcpCertPath(tlsCertPath);
 		}
 		return tcpConnectionBuilder.build();
