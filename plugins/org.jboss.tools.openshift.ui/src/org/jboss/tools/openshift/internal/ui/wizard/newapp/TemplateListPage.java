@@ -282,7 +282,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		projectsViewer.setLabelProvider(new ObservableTreeItemLabelProvider());
 		projectsViewer.setInput(
 				BeanProperties.list(ITemplateListPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
-		projectsViewer.setComparator(new ProjectViewerComparator(labelProvider));
+		projectsViewer.setComparator(ProjectViewerComparator.createProjectTreeSorter(labelProvider));
 
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
 		Binding selectedProjectBinding =
