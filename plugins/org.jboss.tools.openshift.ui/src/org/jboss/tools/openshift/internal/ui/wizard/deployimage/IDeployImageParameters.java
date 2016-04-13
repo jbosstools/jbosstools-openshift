@@ -34,5 +34,4 @@ public interface IDeployImageParameters
 	 * @return
 	 */
 	Map<String, String> getImageEnvVars();
-
 }

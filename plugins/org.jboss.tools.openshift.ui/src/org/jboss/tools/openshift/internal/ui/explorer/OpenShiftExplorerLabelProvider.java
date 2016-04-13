@@ -26,6 +26,7 @@ import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelPr
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -113,6 +114,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public StyledString getStyledText(Object element) {
 		if (element instanceof Deployment) {
@@ -120,6 +122,8 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 			return style(d.getService().getName(), formatRoute(d.getRoutes()));
 		} else if(element instanceof NewProjectLinkNode) {
 			return getStyledText((NewProjectLinkNode)element);
+		} else if(element instanceof IApplicationSource) {
+			return getStyledText((IApplicationSource) element);
 		}
 		if (element instanceof IResource || element instanceof IResourceUIModel) {
 			IResource resource = element instanceof IResourceUIModel ? ((IResourceUIModel)element).getResource() : (IResource) element;
@@ -143,8 +147,6 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 			case ResourceKind.SERVICE:
 				IService service = (IService) resource;
 				return getStyledText(service);
-			case ResourceKind.TEMPLATE:
-				return getStyledText((ITemplate) resource);
 			default:
 				break;
 			}
@@ -207,21 +209,17 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 		return style(prefix, conn.toString());
 	}
 
-	private StyledString getStyledText(ITemplate template) {
-		String tags = (String) template.accept(new CapabilityVisitor<ITags, Object>() {
-			@Override
-			public Object visit(ITags capability) {
-				return NLS.bind("({0})", org.apache.commons.lang.StringUtils.join(capability.getTags(), ", "));
-			}
-		}, null);
+	@SuppressWarnings("rawtypes")
+	private StyledString getStyledText(IApplicationSource source) {
+		String tags = NLS.bind("({0})", org.apache.commons.lang.StringUtils.join(source.getTags(), ", "));
 		StringBuilder qualifier = new StringBuilder();
 		if(!StringUtils.isEmpty(tags)) {
 			qualifier.append(tags);
 		}
-		if(!StringUtils.isEmpty(template.getNamespace())) {
-			qualifier.append(" - ").append(template.getNamespace());
+		if(!StringUtils.isEmpty(source.getNamespace())) {
+			qualifier.append(" - ").append(source.getNamespace());
 		}
-		return style(template.getName(), qualifier.toString());
+		return style(source.getName(), qualifier.toString());
 	}
 
 	private StyledString getStyledText(IProject project) {

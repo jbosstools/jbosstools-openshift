@@ -67,7 +67,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 
 	TableViewer portsViewer;
 	
-	protected ServicesAndRoutingPage(IWizard wizard, IServiceAndRoutingPageModel model) {
+	public ServicesAndRoutingPage(IWizard wizard, IServiceAndRoutingPageModel model) {
 		super(PAGE_TITLE, PAGE_DESCRIPTION, PAGE_NAME, wizard);
 		this.model = model;
 	}

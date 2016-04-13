@@ -14,12 +14,15 @@ import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.StyledString;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,6 +70,26 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(build.getStatus()).thenReturn("Running");
 		
 		assertEquals(String.format("%s Build Running", build.getName()), provider.getStyledText(build).getString());
+	}
+
+	@Test
+	public void getStyledTextForAnApplicationSource(){
+		IApplicationSource source = mock(IApplicationSource.class);
+		when(source.getTags()).thenReturn(Arrays.asList("foo","bar"));
+		when(source.getNamespace()).thenReturn("aNamespace");
+		when(source.getName()).thenReturn("aname");
+		
+		assertEquals("", "aname (foo, bar) - aNamespace", provider.getStyledText(source).getString());
+	}
+
+	@Test
+	public void getStyledTextForAnApplicationSourceWithoutTags(){
+		IApplicationSource source = mock(IApplicationSource.class);
+		when(source.getTags()).thenReturn(Collections.emptyList());
+		when(source.getNamespace()).thenReturn("aNamespace");
+		when(source.getName()).thenReturn("aname");
+		
+		assertEquals("", "aname () - aNamespace", provider.getStyledText(source).getString());
 	}
 	
 	@Test

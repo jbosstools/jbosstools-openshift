@@ -73,4 +73,6 @@ Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tool
  org.jboss.tools.openshift.internal.ui.wizard.deployimage;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.deployimage.search;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.importapp;x-friends:="org.jboss.tools.openshift.test",
- org.jboss.tools.openshift.internal.ui.wizard.newapp;x-friends:="org.jboss.tools.openshift.test"
+ org.jboss.tools.openshift.internal.ui.wizard.newapp;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;x-friends:="org.jboss.tools.openshift.test"

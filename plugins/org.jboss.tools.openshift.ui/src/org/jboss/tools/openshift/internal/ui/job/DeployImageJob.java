@@ -57,13 +57,22 @@ import com.openshift.restclient.model.route.IRoute;
 public class DeployImageJob extends AbstractDelegatingMonitorJob implements IResourcesModel{
 	
 	public static final String SELECTOR_KEY = "deploymentconfig";
+	private static final String JBOSSTOOLS_OPENSHIFT = "jbosstools-openshift";
 	
 	private IDeployImageParameters parameters;
 	private Collection<IResource> created = Collections.emptyList();
 	
 	public DeployImageJob(IDeployImageParameters parameters) {
-		super("Deploy Image Job");
+		this("Deploy Image Job", parameters);
+	}
+
+	protected DeployImageJob(String title, IDeployImageParameters parameters) {
+		super(title);
 		this.parameters = parameters;
+	}
+	
+	protected IDeployImageParameters getParameters() {
+		return this.parameters;
 	}
 	
 	@Override
@@ -75,9 +84,8 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
 			final Connection connection = parameters.getConnection();
-			final IResourceFactory factory = connection.getResourceFactory();
 			final String name = parameters.getResourceName();
-			Map<String, IResource> resources = generateResources(factory, name);
+			Map<String, IResource> resources = generateResources(connection, name);
 			
 			//validate 
 			Collection<IResource> existing = findExistingResources(connection, resources.values());
@@ -88,9 +96,11 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 			//create
 			created = createResources(connection, resources.values());
 		}catch(Exception e) {
+			String message = NLS.bind("Unable to create resources to deploy image {0}", parameters.getImageName());
+			OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
 			return new Status(IStatus.ERROR, 
 					OpenShiftUIActivator.PLUGIN_ID, 
-					NLS.bind("Unable to create resources to deploy image {0}", parameters.getImageName()),
+					message,
 					e);
 		}
 		return Status.OK_STATUS;
@@ -114,7 +124,8 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		return created;
 	}
 
-	private Map<String, IResource> generateResources(final IResourceFactory factory, final String name) {
+	private Map<String, IResource> generateResources(final Connection connection, final String name) {
+		final IResourceFactory factory = connection.getResourceFactory();
 		final IProject project = parameters.getProject();
 		DockerImageURI sourceImage = new DockerImageURI(parameters.getImageName());
 		
@@ -129,12 +140,17 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		}
 		
 		resources.put(ResourceKind.DEPLOYMENT_CONFIG, stubDeploymentConfig(factory, name, sourceImage));
+		addToGeneratedResources(resources, connection, name, project);
 		
 		for (IResource resource : resources.values()) {
 			addLabelsToResource(resource);
-			resource.setAnnotation(OpenShiftAPIAnnotations.GENERATED_BY, "jbosstools-openshift");
+			resource.setAnnotation(OpenShiftAPIAnnotations.GENERATED_BY, JBOSSTOOLS_OPENSHIFT);
 		}
 		return resources;
+	}
+	
+	protected void addToGeneratedResources(Map<String, IResource> resources, final Connection connection, final String name, final IProject project) {
+		
 	}
 	
 	public IResource stubDeploymentConfig(IResourceFactory factory, final String name, DockerImageURI imageUri) {
@@ -170,7 +186,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		return envs;
 	}
 
-	private IImageStream stubImageStream(IResourceFactory factory, String name, IProject project, DockerImageURI imageUri) {
+	protected IImageStream stubImageStream(IResourceFactory factory, String name, IProject project, DockerImageURI imageUri) {
 		IImageStream imageStream = factory.stub(ResourceKind.IMAGE_STREAM, name, parameters.getProject().getName());
 		imageStream.setDockerImageRepository(imageUri.getUriWithoutTag());
 		return imageStream;

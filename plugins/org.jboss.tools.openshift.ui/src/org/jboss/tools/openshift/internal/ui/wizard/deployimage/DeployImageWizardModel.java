@@ -10,18 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -33,16 +33,15 @@ import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerConnectionManagerListener2;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
-import org.jboss.dmr.ModelNode;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
 import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
+import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablesPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
 
 import com.openshift.restclient.OpenShiftException;
@@ -61,7 +60,7 @@ import com.openshift.restclient.model.image.IImageStreamImport;
  */
 public class DeployImageWizardModel 
 		extends ResourceLabelsPageModel 
-		implements IDeployImageParameters, IDockerConnectionManagerListener2 {
+		implements IDeployImageParameters, IDockerConnectionManagerListener2, PropertyChangeListener{
 
 	private static final int DEFAULT_REPLICA_COUNT = 1;
 
@@ -71,9 +70,7 @@ public class DeployImageWizardModel
 	private String imageName;
 	private Collection<IProject> projects = Collections.emptyList();
 
-	private List<EnvironmentVariable> environmentVariables = Collections.emptyList();
-	private Map<String, String> imageEnvVars = new HashMap<>();
-	private EnvironmentVariable selectedEnvironmentVariable = null;
+	private EnvironmentVariablesPageModel envModel = new EnvironmentVariablesPageModel();
 
 	private List<String> volumes = Collections.emptyList();
 	private String selectedVolume;
@@ -95,19 +92,28 @@ public class DeployImageWizardModel
 	private final List<String> imageNames = new ArrayList<>();
 	
 	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
+
+	public DeployImageWizardModel() {
+		envModel.addPropertyChangeListener(PROPERTY_ENVIRONMENT_VARIABLES, this);
+		envModel.addPropertyChangeListener(PROPERTY_SELECTED_ENVIRONMENT_VARIABLE, this);
+		DockerConnectionManager.getInstance().addConnectionManagerListener(this);
+	}
 	
     private List<IDockerConnection> dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections());
-
-	
-	public DeployImageWizardModel() {
-	    DockerConnectionManager.getInstance().addConnectionManagerListener(this);
-	}
 	
 	@Override
 	public void dispose() {
 	    DockerConnectionManager.getInstance().removeConnectionManagerListener(this);
 	}
 	
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if(evt != null) {
+			firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+		}
+	}
+
 	@Override
 	public void setOriginatedFromDockerExplorer(boolean orig) {
 		this.originatedFromDockerExplorer = orig;
@@ -266,18 +272,12 @@ public class DeployImageWizardModel
 	
 	@Override
 	public List<EnvironmentVariable> getEnvironmentVariables() {
-		return environmentVariables;
+		return envModel.getEnvironmentVariables();
 	}
 	
 	@Override
 	public void setEnvironmentVariables(List<EnvironmentVariable> envVars) {
-		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, 
-				this.environmentVariables, 
-				this.environmentVariables = envVars);
-		this.imageEnvVars.clear();
-		for (IKeyValueItem label : envVars) {
-			imageEnvVars.put(label.getKey(), label.getValue());
-		}
+		envModel.setEnvironmentVariables(envVars);
 	}
 
 	@Override
@@ -361,49 +361,33 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setSelectedEnvironmentVariable(EnvironmentVariable envVar) {
-		firePropertyChange(PROPERTY_SELECTED_ENVIRONMENT_VARIABLE, 
-				this.selectedEnvironmentVariable, 
-				this.selectedEnvironmentVariable = envVar);
+		envModel.setSelectedEnvironmentVariable(envVar);
 	}
 
 	@Override
 	public EnvironmentVariable getSelectedEnvironmentVariable() {
-		return selectedEnvironmentVariable;
+		return envModel.getSelectedEnvironmentVariable();
 	}
 
 	@Override
 	public void removeEnvironmentVariable(EnvironmentVariable envVar) {
-		final int i = environmentVariables.indexOf(envVar);
-		if(i > -1) {
-			List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
-			this.environmentVariables.remove(i);
-			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old, Collections.unmodifiableList(environmentVariables));
-		}
+		envModel.removeEnvironmentVariable(envVar);
 	}
 
 	@Override
 	public void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value) {
-		final int i = environmentVariables.indexOf(envVar);
-		if(i > -1) {
-			List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
-			EnvironmentVariable prev = environmentVariables.get(i);
-			environmentVariables.set(i, new EnvironmentVariable(key, value, prev.isNew()));
-			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old, Collections.unmodifiableList(environmentVariables));
-		}
+		envModel.updateEnvironmentVariable(envVar, key, value);
 	}	
+
 	@Override
 	public void resetEnvironmentVariable(EnvironmentVariable envVar) {
-		if(imageEnvVars.containsKey(envVar.getKey())) {
-			updateEnvironmentVariable(envVar, envVar.getKey(), imageEnvVars.get(envVar.getKey()));
-		}
+		envModel.resetEnvironmentVariable(envVar);
 	}
 
 
 	@Override
 	public void addEnvironmentVariable(String key, String value) {
-		List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
-		this.environmentVariables.add(new EnvironmentVariable(key, value, true));
-		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, old, Collections.unmodifiableList(environmentVariables));
+		envModel.addEnvironmentVariable(key, value);
 	}
 	
 	
@@ -484,14 +468,14 @@ public class DeployImageWizardModel
 
 	
 	
-	private IDockerImageMetadata lookupImageMetadata() {
-		if (dockerConnection == null || StringUtils.isBlank(this.imageName)) {
+	protected IDockerImageMetadata lookupImageMetadata() {
+		if (StringUtils.isBlank(this.imageName)) {
 			return null;
 		}
 		final DockerImageURI imageURI = new DockerImageURI(this.imageName);
 		final String repo = imageURI.getUriWithoutTag();
 		final String tag = StringUtils.defaultIfBlank(imageURI.getTag(), "latest");
-		if (dockerConnection.hasImage(repo, tag)) {
+		if (dockerConnection != null && dockerConnection.hasImage(repo, tag)) {
 			final IDockerImageInfo info = dockerConnection.getImageInfo(this.imageName);
 			return new DockerConfigMetaData(info);
 		} else if (this.project != null && project.supports(IImageStreamImportCapability.class)) {
@@ -499,7 +483,7 @@ public class DeployImageWizardModel
 			try {
 				final IImageStreamImport streamImport = cap.importImageMetadata(imageURI);
 				if (ResourceUtils.isSuccessful(streamImport)) {
-					return new ImportImageMetaData(streamImport.getImageJsonFor(imageURI));
+					return new ImageStreamTagMetaData(streamImport.getImageJsonFor(imageURI));
 				}
 			} catch (OpenShiftException e) {
 				OpenShiftUIActivator.getDefault().getLogger().logError(e);
@@ -521,7 +505,7 @@ public class DeployImageWizardModel
 
 	@Override
 	public Map<String, String> getImageEnvVars() {
-		return Collections.unmodifiableMap(this.imageEnvVars);
+		return envModel.getImageEnvVars();
 	}
 	
 	private static class DockerConfigMetaData implements IDockerImageMetadata {
@@ -547,46 +531,6 @@ public class DeployImageWizardModel
 			return info.containerConfig().volumes();
 		}
 		
-	}
-
-	private static class ImportImageMetaData implements IDockerImageMetadata {
-
-		private static final String[] ROOT = new String [] {"image","dockerImageMetadata","ContainerConfig"};
-		private static final String[] PORTS = (String [])ArrayUtils.add(ROOT, "ExposedPorts");
-		private static final String[] ENV = (String [])ArrayUtils.add(ROOT, "Env");
-		private static final String[] VOLUMES = (String [])ArrayUtils.add(ROOT, "Volumes");
-		private final ModelNode node;
-
-		public ImportImageMetaData(final String json) {
-			this.node = ModelNode.fromJSONString(json);
-		}
-
-		@Override
-		public Set<String> exposedPorts(){
-			ModelNode ports = node.get(PORTS);
-			if(ports.isDefined()) {
-				return ports.keys();
-			}
-			return Collections.emptySet();
-		}
-		
-		@Override
-		public List<String> env(){
-			ModelNode env = node.get(ENV);
-			if(env.isDefined()) {
-				return env.asList().stream().map(n->n.asString()).collect(Collectors.toList());
-			}
-			return Collections.emptyList();
-		}
-		
-		@Override
-		public Set<String> volumes(){
-			ModelNode volumes = node.get(VOLUMES);
-			if(volumes.isDefined()) {
-				return volumes.keys();
-			}
-			return Collections.emptySet();
-		}
 	}
 
     @Override

@@ -48,8 +48,10 @@ import com.openshift.restclient.authorization.IAuthorizationStrategy;
 import com.openshift.restclient.authorization.TokenAuthorizationStrategy;
 import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.ICapability;
 import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IResourceBuilder;
 
 public class Connection extends ObservablePojo implements IConnection, IRefreshable, IOpenShiftConnection {
 
@@ -86,12 +88,23 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 	
 	/**
-	 * Retrieve the resoruce factory associated with this connection
+	 * Retrieve the resource factory associated with this connection
 	 * for stubbing versioned resources supported by th server
 	 * @return an {@link IResourceFactory}
 	 */
 	public IResourceFactory getResourceFactory() {
 		return client.getResourceFactory();
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public <B extends IResourceBuilder> B getResourceBuilder(Class<? extends ICapability> klass){
+		if(client.supports(klass)) {
+			ICapability cap = (ICapability) client.getCapability(klass);
+			if(cap instanceof IResourceBuilder) {
+				return (B) cap;
+			}
+		}
+		return null;
 	}
 	
 	@Override

@@ -6,7 +6,7 @@
  *
  * Contributors: Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.newapp;
+package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;
 
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;

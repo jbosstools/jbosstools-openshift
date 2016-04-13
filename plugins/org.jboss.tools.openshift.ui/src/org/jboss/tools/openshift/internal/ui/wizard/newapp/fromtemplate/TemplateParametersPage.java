@@ -6,7 +6,7 @@
  *
  * Contributors: Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.newapp;
+package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;
 
 import java.util.Iterator;
 
@@ -57,7 +57,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerCellDecorationManager;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterViewerUtils.ParameterNameViewerComparator;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.EditValueDialog;
 
 import com.openshift.restclient.model.template.IParameter;
 
@@ -71,13 +71,14 @@ import com.openshift.restclient.model.template.IParameter;
  */
 public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 
+	public static final String PAGE_NAME = "Template Parameter Page";
 	private ITemplateParametersPageModel model;
 	private TableViewer viewer;
 
 	public TemplateParametersPage(IWizard wizard, ITemplateParametersPageModel model) {
 		super("Template Parameters", 
 				"Edit the parameter values to be substituted into the template.", 
-				"Template Parameter Page", 
+				PAGE_NAME, 
 				wizard);
 		this.model = model;
 	}
@@ -266,7 +267,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 						.buildColumn()
 			.buildViewer();
 
-		viewer.setComparator(new ParameterNameViewerComparator());
+		viewer.setComparator(new TemplateParameterViewerUtils.ParameterNameViewerComparator());
 		viewer.setContentProvider(new ObservableListContentProvider());
 
 		// cells validity
