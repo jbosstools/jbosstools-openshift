@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
@@ -275,6 +276,20 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		throw new OpenShiftException("Authscheme '%s' is not supported.", scheme);
 	}
 
+	/**
+	 * Computes actual state of connection. May be a long running operation.
+	 * @return
+	 */
+	public boolean isConnected(IProgressMonitor monitor) {
+		client.setAuthorizationStrategy(getAuthorizationStrategy());
+		try {
+			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
+			return context.isAuthorized();
+		} catch (UnauthorizedException e) {
+			return false;
+		}
+	}
+	
 	public void setAuthScheme(String scheme) {
 		firePropertyChange(SECURE_STORAGE_AUTHSCHEME, this.authScheme, this.authScheme = scheme);
 	}

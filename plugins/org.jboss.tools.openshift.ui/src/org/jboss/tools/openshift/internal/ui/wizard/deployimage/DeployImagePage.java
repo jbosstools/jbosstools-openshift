@@ -82,13 +82,14 @@ import com.openshift.restclient.model.IProject;
  * @author jeff.cantrill
  */
 public class DeployImagePage extends AbstractOpenShiftWizardPage {
+	static String DEPLOY_IMAGE_PAGE_NAME = "Deployment Config Settings Page";
 
 	private static final String PAGE_DESCRIPTION = "This page allows you to choose an image and the name to be used for the deployed resources.";
 
 	private IDeployImagePageModel model;
 
 	protected DeployImagePage(IWizard wizard, IDeployImagePageModel model) {
-		super("Deploy an Image", PAGE_DESCRIPTION, "Deployment Config Settings Page", wizard);
+		super("Deploy an Image", PAGE_DESCRIPTION, DEPLOY_IMAGE_PAGE_NAME, wizard);
 		this.model = model;
 	}
 	
@@ -114,6 +115,10 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	 */
 	@Override
 	protected void onPageWillGetDeactivated(final Direction progress, final PageChangingEvent event, final DataBindingContext dbc) {
+		if(progress == Direction.BACKWARDS) {
+			//Do not block return to change connection.
+			return;
+		}
 		
 		/**
 		 * Inner class to perform the image search in the selected Docker daemon cache or on the remote registry. 
