@@ -41,6 +41,7 @@ import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.osgi.framework.Version;
 
 import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_INSTRUCTIONS_URL;
 
@@ -154,7 +155,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		}
 		Job job = new UIUpdatingJob("Checking oc binary") {
  
-		    private String version;
+		    private Version version;
 		    
             @Override
             protected IStatus run(IProgressMonitor monitor) {
