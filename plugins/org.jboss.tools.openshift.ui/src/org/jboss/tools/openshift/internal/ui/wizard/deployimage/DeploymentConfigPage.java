@@ -30,9 +30,12 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -69,13 +72,18 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 	private TableViewer envViewer;
 	private TableViewer dataViewer;
 
+	//Layout
+	private int heightScale = 30;
+	private Composite envTableContainer;
+	private Composite volTableContainer;
+
 	protected DeploymentConfigPage(IWizard wizard, IDeploymentConfigPageModel model) {
 		super(PAGE_TITLE, PAGE_DESCRIPTION, PAGE_NAME, wizard);
 		this.model = model;
 	}
 
 	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+	protected void doCreateControls(final Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
 		//Env Variables Block
@@ -111,9 +119,46 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 			.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_REPLICAS)
 			.observe(model))
 			.in(dbc);
+		parent.addControlListener(new ControlListener() {
+
+			@Override
+			public void controlResized(ControlEvent e) {
+				if(parent.isDisposed() || envTableContainer == null || envTableContainer.isDisposed()
+						|| volTableContainer == null || volTableContainer.isDisposed()) {
+					return;
+				}
+
+				int h = parent.getSize().y;
+				if(h > 0) {
+					int table = heightScale * 4 + 30; //Minimum height that can be assigned to both tables.
+					int replicas = heightScale * 7; //Preferred height for bottom.
+					int all = 2 * table + replicas;
+					int minVolume = heightScale * 2;
+	
+					int hEnvVar = table;
+					int hVolumes = table;
+					if(h > all) {
+						//In this case the bottom gets its preferred size and the remainder is evenly shared by tables.
+						hEnvVar = hVolumes = (h - replicas) / 2;
+					} else if(h > table + replicas + minVolume) {
+						//Shrink volumes table, no use to shrink env-var table because of buttons.
+						hVolumes = h - table - replicas;
+					} else {
+						//At a smaller available height, all components will be in lack of height evenly.
+						hVolumes = minVolume;
+					}
+					((GridData)envTableContainer.getLayoutData()).heightHint = hEnvVar;
+					((GridData)volTableContainer.getLayoutData()).heightHint = hVolumes;
+					parent.layout(true);
+				}
+			}
+
+			@Override
+			public void controlMoved(ControlEvent e) {
+			}
+		});
 	}
-	
-	
+
 	private void createEnvVariableControl(Composite parent, DataBindingContext dbc) {
 		Composite envContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -128,11 +173,11 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.FILL)
 			.span(2,1)
 			.applyTo(lblEnvVars);
-		Composite tableContainer = new Composite(envContainer, SWT.NONE);
+		Composite tableContainer = envTableContainer = new Composite(envContainer, SWT.NONE);
 		
 		this.envViewer = createEnvVarTable(tableContainer);
 		GridDataFactory.fillDefaults()
-			.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+			.span(1, 4).align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT, 150).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(envViewer))
 				.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE)
 				.observe(model))
@@ -143,16 +188,16 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 		
 		Button addButton = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).applyTo(addButton);
+			.align(SWT.FILL, SWT.BEGINNING).applyTo(addButton);
 		addButton.setText("Add...");
 		addButton.setToolTipText("Add an environment variable declared by the docker image.");
 		addButton.addSelectionListener(onAdd());
 		UIUtils.setDefaultButtonWidth(addButton);
-
+		heightScale = addButton.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		
 		Button editExistingButton = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
+			.align(SWT.FILL, SWT.BEGINNING).applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
 		editExistingButton.setToolTipText("Edit the environment variable declared by the docker image.");
 		editExistingButton.addSelectionListener(new EditHandler());
@@ -166,7 +211,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 		
 		Button btnReset = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).applyTo(btnReset);
+			.align(SWT.FILL, SWT.BEGINNING).applyTo(btnReset);
 		btnReset.setText("Reset");
 		btnReset.setToolTipText("Reset to the value declared by the docker image.");
 		btnReset.addSelectionListener(onResetEnvVar());
@@ -188,7 +233,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 
 		Button btnRemove = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-		.align(SWT.FILL, SWT.FILL).applyTo(btnRemove);
+		.align(SWT.FILL, SWT.BEGINNING).applyTo(btnRemove);
 		btnRemove.setText("Remove");
 		btnRemove.setToolTipText("Remove the environment variable added here.");
 		btnRemove.addSelectionListener(onRemoveEnvVar());
@@ -207,7 +252,6 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 			})
 			.in(dbc);
 		UIUtils.setDefaultButtonWidth(btnRemove);
-		
 	}
 
 	private void createDataVolumeControl(Composite parent, DataBindingContext dbc) {
@@ -223,12 +267,12 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.FILL)
 			.span(2,1)
 			.applyTo(lblSection);
-		Composite tableContainer = new Composite(sectionContainer, SWT.NONE);
+		Composite tableContainer = volTableContainer = new Composite(sectionContainer, SWT.NONE);
 		
 		dataViewer = createDataVolumeTable(tableContainer);
 		dataViewer.setContentProvider(new ObservableListContentProvider());
 		GridDataFactory.fillDefaults()
-			.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+			.span(2, 4).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(dataViewer))
 			.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_VOLUME)
 			.observe(model));
@@ -239,6 +283,7 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 		lblNotice.setText(NLS.bind("NOTICE: This image might use an EmptyDir volume. Data in EmptyDir volumes is not persisted across deployments.", model.getResourceName()));
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL)
+			.grab(true, false)
 			.span(2,2)
 			.applyTo(lblNotice);
 	}
