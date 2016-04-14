@@ -44,6 +44,12 @@ public class DockerImage2OpenshiftResourceConverterTest {
     }
     
     @Test
+    public void testDash() {
+        String resourceName = converter.convert(new DockerImageURI("image-sub"));
+        assertEquals("image-sub", resourceName);
+    }
+    
+    @Test
     public void testNonAllowed() {
         String resourceName = converter.convert(new DockerImageURI("image+sub"));
         assertEquals("imagesub", resourceName);
@@ -53,5 +59,47 @@ public class DockerImage2OpenshiftResourceConverterTest {
     public void testTooLong() {
         String resourceName = converter.convert(new DockerImageURI("image01234567890123456789"));
         assertEquals("image0123456789012345678", resourceName);
+    }
+    
+    @Test
+    public void testLeadingUnderscore() {
+        String resourceName = converter.convert(new DockerImageURI("_image"));
+        assertEquals("image", resourceName);
+    }
+    
+    @Test
+    public void testTrailingUnderscore() {
+        String resourceName = converter.convert(new DockerImageURI("image_"));
+        assertEquals("image", resourceName);
+    }
+    
+    @Test
+    public void testDoubleLeadingUnderscore() {
+        String resourceName = converter.convert(new DockerImageURI("__image"));
+        assertEquals("image", resourceName);
+    }
+    
+    @Test
+    public void testDoubleTrailingUnderscore() {
+        String resourceName = converter.convert(new DockerImageURI("image__"));
+        assertEquals("image", resourceName);
+    }
+    
+    @Test
+    public void testDoubleUnderscore() {
+        String resourceName = converter.convert(new DockerImageURI("image__sub"));
+        assertEquals("image-sub", resourceName);
+    }
+    
+    @Test
+    public void testDoubleDash() {
+        String resourceName = converter.convert(new DockerImageURI("image--sub"));
+        assertEquals("image-sub", resourceName);
+    }
+    
+    @Test
+    public void testSingleNumeric() {
+        String resourceName = converter.convert(new DockerImageURI("1"));
+        assertEquals("a1", resourceName);
     }
 }
