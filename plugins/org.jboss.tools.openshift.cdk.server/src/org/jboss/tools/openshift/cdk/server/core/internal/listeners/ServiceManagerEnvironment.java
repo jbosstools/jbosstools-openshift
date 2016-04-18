@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
