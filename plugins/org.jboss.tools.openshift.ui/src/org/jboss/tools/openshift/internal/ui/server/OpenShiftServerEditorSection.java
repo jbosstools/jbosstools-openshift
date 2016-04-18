@@ -363,16 +363,18 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		Button browseSourceButton = new Button(container, SWT.PUSH);
 		browseSourceButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(browseSourceButton);
 		browseSourceButton.addSelectionListener(onBrowseSource(browseSourceButton.getShell()));
 
 		Button browseWorkspaceSourceButton = new Button(container, SWT.PUSH | SWT.READ_ONLY);
 		browseWorkspaceSourceButton.setText("Workspace...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(browseWorkspaceSourceButton);
 		browseWorkspaceSourceButton.addSelectionListener(onBrowseWorkspace(browseWorkspaceSourceButton.getShell()));
+
+		UIUtils.setEqualButtonWidth(browseSourceButton, browseWorkspaceSourceButton);
 	}
 
 	private SelectionAdapter onBrowseSource(final Shell shell) {

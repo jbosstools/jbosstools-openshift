@@ -388,7 +388,6 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER)
 				.applyTo(btnBrowseFiles);
-		UIUtils.setDefaultButtonWidth(btnBrowseFiles);
 
 		btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
 		
@@ -398,9 +397,10 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER)
 				.applyTo(btnBrowseWorkspaceFiles);
-		UIUtils.setDefaultButtonWidth(btnBrowseWorkspaceFiles);
 
 		btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());
+
+		UIUtils.setEqualButtonWidth(btnBrowseFiles, btnBrowseWorkspaceFiles);
 
 
 		localTemplatesTab.setControl(parent);
