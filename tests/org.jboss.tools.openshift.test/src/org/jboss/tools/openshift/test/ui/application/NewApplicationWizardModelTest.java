@@ -16,6 +16,7 @@ import static org.jboss.tools.openshift.test.util.ResourceMocks.createResources;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -39,15 +40,19 @@ import java.util.stream.Collectors;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizardModel;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.NotATemplateException;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.IResourceFactory;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.route.IRoute;
 import com.openshift.restclient.model.template.IParameter;
 import com.openshift.restclient.model.template.ITemplate;
 /**
@@ -284,7 +289,20 @@ public class NewApplicationWizardModelTest {
 		
 		assertArrayEquals(parameters.values().toArray(), model.getParameters().toArray());
 	}
-	
+
+	@Test
+	public void setWrongJsonAsTemplateFile() throws Exception {
+		IRoute route = Mockito.mock(IRoute.class);
+		when(route.getKind()).thenReturn(ResourceKind.ROUTE);
+		when(factory.create(any(InputStream.class))).thenReturn(route);
+		try {
+			model.setLocalTemplateFileName("resources/jboss_infinispan-server_ImageStreamImport.json");
+			fail("No NotATemplateException occurred");
+		} catch (NotATemplateException e) {
+			assertEquals(ResourceKind.ROUTE, e.getResourceKind());
+		}
+	}
+
 	private Map<String, IParameter> givenTheTemplateHasParameters() {
 		IParameter param = mock(IParameter.class);
 		when(param.getName()).thenReturn("foo");
