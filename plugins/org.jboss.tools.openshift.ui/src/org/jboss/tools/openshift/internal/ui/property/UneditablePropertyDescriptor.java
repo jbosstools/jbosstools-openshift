@@ -35,6 +35,13 @@ public class UneditablePropertyDescriptor extends PropertyDescriptor {
             	text.setEditable(false);
             	return result;
             }
+            @Override
+            protected void doSetValue(Object value) {
+            	//Since the text field is not used for editing, it does not matter which value is set,
+            	//just do the check and conversion here. When toString() is not good enough,
+            	//do conversion in property source or extend this class.
+            	super.doSetValue(value == null ? "" : value.toString());
+            }
         };
         return editor;
     }
