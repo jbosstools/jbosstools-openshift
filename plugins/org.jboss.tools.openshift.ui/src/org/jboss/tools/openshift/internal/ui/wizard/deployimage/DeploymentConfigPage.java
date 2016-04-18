@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
+import org.jboss.tools.openshift.internal.common.ui.utils.GTK3Utils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
@@ -396,4 +397,10 @@ public class DeploymentConfigPage extends AbstractOpenShiftWizardPage {
 		return dataViewer;
 	}
 	
+	@Override
+	protected void onPageActivated(DataBindingContext dbc) {
+		GTK3Utils.refreshTableViewer(envViewer);
+		GTK3Utils.refreshTableViewer(dataViewer);
+	}
+
 }

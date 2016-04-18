@@ -14,6 +14,7 @@ package org.jboss.tools.openshift.internal.common.ui.utils;
 import java.lang.reflect.Field;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.viewers.TableViewer;
 
 /**
  * @author Snjezana Peco
@@ -55,5 +56,26 @@ public class GTK3Utils {
 		return !"0".equals(gtk3); //$NON-NLS-1$
 	}
 
+	/**
+	 * This method is a workaround for an issue in GTK3.
+	 * It does nothing in an environment other than GTK3.
+	 * 
+	 * In GTK3 table viewer in some cases (e.g. if it is invisible,
+	 * on the next wizard page, and has vertical scroll) is not updated
+	 * after its content is changed even with refresh(true).
+	 * This method makes it to update in a radical way. It will 
+	 * take effect if invoked after tree of widgets including 
+	 * the table gets visible (e.g. on wizard page activated).
+	 * @param viewer
+	 */
+	public static void refreshTableViewer(TableViewer viewer) {
+		if(isRunning() && viewer != null && viewer.getControl() != null && !viewer.getControl().isDisposed()) {
+			Object input = viewer.getInput();
+			if(input != null) {
+				viewer.setInput(null);
+				viewer.setInput(input);
+			}
+		}
+	}
 	
 }
