@@ -99,11 +99,18 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 		} finally {
 			UsageStats.getInstance().newV3Application( getModel().getConnection().getHost(), success);
 		}
+		getModel().dispose();
 		return success;
 	}
 	
 	public static boolean isFailed(IStatus status) {
 		return JobUtils.isOk(status) || JobUtils.isWarning(status);
 	}
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        getModel().dispose();
+    }
 
 }
