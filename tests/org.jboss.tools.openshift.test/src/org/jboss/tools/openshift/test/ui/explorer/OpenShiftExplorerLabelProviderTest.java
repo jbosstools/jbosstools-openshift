@@ -78,6 +78,8 @@ public class OpenShiftExplorerLabelProviderTest {
 
 		when(route.getPath()).thenReturn("/foo");
 		assertEquals(String.format("%s www.example.com/foo", route.getName()), provider.getStyledText(route).getString());
+		//test description
+		assertEquals(String.format("%s www.example.com/foo", route.getName()), provider.getDescription(route));
 	}
 	
 	@Test
@@ -110,6 +112,8 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(pod.getStatus()).thenReturn(status);
 		String exp = "s...e P...g";
 		assertEquals(exp, provider.getStyledText(pod).getString());
+		//test description
+		assertEquals("someName Pod Chilling", provider.getDescription(pod));
 	}
 	
 	@Test
@@ -159,10 +163,14 @@ public class OpenShiftExplorerLabelProviderTest {
 		provider.setLabelLimit(120);
 		IDeploymentConfig config = givenAResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
 		Map<String, String> selector = new HashMap<>();
-		selector.put("name", "foo01234567890123456789012345678901234567890123456789");
-		selector.put("deployment", "bar01234567890123456789012345678901234567890123456789");
+		String name = "foo01234567890123456789012345678901234567890123456789";
+		selector.put("name", name);
+		String deployment = "bar01234567890123456789012345678901234567890123456789";
+		selector.put("deployment", deployment);
 		when(config.getReplicaSelector()).thenReturn(selector );
 		assertEquals("someName selector: deployment=bar0123456789012345678901234567890...=foo01234567890123456789012345678901234567890123456789", provider.getStyledText(config).getString());
+		//test description
+		assertEquals("someName selector: deployment=" + deployment + ",name=" + name, provider.getDescription(config));
 	}
 	
 	@Test
