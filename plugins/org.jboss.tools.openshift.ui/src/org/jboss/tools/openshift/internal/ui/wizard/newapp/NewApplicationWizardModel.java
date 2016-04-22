@@ -105,7 +105,11 @@ public class NewApplicationWizardModel
 			if (!Files.isRegularFile(Paths.get(filename))) {
 				return null;
 			}
-			template = resourceFactory.create(createInputStream(filename));
+			IResource resource = resourceFactory.create(createInputStream(filename));
+			if(resource != null && !(resource instanceof ITemplate)) {
+				throw new NotATemplateException(resource.getKind());
+			}
+			template = (ITemplate)resource;
 		} catch (FileNotFoundException e) {
 			throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
 		} catch (ResourceFactoryException | ClassCastException e) {

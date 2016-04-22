@@ -48,6 +48,7 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -466,7 +467,12 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		try {
 			model.setLocalTemplateFileName(file);
 			return;
+		} catch (NotATemplateException ex) {
+			MessageDialog.openWarning(getShell(), "Wrong resource",
+					NLS.bind("The file \"{0}\" contains resource {1}. Please select OpenShift template.",
+							file, ex.getResourceKind()));
 		} catch (ClassCastException ex) {
+			//should not happen due to NotATemplateException.
 			IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
 			ErrorDialog.openError(getShell(), "Template Error",
