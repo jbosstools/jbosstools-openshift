@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.comparators;
 
+import java.util.Comparator;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -31,11 +33,37 @@ public class ProjectViewerComparator extends ViewerComparator {
 	public ProjectViewerComparator(ILabelProvider labelProvider) {
 		this.labelProvider = labelProvider;
 	}
-	
+
+	/**
+	 * Returns comparator that compares only tree items representing projects.
+	 * It should not be applied to items other than projects. 
+	 * @return
+	 */
+	public Comparator<ObservableTreeItem> asItemComparator() {
+		return new Comparator<ObservableTreeItem>() {
+			@Override
+			public int compare(ObservableTreeItem o1, ObservableTreeItem o2) {
+				Object m1 = ((ObservableTreeItem) o1).getModel();
+				Object m2 = ((ObservableTreeItem) o2).getModel();
+				return ProjectViewerComparator.this.compare(null, m1, m2);
+			}
+		};
+	}
+
+	/**
+	 * Compares only projects. Other objects always go after projects and equal to each other.
+	 * When applied to sorting a mixed array, projects go to the beginning of the array and are sorted,
+	 * other objects go to the end without change in order.
+	 * Project named 'default' is always the first.
+	 * Projects with name prefixed 'openshift' go after 'default' and before all other projects.
+	 * Finally, projects are compared by label provider, or if it is not available then by name.
+	 */
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
-		if(e1 == null || e2 == null || !(e1 instanceof IProject) || !(e2 instanceof IProject)) {
-			return LAST;
+		boolean isProject1 = (e1 instanceof IProject);
+		boolean isProject2 = (e2 instanceof IProject);
+		if(!isProject1 || !isProject2) {
+			return (isProject1) ? -1 : (isProject2) ? LAST : 0;
 		}
 		IProject projectOne = (IProject) e1;
 		IProject projectTwo = (IProject) e2;

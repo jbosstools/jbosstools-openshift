@@ -303,6 +303,33 @@ public class NewApplicationWizardModelTest {
 		}
 	}
 
+	/**
+	 * Test that the model computes the default project as the first one
+	 * after sorting the list of project items in the same way as in the combo viewer.
+	 */
+	@Test
+	public void testDefaultProject() {
+		ObservableTreeItem p1 = new ObservableTreeItem(mockProject("zz", "z"));
+		ObservableTreeItem p2 = new ObservableTreeItem(mockProject("kk", "y"));
+		ObservableTreeItem p3 = new ObservableTreeItem(mockProject("a", "c"));
+		ObservableTreeItem p4 = new ObservableTreeItem(mockProject("b2", null));
+		ObservableTreeItem p5 = new ObservableTreeItem(mockProject("d", "b"));
+		List<ObservableTreeItem> projects = Arrays.asList(p1, p2, p3, p4, p5);
+		model.setProjectItems(projects);
+		model.setProject(null); //this call invokes computing default project.
+		IProject project = model.getProject();
+		assertEquals(p5.getModel(), project);
+	}
+
+	IProject mockProject(String name, String displayName) {
+		IProject p = Mockito.mock(IProject.class);
+		when(p.getName()).thenReturn(name);
+		if(displayName != null) {
+			when(p.getDisplayName()).thenReturn(displayName);
+		}
+		return p;
+	}
+
 	private Map<String, IParameter> givenTheTemplateHasParameters() {
 		IParameter param = mock(IParameter.class);
 		when(param.getName()).thenReturn("foo");

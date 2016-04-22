@@ -16,8 +16,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,8 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
+import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
 
@@ -351,12 +355,18 @@ public class NewApplicationWizardModel
 		update(this.useLocalTemplate, null, null, null, null);
 	}
 
+	Comparator<ObservableTreeItem> comparator = new ProjectViewerComparator(new OpenShiftExplorerLabelProvider()).asItemComparator();
+
 	private IProject getDefaultProject(List<ObservableTreeItem> projects) {
 		if (projects == null 
 				|| projects.size() == 0) {
 			return null;
+		} else if(projects.size() == 1) {
+			return (IProject) projects.get(0).getModel();
 		}
-		return (IProject) projects.get(0).getModel();
+		ObservableTreeItem[] items = projects.toArray(new ObservableTreeItem[projects.size()]);
+		Arrays.sort(items, comparator);
+		return (IProject) items[0].getModel();
 	}
 
 	private void setResourceFactory(Connection connection) {

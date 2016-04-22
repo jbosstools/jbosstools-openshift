@@ -63,13 +63,15 @@ public class ProjectViewerComparatorTest {
 	
 	@Test
 	public void testWhenInstanceAreNotProjects() {
-		assertEquals(LAST, comparator.compare(null, "first", null));
-		assertEquals(LAST, comparator.compare(null, null, "second"));
+		assertEquals(EQUAL, comparator.compare(null, "first", null));
+		assertEquals(EQUAL, comparator.compare(null, null, "second"));
+		assertEquals(LAST, comparator.compare(null, "first", projectOne));
 	}
 
 	@Test
 	public void testWhenInstanceAreNull() {
-		assertEquals(LAST, comparator.compare(null, projectOne, null));
+		assertEquals(EQUAL, comparator.compare(null, null, null));
+		assertEquals(FIRST, comparator.compare(null, projectOne, null));
 		assertEquals(LAST, comparator.compare(null, null, projectOne));
 	}
 
