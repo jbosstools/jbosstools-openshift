@@ -95,6 +95,23 @@ public class ProjectTreeSorterTest {
 	}
 
 	@Test
+	public void testProjectItemsWithLabelProvider() {
+		final Comparator<ObservableTreeItem> comparator = new ProjectViewerComparator(new OpenShiftExplorerLabelProvider()).asItemComparator();
+		ObservableTreeItem p1 = new ObservableTreeItem(mockProject("default", "z"));
+		ObservableTreeItem p2 = new ObservableTreeItem(mockProject("openshift", "y"));
+		ObservableTreeItem p3 = new ObservableTreeItem(mockProject("a", "c"));
+		ObservableTreeItem p4 = new ObservableTreeItem(mockProject("b2", null));
+		ObservableTreeItem p5 = new ObservableTreeItem(mockProject("d", "b"));
+		ObservableTreeItem[] projects = new ObservableTreeItem[]{p3,p5,p2,p1,p4};
+		Arrays.sort(projects, comparator);
+		assertEquals(p1, projects[0]);
+		assertEquals(p2, projects[1]);
+		assertEquals(p5, projects[2]);
+		assertEquals(p4, projects[3]);
+		assertEquals(p3, projects[4]);
+	}
+
+	@Test
 	public void testServices() {
 		ViewerComparator comparator = ProjectViewerComparator.createProjectTreeSorter();
 		ObservableTreeItem i1 = new ObservableTreeItem(mockService("s1", "z"));
