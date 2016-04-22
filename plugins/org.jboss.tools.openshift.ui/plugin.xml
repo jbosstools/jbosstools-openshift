@@ -289,6 +289,55 @@
 		         </with>
 		      </visibleWhen>
 		   </command>
+     <menu
+           label="Scale">
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.deployment.scale"
+              icon="icons/trend-up.png"
+              label="Up"
+              style="push"
+              tooltip="Increment the number of deployed replicas by one.">
+           <parameter
+                 name="org.jboss.tools.openshift.ui.command.deployment.scale.replicadiff"
+                 value="1">
+           </parameter>
+        </command>
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.deployment.scale"
+              icon="icons/trend-down.png"
+              label="Down"
+              style="push"
+              tooltip="Increment the number of deployed replicas by one.">
+           <parameter
+                 name="org.jboss.tools.openshift.ui.command.deployment.scale.replicadiff"
+                 value="-1">
+           </parameter>
+        </command>
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.deployment.scale"
+              label="To..."
+              style="push"
+              tooltip="Scale the number of deployed replicas to a specific value.">
+        </command>
+        <visibleWhen
+              checkEnabled="false">
+           <with
+                 variable="selection">
+              <and>
+                 <count
+                       value="1">
+                 </count>
+                 <iterate>
+                    <or>
+                       <instanceof
+                             value="org.jboss.tools.openshift.internal.ui.models.Deployment">
+                       </instanceof>
+                    </or>
+                 </iterate>
+              </and>
+           </with>
+        </visibleWhen>
+     </menu>
 		</menuContribution>
 		<menuContribution
 			allPopups="false"
@@ -619,6 +668,40 @@
         label="Web Console"
         mnemonic="C" />
       </menu>
+     <separator
+           name="org.jboss.tools.openshift.ui.separator2">
+     </separator>
+     <menu
+           label="Scale">
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.deployment.scale"
+              icon="icons/trend-up.png"
+              label="Up"
+              style="push"
+              tooltip="Increment the number of deployed replicas by one.">
+           <parameter
+                 name="org.jboss.tools.openshift.ui.command.deployment.scale.replicadiff"
+                 value="1">
+           </parameter>
+        </command>
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.deployment.scale"
+              icon="icons/trend-down.png"
+              label="Down"
+              style="push"
+              tooltip="Increment the number of deployed replicas by one.">
+           <parameter
+                 name="org.jboss.tools.openshift.ui.command.deployment.scale.replicadiff"
+                 value="-1">
+           </parameter>
+        </command>
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.deployment.scale"
+              label="To..."
+              style="push"
+              tooltip="Scale the number of deployed replicas to a specific value.">
+        </command>
+     </menu>
       <separator visible="true" name="org.jboss.tools.openshift.ui.separator7" />
       <command
         commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
@@ -689,6 +772,40 @@
         label="Web Console"
         mnemonic="C" />
       </menu>
+     <separator
+           name="org.jboss.tools.openshift.ui.separator1">
+     </separator>
+     <menu
+           label="Scale">
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.deployment.scale"
+              icon="icons/trend-up.png"
+              label="Up"
+              style="push"
+              tooltip="Increment the number of deployed replicas by one.">
+           <parameter
+                 name="org.jboss.tools.openshift.ui.command.deployment.scale.replicadiff"
+                 value="1">
+           </parameter>
+        </command>
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.deployment.scale"
+              icon="icons/trend-down.png"
+              label="Down"
+              style="push"
+              tooltip="Increment the number of deployed replicas by one.">
+           <parameter
+                 name="org.jboss.tools.openshift.ui.command.deployment.scale.replicadiff"
+                 value="-1">
+           </parameter>
+        </command>
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.deployment.scale"
+              label="To..."
+              style="push"
+              tooltip="Scale the number of deployed replicas to a specific value.">
+        </command>
+     </menu>
       <separator visible="true" name="org.jboss.tools.openshift.ui.separator10"/>
       <command
         commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
@@ -937,6 +1054,10 @@
         class="org.jboss.tools.openshift.internal.ui.handler.TriggerDeploymentHandler"
         commandId="org.jboss.tools.openshift.ui.command.explorer.triggerdeploy">
   </handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.handler.ScaleDeploymentHandler"
+        commandId="org.jboss.tools.openshift.ui.command.deployment.scale">
+  </handler>
 	</extension>
 	
 	<!-- adapters -->
@@ -1090,6 +1211,15 @@
 			id="org.jboss.tools.openshift.ui.command.editresource"
 			name="%openshift.command.editresource">
 		</command>
+  <command
+        id="org.jboss.tools.openshift.ui.command.deployment.scale"
+        name="Scale deployment">
+     <commandParameter
+           id="org.jboss.tools.openshift.ui.command.deployment.scale.replicadiff"
+           name="Replica Differential"
+           optional="true">
+     </commandParameter>
+  </command>
 	</extension>
 
 	<!-- editor for express connections -->

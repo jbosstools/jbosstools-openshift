@@ -365,6 +365,23 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 
 	/**
+	 * 
+	 * @param resource
+	 * @return
+	 * @throws UnauthorizedException 
+	 */
+	public <T extends IResource> T updateResource(T resource) {
+		try {
+			if(client.getAuthorizationStrategy() == null) {
+				client.setAuthorizationStrategy(getAuthorizationStrategy());
+			}
+			return client.update(resource);
+		} catch (UnauthorizedException e) {
+			return retryUpdate("Unauthorized.  Trying to reauthenticate", e, resource);
+		}
+	}
+
+	/**
 	 * Get a list of resource types in the default namespace
 	 * 
 	 * @return List<IResource>
@@ -433,6 +450,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		// cache
 		if (connect()) {
 			return client.create(resource);
+		}
+		throw e;
+	}
+
+	private <T extends IResource>  T retryUpdate(String message, OpenShiftException e, T resource){
+		OpenShiftCoreActivator.pluginLog().logInfo(message);
+		setToken(null);// token must be invalid, make sure not to try with
+		// cache
+		if (connect()) {
+			return client.update(resource);
 		}
 		throw e;
 	}
