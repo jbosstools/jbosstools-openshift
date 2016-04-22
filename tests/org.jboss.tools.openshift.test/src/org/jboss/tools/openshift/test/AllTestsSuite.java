@@ -23,6 +23,7 @@ import org.jboss.tools.openshift.test.core.security.OpenShiftSecureStorageKeyTes
 import org.jboss.tools.openshift.test.core.server.OpenShiftModuleDeploymentPrefsUtilTest;
 import org.jboss.tools.openshift.test.core.server.OpenShiftSubsystemTest;
 import org.jboss.tools.openshift.test.core.util.ResourceUtilsTest;
+import org.jboss.tools.openshift.test.handler.ScaleDeploymentHandlerTest;
 import org.jboss.tools.openshift.test.ui.application.NewApplicationWizardModelTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateFilterTest;
 import org.jboss.tools.openshift.test.ui.application.TemplateParameterColumnLabelProviderTest;
@@ -79,6 +80,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	PortSpecAdapterTest.class,
 	ResourcePropertySourceTest.class,
 	ResourceUtilsTest.class,
+	ScaleDeploymentHandlerTest.class,
 	StringUtilsTest.class,
 	TemplateParameterColumnLabelProviderTest.class,
 	URIUtilsTest.class,
