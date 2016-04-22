@@ -18,6 +18,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.navigator.IDescriptionProvider;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
@@ -45,7 +46,7 @@ import com.openshift.restclient.model.template.ITemplate;
  * @author jeff.cantrill
  * @author Andre Dietisheim
  */
-public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider { 
+public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider implements IDescriptionProvider { 
 	//Limit for label length = baseText.length + qualifiedText.length
 	private static final int DEFAULT_LABEL_LIMIT = 60;
 
@@ -260,5 +261,21 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 		});
 		return value;
+	}
+
+	//Status line has with CLabel its own ellipses adjusting string to available space.
+	//We could set Integer.MAX_VALUE as limit, but performance will be too low for really long texts.
+	private static final int STATUS_LINE_LABEL_LIMIT = 512;
+
+	private static final OpenShiftExplorerLabelProvider instanceForDescription;
+
+	static {
+		instanceForDescription = new OpenShiftExplorerLabelProvider();
+		instanceForDescription.setLabelLimit(STATUS_LINE_LABEL_LIMIT);
+	}
+
+	@Override
+	public String getDescription(Object anElement) {
+		return instanceForDescription.getStyledText(anElement).getString();
 	}
 }
