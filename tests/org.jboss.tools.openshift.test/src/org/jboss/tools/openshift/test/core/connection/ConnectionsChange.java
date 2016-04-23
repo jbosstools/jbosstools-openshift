@@ -113,12 +113,12 @@ public class ConnectionsChange {
 
 		@Override
 		public void connectionChanged(IConnection connection, String eventProperty, Object eventOldValue, Object eventNewValue) {
-			bumpCountdown();
 			changeNotified = true;
 			notifiedConnection = connection;
 			property = eventProperty;
 			oldValue = eventOldValue;
 			newValue = eventNewValue;
+			bumpCountdown();
 		}
 	}
 }

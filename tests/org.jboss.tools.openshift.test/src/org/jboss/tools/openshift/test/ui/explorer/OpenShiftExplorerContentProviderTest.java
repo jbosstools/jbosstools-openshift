@@ -54,8 +54,8 @@ public class OpenShiftExplorerContentProviderTest {
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8442")); 
 
 		connection = spy(new Connection(client, null, null));
-		when(connection.ownsResource(any(IResource.class))).thenReturn(true);
-		when(connection.getUsername()).thenReturn("hookaboo");
+		doReturn(true).when(connection).ownsResource(any(IResource.class));
+		doReturn("hookaboo").when(connection).getUsername();
 		
 		registry = ConnectionsRegistrySingleton.getInstance();
 		registry.add(connection);
