@@ -66,7 +66,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		Link link = new Link(getFieldEditorParent(), SWT.WRAP);
 		link.setText("The OpenShift Client binary (oc) is required for features such as Port Forwarding or Log Streaming. "
 				+ "You can find more information about how to install it from <a>here</a>.");
-		GridDataFactory.fillDefaults().span(3, 1).hint(300, SWT.DEFAULT).applyTo(link);
+		GridDataFactory.fillDefaults().span(3, 1).hint(1, SWT.DEFAULT).grab(true, false).applyTo(link);
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -81,12 +81,15 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		cliLocationEditor.setValidateStrategy(FileFieldEditor.VALIDATE_ON_KEY_STROKE);
 		addField(cliLocationEditor);
 		
-		ocVersionLabel = new Label(getFieldEditorParent(), SWT.WRAP);
-		GridDataFactory.fillDefaults().span(3, 1).hint(300, SWT.DEFAULT).applyTo(ocVersionLabel);
+		Label label = new Label(getFieldEditorParent(), SWT.WRAP);
+		GridDataFactory.fillDefaults().span(1, 1).applyTo(label);
+		label.setText("Version");
+        ocVersionLabel = new Label(getFieldEditorParent(), SWT.WRAP);
+        GridDataFactory.fillDefaults().span(2, 1).applyTo(ocVersionLabel);
 		ocMessageComposite = new Composite(getFieldEditorParent(), SWT.NONE);
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(ocMessageComposite);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(ocMessageComposite);
-        Label label = new Label(ocMessageComposite, SWT.NONE);
+        label = new Label(ocMessageComposite, SWT.NONE);
         label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
         GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(label);
         ocMessageLabel = new Label(ocMessageComposite, SWT.WRAP);
@@ -166,7 +169,8 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
             @Override
             protected IStatus updateUI(IProgressMonitor monitor) {
                 if (!ocMessageComposite.isDisposed() && !monitor.isCanceled()) {
-                    ocMessageLabel.setText(NLS.bind("Your client version is {0}. OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
+                    ocVersionLabel.setText(NLS.bind("Your client version is {0}.{1}.{2}", new Object[] {version.getMajor(), version.getMinor(), version.getMicro()}));
+                    ocMessageLabel.setText(NLS.bind("OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
                     ocMessageComposite.setVisible(!OCBinaryValidator.isCompatibleForPublishing(version));
                 }
                 return super.updateUI(monitor);
