@@ -10,10 +10,15 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Properties;
 
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.foundation.core.credentials.CredentialService;
+import org.jboss.tools.foundation.core.credentials.ICredentialDomain;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsFactoryTracker;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
@@ -51,6 +56,8 @@ public class CDKOpenshiftUtility {
 	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
 		return createOpenshiftConnection(server, adb, ConnectionsRegistrySingleton.getInstance());
 	}
+
+	private static final String defaultPassword = "devel";
 	
 	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment adb, ConnectionsRegistry registry) {
 		Properties dotcdkProps = new CDKServerUtility().getDotCDK(server);
@@ -67,7 +74,7 @@ public class CDKOpenshiftUtility {
 				// .cdk file set a username and no password.  leave as null
 			} else {
 				// .cdk did not set a username OR password... so we will set the default password to devel
-				password = "devel";
+				password = defaultPassword;
 			}
 		}
 		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
@@ -81,11 +88,38 @@ public class CDKOpenshiftUtility {
 
 		if( password != null ) {
 			((Connection)con).setPassword(password);
+			if(defaultPassword.equals(password) //remember it, user does not know it 
+				|| isSavePassword(username)) {
+				((Connection)con).setRememberPassword(true);
+			}
 		}
 		
 		if( registry != null )
 			registry.add(con);
 		return con;
+	}
+
+	/**
+	 * Check if user selected save password at creating CDK server and extend that choice
+	 * to remembering password of openshift connection.
+	 * 
+	 * @param username
+	 * @return
+	 */
+	private boolean isSavePassword(String username) {
+		ICredentialDomain domain = CredentialService.getCredentialModel().getDomain(CredentialService.REDHAT_ACCESS);
+		if(domain == null) {
+			return false; //should not happen
+		}
+		try {
+			Method method = domain.getClass().getDeclaredMethod("userRequiresPrompt", new Class[]{String.class});
+			method.setAccessible(true);
+			Object result = method.invoke(domain, new Object[]{username});
+			return result instanceof Boolean && !((Boolean)result).booleanValue();
+		} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+			CDKCoreActivator.pluginLog().logError(e);
+		}
+		return false;
 	}
 	
 }
