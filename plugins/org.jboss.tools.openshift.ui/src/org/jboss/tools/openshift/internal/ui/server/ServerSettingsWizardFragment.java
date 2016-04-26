@@ -230,7 +230,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						//only reload services.
-						ServerSettingsWizardPageWrapper.this.model.loadResources(model.getConnection());
+						ServerSettingsWizardPageWrapper.this.model.loadResources();
 						ServerSettingsWizardPageWrapper.this.needsLoadingResources = false;
 						return Status.OK_STATUS;
 					}

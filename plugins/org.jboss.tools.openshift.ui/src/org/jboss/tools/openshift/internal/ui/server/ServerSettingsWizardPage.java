@@ -135,8 +135,6 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		this(wizard, server, connection, null, null, deployProject);
 	}
 
-	
-	
 	/**
 	 * Invoked from OpenShift explorer
 	 * 

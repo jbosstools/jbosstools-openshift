@@ -80,6 +80,11 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	private boolean invalidOCBinary = false;
 
 	protected ServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, 
+			Connection connection, IServerWorkingCopy server) {
+		this(service, route, deployProject, connection, server, false);
+	}
+	
+	protected ServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, 
 			Connection connection, IServerWorkingCopy server, boolean invalidOCBinary) {
 		super(service, connection);
 		this.route = route;
