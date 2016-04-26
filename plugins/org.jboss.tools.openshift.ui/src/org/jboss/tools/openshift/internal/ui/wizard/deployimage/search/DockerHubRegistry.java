@@ -18,7 +18,6 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
  * The default implementation is the Docker Hub registry (running Docker
  * registry version 0.6.3)
  */
-@SuppressWarnings("restriction")
 public class DockerHubRegistry {
 
 	private static final String REGISTRY_LOCATION = "https://registry.hub.docker.com/"; //$NON-NLS-1$
