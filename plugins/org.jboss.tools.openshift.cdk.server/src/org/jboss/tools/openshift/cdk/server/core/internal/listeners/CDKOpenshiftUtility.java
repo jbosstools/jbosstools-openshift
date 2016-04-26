@@ -61,12 +61,8 @@ public class CDKOpenshiftUtility {
 		if( dotcdkProps.containsKey(DOTCDK_AUTH_PASS) ) {
 			password = dotcdkProps.getProperty(DOTCDK_AUTH_PASS);
 		} else {
-			// If the .cdk file only has a username set and no password, we don't want to set a password.  
-			// We can assume the user hand-modified hte username and so maybe has their own custom password they want to enter by hand
-			if( dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ) {
-				// .cdk file set a username and no password.  leave as null
-			} else {
-				// .cdk did not set a username OR password... so we will set the default password to devel
+			// no pw set in .cdk file
+			if( "openshift-dev".equals(username)) {
 				password = "devel";
 			}
 		}
@@ -78,6 +74,8 @@ public class CDKOpenshiftUtility {
 		IConnection con = factory.create(soughtHost);
 		((Connection)con).setAuthScheme(authScheme);
 		((Connection)con).setUsername(username);
+		((Connection)con).setRememberPassword(true);
+		
 
 		if( password != null ) {
 			((Connection)con).setPassword(password);
