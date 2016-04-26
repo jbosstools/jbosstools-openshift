@@ -8,7 +8,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.property;
 
-import static org.jboss.tools.openshift.test.ui.property.Assert.assertPropertyDescriptorsEquals;
+import static org.jboss.tools.openshift.test.ui.property.util.Assert.assertPropertyDescriptorsEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 

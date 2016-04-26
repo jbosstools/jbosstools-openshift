@@ -6,7 +6,7 @@
  *
  * Contributors: Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.test.ui.application;
+package org.jboss.tools.openshift.test.core.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +32,7 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TemplateFilterTest {
+public class ResourceUtilsIsMatchingTest {
 
 	@Mock private IResource resource;
 	@Mock private ITags capability;
