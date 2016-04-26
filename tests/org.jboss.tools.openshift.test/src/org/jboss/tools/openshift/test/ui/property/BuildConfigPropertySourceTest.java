@@ -6,9 +6,9 @@
  * 
  * Contributors: Red Hat, Inc.
  ******************************************************************************/
-package org.jboss.tools.openshift.test.ui.property.build;
+package org.jboss.tools.openshift.test.ui.property;
 
-import static org.jboss.tools.openshift.test.ui.property.Assert.assertPropertyDescriptorsContains;
+import static org.jboss.tools.openshift.test.ui.property.util.Assert.assertPropertyDescriptorsContains;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
