@@ -11,7 +11,9 @@
 package org.jboss.tools.openshift.test.handler;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -29,6 +31,7 @@ import org.jboss.tools.openshift.internal.ui.handler.ScaleDeploymentHandler;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.handler.ScaleDeploymentHandler.DialogResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,6 +62,8 @@ public class ScaleDeploymentHandlerTest {
 	@Before
 	public void setUp() throws Exception {
 		handler = spy(new TestScaleDeploymentHandler());
+		when(rc.getKind()).thenReturn(ResourceKind.REPLICATION_CONTROLLER);
+		when(dc.getKind()).thenReturn(ResourceKind.DEPLOYMENT_CONFIG);
 		
 		event = new ExecutionEvent(null, parameters, null, null);
 		when(service.getName()).thenReturn("aService");
@@ -142,31 +147,28 @@ public class ScaleDeploymentHandlerTest {
 	}
 	
 	private void givenADeploymentIsSelected() {
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
 		doReturn(deployment).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
 	}
 	private void givenAReplicationControllerIsSelected() {
-		doReturn(rc).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
+//		doReturn(new ResourceWrapper(deployment, rc)).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
 	}
 	private void givenADeploymentConfigIsSelected() {
-		doReturn(dc).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
+//		doReturn(new ResourceWrapper(deployment, dc)).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IDeploymentConfig.class));
 	}
 	
 	private void givenAUserCancelsTheReplicaInputDialog() {
-		doReturn(-1).when(handler).showInputDialog(anyInt(), any());
+		doReturn(null).when(handler).showInputDialog(anyString(), anyInt(), anyBoolean(), any());
 	}
 
 	private void givenAUserChoosesDesiredReplicas() {
-		doReturn(4).when(handler).showInputDialog(anyInt(), any());
+		doReturn(new DialogResult(4, false)).when(handler).showInputDialog(anyString(), anyInt(), anyBoolean(), any());
 	}
 	
 	private void thenTheReplicasShouldNotBeUpdated() {
 		verify(rc, times(0)).setDesiredReplicaCount(anyInt());
 	}
 	private void thenTheReplicasShouldBeUpdated() {
-		verify(handler, times(1)).scaleDeployment(any(), any(), any(), anyInt());
+		verify(handler, times(1)).scaleDeployment(any(), any(), anyInt(), any());
 	}
 	
 	public static class TestScaleDeploymentHandler extends ScaleDeploymentHandler{
@@ -177,14 +179,14 @@ public class ScaleDeploymentHandlerTest {
 		}
 		
 		@Override
-		protected int showInputDialog(int current, ExecutionEvent event) {
-			return super.showInputDialog(current, event);
+		protected DialogResult showInputDialog(String name, int current, boolean showCheckbox, ExecutionEvent event) {
+			return super.showInputDialog(name, current, showCheckbox, event);
 		}
 
 		@Override
-		protected void scaleDeployment(ExecutionEvent event, String name, IReplicationController rc,
-				int replicas) {
-			super.scaleDeployment(event, name, rc, replicas);
+		protected void scaleDeployment(String name, IReplicationController rc,
+				int replicas, IDeploymentConfig dc) {
+			super.scaleDeployment(name, rc, replicas, dc);
 		}
 		
 		
