@@ -70,4 +70,12 @@ public class JobChainBuilder {
 			return JobChainBuilder.this.job;
 		}
 	}
+	
+	public Job build() {
+	    return job;
+	}
+	
+	public void schedule() {
+	    job.schedule();
+	}
 }

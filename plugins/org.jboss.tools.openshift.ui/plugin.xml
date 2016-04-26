@@ -235,6 +235,31 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
+        <menuContribution
+            allPopups="false"
+            locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+            <command
+                commandId="org.jboss.tools.openshift.ui.command.resource.new"
+                style="push"
+                icon="icons/resource.gif"
+                tooltip="Create a new resource">
+                <visibleWhen
+                    checkEnabled="false">
+                    <and>
+                        <count
+                            value="1" />
+                        <iterate>
+                         <or>
+                            <adapt
+                                type="com.openshift.restclient.model.IProject" />
+                            <instanceof
+                                value="org.jboss.tools.openshift.core.connection.Connection"/>
+                         </or>
+                        </iterate>
+                    </and>
+                </visibleWhen>
+            </command>
+        </menuContribution>
 		<menuContribution
 			allPopups="false"
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
@@ -945,6 +970,10 @@
 			class="org.jboss.tools.openshift.internal.ui.handler.NewApplicationHandler"
 			commandId="org.jboss.tools.openshift.ui.command.application.new">
 		</handler>
+        <handler
+            class="org.jboss.tools.openshift.internal.ui.handler.NewResourceHandler"
+            commandId="org.jboss.tools.openshift.ui.command.resource.new">
+        </handler>
 		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.DeleteResourceHandler"
 			commandId="org.eclipse.ui.edit.delete">
@@ -1137,6 +1166,11 @@
 			id="org.jboss.tools.openshift.ui.command.application.new"
 			name="Application...">
 		</command>
+        <command
+            description="Create a new resource from a file"
+            id="org.jboss.tools.openshift.ui.command.resource.new"
+            name="Resource...">
+        </command>
 		<command
 			description="Create a new project"
 			id="org.jboss.tools.openshift.ui.command.project.new"
