@@ -10,7 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.areRelated;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.containsAll;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigForService;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigsForService;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRouteForService;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRoutesForService;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getServicesForPod;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuildPod;
@@ -24,10 +30,12 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
+import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,11 +50,30 @@ import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
+import com.openshift.restclient.model.route.IRoute;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceUtilsTest {
 	
 	private static final String IMAGE_REF = "foo:latest";
+	
+	private static final IService SERVICE_42 =
+			ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("42"));
+	private static final IBuildConfig[] BUILDCONFIGS = new IBuildConfig[] {
+			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("41")),
+			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42")),
+			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42a")),
+			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42")),
+			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("a42a")) 
+	};
+	private static final IRoute[] ROUTES = new IRoute[] {
+			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("41")),
+			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("42")),
+			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("42a")),
+			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("42")),
+			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("a42a")) 
+	};
+
 	private Map<String, String> podLabels = new HashMap<>();
 	private Map<String, String> serviceSelector = new HashMap<>();
 	@Mock private IPod pod;
@@ -180,4 +207,182 @@ public class ResourceUtilsTest {
 		when(build.getOutputKind()).thenReturn(ResourceUtils.DOCKER_IMAGE_KIND);
 		assertEquals(IMAGE_REF, imageRef(build));
 	}
+	
+	@Test
+	public void testAreRelatedForBuildConfigAndService() {
+		// given
+		// when
+		// then
+		assertThat(areRelated((IBuildConfig) null, (IService) null)).isFalse();
+
+		// given
+		// when
+		// then
+		assertThat(areRelated(mock(IBuildConfig.class), (IService) null)).isFalse();
+
+		// given
+		// when
+		// then
+		assertThat(areRelated((IBuildConfig) null, mock(IService.class))).isFalse();
+
+		// given
+		IBuildConfig buildConfig = mock(IBuildConfig.class);
+		when(buildConfig.getName()).thenReturn("42");
+		IService service = mock(IService.class);
+		when(service.getName()).thenReturn("24");
+		// when
+		// then
+		assertThat(areRelated(buildConfig, service)).isFalse();
+		
+		// given
+		buildConfig = mock(IBuildConfig.class);
+		when(buildConfig.getName()).thenReturn("42");
+		service = mock(IService.class);
+		when(service.getName()).thenReturn("42");
+		// when
+		// then
+		assertThat(areRelated(buildConfig, service)).isTrue();
+	}
+
+	@Test
+	public void testGetBuildConfigsForService() {
+		// given
+		// when
+		List<IBuildConfig> matchingConfigs = getBuildConfigsForService(SERVICE_42, Arrays.asList(BUILDCONFIGS));
+		// then
+		assertThat(matchingConfigs).containsExactly(BUILDCONFIGS[1], BUILDCONFIGS[3]);
+
+		// when
+		matchingConfigs = getBuildConfigsForService(SERVICE_42, null);
+		// then
+		assertThat(matchingConfigs).isEmpty();
+		
+		// when
+		matchingConfigs = getBuildConfigsForService((IService) null, Arrays.asList(BUILDCONFIGS));
+		// then
+		assertThat(matchingConfigs).isEmpty();
+
+		// when
+		matchingConfigs = getBuildConfigsForService(
+				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+				Arrays.asList(BUILDCONFIGS));
+		// then
+		assertThat(matchingConfigs).isEmpty();
+	}
+
+	@Test
+	public void testGetBuildConfigForService() {
+		// given
+		// when
+		IBuildConfig matchingConfig = getBuildConfigForService(SERVICE_42, Arrays.asList(BUILDCONFIGS));
+		// then
+		assertThat(matchingConfig).isEqualTo(BUILDCONFIGS[1]);
+
+		// when
+		matchingConfig = getBuildConfigForService(SERVICE_42, null);
+		// then
+		assertThat(matchingConfig).isNull();
+		
+		// when
+		matchingConfig = getBuildConfigForService((IService) null, Arrays.asList(BUILDCONFIGS));
+		// then
+		assertThat(matchingConfig).isNull();
+
+		// when
+		matchingConfig = getBuildConfigForService(
+				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+				Arrays.asList(BUILDCONFIGS));
+		// then
+		assertThat(matchingConfig).isNull();
+	}
+
+	@Test
+	public void testAreRelatedForRouteAndService() {
+		// given
+		// when
+		// then
+		assertThat(areRelated((IRoute) null, (IService) null)).isFalse();
+
+		// given
+		// when
+		// then
+		assertThat(areRelated(mock(IRoute.class), (IService) null)).isFalse();
+
+		// given
+		// when
+		// then
+		assertThat(areRelated((IRoute) null, mock(IService.class))).isFalse();
+
+		// given
+		IRoute route = mock(IRoute.class);
+		when(route.getServiceName()).thenReturn("42");
+		IService service = mock(IService.class);
+		when(service.getName()).thenReturn("24");
+		// when
+		// then
+		assertThat(areRelated(route, service)).isFalse();
+		
+		// given
+		route = mock(IRoute.class);
+		when(route.getServiceName()).thenReturn("42");
+		service = mock(IService.class);
+		when(service.getName()).thenReturn("42");
+		// when
+		// then
+		assertThat(areRelated(route, service)).isTrue();
+	}
+
+	@Test
+	public void testGetRoutesForService() {
+		// given
+		// when
+		List<IRoute> routes = getRoutesForService(SERVICE_42, Arrays.asList(ROUTES));
+		// then
+		assertThat(routes).containsExactly(ROUTES[1], ROUTES[3]);
+
+		// when
+		routes = getRoutesForService(SERVICE_42, null);
+		// then
+		assertThat(routes).isEmpty();
+		
+		// when
+		routes = getRoutesForService((IService) null, Arrays.asList(ROUTES));
+		// then
+		assertThat(routes).isEmpty();
+
+		// when
+		routes = getRoutesForService(
+				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+				Arrays.asList(ROUTES));
+		// then
+		assertThat(routes).isEmpty();
+	}
+
+	@Test
+	public void testGetRouteForService() {
+		// given
+		// when
+		IRoute route = getRouteForService(SERVICE_42, Arrays.asList(ROUTES));
+		// then
+		assertThat(route).isEqualTo(ROUTES[1]);
+
+		// when
+		route = getRouteForService(SERVICE_42, null);
+		// then
+		assertThat(route).isNull();
+		
+		// when
+		route = getRouteForService((IService) null, Arrays.asList(ROUTES));
+		// then
+		assertThat(route).isNull();
+
+		// when
+		route = getRouteForService(
+				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+				Arrays.asList(ROUTES));
+		// then
+		assertThat(route).isNull();
+	}
+
+	
 }

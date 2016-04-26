@@ -249,7 +249,7 @@ public class ResourceUtils {
 	 * @return
 	 */
 	public static IRoute getRouteForService(final IService service, Collection<IRoute> routes) {
-		List<IRoute> matchingRoutes = ResourceUtils.getRoutesForService(service, routes);
+		List<IRoute> matchingRoutes = getRoutesForService(service, routes);
 		if (matchingRoutes.isEmpty()) {
 			return null;
 		} else {
@@ -270,7 +270,7 @@ public class ResourceUtils {
 			return Collections.emptyList();
 		}
 		return routes.stream()
-				.filter(r -> ResourceUtils.areRelated(r, service))
+				.filter(r -> areRelated(r, service))
 				.collect(Collectors.toList());
 	}
 
@@ -314,7 +314,7 @@ public class ResourceUtils {
 		}
 		
 		return buildConfigs.stream()
-				.filter(bc -> ResourceUtils.areRelated(bc, service))
+				.filter(bc -> areRelated(bc, service))
 				.collect(Collectors.toList());
 	}
 
