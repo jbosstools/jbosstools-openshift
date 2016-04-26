@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -48,7 +48,6 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -97,6 +96,7 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
+import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TabFolderSelectionProperty;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
@@ -115,9 +115,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelCo
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemStyledCellLabelProvider;
 import org.jboss.tools.openshift.internal.ui.wizard.builder.ProjectBuilderTypeDetector;
-import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
-import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
-
+import org.jboss.tools.openshift.internal.ui.wizard.common.AbstractProjectPage;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.UnsupportedVersionException;
@@ -129,32 +127,28 @@ import com.openshift.restclient.model.template.ITemplate;
  *
  * @author jeff.cantrill
  * @author Andre Dietisheim
+ * @author Jeff Maury
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class ApplicationSourceListPage  extends AbstractOpenShiftWizardPage  {
+public class ApplicationSourceListPage  extends AbstractProjectPage<IApplicationSourceListPageModel>  {
 
 	private static final int LOCAL_TEMPLATE_TAB_INDEX = 1;
 	public static final String PAGE_NAME = "appSourceList";
 	
-	private IApplicationSourceListPageModel model;
 	private TreeViewer templatesViewer;
 
 	public ApplicationSourceListPage(IWizard wizard, IApplicationSourceListPageModel model) {
-		super("Select Image or Template", 
-				"Choices may be filtered by typing the name of a tag in the text field.", 
-				PAGE_NAME, 
-				wizard);
-		this.model = model;
+		super(wizard, model, "Select template", 
+				"Server template choices may be filtered by typing the name of a tag in the text field.", 
+				"templateList" 
+				);
 	}
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults()
-			.numColumns(3).margins(10, 6).spacing(6, 6)
-			.applyTo(parent);
+	    super.doCreateControls(parent, dbc);
 
-		createProjectControls(parent, dbc);
 		IObservableValue selectedEclipseProject = createEclipseProjectControls(parent, dbc);
 
 		TabFolder tabContainer= new TabFolder(parent, SWT.NONE);
@@ -268,94 +262,6 @@ public class ApplicationSourceListPage  extends AbstractOpenShiftWizardPage  {
 		};
 	}
 
-	private void createProjectControls(Composite parent, DataBindingContext dbc) {
-		Label projectLabel = new Label(parent, SWT.NONE);
-		projectLabel.setText("OpenShift project: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(projectLabel);
-
-		StructuredViewer projectsViewer = new ComboViewer(parent);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).grab(true, false)
-			.applyTo(projectsViewer.getControl());
-
-		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();
-		projectsViewer.setContentProvider(new ObservableListContentProvider());
-		projectsViewer.setLabelProvider(new ObservableTreeItemLabelProvider());
-		projectsViewer.setInput(
-				BeanProperties.list(IApplicationSourceListPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
-		projectsViewer.setComparator(ProjectViewerComparator.createProjectTreeSorter(labelProvider));
-
-		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
-		Binding selectedProjectBinding =
-				ValueBindingBuilder.bind(selectedProjectObservable)
-					.converting(new ObservableTreeItem2ModelConverter(IProject.class))
-					.validatingAfterConvert(new IValidator() {
-
-						@Override
-						public IStatus validate(Object value) {
-							if (value instanceof IProject) {
-								return ValidationStatus.ok();
-							}
-							return ValidationStatus.cancel("Please choose an OpenShift project.");
-						}
-					})
-					.to(BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_PROJECT)
-					.observe(model))
-					.converting(new Model2ObservableTreeItemConverter(ApplicationSourceTreeItems.INSTANCE))
-					.in(dbc);
-		ControlDecorationSupport.create(
-				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-
-		BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_CONNECTION).observe(model)
-				.addValueChangeListener(onConnectionChanged());
-
-		StyledText manageProjectsLink = StyledTextUtils.emulateLinkWidget("<a>Manage Projects</a>", new StyledText(parent, SWT.WRAP));
-		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
-			.applyTo(manageProjectsLink);
-		StyledTextUtils.emulateLinkAction(manageProjectsLink, r->onManageProjectsClicked());
-
-		Label filler = new Label(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).span(3, 1)
-			.applyTo(filler);
-	}
-
-	private void onManageProjectsClicked() {
-				try {
-					// run in job to enforce busy cursor which doesnt work otherwise
-					WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
-
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							return Status.OK_STATUS;
-						}
-
-						@Override
-						protected IStatus updateUI(IProgressMonitor monitor) {
-							ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
-							int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open();
-							// reload projects to reflect changes that happened in projects wizard
-							if (manageProjectsWizard.hasChanged()) {
-								loadResources(templatesViewer, model, false);
-							}
-							if(Dialog.OK == result) {
-								IProject selectedProject = manageProjectsWizard.getSelectedProject();
-								if (selectedProject != null) {
-									model.setProject(selectedProject);
-								}
-							};
-							return Status.OK_STATUS;
-						}
-
-					}, getContainer());
-				} catch (InvocationTargetException | InterruptedException e) {
-					// swallow intentionnally
-				}
-	}
-
 	private IObservableValue createLocalTemplateControls(TabFolder tabContainer, IObservableValue useLocalTemplate, DataBindingContext dbc) {
 
 		TabItem localTemplatesTab = new TabItem(tabContainer, SWT.NONE);
@@ -416,7 +322,11 @@ public class ApplicationSourceListPage  extends AbstractOpenShiftWizardPage  {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ElementTreeSelectionDialog dialog = createFileDialog(model.getLocalAppSourceFileName());
+				ElementTreeSelectionDialog dialog = UIUtils.createFileDialog(model.getLocalAppSourceFileName(),
+				                                                             "Select an OpenShift template",
+				                                                             "Select an OpenShift template (*.json)",
+				                                                             "json",
+				                                                             model.getEclipseProject());
 				if (dialog.open() == IDialogConstants.OK_ID && dialog.getFirstResult() instanceof IFile) {
 					String path = ((IFile)dialog.getFirstResult()).getFullPath().toString();
 					String file = VariablesHelper.addWorkspacePrefix(path);
@@ -425,39 +335,6 @@ public class ApplicationSourceListPage  extends AbstractOpenShiftWizardPage  {
 			}
 
 
-			private ElementTreeSelectionDialog createFileDialog(String selectedFile) {
-				ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
-						    getShell(),
-						    new WorkbenchLabelProvider(),
-						    new WorkbenchContentProvider()
-				);
-				dialog.setTitle("Select an OpenShift template");
-				dialog.setMessage("Select an OpenShift template (*.json)");
-				dialog.setInput( ResourcesPlugin.getWorkspace().getRoot() );
-				dialog.addFilter(new ViewerFilter() {
-					
-					@Override
-					public boolean select(Viewer viewer, Object parentElement, Object element) {
-						return element instanceof IContainer 
-								|| (element instanceof IFile && ((IFile)element).getFileExtension().equals("json"));
-					}
-				});
-				dialog.setAllowMultiple( false );
-				IResource res = model.getEclipseProject();
-				if (StringUtils.isNotBlank(selectedFile)) {
-					String prefix = "${workspace_loc:";
-					String path = selectedFile;
-					if (selectedFile.startsWith(prefix) && selectedFile.endsWith("}")) {
-						path = path.substring(prefix.length(), path.length()-1);
-					}
-					res = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
-				}
-				if (res != null) {
-					dialog.setInitialSelection(res);
-				}
-				
-				return dialog;
-			}
 		};
 	}
 
@@ -496,11 +373,6 @@ public class ApplicationSourceListPage  extends AbstractOpenShiftWizardPage  {
 		}
 	}
 	
-	private boolean isFile(String path) {
-		return StringUtils.isNotBlank(path) &&
-				Files.isRegularFile(Paths.get(VariablesHelper.replaceVariables(path)));
-	}
-
 	private IObservableValue createServerTemplateControls(TabFolder tabFolder, IObservableValue uploadTemplate, DataBindingContext dbc) {
 
 		TabItem serverTemplatesTab = new TabItem(tabFolder, SWT.NONE);
@@ -705,90 +577,18 @@ public class ApplicationSourceListPage  extends AbstractOpenShiftWizardPage  {
 		};
 	}
 
-	private IValueChangeListener onConnectionChanged() {
-		return new IValueChangeListener() {
-
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				loadResources(templatesViewer, model, getPreviousPage() == null);
-				templatesViewer.expandAll();
-			}
-		};
-	}
-
-	private void loadResources(final TreeViewer templatesViewer, final IApplicationSourceListPageModel model, final boolean closeOnCancel) {
-		if (!model.hasConnection()) {
-			return;
-		}
-		try {
-			final boolean[] closeAfter = new boolean[]{false}; 
-			Job jobs = new JobChainBuilder(
-					new AbstractDelegatingMonitorJob("Loading projects, templates, image streams...") {
-
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							try {
-								model.loadResources();
-							} catch (OpenShiftException e) {
-								closeAfter[0] = closeOnCancel;
-								String problem = e.getStatus() == null ? e.getMessage() : e.getStatus().getMessage();
-								return	OpenShiftUIActivator.statusFactory().errorStatus(problem, e);
-							}
-							return Status.OK_STATUS;
-						}
-					}).runWhenSuccessfullyDone(new UIJob("Verifying required project...") {
-
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							if(!model.hasProjects()) {
-								List<IProject> projects = new ObservableTreeItem2ModelConverter().convert(model.getProjectItems());
-								Connection connection = model.getConnection();
-								NewProjectWizard newProjectWizard = new NewProjectWizard(connection, projects);
-								if (Dialog.CANCEL ==
-										WizardUtils.openWizardDialog(newProjectWizard, getShell())) {
-									closeAfter[0] = closeOnCancel;
-									return Status.CANCEL_STATUS;
-								} else {
-									model.loadResources();
-									model.setProject(newProjectWizard.getProject());
-								}
-							}
-							return Status.OK_STATUS;
-						}
-					}).runWhenSuccessfullyDone(new UIJob("Expanding resource tree...") {
-
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							templatesViewer.expandAll();
-							return Status.OK_STATUS;
-						}
-					}).build();
-			WizardUtils.runInWizard(jobs, getContainer());
-			if(closeAfter[0]) {
-				if(Display.getCurrent() != null) {
-					WizardUtils.close(getWizard());
-				} else {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						WizardUtils.close(getWizard());
-					}
-				});
-				}
-			}
-		} catch (InvocationTargetException | InterruptedException e) {
-			// intentionnally swallowed
-		}
-	}
-
 	@Override
-	protected void onPageActivated(final DataBindingContext dbc) {
-		loadResources(templatesViewer, model, getPreviousPage() == null);
-		// fix GTK3 combo boxes too small
-		// https://issues.jboss.org/browse/JBIDE-16877,
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431425
-		((Composite) getControl()).layout(true, true);
-	}
+    protected JobChainBuilder getLoadResourcesJobBuilder(boolean[] closeAfter, boolean closeOnCancel) {
+        JobChainBuilder builder = super.getLoadResourcesJobBuilder(closeAfter, closeOnCancel);
+        builder.runWhenSuccessfullyDone(new UIJob("Expanding resource tree...") {
+            @Override
+            public IStatus runInUIThread(IProgressMonitor monitor) {
+                templatesViewer.expandAll();
+                return Status.OK_STATUS;
+            }
+        });
+        return builder;
+    }
 
 	public static class ApplicationSourceComparator extends ViewerComparator {
 

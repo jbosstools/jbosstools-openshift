@@ -15,7 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.Adapters;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.ContributionManager;
 import org.eclipse.jface.action.GroupMarker;
@@ -26,6 +31,8 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -52,7 +59,10 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.menus.IMenuService;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 /**
  * @author André Dietisheim
@@ -459,6 +469,54 @@ public class UIUtils {
 	
 		return (int)Math.round(dlus * horizontalDialogUnitSize);
 	}
+	
+	/**
+	 * Create a file selection dialog.
+	 * 
+	 * @param selectedFile the initial selected file. May be null
+	 * @param title the title of the dialog
+	 * @param message the message of the dialog
+	 * @param extension the extension to filter. May be null
+	 * @param initialSelection the initial selection resource (used if selectedFile is null)
+	 * @return the dialog
+	 */
+    public static ElementTreeSelectionDialog createFileDialog(String selectedFile,
+                                                              String title,
+                                                              String message,
+                                                              String extension,
+                                                              IResource initialSelection) {
+        ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
+                    getShell(),
+                    new WorkbenchLabelProvider(),
+                    new WorkbenchContentProvider()
+        );
+        dialog.setTitle(title);
+        dialog.setMessage(message);
+        dialog.setInput( ResourcesPlugin.getWorkspace().getRoot() );
+        dialog.addFilter(new ViewerFilter() {
+            
+            @Override
+            public boolean select(Viewer viewer, Object parentElement, Object element) {
+                return element instanceof IContainer 
+                        || (element instanceof IFile && ((IFile)element).getFileExtension().equals(extension));
+            }
+        });
+        dialog.setAllowMultiple( false );
+        if (StringUtils.isNotBlank(selectedFile)) {
+            String prefix = "${workspace_loc:";
+            String path = selectedFile;
+            if (selectedFile.startsWith(prefix) && selectedFile.endsWith("}")) {
+                path = path.substring(prefix.length(), path.length()-1);
+            }
+            initialSelection = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+        }
+        if (initialSelection != null) {
+            dialog.setInitialSelection(initialSelection);
+        }
+        
+        return dialog;
+    }
+
 
 
 }
