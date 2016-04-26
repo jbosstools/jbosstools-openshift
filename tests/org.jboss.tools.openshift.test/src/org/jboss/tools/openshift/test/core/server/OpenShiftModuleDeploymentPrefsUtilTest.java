@@ -18,6 +18,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerAttributes;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.behavior.OpenShiftEapDeployPathController.OpenShiftModuleDeploymentPrefsUtil;
+import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +37,7 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 	@Test
 	public void testOutputName() throws Exception {
 		// Create server
-		IServer s1 =  OpenShiftServerTestUtility.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
+		IServer s1 =  OpenShiftServerTestUtils.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
 		
 		// Make a web module 
 		when(module1.getName()).thenReturn("webProject");
@@ -104,6 +105,6 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 	@Override
 	@After
 	public void tearDown() {
-		OpenShiftServerTestUtility.cleanup();
+		OpenShiftServerTestUtils.cleanup();
 	}
 }

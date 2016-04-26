@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.test.ui.application;
+package org.jboss.tools.openshift.test.ui.wizard.newapp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createObservableTreeItems;

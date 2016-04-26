@@ -19,6 +19,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.tools.as.core.server.controllable.systems.IDeploymentOptionsController;
 import org.jboss.tools.as.core.server.controllable.systems.IModuleDeployPathController;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
+import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.junit.After;
 import org.junit.Test;
 
@@ -36,18 +37,18 @@ public class OpenShiftSubsystemTest extends TestCase {
 	@Override
 	@After
 	public void tearDown() {
-		OpenShiftServerTestUtility.cleanup();
+		OpenShiftServerTestUtils.cleanup();
 	}
 	
 	@Test 
 	public void testSubsystemsNull() throws Exception {
-		IServer s1 =  OpenShiftServerTestUtility.createOpenshift3Server("example", null);
+		IServer s1 =  OpenShiftServerTestUtils.createOpenshift3Server("example", null);
 		testOpenshift3Standard(s1);
 	}
 
 	@Test 
 	public void testSubsystemsStandard() throws Exception {
-		IServer s1 =  OpenShiftServerTestUtility.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
+		IServer s1 =  OpenShiftServerTestUtils.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
 		testOpenshift3Standard(s1);
 	}
 
@@ -76,7 +77,7 @@ public class OpenShiftSubsystemTest extends TestCase {
 	
 	@Test
 	public void testSubsystemsEAP() throws Exception {
-		IServer s1 = OpenShiftServerTestUtility.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3_EAP);
+		IServer s1 = OpenShiftServerTestUtils.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3_EAP);
 		IControllableServerBehavior beh = (IControllableServerBehavior)s1.loadAdapter(IControllableServerBehavior.class, new NullProgressMonitor());
 		String[] systems = new String[]{
 				IControllableServerBehavior.SYSTEM_LAUNCH, IControllableServerBehavior.SYSTEM_MODULES,
