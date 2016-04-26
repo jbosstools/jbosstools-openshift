@@ -45,7 +45,6 @@ import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -101,6 +100,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -275,7 +275,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	}
 	
 	private void createProjectControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
-		IObservableValue eclipseProjectObservable = BeanProperties.value(
+		IObservableValue<IProject> eclipseProjectObservable = BeanProperties.value(
 				ServerSettingsWizardPageModel.PROPERTY_DEPLOYPROJECT).observe(model);
 		new SelectProjectComponentBuilder()
 			.setTextLabel("Eclipse Project: ")
@@ -502,10 +502,10 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 	private static class PodPathValidator extends MultiValidator {
 		
-		private IObservableValue useDefaultPodPath;
-		private IObservableValue podPath;
+		private IObservableValue<Boolean> useDefaultPodPath;
+		private IObservableValue<String> podPath;
 
-		public PodPathValidator(IObservableValue useDefaultPodPath, IObservableValue podPath) {
+		public PodPathValidator(IObservableValue<Boolean> useDefaultPodPath, IObservableValue<String> podPath) {
 			this.useDefaultPodPath = useDefaultPodPath;
 			this.podPath = podPath;
 		}
@@ -584,7 +584,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
 				.applyTo(detailsContainer);
-		IObservableValue selectedService = new WritableValue();
+		IObservableValue<IResource> selectedService = new WritableValue<IResource>();
 		ValueBindingBuilder
 			.bind(selectedServiceTreeItem)
 			.converting(new ObservableTreeItem2ModelConverter())
@@ -679,15 +679,15 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 //			}
 //		});
 		
-		IObservableValue selectedRouteObservable = ViewerProperties.singleSelection().observe(routesViewer);
+		IObservableValue<IResource> selectedRouteObservable = ViewerProperties.singleSelection().observe(routesViewer);
 		ValueBindingBuilder
 			.bind(selectedRouteObservable)
 			.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_ROUTE).observe(model))
 			.in(dbc);
 
-		final IObservableValue isSelectDefaultRouteObservable =
+		final IObservableValue<Boolean> isSelectDefaultRouteObservable =
 				WidgetProperties.selection().observe(promptRouteButton);
-		final IObservableValue selectDefaultRouteModelObservable = 
+		final IObservableValue<Boolean> selectDefaultRouteModelObservable = 
 				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_SELECT_DEFAULT_ROUTE).observe(model);
 		ValueBindingBuilder
 			.bind(isSelectDefaultRouteObservable)
@@ -708,20 +708,21 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		ControlDecorationSupport.create(routeValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 	}
 
-	private IListChangeListener onServiceItemsChanged(final TreeViewer servicesViewer) {
-		return new IListChangeListener() {
-			
+	private IListChangeListener<ObservableTreeItem> onServiceItemsChanged(final TreeViewer servicesViewer) {
+		return new IListChangeListener<ObservableTreeItem>() {
+
 			@Override
-			public void handleListChange(ListChangeEvent event) {
+			public void handleListChange(ListChangeEvent<? extends ObservableTreeItem> event) {
 				servicesViewer.expandAll();
 			}
+			
 		};
 	}
 
 	private TreeViewer createServicesTreeViewer(Composite parent, ServerSettingsWizardPageModel model, Text selectorText) {
 		TreeViewer applicationTemplatesViewer =
 				new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
-		IListProperty childrenProperty = new MultiListProperty(
+		IListProperty<ServerSettingsWizardPageModel, ObservableTreeItem> childrenProperty = new MultiListProperty<ServerSettingsWizardPageModel, ObservableTreeItem>(
 				new IListProperty[] {
 						BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_SERVICE_ITEMS),
 						BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
@@ -767,20 +768,13 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
     	model.updateServer();
 		return model.saveServer(monitor);
 	}
-	
-	@Override
-	protected void onPageWillGetDeactivated(Direction progress, PageChangingEvent event, DataBindingContext dbc) {
-		if (progress == Direction.FORWARDS) {
-			System.err.println("deactivating FORWARD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		}
-	}
 
 	class RouteValidator extends MultiValidator {
 
-		private IObservableValue useDefaultRoute;
-		private IObservableValue selectedRoute;
+		private IObservableValue<Boolean> useDefaultRoute;
+		private IObservableValue<IResource> selectedRoute;
 
-		public RouteValidator(IObservableValue useDefaultRoute, IObservableValue selectedRoute) {
+		public RouteValidator(IObservableValue<Boolean> useDefaultRoute, IObservableValue<IResource> selectedRoute) {
 			this.useDefaultRoute = useDefaultRoute;
 			this.selectedRoute = selectedRoute;
 		}
