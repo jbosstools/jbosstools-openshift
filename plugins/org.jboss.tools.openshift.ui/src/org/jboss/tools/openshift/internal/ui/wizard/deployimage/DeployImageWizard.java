@@ -16,10 +16,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.linuxtools.docker.core.IDockerConnection;
+import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
@@ -29,6 +34,8 @@ import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.job.DeployImageJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPage;
+
+import com.openshift.restclient.model.IProject;
 
 
 /**
@@ -42,20 +49,47 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 
 	private static final String TITLE = "Deploy Image to OpenShift";
 
-	public DeployImageWizard(IDeployImageParameters wizardModel) {
-		super(TITLE, wizardModel);
+	public DeployImageWizard(IDockerImage image, Connection connection, IProject project, boolean isConnected) {
+		super(TITLE, new DeployImageWizardModel());
+
+		DeployImageWizardModel model = (DeployImageWizardModel)getModel();
+		if(image != null) {
+			IDockerConnection dockerConnection = image.getConnection();
+			model.setOriginatedFromDockerExplorer(true);
+			model.setDockerConnection(dockerConnection);
+			model.setImageName(image.repo());
+		}
+		if(project != null) {
+			model.initModel(ConnectionsRegistryUtil.getConnectionFor(project), project);
+		} else {
+			if(connection != null) {
+				model.setConnection(connection);
+			}
+		}
+
+		model.setStartedWithActiveConnection(isConnected);
+
 		setNeedsProgressMonitor(true);
 	}
 
 	@Override
 	public void addPages() {
-	    if (getModel().originatedFromDockerExplorer()) {
-	        addPage(new ConnectionWizardPage(this, getModel()));
+	    if (getModel().originatedFromDockerExplorer()
+				|| !((DeployImageWizardModel)getModel()).isStartedWithActiveConnection()) {
+	        addPage(new ConnectionWizardPage(this, getModel(), Connection.class));
 	    }
 		addPage(new DeployImagePage(this, getModel()));
 		addPage(new DeploymentConfigPage(this, getModel()));
 		addPage(new ServicesAndRoutingPage(this,  getModel()));
 		addPage(new ResourceLabelsPage(this,  getModel()));
+	}
+
+	@Override
+	public IWizardPage getStartingPage() {
+		if(((DeployImageWizardModel)getModel()).isStartedWithActiveConnection()) {
+			return getPage(DeployImagePage.DEPLOY_IMAGE_PAGE_NAME);
+		}
+		return super.getStartingPage();
 	}
 
 	@Override

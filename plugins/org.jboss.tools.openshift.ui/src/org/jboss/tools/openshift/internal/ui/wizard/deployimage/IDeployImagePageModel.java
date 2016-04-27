@@ -38,6 +38,13 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * 
 	 */
 	boolean originatedFromDockerExplorer();
+
+	/**
+	 * Returns true if model is initialized with active connection selected project and
+	 * when wizard is originated from docker explorer connection page may be skipped.
+	 * @return
+	 */
+	boolean isStartedWithActiveConnection();
 	
 	/**
 	 * The set of known OpenShift connections

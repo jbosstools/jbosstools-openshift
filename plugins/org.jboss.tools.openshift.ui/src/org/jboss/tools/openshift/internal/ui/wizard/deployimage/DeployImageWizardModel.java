@@ -90,6 +90,7 @@ public class DeployImageWizardModel
 	private IDockerConnection dockerConnection;
 	private ArrayList<IServicePort> imagePorts;
 	private boolean originatedFromDockerExplorer;
+	private boolean isStartedWithActiveConnection = false;
 	private IDockerImageMetadata imageMeta;
 	
 	private final List<String> imageNames = new ArrayList<>();
@@ -117,7 +118,16 @@ public class DeployImageWizardModel
 	public boolean originatedFromDockerExplorer() {
 		return originatedFromDockerExplorer;
 	}
-	
+
+	@Override
+	public boolean isStartedWithActiveConnection() {
+		return isStartedWithActiveConnection;
+	}
+
+	public void setStartedWithActiveConnection(boolean value) {
+		isStartedWithActiveConnection = value;
+	}
+
 	@Override
 	public List<IDockerConnection> getDockerConnections() {
 		return dockerConnections;
@@ -177,7 +187,9 @@ public class DeployImageWizardModel
 
 					@Override
 					public void done(IJobChangeEvent event) {
-						setProject(project);
+						if(project != null) {
+							setProject(project);
+						}
 					}
 				});
 			}
