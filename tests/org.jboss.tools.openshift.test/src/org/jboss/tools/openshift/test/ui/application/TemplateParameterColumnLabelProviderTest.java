@@ -11,7 +11,7 @@ package org.jboss.tools.openshift.test.ui.application;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.TemplateParameterViewerUtils;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateParameterViewerUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;

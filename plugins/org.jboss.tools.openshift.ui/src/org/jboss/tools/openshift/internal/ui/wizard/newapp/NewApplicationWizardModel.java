@@ -17,34 +17,30 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
 
 import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceFactoryException;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.template.IParameter;
 import com.openshift.restclient.model.template.ITemplate;
 
 /**
@@ -57,69 +53,87 @@ import com.openshift.restclient.model.template.ITemplate;
  */
 public class NewApplicationWizardModel 
 		extends ResourceLabelsPageModel 
-		implements IResourceDetailsModel, ITemplateListPageModel, ITemplateParametersPageModel{
+		implements IApplicationSourceListPageModel{
 
 	private Connection connection;
 	private IProject project;
 	private List<ObservableTreeItem> projectItems = new ArrayList<>();
 	private List<ObservableTreeItem> projectTemplates = new ArrayList<>();
-	private ITemplate selectedTemplate;
-	private ITemplate localTemplate;
-	private ITemplate serverTemplate;
-	private List<IParameter> parameters = new ArrayList<>();
-	private IParameter selectedParameter;
-	private Map<String, String> originalValueMap;
-	private Collection<IResource> items = new ArrayList<>(); 
-	private boolean useLocalTemplate = true;
-	private String localTemplateFilename;
+	private IApplicationSource selectedAppSource;
+	private IApplicationSource localAppSource;
+	private IApplicationSource serverAppSource;
+	private boolean useLocalAppSource = true;
+	private String localAppSourceFilename;
 	private IResourceFactory resourceFactory;
 	private org.eclipse.core.resources.IProject eclipseProject;
 
-	private void update(boolean useLocalTemplate, IProject selectedProject, List<ObservableTreeItem> projectItems, ITemplate serverTemplate, String localTemplateFilename) {
-		firePropertyChange(PROPERTY_USE_LOCAL_TEMPLATE, this.useLocalTemplate, this.useLocalTemplate = useLocalTemplate);
+	private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems, IApplicationSource appSource, String localAppSourceFilename) {
+		firePropertyChange(PROPERTY_USE_LOCAL_APP_SOURCE, this.useLocalAppSource, this.useLocalAppSource = useLocalAppSource);
 		updateProjectItems(projectItems);
 		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = selectedProject = getProjectOrDefault(selectedProject, projectItems));
-		firePropertyChange(PROPERTY_TEMPLATES, this.projectTemplates, this.projectTemplates = getProjectTemplates(selectedProject, projectItems) );
-		updateSelectedTemplate(useLocalTemplate, serverTemplate, localTemplate, localTemplateFilename);
-		updateTemplateParameters(selectedTemplate);
+		firePropertyChange(PROPERTY_APP_SOURCES, this.projectTemplates, this.projectTemplates = getProjectTemplates(selectedProject, projectItems) );
+		
+		updateSelectedAppSource(useLocalAppSource, appSource, localAppSource, localAppSourceFilename);
 	}
 
-	private void updateSelectedTemplate(boolean useLocalTemplate, ITemplate serverTemplate, ITemplate localTemplate, String localTemplateFilename) {
-		ITemplate template = null;
-		if (useLocalTemplate) {
-			if (!ObjectUtils.equals(localTemplateFilename, this.localTemplateFilename)) {
-				template = this.localTemplate = getLocalTemplate(localTemplateFilename);
-				firePropertyChange(PROPERTY_LOCAL_TEMPLATE_FILENAME, this.localTemplateFilename, this.localTemplateFilename = localTemplateFilename);
+	private void updateSelectedAppSource(boolean useLocalAppSource, IApplicationSource serverAppSource, IApplicationSource localAppSource, String localAppSourceFilename) {
+		IApplicationSource source = null;
+		if (useLocalAppSource) {
+			if (!ObjectUtils.equals(localAppSourceFilename, this.localAppSourceFilename)) {
+				source = this.localAppSource = getLocalAppSource(localAppSourceFilename);
+				firePropertyChange(PROPERTY_LOCAL_APP_SOURCE_FILENAME, this.localAppSourceFilename, this.localAppSourceFilename = localAppSourceFilename);
 			} else {
-				template = localTemplate;
+				source = localAppSource;
 			}
 		} else {
-			template = this.serverTemplate = serverTemplate;
+			source = this.serverAppSource = serverAppSource;
 		}
-		firePropertyChange(PROPERTY_SELECTED_TEMPLATE, this.selectedTemplate, this.selectedTemplate = template);
+		updateLabels(source);
+		firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, this.selectedAppSource, this.selectedAppSource = source);
 	}
 	
-	private ITemplate getLocalTemplate(String filename) {
+	private void updateLabels(IApplicationSource source) {
+		if(source != null && ResourceKind.TEMPLATE.equals(source.getKind())) {
+			ITemplate template = (ITemplate) source.getSource();
+			setLabels(template.getObjectLabels());
+			return;
+		}
+		setLabels(Collections.emptyMap());
+	}
+	
+	private void setLabels(Map<String, String> labelMap) {
+		if(labelMap == null) return;
+		List<Label> labels =  new ArrayList<>(labelMap.size());
+		for (Entry<String,String> entry : labelMap.entrySet()) {
+			labels.add(new Label(entry.getKey(), entry.getValue()));
+		}
+		setLabels(labels);
+	}
+	
+	private IApplicationSource getLocalAppSource(String filename) {
 		if (StringUtils.isBlank(filename)) {
 			return null;
 		}
-		ITemplate template = null;
+		IResource resource = null;
 		filename = VariablesHelper.replaceVariables(filename);
 		try {
 			if (!Files.isRegularFile(Paths.get(filename))) {
 				return null;
 			}
-			IResource resource = resourceFactory.create(createInputStream(filename));
+			resource = resourceFactory.create(createInputStream(filename));
 			if(resource != null && !(resource instanceof ITemplate)) {
 				throw new NotATemplateException(resource.getKind());
 			}
-			template = (ITemplate)resource;
 		} catch (FileNotFoundException e) {
 			throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
 		} catch (ResourceFactoryException | ClassCastException e) {
 			throw e;
 		}
-		return template;
+		switch(resource.getKind()) {
+		case ResourceKind.TEMPLATE:
+			return new TemplateApplicationSource((ITemplate)resource);
+		}
+		throw new OpenShiftException("Creating applications from local files is only allowed using a template");
 	}
 	
 	
@@ -148,36 +162,18 @@ public class NewApplicationWizardModel
 	}
 	
 	@Override
-	public Collection<IResource> getItems() {
-		return items;
-	}
-
-	private void setItems(Collection<IResource> items) {
-		firePropertyChange(PROPERTY_ITEMS, this.items, this.items = items);
+	public void setServerAppSource(IApplicationSource appSource) {
+		update(false, this.project, this.projectItems, appSource, localAppSourceFilename);
 	}
 
 	@Override
-	public void setServerTemplate(ITemplate serverTemplate) {
-		update(false, this.project, this.projectItems, serverTemplate, localTemplateFilename);
+	public IApplicationSource getServerAppSource() {
+		return serverAppSource;
 	}
 
 	@Override
-	public ITemplate getServerTemplate() {
-		return serverTemplate;
-	}
-
-	@Override
-	public ITemplate getSelectedTemplate() {
-		return selectedTemplate;
-	}
-
-	private void updateTemplateParameters(ITemplate template) {
-		if (template == null) {
-			return;
-		}
-		setParameters(new ArrayList<>(template.getParameters().values()));
-		setItems(template.getItems());
-		setLabels(template.getObjectLabels());
+	public IApplicationSource getSelectedAppSource() {
+		return selectedAppSource;
 	}
 
 	private IProject getProjectOrDefault(IProject project, List<ObservableTreeItem> projects) {
@@ -189,7 +185,7 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setProject(IProject project) {
-		update(this.useLocalTemplate, project, this.projectItems, this.serverTemplate, localTemplateFilename);
+		update(this.useLocalAppSource, project, this.projectItems, this.serverAppSource, localAppSourceFilename);
 	}
 
 	@Override
@@ -202,118 +198,21 @@ public class NewApplicationWizardModel
 		if (connection == null) {
 			return;
 		}
-		ObservableTreeItem connectionItem = TemplateTreeItems.INSTANCE.create(connection);
+		ObservableTreeItem connectionItem = ApplicationSourceTreeItems.INSTANCE.create(connection);
 		connectionItem.load();
 		List<ObservableTreeItem> projects = connectionItem.getChildren();
 		setProjectItems(projects);
 	}
 
-	@Override
-	public List<IParameter> getParameters() {
-		return parameters;
-	}
 
 	@Override
-	public void setParameters(List<IParameter> parameters) {
-		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = injectProjectParameters(getEclipseProject(), parameters));
-		Map<String, String> paramsMap = new HashMap<>();
-		if (parameters != null) {
-		  parameters.forEach(p -> paramsMap.put(p.getName(), p.getValue()));
-		}
-		originalValueMap = paramsMap;
-	}
-
-	private static List<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project, List<IParameter> originalParameters) {
-		if (originalParameters == null || originalParameters.isEmpty()) {
-			return originalParameters;
-		}
-		Map<String, String> projectParams = getProjectParameters(project);
-
-		List<IParameter> newParameters = originalParameters.stream().map(p -> { 
-			IParameter clone = p.clone();
-			String value = projectParams.get(clone.getName());
-			if (value != null) {
-				clone.setValue(value);
-			}
-			return clone;
-		}).collect(Collectors.toList());
-
-		return newParameters;
-	}
-
-	private static Map<String, String> getProjectParameters(org.eclipse.core.resources.IProject project) {
-		if(project == null) {
-			return Collections.emptyMap();
-		}
-		Map<String,String> projectParams = new HashMap<>();
-		String gitRepo = null;
-		try {
-			gitRepo = StringUtils.defaultString(EGitUtils.getDefaultRemoteRepo(project));
-		} catch (CoreException e) {
-			throw new OpenShiftException(e, NLS.bind("Could not determine the default remote Git repository for \"{0}\"", project.getName()));
-		}
-		if (gitRepo != null) {
-			projectParams.put(PARAMETER_SOURCE_REPOSITORY_URL, gitRepo);
-			projectParams.put(PARAMETER_GIT_URI, gitRepo);//legacy key
-			
-			String branch;
-			try {
-				branch = StringUtils.defaultString(EGitUtils.getCurrentBranch(project));
-			} catch (CoreException e) {
-				throw new OpenShiftException(e, NLS.bind("Could not determine the default Git branch for \"{0}\"", project.getName()));
-			}
-			projectParams.put("SOURCE_REPOSITORY_REF", branch);
-			projectParams.put("GIT_REF", branch);//legacy key
-			
-			//Setting the context dir is a really bad idea if we're dealing with a multi module project
-			//Better let the user do it manually if needed.
-			//String contextDir = getDefaultContextDir(project);
-			String contextDir = StringUtils.EMPTY;
-			projectParams.put("CONTEXT_DIR", contextDir);
-			projectParams.put("GIT_CONTEXT_DIR", contextDir);//legacy key
-		}
-		return projectParams;
+	public void setUseLocalAppSource(boolean useLocalTemplate) {
+		update(useLocalTemplate, this.project, this.projectItems, this.serverAppSource, this.localAppSourceFilename);
 	}
 
 	@Override
-	public IParameter getSelectedParameter() {
-		return this.selectedParameter;
-	}
-
-	@Override
-	public void setSelectedParameter(IParameter parameter) {
-		firePropertyChange(PROPERTY_SELECTED_PARAMETER, this.selectedParameter, this.selectedParameter = parameter);
-	}
-
-	@Override
-	public void updateParameterValue(IParameter param, String value) {
-		param.setValue(value);
-	}
-
-	@Override
-	public void resetParameter(IParameter param) {
-		if (param != null) {
-			updateParameterValue(param, originalValueMap.get(param.getName()));
-		}
-	}
-
-	private void setLabels(Map<String, String> labelMap) {
-		if(labelMap == null) return;
-		List<Label> labels =  new ArrayList<>(labelMap.size());
-		for (Entry<String,String> entry : labelMap.entrySet()) {
-			labels.add(new Label(entry.getKey(), entry.getValue()));
-		}
-		setLabels(labels);
-	}
-
-	@Override
-	public void setUseLocalTemplate(boolean useLocalTemplate) {
-		update(useLocalTemplate, this.project, this.projectItems, this.serverTemplate, this.localTemplateFilename);
-	}
-
-	@Override
-	public boolean isUseLocalTemplate() {
-		return useLocalTemplate;
+	public boolean isUseLocalAppSource() {
+		return useLocalAppSource;
 	}
 
 	public InputStream createInputStream(String fileName) throws FileNotFoundException {
@@ -321,13 +220,13 @@ public class NewApplicationWizardModel
 	}
 
 	@Override
-	public void setLocalTemplateFileName(String filename) {
-		update(true, this.project, this.projectItems, serverTemplate, filename);
+	public void setLocalAppSourceFileName(String filename) {
+		update(true, this.project, this.projectItems, serverAppSource, filename);
 	}
 
 	@Override
-	public String getLocalTemplateFileName() {
-		return this.localTemplateFilename;
+	public String getLocalAppSourceFileName() {
+		return this.localAppSourceFilename;
 	}
 
 	@Override
@@ -352,7 +251,7 @@ public class NewApplicationWizardModel
 	}
 
 	private void reset() {
-		update(this.useLocalTemplate, null, null, null, null);
+		update(this.useLocalAppSource, null, null, null, null);
 	}
 
 	Comparator<ObservableTreeItem> comparator = new ProjectViewerComparator(new OpenShiftExplorerLabelProvider()).asItemComparator();
@@ -380,7 +279,7 @@ public class NewApplicationWizardModel
 	}
 	
 	protected void setProjectItems(List<ObservableTreeItem> projects) {
-		update(useLocalTemplate, findProject(this.project, projects), projects, serverTemplate, localTemplateFilename);
+		update(useLocalAppSource, findProject(this.project, projects), projects, serverAppSource, localAppSourceFilename);
 	}
 
 	private IProject findProject(final IProject project, List<ObservableTreeItem> projects) {
@@ -411,7 +310,7 @@ public class NewApplicationWizardModel
 	}
 
 	@Override
-	public List<ObservableTreeItem> getTemplates() {
+	public List<ObservableTreeItem> getAppSources() {
 		return this.projectTemplates;
 	}
 	
@@ -429,7 +328,6 @@ public class NewApplicationWizardModel
 	@Override
 	public void setEclipseProject(org.eclipse.core.resources.IProject eclipseProject) {
 		firePropertyChange(PROPERTY_ECLIPSE_PROJECT, this.eclipseProject, this.eclipseProject = eclipseProject);
-		updateTemplateParameters(selectedTemplate);
 	}
 
 	@Override

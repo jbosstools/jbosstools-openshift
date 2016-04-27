@@ -28,4 +28,9 @@ public interface OpenShiftAPIAnnotations {
 	static final String DEPLOYMENT_NAME = "openshift.io/deployment.name";
 
 	static final String GENERATED_BY = "openshift.io/generated-by";
+
+	static final String DESCRIPTION = "description";
+	static final String ICON_CLASS = "iconClass";
+	static final String PROVIDER = "provider";
+	static final String TAGS = "tags";
 }

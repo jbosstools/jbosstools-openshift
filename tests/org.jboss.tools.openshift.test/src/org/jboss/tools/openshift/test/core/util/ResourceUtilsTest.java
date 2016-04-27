@@ -14,15 +14,16 @@ import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.contain
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getServicesForPod;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuildPod;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isMatching;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,9 +33,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.resources.ITags;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
@@ -54,7 +59,9 @@ public class ResourceUtilsTest {
 	@Mock private IBuild build;
 	@Mock private IDeploymentImageChangeTrigger deployTrigger;
 	@Mock private IObjectReference objectRef;
+	@Mock private ITags tagsCap;
 	
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setup() {
 		podLabels.put("foo", "bar");
@@ -63,7 +70,81 @@ public class ResourceUtilsTest {
 		
 		when(buildConfig.getBuildOutputReference()).thenReturn(objectRef);
 		when(objectRef.getName()).thenReturn(IMAGE_REF);
+		when(build.getName()).thenReturn("build");
+		when(build.accept(any(CapabilityVisitor.class), anyBoolean()))
+			.then(new Answer<Boolean>() {
+
+				@Override
+				public Boolean answer(InvocationOnMock invocation) throws Throwable {
+					CapabilityVisitor<ITags, Boolean> vis = (CapabilityVisitor<ITags, Boolean>) invocation.getArguments()[0];
+					return vis.visit(tagsCap);
+				}
+				
+			});
+		when(tagsCap.getTags()).thenReturn(Collections.emptyList());
 	}
+	
+	@Test
+	public void testIsMatchingWhenFilterIsBlank() {
+		assertTrue("Exp. a match on blank string", isMatching("   ","something", Collections.emptyList()));
+	}
+	
+	@Test
+	public void testIsMatchingResourceWhenFilterIsBlank() {
+		assertTrue("Exp. a match on blank string", isMatching("   ", build));
+	}
+
+	@Test
+	public void testIsMatchingWhenNameIsInFilterTextThatIsDelimited() {
+		assertTrue("Exp. a match on delimited filter", isMatching("java,jruby","torque-java-jruby", Collections.emptyList()));
+	}
+	
+	@Test
+	public void testIsMatchingResourceWhenNameIsInFilterTextThatIsDelimited() {
+		when(build.getName()).thenReturn("torque-java-jruby");
+		assertTrue("Exp. a match on delimited filter", isMatching("java,jruby",build));
+	}
+	
+	@Test
+	public void testIsMatchingWhenNameIsInFilterTextThatIsNotDelimited() {
+		assertTrue("Exp. a match on undelimited filter", isMatching(" bar ","bar", Collections.emptyList()));
+	}
+	
+	@Test
+	public void testIsMatchingResourceWhenNameIsInFilterTextThatIsNotDelimited() {
+		when(build.getName()).thenReturn("bar");
+		assertTrue("Exp. a match on undelimited filter", isMatching(" bar ",build));
+	}
+
+	@Test
+	public void testIsMatchingWhenNameMatchesTags() {
+		assertTrue("Exp. a match on a tag", isMatching("bar","barrr", Arrays.asList("xyz","bar")));
+	}
+
+	@Test
+	public void testIsMatchingResourceWhenNameMatchesTags() {
+		when(build.getName()).thenReturn("barrr");
+		when(tagsCap.getTags()).thenReturn(Arrays.asList("xyz","bar"));
+		assertTrue("Exp. a match on a tag", isMatching("bar",build));
+	}
+	
+	@Test
+	public void testIsNotMatchingWhenNameIsInFilterTextIsNotNameOrInTag() {
+		assertFalse("Exp. no match", isMatching("foo","bar", Arrays.asList("xyz","123")));
+	}
+
+	@Test
+	public void testIsNotMatchingResourceWhenNameIsInFilterTextIsNotNameOrInTag() {
+		when(build.getName()).thenReturn("bar");
+		when(tagsCap.getTags()).thenReturn(Arrays.asList("xyz","123"));
+		assertFalse("Exp. no match", isMatching("foo","bar", Arrays.asList("xyz","123")));
+	}
+
+	@Test
+	public void testIsMatchingForNullResourceIsFalse() {
+		assertTrue(isMatching("text", null));
+	}
+	
 	
 	@Test
 	public void testContainsAllDoesNotNullPointer() {

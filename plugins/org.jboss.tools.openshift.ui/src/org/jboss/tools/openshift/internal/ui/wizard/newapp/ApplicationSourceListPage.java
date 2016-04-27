@@ -97,7 +97,6 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
-import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TabFolderSelectionProperty;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
@@ -120,28 +119,31 @@ import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard
 import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
 
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.UnsupportedVersionException;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.template.ITemplate;
 
 /**
- * A page that offers a list templates to a user
+ * A page that offers a list of builder images or templates to a user
  *
  * @author jeff.cantrill
  * @author Andre Dietisheim
  *
  */
-public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
+@SuppressWarnings({"rawtypes", "unchecked"})
+public class ApplicationSourceListPage  extends AbstractOpenShiftWizardPage  {
 
 	private static final int LOCAL_TEMPLATE_TAB_INDEX = 1;
-
-	private ITemplateListPageModel model;
+	public static final String PAGE_NAME = "appSourceList";
+	
+	private IApplicationSourceListPageModel model;
 	private TreeViewer templatesViewer;
 
-	public TemplateListPage(IWizard wizard, ITemplateListPageModel model) {
-		super("Select template", 
-				"Server template choices may be filtered by typing the name of a tag in the text field.", 
-				"templateList", 
+	public ApplicationSourceListPage(IWizard wizard, IApplicationSourceListPageModel model) {
+		super("Select Image or Template", 
+				"Choices may be filtered by typing the name of a tag in the text field.", 
+				PAGE_NAME, 
 				wizard);
 		this.model = model;
 	}
@@ -171,7 +173,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		});
 
 		IObservableValue useLocalTemplateObservable = 
-				BeanProperties.value(ITemplateListPageModel.PROPERTY_USE_LOCAL_TEMPLATE).observe(model);
+				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_USE_LOCAL_APP_SOURCE).observe(model);
 		ValueBindingBuilder
 			.bind(new TabFolderSelectionProperty().observe(tabContainer))
 			.converting(new Converter(Integer.class, Boolean.class) {
@@ -193,10 +195,10 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		createDetailsGroup(parent, dbc);
 
-		model.setUseLocalTemplate(false);
+		model.setUseLocalAppSource(false);
 
 		// validate required template
-		IObservableValue selectedTemplate = BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model);
+		IObservableValue selectedTemplate = BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model);
 		TemplateListPageValidator pageValidator = new TemplateListPageValidator(useLocalTemplateObservable, localTemplateFilename, serverTemplate, selectedTemplate, selectedEclipseProject, parent);
 		dbc.addValidationStatusProvider(pageValidator );
 		ControlDecorationSupport.create(pageValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
@@ -204,7 +206,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 	private IObservableValue createEclipseProjectControls(Composite parent, DataBindingContext dbc) {
 		IObservableValue eclipseProjectObservable = BeanProperties.value(
-				ITemplateListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
+				IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
 		SelectProjectComponentBuilder builder = new SelectProjectComponentBuilder();
 		builder
 			.setTextLabel("Use existing workspace project:")
@@ -282,7 +284,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		projectsViewer.setContentProvider(new ObservableListContentProvider());
 		projectsViewer.setLabelProvider(new ObservableTreeItemLabelProvider());
 		projectsViewer.setInput(
-				BeanProperties.list(ITemplateListPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
+				BeanProperties.list(IApplicationSourceListPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
 		projectsViewer.setComparator(ProjectViewerComparator.createProjectTreeSorter(labelProvider));
 
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
@@ -299,14 +301,14 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 							return ValidationStatus.cancel("Please choose an OpenShift project.");
 						}
 					})
-					.to(BeanProperties.value(ITemplateListPageModel.PROPERTY_PROJECT)
+					.to(BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_PROJECT)
 					.observe(model))
-					.converting(new Model2ObservableTreeItemConverter(TemplateTreeItems.INSTANCE))
+					.converting(new Model2ObservableTreeItemConverter(ApplicationSourceTreeItems.INSTANCE))
 					.in(dbc);
 		ControlDecorationSupport.create(
 				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 
-		BeanProperties.value(ITemplateListPageModel.PROPERTY_CONNECTION).observe(model)
+		BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_CONNECTION).observe(model)
 				.addValueChangeListener(onConnectionChanged());
 
 		StyledText manageProjectsLink = StyledTextUtils.emulateLinkWidget("<a>Manage Projects</a>", new StyledText(parent, SWT.WRAP));
@@ -377,7 +379,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		ValueBindingBuilder
 				.bind(localTemplateFilename )
 				.to(BeanProperties.value(
-						ITemplateListPageModel.PROPERTY_LOCAL_TEMPLATE_FILENAME).observe(model))
+						IApplicationSourceListPageModel.PROPERTY_LOCAL_APP_SOURCE_FILENAME).observe(model))
 				.validatingBeforeSet( o -> isFile(o.toString())?
 						ValidationStatus.ok(): 
 						ValidationStatus.error(txtLocalTemplateFileName.getText() +" is not a file"))
@@ -414,7 +416,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ElementTreeSelectionDialog dialog = createFileDialog(model.getLocalTemplateFileName());
+				ElementTreeSelectionDialog dialog = createFileDialog(model.getLocalAppSourceFileName());
 				if (dialog.open() == IDialogConstants.OK_ID && dialog.getFirstResult() instanceof IFile) {
 					String path = ((IFile)dialog.getFirstResult()).getFullPath().toString();
 					String file = VariablesHelper.addWorkspacePrefix(path);
@@ -465,7 +467,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 			return;
 		}
 		try {
-			model.setLocalTemplateFileName(file);
+			model.setLocalAppSourceFileName(file);
 			return;
 		} catch (NotATemplateException ex) {
 			MessageDialog.openWarning(getShell(), "Template Error",
@@ -502,7 +504,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	private IObservableValue createServerTemplateControls(TabFolder tabFolder, IObservableValue uploadTemplate, DataBindingContext dbc) {
 
 		TabItem serverTemplatesTab = new TabItem(tabFolder, SWT.NONE);
-		serverTemplatesTab.setText("Server templates");
+		serverTemplatesTab.setText("Server application source");
 
 		Composite parent = new Composite(tabFolder, SWT.NONE);
 		GridLayoutFactory.fillDefaults()
@@ -517,7 +519,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(txtTemplateFilter);
 
-		IObservableValue eclipseProjectObservable = BeanProperties.value(ITemplateListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
+		IObservableValue eclipseProjectObservable = BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
 		eclipseProjectObservable.addValueChangeListener(new IValueChangeListener() {
 
 			@Override
@@ -538,9 +540,9 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				ViewerProperties.singleSelection().observe(templatesViewer);
 		ValueBindingBuilder
 			.bind(selectedViewerServerTemplate)
-			.converting(new ObservableTreeItem2ModelConverter(ITemplate.class))
-			.to(BeanProperties.value(ITemplateListPageModel.PROPERTY_SERVER_TEMPLATE).observe(model))
-			.converting(new Model2ObservableTreeItemConverter(TemplateTreeItems.INSTANCE))
+			.converting(new ObservableTreeItem2ModelConverter(IApplicationSource.class))
+			.to(BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SERVER_APP_SOURCE).observe(model))
+			.converting(new Model2ObservableTreeItemConverter(ApplicationSourceTreeItems.INSTANCE))
 			.in(dbc);
 
 		templatesViewer.addDoubleClickListener(onServerTemplateDoubleClicked());
@@ -558,7 +560,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 		// details
 		Group detailsGroup = new Group(parent, SWT.NONE);
-		detailsGroup.setText("Template details");
+		detailsGroup.setText("Details");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL)
 				.grab(true, false)
@@ -574,8 +576,8 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.align(SWT.FILL, SWT.FILL).grab(true, true)
 				.applyTo(detailsContainer);
 
-		new TemplateDetailViews(
-			BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model), null, detailsContainer, dbc)
+		new ApplicationSourceDetailViews(
+			BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model), null, detailsContainer, dbc)
 			.createControls();
 
 		// detail resources button
@@ -586,12 +588,19 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 				.applyTo(btnDetails);
 
 		IObservableValue selectedTemplate =
-				BeanProperties.value(ITemplateListPageModel.PROPERTY_SELECTED_TEMPLATE).observe(model);
+				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model);
 		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(btnDetails))
+				.bind(WidgetProperties.visible().observe(btnDetails))
 				.notUpdatingParticipant()
 				.to(selectedTemplate)
-				.converting(new IsNotNull2BooleanConverter())
+				.converting(new Converter(Object.class, Boolean.class) {
+
+					@Override
+					public Object convert(Object fromObject) {
+						return fromObject != null && ResourceKind.TEMPLATE.equals(((IApplicationSource)fromObject).getSource().getKind());
+					}
+					
+				})
 				.in(dbc);
 		btnDetails.addSelectionListener(onDefinedResourcesClicked());
 
@@ -603,7 +612,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 	        @Override
 	        public void doubleClick(DoubleClickEvent event) {
 	            IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-	            if (hasTemplate(selection.getFirstElement())
+	            if (hasApplicationSource(selection.getFirstElement())
 	            		&& canFlipToNextPage()) {
 	            	getContainer().showPage(getNextPage());
 	            }
@@ -615,36 +624,36 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		TreeViewer viewer = new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		IListProperty childrenProperty = new MultiListProperty(
 				new IListProperty[] {
-						BeanProperties.list(ITemplateListPageModel.PROPERTY_TEMPLATES),
+						BeanProperties.list(IApplicationSourceListPageModel.PROPERTY_APP_SOURCES),
 						BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
 		ObservableListTreeContentProvider contentProvider = new ObservableListTreeContentProvider(
 				childrenProperty.listFactory(), null);
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(new ObservableTreeItemStyledCellLabelProvider());
 		viewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
-		viewer.setComparator(new TemplateComparator());
-		viewer.addFilter(new TemplateViewerFilter(templateFilterText));
+		viewer.setComparator(new ApplicationSourceComparator());
+		viewer.addFilter(new AppSourceViewerFilter(templateFilterText));
 		viewer.setInput(model);
 
 		return viewer;
 	}
 
-	private static class TemplateViewerFilter extends ViewerFilter {
+	private static class AppSourceViewerFilter extends ViewerFilter {
 
 		private Text filterText;
 
-		public TemplateViewerFilter(Text filterText) {
+		public AppSourceViewerFilter(Text filterText) {
 			this.filterText = filterText;
 		}
 
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			if (!(element instanceof ObservableTreeItem)
-					|| !(((ObservableTreeItem) element).getModel() instanceof ITemplate)) {
+					|| !(((ObservableTreeItem) element).getModel() instanceof IApplicationSource)) {
 				return true;
 			}
-			ITemplate template = (ITemplate) ((ObservableTreeItem) element).getModel();
-			return ResourceUtils.isMatching(filterText.getText(), template);
+			IApplicationSource appSource = (IApplicationSource) ((ObservableTreeItem) element).getModel();
+			return ResourceUtils.isMatching(filterText.getText(), appSource.getName(), appSource.getTags());
 		}
 	}
 
@@ -653,7 +662,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = createFileDialog(model.getLocalTemplateFileName());
+				FileDialog dialog = createFileDialog(model.getLocalAppSourceFileName());
 				String file = dialog.open();
 				setLocalTemplate(file);
 			}
@@ -675,7 +684,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ITemplate template = model.getSelectedTemplate();
+				ITemplate template = (ITemplate) model.getSelectedAppSource().getSource();
 				new ResourceSummaryDialog(getShell(),
 						template.getItems(),
 						"Template Details",
@@ -707,14 +716,14 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		};
 	}
 
-	private void loadResources(final TreeViewer templatesViewer, final ITemplateListPageModel model, final boolean closeOnCancel) {
+	private void loadResources(final TreeViewer templatesViewer, final IApplicationSourceListPageModel model, final boolean closeOnCancel) {
 		if (!model.hasConnection()) {
 			return;
 		}
 		try {
 			final boolean[] closeAfter = new boolean[]{false}; 
 			Job jobs = new JobChainBuilder(
-					new AbstractDelegatingMonitorJob("Loading projects, templates...") {
+					new AbstractDelegatingMonitorJob("Loading projects, templates, image streams...") {
 
 						@Override
 						protected IStatus doRun(IProgressMonitor monitor) {
@@ -781,23 +790,23 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 		((Composite) getControl()).layout(true, true);
 	}
 
-	public static class TemplateComparator extends ViewerComparator {
+	public static class ApplicationSourceComparator extends ViewerComparator {
 
 		@Override
 		public int compare(Viewer viewer, Object e1, Object e2) {
-			if (hasTemplate(e1) && hasTemplate(e2)) {
-				String t1 = ((ITemplate)((ObservableTreeItem)e1).getModel()).getName();
-				String t2 = ((ITemplate)((ObservableTreeItem)e2).getModel()).getName();
+			if (hasApplicationSource(e1) && hasApplicationSource(e2)) {
+				String t1 = ((IApplicationSource)((ObservableTreeItem)e1).getModel()).getName();
+				String t2 = ((IApplicationSource)((ObservableTreeItem)e2).getModel()).getName();
 				return t1.compareTo(t2);
 			}
 			return super.compare(viewer, e1, e2);
 		}
 	}
 
-	private static boolean hasTemplate(Object item) {
-		return item instanceof ITemplate ||
+	private static boolean hasApplicationSource(Object item) {
+		return item instanceof IApplicationSource ||
 			   item instanceof ObservableTreeItem &&
-			   ((ObservableTreeItem)item).getModel() instanceof ITemplate;
+			   ((ObservableTreeItem)item).getModel() instanceof IApplicationSource;
 	}
 
 	/**
@@ -873,7 +882,7 @@ public class TemplateListPage  extends AbstractOpenShiftWizardPage  {
 					}
 				} else {
 					if (selectedTemplate.getValue() == null){
-						status = ValidationStatus.cancel("Please select a server template.");
+						status = ValidationStatus.cancel("Please select an image or template.");
 						mutableTargets.add(serverTemplate);
 					} 
 				}

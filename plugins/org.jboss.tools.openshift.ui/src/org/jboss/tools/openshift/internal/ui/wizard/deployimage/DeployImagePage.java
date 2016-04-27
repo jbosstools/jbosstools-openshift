@@ -17,7 +17,6 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
-import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -71,7 +70,7 @@ import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProv
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.validator.DockerImageValidator;
-import org.jboss.tools.openshift.internal.ui.validator.ServiceNameValidator;
+import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceNameControl;
 import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 
 import com.openshift.restclient.model.IProject;
@@ -161,7 +160,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		}
 		createProjectControl(parent, dbc);
 		createImageNameControls(parent, dbc);
-		createResourceNameControls(parent, dbc);
+		new ResourceNameControl().doCreateControl(parent, dbc, model);
 	}
 
 	private SelectionAdapter onSearch(Text txtImage) {
@@ -358,46 +357,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			}
 		};
 	}
-	private void createResourceNameControls(final Composite parent, final DataBindingContext dbc) {
-		//Resource Name
-		final Label resourceNameLabel = new Label(parent, SWT.NONE);
-		resourceNameLabel.setText("Resource Name: ");
-		resourceNameLabel.setToolTipText("The name used to identify the resources that will support the deployed image.");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(resourceNameLabel);
-		final Text resourceNameText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.span(2, 1)
-			.applyTo(resourceNameText);
-		final IObservableValue resourceNameTextObservable = 
-				WidgetProperties.text(SWT.Modify).observe(resourceNameText);
-		final Binding nameBinding = ValueBindingBuilder
-				.bind(resourceNameTextObservable)
-				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_RESOURCE_NAME).observe(model))
-				.in(dbc);
-		dbc.addValidationStatusProvider(new DeployImageNameValidator(resourceNameTextObservable));
-		ControlDecorationSupport.create(
-				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		
-	}
 	
-	private static class DeployImageNameValidator extends MultiValidator{
-		
-		private ServiceNameValidator validator = new ServiceNameValidator();
-		final private IObservableValue observable;
-		DeployImageNameValidator(IObservableValue observable){
-			this.observable = observable;
-		}
-		@Override
-		protected IStatus validate() {
-			return validator.validate(observable.getValue());
-		}
-		
-	}
-
 	private void onManageProjectsClicked() {
 		try {
 			// run in job to enforce busy cursor which doesnt work otherwise
