@@ -10,11 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.util;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.mockito.Mockito;
 
@@ -25,18 +29,30 @@ import com.openshift.restclient.model.IResource;
  */
 public class ResourceMocks {
 
+	public static Connection createConnection(String host, String username) {
+		Connection connection = mock(Connection.class);
+		when(connection.getHost()).thenReturn(host);
+		when(connection.getUsername()).thenReturn(username);
+		when(connection.isDefaultHost()).thenReturn(false);
+		return connection;
+	}
+
 	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz) {
 		return createResources(numOf, clazz, null);
 	}
 
 	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz, IResourceVisitor<R> visitor) {
-		ArrayList<R> resources = new ArrayList<>(numOf);
+		List<R> resources = new ArrayList<>(numOf);
 		
 		for (int i = 0; i< numOf; i++) {
 			R mock = createResource(clazz, visitor);
 			resources.add(mock);
 		}
 		return resources;
+	}
+
+	public static <R extends IResource> R createResource(Class<R> clazz) {
+		return createResource(clazz, null);
 	}
 
 	public static <R extends IResource> R createResource(Class<R> clazz, IResourceVisitor<R> visitor) {
@@ -56,5 +72,4 @@ public class ResourceMocks {
 	public static interface IResourceVisitor<R extends IResource> {
 		public void visit(R resource);
 	}
-	
 }

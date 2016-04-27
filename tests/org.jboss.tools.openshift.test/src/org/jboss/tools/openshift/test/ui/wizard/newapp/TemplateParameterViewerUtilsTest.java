@@ -6,7 +6,7 @@
  *
  * Contributors: Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.test.ui.application;
+package org.jboss.tools.openshift.test.ui.wizard.newapp;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -23,7 +23,7 @@ import com.openshift.restclient.model.template.IParameter;
  * @author jeff.cantrill
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TemplateParameterColumnLabelProviderTest {
+public class TemplateParameterViewerUtilsTest {
 	
 	@Mock
 	private IParameter param;
