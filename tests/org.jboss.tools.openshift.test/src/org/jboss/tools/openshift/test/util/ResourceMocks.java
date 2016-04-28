@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
@@ -53,18 +54,22 @@ public class ResourceMocks {
 					service -> when(service.getName()).thenReturn("project2-app3"))
 	};
 
+	public static final String PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI = "git@gitrepo.io/somegroup/someproject.git";
+
 	public static final IBuildConfig[] PROJECT2_BUILDCONFIGS = new IBuildConfig[] {
-			createResource(IBuildConfig.class,
-					// needs to match service name
-					service -> when(service.getName()).thenReturn("project2-app2")),
-			createResource(IBuildConfig.class,
-					// needs to match service name
-					service -> when(service.getName()).thenReturn("project2-app3"))
+			// needs to match service name
+			createBuildConfig("project2-app1", null, null, null),
+			// needs to match service name
+			createBuildConfig("project2-app2", null, null, PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI),
+			// needs to match service name
+			createBuildConfig("project2-app3", null, null, null),
+			// needs to match service name
+			createBuildConfig("project2-app4", null, null, null)
 	};
 
 	public static final IRoute[] PROJECT2_ROUTES = new IRoute[] {
 			createResource(IRoute.class,
-					service -> when(service.getName()).thenReturn("project3-app2")),
+					route -> when(route.getName()).thenReturn("project3-app2")),
 			createResource(IRoute.class,
 					service -> when(service.getName()).thenReturn("project3-app3"))
 	};
@@ -81,7 +86,8 @@ public class ResourceMocks {
 		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(PROJECTS));
 		when(PROJECTS[1].getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT2_SERVICES));
 		when(PROJECTS[2].getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT3_SERVICES));
-		when(connection.getResources(ResourceKind.ROUTE, PROJECTS[1].getName())).thenReturn(Arrays.asList(PROJECT2_BUILDCONFIGS));
+		when(connection.getResources(ResourceKind.BUILD_CONFIG, PROJECTS[1].getName())).thenReturn(Arrays.asList(PROJECT2_BUILDCONFIGS));
+		when(connection.getResources(ResourceKind.ROUTE, PROJECTS[1].getName())).thenReturn(Arrays.asList(PROJECT2_ROUTES));
 		return connection;
 	}
 
@@ -92,6 +98,24 @@ public class ResourceMocks {
 		when(connection.getUsername()).thenReturn(username);
 		when(connection.isDefaultHost()).thenReturn(false);
 		return connection;
+	}
+	
+	public static IBuildConfig createBuildConfig(String buildOutputReferenceKind, String buildOutputReferenceName) {
+		return createBuildConfig(null, buildOutputReferenceKind, buildOutputReferenceName, null);
+	}
+
+	public static IBuildConfig createBuildConfig(String name, String buildOutputReferenceKind, String buildOutputReferenceName, String buildSourceURI) {
+		IBuildConfig bc = mock(IBuildConfig.class);
+		
+		IObjectReference reference = mock(IObjectReference.class);
+		when(reference.getKind()).thenReturn(buildOutputReferenceKind);
+		when(reference.getName()).thenReturn(buildOutputReferenceName);
+		when(bc.getBuildOutputReference()).thenReturn(reference);
+		
+		when(bc.getName()).thenReturn(name);
+		when(bc.getSourceURI()).thenReturn(buildSourceURI);
+
+		return bc;
 	}
 
 	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz) {

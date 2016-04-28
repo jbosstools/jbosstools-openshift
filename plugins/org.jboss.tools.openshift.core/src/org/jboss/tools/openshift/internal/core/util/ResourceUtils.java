@@ -45,7 +45,7 @@ public class ResourceUtils {
 
 	public static final String DOCKER_IMAGE_KIND = "DockerImage";
 	public static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
-	private static final String DEPLOYMENT_CONFIG_KEY = "deploymentconfig";
+	public static final String DEPLOYMENT_CONFIG_KEY = "deploymentconfig";
 
 	/**
 	 * Returns <code>true</code> if the given resource contains the given text
@@ -192,6 +192,9 @@ public class ResourceUtils {
 	 * @see #imageRef(IBuildConfig)
 	 */
 	public static List<String> getImageRefs(List<IBuildConfig> buildConfigs) {
+		if (buildConfigs == null) {
+			return null;
+		}
 		return buildConfigs.stream()
 				.map(bc -> imageRef(bc))
 				.collect(Collectors.toList());
@@ -205,12 +208,14 @@ public class ResourceUtils {
 	 * @return
 	 */
 	public static String imageRef(IBuildConfig config) {
-		if(config != null) {
+		if (config != null) {
 			IObjectReference outputRef = config.getBuildOutputReference();
-			switch(outputRef.getKind()) {
-				case ResourceKind.IMAGE_STREAM_TAG:
-				case IMAGE_STREAM_IMAGE_KIND:
+			if (outputRef != null) {
+				String kind = outputRef.getKind();
+				if (ResourceKind.IMAGE_STREAM_TAG.equals(kind) 
+						|| IMAGE_STREAM_IMAGE_KIND.equals(kind)) {
 					return outputRef.getName();
+				}
 			}
 		}
 		return "";
@@ -265,6 +270,7 @@ public class ResourceUtils {
 	}
 
 	/**
+	 * 
 	 * Returns the routes from the given routes that match the given service.
 	 * 
 	 * @param service
@@ -301,7 +307,6 @@ public class ResourceUtils {
 		return false;
 	}
 
-
 	/**
 	 * Returns build configs of the given list of build configs
 	 * that match the given service.
@@ -319,7 +324,7 @@ public class ResourceUtils {
 				|| buildConfigs.isEmpty()) {
 			return Collections.emptyList();
 		}
-		
+
 		return buildConfigs.stream()
 				.filter(bc -> areRelated(bc, service))
 				.collect(Collectors.toList());
@@ -383,7 +388,7 @@ public class ResourceUtils {
 				|| workspaceProjects.isEmpty()) {
 			return null;
 		}
-		
+
 		return workspaceProjects.stream()
 			// only git shared projects
 			.filter(project -> EGitUtils.isSharedWithGit(project))
@@ -407,7 +412,7 @@ public class ResourceUtils {
 		return imageStreamImport.getImageStatus().stream()
 				.filter(s -> s.isSuccess()).findFirst().isPresent();
 	}
-	
+
 	public static String getDeploymentConfigNameForPods(List<IPod> pods) {
 		if (pods == null
 				|| pods.isEmpty()) {

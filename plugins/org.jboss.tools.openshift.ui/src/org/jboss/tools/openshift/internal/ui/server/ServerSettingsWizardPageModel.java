@@ -138,12 +138,12 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		return this.deployProject;
 	}
 
-	protected String updateSourcePath(String sourcePath, org.eclipse.core.resources.IProject newDeployProject, org.eclipse.core.resources.IProject oldDeployProject) {
+	protected String updateSourcePath(String sourcePath, org.eclipse.core.resources.IProject newDeployProject, 
+			org.eclipse.core.resources.IProject oldDeployProject) {
 		if ((StringUtils.isEmpty(sourcePath)
 				|| newDeployProject != oldDeployProject)
 				&& ProjectUtils.isAccessible(newDeployProject)) {
-			String projectPath = newDeployProject.getFullPath().toString();
-			sourcePath = VariablesHelper.addWorkspacePrefix(projectPath);
+			sourcePath = VariablesHelper.addWorkspacePrefix(newDeployProject.getFullPath().toString());
 		}
 		firePropertyChange(PROPERTY_SOURCE_PATH, this.sourcePath, this.sourcePath = sourcePath);
 		return sourcePath;
@@ -209,7 +209,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		if (service == null) {
 			return null;
 		}
-		List<IBuildConfig> buildConfigs = getBuildConfigs(getOpenShiftProject(service));
+		IProject openShiftProject = getOpenShiftProject(service);
+		List<IBuildConfig> buildConfigs = getBuildConfigs(openShiftProject);
 		IBuildConfig buildConfig = ResourceUtils.getBuildConfigForService(service, buildConfigs);
 		return ResourceUtils.getWorkspaceProjectForBuildConfig(buildConfig, getProjects());
 	}

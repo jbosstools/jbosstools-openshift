@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2006, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2011, Andre Dietisheim <adietish@redhat.com>
+ * Copyright (C) 2011-2016, Andre Dietisheim <adietish@redhat.com>
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
