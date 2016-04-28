@@ -5,7 +5,7 @@
          point="org.eclipse.ui.trace.traceComponents">
       <component
             id="org.jboss.tools.openshift.client"
-            label="OpenShift client">
+            label="OpenShift 3 client">
          <bundle
                consumed="true"
                name="org.jboss.tools.openshift.client">
