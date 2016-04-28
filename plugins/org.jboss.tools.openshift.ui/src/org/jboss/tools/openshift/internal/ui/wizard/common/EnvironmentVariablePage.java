@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.common;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -49,6 +51,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.KeyValueWizard;
 import org.jboss.tools.openshift.internal.common.ui.wizard.KeyValueWizardModelBuilder;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.ui.validator.EnvironmentVarKeyValidator;
+import org.jboss.tools.openshift.internal.ui.wizard.deployimage.IDeploymentConfigPageModel;
 
 /**
  * Base for adding env variable section to a page
@@ -62,6 +65,9 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 	private IEnvironmentVariablesPageModel model;
 	private TableViewer envViewer;
 	private Label lblEnvVars;
+
+	protected int heightScale = 30;
+	protected Composite envTableContainer;
 
 	protected EnvironmentVariablePage(String title, String description, String name, IWizard wizard, IEnvironmentVariablesPageModel model) {
 		super(title, description, name, wizard);
@@ -86,59 +92,104 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 		GridLayoutFactory.fillDefaults()
 			.numColumns(2).margins(6, 6).applyTo(envContainer);
 		
-		lblEnvVars = new Label(envContainer, SWT.NONE);
-		lblEnvVars.setText(TABLE_LABEL + ":");
+		Label lblEnvVars = new Label(envContainer, SWT.NONE);
+		lblEnvVars.setText("Environment variables:");
 		lblEnvVars.setToolTipText("Environment variables are passed to running pods for consumption by the pod containers");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL)
 			.span(2,1)
 			.applyTo(lblEnvVars);
-		Composite tableContainer = new Composite(envContainer, SWT.NONE);
+		Composite tableContainer = envTableContainer = new Composite(envContainer, SWT.NONE);
 		
 		this.envViewer = createEnvVarTable(tableContainer);
 		GridDataFactory.fillDefaults()
-			.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+			.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT, 150).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(envViewer))
-				.to(BeanProperties.value(IEnvironmentVariablesPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE)
+				.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE)
 				.observe(model))
 				.in(dbc);
 		envViewer.setContentProvider(new ObservableListContentProvider());
 		envViewer.setInput(BeanProperties.list(
-				IEnvironmentVariablesPageModel.PROPERTY_ENVIRONMENT_VARIABLES).observe(model));
+				IDeploymentConfigPageModel.PROPERTY_ENVIRONMENT_VARIABLES).observe(model));
 		
 		Button addButton = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).applyTo(addButton);
+			.align(SWT.FILL, SWT.BEGINNING).applyTo(addButton);
 		addButton.setText("Add...");
 		addButton.setToolTipText("Add an environment variable declared by the docker image.");
 		addButton.addSelectionListener(onAdd());
 		UIUtils.setDefaultButtonWidth(addButton);
-
+		heightScale = addButton.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		
 		Button editExistingButton = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
+			.align(SWT.FILL, SWT.BEGINNING).applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
 		editExistingButton.setToolTipText("Edit the environment variable declared by the docker image.");
 		editExistingButton.addSelectionListener(new EditHandler());
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(editExistingButton))
 				.notUpdatingParticipant()
-				.to(BeanProperties.value(IEnvironmentVariablesPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE).observe(model))
+				.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE).observe(model))
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
 		UIUtils.setDefaultButtonWidth(editExistingButton);
+		
+		Button btnReset = new Button(envContainer, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.BEGINNING).applyTo(btnReset);
+		btnReset.setText("Reset");
+		btnReset.setToolTipText("Reset to the value declared by the docker image.");
+		btnReset.addSelectionListener(onResetEnvVar());
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(btnReset))
+					.notUpdatingParticipant()
+					.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE).observe(model))
+				.converting(new IsNotNull2BooleanConverter() {
+
+					@Override
+					public Object convert(Object fromObject) {
+						Boolean notNull = (Boolean) super.convert(fromObject);
+						return notNull && !((EnvironmentVariable)fromObject).isNew() && model.isEnvironmentVariableModified((EnvironmentVariable)fromObject);
+					}
+					
+				})
+				.in(dbc);
+		UIUtils.setDefaultButtonWidth(btnReset);
+
+		Button btnResetAll = new Button(envContainer, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.BEGINNING).applyTo(btnResetAll);
+		btnResetAll.setText("Reset All");
+		btnResetAll.setToolTipText("Reset all variables to the value declared by the docker image.");
+		btnResetAll.addSelectionListener(onResetEnvVars());
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(btnResetAll))
+					.notUpdatingParticipant()
+					//This may look like a hack, but this property do change at each change to variables, so that button refresh will be consistent. 
+					.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE).observe(model))
+				.converting(new IsNotNull2BooleanConverter() {
+
+					@Override
+					public Object convert(Object fromObject) {
+						List<EnvironmentVariable> vars = model.getEnvironmentVariables();
+						return vars != null && !vars.isEmpty() && vars.stream().anyMatch(v -> !v.isNew() && model.isEnvironmentVariableModified(v));
+					}
+
+				})
+				.in(dbc);
+		UIUtils.setDefaultButtonWidth(btnResetAll);
 
 		Button btnRemove = new Button(envContainer, SWT.PUSH);
 		GridDataFactory.fillDefaults()
-		.align(SWT.FILL, SWT.FILL).applyTo(btnRemove);
+		.align(SWT.FILL, SWT.BEGINNING).applyTo(btnRemove);
 		btnRemove.setText("Remove");
 		btnRemove.setToolTipText("Remove the environment variable added here.");
 		btnRemove.addSelectionListener(onRemoveEnvVar());
 		ValueBindingBuilder
 			.bind(WidgetProperties.enabled().observe(btnRemove))
 			.notUpdatingParticipant()
-			.to(BeanProperties.value(IEnvironmentVariablesPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE).observe(model))
+			.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE).observe(model))
 			.converting(new IsNotNull2BooleanConverter() {
 				
 				@Override
@@ -150,91 +201,44 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 			})
 			.in(dbc);
 		UIUtils.setDefaultButtonWidth(btnRemove);
-		
-		Button btnReset = new Button(envContainer, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).applyTo(btnReset);
-		btnReset.setText("Reset");
-		btnReset.setToolTipText("Reset to the value declared by the docker image.");
-		btnReset.addSelectionListener(onResetEnvVar());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(btnReset))
-					.notUpdatingParticipant()
-					.to(BeanProperties.value(IEnvironmentVariablesPageModel.PROPERTY_SELECTED_ENVIRONMENT_VARIABLE).observe(model))
-				.converting(new IsNotNull2BooleanConverter() {
-
-					@Override
-					public Object convert(Object fromObject) {
-						Boolean notNull = (Boolean) super.convert(fromObject);
-						return notNull && !((EnvironmentVariable)fromObject).isNew();
-					}
-					
-				})
-				.in(dbc);
-		UIUtils.setDefaultButtonWidth(btnReset);
-
-		
 	}
 	
-	protected TableViewer createEnvVarTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		this.envViewer = new TableViewerBuilder(table, tableContainer)
-				.column(new IColumnLabelProvider<IKeyValueItem>() {
-					@Override
-					public String getValue(IKeyValueItem label) {
-						return label.getKey();
-					}
-				})
-				.name("Name").align(SWT.LEFT).weight(2).minWidth(75).buildColumn()
-				.column(new IColumnLabelProvider<IKeyValueItem>() {
-
-					@Override
-					public String getValue(IKeyValueItem label) {
-						return label.getValue();
-					}
-				
-				})
-				.name("Value").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.buildViewer();
-		envViewer.setComparator(new ViewerComparator() {
-
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				IKeyValueItem first = (IKeyValueItem) e1;
-				IKeyValueItem other = (IKeyValueItem) e2;
-				return first.getKey().compareTo(other.getKey());
-			}
-			
-		});
-		envViewer.addDoubleClickListener(new EditHandler());
-		return envViewer;
-	}
-	
-	private SelectionListener onAdd() {
+	private SelectionListener onResetEnvVar() {
 		return new SelectionAdapter() {
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Set<String> usedKeys = model.getEnvironmentVariables().stream().map(v -> v.getKey()).collect(Collectors.toSet());
-				IKeyValueWizardModel<KeyValueItem> dialogModel = new KeyValueWizardModelBuilder<KeyValueItem>()
-						.windowTitle(ENVIRONMENT_VARIABLE_LABEL)
-						.title("Add " + ENVIRONMENT_VARIABLE_LABEL)
-						.description(NLS.bind("Add an {0}.", ENVIRONMENT_VARIABLE_LABEL.toLowerCase()))
-						.keyLabel("Name")
-						.groupLabel(ENVIRONMENT_VARIABLE_LABEL)
-						.keyAfterConvertValidator(new EnvironmentVarKeyValidator(usedKeys))
-						.build();
-				OkCancelButtonWizardDialog dialog =
-						new OkCancelButtonWizardDialog(getShell(),
-								new KeyValueWizard<>(dialogModel));
-				if(OkCancelButtonWizardDialog.OK == dialog.open()) {
-					model.addEnvironmentVariable(dialogModel.getKey(), dialogModel.getValue());
+				EnvironmentVariable envVar = UIUtils.getFirstElement(envViewer.getSelection(), EnvironmentVariable.class);
+				if(MessageDialog.openQuestion(getShell(), "Reset " + ENVIRONMENT_VARIABLE_LABEL, 
+						NLS.bind("Are you sure you want to reset the {0} {1}?", ENVIRONMENT_VARIABLE_LABEL.toLowerCase(), envVar.getKey()))) {
+					String key = envVar.getKey();
+					model.resetEnvironmentVariable(envVar);
+					selectEnvVarByKey(key);
 				}
 			}
+
 		};
 	}
+
+	private SelectionListener onResetEnvVars() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				List<EnvironmentVariable> vars = model.getEnvironmentVariables();
+				EnvironmentVariable envVar = UIUtils.getFirstElement(envViewer.getSelection(), EnvironmentVariable.class);
+				if(MessageDialog.openQuestion(getShell(), "Reset " + ENVIRONMENT_VARIABLE_LABEL, 
+						NLS.bind("Are you sure you want to reset all {0}s?", ENVIRONMENT_VARIABLE_LABEL.toLowerCase()))) {
+					vars.stream().forEach(v -> model.resetEnvironmentVariable(v));
+					if(envVar != null) {
+						selectEnvVarByKey(envVar.getKey());
+					}
+				}
+			}
+			
+		};
+	}
+
 	private SelectionListener onRemoveEnvVar() {
 		return new SelectionAdapter() {
 			
@@ -250,22 +254,7 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 			
 		};
 	}
-	private SelectionListener onResetEnvVar() {
-		return new SelectionAdapter() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				EnvironmentVariable envVar = UIUtils.getFirstElement(envViewer.getSelection(), EnvironmentVariable.class);
-				if(MessageDialog.openQuestion(getShell(), "Reset " + ENVIRONMENT_VARIABLE_LABEL, 
-						NLS.bind("Are you sure you want to reset the {0} {1}?", ENVIRONMENT_VARIABLE_LABEL.toLowerCase(), envVar.getKey()))) {
-					model.resetEnvironmentVariable(envVar);
-					envViewer.refresh();
-				}
-			}
-			
-		};
-	}
-	
 	private class EditHandler extends SelectionAdapter implements IDoubleClickListener {
 		@Override
 		public void widgetSelected(SelectionEvent e) {
@@ -295,8 +284,86 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 							new KeyValueWizard<>(var, dialogModel));
 			if(OkCancelButtonWizardDialog.OK == dialog.open()) {
 				model.updateEnvironmentVariable(var, dialogModel.getKey(), dialogModel.getValue());
+				model.resetEnvironmentVariable(var);
+				selectEnvVarByKey(dialogModel.getKey());
 			}
 		}
 		
 	}
+
+	private SelectionListener onAdd() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Set<String> usedKeys = model.getEnvironmentVariables().stream().map(v -> v.getKey()).collect(Collectors.toSet());
+				IKeyValueWizardModel<KeyValueItem> dialogModel = new KeyValueWizardModelBuilder<KeyValueItem>()
+						.windowTitle(ENVIRONMENT_VARIABLE_LABEL)
+						.title("Add " + ENVIRONMENT_VARIABLE_LABEL)
+						.description(NLS.bind("Add an {0}.", ENVIRONMENT_VARIABLE_LABEL.toLowerCase()))
+						.keyLabel("Name")
+						.groupLabel(ENVIRONMENT_VARIABLE_LABEL)
+						.keyAfterConvertValidator(new EnvironmentVarKeyValidator(usedKeys))
+						.build();
+				OkCancelButtonWizardDialog dialog =
+						new OkCancelButtonWizardDialog(getShell(),
+								new KeyValueWizard<>(dialogModel));
+				if(OkCancelButtonWizardDialog.OK == dialog.open()) {
+					model.addEnvironmentVariable(dialogModel.getKey(), dialogModel.getValue());
+					selectEnvVarByKey(dialogModel.getKey());
+				}
+			}
+		};
+	}
+
+	private void selectEnvVarByKey(String key) {
+		EnvironmentVariable envVar = model.getEnvironmentVariable(key);
+		if(envVar != null) {
+			envViewer.setSelection(new StructuredSelection(envVar));
+			envViewer.reveal(envVar);
+		}
+	}
+
+	protected TableViewer createEnvVarTable(Composite tableContainer) {
+		Table table =
+				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		table.setLinesVisible(true);
+		table.setHeaderVisible(true);
+		this.envViewer = new TableViewerBuilder(table, tableContainer)
+				.column(new IColumnLabelProvider<IKeyValueItem>() {
+					@Override
+					public String getValue(IKeyValueItem label) {
+						return label.getKey();
+					}
+					@Override
+					public boolean isModified(IKeyValueItem e) {
+						return ((EnvironmentVariable)e).isNew();
+					}
+				})
+				.name("Name").align(SWT.LEFT).weight(2).minWidth(75).buildColumn()
+				.column(new IColumnLabelProvider<IKeyValueItem>() {
+					@Override
+					public String getValue(IKeyValueItem label) {
+						return label.getValue();
+					}
+					@Override
+					public boolean isModified(IKeyValueItem e) {
+						return model.isEnvironmentVariableModified((EnvironmentVariable)e);
+					}
+				})
+				.name("Value").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
+				.buildViewer();
+		envViewer.setComparator(new ViewerComparator() {
+
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				IKeyValueItem first = (IKeyValueItem) e1;
+				IKeyValueItem other = (IKeyValueItem) e2;
+				return first.getKey().compareTo(other.getKey());
+			}
+			
+		});
+		envViewer.addDoubleClickListener(new EditHandler());
+		return envViewer;
+	}
+
 }

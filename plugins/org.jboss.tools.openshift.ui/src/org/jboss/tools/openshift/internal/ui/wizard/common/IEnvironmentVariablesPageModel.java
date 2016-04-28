@@ -27,9 +27,12 @@ public interface IEnvironmentVariablesPageModel {
 	
 	void setSelectedEnvironmentVariable(EnvironmentVariable envVar);
 	EnvironmentVariable getSelectedEnvironmentVariable();
+	EnvironmentVariable getEnvironmentVariable(String key);
+	boolean isEnvironmentVariableModified(EnvironmentVariable envVar);
 	
 	void removeEnvironmentVariable(EnvironmentVariable envVar);
 	void resetEnvironmentVariable(EnvironmentVariable envVar);
 	void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value);
 	void addEnvironmentVariable(String key, String value);
+	
 }

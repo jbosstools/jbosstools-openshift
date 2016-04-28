@@ -51,8 +51,6 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 	private TableViewer dataViewer;
 
 	//Layout
-	private int heightScale = 30;
-	private Composite envTableContainer;
 	private Composite volTableContainer;
 
 	public DeploymentConfigPage(IWizard wizard, IDeploymentConfigPageModel model) {
@@ -109,19 +107,21 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 
 				int h = parent.getSize().y;
 				if(h > 0) {
-					int table = heightScale * 4 + 30; //Minimum height that can be assigned to both tables.
+					int envtable = heightScale * 5 + 30; //Minimum height that can be assigned to envVars table.
+					int voltable = heightScale * 4 + 24; //Minimum height that can be assigned to volumes table.
 					int replicas = heightScale * 7; //Preferred height for bottom.
-					int all = 2 * table + replicas;
+					int all = envtable + voltable + replicas;
 					int minVolume = heightScale * 2;
 	
-					int hEnvVar = table;
-					int hVolumes = table;
+					int hEnvVar = envtable;
+					int hVolumes = voltable;
 					if(h > all) {
-						//In this case the bottom gets its preferred size and the remainder is evenly shared by tables.
-						hEnvVar = hVolumes = (h - replicas) / 2;
-					} else if(h > table + replicas + minVolume) {
+						//In this case the bottom gets its preferred size and the remainder is proportionally shared by tables.
+						hEnvVar = (h - replicas) * envtable / (envtable + voltable);
+						hVolumes = (h - replicas) * voltable / (envtable + voltable);
+					} else if(h > envtable + replicas + minVolume) {
 						//Shrink volumes table, no use to shrink env-var table because of buttons.
-						hVolumes = h - table - replicas;
+						hVolumes = h - envtable - replicas;
 					} else {
 						//At a smaller available height, all components will be in lack of height evenly.
 						hVolumes = minVolume;
@@ -137,7 +137,6 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 			}
 		});
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private void createDataVolumeControl(Composite parent, DataBindingContext dbc) {

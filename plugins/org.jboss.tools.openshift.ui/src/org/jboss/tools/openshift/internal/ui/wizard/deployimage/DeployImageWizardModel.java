@@ -286,10 +286,20 @@ public class DeployImageWizardModel
 	public List<EnvironmentVariable> getEnvironmentVariables() {
 		return envModel.getEnvironmentVariables();
 	}
+
+	@Override
+	public boolean isEnvironmentVariableModified(EnvironmentVariable envVar) {
+		return envModel.isEnvironmentVariableModified(envVar);
+	}
 	
 	@Override
 	public void setEnvironmentVariables(List<EnvironmentVariable> envVars) {
 		envModel.setEnvironmentVariables(envVars);
+	}
+
+	@Override
+	public EnvironmentVariable getEnvironmentVariable(String key) {
+		return envModel.getEnvironmentVariable(key);
 	}
 
 	@Override

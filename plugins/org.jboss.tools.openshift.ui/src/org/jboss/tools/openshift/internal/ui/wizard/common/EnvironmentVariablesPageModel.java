@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
@@ -99,5 +100,14 @@ public class EnvironmentVariablesPageModel extends ObservablePojo implements IEn
 		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, old, Collections.unmodifiableList(environmentVariables));
 	}
 
+	@Override
+	public boolean isEnvironmentVariableModified(EnvironmentVariable envVar) {
+		return envVar.isNew() || (imageEnvVars.containsKey(envVar.getKey()) && !Objects.equals(imageEnvVars.get(envVar.getKey()), envVar.getValue()));
+	}
+	
+	@Override
+	public EnvironmentVariable getEnvironmentVariable(String key) {
+		return environmentVariables.stream().filter(var -> key.equals(var.getKey())).findAny().orElse(null);
+	}
 
 }

@@ -23,6 +23,11 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.ToolTip;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 
@@ -34,6 +39,8 @@ public class TableViewerBuilder {
 	private TableViewer viewer;
 	private TableColumnLayout tableLayout;
 	
+	Font italic;
+
 	public TableViewerBuilder(Table table, Composite tableContainer) {
 		this(new TableViewer(table), tableContainer);
 	}
@@ -43,6 +50,15 @@ public class TableViewerBuilder {
 		viewer.setComparer(new EqualityComparer());
 		this.tableLayout = new TableColumnLayout();
 		tableContainer.setLayout(tableLayout);
+		FontData fd = viewer.getTable().getFont().getFontData()[0];
+		fd.setStyle(SWT.ITALIC);
+		italic = new Font(null, fd);
+		viewer.getTable().addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				italic.dispose();
+			}
+		});
 	}
 
 	public TableViewerBuilder contentProvider(IStructuredContentProvider contentProvider) {
@@ -146,12 +162,15 @@ public class TableViewerBuilder {
 			if (labelProvider != null) {
 				column.setLabelProvider(new CellLabelProvider() {
 
+					@SuppressWarnings("unchecked")
 					@Override
 					public void update(ViewerCell cell) {
 						if (labelProvider != null) {
-							@SuppressWarnings("unchecked")
 							String cellValue = labelProvider.getValue((E) cell.getElement());
 							cell.setText(cellValue);
+							if(labelProvider.isModified((E) cell.getElement())) {
+								cell.setFont(italic);
+							}
 						}
 					}
 
@@ -183,6 +202,9 @@ public class TableViewerBuilder {
 
 	public static interface IColumnLabelProvider<E> {
 		public String getValue(E e);
+		default public boolean isModified(E e) {
+			return false;
+		}
 	}
 	
 	/**

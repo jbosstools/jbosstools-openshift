@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.wizard;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
@@ -113,6 +114,13 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 		if(initialKey != null && !initialKey.isEmpty()) {
 			DataChangedValidator validator = new DataChangedValidator(keyTextObservable, valueTextObservable);
 			dbc.addValidationStatusProvider(validator);
+		}
+
+		if(!model.isKeyEditable()) {
+			valueText.forceFocus();
+			if(!StringUtils.isEmpty(valueText.getText())) {
+				valueText.setSelection(0, valueText.getText().length());
+			}
 		}
 	}
 
