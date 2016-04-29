@@ -17,6 +17,7 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -139,7 +140,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		
 		final ImageValidatorJob imageValidator = new ImageValidatorJob("Looking-up the selected Docker image...");
 		try {
-			final IStatus validatorJobStatus = WizardUtils.runInWizard(imageValidator, getContainer());
+			final IStatus validatorJobStatus = WizardUtils.runInWizard(imageValidator, getContainer(), getDataBindingContext());
 			if (!validatorJobStatus.isOK()) {
 				MessageDialog.openError(getShell(), "Error",
 						"No Docker image named '" + model.getImageName() + "' could be found.");
@@ -208,20 +209,14 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		connectionViewer.setInput(
 				BeanProperties.list(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTIONS).observe(model));
 		
+		IObservableValue dockerConnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION)
+				.observe(model);
+		DockerConnectionStatusProvider validator = new DockerConnectionStatusProvider(dockerConnectionObservable);
 		IObservableValue selectedConnectionObservable = ViewerProperties.singleSelection().observe(connectionViewer);
 		Binding selectedConnectionBinding = 
 			ValueBindingBuilder.bind(selectedConnectionObservable)
 			.converting(new ObservableTreeItem2ModelConverter(IDockerConnection.class))
-			.validatingAfterConvert(new IValidator() {
-				
-				@Override
-				public IStatus validate(Object value) {
-					if (value instanceof IDockerConnection) {
-						return ValidationStatus.ok();
-					}
-					return ValidationStatus.cancel("Please choose Docker connection.");
-				}
-			})
+			.validatingAfterConvert(validator)
 			.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION)
 			.observe(model))
 			.in(dbc);
@@ -233,7 +228,31 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
             .align(SWT.LEFT, SWT.CENTER).indent(8, 0)
             .applyTo(newDockerConnectionLink);
         StyledTextUtils.emulateLinkAction(newDockerConnectionLink, r->onNewDockerConnectionClicked());
+
+        dbc.addValidationStatusProvider(validator);
+	}
+
+	@SuppressWarnings("rawtypes")
+	class DockerConnectionStatusProvider extends MultiValidator implements IValidator {
+		IObservableValue dockerConnectionObservable;
+
+		DockerConnectionStatusProvider(IObservableValue dockerConnectionObservable) {
+			this.dockerConnectionObservable = dockerConnectionObservable;
 		}
+
+		@Override
+		public IStatus validate(Object value) {
+			if (value instanceof IDockerConnection) {
+				return ValidationStatus.ok();
+			}
+			return ValidationStatus.cancel("Please choose Docker connection.");
+		}
+
+		@Override
+		protected IStatus validate() {
+			return validate(dockerConnectionObservable.getValue());
+		}
+	}
 	
 	private void createProjectControl(Composite parent, DataBindingContext dbc) {
 		Label lblProject = new Label(parent, SWT.NONE);
@@ -385,7 +404,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 					}
 					return Status.OK_STATUS;
 				}
-			}, getContainer());
+			}, getContainer(), getDataBindingContext());
 		} catch (InvocationTargetException | InterruptedException e) {
 			// swallow intentionnally
 		}
@@ -408,14 +427,14 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
                     // set docker connection to reflect changes that happened in
                     // docker connection wizard
                     if (Dialog.OK == result) {
-                        IDockerConnection dockerConnection = newDockerConnectionWizard.getDockerConnection();
-                        if (dockerConnection != null) {
-                            model.setDockerConnection(dockerConnection);
-                        }
+                    	IDockerConnection dockerConnection = newDockerConnectionWizard.getDockerConnection();
+                    	if(dockerConnection != null) {
+                    		model.setDockerConnection(dockerConnection);
+                    	}
                     }
                     return Status.OK_STATUS;
                 }
-            }, getContainer());
+            }, getContainer(), getDatabindingContext());
         } catch (InvocationTargetException | InterruptedException e) {
             OpenShiftUIActivator.getDefault().getLogger().logError(e);
         }
