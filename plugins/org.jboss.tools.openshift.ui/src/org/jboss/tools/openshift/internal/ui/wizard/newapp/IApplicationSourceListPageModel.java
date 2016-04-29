@@ -13,10 +13,8 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 import java.util.List;
 
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
-
-import com.openshift.restclient.model.IProject;
+import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
 
 /**
  * Page model that allows retrieval and selection of templates and imagestreams
@@ -26,22 +24,14 @@ import com.openshift.restclient.model.IProject;
  * @author jeff.cantrill
  *
  */
-public interface IApplicationSourceListPageModel extends IConnectionAware<Connection> {
+public interface IApplicationSourceListPageModel extends IProjectPageModel<Connection> {
 	
-	static final String PROPERTY_PROJECT = "project";
-	static final String PROPERTY_PROJECT_ITEMS = "projectItems";
 	static final String PROPERTY_SELECTED_APP_SOURCE = "selectedAppSource";
 	static final String PROPERTY_APP_SOURCES = "appSources";
 	static final String PROPERTY_SERVER_APP_SOURCE = "serverAppSource";
 	static final String PROPERTY_LOCAL_APP_SOURCE_FILENAME = "localAppSourceFileName";
 	static final String PROPERTY_USE_LOCAL_APP_SOURCE = "useLocalAppSource";
 	static final String PROPERTY_ECLIPSE_PROJECT = "eclipseProject";
-	
-	/**
-	 * Loads the resources for the given connection (in this model) from the server. Should be
-	 * called from a job (so that UI wont freeze)
-	 */
-	void loadResources();
 	
 	/**
 	 * Sets the selected server app source
@@ -93,28 +83,6 @@ public interface IApplicationSourceListPageModel extends IConnectionAware<Connec
 	 */
 	String getLocalAppSourceFileName();
 	
-	/**
-	 * The OpenShift project to associate with the
-	 * new microservice
-	 * 
-	 * @param project
-	 */
-	void setProject(IProject project);
-
-	/**
-	 * 
-	 * @return
-	 */
-	IProject getProject();
-	
-	/**
-	 * The collection of observable projects
-	 * @return
-	 */
-	List<ObservableTreeItem> getProjectItems();
-
-	boolean hasProjects();
-
 	/**
 	 * The collection of observable application sources from
 	 * which a new app can be created (e.g. template, imagestream)
