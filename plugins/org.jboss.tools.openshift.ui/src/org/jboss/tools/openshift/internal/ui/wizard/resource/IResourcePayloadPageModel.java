@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.resource;
 
+import org.jboss.tools.common.core.validation.UrlValidator;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
 
@@ -18,30 +19,24 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
  *
  */
 public interface IResourcePayloadPageModel extends IProjectPageModel<IConnection> {
-    public static final String PROPERTY_LOCAL_SOURCE_FILENAME = "localSourceFileName";
-    public static final String PROPERTY_REMOTE_SOURCE_URL = "remoteSourceURL";
-    public static final String PROPERTY_SOURCE_TEXT = "sourceText";
-    public static final String PROPERTY_SOURCE_TYPE = "sourceType";
+    public static final String PROPERTY_SOURCE = "source";
     
-    public static enum SourceType {
-        LOCAL,
-        REMOTE,
-        TEXT
-    }
+    /*
+     * An UrlValidator that recognize strings as urls with http, https, ftp and file schemes.
+     */
+    public static final UrlValidator URL_VALIDATOR = new UrlValidator(new String[] {"http", "https", "ftp", "file"});
+
+    /**
+     * Set the source. The source can be a file path or an URL.
+     * 
+     * @param source the source
+     */
+    void setSource(String source);
     
-    void setLocalSourceFileName(String localSourceFileName);
-    
-    String getLocalSourceFileName();
-    
-    void setRemoteSourceURL(String url);
-    
-    String getRemoteSourceURL();
-   
-    void setSourceText(String sourceText);
-    
-    String getSourceText();
-    
-    void setSourceType(SourceType sourceType);
-    
-    SourceType getSourceType();
+    /**
+     * Gets the source. The source can be a file path or an URL.
+     * 
+     * @return the source
+     */
+    String getSource();
 }
