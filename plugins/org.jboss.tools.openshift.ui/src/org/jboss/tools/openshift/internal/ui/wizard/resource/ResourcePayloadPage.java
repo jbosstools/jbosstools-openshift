@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.jboss.tools.common.ui.CommonUIMessages;
@@ -93,21 +92,17 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
     }
 
     private void createLocalSourceControls(DataBindingContext dbc, Group sourceGroup) {
-        Composite composite = new Composite(sourceGroup, SWT.NONE);
-        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
-        GridDataFactory.fillDefaults().span(3, 1).grab(true,  false).applyTo(composite);
-        Button localButton = new Button(composite, SWT.RADIO);
+        Button localButton = new Button(sourceGroup, SWT.RADIO);
+        localButton.setText("Create from file");
+        GridDataFactory.fillDefaults().span(3, 1).applyTo(localButton);
         final IObservableValue localTypeSelection = WidgetProperties.selection().observe(localButton);
         ValueBindingBuilder
-        .bind(localTypeSelection)
-        .converting(new Boolean2EnumConverter(SourceType.LOCAL))
-        .to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE_TYPE).observe(model))
-        .converting(new Enum2BooleanConverter(SourceType.LOCAL))
-        .in(dbc);
+            .bind(localTypeSelection)
+            .converting(new Boolean2EnumConverter(SourceType.LOCAL))
+            .to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE_TYPE).observe(model))
+            .converting(new Enum2BooleanConverter(SourceType.LOCAL))
+            .in(dbc);
 
-        Label label = new Label(composite, SWT.NONE);
-        label.setText("Create from file");
-        
         // local template file name
         Text localSourceFileNameText = new Text(sourceGroup, SWT.BORDER);
         GridDataFactory.fillDefaults()
@@ -151,6 +146,20 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
         UIUtils.setDefaultButtonWidth(btnBrowseWorkspaceFiles);
 
         btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());
+        
+        ValueBindingBuilder
+        .bind(localTypeSelection)
+        .to(WidgetProperties.enabled().observe(localSourceFileNameText))
+        .in(dbc);
+        ValueBindingBuilder
+        .bind(localTypeSelection)
+        .to(WidgetProperties.enabled().observe(btnBrowseFiles))
+        .in(dbc);
+        ValueBindingBuilder
+        .bind(localTypeSelection)
+        .to(WidgetProperties.enabled().observe(btnBrowseWorkspaceFiles))
+        .in(dbc);
+
     }
 
     private SelectionAdapter onFileSystemBrowseClicked() {
@@ -213,21 +222,19 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
     }
    
     private void createRemoteSourceControls(DataBindingContext dbc, Group sourceGroup) {
-        Composite composite = new Composite(sourceGroup, SWT.NONE);
-        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
-        GridDataFactory.fillDefaults().span(3, 1).grab(true,  false).applyTo(composite);
-        Button remoteButton = new Button(composite, SWT.RADIO);
+        Button remoteButton = new Button(sourceGroup, SWT.RADIO);
+        remoteButton.setText("Create from url");
+        GridDataFactory.fillDefaults()
+            .span(3, 1)
+            .applyTo(remoteButton);
         final IObservableValue remoteTypeSelection = WidgetProperties.selection().observe(remoteButton);
         ValueBindingBuilder
-        .bind(remoteTypeSelection)
-        .converting(new Boolean2EnumConverter(SourceType.REMOTE))
-        .to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE_TYPE).observe(model))
-        .converting(new Enum2BooleanConverter(SourceType.REMOTE))
-        .in(dbc);
+            .bind(remoteTypeSelection)
+            .converting(new Boolean2EnumConverter(SourceType.REMOTE))
+            .to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE_TYPE).observe(model))
+            .converting(new Enum2BooleanConverter(SourceType.REMOTE))
+            .in(dbc);
 
-        Label label = new Label(composite, SWT.NONE);
-        label.setText("Create from url");
-        
         // local template file name
         Text remoteSourceURLText = new Text(sourceGroup, SWT.BORDER);
         GridDataFactory.fillDefaults()
@@ -242,39 +249,26 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
                 .to(BeanProperties.value(
                         IResourcePayloadPageModel.PROPERTY_REMOTE_SOURCE_URL).observe(model))
                 .in(dbc);
+        
+        /*
+         * disable text field if remote is not selected
+         */
+        ValueBindingBuilder
+            .bind(remoteTypeSelection)
+            .to(WidgetProperties.enabled().observe(remoteSourceURLText))
+            .in(dbc);
+        
         MultiValidator validator = new MultiValidator() {
             
             @Override
             protected IStatus validate() {
                 String url = (String) remoteSourceURL.getValue();
-                return (boolean) remoteTypeSelection.getValue() && !UrlUtils.isValid(url)?ValidationStatus.error(NLS.bind(CommonUIMessages.URLSTRINGVALIDATOR_NOT_A_VALID_URL, url)):ValidationStatus.ok();
+                return (boolean) remoteTypeSelection.getValue()? URL_VALIDATOR.validate(url):ValidationStatus.ok();
             }
         };
         dbc.addValidationStatusProvider(validator);
-
-        ValueBindingBuilder
-        .bind(WidgetProperties.selection().observe(remoteButton))
-        .converting(new Boolean2EnumConverter(SourceType.REMOTE))
-        .to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE_TYPE).observe(model))
-        .converting(new Enum2BooleanConverter(SourceType.REMOTE))
-        .in(dbc);
     }
 
-    public IStatus validate() {
-        System.out.println("Multi validate called");
-        switch (model.getSourceType()) {
-        case LOCAL:
-            return isFile(model.getLocalSourceFileName())?
-                    ValidationStatus.ok(): 
-                    ValidationStatus.error(model.getLocalSourceFileName() +" is not a file");
-        case REMOTE:
-            return URL_VALIDATOR.validate(model.getRemoteSourceURL());
-        case TEXT:
-            return ValidationStatus.error("Not yet supported");
-        }
-        return null;
-    }
-    
     @Override
     protected void setupWizardPageSupport(DataBindingContext dbc) {
         ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
