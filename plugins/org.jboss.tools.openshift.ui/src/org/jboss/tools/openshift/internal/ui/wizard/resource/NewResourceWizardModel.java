@@ -25,10 +25,7 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
     private IConnection connection;
     private IProject project;
     private List<ObservableTreeItem> projectItems = new ArrayList<>();
-    private String localSourceFileName;
-    private String remoteSourceURL;
-    private String sourceText;
-    private SourceType sourceType = SourceType.LOCAL;
+    private String source;
 
     /* (non-Javadoc)
      * @see org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel#loadResources()
@@ -79,13 +76,10 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
         return null;
     }
 
-    private void update(IProject project, List<ObservableTreeItem> projectItems, String localSourceFileName, String remoteSourceURL,
-            String sourceText) {
+    private void update(IProject project, List<ObservableTreeItem> projectItems, String source) {
         updateProjectItems(projectItems);
         firePropertyChange(PROPERTY_PROJECT, this.project, this.project = getDefaultProject(project, projectItems));
-        firePropertyChange(PROPERTY_LOCAL_SOURCE_FILENAME, this.localSourceFileName, this.localSourceFileName = localSourceFileName);
-        firePropertyChange(PROPERTY_REMOTE_SOURCE_URL, this.remoteSourceURL, this.remoteSourceURL = remoteSourceURL);
-        firePropertyChange(PROPERTY_SOURCE_TEXT, this.sourceText, this.sourceText = sourceText);
+        firePropertyChange(PROPERTY_SOURCE, this.source, this.source = source);
     }
     
     private IProject getDefaultProject(IProject project, List<ObservableTreeItem> projectItems) {
@@ -109,8 +103,7 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
      */
     @Override
     public void setProject(IProject project) {
-        System.out.println("set project=" + project.hashCode());
-        update(project, this.projectItems, this.localSourceFileName, this.remoteSourceURL, this.sourceText);
+        update(project, this.projectItems, this.source);
     }
 
     /* (non-Javadoc)
@@ -118,7 +111,6 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
      */
     @Override
     public List<ObservableTreeItem> getProjectItems() {
-        System.out.println("getProjects=" + projectItems);
         return projectItems;
     }
     
@@ -145,8 +137,7 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
         }
     }
     public void setProjectItems(List<ObservableTreeItem> projectItems) {
-        System.out.println("set projectItems=" + projectItems);
-        update(checkProject(this.project, projectItems), projectItems, this.localSourceFileName, this.remoteSourceURL, this.sourceText);
+        update(checkProject(this.project, projectItems), projectItems, this.source);
     }
 
     /* (non-Javadoc)
@@ -161,47 +152,16 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
      * @see org.jboss.tools.openshift.internal.ui.wizard.resource.IResourcePayloadPageModel#setLocalSourceFileName(java.lang.String)
      */
     @Override
-    public void setLocalSourceFileName(String localSourceFileName) {
-        setSourceType(SourceType.LOCAL);
-        update(this.project, this.projectItems, localSourceFileName, remoteSourceURL, sourceText);
+    public void setSource(String source) {
+        update(this.project, this.projectItems, source);
    }
 
     /* (non-Javadoc)
      * @see org.jboss.tools.openshift.internal.ui.wizard.resource.IResourcePayloadPageModel#getLocalSourceFileName()
      */
     @Override
-    public String getLocalSourceFileName() {
-        return localSourceFileName;
-    }
-
-    public void setRemoteSourceURL(String remoteSourceURL) {
-        setSourceType(SourceType.REMOTE);
-        update(this.project, this.projectItems, localSourceFileName, remoteSourceURL, sourceText);
-    }
-
-    public String getRemoteSourceURL() {
-        return remoteSourceURL;
-    }
-
-    public void setSourceText(String sourceText) {
-        setSourceType(SourceType.TEXT);
-        update(this.project, this.projectItems, localSourceFileName, remoteSourceURL, sourceText);
-    }
-
-    public String getSourceText() {
-        return sourceText;
-    }
-
-
-    public SourceType getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(SourceType sourceType) {
-        System.out.println("sourceType = " + sourceType);
-        if (sourceType != null) {
-            firePropertyChange(PROPERTY_SOURCE_TYPE, this.sourceType, this.sourceType = sourceType);
-        }
+    public String getSource() {
+        return source;
     }
 
 }

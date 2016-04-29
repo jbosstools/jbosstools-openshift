@@ -32,7 +32,6 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.job.CreateResourceJob;
-import org.jboss.tools.openshift.internal.ui.wizard.resource.IResourcePayloadPageModel.SourceType;
 
 import com.openshift.restclient.model.IProject;
 
@@ -78,8 +77,8 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 	@Override
 	public boolean performFinish() {
         boolean success = false;
-        try (InputStream is = (model.getSourceType()==SourceType.LOCAL)?new FileInputStream(VariablesHelper.replaceVariables(model.getLocalSourceFileName()))
-                                                                       :new URL(model.getRemoteSourceURL()).openStream()) {
+        try (InputStream is = (IResourcePayloadPageModel.URL_VALIDATOR.isValid(model.getSource()))?new URL(model.getSource()).openStream()
+                                                                                                  :new FileInputStream(VariablesHelper.replaceVariables(model.getSource()))) {
             final CreateResourceJob createJob = new CreateResourceJob(model.getProject(), is);
 
             createJob.addJobChangeListener(new JobChangeAdapter() {

@@ -36,18 +36,13 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
-import org.jboss.tools.common.ui.CommonUIMessages;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.SimpleUrlStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
-import org.jboss.tools.openshift.internal.common.ui.databinding.Boolean2EnumConverter;
-import org.jboss.tools.openshift.internal.common.ui.databinding.Enum2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.AbstractProjectPage;
-import org.jboss.tools.openshift.internal.ui.wizard.resource.IResourcePayloadPageModel.SourceType;
 
 import com.openshift.restclient.OpenShiftException;
 
@@ -88,41 +83,29 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
                 .applyTo(sourceGroup);
         
         createLocalSourceControls(dbc, sourceGroup);
-        createRemoteSourceControls(dbc, sourceGroup);
     }
 
     private void createLocalSourceControls(DataBindingContext dbc, Group sourceGroup) {
-        Button localButton = new Button(sourceGroup, SWT.RADIO);
-        localButton.setText("Create from file");
-        GridDataFactory.fillDefaults().span(3, 1).applyTo(localButton);
-        final IObservableValue localTypeSelection = WidgetProperties.selection().observe(localButton);
-        ValueBindingBuilder
-            .bind(localTypeSelection)
-            .converting(new Boolean2EnumConverter(SourceType.LOCAL))
-            .to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE_TYPE).observe(model))
-            .converting(new Enum2BooleanConverter(SourceType.LOCAL))
-            .in(dbc);
-
         // local template file name
-        Text localSourceFileNameText = new Text(sourceGroup, SWT.BORDER);
+        Text sourceText = new Text(sourceGroup, SWT.BORDER);
         GridDataFactory.fillDefaults()
                 .align(SWT.FILL, SWT.CENTER).grab(true, false)
-                .applyTo(localSourceFileNameText);
-        final IObservableValue localSourceFileName = WidgetProperties.text(SWT.Modify).observe(localSourceFileNameText);
+                .applyTo(sourceText);
+        final IObservableValue source = WidgetProperties.text(SWT.Modify).observe(sourceText);
         Binding binding = ValueBindingBuilder
-                .bind(localSourceFileName )
+                .bind(source )
                 //.validatingBeforeSet(value->isFile(value.toString())?
                 //        ValidationStatus.ok(): 
                 //            ValidationStatus.error(value +" is not a file"))
                 .to(BeanProperties.value(
-                        IResourcePayloadPageModel.PROPERTY_LOCAL_SOURCE_FILENAME).observe(model))
+                        IResourcePayloadPageModel.PROPERTY_SOURCE).observe(model))
                 .in(dbc);
         MultiValidator validator = new MultiValidator() {
             
             @Override
             protected IStatus validate() {
-                String fileName = (String) localSourceFileName.getValue();
-                return (boolean) localTypeSelection.getValue() && !isFile(fileName)?ValidationStatus.error(fileName + " is not a file"):ValidationStatus.ok();
+                String sourceValue = (String) source.getValue();
+                return (boolean) !IResourcePayloadPageModel.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)?ValidationStatus.error(sourceValue + " is not a file"):ValidationStatus.ok();
             }
         };
         dbc.addValidationStatusProvider(validator);
@@ -146,20 +129,6 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
         UIUtils.setDefaultButtonWidth(btnBrowseWorkspaceFiles);
 
         btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());
-        
-        ValueBindingBuilder
-        .bind(localTypeSelection)
-        .to(WidgetProperties.enabled().observe(localSourceFileNameText))
-        .in(dbc);
-        ValueBindingBuilder
-        .bind(localTypeSelection)
-        .to(WidgetProperties.enabled().observe(btnBrowseFiles))
-        .in(dbc);
-        ValueBindingBuilder
-        .bind(localTypeSelection)
-        .to(WidgetProperties.enabled().observe(btnBrowseWorkspaceFiles))
-        .in(dbc);
-
     }
 
     private SelectionAdapter onFileSystemBrowseClicked() {
@@ -167,7 +136,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                FileDialog dialog = createFileDialog(model.getLocalSourceFileName());
+                FileDialog dialog = createFileDialog(model.getSource());
                 String file = dialog.open();
                 setLocalSourceFileName(file);
             }
@@ -189,7 +158,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                ElementTreeSelectionDialog dialog = UIUtils.createFileDialog(model.getLocalSourceFileName(),
+                ElementTreeSelectionDialog dialog = UIUtils.createFileDialog(model.getSource(),
                                                                              "Select an OpenShift resource",
                                                                              "Select an OpenShift resource (*.json)",
                                                                              "json",
@@ -210,7 +179,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
             return;
         }
         try {
-            model.setLocalSourceFileName(file);
+            model.setSource(file);
         } catch (ClassCastException | OpenShiftException ex) {
             IStatus status = ValidationStatus.error(ex.getMessage(), ex);
             OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
@@ -221,53 +190,6 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
         }
     }
    
-    private void createRemoteSourceControls(DataBindingContext dbc, Group sourceGroup) {
-        Button remoteButton = new Button(sourceGroup, SWT.RADIO);
-        remoteButton.setText("Create from url");
-        GridDataFactory.fillDefaults()
-            .span(3, 1)
-            .applyTo(remoteButton);
-        final IObservableValue remoteTypeSelection = WidgetProperties.selection().observe(remoteButton);
-        ValueBindingBuilder
-            .bind(remoteTypeSelection)
-            .converting(new Boolean2EnumConverter(SourceType.REMOTE))
-            .to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE_TYPE).observe(model))
-            .converting(new Enum2BooleanConverter(SourceType.REMOTE))
-            .in(dbc);
-
-        // local template file name
-        Text remoteSourceURLText = new Text(sourceGroup, SWT.BORDER);
-        GridDataFactory.fillDefaults()
-                .align(SWT.FILL, SWT.CENTER)
-                .grab(true, false)
-                .span(3, 1)
-                .applyTo(remoteSourceURLText);
-        final IObservableValue remoteSourceURL = WidgetProperties.text(SWT.Modify).observe(remoteSourceURLText);
-        ValueBindingBuilder
-                .bind(remoteSourceURL )
-                //.validatingBeforeSet(new SimpleUrlStringValidator())
-                .to(BeanProperties.value(
-                        IResourcePayloadPageModel.PROPERTY_REMOTE_SOURCE_URL).observe(model))
-                .in(dbc);
-        
-        /*
-         * disable text field if remote is not selected
-         */
-        ValueBindingBuilder
-            .bind(remoteTypeSelection)
-            .to(WidgetProperties.enabled().observe(remoteSourceURLText))
-            .in(dbc);
-        
-        MultiValidator validator = new MultiValidator() {
-            
-            @Override
-            protected IStatus validate() {
-                String url = (String) remoteSourceURL.getValue();
-                return (boolean) remoteTypeSelection.getValue()? URL_VALIDATOR.validate(url):ValidationStatus.ok();
-            }
-        };
-        dbc.addValidationStatusProvider(validator);
-    }
 
     @Override
     protected void setupWizardPageSupport(DataBindingContext dbc) {
