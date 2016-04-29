@@ -38,8 +38,9 @@ public class TableViewerBuilder {
 
 	private TableViewer viewer;
 	private TableColumnLayout tableLayout;
-	
-	Font italic;
+
+	Font normalFont;
+	Font italicFont;
 
 	public TableViewerBuilder(Table table, Composite tableContainer) {
 		this(new TableViewer(table), tableContainer);
@@ -50,13 +51,14 @@ public class TableViewerBuilder {
 		viewer.setComparer(new EqualityComparer());
 		this.tableLayout = new TableColumnLayout();
 		tableContainer.setLayout(tableLayout);
-		FontData fd = viewer.getTable().getFont().getFontData()[0];
+		normalFont = viewer.getTable().getFont();
+		FontData fd = normalFont.getFontData()[0];
 		fd.setStyle(SWT.ITALIC);
-		italic = new Font(null, fd);
+		italicFont = new Font(null, fd);
 		viewer.getTable().addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
-				italic.dispose();
+				italicFont.dispose();
 			}
 		});
 	}
@@ -90,6 +92,20 @@ public class TableViewerBuilder {
 
 	public TableViewer buildViewer() {
 		return viewer;
+	}
+
+	/**
+	 * Call this method from update(ViewerCell) to flip normal/italic font style.
+	 * If column is created with IColumnLabelProvider, this method is called by inner
+	 * implementation of CellLabelProvider with italic=IColumnLabelProvider.isModified(element)
+	 * Custom implementation of CellLabelProvider may keep to the same behavior
+	 * or choose another condition for using italic font.
+	 *
+	 * @param cell
+	 * @param italic
+	 */
+	public void applyFont(ViewerCell cell, boolean italic) {
+		cell.setFont(italic ? italicFont : normalFont);
 	}
 	
 	public class ColumnBuilder<E> {
@@ -168,9 +184,8 @@ public class TableViewerBuilder {
 						if (labelProvider != null) {
 							String cellValue = labelProvider.getValue((E) cell.getElement());
 							cell.setText(cellValue);
-							if(labelProvider.isModified((E) cell.getElement())) {
-								cell.setFont(italic);
-							}
+							boolean italic = labelProvider.isModified((E) cell.getElement());
+							applyFont(cell, italic);
 						}
 					}
 
