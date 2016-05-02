@@ -76,3 +76,5 @@ Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tool
  org.jboss.tools.openshift.internal.ui.wizard.newapp;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;x-friends:="org.jboss.tools.openshift.test"
+Bundle-ClassPath: lib/commons-validator-1.5.0.jar,
+ .
