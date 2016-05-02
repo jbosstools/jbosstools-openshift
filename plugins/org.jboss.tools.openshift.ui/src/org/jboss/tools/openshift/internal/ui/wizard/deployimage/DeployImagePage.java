@@ -255,7 +255,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			return validate(dockerConnectionObservable.getValue());
 		}
 	}
-	
+
 	private void createProjectControl(Composite parent, DataBindingContext dbc) {
 		Label lblProject = new Label(parent, SWT.NONE);
 		lblProject.setText("OpenShift Project: ");
@@ -276,23 +276,16 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		cmboProject.setInput(
 				BeanProperties.list(IDeployImagePageModel.PROPERTY_PROJECTS).observe(model));
 		cmboProject.setComparator(new ProjectViewerComparator(labelProvider));
-	
+
+		IObservableValue projectObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_PROJECT)
+				.observe(model);
+		ProjectStatusProvider validator = new ProjectStatusProvider(projectObservable);
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(cmboProject);
 		Binding selectedProjectBinding = 
 			ValueBindingBuilder.bind(selectedProjectObservable)
 			.converting(new ObservableTreeItem2ModelConverter(IProject.class))
-			.validatingAfterConvert(new IValidator() {
-				
-				@Override
-				public IStatus validate(Object value) {
-					if (value instanceof IProject) {
-						return ValidationStatus.ok();
-					}
-					return ValidationStatus.cancel("Please choose an OpenShift project.");
-				}
-			})
-			.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_PROJECT)
-			.observe(model))
+			.validatingAfterConvert(validator)
+			.to(projectObservable)
 			.in(dbc);
 		ControlDecorationSupport.create(
 				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
@@ -302,6 +295,30 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
 			.applyTo(manageProjectsLink);
 		StyledTextUtils.emulateLinkAction(manageProjectsLink, r->onManageProjectsClicked());
+
+        dbc.addValidationStatusProvider(validator);
+	}
+
+	@SuppressWarnings("rawtypes")
+	class ProjectStatusProvider extends MultiValidator implements IValidator {
+		IObservableValue projectObservable;
+
+		ProjectStatusProvider(IObservableValue projectObservable) {
+			this.projectObservable = projectObservable;
+		}
+
+		@Override
+		public IStatus validate(Object value) {
+			if (value instanceof IProject) {
+				return ValidationStatus.ok();
+			}
+			return ValidationStatus.cancel("Please choose an OpenShift project.");
+		}
+
+		@Override
+		protected IStatus validate() {
+			return validate(projectObservable.getValue());
+		}
 	}
 
 	private void createImageNameControls(final Composite parent, final DataBindingContext dbc) {
