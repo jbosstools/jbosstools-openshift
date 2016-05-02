@@ -90,6 +90,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 
 	private IDeployImagePageModel model;
 
+	ContentProposalAdapter imageNameProposalAdapter;
+
 	protected DeployImagePage(IWizard wizard, IDeployImagePageModel model) {
 		super("Deploy an Image", PAGE_DESCRIPTION, DEPLOY_IMAGE_PAGE_NAME, wizard);
 		this.model = model;
@@ -117,6 +119,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	 */
 	@Override
 	protected void onPageWillGetDeactivated(final Direction progress, final PageChangingEvent event, final DataBindingContext dbc) {
+		if(imageNameProposalAdapter != null) {
+			imageNameProposalAdapter.setEnabled(false);
+		}
 		if(progress == Direction.BACKWARDS) {
 			//Do not block return to change connection.
 			return;
@@ -152,6 +157,13 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			final String message = "Failed to look-up metadata for a Docker image named '" + model.getImageName() + "'.";
 			MessageDialog.openError(getShell(), "Error", message);
 			OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
+		}
+	}
+
+	@Override
+	protected void onPageWillGetActivated(final Direction progress, final PageChangingEvent event, final DataBindingContext dbc) {
+		if(imageNameProposalAdapter != null) {
+			imageNameProposalAdapter.setEnabled(true);
 		}
 	}
 
@@ -325,7 +337,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(
 				imageBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 
-		new ContentProposalAdapter(imageNameText,
+		imageNameProposalAdapter = new ContentProposalAdapter(imageNameText,
 				// override the text value before content assist was invoked and
 				// move the cursor to the end of the selected value
 				new TextContentAdapter() {
