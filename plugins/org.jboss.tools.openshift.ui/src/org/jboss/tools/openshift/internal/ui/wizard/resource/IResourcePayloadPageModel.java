@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.resource;
 
-import org.jboss.tools.common.core.validation.UrlValidator;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
 
