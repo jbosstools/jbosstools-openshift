@@ -19,6 +19,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.internal.databinding.conversion.ObjectToStringConverter;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -59,6 +60,8 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
@@ -170,12 +173,25 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
+		createOpenShiftConnectionControl(parent, dbc);
+		createProjectControl(parent, dbc);
+		createSeparator(parent);
 		if (!model.originatedFromDockerExplorer()) {
 			createDockerConnectionControl(parent, dbc);
+		} else {
+			createDockerConnectionInfoControl(parent, dbc);
 		}
-		createProjectControl(parent, dbc);
 		createImageNameControls(parent, dbc);
 		new ResourceNameControl().doCreateControl(parent, dbc, model);
+	}
+
+	private void createSeparator(Composite parent) {
+		GridDataFactory
+			.fillDefaults()
+			.align(SWT.FILL, SWT.BEGINNING)
+			.grab(true, false)
+			.span(3, 1)
+			.applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
 	}
 
 	private SelectionAdapter onSearch(Text txtImage) {
@@ -196,11 +212,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	}
 	
 	private void createDockerConnectionControl(Composite parent, DataBindingContext dbc) {
-		Label lblConnection = new Label(parent, SWT.NONE);
-		lblConnection.setText("Docker Connection: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(lblConnection);
+		createDockerConnectionLabel(parent);
 		
 		StructuredViewer connectionViewer = new ComboViewer(parent);
 		GridDataFactory.fillDefaults()
@@ -214,9 +226,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public String getText(Object element) {
-				if(!(element instanceof IDockerConnection)) return "";
-				IDockerConnection conn = (IDockerConnection) element;
-				return NLS.bind("{0} ({1})", conn.getName(), conn.getUri());
+				return (element instanceof IDockerConnection) ? dockerConnectionToString((IDockerConnection) element) : "";
 			}
 			
 		});
@@ -246,6 +256,19 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
         dbc.addValidationStatusProvider(validator);
 	}
 
+	private String dockerConnectionToString(IDockerConnection conn) {
+		return NLS.bind("{0} ({1})", conn.getName(), conn.getUri());
+	}
+
+	private Label createDockerConnectionLabel(Composite parent) {
+		Label lblConnection = new Label(parent, SWT.NONE);
+		lblConnection.setText("Docker Connection: ");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(lblConnection);
+		return lblConnection;
+	}
+
 	@SuppressWarnings("rawtypes")
 	class DockerConnectionStatusProvider extends MultiValidator implements IValidator {
 		IObservableValue dockerConnectionObservable;
@@ -266,6 +289,58 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		protected IStatus validate() {
 			return validate(dockerConnectionObservable.getValue());
 		}
+	}
+
+	private void createDockerConnectionInfoControl(Composite parent, DataBindingContext dbc) {
+		Label lblConnection = createDockerConnectionLabel(parent);
+		final Text connectionText = new Text(parent, SWT.READ_ONLY | SWT.NO_FOCUS);
+		connectionText.setBackground(lblConnection.getBackground());
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.span(2, 1)
+			.grab(true, false)
+			.applyTo(connectionText);
+		final IObservableValue connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
+		final IObservableValue connnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
+		ValueBindingBuilder.bind(connnectionTextObservable)
+			.notUpdatingParticipant()
+			.to(connnectionObservable)
+			.converting(new ObjectToStringConverter(IDockerConnection.class) {
+				ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
+				@Override
+				public Object convert(Object source) {
+					return (source instanceof IDockerConnection) ? dockerConnectionToString((IDockerConnection) source) : "";
+				}
+			})
+			.in(dbc);
+	}
+
+	private void createOpenShiftConnectionControl(Composite parent, DataBindingContext dbc) {
+		Label lblConnection = new Label(parent, SWT.NONE);
+		lblConnection.setText("OpenShift Connection: ");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(lblConnection);
+		final Text connectionText = new Text(parent, SWT.READ_ONLY | SWT.NO_FOCUS);
+		connectionText.setBackground(lblConnection.getBackground());
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.span(2, 1)
+			.grab(true, false)
+			.applyTo(connectionText);
+		final IObservableValue connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
+		final IObservableValue connnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_CONNECTION).observe(model);
+		ValueBindingBuilder.bind(connnectionTextObservable)
+			.notUpdatingParticipant()
+			.to(connnectionObservable)
+			.converting(new ObjectToStringConverter(Connection.class) {
+				ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
+				@Override
+				public Object convert(Object source) {
+					return source == null ? "" : labelProvider.getText(source);
+				}
+			})
+			.in(dbc);
 	}
 
 	private void createProjectControl(Composite parent, DataBindingContext dbc) {
@@ -309,6 +384,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		StyledTextUtils.emulateLinkAction(manageProjectsLink, r->onManageProjectsClicked());
 
         dbc.addValidationStatusProvider(validator);
+
+        cmboProject.getControl().forceFocus();
 	}
 
 	@SuppressWarnings("rawtypes")
