@@ -90,7 +90,7 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(envContainer);
 		GridLayoutFactory.fillDefaults()
-			.numColumns(2).margins(6, 6).applyTo(envContainer);
+			.numColumns(2).margins(2, 2).applyTo(envContainer);
 		
 		Label lblEnvVars = new Label(envContainer, SWT.NONE);
 		lblEnvVars.setText("Environment variables:");

@@ -59,7 +59,7 @@ public class BuildConfigPage extends EnvironmentVariablePage {
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
+		GridLayoutFactory.fillDefaults().margins(10, 2).applyTo(parent);
 		
 		Composite nameParent = new Composite(parent, SWT.NONE);
 		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(nameParent);
