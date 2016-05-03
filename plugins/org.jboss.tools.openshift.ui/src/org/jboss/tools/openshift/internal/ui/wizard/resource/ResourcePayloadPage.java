@@ -19,6 +19,7 @@ import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -40,7 +41,10 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.SimpleUrlStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
+import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.utils.FileValidator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.AbstractProjectPage;
@@ -89,7 +93,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
     private void createLocalSourceControls(DataBindingContext dbc, Group sourceGroup) {
         Label label = new Label(sourceGroup, SWT.NONE);
         GridDataFactory.fillDefaults().span(3, 1).applyTo(label);
-        label.setText("Enter a file path (workspace or local) or a full URL");
+        label.setText("Enter a file path (workspace or local) or a full URL.");
         // local template file name
         Text sourceText = new Text(sourceGroup, SWT.BORDER);
         GridDataFactory.fillDefaults()
@@ -109,28 +113,31 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
             @Override
             protected IStatus validate() {
                 String sourceValue = (String) source.getValue();
+                if (StringUtils.isEmpty(sourceValue)) {
+                    return ValidationStatus.cancel("You need to provide a file path or an URL");
+                }
                 return (boolean) !IResourcePayloadPageModel.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)?ValidationStatus.error(sourceValue + " is not a file"):ValidationStatus.ok();
             }
         };
         dbc.addValidationStatusProvider(validator);
+        ControlDecorationSupport.create(
+                validator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
         // browse button
         Button btnBrowseFiles = new Button(sourceGroup, SWT.NONE);
-        btnBrowseFiles.setText("File system...");
+        btnBrowseFiles.setText("Browse File System...");
         GridDataFactory.fillDefaults()
                 .align(SWT.LEFT, SWT.CENTER)
                 .applyTo(btnBrowseFiles);
-        UIUtils.setDefaultButtonWidth(btnBrowseFiles);
 
         btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
         
         // browse button
         Button btnBrowseWorkspaceFiles = new Button(sourceGroup, SWT.NONE);
-        btnBrowseWorkspaceFiles.setText("Workspace...");
+        btnBrowseWorkspaceFiles.setText("Browse Workspace...");
         GridDataFactory.fillDefaults()
                 .align(SWT.LEFT, SWT.CENTER)
                 .applyTo(btnBrowseWorkspaceFiles);
-        UIUtils.setDefaultButtonWidth(btnBrowseWorkspaceFiles);
 
         btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());
     }
@@ -148,9 +155,13 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
             private FileDialog createFileDialog(String selectedFile) {
                 FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
                 dialog.setText("Select an OpenShift resource");
-                if(isFile(selectedFile)) {
+                dialog.setFilterExtensions(new String[] {"*.json"});
+                if(exists(selectedFile)) {
                     File file = new File(selectedFile);
-                    dialog.setFilterPath(file.getParentFile().getAbsolutePath());
+                    if (file.isFile()) {
+                        file = file.getParentFile();
+                    }
+                    dialog.setFilterPath(file.getAbsolutePath());
                 }
                 return dialog;
             }
@@ -167,6 +178,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
                                                                              "Select an OpenShift resource (*.json)",
                                                                              "json",
                                                                              null);
+                dialog.setValidator(new FileValidator());
                 if (dialog.open() == IDialogConstants.OK_ID && dialog.getFirstResult() instanceof IFile) {
                     String path = ((IFile)dialog.getFirstResult()).getFullPath().toString();
                     String file = VariablesHelper.addWorkspacePrefix(path);
