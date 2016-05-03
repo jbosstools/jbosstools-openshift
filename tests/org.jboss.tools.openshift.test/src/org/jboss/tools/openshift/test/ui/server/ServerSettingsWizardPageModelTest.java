@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.test.ui.server;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -36,6 +37,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
+import com.openshift.restclient.ResourceKind;
 
 /**
  * @author Andre Dietisheim
@@ -60,7 +62,7 @@ public class ServerSettingsWizardPageModelTest {
 		this.project3 = ResourceMocks.mockProject("project3");
 		this.project4 = ResourceMocks.mockGitSharedProject("project4", "git@42.git");
 
-		this.model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, Arrays.asList(project1, project2, project3, project4), connection);
+		this.model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, null, Arrays.asList(project1, project2, project3, project4), connection);
 	}
 
 	@After
@@ -72,7 +74,7 @@ public class ServerSettingsWizardPageModelTest {
 	public void shouldReturn1stProjectIfNoMatchesGitRemoteOfServiceModelWasInitializedWith() {
 		// given
 		ServerSettingsWizardPageModel model = 
-				createModel(ResourceMocks.PROJECT2_SERVICES[1], null, Arrays.asList(project1, project3, project4), connection);
+				createModel(ResourceMocks.PROJECT2_SERVICES[1], null, null, Arrays.asList(project1, project3, project4), connection);
 		// when
 		IProject project = model.getDeployProject();
 		// then
@@ -93,7 +95,7 @@ public class ServerSettingsWizardPageModelTest {
 	public void shouldReturnServiceMatchingGitRemoteOfProjectModeldWasInitializedWith() {
 		// given
 		// model initialized with project
-		ServerSettingsWizardPageModel model = createModel(null, project2, Arrays.asList(project1, project2, project3, project4), connection);
+		ServerSettingsWizardPageModel model = createModel(null, null, project2, Arrays.asList(project1, project2, project3, project4), connection);
 		// when
 		IService service = model.getService();
 		IProject deployProject = model.getDeployProject();
@@ -105,7 +107,7 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void shouldReturn1stAvailableProjectIfModelInitializingProjectIsNotContainedInAvailableProjects() {
 		// given
-		ServerSettingsWizardPageModel model = createModel(null, project2, Arrays.asList(project1, project3, project4), connection);
+		ServerSettingsWizardPageModel model = createModel(null, null, project2, Arrays.asList(project1, project3, project4), connection);
 		// when
 		IProject deployProject = model.getDeployProject();
 		// then
@@ -115,7 +117,7 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void shouldReturn1stServiceIfNoServiceMatchesGitRemoteOfProjectModelWasInitializedWith() {
 		// given
-		ServerSettingsWizardPageModel model = createModel(null, project1, Arrays.asList(project1, project2, project3, project4), connection);
+		ServerSettingsWizardPageModel model = createModel(null, null, project1, Arrays.asList(project1, project2, project3, project4), connection);
 		// when
 		IService service = model.getService();
 		// then
@@ -135,7 +137,7 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void shouldReturnProjectMatchingServiceByGitRemoteIfSettingUnavailableDeployProject() {
 		// given
-		ServerSettingsWizardPageModel model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, Arrays.asList(project2, project3, project4), connection);
+		ServerSettingsWizardPageModel model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, null, Arrays.asList(project2, project3, project4), connection);
 		assertThat(model.getDeployProject()).isEqualTo(project2); 
 		// when
 		model.setDeployProject(project1);
@@ -234,10 +236,35 @@ public class ServerSettingsWizardPageModelTest {
 		// then
 		assertThat(notifiedRoutes).containsOnly(ResourceMocks.PROJECT3_ROUTES[1]);
 	}
+	
+	public void testRouteProperty() {
+		when(ResourceMocks.PROJECT2_SERVICES[1].getProject()).thenReturn(ResourceMocks.PROJECTS[1]);
+		when(ResourceMocks.PROJECT3_SERVICES[0].getProject()).thenReturn(ResourceMocks.PROJECTS[2]);
+		when(ResourceMocks.PROJECTS[1].getResources(ResourceKind.ROUTE)).thenReturn( Arrays.asList(ResourceMocks.PROJECT2_ROUTES));
+		when(ResourceMocks.PROJECTS[2].getResources(ResourceKind.ROUTE)).thenReturn( Arrays.asList(ResourceMocks.PROJECT2_ROUTES[1]));
+			model = createModel(null, null, null, Arrays.asList(project1, project2, project3, project4), connection);
 
-	private ServerSettingsWizardPageModel createModel(IService service, org.eclipse.core.resources.IProject deployProject, List<IProject> projects, Connection connection) {
-		TestableServerSettingsWizardPageModel model = 
-				spy(new TestableServerSettingsWizardPageModel(service, null, deployProject, connection));
+		//Initial service is from project2
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[0], model.getRoute());
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[1]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[1], model.getRoute());
+
+		//Set service from project3
+		model.setService(ResourceMocks.PROJECT3_SERVICES[0]);
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[1], model.getRoute()); //default route returned
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[1]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[1], model.getRoute());
+
+		//Set service from another project2 again
+		model.setService(ResourceMocks.PROJECT2_SERVICES[1]);
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[0], model.getRoute());
+	}
+
+	private ServerSettingsWizardPageModel createModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, List<IProject> projects, Connection connection) {
+		TestableServerSettingsWizardPageModel model = spy(new TestableServerSettingsWizardPageModel(service, route, deployProject, connection));
 		doReturn(projects).when(model).loadProjects();
 		model.loadResources();
 		return model;
