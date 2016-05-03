@@ -45,6 +45,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.openshift.restclient.ResourceKind;
+
 /**
  * @author Andre Dietisheim
  */
@@ -104,6 +106,33 @@ public class ServerSettingsWizardPageModelTest {
 		Assert.assertEquals(true, model.isUseInferredPodPath());
 		model.setPodPath("somePath");
 		Assert.assertEquals("somePath", model.getPodPath());
+	}
+
+	@Test
+	public void testRouteProperty() {
+		when(ResourceMocks.PROJECT2_SERVICES[1].getProject()).thenReturn(ResourceMocks.PROJECTS[1]);
+		when(ResourceMocks.PROJECT3_SERVICES[0].getProject()).thenReturn(ResourceMocks.PROJECTS[2]);
+		when(ResourceMocks.PROJECTS[1].getResources(ResourceKind.ROUTE)).thenReturn( Arrays.asList(ResourceMocks.PROJECT2_ROUTES));
+		when(ResourceMocks.PROJECTS[2].getResources(ResourceKind.ROUTE)).thenReturn( Arrays.asList(ResourceMocks.PROJECT2_ROUTES[1]));
+			model = createModel(Arrays.asList(project1, project2, project3, project4));
+
+		//Initial service is from project2
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[0], model.getRoute());
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[1]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[1], model.getRoute());
+
+		//Set service from project3
+		model.setService(ResourceMocks.PROJECT3_SERVICES[0]);
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[1], model.getRoute()); //default route returned
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[1]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[1], model.getRoute());
+
+		//Set service from another project2 again
+		model.setService(ResourceMocks.PROJECT2_SERVICES[1]);
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
+		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[0], model.getRoute());
 	}
 
 	private ServerSettingsWizardPageModel createModel(List<IProject> projects) {

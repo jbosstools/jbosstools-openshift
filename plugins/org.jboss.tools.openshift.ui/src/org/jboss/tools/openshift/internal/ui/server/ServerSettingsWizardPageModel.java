@@ -192,7 +192,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		if (routes == null
 				|| routes.isEmpty()) {
 			route = null;
-		} else {
+		} else if(route == null || !routes.contains(route)) {
 			route = ResourceUtils.getRouteForService(service, routes);
 			if(route == null 
 					|| !routes.contains(route)) {
@@ -476,7 +476,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
 				getService(), getServiceItems(),
-				route, this.selectDefaultRoute, this.routesByProject,
+				newRoute, this.selectDefaultRoute, this.routesByProject,
 				this.invalidOCBinary);
 	}
 
