@@ -292,4 +292,8 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
     protected static boolean isFile(String path) {
         return StringUtils.isNotBlank(path) && Files.isRegularFile(Paths.get(VariablesHelper.replaceVariables(path)));
     }
+    
+    protected static boolean exists(String path) {
+        return StringUtils.isNotBlank(path) && Files.exists(Paths.get(VariablesHelper.replaceVariables(path)));
+    }
 }
