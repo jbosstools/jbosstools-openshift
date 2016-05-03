@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
@@ -86,6 +87,9 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
     }
 
     private void createLocalSourceControls(DataBindingContext dbc, Group sourceGroup) {
+        Label label = new Label(sourceGroup, SWT.NONE);
+        GridDataFactory.fillDefaults().span(3, 1).applyTo(label);
+        label.setText("Enter a file path (workspace or local) or a full URL");
         // local template file name
         Text sourceText = new Text(sourceGroup, SWT.BORDER);
         GridDataFactory.fillDefaults()
