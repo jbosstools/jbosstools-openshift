@@ -32,6 +32,11 @@ import org.jboss.tools.runtime.core.model.RuntimeDefinition;
 
 public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 	public static final String CDK_RUNTIME_TYPE = "CDK";
+	
+	public static final String DOT_CDK_SUBSCRIPTION_USERNAME = "rhel.subscription.username";
+	public static final String SYSPROP_SUBSCRIPTION_PASSWORD = "rhel.subscription.password";
+	
+	
 	@Override
 	public RuntimeDefinition getRuntimeDefinition(File root,
 			IProgressMonitor monitor) {
@@ -59,12 +64,17 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 						// Ignore
 					}
 				}
-				String val = props.getProperty("rhel.subscription.username");
+				String val = props.getProperty(DOT_CDK_SUBSCRIPTION_USERNAME);
 				if( val != null ) {
 					ICredentialDomain domain = CredentialService.getCredentialModel().getDomain(CredentialService.REDHAT_ACCESS);
+					String password = System.getProperty(SYSPROP_SUBSCRIPTION_PASSWORD);
 					if( !domain.userExists(val)) {
-						CredentialService.getCredentialModel().addPromptedCredentials(domain, val);
-						CredentialService.getCredentialModel().saveModel();
+						if( password == null || password.isEmpty()) {
+							CredentialService.getCredentialModel().addPromptedCredentials(domain, val);
+						} else {
+							CredentialService.getCredentialModel().addCredentials(domain, val, password);
+						}
+						CredentialService.getCredentialModel().save();
 					}
 				}
 				wc.setAttribute(CDKServer.PROP_FOLDER, folder);
