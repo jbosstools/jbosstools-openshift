@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
+import org.jboss.tools.openshift.internal.common.ui.utils.SmartTooltip;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 
 /**
@@ -201,6 +202,7 @@ public abstract class AbstractStackedDetailViews {
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(styledText);
 			styledText.addFocusListener(fl);
+			new SmartTooltip(styledText);
 			return styledText;
 		}
 

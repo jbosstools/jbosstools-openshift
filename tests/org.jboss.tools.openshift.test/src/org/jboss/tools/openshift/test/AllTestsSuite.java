@@ -14,6 +14,7 @@ import org.jboss.tools.openshift.test.common.core.connection.ConnectionsFactoryT
 import org.jboss.tools.openshift.test.common.core.util.StringUtilsTest;
 import org.jboss.tools.openshift.test.common.core.util.URIUtilsTest;
 import org.jboss.tools.openshift.test.common.ui.utils.ConnectionWizardPageModelTest;
+import org.jboss.tools.openshift.test.common.ui.utils.SmartTooltipTest;
 import org.jboss.tools.openshift.test.core.LazySSLCertificateCallbackTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionPersistencyTest;
 import org.jboss.tools.openshift.test.core.connection.ConnectionRegistryTest;
@@ -81,6 +82,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	ResourcePropertySourceTest.class,
 	ResourceUtilsTest.class,
 	ScaleDeploymentHandlerTest.class,
+	SmartTooltipTest.class,
 	StringUtilsTest.class,
 	TemplateParameterViewerUtilsTest.class,
 	URIUtilsTest.class,
