@@ -108,6 +108,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		updateRoute(route, newRoutes, service);
 		updateSelectDefaultRoute(isSelectDefaultRoute);
 		updateInvalidOCBinary(invalidOCBinary);
+		firePropertyChange(PROPERTY_USE_INFERRED_POD_PATH, this.useInferredPodPath, this.useInferredPodPath = useInferredPodPath);
+		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = podPath);
 	}
 	
 	private void updateProjects(List<org.eclipse.core.resources.IProject> projects) {
@@ -378,6 +380,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		String serverName = OpenShiftServerUtils.getServerName(getService(), getConnection());
 		String host = getHost(getRoute());
 		String routeURL = getRouteURL(isSelectDefaultRoute(), getRoute());
+		String podPath = useInferredPodPath ? "": this.podPath;
 		OpenShiftServerUtils.updateServer(
 				serverName, host, connectionUrl, getService(), sourcePath, podPath, deployProject, routeURL, server);
 		server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
