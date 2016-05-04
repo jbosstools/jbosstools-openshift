@@ -191,7 +191,7 @@ public class NewApplicationWizard
 	@Override
 	public boolean performFinish() {
 
-		final IResourcesModelJob createJob = ResourceKind.TEMPLATE.equals(model.getSelectedAppSource().getKind()) 
+		final IResourcesModelJob createJob = isTemplateFlow()
 				? fromTemplateModel.createFinishJob() 
 				: fromImageModel.createFinishJob();
 		
