@@ -39,6 +39,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.server.ServerSettingsWizardPageModel;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,6 +93,17 @@ public class ServerSettingsWizardPageModelTest {
 		IProject project = model.getDeployProject();
 		// then
 		assertThat(project).isEqualTo(project2);
+	}
+
+	@Test
+	public void testPodPathProperty() {
+		TestableServerSettingsWizardPageModel model = new TestableServerSettingsWizardPageModel();
+		model.setUseInferredPodPath(false);
+		Assert.assertEquals(false, model.isUseInferredPodPath());
+		model.setUseInferredPodPath(true);
+		Assert.assertEquals(true, model.isUseInferredPodPath());
+		model.setPodPath("somePath");
+		Assert.assertEquals("somePath", model.getPodPath());
 	}
 
 	private ServerSettingsWizardPageModel createModel(List<IProject> projects) {
