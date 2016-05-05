@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.validator;
 
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.runtime.IStatus;
 
@@ -21,7 +22,7 @@ import org.eclipse.core.runtime.IStatus;
  * @author jeff.cantrill
  *
  */
-public class ResourceNameValidator extends MultiValidator{
+public class ResourceNameValidator extends MultiValidator implements IValidator {
 	
 	private final ServiceNameValidator validator = new ServiceNameValidator();
 	private final IObservableValue<String> observable;
@@ -32,6 +33,10 @@ public class ResourceNameValidator extends MultiValidator{
 	@Override
 	protected IStatus validate() {
 		return validator.validate(observable.getValue());
+	}
+	@Override
+	public IStatus validate(Object value) {
+		return validator.validate(value);
 	}
 	
 }

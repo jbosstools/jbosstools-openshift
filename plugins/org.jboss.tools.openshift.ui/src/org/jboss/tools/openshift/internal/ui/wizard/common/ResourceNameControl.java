@@ -58,11 +58,13 @@ public class ResourceNameControl {
 		layoutText(resourceNameText);
 		final IObservableValue resourceNameTextObservable = 
 				WidgetProperties.text(SWT.Modify).observe(resourceNameText);
+		ResourceNameValidator validator = new ResourceNameValidator(resourceNameTextObservable);
 		final Binding nameBinding = ValueBindingBuilder
 				.bind(resourceNameTextObservable)
+				.validatingAfterConvert(validator)
 				.to(BeanProperties.value(PROPERTY_RESOURCE_NAME).observe(model))
 				.in(dbc);
-		dbc.addValidationStatusProvider(new ResourceNameValidator(resourceNameTextObservable));
+		dbc.addValidationStatusProvider(validator);
 		ControlDecorationSupport.create(
 				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 	}
