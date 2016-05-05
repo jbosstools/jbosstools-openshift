@@ -35,7 +35,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.team.internal.core.TeamPlugin;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
-import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.server.ServerSettingsWizardPageModel;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
@@ -95,7 +94,7 @@ public class ServerSettingsWizardPageModelTest {
 		assertThat(project).isEqualTo(project2);
 	}
 
-	private ServerSettingsWizardPageModel createModel(Object projects) {
+	private ServerSettingsWizardPageModel createModel(List<IProject> projects) {
 		TestableServerSettingsWizardPageModel model = spy(new TestableServerSettingsWizardPageModel());
 		doReturn(projects).when(model).loadProjects();
 		model.loadResources();
@@ -110,7 +109,7 @@ public class ServerSettingsWizardPageModelTest {
 
 		@Override
 		public List<org.eclipse.core.resources.IProject> loadProjects() {
-			return ProjectUtils.getAllAccessibleProjects();
+			return super.loadProjects();
 		}
 	}
 
