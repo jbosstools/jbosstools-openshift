@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.common;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -292,7 +293,11 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 	}
 	
     protected static boolean isFile(String path) {
-        return StringUtils.isNotBlank(path) && Files.isRegularFile(Paths.get(VariablesHelper.replaceVariables(path)));
+        try {
+            return StringUtils.isNotBlank(path) && Files.isRegularFile(Paths.get(VariablesHelper.replaceVariables(path)));
+        } catch (InvalidPathException e) {
+            return false;
+        }
     }
     
     protected static boolean exists(String path) {

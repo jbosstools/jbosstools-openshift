@@ -12,7 +12,9 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -29,9 +31,11 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
+import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
 
@@ -117,7 +121,7 @@ public class NewApplicationWizardModel
 		IResource resource = null;
 		filename = VariablesHelper.replaceVariables(filename);
 		try {
-			if (!Files.isRegularFile(Paths.get(filename))) {
+			if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(filename) && !Files.isRegularFile(Paths.get(filename))) {
 				return null;
 			}
 			resource = resourceFactory.create(createInputStream(filename));
@@ -126,6 +130,8 @@ public class NewApplicationWizardModel
 			}
 		} catch (FileNotFoundException e) {
 			throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
+		} catch (IOException e) {
+            throw new OpenShiftException(e, NLS.bind("Error reading the file or URL \"{0}\" to upload", filename));
 		} catch (ResourceFactoryException | ClassCastException e) {
 			throw e;
 		}
@@ -215,8 +221,12 @@ public class NewApplicationWizardModel
 		return useLocalAppSource;
 	}
 
-	public InputStream createInputStream(String fileName) throws FileNotFoundException {
-		return new FileInputStream(fileName);
+	public InputStream createInputStream(String fileName) throws IOException {
+	    if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(fileName)) {
+	        return new FileInputStream(fileName);
+	    } else {
+	        return new URL(fileName).openStream();
+	    }
 	}
 
 	@Override

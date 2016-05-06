@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.resource;
 
-import org.apache.commons.validator.routines.UrlValidator;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
 
@@ -21,11 +20,6 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
 public interface IResourcePayloadPageModel extends IProjectPageModel<IConnection> {
     public static final String PROPERTY_SOURCE = "source";
     
-    /*
-     * An UrlValidator that recognize strings as urls with http, https, ftp and file schemes.
-     */
-    public static final UrlValidator URL_VALIDATOR = new UrlValidator(new String[] {"http", "https", "ftp", "file"});
-
     /**
      * Set the source. The source can be a file path or an URL.
      * 

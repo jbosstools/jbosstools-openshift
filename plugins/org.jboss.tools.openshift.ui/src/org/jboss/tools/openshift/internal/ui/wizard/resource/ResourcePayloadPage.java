@@ -47,8 +47,8 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.utils.FileValidator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.wizard.common.AbstractProjectPage;
-
 import com.openshift.restclient.OpenShiftException;
 
 /**
@@ -116,7 +116,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
                 if (StringUtils.isEmpty(sourceValue)) {
                     return ValidationStatus.cancel("You need to provide a file path or an URL");
                 }
-                return (boolean) !IResourcePayloadPageModel.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)?ValidationStatus.error(sourceValue + " is not a file"):ValidationStatus.ok();
+                return (boolean) !OpenshiftUIConstants.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)?ValidationStatus.error(sourceValue + " is not a file"):ValidationStatus.ok();
             }
         };
         dbc.addValidationStatusProvider(validator);

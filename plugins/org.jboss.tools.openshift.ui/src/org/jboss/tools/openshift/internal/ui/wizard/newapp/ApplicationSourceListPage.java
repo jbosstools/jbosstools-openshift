@@ -92,6 +92,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.TabFolderSelecti
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
@@ -258,7 +259,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			.applyTo(parent);
 
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText("Select a local template:");
+		lbl.setText("Select a local template file or a full URL:");
 		GridDataFactory.fillDefaults().span(3,1).applyTo(lbl);
 		
 		// local template file name
@@ -271,14 +272,14 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 				.bind(localTemplateFilename )
 				.to(BeanProperties.value(
 						IApplicationSourceListPageModel.PROPERTY_LOCAL_APP_SOURCE_FILENAME).observe(model))
-				.validatingBeforeSet( o -> isFile(o.toString())?
-						ValidationStatus.ok(): 
-						ValidationStatus.error(txtLocalTemplateFileName.getText() +" is not a file"))
+				.validatingBeforeSet(o -> !OpenshiftUIConstants.URL_VALIDATOR.isValid(o.toString()) && !isFile(o.toString())?
+						ValidationStatus.error(txtLocalTemplateFileName.getText() +" is not a file"):
+                        ValidationStatus.ok()) 
 				.in(dbc);
 
 		// browse button
 		Button btnBrowseFiles = new Button(parent, SWT.NONE);
-		btnBrowseFiles.setText("File system...");
+		btnBrowseFiles.setText("Browse File System...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER)
 				.applyTo(btnBrowseFiles);
@@ -287,7 +288,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 		
 		// browse button
 		Button btnBrowseWorkspaceFiles = new Button(parent, SWT.NONE);
-		btnBrowseWorkspaceFiles.setText("Workspace...");
+		btnBrowseWorkspaceFiles.setText("Browse Workspace...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER)
 				.applyTo(btnBrowseWorkspaceFiles);
@@ -702,12 +703,12 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 				if (Boolean.TRUE.equals(useLocalTemplate.getValue())) {
 					String localTemplate = (String)localTemplateFilename.getValue();
 					if (StringUtils.isNotEmpty(localTemplate)){ 
-						if (!isFile(localTemplate)) {
+						if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(localTemplate) && !isFile(localTemplate)) {
 							status = ValidationStatus.error(NLS.bind("{0} is not a valid file.", localTemplate));
 							mutableTargets.add(localTemplateFilename);
 						}
 					} else if (selectedTemplate.getValue() == null) {
-						status = ValidationStatus.cancel("Please select a local template file.");
+						status = ValidationStatus.cancel("Please select a local template file or URL.");
 						mutableTargets.add(localTemplateFilename);
 					}
 				} else {
