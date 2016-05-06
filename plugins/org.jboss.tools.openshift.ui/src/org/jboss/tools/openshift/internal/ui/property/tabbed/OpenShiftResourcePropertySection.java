@@ -86,6 +86,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		SashForm container = new SashForm(parent, SWT.VERTICAL);
 		GridData d = new GridData(GridData.FILL_BOTH);
 		d.widthHint = 100; //A dirty trick that keeps table from growing unlimitedly within scrolled parent composite.
+		d.heightHint = 100;
 		container.setLayoutData(d);
 		Composite tableContainer = new Composite(container, SWT.NONE);
 
