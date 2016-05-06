@@ -34,7 +34,7 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 	public static final String CDK_RUNTIME_TYPE = "CDK";
 	
 	public static final String DOT_CDK_SUBSCRIPTION_USERNAME = "rhel.subscription.username";
-	public static final String SYSPROP_SUBSCRIPTION_PASSWORD = "rhel.subscription.password";
+	public static final String ENV_VAR_SUBSCRIPTION_PASSWORD = "rhel.subscription.password";
 	
 	
 	@Override
@@ -67,7 +67,7 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 				String val = props.getProperty(DOT_CDK_SUBSCRIPTION_USERNAME);
 				if( val != null ) {
 					ICredentialDomain domain = CredentialService.getCredentialModel().getDomain(CredentialService.REDHAT_ACCESS);
-					String password = System.getProperty(SYSPROP_SUBSCRIPTION_PASSWORD);
+					String password = System.getenv(ENV_VAR_SUBSCRIPTION_PASSWORD);
 					if( !domain.userExists(val)) {
 						if( password == null || password.isEmpty()) {
 							CredentialService.getCredentialModel().addPromptedCredentials(domain, val);
