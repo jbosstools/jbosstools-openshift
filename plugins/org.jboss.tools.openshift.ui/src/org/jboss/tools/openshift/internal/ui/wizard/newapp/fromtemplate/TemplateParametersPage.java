@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Iterator;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -129,9 +131,34 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		.bind(WidgetProperties.enabled().observe(resetButton))
 		.notUpdatingParticipant()
 		.to(selectedParameter)
-		.converting(new IsNotNull2BooleanConverter())
+		.converting(new IsNotNull2BooleanConverter() {
+			@Override
+			public Object convert(Object fromObject) {
+				return fromObject instanceof IParameter
+						&& ((ApplicationSourceFromTemplateModel)model).isParameterModified((IParameter)fromObject);
+			}
+		})
 		.in(dbc);
-		
+
+		// reset all button
+		Button resetAllButton = new Button(container, SWT.PUSH);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).applyTo(resetAllButton);
+		resetAllButton.setText("Reset All");
+		UIUtils.setDefaultButtonWidth(resetAllButton);
+		resetAllButton.addSelectionListener(onResetAll());
+		ValueBindingBuilder
+		.bind(WidgetProperties.enabled().observe(resetAllButton))
+		.notUpdatingParticipant()
+		.to(selectedParameter)
+		.converting(new IsNotNull2BooleanConverter() {
+			@Override
+			public Object convert(Object fromObject) {
+				return model.getParameters().stream().anyMatch(p -> ((ApplicationSourceFromTemplateModel)model).isParameterModified(p));
+			}
+		})
+		.in(dbc);
+
 		// required explanation
 		Label requiredExplanationLabel = new Label(container, SWT.None);
 		requiredExplanationLabel.setText("* = value required, click the 'Edit...' button or double-click on a value to edit it.");
@@ -146,7 +173,14 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 				.applyTo(detailsContainer);
 		new TemplateParameterDetailViews(selectedParameter, detailsContainer, dbc)
 				.createControls();
-
+		((ApplicationSourceFromTemplateModel)model).addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if(ApplicationSourceFromTemplateModel.PROPERTY_MODIFIED_PARAMETER.equals(evt.getPropertyName())) {
+					viewer.refresh(evt.getNewValue());
+				}
+			}
+		});
 	}
 
 	private IListChangeListener<IParameter> onParametersChanged(final TableViewerCellDecorationManager cellDecorations, final ObservableMap<String, IStatus> validationStatusByParameter) {
@@ -181,7 +215,8 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		final ObservableMap<String, IStatus> cellsValidationStatusObservable = new WritableMap<>(String.class, IStatus.class);
 		final TableViewerCellDecorationManager decorations = new TableViewerCellDecorationManager(decorationImage, table);
 		parametersObservable.addListChangeListener(onParametersChanged(decorations, cellsValidationStatusObservable));
-		TableViewer viewer = new TableViewerBuilder(table, tableContainer)
+		final TableViewerBuilder builder = new TableViewerBuilder(table, tableContainer);
+		TableViewer viewer = builder
 				.contentProvider(new ArrayContentProvider())
 				.column(new CellLabelProvider() {
 							
@@ -227,6 +262,9 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 								final IParameter parameter = (IParameter) cell.getElement();
 								String label = TemplateParameterViewerUtils.getValueLabel(parameter);
 								cell.setText(label);
+
+								boolean italic = ((ApplicationSourceFromTemplateModel)model).isParameterModified(parameter);
+								builder.applyFont(cell, italic);
 
 								IStatus validationStatus = validate(parameter);
 								cellsValidationStatusObservable.put(parameter.getName(), validationStatus);
@@ -379,7 +417,6 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		}
 		if (InputDialog.OK == dialog.open()) {
 			model.updateParameterValue(parameter, dialog.getValue());
-			viewer.refresh();
 		}
 	}
 
@@ -388,7 +425,15 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				model.resetParameter(getSelectedParameter());
-				viewer.refresh();
+			}
+		};
+	}
+
+	private SelectionListener onResetAll() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				model.getParameters().stream().forEach(p  -> model.resetParameter(p));
 			}
 		};
 	}

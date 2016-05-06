@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -54,6 +55,9 @@ import com.openshift.restclient.model.template.ITemplate;
 public class ApplicationSourceFromTemplateModel 
 	extends ResourceLabelsPageModel 
 	implements IResourceDetailsModel, ITemplateParametersPageModel, IApplicationSourceModel {
+
+	//intentionally package local, facilitates refresh of widgets in TemplateParametersPage
+	static final String PROPERTY_MODIFIED_PARAMETER = "modifiedParameter";
 	
 	private IProject project;
 	private ITemplate template;
@@ -171,6 +175,11 @@ public class ApplicationSourceFromTemplateModel
 		return parameters;
 	}
 
+	public boolean isParameterModified(IParameter param) {
+		return param != null && originalValueMap != null
+			&& !Objects.equals(param.getValue(), originalValueMap.get(param.getName()));
+	}
+
 	@Override
 	public void setParameters(List<IParameter> parameters) {
 		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = injectProjectParameters(this.eclipseProject, parameters));
@@ -246,11 +255,17 @@ public class ApplicationSourceFromTemplateModel
 	@Override
 	public void updateParameterValue(IParameter param, String value) {
 		param.setValue(value);
+		firePropertyChange(PROPERTY_MODIFIED_PARAMETER, null, param);
+		//Let's flip the selection to cause refresh of the state of buttons.
+		//Otherwise, we would have to introduce more properties and keep there state.
+		IParameter s = selectedParameter;
+		setSelectedParameter(null);
+		setSelectedParameter(s);
 	}
 
 	@Override
 	public void resetParameter(IParameter param) {
-		if (param != null) {
+		if (param != null && !Objects.equals(param.getValue(), originalValueMap.get(param.getName()))) {
 			updateParameterValue(param, originalValueMap.get(param.getName()));
 		}
 	}
