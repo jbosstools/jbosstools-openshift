@@ -179,7 +179,11 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
             	}
                 if (!ocMessageComposite.isDisposed() && !monitor.isCanceled()) {
                     setValid(true);
-                    ocVersionLabel.setText(NLS.bind("Your OpenShift client version is {0}.{1}.{2}", new Object[] {version.getMajor(), version.getMinor(), version.getMicro()}));
+                    if (Version.emptyVersion.equals(version)) {
+                    	ocVersionLabel.setText("Could not determine your OpenShift client version");
+                    } else {
+                    	ocVersionLabel.setText(NLS.bind("Your OpenShift client version is {0}.{1}.{2}", new Object[] {version.getMajor(), version.getMinor(), version.getMicro()}));
+                    }
                     ocMessageLabel.setText(NLS.bind("OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
                     ocMessageComposite.setVisible(!OCBinaryValidator.isCompatibleForPublishing(version));
                 }
