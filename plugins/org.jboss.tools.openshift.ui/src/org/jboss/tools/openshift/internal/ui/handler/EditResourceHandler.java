@@ -16,7 +16,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
@@ -67,25 +66,18 @@ public class EditResourceHandler extends OpenInWebBrowserHandler {
 		   if (page != null) {
 			   IEditorRegistry editorRegistry= PlatformUI.getWorkbench().getEditorRegistry();
 			   String defaultJsonEditorId = getDefaultJSONEditorDescriptorId(editorRegistry);
-			   IEditorDescriptor editorDescriptor = editorRegistry.getDefaultEditor(resource.getName()+".json", null);
-			   String editorId = editorDescriptor == null?defaultJsonEditorId:editorDescriptor.getId();
-			   try {
-				   page.openEditor(input, editorId);
-			   } catch (PartInitException O_o) {
-				   if (defaultJsonEditorId.equals(editorId)){
-					   throw O_o;
-				   }
-				   //try to fall back on default editor
-				   page.openEditor(input, defaultJsonEditorId);
-			   }
+			   page.openEditor(input, defaultJsonEditorId);
 		   }
 	}
-	
-	private String getDefaultJSONEditorDescriptorId(IEditorRegistry editorRegistry) {
-		IEditorDescriptor editorDescriptor = editorRegistry.findEditor("org.eclipse.wst.json.ui.JSONEditor");
-		if (editorDescriptor == null) {
-			editorDescriptor = editorRegistry.findEditor("org.eclipse.ui.DefaultTextEditor");
-		}
-		return editorDescriptor.getId();
+
+	/**
+	 * Return the default editor for JSON payloads. Please note that due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=493145
+	 * the JSON editor (as of 3.7.2) is not used as it does not fully respect the IDocumentProvider interface.
+	 * 
+	 * @param editorRegistry the Eclipse editor registry
+	 * @return the id of the editor to use
+	 */
+    private String getDefaultJSONEditorDescriptorId(IEditorRegistry editorRegistry) {
+        return editorRegistry.findEditor("org.eclipse.ui.DefaultTextEditor").getId();
 	}
 }
