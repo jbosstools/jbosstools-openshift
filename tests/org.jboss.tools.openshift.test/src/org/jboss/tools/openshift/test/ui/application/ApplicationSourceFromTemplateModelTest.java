@@ -75,11 +75,17 @@ public class ApplicationSourceFromTemplateModelTest {
 		when(param.getName()).thenReturn("foo");
 		when(param.getValue()).thenReturn("abc");
 		when(param.clone()).thenReturn(param);
+
+		IParameter other = mock(IParameter.class);
+		when(other.getName()).thenReturn("foo");
+		when(other.getValue()).thenReturn("xyz");
 		
 		model.setParameters(Arrays.asList(new IParameter[] {param}));
-		model.resetParameter(param);
 		
-		verify(param).setValue("abc");
+		
+		model.resetParameter(other);
+		
+		verify(other).setValue("abc");
 	}
 	
 	@Test
