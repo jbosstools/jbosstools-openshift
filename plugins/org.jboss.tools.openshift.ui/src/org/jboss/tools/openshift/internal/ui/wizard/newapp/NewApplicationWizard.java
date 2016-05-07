@@ -100,7 +100,7 @@ public class NewApplicationWizard
 			IResource resource = UIUtils.getFirstElement(selection, IResource.class);
 			if (resource != null) {
 				connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
-				model.setConnection(connection);
+				setConnection(connection);
 				model.setProject(resource.getProject());
 			} 
 		}
