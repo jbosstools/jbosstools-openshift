@@ -212,7 +212,7 @@ public class BuildConfigPage extends EnvironmentVariablePage {
 			.span(2, 1)
 			.applyTo(gitReferenceText);
 		ValueBindingBuilder
-			.bind(WidgetProperties.text().observe(gitReferenceText))
+			.bind(WidgetProperties.text(SWT.Modify).observe(gitReferenceText))
 			.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_GIT_REFERENCE).observe(model))
 			.in(dbc);
 		
@@ -232,7 +232,7 @@ public class BuildConfigPage extends EnvironmentVariablePage {
 			.span(2, 1)
 			.applyTo(contextDirText);
 		ValueBindingBuilder
-			.bind(WidgetProperties.text().observe(contextDirText))
+			.bind(WidgetProperties.text(SWT.Modify).observe(contextDirText))
 			.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONTEXT_DIR).observe(model))
 			.in(dbc);
 	}
