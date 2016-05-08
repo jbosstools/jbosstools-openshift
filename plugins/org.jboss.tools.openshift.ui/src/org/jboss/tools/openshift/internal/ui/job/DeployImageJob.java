@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -25,10 +26,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.core.Trace;
+import org.jboss.tools.openshift.internal.core.util.OpenShiftProjectUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
@@ -54,13 +57,16 @@ import com.openshift.restclient.model.route.IRoute;
  * @author jeff.cantrill
  *
  */
-public class DeployImageJob extends AbstractDelegatingMonitorJob implements IResourcesModel{
+public class DeployImageJob extends AbstractDelegatingMonitorJob 
+	implements IResourcesModel, ICommonAttributes{
 	
 	public static final String SELECTOR_KEY = "deploymentconfig";
 	private static final String JBOSSTOOLS_OPENSHIFT = "jbosstools-openshift";
+	private static final String MSG_NO_IMAGESTREAM = "{0} Note: Could not find an image stream\nfor {1} and/or the image is not available to the cluster.\nMake sure that a Docker image with that tag is available on the node for the\ndeployment to succeed.";
 	
 	private IDeployImageParameters parameters;
 	private Collection<IResource> created = Collections.emptyList();
+	private String summaryMessage;
 	
 	public DeployImageJob(IDeployImageParameters parameters) {
 		this("Deploy Image Job", parameters);
@@ -69,17 +75,22 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 	protected DeployImageJob(String title, IDeployImageParameters parameters) {
 		super(title);
 		this.parameters = parameters;
+		this.summaryMessage = NLS.bind("Results of deploying image \"{0}\".",  parameters.getResourceName());
 	}
 	
 	protected IDeployImageParameters getParameters() {
 		return this.parameters;
 	}
 	
+	public String getSummaryMessage() {
+		return this.summaryMessage;
+	}
+	
 	@Override
 	public Collection<IResource> getResources(){
 		return created;
 	}
-	
+
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
@@ -131,7 +142,10 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		
 		Map<String, IResource> resources = new HashMap<>(4);
 
-		resources.put(ResourceKind.IMAGE_STREAM, stubImageStream(factory, name, project, sourceImage));
+		IImageStream is = stubImageStream(factory, name, project, sourceImage);
+		if(is != null && StringUtils.isBlank(is.getResourceVersion())) {
+			resources.put(ResourceKind.IMAGE_STREAM, is);
+		}
 		
 		resources.put(ResourceKind.SERVICE, stubService(factory, name, SELECTOR_KEY, name));
 		
@@ -139,7 +153,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 			resources.put(ResourceKind.ROUTE, stubRoute(factory, name, resources.get(ResourceKind.SERVICE).getName()));
 		}
 		
-		resources.put(ResourceKind.DEPLOYMENT_CONFIG, stubDeploymentConfig(factory, name, sourceImage));
+		resources.put(ResourceKind.DEPLOYMENT_CONFIG, stubDeploymentConfig(factory, name, sourceImage, is));
 		addToGeneratedResources(resources, connection, name, project);
 		
 		for (IResource resource : resources.values()) {
@@ -153,7 +167,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		
 	}
 	
-	public IResource stubDeploymentConfig(IResourceFactory factory, final String name, DockerImageURI imageUri) {
+	protected IResource stubDeploymentConfig(IResourceFactory factory, final String name, DockerImageURI imageUri, IImageStream is) {
 		IDeploymentConfig dc = factory.stub(ResourceKind.DEPLOYMENT_CONFIG, name, parameters.getProject().getName());
 		dc.addLabel(SELECTOR_KEY, name);
 		dc.addTemplateLabel(SELECTOR_KEY, name);
@@ -167,11 +181,14 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 		dc.addContainer(dc.getName(), imageUri, new HashSet<>(parameters.getPortSpecs()), envs, parameters.getVolumes());
 		
 		dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
-		IDeploymentImageChangeTrigger imageChangeTrigger = (IDeploymentImageChangeTrigger) dc.addTrigger(DeploymentTriggerType.IMAGE_CHANGE);
-		imageChangeTrigger.setAutomatic(true);
-		imageChangeTrigger.setContainerName(name);
-		imageChangeTrigger.setFrom(new DockerImageURI(null, null, name, imageUri.getTag()));
-		imageChangeTrigger.setKind(ResourceKind.IMAGE_STREAM_TAG);
+		if(is != null) {
+			IDeploymentImageChangeTrigger imageChangeTrigger = (IDeploymentImageChangeTrigger) dc.addTrigger(DeploymentTriggerType.IMAGE_CHANGE);
+			imageChangeTrigger.setAutomatic(true);
+			imageChangeTrigger.setContainerName(name);
+			imageChangeTrigger.setFrom(new DockerImageURI(null, null, is.getName(), imageUri.getTag()));
+			imageChangeTrigger.setKind(ResourceKind.IMAGE_STREAM_TAG);
+			imageChangeTrigger.setNamespace(is.getNamespace());
+		}
 		return dc;
 	}
 	
@@ -187,10 +204,43 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 	}
 
 	protected IImageStream stubImageStream(IResourceFactory factory, String name, IProject project, DockerImageURI imageUri) {
-		IImageStream imageStream = factory.stub(ResourceKind.IMAGE_STREAM, name, parameters.getProject().getName());
-		imageStream.setDockerImageRepository(imageUri.getUriWithoutTag());
-		return imageStream;
+		//get project is - check
+		IImageStream is = findImageStreamFor(project.getName(), imageUri);
+		if(is == null) {
+			//get openshift is - check
+			is = findImageStreamFor(COMMON_NAMESPACE, imageUri);
+			
+			//check if cluster will be able to pull image
+			if(is == null && isImageVisibleByOpenShift(project, imageUri)){
+				is = factory.stub(ResourceKind.IMAGE_STREAM, name, project.getName());
+				is.setDockerImageRepository(imageUri.getUriWithoutTag());
+			}
+		}
+		if(is == null) {
+			summaryMessage = NLS.bind(MSG_NO_IMAGESTREAM, summaryMessage, parameters.getImageName());
+		}
+		return is;
 	}
+	
+	private IImageStream findImageStreamFor(String namespace, DockerImageURI uri){
+		Connection connection = parameters.getConnection();
+		List<IImageStream> streams = connection.getResources(ResourceKind.IMAGE_STREAM, namespace);
+		return streams.stream()
+			.filter(is->is.getDockerImageRepository() != null && is.getDockerImageRepository().getUriUserNameAndName().equals(uri.getUriUserNameAndName()))
+			.findFirst().orElse(null);
+	}
+	
+	
+	/**
+	 * Determine if the image is visible by the cluser.  Will use
+	 * to create an imagestream ref it.
+	 * @param uri
+	 * @return
+	 */
+	protected boolean isImageVisibleByOpenShift(IProject project, DockerImageURI uri) {
+		return OpenShiftProjectUtils.lookupImageMetadata(project, uri) != null;
+	}
+	
 
 	private IResource stubRoute(IResourceFactory factory, String name, String serviceName) {
 		IRoute route = factory.stub(ResourceKind.ROUTE, name, parameters.getProject().getName());

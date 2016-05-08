@@ -28,6 +28,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
+import org.jboss.tools.openshift.internal.core.ImageStreamTagMetaData;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.job.CreateApplicationFromImageJob;
 import org.jboss.tools.openshift.internal.ui.job.IResourcesModelJob;
@@ -35,7 +36,6 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablesP
 import org.jboss.tools.openshift.internal.ui.wizard.common.IEnvironmentVariablesPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizardModel;
-import org.jboss.tools.openshift.internal.ui.wizard.deployimage.ImageStreamTagMetaData;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSourceListPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSourceModel;

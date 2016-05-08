@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
@@ -104,13 +103,11 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 					Display.getDefault().syncExec(new Runnable() {
 						@Override
 						public void run() {
-							final String message = NLS.bind(
-									"Results of deploying image \"{0}\".",  getModel().getResourceName());
 							new ResourceSummaryDialog(
 									getShell(), 
 									deployJob.getResources(),
 									TITLE,
-									message).open();
+									deployJob.getSummaryMessage()).open();
 						}
 					});
 					OpenShiftUIUtils.showOpenShiftExplorerView();
