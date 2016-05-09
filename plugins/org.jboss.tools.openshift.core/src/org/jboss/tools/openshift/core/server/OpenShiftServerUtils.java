@@ -37,6 +37,7 @@ import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.server.ServerUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -100,7 +101,7 @@ public class OpenShiftServerUtils {
 		return ServerCore.findServerType(OpenShiftServer.SERVER_TYPE_ID);
 	}
 	
-	public static String getServerName(IService service, Connection connection) {
+	public static String getServerName(IService service, IConnection connection) {
 		if (service == null) {
 			return null;
 		}
@@ -199,6 +200,7 @@ public class OpenShiftServerUtils {
 		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, routeURL, project);
 	}
 
+	@Deprecated // Not used currently?
 	public static void updateServerProject(String connectionUrl, String serviceId, String sourcePath, String podPath, IProject project) {
 		updateServerProject(connectionUrl, serviceId, sourcePath, podPath, null, project);
 	}
@@ -292,8 +294,9 @@ public class OpenShiftServerUtils {
 
 	public static Connection getConnection(IServerAttributes attributes) {
 		try {
-			String url = getProjectAttribute(
-					ATTR_CONNECTIONURL, null, getDeployProject(attributes));
+			String url = attributes.getAttribute(ATTR_CONNECTIONURL, (String)null);
+			if( url == null)
+					url = getProjectAttribute(ATTR_CONNECTIONURL, null, getDeployProject(attributes));
 			if (!StringUtils.isEmpty(url)) {
 				ConnectionURL connectionUrl = ConnectionURL.forURL(url);
 				return ConnectionsRegistrySingleton.getInstance().getByUrl(connectionUrl, Connection.class);
@@ -311,7 +314,9 @@ public class OpenShiftServerUtils {
 	
 	public static IService getService(IServerAttributes attributes, Connection connection) {
 		// TODO: implement override project settings with server settings
-		String uniqueId = getProjectAttribute(ATTR_SERVICE, null, getDeployProject(attributes));
+		String uniqueId = attributes.getAttribute(ATTR_SERVICE, (String)null);
+		if( uniqueId == null )
+			uniqueId = getProjectAttribute(ATTR_SERVICE, null, getDeployProject(attributes));
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
@@ -322,11 +327,18 @@ public class OpenShiftServerUtils {
 	}
 
 	public static String getRouteURL(IServerAttributes attributes) {
-		return getProjectAttribute(ATTR_ROUTE, null, getDeployProject(attributes));
+		String routeURL = attributes.getAttribute(ATTR_ROUTE, (String)null);
+		if( routeURL == null ) 
+			routeURL = getProjectAttribute(ATTR_ROUTE, null, getDeployProject(attributes));
+		return routeURL;
 	}
 
 	public static String getPodPath(IServerAttributes attributes) {
 		// TODO: implement override project settings with server settings
+		String podPath = attributes.getAttribute(OpenShiftServerUtils.ATTR_POD_PATH, (String)null);
+		if( podPath != null && !podPath.isEmpty()) {
+			return podPath;
+		}
 		return getProjectAttribute(ATTR_POD_PATH, null, getDeployProject(attributes));
 	}
 	
@@ -368,7 +380,10 @@ public class OpenShiftServerUtils {
 
 	public static String getSourcePath(IServerAttributes attributes) {
 		// TODO: implement override project settings with server settings
-		String rawSourcePath = getProjectAttribute(ATTR_SOURCE_PATH, null, getDeployProject(attributes));
+		String rawSourcePath = attributes.getAttribute(ATTR_SOURCE_PATH, (String)null);
+		if( rawSourcePath == null || rawSourcePath.isEmpty()) {
+			rawSourcePath = getProjectAttribute(ATTR_SOURCE_PATH, null, getDeployProject(attributes));
+		}
 		if (org.apache.commons.lang.StringUtils.isBlank(rawSourcePath)) {
 			return rawSourcePath;
 		}
@@ -380,7 +395,7 @@ public class OpenShiftServerUtils {
 		return server.getAttribute(ATTR_OVERRIDE_PROJECT_SETTINGS, false);
 	}
 
-	public static String getProjectAttribute(String name, String defaultValue, IServerAttributes attributes) {
+	private static String getProjectAttribute(String name, String defaultValue, IServerAttributes attributes) {
 		return getProjectAttribute(name, defaultValue, getDeployProject(attributes));
 	}
 
@@ -393,7 +408,7 @@ public class OpenShiftServerUtils {
 	 * @param defaultValue
 	 * @return
 	 */
-	public static String getProjectAttribute(String name, String defaultValue, IProject project) {
+	private static String getProjectAttribute(String name, String defaultValue, IProject project) {
 		return ServerUtils.getProjectAttribute(name, defaultValue, SERVER_PROJECT_QUALIFIER, project);
 	}
 	
@@ -416,7 +431,7 @@ public class OpenShiftServerUtils {
 		return dc;
 	}
 
-	public static void setProjectAttribute(String name, String defaultValue, IProject project) {
+	private static void setProjectAttribute(String name, String defaultValue, IProject project) {
 		ServerUtils.setProjectAttribute(name, defaultValue, SERVER_PROJECT_QUALIFIER, project, true);
 	}
 	

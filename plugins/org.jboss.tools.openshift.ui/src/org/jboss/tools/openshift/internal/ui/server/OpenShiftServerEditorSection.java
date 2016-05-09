@@ -11,13 +11,17 @@
 package org.jboss.tools.openshift.internal.ui.server;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.IValueChangeListener;
+import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
@@ -44,6 +48,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -65,7 +70,9 @@ import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.ui.jobs.DisableAllWidgetsJob;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.FileUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -120,7 +127,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.align(SWT.FILL, SWT.FILL).grab(true, true)
 			.applyTo(section);
 
-		this.model = new OpenShiftServerEditorModel(server, null);
+		this.model = new OpenShiftServerEditorModel(server, this, null);
 
 		Composite container = createControls(section, model);
 		GridDataFactory.fillDefaults()
@@ -227,7 +234,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		 	.in(dbc);
 		ControlDecorationSupport.create(
 				connectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-
+		
+		
 		Button newConnectionButton = new Button(parent, SWT.PUSH);
 		newConnectionButton.setText("New...");
 		GridDataFactory.fillDefaults()
@@ -336,7 +344,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		Text sourcePathText = new Text(container, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(sourcePathText);
+				.span(3,1).applyTo(sourcePathText);
 		ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(sourcePathText))
 				.validatingAfterConvert(new IValidator() {
@@ -359,18 +367,27 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				})
 				.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_SOURCE_PATH).observe(model))
 				.in(dbc);
+		
+		// placeholder labels and a wrapper to hold the two buttons
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		Composite wrapper = new Composite(container, SWT.NONE);
+		wrapper.setLayout(new GridLayout(2, true));
+		GridDataFactory.fillDefaults().align(SWT.END, SWT.FILL).span(2,1).applyTo(wrapper);
 
-		Button browseSourceButton = new Button(container, SWT.PUSH);
+		
+		
+		Button browseSourceButton = new Button(wrapper, SWT.PUSH);
 		browseSourceButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
+				.align(SWT.FILL, SWT.END)
 				.applyTo(browseSourceButton);
 		browseSourceButton.addSelectionListener(onBrowseSource(browseSourceButton.getShell()));
 
-		Button browseWorkspaceSourceButton = new Button(container, SWT.PUSH | SWT.READ_ONLY);
+		Button browseWorkspaceSourceButton = new Button(wrapper, SWT.PUSH | SWT.READ_ONLY);
 		browseWorkspaceSourceButton.setText("Workspace...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
+				.align(SWT.FILL, SWT.END)
 				.applyTo(browseWorkspaceSourceButton);
 		browseWorkspaceSourceButton.addSelectionListener(onBrowseWorkspace(browseWorkspaceSourceButton.getShell()));
 
@@ -505,7 +522,19 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
-								model.loadResources();
+								model.setInitializing(true);
+								try {
+									String conUrl = server.getAttribute(OpenShiftServerUtils.ATTR_CONNECTIONURL, (String)null);
+									if( conUrl != null ) {
+										ConnectionURL conurl2 = ConnectionURL.forURL(conUrl);
+										IConnection con = ConnectionsRegistrySingleton.getInstance().getByUrl(conurl2);
+										model.loadResources(con);
+									}
+								} catch(UnsupportedEncodingException uee) {
+									
+								} catch(MalformedURLException murle) {
+									
+								}
 								return Status.OK_STATUS;
 							}
 						})
@@ -521,15 +550,19 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 									model.setConnection(connection);
 								}
 								model.setService(OpenShiftServerUtils.getService(server));
+								String sourcePath = OpenShiftServerUtils.getSourcePath(server);
+								if(!StringUtils.isEmpty(sourcePath)) {
+									model.setSourcePath(sourcePath);
+								}
 								String podPath = OpenShiftServerUtils.getPodPath(server);
 								if(!StringUtils.isEmpty(podPath)) {
 									model.setPodPath(podPath);
 								}
+								model.setInitializing(false);
 								return Status.OK_STATUS;
 							}
 						})
-				// disable widgets for now, we're not supporting editing yet
-				.runWhenDone(new DisableAllWidgetsJob(true, container, false, busyCursor))
+				.runWhenDone(new DisableAllWidgetsJob(false, container, false, busyCursor))
 				.schedule();
 	}
 	

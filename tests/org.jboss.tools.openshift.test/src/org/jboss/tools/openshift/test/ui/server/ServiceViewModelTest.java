@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.server.ServiceViewModel;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
@@ -60,7 +61,7 @@ public class ServiceViewModelTest {
 	public void shouldReturnConnection() {
 		// given
 		// when
-		Connection connection = model.getConnection();
+		IConnection connection = model.getConnection();
 		// then
 		assertThat(connection).isEqualTo(this.connection);
 	}

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
@@ -59,7 +60,7 @@ public class SelectServiceWizard extends AbstractOpenShiftWizard<ServiceViewMode
 
 	private String description;
 
-	public SelectServiceWizard(String description, IService service, Connection connection) {
+	public SelectServiceWizard(String description, IService service, IConnection connection) {
 		super("Select Service", new ServiceViewModel(service, connection));
 		this.description = description;
 	}

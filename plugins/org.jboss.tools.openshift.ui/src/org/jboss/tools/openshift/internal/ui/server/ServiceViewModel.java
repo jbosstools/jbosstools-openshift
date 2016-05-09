@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.treeitem.IModelFactory;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
@@ -37,33 +38,33 @@ public class ServiceViewModel extends ObservablePojo {
 	public static final String PROPERTY_SERVICE_ITEMS = "serviceItems";
 
 	private boolean isLoaded = false;
-	private Connection connection;
-	private List<Connection> connections = new ArrayList<>();
+	private IConnection connection;
+	private List<IConnection> connections = new ArrayList<>();
 	private List<ObservableTreeItem> serviceItems = new ArrayList<>();
 	protected IService service;
 
-	public ServiceViewModel(Connection connection) {
+	public ServiceViewModel(IConnection connection) {
 		this(null, connection);
 	}
 
-	public ServiceViewModel(IService service, Connection connection) {
+	public ServiceViewModel(IService service, IConnection connection) {
 		this.connection = connection;
 		this.service = service;
 	}
 
-	protected void update(Connection connection, List<Connection> connections, IService service, List<ObservableTreeItem> serviceItems) {
+	protected void update(IConnection connection, List<IConnection> connections, IService service, List<ObservableTreeItem> serviceItems) {
 		updateConnections(connections);
 		updateConnection(connection);
 		updateServiceItems(serviceItems);
 		updateService(service, serviceItems);
 	}
 
-	protected void updateConnection(Connection connection) {
+	protected void updateConnection(IConnection connection) {
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
 	}
 
-	private void updateConnections(List<Connection> newConnections) {
-		List<Connection> oldItems = new ArrayList<>(this.connections);
+	private void updateConnections(List<IConnection> newConnections) {
+		List<IConnection> oldItems = new ArrayList<>(this.connections);
 		// ensure we're not operating on the same list
 		if (newConnections != this.connections) {
 			this.connections.clear();
@@ -96,19 +97,19 @@ public class ServiceViewModel extends ObservablePojo {
 		return newService;
 	}
 
-	public void setConnections(List<Connection> connections) {
+	public void setConnections(List<IConnection> connections) {
 		update(this.connection, connections, this.service, this.serviceItems);
 	}
 
-	public Connection getConnection() {
+	public IConnection getConnection() {
 		return connection;
 	}
 	
-	public List<Connection> getConnections() {
+	public List<IConnection> getConnections() {
 		return this.connections;
 	}
 
-	public void setConnection(Connection connection) {
+	public void setConnection(IConnection connection) {
 		if(this.connection != connection) {
 			update(connection, this.connections, null, Collections.emptyList());
 		}
@@ -186,10 +187,10 @@ public class ServiceViewModel extends ObservablePojo {
 	 * This method should be invoked in an ui job.
 	 * @param connection the connection to use to load the resources.
 	 */
-	public void loadResources(final Connection connection) {
+	public void loadResources(final IConnection connection) {
 		this.isLoaded = false;
-		setConnection(connection);
 		setConnections(loadConnections());
+		setConnection(connection);
 		if (connection != null) {
 			List<ObservableTreeItem> serviceItems = loadServices(connection);
 			setServiceItems(serviceItems);
@@ -198,11 +199,11 @@ public class ServiceViewModel extends ObservablePojo {
 		update(this.connection, this.connections, this.service, this.serviceItems);
 	}
 
-	private List<Connection> loadConnections() {
-		return (List<Connection>) ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
+	private List<IConnection> loadConnections() {
+		return new ArrayList<IConnection>(ConnectionsRegistrySingleton.getInstance().getAll());
 	}
 
-	protected List<ObservableTreeItem> loadServices(Connection connection) {
+	protected List<ObservableTreeItem> loadServices(IConnection connection) {
 		if (connection == null) {
 			return null;
 		}

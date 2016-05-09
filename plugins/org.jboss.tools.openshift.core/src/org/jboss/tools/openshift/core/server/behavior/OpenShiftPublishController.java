@@ -178,8 +178,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		new Job("Updating Pod Path") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				OpenShiftServerUtils.setProjectAttribute(
-						OpenShiftServerUtils.ATTR_POD_PATH, podPath, OpenShiftServerUtils.getDeployProject(getServer()));
+				// Only set the pod path on the server object
 				IServerWorkingCopy wc = server.createWorkingCopy();
 				wc.setAttribute(OpenShiftServerUtils.ATTR_POD_PATH, podPath);
 				try {

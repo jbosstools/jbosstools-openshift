@@ -137,8 +137,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 		new Job("Updating Route") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				OpenShiftServerUtils.setProjectAttribute(
-						OpenShiftServerUtils.ATTR_ROUTE, route, OpenShiftServerUtils.getDeployProject(server));
+				// Only set the route on the server, not the project
 				IServerWorkingCopy wc = server.createWorkingCopy();
 				wc.setAttribute(OpenShiftServerUtils.ATTR_ROUTE, route);
 				wc.setHost(UrlUtils.getHost(route));

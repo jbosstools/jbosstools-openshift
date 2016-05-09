@@ -29,6 +29,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
@@ -93,7 +94,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		this.invalidOCBinary = invalidOCBinary;
 	}
 
-	protected void update(Connection connection, List<Connection> connections, 
+	protected void update(IConnection connection, List<IConnection> connections, 
 			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
 			String sourcePath, String podPath, boolean useInferredPodPath,
 			IService service, List<ObservableTreeItem> serviceItems, 
@@ -107,6 +108,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		List<IRoute> newRoutes = updateRoutes(service, routesByProject);
 		updateRoute(route, newRoutes, service);
 		updateSelectDefaultRoute(isSelectDefaultRoute);
+		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath= podPath);
 		updateInvalidOCBinary(invalidOCBinary);
 		firePropertyChange(PROPERTY_USE_INFERRED_POD_PATH, this.useInferredPodPath, this.useInferredPodPath = useInferredPodPath);
 		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = podPath);
@@ -300,7 +302,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	}
 
 	@Override
-	public void loadResources(Connection newConnection) {
+	public void loadResources(IConnection newConnection) {
 		boolean serviceInitialized = this.service != null;
 		this.isLoaded = false;
 
@@ -343,16 +345,18 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 			.findFirst().orElse(null);
 	}
 	
-	private Map<IProject, List<IBuildConfig>> loadBuildConfigs(List<IProject> projects, Connection connection) {
+	private Map<IProject, List<IBuildConfig>> loadBuildConfigs(List<IProject> projects, IConnection connection) {
 		if (projects == null
 				|| projects.isEmpty()) {
 			return Collections.emptyMap();
 		}
+		
+		Connection c2 = (Connection)connection;
 		return projects.stream()
 				.collect(Collectors.toMap(
 						project -> project, 
 						project -> {
-							List<IBuildConfig> buildConfigs = connection.getResources(ResourceKind.BUILD_CONFIG, project.getName());
+							List<IBuildConfig> buildConfigs = c2.getResources(ResourceKind.BUILD_CONFIG, project.getName());
 							return buildConfigs;
 						}));
 	}
@@ -425,14 +429,14 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3;
 	}
 
-	private String getHost(IRoute route) {
+	protected String getHost(IRoute route) {
 		if (route == null) {
 			return "";
 		}
 		return UrlUtils.getHost(route.getURL());
 	}
 
-	private String getRouteURL(boolean isDefaultRoute, IRoute route) {
+	protected String getRouteURL(boolean isDefaultRoute, IRoute route) {
 		if (!isDefaultRoute || route == null) {
 			return null;
 		}
@@ -514,7 +518,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		return server.save(true, monitor);
 	}
 	
-	private String getConnectionUrl(Connection connection) {
+	protected String getConnectionUrl(IConnection connection) {
 		ConnectionURL connectionUrl;
 		try {
 			connectionUrl = ConnectionURL.forConnection(connection);
@@ -540,5 +544,9 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
                 getService(), getServiceItems(),
                 route, this.selectDefaultRoute, this.routesByProject,
                 invalidOCBinary);
+    }
+    
+    protected IServerWorkingCopy getServer() {
+    	return server;
     }
 }

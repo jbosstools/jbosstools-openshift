@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.server;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.wst.server.core.IServerAttributes;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.junit.Test;
 
@@ -107,5 +109,28 @@ public class OpenShiftServerUtilsTest {
 	
 	private void assertNotContainsEapLikeKeywords(String text) {
 		assertFalse(OpenShiftServerUtils.containsEapLikeKeywords(text));
+	}
+	
+	
+	@Test
+	public void testGetPodPathFromServer() {
+		// Only tests resolution from server
+		IServerAttributes server = mock(IServerAttributes.class);
+		when(server.getAttribute(OpenShiftServerUtils.ATTR_POD_PATH, (String)null)).thenReturn("test1");
+		assertEquals("test1", OpenShiftServerUtils.getPodPath(server));
+	}
+	@Test
+	public void testGetSourceFromServer() {
+		// Only tests resolution from server
+		IServerAttributes server = mock(IServerAttributes.class);
+		when(server.getAttribute(OpenShiftServerUtils.ATTR_SOURCE_PATH, (String)null)).thenReturn("test1");
+		assertEquals("test1", OpenShiftServerUtils.getSourcePath(server));
+	}
+	@Test
+	public void testGetRouteURLFromServer() {
+		// Only tests resolution from server
+		IServerAttributes server = mock(IServerAttributes.class);
+		when(server.getAttribute(OpenShiftServerUtils.ATTR_ROUTE, (String)null)).thenReturn("test1");
+		assertEquals("test1", OpenShiftServerUtils.getRouteURL(server));
 	}
 }
