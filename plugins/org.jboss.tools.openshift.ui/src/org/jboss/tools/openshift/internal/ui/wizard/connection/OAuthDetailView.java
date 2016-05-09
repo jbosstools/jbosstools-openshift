@@ -176,7 +176,8 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 				.in(dbc);
 		ControlDecorationSupport.create(
 				tokenBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		tokenObservable.addValueChangeListener(changeListener);
+		org.jboss.tools.common.ui.databinding.DataBindingUtils
+			.addDisposableValueChangeListener(changeListener, tokenObservable, tokenText);
 	}
 	
 	@Override

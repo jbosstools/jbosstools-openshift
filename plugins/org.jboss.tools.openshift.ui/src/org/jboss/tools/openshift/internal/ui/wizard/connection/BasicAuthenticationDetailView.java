@@ -140,7 +140,8 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 				.in(dbc);
 		ControlDecorationSupport.create(
 				usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		usernameObservable.addValueChangeListener(changeListener);
+		org.jboss.tools.common.ui.databinding.DataBindingUtils
+			.addDisposableValueChangeListener(changeListener, usernameObservable, usernameText);
 
 		// password
 		this.passwordBinding = ValueBindingBuilder
@@ -151,7 +152,8 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 				.in(dbc);
 		ControlDecorationSupport.create(
 				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		passwordObservable.addValueChangeListener(changeListener);
+		org.jboss.tools.common.ui.databinding.DataBindingUtils
+		.addDisposableValueChangeListener(changeListener, passwordObservable, passwordText);
 		
 		connectionAuthProvider = new ConnectionAuthenticationProvider();
 	}

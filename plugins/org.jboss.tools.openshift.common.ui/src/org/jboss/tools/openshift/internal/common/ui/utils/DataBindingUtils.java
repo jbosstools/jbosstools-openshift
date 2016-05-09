@@ -19,7 +19,13 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.observable.IObservable;
+import org.eclipse.core.databinding.observable.list.IListChangeListener;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.widgets.Control;
 
 /**
  * @author Andre Dietisheim
@@ -116,5 +122,36 @@ public class DataBindingUtils {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Adds the given list change listener to the given observable and removes
+	 * it once the given control is disposed.
+	 * 
+	 * @param listener
+	 *            the listener that shall be added
+	 * @param observable
+	 *            the observable that the listener shall be attached to
+	 * @param control
+	 *            the control that triggers removal once it's disposed
+	 */
+	public static void addDisposableListChangeListener(
+			final IListChangeListener listener, final IObservableList observable, Control control) {
+		Assert.isNotNull(listener);
+		Assert.isNotNull(observable);
+		Assert.isNotNull(control);
+		
+		if (control.isDisposed()) {
+			return;
+		}
+
+		observable.addListChangeListener(listener);
+		control.addDisposeListener(new DisposeListener() {
+
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				observable.removeListChangeListener(listener);
+			}
+		});
 	}
 }

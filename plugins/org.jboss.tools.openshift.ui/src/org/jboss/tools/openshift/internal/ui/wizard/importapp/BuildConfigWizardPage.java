@@ -46,6 +46,7 @@ import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
@@ -109,8 +110,9 @@ public class BuildConfigWizardPage extends AbstractOpenShiftWizardPage {
 				}
 			}
 		});
-		BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONNECTION).observe(model)
-				.addValueChangeListener(onConnectionChanged(buildConfigsViewer, model));
+		IObservableValue connectionObservable = BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONNECTION).observe(model);
+		DataBindingUtils.addDisposableValueChangeListener(
+				onConnectionChanged(buildConfigsViewer, model), connectionObservable, buildConfigsViewer.getTree());
 		
 		ControlDecorationSupport.create(
 				selectedBuildConfigBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));

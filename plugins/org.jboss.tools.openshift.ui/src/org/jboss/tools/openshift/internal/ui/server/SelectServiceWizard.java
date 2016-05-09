@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
+import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
@@ -41,6 +42,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
@@ -119,8 +121,9 @@ public class SelectServiceWizard extends AbstractOpenShiftWizard<ServiceViewMode
 					.applyTo(selectorText);
 
 			final TreeViewer servicesViewer = createServicesTreeViewer(servicesGroup, selectorText);
-			BeanProperties.list(ServiceViewModel.PROPERTY_SERVICE_ITEMS).observe(getModel())
-				.addListChangeListener(onServiceItemsChanged(servicesViewer));
+			IObservableList serviceItemsObservable = BeanProperties.list(ServiceViewModel.PROPERTY_SERVICE_ITEMS).observe(getModel());
+			DataBindingUtils.addDisposableListChangeListener(
+					onServiceItemsChanged(servicesViewer), serviceItemsObservable, servicesViewer.getTree());
 			GridDataFactory.fillDefaults()
 				.span(2, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 160).grab(true, true)
 				.applyTo(servicesViewer.getControl());

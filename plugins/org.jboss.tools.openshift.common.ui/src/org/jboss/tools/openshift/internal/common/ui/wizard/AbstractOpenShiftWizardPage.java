@@ -24,9 +24,12 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
+import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 
 /**
  * @author André Dietisheim
@@ -70,6 +73,13 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 		setControl(container);
 		initPageChangedListener();
 		doCreateControls(child, dbc);
+		parent.getShell().addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				DataBindingUtils.dispose(dbc);
+				dbc = null;
+			}
+		});
 	}
 
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
@@ -177,4 +187,5 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	protected DataBindingContext getDataBindingContext() {
 		return dbc;
 	}
+
 }

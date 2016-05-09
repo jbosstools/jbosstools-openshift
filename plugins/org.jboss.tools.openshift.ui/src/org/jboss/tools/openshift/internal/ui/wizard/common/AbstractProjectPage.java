@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
@@ -138,8 +139,9 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 		ControlDecorationSupport.create(
 				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 
-		BeanProperties.value(IProjectPageModel.PROPERTY_CONNECTION).observe(model)
-				.addValueChangeListener(onConnectionChanged());
+		IObservableValue connectionObservable = BeanProperties.value(IProjectPageModel.PROPERTY_CONNECTION).observe(model);
+		DataBindingUtils.addDisposableValueChangeListener(
+				onConnectionChanged(), connectionObservable, projectsViewer.getControl());
 
 		StyledText manageProjectsLink = StyledTextUtils.emulateLinkWidget("<a>Manage Projects</a>", new StyledText(parent, SWT.WRAP));
 		GridDataFactory.fillDefaults()

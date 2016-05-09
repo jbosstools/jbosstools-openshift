@@ -279,4 +279,18 @@ public class ApplicationSourceFromTemplateModel
 		setLabels(labels);
 	}
 
+	@Override
+	public void dispose() {
+		super.dispose();
+		project = null;
+		template = null;
+		parameters.clear();
+		selectedParameter = null;
+		if(originalValueMap != null) {
+			originalValueMap.clear();
+		}
+		items.clear();
+		eclipseProject = null;
+	}
+
 }

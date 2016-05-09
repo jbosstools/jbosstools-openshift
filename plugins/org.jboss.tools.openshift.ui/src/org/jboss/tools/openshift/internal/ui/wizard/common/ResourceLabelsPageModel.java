@@ -81,4 +81,11 @@ public class ResourceLabelsPageModel extends ObservablePojo implements IResource
 		fireIndexedPropertyChange(PROPERTY_LABELS, this.labels.size(), old, Collections.unmodifiableList(labels));
 	}
 
+	@Override
+	public void dispose() {
+		super.dispose();
+		labels.clear();
+		selectedLabel = null;
+	}
+
 }
