@@ -255,7 +255,12 @@ public class ApplicationSourceFromImageModel
 		firePropertyChange(PROPERTY_CONTEXT_DIR, this.contextDir, this.contextDir = contextDir);
 	}
 	
-	
-
+	@Override
+	public void dispose() {
+		super.dispose();
+		source = null;
+		container = null;
+		((EnvironmentVariablesPageModel)envModel).dispose();
+	}
 
 }

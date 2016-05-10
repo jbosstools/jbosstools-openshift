@@ -104,7 +104,19 @@ public class DeployImageWizardModel
 	
 	@Override
 	public void dispose() {
+		super.dispose();
 	    DockerConnectionManager.getInstance().removeConnectionManagerListener(this);
+	    ((EnvironmentVariablesPageModel)envModel).dispose();
+	    connection = null;
+	    project = null;
+	    dockerConnection = null;
+	    projects.clear();
+	    volumes.clear();
+	    portSpecs.clear();
+	    if(imagePorts != null) {
+	    	imagePorts.clear();
+	    	imagePorts = null;
+	    }
 	}
 	
 	

@@ -55,6 +55,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
+import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerCellDecorationManager;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -214,7 +215,10 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		Image decorationImage = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
 		final ObservableMap<String, IStatus> cellsValidationStatusObservable = new WritableMap<>(String.class, IStatus.class);
 		final TableViewerCellDecorationManager decorations = new TableViewerCellDecorationManager(decorationImage, table);
-		parametersObservable.addListChangeListener(onParametersChanged(decorations, cellsValidationStatusObservable));
+		DataBindingUtils.addDisposableListChangeListener(
+				onParametersChanged(decorations, cellsValidationStatusObservable), 
+				parametersObservable, 
+				table);
 		final TableViewerBuilder builder = new TableViewerBuilder(table, tableContainer);
 		TableViewer viewer = builder
 				.contentProvider(new ArrayContentProvider())

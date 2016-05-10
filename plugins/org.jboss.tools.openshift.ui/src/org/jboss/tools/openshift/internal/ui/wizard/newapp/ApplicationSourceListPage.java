@@ -71,6 +71,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.progress.UIJob;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
@@ -202,15 +203,16 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			}
 		});
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(gitLabel);
-		
-		eclipseProjectObservable.addValueChangeListener(new IValueChangeListener() {
 
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				org.eclipse.core.resources.IProject p = (org.eclipse.core.resources.IProject) event.getObservableValue().getValue();
-				toggleEgitLink(gitLabel, p);
-			}
-		});
+		DataBindingUtils.addDisposableValueChangeListener(
+				new IValueChangeListener() {
+
+					@Override
+					public void handleValueChange(ValueChangeEvent event) {
+						org.eclipse.core.resources.IProject p = (org.eclipse.core.resources.IProject) event.getObservableValue().getValue();
+						toggleEgitLink(gitLabel, p);
+					}
+				}, eclipseProjectObservable, gitLabel);
 		toggleEgitLink(gitLabel, model.getEclipseProject());
 		return builder.getProjectNameTextObservable();
 	}
@@ -367,13 +369,13 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 				.applyTo(txtTemplateFilter);
 
 		IObservableValue eclipseProjectObservable = BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
-		eclipseProjectObservable.addValueChangeListener(new IValueChangeListener() {
+		DataBindingUtils.addDisposableValueChangeListener(new IValueChangeListener() {
 
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
 				filterTemplates(txtTemplateFilter, (org.eclipse.core.resources.IProject)event.getObservableValue().getValue());
 			}
-		});
+		}, eclipseProjectObservable, txtTemplateFilter);
 		
 		filterTemplates(txtTemplateFilter, model.getEclipseProject());
 		

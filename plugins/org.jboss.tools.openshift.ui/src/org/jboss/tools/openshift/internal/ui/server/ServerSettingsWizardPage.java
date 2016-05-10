@@ -21,6 +21,7 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
+import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
@@ -98,6 +99,7 @@ import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilde
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport.IFormPresenter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
@@ -594,8 +596,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				.applyTo(selectorText);
 
 		final TreeViewer servicesViewer = createServicesTreeViewer(servicesGroup, model, selectorText);
-		BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_SERVICE_ITEMS).observe(model)
-			.addListChangeListener(onServiceItemsChanged(servicesViewer));
+		IObservableList serviceItemsObservable = BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_SERVICE_ITEMS).observe(model);
+		DataBindingUtils.addDisposableListChangeListener(
+				onServiceItemsChanged(servicesViewer), serviceItemsObservable, servicesViewer.getTree());
 		GridDataFactory.fillDefaults()
 			.span(2, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 160).grab(true, true)
 			.applyTo(servicesViewer.getControl());

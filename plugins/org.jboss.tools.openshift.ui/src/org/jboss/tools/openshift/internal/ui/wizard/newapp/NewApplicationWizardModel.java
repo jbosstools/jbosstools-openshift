@@ -334,5 +334,18 @@ public class NewApplicationWizardModel
 	public org.eclipse.core.resources.IProject getEclipseProject() {
 		return eclipseProject;
 	}
-	
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		connection = null;
+		project = null;
+		projectItems.clear();
+		projectTemplates.clear();
+		selectedAppSource = null;
+		localAppSource = null;
+		serverAppSource = null;
+		resourceFactory = null;
+		eclipseProject = null;
+	}
 }

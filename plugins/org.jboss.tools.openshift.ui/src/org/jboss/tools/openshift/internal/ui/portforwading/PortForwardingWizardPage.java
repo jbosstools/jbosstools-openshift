@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
@@ -110,12 +111,13 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 				PortForwardingWizardModel.PROPERTY_USE_FREE_PORTS).observe(wizardModel);
 		final IObservableValue findFreePortsButtonSelection = WidgetProperties.selection().observe(findFreesPortButton);
 		dbc.bindValue(findFreePortsButtonSelection, findFreePortsButtonObservable);
-		findFreePortsButtonObservable.addValueChangeListener(new IValueChangeListener() {
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				refreshViewerInput(viewer);
-			}
-		});
+		DataBindingUtils.addDisposableValueChangeListener(
+				new IValueChangeListener() {
+					@Override
+					public void handleValueChange(ValueChangeEvent event) {
+						refreshViewerInput(viewer);
+					}
+				}, findFreePortsButtonObservable, viewer.getTable());
 
 		// enabling/disabling controls
 		IObservableValue portForwardingStartedObservable = BeanProperties.value(

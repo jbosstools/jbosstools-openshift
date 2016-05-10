@@ -178,9 +178,19 @@ public class NewApplicationWizard
 		addPage(dcPage);
 		addPage(servicesPage);
 		addPage(labelsPage);
-
 	}
-	
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		model.dispose();
+		fromImageModel.dispose();
+		fromTemplateModel.dispose();
+		model = null;
+		fromImageModel = null;
+		fromTemplateModel = null;
+	}
+
 	private boolean isTemplateFlow() {
 		if(model.getSelectedAppSource() != null && model.getSelectedAppSource().getSource() != null) {
 			return ResourceKind.TEMPLATE.equals(model.getSelectedAppSource().getSource().getKind());
