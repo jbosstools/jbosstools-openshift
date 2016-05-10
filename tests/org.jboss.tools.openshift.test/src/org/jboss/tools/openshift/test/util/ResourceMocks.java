@@ -10,15 +10,29 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.util;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.egit.core.GitProvider;
+import org.eclipse.egit.core.project.GitProjectData;
+import org.eclipse.egit.core.project.RepositoryMapping;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.team.internal.core.TeamPlugin;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.mockito.Mockito;
@@ -34,6 +48,7 @@ import com.openshift.restclient.model.route.IRoute;
 /**
  * @author Andre Dietisheim
  */
+@SuppressWarnings("restriction")
 public class ResourceMocks {
 	
 	public static final IProject[] PROJECTS = new IProject[] {
@@ -68,10 +83,11 @@ public class ResourceMocks {
 	};
 
 	public static final IRoute[] PROJECT2_ROUTES = new IRoute[] {
-			createResource(IRoute.class,
-					route -> when(route.getName()).thenReturn("project3-app2")),
-			createResource(IRoute.class,
-					service -> when(service.getName()).thenReturn("project3-app3"))
+			// 2nd param must match service name
+			createRoute("project2-app1-service1", "project2-app1"),
+			createRoute("project2-app2-service2", "project2-app2"),
+			createRoute("project2-app2-service3", "project2-app2"),
+			createRoute("project2-app3-service4", "project2-app3")
 	};
 
 	public static final IService[] PROJECT3_SERVICES = new IService[] {
@@ -81,13 +97,21 @@ public class ResourceMocks {
 					service -> when(service.getName()).thenReturn("project3-app2"))
 	};
 
+	public static final IRoute[] PROJECT3_ROUTES = new IRoute[] {
+			// 2nd param must match service name
+			createRoute("project3-app1-service1", "project3-app1"),
+			createRoute("project3-app2-service2", "project3-app2"),
+			createRoute("project3-app3-service3", "bogus")
+	};
+
 	public static Connection createServerSettingsWizardPageConnection() {
 		Connection connection = createConnection("http://localhost:8443", "dev@openshift.com");
 		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(PROJECTS));
 		when(PROJECTS[1].getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT2_SERVICES));
+		when(PROJECTS[1].getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT2_ROUTES));
 		when(PROJECTS[2].getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT3_SERVICES));
+		when(PROJECTS[2].getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT3_ROUTES));
 		when(connection.getResources(ResourceKind.BUILD_CONFIG, PROJECTS[1].getName())).thenReturn(Arrays.asList(PROJECT2_BUILDCONFIGS));
-		when(connection.getResources(ResourceKind.ROUTE, PROJECTS[1].getName())).thenReturn(Arrays.asList(PROJECT2_ROUTES));
 		return connection;
 	}
 
@@ -118,6 +142,14 @@ public class ResourceMocks {
 		return bc;
 	}
 
+	public static IRoute createRoute(String name, String serviceName) {
+		return createResource(IRoute.class, 
+				route -> {
+					when(route.getName()).thenReturn(name);
+					when(route.getServiceName()).thenReturn(serviceName);
+				});
+	}
+	
 	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz) {
 		return createResources(numOf, clazz, null);
 	}
@@ -153,4 +185,52 @@ public class ResourceMocks {
 	public static interface IResourceVisitor<R extends IResource> {
 		public void visit(R resource);
 	}
+
+	public static org.eclipse.core.resources.IProject mockProject(String name) throws CoreException {
+		org.eclipse.core.resources.IProject project = mock(org.eclipse.core.resources.IProject.class);
+		when(project.isAccessible()).thenReturn(true);
+		when(project.getName()).thenReturn(name);
+		when(project.getLocation()).thenReturn(new Path(File.separator + name));
+		IPath projectFullPath = new Path(
+				ResourcesPlugin.getWorkspace().getRoot().getFullPath().toString() 
+						+ File.separator + name);
+		when(project.getFullPath()).thenReturn(projectFullPath);
+		when(project.getProject()).thenReturn(project);
+
+		IProjectDescription description = mock(IProjectDescription.class);
+		when(description.getNatureIds()).thenReturn(new String[] {});
+		when(project.getDescription()).thenReturn(description);
+
+		return project;
+	}
+
+	public static org.eclipse.core.resources.IProject mockGitSharedProject(String name, String gitRemoteUri) throws CoreException {
+		org.eclipse.core.resources.IProject project = mockProject(name);
+
+		when(project.getPersistentProperty(TeamPlugin.PROVIDER_PROP_KEY)).thenReturn(GitProvider.ID);
+
+		when(project.getWorkingLocation(any())).thenReturn(new Path(ResourcesPlugin.getWorkspace().getRoot().getFullPath().toString()));
+
+		StoredConfig config = mock(StoredConfig.class);
+		when(config.getSubsections("remote")).thenReturn(new HashSet<String>(Arrays.asList("origin")));
+		when(config.getStringList(any(), any(), any())).thenReturn(new String[] { gitRemoteUri });
+		when(config.getStringList("remote", "origin", "url")).thenReturn(new String[] { gitRemoteUri });
+
+		Repository repository = mock(Repository.class);
+		when(repository.getConfig()).thenReturn(config);
+		
+		RepositoryMapping mapping = mock(RepositoryMapping.class);
+		when(mapping.getRepository()).thenReturn(repository);
+
+		GitProjectData data = mock(GitProjectData.class);
+		when(data.getRepositoryMapping(project)).thenReturn(mapping);
+		
+		GitProvider repositoryProvider = mock(GitProvider.class);
+		when(repositoryProvider.getID()).thenReturn(GitProvider.ID);
+		when(repositoryProvider.getData()).thenReturn(data);
+		when(project.getSessionProperty(TeamPlugin.PROVIDER_PROP_KEY)).thenReturn(repositoryProvider);
+
+		return project;
+	}
+
 }

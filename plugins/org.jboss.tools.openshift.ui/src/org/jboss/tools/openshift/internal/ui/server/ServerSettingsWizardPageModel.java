@@ -84,7 +84,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 			Connection connection, IServerWorkingCopy server) {
 		this(service, route, deployProject, connection, server, false);
 	}
-	
+
 	protected ServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, 
 			Connection connection, IServerWorkingCopy server, boolean invalidOCBinary) {
 		super(service, connection);
@@ -164,7 +164,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		this.routesByProject = routesByProject;
 
 		List<IRoute> oldRoutes = new ArrayList<>(this.serviceRoutes);
-		List<IRoute> routes = getAllRoutes(service);
+		List<IRoute> routes = getRoutes(service);
 		this.serviceRoutes.clear();
 		this.serviceRoutes.addAll(routes);
 		resetSelectedRoute();
@@ -460,11 +460,24 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		updateRoutes(service, routesByProject);
 	}
 
+	/**
+	 * Returns the routes that match the service that's currently selected.
+	 * 
+	 * @return the routes that match the selected service
+	 * 
+	 * @see #getService()
+	 * @see #getAllRoutes(IService)
+	 */
 	public List<IRoute> getRoutes() {
 		if (getService() == null) {
 			return Collections.emptyList();
 		}
-		return getAllRoutes(getService());
+//		return getAllRoutes(getService());
+		return getRoutes(getService());
+	}
+
+	protected List<IRoute> getRoutes(IService service) {
+		return ResourceUtils.getRoutesForService(service, getAllRoutes(service));
 	}
 
 	public IRoute getRoute() {

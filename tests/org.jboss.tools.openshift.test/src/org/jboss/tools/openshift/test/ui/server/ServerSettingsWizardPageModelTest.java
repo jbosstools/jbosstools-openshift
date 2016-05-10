@@ -11,30 +11,19 @@
 package org.jboss.tools.openshift.test.ui.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
-import java.io.File;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.egit.core.GitProvider;
-import org.eclipse.egit.core.project.GitProjectData;
-import org.eclipse.egit.core.project.RepositoryMapping;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.StoredConfig;
-import org.eclipse.team.internal.core.TeamPlugin;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.server.ServerSettingsWizardPageModel;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
@@ -44,6 +33,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author Andre Dietisheim
@@ -63,12 +55,12 @@ public class ServerSettingsWizardPageModelTest {
 		this.connection = ResourceMocks.createServerSettingsWizardPageConnection();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 
-		this.project1 = mockProject("project1");
-		this.project2 = mockGitSharedProject("project2", ResourceMocks.PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI);
-		this.project3 = mockProject("project3");
-		this.project4 = mockGitSharedProject("project4", "git@42.git");
+		this.project1 = ResourceMocks.mockProject("project1");
+		this.project2 = ResourceMocks.mockGitSharedProject("project2", ResourceMocks.PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI);
+		this.project3 = ResourceMocks.mockProject("project3");
+		this.project4 = ResourceMocks.mockGitSharedProject("project4", "git@42.git");
 
-		this.model = createModel(Arrays.asList(project1, project2, project3, project4));
+		this.model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, Arrays.asList(project1, project2, project3, project4), connection);
 	}
 
 	@After
@@ -77,9 +69,10 @@ public class ServerSettingsWizardPageModelTest {
 	}
 
 	@Test
-	public void shouldReturn1stProjectIfNoProjecthasGitRemoteMatchingBuildConfig() {
+	public void shouldReturn1stProjectIfNoMatchesGitRemoteOfServiceModelWasInitializedWith() {
 		// given
-		ServerSettingsWizardPageModel model = createModel(Arrays.asList(project1, project3, project4));
+		ServerSettingsWizardPageModel model = 
+				createModel(ResourceMocks.PROJECT2_SERVICES[1], null, Arrays.asList(project1, project3, project4), connection);
 		// when
 		IProject project = model.getDeployProject();
 		// then
@@ -87,8 +80,9 @@ public class ServerSettingsWizardPageModelTest {
 	}
 
 	@Test
-	public void shouldReturnProjectThatHasGitRemoteMatchingBuildConfig() {
+	public void shouldReturnProjectMatchingGitRemoteOfServiceModelWasInitializedWith() {
 		// given
+		// model initialized with service
 		// when
 		IProject project = model.getDeployProject();
 		// then
@@ -96,18 +90,154 @@ public class ServerSettingsWizardPageModelTest {
 	}
 
 	@Test
-	public void testPodPathProperty() {
-		TestableServerSettingsWizardPageModel model = new TestableServerSettingsWizardPageModel();
-		model.setUseInferredPodPath(false);
-		Assert.assertEquals(false, model.isUseInferredPodPath());
-		model.setUseInferredPodPath(true);
-		Assert.assertEquals(true, model.isUseInferredPodPath());
-		model.setPodPath("somePath");
-		Assert.assertEquals("somePath", model.getPodPath());
+	public void shouldReturnServiceMatchingGitRemoteOfProjectModeldWasInitializedWith() {
+		// given
+		// model initialized with project
+		ServerSettingsWizardPageModel model = createModel(null, project2, Arrays.asList(project1, project2, project3, project4), connection);
+		// when
+		IService service = model.getService();
+		IProject deployProject = model.getDeployProject();
+		// then
+		assertThat(service).isEqualTo(ResourceMocks.PROJECT2_SERVICES[1]);
+		assertThat(deployProject).isEqualTo(project2);
 	}
 
-	private ServerSettingsWizardPageModel createModel(List<IProject> projects) {
-		TestableServerSettingsWizardPageModel model = spy(new TestableServerSettingsWizardPageModel());
+	@Test
+	public void shouldReturn1stAvailableProjectIfModelInitializingProjectIsNotContainedInAvailableProjects() {
+		// given
+		ServerSettingsWizardPageModel model = createModel(null, project2, Arrays.asList(project1, project3, project4), connection);
+		// when
+		IProject deployProject = model.getDeployProject();
+		// then
+		assertThat(deployProject).isEqualTo(project1);
+	}
+
+	@Test
+	public void shouldReturn1stServiceIfNoServiceMatchesGitRemoteOfProjectModelWasInitializedWith() {
+		// given
+		ServerSettingsWizardPageModel model = createModel(null, project1, Arrays.asList(project1, project2, project3, project4), connection);
+		// when
+		IService service = model.getService();
+		// then
+		assertThat(service).isEqualTo(ResourceMocks.PROJECT2_SERVICES[0]);
+	}
+
+	@Test
+	public void shouldReturnProjectMatchingServiceByGitRemoteIfSettingNullDeployProject() {
+		// given
+		// when
+		model.setDeployProject(null);
+		// then
+		// project2 matches ResourceMocks.PROJECT2_SERVICES[1] in git remote
+		assertThat(model.getDeployProject()).isEqualTo(project2); 
+	}
+
+	@Test
+	public void shouldReturnProjectMatchingServiceByGitRemoteIfSettingUnavailableDeployProject() {
+		// given
+		ServerSettingsWizardPageModel model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, Arrays.asList(project2, project3, project4), connection);
+		assertThat(model.getDeployProject()).isEqualTo(project2); 
+		// when
+		model.setDeployProject(project1);
+		// then
+		// project2 matches ResourceMocks.PROJECT2_SERVICES[1] in git remote
+		assertThat(model.getDeployProject()).isEqualTo(project2); 
+	}
+
+	@Test
+	public void shouldRespectUseInferredPodPath() {
+		// given
+		//when
+		model.setUseInferredPodPath(false);
+		// then
+		Assert.assertEquals(false, model.isUseInferredPodPath());
+
+		// given
+		//when
+		model.setUseInferredPodPath(true);
+		// then
+		assertThat(model.isUseInferredPodPath()).isTrue();
+	}
+
+	@Test
+	public void shouldRespectPodPathThatIsSet() {
+		// given
+		model.setUseInferredPodPath(false);
+		//when
+		model.setPodPath("somePath");
+		// then
+		assertThat(model.getPodPath()).isEqualTo("somePath");
+	}
+
+	@Test
+	public void shouldUpdateSourcePathIfNewDeployProjectIsSet() {
+		// given
+		assertThat(model.getSourcePath()).isEqualTo(
+				VariablesHelper.addWorkspacePrefix(project2.getFullPath().toString()));
+		//when
+		model.setDeployProject(project4);
+		// then
+		assertThat(model.getSourcePath()).isEqualTo(
+				VariablesHelper.addWorkspacePrefix(project4.getFullPath().toString()));
+	}
+
+	@Test
+	public void shouldNotUpdateSourcePathIfNewDeployProjectIsNotAccessible() {
+		// given
+		assertThat(model.getSourcePath()).isEqualTo(
+				VariablesHelper.addWorkspacePrefix(project2.getFullPath().toString()));
+		doReturn(false).when(project4).isAccessible();
+		//when
+		model.setDeployProject(project4);
+		// then
+		assertThat(model.getSourcePath()).isEqualTo(
+				VariablesHelper.addWorkspacePrefix(project2.getFullPath().toString()));
+	}
+
+	@Test
+	public void shouldReturn2RoutesThatMatchService() {
+		// given
+		// when
+		List<IRoute> routes = model.getRoutes();
+		// then
+		assertThat(routes).containsOnly(
+				ResourceMocks.PROJECT2_ROUTES[1], ResourceMocks.PROJECT2_ROUTES[2]);
+	}
+
+	@Test
+	public void shouldUpdateRoutesWhenServiceIsSwitched() {
+		// given
+		// when
+		model.setService(ResourceMocks.PROJECT3_SERVICES[1]);
+		List<IRoute> routes = model.getRoutes();
+		// then
+		assertThat(routes).containsOnly(ResourceMocks.PROJECT3_ROUTES[1]);
+	}
+
+	@Test
+	public void shouldNotifyRoutesMatchingSelectedService() {
+		// given
+		List<IRoute> notifiedRoutes = new ArrayList<>();
+		model.addPropertyChangeListener(new PropertyChangeListener() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (ServerSettingsWizardPageModel.PROPERTY_ROUTES.equals(event.getPropertyName())) {
+					assertThat(event.getNewValue()).isInstanceOf(List.class);
+					notifiedRoutes.addAll((List<IRoute>) event.getNewValue());
+				}
+			}
+		});
+		// when
+		model.setService(ResourceMocks.PROJECT3_SERVICES[1]);
+		// then
+		assertThat(notifiedRoutes).containsOnly(ResourceMocks.PROJECT3_ROUTES[1]);
+	}
+
+	private ServerSettingsWizardPageModel createModel(IService service, org.eclipse.core.resources.IProject deployProject, List<IProject> projects, Connection connection) {
+		TestableServerSettingsWizardPageModel model = 
+				spy(new TestableServerSettingsWizardPageModel(service, null, deployProject, connection));
 		doReturn(projects).when(model).loadProjects();
 		model.loadResources();
 		return model;
@@ -115,61 +245,14 @@ public class ServerSettingsWizardPageModelTest {
 
 	public class TestableServerSettingsWizardPageModel extends ServerSettingsWizardPageModel {
 
-		public TestableServerSettingsWizardPageModel() {
-			super(ResourceMocks.PROJECT2_SERVICES[1], null, null, connection, null);
+		public TestableServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, Connection connection) {
+			super(service, route, deployProject, connection, null);
 		}
 
 		@Override
 		public List<org.eclipse.core.resources.IProject> loadProjects() {
 			return super.loadProjects();
 		}
-	}
-
-	private IProject mockProject(String name) throws CoreException {
-		IProject project = mock(IProject.class);
-		when(project.isAccessible()).thenReturn(true);
-		when(project.getName()).thenReturn(name);
-		when(project.getLocation()).thenReturn(new Path(File.separator + name));
-		IPath projectFullPath = new Path(
-				ResourcesPlugin.getWorkspace().getRoot().getFullPath().toString() 
-						+ File.separator + name);
-		when(project.getFullPath()).thenReturn(projectFullPath);
-		when(project.getProject()).thenReturn(project);
-
-		IProjectDescription description = mock(IProjectDescription.class);
-		when(description.getNatureIds()).thenReturn(new String[] {});
-		when(project.getDescription()).thenReturn(description);
-
-		return project;
-	}
-
-	private IProject mockGitSharedProject(String name, String gitRemoteUri) throws CoreException {
-		IProject project = mockProject(name);
-
-		when(project.getPersistentProperty(TeamPlugin.PROVIDER_PROP_KEY)).thenReturn(GitProvider.ID);
-
-		when(project.getWorkingLocation(any())).thenReturn(new Path(ResourcesPlugin.getWorkspace().getRoot().getFullPath().toString()));
-
-		StoredConfig config = mock(StoredConfig.class);
-		when(config.getSubsections("remote")).thenReturn(new HashSet<String>(Arrays.asList("origin")));
-		when(config.getStringList(any(), any(), any())).thenReturn(new String[] { gitRemoteUri });
-		when(config.getStringList("remote", "origin", "url")).thenReturn(new String[] { gitRemoteUri });
-
-		Repository repository = mock(Repository.class);
-		when(repository.getConfig()).thenReturn(config);
-		
-		RepositoryMapping mapping = mock(RepositoryMapping.class);
-		when(mapping.getRepository()).thenReturn(repository);
-
-		GitProjectData data = mock(GitProjectData.class);
-		when(data.getRepositoryMapping(project)).thenReturn(mapping);
-		
-		GitProvider repositoryProvider = mock(GitProvider.class);
-		when(repositoryProvider.getID()).thenReturn(GitProvider.ID);
-		when(repositoryProvider.getData()).thenReturn(data);
-		when(project.getSessionProperty(TeamPlugin.PROVIDER_PROP_KEY)).thenReturn(repositoryProvider);
-
-		return project;
 	}
 
 }
