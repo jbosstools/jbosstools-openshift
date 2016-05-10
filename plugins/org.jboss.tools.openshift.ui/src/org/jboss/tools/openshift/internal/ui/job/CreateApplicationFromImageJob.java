@@ -91,8 +91,8 @@ public class CreateApplicationFromImageJob
 	
 	
 	@Override
-	public IResource stubDeploymentConfig(IResourceFactory factory, String name, DockerImageURI imageUri) {
-		return super.stubDeploymentConfig(factory, name, new DockerImageURI(name));
+	public IResource stubDeploymentConfig(IResourceFactory factory, String name, DockerImageURI imageUri, IImageStream is) {
+		return super.stubDeploymentConfig(factory, name, new DockerImageURI(name), is);
 	}
 
 	@Override

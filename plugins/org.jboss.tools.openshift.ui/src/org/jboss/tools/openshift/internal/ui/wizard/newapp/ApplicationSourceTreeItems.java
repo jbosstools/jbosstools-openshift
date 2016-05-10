@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
@@ -36,9 +37,8 @@ import com.openshift.restclient.model.template.ITemplate;
 /**
  * @author Andre Dietisheim
  */
-public class ApplicationSourceTreeItems implements IModelFactory {
+public class ApplicationSourceTreeItems implements IModelFactory , ICommonAttributes{
 
-	private static final String COMMON_NAMESPACE = "openshift";
 	private static final String BUILDER_TAG = "builder";
 	public static final ApplicationSourceTreeItems INSTANCE = new ApplicationSourceTreeItems();
 	

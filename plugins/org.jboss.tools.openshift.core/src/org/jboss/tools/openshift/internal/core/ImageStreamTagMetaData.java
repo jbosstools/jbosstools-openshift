@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
+package org.jboss.tools.openshift.internal.core;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.ArrayUtils;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
-import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
 
 public class ImageStreamTagMetaData implements IDockerImageMetadata {
 

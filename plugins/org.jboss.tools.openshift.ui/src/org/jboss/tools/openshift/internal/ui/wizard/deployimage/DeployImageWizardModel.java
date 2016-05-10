@@ -38,20 +38,17 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
-import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
+import org.jboss.tools.openshift.internal.core.util.OpenShiftProjectUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablesPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
 
-import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.capability.resources.IImageStreamImportCapability;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IServicePort;
-import com.openshift.restclient.model.image.IImageStreamImport;
 
 /**
  * The Wizard model to support deploying an image to OpenShift
@@ -512,16 +509,8 @@ public class DeployImageWizardModel
 		if (dockerConnection != null && dockerConnection.hasImage(repo, tag)) {
 			final IDockerImageInfo info = dockerConnection.getImageInfo(this.imageName);
 			return new DockerConfigMetaData(info);
-		} else if (this.project != null && project.supports(IImageStreamImportCapability.class)) {
-			final IImageStreamImportCapability cap = project.getCapability(IImageStreamImportCapability.class);
-			try {
-				final IImageStreamImport streamImport = cap.importImageMetadata(imageURI);
-				if (ResourceUtils.isSuccessful(streamImport)) {
-					return new ImageStreamTagMetaData(streamImport.getImageJsonFor(imageURI));
-				}
-			} catch (OpenShiftException e) {
-				OpenShiftUIActivator.getDefault().getLogger().logError(e);
-			}
+		} else if (this.project != null) {
+			return OpenShiftProjectUtils.lookupImageMetadata(project, imageURI);
 		}
 		return null;
 	}

@@ -81,6 +81,10 @@ public class CreateApplicationFromImageJobTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testStubDeploymentConfig() {
+		IImageStream is = mock(IImageStream.class);
+		when(is.getName()).thenReturn("aISname");
+		when(is.getNamespace()).thenReturn("anamespace");
+		
 		IDeploymentConfig stub = mock(IDeploymentConfig.class);
 		when(stub.getName()).thenReturn(APP_NAME);
 		when(stub.addTrigger(anyString())).thenReturn(mock(IDeploymentImageChangeTrigger.class));
@@ -92,7 +96,7 @@ public class CreateApplicationFromImageJobTest {
 		when(deployImageModel.getReplicas()).thenReturn(1);
 		when(deployImageModel.getEnvironmentVariables()).thenReturn(Collections.emptyList());
 		
-		job.stubDeploymentConfig(factory, APP_NAME, new DockerImageURI("foo:bar"));
+		job.stubDeploymentConfig(factory, APP_NAME, new DockerImageURI("foo:bar"), is);
 		
 		verify(stub).addContainer(eq(APP_NAME), eq(new DockerImageURI(APP_NAME)), anySet(), anyMap(), anyList());
 		
