@@ -42,14 +42,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.foundation.ui.widget.IWidgetVisitor;
 import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils.IWidgetVisitor;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 
@@ -184,13 +184,7 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 
 	private void enableEnvVariableGroup(final boolean enable, Group envVariableGroup) {
 		envVariableGroup.setEnabled(enable);
-		UIUtils.doForAllChildren(new IWidgetVisitor() {
-			
-			@Override
-			public void visit(Control control) {
-				control.setEnabled(enable);
-			}
-		}, envVariableGroup);
+		UIUtils.enableAllChildren(enable, envVariableGroup);
 	}
 
 	@Override

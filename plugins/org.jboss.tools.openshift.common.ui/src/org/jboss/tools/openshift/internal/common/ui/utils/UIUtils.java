@@ -14,13 +14,13 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.Adapters;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.ContributionManager;
 import org.eclipse.jface.action.GroupMarker;
@@ -63,6 +63,8 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.menus.IMenuService;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.jboss.tools.foundation.ui.widget.IWidgetVisitor;
+import org.jboss.tools.foundation.ui.widget.WidgetVisitorUtility;
 
 /**
  * @author André Dietisheim
@@ -176,30 +178,15 @@ public class UIUtils {
 	}
 
 	public static void doForAllChildren(IWidgetVisitor visitor, Composite composite) {
-		if (composite == null
-				|| composite.isDisposed()) {
-			return;
-		}
-		for (Control control : composite.getChildren()) {
-			if (control instanceof Composite) {
-				doForAllChildren(visitor, (Composite) control);
-			}
-			visitor.visit(control);
-		}
+		// assuming it is intentional to not visit the root composite
+		new WidgetVisitorUtility(false).accept(composite, visitor);
 	}
 
-	public static interface IWidgetVisitor {
-		public void visit(Control control);
-	}
-	
 	public static void enableAllChildren(boolean enabled, Composite composite) {
-		doForAllChildren(new IWidgetVisitor() {
-			
-			@Override
-			public void visit(Control control) {
-				control.setEnabled(enabled);
-			}
-		}, composite);
+		// Calling in this fashion to avoid change in behavior. I'm unsure if 
+		// it was intentionally coded to avoid visiting root element, or if that was
+		// just by chance. 
+		new WidgetVisitorUtility(false).setEnablementRecursive(composite, enabled);
 	}
 	
 	public static Shell getShell() {

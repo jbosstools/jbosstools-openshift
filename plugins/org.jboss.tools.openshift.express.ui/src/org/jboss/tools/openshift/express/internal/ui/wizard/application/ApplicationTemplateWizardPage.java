@@ -60,7 +60,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -82,7 +81,6 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils.IWidgetVisitor;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 
@@ -349,13 +347,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 
 
 	private void enableTemplateDetailsControls(final Composite detailsContainer, final Boolean enabled) {
-		UIUtils.doForAllChildren(new IWidgetVisitor() {
-			
-			@Override
-			public void visit(Control control) {
-				control.setEnabled(enabled);
-			}
-		}, detailsContainer);
+		UIUtils.enableAllChildren(enabled, detailsContainer);
 	}
 	
 	protected ModifyListener onFilterTextModified(final TreeViewer applicationTemplatesViewer) {
