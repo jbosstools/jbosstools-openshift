@@ -66,7 +66,7 @@ public class VariablesHelperTest {
 		}
 		assertEquals(value, VariablesHelper.replaceVariables(value, true));
 		IProject bar = getOrcreateProject(name);
-		assertEquals(bar.getLocation().toString(), VariablesHelper.replaceVariables(value));
+		assertEquals(bar.getLocation().toOSString(), VariablesHelper.replaceVariables(value));
 	}
 	
 	private IProject getOrcreateProject(String projectName) throws Exception {
