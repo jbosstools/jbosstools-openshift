@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test;
 
+import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.test.common.core.connection.ConnectionsFactoryTest;
 import org.jboss.tools.openshift.test.common.core.util.StringUtilsTest;
 import org.jboss.tools.openshift.test.common.core.util.URIUtilsTest;
@@ -74,6 +75,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	ProjectTreeSorterTest.class,
 	LazySSLCertificateCallbackTest.class, 
 	NewApplicationWizardModelTest.class,
+	OpenShiftCorePreferences.class,
 	OpenShiftExplorerContentProviderTest.class,
 	OpenShiftExplorerLabelProviderTest.class,
 	OpenShiftProjectCacheTest.class,

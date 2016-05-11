@@ -10,8 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.connection;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.jboss.tools.openshift.common.core.connection.AbstractConnectionPersistency;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.core.preferences.IOpenShiftCorePreferences;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
@@ -20,15 +24,28 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  * @author Andre Dietisheim
  */
 public class ConnectionPersistency extends AbstractConnectionPersistency<Connection>{
-
+	
+	private final IOpenShiftCorePreferences preferences;
+	
+	public ConnectionPersistency() {
+		this(OpenShiftCorePreferences.INSTANCE);
+	}
+	
+	protected ConnectionPersistency(IOpenShiftCorePreferences preferences) {
+		this.preferences = preferences;
+	}
+	
 	@Override
 	protected String[] loadPersisted() {
-		return OpenShiftCorePreferences.INSTANCE.loadConnections();
+		return preferences.loadConnections();
 	}
 
 	@Override
-	protected void persist(String[] connections) {
-		OpenShiftCorePreferences.INSTANCE.saveConnections(connections);
+	protected void persist(Map<String, Connection> connections) {
+		preferences.saveConnections(connections.keySet().toArray(new String[] {}));
+		for (Entry<String, Connection> entry : connections.entrySet()) {
+			preferences.saveExtProperties(entry.getKey(), entry.getValue().getExtendedProperties());
+		}
 	}
 
 	@Override
@@ -44,7 +61,8 @@ public class ConnectionPersistency extends AbstractConnectionPersistency<Connect
 			return null;
 		} else {
 			connection.setUsername(connectionURL.getUsername());
-			connection.setAuthScheme(OpenShiftCorePreferences.INSTANCE.loadScheme(connectionURL.toString()));
+			connection.setAuthScheme(preferences.loadScheme(connectionURL.toString()));
+			connection.setExtendedProperties(preferences.loadExtProperties(connectionURL.toString()));
 			return connection;
 		}
 	}

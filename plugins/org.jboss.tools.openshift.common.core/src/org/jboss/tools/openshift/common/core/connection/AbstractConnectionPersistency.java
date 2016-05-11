@@ -14,7 +14,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
@@ -26,19 +27,19 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 
 
 	public Collection<C> load() {
-		List<C> connections = new ArrayList<>();
+		Map<String, C> connections = new HashMap<>();
 		String[] persistedConnections = loadPersisted();
         for (String connectionUrl : persistedConnections) {
         	addConnection(connectionUrl, connections);
 		}
-        return connections;
+        return new ArrayList<>(connections.values());
 	}
 
-	private void addConnection(String connectionUrl, List<C> connections) {
+	private void addConnection(String connectionUrl, Map<String, C> connections) {
 		try {
 			C connection = createConnection(createConnectionURL(connectionUrl));
 			if (connection != null) {
-				connections.add(connection);
+				connections.put(connectionUrl, connection);
 			}
 		} catch (MalformedURLException e) {
 			logError(NLS.bind("Could not add connection for {0}.", connectionUrl), e);
@@ -64,17 +65,17 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 			return;
 		}
 
-		List<String> serializedConnections = new ArrayList<>(connections.size());
+		Map<String, C> serializedConnections = new HashMap<>(connections.size());
 		for (C connection : connections) {
 			addConnection(connection, serializedConnections);
 		}
-		persist(serializedConnections.toArray(new String[serializedConnections.size()]));
+		persist(serializedConnections);
 	}
 
-	private void addConnection(C connection, List<String> serializedConnections) {
+	private void addConnection(C connection, Map<String, C> serializedConnections) {
 		try {
 			ConnectionURL connectionURL = ConnectionURL.forConnection(connection);
-			serializedConnections.add(connectionURL.toString());
+			serializedConnections.put(connectionURL.toString(), connection);
 		} catch (MalformedURLException e) {
 			logError(NLS.bind("Could not add connection for {0}@{1}.", connection.getUsername(), connection.getHost()), e);
 		} catch (UnsupportedEncodingException e) {
@@ -84,7 +85,13 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 
 	protected abstract String[] loadPersisted();
 	
-	protected abstract void persist(String[] connections);
+	/**
+	 * Persist the connections using the given key as the
+	 * connectionURL for the connection
+	 * 
+	 * @param connections    a map of connctionURL to connection
+	 */
+	protected abstract void persist(Map<String, C> connections);
 	
 	protected abstract void logError(String message, Exception e);
 	

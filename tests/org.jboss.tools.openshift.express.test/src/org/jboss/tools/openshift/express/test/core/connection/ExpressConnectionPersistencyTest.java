@@ -16,6 +16,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnectionPersistency;
@@ -41,9 +42,9 @@ public class ExpressConnectionPersistencyTest {
 		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
 
 			@Override
-			protected void persist(String[] connections) {
+			protected void persist(Map<String, ExpressConnection> connections) {
 				// verification
-				assertArrayEquals(new String[] {	"https://foo@localhost:8442", "https://bar@localhost:8443" }, connections);
+				assertArrayEquals(new String[] {	"https://foo@localhost:8442", "https://bar@localhost:8443" }, connections.keySet().toArray(new String[] {}));
 			}
 			
 		};

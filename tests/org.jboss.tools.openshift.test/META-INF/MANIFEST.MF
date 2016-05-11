@@ -37,6 +37,6 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.eclipse.team.core,
  org.eclipse.jgit;bundle-version="4.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-Activator: org.jboss.tools.openshift.internal.OpenShiftTestActivator
+Bundle-Activator: org.jboss.tools.openshift.test.internal.OpenShiftTestActivator
 Bundle-ActivationPolicy: lazy
 

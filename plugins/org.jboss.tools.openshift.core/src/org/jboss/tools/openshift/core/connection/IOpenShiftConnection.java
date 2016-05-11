@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.core.connection;
 
 import java.util.List;
+import java.util.Map;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
@@ -23,6 +24,8 @@ import com.openshift.restclient.model.IResource;
  */
 public interface IOpenShiftConnection {
 
+	static final String PROPERTY_EXTENDED_PROPERTIES = "extendedProperties";
+	
 	/**
 	 * Retrieve a list of resources of the given kind;
 	 * @param kind
@@ -43,4 +46,24 @@ public interface IOpenShiftConnection {
 	<T extends IResource> T getResource(String kind, String namespace, String name);
 	
 	String getUsername();
+	
+	/**
+	 * Map of extended properties for
+	 * a connection (e.g. public url to the registry
+	 * @return
+	 */
+	Map<String, Object> getExtendedProperties();
+	
+	/**
+	 * Set the extended properties for a connection.
+	 * @param ext
+	 */
+	void setExtendedProperties(Map<String, Object> ext);
+	
+	/**
+	 * Set a value of an extended property
+	 * @param name
+	 * @param value
+	 */
+	void setExtendedProperty(String name, Object value);
 }
