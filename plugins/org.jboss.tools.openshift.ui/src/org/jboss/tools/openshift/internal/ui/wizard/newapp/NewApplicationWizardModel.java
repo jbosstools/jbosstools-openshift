@@ -10,11 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -28,14 +29,18 @@ import java.util.Map.Entry;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
-import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
 
@@ -66,17 +71,18 @@ public class NewApplicationWizardModel
 	private IApplicationSource selectedAppSource;
 	private IApplicationSource localAppSource;
 	private IApplicationSource serverAppSource;
+	private IStatus appSourceStatus = Status.OK_STATUS;
 	private boolean useLocalAppSource = true;
 	private String localAppSourceFilename;
 	private IResourceFactory resourceFactory;
 	private org.eclipse.core.resources.IProject eclipseProject;
 
-	private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems, IApplicationSource appSource, String localAppSourceFilename) {
-		firePropertyChange(PROPERTY_USE_LOCAL_APP_SOURCE, this.useLocalAppSource, this.useLocalAppSource = useLocalAppSource);
+	private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems, IApplicationSource appSource, String localAppSourceFilename, IStatus appSourceStatus) {
 		updateProjectItems(projectItems);
 		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = selectedProject = getProjectOrDefault(selectedProject, projectItems));
 		firePropertyChange(PROPERTY_APP_SOURCES, this.projectTemplates, this.projectTemplates = getProjectTemplates(selectedProject, projectItems) );
-		
+		updateAppSourceStatus(appSourceStatus);
+		firePropertyChange(PROPERTY_USE_LOCAL_APP_SOURCE, this.useLocalAppSource, this.useLocalAppSource = useLocalAppSource);
 		updateSelectedAppSource(useLocalAppSource, appSource, localAppSource, localAppSourceFilename);
 	}
 
@@ -84,7 +90,6 @@ public class NewApplicationWizardModel
 		IApplicationSource source = null;
 		if (useLocalAppSource) {
 			if (!ObjectUtils.equals(localAppSourceFilename, this.localAppSourceFilename)) {
-				source = this.localAppSource = getLocalAppSource(localAppSourceFilename);
 				firePropertyChange(PROPERTY_LOCAL_APP_SOURCE_FILENAME, this.localAppSourceFilename, this.localAppSourceFilename = localAppSourceFilename);
 			} else {
 				source = localAppSource;
@@ -105,6 +110,10 @@ public class NewApplicationWizardModel
 		setLabels(Collections.emptyMap());
 	}
 	
+	private void updateAppSourceStatus(IStatus appSourceStatus) {
+	    firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = appSourceStatus);
+	}
+	
 	private void setLabels(Map<String, String> labelMap) {
 		if(labelMap == null) return;
 		List<Label> labels =  new ArrayList<>(labelMap.size());
@@ -114,7 +123,7 @@ public class NewApplicationWizardModel
 		setLabels(labels);
 	}
 	
-	private IApplicationSource getLocalAppSource(String filename) {
+	private IApplicationSource getLocalAppSource(IProgressMonitor monitor, String filename) {
 		if (StringUtils.isBlank(filename)) {
 			return null;
 		}
@@ -124,7 +133,7 @@ public class NewApplicationWizardModel
 			if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(filename) && !Files.isRegularFile(Paths.get(filename))) {
 				return null;
 			}
-			resource = resourceFactory.create(createInputStream(filename));
+			resource = resourceFactory.create(createInputStream(filename, monitor));
 			if(resource != null && !(resource instanceof ITemplate)) {
 				throw new NotATemplateException(resource.getKind());
 			}
@@ -169,7 +178,7 @@ public class NewApplicationWizardModel
 	
 	@Override
 	public void setServerAppSource(IApplicationSource appSource) {
-		update(false, this.project, this.projectItems, appSource, localAppSourceFilename);
+		update(false, this.project, this.projectItems, appSource, localAppSourceFilename, Status.OK_STATUS);
 	}
 
 	@Override
@@ -191,7 +200,7 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setProject(IProject project) {
-		update(this.useLocalAppSource, project, this.projectItems, this.serverAppSource, localAppSourceFilename);
+		update(this.useLocalAppSource, project, this.projectItems, this.serverAppSource, this.localAppSourceFilename, this.appSourceStatus);
 	}
 
 	@Override
@@ -213,7 +222,7 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setUseLocalAppSource(boolean useLocalTemplate) {
-		update(useLocalTemplate, this.project, this.projectItems, this.serverAppSource, this.localAppSourceFilename);
+		update(useLocalTemplate, this.project, this.projectItems, this.serverAppSource, this.localAppSourceFilename, this.appSourceStatus);
 	}
 
 	@Override
@@ -221,25 +230,50 @@ public class NewApplicationWizardModel
 		return useLocalAppSource;
 	}
 
-	public InputStream createInputStream(String fileName) throws IOException {
-	    if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(fileName)) {
-	        return new FileInputStream(fileName);
-	    } else {
-	        return new URL(fileName).openStream();
+	public InputStream createInputStream(String filename, IProgressMonitor monitor) throws IOException {
+	    String url = OpenshiftUIConstants.URL_VALIDATOR.isValid(filename)?filename:new File(filename).toURI().toString();
+	    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+	        IStatus status = OpenshiftUIConstants.TRANSPORT_UTILITY.download(filename, url, out, monitor);
+	        if (!status.isOK()) {
+	            throw new IOException(status.getMessage());
+	        }
+	        return new ByteArrayInputStream(out.toByteArray());
 	    }
 	}
 
 	@Override
 	public void setLocalAppSourceFileName(String filename) {
-		update(true, this.project, this.projectItems, serverAppSource, filename);
+		update(true, this.project, this.projectItems, this.serverAppSource, filename, this.appSourceStatus);
 	}
 
 	@Override
 	public String getLocalAppSourceFileName() {
 		return this.localAppSourceFilename;
 	}
-
+	
+	/**
+     * @return the appSourceStatus
+     */
 	@Override
+    public IStatus getAppSourceStatus() {
+        return appSourceStatus;
+    }
+	
+    @Override
+    public void loadAppSource(IProgressMonitor monitor) {
+        IStatus status = Status.OK_STATUS;
+        try {
+            if (useLocalAppSource) {
+                IApplicationSource source = getLocalAppSource(monitor, localAppSourceFilename);
+                updateSelectedAppSource(useLocalAppSource, serverAppSource, source, localAppSourceFilename);
+            }
+        } catch (OpenShiftException | NotATemplateException e) {
+            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage(), e);
+        }
+        updateAppSourceStatus(status);
+    }
+
+    @Override
 	public Connection getConnection() {
 		return connection;
 	}
@@ -261,7 +295,7 @@ public class NewApplicationWizardModel
 	}
 
 	private void reset() {
-		update(this.useLocalAppSource, null, null, null, null);
+		update(this.useLocalAppSource, null, null, null, null, Status.OK_STATUS);
 	}
 
 	Comparator<ObservableTreeItem> comparator = new ProjectViewerComparator(new OpenShiftExplorerLabelProvider()).asItemComparator();
@@ -289,7 +323,7 @@ public class NewApplicationWizardModel
 	}
 	
 	protected void setProjectItems(List<ObservableTreeItem> projects) {
-		update(useLocalAppSource, findProject(this.project, projects), projects, serverAppSource, localAppSourceFilename);
+		update(useLocalAppSource, findProject(this.project, projects), projects, serverAppSource, localAppSourceFilename, this.appSourceStatus);
 	}
 
 	private IProject findProject(final IProject project, List<ObservableTreeItem> projects) {
