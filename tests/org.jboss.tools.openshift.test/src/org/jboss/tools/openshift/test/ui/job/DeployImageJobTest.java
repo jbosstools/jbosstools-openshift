@@ -170,7 +170,7 @@ public class DeployImageJobTest {
 		assertEquals("Exp. the trigger to point to the imagestream name", is.getNamespace(), imageChangeTrigger.getNamespace());
 	}
 	
-	static class TestDeployImageJob extends DeployImageJob{
+	public static class TestDeployImageJob extends DeployImageJob{
 
 		public TestDeployImageJob(IDeployImageParameters parameters) {
 			super(parameters);

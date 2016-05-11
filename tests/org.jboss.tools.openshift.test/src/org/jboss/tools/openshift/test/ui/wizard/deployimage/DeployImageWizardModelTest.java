@@ -87,7 +87,7 @@ public class DeployImageWizardModelTest {
 		final DockerImageURI dockerImageURI = new DockerImageURI("jboss/infinispan-server:latest");
 		when(status.isSuccess()).thenReturn(true);
 		when(cap.importImageMetadata(dockerImageURI)).thenReturn(streamImport);
-		when(streamImport.getImageJsonFor(dockerImageURI))
+		when(streamImport.getImageJsonFor(dockerImageURI.getTag()))
 				.thenReturn(getImageStreamImport("jboss_infinispan-server_ImageStreamImport.json"));
 		when(streamImport.getImageStatus()).thenReturn(Arrays.asList(status));
 		// when
