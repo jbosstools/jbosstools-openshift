@@ -45,6 +45,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -52,6 +53,9 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -59,6 +63,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
@@ -69,6 +74,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
@@ -160,8 +166,10 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			})
 			.in(dbc);
 
-		IObservableValue serverTemplate = createServerTemplateControls(tabContainer, useLocalTemplateObservable, dbc);
-		IObservableValue localTemplateFilename = createLocalTemplateControls(tabContainer, useLocalTemplateObservable, dbc);
+		TabFolderTraverseListener tabFolderTraverseListener = new TabFolderTraverseListener(tabContainer);
+
+		IObservableValue serverTemplate = createServerTemplateControls(tabContainer, tabFolderTraverseListener, useLocalTemplateObservable, dbc);
+		IObservableValue localTemplateFilename = createLocalTemplateControls(tabContainer, tabFolderTraverseListener, useLocalTemplateObservable, dbc);
 
 		createDetailsGroup(parent, dbc);
 
@@ -239,7 +247,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 		};
 	}
 
-	private IObservableValue createLocalTemplateControls(TabFolder tabContainer, IObservableValue useLocalTemplate, DataBindingContext dbc) {
+	private IObservableValue createLocalTemplateControls(TabFolder tabContainer, TabFolderTraverseListener tabFolderTraverseListener, IObservableValue useLocalTemplate, DataBindingContext dbc) {
 
 		TabItem localTemplatesTab = new TabItem(tabContainer, SWT.NONE);
 		localTemplatesTab.setText("Local template");
@@ -290,7 +298,9 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 
 
 		localTemplatesTab.setControl(parent);
-		
+
+		tabFolderTraverseListener.bindTabControls(tabContainer.getItemCount() - 1,
+				txtLocalTemplateFileName, btnBrowseFiles, btnBrowseWorkspaceFiles);
 		return localTemplateFilename;
 	}
 
@@ -314,7 +324,6 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 
 		};
 	}
-
 
 	private void setLocalTemplate(String file) {
 		if (file == null || !isFile(file)) {
@@ -350,7 +359,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 		}
 	}
 	
-	private IObservableValue createServerTemplateControls(TabFolder tabFolder, IObservableValue uploadTemplate, DataBindingContext dbc) {
+	private IObservableValue createServerTemplateControls(TabFolder tabFolder, TabFolderTraverseListener tabFolderTraverseListener, IObservableValue uploadTemplate, DataBindingContext dbc) {
 
 		TabItem serverTemplatesTab = new TabItem(tabFolder, SWT.NONE);
 		serverTemplatesTab.setText("Server application source");
@@ -398,6 +407,8 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 
 		txtTemplateFilter.addModifyListener(onFilterTextTyped(templatesViewer));
 
+		tabFolderTraverseListener.bindTabControls(tabFolder.getItemCount() - 1,
+				txtTemplateFilter, templatesViewer.getTree());
 		return selectedViewerServerTemplate;
 	}
 
@@ -452,8 +463,6 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 				})
 				.in(dbc);
 		btnDetails.addSelectionListener(onDefinedResourcesClicked());
-
-
 	}
 
 	private IDoubleClickListener onServerTemplateDoubleClicked() {
@@ -482,6 +491,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 		viewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
 		viewer.setComparator(new ApplicationSourceComparator());
 		viewer.addFilter(new AppSourceViewerFilter(templateFilterText));
+		templateFilterText.addKeyListener(onFilterKeyPressed(viewer));
 		viewer.setInput(model);
 
 		return viewer;
@@ -550,6 +560,49 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			public void modifyText(ModifyEvent e) {
 				viewer.refresh();
 				viewer.expandAll();
+			}
+		};
+	}
+
+	/**
+	 * Navigates templates with arrows up/down while focus remains on the filter text.
+	 * 
+	 * @param viewer
+	 * @return
+	 */
+	private KeyListener onFilterKeyPressed(final TreeViewer viewer) {
+		return new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_UP) {
+					TreeItem[] items = viewer.getTree().getItems();
+					if(items == null || items.length == 0) {
+						return;
+					}
+					TreeItem[] s = viewer.getTree().getSelection();
+					TreeItem next = null;
+					if(s == null || s.length == 0) {
+						next = (e.keyCode == SWT.ARROW_DOWN)? items[0] : items[items.length - 1];
+					} else {
+						for (int i = 0; i < items.length && next == null; i++) {
+							if(items[i] == s[0]) {
+								if(e.keyCode == SWT.ARROW_DOWN) {
+									if(i + 1 < items.length) {
+										next = items[i + 1];
+									}
+								} else {
+									if(i > 0) {
+										next = items[i - 1];
+									}
+								}
+							}
+						}
+					}
+					if(next != null) {
+						viewer.setSelection(new StructuredSelection(next.getData()), true);
+					}
+					e.doit = false;
+				}
 			}
 		};
 	}
