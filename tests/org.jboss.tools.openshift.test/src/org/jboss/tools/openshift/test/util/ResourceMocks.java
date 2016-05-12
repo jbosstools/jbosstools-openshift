@@ -51,22 +51,19 @@ import com.openshift.restclient.model.route.IRoute;
 @SuppressWarnings("restriction")
 public class ResourceMocks {
 	
-	public static final IProject[] PROJECTS = new IProject[] {
-			createResource(IProject.class, 
-					project -> when(project.getName()).thenReturn("project1")),
-			createResource(IProject.class, 
-					project -> when(project.getName()).thenReturn("project2")),
-			createResource(IProject.class, 
-					project -> when(project.getName()).thenReturn("project3"))
-	};
+	public static final IProject PROJECT1 = createResource(IProject.class, 
+			project -> when(project.getName()).thenReturn("project1"));
+	public static final IProject PROJECT2 = createResource(IProject.class, 
+			project -> when(project.getName()).thenReturn("project1"));
+	public static final IProject PROJECT3 = createResource(IProject.class, 
+			project -> when(project.getName()).thenReturn("project1"));
+
+	public static final IProject[] PROJECTS = new IProject[] { PROJECT1, PROJECT2, PROJECT3 };
 
 	public static final IService[] PROJECT2_SERVICES = new IService[] {
-			createResource(IService.class,
-					service -> when(service.getName()).thenReturn("project2-app1")),
-			createResource(IService.class,
-					service -> when(service.getName()).thenReturn("project2-app2")),
-			createResource(IService.class,
-					service -> when(service.getName()).thenReturn("project2-app3"))
+			createService("project2-app1", PROJECT2),
+			createService("project2-app2", PROJECT2),
+			createService("project2-app3", PROJECT2)
 	};
 
 	public static final String PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI = "git@gitrepo.io/somegroup/someproject.git";
@@ -84,34 +81,32 @@ public class ResourceMocks {
 
 	public static final IRoute[] PROJECT2_ROUTES = new IRoute[] {
 			// 2nd param must match service name
-			createRoute("project2-app1-service1", "project2-app1"),
-			createRoute("project2-app2-service2", "project2-app2"),
-			createRoute("project2-app2-service3", "project2-app2"),
-			createRoute("project2-app3-service4", "project2-app3")
+			createRoute("project2-app1-route1", "project2-app1"),
+			createRoute("project2-app2-route2", "project2-app2"),
+			createRoute("project2-app2-route3", "project2-app2"),
+			createRoute("project2-app3-route4", "project2-app3")
 	};
 
 	public static final IService[] PROJECT3_SERVICES = new IService[] {
-			createResource(IService.class,
-					service -> when(service.getName()).thenReturn("project3-app1")),
-			createResource(IService.class,
-					service -> when(service.getName()).thenReturn("project3-app2"))
+			createService("project3-app1", PROJECT3),
+			createService("project3-app2", PROJECT3),
 	};
 
 	public static final IRoute[] PROJECT3_ROUTES = new IRoute[] {
 			// 2nd param must match service name
-			createRoute("project3-app1-service1", "project3-app1"),
-			createRoute("project3-app2-service2", "project3-app2"),
-			createRoute("project3-app3-service3", "bogus")
+			createRoute("project3-app1-route1", "project3-app1"),
+			createRoute("project3-app2-route2", "project3-app2"),
+			createRoute("project3-app3-route3", "bogus")
 	};
 
 	public static Connection createServerSettingsWizardPageConnection() {
 		Connection connection = createConnection("http://localhost:8443", "dev@openshift.com");
 		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(PROJECTS));
-		when(PROJECTS[1].getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT2_SERVICES));
-		when(PROJECTS[1].getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT2_ROUTES));
-		when(PROJECTS[2].getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT3_SERVICES));
-		when(PROJECTS[2].getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT3_ROUTES));
-		when(connection.getResources(ResourceKind.BUILD_CONFIG, PROJECTS[1].getName())).thenReturn(Arrays.asList(PROJECT2_BUILDCONFIGS));
+		when(PROJECT2.getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT2_SERVICES));
+		when(PROJECT2.getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT2_ROUTES));
+		when(connection.getResources(ResourceKind.BUILD_CONFIG, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_BUILDCONFIGS));
+		when(PROJECT3.getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT3_SERVICES));
+		when(PROJECT3.getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT3_ROUTES));
 		return connection;
 	}
 
@@ -150,6 +145,14 @@ public class ResourceMocks {
 				});
 	}
 	
+	public static IService createService(String name, IProject project) {
+		return createResource(IService.class, 
+				service -> {
+					when(service.getName()).thenReturn(name);
+					when(service.getProject()).thenReturn(project);
+				});
+	}
+
 	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz) {
 		return createResources(numOf, clazz, null);
 	}

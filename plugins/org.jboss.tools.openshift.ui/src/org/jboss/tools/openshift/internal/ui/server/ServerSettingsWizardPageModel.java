@@ -472,7 +472,6 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		if (getService() == null) {
 			return Collections.emptyList();
 		}
-//		return getAllRoutes(getService());
 		return getRoutes(getService());
 	}
 

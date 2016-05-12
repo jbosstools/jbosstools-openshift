@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.test.ui.server;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -37,7 +36,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
-import com.openshift.restclient.ResourceKind;
 
 /**
  * @author Andre Dietisheim
@@ -236,35 +234,54 @@ public class ServerSettingsWizardPageModelTest {
 		// then
 		assertThat(notifiedRoutes).containsOnly(ResourceMocks.PROJECT3_ROUTES[1]);
 	}
-	
-	public void testRouteProperty() {
-		when(ResourceMocks.PROJECT2_SERVICES[1].getProject()).thenReturn(ResourceMocks.PROJECTS[1]);
-		when(ResourceMocks.PROJECT3_SERVICES[0].getProject()).thenReturn(ResourceMocks.PROJECTS[2]);
-		when(ResourceMocks.PROJECTS[1].getResources(ResourceKind.ROUTE)).thenReturn( Arrays.asList(ResourceMocks.PROJECT2_ROUTES));
-		when(ResourceMocks.PROJECTS[2].getResources(ResourceKind.ROUTE)).thenReturn( Arrays.asList(ResourceMocks.PROJECT2_ROUTES[1]));
-			model = createModel(null, null, null, Arrays.asList(project1, project2, project3, project4), connection);
 
-		//Initial service is from project2
-		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
-		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[0], model.getRoute());
-		model.setRoute(ResourceMocks.PROJECT2_ROUTES[1]);
-		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[1], model.getRoute());
-
-		//Set service from project3
-		model.setService(ResourceMocks.PROJECT3_SERVICES[0]);
-		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
-		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[1], model.getRoute()); //default route returned
-		model.setRoute(ResourceMocks.PROJECT2_ROUTES[1]);
-		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[1], model.getRoute());
-
-		//Set service from another project2 again
+	@Test
+	public void should_return_route_that_was_set_if_route_points_to_correct_service() {
+		// given
 		model.setService(ResourceMocks.PROJECT2_SERVICES[1]);
+		// when
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[1]);
+		// then
+		assertThat(model.getRoute()).isEqualTo(ResourceMocks.PROJECT2_ROUTES[1]);
+
+		// given
+		model.setService(ResourceMocks.PROJECT2_SERVICES[1]);
+		// when
+		model.setRoute(ResourceMocks.PROJECT2_ROUTES[2]);
+		// then
+		assertThat(model.getRoute()).isEqualTo(ResourceMocks.PROJECT2_ROUTES[2]);
+	}
+
+	@Test
+	public void should_return_1st_valid_route_if_invalid_route_is_set() {
+		// given
+		model.setService(ResourceMocks.PROJECT2_SERVICES[1]);
+		// when setting route that is not pointing to selected service
 		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
-		Assert.assertEquals(ResourceMocks.PROJECT2_ROUTES[0], model.getRoute());
+		// then 1st valid route is used
+		assertThat(model.getRoute()).isEqualTo(ResourceMocks.PROJECT2_ROUTES[1]);
+	}
+
+	@Test
+	public void should_return_useInferredPodPath_that_was_set() {
+		// given
+		model.setUseInferredPodPath(true);
+		//when
+		model.setUseInferredPodPath(false);
+		// then
+		assertThat(model.isUseInferredPodPath()).isFalse();
+
+		// given
+		model.setUseInferredPodPath(false);
+		//when
+		model.setUseInferredPodPath(true);
+		// then
+		assertThat(model.isUseInferredPodPath()).isTrue();
 	}
 
 	private ServerSettingsWizardPageModel createModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, List<IProject> projects, Connection connection) {
-		TestableServerSettingsWizardPageModel model = spy(new TestableServerSettingsWizardPageModel(service, route, deployProject, connection));
+		TestableServerSettingsWizardPageModel model = 
+				spy(new TestableServerSettingsWizardPageModel(service, null, deployProject, connection));
 		doReturn(projects).when(model).loadProjects();
 		model.loadResources();
 		return model;
