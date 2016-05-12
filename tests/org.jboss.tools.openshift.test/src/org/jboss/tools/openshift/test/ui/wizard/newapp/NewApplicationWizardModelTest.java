@@ -14,9 +14,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createObservableTreeItems;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createResources;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -73,7 +76,7 @@ public class NewApplicationWizardModelTest {
 		model.setResourceFactory(factory);
 
 		this.model = spy(model);
-		doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString());
+		doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString(), anyObject());
 	}
 
 	/**
@@ -214,27 +217,48 @@ public class NewApplicationWizardModelTest {
 		assertThat(model.isUseLocalAppSource()).isTrue();
 	}
 
-	@Test
+    @Test
+    public void setLocalTemplateURLShouldSetUseLocalTemplateToTrue() {
+        // pre-conditions
+
+        // operations
+        model.setLocalAppSourceFileName("http://nowhere.com");
+
+        // verification
+        assertThat(model.isUseLocalAppSource()).isTrue();
+    }
+
+    @Test
 	public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
 		when(factory.create(any(InputStream.class))).thenReturn(template);
 		model.setUseLocalAppSource(true);
 		model.setLocalAppSourceFileName("resources/eap6-basic-sti.json");
-		
+		model.loadAppSource(null);
 		verify(factory).create(any(InputStream.class));
 		assertEquals(TemplateApplicationSource.class, model.getSelectedAppSource().getClass());
 	}
 	
-	@Test
+    @Test
+    public void setTemplateURLShouldLoadAndParseTheTemplate() {
+        when(factory.create(any(InputStream.class))).thenReturn(template);
+        model.setUseLocalAppSource(true);
+        model.setLocalAppSourceFileName("http://nowhere.com");
+        model.loadAppSource(null);
+        verify(factory).create(any(InputStream.class));
+        assertEquals(TemplateApplicationSource.class, model.getSelectedAppSource().getClass());
+    }
+
+    @Test
 	public void setWrongJsonAsTemplateFile() throws Exception {
 		IRoute route = Mockito.mock(IRoute.class);
 		when(route.getKind()).thenReturn(ResourceKind.ROUTE);
 		when(factory.create(any(InputStream.class))).thenReturn(route);
-		try {
-			model.setLocalAppSourceFileName("resources/jboss_infinispan-server_ImageStreamImport.json");
-			fail("No NotATemplateException occurred");
-		} catch (NotATemplateException e) {
-			assertEquals(ResourceKind.ROUTE, e.getResourceKind());
-		}
+		model.setLocalAppSourceFileName("resources/jboss_infinispan-server_ImageStreamImport.json");
+		model.loadAppSource(null);
+		assertFalse(model.getAppSourceStatus().isOK());
+		assertNotNull(model.getAppSourceStatus().getException());
+		assertTrue(model.getAppSourceStatus().getException() instanceof NotATemplateException);
+		assertEquals(ResourceKind.ROUTE, ((NotATemplateException)model.getAppSourceStatus().getException()).getResourceKind());
 	}
 	
 	private IProject getProject(int i) {

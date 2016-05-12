@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -133,10 +133,12 @@ public class NewApplicationWizardModel
 			if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(filename) && !Files.isRegularFile(Paths.get(filename))) {
 				return null;
 			}
-			resource = resourceFactory.create(createInputStream(filename, monitor));
-			if(resource != null && !(resource instanceof ITemplate)) {
-				throw new NotATemplateException(resource.getKind());
-			}
+			try (InputStream input = createInputStream(filename, monitor)) {
+                resource = resourceFactory.create(input);
+                if(resource != null && !(resource instanceof ITemplate)) {
+                	throw new NotATemplateException(resource.getKind());
+                }
+            }
 		} catch (FileNotFoundException e) {
 			throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
 		} catch (IOException e) {
@@ -231,13 +233,16 @@ public class NewApplicationWizardModel
 	}
 
 	public InputStream createInputStream(String filename, IProgressMonitor monitor) throws IOException {
-	    String url = OpenshiftUIConstants.URL_VALIDATOR.isValid(filename)?filename:new File(filename).toURI().toString();
-	    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-	        IStatus status = OpenshiftUIConstants.TRANSPORT_UTILITY.download(filename, url, out, monitor);
-	        if (!status.isOK()) {
-	            throw new IOException(status.getMessage());
+	    if (OpenshiftUIConstants.URL_VALIDATOR.isValid(filename)) {
+	        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+	            IStatus status = OpenshiftUIConstants.TRANSPORT_UTILITY.download(filename, filename, out, monitor);
+	            if (!status.isOK()) {
+	                throw new IOException(status.getMessage());
+	            }
+	            return new ByteArrayInputStream(out.toByteArray());
 	        }
-	        return new ByteArrayInputStream(out.toByteArray());
+	    } else {
+	        return new FileInputStream(filename);
 	    }
 	}
 
