@@ -213,7 +213,7 @@ public class NewApplicationWizard
 				if(JobUtils.isOk(status) 
 						|| JobUtils.isWarning(status)) {
 					Display.getDefault().syncExec(createJob.getSummaryRunnable(getShell()));
-					OpenShiftUIUtils.showOpenShiftExplorerView();
+					OpenShiftUIUtils.showOpenShiftExplorer();
 					if (model.getEclipseProject() != null) {
 						//No need to import the project from git, it's already here
 						return;

@@ -95,7 +95,7 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
                                         "Results of creating the resource(s)").open();
                             }
                         });
-                        OpenShiftUIUtils.showOpenShiftExplorerView();
+                        OpenShiftUIUtils.showOpenShiftExplorer();
                     }
                 }
             });
