@@ -891,6 +891,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	public void dispose() {
 		super.dispose();
 		uiHook = null;
+		if(model != null) {
+			model.dispose();
+		}
 		//not good set model to null here
 	}
 

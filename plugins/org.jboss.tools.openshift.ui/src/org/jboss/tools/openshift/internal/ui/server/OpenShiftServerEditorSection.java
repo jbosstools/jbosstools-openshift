@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
@@ -69,6 +70,7 @@ import org.eclipse.wst.server.ui.editor.IServerEditorPartInput;
 import org.eclipse.wst.server.ui.editor.ServerEditorPart;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -427,6 +429,16 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	}
 
 	private void createDeploymentControls(Composite parent, DataBindingContext dbc) {
+		Button useInferredPodPathButton = getFormToolkit(parent.getDisplay()).createButton(parent, "&Use inferred Pod Deployment Path", SWT.CHECK);
+		GridDataFactory.fillDefaults()
+			.span(4,1).align(SWT.FILL, SWT.CENTER)
+			.applyTo(useInferredPodPathButton);
+		ISWTObservableValue useInferredPodPathObservable = WidgetProperties.selection().observe(useInferredPodPathButton);
+		ValueBindingBuilder
+				.bind(useInferredPodPathObservable)
+				.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_INFERRED_POD_PATH).observe(model))
+				.in(dbc);
+
 		Label deployPathLabel = new Label(parent, SWT.NONE);
 		deployPathLabel.setText("Pod Deployment Path: ");
 		GridDataFactory.fillDefaults()
@@ -454,6 +466,19 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				
 			})
 			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_POD_PATH).observe(model))
+			.in(dbc);
+		ISWTObservableValue podPathObservable = WidgetProperties.text(SWT.Modify).observe(deployPathText);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(deployPathText))
+			.notUpdatingParticipant()
+			.to(useInferredPodPathObservable)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(deployPathLabel))
+			.notUpdatingParticipant()
+			.to(useInferredPodPathObservable)
+			.converting(new InvertingBooleanConverter())
 			.in(dbc);
 	}
 
@@ -567,6 +592,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 									model.setDeployProject(deployProject);
 								}
 								model.setConnection(connection);
+								model.setUseInferredPodPath(false); //prevent immediate pod path loading
 								model.setService(OpenShiftServerUtils.getService(server));
 								String sourcePath = OpenShiftServerUtils.getSourcePath(server);
 								if (!StringUtils.isEmpty(sourcePath)) {
@@ -575,6 +601,9 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 								String podPath = OpenShiftServerUtils.getPodPath(server);
 								if(!StringUtils.isEmpty(podPath)) {
 									model.setPodPath(podPath);
+								} else {
+									//enable loading if pod path is missing.
+									model.setUseInferredPodPath(true);
 								}
 
 								model.setInitializing(false);
@@ -621,5 +650,13 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	public void doSave(IProgressMonitor monitor) {
 		// TODO Auto-generated method stub
 		super.doSave(monitor);
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		if(model != null) {
+			model.dispose();
+		}
 	}
 }
