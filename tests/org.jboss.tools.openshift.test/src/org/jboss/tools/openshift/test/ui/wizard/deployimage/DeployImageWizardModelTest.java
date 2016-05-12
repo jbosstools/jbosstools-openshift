@@ -88,7 +88,7 @@ public class DeployImageWizardModelTest {
 		when(status.isSuccess()).thenReturn(true);
 		when(cap.importImageMetadata(dockerImageURI)).thenReturn(streamImport);
 		when(streamImport.getImageJsonFor(dockerImageURI.getTag()))
-				.thenReturn(getImageStreamImport("jboss_infinispan-server_ImageStreamImport.json"));
+				.thenReturn(getImageStreamImport("/resources/jboss_infinispan-server_ImageStreamImport.json"));
 		when(streamImport.getImageStatus()).thenReturn(Arrays.asList(status));
 		// when
 		model.setImageName("jboss/infinispan-server:latest");
