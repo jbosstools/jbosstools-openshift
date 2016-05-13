@@ -11,6 +11,8 @@
 package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -27,7 +29,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
@@ -80,12 +81,38 @@ import com.openshift.restclient.authorization.IAuthorizationDetails;
 
 /**
  * @author jeff.cantrill
+ * @author Jeff Maury
  */
 public class OAuthDetailView extends BaseDetailsView implements IConnectionEditorDetailView {
 
 	private static final String MSG_TOKEN = "Enter a token or <a>retrieve</a> a new one.";
 	
-	private IObservableValue tokenObservable;
+	/**
+	 * Helper class to handle Openshift token authentication response
+	 * 
+	 */
+	public static class TokenExtractor {
+	    /**
+	     * Regular expression used to check if browser page is page that displays the OAuth token
+	     */
+	    public static final Pattern TOKEN_PAGE_PATTERN = Pattern.compile(".*<h2>Your API token is<\\/h2>.*<code>(.*)<\\/code>.*", Pattern.DOTALL);
+	    
+	    private Matcher matcher;
+	    
+	    public TokenExtractor(String content) {
+	        matcher = TOKEN_PAGE_PATTERN.matcher(content);
+	    }
+	    
+	    public boolean isTokenPage() {
+	        return matcher.matches();
+	    }
+	    
+	    public String getToken() {
+	        return matcher.group(1);
+	    }
+	}
+
+    private IObservableValue tokenObservable;
 	private Binding tokenBinding;
 	private Text tokenText;
 	private IValueChangeListener changeListener;
@@ -126,7 +153,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		if(authDetails != null) {
 			authDetails.getRequestTokenLink();
 		}
-		StyledTextUtils.emulateLinkAction(tokenRequestLink, r->onRetrieveLinkClicked(tokenRequestLink.getShell()));
+		StyledTextUtils.emulateLinkAction(tokenRequestLink, r->onRetrieveLinkClicked(tokenRequestLink.getShell(), dbc));
 		tokenRequestLink.setCursor(new Cursor(tokenRequestLink.getShell().getDisplay(), SWT.CURSOR_HAND));
 
 		//token
@@ -207,7 +234,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		return IAuthorizationContext.AUTHSCHEME_OAUTH;
 	}
 
-	private void onRetrieveLinkClicked(final Shell shell) {
+	private void onRetrieveLinkClicked(final Shell shell, final DataBindingContext dbc) {
 				if (StringUtils.isBlank(pageModel.getHost())) {
 					return;
 				}
@@ -239,8 +266,11 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 														OpenShiftUIActivator.getDefault().getLog());
 											} else {
 												OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
-												job.addJobChangeListener(dialog);
-												dialog.open(); 
+												dialog.open();
+												String token = dialog.getToken();
+												if (token != null) {
+												    tokenObservable.setValue(token);
+												}
 											}
 										}
 									}
@@ -250,7 +280,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 					}
 				});
 				try {
-					WizardUtils.runInWizard(job, wizard.getContainer());
+					WizardUtils.runInWizard(job, wizard.getContainer(), dbc);
 				} catch (InvocationTargetException | InterruptedException ex) {
 					showErrorDialog(shell,ex);
 				}				
@@ -324,11 +354,12 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	 * Leaving for now as we may need this if we are ever able
 	 * to progammatically get the token
 	 */
-	private class OAuthDialog extends Dialog implements IJobChangeListener {
+	private class OAuthDialog extends Dialog {
 		
 		private String loadingHtml;
 		private String url;
 		private Browser browser;
+		private String token;
 		
 		OAuthDialog(Shell parentShell, String url) {
 			super(parentShell);
@@ -383,11 +414,14 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 				@Override
 				public void completed(ProgressEvent event) {
 					progressBar.setSelection(0);
+					TokenExtractor extractor = new TokenExtractor(browser.getText());
+					if (extractor.isTokenPage()) {
+					    token = extractor.getToken();
+				    }
 				}
 			};
 			browser.addProgressListener(progressListener);
-			
-			setURL(url);
+    		setURL(url);
 			return container;
 		}
 		
@@ -398,53 +432,12 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			}
 		}
 
-
-		@Override
-		public void aboutToRun(IJobChangeEvent event) {
-		}
-
-
-		@Override
-		public void awake(IJobChangeEvent event) {
-		}
-
-
-		@Override
-		public void done(final IJobChangeEvent event) {
-			if(event.getJob() instanceof AuthDetailsJob) {
-				getShell().getDisplay().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						AuthDetailsJob job = (AuthDetailsJob)event.getJob();
-						final IAuthorizationDetails details = job.getDetails();
-						if(details != null) {
-							setURL(details.getRequestTokenLink());
-						}else {
-							IStatus result = job.getResult();
-							showErrorDialog(getShell(),result.getException());
-							close();
-						}
-					}
-				});
-			}
-		}
-
-
-		@Override
-		public void running(IJobChangeEvent event) {
-		}
-
-
-		@Override
-		public void scheduled(IJobChangeEvent event) {
-		}
-
-
-		@Override
-		public void sleeping(IJobChangeEvent event) {
-			
-		}
-
+		/**
+         * @return the token
+         */
+        public String getToken() {
+            return token;
+        }
 	}
 	
 }
