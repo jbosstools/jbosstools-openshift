@@ -393,8 +393,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		String profile = getProfileId();
 		ServerProfileModel.setProfile(server, profile);
 		
-		OpenShiftServerUtils.updateServerProject(
-				connectionUrl, getService(), sourcePath, podPath, routeURL, deployProject);
+		updateServerProject(connectionUrl, getService(), sourcePath, podPath, routeURL, deployProject);
 
 		IModule[] matchingModules = ServerUtil.getModules(deployProject);
 		if( matchingModules != null && matchingModules.length > 0) {
@@ -404,6 +403,12 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				throw new OpenShiftException(ce, "Could not get add modules to server ", server.getName());
 			}
 		}
+	}
+
+	protected void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, 
+			String routeURL, org.eclipse.core.resources.IProject deployProject) {
+		OpenShiftServerUtils.updateServerProject(
+				connectionUrl, service, sourcePath, podPath, routeURL, deployProject);
 	}
 	
 	private String getProfileId() {
@@ -436,8 +441,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		return UrlUtils.getHost(route.getURL());
 	}
 
-	protected String getRouteURL(boolean isDefaultRoute, IRoute route) {
-		if (!isDefaultRoute || route == null) {
+	protected String getRouteURL(boolean isSelectDefaultRoute, IRoute route) {
+		if (!isSelectDefaultRoute || route == null) {
 			return null;
 		}
 		return route.getURL();

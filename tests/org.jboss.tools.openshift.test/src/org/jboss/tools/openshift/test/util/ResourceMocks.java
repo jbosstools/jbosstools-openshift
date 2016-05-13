@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.internal.preferences.EclipsePreferences;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -34,6 +35,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.team.internal.core.TeamPlugin;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.mockito.Mockito;
 
@@ -50,6 +52,11 @@ import com.openshift.restclient.model.route.IRoute;
  */
 @SuppressWarnings("restriction")
 public class ResourceMocks {
+	
+	public static final IPath SERVER_PROJECT_PREFS_FILE_PATH = 
+			new Path(EclipsePreferences.DEFAULT_PREFERENCES_DIRNAME)
+				.append(OpenShiftServerUtils.SERVER_PROJECT_QUALIFIER)
+				.addFileExtension(EclipsePreferences.PREFS_FILE_EXTENSION);
 	
 	public static final IProject PROJECT1 = createResource(IProject.class, 
 			project -> when(project.getName()).thenReturn("project1"));
@@ -142,6 +149,7 @@ public class ResourceMocks {
 				route -> {
 					when(route.getName()).thenReturn(name);
 					when(route.getServiceName()).thenReturn(serviceName);
+					when(route.getURL()).thenReturn("http://" + serviceName);
 				});
 	}
 	
@@ -189,7 +197,7 @@ public class ResourceMocks {
 		public void visit(R resource);
 	}
 
-	public static org.eclipse.core.resources.IProject mockProject(String name) throws CoreException {
+	public static org.eclipse.core.resources.IProject createProject(String name) throws CoreException {
 		org.eclipse.core.resources.IProject project = mock(org.eclipse.core.resources.IProject.class);
 		when(project.isAccessible()).thenReturn(true);
 		when(project.getName()).thenReturn(name);
@@ -208,7 +216,7 @@ public class ResourceMocks {
 	}
 
 	public static org.eclipse.core.resources.IProject mockGitSharedProject(String name, String gitRemoteUri) throws CoreException {
-		org.eclipse.core.resources.IProject project = mockProject(name);
+		org.eclipse.core.resources.IProject project = createProject(name);
 
 		when(project.getPersistentProperty(TeamPlugin.PROVIDER_PROP_KEY)).thenReturn(GitProvider.ID);
 

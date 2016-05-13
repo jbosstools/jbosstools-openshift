@@ -78,7 +78,7 @@ public class OpenShiftServerUtils {
 
 	public static final String ATTR_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.IgnoreContextRoot";//$NON-NLS-1$
 	public static final String ATTR_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.Override";//$NON-NLS-1$
-	
+
 	public static final String ATTR_CONNECTIONURL = "org.jboss.tools.openshift.Connection";//$NON-NLS-1$
 	
 	/** the OpensHift Server Type as defined in the plugin.xml. */
@@ -191,18 +191,13 @@ public class OpenShiftServerUtils {
 		server.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 		server.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
 	}
-	
+
 	public static void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, IProject project) {
 		updateServerProject(connectionUrl, service, sourcePath, podPath, project);
 	}
 
 	public static void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, String routeURL, IProject project) {
 		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, routeURL, project);
-	}
-
-	@Deprecated // Not used currently?
-	public static void updateServerProject(String connectionUrl, String serviceId, String sourcePath, String podPath, IProject project) {
-		updateServerProject(connectionUrl, serviceId, sourcePath, podPath, null, project);
 	}
 
 	public static void updateServerProject(String connectionUrl, String serviceId, String sourcePath, String podPath, String routeURL, IProject project) {
@@ -252,7 +247,8 @@ public class OpenShiftServerUtils {
 		IModule[] all = org.eclipse.wst.server.core.ServerUtil.getModules(p);
 		for( int i = 0; i < all.length; i++ ) {
 			ModuleDelegate md = (ModuleDelegate)all[i].loadAdapter(ModuleDelegate.class, new NullProgressMonitor());
-			if( md instanceof ProjectModule && !(md instanceof org.eclipse.jst.j2ee.internal.deployables.BinaryFileModuleDelegate)) {
+			if( md instanceof ProjectModule 
+					&& !(md instanceof org.eclipse.jst.j2ee.internal.deployables.BinaryFileModuleDelegate)) {
 				return all[i];
 			}
 		}
@@ -393,10 +389,6 @@ public class OpenShiftServerUtils {
 
 	public static boolean isOverridesProject(IServerAttributes server) {
 		return server.getAttribute(ATTR_OVERRIDE_PROJECT_SETTINGS, false);
-	}
-
-	private static String getProjectAttribute(String name, String defaultValue, IServerAttributes attributes) {
-		return getProjectAttribute(name, defaultValue, getDeployProject(attributes));
 	}
 
 	/**
