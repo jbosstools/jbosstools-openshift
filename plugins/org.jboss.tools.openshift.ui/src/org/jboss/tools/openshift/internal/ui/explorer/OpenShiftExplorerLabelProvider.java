@@ -27,6 +27,8 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.models.Deployment;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.ImageStreamApplicationSource;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
@@ -106,6 +108,10 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 			default:
 				return OpenShiftCommonImages.FILE;
 			}
+		} else if (element instanceof ImageStreamApplicationSource) {
+			return OpenShiftImages.IMAGE_IMG;
+		} else if (element instanceof TemplateApplicationSource) {
+			return OpenShiftImages.TEMPLATE_IMG;
 		} else {
 			return super.getImage(element);
 		}

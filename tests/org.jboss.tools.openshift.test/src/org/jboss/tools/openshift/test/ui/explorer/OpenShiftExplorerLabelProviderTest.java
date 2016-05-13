@@ -20,9 +20,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
+import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.internal.ui.explorer.NewProjectLinkNode;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
+import org.jboss.tools.openshift.internal.ui.models.Deployment;
+import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.ImageStreamApplicationSource;
+import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +52,6 @@ import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
- * Skipping getImage tests as they can't be run headless
  * @author jeff.cantrill
  */
 @RunWith(MockitoJUnitRunner.class)
@@ -64,6 +71,14 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(resource.getName()).thenReturn("someName");
 		return resource;
 	}
+
+	private IResourceUIModel givenAResourceUIModel(Class<? extends IResource> klass, String kind){
+		IResource resource = givenAResource(klass, kind);
+		IResourceUIModel resourceUIModel = mock(IResourceUIModel.class);
+		when(resourceUIModel.getResource()).thenReturn(resource);
+		return resourceUIModel;
+	}
+
 	@Test
 	public void getStyledTextForABuild(){
 		IBuild build = givenAResource(IBuild.class, ResourceKind.BUILD);
@@ -88,10 +103,10 @@ public class OpenShiftExplorerLabelProviderTest {
 		when(source.getTags()).thenReturn(Collections.emptyList());
 		when(source.getNamespace()).thenReturn("aNamespace");
 		when(source.getName()).thenReturn("aname");
-		
+	
 		assertEquals("", "aname () - aNamespace", provider.getStyledText(source).getString());
 	}
-	
+
 	@Test
 	public void getStyledTextForARoute() {
 		IRoute route = givenAResource(IRoute.class, ResourceKind.ROUTE);
@@ -243,4 +258,30 @@ public class OpenShiftExplorerLabelProviderTest {
 		assertEquals("Exp. a connection to display its base URL", exp, provider.getStyledText(connection).getString());
 	}
 
+	@Test
+	public void getImage(){
+		testImage(null, null);
+		testImage(null, new Object());
+		testImage(OpenShiftImages.SERVICE_IMG, mock(Deployment.class));
+		testImage(OpenShiftImages.PROJECT_NEW_IMG, mock(NewProjectLinkNode.class));
+		testImage(OpenShiftImages.BUILD_IMG, IBuild.class, ResourceKind.BUILD);
+		testImage(OpenShiftImages.BUILDCONFIG_IMG, IBuild.class, ResourceKind.BUILD_CONFIG);
+		testImage(OpenShiftImages.IMAGE_IMG, IBuild.class, ResourceKind.IMAGE_STREAM);
+		testImage(OpenShiftImages.BLOCKS_IMG, IBuild.class, ResourceKind.POD);
+		testImage(OpenShiftImages.PROJECT_IMG, IBuild.class, ResourceKind.PROJECT);
+		testImage(OpenShiftImages.ROUTE_IMG, IBuild.class, ResourceKind.ROUTE);
+		testImage(OpenShiftImages.SERVICE_IMG, IBuild.class, ResourceKind.SERVICE);
+		testImage(OpenShiftCommonImages.FILE, IResource.class, "unknown");
+		testImage(OpenShiftImages.IMAGE_IMG, mock(ImageStreamApplicationSource.class));
+		testImage(OpenShiftImages.TEMPLATE_IMG, mock(TemplateApplicationSource.class));
+	}
+
+	private void testImage(Image expectedImage, Object element) {
+		assertEquals(expectedImage, provider.getImage(element));
+	}
+
+	private void testImage(Image expectedImage, Class<? extends IResource> klass, String kind) {
+		testImage(expectedImage, givenAResource(klass, kind));
+		testImage(expectedImage, givenAResourceUIModel(klass, kind));
+	}
 }
