@@ -38,7 +38,7 @@ public class TabFolderTraverseListener  implements Listener {
 		if(event.detail == SWT.TRAVERSE_ARROW_NEXT || event.detail == SWT.TRAVERSE_TAB_NEXT) {
 			int i = tabFolder.getSelectionIndex();
 			if(i >= 0 && i < firstControls.size() && firstControls.get(i) != null) {
-				firstControls.get(i).forceFocus();
+				setFocus(firstControls.get(i));
 				event.doit = false;
 			}
 		}
@@ -84,7 +84,8 @@ public class TabFolderTraverseListener  implements Listener {
 			if (child == c) {
 				for (int j = i + 1; j < children.length; j++) {
 					Control nc = children[j];
-					if (nc.isEnabled() && nc.setFocus()) {
+					if (nc.isEnabled() && nc.isVisible() && ((nc.getStyle() & SWT.NO_FOCUS) == 0) 
+							&& setFocus(nc)) {
 						return;
 					}
 				}
@@ -92,4 +93,13 @@ public class TabFolderTraverseListener  implements Listener {
 		}
 	}
 
+	/**
+	 * Override for tests. This method is called after all checks that
+	 * guarantee that control.forceFocus() must be successful if the window is active.
+	 * @param control
+	 * @return
+	 */
+	protected boolean setFocus(Control control) {
+		return control.forceFocus();
+	}
 }
