@@ -13,7 +13,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -22,7 +24,6 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.common.ui.WizardUtils;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
@@ -39,15 +40,27 @@ import com.openshift.restclient.model.IResource;
  * OpenShift template
  * 
  * @author jeff.cantrill
+ * @author Jeff Maury
  */
 public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
 
+    /** The dialog settings key */
+    private static final String DIALOG_SETTINGS_KEY = "ImportApplicationWizard";
+    
+    private static final String REPO_PATH_KEY = "repoPath";
+    
 	private ImportApplicationWizardModel model;
 
 	public ImportApplicationWizard() {
 		setWindowTitle("Import OpenShift Application");
 		setNeedsProgressMonitor(true);
+		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftUIActivator.getDefault().getDialogSettings(), DIALOG_SETTINGS_KEY));
 		this.model = new ImportApplicationWizardModel();
+		String repoPath = getDialogSettings().get(REPO_PATH_KEY);
+		if (StringUtils.isNotBlank(repoPath)) {
+		    model.setRepositoryPath(repoPath);
+		    model.setUseDefaultRepositoryPath(false);
+		}
 	}
 
 	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
@@ -109,6 +122,9 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		} else {
 			success = importProject();
 		}
+		if (success && !model.isUseDefaultRepositoryPath()) {
+		    getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
+		}
 		UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
 		return success;
 	}
@@ -130,7 +146,7 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	private boolean importProject(ImportJob importJob, DelegatingProgressMonitor delegatingMonitor) {
 		try {
 			String gitContextDir = model.getGitContextDir();
-			if (!StringUtils.isEmptyOrNull(gitContextDir)) {
+			if (StringUtils.isNotEmpty(gitContextDir)) {
 				importJob.setFilters(Collections.singleton(gitContextDir));
 			}
 			IStatus jobResult = WizardUtils.runInWizard(importJob, delegatingMonitor, getContainer());
