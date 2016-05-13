@@ -25,6 +25,7 @@ import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.property.list.IListProperty;
 import org.eclipse.core.databinding.property.list.MultiListProperty;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IFile;
@@ -291,16 +292,19 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 				.span(3, 1)
 				.applyTo(txtLocalTemplateFileName);
 		IObservableValue localTemplateFilename = WidgetProperties.text(SWT.Modify).observe(txtLocalTemplateFileName);
+		IValidator validator = (o -> {
+		    IStatus status = ValidationStatus.ok();
+		    if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(o.toString()) &&
+		        StringUtils.isNotBlank(o.toString()) &&
+		        !isFile(o.toString())) {
+		        status = ValidationStatus.error(o +" is not a file");
+		    }
+		    return status;});
 		ValueBindingBuilder
 				.bind(localTemplateFilename )
-             .validatingBeforeSet(o -> !OpenshiftUIConstants.URL_VALIDATOR.isValid(o.toString()) && !isFile(o.toString())?
-                        ValidationStatus.error(txtLocalTemplateFileName.getText() +" is not a file"):
-                        ValidationStatus.ok()) 
+             .validatingBeforeSet(validator) 
 				.to(BeanProperties.value(
 						IApplicationSourceListPageModel.PROPERTY_LOCAL_APP_SOURCE_FILENAME).observe(model))
-				.validatingBeforeSet(o -> !OpenshiftUIConstants.URL_VALIDATOR.isValid(o.toString()) && !isFile(o.toString())?
-						ValidationStatus.error(txtLocalTemplateFileName.getText() +" is not a file"):
-                        ValidationStatus.ok()) 
 				.in(dbc);
 
 		// browse button
@@ -786,7 +790,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 
     @Override
     public void handleValueChange(ValueChangeEvent<? extends Object> event) {
-        if (model.isUseLocalAppSource() && StringUtils.isNotEmpty(model.getLocalAppSourceFileName())) {
+        if (model.isUseLocalAppSource()) {
             Job job = new Job("Loading application source") {
                 
                 @Override
