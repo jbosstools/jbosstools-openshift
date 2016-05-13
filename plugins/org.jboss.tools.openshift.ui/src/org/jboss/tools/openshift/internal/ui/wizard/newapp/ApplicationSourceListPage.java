@@ -786,7 +786,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 
     @Override
     public void handleValueChange(ValueChangeEvent<? extends Object> event) {
-        if (model.isUseLocalAppSource()) {
+        if (model.isUseLocalAppSource() && StringUtils.isNotEmpty(model.getLocalAppSourceFileName())) {
             Job job = new Job("Loading application source") {
                 
                 @Override

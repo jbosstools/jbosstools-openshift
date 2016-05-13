@@ -87,18 +87,19 @@ public class NewApplicationWizardModel
 	}
 
 	private void updateSelectedAppSource(boolean useLocalAppSource, IApplicationSource serverAppSource, IApplicationSource localAppSource, String localAppSourceFilename) {
-		IApplicationSource source = null;
+		IApplicationSource source;
 		if (useLocalAppSource) {
-			if (!ObjectUtils.equals(localAppSourceFilename, this.localAppSourceFilename)) {
-				firePropertyChange(PROPERTY_LOCAL_APP_SOURCE_FILENAME, this.localAppSourceFilename, this.localAppSourceFilename = localAppSourceFilename);
-			} else {
-				source = localAppSource;
-			}
+			source = this.localAppSource = localAppSource;
 		} else {
 			source = this.serverAppSource = serverAppSource;
 		}
 		updateLabels(source);
-		firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, this.selectedAppSource, this.selectedAppSource = source);
+		String oldLocalAppSourceFileName = this.localAppSourceFilename;
+		IApplicationSource oldSelectedAppSource = this.selectedAppSource;
+		this.localAppSourceFilename = localAppSourceFilename;
+		this.selectedAppSource = source;
+        firePropertyChange(PROPERTY_LOCAL_APP_SOURCE_FILENAME, oldLocalAppSourceFileName, this.localAppSourceFilename);
+		firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, oldSelectedAppSource, this.selectedAppSource);
 	}
 	
 	private void updateLabels(IApplicationSource source) {
