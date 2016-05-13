@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.connection;
 
+import java.util.Map;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.jboss.tools.openshift.common.core.connection.AbstractConnectionPersistency;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
@@ -32,8 +34,8 @@ public class ExpressConnectionPersistency extends AbstractConnectionPersistency<
 	}
 
 	@Override
-	protected void persist(String[] connections) {
-		ExpressCorePreferences.INSTANCE.saveConnections(connections);
+	protected void persist(Map<String, ExpressConnection> connections) {
+		ExpressCorePreferences.INSTANCE.saveConnections(connections.keySet().toArray(new String [] {}));
 	}
 
 	@Override

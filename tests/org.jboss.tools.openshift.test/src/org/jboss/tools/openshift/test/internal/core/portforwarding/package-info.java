@@ -12,4 +12,4 @@
 /**
  * 
  */
-package org.jboss.tools.openshift.internal.core.portforwarding;
+package org.jboss.tools.openshift.test.internal.core.portforwarding;

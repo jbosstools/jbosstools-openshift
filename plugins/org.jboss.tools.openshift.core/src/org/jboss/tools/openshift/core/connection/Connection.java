@@ -14,7 +14,9 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang.ObjectUtils;
@@ -37,7 +39,7 @@ import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
-import com.openshift.restclient.ClientFactory;
+import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ISSLCertificateCallback;
@@ -74,11 +76,12 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private ICredentialsPrompter credentialsPrompter;
 	private ISSLCertificateCallback sslCertificateCallback;
 	private String authScheme;
+	private Map<String, Object> extendedProperties = new HashMap<>();
 
 	//TODO modify default client to take url and throw lib specific exception
 	public Connection(String url, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback)
 			throws MalformedURLException {
-		this(new ClientFactory().create(url, sslCertCallback), credentialsPrompter, sslCertCallback);
+		this(new ClientBuilder(url).sslCertificateCallback(sslCertCallback).build(), credentialsPrompter, sslCertCallback);
 	}
 	
 	public Connection(IClient client, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) {
@@ -88,6 +91,23 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		this.sslCertificateCallback = sslCertCallback;
 	}
 	
+	@Override
+	public Map<String, Object> getExtendedProperties() {
+		return new HashMap<>(extendedProperties);
+	}
+
+	@Override
+	public void setExtendedProperty(String name, Object value) {
+		Map<String, Object> oldExt = new HashMap<>(extendedProperties);
+		extendedProperties.put(name, value);
+		firePropertyChange(PROPERTY_EXTENDED_PROPERTIES, oldExt, this.extendedProperties);
+	}
+
+	@Override
+	public void setExtendedProperties(Map<String, Object> ext) {
+		firePropertyChange(PROPERTY_EXTENDED_PROPERTIES, this.extendedProperties, this.extendedProperties = ext);
+	}
+
 	/**
 	 * Retrieve the resource factory associated with this connection
 	 * for stubbing versioned resources supported by th server

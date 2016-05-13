@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/ 
-package org.jboss.tools.openshift.internal.core.preferences;
+package org.jboss.tools.openshift.test.internal.core.preferences;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;
 
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.junit.Test;
 import org.osgi.framework.Version;
 

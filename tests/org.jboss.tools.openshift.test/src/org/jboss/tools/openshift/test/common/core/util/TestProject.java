@@ -24,7 +24,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.openshift.internal.OpenShiftTestActivator;
+import org.jboss.tools.openshift.test.internal.OpenShiftTestActivator;
 
 public class TestProject {
 	public IProject project;

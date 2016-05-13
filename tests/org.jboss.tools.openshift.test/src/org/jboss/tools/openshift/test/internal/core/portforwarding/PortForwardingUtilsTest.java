@@ -9,7 +9,7 @@
  *     Red Hat - Initial Contribution
  *******************************************************************************/
 
-package org.jboss.tools.openshift.internal.core.portforwarding;
+package org.jboss.tools.openshift.test.internal.core.portforwarding;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.launching.SocketUtil;
+import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 
