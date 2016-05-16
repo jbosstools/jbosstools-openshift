@@ -14,6 +14,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.foundation.ui.plugin.BaseUIPlugin;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistryAdapter;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.osgi.framework.BundleContext;
 
 public class OpenShiftCommonUIActivator extends BaseUIPlugin {
@@ -21,6 +25,8 @@ public class OpenShiftCommonUIActivator extends BaseUIPlugin {
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui"; //$NON-NLS-1$
 
 	private static OpenShiftCommonUIActivator plugin;
+
+	ConnectionsRegistryAdapter connectionsRegistryListener;
 	
 	public OpenShiftCommonUIActivator() {
 	}
@@ -33,14 +39,25 @@ public class OpenShiftCommonUIActivator extends BaseUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+
+		connectionsRegistryListener = new ConnectionsRegistryAdapter() {
+			@Override
+			public void connectionAdded(IConnection connection) {
+				OpenShiftUIUtils.showOpenShiftExplorer();
+			}
+		};
+		ConnectionsRegistrySingleton.getInstance().addListener(connectionsRegistryListener);
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		if (connectionsRegistryListener != null) {
+			ConnectionsRegistrySingleton.getInstance().removeListener(connectionsRegistryListener);
+			connectionsRegistryListener = null;
+		}
 		super.stop(context);
 	}
-
 	public static OpenShiftCommonUIActivator getDefault() {
 		return plugin;
 	}

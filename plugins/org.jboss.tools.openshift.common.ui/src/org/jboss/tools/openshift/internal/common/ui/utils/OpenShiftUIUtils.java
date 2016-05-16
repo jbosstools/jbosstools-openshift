@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -31,24 +32,99 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
  */
 public class OpenShiftUIUtils {
 
+	private OpenShiftUIUtils() {
+		//Contains only static methods
+	}
+	
 	public static final String OPENSHIFT_EXPLORER_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
 	
-	public static void showOpenShiftExplorerView() {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getActivePage()
-					.showView(OPENSHIFT_EXPLORER_VIEW_ID);
-				} catch (PartInitException e) {
-					OpenShiftCommonUIActivator.getDefault().getLogger().logError("Failed to show the OpenShift Explorer view", e);
-				}
+	public static void showOpenShiftExplorer() {
+		showViewAsync(OPENSHIFT_EXPLORER_VIEW_ID);
+	}
+	
+	public static void hideOpenShiftExplorer() {
+		hideViewAsync(OPENSHIFT_EXPLORER_VIEW_ID);
+	}
+	
+	public static boolean isOpenShiftExplorerVisible() {
+		return isViewVisibleSync(OPENSHIFT_EXPLORER_VIEW_ID);
+	}
+	
+	public static void showViewAsync(String viewId) {
+		if (Display.getCurrent() == null) {
+			Display.getDefault().asyncExec(() -> {
+				showView(viewId);
+			});
+		} else {
+			//In UI thread
+			showView(viewId);
+		}
+	}
+	
+	public static void showView(String viewId) {
+		try {
+			IWorkbenchPage page = getActivePage();
+			if (page != null) {
+				page.showView(viewId);
 			}
-		});
+		} catch (PartInitException e) {
+			OpenShiftCommonUIActivator.getDefault().getLogger().logError("Failed to show the view "+viewId, e);
+		}
 	}
 
+	
+	public static boolean isViewVisibleSync(String viewId) {
+		boolean[] visible = new boolean[1];
+		if (Display.getCurrent() == null) {
+			Display.getDefault().syncExec(() -> {
+				visible[0] = isViewVisible(viewId);
+			});
+		} else {
+			//In UI thread
+			visible[0] = isViewVisible(viewId);
+		}
+		return visible[0];
+	}
+	
+	public static boolean isViewVisible(String viewId) {
+		IWorkbenchPage page = getActivePage();
+		if (page != null) {
+			IViewPart view = page.findView(viewId);
+			return view != null && page.isPartVisible(view);
+		}
+		return false;
+	}
+	
+	public static void hideViewAsync(String viewId) {
+		if (Display.getCurrent() == null) {
+			Display.getDefault().asyncExec(() -> {
+				hideView(viewId);
+			});
+		} else {
+			//In UI thread
+			hideView(viewId);
+		}
+	}
+	
+	public static void hideView(String viewId) {
+		IWorkbenchPage page = getActivePage();
+		if (page != null) {
+			IViewPart view = page.findView(viewId);
+			if (view != null) {
+				page.hideView(view);
+			}
+		}
+	}
+	
+	private static IWorkbenchPage getActivePage() {
+		IWorkbenchWindow aww = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (aww != null) {
+			return aww.getActivePage();
+		}
+		return null;
+	}
+	
+	
 	/**
 	 * Returns a connection of the given class that can be used in wizards started from
 	 * a view other than OpenShift explorer to spare user from first selecting the connection.

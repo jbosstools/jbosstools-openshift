@@ -110,7 +110,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 									deployJob.getSummaryMessage()).open();
 						}
 					});
-					OpenShiftUIUtils.showOpenShiftExplorerView();
+					OpenShiftUIUtils.showOpenShiftExplorer();
 				}
 			}
 		});

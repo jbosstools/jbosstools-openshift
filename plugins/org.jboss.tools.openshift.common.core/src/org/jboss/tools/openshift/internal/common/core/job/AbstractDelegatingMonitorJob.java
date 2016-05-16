@@ -27,6 +27,7 @@ public abstract class AbstractDelegatingMonitorJob extends Job {
 
 	public AbstractDelegatingMonitorJob(String name) {
 		super(name);
+		
 		this.delegatingMonitor = new DelegatingProgressMonitor();
 	}
 
@@ -45,4 +46,5 @@ public abstract class AbstractDelegatingMonitorJob extends Job {
 	public boolean isTimeouted(IStatus status){
 		return status.getCode() == TIMEOUTED;
 	}
+	
 }
