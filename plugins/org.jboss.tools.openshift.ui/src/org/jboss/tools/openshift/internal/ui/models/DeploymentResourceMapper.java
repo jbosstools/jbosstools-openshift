@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistryAdapter;
@@ -115,12 +116,6 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		}
 	}
 	
-	private synchronized void setDeployments(Collection<Deployment> newDeployments) {
-		Collection<Deployment> old = new HashSet<>(deployments);
-		deployments = Collections.synchronizedSet(new HashSet<>(newDeployments));
-		firePropertyChange(IProjectAdapter.PROP_DEPLOYMENTS, old, deployments);
-	}
-	
 	private void load(String kind) {
 		List<IResource> resources = conn.getResources(kind, project.getName());
 		resources.forEach(r->add(r));
@@ -129,24 +124,12 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 
 	private void buildDeployments() {
 		if (state.compareAndSet(State.UNINITIALIZED, State.LOADING)) {
-			for (String kind : WatchManager.KINDS) {
-				load(kind);
-			}
 			WatchManager.getInstance().stopWatch(project);
+			ConnectionsRegistrySingleton.getInstance().removeListener(connectionListener);
 			try {
-				ConnectionsRegistrySingleton.getInstance().removeListener(connectionListener);
-				Collection<IService> services = cache.getResourcesOf(ResourceKind.SERVICE);
-				Collection<Deployment> deployments = new ArrayList<>();
-				for (IService service : services) {
-					Deployment d = newDeployment(service);
-					deployments.add(d);
-					synchronized (cache) {
-						for (String kind : WatchManager.KINDS) {
-							init(d, cache, kind);
-						}
-					}
-				}
-				setDeployments(deployments);
+				Collection<Deployment> deployments = new ArrayList<>(this.deployments);
+				deployments.forEach(d->remove(d.getService()));
+				Stream.of(WatchManager.KINDS).forEach(k->load(k));
 			} finally {
 				ConnectionsRegistrySingleton.getInstance().addListener(connectionListener);
 				state.set(State.LOADED);

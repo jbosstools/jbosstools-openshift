@@ -65,8 +65,6 @@ public class OpenShiftExplorerContentProvider extends BaseExplorerContentProvide
 				cache.flushFor((Connection) newValue);
 			}
 			refreshViewer(newValue);
-		} else if (ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
-		    refreshViewer(newValue);
 		}
 	}
 

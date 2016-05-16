@@ -48,7 +48,7 @@ import com.openshift.restclient.model.route.IRoute;
 public class Deployment extends ResourcesUIModel 
 		implements IResourceUIModel, IAdaptable, IResourceCacheListener, OpenShiftAPIAnnotations {
 
-	private final IService service;
+	private IService service;
 	private final IProject project;
 	private final Object grandParent; //connection
 	
@@ -326,6 +326,12 @@ public class Deployment extends ResourcesUIModel
 	@Override
 	public void handleUpdateToCache(IResourceCache cache, IResource resource) {
 		switch(resource.getKind()) {
+			case ResourceKind.SERVICE: {
+				if(this.service.equals(resource) && !this.service.getResourceVersion().equals(resource.getResourceVersion())) {
+					this.service = ((IService)resource);
+				}
+				break;
+			}
 			case ResourceKind.BUILD:
 			{
 				Collection<IResource> resources = handleBuild(cache, (IBuild) resource);
