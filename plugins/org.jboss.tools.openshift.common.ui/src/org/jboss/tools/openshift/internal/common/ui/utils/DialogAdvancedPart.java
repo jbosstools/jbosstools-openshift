@@ -27,6 +27,12 @@ public abstract class DialogAdvancedPart {
 	public DialogAdvancedPart() {
 	}
 
+	/**
+	 * 
+	 * @param parent
+	 * @param numColumns the number of columns the advanced button and the advanced
+	 *                   group container should span of the parent layout
+	 */
 	public final void createAdvancedGroup(Composite parent, int numColumns) {
 		// advanced button
 		this.advancedButton = new Button(parent, SWT.NONE);

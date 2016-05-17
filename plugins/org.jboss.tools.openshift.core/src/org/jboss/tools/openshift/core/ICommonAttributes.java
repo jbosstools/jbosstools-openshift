@@ -21,5 +21,10 @@ public interface ICommonAttributes {
 	 * The default 'library' namespace for the cluster
 	 */
 	static final String COMMON_NAMESPACE = "openshift";
+	
+	/**
+	 * The property key for saving the image registry url
+	 */
+	static final String IMAGE_REGISTRY_URL_KEY = "org.jbosstools.openshift.core.connection.ext.registry.url";
 
 }

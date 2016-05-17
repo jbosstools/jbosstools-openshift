@@ -47,6 +47,7 @@ import org.jboss.tools.openshift.test.ui.validator.LabelKeyValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelValueValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.PodPortValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.ProjectNameValidatorTest;
+import org.jboss.tools.openshift.test.ui.validator.URLValidatorTest;
 import org.jboss.tools.openshift.test.ui.wizard.deployimage.PortSpecAdapterTest;
 import org.jboss.tools.openshift.test.ui.wizard.newapp.NewApplicationWizardModelTest;
 import org.jboss.tools.openshift.test.ui.wizard.newapp.TemplateParameterViewerUtilsTest;
@@ -90,6 +91,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	StringUtilsTest.class,
 	TemplateParameterViewerUtilsTest.class,
 	URIUtilsTest.class,
+	URLValidatorTest.class,
 	WebhooksPropertySourceTest.class,
 	ConnectionWizardPageModelTest.class,
 	ConnectionsFactoryTest.class,

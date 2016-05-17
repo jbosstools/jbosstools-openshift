@@ -65,6 +65,7 @@
 		id="org.jboss.tools.openshift.ui.importApplicationWizard" 
 		name="ImportApplicationWizard" 
 		schema="schema/org.jboss.tools.openshift.ui.importApplicationWizard.exsd"/>
+ <extension-point id="org.jboss.tools.openshift.ui.connectionEditor.advanced" name="connectionEditor.advanced" schema="schema/org.jboss.tools.openshift.ui.connectionEditor.advanced.exsd"/>
 
     <!-- OpenShift Explorer view -->
     <extension

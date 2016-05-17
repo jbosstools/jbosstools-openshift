@@ -81,6 +81,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 	private final ConnectionWizardPageModel pageModel;
 	private ConnectionEditorsStackedView connectionEditors;
+	private AdvancedConnectionEditorsStackedView advConnectionEditors;
 	private StyledText userdocLink;
 	private StyledText signupLink;
 
@@ -96,6 +97,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		this(wizard, wizardModel, null, allowConnectionChange);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected <C extends IConnection> ConnectionWizardPage(IWizard wizard, IConnectionAware<C> wizardModel, Class<? extends IConnection> connectionType, 
 			boolean allowConnectionChange) {
 		super("Sign in to OpenShift", "Please sign in to your OpenShift server.", "Server Connection", wizard);
@@ -113,6 +115,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		EGitUIUtils.ensureEgitUIIsStarted();
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	protected void doCreateControls(final Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
@@ -296,6 +299,19 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				, authenticationDetailsContainer
 				, dbc);
 		connectionEditors.createControls();
+
+		// adv editors
+		Composite advEditorContainer = new Composite(parent, SWT.NONE);
+		GridLayoutFactory.fillDefaults()
+			.margins(0, 0).applyTo(authenticationDetailsGroup);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).span(3, 1).grab(true, true).applyTo(advEditorContainer);
+		this.advConnectionEditors = new AdvancedConnectionEditorsStackedView(
+				connectionFactoryObservable
+				, pageModel
+				, advEditorContainer
+				, dbc);
+		advConnectionEditors.createControls();
 	}
 
 	private void showHideSignupLink() {
@@ -320,6 +336,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 	private FocusAdapter onServerFocusLost(final IObservableValue serverUrlObservable) {
 		return new FocusAdapter() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void focusLost(FocusEvent e) {
 				String value = (String) serverUrlObservable.getValue();
@@ -369,7 +386,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		super.onPageActivated(dbc);
-//		setInitialFocus();
 	}
 
 	@Override
@@ -386,7 +402,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			event.doit = connect();
 		}
 		if (!event.doit) {
-//			setInitialFocus();
 		}
 	}
 
@@ -431,20 +446,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			return false;
 		}
 	}
-	
-//	private void setInitialFocus() {
-//		if (pageModel.isCreateNewConnection()) {
-//			if (connectionCompositeUsernameText.getText().isEmpty()) {
-//				connectionCompositeUsernameText.setFocus();
-//			} else {
-//				connectionCompositePasswordText.setFocus();
-//				connectionCompositePasswordText.selectAll();
-//			}
-//		} else {
-//			passwordCompositePasswordText.setFocus();
-//			passwordCompositePasswordText.selectAll();
-//		}
-//	}
 
 	public IConnection getConnection() {
 		return pageModel.getConnection();

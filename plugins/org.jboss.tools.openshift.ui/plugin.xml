@@ -1727,5 +1727,11 @@
             configTypeID="org.jboss.tools.openshift.internal.core.behaviour.launchType"
             id="org.jboss.tools.openshift.internal.core.behaviour.launchIcon"/>
    </extension>
+   <extension
+         point="org.jboss.tools.openshift.ui.connectionEditor.advanced">
+      <connectionEditorAdvanced
+            class="org.jboss.tools.openshift.internal.ui.wizard.connection.AdvancedConnectionEditor">
+      </connectionEditorAdvanced>
+   </extension>
 
 </plugin>
