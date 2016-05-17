@@ -11,6 +11,8 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -66,6 +68,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2Boolea
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -75,7 +78,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelCo
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.validator.DockerImageValidator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceNameControl;
-import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
+import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
 
 import com.openshift.restclient.model.IProject;
 
@@ -247,11 +250,13 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(
 			selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 		
-        StyledText newDockerConnectionLink = StyledTextUtils.emulateLinkWidget("<a>New Docker connection</a>", new StyledText(parent, SWT.WRAP));
+		Button newDockerConnectionButton = new Button(parent, SWT.PUSH);
+		newDockerConnectionButton.setText("New...");
         GridDataFactory.fillDefaults()
-            .align(SWT.LEFT, SWT.CENTER).indent(8, 0)
-            .applyTo(newDockerConnectionLink);
-        StyledTextUtils.emulateLinkAction(newDockerConnectionLink, r->onNewDockerConnectionClicked());
+            .align(SWT.LEFT, SWT.CENTER)
+            .applyTo(newDockerConnectionButton);
+        UIUtils.setDefaultButtonWidth(newDockerConnectionButton);
+        newDockerConnectionButton.addSelectionListener(onNewDockerConnectionClicked());
 
         dbc.addValidationStatusProvider(validator);
 	}
@@ -377,11 +382,13 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(
 				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 		
-		StyledText manageProjectsLink = StyledTextUtils.emulateLinkWidget("<a>Manage Projects</a>", new StyledText(parent, SWT.WRAP));
+		Button newProjectButton = new Button(parent, SWT.PUSH);
+		newProjectButton.setText("New...");
 		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
-			.applyTo(manageProjectsLink);
-		StyledTextUtils.emulateLinkAction(manageProjectsLink, r->onManageProjectsClicked());
+			.align(SWT.LEFT, SWT.CENTER)
+			.applyTo(newProjectButton);
+		UIUtils.setDefaultButtonWidth(newProjectButton);
+		newProjectButton.addSelectionListener(onNewProjectClicked());
 
         dbc.addValidationStatusProvider(validator);
 
@@ -485,66 +492,82 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		};
 	}
 	
-	private void onManageProjectsClicked() {
-		try {
-			// run in job to enforce busy cursor which doesnt work otherwise
-			WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
+	private SelectionAdapter onNewProjectClicked() {
+	    return new SelectionAdapter() {
 
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					return Status.OK_STATUS;
-				}
+            /* (non-Javadoc)
+             * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+             */
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                try {
+                    // run in job to enforce busy cursor which doesnt work otherwise
+                    WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
 
-				@Override
-				protected IStatus updateUI(IProgressMonitor monitor) {
-					ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(model.getConnection());
-					int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open();
-					// reload projects to reflect changes that happened in
-					// projects wizard
-					if (manageProjectsWizard.hasChanged()) {
-						model.setProjects(manageProjectsWizard.getProjects());
-					}
-					if (Dialog.OK == result) {
-						IProject selectedProject = manageProjectsWizard.getSelectedProject();
-						if (selectedProject != null) {
-							model.setProject(selectedProject);
-						}
-					}
-					return Status.OK_STATUS;
-				}
-			}, getContainer(), getDataBindingContext());
-		} catch (InvocationTargetException | InterruptedException e) {
-			// swallow intentionnally
-		}
+                        @Override
+                        protected IStatus run(IProgressMonitor monitor) {
+                            return Status.OK_STATUS;
+                        }
+
+                        @Override
+                        protected IStatus updateUI(IProgressMonitor monitor) {
+                            NewProjectWizard newProjectWizard = new NewProjectWizard(model.getConnection(), (List<IProject>) model.getProjects());
+                            int result = new OkCancelButtonWizardDialog(getShell(), newProjectWizard).open();
+                            // reload projects to reflect changes that happened in
+                            // projects wizard
+                            if (newProjectWizard.getProject() != null) {
+                                List<IProject> projects = new ArrayList<>(model.getProjects());
+                                projects.add(newProjectWizard.getProject());
+                                model.setProjects(projects);
+                            }
+                            if (Dialog.OK == result) {
+                                IProject selectedProject = newProjectWizard.getProject();
+                                if (selectedProject != null) {
+                                    model.setProject(selectedProject);
+                                }
+                            }
+                            return Status.OK_STATUS;
+                        }
+                    }, getContainer(), getDataBindingContext());
+                } catch (InvocationTargetException | InterruptedException ex) {
+                    // swallow intentionnally
+                }
+            }
+	    };
 	}
 	
-    private void onNewDockerConnectionClicked() {
-        try {
-            // run in job to enforce busy cursor which doesnt work otherwise
-            WizardUtils.runInWizard(new UIUpdatingJob("Opening new Docker connection wizard...") {
+    private SelectionAdapter onNewDockerConnectionClicked() {
+        return new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                try {
+                    // run in job to enforce busy cursor which doesnt work otherwise
+                    WizardUtils.runInWizard(new UIUpdatingJob("Opening new Docker connection wizard...") {
 
-                @Override
-                protected IStatus run(IProgressMonitor monitor) {
-                    return Status.OK_STATUS;
-                }
+                        @Override
+                        protected IStatus run(IProgressMonitor monitor) {
+                            return Status.OK_STATUS;
+                        }
 
-                @Override
-                protected IStatus updateUI(IProgressMonitor monitor) {
-                    NewDockerConnection newDockerConnectionWizard = new NewDockerConnection();
-                    int result = new OkCancelButtonWizardDialog(getShell(), newDockerConnectionWizard).open();
-                    // set docker connection to reflect changes that happened in
-                    // docker connection wizard
-                    if (Dialog.OK == result) {
-                    	IDockerConnection dockerConnection = newDockerConnectionWizard.getDockerConnection();
-                    	if(dockerConnection != null) {
-                    		model.setDockerConnection(dockerConnection);
-                    	}
-                    }
-                    return Status.OK_STATUS;
+                        @Override
+                        protected IStatus updateUI(IProgressMonitor monitor) {
+                            NewDockerConnection newDockerConnectionWizard = new NewDockerConnection();
+                            int result = new OkCancelButtonWizardDialog(getShell(), newDockerConnectionWizard).open();
+                            // set docker connection to reflect changes that happened in
+                            // docker connection wizard
+                            if (Dialog.OK == result) {
+                                IDockerConnection dockerConnection = newDockerConnectionWizard.getDockerConnection();
+                                if(dockerConnection != null) {
+                                    model.setDockerConnection(dockerConnection);
+                                }
+                            }
+                            return Status.OK_STATUS;
+                        }
+                    }, getContainer(), getDatabindingContext());
+                } catch (InvocationTargetException | InterruptedException ex) {
+                    OpenShiftUIActivator.getDefault().getLogger().logError(ex);
                 }
-            }, getContainer(), getDatabindingContext());
-        } catch (InvocationTargetException | InterruptedException e) {
-            OpenShiftUIActivator.getDefault().getLogger().logError(e);
-        }
+            }
+        };
     }
 }
