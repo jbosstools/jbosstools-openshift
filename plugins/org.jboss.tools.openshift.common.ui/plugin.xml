@@ -137,6 +137,12 @@
 	    	<menu
 	           id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new"
 	           label="%openshift.menu.expressConsoleView.new">
+	           <separator
+                  name="group.connection">
+	           </separator>
+	           <separator
+                  name="group.other">          
+	           </separator>
 			</menu>
 		</menuContribution>
 	</extension>
@@ -187,7 +193,7 @@
         point="org.eclipse.ui.menus">
 		<!-- openshift explorer context menu: new connection -->
 		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?after=additions">
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.new?before=group.connection">
 			<command
 				commandId="org.jboss.tools.openshift.common.ui.command.newconnection"
                 icon="icons/openshift-new.png"
@@ -230,28 +236,6 @@
 			commandId="org.jboss.tools.openshift.common.ui.command.editconnection">
 		</handler>
 	</extension>
-		<extension
-		point="org.eclipse.ui.menus">
-		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
-			<command
-				commandId="org.jboss.tools.openshift.common.ui.command.editconnection"
-				icon="icons/openshift-edit.png"
-				mnemonic="E">
-				<visibleWhen>
-					<with variable="selection">
-						<and>
-							<count value="1" />
-							<iterate ifEmpty="false" operator="or">
-								<instanceof
-									value="org.jboss.tools.openshift.common.core.connection.IConnection" />
-							</iterate>
-						</and>
-					</with>
-				</visibleWhen>
-			</command>
-		</menuContribution>
-	</extension>
 	
 	<!-- Remove Connection -->
 	<extension
@@ -284,7 +268,7 @@
 	<extension
 		point="org.eclipse.ui.menus">
 		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?before=group.showIn">
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
 			<command
 				commandId="org.eclipse.ui.edit.delete"
 				icon="icons/delete_edit.gif"
@@ -303,6 +287,28 @@
           </command>
         </menuContribution>
     </extension>
+	<extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
+			<command
+				commandId="org.jboss.tools.openshift.common.ui.command.editconnection"
+				icon="icons/openshift-edit.png"
+				mnemonic="E">
+				<visibleWhen>
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false" operator="or">
+								<instanceof
+									value="org.jboss.tools.openshift.common.core.connection.IConnection" />
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
 
 	<!-- New Application -->
 	<extension
