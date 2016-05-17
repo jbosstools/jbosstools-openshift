@@ -250,11 +250,13 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		ControlDecorationSupport.create(
 			selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 		
-        StyledText newDockerConnectionLink = StyledTextUtils.emulateLinkWidget("<a>New Docker connection</a>", new StyledText(parent, SWT.WRAP));
+		Button newDockerConnectionButton = new Button(parent, SWT.PUSH);
+		newDockerConnectionButton.setText("New...");
         GridDataFactory.fillDefaults()
-            .align(SWT.LEFT, SWT.CENTER).indent(8, 0)
-            .applyTo(newDockerConnectionLink);
-        StyledTextUtils.emulateLinkAction(newDockerConnectionLink, r->onNewDockerConnectionClicked());
+            .align(SWT.LEFT, SWT.CENTER)
+            .applyTo(newDockerConnectionButton);
+        UIUtils.setDefaultButtonWidth(newDockerConnectionButton);
+        newDockerConnectionButton.addSelectionListener(onNewDockerConnectionClicked());
 
         dbc.addValidationStatusProvider(validator);
 	}
@@ -534,33 +536,38 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	    };
 	}
 	
-    private void onNewDockerConnectionClicked() {
-        try {
-            // run in job to enforce busy cursor which doesnt work otherwise
-            WizardUtils.runInWizard(new UIUpdatingJob("Opening new Docker connection wizard...") {
+    private SelectionAdapter onNewDockerConnectionClicked() {
+        return new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                try {
+                    // run in job to enforce busy cursor which doesnt work otherwise
+                    WizardUtils.runInWizard(new UIUpdatingJob("Opening new Docker connection wizard...") {
 
-                @Override
-                protected IStatus run(IProgressMonitor monitor) {
-                    return Status.OK_STATUS;
-                }
+                        @Override
+                        protected IStatus run(IProgressMonitor monitor) {
+                            return Status.OK_STATUS;
+                        }
 
-                @Override
-                protected IStatus updateUI(IProgressMonitor monitor) {
-                    NewDockerConnection newDockerConnectionWizard = new NewDockerConnection();
-                    int result = new OkCancelButtonWizardDialog(getShell(), newDockerConnectionWizard).open();
-                    // set docker connection to reflect changes that happened in
-                    // docker connection wizard
-                    if (Dialog.OK == result) {
-                    	IDockerConnection dockerConnection = newDockerConnectionWizard.getDockerConnection();
-                    	if(dockerConnection != null) {
-                    		model.setDockerConnection(dockerConnection);
-                    	}
-                    }
-                    return Status.OK_STATUS;
+                        @Override
+                        protected IStatus updateUI(IProgressMonitor monitor) {
+                            NewDockerConnection newDockerConnectionWizard = new NewDockerConnection();
+                            int result = new OkCancelButtonWizardDialog(getShell(), newDockerConnectionWizard).open();
+                            // set docker connection to reflect changes that happened in
+                            // docker connection wizard
+                            if (Dialog.OK == result) {
+                                IDockerConnection dockerConnection = newDockerConnectionWizard.getDockerConnection();
+                                if(dockerConnection != null) {
+                                    model.setDockerConnection(dockerConnection);
+                                }
+                            }
+                            return Status.OK_STATUS;
+                        }
+                    }, getContainer(), getDatabindingContext());
+                } catch (InvocationTargetException | InterruptedException ex) {
+                    OpenShiftUIActivator.getDefault().getLogger().logError(ex);
                 }
-            }, getContainer(), getDatabindingContext());
-        } catch (InvocationTargetException | InterruptedException e) {
-            OpenShiftUIActivator.getDefault().getLogger().logError(e);
-        }
+            }
+        };
     }
 }
