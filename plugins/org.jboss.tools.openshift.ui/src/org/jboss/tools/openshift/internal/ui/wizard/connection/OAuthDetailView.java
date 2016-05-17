@@ -255,22 +255,11 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 											MessageDialog.openError(shell, "Authorization Information", NLS.bind("This server utilizes {0} authorization protocol", details.getScheme()));
 											authSchemeObservable.setValue(details.getScheme());
 										} else {
-											if (Platform.WS_COCOA.equals(Platform.getWS())) {
-												// open in external browser for MacOS
-												// because nested dialogs dont get mouse events
-												// https://issues.jboss.org/browse/JBIDE-20464
-												// https://bugs.eclipse.org/bugs/show_bug.cgi?id=471717
-												new BrowserUtility().checkedCreateExternalBrowser(
-														details.getRequestTokenLink(), 
-														OpenShiftUIActivator.PLUGIN_ID, 
-														OpenShiftUIActivator.getDefault().getLog());
-											} else {
-												OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
-												dialog.open();
-												String token = dialog.getToken();
-												if (token != null) {
-												    tokenObservable.setValue(token);
-												}
+											OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
+											dialog.open();
+											String token = dialog.getToken();
+											if (token != null) {
+											    tokenObservable.setValue(token);
 											}
 										}
 									}
