@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
@@ -39,6 +40,9 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -54,6 +58,7 @@ import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -143,11 +148,13 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 		DataBindingUtils.addDisposableValueChangeListener(
 				onConnectionChanged(), connectionObservable, projectsViewer.getControl());
 
-		StyledText manageProjectsLink = StyledTextUtils.emulateLinkWidget("<a>Manage Projects</a>", new StyledText(parent, SWT.WRAP));
+		Button newProjectButton = new Button(parent, SWT.PUSH);
+		newProjectButton.setText("New...");
 		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.CENTER).indent(8, 0)
-			.applyTo(manageProjectsLink);
-		StyledTextUtils.emulateLinkAction(manageProjectsLink, r->onManageProjectsClicked());
+			.align(SWT.LEFT, SWT.CENTER)
+			.applyTo(newProjectButton);
+		UIUtils.setDefaultButtonWidth(newProjectButton);
+		newProjectButton.addSelectionListener(onNewProjectClicked());
 
 		Label filler = new Label(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -166,40 +173,50 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
         };
     }
 
-    private void onManageProjectsClicked() {
-        try {
-            // run in job to enforce busy cursor which doesnt work otherwise
-            WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
+    private SelectionAdapter onNewProjectClicked() {
+        return new SelectionAdapter() {
 
-                @Override
-                protected IStatus run(IProgressMonitor monitor) {
-                    return Status.OK_STATUS;
-                }
+            /* (non-Javadoc)
+             * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+             */
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                try {
+                    // run in job to enforce busy cursor which doesnt work otherwise
+                    WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
 
-                @Override
-                protected IStatus updateUI(IProgressMonitor monitor) {
-                    ManageProjectsWizard manageProjectsWizard = new ManageProjectsWizard(
-                            (Connection) model.getConnection());
-                    int result = new OkCancelButtonWizardDialog(getShell(), manageProjectsWizard).open();
-                    // reload projects to reflect changes that happened in
-                    // projects wizard
-                    if (manageProjectsWizard.hasChanged()) {
-                        loadResources(false);
-                    }
-                    if (Dialog.OK == result) {
-                        IProject selectedProject = manageProjectsWizard.getSelectedProject();
-                        if (selectedProject != null) {
-                            model.setProject(selectedProject);
+                        @Override
+                        protected IStatus run(IProgressMonitor monitor) {
+                            return Status.OK_STATUS;
                         }
-                    }
-                    ;
-                    return Status.OK_STATUS;
-                }
 
-            }, getContainer());
-        } catch (InvocationTargetException | InterruptedException e) {
-            // swallow intentionnally
-        }
+                        @Override
+                        protected IStatus updateUI(IProgressMonitor monitor) {
+                            NewProjectWizard newProjectWizard = new NewProjectWizard(
+                                    (Connection) model.getConnection(), model.getProjectItems().stream().map(it->(IProject)it.getModel()).collect(Collectors.toList()));
+                            int result = new OkCancelButtonWizardDialog(getShell(), newProjectWizard).open();
+                            // reload projects to reflect changes that happened in
+                            // projects wizard
+                            if (newProjectWizard.getProject() != null) {
+                                loadResources(false);
+                            }
+                            if (Dialog.OK == result) {
+                                IProject selectedProject = newProjectWizard.getProject();
+                                if (selectedProject != null) {
+                                    model.setProject(selectedProject);
+                                }
+                            }
+                            ;
+                            return Status.OK_STATUS;
+                        }
+
+                    }, getContainer());
+                } catch (InvocationTargetException | InterruptedException ex) {
+                    // swallow intentionnally
+                }
+            }
+            
+        };
     }
     
     /**
