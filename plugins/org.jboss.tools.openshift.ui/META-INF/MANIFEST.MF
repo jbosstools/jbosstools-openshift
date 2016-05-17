@@ -70,6 +70,7 @@ Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tool
  org.jboss.tools.openshift.internal.ui.webhooks;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.builder;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.common;x-friends:="org.jboss.tools.openshift.test",
+ org.jboss.tools.openshift.internal.ui.wizard.connection;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.deployimage;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.deployimage.search;x-friends:="org.jboss.tools.openshift.test",
  org.jboss.tools.openshift.internal.ui.wizard.importapp;x-friends:="org.jboss.tools.openshift.test",
