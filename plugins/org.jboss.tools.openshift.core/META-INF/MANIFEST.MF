@@ -46,4 +46,16 @@ Export-Package: org.jboss.tools.openshift.core;x-friends:="org.jboss.tools.opens
  org.jboss.tools.openshift.internal.core.server.debug;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui"
 Service-Component: META-INF/connectionFactory.xml
+Bundle-ClassPath: lib/remoting-jmx-2.0.1.Final.jar,
+ .,
+ lib/jboss-logging-3.2.1.Final.jar,
+ lib/jboss-logging-annotations-1.2.0.Final.jar,
+ lib/jboss-logging-processor-1.2.0.Final.jar,
+ lib/jboss-marshalling-1.4.10.Final.jar,
+ lib/jboss-marshalling-river-1.4.10.Final.jar,
+ lib/jboss-remoting-4.0.8.Final.jar,
+ lib/jboss-sasl-1.0.5.Final.jar,
+ lib/jdeparser-1.0.0.Final.jar,
+ lib/xnio-api-3.3.0.Final.jar,
+ lib/xnio-nio-3.3.0.Final.jar
 
