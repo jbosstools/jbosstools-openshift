@@ -14,7 +14,6 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IFile;
@@ -39,7 +38,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
-import org.jboss.tools.common.ui.databinding.SimpleUrlStringValidator;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
@@ -47,8 +45,8 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.utils.FileValidator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.wizard.common.AbstractProjectPage;
-
 import com.openshift.restclient.OpenShiftException;
 
 /**
@@ -57,8 +55,6 @@ import com.openshift.restclient.OpenShiftException;
  */
 public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPageModel> {
     
-    private static final IValidator URL_VALIDATOR =  new SimpleUrlStringValidator();
-
     public ResourcePayloadPage(IWizard wizard, IResourcePayloadPageModel model) {
         super(wizard, model,
               "Select resource payload",
@@ -97,7 +93,9 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
         // local template file name
         Text sourceText = new Text(sourceGroup, SWT.BORDER);
         GridDataFactory.fillDefaults()
-                .align(SWT.FILL, SWT.CENTER).grab(true, false)
+                .align(SWT.FILL, SWT.CENTER)
+                .grab(true, false)
+                .span(3, 1)
                 .applyTo(sourceText);
         final IObservableValue source = WidgetProperties.text(SWT.Modify).observe(sourceText);
         Binding binding = ValueBindingBuilder
@@ -116,7 +114,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
                 if (StringUtils.isEmpty(sourceValue)) {
                     return ValidationStatus.cancel("You need to provide a file path or an URL");
                 }
-                return (boolean) !IResourcePayloadPageModel.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)?ValidationStatus.error(sourceValue + " is not a file"):ValidationStatus.ok();
+                return (boolean) !OpenshiftUIConstants.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)?ValidationStatus.error(sourceValue + " is not a file"):ValidationStatus.ok();
             }
         };
         dbc.addValidationStatusProvider(validator);
@@ -127,7 +125,9 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
         Button btnBrowseFiles = new Button(sourceGroup, SWT.NONE);
         btnBrowseFiles.setText("Browse File System...");
         GridDataFactory.fillDefaults()
-                .align(SWT.LEFT, SWT.CENTER)
+                .align(SWT.END, SWT.CENTER)
+                .span(2, 1)
+                .grab(true, false)
                 .applyTo(btnBrowseFiles);
 
         btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
@@ -136,7 +136,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
         Button btnBrowseWorkspaceFiles = new Button(sourceGroup, SWT.NONE);
         btnBrowseWorkspaceFiles.setText("Browse Workspace...");
         GridDataFactory.fillDefaults()
-                .align(SWT.LEFT, SWT.CENTER)
+                .align(SWT.END, SWT.CENTER)
                 .applyTo(btnBrowseWorkspaceFiles);
 
         btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());

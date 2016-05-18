@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +25,7 @@ import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.property.list.IListProperty;
 import org.eclipse.core.databinding.property.list.MultiListProperty;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IFile;
@@ -32,6 +34,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
@@ -63,7 +66,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
@@ -77,6 +79,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.progress.UIJob;
+import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.DataBindingUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -92,6 +95,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.TabFolderSelecti
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
@@ -113,7 +117,8 @@ import com.openshift.restclient.model.template.ITemplate;
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class ApplicationSourceListPage  extends AbstractProjectPage<IApplicationSourceListPageModel>  {
+public class ApplicationSourceListPage  extends AbstractProjectPage<IApplicationSourceListPageModel> 
+                                       implements IValueChangeListener<Object> {
 
 	private static final int LOCAL_TEMPLATE_TAB_INDEX = 1;
 	public static final String PAGE_NAME = "appSourceList";
@@ -170,6 +175,25 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 
 		IObservableValue serverTemplate = createServerTemplateControls(tabContainer, tabFolderTraverseListener, useLocalTemplateObservable, dbc);
 		IObservableValue localTemplateFilename = createLocalTemplateControls(tabContainer, tabFolderTraverseListener, useLocalTemplateObservable, dbc);
+		/*
+		 * listen for change on local template file name, server app and use local flag to trigger
+		 * template loading. Also add a status validation provider bound to the app status of the model
+		 * to enable/disable page buttons based on the status
+		 */
+		BeanProperties.value(
+                IApplicationSourceListPageModel.PROPERTY_LOCAL_APP_SOURCE_FILENAME).observe(model).addValueChangeListener(this);
+        BeanProperties.value(
+                IApplicationSourceListPageModel.PROPERTY_SERVER_APP_SOURCE).observe(model).addValueChangeListener(this);
+        BeanProperties.value(
+                IApplicationSourceListPageModel.PROPERTY_USE_LOCAL_APP_SOURCE).observe(model).addValueChangeListener(this);
+        dbc.addValidationStatusProvider(new MultiValidator() {
+            @Override
+            protected IStatus validate() {
+                return  (IStatus) BeanProperties
+                    .value(IApplicationSourceListPageModel.PROPERTY_APP_SOURCE_STATUS, IStatus.class)
+                    .observe(model).getValue();
+            }
+        });
 
 		createDetailsGroup(parent, dbc);
 
@@ -211,7 +235,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			}
 		});
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(gitLabel);
-
+		
 		DataBindingUtils.addDisposableValueChangeListener(
 				new IValueChangeListener() {
 
@@ -258,38 +282,47 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			.applyTo(parent);
 
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText("Select a local template:");
+		lbl.setText("Select a local template file or a full URL:");
 		GridDataFactory.fillDefaults().span(3,1).applyTo(lbl);
 		
 		// local template file name
 		Text txtLocalTemplateFileName = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false)
+				.span(3, 1)
 				.applyTo(txtLocalTemplateFileName);
 		IObservableValue localTemplateFilename = WidgetProperties.text(SWT.Modify).observe(txtLocalTemplateFileName);
+		IValidator validator = (o -> {
+		    IStatus status = ValidationStatus.ok();
+		    if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(o.toString()) &&
+		        StringUtils.isNotBlank(o.toString()) &&
+		        !isFile(o.toString())) {
+		        status = ValidationStatus.error(o +" is not a file");
+		    }
+		    return status;});
 		ValueBindingBuilder
 				.bind(localTemplateFilename )
+             .validatingBeforeSet(validator) 
 				.to(BeanProperties.value(
 						IApplicationSourceListPageModel.PROPERTY_LOCAL_APP_SOURCE_FILENAME).observe(model))
-				.validatingBeforeSet( o -> isFile(o.toString())?
-						ValidationStatus.ok(): 
-						ValidationStatus.error(txtLocalTemplateFileName.getText() +" is not a file"))
 				.in(dbc);
 
 		// browse button
 		Button btnBrowseFiles = new Button(parent, SWT.NONE);
-		btnBrowseFiles.setText("File system...");
+		btnBrowseFiles.setText("Browse File System...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER)
+				.align(SWT.END, SWT.CENTER)
+				.span(2,1)
+				.grab(true, false)
 				.applyTo(btnBrowseFiles);
 
 		btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
 		
 		// browse button
 		Button btnBrowseWorkspaceFiles = new Button(parent, SWT.NONE);
-		btnBrowseWorkspaceFiles.setText("Workspace...");
+		btnBrowseWorkspaceFiles.setText("Browse Workspace...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER)
+				.align(SWT.END, SWT.CENTER)
 				.applyTo(btnBrowseWorkspaceFiles);
 
 		btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());
@@ -324,6 +357,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 
 		};
 	}
+
 
 	private void setLocalTemplate(String file) {
 		if (file == null || !isFile(file)) {
@@ -463,6 +497,8 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 				})
 				.in(dbc);
 		btnDetails.addSelectionListener(onDefinedResourcesClicked());
+
+
 	}
 
 	private IDoubleClickListener onServerTemplateDoubleClicked() {
@@ -701,13 +737,13 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			} else {
 				if (Boolean.TRUE.equals(useLocalTemplate.getValue())) {
 					String localTemplate = (String)localTemplateFilename.getValue();
-					if (StringUtils.isNotEmpty(localTemplate)){ 
-						if (!isFile(localTemplate)) {
+					if (StringUtils.isNotBlank(localTemplate)){ 
+						if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(localTemplate) && !isFile(localTemplate)) {
 							status = ValidationStatus.error(NLS.bind("{0} is not a valid file.", localTemplate));
 							mutableTargets.add(localTemplateFilename);
 						}
-					} else if (selectedTemplate.getValue() == null) {
-						status = ValidationStatus.cancel("Please select a local template file.");
+					} else {
+						status = ValidationStatus.cancel("Please select a local template file or URL.");
 						mutableTargets.add(localTemplateFilename);
 					}
 				} else {
@@ -751,5 +787,27 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
 				dbc);
 	}
+
+    @Override
+    public void handleValueChange(ValueChangeEvent<? extends Object> event) {
+        if (model.isUseLocalAppSource()) {
+            if (StringUtils.isNotBlank(model.getLocalAppSourceFileName())) {
+                Job job = new Job("Loading application source") {
+                    @Override
+                    protected IStatus run(IProgressMonitor monitor) {
+                        model.loadAppSource(monitor);
+                        return Status.OK_STATUS;
+                    }
+                };
+                try {
+                    WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
+                } catch (InvocationTargetException | InterruptedException e) {
+                    OpenShiftUIActivator.getDefault().getLogger().logError(e);
+                }
+            } else {
+                model.resetLocalAppSource();
+            }
+        }
+    }
 
 }

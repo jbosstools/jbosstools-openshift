@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
@@ -31,6 +33,7 @@ public interface IApplicationSourceListPageModel extends IProjectPageModel<Conne
 	static final String PROPERTY_SERVER_APP_SOURCE = "serverAppSource";
 	static final String PROPERTY_LOCAL_APP_SOURCE_FILENAME = "localAppSourceFileName";
 	static final String PROPERTY_USE_LOCAL_APP_SOURCE = "useLocalAppSource";
+	static final String PROPERTY_APP_SOURCE_STATUS = "appSourceStatus";
 	static final String PROPERTY_ECLIPSE_PROJECT = "eclipseProject";
 	
 	/**
@@ -53,6 +56,11 @@ public interface IApplicationSourceListPageModel extends IProjectPageModel<Conne
 	 * @return
 	 */
 	IApplicationSource getSelectedAppSource();
+	
+	/**
+	 * Reset the local application source
+	 */
+	void resetLocalAppSource();
 
 	/**
 	 * Sets this model to use a local app source if <code>true</code> is given. 
@@ -82,6 +90,23 @@ public interface IApplicationSourceListPageModel extends IProjectPageModel<Conne
 	 * @return
 	 */
 	String getLocalAppSourceFileName();
+	
+	/**
+	 * Load the app source (if not provided). Will cause change in the app source status 
+	 * property.
+	 * 
+	 * @param monitor the monitor to control the operation
+	 * @see #getAppSourceStatus()
+	 * @see #PROPERTY_APP_SOURCE_STATUS
+	 */
+	void loadAppSource(IProgressMonitor monitor);
+	
+	/**
+	 * Returns the app status (result of loading).
+	 * 
+	 * @return the app status
+	 */
+	IStatus getAppSourceStatus();
 	
 	/**
 	 * The collection of observable application sources from
