@@ -737,12 +737,12 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			} else {
 				if (Boolean.TRUE.equals(useLocalTemplate.getValue())) {
 					String localTemplate = (String)localTemplateFilename.getValue();
-					if (StringUtils.isNotEmpty(localTemplate)){ 
+					if (StringUtils.isNotBlank(localTemplate)){ 
 						if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(localTemplate) && !isFile(localTemplate)) {
 							status = ValidationStatus.error(NLS.bind("{0} is not a valid file.", localTemplate));
 							mutableTargets.add(localTemplateFilename);
 						}
-					} else if (selectedTemplate.getValue() == null) {
+					} else {
 						status = ValidationStatus.cancel("Please select a local template file or URL.");
 						mutableTargets.add(localTemplateFilename);
 					}
@@ -791,18 +791,21 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
     @Override
     public void handleValueChange(ValueChangeEvent<? extends Object> event) {
         if (model.isUseLocalAppSource()) {
-            Job job = new Job("Loading application source") {
-                
-                @Override
-                protected IStatus run(IProgressMonitor monitor) {
-                    model.loadAppSource(monitor);
-                    return Status.OK_STATUS;
+            if (StringUtils.isNotBlank(model.getLocalAppSourceFileName())) {
+                Job job = new Job("Loading application source") {
+                    @Override
+                    protected IStatus run(IProgressMonitor monitor) {
+                        model.loadAppSource(monitor);
+                        return Status.OK_STATUS;
+                    }
+                };
+                try {
+                    WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
+                } catch (InvocationTargetException | InterruptedException e) {
+                    OpenShiftUIActivator.getDefault().getLogger().logError(e);
                 }
-            };
-            try {
-                WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
-            } catch (InvocationTargetException | InterruptedException e) {
-                OpenShiftUIActivator.getDefault().getLogger().logError(e);
+            } else {
+                model.resetLocalAppSource();
             }
         }
     }

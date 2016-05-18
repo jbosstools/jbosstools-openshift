@@ -56,6 +56,11 @@ public interface IApplicationSourceListPageModel extends IProjectPageModel<Conne
 	 * @return
 	 */
 	IApplicationSource getSelectedAppSource();
+	
+	/**
+	 * Reset the local application source
+	 */
+	void resetLocalAppSource();
 
 	/**
 	 * Sets this model to use a local app source if <code>true</code> is given. 

@@ -188,8 +188,15 @@ public class NewApplicationWizardModel
 	public IApplicationSource getServerAppSource() {
 		return serverAppSource;
 	}
+	
+    @Override
+    public void resetLocalAppSource() {
+        this.localAppSource = null;
+        firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, this.selectedAppSource, this.selectedAppSource = null);
+        firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = Status.OK_STATUS);
+    }
 
-	@Override
+    @Override
 	public IApplicationSource getSelectedAppSource() {
 		return selectedAppSource;
 	}
