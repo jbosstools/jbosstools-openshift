@@ -389,6 +389,7 @@
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
 		   <command
 		         commandId="org.jboss.tools.openshift.ui.command.startbuild"
+		         label="%openshift.command.build.startbuild"
 		         id="org.jboss.tools.openshift.ui.explorer.command.startbuild">
 		      <visibleWhen>
 		         <with
@@ -643,6 +644,7 @@
      				<separator visible="true" name="org.jboss.tools.openshift.ui.separator2"/>
      <command
            commandId="org.jboss.tools.openshift.ui.command.startbuild"
+           label="%openshift.command.build.startbuild"
            style="push">
         <parameter
               name="org.jboss.tools.openshift.ui.command.startbuild.source"
@@ -691,6 +693,7 @@
 					<separator visible="true" name="org.jboss.tools.openshift.ui.separator5" />
        <command
            commandId="org.jboss.tools.openshift.ui.command.startbuild"
+           label="%openshift.command.build.startbuild"
            style="push">
         <parameter
               name="org.jboss.tools.openshift.ui.command.startbuild.source"
