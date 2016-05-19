@@ -1,0 +1,77 @@
+{
+    "status": {
+        "metadata": {
+            "annotations": null
+        },
+        "status": "Success"
+    },
+    "image": {
+        "metadata": {
+            "name": "53a7c1eae065d5176aa04e263965f9979d15fdda28a0d9840f19e0fd928a4a53",
+            "creationTimestamp": null
+        },
+        "dockerImageReference": "registry.access.redhat.com/openshift3/jenkins-1-rhel7:latest",
+        "dockerImageMetadata": {
+            "kind": "DockerImage",
+            "apiVersion": "1.0",
+            "Id": "53a7c1eae065d5176aa04e263965f9979d15fdda28a0d9840f19e0fd928a4a53",
+            "Parent": "95612a3264fcea256ed7c179d6e4a5dece55e217cff198bbaeb4a7e554f974ca",
+            "Created": "2016-05-05T15:20:19Z",
+            "ContainerConfig": {
+                
+            },
+            "DockerVersion": "1.8.2-el7",
+            "Author": "Ben Parees <bparees@redhat.com>",
+            "Config": {
+                "User": "1001",
+                "ExposedPorts": {
+                    "50000/tcp": {
+                        
+                    },
+                    "8080/tcp": {
+                        
+                    }
+                },
+                "Env": ["container=docker",
+                "PKGM=yum",
+                "PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin",
+                "JENKINS_VERSION=1.642",
+                "HOME=/var/lib/jenkins",
+                "JENKINS_HOME=/var/lib/jenkins",
+                "STI_SCRIPTS_URL=image:///usr/libexec/s2i"],
+                "Cmd": ["/usr/libexec/s2i/run"],
+                "Image": "95612a3264fcea256ed7c179d6e4a5dece55e217cff198bbaeb4a7e554f974ca",
+                "Volumes": {
+                    "/var/lib/jenkins": {
+                        
+                    }
+                },
+                "Labels": {
+                    "Architecture": "x86_64",
+                    "Authoritative_Registry": "registry.access.redhat.com",
+                    "BZComponent": "openshift-jenkins-docker",
+                    "Build_Host": "rcm-img-docker02.build.eng.bos.redhat.com",
+                    "Name": "openshift3/jenkins-1-rhel7",
+                    "Release": "31",
+                    "Vendor": "Red Hat, Inc.",
+                    "Version": "1.642",
+                    "architecture": "x86_64",
+                    "build-date": "2016-05-05T14:52:56.024367Z",
+                    "distribution-scope": "public",
+                    "io.openshift.s2i.scripts-url": "image:///usr/libexec/s2i",
+                    "k8s.io.description": "Jenkins is a continuous integration server",
+                    "k8s.io.display-name": "Jenkins 1.642",
+                    "openshift.io.expose-services": "8080:http",
+                    "openshift.io.tags": "jenkins,jenkins1,ci",
+                    "vcs-ref": "01596e44a44a954fe1962d0185cd7397c48aaf2b",
+                    "vcs-type": "git"
+                }
+            },
+            "Architecture": "amd64",
+            "Size": 356485120
+        },
+        "dockerImageMetadataVersion": "1.0",
+        "dockerImageLayers": null
+    },
+    "tag": "latest"
+}

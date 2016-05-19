@@ -99,9 +99,15 @@ public class PortSpecAdapter implements IPort{
 		return true;
 	}
 	
-	
-	
-	private String getName(int port, String protocol) {
+    /**
+     * For better test reporting
+     */
+    @Override
+    public String toString() {
+        return "PortSpecAdapter [name=" + name + ", protocol=" + protocol + ", port=" + port + "]";
+    }
+
+    private String getName(int port, String protocol) {
 		return NLS.bind("{0}-{1}", port, protocol.toLowerCase());
 	}
 	

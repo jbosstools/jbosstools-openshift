@@ -26,6 +26,7 @@ import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizardModel;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -40,14 +41,23 @@ import com.openshift.restclient.model.image.IImageStreamImport;
  */
 public class DeployImageWizardModelTest {
 
+    private IDockerConnection dockerConnection;
+    
+    private IProject project;
+    
+    private DeployImageWizardModel model;
+    
+    @Before
+    public void setUp() {
+        model = new DeployImageWizardModel();
+        dockerConnection = mock(IDockerConnection.class);
+        project = Mockito.mock(IProject.class);
+        model.setDockerConnection(dockerConnection);
+        model.setProject(project);
+    }
+    
 	@Test
 	public void shouldInitializeContainerInfoFromLocalDockerImage() {
-		// given
-		final DeployImageWizardModel model = new DeployImageWizardModel();
-		final IDockerConnection dockerConnection = mock(IDockerConnection.class);
-		final IProject project = Mockito.mock(IProject.class);
-		model.setDockerConnection(dockerConnection);
-		model.setProject(project);
 		// assume Docker image is on local
 		final IDockerImageInfo dockerImageInfo = Mockito.mock(IDockerImageInfo.class, Mockito.RETURNS_DEEP_STUBS);
 		when(dockerConnection.hasImage("jboss/wildfly", "latest")).thenReturn(true);
@@ -70,12 +80,6 @@ public class DeployImageWizardModelTest {
 
 	@Test
 	public void shouldInitializeContainerInfoFromRemoteDockerImage() throws IOException {
-		// given
-		final DeployImageWizardModel model = new DeployImageWizardModel();
-		final IDockerConnection dockerConnection = mock(IDockerConnection.class);
-		model.setDockerConnection(dockerConnection);
-		final IProject project = Mockito.mock(IProject.class);
-		model.setProject(project);
 		// no Docker image on local
 		when(dockerConnection.hasImage("jboss/infinispan-server", "latest")).thenReturn(false);
 
@@ -99,10 +103,66 @@ public class DeployImageWizardModelTest {
 				new EnvironmentVariable("JAVA_HOME", "/usr/lib/jvm/java"),
 				new EnvironmentVariable("INFINISPAN_SERVER_HOME", "/opt/jboss/infinispan-server"),
 				new EnvironmentVariable("INFINISPAN_VERSION", "8.2.0.Final"));
-		assertThat(model.getPortSpecs()).isEmpty();;
+		assertThat(model.getPortSpecs()).isEmpty();
+		assertThat(model.getVolumes()).isEmpty();
 	}
 
-	private String getImageStreamImport(final String filename) throws IOException {
+    @Test
+    public void shouldInitializeContainerInfoFromRemoteDockerImageWithVolumes() throws IOException {
+        // no Docker image on local
+        when(dockerConnection.hasImage("openshift3/jenkins-1-rhel7", "latest")).thenReturn(false);
+
+        final IImageStreamImportCapability cap = Mockito.mock(IImageStreamImportCapability.class);
+        when(project.supports(IImageStreamImportCapability.class)).thenReturn(true);
+        when(project.getCapability(IImageStreamImportCapability.class)).thenReturn(cap);
+        final IStatus status = Mockito.mock(IStatus.class);
+        final IImageStreamImport streamImport = Mockito.mock(IImageStreamImport.class);
+        final DockerImageURI dockerImageURI = new DockerImageURI("openshift3/jenkins-1-rhel7:latest");
+        when(status.isSuccess()).thenReturn(true);
+        when(cap.importImageMetadata(dockerImageURI)).thenReturn(streamImport);
+        when(streamImport.getImageJsonFor(dockerImageURI.getTag()))
+                .thenReturn(getImageStreamImport("/resources/openshift3_jenkins_1_rhel7_ImageStreamImport.json"));
+        when(streamImport.getImageStatus()).thenReturn(Arrays.asList(status));
+        // when
+        model.setImageName("openshift3/jenkins-1-rhel7:latest");
+        final boolean result = model.initializeContainerInfo();
+        // then
+        assertThat(result).isTrue();
+        assertThat(model.getEnvironmentVariables()).contains(
+                new EnvironmentVariable("PATH", "/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"),
+                new EnvironmentVariable("JENKINS_VERSION", "1.642"),
+                new EnvironmentVariable("HOME", "/var/lib/jenkins"),
+                new EnvironmentVariable("JENKINS_HOME", "/var/lib/jenkins"));
+        assertThat(model.getPortSpecs()).contains(
+                new PortSpecAdapter("50000-tcp", "TCP", 50000),
+                new PortSpecAdapter("8080-tcp", "TCP", 8080));
+        assertThat(model.getVolumes()).contains("/var/lib/jenkins");
+    }
+    
+    @Test
+    public void shouldNotInitializeContainerInfoFromWrongPayload() throws IOException {
+        // no Docker image on local
+        when(dockerConnection.hasImage("bad/badimage", "latest")).thenReturn(false);
+
+        final IImageStreamImportCapability cap = Mockito.mock(IImageStreamImportCapability.class);
+        when(project.supports(IImageStreamImportCapability.class)).thenReturn(true);
+        when(project.getCapability(IImageStreamImportCapability.class)).thenReturn(cap);
+        final IStatus status = Mockito.mock(IStatus.class);
+        final IImageStreamImport streamImport = Mockito.mock(IImageStreamImport.class);
+        final DockerImageURI dockerImageURI = new DockerImageURI("bad/badimage:latest");
+        when(status.isSuccess()).thenReturn(false);
+        when(cap.importImageMetadata(dockerImageURI)).thenReturn(streamImport);
+        when(streamImport.getImageJsonFor(dockerImageURI.getTag()))
+                .thenReturn(getImageStreamImport("/resources/failed_ImageStreamImport.json"));
+        when(streamImport.getImageStatus()).thenReturn(Arrays.asList(status));
+        // when
+        model.setImageName("bad/badimage:latest");
+        final boolean result = model.initializeContainerInfo();
+        // then
+        assertThat(result).isFalse();
+    }
+
+    private String getImageStreamImport(final String filename) throws IOException {
 		final InputStream imageStreamImport = getClass().getClassLoader()
 				.getResourceAsStream(filename);
 		return IOUtils.toString(imageStreamImport);
