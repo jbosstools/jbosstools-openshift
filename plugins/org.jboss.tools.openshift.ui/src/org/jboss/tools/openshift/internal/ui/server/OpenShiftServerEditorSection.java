@@ -565,6 +565,28 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				.runWhenDone(new DisableAllWidgetsJob(false, container, false, busyCursor))
 				.schedule();
 	}
+
+	//Temporal fix until superclass is fixed. Then just remove this class.
+	private class DisableAllWidgetsJob extends org.jboss.tools.foundation.ui.jobs.DisableAllWidgetsJob {
+		Composite container;
+
+		public DisableAllWidgetsJob(boolean disable, Composite container, Cursor cursor) {
+			super(disable, container, cursor);
+		}
+
+		public DisableAllWidgetsJob(boolean disableWidgets, Composite container, boolean disableCursor,
+				Cursor cursor) {
+			super(disableWidgets, container, disableCursor, cursor);
+			this.container = container;
+		}
+
+		@Override
+		public void run() {
+			if(container != null && !container.isDisposed()) {
+				super.run();
+			}
+		}
+	}
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
