@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -54,6 +55,7 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
@@ -288,9 +290,14 @@ public class OpenShiftServerUtils {
 		return serverWorkingCopy;
 	}
 
+	/**
+	 * Returns 
+	 * @param attributes
+	 * @return
+	 */
 	public static Connection getConnection(IServerAttributes attributes) {
 		try {
-			String url = attributes.getAttribute(ATTR_CONNECTIONURL, (String)null);
+			String url = attributes.getAttribute(ATTR_CONNECTIONURL, (String) null);
 			if( url == null)
 					url = getProjectAttribute(ATTR_CONNECTIONURL, null, getDeployProject(attributes));
 			if (!StringUtils.isEmpty(url)) {
@@ -308,18 +315,27 @@ public class OpenShiftServerUtils {
 		return getService(attributes, getConnection(attributes));
 	}
 	
+	/**
+	 * Returns the service for the given server. It gets the service name from
+	 * server settings and requests the service from the OpenShit server. It
+	 * should thus never be called from the UI thread.
+	 * 
+	 * @param attributes the server (attributes) to get the service name from
+	 * @param connection the connection (to the OpenShift server) to retrieve the service from
+	 * @return the service 
+	 */
 	public static IService getService(IServerAttributes attributes, Connection connection) {
 		// TODO: implement override project settings with server settings
-		String uniqueId = attributes.getAttribute(ATTR_SERVICE, (String)null);
-		if( uniqueId == null )
+		String uniqueId = attributes.getAttribute(ATTR_SERVICE, (String) null);
+		if (uniqueId == null) {
 			uniqueId = getProjectAttribute(ATTR_SERVICE, null, getDeployProject(attributes));
+		}
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
-		
-		return OpenShiftResourceUniqueId.getByUniqueId(uniqueId, 
-				connection.getResources(ResourceKind.SERVICE, 
-						OpenShiftResourceUniqueId.getProject(uniqueId)));
+		String projectName = OpenShiftResourceUniqueId.getProjectName(uniqueId);
+		List<IService> services = connection.getResources(ResourceKind.SERVICE, projectName);
+		return OpenShiftResourceUniqueId.getByUniqueId(uniqueId, services);
 	}
 
 	public static String getRouteURL(IServerAttributes attributes) {
@@ -404,27 +420,54 @@ public class OpenShiftServerUtils {
 		return ServerUtils.getProjectAttribute(name, defaultValue, SERVER_PROJECT_QUALIFIER, project);
 	}
 	
-	public static IDeploymentConfig getDeploymentConfig(IServerAttributes attributes) {
-		IService service = getService(attributes);
-		//TODO use annotations instead of labels
-		if (service == null) {
-			return null;
-		}
-		String dcName = ResourceUtils.getDeploymentConfigNameForPods(service.getPods());
-		if (dcName == null) {
-			return null;
-		}
-		
+	/**
+	 * Returns the deployment config for the given server (attributes). The
+	 * match is done by the service that the given (openshift server) is bound
+	 * to. This method does remote calls to the OpenShift server and thus should
+	 * never be called from the UI thread.
+	 * 
+	 * @param attributes
+	 * @return the deployment config for the given server
+	 * 
+	 * @see #getService(IServerAttributes)
+	 * @see ResourceUtils#getPodsForService(IService, Collection)
+	 */
+	public static IDeploymentConfig getDeploymentConfig(IServerAttributes attributes) throws CoreException {
 		Connection connection = getConnection(attributes);
 		if (connection == null) {
-			return null;
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find the connection for server {0}"
+							+ "Your server adapter might refer to an inexistant connection."
+							, attributes.getName())));
 		}
-		IDeploymentConfig dc = connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, service.getNamespace(), dcName);
-		return dc;
-	}
 
-	private static void setProjectAttribute(String name, String defaultValue, IProject project) {
-		ServerUtils.setProjectAttribute(name, defaultValue, SERVER_PROJECT_QUALIFIER, project, true);
+		IService service = getService(attributes, connection);
+		if (service == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find the service for server {0}" 
+							+ "Your server adapter might refer to an inexistant service.",
+							attributes.getName())));
+		}
+
+		List<IPod> pods = connection.getResources(ResourceKind.POD, service.getProject().getName());
+		List<IPod> servicePods = ResourceUtils.getPodsForService(service, pods);
+		if (servicePods == null
+				|| servicePods.isEmpty()) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find pods for service {0} in connection {1}. "
+							+ "OpenShift might be still building the pods for service {0}.", 
+							service.getName(), connection.getHost())));
+		}
+		String dcName = ResourceUtils.getDeploymentConfigNameForPods(servicePods);
+		if (dcName == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find deployment config for {0}. "
+							+ "Your build might be still running and pods not created yet or "
+							+ "there might be no labels on your pods pointing to the wanted deployment config.", 
+					attributes.getName())));
+		}
+
+		return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, service.getNamespace(), dcName);
 	}
 	
 	public static boolean isEapStyle(IBuildConfig buildConfig) {

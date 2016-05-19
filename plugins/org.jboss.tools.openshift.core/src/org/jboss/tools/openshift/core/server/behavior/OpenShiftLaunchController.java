@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
 import org.eclipse.jdt.launching.SocketUtil;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
@@ -84,20 +83,20 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			throw toCoreException("Unable to find a IControllableServerBehavior instance");
 		}
 		ControllableServerBehavior beh = (ControllableServerBehavior) serverBehavior;
-		
-		beh.setServerStarting();
-		
 		IServer server = beh.getServer();
-		
-		IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
-		if (dc == null) {
+
+		beh.setServerStarting();
+		try {
+			IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
+			toggleDebugging(mode, monitor, beh, server, dc);
+		} catch (CoreException e) {
 			beh.setServerStopped();
-			throw toCoreException(NLS.bind("Could not find deployment config was for {0}. "
-					+ "Your server adapter refers to an inexistant service"
-					+ ", there are no pods for it "
-					+ "or there are no labels on those pods pointing to the wanted deployment config.", 
-					server.getName()));
+			throw e;
 		}
+	}
+
+	private void toggleDebugging(String mode, IProgressMonitor monitor, ControllableServerBehavior beh, IServer server,
+			IDeploymentConfig dc) throws CoreException {
 		String currentMode = beh.getServer().getMode();
 		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
 		try {
@@ -112,7 +111,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		} finally {
 			checkServerState(beh, currentMode, mode);
 		}
-		
 	}
 
 
