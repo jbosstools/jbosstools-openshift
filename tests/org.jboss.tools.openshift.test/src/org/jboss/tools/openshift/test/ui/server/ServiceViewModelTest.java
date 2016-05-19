@@ -46,7 +46,7 @@ public class ServiceViewModelTest {
 
 	@Before
 	public void setUp() {
-		this.connection = ResourceMocks.createServerSettingsWizardPageConnection();
+		this.connection = ResourceMocks.create3ProjectsConnection();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 		this.model = new ServiceViewModel(this.selectedService = ResourceMocks.PROJECT2_SERVICES[1], connection);
 		model.loadResources();

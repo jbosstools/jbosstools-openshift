@@ -290,10 +290,10 @@ public class ResourceUtilsTest {
 	public void buildConfigsListWithErronousKindsShouldReturnEmptyStringAndValidImageRefs() {
 		// given
 		List<IBuildConfig> buildConfigs = Arrays.asList(
-				ResourceMocks.createBuildConfig(null, "nullKind"),
-				ResourceMocks.createBuildConfig(ResourceKind.IMAGE_STREAM_TAG, "imageStreamTagKind"),
-				ResourceMocks.createBuildConfig("foo", "fooKind"),
-				ResourceMocks.createBuildConfig(ResourceUtils.IMAGE_STREAM_IMAGE_KIND, "imageStreamImageKind"));
+				ResourceMocks.createBuildConfig(null, null, "nullKind"),
+				ResourceMocks.createBuildConfig(null, ResourceKind.IMAGE_STREAM_TAG, "imageStreamTagKind"),
+				ResourceMocks.createBuildConfig(null, "foo", "fooKind"),
+				ResourceMocks.createBuildConfig(null, ResourceUtils.IMAGE_STREAM_IMAGE_KIND, "imageStreamImageKind"));
 		// when
 		List<String> imageRefs = getImageRefs(buildConfigs);
 		// then

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat Inc..
+ * Copyright (c) 2015-2016 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,29 +20,44 @@ import com.openshift.restclient.model.IResource;
  * @author Andre Dietisheim
  */
 public class OpenShiftResourceUniqueId {
-	
+
 	private static final char UNIQUE_ID_PROJECT_NAME_DELIMITER = '@';
-	
+
 	public static String get(IResource resource) {
-		return new StringBuilder()
-			.append(resource.getProject().getName())
-			.append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
-			.append(resource.getName())
-			.toString();
+		if (resource == null || StringUtils.isEmpty(resource.getName()) || resource.getProject() == null
+				|| StringUtils.isEmpty(resource.getProject().getName())) {
+			return null;
+		}
+
+		return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+				.append(resource.getName()).toString();
 	}
 
-	public static String getProject(String uniqueId) {
+	/**
+	 * Returns the project name for a given resource unique id
+	 * 
+	 * @param uniqueId
+	 * @return
+	 */
+	public static String getProjectName(String uniqueId) {
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
+
 		int index = uniqueId.indexOf(UNIQUE_ID_PROJECT_NAME_DELIMITER);
 		if (index == -1) {
 			return null;
 		}
 		return uniqueId.substring(0, index);
 	}
-	
-	public static String getName(String uniqueId) {
+
+	/**
+	 * Returns the resource name for a given resource uniqueId
+	 * 
+	 * @param uniqueId
+	 * @return
+	 */
+	public static String getResourceName(String uniqueId) {
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
@@ -50,16 +65,24 @@ public class OpenShiftResourceUniqueId {
 		if (index == -1) {
 			return null;
 		}
-		return uniqueId.substring(index);
+		return uniqueId.substring(index + 1);
 	}
 
+	/**
+	 * Returns the resource within the given collection of resources that match
+	 * the given uniqueId. Returns {@code null} otherwise
+	 * 
+	 * @param uniqueId
+	 *            the unique id to match the resources against
+	 * @param resources
+	 *            the resources to search
+	 * @return
+	 */
 	public static <R extends IResource> R getByUniqueId(String uniqueId, Collection<R> resources) {
-		if (resources == null
-				|| resources.isEmpty()
-				|| StringUtils.isEmpty(uniqueId)) {
+		if (resources == null || resources.isEmpty() || StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
-		
+
 		for (R resource : resources) {
 			if (uniqueId.equals(get(resource))) {
 				return resource;

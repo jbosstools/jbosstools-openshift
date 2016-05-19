@@ -71,12 +71,12 @@ public class ServerSettingsWizardPageModelTest {
 
 	@Before
 	public void setUp() throws CoreException {
-		this.connection = ResourceMocks.createServerSettingsWizardPageConnection();
+		this.connection = ResourceMocks.create3ProjectsConnection();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 
-		this.project1 = ResourceMocks.createProject("project1");
+		this.project1 = ResourceMocks.createEclipseProject("project1");
 		this.project2 = ResourceMocks.mockGitSharedProject("project2", ResourceMocks.PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI);
-		this.project3 = ResourceMocks.createProject("project3");
+		this.project3 = ResourceMocks.createEclipseProject("project3");
 		this.project4 = ResourceMocks.mockGitSharedProject("project4", "git@42.git");
 
 		this.model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, null, Arrays.asList(project1, project2, project3, project4), connection, server);

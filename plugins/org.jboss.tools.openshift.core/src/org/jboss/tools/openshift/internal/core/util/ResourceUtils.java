@@ -105,15 +105,19 @@ public class ResourceUtils {
 	 * @return true if there is overlap; false; otherwise
 	 */
 	public static boolean containsAll(Map<String, String> source, Map<String, String> target) {
-		if(source == null || target == null) return false;
-		if(!target.keySet().isEmpty() && source.keySet().isEmpty()) {
+		if(source == null 
+				|| target == null) {
+			return false;
+		}
+		if(!target.keySet().isEmpty() 
+				&& source.keySet().isEmpty()) {
 			return false;
 		}
 		if(!target.keySet().containsAll(source.keySet())) {
 			return false;
 		}
 		for (String key : source.keySet()) {
-			if(!Objects.deepEquals(target.get(key),source.get(key))) {
+			if (!Objects.deepEquals(target.get(key), source.get(key))) {
 				return false;
 			}
 		}
@@ -149,7 +153,7 @@ public class ResourceUtils {
 	 * @param pods
 	 * @return
 	 */
-	public static List<IPod> getPodsForSelector(Map<String, String> serviceSelector, Collection<IPod> pods) {
+	private static List<IPod> getPodsForSelector(Map<String, String> serviceSelector, Collection<IPod> pods) {
 		return pods.stream()
 				.filter(p -> containsAll(serviceSelector, p.getLabels()))
 				.distinct()

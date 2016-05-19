@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,8 +20,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.internal.preferences.EclipsePreferences;
@@ -36,12 +41,15 @@ import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.team.internal.core.TeamPlugin;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.mockito.Mockito;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IObjectReference;
+import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
@@ -58,65 +66,105 @@ public class ResourceMocks {
 				.append(OpenShiftServerUtils.SERVER_PROJECT_QUALIFIER)
 				.addFileExtension(EclipsePreferences.PREFS_FILE_EXTENSION);
 	
-	public static final IProject PROJECT1 = createResource(IProject.class, 
-			project -> when(project.getName()).thenReturn("project1"));
-	public static final IProject PROJECT2 = createResource(IProject.class, 
-			project -> when(project.getName()).thenReturn("project1"));
-	public static final IProject PROJECT3 = createResource(IProject.class, 
-			project -> when(project.getName()).thenReturn("project1"));
+	public static final IProject PROJECT1 = createProject("project1");
+	public static final IProject PROJECT2 = createProject("project2");
+	public static final IProject PROJECT3 = createProject("project3");
 
 	public static final IProject[] PROJECTS = new IProject[] { PROJECT1, PROJECT2, PROJECT3 };
 
 	public static final IService[] PROJECT2_SERVICES = new IService[] {
-			createService("project2-app1", PROJECT2),
-			createService("project2-app2", PROJECT2),
-			createService("project2-app3", PROJECT2)
+			// selectors need to match pod labels
+			createService("project2-app1", PROJECT2, new HashMap<String, String>() {{ put("key1", "42"); put("key2", "24"); put("key3", "48"); }}),
+			createService("project2-app2", PROJECT2, new HashMap<String, String>() {{ put("key1", "84"); put("key2", "48"); }}),
+			createService("project2-app3", PROJECT2, new HashMap<String, String>() {{ put("key1", "42"); put("key2", "24"); }})
 	};
 
 	public static final String PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI = "git@gitrepo.io/somegroup/someproject.git";
 
 	public static final IBuildConfig[] PROJECT2_BUILDCONFIGS = new IBuildConfig[] {
 			// needs to match service name
-			createBuildConfig("project2-app1", null, null, null),
+			createBuildConfig("project2-app1", PROJECT2, null, null, null),
 			// needs to match service name
-			createBuildConfig("project2-app2", null, null, PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI),
+			createBuildConfig("project2-app2", PROJECT2, null, null, PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI),
 			// needs to match service name
-			createBuildConfig("project2-app3", null, null, null),
+			createBuildConfig("project2-app3", PROJECT2, null, null, null),
 			// needs to match service name
-			createBuildConfig("project2-app4", null, null, null)
+			createBuildConfig("project2-app4", PROJECT2, null, null, null)
 	};
 
 	public static final IRoute[] PROJECT2_ROUTES = new IRoute[] {
-			// 2nd param must match service name
-			createRoute("project2-app1-route1", "project2-app1"),
-			createRoute("project2-app2-route2", "project2-app2"),
-			createRoute("project2-app2-route3", "project2-app2"),
-			createRoute("project2-app3-route4", "project2-app3")
+			// 3rd param must match service name
+			createRoute("project2-app1-route1", PROJECT2, "project2-app1"),
+			createRoute("project2-app2-route2", PROJECT2, "project2-app2"),
+			createRoute("project2-app2-route3", PROJECT2, "project2-app2"),
+			createRoute("project2-app3-route4", PROJECT2, "project2-app3")
+	};
+
+	public static final IDeploymentConfig[] PROJECT2_DEPLOYMENTCONFIGS = new IDeploymentConfig[] {
+			createDeploymentConfig("project2-app1-dc", PROJECT2),
+			createDeploymentConfig("project2-app2-dc", PROJECT2),
+			createDeploymentConfig("project2-app3-dc", PROJECT2)
+	};
+
+	public static final IPod[] PROJECT2_PODS = new IPod[] {
+			// labels need to match service selectors and contain dc name
+			createPod("project2-app1", PROJECT2, new HashMap<String, String>() {{ 
+				put("key1", "42"); put("key2", "24"); }}),
+			createPod("project2-app2", PROJECT2, new HashMap<String, String>() {{ 
+				put("key1", "84"); put("key2", "48"); put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, PROJECT2_DEPLOYMENTCONFIGS[2].getName());}}),
+			createPod("project2-app3", PROJECT2, new HashMap<String, String>() {{ 
+				put("key1", "84"); put("key2", "48"); }})
 	};
 
 	public static final IService[] PROJECT3_SERVICES = new IService[] {
 			createService("project3-app1", PROJECT3),
 			createService("project3-app2", PROJECT3),
+			createService("project3-app2", PROJECT3),
 	};
 
 	public static final IRoute[] PROJECT3_ROUTES = new IRoute[] {
-			// 2nd param must match service name
-			createRoute("project3-app1-route1", "project3-app1"),
-			createRoute("project3-app2-route2", "project3-app2"),
-			createRoute("project3-app3-route3", "bogus")
+			// 3rf param must match service name
+			createRoute("project3-app1-route1", PROJECT3, "project3-app1"),
+			createRoute("project3-app2-route2", PROJECT3, "project3-app2"),
+			createRoute("project3-app3-route3", PROJECT3, "bogus")
 	};
 
-	public static Connection createServerSettingsWizardPageConnection() {
+	public static Connection create3ProjectsConnection() {
 		Connection connection = createConnection("http://localhost:8443", "dev@openshift.com");
 		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(PROJECTS));
 		when(PROJECT2.getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT2_SERVICES));
+		when(connection.getResources(ResourceKind.SERVICE, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_SERVICES));
 		when(PROJECT2.getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT2_ROUTES));
 		when(connection.getResources(ResourceKind.BUILD_CONFIG, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_BUILDCONFIGS));
+		when(connection.getResources(ResourceKind.POD, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_PODS));
+		when(connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_DEPLOYMENTCONFIGS));
+		mockConnectionGetResource(PROJECT2_DEPLOYMENTCONFIGS, ResourceKind.DEPLOYMENT_CONFIG, connection);
+
 		when(PROJECT3.getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT3_SERVICES));
 		when(PROJECT3.getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT3_ROUTES));
 		return connection;
 	}
 
+	private static void mockConnectionGetResource(IResource[] resources, String resourceKind, Connection connection) {
+		for (IResource resource : resources) {
+
+			assertThat(resource).isNotNull();
+			assertThat(resource.getName()).isNotEmpty();
+			assertThat(resource.getProject()).isNotNull();
+			assertThat(resource.getProject().getName()).isNotEmpty();
+			assertThat(resourceKind).isNotNull();
+
+			when(connection.getResource(resourceKind, resource.getProject().getName(), resource.getName()))
+					.thenReturn(resource);
+		}
+	}
+	
+	public static IProject createProject(String name) {
+		return  createResource(IProject.class, 
+					project -> { 
+						mockGetResourceProperties(name, project, project);
+				});
+	}
 
 	public static Connection createConnection(String host, String username) {
 		Connection connection = mock(Connection.class);
@@ -126,11 +174,12 @@ public class ResourceMocks {
 		return connection;
 	}
 	
-	public static IBuildConfig createBuildConfig(String buildOutputReferenceKind, String buildOutputReferenceName) {
-		return createBuildConfig(null, buildOutputReferenceKind, buildOutputReferenceName, null);
+	public static IBuildConfig createBuildConfig(IProject project, String buildOutputReferenceKind, String buildOutputReferenceName) {
+		return createBuildConfig(null, project, buildOutputReferenceKind, buildOutputReferenceName, null);
 	}
 
-	public static IBuildConfig createBuildConfig(String name, String buildOutputReferenceKind, String buildOutputReferenceName, String buildSourceURI) {
+	public static IBuildConfig createBuildConfig(String name, IProject project, 
+			String buildOutputReferenceKind, String buildOutputReferenceName, String buildSourceURI) {
 		IBuildConfig bc = mock(IBuildConfig.class);
 		
 		IObjectReference reference = mock(IObjectReference.class);
@@ -138,27 +187,44 @@ public class ResourceMocks {
 		when(reference.getName()).thenReturn(buildOutputReferenceName);
 		when(bc.getBuildOutputReference()).thenReturn(reference);
 		
-		when(bc.getName()).thenReturn(name);
+		mockGetResourceProperties(name, project, bc);
 		when(bc.getSourceURI()).thenReturn(buildSourceURI);
 
 		return bc;
 	}
 
-	public static IRoute createRoute(String name, String serviceName) {
+	public static IRoute createRoute(String name, IProject project, String serviceName) {
 		return createResource(IRoute.class, 
 				route -> {
-					when(route.getName()).thenReturn(name);
+					mockGetResourceProperties(name, project, route);
 					when(route.getServiceName()).thenReturn(serviceName);
 					when(route.getURL()).thenReturn("http://" + serviceName);
 				});
 	}
 	
 	public static IService createService(String name, IProject project) {
+		return createService(name, project, Collections.emptyMap());
+	}
+
+	public static IService createService(String name, IProject project, Map<String, String> selectors) {
 		return createResource(IService.class, 
 				service -> {
-					when(service.getName()).thenReturn(name);
-					when(service.getProject()).thenReturn(project);
+					mockGetResourceProperties(name, project, service);
+					when(service.getSelector()).thenReturn(selectors);
 				});
+	}
+
+	public static IPod createPod(String name, IProject project, Map<String, String> labels) {
+		return createResource(IPod.class, 
+				pod -> {
+					mockGetResourceProperties(name, project, pod);
+					when(pod.getLabels()).thenReturn(labels);
+				});
+	}
+
+	public static IDeploymentConfig createDeploymentConfig(String name, IProject project) {
+		return createResource(IDeploymentConfig.class, 
+				dc -> mockGetResourceProperties(name, project, dc));
 	}
 
 	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz) {
@@ -187,6 +253,15 @@ public class ResourceMocks {
 		return mock;
 	}
 
+	public static void mockGetResourceProperties(String name, IProject project, IResource resource) {
+		when(resource.getName()).thenReturn(name);
+		if (project != null) {
+			doReturn(project.getName()).when(resource).getNamespace();
+			doReturn(project).when(resource).getProject();
+		}
+		
+	}
+
 	public static List<ObservableTreeItem> createObservableTreeItems(Collection<? extends IResource> resources) {
 		return resources.stream()
 				.map(r -> new ObservableTreeItem(r))
@@ -197,7 +272,7 @@ public class ResourceMocks {
 		public void visit(R resource);
 	}
 
-	public static org.eclipse.core.resources.IProject createProject(String name) throws CoreException {
+	public static org.eclipse.core.resources.IProject createEclipseProject(String name) throws CoreException {
 		org.eclipse.core.resources.IProject project = mock(org.eclipse.core.resources.IProject.class);
 		when(project.isAccessible()).thenReturn(true);
 		when(project.getName()).thenReturn(name);
@@ -216,7 +291,7 @@ public class ResourceMocks {
 	}
 
 	public static org.eclipse.core.resources.IProject mockGitSharedProject(String name, String gitRemoteUri) throws CoreException {
-		org.eclipse.core.resources.IProject project = createProject(name);
+		org.eclipse.core.resources.IProject project = createEclipseProject(name);
 
 		when(project.getPersistentProperty(TeamPlugin.PROVIDER_PROP_KEY)).thenReturn(GitProvider.ID);
 

@@ -10,29 +10,78 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.server;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.server.core.IServerAttributes;
+import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
+import org.jboss.tools.openshift.test.util.ResourceMocks;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
 import com.openshift.restclient.model.build.IDockerBuildStrategy;
 import com.openshift.restclient.model.build.ISTIBuildStrategy;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
+/**
+ * @author Fred Bricon
+ * @author Rob Stryker
+ * @author Andre Dietisheim
+ *
+ */
 public class OpenShiftServerUtilsTest {
 
+	private IServerWorkingCopy server;
+	private Connection connection;
+
+	@Before
+	public void setUp() throws UnsupportedEncodingException, MalformedURLException {
+		this.connection = ResourceMocks.create3ProjectsConnection();
+		ConnectionsRegistrySingleton.getInstance().add(connection);
+
+		this.server = createServer(ResourceMocks.PROJECT2_SERVICES[1]);
+	}
+
+	private IServerWorkingCopy createServer(IService serverService) throws UnsupportedEncodingException, MalformedURLException {
+		IServerWorkingCopy server = mock(IServerWorkingCopy.class);
+		doReturn(ConnectionURL.forConnection(connection).getUrl())
+			.when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), anyString());
+		doReturn(OpenShiftResourceUniqueId.get(serverService))
+			.when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
+		return server;
+	}
+
+	@After
+	public void tearDown() {
+		ConnectionsRegistrySingleton.getInstance().remove(connection);
+	}
+	
 	@Test
 	public void testIsEapStyle() {
 		assertIsNotEapStyle(null);
@@ -111,7 +160,6 @@ public class OpenShiftServerUtilsTest {
 		assertFalse(OpenShiftServerUtils.containsEapLikeKeywords(text));
 	}
 	
-	
 	@Test
 	public void testGetPodPathFromServer() {
 		// Only tests resolution from server
@@ -119,6 +167,7 @@ public class OpenShiftServerUtilsTest {
 		when(server.getAttribute(OpenShiftServerUtils.ATTR_POD_PATH, (String)null)).thenReturn("test1");
 		assertEquals("test1", OpenShiftServerUtils.getPodPath(server));
 	}
+
 	@Test
 	public void testGetSourceFromServer() {
 		// Only tests resolution from server
@@ -126,11 +175,67 @@ public class OpenShiftServerUtilsTest {
 		when(server.getAttribute(OpenShiftServerUtils.ATTR_SOURCE_PATH, (String)null)).thenReturn("test1");
 		assertEquals("test1", OpenShiftServerUtils.getSourcePath(server));
 	}
+
 	@Test
 	public void testGetRouteURLFromServer() {
 		// Only tests resolution from server
 		IServerAttributes server = mock(IServerAttributes.class);
 		when(server.getAttribute(OpenShiftServerUtils.ATTR_ROUTE, (String)null)).thenReturn("test1");
 		assertEquals("test1", OpenShiftServerUtils.getRouteURL(server));
+	}
+	
+	@Test
+	public void should_return_connection_from_server() {
+		// given
+		// when
+		Connection connection = OpenShiftServerUtils.getConnection(server);
+		// then
+		assertThat(connection).isEqualTo(this.connection);
+	}
+	
+	@Test
+	public void should_return_service_from_server() {
+		// given
+		// when
+		IService service = OpenShiftServerUtils.getService(server, connection);
+		// then
+		assertThat(service).isEqualTo(ResourceMocks.PROJECT2_SERVICES[1]);
+	}
+
+	@Test
+	public void should_return_deploymentconfig() throws CoreException {
+		// given
+		// when
+		IDeploymentConfig deploymentConfig = OpenShiftServerUtils.getDeploymentConfig(server);
+		// then
+		assertThat(deploymentConfig).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2]);
+	}
+
+	@Test
+	public void should_throw_exception_no_pods_for_service() throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		// given
+		// when
+		try {
+			OpenShiftServerUtils.getDeploymentConfig(
+				createServer(ResourceMocks.PROJECT2_SERVICES[0]));
+		// then
+			fail("CoreException expected");
+		} catch(CoreException e) {
+			assertThat(e.getMessage().contains("not find pods"));
+		}
+	}
+
+	@Test
+	public void should_throw_exception_no_deployconfig_name_in_pod_labels() throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		// given
+		// when
+		try {
+			OpenShiftServerUtils.getDeploymentConfig(
+				createServer(ResourceMocks.PROJECT2_SERVICES[2]));
+		// then
+			fail("CoreException expected");
+		} catch(CoreException e) {
+			assertThat(e.getMessage().contains("not find deployment config"));
+		}
 	}
 }
