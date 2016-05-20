@@ -40,7 +40,6 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -58,7 +57,6 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
-import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
@@ -68,7 +66,6 @@ import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProv
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
-import org.jboss.tools.openshift.internal.ui.wizard.project.ManageProjectsWizard;
 import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
 
 import com.openshift.restclient.OpenShiftException;
@@ -274,7 +271,7 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 		try {
 			final boolean[] closeAfter = new boolean[]{false}; 
 			Job jobs = getLoadResourcesJobBuilder(closeAfter, closeOnCancel).build();
-			WizardUtils.runInWizard(jobs, getContainer());
+			WizardUtils.runInWizard(jobs, getContainer(), getDataBindingContext());
 			if(closeAfter[0]) {
 				if(Display.getCurrent() != null) {
 					WizardUtils.close(getWizard());
