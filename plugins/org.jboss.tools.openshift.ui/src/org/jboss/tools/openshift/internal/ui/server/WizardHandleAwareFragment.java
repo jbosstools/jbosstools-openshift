@@ -28,8 +28,17 @@ public class WizardHandleAwareFragment extends WizardFragment {
 
 	@Override
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
-		this.handle = handle;
+		setHandle(handle);
 		return super.createComposite(parent, handle);
+	}
+
+	/**
+	 * Has to be called if sub-class in overrided createComposite(Composite, IWizardHandle) 
+	 * does not call super method.
+	 * @param handle
+	 */
+	protected void setHandle(IWizardHandle handle) {
+		this.handle = handle;
 	}
 
 	public IWizardHandle getWizardHandle() {
@@ -57,11 +66,11 @@ public class WizardHandleAwareFragment extends WizardFragment {
 	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		super.performFinish(monitor);
-		handle = null;
+		setHandle(null);
 	}
 
 	@Override
 	public void performCancel(IProgressMonitor monitor) throws CoreException {
-		handle = null;
+		setHandle(null);
 	}
 }

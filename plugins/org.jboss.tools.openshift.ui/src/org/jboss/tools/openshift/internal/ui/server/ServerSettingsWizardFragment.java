@@ -139,6 +139,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	
 	@Override
 	public Composite createComposite(final Composite parent, final IWizardHandle handle) {
+		setHandle(handle);
 		this.serverSettingsWizardPage = createServerSettingsWizardPage(parent, handle);
 		updateWizardHandle(handle, this.serverSettingsWizardPage);
 		WizardFragmentUtils.getWizardDialog(handle).addPageChangingListener(onPageChanging());
