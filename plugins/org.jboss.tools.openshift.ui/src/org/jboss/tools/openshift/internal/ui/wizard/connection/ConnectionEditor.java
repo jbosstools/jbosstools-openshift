@@ -125,7 +125,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, 
 				oAuthDetailView);
 		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, 
-				new BasicAuthenticationDetailView(changeListener, pageModel.getContext()));
+				new BasicAuthenticationDetailView(pageModel, changeListener, pageModel.getContext()));
 		rememberTokenObservable = oAuthDetailView.getRememberTokenObservable();
 
 		// auth type
