@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JMX Remoting1_1_3
+Bundle-SymbolicName: org.jboss.tools.jmx.remoting1_1_3;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: lib/jboss-logging-3.1.4.GA.jar,
+ lib/jboss-logging-processor-1.1.0.Final.jar,
+ lib/jboss-logmanager-1.5.3.Final.jar,
+ lib/jboss-marshalling-1.4.8.Final.jar,
+ lib/jboss-marshalling-river-1.4.8.Final.jar,
+ lib/jboss-remoting-3.3.3.Final.jar,
+ lib/jboss-sasl-1.0.4.Final.jar,
+ lib/jdeparser-1.0.0.Final.jar,
+ lib/remoting-jmx-1.1.3.Final.jar,
+ lib/xnio-api-3.0.10.GA.jar,
+ lib/xnio-nio-3.0.10.GA.jar,
+ .
+Require-Bundle: org.jboss.tools.openshift.core;bundle-version="3.2.0"
