@@ -264,7 +264,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	}
 
 	private boolean authorize() {
-		client.setAuthorizationStrategy(getAuthorizationStrategy());
+		client.setAuthorizationStrategy(createAuthorizationStrategy());
 		try {
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
 			if (!context.isAuthorized() 
@@ -296,12 +296,12 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		}
 	}
 	
-	private IAuthorizationStrategy getAuthorizationStrategy() {
+	private IAuthorizationStrategy createAuthorizationStrategy() {
 		final String scheme = getAuthScheme();
 		final String token = getToken();
 		if (org.apache.commons.lang.StringUtils.isNotEmpty(token)
 				|| IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(scheme)) {
-			return new TokenAuthorizationStrategy(token); //always use the token if you have one?
+			return new TokenAuthorizationStrategy(token, getUsername()); //always use the token if you have one?
 		}
 		if (IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(scheme)) {
 			return new BasicAuthorizationStrategy(getUsername(), getPassword(), getToken());
@@ -314,7 +314,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @return
 	 */
 	public boolean isConnected(IProgressMonitor monitor) {
-		boolean needStrategy = initAuthorizationStrategy();
+		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
 			boolean result = context.isAuthorized();
@@ -337,10 +337,10 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * 
 	 * @return
 	 */
-	private boolean initAuthorizationStrategy() {
+	private boolean initClientAuthorizationStrategy() {
 		boolean needStrategy = client.getAuthorizationStrategy() == null;
 		if(needStrategy) {
-			client.setAuthorizationStrategy(getAuthorizationStrategy());
+			client.setAuthorizationStrategy(createAuthorizationStrategy());
 		}
 		return needStrategy;
 	}
@@ -424,7 +424,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @throws UnauthorizedException 
 	 */
 	public <T extends IResource> T createResource(T resource) {
-		boolean needStrategy = initAuthorizationStrategy();
+		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			return client.create(resource);
 		} catch (UnauthorizedException e) {
@@ -444,7 +444,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @throws UnauthorizedException 
 	 */
 	public <T extends IResource> T updateResource(T resource) {
-		boolean needStrategy = initAuthorizationStrategy();
+		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			return client.update(resource);
 		} catch (UnauthorizedException e) {
@@ -470,7 +470,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	
 	@Override
 	public <T extends IResource> List<T> getResources(String kind, String namespace) {
-		boolean needStrategy = initAuthorizationStrategy();
+		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			client.setSSLCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
 			return client.list(kind, namespace);
@@ -486,7 +486,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 
 	@Override
 	public <T extends IResource> T getResource(String kind, String namespace, String name) {
-		boolean needStrategy = initAuthorizationStrategy();
+		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			return client.get(kind, name, namespace);
 		} catch (UnauthorizedException e) {
@@ -505,7 +505,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @throws OpenShiftException
 	 */
 	public <T extends IResource> T getResource(IResource resource) {
-		boolean needStrategy = initAuthorizationStrategy();
+		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
 		} catch (UnauthorizedException e) {
