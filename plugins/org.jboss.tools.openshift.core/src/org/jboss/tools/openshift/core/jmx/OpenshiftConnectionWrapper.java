@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.jmx.core.IConnectionProvider;
-import org.jboss.tools.jmx.core.IConnectionProviderEventEmitter;
 import org.jboss.tools.jmx.core.IConnectionWrapper;
 import org.jboss.tools.jmx.core.IJMXRunnable;
 import org.jboss.tools.jmx.core.JMXActivator;
@@ -73,22 +72,25 @@ public class OpenshiftConnectionWrapper implements IConnectionWrapper {
 	}
 
 	public synchronized void connect() throws IOException {
-
-		IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
-		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
-		HashMap<String, Object> env = new HashMap<>();
-		env.put(JMXConnector.CREDENTIALS,
-				new String[] { debugContext.getAdminUsername(), debugContext.getAdminPassword() });
-		IPod firstPod = OpenShiftDebugUtils.get().getFirstPod(dc);
-		if (firstPod != null) {
-			int port = getLocalAdminPort(firstPod);
-			String url = "service:jmx:remoting-jmx://localhost:" + port;
-			// try to connect
-			connector = factory.newJMXConnector(new JMXServiceURL(url), env);
-			connector.connect();
-			connection = connector.getMBeanServerConnection();
-			isConnected = true;
-			provider.fireChanged(this);
+		try {
+			IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
+			DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
+			HashMap<String, Object> env = new HashMap<>();
+			env.put(JMXConnector.CREDENTIALS,
+					new String[] { debugContext.getAdminUsername(), debugContext.getAdminPassword() });
+			IPod firstPod = OpenShiftDebugUtils.get().getFirstPod(dc);
+			if (firstPod != null) {
+				int port = getLocalAdminPort(firstPod);
+				String url = "service:jmx:remoting-jmx://localhost:" + port;
+				// try to connect
+				connector = factory.newJMXConnector(new JMXServiceURL(url), env);
+				connector.connect();
+				connection = connector.getMBeanServerConnection();
+				isConnected = true;
+				provider.fireChanged(this);
+			}
+		} catch (CoreException e) {
+			throw new IOException(e);
 		}
 	}
 

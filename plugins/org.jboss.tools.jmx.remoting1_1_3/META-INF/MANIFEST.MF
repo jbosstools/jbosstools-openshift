@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: JMX Remoting1_1_3
+Bundle-Name: %BundleName
 Bundle-SymbolicName: org.jboss.tools.jmx.remoting1_1_3;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 3.2.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/jboss-logging-3.1.4.GA.jar,
  lib/jboss-logging-processor-1.1.0.Final.jar,
@@ -17,3 +17,4 @@ Bundle-ClassPath: lib/jboss-logging-3.1.4.GA.jar,
  lib/xnio-nio-3.0.10.GA.jar,
  .
 Require-Bundle: org.jboss.tools.openshift.core;bundle-version="3.2.0"
+Bundle-Vendor: %BundleProvider
