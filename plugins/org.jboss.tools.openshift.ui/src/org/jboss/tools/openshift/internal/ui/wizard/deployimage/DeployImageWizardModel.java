@@ -76,7 +76,7 @@ public class DeployImageWizardModel
 
 	private int replicas;
 
-	private boolean addRoute = false;
+	private boolean addRoute = true;
 
 	List<IServicePort> servicePorts = new ArrayList<>();
 	IServicePort selectedServicePort = null;
