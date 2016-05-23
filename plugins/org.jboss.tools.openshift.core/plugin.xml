@@ -234,11 +234,19 @@
           <subsystem system="moduleDeployPath" subsystem="moduleDeployPath.xmlprefs.openshift.eap"/>
        </serverProfile>
    	</extension>
-    <extension
+   	
+   	<extension-point id="org.jboss.tools.jmx.core.remoting.jmxprovider" name="JMX Connector Provider" schema="schema/org.jboss.tools.jmx.core.remoting.jmxprovider.exsd"/>
+   <extension
+         point="org.jboss.tools.jmx.core.MBeanServerConnectionProvider">
+      <connectionProvider
+            class="org.jboss.tools.openshift.core.jmx.OpenshiftConnectionProvider">
+      </connectionProvider>
+   </extension>
+	<extension
           point="org.eclipse.core.runtime.adapters">
        <factory
              adaptableType="org.jboss.tools.openshift.core.server.OpenShiftServer"
-             class="org.jboss.tools.openshift.core.OpenShiftServerAdapter">
+             class="org.jboss.tools.openshift.core.jmx.OpenShiftServerAdapter">
           <adapter
                 type="org.jboss.tools.jmx.core.IConnectionWrapper">
           </adapter>

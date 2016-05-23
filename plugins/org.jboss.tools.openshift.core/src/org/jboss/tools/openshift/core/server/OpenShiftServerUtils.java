@@ -475,18 +475,9 @@ public class OpenShiftServerUtils {
 			return false;
 		}
 		//First check buildconfig docker image name
-		IBuildStrategy strategy = buildConfig.getBuildStrategy();
-		DockerImageURI image = null;
+		
 		boolean isEapStyle = false;
-		if (strategy instanceof ISourceBuildStrategy) {
-			image = ((ISourceBuildStrategy) strategy).getImage();
-		} else if (strategy instanceof ICustomBuildStrategy) {
-			image = ((ICustomBuildStrategy) strategy).getImage();
-		} else if (strategy instanceof IDockerBuildStrategy) {
-			image = ((IDockerBuildStrategy) strategy).getBaseImage();
-		} else if (strategy instanceof ISTIBuildStrategy) {
-			image = ((ISTIBuildStrategy) strategy).getImage();
-		}
+		DockerImageURI image = getImageUri(buildConfig);
 		if (image != null) {
 			isEapStyle = containsEapLikeKeywords(image.getName());
 		}
@@ -500,6 +491,21 @@ public class OpenShiftServerUtils {
 			}
 		}
 		return isEapStyle;
+	}
+
+	public static DockerImageURI getImageUri(IBuildConfig buildConfig) {
+		IBuildStrategy strategy = buildConfig.getBuildStrategy();
+		DockerImageURI image = null;
+		if (strategy instanceof ISourceBuildStrategy) {
+			image = ((ISourceBuildStrategy) strategy).getImage();
+		} else if (strategy instanceof ICustomBuildStrategy) {
+			image = ((ICustomBuildStrategy) strategy).getImage();
+		} else if (strategy instanceof IDockerBuildStrategy) {
+			image = ((IDockerBuildStrategy) strategy).getBaseImage();
+		} else if (strategy instanceof ISTIBuildStrategy) {
+			image = ((ISTIBuildStrategy) strategy).getImage();
+		}
+		return image;
 	}
 		
 	public static boolean containsEapLikeKeywords(String label) {

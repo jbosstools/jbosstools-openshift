@@ -130,10 +130,11 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	@Override
 	public boolean isComplete() {
+		ServerSettingsWizardPageModel model = this.serverSettingsWizardPage.getModel();
 		return this.serverSettingsWizardPage != null 
 				&& !this.serverSettingsWizardPage.isLoadingResources() 
 				&& !this.serverSettingsWizardPage.isNeedsLoadingResources() 
-				&& this.serverSettingsWizardPage.getModel().getService() != null
+				&& model != null && model.getService() != null
 				&& serverSettingsWizardPage.isPageComplete();
 	}
 	

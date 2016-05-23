@@ -36,14 +36,14 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.core.connection;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.core.server;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.core.server;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.jmx.core.remoting",
  org.jboss.tools.openshift.core.server.behavior,
  org.jboss.tools.openshift.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.models;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.portforwarding;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
  org.jboss.tools.openshift.internal.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.core.server.debug;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
+ org.jboss.tools.openshift.internal.core.server.debug;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.jmx.core.remoting",
  org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui"
 Service-Component: META-INF/connectionFactory.xml
 Bundle-ClassPath: lib/remoting-jmx-2.0.1.Final.jar,

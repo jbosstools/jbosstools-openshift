@@ -19,6 +19,9 @@ public class DebuggingContext {
 	private boolean isDebugEnabled;
 	
 	private IPod pod;
+	
+	private String adminUsername;
+	private String adminPassword;
 
 	private IDebugListener listener;
 
@@ -38,6 +41,22 @@ public class DebuggingContext {
 		this.isDebugEnabled = isDebugEnabled;
 	}
 
+	public String getAdminUsername() {
+		return adminUsername;
+	}
+
+	public void setAdminUsername(String adminUsername) {
+		this.adminUsername = adminUsername;
+	}
+
+	public String getAdminPassword() {
+		return adminPassword;
+	}
+
+	public void setAdminPassword(String adminPassword) {
+		this.adminPassword = adminPassword;
+	}
+
 	public IPod getPod() {
 		return pod;
 	}
@@ -53,6 +72,4 @@ public class DebuggingContext {
 	public void setDebugListener(IDebugListener listener) {
 		this.listener = listener;
 	}
-	
-
 }
