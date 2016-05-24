@@ -163,10 +163,9 @@ public class NewApplicationWizard
 					return null;
 				}
 				if(isTemplateFlow()){
-					Stream.of(bcPage, dcPage, servicesPage).forEach(p->p.setPageComplete(true));
 					return getPage(TemplateParametersPage.PAGE_NAME);
 				}
-				return getPage(DeploymentConfigPage.PAGE_NAME);
+				return getPage(BuildConfigPage.PAGE_NAME);
 			}
 			
 		};
