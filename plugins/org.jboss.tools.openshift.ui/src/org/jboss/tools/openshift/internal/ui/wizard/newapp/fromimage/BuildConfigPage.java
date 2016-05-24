@@ -41,7 +41,7 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceNameControl;
  */
 public class BuildConfigPage extends EnvironmentVariablePage {
 
-	public static final String PAGE_NAME = "Deployment Config Settings Page";
+	public static final String PAGE_NAME = "Build Config Settings Page";
 	private static final String PAGE_TITLE = "Build Configuration";
 	private static final String PAGE_DESCRIPTION = "";
 
