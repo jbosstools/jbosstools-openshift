@@ -628,6 +628,12 @@
   <menuContribution
         allPopups="false"
         locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.BuildsTab">
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
      <menu label="%openshift.explorer.properties.menus.showIn">
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
@@ -637,11 +643,15 @@
       </menu>
      				<separator visible="true" name="org.jboss.tools.openshift.ui.separator1"/>
      <command
+           commandId="org.eclipse.ui.edit.delete"
+           style="push" />
+     				<separator visible="true" name="org.jboss.tools.openshift.ui.separator2"/>
+     <command
            commandId="org.jboss.tools.openshift.ui.command.buildlogs"
            id="org.jboss.tools.openshift.ui.explorer.command.buildlogs"
            tooltip="The openshift binary must be set in user preferences in order to retrieve build logs">
      </command>
-     				<separator visible="true" name="org.jboss.tools.openshift.ui.separator2"/>
+     				<separator visible="true" name="org.jboss.tools.openshift.ui.separator3"/>
      <command
            commandId="org.jboss.tools.openshift.ui.command.startbuild"
            label="%openshift.command.build.startbuild"
@@ -655,17 +665,8 @@
            commandId="org.jboss.tools.openshift.ui.command.clonebuild"
            style="push">
      </command>
-     				<separator visible="true" name="org.jboss.tools.openshift.ui.separator3"/>
-      <command
-        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
-        icon="icons/refresh.gif"
-        id="org.jboss.tools.openshift.ui.command.resource.refresh"
-        style="push"
-        tooltip="Refresh the resource" />
-     <command
-           commandId="org.eclipse.ui.edit.delete"
-           style="push" />
-     </menuContribution>
+  </menuContribution>
+
   <menuContribution
         allPopups="false"
         locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.BuildConfigsTab">
@@ -767,14 +768,12 @@
               tooltip="Scale the number of deployed replicas to a specific value.">
         </command>
      </menu>
-			     <separator name="org.jboss.tools.openshift.ui.separator1" visible="true"/>
      <command
            commandId="org.jboss.tools.openshift.ui.command.deploy"
            label="%openshift.command.deploymentconfig.deploy"
            style="push"
            tooltip="Trigger the latest deployment of a deployment config">
      </command>
-			     <separator name="org.jboss.tools.openshift.ui.separator2" visible="true"/>
   </menuContribution>
 
   <menuContribution
@@ -872,6 +871,12 @@
   <menuContribution
         allPopups="false"
         locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.ImageStreamsTab">
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
      <menu label="%openshift.explorer.properties.menus.showIn">
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
@@ -880,12 +885,6 @@
         mnemonic="C" />
       </menu>
       				<separator visible="true" name="org.jboss.tools.openshift.ui.separator11"/>
-      <command
-        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
-        icon="icons/refresh.gif"
-        id="org.jboss.tools.openshift.ui.command.resource.refresh"
-        style="push"
-        tooltip="Refresh the resource" />
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
@@ -893,6 +892,7 @@
            commandId="org.eclipse.ui.edit.delete"
            style="push" />
   </menuContribution>
+
   <menuContribution
         allPopups="false"
         locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.RoutesTab">
