@@ -10,21 +10,24 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.connection;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.junit.Before;
@@ -37,9 +40,10 @@ import org.mockito.stubbing.Answer;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.authorization.IAuthorizationContext;
+import com.openshift.restclient.authorization.IAuthorizationStrategy;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IClientCapability;
-import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -53,8 +57,13 @@ public class ConnectionTest {
 	@Mock IClient client;
 	
 	@Before
-	public void setup() throws Exception{
+	public void setup() throws Exception {
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));
+		doReturn(mock(IAuthorizationStrategy.class)).when(client).getAuthorizationStrategy();		
+		when(client.getContext(anyString())).thenReturn(mock(IAuthorizationContext.class));
+		IAuthorizationContext authContext = mock(IAuthorizationContext.class);
+		doReturn(true).when(authContext).isAuthorized();
+
 		connection = new Connection(client, null, null);
 	}
 
@@ -90,12 +99,14 @@ public class ConnectionTest {
 	}
 	
 	@Test
-	public void getResourceKindShouldCallClient(){
-		List<IProject> projects = Arrays.asList(mock(IProject.class));
-		when(client.<IProject>list(ResourceKind.PROJECT, "")).thenReturn(projects);
-		
-		assertArrayEquals("Exp. to get projects from the client",projects.toArray(), connection.getResources(ResourceKind.PROJECT).toArray());
+	public void getResourceKindShouldCallClient() {
+		// given
+		// when
+		connection.getResources(ResourceKind.PROJECT);
+		// then
+		verify(client).list(eq(ResourceKind.PROJECT), anyString());
 	}
+
 	@Test
 	public void getHostShouldReturnHost() {
 		assertEquals("https://localhost:8443", connection.getHost());
@@ -186,8 +197,26 @@ public class ConnectionTest {
 		assertTrue(two.credentialsEqual(connection));
 	}
 
+	@Test
+	public void should_not_overwrite_client_authorization_strategy_on_isConnected() {
+		// given
+		// when
+		connection.isConnected(new NullProgressMonitor());
+		// then
+		verify(client, never()).setAuthorizationStrategy(any(IAuthorizationStrategy.class));
+	}
 
-//	@Test
+	@Test
+	public void should_set_client_authorization_strategy_when_not_present_on_isConnected() {
+		// given
+		when(client.getAuthorizationStrategy()).thenReturn(null);
+		// when
+		connection.isConnected(new NullProgressMonitor());
+		// then
+		verify(client).setAuthorizationStrategy(any(IAuthorizationStrategy.class));
+	}
+
+	//	@Test
 //	public void nullHostShouldBeDefaultHost() {
 //		// pre-conditions
 //
