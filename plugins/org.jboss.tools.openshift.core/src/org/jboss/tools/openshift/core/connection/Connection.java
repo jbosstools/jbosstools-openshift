@@ -317,14 +317,17 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		boolean needStrategy = initAuthorizationStrategy();
 		try {
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
-			return context.isAuthorized();
-		} catch (UnauthorizedException e) {
-			needStrategy = false;
-			return false;
-		} finally {
-			if(needStrategy) {
-				connect();
+			boolean result = context.isAuthorized();
+			if(result && needStrategy) {
+				//Call connect() to set the correct strategy instance to the client
+				//in the case when no strategy has been set yet, and as we do it,
+				//we can discard the current result, which nevertheless 
+				//being true, promises that connect will go smoothly.
+				return connect();
 			}
+			return result;
+		} catch (UnauthorizedException e) {
+			return false;
 		}
 	}
 
