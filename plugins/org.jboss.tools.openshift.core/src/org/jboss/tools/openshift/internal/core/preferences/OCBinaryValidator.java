@@ -54,16 +54,19 @@ public class OCBinaryValidator {
 	 */
 	public Version getVersion(IProgressMonitor monitor) {
         Optional<Version> version = Optional.empty();
-		try {
-            ProcessBuilder builder = new ProcessBuilder(path, "version");
-            Process process = builder.start();
-            String line;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                while (!monitor.isCanceled() && (!version.isPresent()) && ((line = reader.readLine()) != null)) {
-                    version = parseVersion(line);
+		if (path != null) {
+            try {
+                ProcessBuilder builder = new ProcessBuilder(path, "version");
+                Process process = builder.start();
+                String line;
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    while (!monitor.isCanceled() && (!version.isPresent()) && ((line = reader.readLine()) != null)) {
+                        version = parseVersion(line);
+                    }
                 }
+            } catch (IOException e) {
             } 
-        } catch (IOException e) {}
+        }
         return version.orElse(Version.emptyVersion);
 	}
 	
