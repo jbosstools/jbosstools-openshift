@@ -314,13 +314,32 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @return
 	 */
 	public boolean isConnected(IProgressMonitor monitor) {
-		client.setAuthorizationStrategy(getAuthorizationStrategy());
+		boolean needStrategy = initAuthorizationStrategy();
 		try {
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
 			return context.isAuthorized();
 		} catch (UnauthorizedException e) {
+			needStrategy = false;
 			return false;
+		} finally {
+			if(needStrategy) {
+				connect();
+			}
 		}
+	}
+
+	/**
+	 * Return true if the client had no strategy instance and it was set to the value provided by 
+	 * method getAuthorizationStrategy()
+	 * 
+	 * @return
+	 */
+	private boolean initAuthorizationStrategy() {
+		boolean needStrategy = client.getAuthorizationStrategy() == null;
+		if(needStrategy) {
+			client.setAuthorizationStrategy(getAuthorizationStrategy());
+		}
+		return needStrategy;
 	}
 	
 	public void setAuthScheme(String scheme) {
@@ -402,13 +421,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @throws UnauthorizedException 
 	 */
 	public <T extends IResource> T createResource(T resource) {
+		boolean needStrategy = initAuthorizationStrategy();
 		try {
-			if(client.getAuthorizationStrategy() == null) {
-				client.setAuthorizationStrategy(getAuthorizationStrategy());
-			}
 			return client.create(resource);
 		} catch (UnauthorizedException e) {
+			needStrategy = false;
 			return retryCreate("Unauthorized.  Trying to reauthenticate", e, resource);
+		} finally {
+			if(needStrategy) {
+				connect();
+			}
 		}
 	}
 
@@ -419,13 +441,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @throws UnauthorizedException 
 	 */
 	public <T extends IResource> T updateResource(T resource) {
+		boolean needStrategy = initAuthorizationStrategy();
 		try {
-			if(client.getAuthorizationStrategy() == null) {
-				client.setAuthorizationStrategy(getAuthorizationStrategy());
-			}
 			return client.update(resource);
 		} catch (UnauthorizedException e) {
+			needStrategy = false;
 			return retryUpdate("Unauthorized.  Trying to reauthenticate", e, resource);
+		} finally {
+			if(needStrategy) {
+				connect();
+			}
 		}
 	}
 
@@ -442,27 +467,32 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	
 	@Override
 	public <T extends IResource> List<T> getResources(String kind, String namespace) {
+		boolean needStrategy = initAuthorizationStrategy();
 		try {
-			if(client.getAuthorizationStrategy() == null) {
-				client.setAuthorizationStrategy(getAuthorizationStrategy());
-			}
-
 			client.setSSLCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
 			return client.list(kind, namespace);
 		} catch (UnauthorizedException e) {
+			needStrategy = false;
 			return retryList("Unauthorized.  Trying to reauthenticate", e, kind, namespace);
+		} finally {
+			if(needStrategy) {
+				connect();
+			}
 		}
 	}
 
 	@Override
 	public <T extends IResource> T getResource(String kind, String namespace, String name) {
+		boolean needStrategy = initAuthorizationStrategy();
 		try {
-			if(client.getAuthorizationStrategy() == null) {
-				client.setAuthorizationStrategy(getAuthorizationStrategy());
-			}
 			return client.get(kind, name, namespace);
 		} catch (UnauthorizedException e) {
+			needStrategy = false;
 			return retryGet("Unauthorized.  Trying to reauthenticate", e, kind, name, namespace);
+		} finally {
+			if(needStrategy) {
+				connect();
+			}
 		}
 	}
 	/**
@@ -472,13 +502,16 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 * @throws OpenShiftException
 	 */
 	public <T extends IResource> T getResource(IResource resource) {
+		boolean needStrategy = initAuthorizationStrategy();
 		try {
-			if(client.getAuthorizationStrategy() == null) {
-				client.setAuthorizationStrategy(getAuthorizationStrategy());
-			}
 			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
 		} catch (UnauthorizedException e) {
+			needStrategy = false;
 			return retryGet("Unauthorized.  Trying to reauthenticate", e, resource.getKind(), resource.getName(), resource.getNamespace());
+		} finally {
+			if(needStrategy) {
+				connect();
+			}
 		}
 	}
 	
