@@ -40,6 +40,8 @@ import com.openshift.restclient.model.IProject;
  * @author jeff.cantrill
  */
 public class NewProjectWizardPage extends AbstractOpenShiftWizardPage {
+	
+	private static final int DISPLAY_NAME_LENGTH_LIMIT = 65535;
 
 	private NewProjectWizardModel model;
 
@@ -93,8 +95,11 @@ public class NewProjectWizardPage extends AbstractOpenShiftWizardPage {
 				public IStatus validate(Object value) {
 					String param = (String) value;
 					if(StringUtils.isNotEmpty(param)) {
-						if(param.contains("\t") || param.contains("\n")) {
+						if(param.indexOf(SWT.TAB) >= 0 || param.indexOf(SWT.LF) >= 0) {
 							return ValidationStatus.error("Display name may not contain tabs or new lines");
+						}
+						if (param.length() > DISPLAY_NAME_LENGTH_LIMIT) {
+							return ValidationStatus.error("Display name may not be longer than " + DISPLAY_NAME_LENGTH_LIMIT + " characters");
 						}
 					}
 					return ValidationStatus.ok();
