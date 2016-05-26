@@ -273,12 +273,13 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 
 		// connect error
 		dbc.addValidationStatusProvider(new MultiValidator() {
+			IObservableValue observable = BeanProperties
+					.value(ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS, IStatus.class)
+					.observe(pageModel);
 			
 			@Override
 			protected IStatus validate() {
-				return (IStatus) BeanProperties
-						.value(ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS, IStatus.class)
-						.observe(pageModel).getValue();
+				return (IStatus) observable.getValue();
 			}
 		});
 

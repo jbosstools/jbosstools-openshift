@@ -13,9 +13,11 @@ package org.jboss.tools.openshift.internal.ui.wizard.connection;
 import org.apache.commons.lang.BooleanUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -31,6 +33,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAuthenticationProvider;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredStringValidator;
@@ -45,6 +48,8 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
  */
 public class BasicAuthenticationDetailView extends BaseDetailsView implements IConnectionEditorDetailView{
 
+	private ConnectionWizardPageModel pageModel;
+	IObservableValue<?> urlObservable;
 	private Text usernameText;
 	private IObservableValue usernameObservable;
 	private Binding usernameBinding;
@@ -57,8 +62,23 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	private Button rememberPasswordCheckbox;
 	private Binding rememberPasswordBinding;
 	
-	public BasicAuthenticationDetailView(IValueChangeListener changeListener, Object context) {
+	private MultiValidator connectionValidator;
+
+	public BasicAuthenticationDetailView(ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context) {
 		this.changeListener = changeListener;
+		this.pageModel = pageModel;
+		urlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel);
+		usernameObservable = new WritableValue(null, String.class);
+		connectionValidator = ConnectionValidatorFactory.
+				createBasicAuthenticationValidator(pageModel, usernameObservable, urlObservable);
+	}
+
+	public final Text getUsernameTextControl() {
+		return usernameText;
+	}
+
+	public final Text getPasswordTextControl() {
+		return passwordText;
 	}
 	
 	@Override
@@ -75,7 +95,6 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		this.usernameText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
-		this.usernameObservable = new WritableValue(null, String.class);
 		
 		// password
 		Label passwordLabel = new Label(composite, SWT.NONE);
@@ -92,7 +111,6 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		rememberPasswordCheckbox.setText("&Save password (could trigger secure storage login)");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckbox);
-		
 		return composite;
 	}
 
@@ -104,6 +122,7 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
+		dbc.addValidationStatusProvider(connectionValidator);
 		bindWidgetsToInternalModel(dbc);
 		this.rememberPasswordBinding = ValueBindingBuilder
 				.bind(WidgetProperties.selection().observe(rememberPasswordCheckbox))
@@ -128,6 +147,7 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		disposeBindings();
 		DataBindingUtils.dispose(rememberPasswordBinding);
+		dbc.removeValidationStatusProvider(connectionValidator);
 	}
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {

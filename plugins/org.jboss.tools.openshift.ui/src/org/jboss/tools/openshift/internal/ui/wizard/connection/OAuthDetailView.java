@@ -19,19 +19,21 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.fieldassist.ControlDecorationUpdater;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -59,7 +61,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
@@ -120,8 +121,11 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	private IObservableValue authSchemeObservable;
 	private IAuthorizationDetails authDetails;
 	private ConnectionWizardPageModel pageModel;
+	IObservableValue<?> urlObservable;
 	private Button rememberTokenCheckbox;
 	private Binding rememberTokenBinding;
+
+	private MultiValidator connectionValidator;
 
 	private IWizard wizard;
 
@@ -129,7 +133,11 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			IObservableValue authSchemeObservable) {
 		this.wizard = wizard;
 		this.pageModel = pageModel;
-		this.rememberTokenObservable = new WritableValue(Boolean.FALSE, Boolean.class);
+		urlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel);
+		tokenObservable = new WritableValue(null, String.class);
+		rememberTokenObservable = new WritableValue(Boolean.FALSE, Boolean.class);
+		connectionValidator = ConnectionValidatorFactory.
+				createOAuthAuthenticationValidator(pageModel, tokenObservable, urlObservable);
 		this.authSchemeObservable = authSchemeObservable;
 		this.changeListener = changeListener;
 		if (context instanceof IAuthorizationDetails) {
@@ -139,6 +147,10 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 
 	IObservableValue getRememberTokenObservable() {
 		return rememberTokenObservable;
+	}
+
+	public final Text getTokenTextControl() {
+		return tokenText;
 	}
 	
 	@Override
@@ -164,7 +176,8 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		this.tokenText = new Text(composite, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(tokenText);
-		this.tokenObservable = new WritableValue(null, String.class);
+		ControlDecorationSupport.create(
+				connectionValidator, SWT.LEFT | SWT.TOP, null, new ControlDecorationUpdater());
 
 		this.rememberTokenCheckbox = new Button(composite, SWT.CHECK);
 		rememberTokenCheckbox.setText("&Save token (could trigger secure storage login)");
@@ -176,6 +189,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
+		dbc.addValidationStatusProvider(connectionValidator);
 		bindWidgetsToInternalModel(dbc);
 		this.rememberTokenBinding = ValueBindingBuilder
 				.bind(WidgetProperties.selection().observe(rememberTokenCheckbox))
@@ -187,6 +201,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		dispose();
 		DataBindingUtils.dispose(rememberTokenBinding);
+		dbc.removeValidationStatusProvider(connectionValidator);
 	}
 
 	@Override
