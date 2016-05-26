@@ -10,13 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.project;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.validation.IValidator;
-import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -32,6 +29,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
+import org.jboss.tools.openshift.internal.ui.validator.ProjectDisplayNameValidator;
 import org.jboss.tools.openshift.internal.ui.validator.ProjectNameValidator;
 
 import com.openshift.restclient.model.IProject;
@@ -41,8 +39,6 @@ import com.openshift.restclient.model.IProject;
  */
 public class NewProjectWizardPage extends AbstractOpenShiftWizardPage {
 	
-	private static final int DISPLAY_NAME_LENGTH_LIMIT = 65535;
-
 	private NewProjectWizardModel model;
 
 	public NewProjectWizardPage(NewProjectWizardModel model, IWizard wizard) {
@@ -89,23 +85,7 @@ public class NewProjectWizardPage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(txtDispalayName);
 		ValueBindingBuilder
 			.bind(WidgetProperties.text(SWT.Modify).observe(txtDispalayName))
-			.validatingAfterConvert(new IValidator() {
-
-				@Override
-				public IStatus validate(Object value) {
-					String param = (String) value;
-					if(StringUtils.isNotEmpty(param)) {
-						if(param.indexOf(SWT.TAB) >= 0 || param.indexOf(SWT.LF) >= 0) {
-							return ValidationStatus.error("Display name may not contain tabs or new lines");
-						}
-						if (param.length() > DISPLAY_NAME_LENGTH_LIMIT) {
-							return ValidationStatus.error("Display name may not be longer than " + DISPLAY_NAME_LENGTH_LIMIT + " characters");
-						}
-					}
-					return ValidationStatus.ok();
-				}
-				
-			})
+			.validatingAfterConvert(new ProjectDisplayNameValidator())
 			.to(BeanProperties.value(NewProjectWizardModel.PROPERTY_DISPLAY_NAME).observe(model))
 			.in(dbc);
 
