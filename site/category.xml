@@ -17,6 +17,9 @@
 	<feature url="features/org.jboss.tools.openshift.express.test.feature_0.0.0.jar" id="org.jboss.tools.openshift.express.test.feature" version="0.0.0">
 		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
 	</feature>
+	<feature url="features/org.jboss.tools.openshift.cdk.test.feature_0.0.0.jar" id="org.jboss.tools.openshift.cdk.test.feature" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
 	<feature url="features/org.jboss.tools.openshift.feature_0.0.0.jar" id="org.jboss.tools.openshift.feature" version="0.0.0">
 		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
 	</feature>
@@ -40,6 +43,9 @@
 		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
 	</feature>
 	<feature url="features/org.jboss.tools.openshift.express.test.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.express.test.feature.source" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
+	<feature url="features/org.jboss.tools.openshift.cdk.test.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.cdk.test.feature.source" version="0.0.0">
 		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
 	</feature>
 	<feature url="features/org.jboss.tools.openshift.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.feature.source" version="0.0.0">

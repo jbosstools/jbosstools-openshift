@@ -18,7 +18,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.model.ServerDelegate;
+import org.jboss.ide.eclipse.as.core.util.ServerNamingUtility;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
 import org.jboss.tools.foundation.core.credentials.ICredentialDomain;
@@ -49,6 +51,21 @@ public class CDKServer extends ServerDelegate {
 		setAttribute(PROP_PASS_CREDENTIALS, true);
 	}
 
+	/**
+	 * Initializes this server with a default server name. 
+	 * This method is called when a new server is created so that the server 
+	 * can be initialized with a name suitable to the server type. 
+	 * 
+	 * This method currently overrides a *nonexistant* upstream method, which
+	 * is only proposed in upstream bug. 
+	 * 
+	 * @param monitor a progress monitor, or <code>null</code> if progress
+	 *    reporting and cancellation are not desired
+	 */
+	public void setDefaultServerName(IProgressMonitor monitor) {
+		getServerWorkingCopy().setName(ServerNamingUtility.getDefaultServerName("Container Development Environment"));
+	}
+	
 	@Override
 	public IStatus canModifyModules(IModule[] add, IModule[] remove) {
 		return Status.CANCEL_STATUS;

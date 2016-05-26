@@ -118,7 +118,7 @@
             class="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDKRuntimeDetector"
             enabled="true"
             id="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDKRuntimeDetector"
-            name="CDK">
+            name="Container Development Environment">
       </runtimeDetector>
    </extension>
 
