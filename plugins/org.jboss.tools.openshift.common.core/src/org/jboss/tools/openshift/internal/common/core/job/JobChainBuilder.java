@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.core.job;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -20,9 +22,33 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 public class JobChainBuilder {
 
 	private Job job;
+	private IProgressMonitor progressMonitor;
 
 	public JobChainBuilder(Job job) {
+		this(job, new NullProgressMonitor());
+	}
+
+	public JobChainBuilder(Job job, IProgressMonitor progressMonitor) {
 		this.job = job;
+		setProgressMonitor(progressMonitor);
+	}
+
+	/**
+	 * Sets progress monitor to provide canceling of jobs that are not yet executed.
+	 * Provides an alternative approach to cancel() method.
+	 * Always sets the inner instance to a non-null value.
+	 * @param progressMonitor
+	 */
+	public JobChainBuilder setProgressMonitor(IProgressMonitor progressMonitor) {
+		this.progressMonitor = (progressMonitor == null) ? new NullProgressMonitor() : progressMonitor;
+		return this;
+	}
+
+	/**
+	 * Cancel jobs that are not yet executed.
+	 */
+	public void cancel() {
+		progressMonitor.setCanceled(true);
 	}
 
 	public JobConstraint runWhenSuccessfullyDone(Job constrainedJob) {
@@ -45,7 +71,9 @@ public class JobChainBuilder {
 
 				@Override
 				public void done(IJobChangeEvent event) {
-					constrainedJob.schedule();
+					if(!progressMonitor.isCanceled()) {
+						constrainedJob.schedule();
+					}
 				}});
 			return new JobConstraint(constrainedJob);
 		}
@@ -55,7 +83,7 @@ public class JobChainBuilder {
 
 				@Override
 				public void done(IJobChangeEvent event) {
-					if (event.getResult().isOK()) {
+					if (event.getResult().isOK() && !progressMonitor.isCanceled()) {
 						constrainedJob.schedule();
 					}
 				}});
@@ -63,7 +91,9 @@ public class JobChainBuilder {
 		}
 
 		public void schedule() {
-			JobChainBuilder.this.job.schedule();
+			if(!progressMonitor.isCanceled()) {
+				JobChainBuilder.this.job.schedule();
+			}
 		}
 		
 		public Job build() {
@@ -76,6 +106,8 @@ public class JobChainBuilder {
 	}
 	
 	public void schedule() {
-	    job.schedule();
+		if(!progressMonitor.isCanceled()) {
+			job.schedule();
+		}
 	}
 }
