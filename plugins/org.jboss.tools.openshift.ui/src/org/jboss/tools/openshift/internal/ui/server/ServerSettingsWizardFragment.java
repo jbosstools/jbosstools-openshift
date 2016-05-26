@@ -191,25 +191,34 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 					OpenShiftServerTaskModelAccessor.getConnection(taskModel),
 					UIUtils.getFirstSelectedWorkbenchProject());
 			this.wizardHandle = wizardHandle;
-			
+		}
+
+		boolean isWizardDisposed() {
+			return getContainer() == null
+					|| getContainer().getShell() == null
+					|| getContainer().getShell().isDisposed();
 		}
 		
 		@Override
 		public void setPageComplete(boolean complete) {
 			super.setPageComplete(complete);
-			if(wizardHandle != null) {
+			if(!isWizardDisposed()) {
 				wizardHandle.update();
 			}
 		}
 
 		@Override
 		public void setErrorMessage(String newMessage) {
-			((WizardPage) wizardHandle).setErrorMessage(newMessage);
+			if(!isWizardDisposed()) {
+				((WizardPage) wizardHandle).setErrorMessage(newMessage);
+			}
 		}
 
 		@Override
 		public void setMessage(String newMessage, int newType) {
-			wizardHandle.setMessage(newMessage, newType);
+			if(!isWizardDisposed()) {
+				wizardHandle.setMessage(newMessage, newType);
+			}
 		}
 
 		public void onPageWillGetDeactivated(Direction direction, PageChangingEvent event) {
@@ -223,16 +232,18 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			}
 
 			try {
-				getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
 				this.isLoadingResources = true;
+				getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
 				container.updateButtons();
 				WizardUtils.runInWizard(new Job("Loading services...") {
 
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						//only reload services.
-						ServerSettingsWizardPageWrapper.this.model.loadResources();
-						ServerSettingsWizardPageWrapper.this.needsLoadingResources = false;
+						if(!isWizardDisposed()) {
+							ServerSettingsWizardPageWrapper.this.model.loadResources();
+							ServerSettingsWizardPageWrapper.this.needsLoadingResources = false;
+						}
 						return Status.OK_STATUS;
 					}
 				}, container);
@@ -242,7 +253,9 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 				this.needsLoadingResources = false;
 				this.isLoadingResources = false;
 				getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
-				container.updateButtons();
+				if(!isWizardDisposed()) {
+					container.updateButtons();
+				}
 			}
 		}
 	
