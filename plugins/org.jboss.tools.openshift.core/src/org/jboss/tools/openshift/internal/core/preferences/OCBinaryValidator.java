@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.osgi.framework.Version;
 
 public class OCBinaryValidator {
@@ -65,6 +66,7 @@ public class OCBinaryValidator {
                     }
                 }
             } catch (IOException e) {
+                OpenShiftCoreActivator.logError(e.getLocalizedMessage(), e);
             } 
         }
         return version.orElse(Version.emptyVersion);
