@@ -41,6 +41,24 @@ import com.openshift.restclient.model.image.IImageStreamImport;
  */
 public class DeployImageWizardModelTest {
 
+    private static final String LATEST_TAG = "latest";
+
+    private static final String WILDFLY_IMAGE = "jboss/wildfly";
+
+    private static final String WILDFLY_IMAGE_URI = WILDFLY_IMAGE + ':' + LATEST_TAG;
+
+    private static final String JBOSS_INFINISPAN_SERVER_IMAGE = "jboss/infinispan-server";
+
+    private static final String JBOSS_INFINISPAN_SERVER_URI = JBOSS_INFINISPAN_SERVER_IMAGE +':' + LATEST_TAG;
+
+    private static final String NON_EXISTANT_IMAGE = "bad/badimage";
+
+    private static final String NON_EXISTANT_IMAGE_URI = NON_EXISTANT_IMAGE + ':' + LATEST_TAG;
+
+    private static final String JENKINS_IMAGE = "openshift3/jenkins-1-rhel7";
+
+    private static final String JENKINS_IMAGE_URI = JENKINS_IMAGE + ':' + LATEST_TAG;
+
     private IDockerConnection dockerConnection;
     
     private IProject project;
@@ -60,15 +78,15 @@ public class DeployImageWizardModelTest {
 	public void shouldInitializeContainerInfoFromLocalDockerImage() {
 		// assume Docker image is on local
 		final IDockerImageInfo dockerImageInfo = Mockito.mock(IDockerImageInfo.class, Mockito.RETURNS_DEEP_STUBS);
-		when(dockerConnection.hasImage("jboss/wildfly", "latest")).thenReturn(true);
-		when(dockerConnection.getImageInfo("jboss/wildfly:latest")).thenReturn(dockerImageInfo);
+		when(dockerConnection.hasImage(WILDFLY_IMAGE, LATEST_TAG)).thenReturn(true);
+		when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
 		when(dockerImageInfo.containerConfig().env()).thenReturn(Arrays.asList("foo1=bar1", "foo2=bar2"));
 		when(dockerImageInfo.containerConfig().exposedPorts())
 				.thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
 		when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
 
 		// when
-		model.setImageName("jboss/wildfly:latest");
+		model.setImageName(WILDFLY_IMAGE_URI);
 		final boolean result = model.initializeContainerInfo();
 		// then
 		assertThat(result).isTrue();
@@ -81,21 +99,21 @@ public class DeployImageWizardModelTest {
 	@Test
 	public void shouldInitializeContainerInfoFromRemoteDockerImage() throws IOException {
 		// no Docker image on local
-		when(dockerConnection.hasImage("jboss/infinispan-server", "latest")).thenReturn(false);
+		when(dockerConnection.hasImage(JBOSS_INFINISPAN_SERVER_IMAGE, LATEST_TAG)).thenReturn(false);
 
 		final IImageStreamImportCapability cap = Mockito.mock(IImageStreamImportCapability.class);
 		when(project.supports(IImageStreamImportCapability.class)).thenReturn(true);
 		when(project.getCapability(IImageStreamImportCapability.class)).thenReturn(cap);
 		final IStatus status = Mockito.mock(IStatus.class);
 		final IImageStreamImport streamImport = Mockito.mock(IImageStreamImport.class);
-		final DockerImageURI dockerImageURI = new DockerImageURI("jboss/infinispan-server:latest");
+		final DockerImageURI dockerImageURI = new DockerImageURI(JBOSS_INFINISPAN_SERVER_URI);
 		when(status.isSuccess()).thenReturn(true);
 		when(cap.importImageMetadata(dockerImageURI)).thenReturn(streamImport);
 		when(streamImport.getImageJsonFor(dockerImageURI.getTag()))
 				.thenReturn(getImageStreamImport("/resources/jboss_infinispan-server_ImageStreamImport.json"));
 		when(streamImport.getImageStatus()).thenReturn(Arrays.asList(status));
 		// when
-		model.setImageName("jboss/infinispan-server:latest");
+		model.setImageName(JBOSS_INFINISPAN_SERVER_URI);
 		final boolean result = model.initializeContainerInfo();
 		// then
 		assertThat(result).isTrue();
@@ -110,21 +128,21 @@ public class DeployImageWizardModelTest {
     @Test
     public void shouldInitializeContainerInfoFromRemoteDockerImageWithVolumes() throws IOException {
         // no Docker image on local
-        when(dockerConnection.hasImage("openshift3/jenkins-1-rhel7", "latest")).thenReturn(false);
+        when(dockerConnection.hasImage(JENKINS_IMAGE, LATEST_TAG)).thenReturn(false);
 
         final IImageStreamImportCapability cap = Mockito.mock(IImageStreamImportCapability.class);
         when(project.supports(IImageStreamImportCapability.class)).thenReturn(true);
         when(project.getCapability(IImageStreamImportCapability.class)).thenReturn(cap);
         final IStatus status = Mockito.mock(IStatus.class);
         final IImageStreamImport streamImport = Mockito.mock(IImageStreamImport.class);
-        final DockerImageURI dockerImageURI = new DockerImageURI("openshift3/jenkins-1-rhel7:latest");
+        final DockerImageURI dockerImageURI = new DockerImageURI(JENKINS_IMAGE_URI);
         when(status.isSuccess()).thenReturn(true);
         when(cap.importImageMetadata(dockerImageURI)).thenReturn(streamImport);
         when(streamImport.getImageJsonFor(dockerImageURI.getTag()))
                 .thenReturn(getImageStreamImport("/resources/openshift3_jenkins_1_rhel7_ImageStreamImport.json"));
         when(streamImport.getImageStatus()).thenReturn(Arrays.asList(status));
         // when
-        model.setImageName("openshift3/jenkins-1-rhel7:latest");
+        model.setImageName(JENKINS_IMAGE_URI);
         final boolean result = model.initializeContainerInfo();
         // then
         assertThat(result).isTrue();
@@ -142,21 +160,21 @@ public class DeployImageWizardModelTest {
     @Test
     public void shouldNotInitializeContainerInfoFromWrongPayload() throws IOException {
         // no Docker image on local
-        when(dockerConnection.hasImage("bad/badimage", "latest")).thenReturn(false);
+        when(dockerConnection.hasImage(NON_EXISTANT_IMAGE, LATEST_TAG)).thenReturn(false);
 
         final IImageStreamImportCapability cap = Mockito.mock(IImageStreamImportCapability.class);
         when(project.supports(IImageStreamImportCapability.class)).thenReturn(true);
         when(project.getCapability(IImageStreamImportCapability.class)).thenReturn(cap);
         final IStatus status = Mockito.mock(IStatus.class);
         final IImageStreamImport streamImport = Mockito.mock(IImageStreamImport.class);
-        final DockerImageURI dockerImageURI = new DockerImageURI("bad/badimage:latest");
+        final DockerImageURI dockerImageURI = new DockerImageURI(NON_EXISTANT_IMAGE_URI);
         when(status.isSuccess()).thenReturn(false);
         when(cap.importImageMetadata(dockerImageURI)).thenReturn(streamImport);
         when(streamImport.getImageJsonFor(dockerImageURI.getTag()))
                 .thenReturn(getImageStreamImport("/resources/failed_ImageStreamImport.json"));
         when(streamImport.getImageStatus()).thenReturn(Arrays.asList(status));
         // when
-        model.setImageName("bad/badimage:latest");
+        model.setImageName(NON_EXISTANT_IMAGE_URI);
         final boolean result = model.initializeContainerInfo();
         // then
         assertThat(result).isFalse();
