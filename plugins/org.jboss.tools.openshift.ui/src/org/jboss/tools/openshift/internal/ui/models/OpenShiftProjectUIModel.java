@@ -14,8 +14,6 @@ import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.jboss.tools.openshift.common.core.IRefreshable;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 
@@ -28,6 +26,7 @@ import com.openshift.restclient.model.IResource;
 /**
  * UI Model for an OpenShift Project
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjectAdapter, IResourceUIModel, IRefreshable, PropertyChangeListener{
@@ -35,12 +34,9 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 	public static final String PROP_LOADING = "loading";
 	
 	private final IDeploymentResourceMapper mapper;
-	private final IProject project;
-	private AtomicBoolean deleting = new AtomicBoolean(false);
 
 	public OpenShiftProjectUIModel(IOpenShiftConnection conn, IProject project) {
-		super(conn);
-		this.project = project;
+		super(project, conn);
 		this.mapper = new DeploymentResourceMapper(conn, this);
 		this.mapper.addPropertyChangeListener(PROP_DEPLOYMENTS, this);
 	}
@@ -51,16 +47,6 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 		mapper.dispose();
 	}
 	
-	@Override
-	public void setDeleting(boolean deleting) {
-		this.deleting.set(deleting);
-	}
-
-	@Override
-	public boolean isDeleting() {
-		return deleting.get();
-	}
-
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if(evt  instanceof IndexedPropertyChangeEvent) {
@@ -87,13 +73,7 @@ public class OpenShiftProjectUIModel extends ResourcesUIModel implements IProjec
 	
 	@Override
 	public IProject getProject() {
-		return this.project;
-	}
-
-
-	@Override
-	public IResource getResource() {
-		return getProject();
+		return (IProject) getResource();
 	}
 
 	public boolean isLoading() {

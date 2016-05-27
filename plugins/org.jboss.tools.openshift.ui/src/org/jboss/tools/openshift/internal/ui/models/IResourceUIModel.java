@@ -17,6 +17,7 @@ import com.openshift.restclient.model.IResource;
 /**
  * UI Model to wrapper an OpenShift resource
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public interface IResourceUIModel extends IAncestorable, IAdaptable {
@@ -28,7 +29,16 @@ public interface IResourceUIModel extends IAncestorable, IAdaptable {
 	 */
 	IResource getResource();
 	
-	
+    /**
+     * Calling marks this 
+     */
+    void setDeleting(boolean deleting);
+    
+    /**
+     * determine if this project is being deleted. 
+     * @return
+     */
+    boolean isDeleting();
 
 	@SuppressWarnings("unchecked")
 	@Override

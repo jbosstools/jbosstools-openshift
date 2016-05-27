@@ -19,21 +19,28 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
-
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 
-public abstract class ResourcesUIModel extends ObservableUIPojo implements IResourcesUIModel {
+/**
+ * 
+ * Abstract class for wrapping a container Openshift resource.
+ * 
+ * @author fbricon@gmail.com
+ * @author André Dietisheim
+ * @author jeff.cantrill
+ * @author Jeff Maury
+ *
+ */
+public abstract class ResourcesUIModel extends OpenShiftResourceUIModel implements IResourcesUIModel {
 
 	private static final int NOT_FOUND = -1;
 	protected Map<String, List<IResourceUIModel>> resources = new ConcurrentHashMap<>();
-	private final Object parent;
 	
-	protected ResourcesUIModel(Object parent) {
-		this.parent = parent;
+	protected ResourcesUIModel(IResource resource, Object parent) {
+		super(resource, parent);
 		Arrays.asList(KINDS).forEach(k->resources.put(k, Collections.synchronizedList(new ArrayList<>())));
 	}
 	
@@ -52,11 +59,6 @@ public abstract class ResourcesUIModel extends ObservableUIPojo implements IReso
 		return new ArrayList<>();
 	}
 	
-	@Override
-	public Object getParent() {
-		return this.parent;
-	}
-
 	@Override
 	public Collection<IResourceUIModel> getImageStreams() {
 		return resources.get(ResourceKind.IMAGE_STREAM);	

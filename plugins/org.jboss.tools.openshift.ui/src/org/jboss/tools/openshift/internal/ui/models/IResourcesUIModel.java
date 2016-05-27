@@ -17,6 +17,15 @@ import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 
+/**
+ * UI element for a container Openshift resource.
+ * 
+ * @author fbricon@gmail.com
+ * @author André Dietisheim
+ * @author jeff.cantrill
+ * @author Jeff Maury
+ *
+ */
 public interface IResourcesUIModel extends IAncestorable {
 
 	static final String PROP_BUILDS = "builds";

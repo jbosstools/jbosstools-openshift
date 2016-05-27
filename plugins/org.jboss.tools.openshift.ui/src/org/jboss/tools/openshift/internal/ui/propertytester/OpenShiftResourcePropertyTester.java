@@ -11,21 +11,22 @@
 package org.jboss.tools.openshift.internal.ui.propertytester;
 
 import org.eclipse.core.expressions.PropertyTester;
-import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
+import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 /**
  * Property tester to determine if a resource is being deleted.
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public class OpenShiftResourcePropertyTester extends PropertyTester {
 
-	private final static String PROPERTY_IS_DELETING = "isDeleting";
+	private static final String PROPERTY_IS_DELETING = "isDeleting";
 
 	@Override
 	public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
-		if (PROPERTY_IS_DELETING.equals(property) && receiver instanceof IProjectAdapter && expectedValue instanceof Boolean) {
-			IProjectAdapter adapter = (IProjectAdapter) receiver;
+		if (PROPERTY_IS_DELETING.equals(property) && receiver instanceof IResourceUIModel && expectedValue instanceof Boolean) {
+		    IResourceUIModel adapter = (IResourceUIModel) receiver;
 			Boolean expected = (Boolean) expectedValue;
 			return expected.equals(adapter.isDeleting());
 		}

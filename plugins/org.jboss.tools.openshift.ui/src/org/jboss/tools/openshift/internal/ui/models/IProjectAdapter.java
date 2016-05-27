@@ -19,23 +19,19 @@ import org.jboss.tools.openshift.common.core.IRefreshable;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
+/**
+ * UI element for an Openshift project.
+ * 
+ * @author jeff.cantrill
+ * @author Jeff Maury
+ *
+ */
 public interface IProjectAdapter extends IResourcesUIModel, IRefreshable, IDisposable{
 	
 	static final String PROP_DEPLOYMENTS = "deployments";
 	
 	IProject getProject();
 	
-	/**
-	 * Calling marks this 
-	 */
-	void setDeleting(boolean deleting);
-	
-	/**
-	 * determine if this project is being deleted. 
-	 * @return
-	 */
-	boolean isDeleting();
-
 	<T extends IResource> void setResources(Collection<T> resources, String kind);
 	
 	Collection<Deployment> getDeployments();
