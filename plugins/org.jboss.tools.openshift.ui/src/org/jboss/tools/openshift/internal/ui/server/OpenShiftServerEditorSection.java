@@ -28,6 +28,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -508,15 +509,21 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		};
 	}
 
-	private void loadResources(Composite container, OpenShiftServerEditorModel model) {
+	private void loadResources(final Composite container, OpenShiftServerEditorModel model) {
 		IServerWorkingCopy server = input.getServer();
 
 		final Connection connection = OpenShiftServerUtils.getConnection(server);
 		final IProject deployProject = OpenShiftServerUtils.getDeployProject(server);
 
 		Cursor busyCursor = new Cursor(container.getDisplay(), SWT.CURSOR_WAIT);
+		IProgressMonitor chainProgressMonitor = new NullProgressMonitor() {
+			@Override
+			public boolean isCanceled() {
+				return container.isDisposed();
+			}
+		};
 		new JobChainBuilder(
-				new DisableAllWidgetsJob(true, container, busyCursor))
+				new DisableAllWidgetsJob(true, container, busyCursor), chainProgressMonitor)
 				.runWhenDone(
 						new Job("Loading projects...") {
 
