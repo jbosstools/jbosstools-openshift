@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -27,11 +27,13 @@ import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.http.IHttpConstants;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 
 /**
  * Utility class to handle OpenShift {@link Job}s
  * 
  * @author Fred Bricon
+ * @author Jeff Maury
  */
 public class OpenShiftJobs {
 	
@@ -93,5 +95,15 @@ public class OpenShiftJobs {
 		
 		return deleteProjectJob;
 	}
-	
+
+	/**
+     * Creates a {@link DeleteResourceJob} to delete an OpenShift {@link IResource}.
+     */
+    public static DeleteResourceJob createDeleteResourceJob(final IResource resource) {
+        if (resource instanceof IProject) {
+            return createDeleteProjectJob((IProject) resource);
+        } else {
+            return new DeleteResourceJob(resource);
+        }
+    }
 }

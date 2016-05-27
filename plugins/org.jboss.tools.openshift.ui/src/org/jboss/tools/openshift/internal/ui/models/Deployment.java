@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -43,31 +43,25 @@ import com.openshift.restclient.model.route.IRoute;
  * that makes up an 'application'
  * 
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public class Deployment extends ResourcesUIModel 
 		implements IResourceUIModel, IAdaptable, IResourceCacheListener, OpenShiftAPIAnnotations {
 
-	private IService service;
 	private final IProject project;
 	private final Object grandParent; //connection
 	
 	public Deployment(IService service, IProjectAdapter parent) {
-		super(parent);
-		this.service = service;
+		super(service, parent);
 		this.project = parent.getProject();
 		this.grandParent = parent.getParent();
 	}
 	
 	public IService getService() {
-		return this.service;
+		return (IService) getResource();
 	}
 	
-	@Override
-	public IResource getResource() {
-		return getService();
-	}
-
 	@Override
 	public Collection<IResourceUIModel> getServices() {
 		return Collections.emptyList();
@@ -119,7 +113,7 @@ public class Deployment extends ResourcesUIModel
 		Collection<IResource> resources = new HashSet<>();
 		final String imageRef = imageRef(config);
 		Collection<IDeploymentConfig> dcs = cache.getDeploymentConfigsBy(imageRef).stream()
-				.filter(dc->containsAll(service.getSelector(), dc.getReplicaSelector()))
+				.filter(dc->containsAll(getService().getSelector(), dc.getReplicaSelector()))
 				.collect(Collectors.toList());
 		if(!dcs.isEmpty()) {
 			resources.add(config);
@@ -150,7 +144,7 @@ public class Deployment extends ResourcesUIModel
 		final String isTagName = istag.getName();
 		Collection<IResource> resources = new HashSet<>();
 		Collection<IDeploymentConfig> dcs = cache.getDeploymentConfigsBy(isTagName).stream()
-				.filter(dc->containsAll(service.getSelector(), dc.getReplicaSelector()))
+				.filter(dc->containsAll(getService().getSelector(), dc.getReplicaSelector()))
 				.collect(Collectors.toList());
 		if(!dcs.isEmpty()) {
 			resources.add(istag);
@@ -186,7 +180,7 @@ public class Deployment extends ResourcesUIModel
 		Collection<IResource> resources = new HashSet<>();
 		final String imageRef = imageRef(build);
 		Collection<IDeploymentConfig> dcs = cache.getDeploymentConfigsBy(imageRef).stream()
-				.filter(dc->containsAll(service.getSelector(), dc.getReplicaSelector()))
+				.filter(dc->containsAll(getService().getSelector(), dc.getReplicaSelector()))
 				.collect(Collectors.toList());
 		if(!dcs.isEmpty()) {
 			resources.add(build);
@@ -217,7 +211,7 @@ public class Deployment extends ResourcesUIModel
 		
 		Collection<String> buildImageRefs = builds.stream().map(b->imageRef(b)).collect(Collectors.toList());
 		Collection<IDeploymentConfig> dcs = cache.getDeploymentConfigsBy(buildImageRefs).stream()
-				.filter(dc->containsAll(service.getSelector(), dc.getReplicaSelector()))
+				.filter(dc->containsAll(getService().getSelector(), dc.getReplicaSelector()))
 				.collect(Collectors.toList());
 		if(!dcs.isEmpty()) {
 			resources.add(pod);
@@ -251,7 +245,7 @@ public class Deployment extends ResourcesUIModel
 	}
 
 	private void handlePod(IResourceCache cache, IPod pod) {
-		if(containsAll(service.getSelector(), pod.getLabels())) {
+		if(containsAll(getService().getSelector(), pod.getLabels())) {
 			add(pod);
 			addResourcesByAnnotation(cache, pod, ResourceKind.REPLICATION_CONTROLLER, OpenShiftAPIAnnotations.DEPLOYMENT_NAME);
 			addResourcesByAnnotation(cache, pod, ResourceKind.DEPLOYMENT_CONFIG, OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
@@ -260,7 +254,7 @@ public class Deployment extends ResourcesUIModel
 	
 	private Collection<IResource> handleDeploymentConfig(IResourceCache cache, IDeploymentConfig dc) {
 		Collection<IResource> resources = new HashSet<>();
-		if(containsAll(service.getSelector(), dc.getReplicaSelector())) {
+		if(containsAll(getService().getSelector(), dc.getReplicaSelector())) {
 			resources.add(dc);
 			
 			Collection<String> imageRefs = getDeploymentConfigImageRefs(dc);
@@ -294,14 +288,14 @@ public class Deployment extends ResourcesUIModel
 	}
 
 	private void handleRepController(IResourceCache cache, IReplicationController resource) {
-		if(containsAll(service.getSelector(), resource.getReplicaSelector()) && !hasModelFor(resource)) {
+		if(containsAll(getService().getSelector(), resource.getReplicaSelector()) && !hasModelFor(resource)) {
 			add(resource);
 			addResourcesByAnnotation(cache, resource, ResourceKind.DEPLOYMENT_CONFIG, OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
 		}
 	}
 
 	private void handleRoute(IResourceCache cache, IRoute route) {
-		if(ResourceUtils.areRelated(route, service) && !hasModelFor(route)) {
+		if(ResourceUtils.areRelated(route, getService()) && !hasModelFor(route)) {
 			add(route);
 		}
 	}
@@ -327,8 +321,8 @@ public class Deployment extends ResourcesUIModel
 	public void handleUpdateToCache(IResourceCache cache, IResource resource) {
 		switch(resource.getKind()) {
 			case ResourceKind.SERVICE: {
-				if(this.service.equals(resource) && !this.service.getResourceVersion().equals(resource.getResourceVersion())) {
-					this.service = ((IService)resource);
+				if(getService().equals(resource) && !getService().getResourceVersion().equals(resource.getResourceVersion())) {
+					setResource(resource);
 				}
 				break;
 			}
@@ -377,7 +371,7 @@ public class Deployment extends ResourcesUIModel
 
 	@Override
 	public String toString() {
-		return service.getNamespace() + "/" + service.getName();
+		return getService().getNamespace() + "/" + getService().getName();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -400,7 +394,7 @@ public class Deployment extends ResourcesUIModel
 		int result = 1;
 		result = prime * result + ((grandParent == null) ? 0 : grandParent.hashCode());
 		result = prime * result + ((project == null) ? 0 : project.hashCode());
-		result = prime * result + ((service == null) ? 0 : service.hashCode());
+		result = prime * result + ((getService() == null) ? 0 : getService().hashCode());
 		return result;
 	}
 
@@ -423,10 +417,10 @@ public class Deployment extends ResourcesUIModel
 				return false;
 		} else if (!project.equals(other.project))
 			return false;
-		if (service == null) {
-			if (other.service != null)
+		if (getService() == null) {
+			if (other.getService() != null)
 				return false;
-		} else if (!service.equals(other.service))
+		} else if (!getService().equals(other.getService()))
 			return false;
 		return true;
 	}

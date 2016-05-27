@@ -14,7 +14,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
+import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 import org.jboss.tools.openshift.internal.ui.propertytester.OpenShiftResourcePropertyTester;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,20 +25,20 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class OpenShiftResourcePropertyTesterTest {
 
 	@Mock 
-	private IProjectAdapter adapter;
+	private IResourceUIModel uiModel;
 	private String property = "isDeleting";
 	private Object expectedValue = Boolean.TRUE;
 	private OpenShiftResourcePropertyTester tester = new OpenShiftResourcePropertyTester();
 	
 	@Test
 	public void testWhenAdapterDoesMatchExpectedReturnsTrue() {
-		when(adapter.isDeleting()).thenReturn(true);
+		when(uiModel.isDeleting()).thenReturn(true);
 		assertTrue(whenTesting());
 	}
 
 	@Test
 	public void testWhenAdapterDoesNotMatchExpectedReturnsFalse() {
-		when(adapter.isDeleting()).thenReturn(false);
+		when(uiModel.isDeleting()).thenReturn(false);
 		assertFalse(whenTesting());
 	}
 
@@ -55,11 +55,11 @@ public class OpenShiftResourcePropertyTesterTest {
 
 	@Test
 	public void testWhenExpectedNotBooleanReturnsFalse() {
-		assertFalse(tester.test(adapter, property, null, ""));
+		assertFalse(tester.test(uiModel, property, null, ""));
 	}
 	
 
 	private boolean whenTesting() {
-		return tester.test(adapter, property, null, expectedValue); 
+		return tester.test(uiModel, property, null, expectedValue); 
 	}
 }
