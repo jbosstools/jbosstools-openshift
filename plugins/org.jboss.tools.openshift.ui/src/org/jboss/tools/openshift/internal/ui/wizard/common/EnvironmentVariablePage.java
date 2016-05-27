@@ -61,6 +61,7 @@ import org.jboss.tools.openshift.internal.ui.wizard.deployimage.IDeploymentConfi
 public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPage{
 	
 	private static final String ENVIRONMENT_VARIABLE_LABEL = "Environment Variable";
+	private static final String ENVIRONMENT_VARIABLE_KEY_LABEL = "Name";
 	public static final String TABLE_LABEL = "Environment variables";
 	private IEnvironmentVariablesPageModel model;
 	private TableViewer envViewer;
@@ -274,7 +275,7 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 					.windowTitle(ENVIRONMENT_VARIABLE_LABEL)
 					.title("Edit " + ENVIRONMENT_VARIABLE_LABEL)
 					.description(NLS.bind("Edit the {0}.", ENVIRONMENT_VARIABLE_LABEL.toLowerCase()))
-					.keyLabel(ENVIRONMENT_VARIABLE_LABEL)
+					.keyLabel(ENVIRONMENT_VARIABLE_KEY_LABEL)
 					.editableKey(var.isNew())
 					.groupLabel(ENVIRONMENT_VARIABLE_LABEL)
 					.keyAfterConvertValidator(new EnvironmentVarKeyValidator(usedKeys))
@@ -300,7 +301,7 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 						.windowTitle(ENVIRONMENT_VARIABLE_LABEL)
 						.title("Add " + ENVIRONMENT_VARIABLE_LABEL)
 						.description(NLS.bind("Add an {0}.", ENVIRONMENT_VARIABLE_LABEL.toLowerCase()))
-						.keyLabel("Name")
+						.keyLabel(ENVIRONMENT_VARIABLE_KEY_LABEL)
 						.groupLabel(ENVIRONMENT_VARIABLE_LABEL)
 						.keyAfterConvertValidator(new EnvironmentVarKeyValidator(usedKeys))
 						.build();
