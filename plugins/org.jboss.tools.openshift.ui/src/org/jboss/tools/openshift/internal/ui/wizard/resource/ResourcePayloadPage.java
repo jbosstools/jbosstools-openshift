@@ -47,6 +47,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.wizard.common.AbstractProjectPage;
+
 import com.openshift.restclient.OpenShiftException;
 
 /**
@@ -98,7 +99,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
                 .span(3, 1)
                 .applyTo(sourceText);
         final IObservableValue source = WidgetProperties.text(SWT.Modify).observe(sourceText);
-        Binding binding = ValueBindingBuilder
+        ValueBindingBuilder
                 .bind(source )
                 //.validatingBeforeSet(value->isFile(value.toString())?
                 //        ValidationStatus.ok(): 
@@ -114,7 +115,10 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
                 if (StringUtils.isEmpty(sourceValue)) {
                     return ValidationStatus.cancel("You need to provide a file path or an URL");
                 }
-                return (boolean) !OpenshiftUIConstants.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)?ValidationStatus.error(sourceValue + " is not a file"):ValidationStatus.ok();
+                return !OpenshiftUIConstants.URL_VALIDATOR.isValid(sourceValue) 
+                		&& !isFile(sourceValue)?
+                				ValidationStatus.error(sourceValue + " is not a file")
+                				:ValidationStatus.ok();
             }
         };
         dbc.addValidationStatusProvider(validator);
