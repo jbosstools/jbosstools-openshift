@@ -19,13 +19,16 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-
 import org.apache.commons.io.IOUtils;
+import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
+import org.eclipse.linuxtools.docker.core.DockerException;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
+import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizardModel;
+import org.jboss.tools.openshift.internal.ui.wizard.deployimage.ServicePortAdapter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -33,6 +36,7 @@ import org.mockito.Mockito;
 import com.openshift.restclient.capability.resources.IImageStreamImportCapability;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IServicePort;
 import com.openshift.restclient.model.IStatus;
 import com.openshift.restclient.model.image.IImageStreamImport;
 
@@ -185,4 +189,174 @@ public class DeployImageWizardModelTest {
 				.getResourceAsStream(filename);
 		return IOUtils.toString(imageStreamImport);
 	}
+    
+    @Test
+    public void emptyDockerConnectionReturnsEmptyImagesNames() {
+        assertThat(model.getImageNames()).isEmpty();
+    }
+    
+    @Test
+    public void imagesFromDockerDonnectionAreReturned() {
+        IDockerImage image= mock(IDockerImage.class);
+        when(image.repoTags()).thenReturn(Collections.singletonList("image:latest"));
+        when(dockerConnection.getImages()).thenReturn(Collections.singletonList(image));
+        model.setDockerConnection(dockerConnection);
+        assertThat(model.getImageNames()).isEqualTo(Collections.singletonList("image:latest"));
+    }
+    
+    @Test
+    public void resourceNameIsReturnedWhenSettingADockerImage() {
+        IDockerImage image= mock(IDockerImage.class);
+        when(image.repoTags()).thenReturn(Collections.singletonList("image:latest"));
+        when(dockerConnection.getImages()).thenReturn(Collections.singletonList(image));
+        model.setDockerConnection(dockerConnection);
+        model.setImageName("image:latest");
+        assertThat(model.getResourceName()).isEqualTo("image");
+    }
+    
+    @Test
+    public void checkThatNewDockerConnectionsAreReported() throws DockerException {
+        IDockerConnection connection = mock(IDockerConnection.class);
+        DockerConnectionManager.getInstance().addConnection(connection);
+        assertThat(model.getDockerConnections()).hasSize(1);
+    }
+    
+    @Test
+    public void checkThatProjectIsSetWhenProjectsAreSet() {
+        IProject project1 = mock(IProject.class);
+        model.setProjects(Collections.singleton(project1));
+        assertThat(model.getProject()).isEqualTo(project1);
+    }
+    
+    @Test
+    public void checkThatProjectIsResetWhenProjectsAreSet() {
+        IProject project1 = mock(IProject.class);
+        IProject project2 = mock(IProject.class);
+        model.setProjects(Arrays.asList(project1, project2));
+        assertThat(model.getProject()).isNull();
+    }
+    
+    @Test
+    public void checkThatProjectIsNotResetWhenNewProjectIsAdded() {
+        IProject project1 = mock(IProject.class);
+        model.setProjects(Arrays.asList(project, project1));
+        assertThat(model.getProject()).isEqualTo(project);
+    }
+    
+    @Test
+    public void checkThatRemoveAnExistingServicePortIsEffective() {
+        // assume Docker image is on local
+        final IDockerImageInfo dockerImageInfo = Mockito.mock(IDockerImageInfo.class, Mockito.RETURNS_DEEP_STUBS);
+        when(dockerConnection.hasImage(WILDFLY_IMAGE, LATEST_TAG)).thenReturn(true);
+        when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
+        when(dockerImageInfo.containerConfig().env()).thenReturn(Collections.emptyList());
+        when(dockerImageInfo.containerConfig().exposedPorts())
+                .thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
+        when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
+
+        // when
+        model.setImageName(WILDFLY_IMAGE_URI);
+        final boolean result = model.initializeContainerInfo();
+        // then
+        assertThat(result).isTrue();
+        model.removeServicePort(model.getServicePorts().get(0));
+        assertThat(model.getServicePorts()).hasSize(1);
+        assertThat(model.getServicePorts()).isEqualTo(Collections.singletonList(new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
+    }
+    
+    @Test
+    public void checkThatServicePortsAreReset() {
+        // assume Docker image is on local
+        final IDockerImageInfo dockerImageInfo = Mockito.mock(IDockerImageInfo.class, Mockito.RETURNS_DEEP_STUBS);
+        when(dockerConnection.hasImage(WILDFLY_IMAGE, LATEST_TAG)).thenReturn(true);
+        when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
+        when(dockerImageInfo.containerConfig().env()).thenReturn(Collections.emptyList());
+        when(dockerImageInfo.containerConfig().exposedPorts())
+                .thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
+        when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
+
+        // when
+        model.setImageName(WILDFLY_IMAGE_URI);
+        final boolean result = model.initializeContainerInfo();
+        // then
+        assertThat(result).isTrue();
+        model.removeServicePort(model.getServicePorts().get(0));
+        assertThat(model.getServicePorts()).hasSize(1);
+        assertThat(model.getServicePorts()).isEqualTo(Collections.singletonList(new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
+        model.resetServicePorts();
+        assertThat(model.getServicePorts()).hasSize(2);
+        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(new ServicePortAdapter(new PortSpecAdapter("8080-tcp", "TCP", 8080)),
+                                                                    new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
+    }
+
+    @Test
+    public void checkThatRemoveANonExistingServicePortIsNotEffective() {
+        // assume Docker image is on local
+        final IDockerImageInfo dockerImageInfo = Mockito.mock(IDockerImageInfo.class, Mockito.RETURNS_DEEP_STUBS);
+        when(dockerConnection.hasImage(WILDFLY_IMAGE, LATEST_TAG)).thenReturn(true);
+        when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
+        when(dockerImageInfo.containerConfig().env()).thenReturn(Collections.emptyList());
+        when(dockerImageInfo.containerConfig().exposedPorts())
+                .thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
+        when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
+
+        // when
+        model.setImageName(WILDFLY_IMAGE_URI);
+        final boolean result = model.initializeContainerInfo();
+        // then
+        assertThat(result).isTrue();
+        IServicePort port = new ServicePortAdapter();
+        port.setName("9000-tcp");
+        port.setProtocol("TCP");
+        port.setPort(9000);
+        port.setTargetPort(9000);
+        model.removeServicePort(port);
+        assertThat(model.getServicePorts()).hasSize(2);
+        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(new ServicePortAdapter(new PortSpecAdapter("8080-tcp", "TCP", 8080)),
+                                                                    new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
+    }
+
+    @Test
+    public void checkThatRemoveAnExistingEnvironmentVariableIsEffective() {
+        // assume Docker image is on local
+        final IDockerImageInfo dockerImageInfo = Mockito.mock(IDockerImageInfo.class, Mockito.RETURNS_DEEP_STUBS);
+        when(dockerConnection.hasImage(WILDFLY_IMAGE, LATEST_TAG)).thenReturn(true);
+        when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
+        when(dockerImageInfo.containerConfig().env()).thenReturn(Arrays.asList("V1=value1", "V2=value2"));
+        when(dockerImageInfo.containerConfig().exposedPorts())
+                .thenReturn(Collections.emptySet());
+        when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
+
+        // when
+        model.setImageName(WILDFLY_IMAGE_URI);
+        final boolean result = model.initializeContainerInfo();
+        // then
+        assertThat(result).isTrue();
+        model.removeEnvironmentVariable(model.getEnvironmentVariable("V1"));
+        assertThat(model.getEnvironmentVariables()).hasSize(1);
+        assertThat(model.getEnvironmentVariables()).isEqualTo(Collections.singletonList(new EnvironmentVariable("V2", "value2")));
+    }
+    
+    @Test
+    public void checkThatRemoveANonExistingEnvironmentVariableIsNotEffective() {
+        // assume Docker image is on local
+        final IDockerImageInfo dockerImageInfo = Mockito.mock(IDockerImageInfo.class, Mockito.RETURNS_DEEP_STUBS);
+        when(dockerConnection.hasImage(WILDFLY_IMAGE, LATEST_TAG)).thenReturn(true);
+        when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
+        when(dockerImageInfo.containerConfig().env()).thenReturn(Arrays.asList("V1=value1", "V2=value2"));
+        when(dockerImageInfo.containerConfig().exposedPorts())
+                .thenReturn(Collections.emptySet());
+        when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
+
+        // when
+        model.setImageName(WILDFLY_IMAGE_URI);
+        final boolean result = model.initializeContainerInfo();
+        // then
+        assertThat(result).isTrue();
+        model.removeEnvironmentVariable(new EnvironmentVariable("V3", "value3"));
+        assertThat(model.getEnvironmentVariables()).hasSize(2);
+        assertThat(model.getEnvironmentVariables()).isEqualTo(Arrays.asList(new EnvironmentVariable("V1", "value1"),
+                                                                            new EnvironmentVariable("V2", "value2")));
+    }
+    
 }
