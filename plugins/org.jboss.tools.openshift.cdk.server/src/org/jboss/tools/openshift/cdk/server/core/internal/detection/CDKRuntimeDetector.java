@@ -41,7 +41,7 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 	public RuntimeDefinition getRuntimeDefinition(File root,
 			IProgressMonitor monitor) {
 		if( validate(root)) {
-			return createDefinition(root.getName(), "2.0", CDK_RUNTIME_TYPE, root);
+			return createDefinition("Container Development Environment", "2.0", CDK_RUNTIME_TYPE, root);
 		}
 		return null;
 	}
@@ -50,7 +50,7 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 	public boolean initializeRuntime(RuntimeDefinition runtimeDefinition) throws CoreException {
 		if( !exists(runtimeDefinition) && validate(runtimeDefinition.getLocation())) {
 			IServerType st = ServerCore.findServerType(CDKServer.CDK_SERVER_TYPE);
-			String possibleId = runtimeDefinition.getLocation().getName() + " CDK Server";
+			String possibleId = runtimeDefinition.getName();
 			String suffixed = ServerNamingUtility.getDefaultServerName(possibleId);
 			try {
 				IServerWorkingCopy wc = st.createServer(suffixed, null, new NullProgressMonitor());
