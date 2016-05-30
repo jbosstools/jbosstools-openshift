@@ -95,7 +95,12 @@ public class EnvironmentVariable implements IKeyValueItem {
 			return false;
 		return true;
 	}
-	
-	
 
+	/**
+	 * For better test reporting
+	 */
+    @Override
+    public String toString() {
+        return "EnvironmentVariable [name=" + name + ", value=" + value + ", isNew=" + isNew + "]";
+    }
 }

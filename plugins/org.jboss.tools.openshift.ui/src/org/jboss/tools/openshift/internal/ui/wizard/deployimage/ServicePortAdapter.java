@@ -20,7 +20,7 @@ import com.openshift.restclient.model.IServicePort;
  * @author jeff.cantrill
  *
  */
-class ServicePortAdapter extends ObservablePojo implements IServicePort{
+public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 	
 	private static final String TARGET_PORT = "targetPort";
 	private String name;
@@ -28,14 +28,14 @@ class ServicePortAdapter extends ObservablePojo implements IServicePort{
 	private String containerPort;
 	private String protocol;
 
-	ServicePortAdapter(IPort port){
+	public ServicePortAdapter(IPort port){
 		name = port.getName();
 		this.port = port.getContainerPort();
 		containerPort = String.valueOf(port.getContainerPort());
 		protocol = port.getProtocol();
 	}
 	
-	ServicePortAdapter(IServicePort port) {
+	public ServicePortAdapter(IServicePort port) {
 		this.name = port.getName();
 		this.port = port.getPort();
 		this.containerPort = "0".equals(port.getTargetPort()) ? String.valueOf(this.port) : port.getTargetPort();
@@ -129,6 +129,15 @@ class ServicePortAdapter extends ObservablePojo implements IServicePort{
 			return false;
 		return true;
 	}
+
+    /**
+     * For better test reporting
+     */
+    @Override
+    public String toString() {
+        return "ServicePortAdapter [name=" + name + ", port=" + port + ", containerPort=" + containerPort
+                + ", protocol=" + protocol + "]";
+    }
 	
 	
 }
