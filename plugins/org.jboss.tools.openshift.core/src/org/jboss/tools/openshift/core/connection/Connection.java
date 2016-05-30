@@ -59,9 +59,10 @@ import com.openshift.restclient.model.IResourceBuilder;
 public class Connection extends ObservablePojo implements IConnection, IRefreshable, IOpenShiftConnection {
 
 	private static final String SECURE_STORAGE_BASEKEY = "org.jboss.tools.openshift.core";
-	private static final String SECURE_STORAGE_PASSWORD = "password";
-	private static final String SECURE_STORAGE_TOKEN = "token";
+	private static final String SECURE_STORAGE_PASSWORD_KEY = "password";
+	private static final String SECURE_STORAGE_TOKEN_KEY = "token";
 	private static final String SECURE_STORAGE_AUTHSCHEME = "authtype";
+
 	public static final String PROPERTY_REMEMBER_TOKEN = "rememberToken";
 	
 	private IClient client;
@@ -144,6 +145,12 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return password;
 	}
 
+	@Override
+	public void setPassword(String password) {
+		firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
+		this.passwordLoaded = true;
+	}
+
 	/**
 	 * Attempts to load the password from the secure storage, only at first time
 	 * it is called.
@@ -151,16 +158,10 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	private void loadPassword() {
 		if (StringUtils.isEmpty(password)
 				&& !passwordLoaded) {
-			this.password = load(SECURE_STORAGE_PASSWORD, getSecureStore(getHost(), getUsername()));
+			this.password = load(SECURE_STORAGE_PASSWORD_KEY);
 			this.passwordLoaded = true;
-			this.rememberPassword = (password != null);
+			setRememberPassword(password != null);
 		}
-	}
-
-	@Override
-	public void setPassword(String password) {
-		firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
-		this.passwordLoaded = true;
 	}
 
 	@Override
@@ -185,38 +186,14 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	public void enablePromptCredentials(boolean enable) {
 		this.promptCredentialsEnabled = enable;
 	}
-	
-	private void save(String token) {
-		//not using getters here because for save there should be no reason
-		//to trigger a load from storage.
-		if(!IAuthorizationContext.AUTHSCHEME_OAUTH.equals(getAuthScheme())) {
-			boolean success = saveOrClear(SECURE_STORAGE_PASSWORD, this.password, isRememberPassword(), getSecureStore(getHost(), getUsername()));
-			if(success) { //Avoid second secure storage prompt.
-				//Password is stored, token should be cleared.
-				setRememberToken(false);
-				saveOrClear(SECURE_STORAGE_TOKEN, null, false, getSecureStore(getHost(), getUsername()));
-			}
-		} else {
-			boolean success = saveOrClear(SECURE_STORAGE_TOKEN, token, isRememberToken(), getSecureStore(getHost(), getUsername()));
-			if(success) { //Avoid second secure storage prompt.
-				//Token is stored, password should be cleared.
-				setRememberPassword(false);
-				password = null;
-				saveOrClear(SECURE_STORAGE_PASSWORD, null, false, getSecureStore(getHost(), getUsername()));
-			}
-		}
-		ConnectionURL url = ConnectionURL.safeForConnection(this);
-		if(url != null) {
-			OpenShiftCorePreferences.INSTANCE.saveAuthScheme(url.toString(), getAuthScheme());
-		}
-	}
 
 	public String getAuthScheme() {
 		return org.apache.commons.lang.StringUtils.defaultIfBlank(this.authScheme, IAuthorizationContext.AUTHSCHEME_OAUTH);
 	}
 
-	private String load(String id, SecureStore store) {
+	protected String load(String id) {
 		String value = null;
+		SecureStore store = getSecureStore();
 		if (store != null) {
 			try {
 				value = store.get(id);
@@ -227,7 +204,8 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		return value;
 	}
 
-	private boolean saveOrClear(String id, String value, boolean saveOrClear, SecureStore store) {
+	private boolean saveOrClear(String id, String value, boolean saveOrClear) {
+		SecureStore store = getSecureStore();
 		if (store != null) {
 			try {
 				if (saveOrClear
@@ -250,20 +228,21 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	/**
 	 * Returns a secure store for the current host and username
 	 */
-	private SecureStore getSecureStore(final String host, final String username) {
-		return new SecureStore(new OpenShiftSecureStorageKey(SECURE_STORAGE_BASEKEY, host, username));
+	protected SecureStore getSecureStore() {
+		return new SecureStore(new OpenShiftSecureStorageKey(SECURE_STORAGE_BASEKEY, getHost(), getUsername()));
 	}
 
 	@Override
 	public boolean connect() throws OpenShiftException {
 		if(authorize()) {
-			save(getToken());
+			savePasswordOrToken();
+			saveAuthSchemePreference();
 			return true;
 		}
 		return false;
 	}
 
-	private boolean authorize() {
+	protected boolean authorize() {
 		client.setAuthorizationStrategy(createAuthorizationStrategy());
 		try {
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
@@ -272,11 +251,11 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 					&& promptCredentialsEnabled){
 				credentialsPrompter.promptAndAuthenticate(this, null);
 			} else {
-				setToken(context.getToken());
+				updateCredentials(context);
 				// TODO: move this logic to openshift-restclient-java
+				// force auth strategy to token of authorized
 				TokenAuthorizationStrategy tokenStrategy = new TokenAuthorizationStrategy(getToken(), context.getUser().getName());
 				client.setAuthorizationStrategy(tokenStrategy);
-				updateCredentials(context);
 			}
 		} catch (UnauthorizedException e) {
 			if (!promptCredentialsEnabled
@@ -288,25 +267,63 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		}
 		return getToken() != null;
 	}
-	
-	
+
+	private void savePasswordOrToken() {
+		// not using getters here because for save there should be no reason
+		// to trigger a load from storage.
+		if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(getAuthScheme())) {
+			boolean success = 
+					saveOrClear(SECURE_STORAGE_PASSWORD_KEY, this.password, isRememberPassword());
+			if (success) {
+				//Avoid second secure storage prompt.
+				// Password is stored, token should be cleared.
+				clearToken();
+			}
+		} else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(getAuthScheme())){
+			boolean success = 
+					saveOrClear(SECURE_STORAGE_TOKEN_KEY, getToken(), isRememberToken());
+			if(success) { 
+				//Avoid second secure storage prompt.
+				//Token is stored, password should be cleared.
+				clearPassword();
+			}
+		}
+	}
+
+	private void clearPassword() {
+		password = null;
+		setRememberPassword(false);
+		saveOrClear(SECURE_STORAGE_PASSWORD_KEY, null, false);
+	}
+
+	private void clearToken() {
+		setRememberToken(false);
+		saveOrClear(SECURE_STORAGE_TOKEN_KEY, null, false);
+	}
+
+	protected void saveAuthSchemePreference() {
+		ConnectionURL url = ConnectionURL.safeForConnection(this);
+		if(!StringUtils.isEmpty(url)) {
+			OpenShiftCorePreferences.INSTANCE.saveAuthScheme(url.toString(), getAuthScheme());
+		}
+	}
+
 	private void updateCredentials(IAuthorizationContext context) {
-		if (IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(this.getAuthScheme())) {
+		setToken(context.getToken());
+		if (IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(getAuthScheme())) {
 			setUsername(context.getUser().getName());
 		}
 	}
 	
 	private IAuthorizationStrategy createAuthorizationStrategy() {
-		final String scheme = getAuthScheme();
-		final String token = getToken();
-		if (org.apache.commons.lang.StringUtils.isNotEmpty(token)
-				|| IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(scheme)) {
-			return new TokenAuthorizationStrategy(token, getUsername()); //always use the token if you have one?
-		}
-		if (IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(scheme)) {
+		if (org.apache.commons.lang.StringUtils.isNotEmpty(getToken())
+				|| IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(getAuthScheme())) {
+			return new TokenAuthorizationStrategy(getToken(), getUsername()); //always use the token if you have one?
+		} else if (IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(getAuthScheme())) {
 			return new BasicAuthorizationStrategy(getUsername(), getPassword(), getToken());
 		}
-		throw new OpenShiftException("Authscheme '%s' is not supported.", scheme);
+
+		throw new OpenShiftException("Authscheme '%s' is not supported.", getAuthScheme());
 	}
 
 	/**
@@ -589,14 +606,14 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 	 */
 	private synchronized void loadToken() {
 		if (StringUtils.isEmpty(token) && !tokenLoaded) {
+			setToken(load(SECURE_STORAGE_TOKEN_KEY));
 			tokenLoaded = true;
-			setToken(load(SECURE_STORAGE_TOKEN, getSecureStore(getHost(), getUsername())));
 			this.rememberToken = isNotBlank(token); //potential conflict with load password?
 		}
 	}
 	
 	public void setToken(String token) {
-		firePropertyChange(SECURE_STORAGE_TOKEN, token, this.token = token);
+		firePropertyChange(SECURE_STORAGE_TOKEN_KEY, token, this.token = token);
 		this.tokenLoaded = true;
 	}
 
