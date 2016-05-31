@@ -485,7 +485,10 @@ public class UIUtils {
             @Override
             public boolean select(Viewer viewer, Object parentElement, Object element) {
                 return element instanceof IContainer 
-                        || (element instanceof IFile && ((IFile)element).getFileExtension().equals(extension));
+                        || (element instanceof IFile 
+                        		&& extension != null 
+                        		&& (extension.equals(((IFile)element).getFileExtension()))
+                        	);
             }
         });
         dialog.setAllowMultiple( false );
