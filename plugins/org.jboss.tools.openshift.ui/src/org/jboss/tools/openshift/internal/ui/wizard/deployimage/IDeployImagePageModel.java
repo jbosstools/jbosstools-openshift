@@ -94,7 +94,17 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @param imageName the name of the Docker Image to use
 	 */
 	void setImageName(String imageName);
-	
+
+	/**
+	 * Since method setImageName(String) ignores attempts to set an empty value, 
+	 * ui gets not synchronized with model as soon as image name is cleared.
+	 * Then, if the previous value is selected again, model will not be changed
+	 * if that method is called, and will not fire change event. This method forces it.
+	 * @param imageName
+	 * @param forceUpdate
+	 */
+	void setImageName(String imageName, boolean forceUpdate);
+
 	/**
 	 * @return the list of names of all images for the current Docker connection.
 	 */
