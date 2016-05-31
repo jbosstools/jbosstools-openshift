@@ -12,12 +12,14 @@ package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.DockerException;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.internal.docker.core.DockerConnection;
+import org.eclipse.linuxtools.internal.docker.core.TCPConnectionSettings;
 import org.eclipse.linuxtools.internal.docker.core.DockerConnection.Builder;
 import org.eclipse.wst.server.core.IServer;
 
@@ -55,7 +57,7 @@ public class CDKDockerUtility {
 	}
 	
 	public IDockerConnection findDockerConnection(ServiceManagerEnvironment adb) {
-		final String dockerHost = adb == null ? null : adb.env == null ? null : adb.env.get("DOCKER_HOST");
+		final String dockerHost = adb == null ? null : adb.env == null ? null : getDockerHost(adb);
 		
 		if( dockerHost != null ) {
 			IDockerConnection[] cons = mgr.getConnections();
@@ -75,11 +77,30 @@ public class CDKDockerUtility {
 	}
 	
 	public IDockerConnection buildDockerConnection(IServer server, ServiceManagerEnvironment adb) throws DockerException {
-		final String dockerHost = adb.env.get("DOCKER_HOST");
+		final String dockerHost = getDockerHost(adb);
+		final String tlsCertPath = getTlsCertPath(adb);
+		return new DockerConnection.Builder()
+				.name(getNextName(server)).tcpConnection(new TCPConnectionSettings(dockerHost, tlsCertPath));
+	}
 
-		final Builder tcpConnectionBuilder = new DockerConnection.Builder()
-				.name(getNextName(server)).tcpHost(dockerHost);
-		String tlsVerifyString = adb.env.get("DOCKER_TLS_VERIFY");
+	/**
+	 * Looks-up the host name and port to connect to Docker.
+	 * @param adb the {@link ServiceManagerEnvironment}
+	 * @return the host name and port or <code>null</code> if it was not set.
+	 */
+	private String getDockerHost(ServiceManagerEnvironment adb) {
+		return adb.env.get("DOCKER_HOST");
+	}
+	
+	/**
+	 * Looks-up the path to the client certificates to connect to Docker
+	 * @param adb the {@link ServiceManagerEnvironment}
+	 * @return the value of {@code DOCKER_CERT_PATH} in the environment variable
+	 *         or <code>null</code> if it was not present or if the {@code DOCKER_TLS_VERIFY} was not present or
+	 *         not set to {@code 1}.
+	 */
+	private String getTlsCertPath(final ServiceManagerEnvironment adb) {
+		final String tlsVerifyString = adb.env.get("DOCKER_TLS_VERIFY");
 		boolean tlsVerify = tlsVerifyString == null ? false : (Integer.parseInt(tlsVerifyString) != 0);
 		if( tlsVerify ) {
 			String tlsCertPath = adb.env.get("DOCKER_CERT_PATH");
@@ -89,11 +110,11 @@ public class CDKDockerUtility {
 					tlsCertPath = tlsCertPath.substring(1, tlsCertPath.length()-1);
 				}
 			}
-			tcpConnectionBuilder.tcpCertPath(tlsCertPath);
-		}
-		return tcpConnectionBuilder.build();
+			return tlsCertPath;
+		}		
+		return null;
 	}
-	
+
 	public IDockerConnection createDockerConnection(IServer server, ServiceManagerEnvironment adb) throws DockerException {
 		IDockerConnection con = buildDockerConnection(server, adb);
 		mgr.addConnection(con);
