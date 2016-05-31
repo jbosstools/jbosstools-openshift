@@ -463,7 +463,7 @@ public class UIUtils {
 	 * @param selectedFile the initial selected file. May be null
 	 * @param title the title of the dialog
 	 * @param message the message of the dialog
-	 * @param extension the extension to filter. May be null
+	 * @param extension the extension to filter. If null or empty, all files are accepted
 	 * @param initialSelection the initial selection resource (used if selectedFile is null)
 	 * @return the dialog
 	 */
@@ -484,12 +484,11 @@ public class UIUtils {
             
             @Override
             public boolean select(Viewer viewer, Object parentElement, Object element) {
-                return element instanceof IContainer 
-                        || (element instanceof IFile 
-                        		&& extension != null 
-                        		&& (extension.equals(((IFile)element).getFileExtension()))
-                        	);
-            }
+				return element instanceof IContainer || 
+						(element instanceof IFile && 
+								(StringUtils.isEmpty(extension) || extension.equals(((IFile)element).getFileExtension()))
+						);
+			}
         });
         dialog.setAllowMultiple( false );
         if (StringUtils.isNotBlank(selectedFile)) {
