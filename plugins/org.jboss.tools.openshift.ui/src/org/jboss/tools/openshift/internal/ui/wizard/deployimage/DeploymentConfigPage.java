@@ -64,7 +64,7 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
 		//Env Variables Block
-		createEnvVariableControl(parent, dbc);
+		createEnvVariableControl(parent, dbc, "Deployment environment variables (Runtime only):", EnvironmentVariablePage.TABLE_LABEL_TOOLTIP);
 
 		Label separator1 = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator1);

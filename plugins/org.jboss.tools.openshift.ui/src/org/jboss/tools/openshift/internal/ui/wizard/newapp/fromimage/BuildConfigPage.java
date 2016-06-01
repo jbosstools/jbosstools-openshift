@@ -97,9 +97,7 @@ public class BuildConfigPage extends EnvironmentVariablePage {
 		createSeparator(parent);
 
 		//Env Variables Block
-		createEnvVariableControl(parent, dbc);
-		setTableLabel(EnvironmentVariablePage.TABLE_LABEL + " (Build and Runtime):");
-		setTableLabelToolToop("Environment variables are used to configure and pass information to running containers.  These environment variables will be available during your build and at runtime.");
+		createEnvVariableControl(parent, dbc, "Build environment variables (Build and Runtime):", "Environment variables are used to configure and pass information to running containers.  These environment variables will be available during your build and at runtime.");
 	}
 	
 	@SuppressWarnings("unchecked")

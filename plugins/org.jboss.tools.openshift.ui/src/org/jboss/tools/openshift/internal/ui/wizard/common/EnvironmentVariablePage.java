@@ -62,10 +62,10 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 	
 	private static final String ENVIRONMENT_VARIABLE_LABEL = "Environment Variable";
 	private static final String ENVIRONMENT_VARIABLE_KEY_LABEL = "Name";
-	public static final String TABLE_LABEL = "Environment variables";
+	public static final String TABLE_LABEL = "Environment variables:";
+	public static final String TABLE_LABEL_TOOLTIP = "Environment variables are passed to running pods for consumption by the pod containers";
 	private IEnvironmentVariablesPageModel model;
 	private TableViewer envViewer;
-	private Label lblEnvVars;
 
 	protected int heightScale = 30;
 	protected Composite envTableContainer;
@@ -75,18 +75,12 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 		this.model = model;
 	}
 	
-	protected void setTableLabel(String value) {
-		if(lblEnvVars == null) return;
-		this.lblEnvVars.setText(value);
+	protected void createEnvVariableControl(Composite parent, DataBindingContext dbc) {
+		createEnvVariableControl(parent, dbc, TABLE_LABEL, TABLE_LABEL_TOOLTIP);
 	}
 
-	protected void setTableLabelToolToop(String value) {
-		if(lblEnvVars == null) return;
-		this.lblEnvVars.setToolTipText(value);
-	}
-	
 	@SuppressWarnings("unchecked")
-	protected void createEnvVariableControl(Composite parent, DataBindingContext dbc) {
+	protected void createEnvVariableControl(Composite parent, DataBindingContext dbc, String label, String tooltip) {
 		Composite envContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(envContainer);
@@ -94,8 +88,8 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 			.numColumns(2).margins(2, 2).applyTo(envContainer);
 		
 		Label lblEnvVars = new Label(envContainer, SWT.NONE);
-		lblEnvVars.setText("Environment variables:");
-		lblEnvVars.setToolTipText("Environment variables are passed to running pods for consumption by the pod containers");
+		lblEnvVars.setText(label);
+		lblEnvVars.setToolTipText(tooltip);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL)
 			.span(2,1)
