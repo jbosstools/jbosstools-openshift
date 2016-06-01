@@ -67,7 +67,6 @@ import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLa
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
-import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
@@ -208,7 +207,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				ImageSearch wizard = new ImageSearch(model.getDockerConnection(), txtImage.getText());
 				if(Window.OK == new OkCancelButtonWizardDialog(getShell(), wizard).open()){
 					//this bypasses validation
-					model.setImageName(wizard.getSelectedImage());
+					model.setImageName(wizard.getSelectedImage(), true);
 				}
 			}
 		};

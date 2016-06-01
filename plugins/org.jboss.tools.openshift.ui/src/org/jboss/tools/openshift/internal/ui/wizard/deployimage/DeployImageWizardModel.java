@@ -268,7 +268,15 @@ public class DeployImageWizardModel
 		final DockerImageURI uri = new DockerImageURI(imageName);
 		setResourceName(dockerImage2OpenshiftResourceConverter.convert(uri));
 	}
-	
+
+	@Override
+	public void setImageName(String imageName, boolean forceUpdate) {
+		if(forceUpdate && this.imageName != null && this.imageName.equals(imageName)) {
+			firePropertyChange(PROPERTY_IMAGE_NAME, this.imageName, this.imageName = null);
+		}
+		setImageName(imageName);
+	}
+
 	@Override
 	public boolean initializeContainerInfo() {
 		this.imageMeta = lookupImageMetadata();
