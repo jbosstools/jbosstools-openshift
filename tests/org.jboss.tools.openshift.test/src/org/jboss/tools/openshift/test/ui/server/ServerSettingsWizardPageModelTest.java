@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.ServerWorkingCopy;
@@ -297,15 +298,15 @@ public class ServerSettingsWizardPageModelTest {
 	public void should_return_invalidOCBinary_as_it_was_set() {
 		// given
 		// when
-		model.setInvalidOCBinary(true);
+		model.setOCBinaryStatus(Status.OK_STATUS);
 		//then
-		assertThat(model.isInvalidOCBinary()).isTrue();
+		assertThat(model.getOCBinaryStatus()).isEqualTo(Status.OK_STATUS);
 
 		// given
 		// when
-		model.setInvalidOCBinary(false);
+		model.setOCBinaryStatus(Status.CANCEL_STATUS);
 		//then
-		assertThat(model.isInvalidOCBinary()).isFalse();
+		assertThat(model.getOCBinaryStatus()).isEqualTo(Status.CANCEL_STATUS);
 	}
 	
 	@Test
