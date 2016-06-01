@@ -437,6 +437,32 @@
 		   </command>
 		</menuContribution>
 
+		<menuContribution
+			allPopups="false"
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
+		   <command
+		         commandId="org.jboss.tools.openshift.ui.command.deployment.envvar"
+		         id="org.jboss.tools.openshift.ui.command.deployment.envvar">
+		      <visibleWhen>
+		         <with
+		               variable="selection">
+		            <and>
+		               <count
+		                     value="1">
+		               </count>
+		               <iterate
+		                     ifEmpty="false">
+		                  <or>
+                         <adapt type="com.openshift.restclient.model.IReplicationController"/>
+                         <adapt type="com.openshift.restclient.model.IDeploymentConfig"/>
+                         <adapt type="com.openshift.restclient.model.IService"/>
+		                  </or>
+		               </iterate>
+		            </and>
+		         </with>
+		      </visibleWhen>
+		   </command>
+		</menuContribution>
  		<menuContribution
         	allPopups="false"
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=additions">
@@ -737,6 +763,9 @@
            commandId="org.eclipse.ui.edit.delete"
            style="push" />
       				<separator visible="true" name="org.jboss.tools.openshift.ui.separator7" />
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.deployment.envvar"
+           style="push" />
      <menu
            label="Scale">
         <command
@@ -835,6 +864,9 @@
            commandId="org.eclipse.ui.edit.delete"
            style="push" />
 				      <separator visible="true" name="org.jboss.tools.openshift.ui.separator10"/>
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.deployment.envvar"
+           style="push" />
      <menu
            label="Scale">
         <command
@@ -1113,6 +1145,10 @@
         class="org.jboss.tools.openshift.internal.ui.handler.ScaleDeploymentHandler"
         commandId="org.jboss.tools.openshift.ui.command.deployment.scale">
   </handler>
+  <handler
+        class="org.jboss.tools.openshift.internal.ui.handler.ManageEnvironmentVariablesHandler"
+        commandId="org.jboss.tools.openshift.ui.command.deployment.envvar">
+  </handler>
 	</extension>
 	
 	<!-- adapters -->
@@ -1280,6 +1316,10 @@
            optional="true">
      </commandParameter>
   </command>
+  		<command
+          id="org.jboss.tools.openshift.ui.command.deployment.envvar"
+          name="Manage Environment Variables...">
+  		</command>
 	</extension>
 
 	<!-- editor for express connections -->
