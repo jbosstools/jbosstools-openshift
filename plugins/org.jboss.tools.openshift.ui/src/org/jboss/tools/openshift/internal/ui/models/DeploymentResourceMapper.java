@@ -42,7 +42,8 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
-public class DeploymentResourceMapper extends ObservablePojo implements OpenShiftAPIAnnotations, IDeploymentResourceMapper{
+public class DeploymentResourceMapper extends ObservablePojo
+		implements OpenShiftAPIAnnotations, IDeploymentResourceMapper {
 
 	private IProjectAdapter projectAdapter;
 	private IProject project;
@@ -61,51 +62,46 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 		this.project = projectAdapter.getProject();
 		this.conn = conn;
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
-		 ConnectionsRegistrySingleton.getInstance().removeListener(connectionListener);	
-		 cache.dispose();
-		 deployments.clear();
+		ConnectionsRegistrySingleton.getInstance().removeListener(connectionListener);
+		cache.dispose();
+		deployments.clear();
 	}
 
 	@Override
 	public synchronized void refresh() {
-		deployments.forEach(d->cache.removeListener(d));
+		deployments.forEach(d -> cache.removeListener(d));
 		deployments.clear();
 		cache.flush();
 		state.set(State.UNINITIALIZED);
 		buildDeployments();
 	}
-	
-	
+
 	@Override
 	public Map<IService, Collection<IResource>> getAllImageStreamTags() {
-		return deployments.stream()
-				.collect(Collectors.toMap(
-						deployment -> deployment.getService(), 
-						deployment -> getImageStreamTagsFor(deployment)));
+		return deployments.stream().collect(Collectors.toMap(deployment -> deployment.getService(),
+				deployment -> getImageStreamTagsFor(deployment)));
 	}
 
 	@Override
 	public Collection<IResource> getImageStreamTagsFor(IService service) {
-		Optional<Deployment> deployment = deployments.stream().filter(d->service.equals(d.getService())).findFirst();
-		if(deployment.isPresent()) {
+		Optional<Deployment> deployment = deployments.stream().filter(d -> service.equals(d.getService())).findFirst();
+		if (deployment.isPresent()) {
 			return getImageStreamTagsFor(deployment.get());
 		}
 		return Collections.emptySet();
 	}
 
 	private Collection<IResource> getImageStreamTagsFor(Deployment deployment) {
-			Set<String> imageRefs = deployment
-				.getBuildConfigs()
-				.stream()
-				.map(bc->ResourceUtils.imageRef((IBuildConfig) bc.getResource())).collect(Collectors.toSet());
-			final String projectName = deployment.getService().getNamespace();
-			return imageRefs.stream()
-					.map(ref->conn.<IResource>getResource(ResourceKind.IMAGE_STREAM_TAG, projectName, ref))
-					.collect(Collectors.toSet());
+		Set<String> imageRefs = deployment.getBuildConfigs().stream()
+				.map(bc -> ResourceUtils.imageRef((IBuildConfig) bc.getResource())).collect(Collectors.toSet());
+		final String projectName = deployment.getService().getNamespace();
+		return imageRefs.stream()
+				.map(ref -> conn.<IResource>getResource(ResourceKind.IMAGE_STREAM_TAG, projectName, ref))
+				.collect(Collectors.toSet());
 	}
 
 	@Override
@@ -115,12 +111,11 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			return new HashSet<>(deployments);
 		}
 	}
-	
+
 	private void load(String kind) {
 		List<IResource> resources = conn.getResources(kind, project.getName());
-		resources.forEach(r->add(r));
+		resources.forEach(r -> add(r));
 	}
-
 
 	private void buildDeployments() {
 		if (state.compareAndSet(State.UNINITIALIZED, State.LOADING)) {
@@ -128,8 +123,8 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			ConnectionsRegistrySingleton.getInstance().removeListener(connectionListener);
 			try {
 				Collection<Deployment> deployments = new ArrayList<>(this.deployments);
-				deployments.forEach(d->remove(d.getService()));
-				Stream.of(WatchManager.KINDS).forEach(k->load(k));
+				deployments.forEach(d -> remove(d.getService()));
+				Stream.of(WatchManager.KINDS).forEach(k -> load(k));
 			} finally {
 				ConnectionsRegistrySingleton.getInstance().addListener(connectionListener);
 				state.set(State.LOADED);
@@ -141,13 +136,13 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 	public synchronized void add(IResource resource) {
 		try {
 			Trace.debug("Trying to add resource to deployment {0}", resource);
-			if(!cache.add(resource)){
+			if (!cache.add(resource)) {
 				return;
 			}
 			projectAdapter.add(resource);
-			if(ResourceKind.SERVICE.equals(resource.getKind())) {
+			if (ResourceKind.SERVICE.equals(resource.getKind())) {
 				Deployment d = newDeployment((IService) resource);
-				if(addDeployment(d)) {
+				if (addDeployment(d)) {
 					synchronized (cache) {
 						for (String kind : WatchManager.KINDS) {
 							init(d, cache, kind);
@@ -159,11 +154,11 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			OpenShiftUIActivator.getDefault().getLogger().logError(e);
 		}
 	}
-	
+
 	private boolean addDeployment(Deployment deployment) {
 		synchronized (deployments) {
 			Collection<Deployment> old = new ArrayList<>(deployments);
-			if(deployments.add(deployment)) {
+			if (deployments.add(deployment)) {
 				int index = deployments.size() - 1;
 				fireIndexedPropertyChange(IProjectAdapter.PROP_DEPLOYMENTS, index, old, new ArrayList<>(deployments));
 				return true;
@@ -171,36 +166,38 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			return false;
 		}
 	}
-	
+
 	private void init(Deployment d, IResourceCache cache, String kind) {
-		if(ResourceKind.SERVICE.equals(kind)) return;
-		for(IResource resource : cache.getResourcesOf(kind)) {
+		if (ResourceKind.SERVICE.equals(kind))
+			return;
+		for (IResource resource : cache.getResourcesOf(kind)) {
 			d.handleAddToCache(cache, resource);
 		}
 	}
-	
+
 	private Deployment newDeployment(IService service) {
 		Deployment d = new Deployment(service, projectAdapter);
 		cache.addListener(d);
 		return d;
 	}
-	
+
 	public synchronized void remove(IResource resource) {
 		try {
 			Trace.debug("Trying to remove resource to deployment {0}", resource);
-			if(!cache.remove(resource)) {
+			if (!cache.remove(resource)) {
 				return;
 			}
 			projectAdapter.remove(resource);
-			if(ResourceKind.SERVICE.equals(resource.getKind())) {
+			if (ResourceKind.SERVICE.equals(resource.getKind())) {
 				Collection<Deployment> old = new ArrayList<>(deployments);
 				Collection<Deployment> clone = new ArrayList<>(deployments);
 				int index = 0;
 				for (Deployment deployment : clone) {
-					if(deployment.getService().equals(resource)) {
+					if (deployment.getService().equals(resource)) {
 						cache.removeListener(deployment);
 						deployments.remove(deployment);
-						fireIndexedPropertyChange(IProjectAdapter.PROP_DEPLOYMENTS, index, old, new ArrayList<>(deployments));
+						fireIndexedPropertyChange(IProjectAdapter.PROP_DEPLOYMENTS, index, old,
+								new ArrayList<>(deployments));
 					}
 					++index;
 				}
@@ -209,11 +206,11 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			OpenShiftUIActivator.getDefault().getLogger().logError(e);
 		}
 	}
-	
+
 	public synchronized void update(IResource resource) {
 		try {
 			Trace.debug("Trying to update resource for a deployment {0}", resource);
-			if(!cache.update(resource)) {
+			if (!cache.update(resource)) {
 				return;
 			}
 			projectAdapter.update(resource);
@@ -221,7 +218,7 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			OpenShiftUIActivator.getDefault().getLogger().logError(e);
 		}
 	}
-	
+
 	private class ConnectionListener extends ConnectionsRegistryAdapter {
 
 		@Override
@@ -231,18 +228,18 @@ public class DeploymentResourceMapper extends ObservablePojo implements OpenShif
 			if (ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
 				if (oldValue == null && newValue != null) {
 					// add
-					handleChange((IResource) newValue, mapper->add(mapper));
+					handleChange((IResource) newValue, mapper -> add(mapper));
 
 				} else if (oldValue != null && newValue == null) {
 					// delete
-					handleChange((IResource) oldValue, mapper->remove(mapper));
+					handleChange((IResource) oldValue, mapper -> remove(mapper));
 				} else {
 					// update
-					handleChange((IResource) newValue, mapper->update(mapper));
+					handleChange((IResource) newValue, mapper -> update(mapper));
 				}
 			}
 		}
-		
+
 		private void handleChange(IResource resource, Consumer<IResource> action) {
 			if (!project.getName().equals(resource.getNamespace())) {
 				return;
