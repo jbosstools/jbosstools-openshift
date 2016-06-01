@@ -1318,7 +1318,7 @@
   </command>
   		<command
           id="org.jboss.tools.openshift.ui.command.deployment.envvar"
-          name="Manage Environment Variables">
+          name="Manage Environment Variables...">
   		</command>
 	</extension>
 

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -48,6 +49,9 @@ public class EnvironmentVarKeyValidator implements IValidator {
 		if(!(paramObject instanceof String))
 			return ValidationStatus.cancel("Value is not an instance of a string");
 		String value= (String) paramObject;
+		if (StringUtils.isBlank(value)) {
+			return ValidationStatus.cancel("Please provide a key name.");
+		}
 		if(!CIDENTIFIER_REGEXP.matcher(value).matches()) {
 			return FAILED;
 		}
