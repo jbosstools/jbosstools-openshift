@@ -90,7 +90,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		
 		Button btnAddRoute = new Button(routingContainer, SWT.CHECK);
 		btnAddRoute.setText("Add Route");
-		btnAddRoute.setToolTipText("Adding a route to the service will make the image accessible\noutside of the OpenShift cluster.");
+		btnAddRoute.setToolTipText("Adding a route to the service will make the image accessible\noutside of the OpenShift cluster on all the available service ports. \nYou can target a specific port by editing the route later.");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(btnAddRoute);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(btnAddRoute))
