@@ -16,6 +16,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyCommand;
@@ -41,7 +42,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	private boolean overrideProject = false;
 	private ServerEditorSection section;
 	public OpenShiftServerEditorModel(IServerWorkingCopy server, ServerEditorSection section, Connection connection) {
-		super(null, null, null, connection, server, false);
+		super(null, null, null, connection, server, Status.OK_STATUS);
 		this.section = section;
 	}
 
@@ -54,7 +55,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
   				deployProject, projects, 
   				sourcePath, podPath, isUseInferredPodPath, 
   				service, serviceItems, 
-  				route, isSelectDefaultRoute, routesByProject, isInvalidOCBinary());
+  				route, isSelectDefaultRoute, routesByProject, getOCBinaryStatus());
 	 	firePropertyChange(PROPERTY_OVERRIDE_PROJECT, this.overrideProject, this.overrideProject = overrideProject);
 	}
 

@@ -20,6 +20,7 @@ import org.apache.commons.lang.BooleanUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.ListChangeEvent;
@@ -60,12 +61,14 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -105,6 +108,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog.RouteLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
@@ -156,7 +160,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				"Create an OpenShift 3 Server Adapter by selecting the project, service and folders used for file synchronization.", 
 				"Create an OpenShift 3 Server Adapter", 
 				wizard);
-		this.model = new ServerSettingsWizardPageModel(service, route, deployProject, connection, server, !OCBinary.getInstance().isCompatibleForPublishing(new NullProgressMonitor()));
+		OCBinary ocBinary = OCBinary.getInstance();
+		boolean valid = ocBinary.isCompatibleForPublishing(new NullProgressMonitor());
+		this.model = new ServerSettingsWizardPageModel(service, route, deployProject, connection, server, getOCBinaryStatus(valid, ocBinary.getLocation()));
 	}
 	
 	/**
@@ -168,6 +174,27 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	
 	void updateServer() throws OpenShiftException {
 		model.updateServer();
+	}
+	
+	/**
+	 * Compute the error message for the OCBinary state and path.
+	 * 
+	 * @param valid if the oc binary is valid or not
+	 * @param location the location of the oc binary
+	 * @return the error message (may be null)
+	 */
+	IStatus getOCBinaryStatus(boolean valid, String location) {
+	    IStatus status = Status.OK_STATUS;
+	    if (!valid) {
+	        if (location == null) {
+	            status = OpenShiftUIActivator.statusFactory().errorStatus(OpenShiftUIMessages.NoOCBinaryLocationErrorMessage);
+	        } else if (!new File(location).exists()) {
+	            status = OpenShiftUIActivator.statusFactory().errorStatus(NLS.bind(OpenShiftUIMessages.OCBinaryLocationDontExistsErrorMessage, location));
+	        } else {
+	            status = OpenShiftUIActivator.statusFactory().warningStatus(OpenShiftUIMessages.OCBinaryLocationIncompatibleErrorMessage);
+	        }
+	    }
+	    return status;
 	}
 	
 	/**
@@ -199,12 +226,16 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 					@Override
 					public void setMessage(String message, int type) {
-						ServerSettingsWizardPage.this.setMessage(message, type);
+					    if (getContainer() != null) {
+	                        ServerSettingsWizardPage.this.setMessage(message, type);
+					    }
 					}
 
 					@Override
 					public void setComplete(boolean complete) {
-						ServerSettingsWizardPage.this.setComplete(complete);
+					    if (getContainer() != null) {
+	                        ServerSettingsWizardPage.this.setComplete(complete);
+					    }
 					}
 
 					@Override
@@ -303,13 +334,49 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
         
         ValueBindingBuilder
                 .bind(WidgetProperties.visible().observe(composite))
-                .to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_INVALID_OC_BINARY).observe(model))
+                .to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model))
+                .converting(new Converter(IStatus.class, Boolean.class) {
+
+                    @Override
+                    public Object convert(Object fromObject) {
+                        return !((IStatus)fromObject).isOK();
+                    }
+                    
+                })
                 .in(dbc);
 
         Label label = new Label(composite, SWT.NONE);
-        label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+        ValueBindingBuilder
+            .bind(WidgetProperties.image().observe(label))
+            .to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model))
+            .converting(new Converter(IStatus.class, Image.class) {
+
+                @Override
+                public Object convert(Object fromObject) {
+                    switch (((IStatus)fromObject).getSeverity()) {
+                        case IStatus.WARNING:
+                            return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
+                        case IStatus.ERROR:
+                            return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_ERROR);
+                    }
+                    return null;
+                }
+             })
+            .in(dbc);
+   
         Link link = new Link(composite, SWT.WRAP);
-        link.setText("OpenShift client version 1.1.1 or higher is required to avoid rsync issues. You may <a>download</a> and/or <a>configure</a> a newer version.");
+        ValueBindingBuilder
+        .bind(WidgetProperties.text().observe(link))
+        .to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model))
+        .converting(new Converter(IStatus.class, String.class) {
+
+            @Override
+            public Object convert(Object fromObject) {
+                return ((IStatus)fromObject).getMessage();
+            }
+            
+        })
+        .in(dbc);
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -327,7 +394,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
                             @Override
                             protected IStatus run(IProgressMonitor monitor) {
-                                ServerSettingsWizardPage.this.model.setInvalidOCBinary(!OCBinary.getInstance().isCompatibleForPublishing(monitor));
+                                OCBinary ocBinary = OCBinary.getInstance();
+                                boolean valid = ocBinary.isCompatibleForPublishing(monitor);
+                                ServerSettingsWizardPage.this.model.setOCBinaryStatus(getOCBinaryStatus(valid, ocBinary.getLocation()));
                                 return Status.OK_STATUS;
                             }
                         }.schedule();
@@ -336,6 +405,22 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
             }
         });
         GridDataFactory.fillDefaults().hint(600, SWT.DEFAULT).applyTo(link);
+        MultiValidator validator = new MultiValidator() {
+            
+            @Override
+            protected IStatus validate() {
+                IObservableValue<IStatus> observable = BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model);
+                Status status = (Status)observable.getValue();
+                switch (status.getSeverity()) {
+                case IStatus.ERROR:
+                    return OpenShiftUIActivator.statusFactory().errorStatus(OpenShiftUIMessages.OCBinaryErrorMessage);
+                case IStatus.WARNING:
+                    return OpenShiftUIActivator.statusFactory().warningStatus(OpenShiftUIMessages.OCBinaryWarningMessage);
+                }
+                return status;
+            }
+        };
+        dbc.addValidationStatusProvider(validator);
 	}
 
 	/**

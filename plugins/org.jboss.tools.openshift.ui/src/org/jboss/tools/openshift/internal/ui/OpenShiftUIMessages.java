@@ -31,4 +31,10 @@ public class OpenShiftUIMessages extends NLS {
 	public static String Description;
 	public static String ProjectDeletionConfirmation;
 	public static String ProjectDeletionDialogTitle;
+	
+	public static String OCBinaryLocationIncompatibleErrorMessage;
+	public static String OCBinaryLocationDontExistsErrorMessage;
+	public static String NoOCBinaryLocationErrorMessage;
+	public static String OCBinaryErrorMessage;
+	public static String OCBinaryWarningMessage;
 }

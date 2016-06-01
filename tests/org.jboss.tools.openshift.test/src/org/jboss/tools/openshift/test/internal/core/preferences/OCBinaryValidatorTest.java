@@ -16,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.junit.Test;
 import org.osgi.framework.Version;
@@ -44,5 +45,11 @@ public class OCBinaryValidatorTest {
 		Optional<Version> version = OCBinaryValidator.parseVersion(input);
 		assertTrue("Couldn't parse "+input, version.isPresent());
 		assertEquals(expectedVersion, version.get().toString());
+	}
+	
+	@Test
+	public void testValidatorWithDefault() {
+	    OCBinaryValidator validator = new OCBinaryValidator(null);
+	    assertEquals(Version.emptyVersion, validator.getVersion(new NullProgressMonitor()));
 	}
 }
