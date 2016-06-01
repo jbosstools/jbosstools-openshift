@@ -30,6 +30,8 @@ public class OpenShiftUIMessages extends NLS {
 	public static String Name;
 	public static String DisplayName;
 	public static String Description;
+    public static String ProjectDeletionConfirmation;
+    public static String ProjectDeletionConfirmationN;
 	public static String ResourceDeletionConfirmation;
 	public static String ResourceDeletionConfirmationN;
 	public static String ResourceDeletionDialogTitle;

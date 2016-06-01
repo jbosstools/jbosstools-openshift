@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.jobs.JobGroup;
+import org.eclipse.debug.internal.ui.sourcelookup.browsers.ProjectSourceContainerDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
@@ -29,6 +30,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
 import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
+import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 /**
@@ -45,15 +47,20 @@ public class DeleteResourceHandler extends AbstractHandler {
 		if(resources == null || resources.length == 0) {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No resource selected that we can delete."); //$NON-NLS-1$
 		}
-		String message = (resources.length > 1)?OpenShiftUIMessages.ResourceDeletionConfirmationN
-		                                       :NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, resources[0].getResource().getName());
-        boolean confirm = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
-                                                    OpenShiftUIMessages.ResourceDeletionDialogTitle, 
-                                                    message);
-        if (confirm) {
-            deleteResources(resources);
-        }
-		return null;
+		try (Stream<IResourceUIModel> stream = Arrays.stream(resources)) {
+	        boolean hasProject = stream.anyMatch(resource -> resource instanceof IProjectAdapter);
+	        
+	        String message = (resources.length > 1)?(hasProject)?OpenShiftUIMessages.ProjectDeletionConfirmationN:OpenShiftUIMessages.ResourceDeletionConfirmationN
+	                                               :(hasProject)?NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation, resources[0].getResource().getName()):
+	                                                             NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, resources[0].getResource().getName());
+	        boolean confirm = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
+	                                                    OpenShiftUIMessages.ResourceDeletionDialogTitle, 
+	                                                    message);
+	        if (confirm) {
+	            deleteResources(resources);
+	        }
+	        return null;
+		}
 	}
 	
 	/**
