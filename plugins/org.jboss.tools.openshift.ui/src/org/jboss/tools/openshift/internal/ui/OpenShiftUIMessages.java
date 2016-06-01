@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,6 +15,7 @@ import org.eclipse.osgi.util.NLS;
 /**
  * UI static message
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public class OpenShiftUIMessages extends NLS {
@@ -29,6 +30,9 @@ public class OpenShiftUIMessages extends NLS {
 	public static String Name;
 	public static String DisplayName;
 	public static String Description;
-	public static String ProjectDeletionConfirmation;
-	public static String ProjectDeletionDialogTitle;
+    public static String ProjectDeletionConfirmation;
+    public static String ProjectDeletionConfirmationN;
+	public static String ResourceDeletionConfirmation;
+	public static String ResourceDeletionConfirmationN;
+	public static String ResourceDeletionDialogTitle;
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 
 import com.openshift.restclient.OpenShiftException;
@@ -19,29 +21,40 @@ import com.openshift.restclient.model.IResource;
  * Display model for OpenShift resources to allow
  * overriding equals and hash
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public class OpenShiftResourceUIModel extends ObservableUIPojo implements IResourceUIModel{
 
-	private final IResource resource;
-	private final String tostring;
+	private IResource resource;
+	private String tostring;
 	private final Object parent;
+	private AtomicBoolean deleting = new AtomicBoolean(false);
 
-	public OpenShiftResourceUIModel(IResource resource, IResourcesUIModel parent){
+
+	public OpenShiftResourceUIModel(IResource resource, Object parent){
 		if(resource == null)
 			throw new OpenShiftException("A null resource was passed while trying to create a display model");
 		if(parent == null)
 			throw new OpenShiftException("A null parent was passed while trying to create a display model");
 		this.parent = parent;
-		this.resource = resource;
-		this.tostring = resource.getNamespace() + "/" + resource.getKind() + "/" + resource.getName() + "/" + resource.getResourceVersion();
+		setResource(resource);
+	}
+	
+	/**
+	 * Returns a string representation for an Openshift resource.
+	 * 
+	 * @param resource the Openshift resource
+	 * @return the string representation
+	 */
+	private String toString(IResource resource) {
+	    return resource.getNamespace() + "/" + resource.getKind() + "/" + resource.getName() + "/" + resource.getResourceVersion();
 	}
 	
 	@Override
 	public Object getParent() {
 		return this.parent;
 	}
-
 
 	/**
 	 * Get the underlying resource for this display model.
@@ -52,8 +65,26 @@ public class OpenShiftResourceUIModel extends ObservableUIPojo implements IResou
 	public IResource getResource() {
 		return this.resource;
 	}
+	
+	protected void setResource(IResource resource) {
+	    this.resource = resource;
+	    this.tostring = toString(resource);
+	}
+	
+    @Override
+    public void setDeleting(boolean deleting) {
+        this.deleting.set(deleting);
+    }
 
-	@Override
+    /* (non-Javadoc)
+     * @see org.jboss.tools.openshift.internal.ui.models.IResourceUIModel#isDeleting()
+     */
+    @Override
+    public boolean isDeleting() {
+        return deleting.get();
+    }
+
+    @Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

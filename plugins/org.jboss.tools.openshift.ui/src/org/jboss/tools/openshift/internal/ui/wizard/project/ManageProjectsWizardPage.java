@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -61,6 +61,7 @@ import com.openshift.restclient.model.IProject;
 
 /**
  * @author jeff.cantrill
+ * @author Jeff Maury
  */
 public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 
@@ -181,12 +182,12 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 					return;
 				}
 				boolean confirm = MessageDialog.openConfirm(getShell(), 
-						OpenShiftUIMessages.ProjectDeletionDialogTitle, 
-						NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation, project.getName()));
+						OpenShiftUIMessages.ResourceDeletionDialogTitle, 
+						NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, project.getName()));
 				if (!confirm) {
 					return;
 				}
-				DeleteResourceJob job = OpenShiftJobs.createDeleteProjectJob(project);
+				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(project);
 				try {
 					org.jboss.tools.common.ui.WizardUtils.runInWizard(
 							job, job.getDelegatingProgressMonitor(), getContainer(), dbc);

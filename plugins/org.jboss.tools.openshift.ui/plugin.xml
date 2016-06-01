@@ -175,19 +175,12 @@
 				  </with>
 
 				  <with
-						variable="selection">
-					<and>
-						<count
-							value="1">
-						</count>
-						<or>
+					variable="selection">
 						<iterate>
-      <instanceof
-            value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
-      </instanceof>
-            </iterate>
-						</or>
-					</and>
+                            <instanceof
+                                value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
+                            </instanceof>
+                        </iterate>
 				  </with>
 				 </or>
 				</visibleWhen>
@@ -1000,27 +993,6 @@
 			commandId="org.jboss.tools.openshift.ui.command.project.manage">
 		</handler>
 		<handler
-			class="org.jboss.tools.openshift.internal.ui.handler.DeleteProjectsHandler"
-			commandId="org.eclipse.ui.edit.delete">
-				<activeWhen>
-				  <with variable="selection">
-					<count
-						value="1">
-					</count>
-					<iterate>
-				         <instanceof
-				               value="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
-				         </instanceof>
-					      <test
-					            forcePluginActivation="true"
-					            property="org.jboss.tools.openshift.ui.isDeleting"
-					            value="false">
-					      </test>
-					</iterate>
-				  </with>
-				</activeWhen>
-		</handler>
-		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.NewProjectHandler"
 			commandId="org.jboss.tools.openshift.ui.command.project.new">
 		</handler>
@@ -1037,36 +1009,22 @@
 			commandId="org.eclipse.ui.edit.delete">
 				<activeWhen>
 				 <or>
-
-				  <with variable="activePartId">
-					<equals  value="org.eclipse.ui.views.PropertySheet" />
-				  </with>
-
+                  <with variable="activePartId">
+                    <equals  value="org.eclipse.ui.views.PropertySheet" />
+                  </with>
 				  <with
 				  		variable="selection">
-					<and>
-						<count
-							value="1">
-						</count>
 						<iterate>
 							<and>
-							  <or>
-								<adapt
-									type="com.openshift.restclient.model.IResource" />
 								<instanceof
 									value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel" />
-							  </or>
-							  <not>
-								  <or>
-									<adapt
-										type="com.openshift.restclient.model.IProject" />
-									<instanceof
-										value="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter" />
-								  </or>
-							  </not>
+                                <test
+                                    forcePluginActivation="true"
+                                    property="org.jboss.tools.openshift.ui.isDeleting"
+                                    value="false">
+                                </test>
 							</and>
 						</iterate>
-					</and>
 				  </with>
 				 </or>
 				</activeWhen>
@@ -1757,7 +1715,7 @@
          id="org.jboss.tools.openshift.internal.ui.propertytester.OpenShiftResourcePropertyTester"
          namespace="org.jboss.tools.openshift.ui"
          properties="isDeleting"
-         type="org.jboss.tools.openshift.internal.ui.models.IProjectAdapter">
+         type="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
    </propertyTester>
 </extension>
 
