@@ -21,6 +21,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsFactory;
+import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 
 public class CDKOpenshiftUtility {
@@ -28,6 +29,7 @@ public class CDKOpenshiftUtility {
 	private static String DOTCDK_AUTH_USERNAME = "openshift.auth.username";
 	private static String DOTCDK_AUTH_PASS = "openshift.auth.password";
 	
+	private static final String DEFAULT_IMAGE_REGISTRY_URL = "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io ";
 
 
 	public IConnection findExistingOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
@@ -76,7 +78,7 @@ public class CDKOpenshiftUtility {
 		((Connection)con).setUsername(username);
 		((Connection)con).setRememberPassword(true);
 		
-
+		((Connection)con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, DEFAULT_IMAGE_REGISTRY_URL);
 		if( password != null ) {
 			((Connection)con).setPassword(password);
 		}

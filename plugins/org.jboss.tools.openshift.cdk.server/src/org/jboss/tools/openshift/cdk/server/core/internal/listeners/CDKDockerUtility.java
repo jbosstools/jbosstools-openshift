@@ -79,8 +79,9 @@ public class CDKDockerUtility {
 	public IDockerConnection buildDockerConnection(IServer server, ServiceManagerEnvironment adb) throws DockerException {
 		final String dockerHost = getDockerHost(adb);
 		final String tlsCertPath = getTlsCertPath(adb);
+		TCPConnectionSettings set = new TCPConnectionSettings(dockerHost, tlsCertPath);
 		return new DockerConnection.Builder()
-				.name(getNextName(server)).tcpConnection(new TCPConnectionSettings(dockerHost, tlsCertPath));
+				.name(getNextName(server)).tcpConnection(set);
 	}
 
 	/**
