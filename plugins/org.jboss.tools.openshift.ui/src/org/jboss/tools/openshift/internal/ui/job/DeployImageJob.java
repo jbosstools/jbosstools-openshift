@@ -33,6 +33,7 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.core.Trace;
 import org.jboss.tools.openshift.internal.core.util.OpenShiftProjectUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.dockerutils.DockerImageUtils;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.IDeployImageParameters;
@@ -138,7 +139,13 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 	private Map<String, IResource> generateResources(final Connection connection, final String name) {
 		final IResourceFactory factory = connection.getResourceFactory();
 		final IProject project = parameters.getProject();
-		DockerImageURI sourceImage = new DockerImageURI(parameters.getImageName());
+		String imageName;
+		if (parameters.isPushImageToRegistry()) {
+			imageName = project.getNamespace() +"/" +  DockerImageUtils.extractImageNameAndTag(parameters.getImageName());
+		} else {
+			imageName = parameters.getImageName();
+		}
+		DockerImageURI sourceImage = new DockerImageURI(imageName);
 		
 		Map<String, IResource> resources = new HashMap<>(4);
 

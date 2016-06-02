@@ -33,6 +33,11 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	static final String PROPERTY_PROJECT = "project";
 	static final String PROPERTY_RESOURCE_NAME = "resourceName";
 	static final String PROPERTY_IMAGE_NAME = "imageName";
+	static final String PROPERTY_PUSH_IMAGE_TO_REGISTRY = "pushImageToRegistry";
+	static final String PROPERTY_TARGET_REGISTRY_LOCATION = "targetRegistryLocation";
+	static final String PROPERTY_TARGET_REGISTRY_USERNAME = "targetRegistryUsername";
+	static final String PROPERTY_TARGET_REGISTRY_PASSWORD = "targetRegistryPassword";
+	
 	
 	/**
 	 * 
@@ -109,6 +114,47 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return the list of names of all images for the current Docker connection.
 	 */
 	List<String> getImageNames();
+	
+
+	/**
+	 * @return flag to indicate if the image should be pushed to the Docker registry on OpenShift
+	 */
+	boolean isPushImageToRegistry();
+
+	/**
+	 * @param pushImageToRegistry flag to indicate if the image should be pushed to the Docker registry on OpenShift
+	 */
+	void setPushImageToRegistry(boolean pushImageToRegistry);
+	
+	/**
+	 * @return the URL to the target registry where the image will be pushed
+	 */
+	String getTargetRegistryLocation();
+	
+	/**
+	 * @param targetRegistryLocation the URL to the target registry where the image will be pushed
+	 */
+	void setTargetRegistryLocation(String targetRegistryLocation);
+	
+	/**
+	 * @return the username to connect to the target registry where the image will be pushed
+	 */
+	String getTargetRegistryUsername();
+	
+	/**
+	 * @param targetRegistryUsername the username to connect to the target registry where the image will be pushed
+	 */
+	void setTargetRegistryUsername(String targetRegistryUsername);
+	
+	/**
+	 * @return the password to connect to the target registry where the image will be pushed
+	 */
+	String getTargetRegistryPassword();
+	
+	/**
+	 * @param targetRegistryPassword the password to connect to the target registry where the image will be pushed
+	 */
+	void setTargetRegistryPassword(String targetRegistryPassword);
 	
 	/**
 	 * Initializes the container info from the selected Docker Image.

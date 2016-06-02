@@ -63,6 +63,7 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
@@ -88,13 +89,16 @@ import com.openshift.restclient.model.IProject;
  * @author jeff.cantrill
  */
 public class DeployImagePage extends AbstractOpenShiftWizardPage {
+	
 	private static final String MISSING_DOCKER_CONNECTION_MSG = "You must select a Docker connection.";
 
 	static String DEPLOY_IMAGE_PAGE_NAME = "Deployment Config Settings Page";
 
 	private static final String PAGE_DESCRIPTION = "This page allows you to choose an image and the name to be used for the deployed resources.";
 
-	private IDeployImagePageModel model;
+	private static final int NUM_COLUMS = 4;
+	
+	private final IDeployImagePageModel model;
 
 	ContentProposalAdapter imageNameProposalAdapter;
 
@@ -175,7 +179,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(NUM_COLUMS)
+				.margins(10, 10)
+				.applyTo(parent);
 		createOpenShiftConnectionControl(parent, dbc);
 		createProjectControl(parent, dbc);
 		createSeparator(parent);
@@ -185,7 +191,18 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			createDockerConnectionInfoControl(parent, dbc);
 		}
 		createImageNameControls(parent, dbc);
-		new ResourceNameControl().doCreateControl(parent, dbc, model);
+		new ResourceNameControl() {
+			@Override
+			protected void layoutText(Text resourceNameText) {
+				GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
+				.span(NUM_COLUMS -1, 1)
+				.applyTo(resourceNameText);
+			}
+		}.doCreateControl(parent, dbc, model);
+		createSeparator(parent);
+		createPushToRegistrySettings(parent, dbc);
 	}
 
 	private void createSeparator(Composite parent) {
@@ -193,11 +210,30 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.fillDefaults()
 			.align(SWT.FILL, SWT.BEGINNING)
 			.grab(true, false)
-			.span(3, 1)
+			.span(NUM_COLUMS, 1)
 			.applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
 	}
 
-	private SelectionAdapter onSearch(Text txtImage) {
+	private SelectionAdapter onBrowseImage() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (model.getDockerConnection() == null) {
+					MessageDialog.openError(getShell(), "A Docker connection must be selected", MISSING_DOCKER_CONNECTION_MSG);
+					return;
+				}
+				final ListDockerImagesWizard wizard = new ListDockerImagesWizard(model.getDockerConnection(), model.getImageName());
+				final OkCancelButtonWizardDialog wizardDialog = new OkCancelButtonWizardDialog(getShell(), wizard);
+				wizardDialog.setPageSize(500, 400);
+				if(Window.OK == wizardDialog.open()){
+					//this bypasses validation
+					model.setImageName(wizard.getSelectedImageName());
+				}
+			}
+		};
+	}
+	
+	private SelectionAdapter onSearchImage(final Text txtImage) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -223,7 +259,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
-			.span(1, 1)
+			.span(NUM_COLUMS - 2, 1)
 			.applyTo(connectionViewer.getControl());
 		
 		connectionViewer.setContentProvider(new ObservableListContentProvider());
@@ -259,7 +295,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
             .applyTo(newDockerConnectionButton);
         UIUtils.setDefaultButtonWidth(newDockerConnectionButton);
         newDockerConnectionButton.addSelectionListener(onNewDockerConnectionClicked());
-
+     		
         dbc.addValidationStatusProvider(validator);
 	}
 
@@ -304,7 +340,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		connectionText.setBackground(lblConnection.getBackground());
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
-			.span(2, 1)
+			.span(NUM_COLUMS - 1, 1)
 			.grab(true, false)
 			.applyTo(connectionText);
 		final IObservableValue connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
@@ -332,7 +368,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		connectionText.setBackground(lblConnection.getBackground());
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
-			.span(2, 1)
+			.span(NUM_COLUMS - 1, 1)
 			.grab(true, false)
 			.applyTo(connectionText);
 		final IObservableValue connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
@@ -362,6 +398,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
 			.hint(SWT.DEFAULT, 30)
+			.span(NUM_COLUMS - 2, 1)
 			.applyTo(cmboProject.getControl());
 		
 		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();
@@ -391,7 +428,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.applyTo(newProjectButton);
 		UIUtils.setDefaultButtonWidth(newProjectButton);
 		newProjectButton.addSelectionListener(onNewProjectClicked());
-
+		
         dbc.addValidationStatusProvider(validator);
 
         cmboProject.getControl().forceFocus();
@@ -456,15 +493,23 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 					}
 				}, getImageNameContentProposalProvider(imageNameText),
 				null, null);
-		//browse
+		
+		// List local Docker images
+		Button btnDockerBrowse = new Button(parent, SWT.NONE);
+		btnDockerBrowse.setText("Browse...");
+		btnDockerBrowse.setToolTipText("Look-up an image by browsing the Docker daemon");
+		btnDockerBrowse.addSelectionListener(onBrowseImage());
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(btnDockerBrowse);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(btnDockerBrowse)).notUpdatingParticipant()
+				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model))
+				.converting(new IsNotNull2BooleanConverter()).in(dbc);
+
+		// search on Docker registry (Docker Hub)
 		Button btnDockerSearch = new Button(parent, SWT.NONE);
 		btnDockerSearch.setText("Search...");
-		btnDockerSearch.setToolTipText("Look-up an image by browsing the docker daemon");
-		btnDockerSearch.addSelectionListener(onSearch(imageNameText));
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(btnDockerSearch);
-	
+		btnDockerSearch.setToolTipText("Search an image on the Docker registry");
+		btnDockerSearch.addSelectionListener(onSearchImage(imageNameText));
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(btnDockerSearch);
 		ValueBindingBuilder
 				.bind(WidgetProperties.enabled().observe(btnDockerSearch))
 				.notUpdatingParticipant()
@@ -472,7 +517,110 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				.converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
 	}
+	
+	@SuppressWarnings("unchecked")
+	private void createPushToRegistrySettings(final Composite parent, final DataBindingContext dbc) {
+		// checkbox
+		final Button pushImageToRegistryButton = new Button(parent, SWT.CHECK);
+		pushImageToRegistryButton.setText("Push Image to Registry");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(NUM_COLUMS, 1).applyTo(pushImageToRegistryButton);
+		final IObservableValue<Boolean> pushImageToRegistryButtonObservable = BeanProperties
+				.value(IDeployImagePageModel.PROPERTY_PUSH_IMAGE_TO_REGISTRY).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.selection().observe(pushImageToRegistryButton))
+				.to(pushImageToRegistryButtonObservable).in(dbc);
 
+		// registry location
+		final Label registryLocationLabel = new Label(parent, SWT.NONE);
+		registryLocationLabel.setText("Image Registry URL:");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).indent(30, 0)
+				.applyTo(registryLocationLabel);
+		final Text registryLocationText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(NUM_COLUMS - 1, 1)
+				.applyTo(registryLocationText);
+		final IObservableValue<String> registryLocationObservable = BeanProperties
+				.value(IDeployImagePageModel.PROPERTY_TARGET_REGISTRY_LOCATION).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(registryLocationText))
+				.to(registryLocationObservable).in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(registryLocationText))
+				.to(pushImageToRegistryButtonObservable).in(dbc);
+
+		// username to authenticate on registry
+		final Label registryUsernameLabel = new Label(parent, SWT.NONE);
+		registryUsernameLabel.setText("Username:");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).indent(30, 0)
+				.applyTo(registryUsernameLabel);
+		final Text registryUsernameText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(NUM_COLUMS - 1, 1)
+				.applyTo(registryUsernameText);
+		final IObservableValue<String> registryUsernameObservable = BeanProperties
+				.value(IDeployImagePageModel.PROPERTY_TARGET_REGISTRY_USERNAME).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(registryUsernameText))
+				.to(registryUsernameObservable).in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(registryUsernameText))
+				.to(pushImageToRegistryButtonObservable).in(dbc);
+
+		// password to authenticate on registry
+		final Label registryPasswordLabel = new Label(parent, SWT.NONE);
+		registryPasswordLabel.setText("Password:");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).indent(30, 0)
+				.applyTo(registryPasswordLabel);
+		final Text registryPasswordText = new Text(parent, SWT.BORDER + SWT.PASSWORD);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(NUM_COLUMS - 1, 1)
+				.applyTo(registryPasswordText);
+		final IObservableValue<String> registryPasswordObservable = BeanProperties
+				.value(IDeployImagePageModel.PROPERTY_TARGET_REGISTRY_PASSWORD).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(registryPasswordText))
+				.to(registryPasswordObservable).in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(registryPasswordText))
+				.to(pushImageToRegistryButtonObservable).in(dbc);
+		
+		// validation
+		final PushImageToRegistryStatusProvider validator = new PushImageToRegistryStatusProvider(
+				pushImageToRegistryButtonObservable, registryLocationObservable, registryUsernameObservable,
+				registryPasswordObservable);
+		dbc.addValidationStatusProvider(validator);
+
+	}
+
+	class PushImageToRegistryStatusProvider extends MultiValidator {
+		
+		private final IObservableValue<Boolean> pushImageToRegistryObservable;
+		private final IObservableValue<String> targetRegistryLocationObservable;
+		private final IObservableValue<String> targetRegistryUsernameObservable;
+		private final IObservableValue<String> targetRegistryPasswordObservable;
+
+		PushImageToRegistryStatusProvider(final IObservableValue<Boolean> pushImageToRegistryObservable,
+				final IObservableValue<String> targetRegistryLocationObservable, final IObservableValue<String> targetRegistryUsernameObservable,
+				final IObservableValue<String> targetRegistryPasswordObservable) {
+			this.pushImageToRegistryObservable = pushImageToRegistryObservable;
+			this.targetRegistryLocationObservable = targetRegistryLocationObservable;
+			this.targetRegistryUsernameObservable = targetRegistryUsernameObservable;
+			this.targetRegistryPasswordObservable = targetRegistryPasswordObservable;
+		}
+
+		@Override
+		protected IStatus validate() {
+			final boolean pushImageToRegistry = pushImageToRegistryObservable.getValue();
+			final String targetRegistryLocation = targetRegistryLocationObservable.getValue();
+			final String targetRegistryUsername = targetRegistryUsernameObservable.getValue();
+			final String targetRegistryPassword = targetRegistryPasswordObservable.getValue();
+			if (pushImageToRegistry) {
+				if (targetRegistryLocation == null || targetRegistryLocation.isEmpty()) {
+					return ValidationStatus.error("Please specify location of the Docker registry to push the image");
+				} else if(!UrlUtils.hasScheme(targetRegistryLocation)) {
+					return ValidationStatus.error("Please provide a valid image registry (HTTP/S) URL.");
+				}
+				if (targetRegistryUsername == null || targetRegistryUsername.isEmpty()) {
+					return ValidationStatus.info("The username to authenticate to the target registry is missing. Authentication may fail.");
+				}
+				if (targetRegistryPassword == null || targetRegistryPassword.isEmpty()) {
+					return ValidationStatus.info("The password to authenticate to the target registry is missing. Authentication may fail.");
+				}
+			}
+			return Status.OK_STATUS;
+		}
+	}
+	
 	/**
 	 * Creates an {@link IContentProposalProvider} to propose
 	 * {@link IDockerImage} names based on the current text.
@@ -572,4 +720,6 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
             }
         };
     }
+    
+    
 }

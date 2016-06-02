@@ -117,7 +117,7 @@ public class DeployImageHandler extends AbstractHandler {
 						@Override
 						public void run() {
 							DeployImageWizard wizard = new DeployImageWizard(image, connection, project, connected[0]);
-							WizardUtils.openWizardDialog(600, 1500, wizard, shell);
+							WizardUtils.openWizardDialog(500, 500, wizard, shell);
 						}
 					});
 				}
