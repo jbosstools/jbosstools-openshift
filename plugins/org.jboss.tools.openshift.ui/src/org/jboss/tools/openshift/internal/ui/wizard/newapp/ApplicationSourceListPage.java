@@ -681,10 +681,10 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 	 */
 	private class TemplateListPageValidator extends MultiValidator {
 
-		private IObservableValue useLocalTemplate;
-		private IObservableValue localTemplateFilename;
-		private IObservableValue serverTemplate;
-		private IObservableValue selectedTemplate;
+		private IObservableValue useLocalTemplateObservable;
+		private IObservableValue localTemplateFilenameObservable;
+		private IObservableValue serverTemplateObservable;
+		private IObservableValue selectedTemplateObservable;
 		private IObservableValue projectNameObservable;
 
 		private IObservableList mutableTargets = new WritableList<>();
@@ -692,11 +692,11 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 		
 		public TemplateListPageValidator(IObservableValue useLocalTemplate, IObservableValue localTemplateFilename, 
 				IObservableValue serverTemplate, IObservableValue selectedTemplate, IObservableValue projectNameObservable, Composite composite) {
-			this.useLocalTemplate = useLocalTemplate;
+			this.useLocalTemplateObservable = useLocalTemplate;
 			useLocalTemplate.getValue();
-			this.localTemplateFilename = localTemplateFilename;
-			this.serverTemplate = serverTemplate;
-			this.selectedTemplate = selectedTemplate;
+			this.localTemplateFilenameObservable = localTemplateFilename;
+			this.serverTemplateObservable = serverTemplate;
+			this.selectedTemplateObservable = selectedTemplate;
 			this.projectNameObservable = projectNameObservable;
 			this.composite = composite;
 		}
@@ -707,6 +707,10 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			mutableTargets.clear();
 			
 			final String projectName = (String) projectNameObservable.getValue();
+			Object useLocalTemplate = useLocalTemplateObservable.getValue();
+			Object localTemplateFilename = localTemplateFilenameObservable.getValue();
+			Object serverTemplate = serverTemplateObservable.getValue();
+			Object selectedTemplate = selectedTemplateObservable.getValue();
 
 			if (!StringUtils.isEmpty(projectName)) {
 				final org.eclipse.core.resources.IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
@@ -734,22 +738,23 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			}
 			if (!status.isOK()) {
 				mutableTargets.add(projectNameObservable);
-			} else {
-				if (Boolean.TRUE.equals(useLocalTemplate.getValue())) {
-					String localTemplate = (String)localTemplateFilename.getValue();
-					if (StringUtils.isNotBlank(localTemplate)){ 
+			}
+			if(status.getSeverity() < IStatus.ERROR) {
+				if (Boolean.TRUE.equals(useLocalTemplate)) {
+					String localTemplate = (String)localTemplateFilename;
+					if (StringUtils.isNotBlank(localTemplate)) { 
 						if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(localTemplate) && !isFile(localTemplate)) {
 							status = ValidationStatus.error(NLS.bind("{0} is not a valid file.", localTemplate));
-							mutableTargets.add(localTemplateFilename);
+							mutableTargets.add(localTemplateFilenameObservable);
 						}
 					} else {
 						status = ValidationStatus.cancel("Please select a local template file or URL.");
-						mutableTargets.add(localTemplateFilename);
+						mutableTargets.add(localTemplateFilenameObservable);
 					}
 				} else {
-					if (selectedTemplate.getValue() == null){
+					if (selectedTemplate == null){
 						status = ValidationStatus.cancel("Please select an image or template.");
-						mutableTargets.add(serverTemplate);
+						mutableTargets.add(serverTemplateObservable);
 					} 
 				}
 			}			
