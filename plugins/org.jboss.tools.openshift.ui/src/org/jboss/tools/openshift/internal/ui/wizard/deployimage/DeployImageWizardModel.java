@@ -20,6 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -32,6 +33,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerConnectionManagerListener2;
+import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -40,9 +42,11 @@ import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.util.OpenShiftProjectUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.dockerutils.DockerImageUtils;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablesPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.deployimage.ListDockerImagesWizardModel.DockerImageTag;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
@@ -86,6 +90,11 @@ public class DeployImageWizardModel
 	private boolean originatedFromDockerExplorer;
 	private boolean isStartedWithActiveConnection = false;
 	private IDockerImageMetadata imageMeta;
+	private boolean pushImageToRegistry = false;
+	private String targetRegistryLocation;
+	private String targetRegistryUsername;
+	private String targetRegistryPassword;
+
 	
 	private final List<String> imageNames = new ArrayList<>();
 	
@@ -277,6 +286,50 @@ public class DeployImageWizardModel
 		setImageName(imageName);
 	}
 
+	@Override
+	public boolean isPushImageToRegistry() {
+		return this.pushImageToRegistry;
+	}
+
+	@Override
+	public void setPushImageToRegistry(final boolean pushImageToRegistry) {
+		firePropertyChange(PROPERTY_PUSH_IMAGE_TO_REGISTRY, this.pushImageToRegistry,
+				this.pushImageToRegistry = pushImageToRegistry);
+	}
+	
+	@Override
+	public String getTargetRegistryLocation() {
+		return this.targetRegistryLocation;
+	}
+	
+	@Override
+	public void setTargetRegistryLocation(final String targetRegistryLocation) {
+		firePropertyChange(PROPERTY_TARGET_REGISTRY_LOCATION, this.targetRegistryLocation,
+				this.targetRegistryLocation = targetRegistryLocation);
+	}
+	
+	@Override
+	public String getTargetRegistryUsername() {
+		return this.targetRegistryUsername;
+	}
+	
+	@Override
+	public void setTargetRegistryUsername(final String targetRegistryUsername) {
+		firePropertyChange(PROPERTY_TARGET_REGISTRY_USERNAME, this.targetRegistryUsername,
+				this.targetRegistryUsername = targetRegistryUsername);
+	}
+	
+	@Override
+	public String getTargetRegistryPassword() {
+		return this.targetRegistryPassword;
+	}
+	
+	@Override
+	public void setTargetRegistryPassword(final String targetRegistryPassword) {
+		firePropertyChange(PROPERTY_TARGET_REGISTRY_PASSWORD, this.targetRegistryPassword,
+				this.targetRegistryPassword = targetRegistryPassword);
+	}
+	
 	@Override
 	public boolean initializeContainerInfo() {
 		this.imageMeta = lookupImageMetadata();
@@ -500,9 +553,12 @@ public class DeployImageWizardModel
 		if(dockerConnection == null) {
 			return;
 		}
-		this.imageNames.addAll(dockerConnection.getImages().stream()
-				.filter(image -> !image.isDangling() && !image.isIntermediateImage())
-				.flatMap(image -> image.repoTags().stream()).sorted().collect(Collectors.toList()));
+		final List<IDockerImage> images = dockerConnection.getImages();
+		if(images != null) {
+			this.imageNames.addAll(dockerConnection.getImages().stream()
+					.filter(image -> !image.isDangling() && !image.isIntermediateImage())
+					.flatMap(image -> image.repoTags().stream()).sorted().collect(Collectors.toList()));
+		}
 	}
 
 	
@@ -514,7 +570,8 @@ public class DeployImageWizardModel
 		final DockerImageURI imageURI = new DockerImageURI(this.imageName);
 		final String repo = imageURI.getUriWithoutTag();
 		final String tag = StringUtils.defaultIfBlank(imageURI.getTag(), "latest");
-		if (dockerConnection != null && dockerConnection.hasImage(repo, tag)) {
+		
+		if (dockerConnection != null && DockerImageUtils.hasImage(dockerConnection, repo, tag)) {
 			final IDockerImageInfo info = dockerConnection.getImageInfo(this.imageName);
 			return new DockerConfigMetaData(info);
 		} else if (this.project != null) {

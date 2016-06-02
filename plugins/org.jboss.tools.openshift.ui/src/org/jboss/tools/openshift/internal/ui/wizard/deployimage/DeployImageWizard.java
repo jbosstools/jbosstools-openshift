@@ -11,17 +11,26 @@ package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 import static org.jboss.tools.common.ui.WizardUtils.runInWizard;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.linuxtools.docker.core.DockerException;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
+import org.eclipse.linuxtools.docker.core.IDockerImageSearchResult;
+import org.eclipse.linuxtools.docker.core.IRegistryAccount;
+import org.eclipse.linuxtools.docker.core.IRepositoryTag;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.common.ui.JobUtils;
+import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
@@ -30,6 +39,7 @@ import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardP
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
+import org.jboss.tools.openshift.internal.ui.dockerutils.PushImageToRegistryJob;
 import org.jboss.tools.openshift.internal.ui.job.DeployImageJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPage;
@@ -65,7 +75,12 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 				model.setConnection(connection);
 			}
 		}
-
+		if(connection != null) {
+			model.setTargetRegistryLocation(
+				(String) connection.getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY));
+			model.setTargetRegistryUsername(connection.getUsername());
+			model.setTargetRegistryPassword(connection.getToken());
+		}
 		model.setStartedWithActiveConnection(isConnected);
 
 		setNeedsProgressMonitor(true);
@@ -93,7 +108,40 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 
 	@Override
 	public boolean performFinish() {
-		final DeployImageJob deployJob = new DeployImageJob( getModel());
+		// checks if we need to push the image, first
+		final Job job = getJobChain(getModel(), PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+		job.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				final IStatus status = event.getResult();
+				UsageStats.getInstance().newV3Application( getModel().getConnection().getHost(), isFailed(status));
+				super.done(event);
+			}
+		});
+		job.schedule();
+			
+		return true;
+	}
+
+	/**
+	 * Gets the Job to run as a chain of smaller jobs, depending on the use-case
+	 * @param model the wizard model
+	 * @param shell the current shell
+	 * @return
+	 */
+	private Job getJobChain(final IDeployImageParameters model, final Shell shell) {
+		final DeployImageJob deployJob = getDeployImageJob(getModel(), getShell());
+		final boolean pushImageToRegistry = model.isPushImageToRegistry();
+		if(pushImageToRegistry) {
+			final PushImageToRegistryJob pushImageToRegistryJob = getPushImageToRegistryJob(model);
+			return new JobChainBuilder(pushImageToRegistryJob).runWhenSuccessfullyDone(deployJob)
+					.runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true)).build();
+		}
+		return new JobChainBuilder(deployJob).runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true)).build();
+	}
+
+	private static DeployImageJob getDeployImageJob(final IDeployImageParameters model, final Shell shell) {
+		final DeployImageJob deployJob = new DeployImageJob(model);
 		deployJob.addJobChangeListener(new JobChangeAdapter(){
 
 			@Override
@@ -104,7 +152,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 						@Override
 						public void run() {
 							new ResourceSummaryDialog(
-									getShell(), 
+									shell, 
 									deployJob.getResources(),
 									TITLE,
 									deployJob.getSummaryMessage()).open();
@@ -114,25 +162,62 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 				}
 			}
 		});
-		boolean success = false;
-		try {
-			Job job = new JobChainBuilder(deployJob)
-					.runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true))
-					.build();
-			IStatus status = runInWizard(
-					job, 
-					deployJob.getDelegatingProgressMonitor(), 
-					getContainer());
-			success = isFailed(status);
-		} catch (InvocationTargetException | InterruptedException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(e);
-			success = false;
-		} finally {
-			UsageStats.getInstance().newV3Application( getModel().getConnection().getHost(), success);
-		}
-		return success;
+		return deployJob;
 	}
 	
+	private static PushImageToRegistryJob getPushImageToRegistryJob(final IDeployImageParameters model) {
+		final IDockerConnection dockerConnection = model.getDockerConnection();
+		final String imageName = model.getImageName();
+		final String deployProjectName = model.getProject().getName();
+		final IRegistryAccount registryAccount = new IRegistryAccount() {
+			
+			@Override
+			public String getServerAddress() {
+				return model.getTargetRegistryLocation();
+			}
+			
+			@Override
+			public String getUsername() {
+				return model.getTargetRegistryUsername();
+			}
+			
+			@Override
+			public char[] getPassword() {
+				return model.getTargetRegistryPassword().toCharArray();
+			}
+			
+			@Override
+			public String getEmail() {
+				return null;
+			}
+			
+			@Override
+			public List<IRepositoryTag> getTags(String arg0) throws DockerException {
+				return null;
+			}
+			
+			@Override
+			public boolean isVersion2() {
+				return false;
+			}
+
+			@Override
+			public List<IDockerImageSearchResult> getImages(String arg0) throws DockerException {
+				return null;
+			}
+		}; 
+		return new PushImageToRegistryJob(dockerConnection, registryAccount, deployProjectName, imageName);
+	}
+	
+	/**
+	 * Checks if the given {@code status}
+	 * 
+	 * @param status
+	 *            the {@link IStatus} to check
+	 * @return <code>true</code> if the given status severity is
+	 *         {@link IStatus.OK} or {@link IStatus.WARNING}, <code>false</code>
+	 *         otherwise.
+	 */
 	public static boolean isFailed(IStatus status) {
 		return JobUtils.isOk(status) || JobUtils.isWarning(status);
 	}
@@ -140,7 +225,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
     @Override
     public void dispose() {
         super.dispose();
-        getModel().dispose();
+        //getModel().dispose();
     }
 
 }
