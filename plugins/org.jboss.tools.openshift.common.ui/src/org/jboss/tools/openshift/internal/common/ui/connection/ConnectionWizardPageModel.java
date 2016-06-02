@@ -163,9 +163,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	private IConnectionFactory getDefaultConnectionFactory(IConnectionsFactory connectionsFactory) {
-		IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_EXPRESS_ID);
+		IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
 		if (factory == null) {
-			factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
+			factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_EXPRESS_ID);
 		}
 		return factory;
 	}
