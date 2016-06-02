@@ -17,11 +17,13 @@ import java.util.concurrent.ExecutionException;
 
 import org.eclipse.linuxtools.docker.core.DockerException;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.search.DockerHubRegistry;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * @author Xavier Coulon
  */
+@Ignore
 public class DockerHubRegistryTest {
 
 	@Test
