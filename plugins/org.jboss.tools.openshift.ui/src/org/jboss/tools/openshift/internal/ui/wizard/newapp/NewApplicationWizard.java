@@ -144,7 +144,10 @@ public class NewApplicationWizard
 			
 			@Override
 			public boolean isPageComplete() {
-				return isTemplateFlow() ? super.isPageComplete() : true;
+				return isTemplateFlow() ? 
+						//force visiting parameters page
+						getContainer() != null && !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage) && super.isPageComplete()  
+						: true;
 			}
 
 			@Override
