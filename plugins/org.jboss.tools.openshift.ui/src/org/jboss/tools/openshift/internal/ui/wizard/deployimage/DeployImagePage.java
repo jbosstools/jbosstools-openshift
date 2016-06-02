@@ -44,13 +44,14 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.linuxtools.docker.core.AbstractRegistry;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.linuxtools.docker.ui.wizards.ImageSearch;
+import org.eclipse.linuxtools.internal.docker.core.RegistryInfo;
 import org.eclipse.linuxtools.internal.docker.ui.wizards.NewDockerConnection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -204,7 +205,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 					MessageDialog.openError(getShell(), "A Docker connection must be selected", MISSING_DOCKER_CONNECTION_MSG);
 					return;
 				}
-				ImageSearch wizard = new ImageSearch(model.getDockerConnection(), txtImage.getText());
+				// FIXME: may need to revisit the call to the constructor once https://bugs.eclipse.org/bugs/show_bug.cgi?id=495285 is addressed
+				// there may be no need to to specify the registry info if we want to search on Docker Hub.
+				ImageSearch wizard = new ImageSearch(model.getDockerConnection(), txtImage.getText(), new RegistryInfo(AbstractRegistry.DOCKERHUB_REGISTRY));
 				if(Window.OK == new OkCancelButtonWizardDialog(getShell(), wizard).open()){
 					//this bypasses validation
 					model.setImageName(wizard.getSelectedImage(), true);
