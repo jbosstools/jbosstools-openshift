@@ -21,15 +21,22 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 			return containedResources.values();
 		}
 	}
+	
+	@Override
+	public synchronized IProject getResource() {
+		return (IProject) super.getResource();
+	}
 
 	public LoadingState getState() {
 		return state.get();
 	}
 
-	public void load() {
+	public boolean load(IExceptionHandler handler) {
 		if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {
-			getRoot().startLoadJob(this);
+			getRoot().startLoadJob(this, handler);
+			return true;
 		}
+		return false;
 	}
 
 	void updateWithResources(Collection<IResource> resources) {
@@ -65,7 +72,7 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 		}
 
 		if (changed) {
-			fireChanged(this);
+			fireChanged();
 		}
 
 		updated.keySet().forEach(r -> {

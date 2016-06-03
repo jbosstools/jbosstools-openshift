@@ -10,11 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.property;
 
+import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.ui.models.Deployment;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
@@ -32,14 +31,12 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adapterType == IPropertySource.class) {
-			if(adaptableObject instanceof Connection){
-				return new ConnectionPropertySource((Connection) adaptableObject);
+			Connection connection = Adapters.adapt(adaptableObject, Connection.class);
+			if(connection != null){
+				return new ConnectionPropertySource(connection);
 			}
-			if(adaptableObject instanceof Deployment) {
-				return new ServicePropertySource(((Deployment) adaptableObject).getService());
-			}
-			if(adaptableObject instanceof IResource || adaptableObject instanceof IResourceUIModel){
-				IResource resource = adaptableObject instanceof IResourceUIModel ? ((IResourceUIModel) adaptableObject).getResource() :(IResource) adaptableObject;
+			IResource resource= Adapters.adapt(adaptableObject, IResource.class);
+			if(resource != null){
 				switch(resource.getKind()){
 				case ResourceKind.BUILD:
 					return new BuildPropertySource((IBuild)resource);

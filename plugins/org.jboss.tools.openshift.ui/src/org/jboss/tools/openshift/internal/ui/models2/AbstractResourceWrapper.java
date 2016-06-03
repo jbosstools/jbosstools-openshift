@@ -4,7 +4,7 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import com.openshift.restclient.model.IResource;
 
-public abstract class AbstractResourceWrapper<R extends IResource, P extends IOpenshiftUIElement<?>> extends AbstractOpenshiftUIElement<P> implements IAdaptable, IOpenshiftUIElement<P> {
+public abstract class AbstractResourceWrapper<R extends IResource, P extends IOpenshiftUIElement<?>> extends AbstractOpenshiftUIElement<P> implements IOpenshiftUIElement<P> {
 	private R resource;
 
 	public AbstractResourceWrapper(P parent, R resource) {
@@ -22,24 +22,31 @@ public abstract class AbstractResourceWrapper<R extends IResource, P extends IOp
 		if (adapter.isInstance(resource)) {
 			return (T) resource;
 		}
-		return null;
+		return super.getAdapter(adapter);
 	}
 
+	@SuppressWarnings("unchecked")
 	public synchronized void updateWith(IResource r) {
 		if (OpenshiftUIModel.isOlder(getResource(), r)) {
-			fireChanged(this);
+			resource= (R) r;
+			fireChanged();
 		}
 	}
 	
 	@Override
 	public boolean equals(Object o) {
-		// TODO: implement
-		return super.equals(o);
+		if (o == null || o.getClass() != getClass()) {
+			return false;
+		}
+		if (o == this) {
+			return true;
+		}
+		AbstractResourceWrapper<?, ?> other= (AbstractResourceWrapper<?, ?>) o;
+		return resource.equals(other.getResource()) && getParent().equals(other.getParent());
 	}
 	
 	@Override
 	public int hashCode() {
-		// TODO: implement
-		return super.hashCode();
+		return resource.hashCode();
 	}
 }

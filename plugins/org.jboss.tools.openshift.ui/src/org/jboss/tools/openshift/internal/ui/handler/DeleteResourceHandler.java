@@ -29,6 +29,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
+<<<<<<< HEAD
 import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;

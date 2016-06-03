@@ -11,6 +11,8 @@
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
+import com.openshift.restclient.ResourceKind;
+
 /**
  * Tabbed property section for displaying Image Streams.
  *  
@@ -20,6 +22,6 @@ package org.jboss.tools.openshift.internal.ui.property.tabbed;
 public class ImageStreamsPropertySection extends OpenShiftResourcePropertySection {
 
 	public ImageStreamsPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.ImageStreamsTab");
+		super("popup:org.jboss.tools.openshift.ui.properties.tab.ImageStreamsTab", ResourceKind.IMAGE_STREAM);
 	}
 }

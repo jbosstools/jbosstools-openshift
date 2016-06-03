@@ -41,14 +41,20 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<OpenshiftUIMod
 		}
 	}
 
-	public LoadingState getState() {
-		return state.get();
+	public boolean load(IExceptionHandler handler) {
+		if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {
+			getRoot().startLoadJob(this, handler);
+			return true;
+		}
+		return false;
 	}
 
-	public void load() {
-		if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {
-			getRoot().startLoadJob(this);
+	@SuppressWarnings("unchecked")
+	public synchronized <T> T getAdapter(Class<T> adapter) {
+		if (adapter.isInstance(connection)) {
+			return (T) connection;
 		}
+		return super.getAdapter(adapter);
 	}
 
 }

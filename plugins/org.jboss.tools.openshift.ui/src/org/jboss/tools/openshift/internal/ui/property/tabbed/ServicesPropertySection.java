@@ -11,6 +11,8 @@
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
+import com.openshift.restclient.ResourceKind;
+
 /**
  * Tabbed property section for displaying Services.
  *  
@@ -20,6 +22,6 @@ package org.jboss.tools.openshift.internal.ui.property.tabbed;
 public class ServicesPropertySection extends OpenShiftResourcePropertySection {
 
 	public ServicesPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.ServicesTab");
+		super("popup:org.jboss.tools.openshift.ui.properties.tab.ServicesTab", ResourceKind.SERVICE);
 	}
 }

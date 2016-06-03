@@ -49,7 +49,7 @@ public class ServiceWrapper extends ResourceContainer<IService, ProjectWrapper> 
 		}
 
 		if (changed) {
-			fireChanged(this);
+			fireChanged();
 		}
 
 		updated.keySet().forEach(r -> {

@@ -12,4 +12,14 @@ public abstract class AbstractOpenshiftUIElement<P extends IOpenshiftUIElement<?
 	public P getParent() {
 		return parent;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Class<T> adapter) {
+		if (adapter.isInstance(this)) {
+			return (T) this;
+		}
+		return null;
+	}
+	
+
 }

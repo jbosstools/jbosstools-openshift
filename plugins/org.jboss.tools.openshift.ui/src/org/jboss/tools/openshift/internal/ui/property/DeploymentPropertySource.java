@@ -15,8 +15,9 @@ import java.util.List;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.jboss.tools.openshift.internal.ui.models.Deployment;
+import org.jboss.tools.openshift.internal.ui.models2.ServiceWrapper;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IServicePort;
 
 /**
@@ -27,9 +28,9 @@ import com.openshift.restclient.model.IServicePort;
  */
 public class DeploymentPropertySource implements IPropertySource {
 
-	private Deployment deployment;
+	private ServiceWrapper deployment;
 
-	public DeploymentPropertySource(Deployment deployment) {
+	public DeploymentPropertySource(ServiceWrapper deployment) {
 		this.deployment = deployment;
 	}
 
@@ -62,9 +63,9 @@ public class DeploymentPropertySource implements IPropertySource {
 	public Object getPropertyValue(Object id) {
 		switch((String)id) {
 		case "service.name":
-			return deployment.getService().getName();
+			return deployment.getResource().getName();
 		case "service.port":
-			List<IServicePort> ports = deployment.getService().getPorts();
+			List<IServicePort> ports = deployment.getResource().getPorts();
 			if(ports.size() > 0) {
 				IServicePort port = ports.get(0);
 				return NLS.bind("{0}/{1}->{2}", new Object[] { port.getPort(), port.getProtocol(), port.getTargetPort()});
@@ -76,7 +77,7 @@ public class DeploymentPropertySource implements IPropertySource {
 		case "deployment.date":
 			
 		case "pods":
-			return deployment.getPods().size();
+			return deployment.getResourcesOfKind(ResourceKind.POD).size();
 		}
 		return null;
 	}

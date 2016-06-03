@@ -1,5 +1,6 @@
 package org.jboss.tools.openshift.internal.ui.models2;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ public abstract class ResourceContainer<R extends IResource, P extends IOpenshif
 
 	public Collection<AbstractResourceWrapper<?, ?>> getResources() {
 		synchronized (childrenLock) {
-			return containedResources.values();
+			return new ArrayList<AbstractResourceWrapper<?,?>>(containedResources.values());
 		}
 	}
 }

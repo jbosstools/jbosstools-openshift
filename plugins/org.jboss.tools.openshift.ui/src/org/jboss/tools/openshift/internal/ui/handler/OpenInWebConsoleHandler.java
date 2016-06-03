@@ -25,7 +25,6 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.Deployment;
 
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
@@ -46,12 +45,6 @@ public class OpenInWebConsoleHandler extends AbstractHandler {
 		ISelection currentSelection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		IResource resource = UIUtils.getFirstElement(currentSelection, IResource.class);
 		Connection connection = null;
-		if (resource == null) {
-			Deployment deployment = UIUtils.getFirstElement(currentSelection, Deployment.class);
-			if (deployment != null) {
-				resource = deployment.getService();
-			}
-		}
 		if ( resource == null) {
 			connection = UIUtils.getFirstElement(currentSelection, Connection.class);
 		} else {

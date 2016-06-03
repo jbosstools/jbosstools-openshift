@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models2;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public class ResourceCache {
 		synchronized (cache) {
 			Map<String, IResource> projectResources = cache.get(namespace);
 			if (projectResources != null) {
-				return (T) cache.get(getCacheKey(kind, name));
+				return (T) projectResources.get(getCacheKey(kind, name));
 			}
 			return null;
 		}
@@ -78,14 +79,16 @@ public class ResourceCache {
 			return Collections.emptyList();
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T extends IResource> Collection<T> getResources(String namespace) {
-		Map<String, IResource> projectResources = cache.get(namespace);
-		if (projectResources != null) {
-			return (Collection<T>) projectResources.values();
+		synchronized (cache) {
+			Map<String, IResource> projectResources = cache.get(namespace);
+			if (projectResources != null) {
+				return new ArrayList<T>((Collection<T>) projectResources.values());
+			}
+			return Collections.emptyList();
 		}
-		return Collections.emptyList();
 	}
 
 	/**
@@ -104,6 +107,16 @@ public class ResourceCache {
 			putIntoCache(resource);
 		}
 		return true;
+	}
+
+	private void removeFromCache(IResource resource) {
+		Map<String, IResource> projectResources = cache.get(getNamespace(resource));
+		if (projectResources != null) {
+			projectResources.remove(getCacheKey(resource));
+			if (projectResources.isEmpty()) {
+				cache.remove(getNamespace(resource));
+			}
+		}
 	}
 
 	private void putIntoCache(IResource resource) {
@@ -132,10 +145,7 @@ public class ResourceCache {
 		if (resource == null)
 			return false;
 		synchronized (cache) {
-			if (getCachedVersion(resource) == null) {
-				Trace.debug("-->Returning early since dont know about {0}", resource);
-				return false;
-			}
+			removeFromCache(resource);
 		}
 		return true;
 

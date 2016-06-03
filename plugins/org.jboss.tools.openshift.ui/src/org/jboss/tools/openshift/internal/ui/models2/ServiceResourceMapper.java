@@ -19,9 +19,11 @@ import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
- * This class encapsulates the logic used for determinining which resource in a project are related to whilch service. 
+ * This class encapsulates the logic used for determinining which resource in a
+ * project are related to whilch service.
  * 
  * @author thomas
  *
@@ -41,10 +43,17 @@ public class ServiceResourceMapper {
 					result.add(resource);
 					result.addAll(getRelated(resources, (IDeploymentConfig) resource));
 				}
-
+			} else if (resource instanceof IRoute) {
+				if (isRelated(s, (IRoute)resource)) {
+					result.add(resource);
+				}
 			}
 		});
 		return result;
+	}
+
+	private static boolean isRelated(IService s, IRoute resource) {
+		return resource.getServiceName().equals(s.getName());
 	}
 
 	private static boolean isRelated(IService s, IDeploymentConfig dc) {
@@ -67,7 +76,7 @@ public class ServiceResourceMapper {
 		result.addAll(getRelatedImageTags(resources, dcImageRefs, dc));
 		Collection<IBuildConfig> buildConfigs = getRelatedBuildConfigs(resources, dcImageRefs, dc);
 		result.addAll(buildConfigs);
-		Collection<IBuild> builds = getRelatedBuilds(resources, buildConfigs);
+		Collection<IBuild> builds = getRelatedBuilds(resources, dcImageRefs, buildConfigs);
 		result.addAll(builds);
 		Collection<IPod> pods = getRelatedPods(resources, builds, dc);
 		result.addAll(pods);
@@ -80,8 +89,8 @@ public class ServiceResourceMapper {
 		Collection<String> deploymentNames = pods.stream()
 				.filter(r -> r.isAnnotatedWith(OpenShiftAPIAnnotations.DEPLOYMENT_NAME))
 				.map(r -> r.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_NAME)).collect(Collectors.toSet());
-		
-		Collection<IResource> result= new HashSet<>();
+
+		Collection<IResource> result = new HashSet<>();
 		resources.forEach(r -> {
 			if (ResourceKind.REPLICATION_CONTROLLER.equals(r.getKind()) && deploymentNames.contains(r.getName())) {
 				result.add(r);
@@ -102,14 +111,17 @@ public class ServiceResourceMapper {
 
 	}
 
-	private static Collection<IBuild> getRelatedBuilds(Collection<IResource> resources,
+	private static Collection<IBuild> getRelatedBuilds(Collection<IResource> resources, Collection<String> dcImageRefs,
 			Collection<IBuildConfig> buildConfigs) {
 
 		Collection<IBuild> result = new HashSet<>();
 		Collection<String> bcNames = buildConfigs.stream().map(bc -> bc.getName()).collect(Collectors.toSet());
 		resources.forEach(r -> {
-			if (r instanceof IBuild && bcNames.contains(r.getAnnotation(OpenShiftAPIAnnotations.BUILD_CONFIG_NAME))) {
-				result.add((IBuild) r);
+			if (r instanceof IBuild) {
+				IBuild build = (IBuild) r;
+				if (bcNames.contains(r.getLabels().get(OpenShiftAPIAnnotations.BUILD_CONFIG_NAME)) || dcImageRefs.contains(imageRef(build))) {
+					result.add((IBuild) r);
+				}
 			}
 		});
 		return result;

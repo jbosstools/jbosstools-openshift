@@ -12,8 +12,6 @@ package org.jboss.tools.openshift.internal.common.ui.explorer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,9 +24,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
-import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 
 /**
@@ -37,11 +33,8 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 public abstract class BaseExplorerContentProvider implements ITreeContentProvider{
 
 	private static final String MSG_LOADING_RESOURCES = "Loading OpenShift resources...";
-	private static final Collection<String> PROPERTY_BLACKLIST = Collections.unmodifiableList(Arrays.asList("token"));
 
 	private TreeViewer viewer;
-	private ConnectionsRegistry input;
-	private IConnectionsRegistryListener connectionListener = new ConnectionsRegistryListener();
 
 	// Keep track of what's loading and what's finished
 	private Map<Object, LoadingStub> loadedElements = new ConcurrentHashMap<>();
@@ -70,15 +63,6 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = (TreeViewer) viewer;
-		if(input != null && connectionListener != null) {
-			input.removeListener(connectionListener);
-		}
-		if(newInput instanceof ConnectionsRegistry) {
-			input = (ConnectionsRegistry) newInput;
-			if(connectionListener != null) {
-				input.addListener(connectionListener);
-			}
-		}
 	}
 	
 	/**
@@ -252,32 +236,6 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		return null;
 	}
 
-	@Override
-	public void dispose() {
-		if(input != null) {
-			input.removeListener(connectionListener);
-		}
-	}
-	
-	private class ConnectionsRegistryListener implements IConnectionsRegistryListener{
-		@Override
-		public void connectionAdded(IConnection connection) {
-			refreshViewer(null);
-		}
-		
-		@Override
-		public void connectionRemoved(IConnection connection) {
-			refreshViewer(null);
-		}
-		
-		@Override
-		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-			if(!PROPERTY_BLACKLIST.contains(property)) {
-				handleConnectionChanged(connection, property, oldValue, newValue);
-			}
-		}
-	}
-	
 	public static class LoadingStub {
 		
 		private List<Object> children = new ArrayList<>();

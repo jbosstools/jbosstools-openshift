@@ -14,6 +14,10 @@ public interface IOpenshiftUIElement<P extends IOpenshiftUIElement<?>> extends I
 		getParent().fireChanged(source);
 	}
 	
+	default void fireChanged() {
+		fireChanged(this);
+	}
+	
 	default OpenshiftUIModel getRoot() {
 		return getParent().getRoot();
 	}
@@ -24,5 +28,10 @@ public interface IOpenshiftUIElement<P extends IOpenshiftUIElement<?>> extends I
 			return (T) this;
 		}
 		return null;
+	}
+
+	
+	default void refresh() {
+		// TODO: implement refresh
 	}
 }
