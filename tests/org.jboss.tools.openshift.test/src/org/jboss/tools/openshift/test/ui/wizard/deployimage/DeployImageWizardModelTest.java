@@ -336,8 +336,10 @@ public class DeployImageWizardModelTest {
         // then
         assertThat(result).isTrue();
         model.removeEnvironmentVariable(model.getEnvironmentVariable("V1"));
-        assertThat(model.getEnvironmentVariables()).hasSize(1);
-        assertThat(model.getEnvironmentVariables()).isEqualTo(Collections.singletonList(new EnvironmentVariable("V2", "value2")));
+        assertThat(model.getEnvironmentVariables()).hasSize(2);
+        //Deleted existing environment variable is marked as deleted, but remains in the table.
+        assertThat(model.isEnvironmentVariableDeleted(model.getEnvironmentVariable("V1"))).isTrue();
+        assertThat(model.getEnvironmentVariable("V2").getValue()).isEqualTo("value2");
     }
     
     @Test

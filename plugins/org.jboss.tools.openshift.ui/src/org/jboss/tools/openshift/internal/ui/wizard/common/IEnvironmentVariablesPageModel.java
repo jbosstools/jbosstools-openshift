@@ -12,12 +12,16 @@ package org.jboss.tools.openshift.internal.ui.wizard.common;
 
 import java.util.List;
 
+import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
+
 /**
  * Model interface for manipulating env variables
  * @author jeff.cantrill
  *
  */
 public interface IEnvironmentVariablesPageModel {
+	//A constant set as value to an environment variable to mark it deleted
+	static final String DELETED = "&Deleted";
 	
 	static final String PROPERTY_ENVIRONMENT_VARIABLES = "environmentVariables";
 	static final String PROPERTY_SELECTED_ENVIRONMENT_VARIABLE = "selectedEnvironmentVariable";
@@ -29,6 +33,10 @@ public interface IEnvironmentVariablesPageModel {
 	EnvironmentVariable getSelectedEnvironmentVariable();
 	EnvironmentVariable getEnvironmentVariable(String key);
 	boolean isEnvironmentVariableModified(EnvironmentVariable envVar);
+
+	default boolean isEnvironmentVariableDeleted(IKeyValueItem envVar) {
+		return DELETED.equals(envVar.getValue());
+	}
 	
 	void removeEnvironmentVariable(EnvironmentVariable envVar);
 	void resetEnvironmentVariable(EnvironmentVariable envVar);

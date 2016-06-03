@@ -70,6 +70,8 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 	protected int heightScale = 30;
 	protected Composite envTableContainer;
 
+	protected boolean canDeleteAnyVar = false;
+
 	protected EnvironmentVariablePage(String title, String description, String name, IWizard wizard, IEnvironmentVariablesPageModel model) {
 		super(title, description, name, wizard);
 		this.model = model;
@@ -190,7 +192,8 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 				@Override
 				public Object convert(Object fromObject) {
 					Boolean notNull = (Boolean) super.convert(fromObject);
-					return notNull && ((EnvironmentVariable)fromObject).isNew();
+					return notNull && (canDeleteAnyVar || ((EnvironmentVariable)fromObject).isNew())
+							&& !model.isEnvironmentVariableDeleted((EnvironmentVariable)fromObject);
 				}
 				
 			})
@@ -263,14 +266,17 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 		
 		private void handleEvent() {
 			EnvironmentVariable var = UIUtils.getFirstElement(envViewer.getSelection(), EnvironmentVariable.class);
-			Set<String> usedKeys = model.getEnvironmentVariables().stream().map(v -> v.getKey()).collect(Collectors.toSet());
+			Set<String> usedKeys = model.getEnvironmentVariables().stream()
+					.filter(v -> !model.isEnvironmentVariableDeleted(v))
+					.map(v -> v.getKey()).collect(Collectors.toSet());
 			usedKeys.remove(var.getKey());
-			IKeyValueWizardModel<IKeyValueItem> dialogModel = new KeyValueWizardModelBuilder<IKeyValueItem>(var)
+			EnvironmentVariable copy = new EnvironmentVariable(var.getKey(), model.isEnvironmentVariableDeleted(var) ? "" : var.getValue(), var.isNew());
+			IKeyValueWizardModel<IKeyValueItem> dialogModel = new KeyValueWizardModelBuilder<IKeyValueItem>(copy)
 					.windowTitle(ENVIRONMENT_VARIABLE_LABEL)
 					.title("Edit " + ENVIRONMENT_VARIABLE_LABEL)
 					.description(NLS.bind("Edit the {0}.", ENVIRONMENT_VARIABLE_LABEL.toLowerCase()))
 					.keyLabel(ENVIRONMENT_VARIABLE_KEY_LABEL)
-					.editableKey(var.isNew())
+					.editableKey(var.isNew() || canDeleteAnyVar)
 					.groupLabel(ENVIRONMENT_VARIABLE_LABEL)
 					.keyAfterConvertValidator(new EnvironmentVarKeyValidator(usedKeys))
 					.build();
@@ -279,7 +285,6 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 							new KeyValueWizard<>(var, dialogModel));
 			if(OkCancelButtonWizardDialog.OK == dialog.open()) {
 				model.updateEnvironmentVariable(var, dialogModel.getKey(), dialogModel.getValue());
-				model.resetEnvironmentVariable(var);
 				selectEnvVarByKey(dialogModel.getKey());
 			}
 		}
@@ -290,7 +295,9 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Set<String> usedKeys = model.getEnvironmentVariables().stream().map(v -> v.getKey()).collect(Collectors.toSet());
+				Set<String> usedKeys = model.getEnvironmentVariables().stream()
+						.filter(v -> !model.isEnvironmentVariableDeleted(v))
+						.map(v -> v.getKey()).collect(Collectors.toSet());
 				IKeyValueWizardModel<KeyValueItem> dialogModel = new KeyValueWizardModelBuilder<KeyValueItem>()
 						.windowTitle(ENVIRONMENT_VARIABLE_LABEL)
 						.title("Add " + ENVIRONMENT_VARIABLE_LABEL)
@@ -327,17 +334,21 @@ public abstract class EnvironmentVariablePage extends AbstractOpenShiftWizardPag
 				.column(new IColumnLabelProvider<IKeyValueItem>() {
 					@Override
 					public String getValue(IKeyValueItem label) {
-						return label.getKey();
+						boolean isDeleted = model.isEnvironmentVariableDeleted(label);
+						return !isDeleted ? label.getKey() : "[deleted] " + label.getKey();
 					}
 					@Override
 					public boolean isModified(IKeyValueItem e) {
-						return ((EnvironmentVariable)e).isNew();
+						return ((EnvironmentVariable)e).isNew() || model.isEnvironmentVariableDeleted(e);
 					}
 				})
 				.name("Name").align(SWT.LEFT).weight(2).minWidth(75).buildColumn()
 				.column(new IColumnLabelProvider<IKeyValueItem>() {
 					@Override
 					public String getValue(IKeyValueItem label) {
+						if(model.isEnvironmentVariableDeleted(label)) {
+							return "";
+						}
 						return label.getValue();
 					}
 					@Override

@@ -116,8 +116,8 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 			dbc.addValidationStatusProvider(validator);
 		}
 
-		if(!model.isKeyEditable()) {
-			valueText.forceFocus();
+		if(!model.isKeyEditable() || nameText.getText().length() > 0) {
+			valueText.forceFocus(); //if name is set, it is more important to modify value.
 			if(!StringUtils.isEmpty(valueText.getText())) {
 				valueText.setSelection(0, valueText.getText().length());
 			}
