@@ -88,7 +88,7 @@ public class DeployImageWizardModelTest {
 		when(dockerImageInfo.containerConfig().exposedPorts())
 				.thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
 		when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
-
+		mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
 		// when
 		model.setImageName(WILDFLY_IMAGE_URI);
 		final boolean result = model.initializeContainerInfo();
@@ -253,7 +253,7 @@ public class DeployImageWizardModelTest {
         when(dockerImageInfo.containerConfig().exposedPorts())
                 .thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
         when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
-
+        mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
         // when
         model.setImageName(WILDFLY_IMAGE_URI);
         final boolean result = model.initializeContainerInfo();
@@ -274,7 +274,7 @@ public class DeployImageWizardModelTest {
         when(dockerImageInfo.containerConfig().exposedPorts())
                 .thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
         when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
-
+        mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
         // when
         model.setImageName(WILDFLY_IMAGE_URI);
         final boolean result = model.initializeContainerInfo();
@@ -299,7 +299,7 @@ public class DeployImageWizardModelTest {
         when(dockerImageInfo.containerConfig().exposedPorts())
                 .thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
         when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
-
+        mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
         // when
         model.setImageName(WILDFLY_IMAGE_URI);
         final boolean result = model.initializeContainerInfo();
@@ -322,6 +322,9 @@ public class DeployImageWizardModelTest {
         final IDockerImageInfo dockerImageInfo = Mockito.mock(IDockerImageInfo.class, Mockito.RETURNS_DEEP_STUBS);
         when(dockerConnection.hasImage(WILDFLY_IMAGE, LATEST_TAG)).thenReturn(true);
         when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
+        
+        mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
+        
         when(dockerImageInfo.containerConfig().env()).thenReturn(Arrays.asList("V1=value1", "V2=value2"));
         when(dockerImageInfo.containerConfig().exposedPorts())
                 .thenReturn(Collections.emptySet());
@@ -347,7 +350,7 @@ public class DeployImageWizardModelTest {
         when(dockerImageInfo.containerConfig().exposedPorts())
                 .thenReturn(Collections.emptySet());
         when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
-
+        mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
         // when
         model.setImageName(WILDFLY_IMAGE_URI);
         final boolean result = model.initializeContainerInfo();
@@ -357,6 +360,13 @@ public class DeployImageWizardModelTest {
         assertThat(model.getEnvironmentVariables()).hasSize(2);
         assertThat(model.getEnvironmentVariables()).isEqualTo(Arrays.asList(new EnvironmentVariable("V1", "value1"),
                                                                             new EnvironmentVariable("V2", "value2")));
+    }
+    
+    private static IDockerImage mockSingleImage(IDockerConnection dockerConnection, String imageName, String tag) {
+        IDockerImage image= mock(IDockerImage.class);
+        when(image.repoTags()).thenReturn(Collections.singletonList(imageName+":"+tag));
+        when(dockerConnection.getImages()).thenReturn(Collections.singletonList(image));
+        return image;
     }
     
 }
