@@ -187,7 +187,7 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 				if (!confirm) {
 					return;
 				}
-				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(project);
+				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(project, false);
 				try {
 					org.jboss.tools.common.ui.WizardUtils.runInWizard(
 							job, job.getDelegatingProgressMonitor(), getContainer(), dbc);

@@ -27,4 +27,24 @@ public final class OpenshiftUIConstants {
      * A bundle common transport utility for easier ECF use for downloads.
      */
     public static final URLTransportUtility TRANSPORT_UTILITY = new URLTransportUtility();
+    
+    /**
+     * Name of the annotation used to link a ReplicationController to its DeploymentConfig.
+     */
+    public static final String DEPLOYMENT_CONFIG_ANNOTATION = "openshift.io/deployment-config.name";
+    
+    /**
+     * Name of the annotation used to mark a BuildConfig under deletion
+     */
+    public static final String  BUILD_CONFIG_PAUSED_ANNOTATION = "openshift.io/build-config.paused";
+    
+    /**
+     * Label used to stored the name of the build config in a build.
+     */
+    public static final String BUILD_CONFIG_LABEL = "openshift.io/build-config.name";
+    
+    /**
+     * Label used to stored the name of the build config in a build. Deprecated one.
+     */
+    public static final String BUILD_CONFIG_LABEL_DEPRECATED = "buildconfig";
 }

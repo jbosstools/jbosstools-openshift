@@ -44,10 +44,11 @@ public class OpenShiftJobs {
 	
 	/**
 	 * Creates a {@link DeleteResourceJob} to delete an OpenShift {@link IProject}.
+	 * @param willDeleteSubResources 
 	 */
-	public static DeleteResourceJob createDeleteProjectJob(final IProject project) {
+	public static DeleteResourceJob createDeleteProjectJob(final IProject project, boolean willDeleteSubResources) {
 		Assert.isNotNull(project, "A project must not be null");
-		DeleteResourceJob deleteProjectJob = new DeleteResourceJob(project) {
+		DeleteResourceJob deleteProjectJob = new DeleteResourceJob(project, willDeleteSubResources) {
 
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
@@ -98,12 +99,15 @@ public class OpenShiftJobs {
 
 	/**
      * Creates a {@link DeleteResourceJob} to delete an OpenShift {@link IResource}.
+     * 
+     * @param resource the Openshift resource to delete
+	 * @param willDeleteSubResources if cascade delete
      */
-    public static DeleteResourceJob createDeleteResourceJob(final IResource resource) {
+    public static DeleteResourceJob createDeleteResourceJob(final IResource resource, boolean willDeleteSubResources) {
         if (resource instanceof IProject) {
-            return createDeleteProjectJob((IProject) resource);
+            return createDeleteProjectJob((IProject) resource, willDeleteSubResources);
         } else {
-            return new DeleteResourceJob(resource);
+            return new DeleteResourceJob(resource, willDeleteSubResources);
         }
     }
 }

@@ -20,6 +20,7 @@ import com.openshift.restclient.model.IResource;
  * Connection to a Kubernetes based version
  * of OpenShift
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public interface IOpenShiftConnection {
@@ -36,7 +37,17 @@ public interface IOpenShiftConnection {
 	
 	<T extends IResource> List<T> getResources(String kind, String namespace);
 
-	/**
+    /**
+     * Search for resources of a specific kind in a namespace.
+     * 
+     * @param namespace the namespace to use
+     * @param kind the resource kind
+     * @param labels the labels to match
+     * @return the list of matching resources
+     */
+    <T extends IResource> List<T> getResources(String kind, String namespace, Map<String, String> labels);
+
+    /**
 	 * Retrieve a resource by name
 	 * @param kind
 	 * @param namespace
@@ -66,4 +77,5 @@ public interface IOpenShiftConnection {
 	 * @param value
 	 */
 	void setExtendedProperty(String name, Object value);
+	
 }
