@@ -39,8 +39,10 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageMo
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.IDeployImageParameters;
 
 import com.openshift.restclient.IResourceFactory;
+import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.http.IHttpConstants;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IImageStream;
@@ -97,6 +99,9 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 		try {
 			final Connection connection = parameters.getConnection();
 			final String name = parameters.getResourceName();
+			if(isUpdate(connection, parameters.getProject().getName(), name)) {
+				return Status.OK_STATUS;
+			}
 			Map<String, IResource> resources = generateResources(connection, name);
 			
 			//validate 
@@ -116,6 +121,22 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 					e);
 		}
 		return Status.OK_STATUS;
+	}
+
+	private boolean isUpdate(Connection connection, String project, String name) {
+		try {
+			IDeploymentConfig dc = connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, project, name);
+			IDeploymentImageChangeTrigger trigger = (IDeploymentImageChangeTrigger) dc.getTriggers().stream()
+					.filter(t->DeploymentTriggerType.IMAGE_CHANGE.equals(t.getType())).findFirst().orElse(null);
+			return trigger != null && 
+				ResourceKind.IMAGE_STREAM_TAG.equals(trigger.getKind()) && 
+				connection.getResource(ResourceKind.IMAGE_STREAM, trigger.getNamespace(), trigger.getFrom().getName()) != null;
+		}catch(OpenShiftException e) {
+			if(e.getStatus() != null && e.getStatus().getCode() == IHttpConstants.STATUS_NOT_FOUND) {
+				return false;
+			}
+			throw e;
+		}
 	}
 
 	private Collection<IResource>  createResources(Connection connection, Collection<IResource> resources) {
@@ -139,13 +160,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 	private Map<String, IResource> generateResources(final Connection connection, final String name) {
 		final IResourceFactory factory = connection.getResourceFactory();
 		final IProject project = parameters.getProject();
-		String imageName;
-		if (parameters.isPushImageToRegistry()) {
-			imageName = project.getNamespace() +"/" +  DockerImageUtils.extractImageNameAndTag(parameters.getImageName());
-		} else {
-			imageName = parameters.getImageName();
-		}
-		DockerImageURI sourceImage = new DockerImageURI(imageName);
+		DockerImageURI sourceImage = getSourceImage();
 		
 		Map<String, IResource> resources = new HashMap<>(4);
 
@@ -172,6 +187,16 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 	
 	protected void addToGeneratedResources(Map<String, IResource> resources, final Connection connection, final String name, final IProject project) {
 		
+	}
+	
+	private DockerImageURI getSourceImage() {
+		String imageName;
+		if (parameters.isPushImageToRegistry()) {
+			imageName = parameters.getProject().getName() +"/" +  DockerImageUtils.extractImageNameAndTag(parameters.getImageName());
+		} else {
+			imageName = parameters.getImageName();
+		}
+		return new DockerImageURI(imageName);
 	}
 	
 	protected IResource stubDeploymentConfig(IResourceFactory factory, final String name, DockerImageURI imageUri, IImageStream is) {

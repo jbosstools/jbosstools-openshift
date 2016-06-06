@@ -147,7 +147,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 			@Override
 			public void done(IJobChangeEvent event) {
 				IStatus status = event.getResult();
-				if(JobUtils.isOk(status) || JobUtils.isWarning(status)) {
+				if((JobUtils.isOk(status) || JobUtils.isWarning(status)) && !deployJob.getResources().isEmpty()) {
 					Display.getDefault().syncExec(new Runnable() {
 						@Override
 						public void run() {
