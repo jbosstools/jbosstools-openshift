@@ -12,12 +12,18 @@ package org.jboss.tools.openshift.test.ui.job;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.job.DeployImageJob;
@@ -50,6 +56,7 @@ import com.openshift.restclient.model.deploy.IDeploymentTrigger;
 @RunWith(MockitoJUnitRunner.class)
 public class DeployImageJobTest {
 
+	private static final String NAMESPACE = "aProjectName";
 	private static final String IMAGE_STREAM_NAME = "somename";
 	private static final String RESOURCE_NAME = "myapplication";
 	private static final DockerImageURI DOCKER_TAG = new DockerImageURI("repo/mynamespace/myimagename:latest");
@@ -62,15 +69,55 @@ public class DeployImageJobTest {
 	private IResourceFactory factory;
 	@Mock
 	private IDeployImageParameters parameters;
+	@Mock
+	private IProgressMonitor monitor;
+	private Connection connection;
 
 	@Before
 	public void setUp() throws Exception {
-		when(project.getName()).thenReturn("aProjectName");
+		when(project.getName()).thenReturn(NAMESPACE);
 		when(parameters.getProject()).thenReturn(project);
 		when(parameters.getReplicas()).thenReturn(5);
+		when(parameters.getResourceName()).thenReturn("aresourcename");
 		when(client.getOpenShiftAPIVersion()).thenReturn("v1");
 		factory = new ResourceFactory(client);
 		job = spy(new TestDeployImageJob(parameters));
+	}
+	
+	@Test
+	public void shouldSkipGeneratingResourcesWhenTheImageIsBeingUpdated() {
+		givenAConnection();
+		givenTheImageStreamExistsTo("foo");
+		givenTheDeploymentConfigExistFor("foo","v1");
+		assertThat(job.doRun(monitor)).isEqualTo(Status.OK_STATUS);
+	}
+	
+	
+	private void givenAConnection() {
+		connection = createConnection("https://somehost", "somedevuser");
+		when(parameters.getConnection()).thenReturn(connection);
+	}
+	
+	private void givenTheImageStreamExistsTo(String name) {
+		IImageStream is = createResource(IImageStream.class);
+		when(connection.getResource(ResourceKind.IMAGE_STREAM, project.getName(), name)).thenReturn(is);
+	}
+
+	private void givenTheDeploymentConfigExistFor(String name, String tag) {
+		IDeploymentImageChangeTrigger trigger = mock(IDeploymentImageChangeTrigger.class);
+		when(trigger.getType()).thenReturn(DeploymentTriggerType.IMAGE_CHANGE);
+		when(trigger.getNamespace()).thenReturn(NAMESPACE);
+		when(trigger.getKind()).thenReturn(ResourceKind.IMAGE_STREAM_TAG);
+		when(trigger.getFrom()).thenReturn(new DockerImageURI(null,null,name, tag));
+		IDeploymentConfig dc = createResource(IDeploymentConfig.class, new IResourceVisitor<IDeploymentConfig>() {
+			@Override
+			public void visit(IDeploymentConfig resource) {
+				Collection<IDeploymentTrigger> triggers = new ArrayList<IDeploymentTrigger>();
+				triggers.add(trigger);
+				when(resource.getTriggers()).thenReturn(triggers);
+			}
+		});
+		when(connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, project.getName(), parameters.getResourceName())).thenReturn(dc);
 	}
 
 	@Test
@@ -174,6 +221,13 @@ public class DeployImageJobTest {
 
 		public TestDeployImageJob(IDeployImageParameters parameters) {
 			super(parameters);
+		}
+		
+		
+
+		@Override
+		protected IStatus doRun(IProgressMonitor monitor) {
+			return super.doRun(monitor);
 		}
 
 		@Override
