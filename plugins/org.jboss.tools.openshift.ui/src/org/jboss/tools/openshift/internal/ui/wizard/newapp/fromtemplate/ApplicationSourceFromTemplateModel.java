@@ -182,12 +182,12 @@ public class ApplicationSourceFromTemplateModel
 
 	@Override
 	public void setParameters(List<IParameter> parameters) {
-		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = injectProjectParameters(this.eclipseProject, parameters));
 		Map<String, String> paramsMap = new HashMap<>();
 		if (parameters != null) {
 		  parameters.forEach(p -> paramsMap.put(p.getName(), p.getValue()));
 		}
 		originalValueMap = paramsMap;
+		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = injectProjectParameters(this.eclipseProject, parameters));
 	}
 
 	private static List<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project, List<IParameter> originalParameters) {
