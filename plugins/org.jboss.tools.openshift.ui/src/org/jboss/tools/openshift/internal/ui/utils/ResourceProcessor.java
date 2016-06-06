@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.utils;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
@@ -36,12 +37,17 @@ public interface ResourceProcessor {
     /**
      * Process the deletion of the resource.
      * 
+     * @param the Openshift connection registry
      * @param connection the Openshift connection
      * @param resource the resource to delete
      * @param willDeleteSubResources if cascade delete
+     * @param monitor the progress monitor for the operation
      */
-    default void handleDelete(ConnectionsRegistry registry, Connection connection, IResource resource, boolean willDeleteSubResources) throws OpenShiftException {
-        connection.deleteResource(resource);
-        registry.fireConnectionChanged(connection, ConnectionProperties.PROPERTY_RESOURCE, resource, null);
+    default void handleDelete(ConnectionsRegistry registry, Connection connection, IResource resource,
+                              boolean willDeleteSubResources, IProgressMonitor monitor) throws OpenShiftException {
+        if (!monitor.isCanceled()) {
+            connection.deleteResource(resource);
+            registry.fireConnectionChanged(connection, ConnectionProperties.PROPERTY_RESOURCE, resource, null);
+        }
     }
 }

@@ -55,7 +55,6 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
-import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 
 import com.openshift.restclient.model.IProject;
 
@@ -187,7 +186,7 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 				if (!confirm) {
 					return;
 				}
-				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(project, false);
+				DeleteResourceJob job = new DeleteResourceJob<IProject>(project, false);
 				try {
 					org.jboss.tools.common.ui.WizardUtils.runInWizard(
 							job, job.getDelegatingProgressMonitor(), getContainer(), dbc);

@@ -18,11 +18,10 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.jobs.JobGroup;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.dialog.CheckboxMessageDialog;
@@ -30,9 +29,10 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
-import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 import org.jboss.tools.openshift.internal.ui.utils.ResourceProcessor;
+
+import com.openshift.restclient.model.IResource;
 
 /**
  * @author jeff.cantrill
@@ -57,8 +57,8 @@ public class DeleteResourceHandler extends AbstractHandler {
                                   NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, resources[0].getResource().getName(), resources[0].getResource().getKind());
             if (willDeleteSubResources) {
 	            int status = new CheckboxMessageDialog(HandlerUtil.getActiveShell(event), OpenShiftUIMessages.ResourceDeletionDialogTitle, message, "Cascade delete").open();
-	            confirm = ((status & 0x01) == 0);
-	            willDeleteSubResources = (status & 0x02) == 2;
+	            confirm = ((status & Window.CANCEL) == 0);
+	            willDeleteSubResources = (status & CheckboxMessageDialog.CHECKBOX_SELECTED) == CheckboxMessageDialog.CHECKBOX_SELECTED;
 	        } else {
 	            confirm = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
                                                     OpenShiftUIMessages.ResourceDeletionDialogTitle, 
@@ -92,22 +92,22 @@ public class DeleteResourceHandler extends AbstractHandler {
             }
 	        
 	    };
-        try (Stream<IResourceUIModel> stream = Arrays.stream(uiResources)) {
-            stream.forEach(uiResource -> {
-                DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(uiResource.getResource(), willDeleteSubResources);
-                job.setJobGroup(group);
-                job.addJobChangeListener(new JobChangeAdapter() {
+	    DeleteResourceJob<IResourceUIModel> job = new DeleteResourceJob<>(Arrays.asList(uiResources), willDeleteSubResources, new DeleteResourceJob.Callback<IResourceUIModel>() {
+            @Override
+            public IResource getResource(IResourceUIModel wrapper) {
+                return wrapper.getResource();
+            }
 
-                    @Override
-                    public void done(IJobChangeEvent event) {
-                        if(!event.getResult().isOK()) {
-                            uiResource.setDeleting(false);
-                        }
-                    }
-                });
-                uiResource.setDeleting(true);
-                job.schedule();
-            });
-        }
+            @Override
+            public void preProcess(IResourceUIModel wrapper) {
+                wrapper.setDeleting(true);
+            }
+
+            @Override
+            public void postProcess(IResourceUIModel wrapper) {
+                wrapper.setDeleting(false);
+            }
+        });
+        job.schedule();
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,9 +11,11 @@
 package org.jboss.tools.openshift.internal.core.util;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +29,17 @@ import org.eclipse.jgit.transport.URIish;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 
+import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.capability.resources.ITags;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
@@ -357,8 +362,73 @@ public class ResourceUtils {
 			return matchinBuildConfigs.get(0);
 		}
 	}
-
+	
 	/**
+	 * Returns the list of replication controllers linked to the deployement config.
+	 * 
+	 * @param dc the deployment config
+	 * @return the list of linked replication controllers
+	 */
+	public static List<IReplicationController> getReplicationControllersForDeploymentConfig(IDeploymentConfig dc) {
+        Map<String, String> selector = new HashMap<String, String>() {
+            {
+                put(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME, dc.getName());
+            }
+        };
+        IClient client =  dc.accept(new CapabilityVisitor<IClientCapability, IClient>() {
+
+            @Override
+            public IClient visit(IClientCapability capability) {
+                return capability.getClient();
+            }
+        }, null);
+        return client.list(ResourceKind.REPLICATION_CONTROLLER,
+                dc.getNamespace(), selector);
+	}
+	
+	/**
+	 * Return a double list of overlapping replication controllers from an existing replication controller.
+	 * A replication controller is overlapping another one if its selector is contained in the other
+	 * (and vice versa). The first list contains the exact matching replication controllers (same selector)
+	 * and the other the rest (different number of elements in the selector.
+	 * 
+	 * @param replicationController the replication controller
+	 * @return the double list
+	 */
+	public static List<IReplicationController>[] getOverlappingReplicationControllers(IReplicationController replicationController) {
+        List<IReplicationController>[] overlappingRCS = new List[2];
+        overlappingRCS[0] = new ArrayList<>();
+        overlappingRCS[1] = new ArrayList<>();
+        IClient client =  replicationController.accept(new CapabilityVisitor<IClientCapability, IClient>() {
+
+            @Override
+            public IClient visit(IClientCapability capability) {
+                return capability.getClient();
+            }
+        }, null);
+
+        List<IReplicationController> rcs = client.list(ResourceKind.REPLICATION_CONTROLLER, replicationController.getNamespace());
+        for(IReplicationController rc : rcs) {
+            if (isOverlapping(rc.getReplicaSelector(), replicationController.getReplicaSelector())) {
+                if (rc.getReplicaSelector().size() == replicationController.getReplicaSelector().size()) {
+                    overlappingRCS[0].add(rc);
+                } else {
+                    overlappingRCS[1].add(rc);
+                }
+            }
+        }
+        return overlappingRCS;
+	}
+
+	private static boolean isOverlapping(Map<String, String> map1, Map<String, String> map2) {
+        if (map1.size() > map2.size()) {
+            return map1.entrySet().containsAll(map2.entrySet());
+        } else {
+            return map2.entrySet().containsAll(map1.entrySet());
+        }
+    }
+
+    /**
 	 * Returns {@code true} if the given build config matches the name of the
 	 * given service.
 	 * 

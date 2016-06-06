@@ -10,18 +10,15 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.utils;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
-
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -38,22 +35,16 @@ public class DeploymentConfigResourceProcessor extends BaseResourceProcessor {
 
     @Override
     public void handleDelete(ConnectionsRegistry registry, Connection connection, IResource resource,
-                             boolean willDeleteSubResources)
+                             boolean willDeleteSubResources, IProgressMonitor monitor)
             throws OpenShiftException {
         IDeploymentConfig dc = (IDeploymentConfig)resource;
 
-        super.handleDelete(registry, connection, resource, willDeleteSubResources);
-        if (willDeleteSubResources) {
-            Map<String, String> selector = new HashMap<String, String>() {
-                {
-                    put(OpenshiftUIConstants.DEPLOYMENT_CONFIG_ANNOTATION, resource.getName());
-                }
-            };
-            List<IResource> replicationControllers = connection.getResources(ResourceKind.REPLICATION_CONTROLLER,
-                    dc.getNamespace(), selector);
+        super.handleDelete(registry, connection, resource, willDeleteSubResources, monitor);
+        if (willDeleteSubResources && !monitor.isCanceled()) {
+            List<IReplicationController> replicationControllers = ResourceUtils.getReplicationControllersForDeploymentConfig(dc);
             for (IResource rc : replicationControllers) {
                 ResourceProcessor process = Platform.getAdapterManager().getAdapter(rc, ResourceProcessor.class);
-                process.handleDelete(registry, connection, rc, willDeleteSubResources);
+                process.handleDelete(registry, connection, rc, willDeleteSubResources, monitor);
             } 
         }
     }

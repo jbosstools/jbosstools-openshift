@@ -30,6 +30,8 @@ public class ResourceProcessorAdapterFactory implements IAdapterFactory {
     private ResourceProcessor BUILD_CONFIG_PROCESSOR;
 
     private ResourceProcessor REPLICATION_CONTROLLER_PROCESSOR;
+    
+    private ResourceProcessor PROJECT_PROCESSOR;
 
     /**
      * Lazy loading
@@ -79,6 +81,18 @@ public class ResourceProcessorAdapterFactory implements IAdapterFactory {
         return REPLICATION_CONTROLLER_PROCESSOR;
     }
 
+    /**
+     * Lazy loading
+     * 
+     * @return the project processor
+     */
+    private synchronized ResourceProcessor getProjectProcessor() {
+        if (null == PROJECT_PROCESSOR) {
+            PROJECT_PROCESSOR = new ProjectResourceProcessor();
+        }
+        return PROJECT_PROCESSOR;
+    }
+
     @Override
     public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
         T adapter = null;
@@ -92,6 +106,9 @@ public class ResourceProcessorAdapterFactory implements IAdapterFactory {
                 break;
             case ResourceKind.REPLICATION_CONTROLLER:
                 adapter = (T) getReplicationControllerProcessor();
+                break;
+            case ResourceKind.PROJECT:
+                adapter = (T) getProjectProcessor();
                 break;
             default:
                 adapter = (T) getBaseProcessor();

@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.utils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
+
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 
@@ -30,73 +30,41 @@ import com.openshift.restclient.model.IResource;
  */
 public class ReplicationControllerResourceProcessor extends BaseResourceProcessor {
 
+    private static final long REPLICATION_CONTROLLER_UPDATE_DELAY = 500;
+    private static final long REPLICATION_CONTROLLER_UPDATE_MAX_DELAY = 5000;
+
     public ReplicationControllerResourceProcessor() {
         super(true);
     }
     
     @Override
-    public void handleDelete(ConnectionsRegistry registry, Connection connection, IResource resource, boolean willDeleteSubResources)
+    public void handleDelete(ConnectionsRegistry registry, Connection connection, IResource resource,
+                             boolean willDeleteSubResources, IProgressMonitor monitor)
             throws OpenShiftException {
         IReplicationController rc = (IReplicationController)resource;
 
-        try {
-            if (willDeleteSubResources) {
-                List<IResource>[] overlappingRCs = findOverlappingReplicationControllers(connection, rc);
+            if (willDeleteSubResources && !monitor.isCanceled()) {
+                List<IReplicationController>[] overlappingRCs = ResourceUtils.getOverlappingReplicationControllers(rc);
                 if (!overlappingRCs[1].isEmpty()) {
                     String list = overlappingRCs[1].stream().map(res -> res.getName()).collect(Collectors.joining(","));
                     throw new OpenShiftException(
                             "Found overlapping replication controllers for replication controller %s: %s", rc.getName(),
                             list);
-                } else if (overlappingRCs[0].size() == 1) {
+                } else if ((overlappingRCs[0].size() == 1) && !monitor.isCanceled()) {
                     rc.setDesiredReplicaCount(0);
                     rc = connection.updateResource(rc);
-                    while (rc.getCurrentReplicaCount() > 0) {
-                        Thread.sleep(1000);
-                        rc = connection.getResource(rc);
+                    long elapsed = 0;
+                    while ((rc.getCurrentReplicaCount() > 0) && !monitor.isCanceled() && (elapsed < REPLICATION_CONTROLLER_UPDATE_MAX_DELAY)) {
+                        try {
+                            Thread.sleep(REPLICATION_CONTROLLER_UPDATE_DELAY);
+                            elapsed += REPLICATION_CONTROLLER_UPDATE_DELAY;
+                        } catch (InterruptedException e) {
+                        } finally {
+                            rc = connection.getResource(rc);
+                        }
                     }
                 } 
             }
-            super.handleDelete(registry, connection, resource, willDeleteSubResources);
-        } catch (InterruptedException e) {
-            throw new OpenShiftException(e, e.getLocalizedMessage());
-        }
-    }
-
-    private List<IResource>[] findOverlappingReplicationControllers(Connection connection, IReplicationController replicationController) {
-        List[] overlappingRCS = new List[2];
-        overlappingRCS[0] = new ArrayList<>();
-        overlappingRCS[1] = new ArrayList<>();
-        List<IResource> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, replicationController.getNamespace());
-        for(IResource rc : rcs) {
-            if (match((IReplicationController)rc, replicationController)) {
-                if (((IReplicationController)rc).getReplicaSelector().size() == replicationController.getReplicaSelector().size()) {
-                    overlappingRCS[0].add(rc);
-                } else {
-                    overlappingRCS[1].add(rc);
-                }
-            }
-        }
-        return overlappingRCS;
-    }
-    
-    private boolean match(IReplicationController rc, IReplicationController replicationController) {
-        return match(rc.getReplicaSelector(), replicationController.getReplicaSelector()) |
-               match(replicationController.getReplicaSelector(), rc.getReplicaSelector());
-    }
-
-    /**
-     * Find if maps matches. Maps matches if map1 is contained in map2
-     * @param map1 the first map
-     * @param map2 the second map
-     * @return the match state
-     */
-    private boolean match(Map<String, String> map1, Map<String, String> map2) {
-        for(Map.Entry<String, String> entry : map1.entrySet()) {
-            String value = map2.get(entry.getKey());
-            if (!entry.getValue().equals(value)) {
-                return false;
-            }
-        }
-        return true;
+            super.handleDelete(registry, connection, resource, willDeleteSubResources, monitor);
     }
 }

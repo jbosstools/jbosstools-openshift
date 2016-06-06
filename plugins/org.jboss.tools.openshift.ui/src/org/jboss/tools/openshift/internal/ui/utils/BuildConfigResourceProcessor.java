@@ -14,8 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 
@@ -38,25 +40,25 @@ public class BuildConfigResourceProcessor extends BaseResourceProcessor {
 
     @Override
     public void handleDelete(ConnectionsRegistry registry, Connection connection, IResource resource,
-                             boolean willDeleteSubResources)
+                             boolean willDeleteSubResources, IProgressMonitor monitor)
             throws OpenShiftException {
         IBuildConfig bc = (IBuildConfig)resource;
 
-        if (willDeleteSubResources) {
-            String paused = bc.getAnnotation(OpenshiftUIConstants.BUILD_CONFIG_PAUSED_ANNOTATION);
+        if (willDeleteSubResources && !monitor.isCanceled()) {
+            String paused = bc.getAnnotation(OpenShiftAPIAnnotations.BUILD_CONFIG_PAUSED);
             if (!Boolean.TRUE.toString().equalsIgnoreCase(paused)) {
-                bc.setAnnotation(OpenshiftUIConstants.BUILD_CONFIG_PAUSED_ANNOTATION, Boolean.TRUE.toString());
+                bc.setAnnotation(OpenShiftAPIAnnotations.BUILD_CONFIG_PAUSED, Boolean.TRUE.toString());
                 bc = connection.updateResource(bc);
             }
             /*
              * get matching builds
              */
-            processBuilds(registry, connection, bc.getNamespace(), OpenshiftUIConstants.BUILD_CONFIG_LABEL,
-                    bc.getName(), willDeleteSubResources);
-            processBuilds(registry, connection, bc.getNamespace(), OpenshiftUIConstants.BUILD_CONFIG_LABEL_DEPRECATED,
-                    bc.getName(), willDeleteSubResources);
+            processBuilds(registry, connection, bc.getNamespace(), OpenShiftAPIAnnotations.BUILD_CONFIG_NAME,
+                    bc.getName(), willDeleteSubResources, monitor);
+            processBuilds(registry, connection, bc.getNamespace(), OpenShiftAPIAnnotations.BUILD_CONFIG_NAME_DEPRECATED,
+                    bc.getName(), willDeleteSubResources, monitor);
         }
-        super.handleDelete(registry, connection, resource, willDeleteSubResources);
+        super.handleDelete(registry, connection, resource, willDeleteSubResources, monitor);
     }
 
     /**
@@ -68,17 +70,21 @@ public class BuildConfigResourceProcessor extends BaseResourceProcessor {
      * @param annotation the annotation to search for
      * @param name the name to match
      * @param willDeleteSubResources if cascade delete
+     * @param monitor the progress monitor for the operation
      */
-    protected void processBuilds(ConnectionsRegistry registry, Connection connection, String namespace, String annotation, String name, boolean willDeleteSubResources) {
-        Map<String, String> selector = new HashMap<String, String>() {
-            {
-                put(annotation, name);
-            }
-        };
-        List<IResource> builds = connection.getResources(ResourceKind.BUILD, namespace, selector);
-        for(IResource build : builds) {
-            ResourceProcessor process = Platform.getAdapterManager().getAdapter(build, ResourceProcessor.class);
-            process.handleDelete(registry, connection, build, willDeleteSubResources);
+    protected void processBuilds(ConnectionsRegistry registry, Connection connection, String namespace, String annotation, String name,
+                                 boolean willDeleteSubResources, IProgressMonitor monitor) {
+        if (!monitor.isCanceled()) {
+            Map<String, String> selector = new HashMap<String, String>() {
+                {
+                    put(annotation, name);
+                }
+            };
+            List<IResource> builds = connection.getResources(ResourceKind.BUILD, namespace, selector);
+            for (IResource build : builds) {
+                ResourceProcessor process = Platform.getAdapterManager().getAdapter(build, ResourceProcessor.class);
+                process.handleDelete(registry, connection, build, willDeleteSubResources, monitor);
+            } 
         }
     }
 }
