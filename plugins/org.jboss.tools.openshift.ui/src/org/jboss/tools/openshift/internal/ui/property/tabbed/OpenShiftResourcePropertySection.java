@@ -39,8 +39,8 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.comparators.CreationTimestampComparator;
-import org.jboss.tools.openshift.internal.ui.models2.AbstractResourceWrapper;
-import org.jboss.tools.openshift.internal.ui.models2.ResourceContainer;
+import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.ResourceContainer;
 
 import com.openshift.restclient.model.IResource;
 

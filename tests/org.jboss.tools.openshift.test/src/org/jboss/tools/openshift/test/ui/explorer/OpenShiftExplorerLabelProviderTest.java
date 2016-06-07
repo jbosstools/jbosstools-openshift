@@ -26,8 +26,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.explorer.NewProjectLinkNode;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
-import org.jboss.tools.openshift.internal.ui.models.Deployment;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
+import org.jboss.tools.openshift.internal.ui.models.ResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.ImageStreamApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
@@ -35,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.IClient;
@@ -72,10 +72,16 @@ public class OpenShiftExplorerLabelProviderTest {
 		return resource;
 	}
 
-	private IResourceUIModel givenAResourceUIModel(Class<? extends IResource> klass, String kind){
-		IResource resource = givenAResource(klass, kind);
-		IResourceUIModel resourceUIModel = mock(IResourceUIModel.class);
+	private <T extends IResource> ResourceWrapper givenAResourceUIModel(Class<T> klass, String kind){
+		T resource = givenAResource(klass, kind);
+		ResourceWrapper resourceUIModel = mock(ResourceWrapper.class);
 		when(resourceUIModel.getResource()).thenReturn(resource);
+		when(resourceUIModel.getAdapter((Class<?>)Mockito.any(Class.class))).then(invocation-> {
+			if (invocation.getArguments()[0] == IResource.class) {
+				return resource;
+			}
+			return null;
+		});
 		return resourceUIModel;
 	}
 
@@ -262,7 +268,7 @@ public class OpenShiftExplorerLabelProviderTest {
 	public void getImage(){
 		testImage(null, null);
 		testImage(null, new Object());
-		testImage(OpenShiftImages.SERVICE_IMG, mock(Deployment.class));
+		testImage(OpenShiftImages.SERVICE_IMG, IService.class, ResourceKind.SERVICE);
 		testImage(OpenShiftImages.PROJECT_NEW_IMG, mock(NewProjectLinkNode.class));
 		testImage(OpenShiftImages.BUILD_IMG, IBuild.class, ResourceKind.BUILD);
 		testImage(OpenShiftImages.BUILDCONFIG_IMG, IBuild.class, ResourceKind.BUILD_CONFIG);

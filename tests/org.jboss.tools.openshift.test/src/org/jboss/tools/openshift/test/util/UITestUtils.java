@@ -10,7 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.util;
 
+import java.util.concurrent.TimeoutException;
+
 import org.eclipse.swt.widgets.Display;
+import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
+import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 
 public class UITestUtils {
 
@@ -45,6 +49,17 @@ public class UITestUtils {
 	 */
 	public static void waitForDeferredEvents() {
 		waitForDeferredEvents(DEFAULT_TIMEOUT);
+	}
+
+
+	public static void waitForState(ConnectionWrapper connectionWrapper, LoadingState state) throws InterruptedException, TimeoutException {
+		int count= 0;
+		while (connectionWrapper.getState() != state) {
+			Thread.sleep(100);
+			if (count++ > 1000) {
+				throw new TimeoutException();
+			};
+		}
 	}
 
 }

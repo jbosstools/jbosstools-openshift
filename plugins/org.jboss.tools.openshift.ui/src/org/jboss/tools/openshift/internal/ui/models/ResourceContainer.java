@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.internal.ui.models2;
+package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -3,9 +3,9 @@ package org.jboss.tools.openshift.internal.ui.property.tabbed;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.jboss.tools.openshift.internal.ui.models2.IElementListener;
-import org.jboss.tools.openshift.internal.ui.models2.IOpenshiftUIElement;
-import org.jboss.tools.openshift.internal.ui.models2.ResourceContainer;
+import org.jboss.tools.openshift.internal.ui.models.IElementListener;
+import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
+import org.jboss.tools.openshift.internal.ui.models.ResourceContainer;
 
 public class ResourceContainerContentProvider implements IStructuredContentProvider {
 	private String resourceKind;

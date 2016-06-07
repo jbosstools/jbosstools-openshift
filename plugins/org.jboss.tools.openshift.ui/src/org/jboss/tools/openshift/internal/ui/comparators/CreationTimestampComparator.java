@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 import org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils;
-import org.jboss.tools.openshift.internal.ui.models2.AbstractResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
 
 /**
  * Comparator for sorting display models by resource creation timestamp

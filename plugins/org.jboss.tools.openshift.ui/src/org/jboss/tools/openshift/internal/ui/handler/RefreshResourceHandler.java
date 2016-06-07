@@ -22,7 +22,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.ui.models2.IOpenshiftUIElement;
+import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 
 import com.openshift.restclient.OpenShiftException;
 

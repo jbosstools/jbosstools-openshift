@@ -32,8 +32,8 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models2.AbstractResourceWrapper;
-import org.jboss.tools.openshift.internal.ui.models2.ServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.ServiceWrapper;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IReplicationController;

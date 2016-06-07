@@ -15,7 +15,7 @@ import java.util.List;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
-import org.jboss.tools.openshift.internal.ui.models2.ServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.ServiceWrapper;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IServicePort;

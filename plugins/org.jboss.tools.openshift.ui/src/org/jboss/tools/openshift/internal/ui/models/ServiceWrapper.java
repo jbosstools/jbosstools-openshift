@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.internal.ui.models2;
+package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ public class ServiceWrapper extends ResourceContainer<IService, ProjectWrapper> 
 	public IService getResource() {
 		return (IService) super.getResource();
 	}
-	
+
 	void initWithResources(Collection<IResource> resources) {
 		synchronized (childrenLock) {
 			resources.forEach(r -> {
@@ -57,5 +57,4 @@ public class ServiceWrapper extends ResourceContainer<IService, ProjectWrapper> 
 			wrapper.updateWith(r);
 		});
 	}
-
 }

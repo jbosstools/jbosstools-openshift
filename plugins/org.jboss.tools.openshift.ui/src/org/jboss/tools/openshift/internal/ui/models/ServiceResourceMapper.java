@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.internal.ui.models2;
+package org.jboss.tools.openshift.internal.ui.models;
 
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.containsAll;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;

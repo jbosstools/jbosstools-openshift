@@ -1,4 +1,4 @@
-package org.jboss.tools.openshift.internal.ui.models2;
+package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 
 	public boolean load(IExceptionHandler handler) {
 		if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {
-			getRoot().startLoadJob(this, handler);
+			getParent().startLoadJob(this, handler);
 			return true;
 		}
 		return false;
@@ -47,7 +47,6 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 			containedResources.clear();
 			for (IResource r : resources) {
 				AbstractResourceWrapper<?, ?> existingWrapper = oldWrappers.remove(r);
-
 				if (existingWrapper == null) {
 					AbstractResourceWrapper<?, ?> newWrapper;
 					if (r instanceof IService) {
@@ -71,10 +70,6 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 			}
 		}
 
-		if (changed) {
-			fireChanged();
-		}
-
 		updated.keySet().forEach(r -> {
 			AbstractResourceWrapper<?, ?> wrapper = updated.get(r);
 			wrapper.updateWith(r);
@@ -85,6 +80,10 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 				service.updateWithResources(relatedResources);
 			}
 		});
+		
+		if (changed) {
+			fireChanged();
+		}
 	}
 
 	void initWithResources(Collection<IResource> resources) {
@@ -105,4 +104,8 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 		}
 	}
 
+	@Override
+	public void refresh() {
+		getParent().refresh(this);
+	}
 }

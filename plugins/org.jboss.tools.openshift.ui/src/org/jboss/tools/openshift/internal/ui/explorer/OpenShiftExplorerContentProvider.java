@@ -18,14 +18,15 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider.LoadingStub;
-import org.jboss.tools.openshift.internal.ui.models2.ConnectionWrapper;
-import org.jboss.tools.openshift.internal.ui.models2.IElementListener;
-import org.jboss.tools.openshift.internal.ui.models2.IOpenshiftUIElement;
-import org.jboss.tools.openshift.internal.ui.models2.OpenshiftUIModel;
-import org.jboss.tools.openshift.internal.ui.models2.ProjectWrapper;
-import org.jboss.tools.openshift.internal.ui.models2.ServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IElementListener;
+import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
+import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
+import org.jboss.tools.openshift.internal.ui.models.ProjectWrapper;
+import org.jboss.tools.openshift.internal.ui.models.ServiceWrapper;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
@@ -42,20 +43,27 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private OpenshiftUIModel model;
 	private IElementListener listener;
 	private StructuredViewer viewer;
-
 	public OpenShiftExplorerContentProvider() {
-		model = new OpenshiftUIModel();
+		this(new OpenshiftUIModel());
+	}
+	
+	public OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
+		this.model= model;
 		listener = new IElementListener() {
 
 			@Override
 			public void elementChanged(IOpenshiftUIElement<?> element) {
-				refreshViewer(element);
+				if (element instanceof OpenshiftUIModel) {
+					refreshViewer(ConnectionsRegistrySingleton.getInstance());
+				} else {
+					refreshViewer(element);
+				}
 			}
 		};
 		model.addListener(listener);
 	}
 
-	protected void refreshViewer(IOpenshiftUIElement<?> element) {
+	protected void refreshViewer(Object element) {
 		if (viewer != null) {
 			viewer.refresh(element);
 		}
@@ -130,6 +138,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object getParent(Object element) {
+		if (element instanceof ConnectionWrapper) {
+			return ConnectionsRegistrySingleton.getInstance();
+		}
 		if (element instanceof IOpenshiftUIElement<?>) {
 			return ((IOpenshiftUIElement<?>) element).getParent();
 		}

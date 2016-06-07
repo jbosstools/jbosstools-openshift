@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import org.jboss.tools.openshift.internal.ui.comparators.CreationTimestampComparator;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
+import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,9 +30,9 @@ public class CreationTimestampComparatorTest {
 	private static final int EQUAL = 0;
 	private CreationTimestampComparator comparator;
 	@Mock
-	private IResourceUIModel one;
+	private AbstractResourceWrapper<?, ?> one;
 	@Mock
-	private IResourceUIModel two;
+	private AbstractResourceWrapper<?, ?> two;
 	@Mock
 	private IResource projectOne;
 	@Mock
