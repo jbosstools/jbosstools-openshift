@@ -68,8 +68,8 @@ public class CDKServerWizardFragment extends WizardFragment {
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		this.handle = handle;
 		Composite main = new Composite(parent, SWT.NONE);
-		handle.setTitle("CDK Server Adapter");
-		handle.setDescription("A server adapter representing a CDK installation folder containing a Vagrantfile.");
+		handle.setTitle("Red Hat Container Development Environment");
+		handle.setDescription("A server adapter representing a Red Hat Container Development Kit installation folder containing a Vagrantfile.");
 		handle.setImageDescriptor(getImageDescriptor());
 		main.setLayout(new GridLayout(3, false));
 		
@@ -156,7 +156,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 			return "The selected folder does not have a Vagrantfile";
 		}
 		if( credentials.getDomain() == null || credentials.getUser() == null) {
-			return "The CDK Server Adapter requries Red Hat Access credentials.";
+			return "The Container Development Environment Server Adapter requries Red Hat Access credentials.";
 		}
 		return null;
 	}
