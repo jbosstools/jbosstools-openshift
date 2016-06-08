@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
@@ -94,12 +95,15 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					IOpenShiftConnection connection = getConnection();
-					List<IResource> projects = connection.getResources(ResourceKind.PROJECT);
-					initWith(projects);
-					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
-					fireChanged();
-				} catch (OpenShiftException e) {
+					throw new NullPointerException();
+//					IOpenShiftConnection connection = getConnection();
+//					List<IResource> projects = connection.getResources(ResourceKind.PROJECT);
+//					initWith(projects);
+//					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
+//					fireChanged();
+				} catch (OperationCanceledException e) {
+					state.compareAndSet(LoadingState.LOADING, LoadingState.INIT);
+				} catch (Throwable e) {
 					state.compareAndSet(LoadingState.LOADING, LoadingState.INIT);
 					handler.handleException(e);
 				}

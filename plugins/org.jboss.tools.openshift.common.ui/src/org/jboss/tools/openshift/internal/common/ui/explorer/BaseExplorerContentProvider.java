@@ -202,7 +202,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		public LoadingStub() {
 		}
 
-		public void add(Exception e) {
+		public void add(Throwable e) {
 			children.add(e);
 		}
 

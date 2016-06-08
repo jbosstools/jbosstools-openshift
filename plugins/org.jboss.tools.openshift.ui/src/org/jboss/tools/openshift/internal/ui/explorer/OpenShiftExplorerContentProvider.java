@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Control;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -43,12 +44,13 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private OpenshiftUIModel model;
 	private IElementListener listener;
 	private StructuredViewer viewer;
+
 	public OpenShiftExplorerContentProvider() {
 		this(new OpenshiftUIModel());
 	}
-	
+
 	public OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
-		this.model= model;
+		this.model = model;
 		listener = new IElementListener() {
 
 			@Override
@@ -66,6 +68,15 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	protected void refreshViewer(Object element) {
 		if (viewer != null) {
 			viewer.refresh(element);
+		}
+	}
+	
+	protected void asyncExec(Runnable r) {
+		if (viewer != null) {
+			Control control = viewer.getControl();
+			if (control != null && !control.isDisposed()) {
+				control.getDisplay().asyncExec(r);
+			}
 		}
 	}
 
@@ -96,7 +107,10 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		LoadingStub stub = new LoadingStub();
 		if (parentElement instanceof ConnectionWrapper) {
 			ConnectionWrapper connection = (ConnectionWrapper) parentElement;
-			if (connection.load(e -> stub.add(e))) {
+			if (connection.load(e -> {
+				stub.add(e);
+				asyncExec(()-> refreshViewer(stub));
+			})) {
 				return new Object[] { stub };
 			} else {
 				Object[] result = connection.getProjects().toArray();
@@ -107,7 +121,10 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			}
 		} else if (parentElement instanceof ProjectWrapper) {
 			ProjectWrapper project = (ProjectWrapper) parentElement;
-			if (project.load(e -> stub.add(e))) {
+			if (project.load(e -> {
+				stub.add(e);
+				asyncExec(()-> refreshViewer(stub));
+			})) {
 				return new Object[] { stub };
 			} else {
 				return project.getResourcesOfKind(ResourceKind.SERVICE).toArray();
@@ -128,7 +145,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		// non-structured viewer would be a configuration problem. Crash!
-		this.viewer= (StructuredViewer) viewer;
+		this.viewer = (StructuredViewer) viewer;
 	}
 
 	private boolean isTerminatedBuild(IBuild build) {
