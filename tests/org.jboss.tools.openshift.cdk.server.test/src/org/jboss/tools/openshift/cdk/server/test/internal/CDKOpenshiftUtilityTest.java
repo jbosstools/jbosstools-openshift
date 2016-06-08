@@ -32,6 +32,8 @@ import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKOpenshift
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.core.ICommonAttributes;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.junit.Test;
 
 import junit.framework.TestCase;
@@ -76,6 +78,38 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 		verify(registry).add(con);
 	}
 
+	
+	@Test
+	public void testOpenshiftRegistry() throws Exception {
+		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
+		ServiceManagerEnvironment adb = createADB("10.1.2.2", "2376", "https://custom.url");
+		IServer s = mockServer("openshift35");
+		
+		createCDKFile("Basic", null, null);
+		ConnectionsRegistry registry = (ConnectionsRegistry) mock(ConnectionsRegistry.class);
+		
+		IConnection con = util.createOpenshiftConnection(s, adb, registry);
+		assertNotNull(con);
+		Object o = ((Connection)con).getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY);
+		assertEquals(o, "https://custom.url");
+	}
+
+	@Test
+	public void testOpenshiftRegistryDefault() throws Exception {
+		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
+		ServiceManagerEnvironment adb = createADB("10.1.2.2", "2376", null);
+		IServer s = mockServer("openshift36");
+		
+		createCDKFile("Basic", null, null);
+		ConnectionsRegistry registry = (ConnectionsRegistry) mock(ConnectionsRegistry.class);
+		
+		IConnection con = util.createOpenshiftConnection(s, adb, registry);
+		assertNotNull(con);
+		Object o = ((Connection)con).getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY);
+		assertEquals(o, "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io ");
+	}
+
+	
 	
 	private void createCDKFile(String authType, String user, String pass ) {
 		File f = new File(getDotCDKFile());
@@ -135,15 +169,16 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 	}
 
 	private ServiceManagerEnvironment createADB(String host) throws URISyntaxException {
-		return createADB(host, "2376");
+		return createADB(host, "2376", null);
 	}
 
-	private ServiceManagerEnvironment createADB(String host, String port) throws URISyntaxException {
+	private ServiceManagerEnvironment createADB(String host, String port, String registry) throws URISyntaxException {
 		HashMap<String,String> env = new HashMap<>();
 		env.put("DOCKER_HOST","tcp://" + host + ":" + port);
 		env.put("DOCKER_CERT_PATH","/cert/path/.docker");
 		env.put("DOCKER_TLS_VERIFY","1");
 		env.put("DOCKER_MACHINE_NAME","e5d7d0a");
+		env.put("DOCKER_REGISTRY", registry);
 		return new ServiceManagerEnvironment(env);
 	}
 
