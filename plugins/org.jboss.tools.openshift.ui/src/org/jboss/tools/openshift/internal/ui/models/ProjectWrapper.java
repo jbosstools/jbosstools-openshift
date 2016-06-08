@@ -30,6 +30,10 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 	public LoadingState getState() {
 		return state.get();
 	}
+	
+	void setLoadingState(LoadingState newState) {
+		state.set(newState);
+	}
 
 	public boolean load(IExceptionHandler handler) {
 		if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {

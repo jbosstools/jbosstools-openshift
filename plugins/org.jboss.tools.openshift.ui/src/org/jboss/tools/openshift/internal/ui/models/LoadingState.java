@@ -1,5 +1,5 @@
 package org.jboss.tools.openshift.internal.ui.models;
 
 public enum LoadingState {
-	INIT, LOADING, LOADED
+	INIT, LOADING, LOAD_STOPPED, LOADED
 }

@@ -12,7 +12,9 @@ import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuild
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -21,6 +23,7 @@ import org.eclipse.swt.widgets.Control;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider.LoadingStub;
 import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IElementListener;
@@ -44,6 +47,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private OpenshiftUIModel model;
 	private IElementListener listener;
 	private StructuredViewer viewer;
+	private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs= new HashMap<Object, BaseExplorerContentProvider.LoadingStub>();
 
 	public OpenShiftExplorerContentProvider() {
 		this(new OpenshiftUIModel());
@@ -98,21 +102,35 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			return new Object[0];
 		}
 	}
+	
+	private void handleLoadingException(Object parentElement, Throwable e) {
+		LoadingStub stub = makeStub(parentElement);
+		stub.add(e);
+		asyncExec(()-> refreshViewer(stub));
+	}
+
+	private LoadingStub makeStub(Object parentElement) {
+		LoadingStub stub = stubs.get(parentElement);
+		if (stub == null) {
+			stub= new LoadingStub();
+			stubs.put(parentElement, stub);
+		}
+		return stub;
+	}
 
 	/**
 	 * Called to obtain the children of any element in the tree viewer
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		LoadingStub stub = new LoadingStub();
 		if (parentElement instanceof ConnectionWrapper) {
 			ConnectionWrapper connection = (ConnectionWrapper) parentElement;
 			if (connection.load(e -> {
-				stub.add(e);
-				asyncExec(()-> refreshViewer(stub));
+				handleLoadingException(parentElement, e);
 			})) {
-				return new Object[] { stub };
+				return new Object[] { makeStub(parentElement) };
 			} else {
+				stubs.remove(parentElement);
 				Object[] result = connection.getProjects().toArray();
 				if (result == null || result.length == 0) {
 					result = new Object[] { new NewProjectLinkNode((Connection) connection.getConnection()) };
@@ -122,11 +140,11 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		} else if (parentElement instanceof ProjectWrapper) {
 			ProjectWrapper project = (ProjectWrapper) parentElement;
 			if (project.load(e -> {
-				stub.add(e);
-				asyncExec(()-> refreshViewer(stub));
+				handleLoadingException(parentElement, e);
 			})) {
-				return new Object[] { stub };
+				return new Object[] { makeStub(parentElement) };
 			} else {
+				stubs.remove(parentElement);
 				return project.getResourcesOfKind(ResourceKind.SERVICE).toArray();
 			}
 		} else if (parentElement instanceof ServiceWrapper) {
@@ -137,6 +155,8 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			wrapper.getResourcesOfKind(ResourceKind.POD).stream().filter(p -> !isBuildPod((IPod) p.getResource()))
 					.forEach(r -> result.add(r));
 			return result.toArray();
+		} else if (parentElement instanceof LoadingStub) {
+			return ((LoadingStub) parentElement).getChildren();
 		}
 
 		return new Object[0];
@@ -166,6 +186,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
+		if (element instanceof LoadingStub) {
+			return ((LoadingStub)element).hasChildren();
+		}
 		return element instanceof ConnectionsRegistry || element instanceof OpenshiftUIModel
 				|| element instanceof ConnectionWrapper || element instanceof ProjectWrapper
 				|| element instanceof ServiceWrapper;

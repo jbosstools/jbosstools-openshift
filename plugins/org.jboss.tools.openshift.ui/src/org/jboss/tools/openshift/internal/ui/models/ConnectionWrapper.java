@@ -18,7 +18,6 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
@@ -81,7 +80,10 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 					resources.forEach(r -> resourceCache.add(r));
 					projectWrapper.initWithResources(resources);
 					projectWrapper.fireChanged();
-				} catch (OpenShiftException e) {
+				} catch (OperationCanceledException e) {
+					projectWrapper.setLoadingState(LoadingState.LOAD_STOPPED);
+				} catch (Throwable e) {
+					projectWrapper.setLoadingState(LoadingState.LOAD_STOPPED);
 					handler.handleException(e);
 				}
 				return Status.OK_STATUS;
@@ -101,9 +103,9 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
 					fireChanged();
 				} catch (OperationCanceledException e) {
-					state.compareAndSet(LoadingState.LOADING, LoadingState.INIT);
+					state.compareAndSet(LoadingState.LOADING, LoadingState.LOAD_STOPPED);
 				} catch (Throwable e) {
-					state.compareAndSet(LoadingState.LOADING, LoadingState.INIT);
+					state.compareAndSet(LoadingState.LOADING, LoadingState.LOAD_STOPPED);
 					handler.handleException(e);
 				}
 				return Status.OK_STATUS;
