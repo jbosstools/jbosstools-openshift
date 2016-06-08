@@ -166,11 +166,11 @@
 
 				  <with
 					variable="selection">
+						<or>
 						<iterate>
-      <adapt type="com.openshift.restclient.model.IResource" />
-            </iterate>
+      					<adapt type="com.openshift.restclient.model.IResource" />
+            			</iterate>
 						</or>
-					</and>
 				  </with>
 				 </or>
 				</visibleWhen>
@@ -977,20 +977,6 @@
 			commandId="org.jboss.tools.openshift.ui.command.project.manage">
 		</handler>
 		<handler
-			class="org.jboss.tools.openshift.internal.ui.handler.DeleteProjectsHandler"
-			commandId="org.eclipse.ui.edit.delete">
-				<activeWhen>
-				  <with variable="selection">
-					<count
-						value="1">
-					</count>
-					<iterate>
-				         <adapt 	type="com.openshift.restclient.model.IProject" />">
-					</iterate>
-				  </with>
-				</activeWhen>
-		</handler>
-		<handler
 			class="org.jboss.tools.openshift.internal.ui.handler.NewProjectHandler"
 			commandId="org.jboss.tools.openshift.ui.command.project.new">
 		</handler>
@@ -1015,9 +1001,6 @@
 						<iterate>
 							<and>
 								<adapt	type="com.openshift.restclient.model.IResource" />
-							  	<not>
-							  		<adapt  type="com.openshift.restclient.model.IProject" />
-							  	</not>
 							</and>
 						</iterate>
 				  </with>
