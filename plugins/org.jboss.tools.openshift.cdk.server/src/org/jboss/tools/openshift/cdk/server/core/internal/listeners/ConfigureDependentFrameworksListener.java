@@ -25,23 +25,31 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	@Override
 	public void serverChanged(final ServerEvent event) {
-		if( serverSwitchesToState(event, IServer.STATE_STARTED) && canHandleServer(event.getServer())) {
-			new Job("Loading service-manager to configure additional frameworks that CDK depends on.") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						if( canHandleServer(event.getServer()))
-							launchChange(event.getServer());
-						return Status.OK_STATUS;
-					} catch(CoreException ce) {
-						return ce.getStatus();
-					}
-				}
-			}.schedule(1000);
+		if( canHandleServer(event.getServer())) {
+			if( serverSwitchesToState(event, IServer.STATE_STARTED)) {
+				scheduleConfigureFrameworksJob(event);
+			} else if( serverSwitchesToState(event, IServer.STATE_STOPPED)) {
+				ServiceManagerEnvironment.clearServiceManagerEnvironment(event.getServer());
+			}
 		}
 	}
 	
-	private void launchChange(IServer server) throws CoreException {
+	private void scheduleConfigureFrameworksJob(final ServerEvent event) {
+		new Job("Loading service-manager to configure additional frameworks that CDK depends on.") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					if( canHandleServer(event.getServer()))
+						configureFrameworks(event.getServer());
+					return Status.OK_STATUS;
+				} catch(CoreException ce) {
+					return ce.getStatus();
+				}
+			}
+		}.schedule(1000);
+	}
+	
+	protected void configureFrameworks(IServer server) throws CoreException {
 		ServiceManagerEnvironment adb = ServiceManagerEnvironment.getOrLoadServiceManagerEnvironment(server, true);
 		if( adb != null ) {
 			configureOpenshift(server, adb);

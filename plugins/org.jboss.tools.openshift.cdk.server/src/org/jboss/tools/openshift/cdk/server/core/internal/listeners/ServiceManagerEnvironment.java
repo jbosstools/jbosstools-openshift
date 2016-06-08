@@ -51,6 +51,10 @@ public class ServiceManagerEnvironment {
 		return openshiftPort;
 	}
 	
+	public String get(String key) {
+		return env == null ? null : env.get(key);
+	}
+	
 	public static ServiceManagerEnvironment getOrLoadServiceManagerEnvironment(IServer server, boolean save) {
 		return getOrLoadServiceManagerEnvironment(server, save, 1);
 	}
@@ -93,49 +97,56 @@ public class ServiceManagerEnvironment {
 	 */
 	public static ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server) {
 		
-		String[] args = new String[]{CDKConstants.VAGRANT_CMD_SERVICE_MANAGER, CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV, "docker"};
+		String[] args = new String[]{
+				CDKConstants.VAGRANT_CMD_SERVICE_MANAGER, 
+				CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV};
 
     	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
 		
     	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
-
-		HashMap<String,String> adbEnv = new HashMap<>();
 	    try {
 	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  CDKServerUtility.getWorkingDirectory(server), env);
-	    	String setEnvWin = "setx ";
-	    	String setEnvNix = "export ";
-			
-			for(String oneAppend : lines) {
-				String[] allAppends = oneAppend.split("\n");
-				for( int i = 0; i < allAppends.length; i++ ) {
-					String setEnvVarCommand = null;
-					String setEnvVarDelim = null;
-					if( allAppends[i].trim().startsWith(setEnvWin)) {
-						setEnvVarCommand = setEnvWin;
-						setEnvVarDelim = " ";
-					} else if( allAppends[i].trim().startsWith(setEnvNix)) {
-						setEnvVarCommand = setEnvNix;
-						setEnvVarDelim = "=";
-					}
-					if( setEnvVarCommand != null ) {
-						String lineRemainder = allAppends[i].trim().substring(setEnvVarCommand.length());
-						int eq = lineRemainder.indexOf(setEnvVarDelim);
-						if( eq != -1 ) {
-							String k = lineRemainder.substring(0, eq);
-							String v = lineRemainder.substring(eq+1);
-							adbEnv.put(k, v);
-						}
-					}
-				}
-			}
-			
-			if( adbEnv.size() > 0 ) {
-				return new ServiceManagerEnvironment(adbEnv);
-			}
+	    	return parseLines(lines);
 		} catch( URISyntaxException urise) {
 			CDKCoreActivator.pluginLog().logError("Environment variable DOCKER_HOST is not a valid uri:  " + env.get("DOCKER_HOST"), urise);
 		} catch(IOException | TimeoutException ce) {
 			CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to vagrant service-manager. ", ce);
+		}
+		return null;
+	}
+	
+	public static ServiceManagerEnvironment parseLines(String[] lines) throws URISyntaxException {
+		HashMap<String,String> adbEnv = new HashMap<>();
+		
+    	String setEnvWin = "setx ";
+    	String setEnvNix = "export ";
+		
+		for(String oneAppend : lines) {
+			String[] allAppends = oneAppend.split("\n");
+			for( int i = 0; i < allAppends.length; i++ ) {
+				String setEnvVarCommand = null;
+				String setEnvVarDelim = null;
+				if( allAppends[i].trim().startsWith(setEnvWin)) {
+					setEnvVarCommand = setEnvWin;
+					setEnvVarDelim = " ";
+				} else if( allAppends[i].trim().startsWith(setEnvNix)) {
+					setEnvVarCommand = setEnvNix;
+					setEnvVarDelim = "=";
+				}
+				if( setEnvVarCommand != null ) {
+					String lineRemainder = allAppends[i].trim().substring(setEnvVarCommand.length());
+					int eq = lineRemainder.indexOf(setEnvVarDelim);
+					if( eq != -1 ) {
+						String k = lineRemainder.substring(0, eq);
+						String v = lineRemainder.substring(eq+1);
+						adbEnv.put(k, v);
+					}
+				}
+			}
+		}
+		
+		if( adbEnv.size() > 0 ) {
+			return new ServiceManagerEnvironment(adbEnv);
 		}
 		return null;
 	}

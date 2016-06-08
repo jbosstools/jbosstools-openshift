@@ -29,6 +29,7 @@ public class CDKOpenshiftUtility {
 	private static String DOTCDK_AUTH_USERNAME = "openshift.auth.username";
 	private static String DOTCDK_AUTH_PASS = "openshift.auth.password";
 	
+	private static final String IMAGE_REGISTRY_KEY = "DOCKER_REGISTRY";
 	private static final String DEFAULT_IMAGE_REGISTRY_URL = "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io ";
 
 
@@ -78,7 +79,16 @@ public class CDKOpenshiftUtility {
 		((Connection)con).setUsername(username);
 		((Connection)con).setRememberPassword(true);
 		
-		((Connection)con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, DEFAULT_IMAGE_REGISTRY_URL);
+		String dockerReg = adb.get(IMAGE_REGISTRY_KEY);
+		if( dockerReg == null ) {
+			dockerReg = DEFAULT_IMAGE_REGISTRY_URL;
+		} else {
+			if( !dockerReg.contains("://")) {
+				dockerReg = "https://" + dockerReg;
+			}
+		}
+		
+		((Connection)con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, dockerReg);
 		if( password != null ) {
 			((Connection)con).setPassword(password);
 		}
