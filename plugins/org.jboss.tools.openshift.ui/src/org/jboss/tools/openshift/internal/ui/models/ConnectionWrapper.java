@@ -95,12 +95,11 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					throw new NullPointerException();
-//					IOpenShiftConnection connection = getConnection();
-//					List<IResource> projects = connection.getResources(ResourceKind.PROJECT);
-//					initWith(projects);
-//					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
-//					fireChanged();
+					IOpenShiftConnection connection = getConnection();
+					List<IResource> projects = connection.getResources(ResourceKind.PROJECT);
+					initWith(projects);
+					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
+					fireChanged();
 				} catch (OperationCanceledException e) {
 					state.compareAndSet(LoadingState.LOADING, LoadingState.INIT);
 				} catch (Throwable e) {
