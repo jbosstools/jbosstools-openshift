@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.test.util;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.swt.widgets.Display;
-import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IConnectionWrapper;
 import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 
 public class UITestUtils {
@@ -52,7 +52,7 @@ public class UITestUtils {
 	}
 
 
-	public static void waitForState(ConnectionWrapper connectionWrapper, LoadingState state) throws InterruptedException, TimeoutException {
+	public static void waitForState(IConnectionWrapper connectionWrapper, LoadingState state) throws InterruptedException, TimeoutException {
 		int count= 0;
 		while (connectionWrapper.getState() != state) {
 			Thread.sleep(100);

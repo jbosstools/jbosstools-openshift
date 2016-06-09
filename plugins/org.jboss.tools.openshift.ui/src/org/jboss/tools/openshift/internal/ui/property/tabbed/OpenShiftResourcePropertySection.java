@@ -39,8 +39,8 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.comparators.CreationTimestampComparator;
-import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
-import org.jboss.tools.openshift.internal.ui.models.ResourceContainer;
+import org.jboss.tools.openshift.internal.ui.models.IResourceContainer;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 
 import com.openshift.restclient.model.IResource;
 
@@ -184,7 +184,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
-		ResourceContainer<?, ?> model = UIUtils.getFirstElement(selection, ResourceContainer.class);
+		IResourceContainer<?, ?> model = UIUtils.getFirstElement(selection, IResourceContainer.class);
 		if (model == null)
 			return;
 		ITabDescriptor tab = page.getSelectedTab();
@@ -223,7 +223,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		return new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				return comparator.compare((AbstractResourceWrapper<?, ?>) e1, (AbstractResourceWrapper<?, ?>) e2);
+				return comparator.compare((IResourceWrapper<?, ?>) e1, (IResourceWrapper<?, ?>) e2);
 			}
 		};
 	}
@@ -232,8 +232,8 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		return new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				IResource r1 = ((AbstractResourceWrapper<?, ?>) e1).getResource();
-				IResource r2 = ((AbstractResourceWrapper<?, ?>) e2).getResource();
+				IResource r1 = ((IResourceWrapper<?, ?>) e1).getWrapped();
+				IResource r2 = ((IResourceWrapper<?, ?>) e2).getWrapped();
 				return r1.getName().compareTo(r2.getName());
 			}
 		};

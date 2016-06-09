@@ -659,10 +659,6 @@
            commandId="org.jboss.tools.openshift.ui.command.startbuild"
            label="%openshift.command.build.startbuild"
            style="push">
-        <parameter
-              name="org.jboss.tools.openshift.ui.command.startbuild.source"
-              value="BuildConfig">
-        </parameter>
      </command>
      <command
            commandId="org.jboss.tools.openshift.ui.command.clonebuild"
@@ -699,10 +695,6 @@
            commandId="org.jboss.tools.openshift.ui.command.startbuild"
            label="%openshift.command.build.startbuild"
            style="push">
-        <parameter
-              name="org.jboss.tools.openshift.ui.command.startbuild.source"
-              value="BuildConfig">
-        </parameter>
      </command>
       				<separator visible="true" name="org.jboss.tools.openshift.ui.separator6" />
        <command
@@ -1186,11 +1178,6 @@
 		<command
 			id="org.jboss.tools.openshift.ui.command.startbuild"
 			name="%openshift.command.build.startbuild">
-     <commandParameter
-           id="org.jboss.tools.openshift.ui.command.startbuild.source"
-           name="name"
-           optional="true">
-     </commandParameter>
 		</command>
 		<command
 			id="org.jboss.tools.openshift.ui.command.clonebuild"
@@ -1676,17 +1663,6 @@
       </propertyCategory>
    </propertyContributor>
 </extension>
-<extension
-      point="org.eclipse.core.expressions.propertyTesters">
-   <propertyTester
-         class="org.jboss.tools.openshift.internal.ui.propertytester.OpenShiftResourcePropertyTester"
-         id="org.jboss.tools.openshift.internal.ui.propertytester.OpenShiftResourcePropertyTester"
-         namespace="org.jboss.tools.openshift.ui"
-         properties="isDeleting"
-         type="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
-   </propertyTester>
-</extension>
-
    <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             icon="icons/openshift-logo-white-icon.png"

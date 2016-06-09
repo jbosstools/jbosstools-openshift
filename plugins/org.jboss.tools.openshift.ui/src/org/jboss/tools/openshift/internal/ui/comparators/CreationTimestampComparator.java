@@ -15,17 +15,17 @@ import java.util.Comparator;
 import java.util.Date;
 
 import org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils;
-import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 
 /**
  * Comparator for sorting display models by resource creation timestamp
  * @author jeff.cantrill
  *
  */
-public class CreationTimestampComparator implements Comparator<AbstractResourceWrapper<?, ?>>{
+public class CreationTimestampComparator implements Comparator<IResourceWrapper<?, ?>>{
 
 	@Override
-	public int compare(AbstractResourceWrapper<?, ?> o1, AbstractResourceWrapper<?, ?> o2) {
+	public int compare(IResourceWrapper<?, ?> o1, IResourceWrapper<?, ?> o2) {
 		Date date1 = getDate(o1);
 		Date date2 = getDate(o2);
 		if(date1 == null || date2 == null) {
@@ -41,8 +41,8 @@ public class CreationTimestampComparator implements Comparator<AbstractResourceW
 		return -1 * date1.compareTo(date2);
 	}
 
-	private Date getDate(AbstractResourceWrapper<?, ?> o1) {
-		String value = o1.getResource().getCreationTimeStamp();
+	private Date getDate(IResourceWrapper<?, ?> o1) {
+		String value = o1.getWrapped().getCreationTimeStamp();
 		try {
 			return DateTimeUtils.parse(value);
 		} catch (ParseException e) {

@@ -1,7 +1,18 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +33,7 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
-public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel> {
+class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel> implements IConnectionWrapper {
 	public static final String[] RESOURCE_KINDS = { ResourceKind.BUILD, ResourceKind.BUILD_CONFIG,
 			ResourceKind.DEPLOYMENT_CONFIG, ResourceKind.IMAGE_STREAM, ResourceKind.IMAGE_STREAM_TAG, ResourceKind.POD,
 			ResourceKind.ROUTE, ResourceKind.REPLICATION_CONTROLLER, ResourceKind.SERVICE };
@@ -35,16 +46,32 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 		super(parent, wrapped);
 	}
 
-	public IOpenShiftConnection getConnection() {
-		return getWrapped();
-	}
-
-	public Collection<ProjectWrapper> getProjects() {
+	public Collection<IResourceWrapper<?, ?>> getResources() {
 		synchronized (projects) {
-			return new ArrayList<ProjectWrapper>(projects.values());
+			return new ArrayList<IResourceWrapper<?, ?>>(projects.values());
 		}
 	}
 
+	@Override
+	public Collection<IResourceWrapper<?, ?>> getResourcesOfKind(String kind) {
+		if (!ResourceKind.PROJECT.equals(kind)) {
+			return Collections.emptyList();
+		}
+		return getResources();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends IResourceWrapper<?, ?>> Collection<T> getResourcesOfType(Class<T> clazz) {
+		ArrayList<T> result= new ArrayList<>();
+		for (IResourceWrapper<?, ?> r : getResources()) {
+			if (clazz.isInstance(r)) {
+				result.add((T) r);
+			}
+		}
+		return result;
+	}
+	
 	public LoadingState getState() {
 		return state.get();
 	}
@@ -54,8 +81,8 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 			resources.forEach(project -> {
 				projects.put((IProject) project, new ProjectWrapper(this, (IProject) project));
 			});
-			state.set(LoadingState.LOADED);
 		}
+		state.set(LoadingState.LOADED);
 	}
 
 	public boolean load(IExceptionHandler handler) {
@@ -67,15 +94,16 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 	}
 
 	void startLoadJob(ProjectWrapper projectWrapper, IExceptionHandler handler) {
-		new Job("load project") {
+		new Job("Load project contents") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					WatchManager.getInstance().startWatch(projectWrapper.getResource());
+					IProject project = projectWrapper.getWrapped();
+					WatchManager.getInstance().startWatch(project);
 					Collection<IResource> resources = new HashSet<>();
 					for (String kind : RESOURCE_KINDS) {
-						resources.addAll(projectWrapper.getResource().getResources(kind));
+						resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
 					}
 					resources.forEach(r -> resourceCache.add(r));
 					projectWrapper.initWithResources(resources);
@@ -91,13 +119,13 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 		}.schedule();
 	}
 
-	void startLoadJob(IExceptionHandler handler) {
-		new Job("load project") {
+	private void startLoadJob(IExceptionHandler handler) {
+		new Job("Load project") {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					IOpenShiftConnection connection = getConnection();
+					IOpenShiftConnection connection = getWrapped();
 					List<IResource> projects = connection.getResources(ResourceKind.PROJECT);
 					initWith(projects);
 					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
@@ -114,13 +142,13 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 	}
 
 	@SuppressWarnings("unchecked")
-	public void connectionChanged(String property, Object oldValue, Object newValue) {
+	void connectionChanged(String property, Object oldValue, Object newValue) {
 		if (ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
 			if (newValue != null) {
 				IResource newResource = (IResource) newValue;
 				ProjectWrapper projectWrapper = findProjectWrapper(newResource);
 				if (projectWrapper != null) {
-					if (projectWrapper.getResource().equals(newResource)) {
+					if (projectWrapper.getWrapped().equals(newResource)) {
 						projectWrapper.updateWith((IProject) newResource);
 					} else {
 						IResource oldVersion = resourceCache.getCachedVersion(newResource);
@@ -143,14 +171,20 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 			} else {
 				// old value == null, new value == null, ignore
 				OpenShiftUIActivator.log(IStatus.WARNING, "old and new value are null",
-						new RuntimeException("Warnign origing"));
+						new RuntimeException("Warning origing"));
 			}
 		} else if (ConnectionProperties.PROPERTY_PROJECTS.equals(property) && (newValue instanceof List)) {
-			handleProjectsChanged((List<IProject>)newValue);
+			updateWithResources((List<IProject>)newValue);
 		}
 	}
 
-	private void handleProjectsChanged(List<IProject> newValue) {
+	private ProjectWrapper findProjectWrapper(IResource resource) {
+		synchronized (projects) {
+			return projects.get(resource.getProject());
+		}
+	}
+
+	private void updateWithResources(List<IProject> newValue) {
 		Map<IProject, ProjectWrapper> updated = new HashMap<>();
 		boolean changed = false;
 		synchronized (projects) {
@@ -195,19 +229,6 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 		projectWrapper.updateWithResources(resources);
 	}
 
-	private ProjectWrapper findProjectWrapper(IResource oldResource) {
-		Collection<ProjectWrapper> projects = getProjects();
-		if (projects != null) {
-			IProject project = oldResource.getProject();
-			for (ProjectWrapper projectWrapper : projects) {
-				if (projectWrapper.getResource().equals(project)) {
-					return projectWrapper;
-				}
-			}
-		}
-		return null;
-	}
-
 	protected void handleUpdate(ProjectWrapper projectWrapper, IResource newResource) {
 		resourceCache.remove(newResource);
 		resourceCache.add(newResource);
@@ -218,24 +239,26 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 
 	@Override
 	public void refresh() {
-		handleProjectsChanged(loadProjects());
+		updateWithResources(loadProjects());
+		state.set(LoadingState.LOADED);
+		fireChanged();
 		for (ProjectWrapper project : projects.values()) {
 			project.refresh();
 		}
-
 	}
 
 	private List<IProject> loadProjects() {
-		return getConnection().getResources(ResourceKind.PROJECT);
+		return getWrapped().getResources(ResourceKind.PROJECT);
 	}
 
-	public void refresh(ProjectWrapper projectWrapper) {
-		resourceCache.flush(projectWrapper.getResource().getNamespace());
-		WatchManager.getInstance().stopWatch(projectWrapper.getResource());
-		WatchManager.getInstance().startWatch(projectWrapper.getResource());
+	void refresh(ProjectWrapper projectWrapper) {
+		resourceCache.flush(projectWrapper.getWrapped().getNamespace());
+		IProject project = projectWrapper.getWrapped();
+		WatchManager.getInstance().stopWatch(project);
+		WatchManager.getInstance().startWatch(project);
 		Collection<IResource> resources = new HashSet<>();
 		for (String kind : RESOURCE_KINDS) {
-			resources.addAll(projectWrapper.getResource().getResources(kind));
+			resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
 		}
 		resources.forEach(r -> resourceCache.add(r));
 		projectWrapper.updateWithResources(resources);

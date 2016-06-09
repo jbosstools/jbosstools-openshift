@@ -16,12 +16,12 @@ import java.util.concurrent.TimeoutException;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
-import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IConnectionWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IElementListener;
 import org.jboss.tools.openshift.internal.ui.models.IExceptionHandler;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
-import org.jboss.tools.openshift.internal.ui.models.ProjectWrapper;
 import org.jboss.tools.openshift.test.util.UITestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,31 +52,31 @@ public class RefreshTest {
 		IProject project2prime = stubProject("test2", 2);
 		
 		when(getConnectionMock().getResources(ResourceKind.PROJECT)).thenReturn(Collections.singletonList(project1));
-		ConnectionWrapper connection = getConnection();
+		IConnectionWrapper connection = getConnection();
 		getConnection().load(IExceptionHandler.NULL_HANDLER);
 		UITestUtils.waitForState(connection, LoadingState.LOADED);
-		assertEquals(1, connection.getProjects().size());
-		assertTrue(connection.getProjects().stream().anyMatch(projectWrapper-> project1.equals(projectWrapper.getResource())));
+		assertEquals(1, connection.getResources().size());
+		assertTrue(connection.getResources().stream().anyMatch(projectWrapper-> project1.equals(projectWrapper.getWrapped())));
 		
 		registry.fireConnectionChanged(getConnectionMock(), ConnectionProperties.PROPERTY_PROJECTS, null, Arrays.asList(project1, project2));
 		
 		verify(listener).elementChanged(connection);
-		assertEquals(2, connection.getProjects().size());
-		assertTrue(connection.getProjects().stream().anyMatch(projectWrapper-> project1.equals(projectWrapper.getResource())));
-		assertTrue(connection.getProjects().stream().anyMatch(projectWrapper-> project2.equals(projectWrapper.getResource())));
+		assertEquals(2, connection.getResources().size());
+		assertTrue(connection.getResources().stream().anyMatch(projectWrapper-> project1.equals(projectWrapper.getWrapped())));
+		assertTrue(connection.getResources().stream().anyMatch(projectWrapper-> project2.equals(projectWrapper.getWrapped())));
 		
 		registry.fireConnectionChanged(getConnectionMock(), ConnectionProperties.PROPERTY_PROJECTS, null, Arrays.asList(project2));
 		verify(listener, times(2)).elementChanged(connection);
-		assertEquals(1, connection.getProjects().size());
-		Optional<ProjectWrapper> project2Wrapper = connection.getProjects().stream().filter(projectWrapper-> project2.equals(projectWrapper.getResource())).findFirst();
+		assertEquals(1, connection.getResources().size());
+		Optional<IResourceWrapper<?, ?>> project2Wrapper = connection.getResources().stream().filter(projectWrapper-> project2.equals(projectWrapper.getWrapped())).findFirst();
 		assertTrue(project2Wrapper.isPresent());
 
 		registry.fireConnectionChanged(getConnectionMock(), ConnectionProperties.PROPERTY_PROJECTS, null, Arrays.asList(project2prime));
 		verify(listener, times(2)).elementChanged(connection);
 		verify(listener).elementChanged(project2Wrapper.get());
-		assertEquals(1, connection.getProjects().size());
-		assertTrue(connection.getProjects().stream().anyMatch(projectWrapper-> {
-			IProject resource = projectWrapper.getResource();
+		assertEquals(1, connection.getResources().size());
+		assertTrue(connection.getResources().stream().anyMatch(projectWrapper-> {
+			IResource resource = projectWrapper.getWrapped();
 			String version = resource.getResourceVersion();
 			return project2.equals(resource) && version.equals("2");
 		}));
@@ -84,10 +84,10 @@ public class RefreshTest {
 	}
 	
 	private IOpenShiftConnection getConnectionMock() {
-		return getConnection().getConnection();
+		return getConnection().getWrapped();
 	}
 
-	private ConnectionWrapper getConnection() {
+	private IConnectionWrapper getConnection() {
 		return model.getConnections().iterator().next();
 	}
 

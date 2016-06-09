@@ -17,13 +17,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.internal.core.Trace;
 
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
-public class ResourceCache {
+class ResourceCache {
 	private Map<String, Map<String, IResource>> cache = new HashMap<String, Map<String, IResource>>();
 
 	public void dispose() {
@@ -53,7 +52,7 @@ public class ResourceCache {
 	}
 
 	private String getCacheKey(String kind, String name) {
-		return NLS.bind("{0}/{1}", new Object[] { kind, name });
+		return kind+"/"+name;
 	}
 
 	@SuppressWarnings("unchecked")

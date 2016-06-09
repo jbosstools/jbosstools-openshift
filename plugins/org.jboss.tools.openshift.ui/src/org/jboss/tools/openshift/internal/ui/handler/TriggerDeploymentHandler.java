@@ -27,8 +27,8 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.comparators.CreationTimestampComparator;
-import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
-import org.jboss.tools.openshift.internal.ui.models.ServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
@@ -59,12 +59,12 @@ public class TriggerDeploymentHandler extends AbstractHandler {
 	}
 
 	private IDeploymentConfig retrieveDeploymentConfig(ISelection selection) {
-		ServiceWrapper deployment = UIUtils.getFirstElement(selection, ServiceWrapper.class);
+		IServiceWrapper deployment = UIUtils.getFirstElement(selection, IServiceWrapper.class);
 		if(deployment != null) {
-			Collection<AbstractResourceWrapper<?, ?>> configs = deployment.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG);
+			Collection<IResourceWrapper<?, ?>> configs = deployment.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG);
 			if(!configs.isEmpty()) {
 				if(configs.size() == 1) {
-					return (IDeploymentConfig) configs.iterator().next().getResource();
+					return (IDeploymentConfig) configs.iterator().next().getWrapped();
 				}else {
 					return (IDeploymentConfig) configs
 							.stream()

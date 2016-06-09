@@ -8,8 +8,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.explorer;
 
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuildPod;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,12 +23,14 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider.LoadingStub;
-import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
+import org.jboss.tools.openshift.internal.ui.models.IConnectionWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IElementListener;
 import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
+import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
-import org.jboss.tools.openshift.internal.ui.models.ProjectWrapper;
-import org.jboss.tools.openshift.internal.ui.models.ServiceWrapper;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
@@ -47,7 +47,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private OpenshiftUIModel model;
 	private IElementListener listener;
 	private StructuredViewer viewer;
-	private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs= new HashMap<Object, BaseExplorerContentProvider.LoadingStub>();
+	private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs = new HashMap<Object, BaseExplorerContentProvider.LoadingStub>();
 
 	public OpenShiftExplorerContentProvider() {
 		this(new OpenshiftUIModel());
@@ -58,7 +58,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		listener = new IElementListener() {
 
 			@Override
-			public void elementChanged(IOpenshiftUIElement<?> element) {
+			public void elementChanged(IOpenshiftUIElement<?, ?> element) {
 				if (element instanceof OpenshiftUIModel) {
 					refreshViewer(ConnectionsRegistrySingleton.getInstance());
 				} else {
@@ -74,7 +74,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			viewer.refresh(element);
 		}
 	}
-	
+
 	protected void asyncExec(Runnable r) {
 		if (viewer != null) {
 			Control control = viewer.getControl();
@@ -102,20 +102,22 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			return new Object[0];
 		}
 	}
-	
+
 	private void handleLoadingException(Object parentElement, Throwable e) {
 		LoadingStub stub = makeStub(parentElement);
 		stub.add(e);
-		asyncExec(()-> refreshViewer(stub));
+		asyncExec(() -> refreshViewer(stub));
 	}
 
 	private LoadingStub makeStub(Object parentElement) {
-		LoadingStub stub = stubs.get(parentElement);
-		if (stub == null) {
-			stub= new LoadingStub();
-			stubs.put(parentElement, stub);
+		synchronized (stubs) {
+			LoadingStub stub = stubs.get(parentElement);
+			if (stub == null) {
+				stub = new LoadingStub();
+				stubs.put(parentElement, stub);
+			}
+			return stub;
 		}
-		return stub;
 	}
 
 	/**
@@ -123,37 +125,44 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof ConnectionWrapper) {
-			ConnectionWrapper connection = (ConnectionWrapper) parentElement;
-			if (connection.load(e -> {
-				handleLoadingException(parentElement, e);
-			})) {
-				return new Object[] { makeStub(parentElement) };
-			} else {
-				stubs.remove(parentElement);
-				Object[] result = connection.getProjects().toArray();
+		if (parentElement instanceof IConnectionWrapper) {
+			IConnectionWrapper connection = (IConnectionWrapper) parentElement;
+			if (connection.getState() == LoadingState.LOADED) {
+				synchronized (stubs) {
+					stubs.remove(parentElement);
+				}
+				Object[] result = connection.getResources().toArray();
 				if (result == null || result.length == 0) {
-					result = new Object[] { new NewProjectLinkNode((Connection) connection.getConnection()) };
+					result = new Object[] { new NewProjectLinkNode((Connection) connection.getWrapped()) };
 				}
 				return result;
-			}
-		} else if (parentElement instanceof ProjectWrapper) {
-			ProjectWrapper project = (ProjectWrapper) parentElement;
-			if (project.load(e -> {
-				handleLoadingException(parentElement, e);
-			})) {
-				return new Object[] { makeStub(parentElement) };
 			} else {
-				stubs.remove(parentElement);
-				return project.getResourcesOfKind(ResourceKind.SERVICE).toArray();
+				connection.load(e -> {
+					handleLoadingException(parentElement, e);
+				});
+				return new Object[] { makeStub(parentElement) };
 			}
-		} else if (parentElement instanceof ServiceWrapper) {
-			ServiceWrapper wrapper = (ServiceWrapper) parentElement;
+		} else if (parentElement instanceof IProjectWrapper) {
+			IProjectWrapper project = (IProjectWrapper) parentElement;
+
+			if (project.getState() == LoadingState.LOADED) {
+				synchronized (stubs) {
+					stubs.remove(parentElement);
+				}
+				return project.getResourcesOfKind(ResourceKind.SERVICE).toArray();
+			} else {
+				project.load(e -> {
+					handleLoadingException(parentElement, e);
+				});
+				return new Object[] { makeStub(parentElement) };
+			}
+		} else if (parentElement instanceof IServiceWrapper) {
+			IServiceWrapper wrapper = (IServiceWrapper) parentElement;
 			ArrayList<Object> result = new ArrayList<>();
 			wrapper.getResourcesOfKind(ResourceKind.BUILD).stream()
-					.filter(b -> !isTerminatedBuild((IBuild) b.getResource())).forEach(r -> result.add(r));
-			wrapper.getResourcesOfKind(ResourceKind.POD).stream().filter(p -> !isBuildPod((IPod) p.getResource()))
-					.forEach(r -> result.add(r));
+					.filter(b -> !isTerminatedBuild((IBuild) b.getWrapped())).forEach(r -> result.add(r));
+			wrapper.getResourcesOfKind(ResourceKind.POD).stream()
+					.filter(p -> !ResourceUtils.isBuildPod((IPod) p.getWrapped())).forEach(r -> result.add(r));
 			return result.toArray();
 		} else if (parentElement instanceof LoadingStub) {
 			return ((LoadingStub) parentElement).getChildren();
@@ -175,11 +184,11 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object getParent(Object element) {
-		if (element instanceof ConnectionWrapper) {
+		if (element instanceof IConnectionWrapper) {
 			return ConnectionsRegistrySingleton.getInstance();
 		}
-		if (element instanceof IOpenshiftUIElement<?>) {
-			return ((IOpenshiftUIElement<?>) element).getParent();
+		if (element instanceof IOpenshiftUIElement<?, ?>) {
+			return ((IOpenshiftUIElement<?, ?>) element).getParent();
 		}
 		return null;
 	}
@@ -187,11 +196,11 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	@Override
 	public boolean hasChildren(Object element) {
 		if (element instanceof LoadingStub) {
-			return ((LoadingStub)element).hasChildren();
+			return ((LoadingStub) element).hasChildren();
 		}
 		return element instanceof ConnectionsRegistry || element instanceof OpenshiftUIModel
-				|| element instanceof ConnectionWrapper || element instanceof ProjectWrapper
-				|| element instanceof ServiceWrapper;
+				|| element instanceof IConnectionWrapper || element instanceof IProjectWrapper
+				|| element instanceof IServiceWrapper;
 	}
 
 }

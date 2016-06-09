@@ -10,22 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
+import java.util.Collection;
+
 /**
- * The state of an entity with delayed loading. Such entities are initially
- * empty. When loading is started, they are filled with results fetched from
- * Openshift. Once loading has finished, a change notification will be sent for
- * the element.
- * 
+ * A container for resources.
  * @author Thomas Mäder
- *
  */
-public enum LoadingState {
-	/** The no loading attempt has been made yet **/
-	INIT,
-	/** the element is currently being loaded **/
-	LOADING,
-	/** loading has been stopped, either cancelled or with exception **/
-	LOAD_STOPPED,
-	/** Loading has finished, the element can be used **/
-	LOADED
+public interface IResourceContainer<R, P extends IOpenshiftUIElement<?, ?>> extends IOpenshiftUIElement<R, P> {
+	Collection<IResourceWrapper<?, ?>> getResourcesOfKind(String kind);
+	<T extends IResourceWrapper<?, ?>> Collection<T> getResourcesOfType(Class<T> clazz);
+	Collection<IResourceWrapper<?, ?>> getResources();
 }

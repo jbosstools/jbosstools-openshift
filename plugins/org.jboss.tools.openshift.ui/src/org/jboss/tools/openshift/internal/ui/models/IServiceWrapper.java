@@ -10,22 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
+import com.openshift.restclient.model.IService;
+
 /**
- * The state of an entity with delayed loading. Such entities are initially
- * empty. When loading is started, they are filled with results fetched from
- * Openshift. Once loading has finished, a change notification will be sent for
- * the element.
- * 
+ * Wrapper for Services
  * @author Thomas Mäder
  *
  */
-public enum LoadingState {
-	/** The no loading attempt has been made yet **/
-	INIT,
-	/** the element is currently being loaded **/
-	LOADING,
-	/** loading has been stopped, either cancelled or with exception **/
-	LOAD_STOPPED,
-	/** Loading has finished, the element can be used **/
-	LOADED
+public interface IServiceWrapper extends IResourceWrapper<IService, IProjectWrapper>, IResourceContainer<IService, IProjectWrapper> {
+
 }

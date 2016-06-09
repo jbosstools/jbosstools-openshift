@@ -217,6 +217,7 @@ public abstract class BaseExplorerContentProvider implements ITreeContentProvide
 		public boolean hasChildren() {
 			return !children.isEmpty();
 		}
+
 	}
 
 	public static class NotConnectedUserStub {

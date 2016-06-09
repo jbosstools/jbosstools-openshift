@@ -26,11 +26,11 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider;
-import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IConnectionWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IExceptionHandler;
+import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
-import org.jboss.tools.openshift.internal.ui.models.ProjectWrapper;
 import org.jboss.tools.openshift.test.util.UITestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -51,7 +51,7 @@ public class OpenShiftExplorerContentProviderTest {
 
 	private OpenShiftExplorerContentProvider provider;
 	private Connection connection;
-	private ConnectionWrapper connectionWrapper;
+	private IConnectionWrapper connectionWrapper;
 	private OpenshiftUIModel root;
 	private ConnectionsRegistry registry;
 	@Mock private IProject project;
@@ -66,12 +66,12 @@ public class OpenShiftExplorerContentProviderTest {
 		connection = spy(new Connection(client, null, null));
 		doReturn(true).when(connection).ownsResource(any(IResource.class));
 		doReturn("hookaboo").when(connection).getUsername();
-		
-		connectionWrapper= new ConnectionWrapper(root, connection);
-		
 		registry = ConnectionsRegistrySingleton.getInstance();
 		registry.clear();
 		registry.add(connection);
+		
+		
+		connectionWrapper= root.getConnections().iterator().next();
 		
 		provider = new OpenShiftExplorerContentProvider(root);
 	}
@@ -88,7 +88,7 @@ public class OpenShiftExplorerContentProviderTest {
 		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
 		UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
 		
-		assertArrayEquals("Exp. to get all the projects for a Connection", projects.toArray(),  Arrays.asList(provider.getChildren(connectionWrapper)).stream().map(a->((ProjectWrapper)a).getResource()).toArray());
+		assertArrayEquals("Exp. to get all the projects for a Connection", projects.toArray(),  Arrays.asList(provider.getChildren(connectionWrapper)).stream().map(a->((IProjectWrapper)a).getWrapped()).toArray());
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class OpenShiftExplorerContentProviderTest {
 	}
 	@Test
 	public void projectsShouldHaveChildren(){
-		assertTrue("Exp. #hasChildren to return true for IProject", provider.hasChildren(mock(ProjectWrapper.class)));
+		assertTrue("Exp. #hasChildren to return true for IProject", provider.hasChildren(mock(IProjectWrapper.class)));
 	}
 
 }

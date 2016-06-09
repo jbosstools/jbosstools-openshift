@@ -27,8 +27,8 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
 import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
-import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
-import org.jboss.tools.openshift.internal.ui.models.ProjectWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 
 /**
  * @author jeff.cantrill
@@ -41,21 +41,21 @@ public class DeleteResourceHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService()
 				.getSelection();
-		AbstractResourceWrapper<?, ?>[] resources = UIUtils.getElements(selection, AbstractResourceWrapper.class);
+		IResourceWrapper<?, ?>[] resources = UIUtils.getElements(selection, IResourceWrapper.class);
 		if (resources == null || resources.length == 0) {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No resource selected that we can delete."); //$NON-NLS-1$
 		}
-		try (Stream<AbstractResourceWrapper<?, ?>> stream = Arrays.stream(resources)) {
-			boolean hasProject = stream.anyMatch(resource -> resource instanceof ProjectWrapper);
+		try (Stream<IResourceWrapper<?, ?>> stream = Arrays.stream(resources)) {
+			boolean hasProject = stream.anyMatch(resource -> resource instanceof IProjectWrapper);
 
 			String message = (resources.length > 1)
 					? (hasProject) ? OpenShiftUIMessages.ProjectDeletionConfirmationN
 							: OpenShiftUIMessages.ResourceDeletionConfirmationN
 					: (hasProject)
 							? NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation,
-									resources[0].getResource().getName())
+									resources[0].getWrapped().getName())
 							: NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation,
-									resources[0].getResource().getName());
+									resources[0].getWrapped().getName());
 			boolean confirm = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event),
 					OpenShiftUIMessages.ResourceDeletionDialogTitle, message);
 			if (confirm) {
@@ -73,7 +73,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 	 * @param uiResources
 	 *            the UI resources to delete
 	 */
-	private void deleteResources(final AbstractResourceWrapper<?, ?>[] uiResources) {
+	private void deleteResources(final IResourceWrapper<?, ?>[] uiResources) {
 		final JobGroup group = new JobGroup("Delete Openshift resources", 1, uiResources.length) {
 
 			/*
@@ -87,9 +87,9 @@ public class DeleteResourceHandler extends AbstractHandler {
 			}
 
 		};
-		try (Stream<AbstractResourceWrapper<?, ?>> stream = Arrays.stream(uiResources)) {
+		try (Stream<IResourceWrapper<?, ?>> stream = Arrays.stream(uiResources)) {
 			stream.forEach(uiResource -> {
-				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(uiResource.getResource());
+				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(uiResource.getWrapped());
 				job.setJobGroup(group);
 				job.schedule();
 			});

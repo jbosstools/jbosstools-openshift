@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.containsAll;
@@ -9,6 +19,7 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
@@ -44,16 +55,12 @@ public class ServiceResourceMapper {
 					result.addAll(getRelated(resources, (IDeploymentConfig) resource));
 				}
 			} else if (resource instanceof IRoute) {
-				if (isRelated(s, (IRoute)resource)) {
+				if (ResourceUtils.areRelated((IRoute)resource, s)) {
 					result.add(resource);
 				}
 			}
 		});
 		return result;
-	}
-
-	private static boolean isRelated(IService s, IRoute resource) {
-		return resource.getServiceName().equals(s.getName());
 	}
 
 	private static boolean isRelated(IService s, IDeploymentConfig dc) {

@@ -26,13 +26,14 @@ import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.jboss.tools.openshift.internal.ui.handler.ScaleDeploymentHandler;
-import org.jboss.tools.openshift.internal.ui.models.ProjectWrapper;
-import org.jboss.tools.openshift.internal.ui.models.ResourceWrapper;
-import org.jboss.tools.openshift.internal.ui.models.ServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.ResourceKind;
@@ -46,11 +47,11 @@ public class ScaleDeploymentHandlerTest {
 	@Mock private IReplicationController rc;
 	@Mock private IDeploymentConfig dc;
 	@Mock private IService service;
-	@Mock private ProjectWrapper project;
-	@Mock private ResourceWrapper uiModel;
+	@Mock private IProjectWrapper project;
+	@Mock private IResourceWrapper<IReplicationController, ?> uiModel;
 	
 	private TestScaleDeploymentHandler handler;
-	private ServiceWrapper deployment;
+	private IServiceWrapper deployment;
 	@SuppressWarnings("rawtypes")
 	private Map parameters = new HashMap();
 	private ExecutionEvent event;
@@ -62,10 +63,11 @@ public class ScaleDeploymentHandlerTest {
 		event = new ExecutionEvent(null, parameters, null, null);
 		when(service.getName()).thenReturn("aService");
 		
-		deployment = spy(new ServiceWrapper(project, service));
+		deployment = Mockito.mock(IServiceWrapper.class);
+		when(deployment.getWrapped()).thenReturn(service);
 		when(deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER)).thenReturn(Arrays.asList(uiModel));
 		
-		when(uiModel.getResource()).thenReturn(rc);
+		when(uiModel.getWrapped()).thenReturn(rc);
 		when(rc.getDesiredReplicaCount()).thenReturn(2);
 	}
 
@@ -141,15 +143,15 @@ public class ScaleDeploymentHandlerTest {
 	
 	private void givenADeploymentIsSelected() {
 		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(deployment).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(ServiceWrapper.class));
+		doReturn(deployment).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
 	}
 	private void givenAReplicationControllerIsSelected() {
 		doReturn(rc).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(ServiceWrapper.class));
+		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
 	}
 	private void givenADeploymentConfigIsSelected() {
 		doReturn(dc).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(ServiceWrapper.class));
+		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
 	}
 	
 	private void givenAUserCancelsTheReplicaInputDialog() {

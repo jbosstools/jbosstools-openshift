@@ -25,8 +25,8 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
-import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
-import org.jboss.tools.openshift.internal.ui.models.ServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.ImageStreamApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
@@ -134,9 +134,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 
 	@Override
 	public StyledString getStyledText(Object element) {
-		if (element instanceof ServiceWrapper) {
-			ServiceWrapper d = (ServiceWrapper) element;
-			return style(d.getResource().getName(), formatRoute(d.getResourcesOfKind(ResourceKind.ROUTE)));
+		if (element instanceof IServiceWrapper) {
+			IServiceWrapper d = (IServiceWrapper) element;
+			return style(d.getWrapped().getName(), formatRoute(d.getResourcesOfKind(ResourceKind.ROUTE)));
 		}
 		element = getAdaptedElement(element);
 		if(element instanceof NewProjectLinkNode) {
@@ -176,9 +176,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 		return super.getStyledText(element);
 	}
 
-	private String formatRoute(Collection<AbstractResourceWrapper<?, ?>> routes) {
+	private String formatRoute(Collection<IResourceWrapper<?, ?>> routes) {
 		if(routes.size() > 0) {
-			IRoute route = (IRoute)routes.iterator().next().getResource();
+			IRoute route = (IRoute)routes.iterator().next().getWrapped();
 			return route.getURL();
 			
 		}

@@ -1,8 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
 import org.eclipse.core.runtime.IAdaptable;
 
-public abstract class AbstractOpenshiftUIElement<R, P extends IOpenshiftUIElement<?>> implements IAdaptable, IOpenshiftUIElement<P> {
+/**
+ * Shared implementation of all UI elements.
+ * @author Thomas Mäder
+ *
+ * @param <R> the wrapped element type
+ * @param <P> the parent type
+ */
+abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElement<?, ?>> implements IAdaptable, IOpenshiftUIElement<R, P> {
 	private P parent;
 	private R wrapped;
 
@@ -19,6 +36,10 @@ public abstract class AbstractOpenshiftUIElement<R, P extends IOpenshiftUIElemen
 		return wrapped;
 	}
 	
+	public OpenshiftUIModel getRoot() {
+		return getParent().getRoot();
+	}
+
 	@SuppressWarnings("unchecked")
 	public synchronized <T> T getAdapter(Class<T> adapter) {
 		if (adapter.isInstance(this)) {
@@ -46,11 +67,20 @@ public abstract class AbstractOpenshiftUIElement<R, P extends IOpenshiftUIElemen
 		return wrapped.hashCode();
 	}
 	
-	public synchronized void updateWith(R r) {
+	synchronized void updateWith(R r) {
 		wrapped= r;
 		fireChanged();
 	}
 	
+
+	protected void fireChanged() {
+		fireChanged(this);
+	}
+	
+	protected void fireChanged(IOpenshiftUIElement<?, ?> source) {
+		getParent().fireChanged(source);
+	}
+
 	@Override
 	public void refresh() {
 		// since the containment structure depends on the content of a single

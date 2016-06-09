@@ -32,8 +32,8 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.AbstractResourceWrapper;
-import org.jboss.tools.openshift.internal.ui.models.ServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablePage;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablesPageModel;
@@ -76,10 +76,10 @@ public class ManageEnvironmentVariablesHandler extends AbstractHandler{
 		if(rc != null) {
 			return rc;
 		}
-		ServiceWrapper deployment = UIUtils.getFirstElement(selection, ServiceWrapper.class);
-		Collection<AbstractResourceWrapper<?, ?>> dcs = deployment.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG);
+		IServiceWrapper deployment = UIUtils.getFirstElement(selection, IServiceWrapper.class);
+		Collection<IResourceWrapper<?, ?>> dcs = deployment.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG);
 		if(!dcs.isEmpty()) {
-			dc = (IDeploymentConfig)dcs.iterator().next().getResource();
+			dc = (IDeploymentConfig)dcs.iterator().next().getWrapped();
 			if(dc != null) {
 				return dc;
 			}

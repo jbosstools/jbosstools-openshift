@@ -26,7 +26,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 import org.jboss.tools.openshift.internal.ui.explorer.NewProjectLinkNode;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
-import org.jboss.tools.openshift.internal.ui.models.ResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.ImageStreamApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
@@ -72,10 +72,11 @@ public class OpenShiftExplorerLabelProviderTest {
 		return resource;
 	}
 
-	private <T extends IResource> ResourceWrapper givenAResourceUIModel(Class<T> klass, String kind){
+	private <T extends IResource> IResourceWrapper<T, ?> givenAResourceUIModel(Class<T> klass, String kind){
 		T resource = givenAResource(klass, kind);
-		ResourceWrapper resourceUIModel = mock(ResourceWrapper.class);
-		when(resourceUIModel.getResource()).thenReturn(resource);
+		@SuppressWarnings("unchecked")
+		IResourceWrapper<T, ?> resourceUIModel = mock(IResourceWrapper.class);
+		when(resourceUIModel.getWrapped()).thenReturn(resource);
 		when(resourceUIModel.getAdapter((Class<?>)Mockito.any(Class.class))).then(invocation-> {
 			if (invocation.getArguments()[0] == IResource.class) {
 				return resource;

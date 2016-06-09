@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
 import java.util.ArrayList;
@@ -15,7 +25,7 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 
 import com.openshift.restclient.model.IResource;
 
-public class OpenshiftUIModel implements IOpenshiftUIElement<IOpenshiftUIElement<?>> {
+public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegistry, OpenshiftUIModel> {
 	private Map<IOpenShiftConnection, ConnectionWrapper> connections = new HashMap<>();
 	private List<IElementListener> listeners = new ArrayList<IElementListener>();
 
@@ -26,6 +36,7 @@ public class OpenshiftUIModel implements IOpenshiftUIElement<IOpenshiftUIElement
 	}
 
 	public OpenshiftUIModel(ConnectionsRegistry registry) {
+		super(null, registry);
 		listener = new IConnectionsRegistryListener() {
 
 			@Override
@@ -33,7 +44,7 @@ public class OpenshiftUIModel implements IOpenshiftUIElement<IOpenshiftUIElement
 				synchronized (connections) {
 					connections.remove(connection);
 				}
-				fireChanged();
+				fireChanged(OpenshiftUIModel.this);
 			}
 
 			@Override
@@ -57,7 +68,7 @@ public class OpenshiftUIModel implements IOpenshiftUIElement<IOpenshiftUIElement
 					connections.put((IOpenShiftConnection) connection,
 							new ConnectionWrapper(OpenshiftUIModel.this, (IOpenShiftConnection) connection));
 				}
-				fireChanged();
+				fireChanged(OpenshiftUIModel.this);
 			}
 		};
 		Collection<IConnection> allConnections = registry.getAll();
@@ -83,12 +94,7 @@ public class OpenshiftUIModel implements IOpenshiftUIElement<IOpenshiftUIElement
 	}
 
 	@Override
-	public IOpenshiftUIElement<?> getParent() {
-		return null;
-	}
-
-	@Override
-	public void fireChanged(IOpenshiftUIElement<?> source) {
+	protected void fireChanged(IOpenshiftUIElement<?, ?> source) {
 		if (Display.getCurrent() != null) {
 			dispatchChange(source);
 		} else {
@@ -102,7 +108,7 @@ public class OpenshiftUIModel implements IOpenshiftUIElement<IOpenshiftUIElement
 		}
 	}
 
-	protected void dispatchChange(IOpenshiftUIElement<?> source) {
+	private void dispatchChange(IOpenshiftUIElement<?, ?> source) {
 		Collection<IElementListener> copy = new ArrayList<>();
 		synchronized (listeners) {
 			copy.addAll(listeners);
@@ -147,11 +153,7 @@ public class OpenshiftUIModel implements IOpenshiftUIElement<IOpenshiftUIElement
 			synchronized (connections) {
 				HashMap<IOpenShiftConnection, ConnectionWrapper> oldWrappers = new HashMap<>(connections);
 				connections.clear();
-				for (IConnection r : ConnectionsRegistrySingleton.getInstance().getAll()) {
-					if (!(r instanceof IOpenShiftConnection)) {
-						return;
-					}
-					IOpenShiftConnection connection= (IOpenShiftConnection) r;
+				for (IOpenShiftConnection connection : ConnectionsRegistrySingleton.getInstance().getAll(IOpenShiftConnection.class)) {
 					ConnectionWrapper existingWrapper = oldWrappers.remove(connection);
 
 					if (existingWrapper == null) {
@@ -169,14 +171,14 @@ public class OpenshiftUIModel implements IOpenshiftUIElement<IOpenshiftUIElement
 			}
 
 			if (changed) {
-				fireChanged();
+				fireChanged(this);
 			}
 
 			updated.keySet().forEach(r -> {
 				ConnectionWrapper wrapper = updated.get(r);
 				wrapper.updateWith(r);
 			});
-		for (ConnectionWrapper connection : connections.values()) {
+		for (ConnectionWrapper connection : getConnections()) {
 			connection.refresh();
 		}
 	}

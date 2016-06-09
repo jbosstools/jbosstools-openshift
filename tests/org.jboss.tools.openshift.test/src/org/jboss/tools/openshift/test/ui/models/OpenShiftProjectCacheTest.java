@@ -18,19 +18,19 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
-import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IConnectionWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IExceptionHandler;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
-import org.jboss.tools.openshift.internal.ui.models.ProjectWrapper;
 import org.jboss.tools.openshift.test.util.UITestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -46,7 +46,7 @@ import com.openshift.restclient.model.IProject;
 @RunWith(MockitoJUnitRunner.class)
 public class OpenShiftProjectCacheTest {
 
-	private ConnectionWrapper connectionWrapper;
+	private IConnectionWrapper connectionWrapper;
 	private OpenshiftUIModel root;
 
 	@Mock
@@ -74,7 +74,7 @@ public class OpenShiftProjectCacheTest {
 	
 	@Test
 	public void testGetProjectForOnlyMakesInitialCallToServer() throws InterruptedException, TimeoutException {
-		IOpenShiftConnection connection = connectionWrapper.getConnection();
+		IOpenShiftConnection connection = connectionWrapper.getWrapped();
 		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(new ArrayList<>());
 		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
 		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
@@ -94,13 +94,13 @@ public class OpenShiftProjectCacheTest {
 		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
 				Collections.emptyList(), Arrays.asList(project));
 
-		List<ProjectWrapper> adapters = new ArrayList<>(connectionWrapper.getProjects());
+		Collection<IResourceWrapper<?, ?>> adapters = connectionWrapper.getResources();
 		assertAdapters(adapters);
 
 		// project remove
 		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
 				Arrays.asList(project), Collections.emptyList());
-		adapters = new ArrayList<>(connectionWrapper.getProjects());
+		adapters = connectionWrapper.getResources();
 		assertTrue(adapters.isEmpty());
 	}
 
@@ -113,27 +113,28 @@ public class OpenShiftProjectCacheTest {
 		// provide initial loading
 		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
 		UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
-		List<ProjectWrapper> adapters = new ArrayList<>(connectionWrapper.getProjects());
+		Collection<IResourceWrapper<?, ?>> adapters = connectionWrapper.getResources();
 		assertEquals(2, adapters.size());
 
 		// project remove
 		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
 				Arrays.asList(project, project2), Arrays.asList(project));
-		adapters = new ArrayList<>(connectionWrapper.getProjects());
+		adapters = connectionWrapper.getResources();
 		assertAdapters(adapters);
 
 		// project add
 		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
 				Arrays.asList(project), Arrays.asList(project, project2));
 
-		adapters = new ArrayList<>(connectionWrapper.getProjects());
+		adapters = connectionWrapper.getResources();
 		assertEquals(2, adapters.size());
 	}
 
-	private void assertAdapters(List<ProjectWrapper> adapters) {
+	private void assertAdapters(Collection<IResourceWrapper<?, ?>> adapters) {
 		assertEquals(1, adapters.size());
-		assertEquals(project, adapters.get(0).getResource());
-		assertEquals(conn, adapters.get(0).getParent().getConnection());
+		IResourceWrapper<?, ?> r= adapters.iterator().next();
+		assertEquals(project, r.getWrapped());
+		assertEquals(conn, r.getParent().getWrapped());
 	}
 
 	public interface TestConnection extends IConnection, IOpenShiftConnection {
