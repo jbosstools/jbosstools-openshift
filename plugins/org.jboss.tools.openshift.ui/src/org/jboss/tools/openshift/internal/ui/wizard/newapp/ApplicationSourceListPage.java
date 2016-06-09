@@ -204,6 +204,9 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 		TemplateListPageValidator pageValidator = new TemplateListPageValidator(useLocalTemplateObservable, localTemplateFilename, serverTemplate, selectedTemplate, selectedEclipseProject, parent);
 		dbc.addValidationStatusProvider(pageValidator );
 		ControlDecorationSupport.create(pageValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		ProjectNameValidator projectNameValidator = new ProjectNameValidator(selectedEclipseProject, parent);
+		dbc.addValidationStatusProvider(projectNameValidator);
+		ControlDecorationSupport.create(projectNameValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 	}
 
 	private IObservableValue createEclipseProjectControls(Composite parent, DataBindingContext dbc) {
@@ -706,12 +709,57 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			IStatus status = ValidationStatus.ok();
 			mutableTargets.clear();
 			
-			final String projectName = (String) projectNameObservable.getValue();
+			projectNameObservable.getValue();
 			Object useLocalTemplate = useLocalTemplateObservable.getValue();
 			Object localTemplateFilename = localTemplateFilenameObservable.getValue();
-			Object serverTemplate = serverTemplateObservable.getValue();
+			serverTemplateObservable.getValue();
 			Object selectedTemplate = selectedTemplateObservable.getValue();
 
+			if(status.getSeverity() < IStatus.ERROR) {
+				if (Boolean.TRUE.equals(useLocalTemplate)) {
+					String localTemplate = (String)localTemplateFilename;
+					if (StringUtils.isNotBlank(localTemplate)) {
+						if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(localTemplate) && !isFile(localTemplate)) {
+							status = ValidationStatus.error(NLS.bind("{0} is not a valid file.", localTemplate));
+							mutableTargets.add(localTemplateFilenameObservable);
+						}
+					} else {
+						status = ValidationStatus.cancel("Please select a local template file or URL.");
+						mutableTargets.add(localTemplateFilenameObservable);
+					}
+				} else {
+					if (selectedTemplate == null){
+						status = ValidationStatus.cancel("Please select an image or template.");
+						mutableTargets.add(serverTemplateObservable);
+					}
+				}
+			}
+			// force redraw since removed decorations somehow stay visible, GTK3 bug?
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
+			composite.redraw();
+
+			return status;
+		}
+
+		@Override
+		public IObservableList getTargets() {
+			return mutableTargets;
+		}
+	}
+
+	class ProjectNameValidator extends MultiValidator {
+		private IObservableValue projectNameObservable;
+		private IObservableList mutableTargets = new WritableList<>();
+		private Composite composite;
+
+		public ProjectNameValidator(IObservableValue projectNameObservable, Composite composite) {
+			this.projectNameObservable = projectNameObservable;
+			this.composite = composite;
+		}
+
+		protected IStatus validate() {
+			IStatus status = ValidationStatus.ok();
+			final String projectName = (String) projectNameObservable.getValue();
 			if (!StringUtils.isEmpty(projectName)) {
 				final org.eclipse.core.resources.IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 				if (!ProjectUtils.exists(project)) {
@@ -739,35 +787,8 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			if (!status.isOK()) {
 				mutableTargets.add(projectNameObservable);
 			}
-			if(status.getSeverity() < IStatus.ERROR) {
-				if (Boolean.TRUE.equals(useLocalTemplate)) {
-					String localTemplate = (String)localTemplateFilename;
-					if (StringUtils.isNotBlank(localTemplate)) { 
-						if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(localTemplate) && !isFile(localTemplate)) {
-							status = ValidationStatus.error(NLS.bind("{0} is not a valid file.", localTemplate));
-							mutableTargets.add(localTemplateFilenameObservable);
-						}
-					} else {
-						status = ValidationStatus.cancel("Please select a local template file or URL.");
-						mutableTargets.add(localTemplateFilenameObservable);
-					}
-				} else {
-					if (selectedTemplate == null){
-						status = ValidationStatus.cancel("Please select an image or template.");
-						mutableTargets.add(serverTemplateObservable);
-					} 
-				}
-			}			
-			// force redraw since removed decorations somehow stay visible, GTK3 bug?
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
 			composite.redraw();
-
 			return status;
-		}
-
-		@Override
-		public IObservableList getTargets() {
-			return mutableTargets;
 		}
 	}
 
