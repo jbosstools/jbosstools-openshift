@@ -105,6 +105,9 @@ public class ImportJob extends WorkspaceJob {
 				return OpenShiftUIActivator.statusFactory().errorStatus(
 						"An exception occurred while creating local git repository.", e);
 			}
+		} catch (InterruptedException e) {
+			if(delegatingMonitor.isCanceled()) return Status.CANCEL_STATUS;
+			return OpenShiftUIActivator.statusFactory().errorStatus("Could not import project to the workspace.", e);
 		} catch (Exception e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus("Could not import project to the workspace.", e);
 		} finally {
