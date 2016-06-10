@@ -24,5 +24,5 @@ Require-Bundle: org.jboss.tools.common.core;bundle-version="3.7.0",
  org.jboss.tools.openshift.common.core,
  org.eclipse.debug.core,
  org.jboss.ide.eclipse.as.core;bundle-version="3.1.1",
- org.jboss.tools.openshift.core;bundle-version="3.3.0"
+ org.jboss.tools.openshift.core;bundle-version="3.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
