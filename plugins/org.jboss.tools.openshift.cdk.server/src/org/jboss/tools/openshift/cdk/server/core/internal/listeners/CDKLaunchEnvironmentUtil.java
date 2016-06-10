@@ -47,7 +47,8 @@ public class CDKLaunchEnvironmentUtil {
 		Map<String, String> launchEnv = null;
 		try {
 			ILaunchConfiguration wc = server.getLaunchConfiguration(false, new NullProgressMonitor());
-			launchEnv = wc.getAttribute(IExternalLaunchConstants.ENVIRONMENT_VARS_KEY, (Map<String, String>) null);
+			if( wc != null )
+				launchEnv = wc.getAttribute(IExternalLaunchConstants.ENVIRONMENT_VARS_KEY, (Map<String, String>) null);
 		} catch (CoreException ce) {
 			CDKCoreActivator.pluginLog().logWarning(
 					"Unable to load environment for vagrant status call. System environment will be used instead.");

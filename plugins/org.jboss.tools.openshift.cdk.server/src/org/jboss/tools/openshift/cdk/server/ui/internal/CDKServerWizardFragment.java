@@ -45,6 +45,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 	private String homeDir;
 	private Text homeText;
 	private Button browseButton;
+	private String selectedUser = null;
 	private ChooseCredentialComponent credentials;
 	
 	
@@ -67,6 +68,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 	@Override
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		this.handle = handle;
+		selectedUser = null;
 		Composite main = new Composite(parent, SWT.NONE);
 		handle.setTitle("Red Hat Container Development Environment");
 		handle.setDescription("A server adapter representing a Red Hat Container Development Kit installation folder containing a Vagrantfile.");
@@ -78,6 +80,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		credentials.addCredentialListener(new ICredentialCompositeListener() {
 			@Override
 			public void credentialsChanged() {
+				selectedUser = credentials.getUser();
 				validate();
 			}
 		});
@@ -117,8 +120,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 
 		});
 		
-
-		
+		selectedUser = credentials.getUser();
 		
 		String err = findError();
 		setComplete(err == null);
@@ -205,6 +207,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		if( s instanceof IServerWorkingCopy ) {
 			IServerWorkingCopy swc = (IServerWorkingCopy) s;
 			swc.setAttribute(CDKServer.PROP_FOLDER, homeDir);
+			swc.setAttribute(CDKServer.PROP_USERNAME, selectedUser);
 		}
 	}
 	
