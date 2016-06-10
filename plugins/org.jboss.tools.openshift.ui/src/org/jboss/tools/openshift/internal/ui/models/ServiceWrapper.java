@@ -16,7 +16,7 @@ import java.util.Map;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
-class ServiceWrapper extends ResourceContainer<IService, ProjectWrapper> {
+class ServiceWrapper extends ResourceContainer<IService, ProjectWrapper> implements IServiceWrapper {
 	public ServiceWrapper(ProjectWrapper parent, IService resource) {
 		super(parent, resource);
 	}
