@@ -28,7 +28,15 @@ public class URLValidator implements IValidator{
 	private static final String [] SCHEMES = new String [] {"http", "https"};
 	private final String invalidURLMessage;
 	private boolean allowEmpty = false;
-	private UrlValidator validator = new UrlValidator(SCHEMES, UrlValidator.ALLOW_LOCAL_URLS);
+	@SuppressWarnings("serial")
+	private UrlValidator validator = new UrlValidator(SCHEMES, UrlValidator.ALLOW_LOCAL_URLS) {
+		protected boolean isValidAuthority(String domain) {
+			//default implementation doesn't recognize *.cdk domains as valid authorities
+			//so we bypass that check altogether. An alternative would be to provide a RegexValidator, 
+			//but to use what regexp?
+			return true;
+		};
+	};
 	
 	/**
 	 * @param urlType  The value to plug into error message of 'Please provide a valid TYPE URL'
