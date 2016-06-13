@@ -35,6 +35,7 @@ import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * Contributes OpenShift 3 specific content to the OpenShift explorer view
@@ -63,6 +64,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 					refreshViewer(ConnectionsRegistrySingleton.getInstance());
 				} else {
 					refreshViewer(element);
+				}
+				if (element.getWrapped() instanceof IRoute) {
+					viewer.update(element.getParent(), null);
 				}
 			}
 		};
