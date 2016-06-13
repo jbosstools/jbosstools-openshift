@@ -88,7 +88,14 @@ public class ServiceResourceMapper {
 		Collection<IPod> pods = getRelatedPods(resources, builds, dc);
 		result.addAll(pods);
 		result.addAll(getRelatedReplicationControllers(resources, pods));
+		result.addAll(getRelatedReplicationControllers(resources, dc));
 		return result;
+	}
+
+	private static Collection<IResource> getRelatedReplicationControllers(Collection<IResource> resources, IDeploymentConfig dc) {
+		return resources.stream().filter(r-> {
+			 return dc.getName().equals(r.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME));
+		}).collect(Collectors.toList());
 	}
 
 	private static Collection<IResource> getRelatedReplicationControllers(Collection<IResource> resources,
