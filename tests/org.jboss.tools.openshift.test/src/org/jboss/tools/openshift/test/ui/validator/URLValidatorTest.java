@@ -24,7 +24,13 @@ public class URLValidatorTest {
 	public void testHttpsPassValidURL() {
 		assertEquals(ValidationStatus.ok(), validator.validate("https://foobar"));
 	}
-
+	
+	@Test
+	public void testCdkDomainValidURL() {
+		assertEquals(ValidationStatus.ok(), 
+				validator.validate("https://openshift.cdk"));
+	}
+	
 	@Test
 	public void testHttpPassValidURL() {
 		assertEquals(ValidationStatus.ok(), validator.validate("http://foobar"));
