@@ -299,8 +299,8 @@
 						<and>
 							<count value="1" />
 							<iterate ifEmpty="false" operator="or">
-								<instanceof
-									value="org.jboss.tools.openshift.common.core.connection.IConnection" />
+								<adapt
+									type="org.jboss.tools.openshift.common.core.connection.IConnection" />
 							</iterate>
 						</and>
 					</with>
