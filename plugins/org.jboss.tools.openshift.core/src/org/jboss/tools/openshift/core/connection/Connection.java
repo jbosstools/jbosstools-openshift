@@ -23,6 +23,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.IRefreshable;
@@ -58,13 +59,10 @@ import com.openshift.restclient.model.IResourceBuilder;
 
 public class Connection extends ObservablePojo implements IRefreshable, IOpenShiftConnection {
 
-	private static final String SECURE_STORAGE_BASEKEY = "org.jboss.tools.openshift.core";
-	private static final String SECURE_STORAGE_PASSWORD_KEY = "password";
-	private static final String SECURE_STORAGE_TOKEN_KEY = "token";
-	private static final String SECURE_STORAGE_AUTHSCHEME = "authtype";
+	public static final String SECURE_STORAGE_BASEKEY = "org.jboss.tools.openshift.core";
+	public static final String SECURE_STORAGE_PASSWORD_KEY = "password";
+	public static final String SECURE_STORAGE_TOKEN_KEY = "token";
 
-	public static final String PROPERTY_REMEMBER_TOKEN = "rememberToken";
-	
 	private IClient client;
 	private String username;
 	private String password;
@@ -193,7 +191,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 
 	protected String load(String id) {
 		String value = null;
-		SecureStore store = getSecureStore();
+		SecureStore store = getSecureStore(getHost(), getUsername());
 		if (store != null) {
 			try {
 				value = store.get(id);
@@ -205,7 +203,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 
 	private boolean saveOrClear(String id, String value, boolean saveOrClear) {
-		SecureStore store = getSecureStore();
+		SecureStore store = getSecureStore(getHost(), getUsername());
 		if (store != null) {
 			try {
 				if (saveOrClear
@@ -216,7 +214,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 				}
 			} catch (SecureStoreException e) {
 				firePropertyChange(SecureStoreException.ID, null, e);
-				OpenShiftCoreActivator.logError("Exception saving connection property", e);
+				OpenShiftCoreActivator.logError(NLS.bind("Exception saving {0} for connection to {1}",id, getHost()), e);
 				if(e.getCause() instanceof StorageException) {
 					return false;
 				}
@@ -228,8 +226,8 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	/**
 	 * Returns a secure store for the current host and username
 	 */
-	protected SecureStore getSecureStore() {
-		return new SecureStore(new OpenShiftSecureStorageKey(SECURE_STORAGE_BASEKEY, getHost(), getUsername()));
+	protected SecureStore getSecureStore(String host, String username) {
+		return new SecureStore(new OpenShiftSecureStorageKey(SECURE_STORAGE_BASEKEY, host, username));
 	}
 
 	@Override
@@ -246,42 +244,49 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		client.setAuthorizationStrategy(createAuthorizationStrategy());
 		try {
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
-			if (!context.isAuthorized() 
-					&& credentialsPrompter != null
-					&& promptCredentialsEnabled){
-				credentialsPrompter.promptAndAuthenticate(this, null);
+			if (context.isAuthorized()) {
+				String username = context.getUser().getName();
+				String token = context.getToken();
+				updateAuthorized(username, token);
 			} else {
-				updateCredentials(context);
-				// TODO: move this logic to openshift-restclient-java
-				// force auth strategy to token of authorized
-				TokenAuthorizationStrategy tokenStrategy = new TokenAuthorizationStrategy(getToken(), context.getUser().getName());
-				client.setAuthorizationStrategy(tokenStrategy);
+				if (promptCredentialsEnabled
+						&& credentialsPrompter != null) {
+					credentialsPrompter.promptAndAuthenticate(this, null);
+				}
 			}
 		} catch (UnauthorizedException e) {
-			if (!promptCredentialsEnabled
-					|| credentialsPrompter == null) {
-				throw e;
-			} else {
+			if (promptCredentialsEnabled
+					&& credentialsPrompter != null) {
 				credentialsPrompter.promptAndAuthenticate(this, e.getAuthorizationDetails());
+			} else {
+				throw e;
 			}
 		}
 		return getToken() != null;
+	}
+
+	private void updateAuthorized(String username, String token) {
+		setToken(token);
+		if (IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(getAuthScheme())) {
+			setUsername(username);
+		}
+		// force auth strategy to token if authorized
+		TokenAuthorizationStrategy tokenStrategy = new TokenAuthorizationStrategy(token, username);
+		client.setAuthorizationStrategy(tokenStrategy);
 	}
 
 	private void savePasswordOrToken() {
 		// not using getters here because for save there should be no reason
 		// to trigger a load from storage.
 		if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(getAuthScheme())) {
-			boolean success = 
-					saveOrClear(SECURE_STORAGE_PASSWORD_KEY, this.password, isRememberPassword());
+			boolean success = saveOrClear(SECURE_STORAGE_PASSWORD_KEY, this.password, isRememberPassword());
 			if (success) {
 				//Avoid second secure storage prompt.
 				// Password is stored, token should be cleared.
 				clearToken();
 			}
 		} else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(getAuthScheme())){
-			boolean success = 
-					saveOrClear(SECURE_STORAGE_TOKEN_KEY, getToken(), isRememberToken());
+			boolean success = saveOrClear(SECURE_STORAGE_TOKEN_KEY, getToken(), isRememberToken());
 			if(success) { 
 				//Avoid second secure storage prompt.
 				//Token is stored, password should be cleared.
@@ -291,13 +296,14 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 
 	private void clearPassword() {
-		password = null;
 		setRememberPassword(false);
+		setPassword(null);
 		saveOrClear(SECURE_STORAGE_PASSWORD_KEY, null, false);
 	}
 
 	private void clearToken() {
 		setRememberToken(false);
+		setToken(null);
 		saveOrClear(SECURE_STORAGE_TOKEN_KEY, null, false);
 	}
 
@@ -308,13 +314,6 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		}
 	}
 
-	private void updateCredentials(IAuthorizationContext context) {
-		setToken(context.getToken());
-		if (IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(getAuthScheme())) {
-			setUsername(context.getUser().getName());
-		}
-	}
-	
 	private IAuthorizationStrategy createAuthorizationStrategy() {
 		if (org.apache.commons.lang.StringUtils.isNotEmpty(getToken())
 				|| IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(getAuthScheme())) {
@@ -350,7 +349,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 
 	/**
 	 * Return true if the client had no strategy instance and it was set to the value provided by 
-	 * method getAuthorizationStrategy()
+	 * method createAuthorizationStrategy()
 	 * 
 	 * @return
 	 */
@@ -363,7 +362,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 	
 	public void setAuthScheme(String scheme) {
-		firePropertyChange(SECURE_STORAGE_AUTHSCHEME, this.authScheme, this.authScheme = scheme);
+		firePropertyChange(PROPERTY_AUTHSCHEME, this.authScheme, this.authScheme = scheme);
 	}
 
 	@Override
