@@ -1157,6 +1157,13 @@
           type="org.eclipse.ui.views.properties.IPropertySource">
     </adapter>
  </factory>
+ <factory
+       adaptableType="com.openshift.restclient.model.IResource"
+       class="org.jboss.tools.openshift.internal.ui.utils.ResourceProcessorAdapterFactory">
+    <adapter
+          type="org.jboss.tools.openshift.internal.ui.utils.ResourceProcessor">
+    </adapter>
+ </factory>
 	</extension>
 
 	<!-- definitions -->

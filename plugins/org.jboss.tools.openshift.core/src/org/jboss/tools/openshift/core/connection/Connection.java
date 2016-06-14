@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -14,6 +14,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,15 @@ import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IResourceBuilder;
 
+/**
+ * Openshift connection
+ * 
+ * @author jeff.cantrill
+ * @author Andre Dietisheim
+ * @author Viacheslav Kabanovich
+ * @author Jeff Maury
+ *
+ */
 public class Connection extends ObservablePojo implements IConnection, IRefreshable, IOpenShiftConnection {
 
 	private static final String SECURE_STORAGE_BASEKEY = "org.jboss.tools.openshift.core";
@@ -493,7 +503,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 			return client.list(kind, namespace);
 		} catch (UnauthorizedException e) {
 			needStrategy = false;
-			return retryList("Unauthorized.  Trying to reauthenticate", e, kind, namespace);
+			return retryList("Unauthorized.  Trying to reauthenticate", e, kind, namespace, Collections.EMPTY_MAP);
 		} finally {
 			if(needStrategy) {
 				connect();
@@ -501,7 +511,23 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		}
 	}
 
-	@Override
+    @Override
+    public <T extends IResource> List<T> getResources(String kind, String namespace, Map<String, String> labels) {
+        boolean needStrategy = initClientAuthorizationStrategy();
+        try {
+            client.setSSLCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
+            return client.list(kind, namespace, labels);
+        } catch (UnauthorizedException e) {
+            needStrategy = false;
+            return retryList("Unauthorized.  Trying to reauthenticate", e, kind, namespace, labels);
+        } finally {
+            if(needStrategy) {
+                connect();
+            }
+        }
+    }
+
+    @Override
 	public <T extends IResource> T getResource(String kind, String namespace, String name) {
 		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
@@ -565,7 +591,7 @@ public class Connection extends ObservablePojo implements IConnection, IRefresha
 		throw e;
 	}
 
-	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, String kind, String namespace){
+	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, String kind, String namespace, Map<String, String> labels){
 		OpenShiftCoreActivator.pluginLog().logInfo(message);
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
