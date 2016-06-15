@@ -53,14 +53,10 @@ public class PortForwardingUtils {
 			return false;
 		}
 		try (ServerSocket socket = new ServerSocket(port)){
-			//not in use apparently
+			//not in use
+		    return false;
 		} catch (IOException e) {
 			return true;//in use
-		}
-		try (Socket socket = new Socket("localhost", port)) {
-			return true; // in use
-		} catch (IOException e) {
-			return false;
 		}
 	}
 	
