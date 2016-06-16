@@ -29,13 +29,11 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.job.PodLogsJob;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IPod;
-import com.openshift.restclient.model.IResource;
 
 /**
  * @author jeff.cantrill
@@ -93,15 +91,6 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 
 	private IPod getPodFromBuild(ISelection selection) {
 		IBuild build = UIUtils.getFirstElement(selection, IBuild.class);
-		if(build == null) {
-			IResourceUIModel model = UIUtils.getFirstElement(selection, IResourceUIModel.class);
-			if(model != null) {
-				IResource resource = model.getResource();
-				if(resource != null && ResourceKind.BUILD.equals(resource.getKind())) {
-					build = (IBuild) resource;
-				}
-			}
-		}
 		if(build != null) {
 			final String buildName = build.getName();
 			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(build);

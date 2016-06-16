@@ -24,12 +24,12 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.Deployment;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 
 /**
  * @author Andre Dietisheim
@@ -47,11 +47,9 @@ public class ImportApplicationHandler extends AbstractHandler {
 		IProject project = null;
 		Collection<IBuildConfig> buildConfigs = null;
 		if (buildConfig == null) {
-			Deployment deployment = UIUtils.getFirstElement(currentSelection, Deployment.class);
-			if (deployment == null || deployment.getService() == null) {
-				project = UIUtils.getFirstElement(currentSelection, IProject.class);
-			} else {
-				project = deployment.getService().getProject();
+			IResource resource = UIUtils.getFirstElement(currentSelection, IResource.class);
+			if (resource != null) {
+				project= resource.getProject();
 			}
 			if (project != null) {
 				buildConfigs = project.getResources(ResourceKind.BUILD_CONFIG);

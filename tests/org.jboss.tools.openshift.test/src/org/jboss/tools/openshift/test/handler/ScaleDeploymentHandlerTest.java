@@ -10,7 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.handler;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,15 +26,17 @@ import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.jboss.tools.openshift.internal.ui.handler.ScaleDeploymentHandler;
-import org.jboss.tools.openshift.internal.ui.models.Deployment;
-import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
+import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IService;
@@ -38,11 +47,11 @@ public class ScaleDeploymentHandlerTest {
 	@Mock private IReplicationController rc;
 	@Mock private IDeploymentConfig dc;
 	@Mock private IService service;
-	@Mock private IProjectAdapter project;
-	@Mock private IResourceUIModel uiModel;
+	@Mock private IProjectWrapper project;
+	@Mock private IResourceWrapper<IReplicationController, ?> uiModel;
 	
 	private TestScaleDeploymentHandler handler;
-	private Deployment deployment;
+	private IServiceWrapper deployment;
 	@SuppressWarnings("rawtypes")
 	private Map parameters = new HashMap();
 	private ExecutionEvent event;
@@ -54,10 +63,11 @@ public class ScaleDeploymentHandlerTest {
 		event = new ExecutionEvent(null, parameters, null, null);
 		when(service.getName()).thenReturn("aService");
 		
-		deployment = spy(new Deployment(service, project));
-		when(deployment.getReplicationControllers()).thenReturn(Arrays.asList(uiModel));
+		deployment = Mockito.mock(IServiceWrapper.class);
+		when(deployment.getWrapped()).thenReturn(service);
+		when(deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER)).thenReturn(Arrays.asList(uiModel));
 		
-		when(uiModel.getResource()).thenReturn(rc);
+		when(uiModel.getWrapped()).thenReturn(rc);
 		when(rc.getDesiredReplicaCount()).thenReturn(2);
 	}
 
@@ -116,7 +126,7 @@ public class ScaleDeploymentHandlerTest {
 	@Test
 	public void testWhenDeploymentHasNoRepControllers() throws Exception{
 		givenADeploymentIsSelected();
-		when(deployment.getReplicationControllers()).thenReturn(Collections.emptyList());
+		when(deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER)).thenReturn(Collections.emptyList());
 		
 		handler.execute(event);
 
@@ -133,15 +143,15 @@ public class ScaleDeploymentHandlerTest {
 	
 	private void givenADeploymentIsSelected() {
 		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(deployment).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(Deployment.class));
+		doReturn(deployment).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
 	}
 	private void givenAReplicationControllerIsSelected() {
 		doReturn(rc).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(Deployment.class));
+		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
 	}
 	private void givenADeploymentConfigIsSelected() {
 		doReturn(dc).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(Deployment.class));
+		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
 	}
 	
 	private void givenAUserCancelsTheReplicaInputDialog() {

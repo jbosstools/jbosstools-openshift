@@ -11,6 +11,8 @@
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
+import com.openshift.restclient.ResourceKind;
+
 /**
  * Tabbed property section for displaying Build Configs.
  *  
@@ -20,6 +22,6 @@ package org.jboss.tools.openshift.internal.ui.property.tabbed;
 public class BuildConfigsPropertySection extends OpenShiftResourcePropertySection {
 
 	public BuildConfigsPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.BuildConfigsTab");
+		super("popup:org.jboss.tools.openshift.ui.properties.tab.BuildConfigsTab", ResourceKind.BUILD_CONFIG);
 	}
 }

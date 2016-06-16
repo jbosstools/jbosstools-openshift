@@ -32,7 +32,7 @@ import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog;
-import org.jboss.tools.openshift.internal.ui.models.Deployment;
+import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
@@ -55,12 +55,12 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 		if (route != null) {
 			return openBrowser(shell, route);
 		}
-		Deployment deployment = UIUtils.getFirstElement(currentSelection, Deployment.class);
-		if (deployment != null) {
-			new RouteOpenerJob(deployment.getService().getNamespace(), shell) {
+		IServiceWrapper service = UIUtils.getFirstElement(currentSelection, IServiceWrapper.class);
+		if (service != null) {
+			new RouteOpenerJob(service.getWrapped().getNamespace(), shell) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					this.routes = deployment.getRoutes().stream().map(r -> (IRoute)r.getResource()).collect(Collectors.toList());
+					this.routes = service.getResourcesOfKind(ResourceKind.ROUTE).stream().map(r -> (IRoute)r.getWrapped()).collect(Collectors.toList());
 					return Status.OK_STATUS;
 				}
 			}.schedule();

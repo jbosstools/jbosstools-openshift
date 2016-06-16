@@ -10,10 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.explorer;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jface.viewers.Viewer;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
 import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnection;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 
@@ -25,7 +30,34 @@ import com.openshift.client.OpenShiftException;
  * Content Provider for OpenShift 2 content
  */
 public class ExpressExplorerContentProvider extends BaseExplorerContentProvider {
-
+	private ConnectionsRegistry input;
+	private IConnectionsRegistryListener connectionListener = new ConnectionsRegistryListener();
+	private static final Collection<String> PROPERTY_BLACKLIST = Collections.unmodifiableList(Arrays.asList("token"));
+	private class ConnectionsRegistryListener implements IConnectionsRegistryListener{
+		@Override
+		public void connectionAdded(IConnection connection) {
+			refreshViewer(null);
+		}
+		
+		@Override
+		public void connectionRemoved(IConnection connection) {
+			refreshViewer(null);
+		}
+		
+		@Override
+		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+			if(!PROPERTY_BLACKLIST.contains(property)) {
+				handleConnectionChanged(connection, property, oldValue, newValue);
+			}
+		}
+	}
+	
+	@Override
+	public void dispose() {
+		if(input != null) {
+			input.removeListener(connectionListener);
+		}
+	}
 	
 	@Override
 	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
@@ -39,6 +71,21 @@ public class ExpressExplorerContentProvider extends BaseExplorerContentProvider 
 		super.handleConnectionRemoved(connection);
 	}
 
+	@Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		super.inputChanged(viewer, oldInput, newInput);
+		if(input != null && connectionListener != null) {
+			input.removeListener(connectionListener);
+		}
+		if(newInput instanceof ConnectionsRegistry) {
+			input = (ConnectionsRegistry) newInput;
+			if(connectionListener != null) {
+				input.addListener(connectionListener);
+			}
+		}
+
+	}
+	
 	/**
 	 * Called to obtain the root elements of the tree viewer, the connections
 	 */

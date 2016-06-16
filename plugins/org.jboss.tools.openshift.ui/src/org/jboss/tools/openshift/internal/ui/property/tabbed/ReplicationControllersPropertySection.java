@@ -11,6 +11,8 @@
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
+import com.openshift.restclient.ResourceKind;
+
 /**
  * Tabbed property section for displaying Replication Controllers.
  *  
@@ -20,6 +22,6 @@ package org.jboss.tools.openshift.internal.ui.property.tabbed;
 public class ReplicationControllersPropertySection extends OpenShiftResourcePropertySection {
 
 	public ReplicationControllersPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.ReplicationControllersTab");
+		super("popup:org.jboss.tools.openshift.ui.properties.tab.ReplicationControllersTab", ResourceKind.REPLICATION_CONTROLLER);
 	}
 }

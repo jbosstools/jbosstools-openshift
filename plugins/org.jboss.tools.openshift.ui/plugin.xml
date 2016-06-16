@@ -23,13 +23,7 @@
 			<possibleChildren>
 				<or>
 					<instanceof
-						value="com.openshift.restclient.model.IResource" />
-     <instanceof
-           value="org.jboss.tools.openshift.internal.ui.models.IResourcesUIModel">
-     </instanceof>
-     <instanceof
-           value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
-     </instanceof>
+						value="org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement" />
 				</or>
 			</possibleChildren>
 			<triggerPoints>
@@ -39,10 +33,7 @@
 					<instanceof
 						value="com.openshift.restclient.model.IProject" />
      <instanceof
-           value="org.jboss.tools.openshift.internal.ui.models.IResourcesUIModel">
-     </instanceof>
-     <instanceof
-           value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
+           value="org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement">
      </instanceof>
 				</or>
 			</triggerPoints>
@@ -119,8 +110,8 @@
 						<iterate
 							ifEmpty="false">
 							<or>
-								<instanceof
-									value="org.jboss.tools.openshift.internal.ui.models.Deployment" />
+								<adapt
+									type="com.openshift.restclient.model.IService" />
 								<adapt
 									type="com.openshift.restclient.model.IBuildConfig" />
 								<adapt
@@ -147,8 +138,8 @@
 							value="1" />
 						<iterate>
 							<or>
-								<instanceof
-									value="org.jboss.tools.openshift.common.core.IRefreshable" />
+								<adapt
+									type="org.jboss.tools.openshift.core.connection.Connection" />
 								<adapt
 									type="com.openshift.restclient.model.IResource" />
 								<instanceof 
@@ -163,8 +154,7 @@
 		<!-- openshift explorer context menu: new connection -->
 		<menuContribution
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
-			<command
-         commandId="org.eclipse.ui.edit.delete"
+			<command commandId="org.eclipse.ui.edit.delete"
          id="org.jboss.tools.openshift.ui.command.resource.delete"
          style="push"
          tooltip="Delete the resource">
@@ -176,11 +166,11 @@
 
 				  <with
 					variable="selection">
+						<or>
 						<iterate>
-                            <instanceof
-                                value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
-                            </instanceof>
-                        </iterate>
+      					<adapt type="com.openshift.restclient.model.IResource" />
+            			</iterate>
+						</or>
 				  </with>
 				 </or>
 				</visibleWhen>
@@ -208,8 +198,8 @@
                          <or>
                             <adapt
                                 type="com.openshift.restclient.model.IProject" />
-                            <instanceof
-                                value="org.jboss.tools.openshift.core.connection.Connection"/>
+                            <adapt
+                                type="org.jboss.tools.openshift.core.connection.Connection"/>
                          </or>
                         </iterate>
                     </and>
@@ -234,8 +224,8 @@
 						 <or>
 							<adapt
 								type="com.openshift.restclient.model.IProject" />
-							<instanceof
-                    			value="org.jboss.tools.openshift.core.connection.Connection"/>
+							<adapt
+                    			type="org.jboss.tools.openshift.core.connection.Connection"/>
 						 </or>
 						</iterate>
 					</and>
@@ -260,8 +250,8 @@
 						 <or>
 							<adapt
 								type="com.openshift.restclient.model.IProject" />
-							<instanceof
-                    			value="org.jboss.tools.openshift.core.connection.Connection"/>
+							<adapt
+                    			type="org.jboss.tools.openshift.core.connection.Connection"/>
 						 </or>
 						</iterate>
 					</and>
@@ -343,9 +333,7 @@
                  </count>
                  <iterate>
                     <or>
-                       <instanceof
-                             value="org.jboss.tools.openshift.internal.ui.models.Deployment">
-                       </instanceof>
+                       <adapt type="com.openshift.restclient.model.IService" />
                     </or>
                  </iterate>
               </and>
@@ -368,10 +356,8 @@
                   		value="1">
             		</count>
             		<iterate>
-               			<instanceof
-                     		value="org.jboss.tools.openshift.internal.ui.models.Deployment">
-               			</instanceof>
-               		</iterate>
+            			<adapt type="com.openshift.restclient.model.IService" />
+               	</iterate>
          			</and>
       			</visibleWhen>
    			</command>
@@ -573,8 +559,10 @@
 		                	<iterate
 								ifEmpty="false"
 								operator="and">
-								<adapt
-									type="org.jboss.tools.openshift.internal.ui.models.Deployment" />
+								<or>
+									<adapt type="com.openshift.restclient.model.IService" />
+									<adapt type="com.openshift.restclient.model.route.IRoute" />
+								</or>
 							</iterate>
 						</and>
 					</with>
@@ -597,13 +585,9 @@
 							<iterate
 								ifEmpty="false">
 								<or>
-									<adapt
-										type="com.openshift.restclient.model.IResource"/>
-									<instanceof 
-										value="org.jboss.tools.openshift.internal.ui.models.Deployment" />
-									<instanceof
-										value="org.jboss.tools.openshift.core.connection.Connection">
-									</instanceof>
+									<adapt	type="com.openshift.restclient.model.IResource"/>
+									<instanceof value="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper" />
+									<adapt type="org.jboss.tools.openshift.core.connection.Connection" />
 								</or>
 							</iterate>
 						</and>
@@ -675,10 +659,6 @@
            commandId="org.jboss.tools.openshift.ui.command.startbuild"
            label="%openshift.command.build.startbuild"
            style="push">
-        <parameter
-              name="org.jboss.tools.openshift.ui.command.startbuild.source"
-              value="BuildConfig">
-        </parameter>
      </command>
      <command
            commandId="org.jboss.tools.openshift.ui.command.clonebuild"
@@ -715,10 +695,6 @@
            commandId="org.jboss.tools.openshift.ui.command.startbuild"
            label="%openshift.command.build.startbuild"
            style="push">
-        <parameter
-              name="org.jboss.tools.openshift.ui.command.startbuild.source"
-              value="BuildConfig">
-        </parameter>
      </command>
       				<separator visible="true" name="org.jboss.tools.openshift.ui.separator6" />
        <command
@@ -1016,13 +992,7 @@
 				  		variable="selection">
 						<iterate>
 							<and>
-								<instanceof
-									value="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel" />
-                                <test
-                                    forcePluginActivation="true"
-                                    property="org.jboss.tools.openshift.ui.isDeleting"
-                                    value="false">
-                                </test>
+								<adapt	type="com.openshift.restclient.model.IResource" />
 							</and>
 						</iterate>
 				  </with>
@@ -1069,10 +1039,9 @@
 									<adapt
 										type="com.openshift.restclient.model.IResource"/>
 									<instanceof
-										value="org.jboss.tools.openshift.internal.ui.models.Deployment"/>
-									<instanceof
-										value="org.jboss.tools.openshift.core.connection.Connection">
-									</instanceof>
+										value="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper"/>
+									<adapt
+										type="org.jboss.tools.openshift.core.connection.Connection" />
 								</or>
 							</iterate>
 						</and>
@@ -1134,7 +1103,7 @@
 		</adapter>
 	</factory>
  <factory
-       adaptableType="org.jboss.tools.openshift.internal.ui.models.Deployment"
+       adaptableType="org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement"
        class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
     <adapter
           type="org.eclipse.ui.views.properties.IPropertySource">
@@ -1147,16 +1116,7 @@
           type="org.eclipse.ui.views.properties.IPropertySheetPage">
     </adapter>
  </factory>
- <factory
-       adaptableType="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel"
-       class="org.jboss.tools.openshift.internal.ui.property.OpenShiftPropertySourceAdapterFactory">
-    <adapter
-          type="org.eclipse.ui.views.properties.IPropertySource">
-    </adapter>
-    <adapter
-          type="org.eclipse.ui.views.properties.IPropertySource">
-    </adapter>
- </factory>
+
 	</extension>
 
 	<!-- definitions -->
@@ -1218,11 +1178,6 @@
 		<command
 			id="org.jboss.tools.openshift.ui.command.startbuild"
 			name="%openshift.command.build.startbuild">
-     <commandParameter
-           id="org.jboss.tools.openshift.ui.command.startbuild.source"
-           name="name"
-           optional="true">
-     </commandParameter>
 		</command>
 		<command
 			id="org.jboss.tools.openshift.ui.command.clonebuild"
@@ -1376,7 +1331,7 @@
 									<adapt
 										type="com.openshift.restclient.model.IProject" />
 									<instanceof 
-                    value="org.jboss.tools.openshift.internal.ui.models.Deployment" />
+                    value="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper" />
 								</or>
 						</iterate>
 					</with>
@@ -1401,11 +1356,10 @@
 							<iterate
 								ifEmpty="false">
 								<or>
-									<instanceof
-										value="org.jboss.tools.openshift.core.connection.Connection" />
+									<adapt
+										type="org.jboss.tools.openshift.core.connection.Connection" />
 									<adapt
 										type="com.openshift.restclient.model.IResource" />
-									<instanceof value="org.jboss.tools.openshift.internal.ui.models.Deployment" />
 								</or>
 						</iterate>
 					</with>
@@ -1609,11 +1563,12 @@
             enablesFor="1"
             id="org.jboss.tools.openshift.ui.properties.tab.section.builds"
             tab="org.jboss.tools.openshift.ui.properties.tab.builds">
+            
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+               type="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper">
          </input>
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
       </propertySection>
       <propertySection
@@ -1622,10 +1577,10 @@
             id="org.jboss.tools.openshift.ui.properties.tab.section.buildConfigs"
             tab="org.jboss.tools.openshift.ui.properties.tab.buildConfigs">
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+               type="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper">
          </input>
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
       </propertySection>
       <propertySection
@@ -1634,10 +1589,10 @@
             id="org.jboss.tools.openshift.ui.properties.tab.section.pods"
             tab="org.jboss.tools.openshift.ui.properties.tab.pods">
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+               type="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper">
          </input>
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
       </propertySection>
       <propertySection
@@ -1646,7 +1601,7 @@
             id="org.jboss.tools.openshift.ui.properties.tab.section.imageStreams"
             tab="org.jboss.tools.openshift.ui.properties.tab.imageStreams">
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
       </propertySection>
       <propertySection
@@ -1655,10 +1610,10 @@
             id="org.jboss.tools.openshift.ui.properties.tab.section.replicationControllers"
             tab="org.jboss.tools.openshift.ui.properties.tab.replicationControllers">
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+               type="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper">
          </input>
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
       </propertySection>
       <propertySection
@@ -1667,10 +1622,10 @@
             id="org.jboss.tools.openshift.ui.properties.tab.section.routes"
             tab="org.jboss.tools.openshift.ui.properties.tab.routes">
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+               type="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper">
          </input>
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
       </propertySection>
       <propertySection
@@ -1679,10 +1634,10 @@
             id="org.jboss.tools.openshift.ui.properties.tab.section.deploymentConfigs"
             tab="org.jboss.tools.openshift.ui.properties.tab.deploymentConfigs">
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.Deployment">
+               type="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper">
          </input>
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
       </propertySection>
       <propertySection
@@ -1691,7 +1646,7 @@
             id="org.jboss.tools.openshift.ui.properties.tab.section.services"
             tab="org.jboss.tools.openshift.ui.properties.tab.project.services">
          <input
-               type="org.jboss.tools.openshift.internal.ui.models.OpenShiftProjectUIModel">
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
       </propertySection>
    </propertySections>
@@ -1708,17 +1663,6 @@
       </propertyCategory>
    </propertyContributor>
 </extension>
-<extension
-      point="org.eclipse.core.expressions.propertyTesters">
-   <propertyTester
-         class="org.jboss.tools.openshift.internal.ui.propertytester.OpenShiftResourcePropertyTester"
-         id="org.jboss.tools.openshift.internal.ui.propertytester.OpenShiftResourcePropertyTester"
-         namespace="org.jboss.tools.openshift.ui"
-         properties="isDeleting"
-         type="org.jboss.tools.openshift.internal.ui.models.IResourceUIModel">
-   </propertyTester>
-</extension>
-
    <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             icon="icons/openshift-logo-white-icon.png"

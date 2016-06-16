@@ -56,7 +56,7 @@ import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IResourceBuilder;
 
-public class Connection extends ObservablePojo implements IConnection, IRefreshable, IOpenShiftConnection {
+public class Connection extends ObservablePojo implements IRefreshable, IOpenShiftConnection {
 
 	private static final String SECURE_STORAGE_BASEKEY = "org.jboss.tools.openshift.core";
 	private static final String SECURE_STORAGE_PASSWORD_KEY = "password";

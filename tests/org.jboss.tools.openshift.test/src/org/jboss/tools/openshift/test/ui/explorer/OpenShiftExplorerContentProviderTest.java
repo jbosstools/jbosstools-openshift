@@ -20,12 +20,18 @@ import static org.mockito.Mockito.when;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerContentProvider;
-import org.jboss.tools.openshift.internal.ui.models.IProjectAdapter;
+import org.jboss.tools.openshift.internal.ui.models.IConnectionWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IExceptionHandler;
+import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
+import org.jboss.tools.openshift.internal.ui.models.LoadingState;
+import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
+import org.jboss.tools.openshift.test.util.UITestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,22 +51,29 @@ public class OpenShiftExplorerContentProviderTest {
 
 	private OpenShiftExplorerContentProvider provider;
 	private Connection connection;
+	private IConnectionWrapper connectionWrapper;
+	private OpenshiftUIModel root;
 	private ConnectionsRegistry registry;
 	@Mock private IProject project;
 	@Mock private IClient client;
 	
 	@Before
 	public void setup() throws Exception{
+		root= new OpenshiftUIModel();
+		
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8442")); 
 
 		connection = spy(new Connection(client, null, null));
 		doReturn(true).when(connection).ownsResource(any(IResource.class));
 		doReturn("hookaboo").when(connection).getUsername();
-		
 		registry = ConnectionsRegistrySingleton.getInstance();
+		registry.clear();
 		registry.add(connection);
 		
-		provider = new OpenShiftExplorerContentProvider();
+		
+		connectionWrapper= root.getConnections().iterator().next();
+		
+		provider = new OpenShiftExplorerContentProvider(root);
 	}
 	
 	@After
@@ -69,29 +82,31 @@ public class OpenShiftExplorerContentProviderTest {
 	}
 	
 	@Test
-	public void getChildrenForConnectionReturnsProjectAdapters(){
+	public void getChildrenForConnectionReturnsProjectAdapters() throws InterruptedException, TimeoutException{
 		List<IProject> projects = Arrays.asList(new IProject[]{project});
 		doReturn(projects).when(connection).getResources(anyString());
+		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
+		UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
 		
-		assertArrayEquals("Exp. to get all the projects for a Connection", projects.toArray(),  Arrays.asList(provider.getChildrenFor(connection)).stream().map(a->((IProjectAdapter)a).getProject()).toArray());
+		assertArrayEquals("Exp. to get all the projects for a Connection", projects.toArray(),  Arrays.asList(provider.getChildren(connectionWrapper)).stream().map(a->((IProjectWrapper)a).getWrapped()).toArray());
 	}
 
 	@Test
 	public void getExplorerElementsForRegistryReturnsConnections(){
-		assertArrayEquals("Exp. to get all the connections from the ConnectionsRegistry", new Object []{connection},  provider.getExplorerElements(registry));
+		assertArrayEquals("Exp. to get all the connections from the ConnectionsRegistry", new Object []{connectionWrapper},  provider.getElements(registry));
 	}
 
 	@Test
 	public void connectionsRegistryShouldHaveChildren(){
-		assertTrue("Exp. #hasChildren to return true for ConnectionsRegistry", provider.hasChildren(registry));
+		assertTrue("Exp. #hasChildren to return true for ConnectionsRegistry", provider.hasChildren(root));
 	}
 	@Test
 	public void connectionsShouldHaveChildren(){
-		assertTrue("Exp. #hasChildren to return true for Connections", provider.hasChildren(connection));
+		assertTrue("Exp. #hasChildren to return true for Connections", provider.hasChildren(connectionWrapper));
 	}
 	@Test
 	public void projectsShouldHaveChildren(){
-		assertTrue("Exp. #hasChildren to return true for IProject", provider.hasChildren(mock(IProjectAdapter.class)));
+		assertTrue("Exp. #hasChildren to return true for IProject", provider.hasChildren(mock(IProjectWrapper.class)));
 	}
 
 }

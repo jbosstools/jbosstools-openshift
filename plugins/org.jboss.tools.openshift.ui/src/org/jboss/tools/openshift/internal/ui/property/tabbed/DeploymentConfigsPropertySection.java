@@ -11,6 +11,8 @@
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
+import com.openshift.restclient.ResourceKind;
+
 /**
  * Tabbed property section for displaying Deployment Configs.
  *  
@@ -20,6 +22,6 @@ package org.jboss.tools.openshift.internal.ui.property.tabbed;
 public class DeploymentConfigsPropertySection extends OpenShiftResourcePropertySection {
 
 	public DeploymentConfigsPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.DeploymentConfigsTab");
+		super("popup:org.jboss.tools.openshift.ui.properties.tab.DeploymentConfigsTab", ResourceKind.DEPLOYMENT_CONFIG);
 	}
 }

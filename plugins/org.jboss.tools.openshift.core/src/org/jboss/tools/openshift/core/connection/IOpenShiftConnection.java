@@ -13,6 +13,8 @@ package org.jboss.tools.openshift.core.connection;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
 
@@ -22,7 +24,7 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public interface IOpenShiftConnection {
+public interface IOpenShiftConnection extends IConnection {
 
 	static final String PROPERTY_EXTENDED_PROPERTIES = "extendedProperties";
 	

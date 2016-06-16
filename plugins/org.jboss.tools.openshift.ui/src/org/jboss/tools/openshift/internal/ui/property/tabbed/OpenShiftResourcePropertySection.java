@@ -11,9 +11,8 @@
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -40,13 +39,14 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.comparators.CreationTimestampComparator;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
+import org.jboss.tools.openshift.internal.ui.models.IResourceContainer;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 
 import com.openshift.restclient.model.IResource;
 
 /**
- * Generic tabbed property section for displaying
- * an openshift resource
+ * Generic tabbed property section for displaying an openshift resource
+ * 
  * @author jeff.cantrill
  *
  */
@@ -57,11 +57,10 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	protected TabbedPropertySheetPage page;
 	private ISelectionProvider selectionProvider;
 	private String menuContributionId;
+	private String resourceKind;
 
-	public OpenShiftResourcePropertySection() {
-	}
-
-	public OpenShiftResourcePropertySection(String menuContributionId) {
+	public OpenShiftResourcePropertySection(String menuContributionId, String kind) {
+		this.resourceKind= kind;
 		this.menuContributionId = menuContributionId;
 	}
 
@@ -85,7 +84,8 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 
 		SashForm container = new SashForm(parent, SWT.VERTICAL);
 		GridData d = new GridData(GridData.FILL_BOTH);
-		d.widthHint = 100; //A dirty trick that keeps table from growing unlimitedly within scrolled parent composite.
+		d.widthHint = 100; // A dirty trick that keeps table from growing
+							// unlimitedly within scrolled parent composite.
 		d.heightHint = 100;
 		container.setLayoutData(d);
 		Composite tableContainer = new Composite(container, SWT.NONE);
@@ -123,7 +123,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		TableViewerBuilder tableViewerBuilder = new TableViewerBuilder(table, tableContainer)
-			.contentProvider(new ObservableListContentProvider());
+				.contentProvider(new ResourceContainerContentProvider(resourceKind));
 
 		setSorter(tableViewerBuilder);
 		addColumns(tableViewerBuilder);
@@ -149,25 +149,29 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		addLabelsColumn(tableViewerBuilder);
 	}
 
+	protected IResource getResource(Object element) {
+		if (element instanceof IResource) {
+			return (IResource) element;
+		}
+		if (element instanceof IAdaptable) {
+			return ((IAdaptable) element).getAdapter(IResource.class);
+		}
+		return null;
+	}
+
 	protected void addNameColumn(TableViewerBuilder tableViewerBuilder) {
-		tableViewerBuilder
-		.column((IResourceUIModel model) -> {
-				return model.getResource().getName();
-		}).name("Name").align(SWT.LEFT).weight(1).minWidth(15).buildColumn();
+		tableViewerBuilder.column(model -> getResource(model).getName()).name("Name").align(SWT.LEFT).weight(1)
+				.minWidth(15).buildColumn();
 	}
 
 	protected void addCreatedColumn(TableViewerBuilder tableViewerBuilder) {
-		tableViewerBuilder
-		.column((IResourceUIModel model) -> {
-				return DateTimeUtils.formatSince(model.getResource().getCreationTimeStamp());
-		}).name("Created").align(SWT.LEFT).weight(1).minWidth(5).buildColumn();
+		tableViewerBuilder.column(model -> DateTimeUtils.formatSince(getResource(model).getCreationTimeStamp()))
+				.name("Created").align(SWT.LEFT).weight(1).minWidth(5).buildColumn();
 	}
 
 	protected void addLabelsColumn(TableViewerBuilder tableViewerBuilder) {
-		tableViewerBuilder
-		.column((IResourceUIModel model) -> {
-				return StringUtils.serialize(model.getResource().getLabels());
-		}).name("Labels").align(SWT.LEFT).weight(1).minWidth(25).buildColumn();
+		tableViewerBuilder.column(model -> StringUtils.serialize(getResource(model).getLabels())).name("Labels")
+				.align(SWT.LEFT).weight(1).minWidth(25).buildColumn();
 	}
 
 	protected void addContextMenu(TableViewer viewer) {
@@ -180,22 +184,21 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
-		Object model = UIUtils.getFirstElement(selection);
-		if(model == null) return;
+		IResourceContainer<?, ?> model = UIUtils.getFirstElement(selection, IResourceContainer.class);
+		if (model == null)
+			return;
 		ITabDescriptor tab = page.getSelectedTab();
-		if(tab == null) return;
-
-		String id = tab.getId();
-		String property = org.apache.commons.lang.StringUtils.right(id, id.length() - id.lastIndexOf(".") - 1);
-		table.setInput(BeanProperties.list(property).observe(model));
+		if (tab == null)
+			return;
+		table.setInput(model);
 	}
 
 	@Override
 	public void dispose() {
-		if(this.table != null && this.table.getTable() != null) {
+		if (this.table != null && this.table.getTable() != null) {
 			this.table.getTable().dispose();
 		}
-		if(this.details != null) {
+		if (this.details != null) {
 			this.details.dispose();
 		}
 	}
@@ -207,31 +210,30 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 
 	@Override
 	public void refresh() {
-		if(!DisposeUtils.isDisposed(table)) {
+		if (!DisposeUtils.isDisposed(table)) {
 			this.table.refresh();
 		}
-		if(!DisposeUtils.isDisposed(this.details.getControl())) {
+		if (!DisposeUtils.isDisposed(this.details.getControl())) {
 			this.details.refresh();
 		}
 	}
-	
 
 	protected ViewerComparator createCreatedBySorter() {
 		final CreationTimestampComparator comparator = new CreationTimestampComparator();
 		return new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				return comparator.compare((IResourceUIModel)e1, (IResourceUIModel)e2);
+				return comparator.compare((IResourceWrapper<?, ?>) e1, (IResourceWrapper<?, ?>) e2);
 			}
 		};
 	}
-	
+
 	protected ViewerComparator createNameSorter() {
 		return new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				IResource r1 = ((IResourceUIModel)e1).getResource();
-				IResource r2 = ((IResourceUIModel)e2).getResource();
+				IResource r1 = ((IResourceWrapper<?, ?>) e1).getWrapped();
+				IResource r2 = ((IResourceWrapper<?, ?>) e2).getWrapped();
 				return r1.getName().compareTo(r2.getName());
 			}
 		};

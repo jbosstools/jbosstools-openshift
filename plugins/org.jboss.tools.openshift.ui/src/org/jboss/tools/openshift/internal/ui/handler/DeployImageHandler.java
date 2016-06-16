@@ -33,10 +33,10 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizard;
 
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 
 
 /**
@@ -69,15 +69,9 @@ public class DeployImageHandler extends AbstractHandler {
 			project = UIUtils.getFirstElement(selection, IProject.class);
 			if(project == null) {
 				//If another resource is selected in OpenShift explorer, navigate to its project.
-				IResourceUIModel resourceModel = UIUtils.getFirstElement(selection, IResourceUIModel.class);
-				while(resourceModel != null && project == null) {
-					if(resourceModel.getResource() instanceof IProject) {
-						project = (IProject)resourceModel.getResource();
-					} else if(resourceModel.getParent() instanceof IResourceUIModel) {
-						resourceModel = (IResourceUIModel)resourceModel.getParent();
-					} else {
-						resourceModel = null;
-					}
+				IResource resource = UIUtils.getFirstElement(selection, IResource.class);
+				if (resource != null) {
+					project= resource.getProject();
 				}
 			}
 			if(project != null) {

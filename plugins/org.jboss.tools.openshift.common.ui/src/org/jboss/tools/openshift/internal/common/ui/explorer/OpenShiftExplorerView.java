@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.explorer;
 
-
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
@@ -53,7 +52,7 @@ import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
  * @author Andre Dietisheim
  */
 public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsRegistryListener {
-	
+
 	private Control connectionsPane;
 	private Control explanationsPane;
 	private PageBook pageBook;
@@ -62,7 +61,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	protected Object getInitialInput() {
 		return ConnectionsRegistrySingleton.getInstance();
 	}
-	
+
 	@Override
 	protected CommonViewer createCommonViewer(Composite parent) {
 		CommonViewer viewer = super.createCommonViewer(parent);
@@ -80,16 +79,18 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	public void connectionAdded(IConnection connection) {
 		showConnectionsOrExplanations();
 	}
-	
+
 	private void showConnectionsOrExplanations() {
 		asyncShowConnectionsOrExplanations();
 	}
-	
+
 	private void asyncShowConnectionsOrExplanations() {
-		Display.getDefault().asyncExec(new Runnable() { 
+		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				showConnectionsOrExplanations(connectionsPane, explanationsPane);
+				if (!pageBook.isDisposed()) {
+					showConnectionsOrExplanations(connectionsPane, explanationsPane);
+				}
 			}
 		});
 	}
@@ -134,8 +135,8 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ConnectionWizard wizard = new ConnectionWizard();
-				WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getModalDialogShellProvider()
-						.getShell(), wizard);
+				WizardDialog dialog = new WizardDialog(
+						PlatformUI.getWorkbench().getModalDialogShellProvider().getShell(), wizard);
 				if (dialog.open() == Window.OK) {
 					showConnectionsOrExplanations(connectionsPane, explanationPane);
 				}
@@ -150,30 +151,27 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 			showPage(connectionsPane);
 		}
 	}
-	
-	private void showPage(final Control page) {
-		connectionsPane.getDisplay().syncExec(new Runnable() {
 
-			@Override
-			public void run() {
-				pageBook.showPage(page);
-			}});
+	private void showPage(final Control page) {
+		pageBook.showPage(page);
 	}
-	
+
 	private static class OpenShiftExplorerContextsHandler extends Contexts {
 
 		private static final String CONNECTION_CONTEXT = "org.jboss.tools.openshift.explorer.context.connection";
-//		private static final String APPLICATION_CONTEXT = "org.jboss.tools.openshift.explorer.context.application";
-//		private static final String DOMAIN_CONTEXT = "org.jboss.tools.openshift.explorer.context.domain";
-		
+		// private static final String APPLICATION_CONTEXT =
+		// "org.jboss.tools.openshift.explorer.context.application";
+		// private static final String DOMAIN_CONTEXT =
+		// "org.jboss.tools.openshift.explorer.context.domain";
+
 		OpenShiftExplorerContextsHandler(CommonViewer viewer) {
 			viewer.getControl().addFocusListener(onFocusLost());
 			viewer.addSelectionChangedListener(onSelectionChanged());
 		}
-		
+
 		private FocusAdapter onFocusLost() {
 			return new FocusAdapter() {
-				
+
 				@Override
 				public void focusLost(FocusEvent event) {
 					deactivateCurrent();
@@ -187,15 +185,21 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					ISelection selection = event.getSelection();
-//					if (UIUtils.isFirstElementOfType(IDomain.class, selection)) {
-//						activate(DOMAIN_CONTEXT);
-//					} else if (UIUtils.isFirstElementOfType(IApplication.class, selection)) {
-//						activate(APPLICATION_CONTEXT);
-//					} else if (UIUtils.isFirstElementOfType(ExpressConnection.class, selection)) {
-//						// must be checked after domain, application, adapter may convert
-//						// any resource to a connection
-						activate(CONNECTION_CONTEXT);
-//					}
+					// if (UIUtils.isFirstElementOfType(IDomain.class,
+					// selection)) {
+					// activate(DOMAIN_CONTEXT);
+					// } else if
+					// (UIUtils.isFirstElementOfType(IApplication.class,
+					// selection)) {
+					// activate(APPLICATION_CONTEXT);
+					// } else if
+					// (UIUtils.isFirstElementOfType(ExpressConnection.class,
+					// selection)) {
+					// // must be checked after domain, application, adapter may
+					// convert
+					// // any resource to a connection
+					activate(CONNECTION_CONTEXT);
+					// }
 				}
 			};
 		}
@@ -205,7 +209,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	public void initListeners(TreeViewer viewer) {
 		super.initListeners(viewer);
 		Tree tree = viewer.getTree();
-		if(tree != null && !tree.isDisposed()) {
+		if (tree != null && !tree.isDisposed()) {
 			new LinkMouseListener(tree);
 		}
 	}
@@ -223,11 +227,11 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 
 		@Override
 		public void mouseMove(MouseEvent e) {
-			if(tree.isDisposed()) {
+			if (tree.isDisposed()) {
 				return;
 			}
 			ILink link = getLink(e);
-			if(isLink != (link != null)) {
+			if (isLink != (link != null)) {
 				isLink = (link != null);
 				Cursor cursor = isLink ? Display.getDefault().getSystemCursor(SWT.CURSOR_HAND) : null;
 				tree.setCursor(cursor);
@@ -237,11 +241,11 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		@Override
 		public void mouseUp(MouseEvent e) {
 			final ILink link = getLink(e);
-			if(link != null) {
+			if (link != null) {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
-						if(tree.isDisposed()) {
+						if (tree.isDisposed()) {
 							return;
 						}
 						tree.setCursor(null);
@@ -253,37 +257,36 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		}
 
 		ILink getLink(MouseEvent e) {
-			if(e.getSource() instanceof Tree) {
-				Tree tree = (Tree)e.getSource();
+			if (e.getSource() instanceof Tree) {
+				Tree tree = (Tree) e.getSource();
 				TreeItem t = tree.getItem(new Point(e.x, e.y));
 				Object o = t == null ? null : t.getData();
-				return o instanceof ILink ? (ILink)o : null;
+				return o instanceof ILink ? (ILink) o : null;
 			}
 			return null;
 		}
 	}
 
 	private static class Contexts {
-		
+
 		private IContextActivation contextActivation;
-		
+
 		public void activate(String contextId) {
 			deactivateCurrent();
 			IContextService service = getService();
 			this.contextActivation = service.activateContext(contextId);
 		}
-		
+
 		public void deactivateCurrent() {
 			if (contextActivation != null) {
 				IContextService service = getService();
 				service.deactivateContext(contextActivation);
 			}
 		}
-		
+
 		private IContextService getService() {
 			return (IContextService) PlatformUI.getWorkbench().getService(IContextService.class);
 		}
 	}
-
 
 }

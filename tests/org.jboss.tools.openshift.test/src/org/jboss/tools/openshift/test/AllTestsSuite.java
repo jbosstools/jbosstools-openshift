@@ -25,9 +25,10 @@ import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.test.core.security.OpenShiftSecureStorageKeyTest;
 import org.jboss.tools.openshift.test.core.server.OpenShiftModuleDeploymentPrefsUtilTest;
 import org.jboss.tools.openshift.test.core.server.OpenShiftSubsystemTest;
-import org.jboss.tools.openshift.test.core.util.ResourceUtilsTest;
 import org.jboss.tools.openshift.test.core.util.ResourceUtilsIsMatchingTest;
+import org.jboss.tools.openshift.test.core.util.ResourceUtilsTest;
 import org.jboss.tools.openshift.test.handler.ScaleDeploymentHandlerTest;
+import org.jboss.tools.openshift.test.internal.core.preferences.OpenShiftCorePreferencesTest;
 import org.jboss.tools.openshift.test.ui.comparators.CreationTimestampComparatorTest;
 import org.jboss.tools.openshift.test.ui.comparators.ProjectTreeSorterTest;
 import org.jboss.tools.openshift.test.ui.comparators.ProjectViewerComparatorTest;
@@ -42,7 +43,6 @@ import org.jboss.tools.openshift.test.ui.property.ConnectionPropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.ExtTextPropertyDescriptorTest;
 import org.jboss.tools.openshift.test.ui.property.ResourcePropertySourceTest;
 import org.jboss.tools.openshift.test.ui.property.WebhooksPropertySourceTest;
-import org.jboss.tools.openshift.test.ui.propertytester.OpenShiftResourcePropertyTesterTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelKeyValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.LabelValueValidatorTest;
 import org.jboss.tools.openshift.test.ui.validator.PodPortValidatorTest;
@@ -76,11 +76,10 @@ import org.junit.runners.Suite.SuiteClasses;
 	ProjectTreeSorterTest.class,
 	LazySSLCertificateCallbackTest.class, 
 	NewApplicationWizardModelTest.class,
-	OpenShiftCorePreferences.class,
+	OpenShiftCorePreferencesTest.class,
 	OpenShiftExplorerContentProviderTest.class,
 	OpenShiftExplorerLabelProviderTest.class,
 	OpenShiftProjectCacheTest.class,
-	OpenShiftResourcePropertyTesterTest.class,
 	OpenShiftSecureStorageKeyTest.class,
 	PortForwardingWizardModelTest.class,
 	PortSpecAdapterTest.class,

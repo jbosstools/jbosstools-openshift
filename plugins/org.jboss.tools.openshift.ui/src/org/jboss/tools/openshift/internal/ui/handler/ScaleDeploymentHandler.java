@@ -32,9 +32,10 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.Deployment;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IReplicationController;
 
 /**
@@ -53,13 +54,13 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 			scaleUsing(event, rc, rc.getName());
 			return null;
 		}
-		Deployment deployment = getSelectedElement(event, Deployment.class);
+		IServiceWrapper deployment = getSelectedElement(event, IServiceWrapper.class);
 		if(deployment != null) {
-			Collection<IResourceUIModel> rcs = deployment.getReplicationControllers();
+			Collection<IResourceWrapper<?, ?>> rcs = deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER);
 			if(!rcs.isEmpty()) {
 				//there should be only 1 per deployment, we'll assume this is true
-				rc = (IReplicationController) rcs.iterator().next().getResource();
-				scaleUsing(event, rc, deployment.getResource().getName());
+				rc = (IReplicationController) rcs.iterator().next().getWrapped();
+				scaleUsing(event, rc, deployment.getWrapped().getName());
 			}
 		}
 		return null;

@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.explorer;
 
 import java.util.Collection;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -24,8 +25,8 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
-import org.jboss.tools.openshift.internal.ui.models.Deployment;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.ImageStreamApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
@@ -84,12 +85,11 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 
 	@Override
 	public Image getImage(Object element) {
-		if (element instanceof Deployment) {
-			return OpenShiftImages.SERVICE_IMG;
-		} else if(element instanceof NewProjectLinkNode) {
+		element = getAdaptedElement(element);
+		if(element instanceof NewProjectLinkNode) {
 			return OpenShiftImages.PROJECT_NEW_IMG;
-		} else if (element instanceof IResource || element instanceof IResourceUIModel) {
-			IResource resource = element instanceof IResourceUIModel ? ((IResourceUIModel)element).getResource() : (IResource) element;
+		} else if (element instanceof IResource) {
+			IResource resource= (IResource) element;
 			switch (resource.getKind()) {
 			case ResourceKind.BUILD:
 				return OpenShiftImages.BUILD_IMG;
@@ -117,18 +117,35 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 		}
 	}
 
+	private Object getAdaptedElement(Object element) {
+		if (element instanceof IAdaptable) {
+			IAdaptable adaptable = (IAdaptable) element;
+			IResource resource = adaptable.getAdapter(IResource.class);
+			if (resource != null) {
+				element= resource;
+			}
+			Connection connection = adaptable.getAdapter(Connection.class);
+			if (connection != null) {
+				element= connection;
+			}
+		}
+		return element;
+	}
+
 	@Override
 	public StyledString getStyledText(Object element) {
-		if (element instanceof Deployment) {
-			Deployment d = (Deployment) element;
-			return style(d.getService().getName(), formatRoute(d.getRoutes()));
-		} else if(element instanceof NewProjectLinkNode) {
+		if (element instanceof IServiceWrapper) {
+			IServiceWrapper d = (IServiceWrapper) element;
+			return style(d.getWrapped().getName(), formatRoute(d.getResourcesOfKind(ResourceKind.ROUTE)));
+		}
+		element = getAdaptedElement(element);
+		if(element instanceof NewProjectLinkNode) {
 			return getStyledText((NewProjectLinkNode)element);
 		} else if(element instanceof IApplicationSource) {
 			return getStyledText((IApplicationSource) element);
 		}
-		if (element instanceof IResource || element instanceof IResourceUIModel) {
-			IResource resource = element instanceof IResourceUIModel ? ((IResourceUIModel)element).getResource() : (IResource) element;
+		if (element instanceof IResource) {
+			IResource resource = (IResource) element;
 			switch (resource.getKind()) {
 			case ResourceKind.BUILD:
 				return getStyledText((IBuild) resource);
@@ -159,9 +176,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 		return super.getStyledText(element);
 	}
 
-	private String formatRoute(Collection<IResourceUIModel> routes) {
+	private String formatRoute(Collection<IResourceWrapper<?, ?>> routes) {
 		if(routes.size() > 0) {
-			IRoute route = (IRoute)routes.iterator().next().getResource();
+			IRoute route = (IRoute)routes.iterator().next().getWrapped();
 			return route.getURL();
 			
 		}

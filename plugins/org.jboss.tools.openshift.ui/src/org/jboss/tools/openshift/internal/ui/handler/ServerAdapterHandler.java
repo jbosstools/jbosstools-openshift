@@ -33,7 +33,6 @@ import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.IResourceUIModel;
 import org.jboss.tools.openshift.internal.ui.server.ServerSettingsWizard;
 
 import com.openshift.restclient.ResourceKind;
@@ -53,10 +52,7 @@ public class ServerAdapterHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final IWorkbenchWindow workbenchWindow = HandlerUtil.getActiveWorkbenchWindow(event);
 		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
-		IResourceUIModel selectedResourceModel = UIUtils.getFirstElement(selection, IResourceUIModel.class);
-		IResource selectedResource = (selectedResourceModel != null) 
-				? selectedResourceModel.getResource() 
-				: UIUtils.getFirstElement(selection, IResource.class); //Object may be selected in Properties view as IResource.
+		IResource selectedResource = UIUtils.getFirstElement(selection, IResource.class);
 		final IServer openShiftServer = getOpenShiftServer(selectedResource);
 		if (openShiftServer != null) {
 			openServersView(openShiftServer, workbenchWindow);

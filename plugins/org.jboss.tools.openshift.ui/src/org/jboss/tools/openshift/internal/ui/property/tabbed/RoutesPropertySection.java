@@ -11,6 +11,8 @@
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
+import com.openshift.restclient.ResourceKind;
+
 /**
  * Tabbed property section for displaying Routes.
  *  
@@ -20,6 +22,6 @@ package org.jboss.tools.openshift.internal.ui.property.tabbed;
 public class RoutesPropertySection extends OpenShiftResourcePropertySection {
 
 	public RoutesPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.RoutesTab");
+		super("popup:org.jboss.tools.openshift.ui.properties.tab.RoutesTab", ResourceKind.ROUTE);
 	}
 }
