@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -31,6 +32,7 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.ui.validator.GitReferenceValidator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablePage;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceNameControl;
 
@@ -209,10 +211,17 @@ public class BuildConfigPage extends EnvironmentVariablePage {
 			.grab(true, false)
 			.span(2, 1)
 			.applyTo(gitReferenceText);
-		ValueBindingBuilder
-			.bind(WidgetProperties.text(SWT.Modify).observe(gitReferenceText))
+
+		IObservableValue gitReferenceTextObservable = WidgetProperties.text(SWT.Modify).observe(gitReferenceText);
+		GitReferenceValidator validator = new GitReferenceValidator(gitReferenceTextObservable);
+		Binding gitReferenceBinding = ValueBindingBuilder
+			.bind(gitReferenceTextObservable)
+			.validatingAfterConvert(validator)
 			.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_GIT_REFERENCE).observe(model))
 			.in(dbc);
+		dbc.addValidationStatusProvider(validator);
+		ControlDecorationSupport.create(
+				gitReferenceBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 		
 		//context dir
 		Label contextDirLabel = new Label(parent, SWT.NONE);
