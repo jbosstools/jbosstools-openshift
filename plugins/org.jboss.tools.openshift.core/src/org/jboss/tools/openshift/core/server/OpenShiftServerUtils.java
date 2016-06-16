@@ -57,11 +57,6 @@ import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IService;
-import com.openshift.restclient.model.build.IBuildStrategy;
-import com.openshift.restclient.model.build.ICustomBuildStrategy;
-import com.openshift.restclient.model.build.IDockerBuildStrategy;
-import com.openshift.restclient.model.build.ISTIBuildStrategy;
-import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
 /**
  * @author Andre Dietisheim
@@ -477,7 +472,7 @@ public class OpenShiftServerUtils {
 		//First check buildconfig docker image name
 		
 		boolean isEapStyle = false;
-		DockerImageURI image = getImageUri(buildConfig);
+		DockerImageURI image = ResourceUtils.getImageUri(buildConfig);
 		if (image != null) {
 			isEapStyle = containsEapLikeKeywords(image.getName());
 		}
@@ -493,21 +488,6 @@ public class OpenShiftServerUtils {
 		return isEapStyle;
 	}
 
-	public static DockerImageURI getImageUri(IBuildConfig buildConfig) {
-		IBuildStrategy strategy = buildConfig.getBuildStrategy();
-		DockerImageURI image = null;
-		if (strategy instanceof ISourceBuildStrategy) {
-			image = ((ISourceBuildStrategy) strategy).getImage();
-		} else if (strategy instanceof ICustomBuildStrategy) {
-			image = ((ICustomBuildStrategy) strategy).getImage();
-		} else if (strategy instanceof IDockerBuildStrategy) {
-			image = ((IDockerBuildStrategy) strategy).getBaseImage();
-		} else if (strategy instanceof ISTIBuildStrategy) {
-			image = ((ISTIBuildStrategy) strategy).getImage();
-		}
-		return image;
-	}
-		
 	public static boolean containsEapLikeKeywords(String label) {
 		if (org.apache.commons.lang.StringUtils.isBlank(label)) {
 			return false;

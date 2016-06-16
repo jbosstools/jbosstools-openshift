@@ -284,7 +284,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			if(monitor.isCanceled()) {
 				return -1;
 			}
-			if (port.getRemotePort() != 9999) {
+			if (port.getRemotePort() != OpenShiftDebugUtils.NATIVE_MANAGMENT_PORT) {
 				port.setLocalPort(SocketUtil.findFreePort());
 			}
 			monitor.worked(1);

@@ -59,6 +59,8 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
 
 public class OpenShiftDebugUtils {
+	public static final int NATIVE_MANAGMENT_PORT = 9999;
+
 	private static final String ADMIN_USERNAME_KEY="ADMIN_USERNAME";
 	private static final String ADMIN_PASSSWD_KEY="ADMIN_PASSWORD";
 	private static final String DEBUG_KEY = "DEBUG";
@@ -192,7 +194,7 @@ public class OpenShiftDebugUtils {
 
 	private boolean updateJMXPort(DebuggingContext debugContext, Set<IPort> ports) {
 		IPort existing = ports.stream().filter(p->p.getName().equals("remotingjmx")).findFirst().orElse(null);
-		PortSpecAdapter newPort = new PortSpecAdapter("remotingjmx", "TCP", 9999);
+		PortSpecAdapter newPort = new PortSpecAdapter("remotingjmx", "TCP", NATIVE_MANAGMENT_PORT);
 		if (existing == null) {
 			ports.add(newPort);
 			return true;

@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2006 Jeff Mesnil
+ * Copyright (c) 2016 Red Hat, Inc. 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +8,7 @@
  *
  * Contributors:
  *    "Rob Stryker" <rob.stryker@redhat.com> - Initial implementation
+ *    "Thomas Mäder" <tmader@redhat.com> - Adapted for Openshift 
  *******************************************************************************/
 package org.jboss.tools.openshift.core.jmx;
 
@@ -74,20 +76,22 @@ public class OpenshiftConnectionWrapper implements IConnectionWrapper {
 	public synchronized void connect() throws IOException {
 		try {
 			IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
-			DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
-			HashMap<String, Object> env = new HashMap<>();
-			env.put(JMXConnector.CREDENTIALS,
-					new String[] { debugContext.getAdminUsername(), debugContext.getAdminPassword() });
-			IPod firstPod = OpenShiftDebugUtils.get().getFirstPod(dc);
-			if (firstPod != null) {
-				int port = getLocalAdminPort(firstPod);
-				String url = "service:jmx:remoting-jmx://localhost:" + port;
-				// try to connect
-				connector = factory.newJMXConnector(new JMXServiceURL(url), env);
-				connector.connect();
-				connection = connector.getMBeanServerConnection();
-				isConnected = true;
-				provider.fireChanged(this);
+			if (dc != null) {
+				DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
+				HashMap<String, Object> env = new HashMap<>();
+				env.put(JMXConnector.CREDENTIALS,
+						new String[] { debugContext.getAdminUsername(), debugContext.getAdminPassword() });
+				IPod firstPod = OpenShiftDebugUtils.get().getFirstPod(dc);
+				if (firstPod != null) {
+					int port = getLocalAdminPort(firstPod);
+					String url = "service:jmx:remoting-jmx://localhost:" + port;
+					// try to connect
+					connector = factory.newJMXConnector(new JMXServiceURL(url), env);
+					connector.connect();
+					connection = connector.getMBeanServerConnection();
+					isConnected = true;
+					provider.fireChanged(this);
+				}
 			}
 		} catch (CoreException e) {
 			throw new IOException(e);
@@ -143,8 +147,8 @@ public class OpenshiftConnectionWrapper implements IConnectionWrapper {
 	}
 
 	private int getLocalAdminPort(IPod pod) {
-		return PortForwardingUtils.getForwardablePorts(pod).stream().filter(p -> p.getRemotePort() == 9999)
-				.mapToInt(p -> p.getLocalPort()).findAny().orElse(9999);
+		return PortForwardingUtils.getForwardablePorts(pod).stream().filter(p -> p.getRemotePort() == OpenShiftDebugUtils.NATIVE_MANAGMENT_PORT)
+				.mapToInt(p -> p.getLocalPort()).findAny().orElse(OpenShiftDebugUtils.NATIVE_MANAGMENT_PORT);
 	}
 
 }

@@ -30,6 +30,7 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.ITags;
+import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
@@ -37,6 +38,11 @@ import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.build.IBuildStrategy;
+import com.openshift.restclient.model.build.ICustomBuildStrategy;
+import com.openshift.restclient.model.build.IDockerBuildStrategy;
+import com.openshift.restclient.model.build.ISTIBuildStrategy;
+import com.openshift.restclient.model.build.ISourceBuildStrategy;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.image.IImageStreamImport;
 import com.openshift.restclient.model.route.IRoute;
@@ -428,6 +434,21 @@ public class ResourceUtils {
 				.findFirst()
 				.map(pod -> pod.getLabels().get(DEPLOYMENT_CONFIG_KEY))
 				.orElse(null);
+	}
+
+	public static DockerImageURI getImageUri(IBuildConfig buildConfig) {
+		IBuildStrategy strategy = buildConfig.getBuildStrategy();
+		DockerImageURI image = null;
+		if (strategy instanceof ISourceBuildStrategy) {
+			image = ((ISourceBuildStrategy) strategy).getImage();
+		} else if (strategy instanceof ICustomBuildStrategy) {
+			image = ((ICustomBuildStrategy) strategy).getImage();
+		} else if (strategy instanceof IDockerBuildStrategy) {
+			image = ((IDockerBuildStrategy) strategy).getBaseImage();
+		} else if (strategy instanceof ISTIBuildStrategy) {
+			image = ((ISTIBuildStrategy) strategy).getImage();
+		}
+		return image;
 	}
 
 }

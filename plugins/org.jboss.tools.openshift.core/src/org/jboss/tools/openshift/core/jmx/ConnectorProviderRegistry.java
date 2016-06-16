@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.core.jmx;
 
 import java.util.HashMap;
@@ -14,6 +24,14 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
+/**
+ * Convenience access to an extension point that allows to contribute
+ * {@link JMXConnectorProvider} implementations for a particular version of
+ * EAP/Wildfly
+ * 
+ * @author Thomas Mäder
+ *
+ */
 public class ConnectorProviderRegistry {
 
 	public static final String CONNECTOR_PROVIDER_EXT_POINT = "org.jboss.tools.jmx.core.remoting.jmxprovider";
@@ -21,7 +39,7 @@ public class ConnectorProviderRegistry {
 	private Map<VersionKey, JMXConnectorProvider> extensions;
 
 	public ConnectorProviderRegistry() {
-		extensions= loadExtensions();
+		extensions = loadExtensions();
 	}
 
 	private Map<VersionKey, JMXConnectorProvider> loadExtensions() {
@@ -57,6 +75,5 @@ public class ConnectorProviderRegistry {
 		IExtensionPoint extensionPoint = registry.getExtensionPoint(extensionId);
 		return extensionPoint.getExtensions();
 	}
-
 
 }

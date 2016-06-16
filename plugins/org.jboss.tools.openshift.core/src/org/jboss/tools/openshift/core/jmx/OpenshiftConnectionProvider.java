@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.core.jmx;
 
 import java.io.IOException;
@@ -18,6 +28,11 @@ import org.jboss.tools.jmx.core.IConnectionWrapper;
 import org.jboss.tools.openshift.core.server.OpenShiftServer;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
+/**
+ * ConnectionProvider implementation for EAP/Wildlfy on running on Openshift3 in debug mode.
+ * @author Thomas Mäder
+ *
+ */
 public class OpenshiftConnectionProvider extends AbstractConnectionProvider {
 	private class ServerListener extends UnitedServerListener {
 		@Override
@@ -69,7 +84,9 @@ public class OpenshiftConnectionProvider extends AbstractConnectionProvider {
 		VersionKey version = new VersionDetector(server).guess();
 		if (version != null) {
 			JMXConnectorProvider provider = connectorProviders.getProvider(version);
-			return new OpenshiftConnectionWrapper(this, server, provider);
+			if (provider != null) {
+				return new OpenshiftConnectionWrapper(this, server, provider);
+			}
 		}
 		return null;
 	}
