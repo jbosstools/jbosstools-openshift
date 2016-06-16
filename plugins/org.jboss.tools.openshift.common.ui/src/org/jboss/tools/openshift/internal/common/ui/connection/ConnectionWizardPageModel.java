@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Red Hat, Inc.
+ * Copyright (c) 2012-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -39,6 +39,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
  * @author Andre Dietisheim
  * @author Xavier Coulon
  * @contributor Nick Boldt
+ * @author Jeff Maury
  */
 public class ConnectionWizardPageModel extends ObservableUIPojo {
 
@@ -365,7 +366,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			}
 		} catch (Exception e) {
 			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
-					NLS.bind("The server type, credentials, or auth scheme might be incorrect. {0}", e.getMessage()));
+					                           e.getMessage());
 			OpenShiftCommonUIActivator.log(e);
 		} finally {
 			if(connection instanceof IObservablePojo) {
