@@ -11,6 +11,7 @@ import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolsHelpContextIds;
 import org.eclipse.ui.externaltools.internal.program.launchConfigurations.ProgramMainTab;
@@ -45,6 +46,22 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 							});
 						}
 					}
+					
+					protected void createLocationComponent(Composite parent) {
+						super.createLocationComponent(parent);
+						locationField.setEnabled(false);
+						workspaceLocationButton.setVisible(false);
+						fileLocationButton.setVisible(false);
+						variablesLocationButton.setVisible(false);
+					}
+					protected void createWorkDirectoryComponent(Composite parent) {
+						super.createWorkDirectoryComponent(parent);
+						workDirectoryField.setEnabled(false);
+						fileWorkingDirectoryButton.setVisible(false);
+						workspaceWorkingDirectoryButton.setVisible(false);
+						variablesWorkingDirectoryButton.setVisible(false);
+					}
+					
 				},
 //			refresh,
 //			new ExternalToolsBuildTab(),
@@ -59,7 +76,7 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 			@Override
 			protected void createEnvironmentTable(Composite parent) {
 				SWTFactory.createLabel(parent, 
-						"For security purposes, passwords may not be shown in the table below.", 2);
+						"For security purposes, passwords may not be shown in the table below. Changes to username\n or password should be performed in the server editor. Changes made here will be overwritten.", 2);
 				SWTFactory.createLabel(parent, "", 2); 
 				super.createEnvironmentTable(parent);
 			}
