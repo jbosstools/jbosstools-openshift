@@ -13,11 +13,17 @@ package org.jboss.tools.openshift.core.jmx;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.management.remote.JMXConnectorProvider;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerEvent;
@@ -29,7 +35,9 @@ import org.jboss.tools.openshift.core.server.OpenShiftServer;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 /**
- * ConnectionProvider implementation for EAP/Wildlfy on running on Openshift3 in debug mode.
+ * ConnectionProvider implementation for EAP/Wildlfy on running on Openshift3 in
+ * debug mode.
+ * 
  * @author Thomas Mäder
  *
  */
@@ -39,7 +47,7 @@ public class OpenshiftConnectionProvider extends AbstractConnectionProvider {
 		public boolean canHandleServer(IServer server) {
 			return true;
 		}
-		
+
 		public void serverChanged(ServerEvent event) {
 			updateConnection(event.getServer());
 		}
@@ -57,10 +65,11 @@ public class OpenshiftConnectionProvider extends AbstractConnectionProvider {
 		}
 	}
 
-
 	public static final String ID = "com.jboss.tools.jmx.core.remoting";
 
+	// also serves as mutex for adding/removing connections 
 	private Map<String, IConnectionWrapper> idToConnection = new HashMap<String, IConnectionWrapper>();
+	private Set<String> inCreation = new HashSet<>();
 
 	public OpenshiftConnectionProvider() {
 		UnitedServerListenerManager.getDefault().addListener(new ServerListener());
@@ -93,7 +102,9 @@ public class OpenshiftConnectionProvider extends AbstractConnectionProvider {
 
 	@Override
 	public IConnectionWrapper[] getConnections() {
-		return idToConnection.values().toArray(new IConnectionWrapper[idToConnection.values().size()]);
+		synchronized (idToConnection) {
+			return idToConnection.values().toArray(new IConnectionWrapper[idToConnection.values().size()]);
+		}
 	}
 
 	@Override
@@ -136,29 +147,59 @@ public class OpenshiftConnectionProvider extends AbstractConnectionProvider {
 	}
 
 	public IConnectionWrapper getConnection(String id2) {
-		return idToConnection.get(id2);
+		synchronized (idToConnection) {
+			return idToConnection.get(id2);
+		}
 	}
 
 	private void updateConnection(IServer server) {
-		IConnectionWrapper con = idToConnection.get(server.getId());
 		boolean shouldHaveConnection = shouldHaveConnection(server);
-		if (con == null && shouldHaveConnection) {
-			try {
-				con = createConnection(server);
-				idToConnection.put(server.getId(), con);
-				fireAdded(con);
-			} catch (MalformedURLException e) {
-				OpenShiftCoreActivator.logError("Could not create jmx connection", e);
+		IConnectionWrapper removed = null;
+		synchronized (idToConnection) {
+			IConnectionWrapper con = idToConnection.get(server.getId());
+			if (con == null && shouldHaveConnection && !inCreation.contains(server.getId())) {
+				inCreation.add(server.getId());
+				startConnectionCreateJob(server);
+			} else if (con != null && !shouldHaveConnection) {
+				try {
+					con.disconnect();
+				} catch (IOException e) {
+					OpenShiftCoreActivator.logWarning("Could not disconnect jmx connection", e);
+				}
+				idToConnection.remove(server.getId());
+				removed = con;
 			}
-		} else if (con != null && !shouldHaveConnection) {
-			try {
-				con.disconnect();
-			} catch (IOException e) {
-				OpenShiftCoreActivator.logWarning("Could not disconnect jmx connection", e);
-			}
-			idToConnection.remove(server.getId());
-			fireRemoved(con);
 		}
+
+		if (removed != null) {
+			fireRemoved(removed);
+		} 
+	}
+
+	/*
+	 * Creates a connection in a background job. Call under mutex.
+	 */
+	private void startConnectionCreateJob(IServer server) {
+		new Job("Create Connection") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					IConnectionWrapper added = createConnection(server);
+					synchronized (idToConnection) {
+						idToConnection.put(server.getId(), added);
+					}
+					fireAdded(added);
+					return Status.OK_STATUS;
+				} catch (MalformedURLException e) {
+					return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, "Could not create jmx connection", e);
+				} finally {
+					synchronized (idToConnection) {
+						inCreation.remove(server.getId());
+					}
+				}
+			}
+		}.schedule();
 	}
 
 }
