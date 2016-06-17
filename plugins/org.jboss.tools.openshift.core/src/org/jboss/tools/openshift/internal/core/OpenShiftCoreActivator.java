@@ -41,7 +41,6 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.core"; //$NON-NLS-1$
 	private static OpenShiftCoreActivator instance;
-	private static BundleContext context;
 	private IServerLifecycleListener serverListener;
 	private OpenshiftResourceChangeListener resourceChangeListener;
 	public OpenShiftCoreActivator() {
@@ -54,13 +53,15 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	}
 
 	public static BundleContext getBundleContext() {
-	    return context;
+		if (instance == null) {
+			return null;
+		}
+		return instance.getBundleContext();
 	}
 
 	@Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
-        this.context = context;
         registerDebugOptionsListener(PLUGIN_ID, new Trace(this), context);
         Collection<Connection> connections = new ConnectionPersistency().load();
         ConnectionsRegistrySingleton.getInstance().addAll(connections);
