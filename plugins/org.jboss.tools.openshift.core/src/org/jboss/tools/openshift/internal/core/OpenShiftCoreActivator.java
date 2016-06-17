@@ -28,6 +28,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
+import org.jboss.tools.openshift.core.jmx.ConnectorProviderRegistry;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.core.server.OpenShiftServer;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
@@ -44,8 +45,9 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	private static BundleContext context;
 	private IServerLifecycleListener serverListener;
 	private OpenshiftResourceChangeListener resourceChangeListener;
+	private ConnectorProviderRegistry connectorProviders;
+	
 	public OpenShiftCoreActivator() {
-		super();
 		instance = this;
 	}
 
@@ -58,9 +60,9 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	}
 
 	@Override
-    public void start(BundleContext context) throws Exception {
-        super.start(context);
-        this.context = context;
+    public void start(BundleContext c) throws Exception {
+        super.start(c);
+        context = c;
         registerDebugOptionsListener(PLUGIN_ID, new Trace(this), context);
         Collection<Connection> connections = new ConnectionPersistency().load();
         ConnectionsRegistrySingleton.getInstance().addAll(connections);
@@ -101,7 +103,8 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
         // A clone of the auto-publish thread implementation
         resourceChangeListener = new OpenshiftResourceChangeListener();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
-
+		
+		connectorProviders= new ConnectorProviderRegistry();
 	}
 
     @Override
@@ -140,6 +143,11 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 		}
 		return serverListener;
 	}
+	
+	public ConnectorProviderRegistry getConnectorProviders() {
+		return connectorProviders;
+	}
+	
 	/**
 	 * Get the IPluginLog for this plugin. This method 
 	 * helps to make logging easier, for example:

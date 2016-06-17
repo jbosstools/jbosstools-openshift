@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -58,7 +59,10 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
 
 public class OpenShiftDebugUtils {
+	public static final int NATIVE_MANAGMENT_PORT = 9999;
 
+	private static final String ADMIN_USERNAME_KEY="ADMIN_USERNAME";
+	private static final String ADMIN_PASSSWD_KEY="ADMIN_PASSWORD";
 	private static final String DEBUG_KEY = "DEBUG";
 	private static final String DEV_MODE_KEY = "DEV_MODE";
 	private static final String DEBUG_PORT_KEY = "DEBUG_PORT";
@@ -67,23 +71,25 @@ public class OpenShiftDebugUtils {
 	public static OpenShiftDebugUtils get() {
 		return get(DebugPlugin.getDefault().getLaunchManager());
 	}
-	
+
 	/** For testing purposes **/
 	public static OpenShiftDebugUtils get(ILaunchManager launchManager) {
 		return new OpenShiftDebugUtils(launchManager);
 	}
-	
+
 	private OpenShiftDebugUtils(ILaunchManager launchManager) {
 		this.launchManager = launchManager;
 	}
-	
-	public DebuggingContext enableDebugMode(IDeploymentConfig deploymentConfig, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
+
+	public DebuggingContext enableDebugMode(IDeploymentConfig deploymentConfig, DebuggingContext debugContext,
+			IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(deploymentConfig);
 		Assert.isNotNull(debugContext);
 
 		IDebugListener listener = debugContext.getDebugListener();
 		if (debugContext.isDebugEnabled() && listener != null) {
 			IPod pod = getFirstPod(deploymentConfig);
+			
 			debugContext.setPod(pod);
 			listener.onDebugChange(debugContext, monitor);
 		} else {
@@ -93,7 +99,8 @@ public class OpenShiftDebugUtils {
 		return debugContext;
 	}
 
-	public DebuggingContext disableDebugMode(IDeploymentConfig deploymentConfig, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
+	public DebuggingContext disableDebugMode(IDeploymentConfig deploymentConfig, DebuggingContext debugContext,
+			IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(deploymentConfig);
 		Assert.isNotNull(debugContext);
 
@@ -102,29 +109,30 @@ public class OpenShiftDebugUtils {
 			IPod pod = getFirstPod(deploymentConfig);
 			debugContext.setPod(pod);
 			listener.onDebugChange(debugContext, monitor);
-		} 
+		}
 		if (debugContext.isDebugEnabled()) {
 			debugContext.setDebugEnabled(false);
 			updateDebugConfig(deploymentConfig, debugContext, monitor);
 		}
 		return debugContext;
 	}
-	
-	public void updateDebugConfig(IDeploymentConfig deploymentConfig, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
+
+	public void updateDebugConfig(IDeploymentConfig deploymentConfig, DebuggingContext debugContext,
+			IProgressMonitor monitor) throws CoreException {
 		monitor.subTask("Updating Deployment Configuration");
-		if (deploymentConfig == null
-				|| deploymentConfig.getEnvironmentVariables() == null) {
+		if (deploymentConfig == null || deploymentConfig.getEnvironmentVariables() == null) {
 			return;
 		}
 		updateDeploymentConfigValues(deploymentConfig, debugContext);
-		
+
 		IClient client = getClient(deploymentConfig);
-		
+
 		DeploymentConfigListenerJob deploymentListenerJob = new DeploymentConfigListenerJob(deploymentConfig);
 		deploymentListenerJob.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
-				ConnectionsRegistrySingleton.getInstance().removeListener(deploymentListenerJob.getConnectionsRegistryListener());
+				ConnectionsRegistrySingleton.getInstance()
+						.removeListener(deploymentListenerJob.getConnectionsRegistryListener());
 				debugContext.setPod(deploymentListenerJob.getPod());
 				if (event.getResult().isOK() && debugContext.getDebugListener() != null) {
 					try {
@@ -135,7 +143,7 @@ public class OpenShiftDebugUtils {
 				}
 			};
 		});
-		
+
 		ConnectionsRegistrySingleton.getInstance().addListener(deploymentListenerJob.getConnectionsRegistryListener());
 		deploymentListenerJob.schedule();
 		client.update(deploymentConfig);
@@ -145,44 +153,76 @@ public class OpenShiftDebugUtils {
 			e.printStackTrace();
 		}
 		IStatus result = deploymentListenerJob.getResult();
-		if (result == null) {//timed out!
+		if (result == null) {// timed out!
 			throw new CoreException(deploymentListenerJob.getTimeOutStatus());
 		} else if (!result.isOK()) {
 			throw new CoreException(result);
 		}
-		
+
 	}
 
-	private void updateDeploymentConfigValues(IDeploymentConfig deploymentConfig,
-			DebuggingContext debugContext) {
+	private void updateDeploymentConfigValues(IDeploymentConfig deploymentConfig, DebuggingContext debugContext) {
 		Collection<IContainer> originalContainers = deploymentConfig.getContainers();
 		if (originalContainers != null && !originalContainers.isEmpty() && debugContext.isDebugEnabled()) {
 			Collection<IContainer> containers = new ArrayList<>(originalContainers);
 			IContainer container = containers.iterator().next();
 			Set<IPort> ports = new HashSet<>(container.getPorts());
-			
-			IPort existing = ports.stream().filter(p -> p.getContainerPort() == debugContext.getDebugPort())
-										.findFirst().orElse(null);
-			boolean added = false;
-			if (existing == null) {
-				PortSpecAdapter newPort = new PortSpecAdapter("debug", "TCP", debugContext.getDebugPort());
-				added = ports.add(newPort);
-			} else {
-				PortSpecAdapter newPort = new PortSpecAdapter(existing.getName(), existing.getProtocol(), debugContext.getDebugPort());
-				if (!existing.equals(newPort)) {
-					ports.remove(existing);
-					added = ports.add(newPort);
-				}
-			}
-			if (added) {
-				container.setPorts(ports); 
+
+			if (updateDebugPort(debugContext, ports) | updateJMXPort(debugContext, ports)) {
+				container.setPorts(ports);
 				deploymentConfig.setContainers(containers);
 			}
 		}
-		//TODO the list of env var to set in debug mode should probably be defined in the server settings instead
+		// TODO the list of env var to set in debug mode should probably be
+		// defined in the server settings instead
 		deploymentConfig.setEnvironmentVariable(DEBUG_PORT_KEY, String.valueOf(debugContext.getDebugPort()));
-		deploymentConfig.setEnvironmentVariable(DEV_MODE_KEY, String.valueOf(debugContext.isDebugEnabled()));//for node
-		deploymentConfig.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));//for eap
+		deploymentConfig.setEnvironmentVariable(DEV_MODE_KEY, String.valueOf(debugContext.isDebugEnabled()));// for
+																												// node
+		deploymentConfig.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));// for
+																											// eap
+		if (debugContext.isDebugEnabled()) {
+			if (debugContext.getAdminUsername() == null) {
+				debugContext.setAdminUsername("adminuser"+new Random().nextInt(Integer.MAX_VALUE));
+			}
+			if (debugContext.getAdminPassword() == null) {
+				debugContext.setAdminPassword("adminpw$"+new Random().nextInt(Integer.MAX_VALUE));
+			}
+			deploymentConfig.setEnvironmentVariable(ADMIN_USERNAME_KEY, debugContext.getAdminUsername());
+			deploymentConfig.setEnvironmentVariable(ADMIN_PASSSWD_KEY, debugContext.getAdminPassword());
+		}
+	}
+
+	private boolean updateJMXPort(DebuggingContext debugContext, Set<IPort> ports) {
+		IPort existing = ports.stream().filter(p->p.getName().equals("remotingjmx")).findFirst().orElse(null);
+		PortSpecAdapter newPort = new PortSpecAdapter("remotingjmx", "TCP", NATIVE_MANAGMENT_PORT);
+		if (existing == null) {
+			ports.add(newPort);
+			return true;
+		} else {
+			if (existing.equals(newPort)) {
+				return false;
+			}
+			ports.remove(existing);
+			ports.add(newPort);
+			return true;
+		}
+	}
+
+	private boolean updateDebugPort(DebuggingContext debugContext, Set<IPort> ports) {
+		IPort existing = ports.stream().filter(p -> p.getContainerPort() == debugContext.getDebugPort()).findFirst()
+				.orElse(null);
+		if (existing == null) {
+			return ports.add(new PortSpecAdapter("debug", "TCP", debugContext.getDebugPort()));
+		} else {
+			IPort targetPort = new PortSpecAdapter(existing.getName(), existing.getProtocol(),
+					debugContext.getDebugPort());
+			if (ports.add(targetPort)) {
+				// we were able to add, so target != existing
+				ports.remove(existing);
+				return true;
+			}
+			return false;
+		}
 	}
 
 	private IClient getClient(IDeploymentConfig deploymentConfig) {
@@ -205,92 +245,96 @@ public class OpenShiftDebugUtils {
 		String debugEnabled = getEnv(deploymentConfig, DEBUG_KEY);
 		String devModeEnabled = getEnv(deploymentConfig, DEV_MODE_KEY);
 		debugContext.setDebugEnabled(Boolean.parseBoolean(debugEnabled) || Boolean.parseBoolean(devModeEnabled));
+		debugContext.setAdminUsername(getEnv(deploymentConfig, ADMIN_USERNAME_KEY));
+		debugContext.setAdminPassword(getEnv(deploymentConfig, ADMIN_PASSSWD_KEY));
 		return debugContext;
 	}
-	
+
 	public String getEnv(IDeploymentConfig deploymentConfig, String key) {
 		if (deploymentConfig == null || deploymentConfig.getEnvironmentVariables() == null) {
 			return null;
 		}
 		Optional<IEnvironmentVariable> envVar = deploymentConfig.getEnvironmentVariables().stream()
-				.filter(ev -> key.equals(ev.getName()))
-				.findFirst();
+				.filter(ev -> key.equals(ev.getName())).findFirst();
 		if (envVar.isPresent()) {
 			return envVar.get().getValue();
 		}
 		return null;
 	}
-	
+
 	public IPod getFirstPod(IDeploymentConfig dc) {
-		IPod pod = ResourceUtils.getPodsForDeploymentConfig(dc).stream().findFirst() 
-				.orElse(null);
+		IPod pod = ResourceUtils.getPodsForDeploymentConfig(dc).stream().findFirst().orElse(null);
 		return pod;
 	}
-	
+
 	public ILaunchConfiguration getRemoteDebuggerLaunchConfiguration(IServer server) throws CoreException {
-		ILaunchConfigurationType launchConfigurationType = launchManager.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
+		ILaunchConfigurationType launchConfigurationType = launchManager
+				.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
 		ILaunchConfiguration[] launchConfigs = launchManager.getLaunchConfigurations(launchConfigurationType);
 		String name = getRemoteDebuggerLaunchConfigurationName(server);
-		Optional<ILaunchConfiguration> maybeLaunch = Stream.of(launchConfigs)
-				.filter(lc -> name.equals(lc.getName()))
+		Optional<ILaunchConfiguration> maybeLaunch = Stream.of(launchConfigs).filter(lc -> name.equals(lc.getName()))
 				.findFirst();
-		
+
 		return maybeLaunch.orElse(null);
 	}
-	
-	public ILaunchConfigurationWorkingCopy createRemoteDebuggerLaunchConfiguration(IServer server) throws CoreException {
+
+	public ILaunchConfigurationWorkingCopy createRemoteDebuggerLaunchConfiguration(IServer server)
+			throws CoreException {
 		String name = getRemoteDebuggerLaunchConfigurationName(server);
-		ILaunchConfigurationType launchConfigurationType = launchManager.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
+		ILaunchConfigurationType launchConfigurationType = launchManager
+				.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
 		ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance(null, name);
 		return workingCopy;
 	}
-	
-	public void setupRemoteDebuggerLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProject project, int debugPort) throws CoreException {
+
+	public void setupRemoteDebuggerLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProject project,
+			int debugPort) throws CoreException {
 		String portString = String.valueOf(debugPort);
-	    workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE, false);
-		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR, IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
+		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE, false);
+		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR,
+				IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
 		Map<String, String> connectMap = new HashMap<>(2);
 		connectMap.put("port", portString); //$NON-NLS-1$
 		connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);
-		if(project != null) {
-		   workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getName());
+		if (project != null) {
+			workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getName());
 		}
 	}
-	
+
 	public boolean isRunning(ILaunchConfiguration launchConfiguration, int localDebugPort) {
 		boolean isRunning = getLaunches()
-				.filter(l -> !l.isTerminated() && launchMatches(l, launchConfiguration, localDebugPort))
-				.findFirst().isPresent();
+				.filter(l -> !l.isTerminated() && launchMatches(l, launchConfiguration, localDebugPort)).findFirst()
+				.isPresent();
 		return isRunning;
 	}
-	
-	
+
 	private boolean launchMatches(ILaunch l, ILaunchConfiguration launchConfiguration, int localDebugPort) {
 		return Objects.equals(l.getLaunchConfiguration(), launchConfiguration);
 	}
 
 	public static String getRemoteDebuggerLaunchConfigurationName(IServer server) {
-		String name ="Remote debugger to "+server.getName();
+		String name = "Remote debugger to " + server.getName();
 		return name;
 	}
-	
+
 	public void terminateRemoteDebugger(IServer server) throws CoreException {
 		ILaunchConfiguration launchConfig = getRemoteDebuggerLaunchConfiguration(server);
 		if (launchConfig == null) {
 			return;
 		}
 		List<IStatus> errors = new ArrayList<>();
-		getLaunches().filter(l -> launchConfig.equals(l.getLaunchConfiguration()))
-					 .filter(l -> l.canTerminate())
-					 .forEach(l -> terminate(l, errors));
-		
+		getLaunches().filter(l -> launchConfig.equals(l.getLaunchConfiguration())).filter(l -> l.canTerminate())
+				.forEach(l -> terminate(l, errors));
+
 		if (!errors.isEmpty()) {
-			MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.ERROR, errors.toArray(new IStatus[errors.size()]), "Failed to terminate remote launch configuration", null);
+			MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.ERROR,
+					errors.toArray(new IStatus[errors.size()]), "Failed to terminate remote launch configuration",
+					null);
 			throw new CoreException(status);
 		}
 	}
-	
+
 	private void terminate(ILaunch launch, Collection<IStatus> errors) {
 		try {
 			launch.terminate();

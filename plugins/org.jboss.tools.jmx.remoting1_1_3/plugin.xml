@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.jboss.tools.jmx.core.remoting.jmxprovider">
+      <provider
+            class="org.jboss.remotingjmx.RemotingConnectorProvider">
+         <server-version
+               servertype="eap"
+               version="6.4">
+         </server-version>
+         <server-version
+               servertype="eap"
+               version="6.4.0">
+         </server-version>
+      </provider>
+   </extension>
+
+</plugin>
