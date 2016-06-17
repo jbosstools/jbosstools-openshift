@@ -22,6 +22,8 @@ public interface IConnection {
 	public static final String PROPERTY_USERNAME = "username";
 	public static final String PROPERTY_PASSWORD = "password";
 	public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
+	public static final String PROPERTY_AUTHSCHEME = "authtype";
+	public static final String PROPERTY_REMEMBER_TOKEN = "rememberToken";
 
 	public String getHost();
 	
