@@ -446,7 +446,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			return client.create(resource);
 		} catch (UnauthorizedException e) {
 			needStrategy = false;
-			return retryCreate("Unauthorized.  Trying to reauthenticate", e, resource);
+			return retryCreate(e, resource);
 		} finally {
 			if(needStrategy) {
 				connect();
@@ -466,7 +466,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			return client.update(resource);
 		} catch (UnauthorizedException e) {
 			needStrategy = false;
-			return retryUpdate("Unauthorized.  Trying to reauthenticate", e, resource);
+			return retryUpdate(e, resource);
 		} finally {
 			if(needStrategy) {
 				connect();
@@ -493,7 +493,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			return client.list(kind, namespace);
 		} catch (UnauthorizedException e) {
 			needStrategy = false;
-			return retryList("Unauthorized.  Trying to reauthenticate", e, kind, namespace);
+			return retryList(e, kind, namespace);
 		} finally {
 			if(needStrategy) {
 				connect();
@@ -508,7 +508,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			return client.get(kind, name, namespace);
 		} catch (UnauthorizedException e) {
 			needStrategy = false;
-			return retryGet("Unauthorized.  Trying to reauthenticate", e, kind, name, namespace);
+			return retryGet(e, kind, name, namespace);
 		} finally {
 			if(needStrategy) {
 				connect();
@@ -527,7 +527,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
 		} catch (UnauthorizedException e) {
 			needStrategy = false;
-			return retryGet("Unauthorized.  Trying to reauthenticate", e, resource.getKind(), resource.getName(), resource.getNamespace());
+			return retryGet(e, resource.getKind(), resource.getName(), resource.getNamespace());
 		} finally {
 			if(needStrategy) {
 				connect();
@@ -535,8 +535,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		}
 	}
 	
-	private <T extends IResource> T retryGet(String message, OpenShiftException e, String kind, String name, String namespace){
-		OpenShiftCoreActivator.pluginLog().logInfo(message);
+	private <T extends IResource> T retryGet(OpenShiftException e, String kind, String name, String namespace){
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
@@ -545,8 +544,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		throw e;
 	}
 
-	private <T extends IResource>  T retryCreate(String message, OpenShiftException e, T resource){
-		OpenShiftCoreActivator.pluginLog().logInfo(message);
+	private <T extends IResource>  T retryCreate(OpenShiftException e, T resource){
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
@@ -555,8 +553,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		throw e;
 	}
 
-	private <T extends IResource>  T retryUpdate(String message, OpenShiftException e, T resource){
-		OpenShiftCoreActivator.pluginLog().logInfo(message);
+	private <T extends IResource>  T retryUpdate(OpenShiftException e, T resource){
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
@@ -565,8 +562,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		throw e;
 	}
 
-	private <T extends IResource> List<T> retryList(String message, OpenShiftException e, String kind, String namespace){
-		OpenShiftCoreActivator.pluginLog().logInfo(message);
+	private <T extends IResource> List<T> retryList(OpenShiftException e, String kind, String namespace){
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
