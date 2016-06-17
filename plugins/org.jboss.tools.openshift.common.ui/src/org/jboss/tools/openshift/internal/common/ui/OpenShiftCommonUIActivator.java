@@ -43,7 +43,14 @@ public class OpenShiftCommonUIActivator extends BaseUIPlugin {
 		connectionsRegistryListener = new ConnectionsRegistryAdapter() {
 			@Override
 			public void connectionAdded(IConnection connection) {
-				OpenShiftUIUtils.showOpenShiftExplorer();
+				try {
+					OpenShiftUIUtils.showOpenShiftExplorer();
+				} catch (Exception e) {
+					// Can happen during workbench startup, while the core plugins are starting.
+					// Since mutiple connections would cause multiple errors, 
+					// it's probably better to swallow the exception, else a user would see multiple 
+					// errors in the log, every time the workbench starts.
+				}
 			}
 		};
 		ConnectionsRegistrySingleton.getInstance().addListener(connectionsRegistryListener);

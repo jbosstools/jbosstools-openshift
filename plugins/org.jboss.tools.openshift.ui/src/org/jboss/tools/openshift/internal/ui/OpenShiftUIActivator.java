@@ -43,6 +43,9 @@ public class OpenShiftUIActivator extends BaseUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		//JBIDE-22612: We need to force OpenShift Core to start so that Connections get loaded in the Explorer
+		OpenShiftCoreActivator.getDefault();
+
 		plugin = this;
 	}
 
