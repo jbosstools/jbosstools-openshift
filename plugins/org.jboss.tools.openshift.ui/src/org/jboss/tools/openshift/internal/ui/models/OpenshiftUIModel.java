@@ -21,6 +21,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryListener;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 
 import com.openshift.restclient.model.IResource;
@@ -71,7 +72,7 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 				fireChanged(OpenshiftUIModel.this);
 			}
 		};
-		Collection<IConnection> allConnections = registry.getAll();
+		Collection<Connection> allConnections = registry.getAll(Connection.class);
 		synchronized (connections) {
 			for (IConnection connection : allConnections) {
 				if (connection instanceof IOpenShiftConnection) {

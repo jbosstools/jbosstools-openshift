@@ -32,7 +32,6 @@ public class ExpressCoreActivator extends BaseCorePlugin {
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.express.core"; //$NON-NLS-1$
 	
 	private static ExpressCoreActivator instance;
-	private static BundleContext myContext;
 	
 	public ExpressCoreActivator() {
 		super();
@@ -44,13 +43,15 @@ public class ExpressCoreActivator extends BaseCorePlugin {
 	}
 
 	public static BundleContext getBundleContext() {
-	    return myContext;
+		if (instance == null) {
+			return null;
+		}
+		return instance.getBundleContext();
 	}
 
     @Override
 	public void start(BundleContext context) throws Exception {
         super.start(context);
-        myContext = context;
 
         ConnectionsRegistrySingleton.getInstance().addAll(
         		new ExpressConnectionPersistency().load());
