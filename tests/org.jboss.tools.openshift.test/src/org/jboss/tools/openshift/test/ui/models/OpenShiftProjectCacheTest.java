@@ -10,20 +10,22 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.models;
 
+import static org.jboss.tools.openshift.test.core.connection.ConnectionTestUtils.createConnection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeoutException;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.ui.models.IConnectionWrapper;
@@ -37,7 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.ResourceKind;
@@ -54,17 +55,15 @@ public class OpenShiftProjectCacheTest {
 	@Mock
 	private IProject project2;
 
-	private TestConnection conn;
+	private Connection conn;
 
 	@Before
 	public void setUp() throws Exception {
-		conn= Mockito.mock(TestConnection.class);
-		when(conn.getUsername()).thenReturn("aUser");
-		when(conn.toString()).thenReturn("https://localhost:8443");
-		when(conn.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(project));
+		this.conn = spy(createConnection("aUser", "123", "https://localhost:8443"));
+		doReturn(Arrays.asList(project)).when(conn).getResources(ResourceKind.PROJECT);
 		ConnectionsRegistrySingleton.getInstance().clear();
 		ConnectionsRegistrySingleton.getInstance().add(conn);
-		root= new OpenshiftUIModel();
+		root = new OpenshiftUIModel();
 		connectionWrapper = root.getConnections().iterator().next();
 	}
 	
@@ -75,7 +74,6 @@ public class OpenShiftProjectCacheTest {
 	@Test
 	public void testGetProjectForOnlyMakesInitialCallToServer() throws InterruptedException, TimeoutException {
 		IOpenShiftConnection connection = connectionWrapper.getWrapped();
-		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(new ArrayList<>());
 		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
 		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
 		UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
@@ -135,9 +133,5 @@ public class OpenShiftProjectCacheTest {
 		IResourceWrapper<?, ?> r= adapters.iterator().next();
 		assertEquals(project, r.getWrapped());
 		assertEquals(conn, r.getParent().getWrapped());
-	}
-
-	public interface TestConnection extends IConnection, IOpenShiftConnection {
-
 	}
 }
