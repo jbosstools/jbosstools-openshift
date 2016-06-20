@@ -37,6 +37,7 @@ import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablePage;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablesPageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.common.IEnvironmentVariablesPageModel;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IDeploymentConfig;
@@ -98,6 +99,7 @@ class ManageEnvironmentVariablesWizard extends Wizard {
 			new EnvironmentVariable(var.getName(), var.getValue()))
 			.collect(Collectors.toList());
 		model.setEnvironmentVariables(vars);
+		setWindowTitle("Manage Environment Variables");
 	}
 
 	@Override
@@ -112,7 +114,12 @@ class ManageEnvironmentVariablesWizard extends Wizard {
 					for (EnvironmentVariable var: vars) {
 						if(model.isEnvironmentVariableModified(var)) {
 							modified = true;
-							dc.setEnvironmentVariable(var.getKey(), var.getValue());
+							String value = var.getValue();
+							if(IEnvironmentVariablesPageModel.DELETED.equals(value)) {
+								dc.removeEnvironmentVariable(var.getKey());
+							} else {
+								dc.setEnvironmentVariable(var.getKey(), var.getValue());
+							}
 						}
 					}
 					if(modified) {
@@ -133,20 +140,24 @@ class ManageEnvironmentVariablesWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		EnvironmentVariablePage page = new EnvironmentVariablePage(
-				"Manage Environment Variables", 
-				"", 
-				"EnvVars",
-				this,
-				model) {
-			
-			@Override
-			protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-				GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
-				//Env Variables Block
-				createEnvVariableControl(parent, dbc);
-			}
-		};
+		EnvironmentVariablePage page = new EnvironmentVariablePageImpl();
 		addPage(page);
 	}
+
+	class EnvironmentVariablePageImpl extends EnvironmentVariablePage {
+		public EnvironmentVariablePageImpl() {
+			super("Environment Variables", 
+				"Edit environment variables of deployment config " + dc.getName(), 
+				"EnvVars", ManageEnvironmentVariablesWizard.this, model);
+			canDeleteAnyVar = true;
+		}
+
+		@Override
+		protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+			GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
+			//Env Variables Block
+			createEnvVariableControl(parent, dbc);
+		}
+	}
 }
+

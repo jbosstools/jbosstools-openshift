@@ -67,6 +67,10 @@ public class EnvironmentVariablesPageModel extends ObservablePojo implements IEn
 
 	@Override
 	public void removeEnvironmentVariable(EnvironmentVariable envVar) {
+		if(isPersistent(envVar)) {
+			updateEnvironmentVariable(envVar, envVar.getKey(), DELETED);
+			return;
+		}
 		final int i = environmentVariables.indexOf(envVar);
 		if(i > -1) {
 			List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
@@ -77,6 +81,11 @@ public class EnvironmentVariablesPageModel extends ObservablePojo implements IEn
 
 	@Override
 	public void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value) {
+		if((isPersistent(envVar) || isPersistent(key)) && !key.equals(envVar.getKey())) {
+			addEnvironmentVariable(key, value);
+			removeEnvironmentVariable(envVar);
+			return;
+		}
 		final int i = environmentVariables.indexOf(envVar);
 		if(i > -1) {
 			List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
@@ -87,7 +96,7 @@ public class EnvironmentVariablesPageModel extends ObservablePojo implements IEn
 	}	
 	@Override
 	public void resetEnvironmentVariable(EnvironmentVariable envVar) {
-		if(imageEnvVars.containsKey(envVar.getKey())) {
+		if(isPersistent(envVar)) {
 			updateEnvironmentVariable(envVar, envVar.getKey(), imageEnvVars.get(envVar.getKey()));
 		}
 	}
@@ -95,6 +104,13 @@ public class EnvironmentVariablesPageModel extends ObservablePojo implements IEn
 
 	@Override
 	public void addEnvironmentVariable(String key, String value) {
+		if(isPersistent(key)) {
+			EnvironmentVariable envVar = find(key);
+			if(envVar != null) {
+				updateEnvironmentVariable(envVar, key, value);
+				return;
+			}
+		}
 		List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
 		this.environmentVariables.add(new EnvironmentVariable(key, value, true));
 		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, old, Collections.unmodifiableList(environmentVariables));
@@ -102,12 +118,24 @@ public class EnvironmentVariablesPageModel extends ObservablePojo implements IEn
 
 	@Override
 	public boolean isEnvironmentVariableModified(EnvironmentVariable envVar) {
-		return envVar.isNew() || (imageEnvVars.containsKey(envVar.getKey()) && !Objects.equals(imageEnvVars.get(envVar.getKey()), envVar.getValue()));
+		return envVar.isNew() || (isPersistent(envVar) && !Objects.equals(imageEnvVars.get(envVar.getKey()), envVar.getValue()));
 	}
 	
 	@Override
 	public EnvironmentVariable getEnvironmentVariable(String key) {
 		return environmentVariables.stream().filter(var -> key.equals(var.getKey())).findAny().orElse(null);
+	}
+
+	public boolean isPersistent(EnvironmentVariable envVar) {
+		return isPersistent(envVar.getKey());
+	}
+
+	public boolean isPersistent(String envVarKey) {
+		return imageEnvVars.containsKey(envVarKey);
+	}
+
+	public EnvironmentVariable find(String key) {
+		return environmentVariables.stream().filter(v -> key.equals(v.getKey())).findFirst().orElse(null);
 	}
 
 }
