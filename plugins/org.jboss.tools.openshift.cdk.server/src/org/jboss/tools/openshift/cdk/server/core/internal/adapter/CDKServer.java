@@ -10,6 +10,8 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -19,6 +21,7 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.model.ServerDelegate;
 import org.jboss.ide.eclipse.as.core.util.ServerNamingUtility;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
@@ -119,11 +122,29 @@ public class CDKServer extends ServerDelegate {
 					IServerWorkingCopy wc = getServerWorkingCopy();
 					if( wc == null ) {
 						wc = getServer().createWorkingCopy();
+						
+						// a server stored in metadata will have a null file. 
+						IFile f = ((Server)getServer()).getFile();
 						wc.setAttribute(PROP_USERNAME, uce.getUser());
-						try {
-							wc.save(true, new NullProgressMonitor());
-						} catch(CoreException ce) {
-							CDKCoreActivator.pluginLog().logError("Error persisting changed username", ce);
+						if( f == null ) {
+							try {
+								wc.save(true, new NullProgressMonitor());
+							} catch(CoreException ce) {
+								CDKCoreActivator.pluginLog().logError("Error persisting changed username", ce);
+							}
+						} else {
+							// Job scope rules will not allow us to change the credentials most likely, if called from a job
+							// The change to user/pass will be sent through the usernameChangeException and so 
+							// persisting it immediately is not important, since calling client will already have access to it
+							final IServerWorkingCopy wc2 = wc;
+							WorkspaceJob wj = new WorkspaceJob("Saving updated credentials on server " + getServer().getName()) {
+								@Override
+								public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+									wc2.save(true, new NullProgressMonitor());
+									return Status.OK_STATUS;
+								}
+							};
+							wj.schedule();
 						}
 					}
 				}
