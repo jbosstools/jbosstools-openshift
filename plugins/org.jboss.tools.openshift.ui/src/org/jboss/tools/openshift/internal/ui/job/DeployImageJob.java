@@ -130,6 +130,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 					.filter(t->DeploymentTriggerType.IMAGE_CHANGE.equals(t.getType())).findFirst().orElse(null);
 			return trigger != null && 
 				ResourceKind.IMAGE_STREAM_TAG.equals(trigger.getKind()) && 
+				StringUtils.isNotBlank(trigger.getNamespace()) &&  
 				connection.getResource(ResourceKind.IMAGE_STREAM, trigger.getNamespace(), trigger.getFrom().getName()) != null;
 		}catch(OpenShiftException e) {
 			if(e.getStatus() != null && e.getStatus().getCode() == IHttpConstants.STATUS_NOT_FOUND) {
