@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +28,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
 import org.eclipse.jdt.launching.SocketUtil;
@@ -43,6 +45,8 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
+import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.core.debug.DebugTrackerContributionEvaluation;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
@@ -64,6 +68,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		implements ISubsystemController, ILaunchServerController {
 
 	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
+	private static final String DEV_MODE = "DEV_MODE"; //$NON-NLS-1$
+	private static final String PACKAGE_JSON = "package.json"; //$NON-NLS-1$
 
 	/**
 	 * Get access to the ControllableServerBehavior
@@ -124,6 +130,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 				startDebugging(server, dc, debugContext, monitor);
 			} else {//run, profile
 				stopDebugging(dc, debugContext, monitor);
+				enableDevModeForNodeJsProject(dc, server);
 			}
 		} catch (CoreException e) {
 			mode = currentMode;
@@ -133,6 +140,34 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 	}
 
+	/**
+	 * Enables DEV_MODE environment variables in {@link IDeploymentConfig} for
+	 * Node.js project by default
+	 *
+	 * @see <a href="https://issues.jboss.org/browse/JBIDE-22362">JBIDE-22362</a>
+	 */
+	private void enableDevModeForNodeJsProject(IDeploymentConfig dc, IServer server) {
+		if (isNodeJsProject(server)) {
+
+			new Job("Enabling 'DEV_MODE' for deployment config " + dc.getName()) { //$NON-NLS-1$
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						dc.setEnvironmentVariable(DEV_MODE, Boolean.TRUE.toString());
+						Connection conn = ConnectionsRegistryUtil.getConnectionFor(dc);
+						conn.updateResource(dc);
+					} catch (Exception e) {
+						String message = "Unable to enable 'DEV_MODE' for deployment config " + dc.getName(); //$NON-NLS-1$
+						OpenShiftCoreActivator.getDefault().getLogger().logError(message, e);
+						return new Status(Status.ERROR, OpenShiftCoreActivator.PLUGIN_ID, message, e);
+					}
+					return Status.OK_STATUS;
+				}
+
+			}.schedule();
+		}
+	}
 
 	private void checkServerState(ControllableServerBehavior beh, String oldMode, String mode) {
 		int state = pollState();
@@ -249,6 +284,29 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			ILaunchConfigurationWorkingCopy workingCopy,
 			IProgressMonitor monitor) throws CoreException {
 		// Do Nothing
+	}
+	
+	private boolean isJavaProject(IServer server) {
+		IProject p = OpenShiftServerUtils.getDeployProject(server);
+		try {
+			return p != null && p.isAccessible() && p.hasNature(JavaCore.NATURE_ID);
+		} catch (CoreException e) {
+			OpenShiftCoreActivator.pluginLog().logError(e);
+		}
+		return false;
+	}
+	
+	private boolean isNodeJsProject(IServer server) {
+		IProject p = OpenShiftServerUtils.getDeployProject(server);
+		return (p != null && p.isAccessible() && hasPackageJson(p));
+	}
+	
+	/**
+	 * @return true if {@link IProject} contains package.json file, false otherwise.
+	 */
+	private boolean hasPackageJson(IProject project) {
+		IFile packageJson = project.getFile(PACKAGE_JSON);
+		return (packageJson != null && packageJson.isAccessible());
 	}
 	
 	/**
