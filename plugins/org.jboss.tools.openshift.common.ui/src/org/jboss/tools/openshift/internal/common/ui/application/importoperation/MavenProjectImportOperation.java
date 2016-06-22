@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,11 +13,14 @@ package org.jboss.tools.openshift.internal.common.ui.application.importoperation
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
+import java.util.stream.Collectors;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.m2e.core.embedder.MavenModelManager;
@@ -28,9 +31,11 @@ import org.eclipse.m2e.core.project.LocalProjectScanner;
 import org.eclipse.m2e.core.project.MavenProjectInfo;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages;
 
 /**
  * @author Andre Dietisheim <adietish@redhat.com>
+ * @author Jeff Maury
  * 
  */
 public class MavenProjectImportOperation extends AbstractProjectImportOperation {
@@ -53,9 +58,36 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 		MavenModelManager modelManager = mavenPlugin.getMavenModelManager();
 		Set<MavenProjectInfo> projectInfos = getMavenProjects(getProjectDirectory(), filters, modelManager, monitor);
 		ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration();
-		List<IMavenProjectImportResult> importResults =
-				configurationManager.importProjects(projectInfos, projectImportConfiguration, monitor);
-		return validate(toProjects(importResults));
+		if (overwriteMavenProjects(projectInfos, projectImportConfiguration, monitor)) {
+	        List<IMavenProjectImportResult> importResults =
+	                configurationManager.importProjects(projectInfos, projectImportConfiguration, monitor);
+	        return validate(toProjects(importResults));
+		} else {
+		    return Collections.EMPTY_LIST;
+		}
+	}
+
+	private boolean overwriteMavenProjects(Collection<MavenProjectInfo> projectInfos, final ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
+	    final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+	    Set<IProject> s1 = projectInfos.stream()
+	                                      .map(project -> configuration.getProjectName(project.getModel()))
+	                                      .map(root::getProject)
+	                                      .filter(project -> project.exists())
+	                                      .collect(Collectors.toSet());
+        boolean overwrite = true;
+	    if (!s1.isEmpty()) {
+	        final String message = (s1.size() == 1) ? NLS.bind(OpenShiftCommonUIMessages.MavenProjectWarningMessage,
+                                                               s1.iterator().next().getName())
+	                                                : OpenShiftCommonUIMessages.MavenProjectsWarningMessage; 
+                        
+	        overwrite = displayOverwriteDialog(OpenShiftCommonUIMessages.OverwriteProjectsDialogTitle, message);
+	        if (overwrite) {
+	            for(IProject project : s1) {
+	                project.delete(false, true, monitor);
+	            }
+	        }
+	    }
+	    return overwrite;
 	}
 
 	private List<IProject> toProjects(List<IMavenProjectImportResult> importResults) {
