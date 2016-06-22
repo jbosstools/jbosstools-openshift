@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -40,10 +41,11 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
-import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerHotCodeReplaceListener;
+import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
+import org.jboss.tools.openshift.core.debug.DebugTrackerContributionEvaluation;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -63,7 +65,9 @@ import com.openshift.restclient.model.IService;
 public class OpenShiftLaunchController extends AbstractSubsystemController
 		implements ISubsystemController, ILaunchServerController {
 
-	private static final String DEBUG_MODE = "debug";
+	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
+	public static final String PACKAGE_JSON = "package.json"; //$NON-NLS-1$
+
 
 	/**
 	 * Get access to the ControllableServerBehavior
@@ -188,7 +192,9 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 					if( debuggerLaunch != null ) {
 						overrideHotcodeReplace(server, debuggerLaunch);
 					}
-				}					
+				} else if (isNodeJsProject(server)) {
+					DebugTrackerContributionEvaluation.startDebugSession(server, localPort);
+				}
 			}
 
 			@Override
@@ -257,6 +263,19 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			OpenShiftCoreActivator.pluginLog().logError(e);
 		}
 		return false;
+	}
+	
+	private boolean isNodeJsProject(IServer server) {
+		IProject p = OpenShiftServerUtils.getDeployProject(server);
+		return (p != null && p.isAccessible() && hasPackageJson(p));
+	}
+	
+	/**
+	 * @return true if {@link IProject} contains package.json file, false
+	 *         otherwise.
+	 */
+	private boolean hasPackageJson(IProject project) {
+		return project.getFile(PACKAGE_JSON).isAccessible();
 	}
 
 	/**

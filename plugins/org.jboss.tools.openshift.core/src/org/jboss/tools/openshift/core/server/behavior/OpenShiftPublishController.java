@@ -34,6 +34,7 @@ import org.jboss.tools.as.core.server.controllable.subsystems.internal.StandardF
 import org.jboss.tools.common.util.FileUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.core.debug.DebugTrackerContributionEvaluation;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.RSync;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -49,8 +50,18 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	@Override
 	public void publishStart(final IProgressMonitor monitor) 
 			throws CoreException {
+		
 		syncDownFailed = false;
-		final IProject deployProject = OpenShiftServerUtils.getDeployProject(getServer());
+		IServer server = getServer();
+		
+		
+		// Noode.js Debug session is running - do *not* perform rsync!
+		if (DebugTrackerContributionEvaluation.isDebugSessionAlive(server)) {
+			return;
+		}
+
+		final IProject deployProject = OpenShiftServerUtils.getDeployProject(server);
+		
 		if (!ProjectUtils.isAccessible(deployProject)) {
 			throw new CoreException(new Status(IStatus.ERROR,
 					OpenShiftCoreActivator.PLUGIN_ID,

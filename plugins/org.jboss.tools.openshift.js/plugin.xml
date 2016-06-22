@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.jboss.tools.openshift.core.debugSessionTracker">
+      <tracker
+            class="org.jboss.tools.openshift.js.debug.NodeDebugSessionTracker">
+      </tracker>
+   </extension>
+</plugin>
