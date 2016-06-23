@@ -68,8 +68,9 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * OpenShift connection
 	 * @return
 	 */
-	Collection<IProject> getProjects();
-	void setProjects(Collection<IProject> projects);
+	List<IProject> getProjects();
+
+	void setProjects(List<IProject> projects);
 	
 	/**
 	 * The project to associate with this deployment

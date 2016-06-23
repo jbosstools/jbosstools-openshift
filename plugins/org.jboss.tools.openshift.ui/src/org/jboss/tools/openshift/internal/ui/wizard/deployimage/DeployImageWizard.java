@@ -8,9 +8,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
-import static org.jboss.tools.common.ui.WizardUtils.runInWizard;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -28,7 +25,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.common.ui.JobUtils;
-import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -37,7 +33,6 @@ import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.dockerutils.PushImageToRegistryJob;
 import org.jboss.tools.openshift.internal.ui.job.DeployImageJob;
@@ -58,7 +53,7 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 
 	private static final String TITLE = "Deploy Image to OpenShift";
 
-	public DeployImageWizard(IDockerImage image, Connection connection, IProject project, boolean isConnected) {
+	public DeployImageWizard(IDockerImage image, Connection connection, IProject project, boolean isAuthorized) {
 		super(TITLE, new DeployImageWizardModel());
 
 		DeployImageWizardModel model = (DeployImageWizardModel)getModel();
@@ -68,20 +63,8 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 			model.setDockerConnection(dockerConnection);
 			model.setImageName(image.repo());
 		}
-		if(project != null) {
-			model.initModel(ConnectionsRegistryUtil.getConnectionFor(project), project);
-		} else {
-			if(connection != null) {
-				model.setConnection(connection);
-			}
-		}
-		if(connection != null) {
-			model.setTargetRegistryLocation(
-				(String) connection.getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY));
-			model.setTargetRegistryUsername(connection.getUsername());
-			model.setTargetRegistryPassword(connection.getToken());
-		}
-		model.setStartedWithActiveConnection(isConnected);
+		model.setStartedWithActiveConnection(isAuthorized);
+		model.initModel(connection, project, isAuthorized);
 
 		setNeedsProgressMonitor(true);
 	}
@@ -137,7 +120,9 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 			return new JobChainBuilder(pushImageToRegistryJob).runWhenSuccessfullyDone(deployJob)
 					.runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true)).build();
 		}
-		return new JobChainBuilder(deployJob).runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true)).build();
+		return new JobChainBuilder(deployJob)
+				.runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true))
+				.build();
 	}
 
 	private static DeployImageJob getDeployImageJob(final IDeployImageParameters model, final Shell shell) {

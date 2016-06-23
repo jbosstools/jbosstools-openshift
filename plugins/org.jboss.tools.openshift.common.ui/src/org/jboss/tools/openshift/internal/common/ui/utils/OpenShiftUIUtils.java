@@ -137,21 +137,56 @@ public class OpenShiftUIUtils {
 	 * @param klass
 	 * @return
 	 */
-	public static <T extends IConnection> T getDefaultConnection(Class<T> klass) {
+	public static <T extends IConnection> T getExplorerDefaultConnection(Class<T> klass) {
 		Collection<T> available = ConnectionsRegistrySingleton.getInstance().getAll(klass);
 		if(available.size() == 1) {
 			//There is only one connection, we do not need it to be selected to pick it.
 			return available.iterator().next();
 		}
+		return getConnectionForExplorerSelection(klass);
+	}
+
+	/**
+	 * Returns the OpenShift Explorer view part.
+	 * 
+	 * @return
+	 */
+	public static IViewPart getOpenShiftExplorer() {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		IViewPart part = window.getActivePage().findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
-		if(part != null) {
-			ISelection selection = part.getSite().getSelectionProvider().getSelection();
-			if(selection != null && !selection.isEmpty()) {
+		return window.getActivePage().findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
+	}
+
+	/**
+	 * Returns the selection that exists in the OpenShift explorer.
+	 * 
+	 * @return
+	 */
+	public static ISelection getOpenShiftExplorerSelection() {
+		IViewPart part = getOpenShiftExplorer();
+		if (part == null) {
+			return null;
+		}
+		return part.getSite().getSelectionProvider().getSelection();
+	}
+
+	/**
+	 * Returns the connection for the given type and current selection in the OpenShift explorer. 
+	 * 
+	 * @param klass connection type
+	 * @return
+	 */
+	public static <T extends IConnection> T getConnectionForExplorerSelection(Class<T> klass) {
+		ISelection selection = getOpenShiftExplorerSelection();
+		if(selection != null) {
+			if(selection != null 
+					&& !selection.isEmpty()) {
 				T result = UIUtils.getFirstElement(selection, klass);
-				if(result == null && selection instanceof IStructuredSelection && part instanceof CommonNavigator) {
+				IViewPart part = getOpenShiftExplorer();
+				if(result == null 
+						&& selection instanceof IStructuredSelection
+						&& part instanceof CommonNavigator) {
 					Object selected = ((IStructuredSelection)selection).getFirstElement();
-					IContentProvider provider = ((CommonNavigator)part).getCommonViewer().getContentProvider();
+					IContentProvider provider = ((CommonNavigator) part).getCommonViewer().getContentProvider();
 					if(provider instanceof ITreeContentProvider) {
 						ITreeContentProvider tree = (ITreeContentProvider)provider;
 						while(selected != null && result == null) {

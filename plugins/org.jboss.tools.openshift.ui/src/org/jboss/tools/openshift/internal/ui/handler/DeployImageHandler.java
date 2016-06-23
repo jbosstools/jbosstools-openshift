@@ -23,15 +23,13 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizard;
 
@@ -46,61 +44,39 @@ public class DeployImageHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchWindow window = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow();
-		ISelection selection = window.getSelectionService().getSelection();
-
-		IProject project = null;
 		Connection connection = null;
-
-		boolean checkConnection = true;
+		IProject project = null;
+//		IWorkbenchWindow window = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow();
+//		ISelection selection = window.getSelectionService().getSelection();
+		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		final IDockerImage image = UIUtils.getFirstElement(selection, IDockerImage.class);
-		if(image != null) {
-			checkConnection = false;
-			//Look for current selection in OpenShift Explorer
-			IViewPart part = window.getActivePage().findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
-			if(part != null) {
-				selection = part.getSite().getSelectionProvider().getSelection();
-				if(selection != null && !selection.isEmpty()) {
-					checkConnection = true;
-				}
-			}
-		}
-		if(checkConnection) {
-			project = UIUtils.getFirstElement(selection, IProject.class);
-			if(project == null) {
-				//If another resource is selected in OpenShift explorer, navigate to its project.
-				IResource resource = UIUtils.getFirstElement(selection, IResource.class);
-				if (resource != null) {
-					project= resource.getProject();
-				}
-			}
-			if(project != null) {
-				connection = ConnectionsRegistryUtil.getConnectionFor(project);
-			} else {
-				connection = UIUtils.getFirstElement(selection, Connection.class);
-			}
+		if (image != null) {
+			selection = OpenShiftUIUtils.getOpenShiftExplorerSelection();
+			project = ResourceUtils.getProject(UIUtils.getFirstElement(selection, IResource.class));
+			connection = OpenShiftUIUtils.getConnectionForExplorerSelection(Connection.class);
 		}
 
 		if(connection == null) {
-			connection = OpenShiftUIUtils.getDefaultConnection(Connection.class);
+			connection = OpenShiftUIUtils.getExplorerDefaultConnection(Connection.class);
 		}
 
-		runWizard(HandlerUtil.getActiveWorkbenchWindow(event).getShell(), image, connection, project);
+		runWizard(HandlerUtil.getActiveWorkbenchWindow(event).getShell(), image, project,connection);
 
 		return null;
 	}
 
-	public void runWizard(final Shell shell, final IDockerImage image, final Connection connection, final IProject project) {
+	public void runWizard(final Shell shell, final IDockerImage image, final IProject project, final Connection connection) {
 		if(connection != null) {
-			final boolean[] connected = new boolean[1];
+			final boolean[] authorized = new boolean[1];
 			Job job = new AbstractDelegatingMonitorJob("Checking connection...") {
 				@Override
 				protected IStatus doRun(IProgressMonitor monitor) {
 					try {
-						connected [0] = connection.isConnected(new NullProgressMonitor());
+						authorized [0] = connection.isAuthorized(new NullProgressMonitor());
 						return Status.OK_STATUS;
-					}catch(Exception e) {
-						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to load the OpenShift projects for the selected connection.", e);
+					} catch (Exception e) {
+						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+								"Unable to load the OpenShift projects for the selected connection.", e);
 					}
 				}
 			};
@@ -110,7 +86,7 @@ public class DeployImageHandler extends AbstractHandler {
 					shell.getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
-							DeployImageWizard wizard = new DeployImageWizard(image, connection, project, connected[0]);
+							DeployImageWizard wizard = new DeployImageWizard(image, connection, project, authorized[0]);
 							WizardUtils.openWizardDialog(500, 500, wizard, shell);
 						}
 					});

@@ -224,7 +224,7 @@ public class DeployImageWizardModelTest {
     @Test
     public void checkThatProjectIsSetWhenProjectsAreSet() {
         IProject project1 = mock(IProject.class);
-        model.setProjects(Collections.singleton(project1));
+        model.setProjects(Collections.singletonList(project1));
         assertThat(model.getProject()).isEqualTo(project1);
     }
     

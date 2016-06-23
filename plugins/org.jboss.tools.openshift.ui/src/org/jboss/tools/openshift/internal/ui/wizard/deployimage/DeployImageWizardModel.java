@@ -20,22 +20,20 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerConnectionManagerListener2;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
@@ -46,7 +44,6 @@ import org.jboss.tools.openshift.internal.ui.dockerutils.DockerImageUtils;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablesPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
-import org.jboss.tools.openshift.internal.ui.wizard.deployimage.ListDockerImagesWizardModel.DockerImageTag;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
@@ -69,7 +66,7 @@ public class DeployImageWizardModel
 	private IProject project;
 	private String resourceName;
 	private String imageName;
-	private Collection<IProject> projects = Collections.emptyList();
+	private List<IProject> projects = Collections.emptyList();
 
 	private EnvironmentVariablesPageModel envModel = new EnvironmentVariablesPageModel();
 
@@ -148,8 +145,8 @@ public class DeployImageWizardModel
 		return isStartedWithActiveConnection;
 	}
 
-	public void setStartedWithActiveConnection(boolean value) {
-		isStartedWithActiveConnection = value;
+	public void setStartedWithActiveConnection(boolean active) {
+		isStartedWithActiveConnection = active;
 	}
 
 	@Override
@@ -189,45 +186,51 @@ public class DeployImageWizardModel
 	 * @param connection the connection from which the projects will be retrieved
 	 * @param project the project to set in the model
 	 */
-	public void initModel(final Connection connection, final IProject project) {
+	public void initModel(final Connection connection, final IProject project, boolean loadResources) {
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
-		if(this.connection != null) {
+		if(connection == null) {
+			return;
+		}
+
+		initModelRegistry(connection);
+
+		if (loadResources) {
 			Job job = new AbstractDelegatingMonitorJob("Loading projects...") {
-				
+	
 				@Override
 				protected IStatus doRun(IProgressMonitor monitor) {
 					try {
 						List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
 						setProjects(projects);
+						setProjectOrDefault(project);
 						return Status.OK_STATUS;
-					}catch(Exception e) {
-						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to load the OpenShift projects for the selected connection.", e);
+					} catch (Exception e) {
+						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+								"Unable to load the OpenShift projects for the selected connection.", e);
 					}
 				}
-				
+	
 			};
-			if(project != null) {
-				job.addJobChangeListener(new JobChangeAdapter() {
-
-					@Override
-					public void done(IJobChangeEvent event) {
-						if(project != null) {
-							setProject(project);
-						}
-					}
-				});
-			}
 			job.schedule();
+		}
+	}
+
+	private void initModelRegistry(Connection connection) {
+		if(connection != null) {
+			setTargetRegistryLocation(
+				(String) connection.getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY));
+			setTargetRegistryUsername(connection.getUsername());
+			setTargetRegistryPassword(connection.getToken());
 		}
 	}
 
 	@Override
 	public void setConnection(final Connection connection) {
-		initModel(connection, null);
+		initModel(connection, null, true);
 	}
 
 	@Override
-	public void setProjects(Collection<IProject> projects) {
+	public void setProjects(List<IProject> projects) {
 		if(projects == null) projects = Collections.emptyList();
 		firePropertyChange(PROPERTY_PROJECTS, this.projects, this.projects = projects);
 		if(!projects.isEmpty() && !projects.contains(getProject())) {
@@ -239,7 +242,7 @@ public class DeployImageWizardModel
 	}
 
 	@Override
-	public Collection<IProject> getProjects() {
+	public List<IProject> getProjects() {
 		return projects;
 	}
 
@@ -251,6 +254,14 @@ public class DeployImageWizardModel
 	@Override
 	public void setProject(IProject project) {
 		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = project);
+	}
+
+	public void setProjectOrDefault(IProject project) {
+		if (project != null) {
+			setProject(project);
+		} else if (!projects.isEmpty()) {
+			setProject(projects.get(0));
+		}
 	}
 
 	@Override

@@ -458,7 +458,7 @@ public class ExpressConnection extends AbstractConnection {
 		return hasUser();
 	}
 
-	public List<IOpenShiftSSHKey> getSSHKeys() throws OpenShiftException{
+	public List<IOpenShiftSSHKey> getSSHKeys() throws OpenShiftException {
 		if (connect()) {
 			return user.getSSHKeys();
 		} else {
