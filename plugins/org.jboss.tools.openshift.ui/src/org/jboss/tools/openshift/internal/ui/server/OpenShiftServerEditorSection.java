@@ -555,8 +555,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 								}
 								if (connection != null) {
 									model.setConnection(connection);
+									model.setService(OpenShiftServerUtils.getService(server));
 								}
-								model.setService(OpenShiftServerUtils.getService(server));
 								String sourcePath = OpenShiftServerUtils.getSourcePath(server);
 								if(!StringUtils.isEmpty(sourcePath)) {
 									model.setSourcePath(sourcePath);
