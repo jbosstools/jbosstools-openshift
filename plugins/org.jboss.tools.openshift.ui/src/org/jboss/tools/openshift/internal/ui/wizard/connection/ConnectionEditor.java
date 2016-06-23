@@ -66,7 +66,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private IObservableValue<String> authSchemeObservable;
 	private Binding selectedAuthTypeBinding;
 	
-	private class DetailViewModel extends ObservablePojo{
+	private class DetailViewModel extends ObservablePojo {
 		private IConnectionEditorDetailView selectedDetailView;
 		
 		public IConnectionEditorDetailView getSelectedDetailView() {
@@ -85,6 +85,10 @@ public class ConnectionEditor extends BaseConnectionEditor {
 				rememberTokenObservable.setValue(Boolean.FALSE);
 				selectedDetailViewObservable.setValue(detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH));
 			}
+
+			setDetailViewsConnection(conn);
+		}
+		private void setDetailViewsConnection(IConnection conn) {
 			for (IConnectionEditorDetailView view : detailViews.values()) {
 				//reset all views
 				view.setSelectedConnection(conn);
@@ -170,7 +174,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
 		//auth protocol
-		selectedAuthTypeBinding = ValueBindingBuilder
+		this.selectedAuthTypeBinding = ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(authTypeViewer))
 				.validatingAfterGet(
 						new IsNotNullValidator(

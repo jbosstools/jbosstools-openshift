@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -75,7 +75,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.restclient.ClientFactory;
+import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.IAuthorizationDetails;
@@ -83,6 +83,7 @@ import com.openshift.restclient.authorization.IAuthorizationDetails;
 /**
  * @author jeff.cantrill
  * @author Jeff Maury
+ * @author Andre Dietisheim
  */
 public class OAuthDetailView extends BaseDetailsView implements IConnectionEditorDetailView {
 
@@ -113,15 +114,15 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	    }
 	}
 
-    private IObservableValue tokenObservable;
+    private IObservableValue<String> tokenObservable;
 	private Binding tokenBinding;
 	private Text tokenText;
-	private IValueChangeListener changeListener;
-	private IObservableValue rememberTokenObservable;
-	private IObservableValue authSchemeObservable;
+	private IValueChangeListener<?> changeListener;
+	private IObservableValue<Boolean> rememberTokenObservable;
+	private IObservableValue<String> authSchemeObservable;
 	private IAuthorizationDetails authDetails;
 	private ConnectionWizardPageModel pageModel;
-	IObservableValue<?> urlObservable;
+	IObservableValue<String> urlObservable;
 	private Button rememberTokenCheckbox;
 	private Binding rememberTokenBinding;
 
@@ -129,14 +130,14 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 
 	private IWizard wizard;
 
-	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context, 
-			IObservableValue authSchemeObservable) {
+	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener<?> changeListener, Object context, 
+			IObservableValue<String> authSchemeObservable) {
 		this.wizard = wizard;
 		this.pageModel = pageModel;
-		urlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel);
-		tokenObservable = new WritableValue(null, String.class);
-		rememberTokenObservable = new WritableValue(Boolean.FALSE, Boolean.class);
-		connectionValidator = ConnectionValidatorFactory.
+		this.urlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel);
+		this.tokenObservable = new WritableValue<String>(null, String.class);
+		this.rememberTokenObservable = new WritableValue<Boolean>(Boolean.FALSE, Boolean.class);
+		this.connectionValidator = ConnectionValidatorFactory.
 				createOAuthAuthenticationValidator(pageModel, tokenObservable, urlObservable);
 		this.authSchemeObservable = authSchemeObservable;
 		this.changeListener = changeListener;
@@ -145,7 +146,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		}
 	}
 
-	IObservableValue getRememberTokenObservable() {
+	IObservableValue<Boolean> getRememberTokenObservable() {
 		return rememberTokenObservable;
 	}
 
@@ -303,7 +304,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		});
 	}
 	
-	private class AuthDetailsJob extends Job{
+	private class AuthDetailsJob extends Job {
 		
 		private IAuthorizationDetails details;
 		private String host;
@@ -320,24 +321,30 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-				IClient client = new ClientFactory().create(host, OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
+				IClient client = new ClientBuilder(host)
+						.sslCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback())
+						.build();
 				details = client.getAuthorizationDetails(host);
+				return ValidationStatus.OK_STATUS;
 			} catch(Exception e) {
 				if (e.getCause() instanceof ConnectTimeoutException) {
-					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Timed out waiting for a response for authorization details.\nThis server might be unavailable or may not support OAuth.", e);
+					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, 
+							"Timed out waiting for a response for authorization details.\nThis server might be unavailable or may not support OAuth.", e);
+				} else {
+					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, 
+						"Unable to retrieve the authentication details", e);
 				}
-				return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to retrieve the authentication details", e);
 			}
-			return ValidationStatus.OK_STATUS;
 		}
 		
 	}
 	
-	private class BearTokenAuthenticationProvider implements IConnectionAuthenticationProvider{
+	private class BearTokenAuthenticationProvider implements IConnectionAuthenticationProvider {
 
 		@Override
 		public IConnection update(IConnection conn) {
 			Assert.isLegal(conn instanceof Connection);
+
 			final Connection connection = (Connection) conn;
 			// might be called from job, switch to display thread to access observables
 			Display.getDefault().syncExec(new Runnable() {

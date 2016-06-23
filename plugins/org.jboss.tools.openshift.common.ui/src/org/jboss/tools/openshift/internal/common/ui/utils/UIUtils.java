@@ -207,7 +207,6 @@ public class UIUtils {
 			return adapt(getFirstElement(selection), clazz);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static <E> E adapt(Object object, Class<E> clazz) {
 		return Adapters.adapt(object, clazz);
 	}

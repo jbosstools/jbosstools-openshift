@@ -60,9 +60,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
@@ -160,11 +162,11 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			final IStatus validatorJobStatus = WizardUtils.runInWizard(imageValidator, getContainer(), getDataBindingContext());
 			if (!validatorJobStatus.isOK()) {
 				MessageDialog.openError(getShell(), "Error",
-						"No Docker image named '" + model.getImageName() + "' could be found.");
+						NLS.bind("No Docker image named {0} could be found.", model.getImageName()));
 				event.doit = false;
 			}
 		} catch (InvocationTargetException | InterruptedException e) {
-			final String message = "Failed to look-up metadata for a Docker image named '" + model.getImageName() + "'.";
+			final String message = NLS.bind("Failed to look-up metadata for a Docker image named {0}.", model.getImageName());
 			MessageDialog.openError(getShell(), "Error", message);
 			OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
 		}
@@ -243,7 +245,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				}
 				// FIXME: may need to revisit the call to the constructor once https://bugs.eclipse.org/bugs/show_bug.cgi?id=495285 is addressed
 				// there may be no need to to specify the registry info if we want to search on Docker Hub.
-				ImageSearch wizard = new ImageSearch(model.getDockerConnection(), txtImage.getText(), new RegistryInfo(AbstractRegistry.DOCKERHUB_REGISTRY));
+				ImageSearch wizard = new ImageSearch(
+						model.getDockerConnection(), txtImage.getText(), new RegistryInfo(AbstractRegistry.DOCKERHUB_REGISTRY));
 				if(Window.OK == new OkCancelButtonWizardDialog(getShell(), wizard).open()){
 					//this bypasses validation
 					model.setImageName(wizard.getSelectedImage(), true);
@@ -274,10 +277,10 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		connectionViewer.setInput(
 				BeanProperties.list(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTIONS).observe(model));
 		
-		IObservableValue dockerConnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION)
-				.observe(model);
+		IObservableValue<IDockerConnection> dockerConnectionObservable = 
+				BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
 		DockerConnectionStatusProvider validator = new DockerConnectionStatusProvider(dockerConnectionObservable);
-		IObservableValue selectedConnectionObservable = ViewerProperties.singleSelection().observe(connectionViewer);
+		IObservableValue<?> selectedConnectionObservable = ViewerProperties.singleSelection().observe(connectionViewer);
 		Binding selectedConnectionBinding = 
 			ValueBindingBuilder.bind(selectedConnectionObservable)
 			.converting(new ObservableTreeItem2ModelConverter(IDockerConnection.class))
@@ -343,8 +346,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.span(NUM_COLUMS - 1, 1)
 			.grab(true, false)
 			.applyTo(connectionText);
-		final IObservableValue connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
-		final IObservableValue connnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
+		final IObservableValue<String> connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
+		final IObservableValue<IDockerConnection> connnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
 		ValueBindingBuilder.bind(connnectionTextObservable)
 			.notUpdatingParticipant()
 			.to(connnectionObservable)
@@ -371,8 +374,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.span(NUM_COLUMS - 1, 1)
 			.grab(true, false)
 			.applyTo(connectionText);
-		final IObservableValue connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
-		final IObservableValue connnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_CONNECTION).observe(model);
+		final IObservableValue<String> connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
+		final IObservableValue<IConnection> connnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_CONNECTION).observe(model);
 		ValueBindingBuilder.bind(connnectionTextObservable)
 			.notUpdatingParticipant()
 			.to(connnectionObservable)
@@ -410,8 +413,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		cmboProject.setComparator(comparator);
 		model.setProjectsComparator(comparator.asProjectComparator());
 
-		IObservableValue projectObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_PROJECT)
-				.observe(model);
+		IObservableValue<IProject> projectObservable = 
+				BeanProperties.value(IDeployImagePageModel.PROPERTY_PROJECT).observe(model);
 		ProjectStatusProvider validator = new ProjectStatusProvider(projectObservable);
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(cmboProject);
 		Binding selectedProjectBinding = 
@@ -470,9 +473,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
 			.applyTo(imageNameText);
-		final IObservableValue imageNameTextObservable = 
+		final IObservableValue<String> imageNameTextObservable = 
 				WidgetProperties.text(SWT.Modify).observeDelayed(500, imageNameText);
-		final IObservableValue imageNameObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_IMAGE_NAME).observe(model);
+		final IObservableValue<String> imageNameObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_IMAGE_NAME).observe(model);
 		Binding imageBinding = ValueBindingBuilder.bind(imageNameTextObservable)
 				.validatingAfterConvert(new DockerImageValidator())
 				.to(imageNameObservable).in(dbc);
@@ -502,9 +505,12 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		btnDockerBrowse.setToolTipText("Look-up an image by browsing the Docker daemon");
 		btnDockerBrowse.addSelectionListener(onBrowseImage());
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(btnDockerBrowse);
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(btnDockerBrowse)).notUpdatingParticipant()
+		ValueBindingBuilder
+				.bind(WidgetProperties.enabled().observe(btnDockerBrowse))
+				.notUpdatingParticipant()
 				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model))
-				.converting(new IsNotNull2BooleanConverter()).in(dbc);
+				.converting(new IsNotNull2BooleanConverter())
+				.in(dbc);
 
 		// search on Docker registry (Docker Hub)
 		Button btnDockerSearch = new Button(parent, SWT.NONE);
@@ -647,22 +653,14 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	private SelectionAdapter onNewProjectClicked() {
 	    return new SelectionAdapter() {
 
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-             */
             @Override
             public void widgetSelected(SelectionEvent e) {
                 try {
                     // run in job to enforce busy cursor which doesnt work otherwise
-                    WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
+                    WizardUtils.runInWizard(new UIJob("Opening projects wizard...") {
 
-                        @Override
-                        protected IStatus run(IProgressMonitor monitor) {
-                            return Status.OK_STATUS;
-                        }
-
-                        @Override
-                        protected IStatus updateUI(IProgressMonitor monitor) {
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
                             NewProjectWizard newProjectWizard = new NewProjectWizard(model.getConnection(), (List<IProject>) model.getProjects());
                             int result = new OkCancelButtonWizardDialog(getShell(), newProjectWizard).open();
                             // reload projects to reflect changes that happened in
@@ -679,7 +677,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
                                 }
                             }
                             return Status.OK_STATUS;
-                        }
+						}
                     }, getContainer(), getDataBindingContext());
                 } catch (InvocationTargetException | InterruptedException ex) {
                     // swallow intentionnally
