@@ -274,7 +274,7 @@ public class ConnectionTest {
 	public void should_not_overwrite_client_authorization_strategy_in_authorized_connection_when_isConnected() {
 		// given
 		// when
-		connection.isConnected(new NullProgressMonitor());
+		connection.isAuthorized(new NullProgressMonitor());
 		// then
 		verify(client, never()).setAuthorizationStrategy(any(IAuthorizationStrategy.class));
 	}
@@ -285,7 +285,7 @@ public class ConnectionTest {
 		doReturn(null).when(client).getAuthorizationStrategy();
 		doReturn(mockAuthorizationContext(null, null, false)).when(client).getContext(anyString());
 		// when
-		connection.isConnected(new NullProgressMonitor());
+		connection.isAuthorized(new NullProgressMonitor());
 		// then
 		verify(client).setAuthorizationStrategy(any(IAuthorizationStrategy.class));
 	}
@@ -295,7 +295,7 @@ public class ConnectionTest {
 		// given
 		doReturn(mockAuthorizationContext(null, null, false)).when(client).getContext(anyString());
 		// when
-		testableConnection.isConnected(new NullProgressMonitor());
+		testableConnection.isAuthorized(new NullProgressMonitor());
 		// then
 		verify(testableConnection, never()).connect();
 	}

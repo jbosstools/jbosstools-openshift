@@ -118,6 +118,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private void init(IConnection editedConnection, Class<? extends IConnection> connectionType, IConnectionFactory connectionFactory) {
 		this.connectedStatus = Status.OK_STATUS;
 		this.connectionFactoryError = Status.OK_STATUS;
+		if (editedConnection != null) {
+			editedConnection.enablePromptCredentials(false);
+		}
 		initConnection(editedConnection, connectionType);
 		this.signupUrl = getSignupUrl(host, this.connectionFactory);
 		this.userdocUrl = getUserdocUrl(this.connectionFactory);
@@ -134,7 +137,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	private void initEditConnection(IConnection connection) {
 		this.selectedConnection = connection;
-		this.connection = connection.clone();
 		this.connectionFactory = connectionsFactory.getByConnection(connection.getClass());
 		this.host = connection.getHost();
 		this.hasDefaultHost = connectionFactory != null && connectionFactory.hasDefaultHost();
@@ -146,9 +148,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		this.connectionFactory = getConnectionFactory(connectionType, connectionsFactory);
 		if (connectionFactory != null) {
 			this.host = connectionFactory.getDefaultHost();
-			if (host != null) {
-				this.connection = connectionFactory.create(host);
-			}
 			this.useDefaultHost = this.hasDefaultHost = connectionFactory.hasDefaultHost();
 		}
 	}
@@ -342,19 +341,19 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	}
 
 	public IStatus connect() {
-		if (isConnected() && listener.secureStoreException == null) {
+		if (isConnected() 
+				&& listener.secureStoreException == null) {
 			return Status.OK_STATUS;
 		}
 		IStatus status = Status.OK_STATUS;
 		listener.secureStoreException = null;
 		try {
-			this.connection = createConnection();
+			IConnection connection = createConnection(connectionFactory, connectionAuthenticationProvider);
 			if(connection != null) {
-				if(connection instanceof IObservablePojo) {
-					((IObservablePojo)connection).addPropertyChangeListener(listener);
-				}
+				addConnectionListener(connection);
 				if (connection.connect()) {
 					connection.enablePromptCredentials(true);
+					this.connection = connection;
 					wizardModel.setConnection(connection);
 					ConnectionsRegistrySingleton.getInstance().setRecent(connection);
 					connection.notifyUsage();
@@ -369,12 +368,22 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 					                           e.getMessage());
 			OpenShiftCommonUIActivator.log(e);
 		} finally {
-			if(connection instanceof IObservablePojo) {
-				((IObservablePojo)connection).removePropertyChangeListener(listener);
-			}
+			removeConnectionListener(connection);
 		}
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, status);
 		return status;
+	}
+
+	private void removeConnectionListener(IConnection connection) {
+		if(connection instanceof IObservablePojo) {
+			((IObservablePojo)connection).removePropertyChangeListener(listener);
+		}
+	}
+
+	private void addConnectionListener(IConnection connection) {
+		if(connection instanceof IObservablePojo) {
+			((IObservablePojo)connection).addPropertyChangeListener(listener);
+		}
 	}
 
 	StorageAccessListener listener = new StorageAccessListener();
@@ -393,18 +402,18 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return listener.secureStoreException;
 	}
 
-	private IConnection createConnection() {
-		if (connectionFactory == null) {
+	private IConnection createConnection(IConnectionFactory factory, IConnectionAuthenticationProvider authProvider) {
+		if (factory == null) {
 			return null;
 		}
 		
-		IConnection connection = connectionFactory.create(getHost());
+		IConnection connection = factory.create(getHost());
 		if (connection == null) {
 			return null;
 		}
 		
-		if (connectionAuthenticationProvider != null) {
-			connectionAuthenticationProvider.update(connection);
+		if (authProvider != null) {
+			authProvider.update(connection);
 		}
 		connection.enablePromptCredentials(false);
 		return connection;
@@ -466,6 +475,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	@Override
 	public void dispose() {
 		connectionsFactory.close();
+		if (this.connection != null) {
+			connection.enablePromptCredentials(true);
+		}
 	}
 	
 	/**
@@ -480,14 +492,21 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			return false;
 		}
 
+		this.connection.enablePromptCredentials(true);
+
 		if (isNewConnection()) {
 			ConnectionsRegistrySingleton.getInstance().add(connection);
 		} else {
 			ConnectionsRegistrySingleton.getInstance().update(getSelectedConnection(), connection);
 		}
+
 		return true;
 	}
 
+	public void cancel() {
+		this.connection.enablePromptCredentials(true);
+	}
+	
 	public void setConnectionAuthenticationProvider(IConnectionAuthenticationProvider authenticationProvider) {
 		this.connectionAuthenticationProvider = authenticationProvider;
 	}

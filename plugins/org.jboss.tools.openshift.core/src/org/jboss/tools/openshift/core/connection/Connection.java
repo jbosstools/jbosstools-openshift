@@ -326,10 +326,10 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 
 	/**
-	 * Computes actual state of connection. May be a long running operation.
+	 * Computes authorization state of connection. May be a long running operation.
 	 * @return
 	 */
-	public boolean isConnected(IProgressMonitor monitor) {
+	public boolean isAuthorized(IProgressMonitor monitor) {
 		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
