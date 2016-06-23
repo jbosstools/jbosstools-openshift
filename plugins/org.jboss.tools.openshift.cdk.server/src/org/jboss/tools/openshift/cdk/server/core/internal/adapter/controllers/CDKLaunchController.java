@@ -29,6 +29,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.internal.core.LaunchManager;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
@@ -192,12 +193,19 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		}
 
 		try {
-			// Run the launch, mark server as starting, add debug listeners, etc
-			ILaunch launch2 = wc.launch("run", monitor);
-			final IProcess[] processes = launch2.getProcesses();
+			// Run the external tools launch, Do not register the external-tools launch with launch manager
+			ILaunch externalToolsLaunch = wc.launch("run", monitor, false, false);
 			
+			// Add the external-tools processes to THIS launch
+			final IProcess[] processes = externalToolsLaunch.getProcesses();
+			for( int i = 0; i < processes.length; i++ ) {
+				launch.addProcess(processes[i]);
+			}
+			
+			
+			//mark server as starting, add debug listeners, etc
 			if( processes != null && processes.length >= 1 && processes[0] != null ) {
-				IDebugEventSetListener debug = getDebugListener(processes);
+				IDebugEventSetListener debug = getDebugListener(processes, launch);
 				if( beh != null ) {
 					final IProcess launched = processes[0];
 					beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, launched);
@@ -211,7 +219,11 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		}
 	}
 
-	private IDebugEventSetListener getDebugListener(final IProcess[] processes) {
+	protected LaunchManager getLaunchManager() {
+		return (LaunchManager)DebugPlugin.getDefault().getLaunchManager();
+	}
+	 
+	private IDebugEventSetListener getDebugListener(final IProcess[] processes, final ILaunch launch) {
 		return new IDebugEventSetListener() { 
 			@Override
 			public void handleDebugEvents(DebugEvent[] events) {
@@ -219,7 +231,10 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 					int size = events.length;
 					for (int i = 0; i < size; i++) {
 						if (processes[0] != null && processes[0].equals(events[i].getSource()) && events[i].getKind() == DebugEvent.TERMINATE) {
+							// Register this launch as terminated
+							((LaunchManager)getLaunchManager()).fireUpdate(new ILaunch[] {launch}, LaunchManager.TERMINATE);
 							processTerminated(getServer(), processes[0], this);
+							DebugPlugin.getDefault().removeDebugEventListener(this);
 						}
 					}
 				}
