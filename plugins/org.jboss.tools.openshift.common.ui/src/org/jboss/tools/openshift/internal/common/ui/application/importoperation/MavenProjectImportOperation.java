@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -81,11 +82,13 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 	                                                : OpenShiftCommonUIMessages.MavenProjectsWarningMessage; 
                         
 	        overwrite = displayOverwriteDialog(OpenShiftCommonUIMessages.OverwriteProjectsDialogTitle, message);
-	        if (overwrite) {
-	            for(IProject project : s1) {
-	                project.delete(false, true, monitor);
-	            }
-	        }
+            for(IProject project : s1) {
+                if (overwrite) {
+                    project.delete(false, true, monitor);
+                } else {
+                    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+                }
+            }
 	    }
 	    return overwrite;
 	}

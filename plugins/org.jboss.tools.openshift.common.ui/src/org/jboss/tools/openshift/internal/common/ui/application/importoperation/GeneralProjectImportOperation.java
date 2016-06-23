@@ -68,6 +68,8 @@ public class GeneralProjectImportOperation extends AbstractProjectImportOperatio
 		                                                 NLS.bind(OpenShiftCommonUIMessages.GeneralProjectWarningMessage, project.getName()));
 		if (overwrite) {
 			project.delete(false, true, monitor);
+		} else {
+		    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		}
 		return overwrite;
 	}
