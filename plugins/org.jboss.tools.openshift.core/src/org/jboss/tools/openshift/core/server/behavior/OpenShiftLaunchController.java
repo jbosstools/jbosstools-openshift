@@ -39,6 +39,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
+import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerHotCodeReplaceListener;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
@@ -84,6 +85,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 		ControllableServerBehavior beh = (ControllableServerBehavior) serverBehavior;
 		IServer server = beh.getServer();
+        launch.addProcess(new ServerProcess(launch, server, "Openshift"));
 
 		beh.setServerStarting();
 		try {
