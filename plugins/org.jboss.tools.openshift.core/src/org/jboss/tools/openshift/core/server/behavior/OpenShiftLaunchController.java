@@ -74,8 +74,17 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		IControllableServerBehavior behavior = server.getAdapter(IControllableServerBehavior.class);
 		return behavior;
 	}
-
 	
+	private String getLabel(String mode) {
+	    String label = OpenShiftCoreMessages.RunOnOpenshift;
+	    if (ILaunchManager.PROFILE_MODE.equals(mode)) {
+	        label = OpenShiftCoreMessages.ProfileOnOpenshift;
+	    } else if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+	        label = OpenShiftCoreMessages.DebugOnOpenshift;
+	    }
+	    return label;
+	}
+
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
@@ -85,7 +94,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 		ControllableServerBehavior beh = (ControllableServerBehavior) serverBehavior;
 		IServer server = beh.getServer();
-        launch.addProcess(new ServerProcess(launch, server, "Openshift"));
+        launch.addProcess(new ServerProcess(launch, server, getLabel(launch.getLaunchMode())));
 
 		beh.setServerStarting();
 		try {
