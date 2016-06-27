@@ -9,16 +9,22 @@
 package org.jboss.tools.openshift.internal.ui.wizard.resource;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
+import org.jboss.tools.openshift.internal.ui.utils.ObservableTreeItemUtils;
+
 import com.openshift.restclient.model.IProject;
 
 /**
  * @author Jeff Maury
+ * @author Andre Dietisheim
  */
 public class NewResourceWizardModel extends ObservablePojo implements IResourcePayloadPageModel {
 
@@ -26,6 +32,7 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
     private IProject project;
     private List<ObservableTreeItem> projectItems = new ArrayList<>();
     private String source;
+	private Comparator<ObservableTreeItem> comparator;
 
     /* (non-Javadoc)
      * @see org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel#loadResources()
@@ -83,8 +90,16 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
     }
     
     private IProject getDefaultProject(IProject project, List<ObservableTreeItem> projectItems) {
-        if ((project == null) && (projectItems != null) && (projectItems.size() > 0)) {
-            project = (IProject) projectItems.get(0).getModel();
+    	if (CollectionUtils.isEmpty(projectItems)) {
+    		return null;
+    	}
+
+    	if (project == null
+    			|| !ObservableTreeItemUtils.contains(project, projectItems)) {
+    		if (comparator != null) {
+    			Collections.sort(projectItems, comparator);
+    		}
+			project = ObservableTreeItemUtils.getFirstModel(IProject.class, projectItems);
         }
         return project;
     }
@@ -162,6 +177,11 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
     @Override
     public String getSource() {
         return source;
+    }
+    
+    @Override
+    public void setProjectsComparator(Comparator<ObservableTreeItem> comparator) {
+    	this.comparator = comparator;
     }
 
 }

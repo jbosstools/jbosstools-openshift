@@ -36,6 +36,9 @@ public class ConnectionsRegistryUtil {
 	 * @throws ConnectionNotFoundException  if the connection can't be found
 	 */
 	public static Connection getConnectionFor(IResource resource) {
+		if (resource == null) {
+			return null;
+		}
 		Connection connection = safeGetConnectionFor(resource);
 		if(connection == null) {
 				throw new ConnectionNotFoundException(resource);

@@ -120,7 +120,8 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 		projectsViewer.setInput(
 				BeanProperties.list(IProjectPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
 		projectsViewer.setComparator(ProjectViewerComparator.createProjectTreeSorter(labelProvider));
-
+		model.setProjectsComparator(new ProjectViewerComparator(labelProvider).asItemComparator());
+		
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
 		Binding selectedProjectBinding =
 				ValueBindingBuilder.bind(selectedProjectObservable)

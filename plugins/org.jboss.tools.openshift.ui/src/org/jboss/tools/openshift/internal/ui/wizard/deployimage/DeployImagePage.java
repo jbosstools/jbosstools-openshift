@@ -406,7 +406,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		cmboProject.setLabelProvider(labelProvider);
 		cmboProject.setInput(
 				BeanProperties.list(IDeployImagePageModel.PROPERTY_PROJECTS).observe(model));
-		cmboProject.setComparator(new ProjectViewerComparator(labelProvider));
+		ProjectViewerComparator comparator = new ProjectViewerComparator(labelProvider);
+		cmboProject.setComparator(comparator);
+		model.setProjectsComparator(comparator.asProjectComparator());
 
 		IObservableValue projectObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_PROJECT)
 				.observe(model);

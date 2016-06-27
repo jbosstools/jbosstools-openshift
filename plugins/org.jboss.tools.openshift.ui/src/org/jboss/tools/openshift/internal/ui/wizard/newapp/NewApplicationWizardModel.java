@@ -38,8 +38,6 @@ import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
-import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
-import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
@@ -76,7 +74,8 @@ public class NewApplicationWizardModel
 	private String localAppSourceFilename;
 	private IResourceFactory resourceFactory;
 	private org.eclipse.core.resources.IProject eclipseProject;
-
+	private Comparator<ObservableTreeItem> comparator;
+	
 	private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems, IApplicationSource appSource, String localAppSourceFilename, IStatus appSourceStatus) {
 		updateProjectItems(projectItems);
 		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = selectedProject = getProjectOrDefault(selectedProject, projectItems));
@@ -208,6 +207,20 @@ public class NewApplicationWizardModel
 		return project;
 	}
 
+	private IProject getDefaultProject(List<ObservableTreeItem> projects) {
+		if (projects == null 
+				|| projects.size() == 0) {
+			return null;
+		} else if(projects.size() == 1) {
+			return (IProject) projects.get(0).getModel();
+		}
+		ObservableTreeItem[] items = projects.toArray(new ObservableTreeItem[projects.size()]);
+		if (comparator != null) {
+			Arrays.sort(items, comparator);
+		}
+		return (IProject) items[0].getModel();
+	}
+
 	@Override
 	public void setProject(IProject project) {
 		update(this.useLocalAppSource, project, this.projectItems, this.serverAppSource, this.localAppSourceFilename, this.appSourceStatus);
@@ -311,18 +324,8 @@ public class NewApplicationWizardModel
 		update(this.useLocalAppSource, null, null, null, null, Status.OK_STATUS);
 	}
 
-	Comparator<ObservableTreeItem> comparator = new ProjectViewerComparator(new OpenShiftExplorerLabelProvider()).asItemComparator();
-
-	private IProject getDefaultProject(List<ObservableTreeItem> projects) {
-		if (projects == null 
-				|| projects.size() == 0) {
-			return null;
-		} else if(projects.size() == 1) {
-			return (IProject) projects.get(0).getModel();
-		}
-		ObservableTreeItem[] items = projects.toArray(new ObservableTreeItem[projects.size()]);
-		Arrays.sort(items, comparator);
-		return (IProject) items[0].getModel();
+	public void setProjectsComparator(Comparator<ObservableTreeItem> comparator) {
+		this.comparator = comparator;
 	}
 
 	private void setResourceFactory(Connection connection) {

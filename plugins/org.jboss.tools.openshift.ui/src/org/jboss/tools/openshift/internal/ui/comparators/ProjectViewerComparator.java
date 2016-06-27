@@ -51,6 +51,20 @@ public class ProjectViewerComparator extends ViewerComparator {
 	}
 
 	/**
+	 * Returns a comparator that compares {@link IProject}s.
+	 * 
+	 * @return
+	 */
+	public Comparator<IProject> asProjectComparator() {
+		return new Comparator<IProject>() {
+			@Override
+			public int compare(IProject o1, IProject o2) {
+				return ProjectViewerComparator.this.compare(null, o1, o2);
+			}
+		};
+	}
+
+	/**
 	 * Compares only projects. Other objects always go after projects and equal to each other.
 	 * When applied to sorting a mixed array, projects go to the beginning of the array and are sorted,
 	 * other objects go to the end without change in order.

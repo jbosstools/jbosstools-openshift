@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,17 +94,17 @@ public class DeployImageWizardModel
 	private String targetRegistryPassword;
 
 	
-	private final List<String> imageNames = new ArrayList<>();
 	
 	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
+	private final List<String> imageNames = new ArrayList<>();
+    private List<IDockerConnection> dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections());
+    private Comparator<IProject> projectsComparator;
 
 	public DeployImageWizardModel() {
 		envModel.addPropertyChangeListener(PROPERTY_ENVIRONMENT_VARIABLES, this);
 		envModel.addPropertyChangeListener(PROPERTY_SELECTED_ENVIRONMENT_VARIABLE, this);
 		DockerConnectionManager.getInstance().addConnectionManagerListener(this);
 	}
-	
-    private List<IDockerConnection> dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections());
 	
 	@Override
 	public void dispose() {
@@ -121,8 +122,7 @@ public class DeployImageWizardModel
 	    	imagePorts = null;
 	    }
 	}
-	
-	
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if(evt != null) {
@@ -134,7 +134,7 @@ public class DeployImageWizardModel
 	public void setOriginatedFromDockerExplorer(boolean orig) {
 		this.originatedFromDockerExplorer = orig;
 	}
-	
+
 	@Override
 	public boolean originatedFromDockerExplorer() {
 		return originatedFromDockerExplorer;
@@ -256,14 +256,36 @@ public class DeployImageWizardModel
 		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = project);
 	}
 
-	public void setProjectOrDefault(IProject project) {
-		if (project != null) {
+	protected void setProjectOrDefault(IProject project) {
+		if (projects == null) {
+			return;
+		}
+
+		if (project != null
+				&& projects.contains(project)) {
 			setProject(project);
 		} else if (!projects.isEmpty()) {
-			setProject(projects.get(0));
+			project = getDefaultProject();
+			setProject(project);
 		}
 	}
 
+	private IProject getDefaultProject() {
+		IProject project;
+		if (projectsComparator != null) {
+			Collections.sort(projects, projectsComparator);
+			project = projects.get(0);
+		} else {
+			project = projects.get(0);
+		}
+		return project;
+	}
+
+	@Override
+	public void setProjectsComparator(Comparator<IProject> comparator) {
+		this.projectsComparator = comparator;
+	}
+	
 	@Override
 	public String getResourceName() {
 		return this.resourceName;
