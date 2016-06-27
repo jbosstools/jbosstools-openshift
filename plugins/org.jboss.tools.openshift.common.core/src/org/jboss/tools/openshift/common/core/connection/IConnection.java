@@ -59,6 +59,8 @@ public interface IConnection {
 
 	public void enablePromptCredentials(boolean enable);
 
+	public boolean isEnablePromptCredentials();
+
 	/**
 	 * Returns true if and only if connections are equal and
 	 * credentials like userName and password are equal. 

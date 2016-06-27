@@ -12,7 +12,9 @@ package org.jboss.tools.openshift.test.common.ui.utils;
 
 import static org.apache.commons.collections.ListUtils.union;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -205,19 +207,48 @@ public class ConnectionWizardPageModelTest {
 	}
 	
 	@Test
-	public void should_enable_prompt_on_edited_connection_when_disposing_model() {
-		// given prompt is disabled on edited connection
-		verify(editedConnection).enablePromptCredentials(false);
+	public void should_enable_promptCredentials_on_edited_connection_when_disposing_model_and_was_enabled_before_editing_it() {
+		// given prompt is disabled once connection is being edited
+		Connection connection = mockOS3Connection("foo", "https://localhost");
+		doReturn(true).when(connection).isEnablePromptCredentials();
+		allConnections.add(connection);
+		ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
+				connection, 
+				allConnections,
+				editedConnection.getClass(),
+				true,
+				wizardModel);
+		verify(connection).enablePromptCredentials(false);
 		// when
 		model.dispose();
 		// then
-		verify(editedConnection).enablePromptCredentials(true);
+		verify(connection).enablePromptCredentials(true);
+	}
+
+	@Test
+	public void should_disable_promptCredentials_on_edited_connection_when_disposing_model_and_was_disabled_before_editing_it() {
+		// given prompt is disabled once connection is being edited
+		Connection connection = mockOS3Connection("foo", "https://localhost");
+		doReturn(false).when(connection).isEnablePromptCredentials();
+		allConnections.add(connection);
+		ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
+				connection, 
+				allConnections,
+				connection.getClass(),
+				true,
+				wizardModel);
+		verify(connection).enablePromptCredentials(false);
+		// when
+		model.dispose();
+		// then disable 2x, once when editing, 2nd time when disposing
+		verify(connection, times(2)).enablePromptCredentials(false);
 	}
 
 	private Connection mockOS3Connection(String username, String url) {
 		Connection mock = mock(Connection.class);
 		when(mock.getHost()).thenReturn(url);
 		when(mock.getUsername()).thenReturn(username);
+		when(mock.isEnablePromptCredentials()).thenReturn(true);
 		return mock;
 	}
 

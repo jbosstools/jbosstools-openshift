@@ -345,8 +345,8 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 				@Override
 				public void run() {
 					connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_OAUTH);
-					connection.setToken((String)tokenObservable.getValue());
-					connection.setRememberToken((boolean)rememberTokenObservable.getValue());
+					connection.setToken(tokenObservable.getValue());
+					connection.setRememberToken(rememberTokenObservable.getValue());
 				}
 			});
 			return connection;

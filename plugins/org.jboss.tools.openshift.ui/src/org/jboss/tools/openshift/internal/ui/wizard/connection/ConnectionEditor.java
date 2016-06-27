@@ -61,9 +61,9 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private DetailViewModel detailViewModel = new DetailViewModel();
 
 	private ComboViewer authTypeViewer;
-	private IObservableValue rememberTokenObservable;
-	private IObservableValue detailViewObservable;
-	private IObservableValue authSchemeObservable;
+	private IObservableValue<Boolean> rememberTokenObservable;
+	private IObservableValue<IDetailView> selectedDetailViewObservable;
+	private IObservableValue<String> authSchemeObservable;
 	private Binding selectedAuthTypeBinding;
 	
 	private class DetailViewModel extends ObservablePojo{
@@ -77,17 +77,13 @@ public class ConnectionEditor extends BaseConnectionEditor {
 			this.selectedDetailView = view;
 		}
 		
-		public void setAuthScheme(String scheme) {
-			detailViewObservable.setValue(detailViews.get(scheme));
-		}
-		
 		public void setSelectedConnection(IConnection conn) {
 			if(conn instanceof Connection) {
 				Connection connection = (Connection) conn;
-				detailViewObservable.setValue(detailViews.get(connection.getAuthScheme()));
-			}else {
+				selectedDetailViewObservable.setValue(detailViews.get(connection.getAuthScheme()));
+			} else {
 				rememberTokenObservable.setValue(Boolean.FALSE);
-				detailViewObservable.setValue(detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH));
+				selectedDetailViewObservable.setValue(detailViews.get(IAuthorizationContext.AUTHSCHEME_OAUTH));
 			}
 			for (IConnectionEditorDetailView view : detailViews.values()) {
 				//reset all views
@@ -98,7 +94,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	
 	private class ConnectionEditorStackedDetailViews extends AbstractStackedDetailViews{
 
-		public ConnectionEditorStackedDetailViews(IObservableValue detailViewModel, Object context, Composite parent,
+		public ConnectionEditorStackedDetailViews(IObservableValue<IDetailView> detailViewModel, Object context, Composite parent,
 				DataBindingContext dbc) {
 			super(detailViewModel, context, parent, dbc);
 		}
@@ -116,7 +112,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		GridLayoutFactory.fillDefaults()
 				.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
 
-		this.detailViewObservable = 
+		this.selectedDetailViewObservable = 
 				BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class).observe(detailViewModel);
 		this.authSchemeObservable = 
 				BeanProperties.value("authScheme", String.class).observe(detailViewModel);
@@ -151,7 +147,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(detailsContainer);
 		stackedViews = new ConnectionEditorStackedDetailViews(
-				detailViewObservable,
+				selectedDetailViewObservable,
 				pageModel, 
 				detailsContainer, 
 				dbc);
@@ -179,7 +175,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 				.validatingAfterGet(
 						new IsNotNullValidator(
 								ValidationStatus.cancel("Please select an authorization protocol.")))
-				.to(detailViewObservable)
+				.to(selectedDetailViewObservable)
 				.in(dbc);
 		ControlDecorationSupport
 				.create(selectedAuthTypeBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());

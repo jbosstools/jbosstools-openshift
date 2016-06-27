@@ -181,6 +181,11 @@ public class ExpressConnection extends AbstractConnection {
 		this.promptPasswordEnabled = enable;
 	}
 	
+	@Override
+	public boolean isEnablePromptCredentials() {
+		return promptPasswordEnabled;
+	}
+	
 	public void setSSLCertificateCallback(ISSLCertificateCallback callback) {
 		this.sslCallback = callback;
 	}

@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -46,14 +47,12 @@ public class DeployImageHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		Connection connection = null;
 		IProject project = null;
-//		IWorkbenchWindow window = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow();
-//		ISelection selection = window.getSelectionService().getSelection();
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		final IDockerImage image = UIUtils.getFirstElement(selection, IDockerImage.class);
 		if (image != null) {
 			selection = OpenShiftUIUtils.getOpenShiftExplorerSelection();
 			project = ResourceUtils.getProject(UIUtils.getFirstElement(selection, IResource.class));
-			connection = OpenShiftUIUtils.getConnectionForExplorerSelection(Connection.class);
+			connection = ConnectionsRegistryUtil.getConnectionFor(project);
 		}
 
 		if(connection == null) {

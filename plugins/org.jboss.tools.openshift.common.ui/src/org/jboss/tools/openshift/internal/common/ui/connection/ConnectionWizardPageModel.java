@@ -54,7 +54,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_USERDOCURL = "userdocUrl";
 	public static final String PROPERTY_HAS_DEFAULT_HOST = "hasDefaultHost";
 	private static final IStatus NOT_CONNECTED_STATUS = null;
-
+	
 	/** the connection that the user wants to edit */
 	private IConnection selectedConnection;
 	/** the connection that this wizard operates on */
@@ -73,6 +73,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private Collection<IConnection> allConnections;
 	private Class<? extends IConnection> connectionType;
 	private IConnectionAware<IConnection> wizardModel;
+	private boolean enablePromptCredentialsBackup = false;
 	
 	protected ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, 
 			Class<? extends IConnection> connectionType, boolean allowConnectionChange, IConnectionAware<IConnection> wizardModel) {
@@ -134,6 +135,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	private void initEditConnection(IConnection connection) {
 		this.selectedConnection = connection;
+		this.enablePromptCredentialsBackup = selectedConnection.isEnablePromptCredentials();
 		this.selectedConnection.enablePromptCredentials(false);
 		this.connectionFactory = connectionsFactory.getByConnection(connection.getClass());
 		this.host = connection.getHost();
@@ -474,7 +476,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public void dispose() {
 		connectionsFactory.close();
 		if (this.selectedConnection != null) {
-			selectedConnection.enablePromptCredentials(true);
+			selectedConnection.enablePromptCredentials(enablePromptCredentialsBackup);
 		}
 	}
 	

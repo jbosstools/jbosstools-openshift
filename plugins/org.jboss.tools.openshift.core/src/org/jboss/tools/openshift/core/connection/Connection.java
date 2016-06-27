@@ -185,6 +185,11 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		this.promptCredentialsEnabled = enable;
 	}
 
+	@Override
+	public boolean isEnablePromptCredentials() {
+		return promptCredentialsEnabled;
+	}
+
 	public String getAuthScheme() {
 		return org.apache.commons.lang.StringUtils.defaultIfBlank(this.authScheme, IAuthorizationContext.AUTHSCHEME_OAUTH);
 	}
@@ -249,13 +254,13 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 				String token = context.getToken();
 				updateAuthorized(username, token);
 			} else {
-				if (promptCredentialsEnabled
+				if (isEnablePromptCredentials()
 						&& credentialsPrompter != null) {
 					credentialsPrompter.promptAndAuthenticate(this, null);
 				}
 			}
 		} catch (UnauthorizedException e) {
-			if (promptCredentialsEnabled
+			if (isEnablePromptCredentials()
 					&& credentialsPrompter != null) {
 				credentialsPrompter.promptAndAuthenticate(this, e.getAuthorizationDetails());
 			} else {

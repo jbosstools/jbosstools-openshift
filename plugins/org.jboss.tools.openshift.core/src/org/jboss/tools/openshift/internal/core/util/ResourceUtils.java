@@ -431,7 +431,7 @@ public class ResourceUtils {
 				.orElse(null);
 	}
 	
-	public static com.openshift.restclient.model.IProject getProject(IResource resource) {
+	public static IProject getProject(IResource resource) {
 		IProject project = null;
 		if (resource instanceof IProject) {
 			project = (IProject) resource;

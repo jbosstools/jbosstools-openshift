@@ -177,26 +177,24 @@ public class OpenShiftUIUtils {
 	 */
 	public static <T extends IConnection> T getConnectionForExplorerSelection(Class<T> klass) {
 		ISelection selection = getOpenShiftExplorerSelection();
-		if(selection != null) {
-			if(selection != null 
-					&& !selection.isEmpty()) {
-				T result = UIUtils.getFirstElement(selection, klass);
-				IViewPart part = getOpenShiftExplorer();
-				if(result == null 
-						&& selection instanceof IStructuredSelection
-						&& part instanceof CommonNavigator) {
-					Object selected = ((IStructuredSelection)selection).getFirstElement();
-					IContentProvider provider = ((CommonNavigator) part).getCommonViewer().getContentProvider();
-					if(provider instanceof ITreeContentProvider) {
-						ITreeContentProvider tree = (ITreeContentProvider)provider;
-						while(selected != null && result == null) {
-							result = UIUtils.adapt(selected, klass);
-							selected = tree.getParent(selected);
-						}
+		if (selection != null
+				&& !selection.isEmpty()) {
+			T result = UIUtils.getFirstElement(selection, klass);
+			IViewPart part = getOpenShiftExplorer();
+			if (result == null
+					&& selection instanceof IStructuredSelection
+					&& part instanceof CommonNavigator) {
+				Object selected = ((IStructuredSelection) selection).getFirstElement();
+				IContentProvider provider = ((CommonNavigator) part).getCommonViewer().getContentProvider();
+				if (provider instanceof ITreeContentProvider) {
+					ITreeContentProvider tree = (ITreeContentProvider) provider;
+					while (selected != null && result == null) {
+						result = UIUtils.adapt(selected, klass);
+						selected = tree.getParent(selected);
 					}
 				}
-				return result;
 			}
+			return result;
 		}
 		return null;
 	}

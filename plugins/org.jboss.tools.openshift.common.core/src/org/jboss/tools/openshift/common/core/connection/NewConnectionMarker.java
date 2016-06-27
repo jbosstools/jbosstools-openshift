@@ -108,6 +108,11 @@ public class NewConnectionMarker extends AbstractConnection {
 	@Override
 	public void enablePromptCredentials(boolean enable) {
 	}
+	
+	@Override
+	public boolean isEnablePromptCredentials() {
+		return false;
+	}
 
 	@Override
 	public IConnection clone() {
