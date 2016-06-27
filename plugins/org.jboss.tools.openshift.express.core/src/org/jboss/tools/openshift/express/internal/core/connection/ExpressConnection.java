@@ -181,6 +181,11 @@ public class ExpressConnection extends AbstractConnection {
 		this.promptPasswordEnabled = enable;
 	}
 	
+	@Override
+	public boolean isEnablePromptCredentials() {
+		return promptPasswordEnabled;
+	}
+	
 	public void setSSLCertificateCallback(ISSLCertificateCallback callback) {
 		this.sslCallback = callback;
 	}
@@ -458,7 +463,7 @@ public class ExpressConnection extends AbstractConnection {
 		return hasUser();
 	}
 
-	public List<IOpenShiftSSHKey> getSSHKeys() throws OpenShiftException{
+	public List<IOpenShiftSSHKey> getSSHKeys() throws OpenShiftException {
 		if (connect()) {
 			return user.getSSHKeys();
 		} else {

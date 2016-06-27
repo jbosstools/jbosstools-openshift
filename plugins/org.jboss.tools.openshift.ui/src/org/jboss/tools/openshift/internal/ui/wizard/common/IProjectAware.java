@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.common;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
@@ -33,4 +34,6 @@ public interface IProjectAware
 	List<ObservableTreeItem> getProjectItems();
 
 	boolean hasProjects();
+	
+	void setProjectsComparator(Comparator<ObservableTreeItem> comparator);
 }

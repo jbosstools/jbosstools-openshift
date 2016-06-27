@@ -63,6 +63,11 @@ public class ConnectionFake extends AbstractConnection {
 	}
 
 	@Override
+	public boolean isEnablePromptCredentials() {
+		return false;
+	}
+
+	@Override
 	public boolean isRememberPassword() {
 		return false;
 	}

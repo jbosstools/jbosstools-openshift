@@ -35,6 +35,7 @@ import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
@@ -429,5 +430,16 @@ public class ResourceUtils {
 				.map(pod -> pod.getLabels().get(DEPLOYMENT_CONFIG_KEY))
 				.orElse(null);
 	}
+	
+	public static IProject getProject(IResource resource) {
+		IProject project = null;
+		if (resource instanceof IProject) {
+			project = (IProject) resource;
+		} else if (resource != null) {
+			project = resource.getProject();
+		}
+		return project;
+	}
+
 
 }

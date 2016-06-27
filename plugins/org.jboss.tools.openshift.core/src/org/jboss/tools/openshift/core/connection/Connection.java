@@ -185,6 +185,11 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		this.promptCredentialsEnabled = enable;
 	}
 
+	@Override
+	public boolean isEnablePromptCredentials() {
+		return promptCredentialsEnabled;
+	}
+
 	public String getAuthScheme() {
 		return org.apache.commons.lang.StringUtils.defaultIfBlank(this.authScheme, IAuthorizationContext.AUTHSCHEME_OAUTH);
 	}
@@ -249,13 +254,13 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 				String token = context.getToken();
 				updateAuthorized(username, token);
 			} else {
-				if (promptCredentialsEnabled
+				if (isEnablePromptCredentials()
 						&& credentialsPrompter != null) {
 					credentialsPrompter.promptAndAuthenticate(this, null);
 				}
 			}
 		} catch (UnauthorizedException e) {
-			if (promptCredentialsEnabled
+			if (isEnablePromptCredentials()
 					&& credentialsPrompter != null) {
 				credentialsPrompter.promptAndAuthenticate(this, e.getAuthorizationDetails());
 			} else {
@@ -326,10 +331,10 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 
 	/**
-	 * Computes actual state of connection. May be a long running operation.
+	 * Computes authorization state of connection. May be a long running operation.
 	 * @return
 	 */
-	public boolean isConnected(IProgressMonitor monitor) {
+	public boolean isAuthorized(IProgressMonitor monitor) {
 		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());

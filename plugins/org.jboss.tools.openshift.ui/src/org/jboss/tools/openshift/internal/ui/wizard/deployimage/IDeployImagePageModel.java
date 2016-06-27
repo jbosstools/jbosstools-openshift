@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
@@ -68,9 +69,12 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * OpenShift connection
 	 * @return
 	 */
-	Collection<IProject> getProjects();
-	void setProjects(Collection<IProject> projects);
+	List<IProject> getProjects();
+
+	void setProjects(List<IProject> projects);
 	
+	void setProjectsComparator(Comparator<IProject> comparator);
+
 	/**
 	 * The project to associate with this deployment
 	 * @return
