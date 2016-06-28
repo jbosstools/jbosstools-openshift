@@ -30,7 +30,7 @@ public class CDKOpenshiftUtility {
 	private static String DOTCDK_AUTH_PASS = "openshift.auth.password";
 	
 	private static final String IMAGE_REGISTRY_KEY = "DOCKER_REGISTRY";
-	private static final String DEFAULT_IMAGE_REGISTRY_URL = "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io ";
+	private static final String DEFAULT_IMAGE_REGISTRY_URL = "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io";
 
 
 	public IConnection findExistingOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
