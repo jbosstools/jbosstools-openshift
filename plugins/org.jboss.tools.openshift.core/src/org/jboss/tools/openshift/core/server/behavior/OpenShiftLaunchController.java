@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
@@ -42,6 +43,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerHotCodeReplaceListener;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -76,11 +78,18 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	}
 	
 	private String getLabel(String mode) {
-	    String label = OpenShiftCoreMessages.RunOnOpenshift;
-	    if (ILaunchManager.PROFILE_MODE.equals(mode)) {
-	        label = OpenShiftCoreMessages.ProfileOnOpenshift;
-	    } else if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+	    String label;
+	    
+	    switch (mode) {
+	    case ILaunchManager.DEBUG_MODE:
 	        label = OpenShiftCoreMessages.DebugOnOpenshift;
+	        break;
+	    case ILaunchManager.PROFILE_MODE:
+	        label = OpenShiftCoreMessages.ProfileOnOpenshift;
+	        break;
+	    default:
+	        label = OpenShiftCoreMessages.RunOnOpenshift;
+	        break;
 	    }
 	    return label;
 	}
