@@ -106,7 +106,7 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 		IConnection con = util.createOpenshiftConnection(s, adb, registry);
 		assertNotNull(con);
 		Object o = ((Connection)con).getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY);
-		assertEquals(o, "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io ");
+		assertEquals("https://hub.openshift.rhel-cdk.10.1.2.2.xip.io", o);
 	}
 
 	
