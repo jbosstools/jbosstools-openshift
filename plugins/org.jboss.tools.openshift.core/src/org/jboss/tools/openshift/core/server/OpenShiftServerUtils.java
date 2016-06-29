@@ -194,10 +194,6 @@ public class OpenShiftServerUtils {
 		server.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
 	}
 
-	public static void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, IProject project) {
-		updateServerProject(connectionUrl, service, sourcePath, podPath, project);
-	}
-
 	public static void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, String routeURL, IProject project) {
 		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, routeURL, project);
 	}
@@ -257,16 +253,16 @@ public class OpenShiftServerUtils {
 		return null;
 	}
 	
-	public static IProject getDeployProject(IServerAttributes attributes) {
+	public static IProject getDeployProject(IServerAttributes server) {
 		// TODO: implement override project settings with server settings
-		return ProjectUtils.getProject(getDeployProjectName(attributes));
+		return ProjectUtils.getProject(getDeployProjectName(server));
 	}
 
-	public static String getDeployProjectName(IServerAttributes attributes) {
-		if (attributes == null) {
+	public static String getDeployProjectName(IServerAttributes server) {
+		if (server == null) {
 			return null;
 		}
-		return attributes.getAttribute(ATTR_DEPLOYPROJECT, (String) null);
+		return server.getAttribute(ATTR_DEPLOYPROJECT, (String) null);
 	}
 
 	public static boolean isIgnoresContextRoot(IServerAttributes server) {
@@ -291,24 +287,27 @@ public class OpenShiftServerUtils {
 	}
 
 	/**
-	 * Returns 
-	 * @param attributes
+	 * Returns the connection for the given server
+	 * @param server
 	 * @return
 	 */
-	public static Connection getConnection(IServerAttributes attributes) {
+	public static Connection getConnection(IServerAttributes server) {
 		try {
-			String url = attributes.getAttribute(ATTR_CONNECTIONURL, (String) null);
-			if( url == null)
-					url = getProjectAttribute(ATTR_CONNECTIONURL, null, getDeployProject(attributes));
-			if (!StringUtils.isEmpty(url)) {
-				ConnectionURL connectionUrl = ConnectionURL.forURL(url);
+			String url = getConnectionURL(server);
+			ConnectionURL connectionUrl = ConnectionURL.forURL(url);
+			if (connectionUrl != null) {
 				return ConnectionsRegistrySingleton.getInstance().getByUrl(connectionUrl, Connection.class);
- 			}
+			}
 		} catch (UnsupportedEncodingException | MalformedURLException e) {
-			OpenShiftCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
+			OpenShiftCoreActivator.pluginLog()
+					.logError(NLS.bind("Could not get connection url for user {0}", server.getName()), e);
 		}
 
 		return null;
+	}
+
+	public static String getConnectionURL(IServerAttributes server) {
+		return getAttribute(ATTR_CONNECTIONURL, server);
 	}
 
 	public static IService getService(IServerAttributes attributes) {
@@ -320,16 +319,13 @@ public class OpenShiftServerUtils {
 	 * server settings and requests the service from the OpenShit server. It
 	 * should thus never be called from the UI thread.
 	 * 
-	 * @param attributes the server (attributes) to get the service name from
+	 * @param server the server (attributes) to get the service name from
 	 * @param connection the connection (to the OpenShift server) to retrieve the service from
 	 * @return the service 
 	 */
-	public static IService getService(IServerAttributes attributes, Connection connection) {
+	public static IService getService(IServerAttributes server, Connection connection) {
 		// TODO: implement override project settings with server settings
-		String uniqueId = attributes.getAttribute(ATTR_SERVICE, (String) null);
-		if (uniqueId == null) {
-			uniqueId = getProjectAttribute(ATTR_SERVICE, null, getDeployProject(attributes));
-		}
+		String uniqueId = getAttribute(ATTR_SERVICE, server);
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
@@ -338,20 +334,13 @@ public class OpenShiftServerUtils {
 		return OpenShiftResourceUniqueId.getByUniqueId(uniqueId, services);
 	}
 
-	public static String getRouteURL(IServerAttributes attributes) {
-		String routeURL = attributes.getAttribute(ATTR_ROUTE, (String)null);
-		if( routeURL == null ) 
-			routeURL = getProjectAttribute(ATTR_ROUTE, null, getDeployProject(attributes));
-		return routeURL;
+	public static String getRouteURL(IServerAttributes server) {
+		return getAttribute(ATTR_ROUTE, server);
 	}
 
-	public static String getPodPath(IServerAttributes attributes) {
+	public static String getPodPath(IServerAttributes server) {
 		// TODO: implement override project settings with server settings
-		String podPath = attributes.getAttribute(OpenShiftServerUtils.ATTR_POD_PATH, (String)null);
-		if( podPath != null && !podPath.isEmpty()) {
-			return podPath;
-		}
-		return getProjectAttribute(ATTR_POD_PATH, null, getDeployProject(attributes));
+		return getAttribute(OpenShiftServerUtils.ATTR_POD_PATH, server);
 	}
 	
 
@@ -390,17 +379,13 @@ public class OpenShiftServerUtils {
 		return new PodDeploymentPathProvider().load(service, getConnection(server));
 	}
 
-	public static String getSourcePath(IServerAttributes attributes) {
+	public static String getSourcePath(IServerAttributes server) {
 		// TODO: implement override project settings with server settings
-		String rawSourcePath = attributes.getAttribute(ATTR_SOURCE_PATH, (String)null);
-		if( rawSourcePath == null || rawSourcePath.isEmpty()) {
-			rawSourcePath = getProjectAttribute(ATTR_SOURCE_PATH, null, getDeployProject(attributes));
-		}
+		String rawSourcePath = getAttribute(ATTR_SOURCE_PATH, server);
 		if (org.apache.commons.lang.StringUtils.isBlank(rawSourcePath)) {
 			return rawSourcePath;
 		}
-		String path = VariablesHelper.replaceVariables(rawSourcePath);
-		return path;
+		return VariablesHelper.replaceVariables(rawSourcePath);
 	}
 
 	public static boolean isOverridesProject(IServerAttributes server) {
@@ -513,5 +498,25 @@ public class OpenShiftServerUtils {
 											 .isPresent();
 		return isEapLike;
 	}
+	
+	/**
+	 * Returns the value for the given key and server. Will first query the
+	 * server and if no value was found the deploy project is queried.
+	 * 
+	 * @param key
+	 * @param server
+	 * @return
+	 */
+	protected static String getAttribute(String key, IServerAttributes server) {
+		if (server == null) {
+			return null;
+		}
+		String attribute = server.getAttribute(key, (String) null);
+		if (attribute == null) {
+			attribute = getProjectAttribute(key, null, getDeployProject(server));
+		}
+		return attribute;
+	}
+
 	
 }

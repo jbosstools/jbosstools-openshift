@@ -10,88 +10,189 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core;
 
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
-import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder.JobConstraint;
-import org.junit.Assert;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder.ISchedulingCondition;
+import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author Viacheslav Kabanovich
+ * @author Andre Dietisheim
+ *
+ */
 public class JobChainBuilderTest {
-	static int MAX_WAIT_TIME = 60 * 1000;
+	static int WAIT_FOR_FINISHED = 4 * 1000;
+
+	private JobCounter counter;
+	private JobChainBuilder builder;
+	
+	@Before
+	public void setUp() {
+		this.counter = new JobCounter(4);
+		this.builder = new JobChainBuilder(createJob("Job 1", counter));
+		createJobs(3, null, builder, counter);
+		counter.setBuilder(builder);
+	}
+	
+	@Test
+	public void should_cancel_after_2_jobs() {
+		// given
+		counter.setCancelAt(2);
+		// when
+		builder.schedule();
+		// then
+		assertThat(counter.getDone()).isEqualTo(2);
+	}
 
 	@Test
-	public void testCancelingJobChain() {
-		JobCounter jc = new JobCounter(2);
-		JobChainBuilder jcb = createJobChainBuilder(jc);
-		jcb.schedule();
-		wait(jc, 2, 1000);
-		Assert.assertEquals(2, jc.done);
-
-		jc = new JobCounter(-1);
-		jcb = createJobChainBuilder(jc);
-		jcb.schedule();
-		wait(jc, 4, 0);
-		Assert.assertEquals(4, jc.done);		
+	public void should_schedule_all_jobs_if_no_cancel() {
+		// given
+		// when
+		builder.schedule();
+		// then
+		assertThat(counter.getDone()).isEqualTo(4);
 	}
 
-	void wait(JobCounter jc, int waitForJobs, int waitThenTime) {
-		long t = System.currentTimeMillis();
-		long dt = 0;
-		while(jc.done < waitForJobs && dt < MAX_WAIT_TIME) {
-			try {
-				 Thread.sleep(200);
-			} catch (InterruptedException e) {
-				Assert.fail("Wait interrupted");
-			}
-			dt = System.currentTimeMillis() - t;
-		}
-		if(dt > MAX_WAIT_TIME) {
-			Assert.fail("Failed to wait for " + waitForJobs + " jobs. " 
-					+ jc.done + " jobs are done."); 
-		}
-		try {
-			 Thread.sleep(waitThenTime);
-		} catch (InterruptedException e) {
-			Assert.fail("Wait interrupted");
-		}
+	@Test
+	public void should_schedule_2_jobs_given_condition_that_stops_after_2() {
+		// given
+		JobCounter counter = new JobCounter(4);
+		JobChainBuilder builder = new JobChainBuilder(createJob("Job 1", counter));
+		counter.setBuilder(builder);
+		createJobs(3, 
+				new ISchedulingCondition[] { 
+						new JobChainBuilder.NullCondition(),
+						new JobChainBuilder.ISchedulingCondition() {
+
+							@Override
+							public boolean isFullfilled(Job preceedingJob) {
+								return false;
+							}},
+						new JobChainBuilder.NullCondition() },
+				builder, counter);
+		// when
+		builder.schedule();
+		// then
+		assertThat(counter.getDone()).isEqualTo(2);
 	}
 
-	class JobCounter {
-		int done = 0;
-		JobChainBuilder builder;
-		int cancelAt;
-		public JobCounter(int cancelAt) {
-			this.cancelAt = cancelAt;
-		}
+	@Test
+	public void should_schedule_4_jobs_given_null_condition_wont_stop_scheduling() {
+		// given
+		JobCounter counter = new JobCounter(4);
+		JobChainBuilder builder = new JobChainBuilder(createJob("Job 1", counter));
+		counter.setBuilder(builder);
+		createJobs(3, 
+				new ISchedulingCondition[] { null, null, null },
+				builder, counter);
+		// when
+		builder.schedule();
+		// then
+		assertThat(counter.getDone()).isEqualTo(4);
+	}
 
-		void jobDone(String name) {
-			done++;
-			if(done == cancelAt) {
+	@Test
+	public void should_schedule_3_jobs_given_successfull_condition_not_fullfilled() {
+		// given
+		JobCounter counter = new JobCounter(3);
+		JobChainBuilder builder = new JobChainBuilder(createJob("Job 1", counter));
+		counter.setBuilder(builder);
+		createJobs(3, 
+				new ISchedulingCondition[] { null, null, new JobChainBuilder.SuccessfullyDoneCondition() },
+				builder, counter);
+		// when
+		builder.schedule();
+		// then
+		assertThat(counter.getDone()).isEqualTo(3);
+	}
+
+	private class JobCounter {
+
+		private CountDownLatch countDown;
+		private int cancelAt;
+		private int numOfJobs;
+		private JobChainBuilder builder;
+		
+		JobCounter(int numOfJobs) {
+			this.numOfJobs = numOfJobs;
+			this.cancelAt = -1;
+			this.countDown =  new CountDownLatch(numOfJobs);
+		}
+		
+		void jobDone() {
+			assertThat(builder).isNotNull();
+
+			countDown.countDown();
+			if (countDown.getCount() == cancelAt) {
 				builder.cancel();
 			}
 		}
+		
+		void setBuilder(JobChainBuilder builder) {
+			this.builder = builder;
+		}
+		
+		void setCancelAt(int cancelAt) {
+			this.cancelAt = cancelAt;
+		}
+
+		int getDone() {
+			try {
+				countDown.await(WAIT_FOR_FINISHED, TimeUnit.MILLISECONDS);
+				return numOfJobs - (int) countDown.getCount();
+			} catch (InterruptedException e) {
+				fail("Waiting for lock was interrupted...");
+				return -1;
+			}
+		}
 	}
 
-	public JobChainBuilder createJobChainBuilder(JobCounter jc) {
-		JobChainBuilder result = new JobChainBuilder(createJob("Job 1", jc));
-		JobConstraint c1 =	result.runWhenDone(createJob("Job 2", jc));
-		JobConstraint c2 =	c1.runWhenDone(createJob("Job 3", jc));
-		JobConstraint c3 =	c2.runWhenDone(createJob("Job 4", jc));
-		jc.builder = result;
-		return result;
+	private void createJobs(final int numOfJobs, ISchedulingCondition[] conditions, JobChainBuilder builder, JobCounter counter) {
+		IStatus[] doneStatus = new IStatus[numOfJobs];
+		Arrays.fill(doneStatus, Status.OK_STATUS);
+		createJobs(numOfJobs, conditions, doneStatus, builder, counter);
 	}
 
-	Job createJob(final String name, final JobCounter jc) {
+	private void createJobs(final int numOfJobs, ISchedulingCondition[] conditions, IStatus[] doneStatus, JobChainBuilder builder, JobCounter counter) {
+		if (conditions == null) {
+			conditions = new ISchedulingCondition[] { 
+					new JobChainBuilder.NullCondition(),
+					new JobChainBuilder.NullCondition(),
+					new JobChainBuilder.NullCondition()
+			};
+		}
+
+		assertThat(conditions.length).isEqualTo(numOfJobs);
+
+		for (int i = 0; i < numOfJobs; i++) {
+			builder = builder.runWhenDoneIf(conditions[i], createJob("Job " + (i + 1), counter));
+		}
+	}
+
+	private Job createJob(final String name, JobCounter counter) {
+		return createJob(name, counter, Status.OK_STATUS);
+	}
+
+	private Job createJob(final String name, JobCounter counter, IStatus doneStatus) {
+
 		return new Job(name) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				jc.jobDone(getName());
-				return Status.OK_STATUS;
+				counter.jobDone();
+				return doneStatus;
 			}
-			
 		};
 	}
 }
