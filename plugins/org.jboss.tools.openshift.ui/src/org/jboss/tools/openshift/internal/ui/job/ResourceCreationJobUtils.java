@@ -59,7 +59,7 @@ public class ResourceCreationJobUtils {
 		List<IResource> existing = new ArrayList<>(resources.size());
 		for (IResource resource : resources) {
 			try {
-				IResource found = connection.getResource(resource);
+				IResource found = connection.refresh(resource);
 				existing.add(found);
 			}catch(OpenShiftException e) {
 				//this is expected if the resource is not found

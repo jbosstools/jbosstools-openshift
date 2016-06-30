@@ -39,6 +39,14 @@ public interface IOpenShiftConnection extends IConnection {
 	<T extends IResource> List<T> getResources(String kind, String namespace);
 
 	/**
+	 * Get or refresh a resource
+	 * 
+	 * @return a <IResource>
+	 * @throws OpenShiftException
+	 */
+	<T extends IResource> T refresh(IResource resource);
+	
+	/**
 	 * Retrieve a resource by name
 	 * @param kind
 	 * @param namespace
@@ -47,6 +55,7 @@ public interface IOpenShiftConnection extends IConnection {
 	 */
 	<T extends IResource> T getResource(String kind, String namespace, String name);
 	
+	@Override
 	String getUsername();
 	
 	/**

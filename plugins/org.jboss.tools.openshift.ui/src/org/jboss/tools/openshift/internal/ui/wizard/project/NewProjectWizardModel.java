@@ -58,7 +58,7 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 		request.setDisplayName(getDisplayName());
 		IProject project = (IProject)connection.createResource(request);
 		List<IProject> newProjects = new ArrayList<>(projects);
-		newProjects.add((IProject)connection.getResource(project));
+		newProjects.add((IProject)connection.refresh(project));
 		
 		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
 				connection, 

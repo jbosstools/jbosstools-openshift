@@ -59,7 +59,7 @@ public class RefreshResourcesJob extends AbstractDelegatingMonitorJob {
 				}
 				Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
 				if(connection != null) {
-					IResource newValue = ((Connection)connection).getResource(resource);
+					IResource newValue = ((Connection)connection).refresh(resource);
 					IResource oldValue = resourcesAdded ? null : resource;
 					refreshedResources.add(newValue);
 					ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_RESOURCE, oldValue, newValue);

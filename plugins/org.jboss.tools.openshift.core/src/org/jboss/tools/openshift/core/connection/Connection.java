@@ -107,7 +107,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <B extends IResourceBuilder> B getResourceBuilder(Class<? extends ICapability> klass){
 		if(client.supports(klass)) {
-			ICapability cap = (ICapability) client.getCapability(klass);
+			ICapability cap = client.getCapability(klass);
 			if(cap instanceof IResourceBuilder) {
 				return (B) cap;
 			}
@@ -479,10 +479,11 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	/**
 	 * Get or refresh a resource
 	 * 
-	 * @return List<IResource>
+	 * @return a <IResource>
 	 * @throws OpenShiftException
 	 */
-	public <T extends IResource> T getResource(IResource resource) {
+	@Override
+	public <T extends IResource> T refresh(IResource resource) {
 		try {
 			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
 		} catch (UnauthorizedException e) {
