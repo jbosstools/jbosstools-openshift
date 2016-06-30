@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
@@ -39,8 +40,10 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
+import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerHotCodeReplaceListener;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -73,8 +76,24 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		IControllableServerBehavior behavior = server.getAdapter(IControllableServerBehavior.class);
 		return behavior;
 	}
-
 	
+	private String getLabel(String mode) {
+	    String label;
+	    
+	    switch (mode) {
+	    case ILaunchManager.DEBUG_MODE:
+	        label = OpenShiftCoreMessages.DebugOnOpenshift;
+	        break;
+	    case ILaunchManager.PROFILE_MODE:
+	        label = OpenShiftCoreMessages.ProfileOnOpenshift;
+	        break;
+	    default:
+	        label = OpenShiftCoreMessages.RunOnOpenshift;
+	        break;
+	    }
+	    return label;
+	}
+
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
@@ -84,6 +103,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 		ControllableServerBehavior beh = (ControllableServerBehavior) serverBehavior;
 		IServer server = beh.getServer();
+        launch.addProcess(new ServerProcess(launch, server, getLabel(launch.getLaunchMode())));
 
 		beh.setServerStarting();
 		try {
