@@ -52,7 +52,7 @@ public class OpenShiftJobs {
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
 				Connection connection = ConnectionsRegistryUtil.getConnectionFor(project);
-				WatchManager.getInstance().stopWatch(project);
+				WatchManager.getInstance().stopWatch(project, connection);
 				List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT);
 				IStatus status = super.doRun(monitor);
 				if(status.isOK()) {

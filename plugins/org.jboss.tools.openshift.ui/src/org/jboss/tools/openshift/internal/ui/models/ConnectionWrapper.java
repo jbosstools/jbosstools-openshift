@@ -100,7 +100,8 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					IProject project = projectWrapper.getWrapped();
-					WatchManager.getInstance().startWatch(project);
+					IOpenShiftConnection connection = projectWrapper.getParent().getWrapped();
+					WatchManager.getInstance().startWatch(project, connection);
 					Collection<IResource> resources = new HashSet<>();
 					for (String kind : RESOURCE_KINDS) {
 						resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
@@ -254,8 +255,9 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 	void refresh(ProjectWrapper projectWrapper) {
 		resourceCache.flush(projectWrapper.getWrapped().getNamespace());
 		IProject project = projectWrapper.getWrapped();
-		WatchManager.getInstance().stopWatch(project);
-		WatchManager.getInstance().startWatch(project);
+		IOpenShiftConnection connection = projectWrapper.getParent().getWrapped();
+		WatchManager.getInstance().stopWatch(project, connection);
+		WatchManager.getInstance().startWatch(project, connection);
 		Collection<IResource> resources = new HashSet<>();
 		for (String kind : RESOURCE_KINDS) {
 			resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
