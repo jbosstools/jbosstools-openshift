@@ -64,7 +64,7 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 	                configurationManager.importProjects(projectInfos, projectImportConfiguration, monitor);
 	        return validate(toProjects(importResults));
 		} else {
-		    return Collections.EMPTY_LIST;
+		    return Collections.emptyList();
 		}
 	}
 
