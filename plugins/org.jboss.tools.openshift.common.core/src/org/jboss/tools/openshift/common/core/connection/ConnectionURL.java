@@ -187,6 +187,15 @@ public class ConnectionURL {
 		return forURL(new URL(correctMalformedUrl(url)));
 	}
 
+	public static ConnectionURL safeForURL(String url) {
+		try {
+			return forURL(url);
+		} catch (UnsupportedEncodingException | MalformedURLException e) {
+			OpenShiftCommonCoreActivator.pluginLog().logError(NLS.bind("Unable to getConnectionURL for connection url {0}", url), e);
+			return null;
+		}
+	}
+
 	public static ConnectionURL forURL(URL url) throws UnsupportedEncodingException {
 		Assert.isLegal(url != null, "url is null");
 		UrlPortions portions = UrlUtils.toPortions(url);

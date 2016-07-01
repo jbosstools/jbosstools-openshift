@@ -20,8 +20,6 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.observable.value.IValueChangeListener;
-import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
@@ -37,6 +35,7 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -64,13 +63,13 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
+import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.IServerEditorPartInput;
 import org.eclipse.wst.server.ui.editor.ServerEditorPart;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.foundation.ui.jobs.DisableAllWidgetsJob;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -530,47 +529,70 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
 								model.setInitializing(true);
+								String url = OpenShiftServerUtils.getConnectionURL(server);
 								try {
-									String conUrl = server.getAttribute(OpenShiftServerUtils.ATTR_CONNECTIONURL, (String)null);
-									if( conUrl != null ) {
-										ConnectionURL conurl2 = ConnectionURL.forURL(conUrl);
-										IConnection con = ConnectionsRegistrySingleton.getInstance().getByUrl(conurl2);
+									if( url != null ) {
+										ConnectionURL conUrl = ConnectionURL.forURL(url);
+										IConnection con = ConnectionsRegistrySingleton.getInstance().getByUrl(conUrl);
 										model.loadResources(con);
 									}
-								} catch(UnsupportedEncodingException uee) {
-									
-								} catch(MalformedURLException murle) {
-									
+								} catch(UnsupportedEncodingException | MalformedURLException e) {
+									OpenShiftUIActivator.log(IStatus.ERROR, getConnectionErrorMessage(url, server));
 								}
 								return Status.OK_STATUS;
 							}
 						})
-				.runWhenDone(
-						new Job("Setting connection, deploy project...") {
+				.runWhenDoneIf(job -> {
+							if (connection == null) {
+								container.getDisplay().syncExec(() -> 
+									new ErrorDialog(container.getShell(), "Error", 
+											NLS.bind("Could not initialize server editor {0}", server.getName()),
+											OpenShiftUIActivator.statusFactory().errorStatus(
+													getConnectionErrorMessage(OpenShiftServerUtils.getConnectionURL(server), server)),
+											IStatus.ERROR)
+										.open());
+								return false;
+							} else {
+								return true;
+							}
+						}, new Job("Setting connection, deploy project...") {
 
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
+								if (connection == null) {
+									return Status.CANCEL_STATUS;
+								}
+
 								if (deployProject != null) {
 									model.setDeployProject(deployProject);
 								}
-								if (connection != null) {
-									model.setConnection(connection);
-								}
+								model.setConnection(connection);
 								model.setService(OpenShiftServerUtils.getService(server));
 								String sourcePath = OpenShiftServerUtils.getSourcePath(server);
-								if(!StringUtils.isEmpty(sourcePath)) {
+								if (!StringUtils.isEmpty(sourcePath)) {
 									model.setSourcePath(sourcePath);
 								}
 								String podPath = OpenShiftServerUtils.getPodPath(server);
 								if(!StringUtils.isEmpty(podPath)) {
 									model.setPodPath(podPath);
 								}
+
 								model.setInitializing(false);
 								return Status.OK_STATUS;
 							}
 						})
 				.runWhenDone(new DisableAllWidgetsJob(false, container, false, busyCursor))
 				.schedule();
+	}
+	
+	private String getConnectionErrorMessage(String url, IServerAttributes server) {
+		ConnectionURL connectionUrl = ConnectionURL.safeForURL(OpenShiftServerUtils.getConnectionURL(server));
+		if (connectionUrl == null) {
+			return "Could not find OpenShift connection for server \"{0}\"";
+		} else {
+			return NLS.bind("Could not find OpenShift connection to host \"{0}\" with user \"{1}\" for server \"{2}\"", 
+				new String[] { connectionUrl.getHost(), connectionUrl.getUsername(), server.getName() } );
+		}
 	}
 
 	//Temporal fix until superclass is fixed. Then just remove this class.
