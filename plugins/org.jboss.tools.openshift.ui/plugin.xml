@@ -457,8 +457,8 @@
 						</count>
 						<iterate>
 							<or>
-								<instanceof
-									value="org.jboss.tools.openshift.core.connection.Connection"/>
+								<adapt
+									type="org.jboss.tools.openshift.core.connection.Connection"/>
 							</or>
 						</iterate>
 					</and>
