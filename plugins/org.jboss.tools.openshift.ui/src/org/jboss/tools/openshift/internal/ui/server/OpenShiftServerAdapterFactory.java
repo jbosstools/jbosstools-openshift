@@ -112,7 +112,7 @@ public class OpenShiftServerAdapterFactory implements IAdapterFactory {
 
 		@Override
 		public Object loadAdapter(Class adapter, IProgressMonitor monitor) {
-			return null;
+			return getAdapter(adapter);
 		}
 
 	}
