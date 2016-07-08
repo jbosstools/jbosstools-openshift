@@ -8,6 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -26,9 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
-import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
@@ -61,12 +61,24 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 			IDockerConnection dockerConnection = image.getConnection();
 			model.setOriginatedFromDockerExplorer(true);
 			model.setDockerConnection(dockerConnection);
-			model.setImageName(image.repo());
+			model.setImageName(getImageNameWithTag(image));
 		}
 		model.setStartedWithActiveConnection(isAuthorized);
 		model.initModel(connection, project, isAuthorized);
 
 		setNeedsProgressMonitor(true);
+	}
+
+	private String getImageNameWithTag(IDockerImage image) {
+		String imageName = image.repo();
+		if(!image.tags().isEmpty()) {
+			List<String> tags = new ArrayList<>(image.tags());
+			if(tags.size() > 1) {
+				Collections.sort(tags); //same as in docker explorer
+			}
+			imageName += ":" + tags.get(0);
+		}
+		return imageName;
 	}
 
 	@Override
