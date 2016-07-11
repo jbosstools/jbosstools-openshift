@@ -10,10 +10,6 @@ package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.util.List;
 
-import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.ChangeEvent;
-import org.eclipse.core.databinding.observable.IChangeListener;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -29,7 +25,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.common.ui.JobUtils;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -37,7 +32,6 @@ import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
-import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.dockerutils.PushImageToRegistryJob;
@@ -75,24 +69,11 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 		setNeedsProgressMonitor(true);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void addPages() {
 	    if (getModel().originatedFromDockerExplorer()
 				|| !((DeployImageWizardModel)getModel()).isStartedWithActiveConnection()) {
-	    	ConnectionWizardPage connectionWizardPage = new ConnectionWizardPage(this, getModel(), Connection.class);
-			
-			final IObservableValue<IConnection> connectionObservable = BeanProperties
-					.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION, IConnection.class)
-					.observe(connectionWizardPage.getModel());
-		 	connectionObservable.addChangeListener(new IChangeListener() {
-		 		
-				@Override
-				public void handleChange(ChangeEvent event) {
-					((DeployImageWizardModel)getModel()).initModelRegistryWithConnection((Connection)connectionObservable.getValue());					
-				}
-			});
-	        addPage(connectionWizardPage);
+	        addPage(new ConnectionWizardPage(this, getModel(), Connection.class));
 	    }
 		addPage(new DeployImagePage(this, getModel()));
 		addPage(new DeploymentConfigPage(this, getModel()));

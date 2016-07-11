@@ -570,7 +570,7 @@ public class ConnectionTest {
 	}	
 	
 	@Test
-	public void should_clear_token_when_connecting_successfully_with_password() throws Exception {
+	public void should_not_clear_token_when_connecting_successfully_with_password() throws Exception {
 		// given
 		testableConnection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
 		testableConnection.setPassword("007"); // non-used pw, should be cleared
@@ -581,7 +581,8 @@ public class ConnectionTest {
 		assertThat(isConnected).isTrue();
 		// then
 		verify(store).remove(Connection.SECURE_STORAGE_TOKEN_KEY);
-		assertThat(testableConnection.getToken()).isNullOrEmpty();
+		//normally, even with basic auth, the connection should get a token
+		assertThat(testableConnection.getToken()).isNotEmpty();
 		assertThat(testableConnection.isRememberToken()).isFalse();
 	}	
 

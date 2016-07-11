@@ -348,9 +348,12 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		IStatus status = Status.OK_STATUS;
 		listener.secureStoreException = null;
 		try {
-			IConnection connection = createConnection(connectionFactory, connectionAuthenticationProvider);
+			IConnection connection = 
+					isNewConnection()
+					? createConnection(connectionFactory, connectionAuthenticationProvider)
+					: this.selectedConnection;
 			if(connection != null) {
-				addConnectionListener(connection);
+				addConnectionListener(connection);	
 				if (connection.connect()) {
 					connection.enablePromptCredentials(true);
 					this.connection = connection;

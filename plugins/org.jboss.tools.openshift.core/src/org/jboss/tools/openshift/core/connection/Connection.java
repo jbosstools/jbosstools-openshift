@@ -308,7 +308,6 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 
 	private void clearToken() {
 		setRememberToken(false);
-		setToken(null);
 		saveOrClear(SECURE_STORAGE_TOKEN_KEY, null, false);
 	}
 

@@ -192,7 +192,7 @@ public class DeployImageWizardModel
 			return;
 		}
 
-		initModelRegistryWithConnection(connection);
+		initModelRegistry(connection);
 
 		if (loadResources) {
 			Job job = new AbstractDelegatingMonitorJob("Loading projects...") {
@@ -215,7 +215,7 @@ public class DeployImageWizardModel
 		}
 	}
 
-	public void initModelRegistryWithConnection(Connection connection) {
+	private void initModelRegistry(Connection connection) {
 		if(connection != null) {
 			setTargetRegistryLocation(
 				(String) connection.getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY));
