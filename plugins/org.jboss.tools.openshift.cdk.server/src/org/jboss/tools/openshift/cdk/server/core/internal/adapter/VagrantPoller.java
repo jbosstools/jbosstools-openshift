@@ -27,6 +27,7 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerStatePoller2;
 import org.jboss.ide.eclipse.as.core.server.IServerStatePollerType;
@@ -210,9 +211,10 @@ public class VagrantPoller implements IServerStatePoller2 {
     		e = murle;
     	}
 
+    	String msg = NLS.bind("The CDK VM is up and running, but OpenShift is unreachable at url {0}. " + 
+    	"The VM may not have been registered successfully. Please check your console output for more information", url);
 		throw new OpenShiftNotReadyPollingException(CDKCoreActivator.statusFactory().errorStatus(CDKCoreActivator.PLUGIN_ID,
-				"The CDK VM is up and running, but OpenShift is unreachable at url " + url, e,
-				OpenShiftNotReadyPollingException.OPENSHIFT_UNREACHABLE_CODE));
+				msg, e, OpenShiftNotReadyPollingException.OPENSHIFT_UNREACHABLE_CODE));
 	}
 	
 	public static class OpenShiftNotReadyPollingException extends PollingException {
