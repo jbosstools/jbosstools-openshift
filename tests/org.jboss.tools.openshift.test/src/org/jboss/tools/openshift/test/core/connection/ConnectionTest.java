@@ -582,7 +582,7 @@ public class ConnectionTest {
 		// then
 		verify(store).remove(Connection.SECURE_STORAGE_TOKEN_KEY);
 		//normally, even with basic auth, the connection should get a token
-		assertThat(testableConnection.getToken()).isNotEmpty();
+		assertThat(testableConnection.getToken()).isEqualTo("42");
 		assertThat(testableConnection.isRememberToken()).isFalse();
 	}	
 
