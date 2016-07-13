@@ -70,6 +70,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
@@ -477,6 +478,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				WidgetProperties.text(SWT.Modify).observeDelayed(500, imageNameText);
 		final IObservableValue<String> imageNameObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_IMAGE_NAME).observe(model);
 		Binding imageBinding = ValueBindingBuilder.bind(imageNameTextObservable)
+		        .converting(new TrimmingStringConverter())
 				.validatingAfterConvert(new DockerImageValidator())
 				.to(imageNameObservable).in(dbc);
 		ControlDecorationSupport.create(
