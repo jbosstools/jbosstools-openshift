@@ -960,6 +960,24 @@
         icon="icons/openshift-logo-white-icon.png"
         style="push"/>
   </menuContribution>
+
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.TemplatesTab">
+      <command
+        commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+        icon="icons/refresh.gif"
+        id="org.jboss.tools.openshift.ui.command.resource.refresh"
+        style="push"
+        tooltip="Refresh the resource" />
+                     <separator visible="true" name="org.jboss.tools.openshift.ui.separator13"/>
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.editresource"
+           style="push" />
+     <command
+           commandId="org.eclipse.ui.edit.delete"
+           style="push" />
+  </menuContribution>
 	</extension>
 
 	<extension
@@ -1494,7 +1512,14 @@
             label="%openshift.explorer.properties.tab.imageStreams">
       </propertyTab>
       <propertyTab
-            afterTab="org.jboss.tools.openshift.ui.properties.tab.replicationControllers"
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.imageStreams"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.templates"
+            image="icons/template.png"
+            label="%openshift.explorer.properties.tab.templates">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.templates"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
             id="org.jboss.tools.openshift.ui.properties.tab.routes"
             image="icons/route.png"
@@ -1645,6 +1670,15 @@
             enablesFor="1"
             id="org.jboss.tools.openshift.ui.properties.tab.section.services"
             tab="org.jboss.tools.openshift.ui.properties.tab.project.services">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.TemplatesPropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.templates"
+            tab="org.jboss.tools.openshift.ui.properties.tab.project.templates">
          <input
                type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
