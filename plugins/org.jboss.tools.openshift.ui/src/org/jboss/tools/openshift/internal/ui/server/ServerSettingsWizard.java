@@ -28,20 +28,12 @@ import com.openshift.restclient.model.route.IRoute;
  * Explorer view.
  */
 public class ServerSettingsWizard extends Wizard {
+	
+	private static final String WIZARD_TITLE = "OpenShift Server Adapter Settings";
 
 	private final ServerSettingsWizardPage serverSettingsWizardPage;
 	
 	private IServer createdServer = null;
-	
-	/**
-	 * Invoked from new server wizard (servers view, main menu)
-	 * 
-	 * @param server the working copy of the {@link IServer} to create
-	 * @param connection the current OpenShift {@link Connection}
-	 */
-	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, final IProject deployProject) {
-		this.serverSettingsWizardPage = new ServerSettingsWizardPage(this, server, connection, deployProject);
-	}
 	
 	/**
 	 * Invoked when launched from explorer
@@ -52,6 +44,7 @@ public class ServerSettingsWizard extends Wizard {
 	 */
 	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, 
 			final IService service, final IRoute route) {
+		setWindowTitle(WIZARD_TITLE);
 		this.serverSettingsWizardPage = 
 				new ServerSettingsWizardPage(this, server, connection, service, route);
 	}
