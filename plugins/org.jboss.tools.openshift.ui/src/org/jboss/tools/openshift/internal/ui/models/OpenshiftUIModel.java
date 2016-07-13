@@ -142,6 +142,12 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 			return new ArrayList<ConnectionWrapper>(connections.values());
 		}
 	}
+	
+	public ConnectionWrapper getConnectionWrapperForConnection(IConnection connection) {
+		synchronized (connections) {
+			return connections.get(connection);
+		}
+	}
 
 	public void dispose() {
 		ConnectionsRegistrySingleton.getInstance().removeListener(listener);

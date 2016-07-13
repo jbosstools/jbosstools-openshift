@@ -18,7 +18,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -27,7 +26,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.navigator.CommonActionProvider;
 import org.eclipse.ui.navigator.CommonNavigator;
-import org.eclipse.ui.navigator.CommonViewer;
 import org.eclipse.ui.navigator.ICommonActionExtensionSite;
 import org.eclipse.ui.navigator.ICommonViewerSite;
 import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
@@ -44,6 +42,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKDockerUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKOpenshiftUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
+import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
 
 public class CDKActionProvider extends CommonActionProvider {
 	private ICommonActionExtensionSite actionSite;
@@ -66,14 +65,10 @@ public class CDKActionProvider extends CommonActionProvider {
 
 	protected void createActions(ICommonActionExtensionSite aSite) {
 		ICommonViewerSite site = aSite.getViewSite();
-		if( site instanceof ICommonViewerWorkbenchSite ) {
-			StructuredViewer v = aSite.getStructuredViewer();
-			if( v instanceof CommonViewer ) {
-				CommonViewer cv = (CommonViewer)v;
-				ICommonViewerWorkbenchSite wsSite = (ICommonViewerWorkbenchSite)site;
-				showInOpenshiftViewAction = new ShowInOpenshiftViewAfterStartupAction(wsSite.getSelectionProvider(), OPENSHIFT_VIEW_ID);
-				showInDockerViewAction = new ShowInDockerViewAfterStartupAction(wsSite.getSelectionProvider(), DOCKER_VIEW_ID);
-			}
+		if (site instanceof ICommonViewerWorkbenchSite) {
+			ICommonViewerWorkbenchSite wsSite = (ICommonViewerWorkbenchSite) site;
+			showInOpenshiftViewAction = new ShowInOpenshiftViewAfterStartupAction(wsSite.getSelectionProvider(), OPENSHIFT_VIEW_ID);
+			showInDockerViewAction = new ShowInDockerViewAfterStartupAction(wsSite.getSelectionProvider(), DOCKER_VIEW_ID);
 		}
 	}
 
@@ -89,8 +84,11 @@ public class CDKActionProvider extends CommonActionProvider {
 			if( beh != null ) {
 				adb = (ServiceManagerEnvironment)beh.getSharedData(ServiceManagerEnvironment.SHARED_INFO_KEY);
 			}
-			if( adb != null )
-				return new CDKOpenshiftUtility().findExistingOpenshiftConnection(server, adb);
+			
+			if( adb != null ) {
+				OpenshiftUIModel model = new OpenshiftUIModel();
+				return model.getConnectionWrapperForConnection(new CDKOpenshiftUtility().findExistingOpenshiftConnection(server, adb));
+			}
 			return null;
 		}
 	}
@@ -146,7 +144,7 @@ public class CDKActionProvider extends CommonActionProvider {
 		return false;
 	}
 	
-	private static class ShowInViewAfterStartupAction extends AbstractServerAction { 
+	private abstract static class ShowInViewAfterStartupAction extends AbstractServerAction { 
 		private IStructuredSelection previousSelection;
 		private IServerListener serverListener;
 		private String viewId;
@@ -181,10 +179,7 @@ public class CDKActionProvider extends CommonActionProvider {
 			selectionChanged(sp.getSelection());
 		}
 		
-		protected Object adaptToViewItem(IServer server) {
-			// Subclass override this
-			return null;
-		}
+		protected abstract Object adaptToViewItem(IServer server);
 		
 		@Override
 		public boolean accept(IServer server) {
@@ -237,8 +232,7 @@ public class CDKActionProvider extends CommonActionProvider {
 				if (view != null && view.getCommonViewer() != null && view.getCommonViewer().getTree() != null && !view.getCommonViewer().getTree().isDisposed()){
 					Object connection = adaptToViewItem(server);
 					if( connection != null ) {
-						view.getCommonViewer().collapseAll();
-						view.getCommonViewer().expandToLevel(2);
+						view.getCommonViewer().expandToLevel(connection, 1);
 						ISelection sel = new StructuredSelection(new Object[] { connection });
 						view.getCommonViewer().setSelection(sel, true);
 					}
@@ -255,8 +249,7 @@ public class CDKActionProvider extends CommonActionProvider {
 				part = page.findView(viewId);
 				if (part == null) {
 					part = page.showView(viewId);
-				}
-				if (part != null) {
+				} else {
 					page.activate(part);
 					part.setFocus();
 				}
