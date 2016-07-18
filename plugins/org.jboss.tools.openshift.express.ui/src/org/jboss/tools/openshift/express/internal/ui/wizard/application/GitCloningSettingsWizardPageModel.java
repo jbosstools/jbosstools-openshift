@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -25,6 +25,7 @@ import com.openshift.client.cartridge.ICartridge;
  * @author Andre Dietisheim
  * @author Rob Stryker
  * @author Xavier Coulon
+ * @author Jeff Maury
  */
 public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
@@ -32,12 +33,11 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_NEW_PROJECT = "newProject";
 	public static final String PROPERTY_REPO_PATH = "repositoryPath";
 	public static final String PROPERTY_REMOTE_NAME = "remoteName";
-	public static final String PROPERTY_USE_DEFAULT_REPO_PATH = "useDefaultRepoPath";
+	public static final String PROPERTY_USE_DEFAULT_REPO_PATH = IOpenShiftApplicationWizardModel.PROP_USE_DEFAULT_REPO_PATH;
 	public static final String PROPERTY_USE_DEFAULT_REMOTE_NAME = "useDefaultRemoteName";
 	public static final String PROPERTY_HAS_REMOTEKEYS = "hasRemoteKeys";
 
 	private IOpenShiftApplicationWizardModel wizardModel;
-	private boolean useDefaultRepoPath = true;
 	private boolean useDefaultRemoteName = true;
 	private boolean hasRemoteKeys;
 
@@ -46,7 +46,7 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME, onWizardProjectNameChanged());
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_NEW_PROJECT, onWizardProjectNameChanged());
-		setRepositoryPath(getDefaultRepositoryPath());
+		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_USE_DEFAULT_REPO_PATH, onUseDefaultRepoPathChanged());
 		setDefaultRemoteName();
 	}
 
@@ -84,6 +84,19 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 					}
 				}
 				setDefaultRemoteName();
+			}
+		};
+	}
+	
+	/**
+	 * Listener to propagate the default repository path flag changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
+	 * @return the property listener
+	 */
+	private PropertyChangeListener onUseDefaultRepoPathChanged() {
+		return new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				firePropertyChange(PROPERTY_USE_DEFAULT_REPO_PATH, evt.getOldValue(), evt.getNewValue());
 			}
 		};
 	}
@@ -137,15 +150,15 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
 	public void setUseDefaultRepoPath(boolean useDefaultRepoPath) {
 		firePropertyChange(PROPERTY_USE_DEFAULT_REPO_PATH
-				, this.useDefaultRepoPath
-				, this.useDefaultRepoPath = useDefaultRepoPath);
+				, wizardModel.isUseDefaultRepoPath()
+				, wizardModel.setUseDefaultRepoPath(useDefaultRepoPath));
 		if (useDefaultRepoPath) {
 			setRepositoryPath(getDefaultRepositoryPath());
 		}
 	}
 
 	public boolean isUseDefaultRepoPath() {
-		return useDefaultRepoPath;
+		return wizardModel.isUseDefaultRepoPath();
 	}
 
 	public void setUseDefaultRemoteName(boolean useDefaultRemoteName) {

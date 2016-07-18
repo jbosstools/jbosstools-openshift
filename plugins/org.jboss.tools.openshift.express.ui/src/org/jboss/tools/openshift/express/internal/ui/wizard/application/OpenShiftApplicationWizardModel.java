@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011-2014 Red Hat, Inc.
+ * Copyright (c) 2011-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -53,6 +53,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @author Jeff Maury
  */
 class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShiftApplicationWizardModel {
 
@@ -270,6 +271,16 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	@Override
 	public String getRemoteName() {
 		return getProperty(PROP_REMOTE_NAME);
+	}
+
+	@Override
+	public boolean setUseDefaultRepoPath(boolean useDefaultRepoPath) {
+		return setProperty(PROP_USE_DEFAULT_REPO_PATH, useDefaultRepoPath);
+	}
+
+	@Override
+	public boolean isUseDefaultRepoPath() {
+		return getProperty(PROP_USE_DEFAULT_REPO_PATH, true);
 	}
 
 	@Override

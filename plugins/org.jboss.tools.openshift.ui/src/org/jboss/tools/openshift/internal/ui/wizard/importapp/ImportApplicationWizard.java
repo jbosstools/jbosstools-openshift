@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbench;
@@ -27,6 +28,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -34,6 +36,9 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
+
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.REPO_PATH_KEY;
 
 /**
  * The new application wizard that allows you to create an application given an
@@ -44,25 +49,36 @@ import com.openshift.restclient.model.IResource;
  */
 public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
 
-    /** The dialog settings key */
-    private static final String DIALOG_SETTINGS_KEY = "ImportApplicationWizard";
-    
-    private static final String REPO_PATH_KEY = "repoPath";
-    
 	private ImportApplicationWizardModel model;
 
 	public ImportApplicationWizard() {
 		setWindowTitle("Import OpenShift Application");
 		setNeedsProgressMonitor(true);
-		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftUIActivator.getDefault().getDialogSettings(), DIALOG_SETTINGS_KEY));
+		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
 		this.model = new ImportApplicationWizardModel();
-		String repoPath = getDialogSettings().get(REPO_PATH_KEY);
+		String repoPath = getDefaultRepoPath();
 		if (StringUtils.isNotBlank(repoPath)) {
 		    model.setRepositoryPath(repoPath);
 		    model.setUseDefaultRepositoryPath(false);
 		}
 	}
 
+	/**
+	 * Get the default Git import path. Check for a section in the openshift.common.ui
+	 * plugin (to share with Openshift v2) and if not found, check for a section in
+	 * openshift.ui (initial implementation that was not shared with Openshift v2).
+	 * 
+	 * @return the found default git path
+	 */
+	private String getDefaultRepoPath() {
+	    String path = getDialogSettings().get(REPO_PATH_KEY);
+	    if (path == null) {
+	        IDialogSettings settings = DialogSettings.getOrCreateSection(OpenShiftUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
+	        path = settings.get(REPO_PATH_KEY);
+	    }
+	    return path;
+	}
+	
 	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
 		this();
 		if (projectsAndBuildConfigs != null 
