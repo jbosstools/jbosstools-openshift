@@ -588,9 +588,9 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	@Override
 	public IApplicationTemplate setSelectedApplicationTemplate(IApplicationTemplate template) {
 		setUseExistingApplication(false);
-		setInitialGitUrl(template.getInitialGitUrl());
-		setUseInitialGitUrl(!StringUtils.isEmpty(template.getInitialGitUrl()));
-		setEmbeddedCartridges(template.getEmbeddedCartridges());
+		setInitialGitUrl(template != null ? template.getInitialGitUrl() : null);
+		setUseInitialGitUrl(template != null && !StringUtils.isEmpty(template.getInitialGitUrl()));
+		setEmbeddedCartridges(template != null ? template.getEmbeddedCartridges() : Collections.emptySet());
 		setProperty(PROP_SELECTED_APPLICATION_TEMPLATE, template);
 		return template;
 	}
