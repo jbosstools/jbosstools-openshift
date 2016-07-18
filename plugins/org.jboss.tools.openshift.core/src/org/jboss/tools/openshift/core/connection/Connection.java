@@ -291,7 +291,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 				clearToken();
 			}
 		} else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(getAuthScheme())){
-			boolean success = saveOrClear(SECURE_STORAGE_TOKEN_KEY, getToken(), isRememberToken());
+			boolean success = saveOrClear(SECURE_STORAGE_TOKEN_KEY, this.token, isRememberToken());
 			if(success) { 
 				//Avoid second secure storage prompt.
 				//Token is stored, password should be cleared.
@@ -307,6 +307,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 
 	private void clearToken() {
+		// dont clear the token instance var: JBIDE-22594
 		setRememberToken(false);
 		saveOrClear(SECURE_STORAGE_TOKEN_KEY, null, false);
 	}
