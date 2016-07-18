@@ -57,7 +57,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 							: NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation,
 									resources[0].getWrapped().getName());
 			boolean confirm = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event),
-					OpenShiftUIMessages.ResourceDeletionDialogTitle, message);
+					hasProject?OpenShiftUIMessages.ProjectDeletionDialogTitle:OpenShiftUIMessages.ResourceDeletionDialogTitle, message);
 			if (confirm) {
 				deleteResources(resources);
 			}
