@@ -76,7 +76,7 @@ public class JobChainBuilder {
 			public void done(IJobChangeEvent event) {
 				if(!progressMonitor.isCanceled()
 						&& (condition == null 
-							|| condition.isFullfilled(constrainedJob))) {
+							|| condition.isFullfilled(job))) {
 					constrainedJob.schedule();
 				}
 			}
