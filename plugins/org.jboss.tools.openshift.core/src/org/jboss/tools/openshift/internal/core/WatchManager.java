@@ -52,7 +52,8 @@ public class WatchManager {
 			ResourceKind.REPLICATION_CONTROLLER, 
 			ResourceKind.BUILD, 
 			ResourceKind.IMAGE_STREAM, 
-			ResourceKind.ROUTE
+			ResourceKind.ROUTE,
+			ResourceKind.TEMPLATE
 	};
 	
 	private Map<IProject, ConcurrentMap<String,IWatcher>> watches = new ConcurrentHashMap<>();
