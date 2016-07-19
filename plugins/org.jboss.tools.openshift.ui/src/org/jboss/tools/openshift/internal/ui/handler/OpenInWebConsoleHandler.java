@@ -37,6 +37,7 @@ import com.openshift.restclient.model.IService;
 
 /**
  * @author Fred Bricon
+ * @author Jeff Maury
  */
 public class OpenInWebConsoleHandler extends AbstractHandler {
 
@@ -56,8 +57,8 @@ public class OpenInWebConsoleHandler extends AbstractHandler {
 		} else {
 			String url = getWebConsoleUrl(connection, resource);
 			if (!StringUtils.isEmpty(url)) {
-				new BrowserUtility().checkedCreateInternalBrowser(url,
-						"", OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+				new BrowserUtility().checkedCreateExternalBrowser(url,
+						OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 				return Status.OK_STATUS;
 			}
 			msg = NLS.bind("Could not determine the url for the web console on {0}", connection.getHost());
