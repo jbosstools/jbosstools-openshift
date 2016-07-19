@@ -49,10 +49,15 @@ public class DeployImageHandler extends AbstractHandler {
 		IProject project = null;
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		final IDockerImage image = UIUtils.getFirstElement(selection, IDockerImage.class);
-		if (image != null) {
+		if (image == null
+				|| OpenShiftUIUtils.hasOpenShiftExplorerSelection()) {
 			selection = OpenShiftUIUtils.getOpenShiftExplorerSelection();
 			project = ResourceUtils.getProject(UIUtils.getFirstElement(selection, IResource.class));
-			connection = ConnectionsRegistryUtil.getConnectionFor(project);
+			if(project != null) {
+				connection = ConnectionsRegistryUtil.getConnectionFor(project);
+			} else {
+				connection = UIUtils.getFirstElement(selection, Connection.class);
+			}
 		}
 
 		if(connection == null) {

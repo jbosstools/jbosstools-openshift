@@ -169,6 +169,11 @@ public class OpenShiftUIUtils {
 		return part.getSite().getSelectionProvider().getSelection();
 	}
 
+	public static boolean hasOpenShiftExplorerSelection() {
+		ISelection selection = getOpenShiftExplorerSelection();
+		return selection != null && !selection.isEmpty();
+	}
+
 	/**
 	 * Returns the connection for the given type and current selection in the OpenShift explorer. 
 	 * 
