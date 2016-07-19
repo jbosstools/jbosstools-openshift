@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -141,8 +141,11 @@ public class ApplicationSourceFromTemplateModel
 		if(evt.getNewValue() instanceof IApplicationSource
 				&& ResourceKind.TEMPLATE.equals(((IApplicationSource) evt.getNewValue()).getKind())){
 			IApplicationSource source = (IApplicationSource) evt.getNewValue();
-			this.template = (ITemplate) source.getSource();
-			updateTemplateParameters(template);
+			ITemplate newTemplate = (ITemplate) source.getSource();
+			if (!Objects.equals(newTemplate, this.template)) {
+				this.template = newTemplate;
+				updateTemplateParameters(newTemplate);
+			}
 		} 
 	}
 	private void handleEclipseProject(PropertyChangeEvent evt) {
@@ -165,7 +168,7 @@ public class ApplicationSourceFromTemplateModel
 		if (template == null) {
 			return;
 		}
-		setParameters(new ArrayList<>(template.getParameters().values()));
+		setParameters(template.getParameters().values());
 		setItems(template.getItems());
 		setLabels(template.getObjectLabels());
 	}
@@ -181,54 +184,60 @@ public class ApplicationSourceFromTemplateModel
 	}
 
 	@Override
-	public void setParameters(List<IParameter> parameters) {
+	public void setParameters(Collection<IParameter> parameters) {
+		List<IParameter> oldParameters = new ArrayList<>(this.parameters);
+		if (parameters == null) {
+			this.parameters.clear();
+		} else {
+			this.originalValueMap = toMap(parameters);
+			List<IParameter> newParameters = new ArrayList<>();
+			newParameters.addAll(injectProjectParameters(eclipseProject, parameters));
+			this.parameters.clear();
+			this.parameters.addAll(newParameters);
+			Collections.sort(this.parameters, new TemplateParameterViewerUtils.ParameterNameComparator());
+		}
+		firePropertyChange(PROPERTY_PARAMETERS, oldParameters, this.parameters);
+
+		// update selected parameter
+		setSelectedParameter(getSelectedParameterOrDefault());
+	}
+
+	private Map<String, String> toMap(Collection<IParameter> parameters) {
 		Map<String, String> paramsMap = new HashMap<>();
 		if (parameters != null) {
 		  parameters.forEach(p -> paramsMap.put(p.getName(), p.getValue()));
 		}
-		originalValueMap = paramsMap;
-		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = injectProjectParameters(this.eclipseProject, parameters));
+		return paramsMap;
 	}
 
-	private static List<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project, List<IParameter> originalParameters) {
+	private Collection<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project, Collection<IParameter> originalParameters) {
 		if (originalParameters == null || originalParameters.isEmpty()) {
 			return originalParameters;
 		}
 		Map<String, String> projectParams = getProjectParameters(project);
 
-		List<IParameter> newParameters = originalParameters.stream().map(p -> { 
-			IParameter clone = p.clone();
-			String value = projectParams.get(clone.getName());
+		originalParameters.forEach(p -> { 
+			String value = projectParams.get(p.getName());
 			if (value != null) {
-				clone.setValue(value);
+				p.setValue(value);
 			}
-			return clone;
-		}).collect(Collectors.toList());
+		});
 
-		return newParameters;
+		return originalParameters;
 	}
 
-	private static Map<String, String> getProjectParameters(org.eclipse.core.resources.IProject project) {
+	private Map<String, String> getProjectParameters(org.eclipse.core.resources.IProject project) {
 		if(project == null) {
 			return Collections.emptyMap();
 		}
+
 		Map<String,String> projectParams = new HashMap<>();
-		String gitRepo = null;
-		try {
-			gitRepo = StringUtils.defaultString(EGitUtils.getDefaultRemoteRepo(project));
-		} catch (CoreException e) {
-			throw new OpenShiftException(e, NLS.bind("Could not determine the default remote Git repository for \"{0}\"", project.getName()));
-		}
+		String gitRepo = getGitRepo(project);
 		if (gitRepo != null) {
 			projectParams.put(PARAMETER_SOURCE_REPOSITORY_URL, gitRepo);
 			projectParams.put(PARAMETER_GIT_URI, gitRepo);//legacy key
 			
-			String branch;
-			try {
-				branch = StringUtils.defaultString(EGitUtils.getCurrentBranch(project));
-			} catch (CoreException e) {
-				throw new OpenShiftException(e, NLS.bind("Could not determine the default Git branch for \"{0}\"", project.getName()));
-			}
+			String branch = getGitBranch(project);
 			projectParams.put("SOURCE_REPOSITORY_REF", branch);
 			projectParams.put("GIT_REF", branch);//legacy key
 			
@@ -242,9 +251,38 @@ public class ApplicationSourceFromTemplateModel
 		return projectParams;
 	}
 
+	private String getGitBranch(org.eclipse.core.resources.IProject project) {
+		try {
+			return StringUtils.defaultString(EGitUtils.getCurrentBranch(project));
+		} catch (CoreException e) {
+			throw new OpenShiftException(e, NLS.bind("Could not determine the default Git branch for \"{0}\"", project.getName()));
+		}
+	}
+
+	private String getGitRepo(org.eclipse.core.resources.IProject project) {
+		try {
+			return StringUtils.defaultString(EGitUtils.getDefaultRemoteRepo(project));
+		} catch (CoreException e) {
+			throw new OpenShiftException(e, NLS.bind("Could not determine the default remote Git repository for \"{0}\"", project.getName()));
+		}
+	}
+
 	@Override
 	public IParameter getSelectedParameter() {
 		return this.selectedParameter;
+	}
+
+	private IParameter getSelectedParameterOrDefault() {
+		if (selectedParameter == null
+				|| !parameters.contains(selectedParameter)) {
+			if (CollectionUtils.isEmpty(parameters)) {
+				return null;
+			} else {
+				return parameters.get(0);
+			}
+		} else {
+			return selectedParameter;
+		}
 	}
 
 	@Override

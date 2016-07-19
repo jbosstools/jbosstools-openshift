@@ -10,8 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.ui.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -94,6 +97,51 @@ public class ApplicationSourceFromTemplateModelTest {
 		model.updateParameterValue(param, "abc123");
 		
 		verify(param).setValue(eq("abc123"));
+	}
+	
+	@Test
+	public void should_return_first_parameter_as_selected_parameter_when_new_parameters_are_set() {
+		// given
+		assertThat(model.getSelectedParameter()).isNull();
+		List<IParameter> parameters = Arrays.asList(
+				mockParameter("n1", "v1"),
+				mockParameter("n2", "v2"),
+				mockParameter("n3", "v3")
+				);
+		// when
+		model.setParameters(parameters);
+		// then
+		assertThat(model.getSelectedParameter()).isNotNull();
+		assertThat(model.getSelectedParameter().getName()).isEqualTo("n1");
+	}
+
+	@Test
+	public void should_reset_selected_parameter_to_first_parameter_as_selected_parameter_when_new_parameters_are_set() {
+		// given
+		List<IParameter> parameters = Arrays.asList(
+				mockParameter("n1", "v1"),
+				mockParameter("n2", "v2"),
+				mockParameter("n3", "v3")
+				);
+		model.setParameters(parameters);
+		model.setSelectedParameter(parameters.get(1));
+		assertThat(model.getSelectedParameter().getName()).isEqualTo("n2");
+		// when
+		model.setParameters(Arrays.asList(
+				mockParameter("n10", "v10"),
+				mockParameter("n20", "v20"),
+				mockParameter("n30", "v30")
+				));
+		// then
+		assertThat(model.getSelectedParameter()).isNotNull();
+		assertThat(model.getSelectedParameter().getName()).isEqualTo("n10");
+	}
+
+	private IParameter mockParameter(String name, String value) {
+		IParameter parameter = mock(IParameter.class);
+		doReturn(name).when(parameter).getName();
+		doReturn(value).when(parameter).getValue();
+		return parameter;
 	}
 	
 	@Test
