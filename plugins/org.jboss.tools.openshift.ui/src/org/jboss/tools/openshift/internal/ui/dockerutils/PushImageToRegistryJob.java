@@ -25,8 +25,6 @@ import org.eclipse.linuxtools.internal.docker.ui.views.ImagePushProgressHandler;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
-import com.spotify.docker.client.DockerCertificateException;
-
 /**
  * {@link Job} to push an image from a Docker daemon into the OpenShift registry
  */
@@ -66,10 +64,10 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 			// then we can push that image with the new name
 			this.dockerConnection.pushImage(tmpImageName, registryAccount,
 					new ImagePushProgressHandler(this.dockerConnection, tmpImageName));
-		}
-		// FIXME: needs to catch DockerCertificateException until
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=495249 is fixed
-		catch (DockerException | InterruptedException | DockerCertificateException e) {
+		// FIXME: needs more fined tuned error handling once Neon.0 is no longer supported:
+		// catch (DockerException | InterruptedException e) {
+		// see https://issues.jboss.org/browse/JBIDE-22764
+		} catch (Exception e) {
 			return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 					"Failed to push the selected Docker image into OpenShift registry", e);
 		} finally {
