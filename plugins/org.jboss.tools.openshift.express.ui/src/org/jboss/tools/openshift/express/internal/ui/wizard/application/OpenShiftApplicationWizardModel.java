@@ -55,7 +55,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  * @author Xavier Coulon
  * @author Jeff Maury
  */
-class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShiftApplicationWizardModel {
+public class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShiftApplicationWizardModel {
 
 	protected HashMap<String, Object> dataModel = new HashMap<>();
 
