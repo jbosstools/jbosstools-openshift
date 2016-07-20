@@ -50,6 +50,7 @@ import com.openshift.restclient.model.template.ITemplate;
  * based on a template
  * 
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public class ApplicationSourceFromTemplateModel 
@@ -187,7 +188,15 @@ public class ApplicationSourceFromTemplateModel
 		  parameters.forEach(p -> paramsMap.put(p.getName(), p.getValue()));
 		}
 		originalValueMap = paramsMap;
-		firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = injectProjectParameters(this.eclipseProject, parameters));
+		/*
+		 * firePropertyChange will send an event if the array are differents so we need to check
+		 * otherwise we will risk the ObservableList to be based on the wrong list as it is assigned
+		 * in the call.
+		 */
+		List<IParameter> newParameters = injectProjectParameters(this.eclipseProject, parameters);
+		if (!Objects.equals(this.parameters, newParameters)) {
+	        firePropertyChange(PROPERTY_PARAMETERS, this.parameters, this.parameters = newParameters);
+		}
 	}
 
 	private static List<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project, List<IParameter> originalParameters) {
