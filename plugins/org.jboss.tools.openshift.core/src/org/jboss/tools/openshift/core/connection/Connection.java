@@ -311,6 +311,18 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		setRememberToken(false);
 		saveOrClear(SECURE_STORAGE_TOKEN_KEY, null, false);
 	}
+	
+	public void removeSecureStoreData() {
+		SecureStore store = getSecureStore(getHost(), getUsername());
+		if (store != null) {
+			try {
+				store.removeNode();
+			} catch (SecureStoreException e) {
+				firePropertyChange(SecureStoreException.ID, null, e);
+				OpenShiftCoreActivator.logWarning(e.getMessage(), e);
+			}
+		}
+	}
 
 	protected void saveAuthSchemePreference() {
 		ConnectionURL url = ConnectionURL.safeForConnection(this);

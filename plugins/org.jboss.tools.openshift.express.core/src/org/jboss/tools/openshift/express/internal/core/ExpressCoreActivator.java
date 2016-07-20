@@ -59,7 +59,8 @@ public class ExpressCoreActivator extends BaseCorePlugin {
        ConnectionsRegistrySingleton.getInstance().addListener(new ConnectionsRegistryAdapter() {
 			@Override
 			public void connectionRemoved(IConnection connection) {
-				if(connection instanceof ExpressConnection){
+				if(connection instanceof ExpressConnection) {
+					((ExpressConnection)connection).removeSecureStoreData();
 					saveAllConnections();
 				}
 			}
