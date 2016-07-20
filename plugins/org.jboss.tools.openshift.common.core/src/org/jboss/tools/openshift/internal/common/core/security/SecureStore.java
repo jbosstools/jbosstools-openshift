@@ -81,6 +81,14 @@ public class SecureStore {
 			getNode(storeKey).clear();
 			values.clear();
 		} catch (Exception e) {
+			throw new SecureStoreException(NLS.bind("Could not clear storage node {0}", storeKey.getKey()), e);
+		}
+	}
+	
+	public void removeNode() throws SecureStoreException {
+		try {
+			getNode(storeKey).removeNode();
+		} catch (UnsupportedEncodingException | SecureStoreException e) {
 			throw new SecureStoreException(NLS.bind("Could not remove storage node {0}", storeKey.getKey()), e);
 		}
 	}

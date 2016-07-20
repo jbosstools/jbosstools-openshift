@@ -549,6 +549,18 @@ public class ExpressConnection extends AbstractConnection {
 	private SecureStore getSecureStore(final String host, final String username) {
 		return new SecureStore(new OpenShiftSecureStorageKey(SECURE_STORAGE_BASEKEY, host, username));
 	}
+	
+	public void removeSecureStoreData() {
+		SecureStore store = getSecureStore(getHost(), getUsername());
+		if (store != null) {
+			try {
+				store.removeNode();
+			} catch (SecureStoreException e) {
+				firePropertyChange(SecureStoreException.ID, null, e);
+				ExpressCoreActivator.pluginLog().logWarning(e.getMessage(), e);
+			}
+		}
+	}
 
 	public String getId() {
 		StringBuilder builder = new StringBuilder(username);

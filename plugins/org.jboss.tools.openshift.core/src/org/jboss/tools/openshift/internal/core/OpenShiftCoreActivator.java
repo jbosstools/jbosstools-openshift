@@ -75,7 +75,10 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
         	
 			@Override
 			public void connectionRemoved(IConnection connection) {
-				if(!(connection instanceof Connection)) return;
+				if (!(connection instanceof Connection)) {
+					return;
+				}
+				((Connection)connection).removeSecureStoreData();
 				ConnectionURL url = ConnectionURL.safeForConnection(connection);
 				if(url != null) {
 					OpenShiftCorePreferences.INSTANCE.removeAuthScheme(url.toString());

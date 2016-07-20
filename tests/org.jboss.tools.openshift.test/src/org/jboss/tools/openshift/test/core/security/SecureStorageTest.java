@@ -11,15 +11,17 @@
 package org.jboss.tools.openshift.test.core.security;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStore.IStoreKey;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -29,13 +31,13 @@ import org.junit.Test;
 @Ignore
 public class SecureStorageTest {
 
-	private IStoreKey key;
-	private SecureStore store;
+	private static IStoreKey key;
+	private static SecureStore store;
 
-	@Before
-	public void setUp() throws CoreException {
-		this.key = new OpenShiftSecureStorageKey("org.jboss.tools.openshift.test", "localhost", "foobar");
-		this.store = new SecureStore(key);
+	@BeforeClass
+	public static void setUp() throws CoreException {
+		key = new OpenShiftSecureStorageKey("org.jboss.tools.openshift.test", "localhost", "foobar");
+		store = new SecureStore(key);
 	}
 
 	@After
@@ -91,5 +93,20 @@ public class SecureStorageTest {
 		
 		// verification
 		assertEquals("foobar", store.get("nonsense"));
+	}
+	
+	@Test
+	public void shouldRemoveNode() throws SecureStoreException {
+		// pre-condition
+		IStoreKey key = new OpenShiftSecureStorageKey("org.jboss.tools.openshift.test", "localhost", "foobar");
+		SecureStore store = new SecureStore(key);
+		store.put("password", "chocolate");
+		assertTrue(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
+		
+		// operation
+		store.removeNode();
+		
+		// verification
+		assertFalse(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
 	}
 }

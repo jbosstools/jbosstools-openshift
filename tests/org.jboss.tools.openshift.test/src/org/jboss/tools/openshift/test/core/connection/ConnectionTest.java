@@ -34,10 +34,13 @@ import java.util.Map;
 
 import org.assertj.core.data.MapEntry;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
+import org.jboss.tools.openshift.internal.common.core.security.SecureStore.IStoreKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -595,6 +598,22 @@ public class ConnectionTest {
 		testableConnection.refresh();
 		// then
 		verify(prompter).promptAndAuthenticate(eq(testableConnection), any(IAuthorizationContext.class));
+	}
+	
+	@Test
+	public void should_clear_secure_data_when_connection_deleted() throws MalformedURLException {
+		// pre-conditions
+		Connection connection = ConnectionTestUtils.createConnection("bdshadow", "13", "https://localhost.com");
+		connection.connect();
+		
+		//when
+		IStoreKey key = new OpenShiftSecureStorageKey(
+				Connection.SECURE_STORAGE_BASEKEY, connection.getHost(), connection.getUsername());
+		assertTrue(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
+		connection.removeSecureStoreData();
+		
+		//then
+		assertFalse(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
 	}
 	
 	public class TestableConnection extends Connection {
