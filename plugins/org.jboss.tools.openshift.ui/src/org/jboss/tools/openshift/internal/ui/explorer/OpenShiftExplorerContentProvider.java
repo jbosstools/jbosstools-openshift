@@ -45,12 +45,20 @@ import com.openshift.restclient.model.route.IRoute;
 public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private static final List<String> TERMINATED_STATUS = Arrays.asList("Complete", "Failed", "Error", "Cancelled");
 
-	private OpenshiftUIModel model = OpenshiftUIModel.getInstance();
+	private OpenshiftUIModel model;
 	private IElementListener listener;
 	private StructuredViewer viewer;
 	private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs = new HashMap<Object, BaseExplorerContentProvider.LoadingStub>();
 
 	public OpenShiftExplorerContentProvider() {
+		this(OpenshiftUIModel.getInstance());
+	}
+	
+	/**
+	 * Constructor for testing purposes to inject mocked OpenshiftUIModel
+	 */
+	protected OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
+		this.model = model;
 		listener = new IElementListener() {
 
 			@Override

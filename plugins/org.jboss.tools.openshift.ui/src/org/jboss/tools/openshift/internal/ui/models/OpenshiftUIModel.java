@@ -28,7 +28,9 @@ import com.openshift.restclient.model.IResource;
 
 public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegistry, OpenshiftUIModel> {
 	
-	private static OpenshiftUIModel instance;
+	protected static class OpenshiftUIModelSingletonHolder {
+		public static final OpenshiftUIModel INSTANCE = new OpenshiftUIModel(ConnectionsRegistrySingleton.getInstance());
+	};
 	
 	private Map<IOpenShiftConnection, ConnectionWrapper> connections = new HashMap<>();
 	private List<IElementListener> listeners = new ArrayList<IElementListener>();
@@ -36,10 +38,7 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 	private IConnectionsRegistryListener listener;
 	
 	public static OpenshiftUIModel getInstance() {
-		if (instance == null) {
-			instance = new OpenshiftUIModel(ConnectionsRegistrySingleton.getInstance());
-		}
-		return instance;
+		return OpenshiftUIModelSingletonHolder.INSTANCE;
 	}
 
 	/**
