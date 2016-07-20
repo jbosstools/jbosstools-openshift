@@ -86,8 +86,8 @@ public class CDKActionProvider extends CommonActionProvider {
 			}
 			
 			if( adb != null ) {
-				OpenshiftUIModel model = new OpenshiftUIModel();
-				return model.getConnectionWrapperForConnection(new CDKOpenshiftUtility().findExistingOpenshiftConnection(server, adb));
+				return OpenshiftUIModel.getInstance().getConnectionWrapperForConnection(
+						new CDKOpenshiftUtility().findExistingOpenshiftConnection(server, adb));
 			}
 			return null;
 		}

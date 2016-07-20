@@ -38,7 +38,7 @@ public class RefreshTest {
 	@Before
 	public void setUp() {
 		registry = new ConnectionsRegistry();
-		model= new OpenshiftUIModel(registry);
+		model = new OpenshiftUIModelTestable(registry);
 		listener = mock(IElementListener.class);
 		model.addListener(listener);
 		IOpenShiftConnection connection = mock(IOpenShiftConnection.class);
@@ -116,6 +116,12 @@ public class RefreshTest {
 		handler.stub((proxy, method, args)->name).when(instance.getName());
 		handler.stub((proxy, method, args)->kind).when(instance.getKind());
 		handler.stub((proxy, method, args)->String.valueOf(version)).when(instance.getResourceVersion());;
+	}
+	
+	private class OpenshiftUIModelTestable extends OpenshiftUIModel {
+		public OpenshiftUIModelTestable(ConnectionsRegistry registry) {
+			super(registry);
+		}
 	}
 
 }

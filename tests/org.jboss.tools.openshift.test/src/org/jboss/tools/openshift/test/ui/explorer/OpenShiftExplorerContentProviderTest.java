@@ -59,7 +59,7 @@ public class OpenShiftExplorerContentProviderTest {
 	
 	@Before
 	public void setup() throws Exception{
-		root= new OpenshiftUIModel();
+		root = OpenshiftUIModel.getInstance();
 		
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8442")); 
 
@@ -73,7 +73,7 @@ public class OpenShiftExplorerContentProviderTest {
 		
 		connectionWrapper= root.getConnections().iterator().next();
 		
-		provider = new OpenShiftExplorerContentProvider(root);
+		provider = new OpenShiftExplorerContentProvider();
 	}
 	
 	@After

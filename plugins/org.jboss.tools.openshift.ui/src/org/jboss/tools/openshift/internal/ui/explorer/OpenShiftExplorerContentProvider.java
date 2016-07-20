@@ -45,17 +45,12 @@ import com.openshift.restclient.model.route.IRoute;
 public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private static final List<String> TERMINATED_STATUS = Arrays.asList("Complete", "Failed", "Error", "Cancelled");
 
-	private OpenshiftUIModel model;
+	private OpenshiftUIModel model = OpenshiftUIModel.getInstance();
 	private IElementListener listener;
 	private StructuredViewer viewer;
 	private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs = new HashMap<Object, BaseExplorerContentProvider.LoadingStub>();
 
 	public OpenShiftExplorerContentProvider() {
-		this(new OpenshiftUIModel());
-	}
-
-	public OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
-		this.model = model;
 		listener = new IElementListener() {
 
 			@Override
@@ -91,7 +86,6 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	@Override
 	public void dispose() {
 		model.removeListener(listener);
-		model.dispose();
 	}
 
 	/**
