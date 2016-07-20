@@ -94,6 +94,8 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 		if (isNotBlank(repoPath)) {
 			model.setUseDefaultRepoPath(false);
 			model.setRepositoryPath(repoPath);
+		} else {
+			model.setUseDefaultRepoPath(true);
 		}
 	}
 	

@@ -48,7 +48,6 @@ public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_NEW_PROJECT, onWizardProjectNameChanged());
 		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_USE_DEFAULT_REPO_PATH, onUseDefaultRepoPathChanged());
 		setDefaultRemoteName();
-		setUseDefaultRepoPath(true);
 	}
 
 
