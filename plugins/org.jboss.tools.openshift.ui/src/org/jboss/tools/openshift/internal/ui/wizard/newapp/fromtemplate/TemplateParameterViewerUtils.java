@@ -11,6 +11,8 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.Comparator;
+
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 
@@ -42,11 +44,21 @@ public class TemplateParameterViewerUtils {
 	 */
 	public static class ParameterNameViewerComparator extends ViewerComparator {
 
+		Comparator<IParameter> comparator = new ParameterNameComparator();
+
 		@Override
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			IParameter first = (IParameter) e1;
-			IParameter other = (IParameter) e2;
-			return first.getName().compareTo(other.getName());
+			IParameter second = (IParameter) e2;
+			return comparator.compare(first, second);
+		}
+	}
+
+	public static class ParameterNameComparator implements Comparator<IParameter> {
+
+		@Override
+		public int compare(IParameter parameter1, IParameter parameter2) {
+			return parameter1.getName().compareTo(parameter2.getName());
 		}
 	}
 

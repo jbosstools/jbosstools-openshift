@@ -99,12 +99,12 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		this.viewer = createTable(tableContainer, parametersObservable, dbc);
 		GridDataFactory.fillDefaults()
 				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
+		viewer.setInput(parametersObservable);
 		IObservableValue<IParameter> selectedParameter = 
 				BeanProperties.value(ITemplateParametersPageModel.PROPERTY_SELECTED_PARAMETER).observe(model);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
 				.to(selectedParameter)
 				.in(dbc);
-		viewer.setInput(parametersObservable);
 		viewer.addDoubleClickListener(onDoubleClick());
 
 		// edit button

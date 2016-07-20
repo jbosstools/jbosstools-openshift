@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.openshift.restclient.model.template.IParameter;
@@ -34,7 +35,7 @@ public interface ITemplateParametersPageModel {
 	 * Set the list of template parameters
 	 * @param parameters
 	 */
-	void setParameters(List<IParameter> parameters);
+	void setParameters(Collection<IParameter> parameters);
 	
 	/**
 	 * Get the selected parameter
