@@ -27,16 +27,24 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import com.openshift.restclient.model.IResource;
 
 public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegistry, OpenshiftUIModel> {
+	
+	protected static class OpenshiftUIModelSingletonHolder {
+		public static final OpenshiftUIModel INSTANCE = new OpenshiftUIModel(ConnectionsRegistrySingleton.getInstance());
+	};
+	
 	private Map<IOpenShiftConnection, ConnectionWrapper> connections = new HashMap<>();
 	private List<IElementListener> listeners = new ArrayList<IElementListener>();
 
 	private IConnectionsRegistryListener listener;
 	
-	public OpenshiftUIModel() {
-		this(ConnectionsRegistrySingleton.getInstance());
+	public static OpenshiftUIModel getInstance() {
+		return OpenshiftUIModelSingletonHolder.INSTANCE;
 	}
 
-	public OpenshiftUIModel(ConnectionsRegistry registry) {
+	/**
+	 * Explicitly call this method, only for testing purposes!
+	 */
+	protected OpenshiftUIModel(ConnectionsRegistry registry) {
 		super(null, registry);
 		listener = new IConnectionsRegistryListener() {
 
@@ -142,9 +150,11 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 			return new ArrayList<ConnectionWrapper>(connections.values());
 		}
 	}
-
-	public void dispose() {
-		ConnectionsRegistrySingleton.getInstance().removeListener(listener);
+	
+	public ConnectionWrapper getConnectionWrapperForConnection(IConnection connection) {
+		synchronized (connections) {
+			return connections.get(connection);
+		}
 	}
 
 	@Override

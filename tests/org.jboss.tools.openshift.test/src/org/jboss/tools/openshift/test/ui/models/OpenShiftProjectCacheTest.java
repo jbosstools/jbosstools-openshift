@@ -63,7 +63,7 @@ public class OpenShiftProjectCacheTest {
 		doReturn(Arrays.asList(project)).when(conn).getResources(ResourceKind.PROJECT);
 		ConnectionsRegistrySingleton.getInstance().clear();
 		ConnectionsRegistrySingleton.getInstance().add(conn);
-		root = new OpenshiftUIModel();
+		root = OpenshiftUIModel.getInstance();
 		connectionWrapper = root.getConnections().iterator().next();
 	}
 	

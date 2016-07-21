@@ -51,10 +51,13 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs = new HashMap<Object, BaseExplorerContentProvider.LoadingStub>();
 
 	public OpenShiftExplorerContentProvider() {
-		this(new OpenshiftUIModel());
+		this(OpenshiftUIModel.getInstance());
 	}
-
-	public OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
+	
+	/**
+	 * Constructor for testing purposes to inject mocked OpenshiftUIModel
+	 */
+	protected OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
 		this.model = model;
 		listener = new IElementListener() {
 
@@ -91,7 +94,6 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	@Override
 	public void dispose() {
 		model.removeListener(listener);
-		model.dispose();
 	}
 
 	/**

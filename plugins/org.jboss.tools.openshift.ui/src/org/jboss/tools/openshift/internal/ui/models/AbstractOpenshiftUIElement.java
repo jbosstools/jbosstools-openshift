@@ -59,7 +59,11 @@ abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElemen
 			return true;
 		}
 		AbstractOpenshiftUIElement<?, ?> other= (AbstractOpenshiftUIElement<?, ?>) o;
-		return wrapped.equals(other.getWrapped()) && getParent().equals(other.getParent());
+		return wrapped.equals(other.getWrapped()) 
+				&& (
+						getParent() != null && getParent().equals(other.getParent())
+						|| getParent() == null && other.getParent() == null
+					);
 	}
 	
 	@Override
