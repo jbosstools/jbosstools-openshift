@@ -290,7 +290,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 
 	@Override
 	public String getRepositoryPath() {
-		return getProperty(PROP_REPOSITORY_PATH);
+		return getProperty(PROP_REPOSITORY_PATH, DEFAULT_REPOSITORY_PATH);
 	}
 
 	@Override
