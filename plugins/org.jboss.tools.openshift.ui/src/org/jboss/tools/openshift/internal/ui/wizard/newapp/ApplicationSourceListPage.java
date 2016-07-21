@@ -262,7 +262,10 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				SelectExistingProjectDialog dialog = 
-						new SelectExistingProjectDialog(model.getEclipseProject() == null? null: model.getEclipseProject().getName(), getShell());
+					new SelectExistingProjectDialog(model.getEclipseProject() == null
+							? "Select an existing workspace project from the list below."
+							: NLS.bind("Currently project {0} is selected, you may pick a different one from the list below.", model.getEclipseProject().getName())
+						, getShell());
 				if(model.getEclipseProject() != null) {
 					dialog.setInitialSelections(new Object[]{model.getEclipseProject()});
 				}
