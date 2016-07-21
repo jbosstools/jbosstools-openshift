@@ -104,7 +104,7 @@ public class RSync {
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
 				final InputStream syncStream = rsyncable.sync(new PodPeer(podPath, pod),
-						new LocalPeer(destinationPath), OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
+						new LocalPeer(destinationPath), OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER, OpenShiftBinaryOption.SKIP_TLS_VERIFY, OpenShiftBinaryOption.NO_PERMS);
 				asyncWriteLogs(syncStream, consoleWriter);
 				try {
 					rsyncable.await();
@@ -124,7 +124,7 @@ public class RSync {
 		pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
-				final InputStream syncStream = rsyncable.sync(new LocalPeer(sourcePath), new PodPeer(podPath, pod), OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
+				final InputStream syncStream = rsyncable.sync(new LocalPeer(sourcePath), new PodPeer(podPath, pod), OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER, OpenShiftBinaryOption.SKIP_TLS_VERIFY, OpenShiftBinaryOption.NO_PERMS);
 				asyncWriteLogs(syncStream, consoleWriter);
 				try {
 					rsyncable.await();
