@@ -11,14 +11,18 @@
 package org.jboss.tools.openshift.test.ui.wizard.importapp;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizardModel;
 import org.junit.Before;
@@ -96,5 +100,26 @@ public class ImportApplicationWizardModelTest {
 		assertEquals(1, results.size());
 		assertEquals(bc3, results.get(0).getModel());
 	}
-
+	
+	@Test
+	public void testDefaultGitRepositoryPath() {
+		assertTrue(model.isUseDefaultRepositoryPath());
+		assertEquals(EGitUIUtils.getEGitDefaultRepositoryPath(), model.getRepositoryPath());
+	}
+	
+    @Test
+    public void testGitRepositoryPath() {
+    	model.setUseDefaultRepositoryPath(false);
+        assertFalse(model.isUseDefaultRepositoryPath());
+        assertEquals(EGitUIUtils.getEGitDefaultRepositoryPath(), model.getRepositoryPath());
+    }
+    
+    @Test
+    public void testGitRepositoryPathAndValue() {
+        model.setUseDefaultRepositoryPath(false);
+        String path = new File(".").getAbsolutePath();
+        model.setRepositoryPath(path);
+        assertFalse(model.isUseDefaultRepositoryPath());
+        assertEquals(path, model.getRepositoryPath());
+    }
 }

@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -54,6 +55,7 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.application.template
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.ImportFailedException;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.WontOverwriteException;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -64,11 +66,16 @@ import com.openshift.client.IDomain;
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.cartridge.IEmbeddedCartridge;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.REPO_PATH_KEY;
+
 /**
  * A wizard to import and create OpenShift applications. 
  * 
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @author Jeff Maury
  * 
  * @see NewApplicationWorkbenchWizard
  * @see ImportExpressApplicationWizard
@@ -81,7 +88,15 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 			boolean useExistingApplication, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
+		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
 		this.model = new OpenShiftApplicationWizardModel(connection, domain, application, project, useExistingApplication);
+		String repoPath = getDialogSettings().get(REPO_PATH_KEY);
+		if (isNotBlank(repoPath)) {
+			model.setUseDefaultRepoPath(false);
+			model.setRepositoryPath(repoPath);
+		} else {
+			model.setUseDefaultRepoPath(true);
+		}
 	}
 	
 	@Override
@@ -127,6 +142,9 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 				UsageStats.getInstance().newV2Application(model.getConnection().getHost(), success);
 			} else {
 				UsageStats.getInstance().importV2Application(model.getConnection().getHost(), success);
+			}
+			if (success && !model.isUseDefaultRepoPath()) {
+				getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
 			}
 			return success;
 	}

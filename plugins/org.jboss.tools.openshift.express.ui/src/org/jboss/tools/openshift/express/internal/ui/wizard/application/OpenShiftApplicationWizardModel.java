@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011-2014 Red Hat, Inc.
+ * Copyright (c) 2011-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -53,8 +53,9 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 /**
  * @author Andre Dietisheim
  * @author Xavier Coulon
+ * @author Jeff Maury
  */
-class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShiftApplicationWizardModel {
+public class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShiftApplicationWizardModel {
 
 	protected HashMap<String, Object> dataModel = new HashMap<>();
 
@@ -273,13 +274,23 @@ class OpenShiftApplicationWizardModel extends ObservablePojo implements IOpenShi
 	}
 
 	@Override
+	public boolean setUseDefaultRepoPath(boolean useDefaultRepoPath) {
+		return setProperty(PROP_USE_DEFAULT_REPO_PATH, useDefaultRepoPath);
+	}
+
+	@Override
+	public boolean isUseDefaultRepoPath() {
+		return getProperty(PROP_USE_DEFAULT_REPO_PATH, true);
+	}
+
+	@Override
 	public String setRepositoryPath(String repositoryPath) {
 		return setProperty(PROP_REPOSITORY_PATH, repositoryPath);
 	}
 
 	@Override
 	public String getRepositoryPath() {
-		return getProperty(PROP_REPOSITORY_PATH);
+		return getProperty(PROP_REPOSITORY_PATH, DEFAULT_REPOSITORY_PATH);
 	}
 
 	@Override

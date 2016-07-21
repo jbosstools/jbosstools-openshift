@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -42,6 +42,7 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
 
 /**
  * @author André Dietisheim
+ * @author Jeff Maury
  */
 public interface IOpenShiftApplicationWizardModel extends IConnectionAware<ExpressConnection>, IObservablePojo {
 
@@ -62,6 +63,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	public static final String PROP_NEW_PROJECT = "newProject";
 	public static final String PROP_PROJECT_NAME = "projectName";
 	public static final String PROP_REMOTE_NAME = "remoteName";
+	public static final String PROP_USE_DEFAULT_REPO_PATH = "useDefaultRepoPath";
 	public static final String PROP_REPOSITORY_PATH = "repositoryPath";
 	public static final String PROP_SKIP_MAVEN_BUILD = "skipMavenBuild";
 	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
@@ -223,6 +225,16 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	 */
 	public String getRemoteName();
 
+	public boolean setUseDefaultRepoPath(boolean useDefaultRepositoryPath);
+	
+	/**
+	 * Returns the flag to stores the information if the default path to the local git repository the wizard will clone the
+	 * existing/new OpenShift application to should be used or not.
+	 * 
+	 * @return
+	 */
+	public boolean isUseDefaultRepoPath();
+	
 	public String setRepositoryPath(String repositoryPath);
 
 	/**
