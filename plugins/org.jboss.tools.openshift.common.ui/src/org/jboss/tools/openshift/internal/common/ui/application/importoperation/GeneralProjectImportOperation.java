@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,13 +22,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages;
 
 /**
  * @author Andre Dietisheim <adietish@redhat.com>
+ * @author Jeff Maury
  * 
  */
 public class GeneralProjectImportOperation extends AbstractProjectImportOperation {
@@ -42,8 +41,9 @@ public class GeneralProjectImportOperation extends AbstractProjectImportOperatio
 
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IProject project = workspace.getRoot().getProject(getProjectDirectory().getName());
-		overwriteExistingProject(project, workspace, monitor);
-		importToWorkspace(getProjectDirectory(), workspace, monitor);
+		if (overwriteExistingProject(project, workspace, monitor)) {
+	        importToWorkspace(getProjectDirectory(), workspace, monitor);
+		}
 		return Collections.singletonList(project);
 	}
 
@@ -57,32 +57,20 @@ public class GeneralProjectImportOperation extends AbstractProjectImportOperatio
 		project.open(IResource.BACKGROUND_REFRESH, monitor);
 	}
 
-	private void overwriteExistingProject(final IProject project, IWorkspace workspace, IProgressMonitor monitor)
+	private boolean overwriteExistingProject(final IProject project, IWorkspace workspace, IProgressMonitor monitor)
 			throws CoreException {
 		if (project == null
 				|| !project.exists()) {
-			return;
+			return true;
 		}
 
-		final boolean[] overwrite = new boolean[1];
-		Display.getDefault().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				overwrite[0] = MessageDialog.openQuestion(
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-						"Overwrite project?",
-						NLS.bind(
-								"A project \"{0}\" already exists in the workspace.\n"
-										+ "If you want to import the OpenShift \"{0}\", the project in your workspace will "
-										+ "get overwritten and may not be recovered.\n\n"
-										+ "Are you sure that you want to overwrite the project \"{0}\" in your workspace?",
-								project.getName()));
-			}
-
-		});
-		if (overwrite[0]) {
-			project.delete(true, true, monitor);
+		final boolean overwrite = displayOverwriteDialog(OpenShiftCommonUIMessages.OverwriteProjectsDialogTitle,
+		                                                 NLS.bind(OpenShiftCommonUIMessages.GeneralProjectWarningMessage, project.getName()));
+		if (overwrite) {
+			project.delete(false, true, monitor);
+		} else {
+		    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		}
+		return overwrite;
 	}
 }
