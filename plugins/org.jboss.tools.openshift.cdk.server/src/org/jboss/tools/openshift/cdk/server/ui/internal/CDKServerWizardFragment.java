@@ -58,7 +58,8 @@ public class CDKServerWizardFragment extends WizardFragment {
 	@Override
 	public boolean isComplete() {
 		// Only one instance created per workspace, so we need to workaround this
-		return browseButton != null && !browseButton.isDisposed() && super.isComplete();
+		boolean b = browseButton != null && !browseButton.isDisposed() && findError() == null && super.isComplete();
+		return b;
 	}
 	
 	public ImageDescriptor getImageDescriptor() {
@@ -121,6 +122,9 @@ public class CDKServerWizardFragment extends WizardFragment {
 		});
 		
 		selectedUser = credentials.getUser();
+		if( homeDir != null ) {
+			homeText.setText(homeDir);
+		}
 		
 		String err = findError();
 		setComplete(err == null);
