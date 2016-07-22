@@ -102,7 +102,8 @@ public class ServiceManagerEnvironment {
 				CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV};
 
     	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
-		
+    	// Docs indicate any value here is fine, so no need to check for existing property
+		env.put("VAGRANT_NO_COLOR", "1");
     	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
 	    try {
 	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  CDKServerUtility.getWorkingDirectory(server), env);
