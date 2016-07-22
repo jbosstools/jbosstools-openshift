@@ -18,11 +18,13 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.databinding.ObservablePojo;
@@ -32,6 +34,7 @@ import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionFactory;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAdvancedPropertiesProvider;
 import org.jboss.tools.openshift.internal.common.ui.connection.IAdvancedConnectionPropertiesEditor;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimTrailingSlashConverter;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
@@ -49,6 +52,8 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	private IObservableValue selectedConnection;
 	private IValueChangeListener connectionChangedListener;
 	private IObservableValue registryURLObservable;
+	private IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider;
+	
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -96,6 +101,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 			
 		};
 		part.createAdvancedGroup(composite, 1);
+		this.connectionAdvancedPropertiesProvider = new ConnectionAdvancedPropertiesProvider();
 		
 		return composite;
 	}
@@ -107,11 +113,13 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	
 	@Override
 	public void onVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
+		pageModel.setConnectionAdvancedPropertiesProvider(this.connectionAdvancedPropertiesProvider);
 		this.connectionChangedListener = addSelectedConnectionChangedListener(selectedConnection, dbc);
 	}
 	
 	@Override
 	public void onInVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
+		pageModel.setConnectionAdvancedPropertiesProvider(null);
 		removeConnectionChangedListener(connectionChangedListener, selectedConnection);
 		this.connectionChangedListener = null;
 	}
@@ -172,6 +180,25 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				return (String) ObjectUtils.defaultIfNull(properties.get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY), ""); 
 			}
 			return "";
+		}
+		
+	}
+	
+	private class ConnectionAdvancedPropertiesProvider implements IConnectionAdvancedPropertiesProvider {
+
+		@Override
+		public IConnection update(IConnection conn) {
+			Assert.isLegal(conn instanceof Connection);
+
+			final Connection connection = (Connection) conn;
+			Display.getDefault().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					connection.setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, registryURLObservable.getValue());
+				}
+			});
+			return connection;
 		}
 		
 	}
