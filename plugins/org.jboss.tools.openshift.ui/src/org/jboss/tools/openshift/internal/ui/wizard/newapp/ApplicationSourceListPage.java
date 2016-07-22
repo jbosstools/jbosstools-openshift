@@ -587,7 +587,7 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 			public void widgetSelected(SelectionEvent e) {
 				ITemplate template = (ITemplate) model.getSelectedAppSource().getSource();
 				new ResourceSummaryDialog(getShell(),
-						template.getItems(),
+						template.getObjects(),
 						"Template Details",
 						NLS.bind("The following resources will be created by using template\n\"{0}\":", template.getName()),
 						new ResourceDetailsLabelProvider(), new ResourceDetailsContentProvider()).open();

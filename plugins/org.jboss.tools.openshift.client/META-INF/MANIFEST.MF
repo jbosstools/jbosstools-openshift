@@ -6,7 +6,10 @@ Bundle-Version: 3.3.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
-Bundle-ClassPath: lib/openshift-restclient-java-4.1.0-SNAPSHOT.jar,
+Bundle-ClassPath: lib/openshift-restclient-java-5.0.0-SNAPSHOT.jar,
+ lib/okhttp-3.3.1.jar,
+ lib/okhttp-ws-3.3.1.jar,
+ lib/okio-1.8.0.jar,
  lib/commons-compress-1.8.1.jar,
  lib/jboss-dmr-1.3.0.Final.jar,
  lib/log4j-1.2.17.jar,
@@ -17,7 +20,7 @@ Bundle-ClassPath: lib/openshift-restclient-java-4.1.0-SNAPSHOT.jar,
  lib/commons-io-2.1.jar,
  .
 Export-Package: com.openshift.internal.restclient;x-friends:="org.jboss.tools.openshift.test",
- com.openshift.internal.restclient.http,
+ com.openshift.internal.restclient.okhttp,
  com.openshift.restclient,
  com.openshift.restclient.authorization,
  com.openshift.restclient.capability,
@@ -40,13 +43,4 @@ Import-Package: org.apache.commons.logging,
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.apache.httpcomponents.httpclient;bundle-version="4.3.6",
- org.apache.httpcomponents.httpcore;bundle-version="4.3.3",
- org.eclipse.jetty.websocket.client;bundle-version="9.2.13",
- org.eclipse.jetty.util;bundle-version="9.2.13",
- org.eclipse.jetty.io;bundle-version="9.2.13",
- org.eclipse.jetty.websocket.common;bundle-version="9.2.13",
- org.eclipse.jetty.websocket.api;bundle-version="9.2.13",
- org.eclipse.jetty.client;bundle-version="9.2.13",
- org.eclipse.jetty.http;bundle-version="9.2.13"
 Bundle-Activator: org.jboss.tools.openshift.client.internal.OpenShiftClientActivator

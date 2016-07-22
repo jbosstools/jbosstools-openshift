@@ -50,10 +50,10 @@ public class LazyCredentialsPrompterTest {
 	@Before
 	public void setup() throws MalformedURLException {
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));
-		this.connection = new Connection(client, lazyPrompter, null);
+		this.lazyPrompter = spy(new LazyCredentialsPrompter());
+		this.connection = new Connection(client.getBaseURL().toString(), lazyPrompter, null);
 		when(permissiveExtensionPrompter.promptAndAuthenticate(connection, null)).thenReturn(true);
 		when(denyingExtensionPrompter.promptAndAuthenticate(connection, null)).thenReturn(true);
-		this.lazyPrompter = spy(new LazyCredentialsPrompter());
 	}
 
 	@Test

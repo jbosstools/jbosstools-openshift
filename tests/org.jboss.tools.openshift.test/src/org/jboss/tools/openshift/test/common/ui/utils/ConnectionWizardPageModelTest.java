@@ -18,6 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import com.openshift.restclient.IClient;
 import com.openshift.restclient.ISSLCertificateCallback;
 
 /**
@@ -261,9 +261,9 @@ public class ConnectionWizardPageModelTest {
 
 	private class OtherConnection extends Connection {
 
-		public OtherConnection(IClient client, ICredentialsPrompter credentialsPrompter,
-				ISSLCertificateCallback sslCertCallback) {
-			super(client, credentialsPrompter, sslCertCallback);
+		public OtherConnection(String url, ICredentialsPrompter credentialsPrompter,
+				ISSLCertificateCallback sslCertCallback) throws MalformedURLException {
+			super(url, credentialsPrompter, sslCertCallback);
 		}
 	}
 

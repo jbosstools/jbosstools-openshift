@@ -31,6 +31,7 @@ import org.jboss.tools.openshift.internal.ui.models.IExceptionHandler;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
+import org.jboss.tools.openshift.test.core.connection.ConnectionTestUtils;
 import org.jboss.tools.openshift.test.util.UITestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -63,7 +64,7 @@ public class OpenShiftExplorerContentProviderTest {
 		
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8442")); 
 
-		connection = spy(new Connection(client, null, null));
+		connection = spy(ConnectionTestUtils.createConnection("auser", "atoken", "https://localhost:8442"));
 		doReturn(true).when(connection).ownsResource(any(IResource.class));
 		doReturn("hookaboo").when(connection).getUsername();
 		registry = ConnectionsRegistrySingleton.getInstance();

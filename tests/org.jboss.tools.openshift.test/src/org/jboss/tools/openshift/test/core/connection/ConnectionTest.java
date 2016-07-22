@@ -17,8 +17,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -27,8 +25,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static org.jboss.tools.openshift.test.core.connection.ConnectionTestUtils.*;
+
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,16 +48,14 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
-import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.IAuthorizationContext;
-import com.openshift.restclient.authorization.IAuthorizationStrategy;
-import com.openshift.restclient.authorization.TokenAuthorizationStrategy;
+import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.user.IUser;
 
 /**
  * @author Jeff Cantrill
@@ -76,34 +73,16 @@ public class ConnectionTest {
 	@Before
 	public void setup() throws Exception {
 		this.client = createClient("foo", "42", "https://localhost:8443");
-		this.connection = new Connection(client, null, null);
+		this.connection = new Connection(client, prompter);
 		this.testableConnection = createTestableConnection("42", client, prompter);
-	}
-
-	private IClient createClient(String username, String token, String host) throws MalformedURLException {
-		IClient client = mock(IClient.class);
-		when(client.getBaseURL()).thenReturn(new URL(host));
-		doReturn(mock(IAuthorizationStrategy.class)).when(client).getAuthorizationStrategy();	
-		doReturn(mockAuthorizationContext(username, token, true)).when(client).getContext(anyString());
-		return client;
+		
+		doReturn(createClient("foo", "42", "https://localhost:8443")).when(client).clone();
 	}
 
 	private TestableConnection createTestableConnection(String passwordToken, IClient client, ICredentialsPrompter prompter) throws SecureStoreException {
 		doReturn(passwordToken).when(store).get(anyString()); // password/token
 
-		return spy(new TestableConnection(client, prompter, null, store));
-	}
-
-	private IAuthorizationContext mockAuthorizationContext(String username, String token, boolean isAuthorized) {
-		IAuthorizationContext authorizationContext = mock(IAuthorizationContext.class);
-		doReturn(isAuthorized).when(authorizationContext).isAuthorized();
-		doReturn(token).when(authorizationContext).getToken();
-
-		IUser user = mock(IUser.class);
-		doReturn(username).when(user).getName();
-		doReturn(user).when(authorizationContext).getUser();
-
-		return authorizationContext;
+		return spy(new TestableConnection(client, prompter, store));
 	}
 
 	@Test
@@ -162,8 +141,8 @@ public class ConnectionTest {
 	@Test
 	public void should_not_equals_if_different_user() throws Exception {
 		// given
-		Connection two = new Connection("https://localhost:8443", null, null);
-		two.setUsername("foo");
+		Connection two = new Connection(new ClientBuilder("https://localhost:8443").build(), null);
+		two.setUsername("bar");
 		// when
 		// then
 		assertThat(connection).isNotEqualTo(two);
@@ -253,6 +232,10 @@ public class ConnectionTest {
 	@Test
 	public void should_not_credentialsEqual_if_different_token() throws Exception {
 		// given
+		connection = new Connection(new ClientBuilder("https://someplace")
+				.withUserName("foo")
+				.withPassword("bar")
+				.usingToken("mytoken").build(), null);
 		Connection two = (Connection) connection.clone();
 		assertThat(two).isEqualTo(connection);
 		assertThat(two.credentialsEqual(connection));
@@ -274,29 +257,9 @@ public class ConnectionTest {
 	}
 
 	@Test
-	public void should_not_overwrite_client_authorization_strategy_in_authorized_connection_when_isConnected() {
-		// given
-		// when
-		connection.isAuthorized(new NullProgressMonitor());
-		// then
-		verify(client, never()).setAuthorizationStrategy(any(IAuthorizationStrategy.class));
-	}
-
-	@Test
-	public void should_set_client_authorization_strategy_when_not_present_on_isConnected() {
-		// given
-		doReturn(null).when(client).getAuthorizationStrategy();
-		doReturn(mockAuthorizationContext(null, null, false)).when(client).getContext(anyString());
-		// when
-		connection.isAuthorized(new NullProgressMonitor());
-		// then
-		verify(client).setAuthorizationStrategy(any(IAuthorizationStrategy.class));
-	}
-
-	@Test
 	public void should_not_connect_upon_isConnected_if_is_not_authorized() {
 		// given
-		doReturn(mockAuthorizationContext(null, null, false)).when(client).getContext(anyString());
+		doReturn(mockAuthorizationContext(null, null, false)).when(client).getAuthorizationContext();
 		// when
 		testableConnection.isAuthorized(new NullProgressMonitor());
 		// then
@@ -449,7 +412,7 @@ public class ConnectionTest {
 	@Test
 	public void should_prompt_when_connecting_without_credentials() {
 		// given
-		doReturn(mockAuthorizationContext("shadowman", "42", false)).when(client).getContext(anyString());
+		doReturn(mockAuthorizationContext("shadowman", "42", false)).when(client).getAuthorizationContext();
 		testableConnection.setPassword(null);
 		testableConnection.setToken(null);
 		// when
@@ -461,7 +424,7 @@ public class ConnectionTest {
 	@Test
 	public void should_not_prompt_when_connecting_without_credentials_but_prompting_disabled() {
 		// given
-		doReturn(mockAuthorizationContext("shadowman", "42", false)).when(client).getContext(anyString());
+		doReturn(mockAuthorizationContext("shadowman", "42", false)).when(client).getAuthorizationContext();
 		testableConnection.setPassword(null);
 		testableConnection.setToken(null);
 		testableConnection.enablePromptCredentials(false);
@@ -472,9 +435,13 @@ public class ConnectionTest {
 	}
 
 	@Test
-	public void should_prompt_when_connecting_while_being_unauthorized() {
+	public void should_prompt_when_connecting_while_being_unauthorized() throws Exception {
 		// given no or outdated token
-		doThrow(com.openshift.restclient.authorization.UnauthorizedException.class).when(client).getContext(anyString());
+		IClient client = createClient("username", "token", "https://ahost");
+		IAuthorizationContext authorizationContext = mock(IAuthorizationContext.class);
+		when(client.getAuthorizationContext()).thenReturn(authorizationContext);
+		doThrow(UnauthorizedException.class).when(authorizationContext).isAuthorized();
+		testableConnection = createTestableConnection("token", client, prompter);
 		testableConnection.enablePromptCredentials(true);
 		// when
 		testableConnection.connect();
@@ -485,36 +452,11 @@ public class ConnectionTest {
 	@Test(expected=com.openshift.restclient.authorization.UnauthorizedException.class)
 	public void should_throw_when_connecting_while_being_unauthorized_but_prompting_disabled() {
 		// given no or outdated token
-		doThrow(com.openshift.restclient.authorization.UnauthorizedException.class).when(client).getContext(anyString());
+		doThrow(com.openshift.restclient.authorization.UnauthorizedException.class).when(client).getAuthorizationContext();
 		testableConnection.enablePromptCredentials(false);
 		// when
 		testableConnection.connect();
 		// then
-	}
-
-	@Test
-	public void should_set_tokenAuthStrategy_when_successfully_connecting_using_basicAuth() throws Exception {
-		// given
-		testableConnection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
-		testableConnection.setPassword("kungfoo");
-		// when
-		boolean isConnected = testableConnection.connect();
-		assertThat(isConnected).isTrue();
-		// then
-		verify(client, atLeast(1)).setAuthorizationStrategy(isA(TokenAuthorizationStrategy.class));
-	}
-
-	@Test
-	public void should_set_token_when_successfully_connecting_using_basicAuth() throws Exception {
-		// given
-		testableConnection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
-		testableConnection.setPassword("kungfoo");
-		testableConnection.setToken(null);
-		// when
-		boolean isConnected = testableConnection.connect();
-		assertThat(isConnected).isTrue();
-		// then
-		verify(testableConnection, atLeast(1)).setToken(eq(client.getAuthorizationStrategy().getToken()));
 	}
 
 	@Test
@@ -523,6 +465,7 @@ public class ConnectionTest {
 		testableConnection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
 		testableConnection.setRememberPassword(true);
 		testableConnection.setPassword("kungfoo");
+		when(client.getAuthorizationContext().isAuthorized()).thenReturn(true);
 		// when
 		boolean isConnected = testableConnection.connect();
 		assertThat(isConnected).isTrue();
@@ -577,7 +520,6 @@ public class ConnectionTest {
 		// given
 		testableConnection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
 		testableConnection.setPassword("007"); // non-used pw, should be cleared
-		testableConnection.setToken("pieInTheSky");
 		testableConnection.setRememberPassword(true); // even if set to store it
 		// when
 		boolean isConnected = testableConnection.connect();
@@ -592,7 +534,7 @@ public class ConnectionTest {
 	@Test
 	public void should_prompt_if_refreshing_unauthorized_connection() {
 		// given no or outdated token
-		doReturn(mockAuthorizationContext("dagobert", "$42", false)).when(client).getContext(anyString());
+		doReturn(mockAuthorizationContext("dagobert", "$42", false)).when(client).getAuthorizationContext();
 		testableConnection.enablePromptCredentials(true);
 		// when
 		testableConnection.refresh();
@@ -620,9 +562,8 @@ public class ConnectionTest {
 
 		private SecureStore store;
 
-		public TestableConnection(IClient client, ICredentialsPrompter credentialsPrompter,
-				ISSLCertificateCallback sslCertCallback, SecureStore store) {
-			super(client, credentialsPrompter, sslCertCallback);
+		public TestableConnection(IClient client, ICredentialsPrompter credentialsPrompter, SecureStore store) {
+			super(client, credentialsPrompter);
 			this.store = store;
 		}
 
@@ -638,5 +579,6 @@ public class ConnectionTest {
 		
 		
 	}
+	
 
 }

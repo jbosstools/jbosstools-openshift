@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.runtime.CoreException;
@@ -37,12 +38,13 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantLaunchUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKLaunchEnvironmentUtil;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
+import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
 import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 
-import com.openshift.internal.restclient.http.HttpClientException;
-import com.openshift.internal.restclient.http.UrlConnectionHttpClientBuilder;
+import com.openshift.restclient.ClientBuilder;
+import com.openshift.restclient.IClient;
 import com.openshift.restclient.ISSLCertificateCallback;
-import com.openshift.restclient.http.IHttpClient;
+import com.openshift.restclient.OpenShiftException;
 
 public class VagrantPoller implements IServerStatePoller2 {
 	private IServer server;
@@ -187,28 +189,22 @@ public class VagrantPoller implements IServerStatePoller2 {
 		if( adb == null ) {
 			return false;
 		}
-		String url = adb.getOpenShiftHost() + ":" + adb.getOpenShiftPort() + "/healthz/ready";
+		String url = adb.getOpenShiftHost() + ":" + adb.getOpenShiftPort();
 		return checkOpenShiftHealth(url, timeout);
 	}
 	protected boolean checkOpenShiftHealth(String url,  int timeout) throws OpenShiftNotReadyPollingException {
-		ISSLCertificateCallback sslCallback = OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback(); 
-    	UrlConnectionHttpClientBuilder builder =  new UrlConnectionHttpClientBuilder()
-                .setAcceptMediaType("*/*")
-                .setConfigTimeout(new Integer(timeout))
-                .setSSLCertificateCallback(sslCallback);
-    	
+		ISSLCertificateCallback sslCallback = new LazySSLCertificateCallback(); 
+		IClient client = new ClientBuilder(url)
+				.sslCertificateCallback(sslCallback)
+				.withConnectTimeout(timeout, TimeUnit.MILLISECONDS)
+				.build();
+   	
     	Exception e = null;
-    	IHttpClient client = builder.client();
     	try {
-    		String ret = client.get(new URL(url), timeout);
-    		if( "ok".equals(ret))
+    		if( "ok".equals(client.getServerReadyStatus()))
     			return true;
-    	} catch(HttpClientException hce) {
-    		e = hce;
-    	} catch( SocketTimeoutException ste) {
-    		e = ste;
-    	} catch(MalformedURLException murle) {
-    		e = murle;
+    	} catch(OpenShiftException ex) {
+    		e = ex;
     	}
 
     	String msg = NLS.bind("The CDK VM is up and running, but OpenShift is unreachable at url {0}. " + 

@@ -74,7 +74,7 @@ public class CreateApplicationFromImageJobTest {
 	public void setUp() throws Exception {
 		when(project.getName()).thenReturn(PROJECT_NAME);
 		job = new TestCreateApplicationFromImageJob(bcModel, deployImageModel);
-		connection = spy(new Connection(client, null, null));
+		connection = spy(new Connection(client, null));
 		doReturn(builder).when(connection).getResourceBuilder(any());
 	}
 	

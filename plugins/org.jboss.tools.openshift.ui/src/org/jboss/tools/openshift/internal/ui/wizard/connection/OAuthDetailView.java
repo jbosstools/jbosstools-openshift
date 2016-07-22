@@ -321,10 +321,8 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-				IClient client = new ClientBuilder(host)
-						.sslCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback())
-						.build();
-				details = client.getAuthorizationDetails(host);
+				IClient client = new ClientBuilder(host).sslCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback()).build();
+				details = client.getAuthorizationContext().getAuthorizationDetails();
 				return ValidationStatus.OK_STATUS;
 			} catch(Exception e) {
 				if (e.getCause() instanceof ConnectTimeoutException) {

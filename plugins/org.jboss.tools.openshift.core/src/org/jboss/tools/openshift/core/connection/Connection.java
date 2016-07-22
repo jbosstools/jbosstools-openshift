@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.connection;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -32,7 +30,6 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
-import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
@@ -46,10 +43,7 @@ import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.authorization.BasicAuthorizationStrategy;
 import com.openshift.restclient.authorization.IAuthorizationContext;
-import com.openshift.restclient.authorization.IAuthorizationStrategy;
-import com.openshift.restclient.authorization.TokenAuthorizationStrategy;
 import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.ICapability;
@@ -64,30 +58,24 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	public static final String SECURE_STORAGE_TOKEN_KEY = "token";
 
 	private IClient client;
-	private String username;
-	private String password;
-	private String token;
-	private boolean passwordLoaded;
-	private boolean tokenLoaded;
+	private boolean passwordLoaded = false;
+	private boolean tokenLoaded = false;
 	private boolean rememberPassword;
 	private boolean rememberToken;
 	private boolean promptCredentialsEnabled = true;
 	private ICredentialsPrompter credentialsPrompter;
-	private ISSLCertificateCallback sslCertificateCallback;
 	private String authScheme;
 	private Map<String, Object> extendedProperties = new HashMap<>();
 
 	//TODO modify default client to take url and throw lib specific exception
 	public Connection(String url, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback)
 			throws MalformedURLException {
-		this(new ClientBuilder(url).sslCertificateCallback(sslCertCallback).build(), credentialsPrompter, sslCertCallback);
+		this(new ClientBuilder(url).sslCertificateCallback(sslCertCallback).build(), credentialsPrompter);
 	}
 	
-	public Connection(IClient client, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) {
+	public Connection(IClient client, ICredentialsPrompter credentialsPrompter) {
 		this.client = client;
-		this.client.setSSLCertificateCallback(sslCertCallback);
 		this.credentialsPrompter = credentialsPrompter;
-		this.sslCertificateCallback = sslCertCallback;
 	}
 	
 	@Override
@@ -129,39 +117,31 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	
 	@Override
 	public String getUsername(){
-		return username;
+		return client.getAuthorizationContext().getUserName();
 	}
 
 	@Override
 	public void setUsername(String userName) {
-		firePropertyChange(PROPERTY_USERNAME, this.username, this.username = userName);
+		IAuthorizationContext authContext = client.getAuthorizationContext();
+		String old = authContext.getUserName();
+		authContext.setUserName(userName);
+		firePropertyChange(PROPERTY_USERNAME, old, userName);
 	}
 
 	@Override
 	public String getPassword() {
-		loadPassword();
-		return password;
+		return loadAuthorizationContext().getPassword();
 	}
 
 	@Override
 	public void setPassword(String password) {
-		firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
+		IAuthorizationContext authContext = client.getAuthorizationContext();
+		String old = authContext.getPassword();
+		authContext.setPassword(password);
+		firePropertyChange(PROPERTY_PASSWORD, old, password);
 		this.passwordLoaded = true;
 	}
-
-	/**
-	 * Attempts to load the password from the secure storage, only at first time
-	 * it is called.
-	 */
-	private void loadPassword() {
-		if (StringUtils.isEmpty(password)
-				&& !passwordLoaded) {
-			this.password = load(SECURE_STORAGE_PASSWORD_KEY);
-			this.passwordLoaded = true;
-			setRememberPassword(password != null);
-		}
-	}
-
+	
 	@Override
 	public void setRememberPassword(boolean rememberPassword) {
 		firePropertyChange(PROPERTY_REMEMBER_PASSWORD, this.rememberPassword, this.rememberPassword = rememberPassword);
@@ -246,18 +226,14 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 
 	protected boolean authorize() {
-		client.setAuthorizationStrategy(createAuthorizationStrategy());
 		try {
-			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
-			if (context.isAuthorized()) {
-				String username = context.getUser().getName();
-				String token = context.getToken();
-				updateAuthorized(username, token);
+			IAuthorizationContext context = loadAuthorizationContext();
+			if (!context.isAuthorized() 
+					&& credentialsPrompter != null
+					&& promptCredentialsEnabled){
+				credentialsPrompter.promptAndAuthenticate(this, null);
 			} else {
-				if (isEnablePromptCredentials()
-						&& credentialsPrompter != null) {
-					credentialsPrompter.promptAndAuthenticate(this, null);
-				}
+				updateCredentials(context);
 			}
 		} catch (UnauthorizedException e) {
 			if (isEnablePromptCredentials()
@@ -269,29 +245,35 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		}
 		return getToken() != null;
 	}
-
-	private void updateAuthorized(String username, String token) {
-		setToken(token);
-		if (IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(getAuthScheme())) {
-			setUsername(username);
+	
+	private IAuthorizationContext loadAuthorizationContext() {
+		IAuthorizationContext context = client.getAuthorizationContext();
+		synchronized (context) {
+			if(!passwordLoaded) {
+				setPassword(load(SECURE_STORAGE_PASSWORD_KEY));
+				setRememberPassword(context.getPassword() != null);
+			}
+			if(!tokenLoaded) {
+				setToken(load(SECURE_STORAGE_TOKEN_KEY));
+				setRememberToken(context.getToken() != null); //potential conflict with load password?
+			}
 		}
-		// force auth strategy to token if authorized
-		TokenAuthorizationStrategy tokenStrategy = new TokenAuthorizationStrategy(token, username);
-		client.setAuthorizationStrategy(tokenStrategy);
+		return context;
 	}
-
+	
 	private void savePasswordOrToken() {
 		// not using getters here because for save there should be no reason
 		// to trigger a load from storage.
 		if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(getAuthScheme())) {
-			boolean success = saveOrClear(SECURE_STORAGE_PASSWORD_KEY, this.password, isRememberPassword());
+			boolean success = 
+					saveOrClear(SECURE_STORAGE_PASSWORD_KEY, client.getAuthorizationContext().getPassword(), isRememberPassword());
 			if (success) {
 				//Avoid second secure storage prompt.
 				// Password is stored, token should be cleared.
 				clearToken();
 			}
 		} else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(getAuthScheme())){
-			boolean success = saveOrClear(SECURE_STORAGE_TOKEN_KEY, this.token, isRememberToken());
+			boolean success = saveOrClear(SECURE_STORAGE_TOKEN_KEY, client.getAuthorizationContext().getToken(), isRememberToken());
 			if(success) { 
 				//Avoid second secure storage prompt.
 				//Token is stored, password should be cleared.
@@ -301,8 +283,8 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 
 	private void clearPassword() {
+		client.getAuthorizationContext().setPassword(null);
 		setRememberPassword(false);
-		setPassword(null);
 		saveOrClear(SECURE_STORAGE_PASSWORD_KEY, null, false);
 	}
 
@@ -331,15 +313,11 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		}
 	}
 
-	private IAuthorizationStrategy createAuthorizationStrategy() {
-		if (org.apache.commons.lang.StringUtils.isNotEmpty(getToken())
-				|| IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(getAuthScheme())) {
-			return new TokenAuthorizationStrategy(getToken(), getUsername()); //always use the token if you have one?
-		} else if (IAuthorizationContext.AUTHSCHEME_BASIC.equalsIgnoreCase(getAuthScheme())) {
-			return new BasicAuthorizationStrategy(getUsername(), getPassword(), getToken());
+	private void updateCredentials(IAuthorizationContext context) {
+		setToken(context.getToken());
+		if (IAuthorizationContext.AUTHSCHEME_OAUTH.equalsIgnoreCase(getAuthScheme())) {
+			setUsername(context.getUser().getName());
 		}
-
-		throw new OpenShiftException("Authscheme '%s' is not supported.", getAuthScheme());
 	}
 
 	/**
@@ -347,11 +325,10 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	 * @return
 	 */
 	public boolean isAuthorized(IProgressMonitor monitor) {
-		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
-			IAuthorizationContext context = client.getContext(client.getBaseURL().toString());
+			IAuthorizationContext context = client.getAuthorizationContext();
 			boolean result = context.isAuthorized();
-			if(result && needStrategy) {
+			if(result) {
 				//Call connect() to set the correct strategy instance to the client
 				//in the case when no strategy has been set yet, and as we do it,
 				//we can discard the current result, which nevertheless 
@@ -362,20 +339,6 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		} catch (UnauthorizedException e) {
 			return false;
 		}
-	}
-
-	/**
-	 * Return true if the client had no strategy instance and it was set to the value provided by 
-	 * method createAuthorizationStrategy()
-	 * 
-	 * @return
-	 */
-	private boolean initClientAuthorizationStrategy() {
-		boolean needStrategy = client.getAuthorizationStrategy() == null;
-		if(needStrategy) {
-			client.setAuthorizationStrategy(createAuthorizationStrategy());
-		}
-		return needStrategy;
 	}
 	
 	public void setAuthScheme(String scheme) {
@@ -403,19 +366,20 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((client  == null) ? 0 : client.getBaseURL().hashCode());
-		result = prime * result + ((username == null) ? 0 : username.hashCode());
+		if(client != null) {
+			result = prime * result + ((client.getAuthorizationContext().getUserName() == null) ? 0 : client.getAuthorizationContext().getUserName().hashCode());
+		}
 		return result;
 	}
 
 	@Override
 	public IConnection clone() {
-		Connection connection = new Connection(client, credentialsPrompter, sslCertificateCallback);
-		connection.setUsername(username);
-		connection.setPassword(password);
-		connection.setRememberPassword(rememberPassword);
-		connection.setRememberToken(rememberToken);
-		connection.setToken(token);
-		connection.setAuthScheme(authScheme);
+		IClient clone = client.clone();
+		Connection connection = new Connection(clone, credentialsPrompter);
+		connection.passwordLoaded = this.passwordLoaded;
+		connection.tokenLoaded = this.tokenLoaded;
+		connection.rememberPassword = this.rememberPassword;
+		connection.rememberToken = this.rememberToken;
 		connection.promptCredentialsEnabled = promptCredentialsEnabled;
 		return connection;
 	}
@@ -423,16 +387,22 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	@Override
 	public void update(IConnection connection) {
 		Assert.isLegal(connection instanceof Connection);
+
 		
 		Connection otherConnection = (Connection) connection;
+
 		this.client = otherConnection.client; 
 		this.credentialsPrompter = otherConnection.credentialsPrompter;
-		this.sslCertificateCallback = otherConnection.sslCertificateCallback;
-		this.username = otherConnection.username;
-		this.password = otherConnection.password;
-		this.rememberPassword = otherConnection.rememberPassword;
-		this.token = otherConnection.token;
 		this.rememberToken = otherConnection.rememberToken;
+		this.rememberPassword = otherConnection.rememberPassword;
+		this.tokenLoaded = otherConnection.tokenLoaded;
+		this.rememberPassword = otherConnection.rememberPassword;
+
+		IAuthorizationContext otherContext = otherConnection.client.getAuthorizationContext();
+		IAuthorizationContext context = this.client.getAuthorizationContext();
+		context.setUserName(otherContext.getUserName());
+		context.setPassword(otherContext.getPassword());
+		context.setToken(otherContext.getToken());
 	}
 
 	@Override
@@ -457,16 +427,10 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	 * @throws UnauthorizedException 
 	 */
 	public <T extends IResource> T createResource(T resource) {
-		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			return client.create(resource);
 		} catch (UnauthorizedException e) {
-			needStrategy = false;
 			return retryCreate(e, resource);
-		} finally {
-			if(needStrategy) {
-				connect();
-			}
 		}
 	}
 
@@ -477,16 +441,10 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	 * @throws UnauthorizedException 
 	 */
 	public <T extends IResource> T updateResource(T resource) {
-		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			return client.update(resource);
 		} catch (UnauthorizedException e) {
-			needStrategy = false;
 			return retryUpdate(e, resource);
-		} finally {
-			if(needStrategy) {
-				connect();
-			}
 		}
 	}
 
@@ -503,32 +461,19 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	
 	@Override
 	public <T extends IResource> List<T> getResources(String kind, String namespace) {
-		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
-			client.setSSLCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback());
 			return client.list(kind, namespace);
 		} catch (UnauthorizedException e) {
-			needStrategy = false;
 			return retryList(e, kind, namespace);
-		} finally {
-			if(needStrategy) {
-				connect();
-			}
 		}
 	}
 
 	@Override
 	public <T extends IResource> T getResource(String kind, String namespace, String name) {
-		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			return client.get(kind, name, namespace);
 		} catch (UnauthorizedException e) {
-			needStrategy = false;
 			return retryGet(e, kind, name, namespace);
-		} finally {
-			if(needStrategy) {
-				connect();
-			}
 		}
 	}
 	/**
@@ -538,16 +483,10 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	 * @throws OpenShiftException
 	 */
 	public <T extends IResource> T getResource(IResource resource) {
-		boolean needStrategy = initClientAuthorizationStrategy();
 		try {
 			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
 		} catch (UnauthorizedException e) {
-			needStrategy = false;
 			return retryGet(e, resource.getKind(), resource.getName(), resource.getNamespace());
-		} finally {
-			if(needStrategy) {
-				connect();
-			}
 		}
 	}
 	
@@ -609,23 +548,15 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 
 	public String getToken() {
-		loadToken();
-		return token;
+		return loadAuthorizationContext().getToken();
 	}
 
-	/**
-	 * Loads the token from the secure storage if it's not been loaded nor set yet. 
-	 */
-	private synchronized void loadToken() {
-		if (StringUtils.isEmpty(token) && !tokenLoaded) {
-			setToken(load(SECURE_STORAGE_TOKEN_KEY));
-			tokenLoaded = true;
-			this.rememberToken = isNotBlank(token); //potential conflict with load password?
-		}
-	}
 	
 	public void setToken(String token) {
-		firePropertyChange(SECURE_STORAGE_TOKEN_KEY, token, this.token = token);
+		IAuthorizationContext context = client.getAuthorizationContext();
+		String old = context.getToken();
+		context.setToken(token);
+		firePropertyChange(SECURE_STORAGE_TOKEN_KEY, old, token);
 		this.tokenLoaded = true;
 	}
 
@@ -643,16 +574,16 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		if (getClass() != obj.getClass())
 			return false;
 		Connection other = (Connection) obj;
-		if (username == null) {
-			if (other.username != null)
-				return false;
-		} else if (!username.equals(other.username))
-			return false;
 		if (client == null) {
 			if (other.client != null)
 				return false;
 		} else if (other.client == null
 				|| !client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
+			return false;
+		if (client.getAuthorizationContext().getUserName() == null) {
+			if (other.client.getAuthorizationContext().getUserName() != null)
+				return false;
+		} else if (!client.getAuthorizationContext().getUserName().equals(other.client.getAuthorizationContext().getUserName()))
 			return false;
 		return true;
 	}
@@ -665,10 +596,10 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		//It is safe to cast now.
 		Connection other = (Connection)connection;
 		//User name is already compared
-		if(!Objects.equals(password, other.password)) {
+		if(!Objects.equals(client.getAuthorizationContext().getPassword(), other.client.getAuthorizationContext().getPassword())) {
 			return false;
 		}
-		if(!Objects.equals(token, other.token)) {
+		if(!Objects.equals(client.getAuthorizationContext().getToken(), other.client.getAuthorizationContext().getToken())) {
 			return false;
 		}
 		return true;
