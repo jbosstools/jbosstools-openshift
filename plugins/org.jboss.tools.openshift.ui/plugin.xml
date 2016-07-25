@@ -336,6 +336,7 @@
                  <iterate>
                     <or>
                        <adapt type="com.openshift.restclient.model.IService" />
+                       <adapt type="org.jboss.tools.openshift.internal.ui.models.IRunningPodHolder" />
                     </or>
                  </iterate>
               </and>
@@ -810,10 +811,14 @@
        commandId="org.jboss.tools.openshift.ui.command.podlogs"
        tooltip="The openshift binary must be set in user preferences in order to retrieve Pod logs"
        style="push" />
-     <command
+    <command
         commandId="org.jboss.tools.openshift.ui.command.portforwarding"
         style="push" />
-  </menuContribution>
+       <dynamic
+             id="org.jboss.tools.openshift.ui.dynamic3" 
+             class="org.jboss.tools.openshift.internal.ui.handler.ScaleDeploymentContributionItem">
+       </dynamic>
+   </menuContribution>
 
   <menuContribution
         allPopups="false"
@@ -1190,6 +1195,13 @@
     </adapter>
  </factory>
 
+		<factory
+			adaptableType="org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement"
+			class="org.jboss.tools.openshift.internal.ui.models.RunningPodHolderAdapterFactory">
+			<adapter
+				type="org.jboss.tools.openshift.internal.ui.models.IRunningPodHolder">
+		</adapter>
+	</factory>
 	</extension>
 
 	<!-- definitions -->

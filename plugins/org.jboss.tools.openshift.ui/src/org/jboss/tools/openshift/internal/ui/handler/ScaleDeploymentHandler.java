@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler;
 
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.math.NumberUtils;
@@ -51,12 +52,15 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
+import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.api.capabilities.IScalable;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
 
 /**
@@ -77,10 +81,34 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 			scaleUsing(event, rc, rc.getName());
 		} else {
 			IServiceWrapper deployment = getSelectedElement(event, IServiceWrapper.class);
+			if(deployment == null) {
+				IResourceWrapper<?, IOpenshiftUIElement<?,?>> wrapper = getSelectedElement(event, IResourceWrapper.class);
+				deployment = getServiceWrapperForRunningPod(wrapper);
+			}
 			if (deployment != null) {
 				rc = getReplicationController(deployment);
 				if (rc != null) {
 					scaleUsing(event, rc, deployment.getWrapped().getName());
+				}
+			}
+		}
+		return null;
+	}
+
+	//Returns service UI element if given resource wrapper has a running pod and service wrapper as the parent, otherwise returns null.
+	protected static IServiceWrapper getServiceWrapperForRunningPod(IResourceWrapper<?, IOpenshiftUIElement<?,?>> resourceWrapper) {
+		if(resourceWrapper != null && resourceWrapper.getWrapped() instanceof IPod
+				&& !ResourceUtils.isBuildPod((IPod)resourceWrapper.getWrapped())) {
+			Object parent = resourceWrapper.getParent();
+			if(parent instanceof IServiceWrapper) {
+				return (IServiceWrapper)parent;
+			} else if(parent instanceof IProjectWrapper) {
+				Collection<IResourceWrapper<?, ?>> services = ((IProjectWrapper)parent).getResourcesOfKind(ResourceKind.SERVICE);
+				for (IResourceWrapper<?, ?> wrapper: services) {
+					IServiceWrapper serviceWrapper = (IServiceWrapper)wrapper;
+					if(ResourceUtils.containsAll(serviceWrapper.getWrapped().getMetadata(), ((IPod)resourceWrapper.getWrapped()).getLabels())) {
+						return serviceWrapper;
+					}
 				}
 			}
 		}

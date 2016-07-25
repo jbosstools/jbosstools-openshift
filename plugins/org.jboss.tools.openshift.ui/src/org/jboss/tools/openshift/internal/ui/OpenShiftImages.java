@@ -57,6 +57,8 @@ public class OpenShiftImages {
     public static final Image CHECKED_IMG = repo.getImage("checked.png"); //$NON-NLS-1$
     public static final ImageDescriptor UNCHECKED = repo.create("unchecked.png"); //$NON-NLS-1$
     public static final Image UNCHECKED_IMG = repo.getImage("unchecked.png"); //$NON-NLS-1$
+	public static final ImageDescriptor TREND_UP = repo.create("trend-up.png"); //$NON-NLS-1$ 
+	public static final ImageDescriptor TREND_DOWN = repo.create("trend-down.png"); //$NON-NLS-1$ 
 
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 
