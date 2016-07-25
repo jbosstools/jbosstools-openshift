@@ -115,7 +115,7 @@ public class WatchManager {
 
 
 		public WatchListener(IProject project, Connection conn, String kind, int backoff, long lastConnect) {
-			Trace.debug("Adding WatchListener for {0} and kind {1}", project.getName(), kind);
+			Trace.debug("WatchManager Adding WatchListener for {0} and kind {1}", project.getName(), kind);
 			this.project = project;
 			this.conn = conn;
 			this.backoff = backoff;
@@ -125,40 +125,44 @@ public class WatchManager {
 			if(System.currentTimeMillis() - lastConnect > BACKOFF_RESET) {
 				backoff = 0;
 			}
-			Trace.debug("Initial watch backoff of {0} ms", FIBONACCI[backoff] * BACKOFF_MILLIS );
+			Trace.debug("WatchManager 	Initial watch backoff of {0} ms", FIBONACCI[backoff] * BACKOFF_MILLIS );
 
 		}
 	
 		@Override
 		public void connected(List<IResource> resources) {
-			Trace.debug("Endpoint connected to {0} with {1} resources", conn.toString(), resources.size());
+			Trace.debug("WatchManager Endpoint connected to {0} with {1} resources", conn.toString(), resources.size());
 			this.resources.addAll(resources);
 		}
 
 		@Override
 		public void disconnected() {
-			Trace.debug("Endpoint disconnected to {0}.", conn.toString());
-			restart();
+			Trace.debug("WatchManager Endpoint disconnected to {0}.", conn.toString());
+			state.set(State.DISCONNECTED);
 		}
 
 		@Override
 		public void error(Throwable err) {
-			Trace.warn("Reconnecting. There was an error watching connection {0}: ", err, conn.toString());
+			Trace.warn("WatchManager Reconnecting. There was an error watching connection {0}: ", err, conn.toString());
 			restart();
 		}
 		
+		@SuppressWarnings("incomplete-switch")
 		private void restart() {
-			if(state.get() == State.STARTING) {
+			switch(state.get()) {
+			case STARTING:
 				Trace.debug("Returning early from restart.  Already starting for project {0} and kind {1}", project.getName(), kind);
+			case DISCONNECTED:
+				Trace.debug("Endpoint disconnected and skipping restart for project {0} and kind {1}", project.getName(), kind);
 				return;
 			}
 			try {
 				// TODO enhance fix to only check project once
 				conn.getResource(project);
-				Trace.debug("Rescheduling watch job for project {0} and kind {1}", project.getName(), kind);
+				Trace.debug("WatchManager Rescheduling watch job for project {0} and kind {1}", project.getName(), kind);
 				startWatch(project, backoff, lastConnect, this);
 			}catch(Exception e) {
-				Trace.debug("Unable to rescheduling watch job for project {0} and kind {1}", e, project.getName(), kind);
+				Trace.debug("WatchManager Unable to rescheduling watch job for project {0} and kind {1}", e, project.getName(), kind);
 				stopWatch(project);
 			}
 		}
@@ -234,23 +238,25 @@ public class WatchManager {
 		
 		@Override
 		public void received(IResource resource, ChangeType change) {
-			Trace.debug("Watch received change\n{0}",resource.toJson(false));
-			IResource newItem = null;
-			IResource oldItem = null;
-			int index = resources.indexOf(resource);
-			if (ChangeType.ADDED.equals(change)) {
-				resources.add(resource);
-				newItem = resource;
-			} else if (ChangeType.DELETED.equals(change)) {
-				oldItem = index > NOT_FOUND ? resources.remove(index) : resource;
-			} else if (ChangeType.MODIFIED.equals(change)) {				
-				if(index > NOT_FOUND) {
-					oldItem = resources.remove(index);
+			Trace.debug("Watch received change in {0} state\n{1}", state, resource.toJson(false));
+			if(State.CONNECTED == state.get()) {
+				IResource newItem = null;
+				IResource oldItem = null;
+				int index = resources.indexOf(resource);
+				if (ChangeType.ADDED.equals(change)) {
+					resources.add(resource);
+					newItem = resource;
+				} else if (ChangeType.DELETED.equals(change)) {
+					oldItem = index > NOT_FOUND ? resources.remove(index) : resource;
+				} else if (ChangeType.MODIFIED.equals(change)) {				
+					if(index > NOT_FOUND) {
+						oldItem = resources.remove(index);
+					}
+					resources.add(resource);
+					newItem = resource;
 				}
-				resources.add(resource);
-				newItem = resource;
+				ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_RESOURCE, oldItem, newItem);
 			}
-			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_RESOURCE, oldItem, newItem);
 		}
 		
 	}

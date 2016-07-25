@@ -30,6 +30,7 @@ import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.ImageStreamApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
+import org.jboss.tools.openshift.test.core.connection.ConnectionTestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -252,15 +253,15 @@ public class OpenShiftExplorerLabelProviderTest {
 	}
 	
 	@Test
-	public void getStyledTextForAConnection(){
-		Connection connection = new Connection(client, null, null);
+	public void getStyledTextForAConnection() throws Exception{
+		Connection connection = ConnectionTestUtils.createConnection("username", "token", client.getBaseURL().toString());
 		connection.setUsername("foo@bar.com");
 		String exp = String.format("foo@bar.com %s", client.getBaseURL().toString());
 		assertEquals("Exp. a connection to display its base URL", exp, provider.getStyledText(connection).getString());
 	}
 	@Test
-	public void getStyledTextForAConnectionWithoutUserName(){
-		Connection connection = new Connection(client, null, null);
+	public void getStyledTextForAConnectionWithoutUserName() throws Exception{
+		Connection connection = ConnectionTestUtils.createConnection(null, "token", client.getBaseURL().toString());
 		String exp = String.format("<unknown user> %s", client.getBaseURL().toString());
 		assertEquals("Exp. a connection to display its base URL", exp, provider.getStyledText(connection).getString());
 	}

@@ -100,8 +100,8 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 			@Override
 			public Collection<IResource> visit(IClientCapability capability) {
 				final IClient client = capability.getClient();
-				List<IResource> existing = new ArrayList<>(template.getItems().size());
-				for (IResource resource : template.getItems()) {
+				List<IResource> existing = new ArrayList<>(template.getObjects().size());
+				for (IResource resource : template.getObjects()) {
 					try {
 						IResource found = client.get(resource.getKind(), resource.getName(), project.getName());
 						existing.add(found);

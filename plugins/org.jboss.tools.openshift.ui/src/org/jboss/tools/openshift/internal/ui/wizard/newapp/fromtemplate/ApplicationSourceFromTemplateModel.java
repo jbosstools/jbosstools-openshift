@@ -169,7 +169,7 @@ public class ApplicationSourceFromTemplateModel
 			return;
 		}
 		setParameters(template.getParameters().values());
-		setItems(template.getItems());
+		setItems(template.getObjects());
 		setLabels(template.getObjectLabels());
 	}
 

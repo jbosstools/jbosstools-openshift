@@ -9,7 +9,6 @@
 package org.jboss.tools.openshift.client.internal;
 
 import org.eclipse.core.runtime.Plugin;
-import org.eclipse.jetty.util.log.Log;
 import org.osgi.framework.BundleContext;
 
 public class OpenShiftClientActivator extends Plugin {
@@ -26,10 +25,6 @@ public class OpenShiftClientActivator extends Plugin {
 			//Change class loader to make jetty-logging.properties available and 
 			//force Jetty to use the StrErrLog logger, where we can control the logging level
 			Thread.currentThread().setContextClassLoader(cl);
-			//This forces the Jetty logger to load and initialize with our defined properties
-			if (Log.getRootLogger().isDebugEnabled()) {
-				Log.getRootLogger().setDebugEnabled(false);	
-			}
 		} finally {
 			Thread.currentThread().setContextClassLoader(orig);
 		}
