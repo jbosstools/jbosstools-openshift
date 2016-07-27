@@ -340,6 +340,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public Collection<String> getAllHosts() {
 		return allHosts;
 	}
+	
+	public void refreshWizardModel() {
+		wizardModel.setConnection(connection);
+	}
 
 	public IStatus connect() {
 		if (isConnected() 
@@ -522,6 +526,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	
 	public void setConnectionAdvancedPropertiesProvider(IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider) {
 		this.connectionAdvancedPropertiesProvider = connectionAdvancedPropertiesProvider;
+	}
+	
+	public IConnectionAdvancedPropertiesProvider getConnectionAdvancedPropertiesProvider() {
+		return this.connectionAdvancedPropertiesProvider;
 	}
 
 	public interface IConnectionAuthenticationProvider {
