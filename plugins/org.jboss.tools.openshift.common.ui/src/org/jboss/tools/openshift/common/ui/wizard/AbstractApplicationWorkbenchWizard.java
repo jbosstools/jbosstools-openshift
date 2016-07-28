@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -38,6 +38,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizar
  * A wizard to create a new OpenShift application.
  * 
  * @author Andre Dietisheim
+ * @author Jeff Maury
  * 
  */
 public abstract class AbstractApplicationWorkbenchWizard extends Wizard implements IWorkbenchWizard {
@@ -89,6 +90,7 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 				return null;
 			}
 
+			wizard.setContainer(getContainer());
 			if (wizard.getPageCount() == 0) {
 				// initialize wizard
 				if (wizard instanceof IWorkbenchWizard) {

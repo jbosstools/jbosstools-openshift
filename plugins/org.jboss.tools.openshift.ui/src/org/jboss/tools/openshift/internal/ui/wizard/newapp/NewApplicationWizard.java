@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -62,6 +62,7 @@ import com.openshift.restclient.model.IResource;
  * 
  * @author jeff.cantrill
  * @author Andre Dietisheim
+ * @author Jeff Maury
  */
 public class NewApplicationWizard 
 	extends Wizard 
@@ -85,11 +86,11 @@ public class NewApplicationWizard
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
+        fromImageModel.setContainer(getContainer());
 		if (selection == null
 				|| selection.isEmpty()) {
 			return;
 		}
-		fromImageModel.setContainer(getContainer());
 		org.eclipse.core.resources.IProject selectedProject = UIUtils.getFirstElement(selection, org.eclipse.core.resources.IProject.class);
 		model.setEclipseProject(selectedProject);
 		
