@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.jboss.tools.openshift.common.core.ICredentialsPrompter;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.connection.IConnectionsFactory;
 import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
@@ -38,6 +39,7 @@ import com.openshift.restclient.ISSLCertificateCallback;
 
 /**
  * @author Andre Dietisheim
+ * @author Jeff Maury
  */
 public class ConnectionWizardPageModelTest {
 
@@ -242,6 +244,12 @@ public class ConnectionWizardPageModelTest {
 		model.dispose();
 		// then disable 2x, once when editing, 2nd time when disposing
 		verify(connection, times(2)).enablePromptCredentials(false);
+	}
+	
+	@Test
+	public void should_default_connection_be_OS3() {
+	    ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(null, allConnections, null, true, wizardModel);
+	    assertThat(model.getConnectionFactory().getId()).isEqualTo(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
 	}
 
 	private Connection mockOS3Connection(String username, String url) {
