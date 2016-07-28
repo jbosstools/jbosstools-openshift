@@ -289,6 +289,10 @@ public class NewApplicationWizard
 	@Override
 	public void setConnection(Connection connection) {
 		model.setConnection(connection);
+		if(model == null || fromImageModel == null) {
+			//wizard is disposed by canceling the creation of a required project;
+			return;
+		}
 		fromImageModel.setConnection(connection);
 	}
 
