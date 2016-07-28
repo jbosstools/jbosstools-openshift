@@ -6,3 +6,4 @@ bin/
 .plugins/.project
 .recommenders
 .DS_Store
+rebel.xml
