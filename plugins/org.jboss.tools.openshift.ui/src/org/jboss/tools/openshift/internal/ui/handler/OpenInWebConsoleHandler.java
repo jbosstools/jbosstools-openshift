@@ -34,6 +34,7 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.volume.IPersistentVolumeClaim;
 
 /**
  * @author Fred Bricon
@@ -90,6 +91,8 @@ public class OpenInWebConsoleHandler extends AbstractHandler {
 				url.append("/services/").append(resource.getName());
 			} else if (resource instanceof IImageStream) {
 				url.append("/images/").append(resource.getName());
+			} else if (resource instanceof IPersistentVolumeClaim) {
+				url.append("/persistentvolumeclaims/").append(resource.getName());
 			}
 		}
 		return url.toString();

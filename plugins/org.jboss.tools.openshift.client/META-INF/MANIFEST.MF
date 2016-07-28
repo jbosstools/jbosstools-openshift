@@ -35,7 +35,8 @@ Export-Package: com.openshift.internal.restclient;x-friends:="org.jboss.tools.op
  com.openshift.restclient.model.project,
  com.openshift.restclient.model.route,
  com.openshift.restclient.model.template,
- com.openshift.restclient.model.user
+ com.openshift.restclient.model.user,
+ com.openshift.restclient.model.volume
 Import-Package: org.apache.commons.logging,
  org.eclipse.core.runtime,
  org.eclipse.debug.internal.core,
