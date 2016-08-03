@@ -50,6 +50,8 @@ public class ConnectionFactory implements IConnectionFactory {
 			LazySSLCertificateCallback sslCertCallback = new LazySSLCertificateCallback();
 			IClient client = new ClientBuilder(url)
 					.sslCertificateCallback(sslCertCallback)
+					.withMaxRequests(ConnectionProperties.MAX_REQUESTS)
+					.withMaxRequestsPerHost(ConnectionProperties.MAX_REQUESTS)
 					.build();
 			return new Connection(client, new LazyCredentialsPrompter());
 		} catch (OpenShiftException e) {
