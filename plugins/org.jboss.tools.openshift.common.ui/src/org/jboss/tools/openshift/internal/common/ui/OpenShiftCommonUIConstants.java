@@ -21,7 +21,7 @@ public final class OpenShiftCommonUIConstants {
     public static final String IMPORT_APPLICATION_DIALOG_SETTINGS_KEY = "ImportApplicationWizard";
     
     /**
-     * Name of the key used to stored Git default repo path
+     * Name of the key used to stored custom Git repo path
      */
     public static final String REPO_PATH_KEY = "repoPath";
 }
