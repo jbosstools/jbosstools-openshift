@@ -68,7 +68,11 @@ abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElemen
 	
 	@Override
 	public int hashCode() {
-		return wrapped.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((parent == null) ? 0 : parent.hashCode());
+		result = prime * result + wrapped.hashCode();
+		return result;
 	}
 	
 	synchronized void updateWith(R r) {
