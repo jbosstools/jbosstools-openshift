@@ -143,8 +143,12 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 			} else {
 				UsageStats.getInstance().importV2Application(model.getConnection().getHost(), success);
 			}
-			if (success && !model.isUseDefaultRepoPath()) {
-				getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
+			if (success) {
+				if(!model.isUseDefaultRepoPath()) {
+					getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
+				} else {
+					getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
+				}
 			}
 			return success;
 	}

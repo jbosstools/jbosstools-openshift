@@ -138,8 +138,12 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		} else {
 			success = importProject();
 		}
-		if (success && !model.isUseDefaultRepositoryPath()) {
-		    getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
+		if (success) {
+			if(!model.isUseDefaultRepositoryPath()) {
+				getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
+			} else {
+				getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
+			}
 		}
 		UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
 		return success;
