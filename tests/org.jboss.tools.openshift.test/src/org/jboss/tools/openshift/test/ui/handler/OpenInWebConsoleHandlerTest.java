@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IEvent;
 import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
@@ -55,6 +56,7 @@ public class OpenInWebConsoleHandlerTest {
 			new DataPair(mock(IService.class), "http://localhost/console/project/namespace/browse/services/qwerty"),
 			new DataPair(mock(IImageStream.class), "http://localhost/console/project/namespace/browse/images/qwerty"),
 			new DataPair(mock(IPersistentVolumeClaim.class), "http://localhost/console/project/namespace/browse/persistentvolumeclaims/qwerty"),
+			new DataPair(mock(IEvent.class), "http://localhost/console/project/namespace/browse/events/"),
 			new DataPair(mock(IProject.class), "http://localhost/console/project/namespace"),
 			new DataPair(null, "http://localhost/console")	
 	};

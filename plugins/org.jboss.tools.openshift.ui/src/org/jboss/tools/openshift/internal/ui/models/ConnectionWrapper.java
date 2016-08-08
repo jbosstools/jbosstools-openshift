@@ -34,9 +34,20 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
 class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel> implements IConnectionWrapper {
-	public static final String[] RESOURCE_KINDS = { ResourceKind.BUILD, ResourceKind.BUILD_CONFIG,
-			ResourceKind.DEPLOYMENT_CONFIG, ResourceKind.IMAGE_STREAM, ResourceKind.IMAGE_STREAM_TAG, ResourceKind.POD,
-			ResourceKind.ROUTE, ResourceKind.REPLICATION_CONTROLLER, ResourceKind.SERVICE, ResourceKind.TEMPLATE, ResourceKind.PVC };
+	public static final String[] RESOURCE_KINDS = { 
+			ResourceKind.BUILD, 
+			ResourceKind.BUILD_CONFIG,
+			ResourceKind.DEPLOYMENT_CONFIG, 
+			ResourceKind.EVENT, 
+			ResourceKind.IMAGE_STREAM, 
+			ResourceKind.IMAGE_STREAM_TAG, 
+			ResourceKind.POD,
+			ResourceKind.ROUTE, 
+			ResourceKind.REPLICATION_CONTROLLER, 
+			ResourceKind.SERVICE, 
+			ResourceKind.TEMPLATE,
+			ResourceKind.PVC
+		};
 
 	private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
 	private Map<IProject, ProjectWrapper> projects = new HashMap<>();

@@ -31,6 +31,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IEvent;
 import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
@@ -98,7 +99,8 @@ public class OpenInWebConsoleHandler extends AbstractHandler {
 		Pod					  (IPod.class, "/browse/pods/", IResource::getName),
 		Service				  (IService.class, "/browse/services/", IResource::getName),
 		ImageStream			  (IImageStream.class, "/browse/images/", IResource::getName),
-		PersistentVolumeClaim (IPersistentVolumeClaim.class, "/browse/persistentvolumeclaims/", IResource::getName);
+		PersistentVolumeClaim (IPersistentVolumeClaim.class, "/browse/persistentvolumeclaims/", IResource::getName),
+		Event                 (IEvent.class, "/browse/events/", r -> org.apache.commons.lang.StringUtils.EMPTY);
 		
 		private final Class<? extends IResource> resType;
 		private final String urlPart;

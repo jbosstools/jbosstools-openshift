@@ -1006,7 +1006,27 @@
            style="push">
      </command>
   </menuContribution>
-	</extension>
+  <menuContribution
+        allPopups="false"
+         locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.EventsTab">
+      <command
+            commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+            icon="icons/refresh.gif"
+            id="org.jboss.tools.openshift.ui.command.resource.refresh"
+            style="push"
+            tooltip="Refresh">
+      </command>
+      <menu
+            label="%openshift.explorer.properties.menus.showIn">
+         <command
+              commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
+               icon="icons/open-web-console.gif"
+               label="Web Console"
+               mnemonic="C">
+         </command>
+      </menu>
+   </menuContribution>
+   </extension>
 
 	<extension
 		point="org.eclipse.ui.handlers">
@@ -1514,19 +1534,6 @@
             label="%openshift.explorer.properties.tab.buildConfigs">
       </propertyTab>
       <propertyTab
-            afterTab="org.jboss.tools.openshift.ui.properties.tab.replicationControllers"
-            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
-            id="org.jboss.tools.openshift.ui.properties.tab.deploymentConfigs"
-            label="%openshift.explorer.properties.tab.deploymentConfigs">
-      </propertyTab>
-      <propertyTab
-            afterTab="org.jboss.tools.openshift.ui.properties.tab.deploymentConfigs"
-            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
-            id="org.jboss.tools.openshift.ui.properties.tab.pods"
-            image="icons/blocks.png"
-            label="%openshift.explorer.properties.tab.pods">
-      </propertyTab>
-      <propertyTab
             afterTab="org.jboss.tools.openshift.ui.properties.tab.buildConfigs"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
             id="org.jboss.tools.openshift.ui.properties.tab.replicationControllers"
@@ -1535,6 +1542,12 @@
       <propertyTab
             afterTab="org.jboss.tools.openshift.ui.properties.tab.replicationControllers"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
+            id="org.jboss.tools.openshift.ui.properties.tab.deploymentConfigs"
+            label="%openshift.explorer.properties.tab.deploymentConfigs">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.deploymentConfigs"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
             id="org.jboss.tools.openshift.ui.properties.tab.imageStreams"
             image="icons/image.png"
             label="%openshift.explorer.properties.tab.imageStreams">
@@ -1542,12 +1555,12 @@
       <propertyTab
             afterTab="org.jboss.tools.openshift.ui.properties.tab.imageStreams"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
-            id="org.jboss.tools.openshift.ui.properties.tab.project.templates"
-            image="icons/template.png"
-            label="%openshift.explorer.properties.tab.templates">
+            id="org.jboss.tools.openshift.ui.properties.tab.pods"
+            image="icons/blocks.png"
+            label="%openshift.explorer.properties.tab.pods">
       </propertyTab>
       <propertyTab
-            afterTab="org.jboss.tools.openshift.ui.properties.tab.templates"
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.pods"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Deployments"
             id="org.jboss.tools.openshift.ui.properties.tab.routes"
             image="icons/route.png"
@@ -1566,6 +1579,12 @@
             label="%openshift.explorer.properties.tab.buildConfigs">
       </propertyTab>
       <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.buildConfigs"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.replicationControllers"
+            label="%openshift.explorer.properties.tab.replicationControllers">
+      </propertyTab>
+      <propertyTab
             afterTab="org.jboss.tools.openshift.ui.properties.tab.project.replicationControllers"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
             id="org.jboss.tools.openshift.ui.properties.tab.project.deploymentConfigs"
@@ -1574,32 +1593,32 @@
       <propertyTab
             afterTab="org.jboss.tools.openshift.ui.properties.tab.project.deploymentConfigs"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
-            id="org.jboss.tools.openshift.ui.properties.tab.project.pods"
-            image="icons/blocks.png"
-            label="%openshift.explorer.properties.tab.pods">
+            id="org.jboss.tools.openshift.ui.properties.tab.project.events"
+            label="%openshift.explorer.properties.tab.events">
       </propertyTab>
       <propertyTab
-            afterTab="org.jboss.tools.openshift.ui.properties.project.tab.buildConfigs"
-            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
-            id="org.jboss.tools.openshift.ui.properties.tab.project.replicationControllers"
-            label="%openshift.explorer.properties.tab.replicationControllers">
-      </propertyTab>
-      <propertyTab
-            afterTab="org.jboss.tools.openshift.ui.properties.project.tab.replicationControllers"
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.events"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
             id="org.jboss.tools.openshift.ui.properties.tab.project.imageStreams"
             image="icons/image.png"
             label="%openshift.explorer.properties.tab.imageStreams">
       </propertyTab>
       <propertyTab
-            afterTab="org.jboss.tools.openshift.ui.properties.project.tab.replicationControllers"
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.imageStreams"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.pods"
+            image="icons/blocks.png"
+            label="%openshift.explorer.properties.tab.pods">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.pods"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
             id="org.jboss.tools.openshift.ui.properties.tab.project.routes"
             image="icons/route.png"
             label="%openshift.explorer.properties.tab.routes">
       </propertyTab>
       <propertyTab
-            afterTab="org.jboss.tools.openshift.ui.properties.project.tab.routes"
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.routes"
             category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
             id="org.jboss.tools.openshift.ui.properties.tab.project.services"
             image="icons/service.png"
@@ -1611,6 +1630,13 @@
             id="org.jboss.tools.openshift.ui.properties.tab.project.storage"
             image="icons/storage.png"
             label="%openshift.explorer.properties.tab.storage">
+      </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.storage"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.templates"
+            image="icons/template.png"
+            label="%openshift.explorer.properties.tab.templates">
       </propertyTab>
    </propertyTabs>
 </extension>
@@ -1723,6 +1749,15 @@
             enablesFor="1"
             id="org.jboss.tools.openshift.ui.properties.tab.section.storage"
             tab="org.jboss.tools.openshift.ui.properties.tab.project.storage">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.EventsPropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.events"
+            tab="org.jboss.tools.openshift.ui.properties.tab.project.events">
          <input
                type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
