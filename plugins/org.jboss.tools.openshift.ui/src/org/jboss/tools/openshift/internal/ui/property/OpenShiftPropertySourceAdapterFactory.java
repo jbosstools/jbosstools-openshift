@@ -18,6 +18,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IEvent;
 import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
@@ -42,6 +43,8 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 					return new BuildPropertySource((IBuild)resource);
 				case ResourceKind.BUILD_CONFIG: 
 					return new BuildConfigPropertySource((IBuildConfig)resource);
+				case ResourceKind.EVENT: 
+					return new EventPropertySource((IEvent)resource);
 				case ResourceKind.IMAGE_STREAM:
 					return new ImageStreamPropertySource((IImageStream) resource);
 				case ResourceKind.POD:

@@ -11,7 +11,11 @@
 
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
+import java.text.ParseException;
+import java.util.Date;
+
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -38,6 +42,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.comparators.CreationTimestampComparator;
 import org.jboss.tools.openshift.internal.ui.models.IResourceContainer;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
@@ -235,6 +240,23 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 				IResource r1 = ((IResourceWrapper<?, ?>) e1).getWrapped();
 				IResource r2 = ((IResourceWrapper<?, ?>) e2).getWrapped();
 				return r1.getName().compareTo(r2.getName());
+			}
+		};
+	}
+	protected ViewerComparator createCreationTimestampSorter(boolean descending) {
+		return new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				IResource r1 = ((IResourceWrapper<?, ?>) e1).getWrapped();
+				IResource r2 = ((IResourceWrapper<?, ?>) e2).getWrapped();
+				try {
+					Date d1 = DateTimeUtils.parse(r1.getCreationTimeStamp());
+					Date d2 = DateTimeUtils.parse(r2.getCreationTimeStamp());
+					return descending ? d2.compareTo(d1) : d1.compareTo(d2);
+				}catch(ParseException e) {
+					OpenShiftUIActivator.log(IStatus.ERROR, "Unable to parse dates in OpenShift Resource Property Tab Section", e);
+				}
+				return 0;
 			}
 		};
 	}
