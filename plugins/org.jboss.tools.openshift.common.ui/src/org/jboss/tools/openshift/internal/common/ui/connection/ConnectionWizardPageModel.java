@@ -70,6 +70,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private String userdocUrl;
 	private IStatus connectedStatus;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
+	private IConnectionAdvancedPropertiesProvider  connectionAdvancedPropertiesProvider;
 	private Collection<IConnection> allConnections;
 	private Class<? extends IConnection> connectionType;
 	private IConnectionAware<IConnection> wizardModel;
@@ -339,6 +340,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public Collection<String> getAllHosts() {
 		return allHosts;
 	}
+	
+	public void refreshWizardModel() {
+		wizardModel.setConnection(connection);
+	}
 
 	public IStatus connect() {
 		if (isConnected() 
@@ -348,7 +353,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		IStatus status = Status.OK_STATUS;
 		listener.secureStoreException = null;
 		try {
-			IConnection connection = createConnection(connectionFactory, connectionAuthenticationProvider);
+			IConnection connection = 
+					createConnection(connectionFactory, connectionAuthenticationProvider, connectionAdvancedPropertiesProvider);
 			if(connection != null) {
 				addConnectionListener(connection);
 				if (connection.connect()) {
@@ -402,7 +408,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return listener.secureStoreException;
 	}
 
-	private IConnection createConnection(IConnectionFactory factory, IConnectionAuthenticationProvider authProvider) {
+	private IConnection createConnection(
+				IConnectionFactory factory, 
+				IConnectionAuthenticationProvider authProvider, 
+				IConnectionAdvancedPropertiesProvider advPropsProvider) {
 		if (factory == null) {
 			return null;
 		}
@@ -414,6 +423,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		
 		if (authProvider != null) {
 			authProvider.update(connection);
+		}
+		
+		if (advPropsProvider != null) {
+			advPropsProvider.update(connection);
 		}
 		connection.enablePromptCredentials(false);
 		return connection;
@@ -510,8 +523,22 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public void setConnectionAuthenticationProvider(IConnectionAuthenticationProvider authenticationProvider) {
 		this.connectionAuthenticationProvider = authenticationProvider;
 	}
+	
+	public void setConnectionAdvancedPropertiesProvider(IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider) {
+		this.connectionAdvancedPropertiesProvider = connectionAdvancedPropertiesProvider;
+	}
+	
+	public IConnectionAdvancedPropertiesProvider getConnectionAdvancedPropertiesProvider() {
+		return this.connectionAdvancedPropertiesProvider;
+	}
 
 	public interface IConnectionAuthenticationProvider {
+
+		public IConnection update(IConnection connection);
+
+	}
+	
+	public interface IConnectionAdvancedPropertiesProvider {
 
 		public IConnection update(IConnection connection);
 
