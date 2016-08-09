@@ -43,41 +43,22 @@ public class CDKDockerUtilityTest extends TestCase {
 	@Test
 	public void testDockerConnectionExists() throws Exception {
 		assertFalse(util.dockerConnectionExists(null));
-
-		ServiceManagerEnvironment adb = createADB();
-		assertFalse(util.dockerConnectionExists(adb));	
+		assertFalse(util.dockerConnectionExists("test"));
 
 		IDockerConnection existingConnection = mock(IDockerConnection.class);
 		when(existingConnection.getUri()).thenReturn("https://10.1.2.2:2376");
+		when(existingConnection.getName()).thenReturn("test");
 		when(mgr.getConnections()).thenReturn(new IDockerConnection[]{existingConnection });
-
-		assertTrue(util.dockerConnectionExists(adb));
-
-		ServiceManagerEnvironment wrongHost = createADB("10.1.2.3");
-		assertFalse(util.dockerConnectionExists(wrongHost));
-
-		ServiceManagerEnvironment wrongPort = createADB("10.1.2.2", "500");
-		assertFalse(util.dockerConnectionExists(wrongPort));
-	}
-
-	@Test
-	public void testGetNextName() throws Exception {
-		String name = "foo";
-		IServer server = mockServer(name);
-		assertEquals(name, util.getNextName(server));	
-
-		IDockerConnection existingConnection = mock(IDockerConnection.class);
-		when(existingConnection.getName()).thenReturn(name);
-		when(mgr.getConnections()).thenReturn(new IDockerConnection[]{existingConnection });
-
-		assertEquals(name+" (1)", util.getNextName(server));	
+		assertTrue(util.dockerConnectionExists("test"));
+		IDockerConnection found = util.findDockerConnection("test");
+		assertEquals(found, existingConnection);
 	}
 
 	@Test
 	public void testCreateDockerConnection() throws Exception {
 		String name = "foo";
 		IServer server = mockServer(name);
-		ServiceManagerEnvironment adb = createADB();
+		ServiceManagerEnvironment adb = createADB("10.1.2.2");
 		IDockerConnection dockerConnection = util.createDockerConnection(server, adb);
 		assertNotNull(dockerConnection);
 		verify(mgr).addConnection(dockerConnection);
@@ -85,10 +66,6 @@ public class CDKDockerUtilityTest extends TestCase {
 		assertEquals(name, dockerConnection.getName());	
 		assertEquals("https://10.1.2.2:2376", dockerConnection.getUri());
 		assertEquals("/cert/path/.docker", dockerConnection.getTcpCertPath());
-	}
-
-	private ServiceManagerEnvironment createADB() throws URISyntaxException {
-		return createADB("10.1.2.2");
 	}
 
 	private ServiceManagerEnvironment createADB(String host) throws URISyntaxException {

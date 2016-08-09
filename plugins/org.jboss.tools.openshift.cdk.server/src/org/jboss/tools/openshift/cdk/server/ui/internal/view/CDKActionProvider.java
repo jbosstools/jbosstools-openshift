@@ -100,13 +100,8 @@ public class CDKActionProvider extends CommonActionProvider {
 
 		@Override
 		protected Object adaptToViewItem(IServer server) {
-			ControllableServerBehavior beh = (ControllableServerBehavior)server.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
-			ServiceManagerEnvironment adb = null;
-			if( beh != null ) {
-				adb = (ServiceManagerEnvironment)beh.getSharedData(ServiceManagerEnvironment.SHARED_INFO_KEY);
-			}
-			if( adb != null )
-				return new CDKDockerUtility().findDockerConnection(adb);
+			if( server != null ) 
+				return new CDKDockerUtility().findDockerConnection(server.getName());
 			return null;
 		}
 

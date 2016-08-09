@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.linuxtools.docker.core.DockerException;
+import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
@@ -70,7 +71,12 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	private void configureDocker(IServer server, ServiceManagerEnvironment adb) {
 		try {
 			CDKDockerUtility util = new CDKDockerUtility();
-			if( !util.dockerConnectionExists(adb)) {
+			IDockerConnection dc = util.findDockerConnection(server.getName());
+			if( dc != null ) {
+				// update
+				util.updateConnection(dc, server.getName(), adb);
+			} else {
+				// create
 				util.createDockerConnection(server, adb);
 			}
 		} catch(DockerException de) {
