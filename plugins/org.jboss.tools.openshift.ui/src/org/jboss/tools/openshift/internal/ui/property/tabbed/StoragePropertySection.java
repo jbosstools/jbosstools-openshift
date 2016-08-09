@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.property.tabbed;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.swt.SWT;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 
@@ -26,13 +27,22 @@ public class StoragePropertySection extends OpenShiftResourcePropertySection {
 	protected void addColumns(TableViewerBuilder tableViewerBuilder) {
 		addNameColumn(tableViewerBuilder);
 		tableViewerBuilder
-			.column(model -> ((IPersistentVolumeClaim)getResource(model)).getStatus())
+			.column(model -> getStatus(model))
 				.name("Status")
 				.align(SWT.LEFT)
 				.weight(1)
 				.minWidth(25)
 			.buildColumn();
 		addCreatedColumn(tableViewerBuilder);
+	}
+	
+	private String getStatus(Object model) {
+		IPersistentVolumeClaim pvc = (IPersistentVolumeClaim)getResource(model);
+		String status = pvc.getStatus();
+		if (StringUtils.isNotBlank(pvc.getVolumeName())) {
+			return String.join(" ", status, "to volume", pvc.getVolumeName());
+		}
+		return status;
 	}
 
 }
