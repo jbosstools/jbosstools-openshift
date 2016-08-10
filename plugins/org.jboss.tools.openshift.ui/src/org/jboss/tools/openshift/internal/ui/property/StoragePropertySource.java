@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.property;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.openshift.restclient.model.volume.IPersistentVolumeClaim;
@@ -24,7 +25,8 @@ public class StoragePropertySource extends ResourcePropertySource<IPersistentVol
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] {
 				new UneditablePropertyDescriptor(StorageIds.Modes, "Access Modes"),
-				new UneditablePropertyDescriptor(StorageIds.Requested, "Requested Capacity")
+				new UneditablePropertyDescriptor(StorageIds.Requested, "Requested Capacity"),
+				new UneditablePropertyDescriptor(StorageIds.Status, "Status")
 		};
 	}
 	
@@ -37,14 +39,26 @@ public class StoragePropertySource extends ResourcePropertySource<IPersistentVol
 				return String.join(", ", getResource().getAccessModes());
 			case Requested:
 				return getResource().getRequestedStorage();
+			case Status:
+				return getStatus();
 			}
 		}
 		return super.getPropertyValue(id);
 	}
+	
+	private String getStatus() {
+		IPersistentVolumeClaim pvc = getResource();
+		String status = pvc.getStatus();
+		if (StringUtils.isNotBlank(pvc.getVolumeName())) {
+			return String.join(" ", status, "to volume", pvc.getVolumeName());
+		}
+		return status;
+	}
 
 	public static enum StorageIds{
 		Modes,
-		Requested
+		Requested,
+		Status
 	}
 	
 }
