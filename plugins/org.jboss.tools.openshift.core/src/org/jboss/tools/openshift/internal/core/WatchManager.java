@@ -45,14 +45,15 @@ public class WatchManager {
 	private static final long BACKOFF_MILLIS = 5000;
 	private static final long BACKOFF_RESET = FIBONACCI[FIBONACCI.length - 1] * BACKOFF_MILLIS * 2;
 	public static final String [] KINDS = new String[] {
+			ResourceKind.BUILD, 
 			ResourceKind.BUILD_CONFIG, 
 			ResourceKind.DEPLOYMENT_CONFIG, 
-			ResourceKind.SERVICE, 
+			ResourceKind.EVENT, 
+			ResourceKind.IMAGE_STREAM, 
 			ResourceKind.POD,
 			ResourceKind.REPLICATION_CONTROLLER, 
-			ResourceKind.BUILD, 
-			ResourceKind.IMAGE_STREAM, 
 			ResourceKind.ROUTE,
+			ResourceKind.SERVICE, 
 			ResourceKind.TEMPLATE
 	};
 	

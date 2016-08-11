@@ -26,14 +26,9 @@ import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.restclient.model.IBuild;
-import com.openshift.restclient.model.IBuildConfig;
-import com.openshift.restclient.model.IDeploymentConfig;
-import com.openshift.restclient.model.IImageStream;
-import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 /**
  * @author Fred Bricon
@@ -77,19 +72,16 @@ public class OpenInWebConsoleHandler extends AbstractHandler {
 			url.append("/browse");
 			//console doesn't seem to provide anchors to reach specific items
 			//so we just open the root category for all given resources
-			if (resource instanceof IBuildConfig ) {
-				url.append("/builds/").append(resource.getName());
-			} else if ( resource instanceof IBuild) {
+			switch(resource.getKind()) {
+			case ResourceKind.BUILD:
 				String buildConfig =  resource.getLabels().get("buildconfig");
 				url.append("/builds/").append(buildConfig).append("/").append(resource.getName());
-			} else if (resource instanceof IDeploymentConfig) {
-				url.append("/deployments/").append(resource.getName());
-			} else if (resource instanceof IPod) {
-				url.append("/pods/").append(resource.getName());
-			} else if (resource instanceof IService) {
-				url.append("/services/").append(resource.getName());
-			} else if (resource instanceof IImageStream) {
-				url.append("/images/").append(resource.getName());
+				break;
+			case ResourceKind.EVENT:
+				url.append("/events");
+				break;
+			default:
+				url.append("/").append(ResourceKind.pluralize(resource.getKind(), true, true)).append("/").append(resource.getName());
 			}
 		}
 		return url.toString();
