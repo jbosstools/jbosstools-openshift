@@ -365,7 +365,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((client  == null) ? 0 : client.getBaseURL().hashCode());
+		result = prime * result + ((client  == null) ? 0 : client.getBaseURL().toString().hashCode());
 		if(client != null) {
 			result = prime * result + ((client.getAuthorizationContext().getUserName() == null) ? 0 : client.getAuthorizationContext().getUserName().hashCode());
 		}
