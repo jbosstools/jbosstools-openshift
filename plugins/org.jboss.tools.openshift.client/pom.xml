@@ -13,8 +13,7 @@
 	<properties>
 		<!-- 
 			TODO: update this line to cause the build to republish bits when a new version is available. Latest version:
-			https://repository.jboss.org/nexus/content/repositories/snapshots/com/openshift/openshift-restclient-java/5.0.0-SNAPSHOT/
-			https://repository.jboss.org/nexus/content/repositories/snapshots/com/openshift/openshift-restclient-java/5.0.0-SNAPSHOT/openshift-restclient-java-5.0.0-20160809.161416-8.jar
+			https://repository.jboss.org/nexus/service/local/repositories/releases/content/com/openshift/openshift-restclient-java/5.0.0-RC1/openshift-restclient-java-5.0.0-RC1.jar 20160811
 		-->
 		<openshift-restclient-java.version>5.0.0-RC1</openshift-restclient-java.version>
 		<ok-http.version>3.3.1</ok-http.version>
