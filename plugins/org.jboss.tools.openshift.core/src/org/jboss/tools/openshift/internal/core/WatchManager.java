@@ -53,7 +53,8 @@ public class WatchManager {
 			ResourceKind.BUILD, 
 			ResourceKind.IMAGE_STREAM, 
 			ResourceKind.ROUTE,
-			ResourceKind.TEMPLATE
+			ResourceKind.TEMPLATE,
+			ResourceKind.PVC
 	};
 	
 	private Map<IProject, ConcurrentMap<String,IWatcher>> watches = new ConcurrentHashMap<>();

@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler;
 
+import java.util.function.Function;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -34,6 +36,7 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.volume.IPersistentVolumeClaim;
 
 /**
  * @author Fred Bricon
@@ -67,31 +70,55 @@ public class OpenInWebConsoleHandler extends AbstractHandler {
 		return new Status(IStatus.WARNING, OpenShiftUIActivator.PLUGIN_ID, msg);
 	}
 
-	private String getWebConsoleUrl(Connection connection, IResource resource) {
+	protected String getWebConsoleUrl(Connection connection, IResource resource) {
 		StringBuilder url = new StringBuilder(connection.getHost()).append("/console");
 		String projectName = resource == null? null : resource.getNamespace();
 		if (projectName != null) {
 			url.append("/project/").append(projectName);
 		}
 		if (resource != null && !(resource instanceof IProject)) {
-			url.append("/browse");
-			//console doesn't seem to provide anchors to reach specific items
-			//so we just open the root category for all given resources
-			if (resource instanceof IBuildConfig ) {
-				url.append("/builds/").append(resource.getName());
-			} else if ( resource instanceof IBuild) {
-				String buildConfig =  resource.getLabels().get("buildconfig");
-				url.append("/builds/").append(buildConfig).append("/").append(resource.getName());
-			} else if (resource instanceof IDeploymentConfig) {
-				url.append("/deployments/").append(resource.getName());
-			} else if (resource instanceof IPod) {
-				url.append("/pods/").append(resource.getName());
-			} else if (resource instanceof IService) {
-				url.append("/services/").append(resource.getName());
-			} else if (resource instanceof IImageStream) {
-				url.append("/images/").append(resource.getName());
-			}
+			url.append(getResourceURL(resource));
 		}
 		return url.toString();
+	}
+	
+	protected String getResourceURL(IResource resource) {
+		for (ResourceUrls resUrl : ResourceUrls.values()) {
+			if (resUrl.getResType().isInstance(resource)) {
+				return resUrl.getUrlPart() + resUrl.getEndUrlFunc().apply(resource);
+			}
+		}
+		return "/browse";
+	}
+	
+	protected enum ResourceUrls {
+		BuildConfig			  (IBuildConfig.class, "/browse/builds/", IResource::getName),
+		Build				  (IBuild.class, "/browse/builds/", r -> String.join("/", r.getLabels().get("buildconfig"), r.getName())),
+		DeploymentConfig	  (IDeploymentConfig.class, "/browse/deployments/", IResource::getName),
+		Pod					  (IPod.class, "/browse/pods/", IResource::getName),
+		Service				  (IService.class, "/browse/services/", IResource::getName),
+		ImageStream			  (IImageStream.class, "/browse/images/", IResource::getName),
+		PersistentVolumeClaim (IPersistentVolumeClaim.class, "/browse/persistentvolumeclaims/", IResource::getName);
+		
+		private final Class<? extends IResource> resType;
+		private final String urlPart;
+		private final Function<IResource, String> endUrlFunc;
+		private ResourceUrls(Class<? extends IResource> resType, String urlPart, Function<IResource, String> endUrlFunc) {
+			this.resType = resType;
+			this.urlPart = urlPart;
+			this.endUrlFunc = endUrlFunc;
+		}
+
+		public Class<? extends IResource> getResType() {
+			return resType;
+		}
+
+		public String getUrlPart() {
+			return urlPart;
+		}
+
+		public Function<IResource, String> getEndUrlFunc() {
+			return endUrlFunc;
+		}
 	}
 }

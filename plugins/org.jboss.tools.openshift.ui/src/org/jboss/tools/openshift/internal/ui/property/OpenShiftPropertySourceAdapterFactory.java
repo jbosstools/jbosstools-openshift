@@ -24,6 +24,7 @@ import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
+import com.openshift.restclient.model.volume.IPersistentVolumeClaim;
 
 public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 
@@ -52,6 +53,8 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 					return new RoutePropertySource((IRoute) resource);
 				case ResourceKind.SERVICE: 
 					return new ServicePropertySource((IService) resource);
+				case ResourceKind.PVC: 
+					return new StoragePropertySource((IPersistentVolumeClaim) resource);
 				default:
 					return new ResourcePropertySource<>(resource);
 				}

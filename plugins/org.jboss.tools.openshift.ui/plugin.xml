@@ -131,7 +131,7 @@
 				icon="icons/refresh.gif"
 				id="org.jboss.tools.openshift.ui.command.resource.refresh"
 				style="push"
-				tooltip="Refresh the resource">
+				tooltip="Refresh">
 				<visibleWhen>
 					<and>
 						<count
@@ -636,7 +636,7 @@
         icon="icons/refresh.gif"
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
-        tooltip="Refresh the resource" />
+        tooltip="Refresh" />
      <menu label="%openshift.explorer.properties.menus.showIn">
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
@@ -675,7 +675,7 @@
         icon="icons/refresh.gif"
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
-        tooltip="Refresh the resource" />
+        tooltip="Refresh" />
       <menu label="%openshift.explorer.properties.menus.showIn">
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
@@ -716,7 +716,7 @@
         icon="icons/refresh.gif"
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
-        tooltip="Refresh the resource" />
+        tooltip="Refresh" />
      <menu label="%openshift.explorer.properties.menus.showIn">
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
@@ -783,7 +783,7 @@
         icon="icons/refresh.gif"
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
-        tooltip="Refresh the resource" />
+        tooltip="Refresh" />
      <menu label="%openshift.explorer.properties.menus.showIn">
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
@@ -817,7 +817,7 @@
         icon="icons/refresh.gif"
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
-        tooltip="Refresh the resource" />
+        tooltip="Refresh" />
      <menu label="%openshift.explorer.properties.menus.showIn">
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
@@ -877,7 +877,7 @@
         icon="icons/refresh.gif"
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
-        tooltip="Refresh the resource" />
+        tooltip="Refresh" />
      <menu label="%openshift.explorer.properties.menus.showIn">
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
@@ -903,7 +903,7 @@
         icon="icons/refresh.gif"
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
-        tooltip="Refresh the resource" />
+        tooltip="Refresh" />
        <menu label="%openshift.explorer.properties.menus.showIn">
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInBrowser"
@@ -933,7 +933,7 @@
         icon="icons/refresh.gif"
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
-        tooltip="Refresh the resource" />
+        tooltip="Refresh" />
      <menu label="%openshift.explorer.properties.menus.showIn">
        <command
         commandId="org.jboss.tools.openshift.ui.command.openInBrowser"
@@ -969,7 +969,7 @@
         icon="icons/refresh.gif"
         id="org.jboss.tools.openshift.ui.command.resource.refresh"
         style="push"
-        tooltip="Refresh the resource" />
+        tooltip="Refresh" />
                      <separator visible="true" name="org.jboss.tools.openshift.ui.separator13"/>
      <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
@@ -977,6 +977,34 @@
      <command
            commandId="org.eclipse.ui.edit.delete"
            style="push" />
+  </menuContribution>
+  <menuContribution
+        allPopups="false"
+        locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.StorageTab">
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
+           icon="icons/refresh.gif"
+           id="org.jboss.tools.openshift.ui.command.resource.refresh"
+           style="push"
+           tooltip="Refresh">
+     </command>
+     <menu
+           label="%openshift.explorer.properties.menus.showIn">
+        <command
+              commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
+              icon="icons/open-web-console.gif"
+              label="Web Console"
+              mnemonic="C">
+        </command>
+     </menu>
+     <command
+           commandId="org.jboss.tools.openshift.ui.command.editresource"
+           style="push">
+     </command>
+     <command
+           commandId="org.eclipse.ui.edit.delete"
+           style="push">
+     </command>
   </menuContribution>
 	</extension>
 
@@ -1577,6 +1605,13 @@
             image="icons/service.png"
             label="%openshift.explorer.properties.tab.services">
       </propertyTab>
+      <propertyTab
+            afterTab="org.jboss.tools.openshift.ui.properties.tab.project.services"
+            category="org.jboss.tools.openshift.ui.explorer.expressConsoleView.Projects"
+            id="org.jboss.tools.openshift.ui.properties.tab.project.storage"
+            image="icons/storage.png"
+            label="%openshift.explorer.properties.tab.storage">
+      </propertyTab>
    </propertyTabs>
 </extension>
 <extension
@@ -1679,6 +1714,15 @@
             enablesFor="1"
             id="org.jboss.tools.openshift.ui.properties.tab.section.templates"
             tab="org.jboss.tools.openshift.ui.properties.tab.project.templates">
+         <input
+               type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
+         </input>
+      </propertySection>
+      <propertySection
+            class="org.jboss.tools.openshift.internal.ui.property.tabbed.StoragePropertySection"
+            enablesFor="1"
+            id="org.jboss.tools.openshift.ui.properties.tab.section.storage"
+            tab="org.jboss.tools.openshift.ui.properties.tab.project.storage">
          <input
                type="org.jboss.tools.openshift.internal.ui.models.ProjectWrapper">
          </input>
