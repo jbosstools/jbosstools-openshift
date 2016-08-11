@@ -272,6 +272,13 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 			section.execute(new SetPodPathCommand(getServer(), previous, podPath));
 	}
 
+	@Override
+	protected void setInferredPodPath(String podPath) {
+		//Inferred pod path is set asynchronously after initialization is formally completed, 
+		//When setting inferred path, no undoable command should be created.
+		setPodPath(podPath, false);
+	}
+
 	public class SetPodPathCommand extends ServerWorkingCopyPropertyCommand {
 		private String oldPath, newPath;
 		public SetPodPathCommand(IServerWorkingCopy server, String oldPath, String newPath) {

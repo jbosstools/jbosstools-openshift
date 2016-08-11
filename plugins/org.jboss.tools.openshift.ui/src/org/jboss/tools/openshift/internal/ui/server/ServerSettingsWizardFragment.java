@@ -261,6 +261,9 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	
 		void unhook() {
 			uiHook = null;
+			if(model != null) {
+				model.dispose();
+			}
 			model = null;
 		}
 

@@ -82,6 +82,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	private boolean useInferredPodPath = true;
 	private IStatus ocBinaryStatus = Status.OK_STATUS;
 
+	private InferPodPathJob inferPodPathJob = new InferPodPathJob(this);
+
 	protected ServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, 
 			Connection connection, IServerWorkingCopy server) {
 		this(service, route, deployProject, connection, server, Status.OK_STATUS);
@@ -94,6 +96,10 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		this.deployProject = deployProject;
 		this.server = server;
 		this.ocBinaryStatus = ocBinaryStatus;
+		addPropertyChangeListener(inferPodPathJob);
+		if(service != null && useInferredPodPath) {
+			inferPodPathJob.schedule();
+		}
 	}
 
 	protected void update(IConnection connection, List<IConnection> connections, 
@@ -264,12 +270,25 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 				this.ocBinaryStatus);
 	}
 
+	/**
+	 * Used by InferPodPathJob. Overriden in server editor model to prevent it from 
+	 * creating an undoable operation and setting the editor to the dirty state.
+	 * @param podPath
+	 */
+	protected void setInferredPodPath(String podPath) {
+		setPodPath(podPath);
+	}
+
 	public String getPodPath() {
 		return podPath;
 	}
 
 	public boolean isUseInferredPodPath() {
 		return this.useInferredPodPath;
+	}
+
+	boolean isInferredPodPathLoaded() {
+		return inferPodPathJob.isLoaded();
 	}
 
 	public void setUseInferredPodPath(boolean useInferredPodPath) {
@@ -382,11 +401,12 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 	}
 
 	private void updateServer(IServerWorkingCopy server) throws OpenShiftException {
+		inferPodPathJob.stop();
 		String connectionUrl = getConnectionUrl(getConnection());
 		String serverName = OpenShiftServerUtils.getServerName(getService(), getConnection());
 		String host = getHost(getRoute());
 		String routeURL = getRouteURL(isSelectDefaultRoute(), getRoute());
-		String podPath = useInferredPodPath ? "": this.podPath;
+		String podPath = useInferredPodPath && !isInferredPodPathLoaded() ? "": this.podPath;
 		OpenShiftServerUtils.updateServer(
 				serverName, host, connectionUrl, getService(), sourcePath, podPath, deployProject, routeURL, server);
 		server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
@@ -568,4 +588,10 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
     protected IServerWorkingCopy getServer() {
     	return server;
     }
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		inferPodPathJob.stop();
+	}
 }

@@ -156,7 +156,7 @@ public class NewApplicationWizardModel
 	
 	private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject, List<ObservableTreeItem> allProjects) {
 		if (allProjects == null) {
-			return null;
+			return Collections.emptyList();
 		}
 		for (ObservableTreeItem item : allProjects) {
 			if (item.getModel().equals(selectedProject)) {
