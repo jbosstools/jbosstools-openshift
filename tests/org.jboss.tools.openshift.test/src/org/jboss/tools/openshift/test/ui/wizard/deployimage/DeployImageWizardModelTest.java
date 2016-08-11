@@ -217,8 +217,9 @@ public class DeployImageWizardModelTest {
     @Test
     public void checkThatNewDockerConnectionsAreReported() throws DockerException {
         IDockerConnection connection = mock(IDockerConnection.class);
+        int connectionsSize = model.getDockerConnections().size();
         DockerConnectionManager.getInstance().addConnection(connection);
-        assertThat(model.getDockerConnections()).hasSize(1);
+        assertThat(model.getDockerConnections()).hasSize(connectionsSize + 1);
     }
     
     @Test
