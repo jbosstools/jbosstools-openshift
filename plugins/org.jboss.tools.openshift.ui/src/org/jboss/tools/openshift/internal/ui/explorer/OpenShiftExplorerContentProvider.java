@@ -112,7 +112,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private void handleLoadingException(Object parentElement, Throwable e) {
 		LoadingStub stub = makeStub(parentElement);
 		stub.add(e);
-		asyncExec(() -> refreshViewer(stub));
+		asyncExec(() -> refreshViewer(parentElement));
 	}
 
 	private LoadingStub makeStub(Object parentElement) {
@@ -125,6 +125,12 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			return stub;
 		}
 	}
+	
+	private LoadingStub removeStub(Object parentElement) {
+		synchronized (stubs) {
+			return stubs.remove(parentElement);
+		}
+	}
 
 	/**
 	 * Called to obtain the children of any element in the tree viewer
@@ -132,49 +138,64 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IConnectionWrapper) {
-			IConnectionWrapper connection = (IConnectionWrapper) parentElement;
-			if (connection.getState() == LoadingState.LOADED) {
-				synchronized (stubs) {
-					stubs.remove(parentElement);
-				}
-				Object[] result = connection.getResources().toArray();
-				if (result == null || result.length == 0) {
-					result = new Object[] { new NewProjectLinkNode((Connection) connection.getWrapped()) };
-				}
-				return result;
-			} else {
-				connection.load(e -> {
-					handleLoadingException(parentElement, e);
-				});
-				return new Object[] { makeStub(parentElement) };
-			}
+			return getConnectionChildren((IConnectionWrapper) parentElement);
 		} else if (parentElement instanceof IProjectWrapper) {
-			IProjectWrapper project = (IProjectWrapper) parentElement;
-
-			if (project.getState() == LoadingState.LOADED) {
-				synchronized (stubs) {
-					stubs.remove(parentElement);
-				}
-				return project.getResourcesOfKind(ResourceKind.SERVICE).toArray();
-			} else {
-				project.load(e -> {
-					handleLoadingException(parentElement, e);
-				});
-				return new Object[] { makeStub(parentElement) };
-			}
+			return getProjectChildren((IProjectWrapper) parentElement);
 		} else if (parentElement instanceof IServiceWrapper) {
-			IServiceWrapper wrapper = (IServiceWrapper) parentElement;
-			ArrayList<Object> result = new ArrayList<>();
-			wrapper.getResourcesOfKind(ResourceKind.BUILD).stream()
-					.filter(b -> !isTerminatedBuild((IBuild) b.getWrapped())).forEach(r -> result.add(r));
-			wrapper.getResourcesOfKind(ResourceKind.POD).stream()
-					.filter(p -> !ResourceUtils.isBuildPod((IPod) p.getWrapped())).forEach(r -> result.add(r));
-			return result.toArray();
+			return getServiceChildren((IServiceWrapper) parentElement);
 		} else if (parentElement instanceof LoadingStub) {
 			return ((LoadingStub) parentElement).getChildren();
 		}
-
 		return new Object[0];
+	}
+	
+	protected Object[] getConnectionChildren(IConnectionWrapper connection) {
+		switch(connection.getState()) {
+		case LOADED:
+			removeStub(connection);
+			Object[] result = connection.getResources().toArray();
+			if (result == null || result.length == 0) {
+				result = new Object[] { new NewProjectLinkNode((Connection) connection.getWrapped()) };
+			}
+			return result;
+		case LOAD_STOPPED:
+			LoadingStub stub = removeStub(connection);
+			if (stub != null) {
+				return stub.getChildren();
+			}
+		default:
+			connection.load(e -> {
+				handleLoadingException(connection, e);
+			});
+			return new Object[] { makeStub(connection) };
+		}
+	}
+	
+	protected Object[] getProjectChildren(IProjectWrapper project) {
+		switch(project.getState()) {
+		case LOADED:
+			removeStub(project);
+			return project.getResourcesOfKind(ResourceKind.SERVICE).toArray();
+		case LOAD_STOPPED:
+			LoadingStub stub = removeStub(project);
+			if (stub != null) {
+				return stub.getChildren();
+			}
+		default:
+			project.load(e -> {
+				handleLoadingException(project, e);
+			});
+			return new Object[] { makeStub(project) };
+		}
+	}
+	
+	protected Object[] getServiceChildren(IServiceWrapper service) {
+		ArrayList<Object> result = new ArrayList<>();
+		service.getResourcesOfKind(ResourceKind.BUILD).stream()
+				.filter(b -> !isTerminatedBuild((IBuild) b.getWrapped())).forEach(r -> result.add(r));
+		service.getResourcesOfKind(ResourceKind.POD).stream()
+				.filter(p -> !ResourceUtils.isBuildPod((IPod) p.getWrapped())).forEach(r -> result.add(r));
+		return result.toArray();
 	}
 
 	@Override
