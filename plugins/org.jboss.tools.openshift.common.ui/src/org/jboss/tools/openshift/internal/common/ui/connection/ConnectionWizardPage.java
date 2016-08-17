@@ -402,10 +402,13 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		if (!isConnected()) {
 			event.doit = connect();
 		} else {
-			// all non-advanced properties are updated while `pageModel.connect()` if they're changed,
-			// but we don't need to do long `connect()` again to change advanced properties:
-			// just read them from UI and refresh wizard model
-			pageModel.getConnectionAdvancedPropertiesProvider().update(getConnection());
+			//Openshift 2 doesn't have advanced properties
+			if (pageModel.getConnectionAdvancedPropertiesProvider() != null) {
+				// all non-advanced properties are updated while `pageModel.connect()` if they're changed,
+				// but we don't need to do long `connect()` again to change advanced properties:
+				// just read them from UI and refresh wizard model
+				pageModel.getConnectionAdvancedPropertiesProvider().update(getConnection());
+			}
 			pageModel.refreshWizardModel();
 		}
 		if (!event.doit) {
