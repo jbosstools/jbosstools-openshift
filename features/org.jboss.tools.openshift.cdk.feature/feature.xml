@@ -20,22 +20,10 @@
       %license
    </license>
 
-
    <requires>
        <import feature="org.eclipse.linuxtools.docker.feature"/>
+       <import feature="org.jboss.tools.openshift.feature"/>
    </requires>
 
-
-
-   <includes
-         id="org.jboss.tools.openshift.feature"
-         version="0.0.0"/>
-
-
-   <plugin
-         id="org.jboss.tools.openshift.cdk.server"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+   <plugin id="org.jboss.tools.openshift.cdk.server" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
 </feature>
