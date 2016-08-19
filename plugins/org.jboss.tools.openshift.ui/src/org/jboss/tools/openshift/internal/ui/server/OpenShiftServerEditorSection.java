@@ -551,6 +551,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 													getConnectionErrorMessage(OpenShiftServerUtils.getConnectionURL(server), server)),
 											IStatus.ERROR)
 										.open());
+								model.setInitializing(false);
 								return false;
 							} else {
 								return true;
