@@ -102,6 +102,7 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
@@ -335,7 +336,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			.setSelectionListener(onBrowseProjects(model, container.getShell()))
 			.build(container, dbc);
 		Button importButton = new Button(container, SWT.PUSH);
-		importButton.setText("Import");
+		importButton.setText(OpenShiftCommonUIMessages.ImportButtonLabel);
 	    GridDataFactory.fillDefaults()
           .align(SWT.LEFT, SWT.CENTER)
           .grab(false, false)
