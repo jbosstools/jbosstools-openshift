@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat Inc..
+ * Copyright (c) 2015-2016 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,11 @@ import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.eclipse.core.databinding.Binding;
@@ -107,6 +112,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
@@ -114,14 +120,17 @@ import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog.RouteLabel
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
+import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author Andre Dietisheim
+ * @author Jeff Maury
  */
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
 	static final String IS_LOADING_SERVICES = "isLoadingServices";
@@ -321,10 +330,18 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				ServerSettingsWizardPageModel.PROPERTY_DEPLOYPROJECT).observe(model);
 		new SelectProjectComponentBuilder()
 			.setTextLabel("Eclipse Project: ")
-			.setHorisontalSpan(2)
+			.setHorisontalSpan(1)
 			.setEclipseProjectObservable(eclipseProjectObservable)
 			.setSelectionListener(onBrowseProjects(model, container.getShell()))
 			.build(container, dbc);
+		Button importButton = new Button(container, SWT.PUSH);
+		importButton.setText("Import");
+	    GridDataFactory.fillDefaults()
+          .align(SWT.LEFT, SWT.CENTER)
+          .grab(false, false)
+          .applyTo(importButton);
+		UIUtils.setDefaultButtonWidth(importButton);
+		importButton.addSelectionListener(onImportProject(model, container.getShell()));
 	}
 	
 	private void createInfoControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
@@ -447,7 +464,29 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		};
 	}
 
-	private void createSourcePathControls(Composite container, ServerSettingsWizardPageModel model,
+    /**
+     * Open a dialog box to import an Eclipse project when clicking on the 'Import' button.
+     * 
+     * @return
+     */
+    private SelectionListener onImportProject(ServerSettingsWizardPageModel model, final Shell shell) {
+        return new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Map<com.openshift.restclient.model.IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = new HashMap<>();
+                List<IBuildConfig> buildConfigs = new ArrayList<>();
+                ResourceUtils.getBuildConfigForService(model.getService(), buildConfigs);
+                projectsAndBuildConfigs.put(model.getService().getProject(), buildConfigs);
+                ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
+                final boolean done = WizardUtils.openWizardDialog(wizard, shell);
+                if (done) {
+                    model.setDeployProject(ResourcesPlugin.getWorkspace().getRoot().getProject(wizard.getModel().getProjectName()));
+                }
+            }
+        };
+    }
+
+    private void createSourcePathControls(Composite container, ServerSettingsWizardPageModel model,
 			DataBindingContext dbc) {
 		Label sourcePathLabel = new Label(container, SWT.NONE);
 		sourcePathLabel.setText("Source Path: ");
@@ -891,7 +930,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	public void dispose() {
 		super.dispose();
 		uiHook = null;
-		//not good set model to null here
+		model.dispose();
 	}
 
     @Override

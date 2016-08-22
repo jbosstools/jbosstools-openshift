@@ -20,6 +20,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ObjectUtils;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -41,6 +45,7 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.core.util.CollectionUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.utils.ObservableTreeItemUtils;
 
@@ -53,8 +58,9 @@ import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author Andre Dietisheim
+ * @author Jeff Maury
  */
-public class ServerSettingsWizardPageModel extends ServiceViewModel {
+public class ServerSettingsWizardPageModel extends ServiceViewModel implements IResourceChangeListener {
 
 	public static final String PROPERTY_DEPLOYPROJECT = "deployProject";
 	public static final String PROPERTY_PROJECTS = "projects";
@@ -94,6 +100,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
 		this.deployProject = deployProject;
 		this.server = server;
 		this.ocBinaryStatus = ocBinaryStatus;
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
 	}
 
 	protected void update(IConnection connection, List<IConnection> connections, 
@@ -567,5 +574,34 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel {
     
     protected IServerWorkingCopy getServer() {
     	return server;
+    }
+
+    @Override
+    public void resourceChanged(IResourceChangeEvent event) {
+        boolean[] needReload = new boolean[1];
+        try {
+            event.getDelta().accept((delta) -> {
+              if ((delta.getResource().getType() == org.eclipse.core.resources.IResource.PROJECT) &&
+                  ((delta.getKind() == IResourceDelta.ADDED) || (delta.getKind() == IResourceDelta.REMOVED))) {
+                needReload[0] = true;  
+              }
+              return true;
+            }, true);
+            if (needReload[0]) {
+              setProjects(loadProjects());  
+            }
+        }
+        catch (CoreException e) {
+            OpenShiftUIActivator.log(Status.ERROR, e.getLocalizedMessage(), e);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.jboss.tools.common.databinding.ObservablePojo#dispose()
+     */
+    @Override
+    public void dispose() {
+        super.dispose();
+        ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
     }
 }
