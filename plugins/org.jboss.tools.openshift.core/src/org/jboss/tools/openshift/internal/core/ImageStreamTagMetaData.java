@@ -37,7 +37,7 @@ public class ImageStreamTagMetaData implements IDockerImageMetadata {
 	public ImageStreamTagMetaData(final String json) {
 		this.node = ModelNode.fromJSONString(json);
 		final ModelNode config = this.node.get(ROOT).get(CONTAINER_CONFIG);
-		if(ModelType.OBJECT == config.getType() && config.keys().size() > 0) {
+		if(ModelType.OBJECT == config.getType() && config.has(EXPOSED_PORT)) {
 			 CONFIG_ROOT = (String [])ArrayUtils.add(ROOT, CONTAINER_CONFIG);
 		}else {
 			CONFIG_ROOT = (String [])ArrayUtils.add(ROOT, CONFIG);
