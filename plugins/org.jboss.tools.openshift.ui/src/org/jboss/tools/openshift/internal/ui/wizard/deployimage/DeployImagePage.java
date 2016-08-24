@@ -247,7 +247,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				// FIXME: may need to revisit the call to the constructor once https://bugs.eclipse.org/bugs/show_bug.cgi?id=495285 is addressed
 				// there may be no need to to specify the registry info if we want to search on Docker Hub.
 				ImageSearch wizard = new ImageSearch(
-						model.getDockerConnection(), txtImage.getText(), new RegistryInfo(AbstractRegistry.DOCKERHUB_REGISTRY));
+						model.getDockerConnection(), txtImage.getText(), new RegistryInfo(AbstractRegistry.DOCKERHUB_REGISTRY, true));
 				if(Window.OK == new OkCancelButtonWizardDialog(getShell(), wizard).open()){
 					//this bypasses validation
 					model.setImageName(wizard.getSelectedImage(), true);
