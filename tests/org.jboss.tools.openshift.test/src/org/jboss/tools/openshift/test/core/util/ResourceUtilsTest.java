@@ -651,4 +651,53 @@ public class ResourceUtilsTest {
 		assertThat(name).isEqualTo("hooolahoo");
 	}
 	
+	@Test
+	public void shouldReturnNullIfSelectReplicationControllerByDeploymentConfigOnEmptyList() {
+		// given
+		List<IReplicationController> noRcs = Collections.<IReplicationController> emptyList();
+		// when
+		IReplicationController rc = ResourceUtils.selectByDeploymentConfigVersion(noRcs);
+		// then
+		assertThat(rc).isNull();
+	}
+
+	@Test
+	public void shouldReturnNullIfSelectReplicationControllerByDeploymentConfigOnNullList() {
+		// given
+		List<IReplicationController> nullRcs = null;
+		// when
+		IReplicationController rc = ResourceUtils.selectByDeploymentConfigVersion(nullRcs);
+		// then
+		assertThat(rc).isNull();
+
+	}
+
+	@Test
+	public void shouldSelectLatestReplicationControllerGiven4Versions() {
+		// given
+		List<IReplicationController> noRcs = Arrays.asList(
+				ResourceMocks.createResource(IReplicationController.class, rc -> {
+						doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
+						doReturn("4").when(rc).getName();
+					}),
+				ResourceMocks.createResource(IReplicationController.class, rc -> {
+					doReturn("-1").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
+					doReturn("-1").when(rc).getName();
+				}),
+				ResourceMocks.createResource(IReplicationController.class, rc -> {
+					doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
+					doReturn("4").when(rc).getName();
+				}),
+				ResourceMocks.createResource(IReplicationController.class, rc -> {
+					doReturn("6").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
+					doReturn("6").when(rc).getName();
+				})
+				);
+		// when
+		IReplicationController rc = ResourceUtils.selectByDeploymentConfigVersion(noRcs);
+		// then
+		assertThat(rc).isNotNull();
+		assertThat(rc.getName()).isEqualTo("6");
+	}
+	
 }
