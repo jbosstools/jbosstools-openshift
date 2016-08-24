@@ -6,7 +6,7 @@ Bundle-Version: 3.3.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
-Bundle-ClassPath: lib/openshift-restclient-java-5.0.0-RC1.jar,
+Bundle-ClassPath: lib/openshift-restclient-java-5.1.0-SNAPSHOT.jar,
  lib/okhttp-3.3.1.jar,
  lib/okhttp-ws-3.3.1.jar,
  lib/okio-1.8.0.jar,
@@ -20,8 +20,13 @@ Bundle-ClassPath: lib/openshift-restclient-java-5.0.0-RC1.jar,
  lib/commons-io-2.1.jar,
  .
 Export-Package: com.openshift.internal.restclient;x-friends:="org.jboss.tools.openshift.test",
+ com.openshift.internal.restclient.model,
  com.openshift.internal.restclient.okhttp,
  com.openshift.restclient,
+ com.openshift.restclient.api,
+ com.openshift.restclient.api.capabilities,
+ com.openshift.restclient.api.models,
+ com.openshift.restclient.apis.autoscaling.models,
  com.openshift.restclient.authorization,
  com.openshift.restclient.capability,
  com.openshift.restclient.capability.resources,
