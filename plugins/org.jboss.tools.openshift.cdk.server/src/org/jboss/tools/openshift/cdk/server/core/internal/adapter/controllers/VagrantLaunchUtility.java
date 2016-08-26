@@ -149,7 +149,7 @@ public class VagrantLaunchUtility {
 	}
 
 	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env)
-			throws IOException, TimeoutException {
+			throws IOException, VagrantTimeoutException {
 		return call(rootCommand, args, vagrantDir, env, 30000);
 	}
 	
@@ -158,7 +158,7 @@ public class VagrantLaunchUtility {
 	}
 	
 	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
-			int timeout) throws IOException, TimeoutException {
+			int timeout) throws IOException, VagrantTimeoutException {
 		ensureCommandOnPath(rootCommand, env);
 		String[] envp = (env == null ? null : convertEnvironment(env));
 
@@ -183,7 +183,7 @@ public class VagrantLaunchUtility {
 			p.destroyForcibly();
 			inLines = readStream(inStream);
 			List<String> errLines = readStream(errStream);
-			throw new TimeoutException(getTimeoutError(inLines, errLines));
+			throw new VagrantTimeoutException(inLines, errLines);
 		} else {
 			inLines = readStream(inStream);
 		}
@@ -204,13 +204,5 @@ public class VagrantLaunchUtility {
 			// ignore autoclosed ioexception
 		}
 		return lines;
-	}
-	
-	private static String getTimeoutError(List<String> output, List<String> err) {
-		StringBuilder msg = new StringBuilder();
-		msg.append("Process output:\n");
-		output.forEach(line -> msg.append("   ").append(line));
-		err.forEach(line -> msg.append("   ").append(line));
-		return msg.toString();
 	}
 }

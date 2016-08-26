@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -24,6 +25,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantLaunchUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantTimeoutException;
 
 public class ServiceManagerEnvironment {
 	
@@ -110,7 +112,22 @@ public class ServiceManagerEnvironment {
 	    	return parseLines(lines);
 		} catch( URISyntaxException urise) {
 			CDKCoreActivator.pluginLog().logError("Environment variable DOCKER_HOST is not a valid uri:  " + env.get("DOCKER_HOST"), urise);
-		} catch(IOException | TimeoutException ce) {
+		} catch(IOException ce) {
+			CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to vagrant service-manager. ", ce);
+		} catch(VagrantTimeoutException ce) {
+			// Try to salvage it, it could be the process never terminated but it got all the output
+			List<String> inLines = ce.getInLines();
+			if( inLines != null ) {
+				String[] asArr = (String[]) inLines.toArray(new String[inLines.size()]);
+				try {
+					ServiceManagerEnvironment ret = parseLines(asArr);
+					if( ret != null ) {
+						return ret;
+					}
+				} catch(URISyntaxException urise) {
+					CDKCoreActivator.pluginLog().logError("Environment variable DOCKER_HOST is not a valid uri:  " + env.get("DOCKER_HOST"), urise);
+				}
+			}
 			CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to vagrant service-manager. ", ce);
 		}
 		return null;
