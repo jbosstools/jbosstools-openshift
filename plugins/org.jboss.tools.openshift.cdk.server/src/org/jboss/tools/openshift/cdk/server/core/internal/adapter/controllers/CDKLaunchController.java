@@ -32,6 +32,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.core.LaunchManager;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
@@ -179,6 +180,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		IStatus stat = new VagrantPoller().getCurrentStateSynchronous(getServer());
 		if( stat.isOK()) {
 			beh.setServerStarted();
+			((Server)beh.getServer()).setMode("run");
 			return;
 		}
 		
@@ -280,6 +282,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 	private void handleOpenShiftUnavailable(final IControllableServerBehavior beh, final OpenShiftNotReadyPollingException osnrpe) {
 		// Log error?  Show dialog?  
 		((ControllableServerBehavior)beh).setServerStarted();
+		((Server)beh.getServer()).setMode("run");
 		new Job(osnrpe.getMessage()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
