@@ -76,11 +76,6 @@ public class ConnectionFactory implements IConnectionFactory {
 	}
 
 	@Override
-	public String getSignupUrl(String host) {
-		return null;
-	}
-
-	@Override
 	public String getUserDocUrl() {
 		// use commandline override -Dopenshift.userdoc.url
 		String userdoc = System.getProperty(OPENSHIFT_USERDOC, null);

@@ -45,8 +45,6 @@ public interface IConnectionFactory {
 	public String getDefaultHost();
 
 	boolean hasDefaultHost();
-
-	public String getSignupUrl(String host);
 	
 	/**
 	 * Returns <code>true</code> if this factory can create a connection of the given type.

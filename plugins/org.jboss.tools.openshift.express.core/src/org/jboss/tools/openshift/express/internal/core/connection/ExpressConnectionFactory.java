@@ -68,7 +68,6 @@ public class ExpressConnectionFactory implements IConnectionFactory {
 		return ExpressConnection.class == clazz;
 	}
 
-	@Override
 	public String getSignupUrl(String host) {
 		if (StringUtils.isEmpty(host)
 				|| !host.equals(getDefaultHost())) {

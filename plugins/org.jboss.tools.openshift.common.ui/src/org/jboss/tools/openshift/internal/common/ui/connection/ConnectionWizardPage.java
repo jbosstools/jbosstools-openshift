@@ -83,7 +83,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	private ConnectionEditorsStackedView connectionEditors;
 	private AdvancedConnectionEditorsStackedView advConnectionEditors;
 	private StyledText userdocLink;
-	private StyledText signupLink;
 
 	public <C extends IConnection> ConnectionWizardPage(IWizard wizard, IConnectionAware<C> wizardModel) {
 		this(wizard, wizardModel, true);
@@ -119,23 +118,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void doCreateControls(final Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(parent);
-
-		//JBIDE-20361 signup link doesn't work on OSX in some situations. 
-		//Link signupLink = new Link(parent, SWT.WRAP);
-		//signupLink.setText("If you do not have an account on OpenShift, please <a>sign up here</a>.");
-		this.signupLink = new StyledText(parent, SWT.WRAP);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(signupLink);;
-		showHideSignupLink();
-		StyledTextUtils.emulateLinkAction(signupLink, r->onSignupLinkClicked());
-		IObservableValue signupUrlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SIGNUPURL).observe(pageModel);
-		signupUrlObservable.addValueChangeListener(new IValueChangeListener() {
-
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				showHideSignupLink();
-			}
-		});
 
 		// userdoc link (JBIDE-20401)
 		this.userdocLink = new StyledText(parent, SWT.WRAP); // text set in #showHideUserdocLink
@@ -315,15 +297,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		advConnectionEditors.createControls();
 	}
 
-	private void showHideSignupLink() {
-		boolean userdocExists = !StringUtils.isEmpty(pageModel.getSignupUrl());
-		IConnectionFactory factory = pageModel.getConnectionFactory();
-		if (factory != null) {
-			StyledTextUtils.emulateLinkWidget(NLS.bind("If you do not have an account on {0}, please <a>sign up here</a>.", factory.getName()), signupLink);
-		}
-		UIUtils.setVisibleAndExclude(userdocExists, signupLink);
-	}
-
 	private void showHideUserdocLink() {
 		boolean signupUrlExists = !StringUtils.isEmpty(pageModel.getUserdocUrl());
 		if (signupUrlExists) {
@@ -358,19 +331,6 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 				}
 			}
 		};
-	}
-
-	protected void onSignupLinkClicked() {
-		String signupUrl = pageModel.getSignupUrl();
-		if (StringUtils.isEmpty(signupUrl)) {
-			return;
-		}
-		new BrowserUtility().checkedCreateInternalBrowser(
-				signupUrl,
-				signupUrl,
-				OpenShiftCommonUIActivator.PLUGIN_ID,
-				OpenShiftCommonUIActivator.getDefault().getLog());
-		WizardUtils.close(getWizard());
 	}
 
 	protected void onUserdocLinkClicked(final IObservableValue userdocUrlObservable) {

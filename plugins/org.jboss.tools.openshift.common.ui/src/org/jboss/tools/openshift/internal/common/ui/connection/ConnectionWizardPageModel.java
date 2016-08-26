@@ -66,7 +66,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private boolean hasDefaultHost;
 	private Collection<String> allHosts;
 	private ConnectionsFactoryTracker connectionsFactory;
-	private String signupUrl;
 	private String userdocUrl;
 	private IStatus connectedStatus;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
@@ -121,7 +120,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		this.connectedStatus = Status.OK_STATUS;
 		this.connectionFactoryError = Status.OK_STATUS;
 		initConnection(editedConnection, connectionType);
-		this.signupUrl = getSignupUrl(host, this.connectionFactory);
 		this.userdocUrl = getUserdocUrl(this.connectionFactory);
 	}
 
@@ -175,7 +173,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		factory = updateFactory(factory, selectedConnection);
 		useDefaultHost = updateUseDefaultHost(useDefaultHost, selectedConnection, factory);
 		host = updateHost(host, useDefaultHost, selectedConnection, factory);
-		String signupUrl = getSignupUrl(host, factory);
 		String userdocUrl = getUserdocUrl(factory);
 
 		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection, this.selectedConnection = selectedConnection);
@@ -183,7 +180,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 		firePropertyChange(PROPERTY_USE_DEFAULT_HOST, this.useDefaultHost, this.useDefaultHost = useDefaultHost);
 		firePropertyChange(PROPERTY_HAS_DEFAULT_HOST, this.hasDefaultHost, this.hasDefaultHost = factory != null && factory.hasDefaultHost());
-		firePropertyChange(PROPERTY_SIGNUPURL, this.signupUrl, this.signupUrl = signupUrl);
 		firePropertyChange(PROPERTY_USERDOCURL, this.userdocUrl, this.userdocUrl = userdocUrl);
 		
 		setConnectionFactoryError(connectionFactoryError);
@@ -250,15 +246,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return useDefaultHost;
 	}
 
-	private String getSignupUrl(String host, IConnectionFactory factory) {
-		if (factory == null
-				|| StringUtils.isEmpty(host)) {
-			return null;
-		}
-
-		return factory.getSignupUrl(host);
-	}
-
 	private String getUserdocUrl(IConnectionFactory factory) {
 		if (factory == null) {
 			return null;
@@ -303,10 +290,6 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public String getHost() {
 		return host;
-	}
-
-	public String getSignupUrl() {
-		return signupUrl;
 	}
 	
 	public String getUserdocUrl() {
