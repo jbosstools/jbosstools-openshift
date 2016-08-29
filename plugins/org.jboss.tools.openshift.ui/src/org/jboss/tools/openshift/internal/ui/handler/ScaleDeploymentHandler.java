@@ -36,6 +36,9 @@ import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.api.capabilities.IScalable;
+import com.openshift.restclient.apis.autoscaling.models.IScale;
+import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.model.IReplicationController;
 
 /**
@@ -78,15 +81,20 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						rc.setDesiredReplicaCount(replicas);
-						Connection conn = ConnectionsRegistryUtil.getConnectionFor(rc);
-						conn.updateResource(rc);
+						return rc.accept(new CapabilityVisitor<IScalable, IStatus>() {
+
+							@Override
+							public IStatus visit(IScalable capability) {
+								capability.scaleTo(replicas);
+								return Status.OK_STATUS;
+							}
+							
+						}, new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Scaling is not supported for this resource"));
 					}catch(Exception e) {
 						String message = NLS.bind("Unable to scale {0}", name);
 						OpenShiftUIActivator.getDefault().getLogger().logError(message,e);
 						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, e);
 					}
-					return Status.OK_STATUS;
 				}
 				
 			}.schedule();
