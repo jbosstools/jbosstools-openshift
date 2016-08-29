@@ -157,11 +157,6 @@ public class ConnectionsFactoryTest {
 			}
 
 			@Override
-			public String getSignupUrl(String host) {
-				return null;
-			}
-
-			@Override
 			public String getUserDocUrl() {
 				return null;
 			}
