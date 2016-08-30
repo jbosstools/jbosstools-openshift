@@ -75,23 +75,7 @@ public class DeploymentConfigPage extends EnvironmentVariablePage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator2);
 
 		//Scaling
-		Composite scalingContainer = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(scalingContainer);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(2).margins(6, 6).applyTo(scalingContainer);
-		
-		Label lblReplicas = new Label(scalingContainer, SWT.NONE);
-		lblReplicas.setText("Replicas:");
-		lblReplicas.setToolTipText("Replicas are the number of copies of an image that will be scheduled to run on OpenShift");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER)
-			.applyTo(lblReplicas);
-		
-		Spinner replicas = new Spinner(scalingContainer, SWT.BORDER);
-		replicas.setMinimum(1);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(replicas);
+		Spinner replicas = new ScalingComponent().create(parent).getSpinner();
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(replicas))
 			.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_REPLICAS)
 			.observe(model))
