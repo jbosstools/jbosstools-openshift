@@ -97,6 +97,10 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		}
 	}
 	
+	public ImportApplicationWizardModel getModel() {
+	    return model;
+	}
+	
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		if (model.getConnection() != null 

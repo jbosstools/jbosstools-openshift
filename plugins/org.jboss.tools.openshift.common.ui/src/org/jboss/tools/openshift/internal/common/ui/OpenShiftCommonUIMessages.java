@@ -31,4 +31,6 @@ public class OpenShiftCommonUIMessages extends NLS {
 	public static String MavenProjectsWarningMessage;
 	public static String OverwriteProjectsDialogTitle;
 	
+	public static String ImportButtonLabel;
+	
 }
