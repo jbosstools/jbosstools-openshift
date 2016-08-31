@@ -51,6 +51,8 @@ import org.eclipse.linuxtools.internal.docker.core.RegistryInfo;
 import org.eclipse.linuxtools.internal.docker.ui.wizards.NewDockerConnection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -183,6 +185,20 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		loadResources(dbc);
+		// https://issues.jboss.org/browse/JBIDE-22912,
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=500703
+		getControl().addPaintListener(new PaintListener() {
+
+			@Override
+			public void paintControl(PaintEvent e) {
+				if (getControl().isVisible()) {
+					((Composite) getControl()).layout(true, true);
+					((Composite) getControl()).update();
+					getControl().getShell().pack();
+					getControl().removePaintListener(this);
+				}
+			}
+		});
 	}
 
 	private void loadResources(DataBindingContext dbc) {
@@ -425,9 +441,9 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		
 		StructuredViewer cmboProject = new ComboViewer(parent);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.hint(SWT.DEFAULT, 30)
+//			.align(SWT.FILL, SWT.CENTER)
+//			.grab(true, false)
+//			.hint(SWT.DEFAULT, 30)
 			.span(NUM_COLUMS - 2, 1)
 			.applyTo(cmboProject.getControl());
 		

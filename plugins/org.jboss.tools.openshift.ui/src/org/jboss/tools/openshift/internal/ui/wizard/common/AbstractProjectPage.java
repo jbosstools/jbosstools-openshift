@@ -40,6 +40,8 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -111,7 +113,7 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 
 		StructuredViewer projectsViewer = new ComboViewer(parent);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+		//	.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(projectsViewer.getControl());
 
 		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();
@@ -296,7 +298,17 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 		// fix GTK3 combo boxes too small
 		// https://issues.jboss.org/browse/JBIDE-16877,
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431425
-		((Composite) getControl()).layout(true, true);
+		getControl().addPaintListener(new PaintListener() {
+
+			@Override
+			public void paintControl(PaintEvent e) {
+				if (getControl().isVisible()) {
+					((Composite) getControl()).layout(true, true);
+					((Composite) getControl()).update();
+					getControl().removePaintListener(this);
+				}
+			}
+		});
 	}
 
 	@Override
