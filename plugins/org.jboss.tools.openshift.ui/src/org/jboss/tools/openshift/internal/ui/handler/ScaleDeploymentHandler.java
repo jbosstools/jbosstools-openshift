@@ -12,24 +12,42 @@ package org.jboss.tools.openshift.internal.ui.handler;
 
 import java.util.Collection;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
+import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
+import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
@@ -40,7 +58,9 @@ import com.openshift.restclient.model.IReplicationController;
 
 /**
  * Handle for scaling deployments
+ * 
  * @author jeff.cantrill
+ * @author Andre Dietisheim
  *
  */
 public class ScaleDeploymentHandler extends AbstractHandler{
@@ -52,81 +72,217 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 		IReplicationController rc = getSelectedElement(event, IReplicationController.class);
 		if(rc != null) {
 			scaleUsing(event, rc, rc.getName());
-			return null;
-		}
-		IServiceWrapper deployment = getSelectedElement(event, IServiceWrapper.class);
-		if(deployment != null) {
-			Collection<IResourceWrapper<?, ?>> rcs = deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER);
-			if(!rcs.isEmpty()) {
-				//there should be only 1 per deployment, we'll assume this is true
-				rc = (IReplicationController) rcs.iterator().next().getWrapped();
-				scaleUsing(event, rc, deployment.getWrapped().getName());
+		} else {
+			IServiceWrapper deployment = getSelectedElement(event, IServiceWrapper.class);
+			if (deployment != null) {
+				rc = getReplicationController(deployment);
+				if (rc != null) {
+					scaleUsing(event, rc, deployment.getWrapped().getName());
+				}
 			}
 		}
 		return null;
 	}
 	
+	private IReplicationController getReplicationController(IServiceWrapper deployment) {
+		Collection<IResourceWrapper<?, ?>> rcs = deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER);
+		if(rcs.isEmpty()) {
+			return null;
+		}
+		//there should be only 1 per deployment, we'll assume this is true
+		return (IReplicationController) rcs.iterator().next().getWrapped();
+	}
+
 	protected void scaleUsing(ExecutionEvent event, IReplicationController rc, String name) {
-		final int replicas = getDesiredReplicas(rc, event);
-		scaleDeployment(event, name, rc, replicas);
+		final int requestedReplicas = getRequestedReplicas(rc, name, event);
+		final int currentReplicas = rc.getDesiredReplicaCount();
+		if (requestedReplicas != -1
+				&& currentReplicas != requestedReplicas) { 
+				if (requestedReplicas == 0
+						&& !showStopDeploymentWarning(name, HandlerUtil.getActiveShell(event))) {
+					return;
+				}
+				scaleDeployment(event, name, rc, requestedReplicas);
+		}
 	}
 	
+	private boolean showStopDeploymentWarning(String name, Shell shell) {
+		MessageDialog dialog = new MessageDialog(shell, 
+				"Stop all deployments?", 
+				OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG, 
+				NLS.bind("Are you sure you want to scale {0} to 0 replicas?\nThis will stop all pods for the deployment.", name),
+				MessageDialog.WARNING,
+				1,
+				new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL });
+		return dialog.open() == Dialog.OK;
+	}
+
 	protected void scaleDeployment(ExecutionEvent event, String name, IReplicationController rc, int replicas) {
-		if(replicas >=0 ) {
-			new Job(NLS.bind("Scaling {0} deployment ...", name)){
-				
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						rc.setDesiredReplicaCount(replicas);
-						Connection conn = ConnectionsRegistryUtil.getConnectionFor(rc);
-						conn.updateResource(rc);
-					}catch(Exception e) {
-						String message = NLS.bind("Unable to scale {0}", name);
-						OpenShiftUIActivator.getDefault().getLogger().logError(message,e);
-						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, e);
-					}
-					return Status.OK_STATUS;
-				}
-				
-			}.schedule();
+		if (replicas < 0) {
+			return;
 		}
-		
+
+		new Job(NLS.bind("Scaling {0} deployment ...", name)){
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					rc.setDesiredReplicaCount(replicas);
+					Connection conn = ConnectionsRegistryUtil.getConnectionFor(rc);
+					conn.updateResource(rc);
+				} catch (Exception e) {
+					String message = NLS.bind("Unable to scale {0}", name);
+					OpenShiftUIActivator.getDefault().getLogger().logError(message,e);
+					return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, e);
+				}
+				return Status.OK_STATUS;
+			}
+			
+		}.schedule();
 	}
 
 	protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
 		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
 		return UIUtils.getFirstElement(selection, klass);
 	}
-	
-	private int getDesiredReplicas(IReplicationController rc, ExecutionEvent event) {
+
+	private int getRequestedReplicas(IReplicationController rc, String name, ExecutionEvent event) {
 		String diff = event.getParameter(REPLICA_DIFF);
-		int current = rc.getDesiredReplicaCount();
-		if(!NumberUtils.isNumber(diff)) {
-			return showInputDialog(current, event);
+		int currentReplicas = rc.getDesiredReplicaCount();
+		if(NumberUtils.isNumber(diff)) {
+			return currentReplicas + Integer.parseInt(diff);
+		} else {
+			return showScaleReplicasDialog(name, currentReplicas, HandlerUtil.getActiveShell(event));
 		}
-		return current + Integer.parseInt(diff);
 	}
-	
-	protected int showInputDialog(int current, ExecutionEvent event) {
-		Shell shell = HandlerUtil.getActivePart(event).getSite().getShell();
-		InputDialog dialog = new InputDialog(shell, 
-				"Scale deployment", 
-				"Enter the desired number of replicas for this deployment", 
-				String.valueOf(current), new IInputValidator() {
-			
-			@Override
-			public String isValid(String newText) {
-				if(StringUtils.isNumeric(newText)) {
-					return null;
-				}
-				return "Only numeric values greater than zero are allowed";
-			}
-		});
-		int result = dialog.open();
-		if(Dialog.OK == result) {
-			return Integer.parseInt(dialog.getValue());
+
+	protected int showScaleReplicasDialog(String name, int currentReplicas, Shell shell) {
+		ScaleReplicasDialog dialog = new ScaleReplicasDialog(currentReplicas, name, shell);
+		if (dialog.open() == Dialog.OK) {
+			return dialog.getRequestedReplicas();
 		}
 		return -1;
 	}
+
+	public class ScaleReplicasDialog extends TitleAreaDialog {
+
+		private int currentReplicas;
+		private IObservableValue<Integer> requestedReplicas;
+		private String name;
+
+		public ScaleReplicasDialog(int currentReplicas, String name, Shell parentShell) {
+			super(parentShell);
+			this.currentReplicas = currentReplicas;
+			this.requestedReplicas = new WritableValue<Integer>(currentReplicas, Integer.class);
+			this.name = name;
+		}
+
+		@Override
+		protected Control createContents(Composite parent) {
+			Control control = super.createContents(parent);
+			setupDialog(parent.getShell());
+			return control;
+		}
+
+		@Override
+		protected Control createDialogArea(Composite parent) {
+			DataBindingContext dbc = new DataBindingContext();
+
+			Label titleSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
+			GridDataFactory.fillDefaults()
+					.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleSeparator);
+
+			final Composite dialogArea = new Composite(parent, SWT.NONE);
+			GridDataFactory.fillDefaults()
+					.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
+			GridLayoutFactory.fillDefaults()
+				.numColumns(2).margins(10, 20).spacing(20, SWT.DEFAULT).applyTo(dialogArea);
+
+			// scale label
+			Label scaleLabel = new Label(dialogArea, SWT.NONE);
+			scaleLabel.setText("Scale to number of replicas:");
+			GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).applyTo(scaleLabel);
+			
+			// scale spinner
+			Spinner scaleSpinner = new Spinner(dialogArea, SWT.BORDER);
+			scaleSpinner.setMinimum(0);
+			scaleSpinner.setSelection(currentReplicas);
+			scaleSpinner.setPageIncrement(1);
+			GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).applyTo(scaleSpinner);
+
+			ValueBindingBuilder
+				.bind(WidgetProperties.selection().observe(scaleSpinner))
+				.validatingAfterConvert(new IValidator() {
+
+					@Override
+					public IStatus validate(Object value) {
+						if (!(value instanceof Integer)) {
+							return ValidationStatus.error(NLS.bind("You need to provide a positive number of replicas for deployment {0}", name));
+						}
+						int requestedReplicas = (int) value;
+						if (requestedReplicas == currentReplicas) {
+							return ValidationStatus.cancel("");
+						}
+						if (requestedReplicas == 0) {
+							return ValidationStatus.warning(NLS.bind("Scaling to 0 replicas will stop all pods.", name));
+						}
+						return ValidationStatus.ok();
+					}})
+				.to(requestedReplicas)
+				.in(dbc);
+			
+			new FormPresenterSupport(new FormPresenterSupport.IFormPresenter() {
+				
+				@Override
+				public void setMessage(String message, int type) {
+					ScaleReplicasDialog.this.setMessage(message, type);
+				}
+				
+				@Override
+				public void setComplete(boolean complete) {
+					Button button = ScaleReplicasDialog.this.getButton(IDialogConstants.OK_ID);
+					if (!DisposeUtils.isDisposed(button)) {
+						button.setEnabled(complete);
+					}
+				}
+				
+				@Override
+				public Control getControl() {
+					return dialogArea;
+				}
+			}, dbc);
+			
+			return dialogArea;
+		}
+
+		private void setupDialog(Shell shell) {
+			shell.setText("Scale Deployments");
+			setTitle("Enter the desired number of replicas for this deployment");
+			setTitleImage(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
+			setHelpAvailable(false);
+		}
+
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			Button okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+			okButton.setEnabled(false); // initially disable ok since scaling set to current replicas 
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		}
+
+		/**
+		 * Returns the requested number of replicas. Returns -1 if the user cancelled the dialog.
+		 * @return
+		 */
+		public int getRequestedReplicas() {
+			if (Dialog.OK == getReturnCode()) {
+				return requestedReplicas.getValue();
+			} else {
+				return -1;
+			}
+		}
+		
+	}
+
 }

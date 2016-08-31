@@ -41,7 +41,7 @@ public class ConnectionsRegistryUtil {
 		}
 		Connection connection = safeGetConnectionFor(resource);
 		if(connection == null) {
-				throw new ConnectionNotFoundException(resource);
+			throw new ConnectionNotFoundException(resource);
 		}
 		return connection;
 	}
