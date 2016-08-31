@@ -14,14 +14,16 @@ package org.jboss.tools.openshift.internal.ui.dockerutils;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.linuxtools.docker.core.DockerException;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
+import org.eclipse.linuxtools.docker.core.IDockerConnection2;
+import org.eclipse.linuxtools.docker.core.IDockerProgressHandler;
 import org.eclipse.linuxtools.docker.core.IRegistryAccount;
-import org.eclipse.linuxtools.internal.docker.core.DefaultImagePushProgressHandler;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
@@ -63,7 +65,7 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 			this.dockerConnection.tagImage(imageName, tmpImageName);
 			// then we can push that image with the new name
 			this.dockerConnection.pushImage(tmpImageName, registryAccount,
-					new DefaultImagePushProgressHandler(this.dockerConnection, tmpImageName));
+					getPushProgressHandler(tmpImageName));
 		// FIXME: needs more fined tuned error handling once Neon.0 is no longer supported:
 		// catch (DockerException | InterruptedException e) {
 		// see https://issues.jboss.org/browse/JBIDE-22764
@@ -83,6 +85,12 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 		}
 		// TODO Auto-generated method stub
 		return Status.OK_STATUS;
+	}
+
+	private IDockerProgressHandler getPushProgressHandler(final String tmpImageName) {
+		Assert.isTrue(this.dockerConnection instanceof IDockerConnection2);
+
+		return ((IDockerConnection2) this.dockerConnection).getDefaultPushImageProgressHandler(tmpImageName);
 	}
 
 	/**
