@@ -252,7 +252,8 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 				handleProcessTerminated(beh);
 			}
 		}.start();
-		DebugPlugin.getDefault().removeDebugEventListener(listener);
+		if( listener != null ) 
+			DebugPlugin.getDefault().removeDebugEventListener(listener);
 	}
 	
 	
