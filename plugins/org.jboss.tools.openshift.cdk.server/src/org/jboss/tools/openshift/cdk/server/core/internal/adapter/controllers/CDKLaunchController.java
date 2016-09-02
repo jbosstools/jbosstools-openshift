@@ -11,12 +11,8 @@
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,13 +30,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.core.LaunchManager;
-import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
-import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
-import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
-import org.jboss.ide.eclipse.as.core.util.ArgsUtil;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
@@ -55,9 +47,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller.OpenShiftNotReadyPollingException;
-import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKServerUtility;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
-import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
 public class CDKLaunchController extends AbstractSubsystemController implements ILaunchServerController, IExternalLaunchConstants {
 	public static final String FLAG_INITIALIZED = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.launch.isInitialized";
@@ -195,84 +185,42 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		}
 		
 		String args = configuration.getAttribute(ATTR_ARGS, (String)null);
-		
-		if( Platform.getOS().equals(Platform.OS_WIN32)) {
-			windowsLaunch(beh, s, args, launch, monitor);
-		} else {
-			nixLaunch(beh, s, args, launch, monitor);
-		}
-	}
-
-	
-	
-	private void nixLaunch(ControllableServerBehavior beh, IServer s, String args, ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		Process p = null;
+		ILaunchConfigurationWorkingCopy wc = null;
 		try {
-			p = new VagrantLaunchUtility().callVagrantViaScript(s, args, getStartupLaunchName(s));
-		} catch(IOException ioe) {
-			CDKCoreActivator.pluginLog().logError(ioe);
+			wc = new VagrantLaunchUtility().createExternalToolsLaunchConfig(s, args, getStartupLaunchName(s));
+		} catch(CoreException ce) {
+			CDKCoreActivator.pluginLog().logError(ce);
 			beh.setServerStopped();
-			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ioe.getMessage(), ioe));
+			throw ce;
 		}
-		waitOnProcess(beh, p);
-	}
-	
-	// New implementation for windows
-	private void windowsLaunch(ControllableServerBehavior beh, IServer s, String args, ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		Process p = null;
-		try {
-			p = new VagrantLaunchUtility().callVagrant(s, args, getStartupLaunchName(s));
-		} catch(IOException ioe) {
-			CDKCoreActivator.pluginLog().logError(ioe);
-			beh.setServerStopped();
-			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ioe.getMessage(), ioe));
-		}
-		waitOnProcess(beh, p);
-	}
-	
-	
-	
-	private void waitOnProcess(ControllableServerBehavior beh, Process p) throws CoreException {
-		
-		if( p == null ) {
-			beh.setServerStopped();
-			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to vagrant up has failed."));
-		}
-		
-		final Process p2 = p;
-		
-		InputStream in = p.getInputStream();
-		InputStream err = p.getErrorStream();
-		OutputStream out = p.getOutputStream();
-		Map<String, Object> properties = new HashMap<>();
-		properties.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID, "org.eclipse.tm.terminal.connector.streams.launcher.streams");
-		properties.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID, "org.eclipse.tm.terminal.connector.streams.StreamsConnector");
-		properties.put(ITerminalsConnectorConstants.PROP_TITLE, "Test");
-		properties.put(ITerminalsConnectorConstants.PROP_LOCAL_ECHO, false);
-		properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, true);
-		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDIN, out);
-		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDOUT, in);
-		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDERR, err);
-		ITerminalService service = TerminalServiceFactory.getService();
-		service.openConsole(properties, null);
 
-		Integer exitCode = ThreadUtils.runWithTimeout(300000, new Callable<Integer>() {
-			@Override
-		 	public Integer call() throws Exception {
-				return p2.waitFor();
+		try {
+			// Run the external tools launch, Do not register the external-tools launch with launch manager
+			ILaunch externalToolsLaunch = wc.launch("run", monitor, false, false);
+			
+			// Add the external-tools processes to THIS launch
+			final IProcess[] processes = externalToolsLaunch.getProcesses();
+			for( int i = 0; i < processes.length; i++ ) {
+				launch.addProcess(processes[i]);
 			}
-		});
-		
-		if( exitCode == null ) {
-			// Timeout reached
-			p.destroyForcibly();
+			
+			
+			//mark server as starting, add debug listeners, etc
+			if( processes != null && processes.length >= 1 && processes[0] != null ) {
+				IDebugEventSetListener debug = getDebugListener(processes, launch);
+				if( beh != null ) {
+					final IProcess launched = processes[0];
+					beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, launched);
+					beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
+				}
+				DebugPlugin.getDefault().addDebugEventListener(debug);
+			}
+		} catch(CoreException ce) {
+			beh.setServerStopped();
+			throw ce;
 		}
-		
-		processTerminated(getServer(), null);
 	}
-	
-	
-	
+
 	protected LaunchManager getLaunchManager() {
 		return (LaunchManager)DebugPlugin.getDefault().getLaunchManager();
 	}
@@ -287,7 +235,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 						if (processes[0] != null && processes[0].equals(events[i].getSource()) && events[i].getKind() == DebugEvent.TERMINATE) {
 							// Register this launch as terminated
 							((LaunchManager)getLaunchManager()).fireUpdate(new ILaunch[] {launch}, LaunchManager.TERMINATE);
-							processTerminated(getServer(), this);
+							processTerminated(getServer(), processes[0], this);
 							DebugPlugin.getDefault().removeDebugEventListener(this);
 						}
 					}
@@ -296,7 +244,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		};
 	}
 	
-	private void processTerminated(IServer server, IDebugEventSetListener listener) {
+	private void processTerminated(IServer server,IProcess process, IDebugEventSetListener listener) {
 		final ControllableServerBehavior beh = (ControllableServerBehavior)JBossServerBehaviorUtils.getControllableBehavior(server);
 		new Thread() {
 			@Override
