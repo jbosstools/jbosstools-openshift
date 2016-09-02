@@ -36,5 +36,5 @@ public interface CDKConstants {
 	static final String STATE_RUNNING = "running";
 	static final String STATE_SHUTOFF = "shutoff";
 	static final String STATE_POWEROFF = "poweroff";
-	static final String STATE_NOT_CREATED = "not_created";
+
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.externaltools.internal.IExternalToolConstants;
 import org.eclipse.core.runtime.CoreException;
@@ -35,13 +36,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.ide.eclipse.as.core.util.ArgsUtil;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKServerUtility;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
@@ -50,8 +49,8 @@ public class VagrantLaunchUtility {
 		return setupLaunch(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
 	}
 	
-	private static final String[] getUserPass(IServer server) {
-		final CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
+		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		String user = cdkServer.getUsername();
 		String pass = null;
 		try {
@@ -60,14 +59,9 @@ public class VagrantLaunchUtility {
 			pass = uce.getPassword();
 			user = uce.getUser();
 		}
-		return new String[]{user,pass};
+		return setupLaunch(s, args, launchConfigName, startupConfig, user, pass);
 	}
-	
-	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
-		String[] cred = getUserPass(s);
-		return setupLaunch(s, args, launchConfigName, startupConfig, cred[0], cred[1]);
-	}
-	
+
 	
 	private static Map<String,String> getEnvironment(IServer s, ILaunchConfiguration startupConfig, String userName, String pass) throws CoreException {
 		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
@@ -127,6 +121,7 @@ public class VagrantLaunchUtility {
 		return wc;
 	}
 	
+	
 
 	private ILaunchConfigurationWorkingCopy findLaunchConfig(IServer s, String launchName) throws CoreException {
 		return ExternalLaunchUtil.findExternalToolsLaunchConfig(s, launchName);
@@ -174,37 +169,8 @@ public class VagrantLaunchUtility {
 		CommandLocationLookupStrategy.get().ensureOnPath(env, new Path(rootCommand).removeLastSegments(1).toOSString());
 	}
 	
-	
-	public Process callVagrant(IServer s, String args, String launchConfigName) throws CoreException, IOException {
-		return callVagrant(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
-	}
-
-	public Process callVagrant(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException, IOException  {
-		String[] cred = getUserPass(s);
-		Map<String,String> env = getEnvironment(s, startupConfig, cred[0], cred[1]);
-		String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(s);
-		File wd =  CDKServerUtility.getWorkingDirectory(s);
-		Process p = callProcess(vagrantcmdloc, ArgsUtil.parse(args), wd, env);
-		return p;
-	}
-
-	
-	public Process callVagrantViaScript(IServer s, String args, String launchConfigName) throws CoreException, IOException {
-		return callVagrantViaScript(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
-	}
-	
-	public Process callVagrantViaScript(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException, IOException  {
-		String[] cred = getUserPass(s);
-		Map<String,String> env = getEnvironment(s, startupConfig, cred[0], cred[1]);
-		String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(s);
-		String scriptCmd = CDKConstantUtility.getScriptLocation();
-		File wd =  CDKServerUtility.getWorkingDirectory(s);
-		String[] args2 = new String[]{"-qfc", vagrantcmdloc + " " + args, "/dev/null"};
-		Process p = callProcess(scriptCmd, args2, wd, env);
-		return p;
-	}
-	
-	public static Process callProcess(String rootCommand, String[] args, File vagrantDir, Map<String, String> env) throws IOException {
+	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
+			int timeout) throws IOException, VagrantTimeoutException {
 		ensureCommandOnPath(rootCommand, env);
 		String[] envp = (env == null ? null : convertEnvironment(env));
 
@@ -212,13 +178,6 @@ public class VagrantLaunchUtility {
 		cmd.add(rootCommand);
 		cmd.addAll(Arrays.asList(args));
 		final Process p = Runtime.getRuntime().exec(cmd.toArray(new String[0]), envp, vagrantDir);
-		return p;
-	}
-
-	
-	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
-			int timeout) throws IOException, VagrantTimeoutException {
-		final Process p = callProcess(rootCommand, args, vagrantDir, env);
 
 		InputStream errStream = p.getErrorStream();
 		InputStream inStream = p.getInputStream();
