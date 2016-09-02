@@ -314,16 +314,14 @@ public class VagrantPoller implements IServerStatePoller2 {
 	}
 
 	private String[] getValidStoppedStates() {
-		return new String[]{VagrantStatus.STATE_SHUTOFF, VagrantStatus.STATE_POWEROFF, VagrantStatus.STATE_NOT_CREATED};
+		return new String[]{VagrantStatus.STATE_SHUTOFF, VagrantStatus.STATE_POWEROFF};
 	}
 
 	private boolean allStopped(Collection<VagrantStatus> stats) {
 		List<String> off = Arrays.asList(getValidStoppedStates());
 		Iterator<VagrantStatus> i = stats.iterator();
-		VagrantStatus tmp = null;
 		while(i.hasNext()) {
-			tmp = i.next();
-			if( !off.contains(tmp.getState())) {
+			if( !off.contains(i.next().getState())) {
 				return false;
 			}
 		}

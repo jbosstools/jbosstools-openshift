@@ -21,14 +21,12 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IE
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
 
 public class CDKConstantUtility {
-	private static final String SCRIPT_LOCATION_LINUX = "/usr/bin/script";
 	private static final String VAGRANT_LOCATION_LINUX = "/usr/bin/vagrant";
 	
 	// Seems weird?  See https://github.com/mitchellh/vagrant/issues/1652
 	private static final String VAGRANT_LOCATION_WINDOWS = "C:\\HashiCorp\\Vagrant\\bin\\vagrant.exe";
 	
-	private static CommandLocationBinary vagrantBinary;
-	private static CommandLocationBinary scriptBinary;
+	private static CommandLocationBinary binary;
 	
 	public static String getVagrantLocation() {
 		return findVagrantLocation();
@@ -51,24 +49,12 @@ public class CDKConstantUtility {
 	}
 	
 	private static String findVagrantLocation() {
-		if( vagrantBinary == null ) {
-			vagrantBinary = new CommandLocationBinary("vagrant");
-			vagrantBinary.addPlatformLocation(Platform.OS_LINUX, VAGRANT_LOCATION_LINUX);
-			vagrantBinary.addPlatformLocation(Platform.OS_WIN32, VAGRANT_LOCATION_WINDOWS);
-			vagrantBinary.setDefaultPlatform(Platform.OS_LINUX);
+		if( binary == null ) {
+			binary = new CommandLocationBinary("vagrant");
+			binary.addPlatformLocation(Platform.OS_LINUX, VAGRANT_LOCATION_LINUX);
+			binary.addPlatformLocation(Platform.OS_WIN32, VAGRANT_LOCATION_WINDOWS);
+			binary.setDefaultPlatform(Platform.OS_LINUX);
 		}
-		return vagrantBinary.findLocation();
+		return binary.findLocation();
 	}
-	
-	public static String getScriptLocation() {
-		if( scriptBinary == null ) {
-			scriptBinary = new CommandLocationBinary("script");
-			scriptBinary.addPlatformLocation(Platform.OS_LINUX, SCRIPT_LOCATION_LINUX);
-			scriptBinary.addPlatformLocation(Platform.OS_MACOSX, SCRIPT_LOCATION_LINUX);
-			scriptBinary.setDefaultPlatform(Platform.OS_LINUX);
-		}
-		return scriptBinary.findLocation();
-	}
-
-	
 }
