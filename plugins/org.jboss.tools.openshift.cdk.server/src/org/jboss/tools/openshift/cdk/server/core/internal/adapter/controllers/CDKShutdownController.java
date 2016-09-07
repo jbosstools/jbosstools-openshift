@@ -92,19 +92,13 @@ public class CDKShutdownController extends AbstractSubsystemController implement
 		
 		ILaunchConfigurationWorkingCopy wc = new VagrantLaunchUtility().createExternalToolsLaunchConfig(getServer(), 
 				cmd, "Shutdown " + getServer().getName());
-		ControllableServerBehavior beh = (ControllableServerBehavior)getServer().loadAdapter(
-					ControllableServerBehavior.class, new NullProgressMonitor());
-		try {
-			ILaunch launch2 = wc.launch("run", new NullProgressMonitor());
-			final IProcess[] processes = launch2.getProcesses();
-			beh.setServerStopping();
-			
-			if( processes != null && processes.length >= 1 && processes[0] != null ) {
-				DebugPlugin.getDefault().addDebugEventListener(getDebugListener(processes));
-			}
-		} catch(CoreException ce) {
-			CDKCoreActivator.getDefault().getLog().log(ce.getStatus());
+		ILaunch launch2 = wc.launch("run", new NullProgressMonitor());
+		final IProcess[] processes = launch2.getProcesses();
+		
+		if( processes != null && processes.length >= 1 && processes[0] != null ) {
+			DebugPlugin.getDefault().addDebugEventListener(getDebugListener(processes));
 		}
+
 	}
 	
 	private IDebugEventSetListener getDebugListener(final IProcess[] processes) {

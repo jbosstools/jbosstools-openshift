@@ -38,14 +38,19 @@ public class CDKConstantUtility {
 		if( server != null ) {
 			try {
 				ILaunchConfiguration lc = server.getLaunchConfiguration(false, new NullProgressMonitor());
-				if( lc != null ) {
-					String ret = lc.getAttribute(IExternalLaunchConstants.ATTR_LOCATION, (String)null);
-					if( ret != null && new File(ret).exists())
-							return ret;
-				}
+				return getVagrantLocation(lc);
 			} catch(CoreException ce) {
 				// ignore, this is non-critical
 			}
+		}
+		return findVagrantLocation();
+	}
+	
+	public static String getVagrantLocation(ILaunchConfiguration lc) throws CoreException {
+		if( lc != null ) {
+			String ret = lc.getAttribute(IExternalLaunchConstants.ATTR_LOCATION, (String)null);
+			if( ret != null && new File(ret).exists())
+					return ret;
 		}
 		return findVagrantLocation();
 	}

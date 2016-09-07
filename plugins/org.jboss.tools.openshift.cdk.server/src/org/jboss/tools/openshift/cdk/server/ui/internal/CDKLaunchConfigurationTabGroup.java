@@ -8,11 +8,18 @@ import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.debug.ui.RefreshTab;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.externaltools.internal.launchConfigurations.ExternalToolsLaunchConfigurationMessages;
 import org.eclipse.ui.externaltools.internal.model.IExternalToolsHelpContextIds;
 import org.eclipse.ui.externaltools.internal.program.launchConfigurations.ProgramMainTab;
 
@@ -48,11 +55,36 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 					}
 					
 					protected void createLocationComponent(Composite parent) {
-						super.createLocationComponent(parent);
-						locationField.setEnabled(false);
-						workspaceLocationButton.setVisible(false);
-						fileLocationButton.setVisible(false);
-						variablesLocationButton.setVisible(false);
+
+						Group group = new Group(parent, SWT.NONE);
+						String locationLabel = getLocationLabel();
+						group.setText(locationLabel);
+						GridLayout layout = new GridLayout();
+						layout.numColumns = 1;
+						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+						group.setLayout(layout);
+						group.setLayoutData(gridData);
+
+						locationField = new Text(group, SWT.BORDER);
+						gridData = new GridData(GridData.FILL_HORIZONTAL);
+						gridData.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
+						locationField.setLayoutData(gridData);
+						locationField.addModifyListener(fListener);
+						addControlAccessibleListener(locationField, group.getText());
+
+						Composite buttonComposite = new Composite(group, SWT.NONE);
+						layout = new GridLayout();
+						layout.marginHeight = 0;
+				        layout.marginWidth = 0;
+						layout.numColumns = 3;
+						gridData = new GridData(GridData.HORIZONTAL_ALIGN_END);
+						buttonComposite.setLayout(layout);
+						buttonComposite.setLayoutData(gridData);
+						buttonComposite.setFont(parent.getFont());
+
+						fileLocationButton= createPushButton(buttonComposite, ExternalToolsLaunchConfigurationMessages.ExternalToolsMainTab_Brows_e_File_System____4, null);
+						fileLocationButton.addSelectionListener(fListener);
+						addControlAccessibleListener(fileLocationButton, group.getText() + " " + fileLocationButton.getText()); //$NON-NLS-1$
 					}
 					protected void createWorkDirectoryComponent(Composite parent) {
 						super.createWorkDirectoryComponent(parent);

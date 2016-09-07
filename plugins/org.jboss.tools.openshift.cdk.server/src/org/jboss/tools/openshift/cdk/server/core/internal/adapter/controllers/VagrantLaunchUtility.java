@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 
+import org.eclipse.core.externaltools.internal.IExternalToolConstants;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -114,6 +115,15 @@ public class VagrantLaunchUtility {
 		// Set the environment flag
 		Map<String,String> env = getEnvironment(s, startupConfig, userName, pass);
    		wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
+   		
+
+    	String vLoc = CDKConstantUtility.getVagrantLocation();
+		if( vLoc != null ) {
+			wc.setAttribute(IExternalToolConstants.ATTR_LOCATION, vLoc);
+			String vagrantCmdFolder = new Path(vLoc).removeLastSegments(1).toOSString();
+			CommandLocationLookupStrategy.get().ensureOnPath(env, vagrantCmdFolder);
+		}
+   		
 		return wc;
 	}
 	

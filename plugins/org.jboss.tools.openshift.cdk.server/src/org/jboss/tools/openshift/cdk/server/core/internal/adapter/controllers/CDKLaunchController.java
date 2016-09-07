@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.eclipse.core.externaltools.internal.IExternalToolConstants;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -98,10 +99,11 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 			env.put(userKey, cdkServer.getUsername());
     	}
 		
-    	String vLoc = CDKConstantUtility.getVagrantLocation();
+    	String vLoc = CDKConstantUtility.getVagrantLocation(workingCopy);
 		if( vLoc != null ) {
 			String vagrantCmdFolder = new Path(vLoc).removeLastSegments(1).toOSString();
 			CommandLocationLookupStrategy.get().ensureOnPath(env, vagrantCmdFolder);
+			workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, vLoc);
 		}
 
     	if( Platform.getOS().equals(Platform.OS_WIN32)) {
