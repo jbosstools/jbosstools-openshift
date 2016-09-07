@@ -248,7 +248,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 			//check if cluster will be able to pull image
 			if(is == null && isImageVisibleByOpenShift(project, imageUri)){
 				is = factory.stub(ResourceKind.IMAGE_STREAM, name, project.getName());
-				is.setDockerImageRepository(imageUri.getUriWithoutTag());
+				is.addTag(imageUri.getTag(), "DockerImage", imageUri.toString());
 			}
 		}
 		if(is == null) {
