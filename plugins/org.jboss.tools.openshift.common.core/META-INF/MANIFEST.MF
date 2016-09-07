@@ -20,38 +20,10 @@ Require-Bundle: org.jboss.tools.common.core;bundle-version="[3.7.0,4.0.0)",
  org.apache.commons.io;bundle-version="[2.0.1,3.0.0)",
  org.apache.commons.lang;bundle-version="[2.6.0,3.0.0)",
  org.eclipse.core.variables
-Export-Package: org.jboss.tools.openshift.common.core;
-  x-friends:="org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.express.core,
-   org.jboss.tools.openshift.express.test,
-   org.jboss.tools.openshift.express.ui,
-   org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.common.core.connection;
-  x-friends:="org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.express.core,
-   org.jboss.tools.openshift.express.test,
-   org.jboss.tools.openshift.express.ui,
-   org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.common.core.server;
-  x-friends:="org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.express.core,
-   org.jboss.tools.openshift.express.test,
-   org.jboss.tools.openshift.express.ui,
-   org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.common.core.utils;
-  x-friends:="org.jboss.tools.openshift.common.ui,
-   org.jboss.tools.openshift.core,
-   org.jboss.tools.openshift.express.core,
-   org.jboss.tools.openshift.express.test,
-   org.jboss.tools.openshift.express.ui,
-   org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui",
+Export-Package: org.jboss.tools.openshift.common.core,
+ org.jboss.tools.openshift.common.core.connection,
+ org.jboss.tools.openshift.common.core.server,
+ org.jboss.tools.openshift.common.core.utils,
  org.jboss.tools.openshift.internal.common.core;
   x-friends:="org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.core,
@@ -59,7 +31,8 @@ Export-Package: org.jboss.tools.openshift.common.core;
    org.jboss.tools.openshift.express.test,
    org.jboss.tools.openshift.express.ui,
    org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui",
+   org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.common.core.job;
   x-friends:="org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.core,
@@ -67,7 +40,8 @@ Export-Package: org.jboss.tools.openshift.common.core;
    org.jboss.tools.openshift.express.test,
    org.jboss.tools.openshift.express.ui,
    org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui",
+   org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.common.core.preferences;
   x-friends:="org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.core,
@@ -75,7 +49,8 @@ Export-Package: org.jboss.tools.openshift.common.core;
    org.jboss.tools.openshift.express.test,
    org.jboss.tools.openshift.express.ui,
    org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui",
+   org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.common.core.security;
   x-friends:="org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.core,
@@ -83,7 +58,8 @@ Export-Package: org.jboss.tools.openshift.common.core;
    org.jboss.tools.openshift.express.test,
    org.jboss.tools.openshift.express.ui,
    org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui",
+   org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.common.core.util;
   x-friends:="org.jboss.tools.openshift.common.ui,
    org.jboss.tools.openshift.core,
@@ -91,5 +67,6 @@ Export-Package: org.jboss.tools.openshift.common.core;
    org.jboss.tools.openshift.express.test,
    org.jboss.tools.openshift.express.ui,
    org.jboss.tools.openshift.test,
-   org.jboss.tools.openshift.ui"
+   org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.reddeer"
 Service-Component: META-INF/connectionsFactory.xml
