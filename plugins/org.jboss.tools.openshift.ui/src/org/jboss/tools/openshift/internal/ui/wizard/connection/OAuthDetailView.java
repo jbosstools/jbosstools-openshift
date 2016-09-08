@@ -23,6 +23,7 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
@@ -211,11 +212,13 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	}
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
+	    IValidator validator = new RequiredStringValidator("token");
 		this.tokenBinding = ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(tokenText))
 				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("token"))
+				.validatingAfterConvert(validator)
 				.to(tokenObservable)
+				.validatingBeforeSet(validator)
 				.in(dbc);
 		ControlDecorationSupport.create(
 				tokenBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
@@ -274,7 +277,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 											OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
 											dialog.open();
 											String token = dialog.getToken();
-											if (token != null) {
+											if (StringUtils.isNotBlank(token)) {
 											    tokenObservable.setValue(token);
 											}
 										}
