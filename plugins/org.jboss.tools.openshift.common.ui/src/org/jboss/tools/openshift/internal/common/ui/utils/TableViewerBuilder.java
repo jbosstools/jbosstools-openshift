@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat, Inc.
+ * Copyright (c) 2011-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Table;
 
 /**
  * @author Andre Dietisheim
+ * @author Jeff Maury
  */
 public class TableViewerBuilder {
 
@@ -169,9 +170,6 @@ public class TableViewerBuilder {
 
 		private void setLabelAndTooltipProviders(
 				final IColumnLabelProvider<E> labelProvider, final CellLabelProvider cellLabelProvider, final ICellToolTipProvider<E> tooltipProvider, TableViewerColumn column) {
-			Assert.isLegal(labelProvider != null
-					|| cellLabelProvider != null
-					, "set either IColumnLabelProvider or CellLabelProvider");
 			Assert.isLegal((cellLabelProvider != null && tooltipProvider == null)
 					|| cellLabelProvider == null
 					, "cannot use ITooltipProvider with CellLabelProvider");
@@ -209,7 +207,7 @@ public class TableViewerBuilder {
 						}
 					}
 				});
-			} else {
+			} else if (cellLabelProvider != null) {
 					column.setLabelProvider(cellLabelProvider);
 			}
 		}

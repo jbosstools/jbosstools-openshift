@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,6 +17,7 @@ import com.openshift.restclient.model.IServicePort;
 /**
  * 
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public interface IServiceAndRoutingPageModel {
@@ -26,6 +27,7 @@ public interface IServiceAndRoutingPageModel {
 	String PROPERTY_SERVICE_PORTS = "servicePorts";
 	String PROPERTY_SELECTED_SERVICE_PORT = "selectedServicePort";
 	static final String PROPERTY_ROUTE_HOSTNAME = "routeHostname";
+	String PROPERTY_ROUTING_PORT = "routingPort";
 	
 	boolean isAddRoute();
 	
@@ -41,7 +43,7 @@ public interface IServiceAndRoutingPageModel {
 
 	/**
 	 * Resets the model to expose all of the
-	 * service ports that are lised by the 
+	 * service ports that are listed by the 
 	 * image;
 	 */
 	void resetServicePorts();
@@ -63,4 +65,18 @@ public interface IServiceAndRoutingPageModel {
 	 * @param routeHostname the route host name
 	 */
 	void setRouteHostname(String routeHostname);
+
+        /**
+	 * Set the port to be used for routing
+	 *  
+	 * @param port the port to use
+	 */
+	void setRoutingPort(IServicePort port);
+	
+	/**
+	 * Return the port used for routing. May be null (round robin)
+	 * 
+	 * @return the routing port or null
+	 */
+	IServicePort getRoutingPort();
 }

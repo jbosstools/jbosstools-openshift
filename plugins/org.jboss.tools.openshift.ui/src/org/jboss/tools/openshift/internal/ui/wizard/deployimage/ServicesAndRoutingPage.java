@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,6 +22,7 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.property.Properties;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -29,11 +30,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.databinding.viewers.ObservableMapLabelProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TableViewer;
@@ -44,6 +46,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -54,10 +57,12 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
+import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 
 import com.openshift.restclient.model.IServicePort;
 
@@ -65,6 +70,7 @@ import com.openshift.restclient.model.IServicePort;
  * Page to configure OpenShift services and routes
  * 
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
@@ -172,15 +178,37 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			.applyTo(label);
 		Composite tableContainer = new Composite(container, SWT.NONE);
 		
+        IObservableList portsObservable = BeanProperties.list(
+                IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
 		portsViewer = createTable(tableContainer);
+		ObservableListContentProvider contentProvider = new ObservableListContentProvider();
+		portsViewer.setContentProvider(contentProvider);
+		ObservableMapLabelProvider labelProvider = new ObservableMapLabelProvider(Properties.observeEach(contentProvider.getKnownElements(), BeanProperties.values(ServicePortAdapter.NAME, ServicePortAdapter.PORT, ServicePortAdapter.TARGET_PORT, ServicePortAdapter.ROUTE_PORT))) {
+		    @Override
+		    public Image getColumnImage(Object element, int columnIndex) {
+		        if (columnIndex == 3) {
+                    boolean selected = (boolean) attributeMaps[columnIndex].get(element);
+                    return selected?OpenShiftImages.CHECKED_IMG:OpenShiftImages.UNCHECKED_IMG;
+		        }
+		        return null;
+		    }
+
+		    @Override
+		    public String getColumnText(Object element, int columnIndex) {
+		        if (columnIndex < attributeMaps.length - 1) {
+		            Object result = attributeMaps[columnIndex].get(element);
+		            return result == null ? "" : result.toString(); //$NON-NLS-1$
+		        }
+		        return null;
+		    }		    
+		};
+		portsViewer.setLabelProvider(labelProvider);
 		GridDataFactory.fillDefaults()
 			.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(portsViewer))
 				.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
 				.in(dbc);
-		portsViewer.setContentProvider(new ObservableListContentProvider());
-		IObservableList portsObservable = BeanProperties.list(
-				IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
+		
 		portsViewer.setInput(portsObservable);
 		dbc.addValidationStatusProvider(new MultiValidator() {
 			
@@ -260,7 +288,6 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 					model.setSelectedServicePort(port);
 				}
 			}
-			
 		};
 	}
 
@@ -305,7 +332,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		public void handleEvent(){
 			String message = "Edit the port to be exposed by the service";
 			final IServicePort port = model.getSelectedServicePort();
-			final ServicePortAdapter target = new ServicePortAdapter(port);
+			final ServicePortAdapter target = new ServicePortAdapter((ServicePortAdapter)port);
 			ServicePortDialog dialog = new ServicePortDialog(target, message, model.getServicePorts());
 			if(Window.OK == dialog.open()) {
 				target.setName(NLS.bind("{0}-tcp", target.getPort()));
@@ -320,29 +347,25 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
+		
 		TableViewer viewer = new TableViewerBuilder(table, tableContainer)
-				.contentProvider(new ArrayContentProvider())
-				.column(new IColumnLabelProvider<IServicePort>() {
-					@Override
-					public String getValue(IServicePort port) {
-						return port.getName();
-					}
+				.column("Name").align(SWT.LEFT).weight(2).minWidth(50).buildColumn()
+				.column("Service Port").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
+				.column("Pod Port").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
+				.column(new ColumnLabelProvider() {
+                    @Override
+                    public Image getImage(Object element) {
+                        boolean selected = ((ServicePortAdapter)element).isRoutePort();
+                        return selected?OpenShiftImages.CHECKED_IMG:OpenShiftImages.UNCHECKED_IMG;
+                    }
+
+                    @Override
+                    public String getText(Object element) {
+                        return null;
+                    }
+				    
 				})
-				.name("Name").align(SWT.LEFT).weight(2).minWidth(50).buildColumn()
-				.column(new IColumnLabelProvider<IServicePort>() {
-					@Override
-					public String getValue(IServicePort port) {
-						return "" + port.getPort();
-					}
-				})
-				.name("Service Port").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
-				.column(new IColumnLabelProvider<IServicePort>() {
-					@Override
-					public String getValue(IServicePort port) {
-						return port.getTargetPort();
-					}
-				})
-				.name("Pod Port").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
+				.name("Used by route").align(SWT.LEFT).weight(1).buildColumn()
 				.buildViewer();
 		viewer.addDoubleClickListener(new EditHandler());
 		return viewer;
@@ -353,7 +376,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IServicePort port = UIUtils.getFirstElement(portsViewer.getSelection(), IServicePort.class);
+			    ServicePortAdapter port = UIUtils.getFirstElement(portsViewer.getSelection(), ServicePortAdapter.class);
 				if(MessageDialog.openQuestion(getShell(), "Remove port", NLS.bind("Are you sure you want to delete the port {0}?", port.getPort()))) {
 					model.removeServicePort(port);
 					portsViewer.refresh();

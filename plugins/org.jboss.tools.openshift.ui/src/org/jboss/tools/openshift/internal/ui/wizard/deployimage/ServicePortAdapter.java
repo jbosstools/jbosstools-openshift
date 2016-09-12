@@ -22,11 +22,31 @@ import com.openshift.restclient.model.IServicePort;
  */
 public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 	
-	private static final String TARGET_PORT = "targetPort";
+    /**
+     * Name property
+     */
+    public static final String NAME = "name";
+    
+    /**
+     * Port property
+     */
+    public static final String PORT = "port";
+
+    /**
+     * Target port property
+     */
+    public static final String TARGET_PORT = "targetPort";
+
+    /**
+     * Route port property
+     */
+    public static final String ROUTE_PORT = "routePort";
+	
 	private String name;
 	private int port;
 	private String containerPort;
 	private String protocol;
+	private boolean routePort;
 
 	public ServicePortAdapter(IPort port){
 		name = port.getName();
@@ -35,14 +55,22 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 		protocol = port.getProtocol();
 	}
 	
-	public ServicePortAdapter(IServicePort port) {
+	public ServicePortAdapter(ServicePortAdapter port) {
 		this.name = port.getName();
 		this.port = port.getPort();
 		this.containerPort = "0".equals(port.getTargetPort()) ? String.valueOf(this.port) : port.getTargetPort();
 		this.protocol = port.getProtocol();
+		this.routePort = port.isRoutePort();
 	}
 
-	public ServicePortAdapter() {
+    public ServicePortAdapter(IServicePort port) {
+        this.name = port.getName();
+        this.port = port.getPort();
+        this.containerPort = "0".equals(port.getTargetPort()) ? String.valueOf(this.port) : port.getTargetPort();
+        this.protocol = port.getProtocol();
+    }
+
+    public ServicePortAdapter() {
 	}
 
 	@Override
@@ -90,7 +118,21 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 		firePropertyChange("protocol", this.protocol, this.protocol = proto);
 	}
 
-	@Override
+	/**
+     * @return the routePort
+     */
+    public boolean isRoutePort() {
+        return routePort;
+    }
+
+    /**
+     * @param routePort the routePort to set
+     */
+    public void setRoutePort(boolean routePort) {
+        firePropertyChange(ROUTE_PORT, this.routePort, this.routePort = routePort);
+    }
+
+    @Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -127,6 +169,8 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 				return false;
 		} else if (!protocol.equals(other.protocol))
 			return false;
+		else if (routePort != other.routePort)
+		        return false;
 		return true;
 	}
 
@@ -136,7 +180,7 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
     @Override
     public String toString() {
         return "ServicePortAdapter [name=" + name + ", port=" + port + ", containerPort=" + containerPort
-                + ", protocol=" + protocol + "]";
+                + ", protocol=" + protocol + ", routePort=" + routePort + "]";
     }
 	
 	
