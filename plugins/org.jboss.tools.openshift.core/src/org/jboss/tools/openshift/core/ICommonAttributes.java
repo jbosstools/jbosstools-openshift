@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.core;
 /**
  * Common attribute info about an openshift cluster
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public interface ICommonAttributes {
@@ -21,7 +22,12 @@ public interface ICommonAttributes {
 	 * The default 'library' namespace for the cluster
 	 */
 	static final String COMMON_NAMESPACE = "openshift";
-	
+
+	/**
+     * The property key for saving the cluster namespace
+     */
+    static final String CLUSTER_NAMESPACE_KEY = "org.jbosstools.openshift.core.connection.ext.cluster.namespace";
+
 	/**
 	 * The property key for saving the image registry url
 	 */

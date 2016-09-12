@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -58,6 +58,7 @@ import com.openshift.restclient.model.route.IRoute;
  * set of OpenShift resources
  * 
  * @author jeff.cantrill
+ * @author Jeff Maury
  *
  */
 public class DeployImageJob extends AbstractDelegatingMonitorJob 
@@ -243,7 +244,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 		IImageStream is = findImageStreamFor(project.getName(), imageUri);
 		if(is == null) {
 			//get openshift is - check
-			is = findImageStreamFor(COMMON_NAMESPACE, imageUri);
+			is = findImageStreamFor((String) getParameters().getConnection().getClusterNamespace(), imageUri);
 			
 			//check if cluster will be able to pull image
 			if(is == null && isImageVisibleByOpenShift(project, imageUri)){
@@ -259,10 +260,15 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 	
 	private IImageStream findImageStreamFor(String namespace, DockerImageURI uri){
 		Connection connection = parameters.getConnection();
-		List<IImageStream> streams = connection.getResources(ResourceKind.IMAGE_STREAM, namespace);
-		return streams.stream()
-			.filter(is->is.getDockerImageRepository() != null && is.getDockerImageRepository().getUriUserNameAndName().equals(uri.getUriUserNameAndName()))
-			.findFirst().orElse(null);
+		try {
+            List<IImageStream> streams = connection.getResources(ResourceKind.IMAGE_STREAM, namespace);
+            return streams.stream()
+            	.filter(is->is.getDockerImageRepository() != null && is.getDockerImageRepository().getUriUserNameAndName().equals(uri.getUriUserNameAndName()))
+            	.findFirst().orElse(null);
+        } catch (OpenShiftException e) {
+            OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+            return null;
+        }
 	}
 	
 	

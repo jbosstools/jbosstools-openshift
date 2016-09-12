@@ -1,5 +1,5 @@
 /*******************************************************************************
- * coright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -37,6 +37,7 @@ import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardP
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAdvancedPropertiesProvider;
 import org.jboss.tools.openshift.internal.common.ui.connection.IAdvancedConnectionPropertiesEditor;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimTrailingSlashConverter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
@@ -52,6 +53,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	private IObservableValue selectedConnection;
 	private IValueChangeListener connectionChangedListener;
 	private IObservableValue registryURLObservable;
+	private IObservableValue clusterNamespaceObservable;
 	private IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider;
 	
 	
@@ -91,6 +93,22 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 					.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_REGISTRY_URL).observe(model))
 					.in(dbc);
 				
+                Label lblNamespace = new Label(advancedComposite, SWT.NONE);
+                lblNamespace.setText("Cluster namespace:");
+                GridDataFactory.fillDefaults()
+                    .align(SWT.LEFT, SWT.CENTER).hint(150, SWT.DEFAULT).applyTo(lblNamespace);
+                
+                Text txtClusterNamespace = new Text(advancedComposite, SWT.BORDER);
+                GridDataFactory.fillDefaults()
+                    .align(SWT.FILL, SWT.CENTER)
+                    .grab(true, false)
+                    .applyTo(txtClusterNamespace);
+                
+                clusterNamespaceObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, txtClusterNamespace);
+                ValueBindingBuilder.bind(clusterNamespaceObservable)
+                    .converting(new TrimmingStringConverter())
+                    .to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_CLUSTER_NAMESPACE).observe(model))
+                    .in(dbc);
 			}
 
 			@Override
@@ -162,6 +180,8 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	class AdvancedConnectionEditorModel extends ObservablePojo{
 		
 		static final String PROP_REGISTRY_URL = "registryURL";
+		static final String PROP_CLUSTER_NAMESPACE = "clusterNamespace";
+		
 
 		public void setRegistryURL(String value) {
 			Connection connection = getConnection();
@@ -182,6 +202,25 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 			return "";
 		}
 		
+        public void setClusterNamespace(String value) {
+            Connection connection = getConnection();
+            if(connection != null) {
+                Map<String, Object> properties = connection.getExtendedProperties();
+                Object old = properties.get(ICommonAttributes.CLUSTER_NAMESPACE_KEY);
+                connection.setExtendedProperty(ICommonAttributes.CLUSTER_NAMESPACE_KEY, value);
+                firePropertyChange(PROP_CLUSTER_NAMESPACE, old, value);
+            }           
+        }
+        
+        public String getClusterNamespace() {
+            Connection connection = getConnection();
+            if(connection != null) {
+                return connection.getClusterNamespace(); 
+            }
+            return "";
+        }
+		
+		
 	}
 	
 	private class ConnectionAdvancedPropertiesProvider implements IConnectionAdvancedPropertiesProvider {
@@ -196,6 +235,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				@Override
 				public void run() {
 					connection.setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, registryURLObservable.getValue());
+					connection.setExtendedProperty(ICommonAttributes.CLUSTER_NAMESPACE_KEY, clusterNamespaceObservable.getValue());
 				}
 			});
 			return connection;
