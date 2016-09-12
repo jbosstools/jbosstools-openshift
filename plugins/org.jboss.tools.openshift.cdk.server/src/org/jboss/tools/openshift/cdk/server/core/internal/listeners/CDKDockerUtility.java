@@ -36,7 +36,7 @@ public class CDKDockerUtility {
 	public IDockerConnection findDockerConnection(String name) {
 		IDockerConnection[] cons = mgr.getConnections();
 		for( int i = 0; i < cons.length; i++ ) {
-			if( cons[i].getName().equals(name)) {
+			if( cons[i] != null && cons[i].getName() != null && cons[i].getName().equals(name)) {
 				return cons[i];
 			}
 		}
