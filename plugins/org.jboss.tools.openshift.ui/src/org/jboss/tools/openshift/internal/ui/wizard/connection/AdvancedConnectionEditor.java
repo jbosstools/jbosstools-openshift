@@ -217,7 +217,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
             if(connection != null) {
                 return connection.getClusterNamespace(); 
             }
-            return "";
+            return ICommonAttributes.COMMON_NAMESPACE;
         }
 		
 		

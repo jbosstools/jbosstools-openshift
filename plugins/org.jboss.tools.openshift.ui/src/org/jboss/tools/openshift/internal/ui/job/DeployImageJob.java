@@ -244,7 +244,9 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 		IImageStream is = findImageStreamFor(project.getName(), imageUri);
 		if(is == null) {
 			//get openshift is - check
-			is = findImageStreamFor((String) getParameters().getConnection().getClusterNamespace(), imageUri);
+		    if (StringUtils.isNotBlank(getParameters().getConnection().getClusterNamespace())) {
+	            is = findImageStreamFor((String) getParameters().getConnection().getClusterNamespace(), imageUri);
+		    }
 			
 			//check if cluster will be able to pull image
 			if(is == null && isImageVisibleByOpenShift(project, imageUri)){

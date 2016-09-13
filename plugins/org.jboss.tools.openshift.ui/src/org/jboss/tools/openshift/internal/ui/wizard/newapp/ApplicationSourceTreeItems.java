@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
@@ -65,7 +66,9 @@ public class ApplicationSourceTreeItems implements IModelFactory , ICommonAttrib
 		Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
 		Collection<IImageStream> streams = conn.getResources(ResourceKind.IMAGE_STREAM, project.getNamespace());
 		try {
-            streams.addAll(conn.getResources(ResourceKind.IMAGE_STREAM, (String) conn.getClusterNamespace()));
+		    if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
+	            streams.addAll(conn.getResources(ResourceKind.IMAGE_STREAM, (String) conn.getClusterNamespace()));
+		    }
         } catch (OpenShiftException e) {
             OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
         }
