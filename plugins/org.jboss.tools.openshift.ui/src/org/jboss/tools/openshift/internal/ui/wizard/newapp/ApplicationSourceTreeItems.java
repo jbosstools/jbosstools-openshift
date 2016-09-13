@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -17,15 +17,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.treeitem.IModelFactory;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromimage.ImageStreamApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IProjectTemplateList;
@@ -36,6 +40,7 @@ import com.openshift.restclient.model.template.ITemplate;
 
 /**
  * @author Andre Dietisheim
+ * @author Jeff Maury
  */
 public class ApplicationSourceTreeItems implements IModelFactory , ICommonAttributes{
 
@@ -60,7 +65,13 @@ public class ApplicationSourceTreeItems implements IModelFactory , ICommonAttrib
 	private Collection<IApplicationSource> loadImageStreams(IProject project) {
 		Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
 		Collection<IImageStream> streams = conn.getResources(ResourceKind.IMAGE_STREAM, project.getNamespace());
-		streams.addAll(conn.getResources(ResourceKind.IMAGE_STREAM, COMMON_NAMESPACE));
+		try {
+		    if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
+	            streams.addAll(conn.getResources(ResourceKind.IMAGE_STREAM, (String) conn.getClusterNamespace()));
+		    }
+        } catch (OpenShiftException e) {
+            OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+        }
 		
 		Collection<IApplicationSource> sources = new ArrayList<>();
 		for (IImageStream is : streams) {

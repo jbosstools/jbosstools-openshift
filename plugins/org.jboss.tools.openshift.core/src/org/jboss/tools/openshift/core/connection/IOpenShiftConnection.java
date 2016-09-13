@@ -72,6 +72,14 @@ public interface IOpenShiftConnection extends IConnection {
 	void setExtendedProperties(Map<String, Object> ext);
 	
 	/**
+	 * Return the cluster namespace used for common resources.
+	 * 
+	 * @return the cluster namespace
+	 */
+	String getClusterNamespace();
+	
+	
+	/**
 	 * Set a value of an extended property
 	 * @param name
 	 * @param value

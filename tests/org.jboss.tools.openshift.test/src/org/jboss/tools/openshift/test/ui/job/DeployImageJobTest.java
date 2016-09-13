@@ -175,6 +175,7 @@ public class DeployImageJobTest {
 
 		Connection conn = mock(Connection.class);
 		when(conn.getResources(anyString(), eq(namespace))).thenReturn(streams);
+		when(conn.getClusterNamespace()).thenReturn(ICommonAttributes.COMMON_NAMESPACE);
 		when(parameters.getConnection()).thenReturn(conn);
 		return is;
 	}

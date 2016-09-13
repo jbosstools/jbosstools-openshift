@@ -30,6 +30,7 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
+import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureStorageKey;
@@ -95,7 +96,12 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		firePropertyChange(PROPERTY_EXTENDED_PROPERTIES, this.extendedProperties, this.extendedProperties = ext);
 	}
 
-	/**
+    @Override
+    public String getClusterNamespace() {
+        return (String) getExtendedProperties().getOrDefault(ICommonAttributes.CLUSTER_NAMESPACE_KEY, ICommonAttributes.COMMON_NAMESPACE);
+    }
+
+    /**
 	 * Retrieve the resource factory associated with this connection
 	 * for stubbing versioned resources supported by th server
 	 * @return an {@link IResourceFactory}
