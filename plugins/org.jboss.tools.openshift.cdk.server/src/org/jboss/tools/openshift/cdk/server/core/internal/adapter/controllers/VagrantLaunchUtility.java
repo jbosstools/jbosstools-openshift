@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.eclipse.cdt.utils.pty.PTY;
+import org.eclipse.cdt.utils.spawner.ProcessFactory;
 import org.eclipse.core.externaltools.internal.IExternalToolConstants;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -35,11 +37,13 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.ide.eclipse.as.core.util.ArgsUtil;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKServerUtility;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
@@ -160,24 +164,48 @@ public class VagrantLaunchUtility {
 		return ret.toArray(new String[ret.size()]);
 	}
 
-	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env)
+	public static String[] callMachineReadable(String rootCommand, String[] args, File vagrantDir, Map<String, String> env)
 			throws IOException, VagrantTimeoutException {
-		return call(rootCommand, args, vagrantDir, env, 30000);
+		return call(rootCommand, args, vagrantDir, env, 30000, false);
 	}
 	
 	private static void ensureCommandOnPath(String rootCommand, Map<String, String> env) {
 		CommandLocationLookupStrategy.get().ensureOnPath(env, new Path(rootCommand).removeLastSegments(1).toOSString());
 	}
 	
-	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
-			int timeout) throws IOException, VagrantTimeoutException {
+	
+	public Process callInteractive(IServer s, String args, String launchConfigName) throws CoreException, IOException {
+		return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+	}
+
+	public Process callInteractive(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException, IOException  {
+		Map<String,String> env = getEnvironment(s, startupConfig);
+		String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(s);
+		File wd =  CDKServerUtility.getWorkingDirectory(s);
+		Process p = callProcess(vagrantcmdloc, ArgsUtil.parse(args), wd, env, true);
+		return p;
+	}
+	
+	public static Process callProcess(String rootCommand, String[] args, File vagrantDir, Map<String, String> env, boolean interactive) throws IOException {
 		ensureCommandOnPath(rootCommand, env);
 		String[] envp = (env == null ? null : convertEnvironment(env));
 
 		List<String> cmd = new ArrayList<>();
 		cmd.add(rootCommand);
 		cmd.addAll(Arrays.asList(args));
-		final Process p = Runtime.getRuntime().exec(cmd.toArray(new String[0]), envp, vagrantDir);
+		Process p = null;
+		if( interactive ) {
+			p = ProcessFactory.getFactory().exec(cmd.toArray(new String[0]), envp, vagrantDir, new PTY(PTY.Mode.TERMINAL));
+		} else {
+			p = Runtime.getRuntime().exec(cmd.toArray(new String[0]), envp, vagrantDir);
+		}
+		return p;
+	}
+
+	
+	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
+			int timeout, boolean interactive) throws IOException, VagrantTimeoutException {
+		final Process p = callProcess(rootCommand, args, vagrantDir, env, interactive);
 
 		InputStream errStream = p.getErrorStream();
 		InputStream inStream = p.getInputStream();
@@ -248,7 +276,6 @@ public class VagrantLaunchUtility {
 					// ignore
 				}
 			}
-
 		}
 		
 		public void cancel() {

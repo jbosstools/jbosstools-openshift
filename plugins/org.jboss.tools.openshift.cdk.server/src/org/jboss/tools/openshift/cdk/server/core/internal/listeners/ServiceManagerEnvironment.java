@@ -108,7 +108,7 @@ public class ServiceManagerEnvironment {
 		env.put("VAGRANT_NO_COLOR", "1");
     	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
 	    try {
-	    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  CDKServerUtility.getWorkingDirectory(server), env);
+	    	String[] lines = VagrantLaunchUtility.callMachineReadable(vagrantcmdloc, args,  CDKServerUtility.getWorkingDirectory(server), env);
 	    	return parseLines(lines);
 		} catch( URISyntaxException urise) {
 			CDKCoreActivator.pluginLog().logError("Environment variable DOCKER_HOST is not a valid uri:  " + env.get("DOCKER_HOST"), urise);
