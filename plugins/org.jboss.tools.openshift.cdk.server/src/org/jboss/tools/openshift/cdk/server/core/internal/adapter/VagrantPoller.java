@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantLaunchUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantTimeoutException;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKLaunchEnvironmentUtil;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
@@ -166,19 +168,37 @@ public class VagrantPoller implements IServerStatePoller2 {
 		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID, "Vagrant status indicates the CDK is starting.");
 	}
 	
-	private IStatus onePing(IServer server, Map<String,String> env) throws PollingException,IOException, TimeoutException {
+	private IStatus onePing(IServer server, Map<String, String> env)
+			throws PollingException, IOException, TimeoutException {
 
-		String[] args = new String[]{CDKConstants.VAGRANT_CMD_STATUS, 
-				CDKConstants.VAGRANT_FLAG_MACHINE_READABLE, CDKConstants.VAGRANT_FLAG_NO_COLOR};
-    	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);		
-    	String[] lines = VagrantLaunchUtility.call(vagrantcmdloc, args,  getWorkingDirectory(server), env);
-		IStatus vmStatus = parseOutput(lines);
-		if (vmStatus.isOK()) {
-			checkOpenShiftHealth(server, 4000); // throws OpenShiftNotReadyPollingException
+		String[] args = new String[] { CDKConstants.VAGRANT_CMD_STATUS, CDKConstants.VAGRANT_FLAG_MACHINE_READABLE,
+				CDKConstants.VAGRANT_FLAG_NO_COLOR };
+		String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
+		try {
+			String[] lines = VagrantLaunchUtility.callMachineReadable(
+					vagrantcmdloc, args, getWorkingDirectory(server), env);
+			IStatus vmStatus = parseOutput(lines);
+			if (vmStatus.isOK()) {
+				// throws OpenShiftNotReadyPollingException on failure
+				checkOpenShiftHealth(server, 4000); 
+			}
+			return vmStatus;
+		} catch (VagrantTimeoutException vte) {
+			// Try to salvage it, it could be the process never terminated but
+			// it got all the output
+			List<String> inLines = vte.getInLines();
+			if (inLines != null) {
+				String[] asArr = (String[]) inLines.toArray(new String[inLines.size()]);
+				IStatus ret = parseOutput(asArr);
+				if (ret != null) {
+					return ret;
+				}
+			}
+			CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to vagrant status. ", vte);
+			throw vte;
 		}
-		return vmStatus;
 	}
-	
+
 	private boolean checkOpenShiftHealth(IServer server, int timeout) throws OpenShiftNotReadyPollingException {
 		// This doesn't seem to work at all due to SSL certificate errors. 
 		// I'm commenting it out for now until I figure out how to work around this

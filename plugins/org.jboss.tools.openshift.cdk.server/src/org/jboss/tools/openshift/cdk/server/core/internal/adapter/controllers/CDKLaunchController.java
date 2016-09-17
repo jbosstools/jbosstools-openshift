@@ -11,6 +11,9 @@
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +34,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.core.LaunchManager;
+import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
+import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
+import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
@@ -187,42 +193,59 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		}
 		
 		String args = configuration.getAttribute(ATTR_ARGS, (String)null);
-		ILaunchConfigurationWorkingCopy wc = null;
+		
+		Process p = null;
 		try {
-			wc = new VagrantLaunchUtility().createExternalToolsLaunchConfig(s, args, getStartupLaunchName(s));
-		} catch(CoreException ce) {
-			CDKCoreActivator.pluginLog().logError(ce);
+			p = new VagrantLaunchUtility().callInteractive(s, args, getStartupLaunchName(s));
+		} catch(IOException ioe) {
+			CDKCoreActivator.pluginLog().logError(ioe);
 			beh.setServerStopped();
-			throw ce;
+			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ioe.getMessage(), ioe));
+		}
+		
+		if( p == null ) {
+			beh.setServerStopped();
+			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to vagrant up has failed."));
 		}
 
-		try {
-			// Run the external tools launch, Do not register the external-tools launch with launch manager
-			ILaunch externalToolsLaunch = wc.launch("run", monitor, false, false);
-			
-			// Add the external-tools processes to THIS launch
-			final IProcess[] processes = externalToolsLaunch.getProcesses();
-			for( int i = 0; i < processes.length; i++ ) {
-				launch.addProcess(processes[i]);
-			}
-			
-			
-			//mark server as starting, add debug listeners, etc
-			if( processes != null && processes.length >= 1 && processes[0] != null ) {
-				IDebugEventSetListener debug = getDebugListener(processes, launch);
-				if( beh != null ) {
-					final IProcess launched = processes[0];
-					beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, launched);
-					beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
-				}
-				DebugPlugin.getDefault().addDebugEventListener(debug);
-			}
-		} catch(CoreException ce) {
-			beh.setServerStopped();
-			throw ce;
+		IProcess process = addProcessToLaunch(p, launch,s);
+		linkTerminal(p);
+		
+		IDebugEventSetListener debug = getDebugListener(new IProcess[]{process}, launch);
+		if( beh != null ) {
+			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
+			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
 		}
+		DebugPlugin.getDefault().addDebugEventListener(debug);
 	}
-
+	
+	private IProcess addProcessToLaunch(Process p, ILaunch launch, IServer s) {
+		Map<String, String> processAttributes = new HashMap<String, String>();
+		String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(s);
+		String progName = new Path(vagrantcmdloc).lastSegment();
+		processAttributes.put(IProcess.ATTR_PROCESS_TYPE, progName);
+		IProcess process = DebugPlugin.newProcess(launch, p, vagrantcmdloc, processAttributes);
+		launch.addProcess(process);
+		return process;
+	}
+	
+	private void linkTerminal(Process p) {
+		InputStream in = p.getInputStream();
+		InputStream err = p.getErrorStream();
+		OutputStream out = p.getOutputStream();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID, "org.eclipse.tm.terminal.connector.streams.launcher.streams");
+		properties.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID, "org.eclipse.tm.terminal.connector.streams.StreamsConnector");
+		properties.put(ITerminalsConnectorConstants.PROP_TITLE, "Test");
+		properties.put(ITerminalsConnectorConstants.PROP_LOCAL_ECHO, false);
+		properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, true);
+		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDIN, out);
+		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDOUT, in);
+		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDERR, err);
+		ITerminalService service = TerminalServiceFactory.getService();
+		service.openConsole(properties, null);
+	}
+	
 	protected LaunchManager getLaunchManager() {
 		return (LaunchManager)DebugPlugin.getDefault().getLaunchManager();
 	}
@@ -237,7 +260,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 						if (processes[0] != null && processes[0].equals(events[i].getSource()) && events[i].getKind() == DebugEvent.TERMINATE) {
 							// Register this launch as terminated
 							((LaunchManager)getLaunchManager()).fireUpdate(new ILaunch[] {launch}, LaunchManager.TERMINATE);
-							processTerminated(getServer(), processes[0], this);
+							processTerminated(getServer(), this);
 							DebugPlugin.getDefault().removeDebugEventListener(this);
 						}
 					}
@@ -246,7 +269,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		};
 	}
 	
-	private void processTerminated(IServer server,IProcess process, IDebugEventSetListener listener) {
+	private void processTerminated(IServer server, IDebugEventSetListener listener) {
 		final ControllableServerBehavior beh = (ControllableServerBehavior)JBossServerBehaviorUtils.getControllableBehavior(server);
 		new Thread() {
 			@Override
@@ -254,7 +277,8 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 				handleProcessTerminated(beh);
 			}
 		}.start();
-		DebugPlugin.getDefault().removeDebugEventListener(listener);
+		if( listener != null ) 
+			DebugPlugin.getDefault().removeDebugEventListener(listener);
 	}
 	
 	
