@@ -45,11 +45,12 @@ import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
 public class VagrantLaunchUtility {
 	public ILaunchConfigurationWorkingCopy createExternalToolsLaunchConfig(IServer s, String args, String launchConfigName) throws CoreException {
-		return setupLaunch(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+		return setupLaunch(s, args, launchConfigName, 
+				s.getLaunchConfiguration(true, new NullProgressMonitor()));
 	}
 	
-	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
-		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
+	private static final String[] getUserPass(IServer server) {
+		final CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		String user = cdkServer.getUsername();
 		String pass = null;
 		try {
@@ -58,15 +59,17 @@ public class VagrantLaunchUtility {
 			pass = uce.getPassword();
 			user = uce.getUser();
 		}
-		return setupLaunch(s, args, launchConfigName, startupConfig, user, pass);
+		return new String[]{user,pass};
 	}
-
 	
-	private static Map<String,String> getEnvironment(IServer s, ILaunchConfiguration startupConfig, String userName, String pass) throws CoreException {
+	private static Map<String,String> getEnvironment(IServer s, ILaunchConfiguration startupConfig) throws CoreException {
 		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		// Set the environment flag
     	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
     	if( passCredentials) {
+    		String[] userPass = getUserPass(s);
+    		String userName = userPass[0];
+    		String pass = userPass[1];
     		Map<String,String> existingEnvironment = startupConfig.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String,String>)null);
     		if( existingEnvironment == null ) {
     			existingEnvironment = new HashMap<>();
@@ -100,13 +103,12 @@ public class VagrantLaunchUtility {
 	}
 	
 	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, 
-			String launchConfigName, ILaunchConfiguration startupConfig,
-			String userName, String pass) throws CoreException {
+			String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
 		ILaunchConfigurationWorkingCopy wc = findLaunchConfig(s, launchConfigName);
 		wc.setAttributes(startupConfig.getAttributes());
 		wc.setAttribute(ATTR_ARGS, args);
 		// Set the environment flag
-		Map<String,String> env = getEnvironment(s, startupConfig, userName, pass);
+		Map<String,String> env = getEnvironment(s, startupConfig);
    		wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
    		
 
@@ -119,7 +121,6 @@ public class VagrantLaunchUtility {
    		
 		return wc;
 	}
-	
 	
 
 	private ILaunchConfigurationWorkingCopy findLaunchConfig(IServer s, String launchName) throws CoreException {
@@ -145,7 +146,7 @@ public class VagrantLaunchUtility {
 		// Create a new map based on pre-existing environment of Eclipse
 		Map<String, String> original = new HashMap<>(System.getenv());
 
-		// Add new environment on top of existing
+		// Add additions or changes to environment on top of existing
 		original.putAll(env);
 
 		// Convert the combined map into a form that can be used to launch process
