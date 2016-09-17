@@ -13,19 +13,18 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 import static org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IExternalLaunchConstants.ATTR_ARGS;
 import static org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IExternalLaunchConstants.ENVIRONMENT_VARS_KEY;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeoutException;
 
 import org.eclipse.core.externaltools.internal.IExternalToolConstants;
 import org.eclipse.core.runtime.CoreException;
@@ -182,39 +181,89 @@ public class VagrantLaunchUtility {
 		InputStream errStream = p.getErrorStream();
 		InputStream inStream = p.getInputStream();
 
-		Integer exitCode = ThreadUtils.runWithTimeout(timeout, new Callable<Integer>() {
-			@Override
-		 	public Integer call() throws Exception {
-				return p.waitFor();
-			}
-		});
+		StreamGobbler inGob = new StreamGobbler(inStream);
+		StreamGobbler errGob = new StreamGobbler(errStream);
+		
+		inGob.start();
+		errGob.start();
+		
+		Integer exitCode = null;
+		if( p.isAlive()) {
+		
+			exitCode = ThreadUtils.runWithTimeout(timeout, new Callable<Integer>() {
+				@Override
+			 	public Integer call() throws Exception {
+					return p.waitFor();
+				}
+			});
+		} else {
+			exitCode = p.exitValue();
+		}
+		
+		inGob.cancel();
+		errGob.cancel();
 		
 		List<String> inLines = null;
 		if( exitCode == null ) {
+			inGob.cancel();
+			errGob.cancel();
+			
 			// Timeout reached
 			p.destroyForcibly();
-			inLines = readStream(inStream);
-			List<String> errLines = readStream(errStream);
+			inLines = inGob.getOutput();
+			List<String> errLines = errGob.getOutput();
 			throw new VagrantTimeoutException(inLines, errLines);
 		} else {
-			inLines = readStream(inStream);
+			inLines = inGob.getOutput();
 		}
 		
 		return (String[]) inLines.toArray(new String[inLines.size()]);
 	}
 	
-	private static List<String> readStream(InputStream inStream) {
-		ArrayList<String> lines = new ArrayList<>();
-		try (
-			BufferedInputStream is = new BufferedInputStream(inStream);
-			Scanner inScanner = new Scanner(is);
-			) {
-			while (inScanner.hasNextLine()) {
-				lines.add(inScanner.nextLine());
-			}
-		} catch(IOException ioe) {
-			// ignore autoclosed ioexception
+	
+	private static class StreamGobbler extends Thread {
+		InputStream is;
+		ArrayList<String> ret = new ArrayList<String>();
+		private boolean canceled = false;
+		public StreamGobbler(InputStream is) {
+			this.is = is;
 		}
-		return lines;
+
+		public void run() {
+			try {
+				InputStreamReader isr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(isr);
+				String line = null;
+				while (!canceled && (line = br.readLine()) != null)
+					ret.add(line);
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+			
+			if( is != null ) {
+				try {
+					is.close();
+				} catch(IOException ioe) {
+					// ignore
+				}
+			}
+
+		}
+		
+		public void cancel() {
+			canceled = true;
+			if( is != null ) {
+				try {
+					is.close();
+				} catch(IOException ioe) {
+					// ignore
+				}
+			}
+		}
+		
+		public List<String> getOutput() {
+			return ret;
+		}
 	}
+	
 }
