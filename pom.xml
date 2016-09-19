@@ -9,7 +9,7 @@
 	<groupId>org.jboss.tools</groupId>
 	<artifactId>openshift</artifactId>
 	<name>jbosstools-openshift</name>
-	<version>3.3.0-SNAPSHOT</version>
+	<version>3.3.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-openshift.git</tycho.scmUrl>

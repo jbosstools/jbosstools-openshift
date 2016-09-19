@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.common.core
 Bundle-Vendor: %Bundle-Vendor
-Bundle-Version: 3.3.0.qualifier
+Bundle-Version: 3.3.1.qualifier
 Bundle-Activator: org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
