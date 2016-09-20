@@ -214,11 +214,11 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		linkTerminal(p);
 		
 		IDebugEventSetListener debug = getDebugListener(new IProcess[]{process}, launch);
+		DebugPlugin.getDefault().addDebugEventListener(debug);
 		if( beh != null ) {
 			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
 			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
 		}
-		DebugPlugin.getDefault().addDebugEventListener(debug);
 	}
 	
 	private IProcess addProcessToLaunch(Process p, ILaunch launch, IServer s) {
@@ -243,7 +243,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		Map<String, Object> properties = new HashMap<>();
 		properties.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID, "org.eclipse.tm.terminal.connector.streams.launcher.streams");
 		properties.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID, "org.eclipse.tm.terminal.connector.streams.StreamsConnector");
-		properties.put(ITerminalsConnectorConstants.PROP_TITLE, "Test");
+		properties.put(ITerminalsConnectorConstants.PROP_TITLE, getServer().getName());
 		properties.put(ITerminalsConnectorConstants.PROP_LOCAL_ECHO, false);
 		properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, true);
 		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDIN, out);

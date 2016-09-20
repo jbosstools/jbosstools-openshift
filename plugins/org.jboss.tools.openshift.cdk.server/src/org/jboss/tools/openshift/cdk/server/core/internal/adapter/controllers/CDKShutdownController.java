@@ -10,9 +10,17 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
@@ -20,6 +28,11 @@ import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.model.IStreamsProxy;
+import org.eclipse.debug.core.model.RuntimeProcess;
+import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
+import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
+import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.internal.PollThread;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
@@ -29,10 +42,12 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IServerShutdownController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLaunchDelegate;
 import org.jboss.tools.as.core.server.controllable.IDeployableServerBehaviorProperties;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
+import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
 public class CDKShutdownController extends AbstractSubsystemController implements IServerShutdownController, IExternalLaunchConstants {
 	@Override
@@ -79,7 +94,7 @@ public class CDKShutdownController extends AbstractSubsystemController implement
 		}
 		
 		try {
-			shutdownViaExternalTools();
+			shutdownViaTerminal();
 		} catch(CoreException ce) {
 			CDKCoreActivator.getDefault().getLog().log(
 					new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Error shutting down server", ce));
@@ -87,43 +102,60 @@ public class CDKShutdownController extends AbstractSubsystemController implement
 		}
 	}
 	
-	private void shutdownViaExternalTools() throws CoreException {
+	private void shutdownViaTerminal() throws CoreException {
 		String cmd = CDKConstants.VAGRANT_CMD_HALT + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR; 
 		
-		ILaunchConfigurationWorkingCopy wc = new VagrantLaunchUtility().createExternalToolsLaunchConfig(getServer(), 
-				cmd, "Shutdown " + getServer().getName());
-		ILaunch launch2 = wc.launch("run", new NullProgressMonitor());
-		final IProcess[] processes = launch2.getProcesses();
+		Process p = null;
+		try {
+			p = new VagrantLaunchUtility().callInteractive(getServer(), cmd, getServer().getName());
+		} catch(IOException ioe) {
+			CDKCoreActivator.pluginLog().logError(ioe);
+			getBehavior().setServerStarted();
+			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ioe.getMessage(), ioe));
+		}
 		
-		if( processes != null && processes.length >= 1 && processes[0] != null ) {
-			IDebugEventSetListener l = getDebugListener(processes);
-			DebugPlugin dp = DebugPlugin.getDefault();
-			if( !processes[0].isTerminated())
-				dp.addDebugEventListener(l);
-			else {
-				processTerminated(getServer(), processes[0], null);
-			}
+		if( p == null ) {
+			getBehavior().setServerStopped();
+			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to vagrant up has failed."));
 		}
 
-	}
-	
-	private IDebugEventSetListener getDebugListener(final IProcess[] processes) {
-		return new IDebugEventSetListener() { 
+		linkTerminal(p);
+		
+		final Process p2 = p;
+		Integer exitCode = ThreadUtils.runWithTimeout(600000, new Callable<Integer>() {
 			@Override
-			public void handleDebugEvents(DebugEvent[] events) {
-				if (events != null) {
-					int size = events.length;
-					for (int i = 0; i < size; i++) {
-						if (processes[0] != null && processes[0].equals(events[i].getSource()) && events[i].getKind() == DebugEvent.TERMINATE) {
-							processTerminated(getServer(), processes[0], this);
-						}
-					}
-				}
+		 	public Integer call() throws Exception {
+				return p2.waitFor();
 			}
-		};
+		});
+		
+		if( exitCode == null ) {
+			// Timeout reached
+			p.destroyForcibly();
+		}
+		
+		processTerminated(getServer(), null);
 	}
 	
-	private void processTerminated(IServer server,IProcess process, IDebugEventSetListener listener) {
+	
+	private void linkTerminal(Process p) {
+		InputStream in = p.getInputStream();
+		InputStream err = p.getErrorStream();
+		OutputStream out = p.getOutputStream();
+		Map<String, Object> properties = new HashMap<>();
+		properties.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID, "org.eclipse.tm.terminal.connector.streams.launcher.streams");
+		properties.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID, "org.eclipse.tm.terminal.connector.streams.StreamsConnector");
+		properties.put(ITerminalsConnectorConstants.PROP_TITLE, getServer().getName());
+		properties.put(ITerminalsConnectorConstants.PROP_LOCAL_ECHO, false);
+		properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, true);
+		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDIN, out);
+		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDOUT, in);
+		properties.put(ITerminalsConnectorConstants.PROP_STREAMS_STDERR, err);
+		ITerminalService service = TerminalServiceFactory.getService();
+		service.openConsole(properties, null);
+	}
+	
+	private void processTerminated(IServer server, IDebugEventSetListener listener) {
 		final ControllableServerBehavior beh = (ControllableServerBehavior)JBossServerBehaviorUtils.getControllableBehavior(server);
 		new Thread() {
 			@Override
