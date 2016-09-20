@@ -33,6 +33,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.model.IStreamsProxy;
+import org.eclipse.debug.core.model.RuntimeProcess;
 import org.eclipse.debug.internal.core.LaunchManager;
 import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
 import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
@@ -223,8 +225,13 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		Map<String, String> processAttributes = new HashMap<String, String>();
 		String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(s);
 		String progName = new Path(vagrantcmdloc).lastSegment();
+		launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
 		processAttributes.put(IProcess.ATTR_PROCESS_TYPE, progName);
-		IProcess process = DebugPlugin.newProcess(launch, p, vagrantcmdloc, processAttributes);
+		IProcess process = new RuntimeProcess(launch, p, vagrantcmdloc, processAttributes) {
+			protected IStreamsProxy createStreamsProxy() {
+				return null;
+			}
+		};
 		launch.addProcess(process);
 		return process;
 	}

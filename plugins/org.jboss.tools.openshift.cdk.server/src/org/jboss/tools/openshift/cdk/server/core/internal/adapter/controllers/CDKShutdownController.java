@@ -96,7 +96,13 @@ public class CDKShutdownController extends AbstractSubsystemController implement
 		final IProcess[] processes = launch2.getProcesses();
 		
 		if( processes != null && processes.length >= 1 && processes[0] != null ) {
-			DebugPlugin.getDefault().addDebugEventListener(getDebugListener(processes));
+			IDebugEventSetListener l = getDebugListener(processes);
+			DebugPlugin dp = DebugPlugin.getDefault();
+			if( !processes[0].isTerminated())
+				dp.addDebugEventListener(l);
+			else {
+				processTerminated(getServer(), processes[0], null);
+			}
 		}
 
 	}
@@ -141,6 +147,7 @@ public class CDKShutdownController extends AbstractSubsystemController implement
 				}	
 			}
 		}.start();
-		DebugPlugin.getDefault().removeDebugEventListener(listener);
+		if( listener != null ) 
+			DebugPlugin.getDefault().removeDebugEventListener(listener);
 	}
 }
