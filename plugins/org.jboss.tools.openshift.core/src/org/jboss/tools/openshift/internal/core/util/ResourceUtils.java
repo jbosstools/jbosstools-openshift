@@ -36,6 +36,7 @@ import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
@@ -88,7 +89,10 @@ public class ResourceUtils {
 
 	private static boolean containsAll(String text, final Collection<String> items) {
 		final String _text = text.toLowerCase();
-		return items.stream().allMatch((String it)->{return _text.contains(it);});
+		return items.stream()
+				.allMatch(it -> {
+					return _text.contains(it);
+				});
 	}
 
 	private static boolean inCollection(String item, final Collection<String> texts) {
@@ -333,6 +337,47 @@ public class ResourceUtils {
 		return buildConfigs.stream()
 				.filter(bc -> areRelated(bc, service))
 				.collect(Collectors.toList());
+	}
+
+	public static IReplicationController getReplicationControllerForService(IService service, List<IReplicationController> allReplicationControllers, List<IPod> allPods) {
+		if (allReplicationControllers == null
+				|| allReplicationControllers.isEmpty()
+				|| allPods == null
+				|| allPods.isEmpty()
+				|| service == null) {
+			return null;
+		}
+
+		List<IPod> pods = getPodsForService(service, allPods);
+		if (pods.isEmpty()) {
+			return null;
+		}
+		return allReplicationControllers.stream()
+				.filter(rc -> containsAll(rc.getReplicaSelector(), pods.get(0).getLabels()))
+				.findFirst()
+				.orElse(null);
+	}
+	
+	/**
+	 * Returns the 1st replication controllers that's found matching the given
+	 * service. The lookup is done by matching the label in the service and
+	 * replication controller pod template. No existing pods are required.
+	 * 
+	 * @param service
+	 * @param allReplicationControllers
+	 * @return
+	 */
+	public static IReplicationController getReplicationControllerForService(IService service, List<IReplicationController> allReplicationControllers) {
+		if (allReplicationControllers == null
+				|| allReplicationControllers.isEmpty()
+				|| service == null) {
+			return null;
+		}
+
+		return allReplicationControllers.stream()
+				.filter(rc -> containsAll(service.getSelector(), rc.getTemplateLabels()))
+				.findFirst()
+				.orElse(null);
 	}
 
 	/**

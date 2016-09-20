@@ -29,6 +29,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +60,7 @@ import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.route.IRoute;
@@ -426,6 +428,35 @@ public class ResourceUtilsTest {
 				Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfig).isNull();
+	}
+
+	@Test
+	public void testGetReplicationControllerForService() {
+		// given
+		IReplicationController rc1 = ResourceMocks.createResource(IReplicationController.class, 
+				r -> 
+					doReturn(new HashMap<String, String>() {{
+						put("name", "42");
+						put("bookaroobanzai", "84"); }})
+					.when(r).getTemplateLabels());
+		IReplicationController rc2 = ResourceMocks.createResource(IReplicationController.class, 
+				r -> {
+					doReturn(new HashMap<String, String>() {{
+						put("name", "42");
+						put("deploymentConfig", "84");
+						put("foo", "bar"); }})
+					.when(r).getTemplateLabels();
+				});
+		IService srv1 = ResourceMocks.createResource(IService.class, 
+				r -> 
+					doReturn(new HashMap<String, String>() {{
+						put("name", "42");
+						put("deploymentConfig", "84");}})
+					.when(r).getSelector());
+		// when
+		IReplicationController matching = ResourceUtils.getReplicationControllerForService(srv1, Arrays.asList(rc1, rc2));
+		// then
+		assertThat(matching).isEqualTo(rc2);
 	}
 
 	@Test
