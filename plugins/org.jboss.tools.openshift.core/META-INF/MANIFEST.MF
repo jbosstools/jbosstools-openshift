@@ -33,17 +33,17 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  com.fasterxml.jackson.core.jackson-core;bundle-version="2.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: org.jboss.tools.openshift.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.core.connection;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.core.server;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
+Export-Package: org.jboss.tools.openshift.core,
+ org.jboss.tools.openshift.core.connection,
+ org.jboss.tools.openshift.core.preferences,
+ org.jboss.tools.openshift.core.server,
  org.jboss.tools.openshift.core.server.behavior,
- org.jboss.tools.openshift.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.core.models;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.core.portforwarding;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.core.server.debug;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui",
- org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui"
+ org.jboss.tools.openshift.core.util,
+ org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.models;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.portforwarding;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.server.debug;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer"
 Service-Component: META-INF/connectionFactory.xml
 
