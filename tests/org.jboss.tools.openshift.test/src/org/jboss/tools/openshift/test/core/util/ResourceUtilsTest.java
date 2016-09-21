@@ -29,6 +29,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +60,7 @@ import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.route.IRoute;
@@ -69,22 +71,22 @@ public class ResourceUtilsTest {
 	private static final String IMAGE_REF = "foo:latest";
 
 	private static final IService SERVICE_42 =
-			ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("42"));
+			ResourceMocks.createResource(IService.class, service -> when(service.getName()).thenReturn("42"));
 
 	private static final IBuildConfig[] BUILDCONFIGS = new IBuildConfig[] {
 			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("41")),
 			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42")),
 			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42a")),
 			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42")),
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("a42a")) 
+			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("a42a"))
 	};
 
 	private static final IRoute[] ROUTES = new IRoute[] {
-			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("41")),
-			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("42")),
-			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("42a")),
-			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("42")),
-			ResourceMocks.createResource(IRoute.class, config -> when(config.getServiceName()).thenReturn("a42a")) 
+			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("41")),
+			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("42")),
+			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("42a")),
+			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("42")),
+			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("a42a"))
 	};
 
 	private Map<String, String> podLabels = new HashMap<>();
@@ -219,6 +221,16 @@ public class ResourceUtilsTest {
 		target.put("foo", "bar");
 		target.put("xyz", "bar");
 		assertTrue(containsAll(source, target));
+	}
+
+	@Test
+	public void containsAll_wont_match_if_target_contains_source_key_in_different_case() {
+		Map<String, String> source = new HashMap<>(); 
+		source.put("foo", "bar");
+		Map<String, String> target= new HashMap<>(); 
+		target.put("FoO", "bar");
+		target.put("xyz", "bar");
+		assertFalse(ResourceUtils.containsAll(source, target));
 	}
 
 	@Test
@@ -426,6 +438,35 @@ public class ResourceUtilsTest {
 				Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfig).isNull();
+	}
+
+	@Test
+	public void testGetReplicationControllerForService() {
+		// given
+		IReplicationController rc1 = ResourceMocks.createResource(IReplicationController.class, 
+				r -> 
+					doReturn(new HashMap<String, String>() {{
+						put("name", "42");
+						put("bookaroobanzai", "84"); }})
+					.when(r).getTemplateLabels());
+		IReplicationController rc2 = ResourceMocks.createResource(IReplicationController.class, 
+				r -> {
+					doReturn(new HashMap<String, String>() {{
+						put("name", "42");
+						put("deploymentConfig", "84");
+						put("foo", "bar"); }})
+					.when(r).getTemplateLabels();
+				});
+		IService srv1 = ResourceMocks.createResource(IService.class, 
+				r -> 
+					doReturn(new HashMap<String, String>() {{
+						put("name", "42");
+						put("deploymentConfig", "84");}})
+					.when(r).getSelector());
+		// when
+		IReplicationController matching = ResourceUtils.getReplicationControllerForService(srv1, Arrays.asList(rc1, rc2));
+		// then
+		assertThat(matching).isEqualTo(rc2);
 	}
 
 	@Test
