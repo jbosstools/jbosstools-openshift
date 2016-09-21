@@ -12,6 +12,7 @@ import static org.jboss.tools.openshift.internal.ui.job.ResourceCreationJobUtils
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -44,6 +45,10 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 	private Collection<Label> labels;
 	private Collection<IParameter> parameters;
 	private Collection<IResource> resources;
+
+	public CreateApplicationFromTemplateJob(IProject project, ITemplate template) {
+		this(project, template, Collections.emptyList(),Collections.emptyList());
+	}
 
 	public CreateApplicationFromTemplateJob(IProject project, ITemplate template, Collection<IParameter> parameters, Collection<Label> labels) {
 		super("Create Application From Template Job");
