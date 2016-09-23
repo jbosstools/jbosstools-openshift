@@ -201,8 +201,12 @@ public class DeployImageWizardModel
 				protected IStatus doRun(IProgressMonitor monitor) {
 					try {
 						List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
+						//Project might be set by a master model that set connection to this slave model
+						//and thus caused loading projects job. While this job was in wait,
+						//master model might set project. It must be respected.
+						IProject p = (project != null) ? project : getProject();
 						setProjects(projects);
-						setProjectOrDefault(project);
+						setProjectOrDefault(p);
 						return Status.OK_STATUS;
 					} catch (Exception e) {
 						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,
