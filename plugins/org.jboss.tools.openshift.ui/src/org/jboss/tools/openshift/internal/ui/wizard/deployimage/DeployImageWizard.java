@@ -8,9 +8,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -72,11 +71,8 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 	private String getImageNameWithTag(IDockerImage image) {
 		String imageName = image.repo();
 		if(!image.tags().isEmpty()) {
-			List<String> tags = new ArrayList<>(image.tags());
-			if(tags.size() > 1) {
-				Collections.sort(tags); //same as in docker explorer
-			}
-			imageName += ":" + tags.get(0);
+			TreeSet<String> tags = new TreeSet<>(image.tags());
+			imageName += ":" + tags.first();
 		}
 		return imageName;
 	}
