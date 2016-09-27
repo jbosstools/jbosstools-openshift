@@ -200,11 +200,6 @@ public class VagrantPoller implements IServerStatePoller2 {
 	}
 
 	private boolean checkOpenShiftHealth(IServer server, int timeout) throws OpenShiftNotReadyPollingException {
-		// This doesn't seem to work at all due to SSL certificate errors. 
-		// I'm commenting it out for now until I figure out how to work around this
-		//return true; 
-		
-		
 		ServiceManagerEnvironment adb = ServiceManagerEnvironment.getOrLoadServiceManagerEnvironment(server, true);
 		if( adb == null ) {
 			return false;

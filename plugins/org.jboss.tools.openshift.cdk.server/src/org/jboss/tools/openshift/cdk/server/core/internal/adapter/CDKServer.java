@@ -28,6 +28,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.tools.foundation.core.credentials.CredentialService;
 import org.jboss.tools.foundation.core.credentials.ICredentialDomain;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 
 public class CDKServer extends ServerDelegate {
@@ -153,4 +154,19 @@ public class CDKServer extends ServerDelegate {
 		}
 		return null;
 	}
+	
+	public boolean passCredentials() {
+		boolean passCredentials = getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
+		return passCredentials;
+	}
+
+	public String getUserEnvironmentKey() {
+		return getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
+	}
+	
+	public String getPasswordEnvironmentKey() {
+		return getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
+	}
+	
+	
 }

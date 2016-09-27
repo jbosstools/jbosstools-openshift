@@ -69,7 +69,7 @@ public class VagrantLaunchUtility {
 	private static Map<String,String> getEnvironment(IServer s, ILaunchConfiguration startupConfig) throws CoreException {
 		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		// Set the environment flag
-    	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
+    	boolean passCredentials = cdkServer.passCredentials();
     	if( passCredentials) {
     		String[] userPass = getUserPass(s);
     		String userName = userPass[0];
@@ -87,10 +87,10 @@ public class VagrantLaunchUtility {
     		}
     		
     		HashMap<String,String> env = new HashMap<>(existingEnvironment);
-    		String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
+    		String userKey = cdkServer.getUserEnvironmentKey();
     		env.put(userKey, userName);
     		
-    		String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
+    		String passKey = cdkServer.getPasswordEnvironmentKey();
     		if( pass == null ) {
     			// This is an error situation and the user should be made aware
     			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, 

@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
-import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IExternalLaunchConstants;
@@ -28,13 +27,15 @@ public class CDKLaunchEnvironmentUtil {
 
 	public static Map<String, String> createEnvironment(IServer server) {
 		CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+		boolean passCredentials = cdkServer.passCredentials();
 		String pass = null;
-		try {
-			pass = cdkServer.getPassword();
-		} catch (UsernameChangedException uce) {
-			return createEnvironment(server, uce.getPassword(), uce.getUser());
+		if( passCredentials) {
+			try {
+				pass = cdkServer.getPassword();
+			} catch (UsernameChangedException uce) {
+				return createEnvironment(server, uce.getPassword(), uce.getUser());
+			}
 		}
-
 		return createEnvironment(server, pass);
 	}
 
@@ -65,14 +66,15 @@ public class CDKLaunchEnvironmentUtil {
 		}
 
 		CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
-		boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
+		boolean passCredentials = cdkServer.passCredentials();
+		String userKey = cdkServer.getUserEnvironmentKey();
+		String passKey = cdkServer.getPasswordEnvironmentKey();
 		if (passCredentials) {
-			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR,
-					CDKConstants.CDK_ENV_SUB_USERNAME);
-			String passKey = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR,
-					CDKConstants.CDK_ENV_SUB_PASSWORD);
 			systemEnv.put(userKey, user);
 			systemEnv.put(passKey, password);
+		} else {
+			systemEnv.remove(userKey);
+			systemEnv.remove(passKey);
 		}
 		return systemEnv;
 	}

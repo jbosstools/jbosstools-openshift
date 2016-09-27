@@ -81,7 +81,6 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		String workingDir = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);
 		workingCopy.setAttribute(ATTR_WORKING_DIR, workingDir);
-    	boolean passCredentials = cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
     	
     	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map)null);
     	if( env == null ) {
@@ -89,12 +88,16 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
     	} else {
     		env = new HashMap<>(env); // no guarantee existing map is editable
     	}
+    	
+    	String userKey = cdkServer.getUserEnvironmentKey();
+    	boolean passCredentials = cdkServer.passCredentials();
     	if( passCredentials) {
     		// These environment variables are visible AND persisted in the launch configuration.
     		// It is not safe to persist the password here, but rather add it on-the-fly to the 
     		// program launch later on. 
-			String userKey = cdkServer.getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
 			env.put(userKey, cdkServer.getUsername());
+    	} else {
+    		env.remove(userKey);
     	}
 		
     	String vLoc = CDKConstantUtility.getVagrantLocation(workingCopy);
@@ -124,13 +127,15 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		wc.setAttribute(FLAG_INITIALIZED, true);
 		String workingDir = server.getAttribute(CDKServer.PROP_FOLDER, (String)null);
 		wc.setAttribute(ATTR_WORKING_DIR, workingDir);
-    	boolean passCredentials = server.getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
+		CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+
+    	boolean passCredentials = cdkServer.passCredentials();
     	if( passCredentials) {
     		// These environment variables are visible AND persisted in the launch configuration.
     		// It is not safe to persist the password here, but rather add it on-the-fly to the 
     		// program launch later on. 
     		HashMap<String, String> env = new HashMap<>();
-			String userKey = server.getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
+			String userKey = cdkServer.getUserEnvironmentKey();
 			env.put(userKey, userName);
 			wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
     	}
@@ -164,28 +169,32 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		}
 		
 		CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
-    	String pass = null;
-    	String user = cdkServer.getUsername();
-    	try {
-    		pass = cdkServer.getPassword();
-    	} catch(UsernameChangedException uce) {
-    		pass = uce.getPassword();
-    		user = uce.getUser();
-    	}
-    	
-    	if( user == null ) {
-			beh.setServerStopped();
-			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no username associated with it. Please open the server editor and configure the credentials."));
-    	}
+		boolean passCredentials = cdkServer.passCredentials();
+		
+		if( passCredentials) {
+	    	String pass = null;
+	    	String user = cdkServer.getUsername();
+	    	try {
+	    		pass = cdkServer.getPassword();
+	    	} catch(UsernameChangedException uce) {
+	    		pass = uce.getPassword();
+	    		user = uce.getUser();
+	    	}
+	    	
+	    	if( user == null ) {
+				beh.setServerStopped();
+				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no username associated with it. Please open the server editor and configure the credentials."));
+	    	}
+	
+	    	if( pass == null ) {
+				beh.setServerStopped();
+				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no password associated with it. Please open the server editor and configure the credentials."));
+	    	}
 
-    	if( pass == null ) {
-			beh.setServerStopped();
-			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no password associated with it. Please open the server editor and configure the credentials."));
-    	}
-
-		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, pass);
-		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, user);
-
+			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, pass);
+			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, user);
+		}
+		
 		// Poll the server once more 
 		IStatus stat = new VagrantPoller().getCurrentStateSynchronous(getServer());
 		if( stat.isOK()) {
