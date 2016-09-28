@@ -15,10 +15,12 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
@@ -56,6 +58,12 @@ public class CDKLaunchControllerTest {
 		IServer server = mock(IServer.class);
 		when(server.getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false)).thenReturn(Boolean.TRUE);
 		when(server.getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME)).thenReturn(CDKConstants.CDK_ENV_SUB_USERNAME);
+		
+		CDKServer cdk = mock(CDKServer.class);
+		
+		when(cdk.passCredentials()).thenReturn(Boolean.TRUE);
+		when(cdk.getUserEnvironmentKey()).thenReturn(CDKConstants.CDK_ENV_SUB_USERNAME);
+		when(server.loadAdapter(eq(CDKServer.class), any(IProgressMonitor.class))).thenReturn(cdk);
 		return server;
 	}
 }
