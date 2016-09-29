@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -121,6 +122,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
         .observe(model))
         .in(dbc);
         ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(textRouteHostname))
+        .converting(new TrimmingStringConverter())
         .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME)
         .observe(model))
         .in(dbc);
