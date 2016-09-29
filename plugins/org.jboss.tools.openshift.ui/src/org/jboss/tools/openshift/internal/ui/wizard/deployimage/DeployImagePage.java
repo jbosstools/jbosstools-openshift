@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.databinding.Binding;
@@ -67,6 +66,7 @@ import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
@@ -178,8 +178,32 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		if(imageNameProposalAdapter != null) {
 			imageNameProposalAdapter.setEnabled(true);
 		}
+		if (Direction.FORWARDS == progress) {
+			loadResources(dbc);
+		}
 	}
 
+	private void loadResources(DataBindingContext dbc) {
+		Job job = new AbstractDelegatingMonitorJob("Loading projects...") {
+			 	
+				@Override
+				protected IStatus doRun(IProgressMonitor monitor) {
+					try {
+						model.loadResources();
+						return Status.OK_STATUS;
+					} catch(Exception e) {
+						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+								NLS.bind("Unable to load the OpenShift projects from connection {0}.", model.getConnection()), e);
+					}
+				}
+		};
+		try {
+			WizardUtils.runInWizard(job, getContainer(), dbc);
+		} catch (InvocationTargetException | InterruptedException e) {
+			// swallowed on purpose
+		}
+	}
+	
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(NUM_COLUMS)
@@ -668,9 +692,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
                             // reload projects to reflect changes that happened in
                             // projects wizard
                             if (newProjectWizard.getProject() != null) {
-                                List<IProject> projects = new ArrayList<>(model.getProjects());
-                                projects.add(newProjectWizard.getProject());
-                                model.setProjects(projects);
+                                model.addProject(newProjectWizard.getProject());
                             }
                             if (Dialog.OK == result) {
                                 IProject selectedProject = newProjectWizard.getProject();

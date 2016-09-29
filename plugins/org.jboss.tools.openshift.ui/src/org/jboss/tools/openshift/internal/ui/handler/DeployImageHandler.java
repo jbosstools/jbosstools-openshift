@@ -64,7 +64,7 @@ public class DeployImageHandler extends AbstractHandler {
 			connection = OpenShiftUIUtils.getExplorerDefaultConnection(Connection.class);
 		}
 
-		runWizard(HandlerUtil.getActiveWorkbenchWindow(event).getShell(), image, project,connection);
+		runWizard(HandlerUtil.getActiveWorkbenchWindow(event).getShell(), image, project, connection);
 
 		return null;
 	}

@@ -64,8 +64,9 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 			model.setImageName(getImageNameWithTag(image));
 		}
 		model.setStartedWithActiveConnection(isAuthorized);
-		model.initModel(connection, project, isAuthorized);
-
+		model.setConnection(connection);
+		model.setProject(project);
+		
 		setNeedsProgressMonitor(true);
 	}
 

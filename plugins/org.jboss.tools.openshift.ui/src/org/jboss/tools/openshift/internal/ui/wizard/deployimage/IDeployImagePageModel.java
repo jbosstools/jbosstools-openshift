@@ -70,8 +70,14 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return
 	 */
 	List<IProject> getProjects();
-
-	void setProjects(List<IProject> projects);
+	
+	/**
+	 * Adds the given project to the list of projects in this model.
+	 * Does nothing if the project is {@code null}.
+	 * 
+	 * @param project the project that should be added
+	 */
+	void addProject(IProject project);
 	
 	void setProjectsComparator(Comparator<IProject> comparator);
 
@@ -80,6 +86,7 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return
 	 */
 	IProject getProject();
+	
 	void setProject(IProject project);
 	
 	/**
@@ -171,6 +178,8 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 */
 	boolean initializeContainerInfo();
 	
+	public void loadResources();
+
 	/**
 	 * Free any resource
 	 */
