@@ -288,6 +288,10 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 	private IResource stubRoute(IResourceFactory factory, String name, String serviceName) {
 		IRoute route = factory.stub(ResourceKind.ROUTE, name, parameters.getProject().getName());
 		route.setServiceName(serviceName);
+		String hostname = parameters.getRouteHostname();
+		if (StringUtils.isNotBlank(hostname)) {
+		    route.setHost(hostname);
+		}
 		return route;
 	}
 

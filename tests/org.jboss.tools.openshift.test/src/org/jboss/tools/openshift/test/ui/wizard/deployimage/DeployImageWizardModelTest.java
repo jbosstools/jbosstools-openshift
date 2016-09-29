@@ -449,5 +449,9 @@ public class DeployImageWizardModelTest {
     	}
     	
     }
-
+    
+    @Test
+    public void checkThatRoutingHostnameIsNullByDefault() {
+        assertThat(model.getRouteHostname()).isNull();
+    }
 }

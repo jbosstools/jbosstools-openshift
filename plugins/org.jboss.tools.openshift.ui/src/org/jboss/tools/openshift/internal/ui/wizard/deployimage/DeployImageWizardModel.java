@@ -71,6 +71,7 @@ public class DeployImageWizardModel
 	private List<IPort> portSpecs = Collections.emptyList();
 	private int replicas;
 	private boolean addRoute = true;
+        private String routeHostname;
 	List<IServicePort> servicePorts = new ArrayList<>();
 	IServicePort selectedServicePort = null;
 	private IDockerConnection dockerConnection;
@@ -453,7 +454,17 @@ public class DeployImageWizardModel
 				this.addRoute = addRoute);
 	}
 
-	@Override
+    @Override
+    public String getRouteHostname() {
+        return routeHostname;
+    }
+
+    @Override
+    public void setRouteHostname(String routeHostname) {
+        firePropertyChange(PROPERTY_ROUTE_HOSTNAME, this.routeHostname, this.routeHostname = routeHostname);
+    }
+
+    @Override
 	public List<IServicePort> getServicePorts() {
 		return servicePorts;
 	}

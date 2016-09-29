@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
@@ -77,6 +78,12 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 		createExposedPortsControl(parent, dbc);
 		
+	    GridDataFactory
+          .fillDefaults()
+          .align(SWT.FILL, SWT.BEGINNING)
+          .grab(true, false)
+          .applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
+
 		//routing
 		Composite routingContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -92,11 +99,31 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		btnAddRoute.setText("Add Route");
 		btnAddRoute.setToolTipText("Adding a route to the service will make the image accessible\noutside of the OpenShift cluster on all the available service ports. \nYou can target a specific port by editing the route later.");
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(btnAddRoute);
+			.align(SWT.FILL, SWT.FILL).grab(false, false).span(2, 1).applyTo(btnAddRoute);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(btnAddRoute))
 			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE)
 			.observe(model))
 			.in(dbc);
+		
+		Label labelRouteHostname = new Label(routingContainer, SWT.NONE);
+		labelRouteHostname.setText("Hostname:");
+	    GridDataFactory.fillDefaults()
+          .align(SWT.FILL, SWT.FILL)
+          .applyTo(labelRouteHostname);
+
+		Text textRouteHostname = new Text(routingContainer, SWT.BORDER);
+        GridDataFactory.fillDefaults()
+        .align(SWT.FILL, SWT.CENTER)
+        .grab(true, false)
+        .applyTo(textRouteHostname);
+        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(textRouteHostname))
+        .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE)
+        .observe(model))
+        .in(dbc);
+        ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(textRouteHostname))
+        .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME)
+        .observe(model))
+        .in(dbc);
 
 	}
 
