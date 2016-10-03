@@ -370,7 +370,8 @@ public class DeployImageWizardModel
 			return false;
 		}
 		final List<EnvironmentVariable> envVars = this.imageMeta.env().stream().filter(env -> env.indexOf('=') != -1)
-				.map(env -> env.split("=")).map(splittedEnv -> new EnvironmentVariable(splittedEnv[0], splittedEnv[1]))
+				.map(env -> env.split("="))
+				.map(splittedEnv -> new EnvironmentVariable(splittedEnv[0], splittedEnv.length > 1 ? splittedEnv[1] : StringUtils.EMPTY))
 				.collect(Collectors.toList());
 		setEnvironmentVariables(envVars);
 		final List<IPort> portSpecs = this.imageMeta.exposedPorts().stream().map(spec -> new PortSpecAdapter(spec))
