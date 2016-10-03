@@ -87,8 +87,8 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringCo
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.viewer.AbstractLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
@@ -313,6 +313,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						.observe(pageModel));
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(gearViewer.getControl());
+		ValueBindingBuilder
+			.bind(ViewerProperties.singlePostSelection().observe(gearViewer))
+			.to(BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_GEAR_PROFILE)
+					.observe(pageModel))
+			.in(dbc);
 
 		// scaling
 		Button enableScalingButton = new Button(parent, SWT.CHECK);
