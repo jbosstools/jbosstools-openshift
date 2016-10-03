@@ -178,9 +178,11 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		if(imageNameProposalAdapter != null) {
 			imageNameProposalAdapter.setEnabled(true);
 		}
-		if (Direction.FORWARDS == progress) {
-			loadResources(dbc);
-		}
+	}
+
+	@Override
+	protected void onPageActivated(DataBindingContext dbc) {
+		loadResources(dbc);
 	}
 
 	private void loadResources(DataBindingContext dbc) {
