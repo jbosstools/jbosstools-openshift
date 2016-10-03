@@ -205,7 +205,7 @@ public class DeployImageWizardModelTest {
     }
     
     @Test
-    public void imagesFromDockerDonnectionAreReturned() {
+    public void imagesFromDockerConnectionAreReturned() {
         IDockerImage image= mock(IDockerImage.class);
         when(image.repoTags()).thenReturn(Collections.singletonList("image:latest"));
         when(dockerConnection.getImages()).thenReturn(Collections.singletonList(image));
@@ -387,6 +387,26 @@ public class DeployImageWizardModelTest {
         assertThat(model.getEnvironmentVariables()).isEqualTo(Arrays.asList(new EnvironmentVariable("V1", "value1"),
                                                                             new EnvironmentVariable("V2", "value2")));
     }
+    
+	@Test
+	public void shouldInitializeContainerInfoWithEmtyEnvironmentVariable() {
+		final IDockerImageInfo dockerImageInfo = Mockito.mock(IDockerImageInfo.class, Mockito.RETURNS_DEEP_STUBS);
+		when(dockerConnection.hasImage(WILDFLY_IMAGE, LATEST_TAG)).thenReturn(true);
+		when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
+		when(dockerImageInfo.containerConfig().env()).thenReturn(Arrays.asList("V1=value1", "V2="));
+		when(dockerImageInfo.containerConfig().exposedPorts()).thenReturn(Collections.emptySet());
+		when(dockerImageInfo.containerConfig().volumes()).thenReturn(Collections.emptySet());
+		mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
+		// when
+		model.setImageName(WILDFLY_IMAGE_URI);
+        final boolean result = model.initializeContainerInfo();
+        // then
+        assertThat(result).isTrue();
+        assertThat(model.getEnvironmentVariables()).hasSize(2);
+        assertThat(model.getEnvironmentVariables()).isEqualTo(
+        		Arrays.asList(new EnvironmentVariable("V1", "value1"),
+        					  new EnvironmentVariable("V2", "")));
+	}
     
     private static IDockerImage mockSingleImage(IDockerConnection dockerConnection, String imageName, String tag) {
         IDockerImage image= mock(IDockerImage.class);
