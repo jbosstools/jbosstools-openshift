@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
@@ -57,27 +58,21 @@ public class DeployImageWizardModel
 		implements IDeployImageParameters, IDockerConnectionManagerListener2, PropertyChangeListener {
 
 	private static final int DEFAULT_REPLICA_COUNT = 1;
+	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
 
 	private Connection connection;
 	private IProject project;
+	private List<IProject> projects = new ArrayList<>();
 	private String resourceName;
 	private String imageName;
-	private List<IProject> projects = new ArrayList<>();
-
 	private EnvironmentVariablesPageModel envModel = new EnvironmentVariablesPageModel();
-
 	private List<String> volumes = Collections.emptyList();
 	private String selectedVolume;
-
 	private List<IPort> portSpecs = Collections.emptyList();
-
 	private int replicas;
-
 	private boolean addRoute = true;
-
 	List<IServicePort> servicePorts = new ArrayList<>();
 	IServicePort selectedServicePort = null;
-	
 	private IDockerConnection dockerConnection;
 	private ArrayList<IServicePort> imagePorts;
 	private boolean originatedFromDockerExplorer;
@@ -87,13 +82,10 @@ public class DeployImageWizardModel
 	private String targetRegistryLocation;
 	private String targetRegistryUsername;
 	private String targetRegistryPassword;
-
-	
-	
-	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
 	private final List<String> imageNames = new ArrayList<>();
     private List<IDockerConnection> dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections());
     private Comparator<IProject> projectsComparator;
+	protected boolean resourcesLoaded = false;
 
 	public DeployImageWizardModel() {
 		envModel.addPropertyChangeListener(PROPERTY_ENVIRONMENT_VARIABLES, this);
@@ -188,14 +180,23 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setConnection(final Connection connection) {
+		Connection oldConnection = this.connection;
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
 		initImageRegistry(connection);
+		this.resourcesLoaded = ObjectUtils.equals(oldConnection, connection);
 	}
 
+	@Override
 	public void loadResources() {
+		if (resourcesLoaded) {
+			return;
+		}
+
 		List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
 		setProjects(projects);
 		setProjectOrDefault(project);
+
+		this.resourcesLoaded = true;
 	}
 	
 	protected void setProjects(List<IProject> projects) {

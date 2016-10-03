@@ -13,6 +13,10 @@ package org.jboss.tools.openshift.test.ui.wizard.deployimage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -63,14 +67,14 @@ public class DeployImageWizardModelTest {
     private IDockerConnection dockerConnection;
 	private Connection connection;
 	private IProject project;
-    private DeployImageWizardModel model;
+    private TestableDeployImageWizardModel model;
     
     @Before
     public void setUp() {
     	this.dockerConnection = mock(IDockerConnection.class);
     	this.connection = createConnection();
     	this.project = mock(IProject.class);
-    	this.model = new DeployImageWizardModel();
+    	this.model = new TestableDeployImageWizardModel();
     	model.setConnection(connection);
     	createModelProjects(connection, project, mock(IProject.class));
     	model.setDockerConnection(dockerConnection);
@@ -237,6 +241,7 @@ public class DeployImageWizardModelTest {
         IProject project1 = mock(IProject.class);
         IProject project2 = mock(IProject.class);
     	createModelProjects(this.connection, project1, project2) ;
+    	model.setResourcesLoaded(false);
     	// when
     	model.loadResources();
     	// then
@@ -251,6 +256,7 @@ public class DeployImageWizardModelTest {
     	IProject project1 = mock(IProject.class);
     	IProject project2 = mock(IProject.class);
     	createModelProjects(this.connection, project1, project2) ;
+    	model.setResourcesLoaded(false);
     	// when
     	model.loadResources();
     	// then
@@ -267,6 +273,27 @@ public class DeployImageWizardModelTest {
         assertThat(model.getProject()).isEqualTo(project);
     }
     
+    @Test
+    public void should_not_load_resources_twice() {
+    	// given
+    	verify(connection, times(1)).getResources(ResourceKind.PROJECT); // loaded in #setUp
+    	reset(connection);
+    	// when
+    	model.loadResources();
+    	verify(connection, never()).getResources(ResourceKind.PROJECT);
+    }
+
+    @Test
+    public void should_reload_resources_if_connection_was_changed() {
+    	// given
+    	Connection connection2 = mock(Connection.class);
+    	model.setConnection(connection2);
+    	// when
+    	model.loadResources();
+    	// then
+    	verify(connection2, times(1)).getResources(ResourceKind.PROJECT);
+    }
+
     @Test
     public void checkThatRemoveAnExistingServicePortIsEffective() {
         // assume Docker image is on local
@@ -414,4 +441,13 @@ public class DeployImageWizardModelTest {
         when(dockerConnection.getImages()).thenReturn(Collections.singletonList(image));
         return image;
     }    
+
+    private static final class TestableDeployImageWizardModel extends DeployImageWizardModel {
+    	
+    	public void setResourcesLoaded(boolean loaded) {
+    		this.resourcesLoaded = loaded;
+    	}
+    	
+    }
+
 }
