@@ -24,10 +24,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerConnectionManagerListener2;
@@ -36,11 +32,9 @@ import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.util.OpenShiftProjectUtils;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dockerutils.DockerImageUtils;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablesPageModel;
@@ -55,11 +49,12 @@ import com.openshift.restclient.model.IServicePort;
 /**
  * The Wizard model to support deploying an image to OpenShift
  * @author jeff.cantrill
+ * @author Andre Dietisheim
  *
  */
 public class DeployImageWizardModel 
 		extends ResourceLabelsPageModel 
-		implements IDeployImageParameters, IDockerConnectionManagerListener2, PropertyChangeListener{
+		implements IDeployImageParameters, IDockerConnectionManagerListener2, PropertyChangeListener {
 
 	private static final int DEFAULT_REPLICA_COUNT = 1;
 
@@ -67,7 +62,7 @@ public class DeployImageWizardModel
 	private IProject project;
 	private String resourceName;
 	private String imageName;
-	private List<IProject> projects = Collections.emptyList();
+	private List<IProject> projects = new ArrayList<>();
 
 	private EnvironmentVariablesPageModel envModel = new EnvironmentVariablesPageModel();
 
@@ -110,16 +105,16 @@ public class DeployImageWizardModel
 	public void dispose() {
 		super.dispose();
 	    DockerConnectionManager.getInstance().removeConnectionManagerListener(this);
-	    ((EnvironmentVariablesPageModel)envModel).dispose();
-	    connection = null;
-	    project = null;
-	    dockerConnection = null;
-	    projects.clear();
-	    volumes.clear();
-	    portSpecs.clear();
+		((EnvironmentVariablesPageModel) envModel).dispose();
+	    this.connection = null;
+	    this.project = null;
+	    this.dockerConnection = null;
+	    this.projects.clear();
+	    this.volumes.clear();
+	    this.portSpecs.clear();
 	    if(imagePorts != null) {
 	    	imagePorts.clear();
-	    	imagePorts = null;
+	    	this.imagePorts = null;
 	    }
 	}
 
@@ -156,9 +151,9 @@ public class DeployImageWizardModel
 
 	@Override
 	public IDockerConnection getDockerConnection() {
-		if(dockerConnection == null) {
+		if (dockerConnection == null) {
 			List<IDockerConnection> all = getDockerConnections();
-			if(all.size() == 1) {
+			if (all.size() == 1) {
 				setDockerConnection(all.get(0));
 			}
 		}
@@ -180,70 +175,47 @@ public class DeployImageWizardModel
 		}
 		return connection;
 	}
-	
-	/**
-	 * Loads all projects for the given {@code connection} and sets this model's project from the given {@code project}.
-	 * @param connection the connection from which the projects will be retrieved
-	 * @param project the project to set in the model
-	 */
-	public void initModel(final Connection connection, final IProject project, boolean loadResources) {
-		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
+
+	private void initImageRegistry(Connection connection) {
 		if(connection == null) {
 			return;
 		}
-
-		initModelRegistry(connection);
-
-		if (loadResources) {
-			Job job = new AbstractDelegatingMonitorJob("Loading projects...") {
-	
-				@Override
-				protected IStatus doRun(IProgressMonitor monitor) {
-					try {
-						List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
-						setProjects(projects);
-						setProjectOrDefault(project);
-						return Status.OK_STATUS;
-					} catch (Exception e) {
-						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-								"Unable to load the OpenShift projects for the selected connection.", e);
-					}
-				}
-	
-			};
-			job.schedule();
-		}
-	}
-
-	private void initModelRegistry(Connection connection) {
-		if(connection != null) {
-			setTargetRegistryLocation(
-				(String) connection.getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY));
-			setTargetRegistryUsername(connection.getUsername());
-			setTargetRegistryPassword(connection.getToken());
-		}
+		setTargetRegistryLocation(
+			(String) connection.getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY));
+		setTargetRegistryUsername(connection.getUsername());
+		setTargetRegistryPassword(connection.getToken());
 	}
 
 	@Override
 	public void setConnection(final Connection connection) {
-		initModel(connection, null, true);
+		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
+		initImageRegistry(connection);
 	}
 
-	@Override
-	public void setProjects(List<IProject> projects) {
-		if(projects == null) projects = Collections.emptyList();
+	public void loadResources() {
+		List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
+		setProjects(projects);
+		setProjectOrDefault(project);
+	}
+	
+	protected void setProjects(List<IProject> projects) {
+		if(projects == null) {
+			projects = Collections.emptyList();
+		}
 		firePropertyChange(PROPERTY_PROJECTS, this.projects, this.projects = projects);
-		if(!projects.isEmpty() && !projects.contains(getProject())) {
-			setProject(null);
-		}
-		if(projects.size() == 1) {
-			setProject(projects.iterator().next());
-		}
 	}
 
 	@Override
 	public List<IProject> getProjects() {
 		return projects;
+	}
+
+	@Override
+	public void addProject(IProject project) {
+		if (project == null) {
+			return;
+		}
+		projects.add(project);
 	}
 
 	@Override
@@ -659,8 +631,11 @@ public class DeployImageWizardModel
     }
     @Override
     public void changeEvent(IDockerConnection connection, int event) {
-        if ((event == ADD_EVENT) || (event == REMOVE_EVENT)) {
-            firePropertyChange(PROPERTY_DOCKER_CONNECTIONS, dockerConnections, dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections()));
+        if ((event == ADD_EVENT) 
+        		|| (event == REMOVE_EVENT)) {
+            firePropertyChange(PROPERTY_DOCKER_CONNECTIONS, 
+            		dockerConnections, 
+            		dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections()));
         }
     }
 }

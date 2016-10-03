@@ -299,7 +299,6 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 		((Composite) getControl()).layout(true, true);
 	}
 
-
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
 		ParametrizableWizardPageSupport.create(

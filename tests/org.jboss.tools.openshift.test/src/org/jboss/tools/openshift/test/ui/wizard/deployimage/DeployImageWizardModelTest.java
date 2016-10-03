@@ -11,20 +11,24 @@
 package org.jboss.tools.openshift.test.ui.wizard.deployimage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+
 import org.apache.commons.io.IOUtils;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.DockerException;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizardModel;
@@ -33,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.resources.IImageStreamImportCapability;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IProject;
@@ -46,38 +51,42 @@ import com.openshift.restclient.model.image.IImageStreamImport;
 public class DeployImageWizardModelTest {
 
     private static final String LATEST_TAG = "latest";
-
     private static final String WILDFLY_IMAGE = "jboss/wildfly";
-
     private static final String WILDFLY_IMAGE_URI = WILDFLY_IMAGE + ':' + LATEST_TAG;
-
     private static final String JBOSS_INFINISPAN_SERVER_IMAGE = "jboss/infinispan-server";
-
     private static final String JBOSS_INFINISPAN_SERVER_URI = JBOSS_INFINISPAN_SERVER_IMAGE +':' + LATEST_TAG;
-
     private static final String NON_EXISTANT_IMAGE = "bad/badimage";
-
     private static final String NON_EXISTANT_IMAGE_URI = NON_EXISTANT_IMAGE + ':' + LATEST_TAG;
-
     private static final String JENKINS_IMAGE = "openshift3/jenkins-1-rhel7";
-
     private static final String JENKINS_IMAGE_URI = JENKINS_IMAGE + ':' + LATEST_TAG;
 
     private IDockerConnection dockerConnection;
-    
-    private IProject project;
-    
+	private Connection connection;
+	private IProject project;
     private DeployImageWizardModel model;
     
     @Before
     public void setUp() {
-        model = new DeployImageWizardModel();
-        dockerConnection = mock(IDockerConnection.class);
-        project = Mockito.mock(IProject.class);
-        model.setDockerConnection(dockerConnection);
+    	this.dockerConnection = mock(IDockerConnection.class);
+    	this.connection = createConnection();
+    	this.project = mock(IProject.class);
+    	this.model = new DeployImageWizardModel();
+    	model.setConnection(connection);
+    	createModelProjects(connection, project, mock(IProject.class));
+    	model.setDockerConnection(dockerConnection);
         model.setProject(project);
+        model.loadResources();
     }
-    
+
+	private Connection createConnection() {
+		Connection connection = mock(Connection.class);
+		return connection;
+	}
+
+	private void createModelProjects(Connection connection, IProject... projects) {
+		doReturn(new ArrayList<IProject>(Arrays.asList(projects))).when(connection).getResources(ResourceKind.PROJECT);
+	}
+	
 	@Test
 	public void shouldInitializeContainerInfoFromLocalDockerImage() {
 		// assume Docker image is on local
@@ -223,24 +232,38 @@ public class DeployImageWizardModelTest {
     }
     
     @Test
-    public void checkThatProjectIsSetWhenProjectsAreSet() {
+    public void loadResources_should_load_projects() {
+    	// given
         IProject project1 = mock(IProject.class);
-        model.setProjects(Collections.singletonList(project1));
+        IProject project2 = mock(IProject.class);
+    	createModelProjects(this.connection, project1, project2) ;
+    	// when
+    	model.loadResources();
+    	// then
+        assertThat(model.getProjects()).isEqualTo(Arrays.asList(project1, project2));
+    }
+
+    @Test
+    public void loadResources_should_reset_project_if_not_contained_in_loaded_project() {
+    	// given
+    	IProject selectedProject = mock(IProject.class);
+    	model.setProject(selectedProject);
+    	IProject project1 = mock(IProject.class);
+    	IProject project2 = mock(IProject.class);
+    	createModelProjects(this.connection, project1, project2) ;
+    	// when
+    	model.loadResources();
+    	// then
+        assertThat(model.getProject()).isNotEqualTo(selectedProject);
         assertThat(model.getProject()).isEqualTo(project1);
     }
     
     @Test
-    public void checkThatProjectIsResetWhenProjectsAreSet() {
-        IProject project1 = mock(IProject.class);
-        IProject project2 = mock(IProject.class);
-        model.setProjects(Arrays.asList(project1, project2));
-        assertThat(model.getProject()).isNull();
-    }
-    
-    @Test
-    public void checkThatProjectIsNotResetWhenNewProjectIsAdded() {
-        IProject project1 = mock(IProject.class);
-        model.setProjects(Arrays.asList(project, project1));
+    public void addProject_should_not_reset_project() {
+    	// given
+    	IProject project1 = mock(IProject.class);
+    	// when
+    	model.addProject(project1);
         assertThat(model.getProject()).isEqualTo(project);
     }
     
@@ -370,6 +393,5 @@ public class DeployImageWizardModelTest {
         when(image.repoTags()).thenReturn(Collections.singletonList(imageName+":"+tag));
         when(dockerConnection.getImages()).thenReturn(Collections.singletonList(image));
         return image;
-    }
-    
+    }    
 }
