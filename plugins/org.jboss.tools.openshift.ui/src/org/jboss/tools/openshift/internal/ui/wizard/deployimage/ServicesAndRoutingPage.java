@@ -20,11 +20,13 @@ import org.apache.commons.validator.routines.DomainValidator;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
@@ -83,10 +85,10 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		createExposedPortsControl(parent, dbc);
 		
 	    GridDataFactory
-          .fillDefaults()
-          .align(SWT.FILL, SWT.BEGINNING)
-          .grab(true, false)
-          .applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
+	        .fillDefaults()
+	        .align(SWT.FILL, SWT.BEGINNING)
+	        .grab(true, false)
+	        .applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
 
 		//routing
 		Composite routingContainer = new Composite(parent, SWT.NONE);
@@ -104,15 +106,15 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		btnAddRoute.setToolTipText("Adding a route to the service will make the image accessible\noutside of the OpenShift cluster on all the available service ports. \nYou can target a specific port by editing the route later.");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(false, false).span(2, 1).applyTo(btnAddRoute);
+		final IObservableValue<Boolean> addRouteModelObservable = BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(btnAddRoute))
-			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE)
-			.observe(model))
+			.to(addRouteModelObservable)
 			.in(dbc);
 		
 		Label labelRouteHostname = new Label(routingContainer, SWT.NONE);
 		labelRouteHostname.setText("Hostname:");
 	    GridDataFactory.fillDefaults()
-          .align(SWT.FILL, SWT.FILL)
+          .align(SWT.FILL, SWT.CENTER)
           .applyTo(labelRouteHostname);
 
 		Text textRouteHostname = new Text(routingContainer, SWT.BORDER);
@@ -124,19 +126,28 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
         .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE)
         .observe(model))
         .in(dbc);
-        ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(textRouteHostname))
+        final IObservableValue<String> routeHostnameObservable = WidgetProperties.text(SWT.Modify).observe(textRouteHostname);
+        ValueBindingBuilder.bind(routeHostnameObservable)
         .converting(new TrimmingStringConverter())
-        .validatingAfterConvert(new IValidator() {
+        .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME)
+                .observe(model))
+        .in(dbc);
+        
+        MultiValidator validator = new MultiValidator() {
             
             @Override
-            public IStatus validate(Object value) {
-                boolean valid = DomainValidator.getInstance(true).isValid((String) value);               
-                return valid?ValidationStatus.ok():ValidationStatus.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, value));
+            protected IStatus validate() {
+                IStatus status = ValidationStatus.ok();
+                boolean isAddRoute = addRouteModelObservable.getValue();
+                String hostName = routeHostnameObservable.getValue();
+                if (isAddRoute && StringUtils.isNotBlank(hostName) && !DomainValidator.getInstance(true).isValid(hostName)) {
+                    status = ValidationStatus.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, hostName));
+                }
+                return status;
             }
-        })
-        .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME)
-        .observe(model))
-        .in(dbc);
+        };
+        dbc.addValidationStatusProvider(validator);
+        ControlDecorationSupport.create(validator, SWT.LEFT | SWT.TOP);
 
 	}
 
