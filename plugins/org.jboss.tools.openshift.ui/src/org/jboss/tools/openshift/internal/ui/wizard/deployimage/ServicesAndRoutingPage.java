@@ -16,9 +16,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.validator.routines.DomainValidator;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -52,6 +54,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 
 import com.openshift.restclient.model.IServicePort;
 
@@ -123,6 +126,14 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
         .in(dbc);
         ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(textRouteHostname))
         .converting(new TrimmingStringConverter())
+        .validatingAfterConvert(new IValidator() {
+            
+            @Override
+            public IStatus validate(Object value) {
+                boolean valid = DomainValidator.getInstance(true).isValid((String) value);               
+                return valid?ValidationStatus.ok():ValidationStatus.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, value));
+            }
+        })
         .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME)
         .observe(model))
         .in(dbc);

@@ -11,7 +11,7 @@
 	<packaging>eclipse-plugin</packaging>
 	
     <properties>
-        <commons-validator.version>1.5.0</commons-validator.version>
+        <commons-validator.version>1.5.1</commons-validator.version>
     </properties>
 
     <build>
