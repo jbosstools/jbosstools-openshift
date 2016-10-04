@@ -41,7 +41,8 @@ public class ImportApplicationHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 
-		ISelection currentSelection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
+		ISelection currentSelection = UIUtils.getCurrentSelection(event);
+
 		IBuildConfig buildConfig = UIUtils.getFirstElement(currentSelection, IBuildConfig.class);
 		Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = null;
 		IProject project = null;

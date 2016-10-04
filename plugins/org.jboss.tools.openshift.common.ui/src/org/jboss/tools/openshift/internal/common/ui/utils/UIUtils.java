@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -52,14 +53,17 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.menus.IMenuService;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -505,6 +509,19 @@ public class UIUtils {
         return dialog;
     }
 
-
+    /**
+     * Use this method instead of HandlerUtil.getCurrentSelection(event)
+     * when action is called on Properties View.
+     * 
+     * @param event
+     * @return
+     */
+    public static ISelection getCurrentSelection(ExecutionEvent event) {
+    	IWorkbenchPart part = HandlerUtil.getActivePart(event);
+    	IWorkbenchPartSite site = (part != null) ? part.getSite() : null;
+    	IWorkbenchWindow window = (site != null) ? site.getWorkbenchWindow() : null;
+    	ISelectionService service = (window != null) ? window.getSelectionService() : null;
+    	return service != null ? service.getSelection() : null;
+    }
 
 }

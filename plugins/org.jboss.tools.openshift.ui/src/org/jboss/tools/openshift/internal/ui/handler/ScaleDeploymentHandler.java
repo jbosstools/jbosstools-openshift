@@ -142,7 +142,7 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 	}
 
 	protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
-		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
+		ISelection selection = UIUtils.getCurrentSelection(event);
 		return UIUtils.getFirstElement(selection, klass);
 	}
 

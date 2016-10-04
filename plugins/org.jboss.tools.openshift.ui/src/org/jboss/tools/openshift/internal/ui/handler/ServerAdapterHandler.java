@@ -51,7 +51,7 @@ public class ServerAdapterHandler extends AbstractHandler {
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final IWorkbenchWindow workbenchWindow = HandlerUtil.getActiveWorkbenchWindow(event);
-		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
+		ISelection selection = UIUtils.getCurrentSelection(event);
 		IResource selectedResource = UIUtils.getFirstElement(selection, IResource.class);
 		final IServer openShiftServer = getOpenShiftServer(selectedResource);
 		if (openShiftServer != null) {

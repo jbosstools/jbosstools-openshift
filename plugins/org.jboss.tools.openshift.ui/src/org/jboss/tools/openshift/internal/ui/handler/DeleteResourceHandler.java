@@ -39,8 +39,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService()
-				.getSelection();
+		ISelection selection = UIUtils.getCurrentSelection(event);
 		IResourceWrapper<?, ?>[] resources = UIUtils.getElements(selection, IResourceWrapper.class);
 		if (resources == null || resources.length == 0) {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No resource selected that we can delete."); //$NON-NLS-1$
