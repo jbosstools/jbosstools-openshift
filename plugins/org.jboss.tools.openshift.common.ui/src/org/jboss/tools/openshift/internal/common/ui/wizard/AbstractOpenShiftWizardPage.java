@@ -106,7 +106,10 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 
 				@Override
 				public void handlePageChanging(PageChangingEvent event) {
-					if (isChangingToThisPage(event)) {
+					//if going away from OpenShiftWizard (via navigating back in File->New->OpenShift->OpenShift application) 
+					if (!(event.getTargetPage() instanceof AbstractOpenShiftWizardPage)) {
+						onPageWillGetDeactivated(Direction.BACKWARDS, event, dbc);
+					} else if (isChangingToThisPage(event)) {
 						if (event.getCurrentPage() == null
 								|| getPreviousPage() == null // in fragments
 								|| equals((IWizardPage) event.getCurrentPage(), getPreviousPage())) {
@@ -114,7 +117,7 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 						} else {
 							onPageWillGetActivated(Direction.BACKWARDS, event, dbc);
 						}
-					} else if (isChangingFromThisPage(event)){
+					} else if (isChangingFromThisPage(event)) {
 						if (event.getTargetPage() == null
 								|| getNextPage() == null // in fragments
 								|| equals((IWizardPage) event.getTargetPage(), getNextPage())) {
