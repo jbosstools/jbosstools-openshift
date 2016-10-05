@@ -34,14 +34,18 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 	public static final String CDK_RUNTIME_TYPE = "CDK";
 	
 	public static final String DOT_CDK_SUBSCRIPTION_USERNAME = "rhel.subscription.username";
-	public static final String ENV_VAR_SUBSCRIPTION_PASSWORD = "rhel.subscription.password";
-	
+	public static final String DOT_CDK_SUBSCRIPTION_PASSWORD = "rhel.subscription.password";
+	public static final String DOT_CDK_BOX_VERSION = "cdk.box.version";
 	
 	@Override
 	public RuntimeDefinition getRuntimeDefinition(File root,
 			IProgressMonitor monitor) {
 		if( validate(root)) {
-			return createDefinition("Container Development Environment", "2.0", CDK_RUNTIME_TYPE, root);
+			File cdkFile = new File(root, CDKConstants.CDK_RESOURCE_DOTCDK);
+			Properties props = loadCDKProperties(cdkFile);
+			String version = props.getProperty(DOT_CDK_BOX_VERSION);
+			version = (version == null ? "2.0" : version);
+			return createDefinition("Container Development Environment", version, CDK_RUNTIME_TYPE, root);
 		}
 		return null;
 	}
@@ -56,18 +60,11 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 				IServerWorkingCopy wc = st.createServer(suffixed, null, new NullProgressMonitor());
 				String folder = runtimeDefinition.getLocation().getAbsolutePath();
 				File cdkFile = new File(folder, CDKConstants.CDK_RESOURCE_DOTCDK);
-				Properties props = new Properties();
-				if( cdkFile.exists()) {
-					try {
-						props.load(new FileInputStream(cdkFile));
-					} catch(IOException ioe) {
-						// Ignore
-					}
-				}
+				Properties props = loadCDKProperties(cdkFile);
 				String val = props.getProperty(DOT_CDK_SUBSCRIPTION_USERNAME);
 				if( val != null ) {
 					ICredentialDomain domain = CredentialService.getCredentialModel().getDomain(CredentialService.REDHAT_ACCESS);
-					String password = System.getenv(ENV_VAR_SUBSCRIPTION_PASSWORD);
+					String password = System.getenv(DOT_CDK_SUBSCRIPTION_PASSWORD);
 					if( !domain.userExists(val)) {
 						if( password == null || password.isEmpty()) {
 							CredentialService.getCredentialModel().addPromptedCredentials(domain, val);
@@ -87,6 +84,18 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 			}
 		}
 		return false;
+	}
+	
+	private Properties loadCDKProperties(File cdkFile) {
+		Properties props = new Properties();
+		if( cdkFile.exists()) {
+			try {
+				props.load(new FileInputStream(cdkFile));
+			} catch(IOException ioe) {
+				// Ignore
+			}
+		}
+		return props;
 	}
 	
 	@Override
