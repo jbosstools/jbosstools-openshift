@@ -23,11 +23,14 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -38,6 +41,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.ListDockerImagesWizardModel.DockerImageTag;
 
@@ -136,6 +140,17 @@ public class ListDockerImagesWizardPage extends AbstractOpenShiftWizardPage {
 		dbc.bindValue(ViewerProperties.singleSelection().observe(dockerImagesTableViewer),
 				BeanProperties.value(ListDockerImagesWizardModel.SELECTED_DOCKER_IMAGE).observe(model));
 		
+		dockerImagesTableViewer.addDoubleClickListener(new IDoubleClickListener() {
+
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				IWizardContainer container = getWizard().getContainer();
+				if(container instanceof OkCancelButtonWizardDialog) {
+					((OkCancelButtonWizardDialog)container).autoFinish();
+				}
+			}
+		});
+
 		// load the Docker images
 		try {
 			getContainer().run(true, false, new IRunnableWithProgress() {

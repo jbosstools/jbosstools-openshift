@@ -42,4 +42,15 @@ public class OkCancelButtonWizardDialog extends WizardDialog {
 			GridDataFactory.fillDefaults().exclude(true).applyTo(button);
 		}
 	}
+	
+	public boolean autoFinish() {
+		if(getWizard().canFinish()) {
+			if(!getWizard().performFinish()) {
+				return false;
+			}			
+			okPressed();
+			return true;
+		}
+		return false;
+	}
 }
