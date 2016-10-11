@@ -105,9 +105,11 @@
    	<extension-point id="org.jboss.tools.openshift.core.routeChooser" 
    		name="RouteChooser" 
    		schema="schema/org.jboss.tools.openshift.core.routeChooser.exsd"/>
-   		
-   		
-   		
+	
+	<!-- Node.js Debugger integration -->
+   	<extension-point id="org.jboss.tools.openshift.core.debugSessionTracker" 
+   		name="DebugSessionTracker" 
+   		schema="schema/org.jboss.tools.openshift.core.debugSessionTracker.exsd"/>
    		
    	<extension
          point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
