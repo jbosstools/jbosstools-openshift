@@ -603,32 +603,7 @@ public class DeployImageWizardModel
 		return envModel.getImageEnvVars();
 	}
 	
-	private static class DockerConfigMetaData implements IDockerImageMetadata {
-
-		private IDockerImageInfo info;
-
-		public DockerConfigMetaData(IDockerImageInfo info) {
-			this.info = info;
-		}
-
-		@Override
-		public Set<String> exposedPorts() {
-			return info.containerConfig().exposedPorts();
-		}
-
-		@Override
-		public List<String> env() {
-			return info.containerConfig().env();
-		}
-
-		@Override
-		public Set<String> volumes() {
-			return info.containerConfig().volumes();
-		}
-		
-	}
-
-    @Override
+	@Override
     public void changeEvent(int event) {
     }
     @Override
