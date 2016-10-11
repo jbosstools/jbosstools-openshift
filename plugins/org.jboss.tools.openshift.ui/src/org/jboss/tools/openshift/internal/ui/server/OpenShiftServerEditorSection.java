@@ -44,6 +44,8 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -316,6 +318,14 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
 				.applyTo(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(onBrowseProjects(model, browseProjectsButton.getShell()));
+		projectsViewer.getControl().addPaintListener(new PaintListener() {
+
+			@Override
+			public void paintControl(PaintEvent e) {
+				projectsViewer.getControl().getParent().update();
+				projectsViewer.getControl().pack();
+			}
+		});
 	}
 
 	private SelectionListener onBrowseProjects(OpenShiftServerEditorModel model, final Shell shell) {
