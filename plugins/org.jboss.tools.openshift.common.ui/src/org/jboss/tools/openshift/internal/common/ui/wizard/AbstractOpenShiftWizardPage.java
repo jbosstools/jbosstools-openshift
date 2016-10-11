@@ -53,7 +53,7 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	}
 	
 	private DataBindingContext dbc;
-
+	
 	protected AbstractOpenShiftWizardPage(String title, String description, String pageName, IWizard wizard) {
 		super(pageName);
 		setWizard(wizard);
@@ -71,7 +71,7 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 		Composite child = new Composite(container, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(child);
 		setControl(container);
-		initPageChangedListener();
+		initPageChangeListeners();
 		doCreateControls(child, dbc);
 		parent.getShell().addDisposeListener(new DisposeListener() {
 			@Override
@@ -88,66 +88,79 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 				dbc);
 	}
 
-	protected void initPageChangedListener() {
-		IWizardContainer wizardContainer = getContainer();
-		if (wizardContainer instanceof WizardDialog) {
-			((WizardDialog) getContainer()).addPageChangedListener(new IPageChangedListener() {
+	/**
+	 * Sets this page to get informed of page changes before they occur and
+	 * changes that occurred (if its running in WizardDialog).
+	 * 
+	 * @see WizardDialog#addPageChangedListener(IPageChangedListener)
+	 * @see WizardDialog#addPageChangingListener(IPageChangingListener)
+	 */
+	protected void initPageChangeListeners() {
+		IWizardContainer container = getContainer();
+		if (container instanceof WizardDialog) {
+			((WizardDialog) container).addPageChangedListener(onPageChanged());
+			((WizardDialog) container).addPageChangingListener(onPageChanging());
+		}
+	}
 
-				@Override
-				public void pageChanged(PageChangedEvent event) {
-					if (event.getSelectedPage() == AbstractOpenShiftWizardPage.this) {
-						onPageActivated(dbc);
+	private IPageChangingListener onPageChanging() {
+		return new IPageChangingListener() {
+
+			@Override
+			public void handlePageChanging(PageChangingEvent event) {
+				if (isChangingToThisPage(event)) {
+					if (event.getCurrentPage() == null
+							|| equals((IWizardPage) event.getCurrentPage(), getPreviousPage())) {
+						onPageWillGetActivated(Direction.FORWARDS, event, dbc);
 					} else {
-						onPageDeactivated(dbc);
+						onPageWillGetActivated(Direction.BACKWARDS, event, dbc);
+					}
+				} else if (isChangingFromThisPage(event)) {
+					if (event.getTargetPage() != null
+							&& equals((IWizardPage) event.getTargetPage(), getPreviousPage())) {
+						onPageWillGetDeactivated(Direction.BACKWARDS, event, dbc);
+					} else if (equals((IWizardPage) event.getTargetPage(), getNextPage())) {
+						onPageWillGetDeactivated(Direction.FORWARDS, event, dbc);
 					}
 				}
-			});
-			((WizardDialog) getContainer()).addPageChangingListener(new IPageChangingListener() {
+			}
 
-				@Override
-				public void handlePageChanging(PageChangingEvent event) {
-					if (isChangingToThisPage(event)) {
-						if (event.getCurrentPage() == null
-								|| getPreviousPage() == null // in fragments
-								|| equals((IWizardPage) event.getCurrentPage(), getPreviousPage())) {
-							onPageWillGetActivated(Direction.FORWARDS, event, dbc);
-						} else {
-							onPageWillGetActivated(Direction.BACKWARDS, event, dbc);
-						}
-					} else if (isChangingFromThisPage(event)){
-						if (event.getTargetPage() == null
-								|| getNextPage() == null // in fragments
-								|| equals((IWizardPage) event.getTargetPage(), getNextPage())) {
-							onPageWillGetDeactivated(Direction.FORWARDS, event, dbc);							
-						} else {
-							onPageWillGetDeactivated(Direction.BACKWARDS, event, dbc);
-						}
-					}
-				}
+			private boolean isChangingToThisPage(PageChangingEvent event) {
+				return equals((IWizardPage) event.getTargetPage(), AbstractOpenShiftWizardPage.this);
+			}
+			
+			private boolean isChangingFromThisPage(PageChangingEvent event) {
+				return equals((IWizardPage) event.getCurrentPage(), AbstractOpenShiftWizardPage.this);
+			}
 
-				private boolean isChangingToThisPage(PageChangingEvent event) {
-					return equals((IWizardPage) event.getTargetPage(), AbstractOpenShiftWizardPage.this);
+			private boolean equals(Object thisPage, Object thatPage) {
+				if (!(thisPage instanceof IWizardPage)) {
+					return thatPage == null;
 				}
 				
-				private boolean isChangingFromThisPage(PageChangingEvent event) {
-					return equals((IWizardPage) event.getCurrentPage(), AbstractOpenShiftWizardPage.this);
+				if (!(thatPage instanceof IWizardPage)) {
+					return false;
 				}
+				
+				return thisPage == thatPage 
+						|| ((IWizardPage) thisPage).getControl() == ((IWizardPage) thatPage).getControl();
+			}
 
-				private boolean equals(Object thisPage, Object thatPage) {
-					if (!(thisPage instanceof IWizardPage)) {
-						return thatPage == null;
-					}
-					
-					if (!(thatPage instanceof IWizardPage)) {
-						return false;
-					}
-					
-					return thisPage == thatPage 
-							|| ((IWizardPage) thisPage).getControl() == ((IWizardPage) thatPage).getControl();
+		};
+	}
+
+	private IPageChangedListener onPageChanged() {
+		return new IPageChangedListener() {
+
+			@Override
+			public void pageChanged(PageChangedEvent event) {
+				if (event.getSelectedPage() == AbstractOpenShiftWizardPage.this) {
+					onPageActivated(dbc);
+				} else {
+					onPageDeactivated(dbc);
 				}
-
-			});
-		}
+			}
+		};
 	}
 
 	protected DataBindingContext getDatabindingContext() {

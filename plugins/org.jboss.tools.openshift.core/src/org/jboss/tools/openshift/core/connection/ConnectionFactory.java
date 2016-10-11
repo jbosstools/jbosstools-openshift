@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.connection;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.foundation.core.properties.IPropertiesProvider;
 import org.jboss.tools.foundation.core.properties.PropertiesHelper;
@@ -46,6 +47,9 @@ public class ConnectionFactory implements IConnectionFactory {
 	
 	@Override
 	public Connection create(String url) {
+		if (StringUtils.isEmpty(url)) {
+			return null;
+		}
 		try {
 			LazySSLCertificateCallback sslCertCallback = new LazySSLCertificateCallback();
 			IClient client = new ClientBuilder(url)

@@ -58,8 +58,8 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 
 		@Override
 		public boolean canFlipToNextPage() {
-			return hasWizard(getModel().getConnectionFactory())
-					&& DataBindingUtils.isValid(getDatabindingContext());
+			return DataBindingUtils.isValid(getDatabindingContext())
+					&& hasWizard(getModel().getConnectionFactory());
 		}
 
 		@Override
@@ -67,9 +67,10 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 			IWizardPage page = null;
 			if (isConnected()) {
 				if (wizard != null) {
-					return wizard.getStartingPage();
+					page = wizard.getStartingPage();
 				}
-			} else if (connect()) {
+			} else if (DataBindingUtils.isValid(getDatabindingContext())
+					&& connect()) {
 				IConnection connection = getConnection();
 				this.wizard = getWizard(connection);
 				if (wizard != null) {
@@ -77,6 +78,7 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 					page = wizard.getStartingPage();
 				}
 			}
+			
 			return page;
 		}
 
@@ -90,6 +92,11 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 				return null;
 			}
 
+			init(wizard);
+			return wizard;
+		}
+
+		private void init(IWizard wizard) {
 			wizard.setContainer(getContainer());
 			if (wizard.getPageCount() == 0) {
 				// initialize wizard
@@ -99,7 +106,6 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 				}
 				wizard.addPages();
 			}
-			return wizard;
 		}
 
 		private boolean hasWizard(IConnectionFactory factory) {
@@ -155,16 +161,22 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 		return wizardsByConnection;
 	}
 
-	private void createWizard(HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection, IConfigurationElement configuration) {
+	private void createWizard(Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection, 
+			IConfigurationElement configuration) {
 		try {
-			IConnectionAwareWizard<IConnection> wizard = ExtensionUtils.createExtension(ATTRIBUTE_CLASS, configuration);
+			IConnectionAwareWizard<IConnection> wizard = 
+					ExtensionUtils.createExtension(ATTRIBUTE_CLASS, configuration);
 			if (wizard != null) {
-				Class<IConnection> connectionClass = ExtensionUtils.getClass(configuration.getAttribute(ATTRIBUTE_CONNECTION), configuration);
+				Class<IConnection> connectionClass = 
+						ExtensionUtils.getClass(configuration.getAttribute(ATTRIBUTE_CONNECTION), configuration);
 				if (connectionClass != null) {
 					wizardsByConnection.put(connectionClass, wizard);
 				}
 			}
-		} catch (InvalidRegistryObjectException | IllegalStateException | IllegalArgumentException | ClassNotFoundException e) {
+		} catch (InvalidRegistryObjectException 
+				| IllegalStateException 
+				| IllegalArgumentException 
+				| ClassNotFoundException e) {
 			OpenShiftCommonUIActivator.log(
 					NLS.bind("Could not create application wizard in bundle {0} for extension {1}", // $NON-NLS-1$
 							ExtensionUtils.getBundleNameFor(configuration),
