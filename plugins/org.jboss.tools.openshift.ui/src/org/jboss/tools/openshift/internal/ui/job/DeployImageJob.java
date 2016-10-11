@@ -100,7 +100,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 		try {
 			final Connection connection = parameters.getConnection();
 			final String name = parameters.getResourceName();
-			if(isUpdate(connection, parameters.getProject().getName(), name)) {
+			if(updateTriggerIfUpdate(connection, parameters.getProject().getName(), name)) {
 				return Status.OK_STATUS;
 			}
 			Map<String, IResource> resources = generateResources(connection, name);
@@ -113,7 +113,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 			}
 			//create
 			created = createResources(connection, resources.values());
-		}catch(Exception e) {
+		} catch(Exception e) {
 			String message = NLS.bind("Unable to create resources to deploy image {0}", parameters.getImageName());
 			OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
 			return new Status(IStatus.ERROR, 
@@ -124,18 +124,27 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 		return Status.OK_STATUS;
 	}
 
-	private boolean isUpdate(Connection connection, String project, String name) {
+	protected boolean updateTriggerIfUpdate(Connection connection, String project, String name) {
 		try {
 			IDeploymentConfig dc = connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, project, name);
 			IDeploymentImageChangeTrigger trigger = (IDeploymentImageChangeTrigger) dc.getTriggers().stream()
 					.filter(t->DeploymentTriggerType.IMAGE_CHANGE.equals(t.getType())).findFirst().orElse(null);
-			return trigger != null && 
-				ResourceKind.IMAGE_STREAM_TAG.equals(trigger.getKind()) && 
-				StringUtils.isNotBlank(trigger.getNamespace()) &&  
-				connection.getResource(ResourceKind.IMAGE_STREAM, trigger.getNamespace(), trigger.getFrom().getName()) != null;
-		}catch(NotFoundException e) {
+			if (trigger == null || 
+				!ResourceKind.IMAGE_STREAM_TAG.equals(trigger.getKind()) || 
+				StringUtils.isBlank(trigger.getNamespace()) ||  
+				connection.getResource(ResourceKind.IMAGE_STREAM, trigger.getNamespace(), trigger.getFrom().getName()) == null) {
+				return false;
+			};
+			DockerImageURI sourceImage = getSourceImage();
+			if (sourceImage.getName().equals(trigger.getFrom().getName()) &&
+					!sourceImage.getTag().equals(trigger.getFrom().getTag())) {
+				trigger.setFrom(new DockerImageURI(null, null, sourceImage.getName(), sourceImage.getTag()));
+				connection.updateResource(dc);
+			}
+			return true;
+		} catch(NotFoundException e) {
 			return false;
-		}catch(OpenShiftException e) {
+		} catch(OpenShiftException e) {
 			if(e.getStatus() != null && e.getStatus().getCode() == IHttpConstants.STATUS_NOT_FOUND) {
 				return false;
 			}
@@ -143,17 +152,17 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 		}
 	}
 
-	private Collection<IResource>  createResources(Connection connection, Collection<IResource> resources) {
+	private Collection<IResource> createResources(Connection connection, Collection<IResource> resources) {
 		Collection<IResource> created = new ArrayList<>();
 		for (IResource resource : resources) {
 			Trace.debug("Trying to create resource: {0}", resource.toJson());
 			try {
 				created.add(connection.createResource(resource));
-			}catch(OpenShiftException e) {
+			} catch(OpenShiftException e) {
 				if(e.getStatus() != null) {
 					created.add(e.getStatus());
 					OpenShiftUIActivator.getDefault().getLogger().logError(NLS.bind("Error creating resource: {0}", e.getStatus().toJson()));
-				}else {
+				} else {
 					throw e;
 				}
 			}
@@ -193,7 +202,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 		
 	}
 	
-	private DockerImageURI getSourceImage() {
+	protected DockerImageURI getSourceImage() {
 		String imageName;
 		if (parameters.isPushImageToRegistry()) {
 			imageName = parameters.getProject().getName() +"/" +  DockerImageUtils.extractImageNameAndTag(parameters.getImageName());
