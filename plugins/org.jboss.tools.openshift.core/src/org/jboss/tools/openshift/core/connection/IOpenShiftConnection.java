@@ -38,6 +38,8 @@ public interface IOpenShiftConnection extends IConnection {
 	
 	<T extends IResource> List<T> getResources(String kind, String namespace);
 
+	<T extends IResource> T getResource(IResource resource);
+	
 	/**
 	 * Get or refresh a resource
 	 * 
