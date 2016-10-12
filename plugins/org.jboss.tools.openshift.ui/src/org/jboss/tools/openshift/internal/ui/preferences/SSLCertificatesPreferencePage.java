@@ -68,7 +68,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 		label.setLayoutData(dl);
 		label.setText("Decisions on untrusted SSL certificates, checked ones are accepted.");		
 
-		listViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.V_SCROLL);
+		listViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		data.heightHint = 100;
@@ -164,8 +164,9 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 	void deleteSelection() {
 		IStructuredSelection s = listViewer.getStructuredSelection();
 		if(!s.isEmpty()) {
-			Item item = (Item)s.getFirstElement();
-			items.remove(item);
+			for (Object item: s.toArray()) {
+				items.remove(item);
+			}
 			listViewer.setInput(items);
 		}
 	}
