@@ -53,7 +53,7 @@ directly in the org.jboss.tools.openshift.client/lib folder, followed by a direc
 - set goals=package
 - add `jar.outputDir` property, set the absolute path to org.jboss.tools.openshift.client/lib as value
 - In the refresh tab, enable refresh resources upon completion
-- click specify resources..., select org.jboss.tools.openshift.client/lib
+- click specify resources..., select `org.jboss.tools.openshift.client/lib`
 - Run, profit!
 
 Subsequent Maven runs will reuse this launch configuration automatically.
