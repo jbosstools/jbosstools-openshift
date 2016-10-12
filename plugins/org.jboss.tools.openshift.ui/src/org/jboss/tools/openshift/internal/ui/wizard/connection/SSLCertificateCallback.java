@@ -76,10 +76,6 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 				allow = openCertificateDialog(certificateChain);
 			}
 		}
-		if (rememberDecision) {
-//			allowByCertificate.put(certificateChain[0], allow);
-			SSLCertificatesPreference.getInstance().setAllowedByCertificate(certificateChain[0], allow);
-		}
 		return allow;
 	}
 	
@@ -91,6 +87,11 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 			public void run() {
 				atomicBoolean.set(
 						new SSLCertificateDialog(UIUtils.getShell(), certificateChain).open() == Dialog.OK);
+				if (rememberDecision) {
+					//Save the choice as soon as possible
+//					allowByCertificate.put(certificateChain[0], allow);
+					SSLCertificatesPreference.getInstance().setAllowedByCertificate(certificateChain[0], atomicBoolean.get());
+				}
 			}
 		});
 		return atomicBoolean.get();
