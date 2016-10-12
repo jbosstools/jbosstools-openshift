@@ -22,6 +22,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.WizardUtils;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
@@ -66,9 +67,16 @@ public class ImportApplicationHandler extends AbstractHandler {
 			projectsAndBuildConfigs = Collections.singletonMap(project, buildConfigs);
 		}
 		
-		WizardUtils.openWizardDialog(
+		if(projectsAndBuildConfigs == null) {
+			ImportApplicationWizard wizard = new ImportApplicationWizard();
+			Connection connection = UIUtils.getFirstElement(currentSelection, Connection.class);
+			wizard.setConnection(connection);
+			WizardUtils.openWizardDialog(wizard, HandlerUtil.getActiveShell(event));
+		} else {
+			WizardUtils.openWizardDialog(
 				new ImportApplicationWizard(projectsAndBuildConfigs),
 				HandlerUtil.getActiveShell(event));
+		}
 		return Status.OK_STATUS;
 	}
 }

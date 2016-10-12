@@ -116,6 +116,8 @@
 									type="com.openshift.restclient.model.IBuildConfig" />
 								<adapt
 									type="com.openshift.restclient.model.IProject" />
+								<adapt
+									type="org.jboss.tools.openshift.core.connection.Connection" />
 							</or>
 						</iterate>
 					</with>
