@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.preferences;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.X509CertificateParser;
@@ -140,6 +142,13 @@ public class SSLCertificatesPreference {
 		StringBuilder sb = new StringBuilder();
 		items.stream().forEach(i->sb.append(i.toPreferenceValue()));
 		getPreferenceStore().setValue(ALLOWED_CERTIFICATES, sb.toString());
+		if(getPreferenceStore() instanceof IPersistentPreferenceStore) {
+			try {
+				((IPersistentPreferenceStore)getPreferenceStore()).save();
+			} catch (IOException e) {
+				OpenShiftUIActivator.getDefault().getLogger().logError(e);
+			}
+		}
 	}
 
 	/**
