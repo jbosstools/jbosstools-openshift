@@ -45,6 +45,8 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 	private static final boolean REMEMBER_DECISION_DEFAULT = true;
 
 	private boolean rememberDecision = REMEMBER_DECISION_DEFAULT;
+	
+	private static final Object LOCK = new Object();
 
 	// TODO: store certificates and decision in Eclipse preferences
 //	private Map<X509Certificate, Boolean> allowByCertificate = new HashMap<X509Certificate, Boolean>();
@@ -60,7 +62,20 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 //			return allowByCertificate.get(certificateChain[0]);
 //		};
 		
-		boolean allow = openCertificateDialog(certificateChain);
+		boolean allow = false;
+		if(Display.getCurrent() != null) {
+			//This prompt is usually called from non-ui threads, so that this should not happen,
+			//but in case it is called from ui thread, synchronization may cause a deadlock. 
+			allow = openCertificateDialog(certificateChain);
+		} else synchronized(LOCK) {
+			//If another instance of dialog is opened, wait for it and check the result.  
+			result = SSLCertificatesPreference.getInstance().getAllowedByCertificate(certificateChain[0]);
+			if(result != null) {
+				return result;
+			} else {
+				allow = openCertificateDialog(certificateChain);
+			}
+		}
 		if (rememberDecision) {
 //			allowByCertificate.put(certificateChain[0], allow);
 			SSLCertificatesPreference.getInstance().setAllowedByCertificate(certificateChain[0], allow);
