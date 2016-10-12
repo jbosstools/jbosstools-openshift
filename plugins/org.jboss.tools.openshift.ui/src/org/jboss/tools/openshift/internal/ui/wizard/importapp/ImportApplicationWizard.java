@@ -36,6 +36,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
 
 import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
 import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.REPO_PATH_KEY;
@@ -111,10 +112,17 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		if (connection != null) {
 			model.setConnection(connection);
 		} else {
-			IResource resource = UIUtils.getFirstElement(selection, IResource.class);
+			IResource resource =  UIUtils.getFirstElement(selection, IBuildConfig.class);
+			if(resource == null) {
+				resource = UIUtils.getFirstElement(selection, IResource.class);
+			}
 			if (resource != null) {
 				setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(resource));
-				model.setSelectedItem(resource);
+				if(resource instanceof IService && resource.getProject() != null) {
+					model.setSelectedItem(resource.getProject());
+				} else {
+					model.setSelectedItem(resource);
+				}
 			} else {
 				IProject project = UIUtils.getFirstElement(selection, IProject.class);
 				if (project != null) {
