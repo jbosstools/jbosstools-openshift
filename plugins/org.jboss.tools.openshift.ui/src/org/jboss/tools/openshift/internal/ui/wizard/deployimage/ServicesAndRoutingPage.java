@@ -16,13 +16,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.validator.routines.DomainValidator;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
@@ -44,12 +48,16 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder.IColumnLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 
 import com.openshift.restclient.model.IServicePort;
 
@@ -77,6 +85,12 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 		createExposedPortsControl(parent, dbc);
 		
+	    GridDataFactory
+	        .fillDefaults()
+	        .align(SWT.FILL, SWT.BEGINNING)
+	        .grab(true, false)
+	        .applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
+
 		//routing
 		Composite routingContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults()
@@ -92,11 +106,53 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		btnAddRoute.setText("Add Route");
 		btnAddRoute.setToolTipText("Adding a route to the service will make the image accessible\noutside of the OpenShift cluster on all the available service ports. \nYou can target a specific port by editing the route later.");
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(btnAddRoute);
+			.align(SWT.FILL, SWT.FILL).grab(false, false).span(2, 1).applyTo(btnAddRoute);
+		final IObservableValue<Boolean> addRouteModelObservable = BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(btnAddRoute))
-			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE)
-			.observe(model))
+			.to(addRouteModelObservable)
 			.in(dbc);
+		
+		Label labelRouteHostname = new Label(routingContainer, SWT.NONE);
+		labelRouteHostname.setText("Hostname:");
+	    GridDataFactory.fillDefaults()
+          .align(SWT.FILL, SWT.CENTER)
+          .applyTo(labelRouteHostname);
+
+		Text textRouteHostname = new Text(routingContainer, SWT.BORDER);
+        GridDataFactory.fillDefaults()
+        .align(SWT.FILL, SWT.CENTER)
+        .grab(true, false)
+        .applyTo(textRouteHostname);
+        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(textRouteHostname))
+        .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE)
+        .observe(model))
+        .in(dbc);
+        final IObservableValue<String> routeHostnameObservable = WidgetProperties.text(SWT.Modify).observe(textRouteHostname);
+        ValueBindingBuilder.bind(routeHostnameObservable)
+        .converting(new TrimmingStringConverter())
+        .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME)
+                .observe(model))
+        .in(dbc);
+        
+        MultiValidator validator = new MultiValidator() {
+            
+            @Override
+            protected IStatus validate() {
+                IStatus status = ValidationStatus.ok();
+                boolean isAddRoute = addRouteModelObservable.getValue();
+                String hostName = routeHostnameObservable.getValue();
+                if (isAddRoute) {
+                    if (StringUtils.isBlank(hostName)) {
+                        status = ValidationStatus.info(NLS.bind(OpenShiftUIMessages.EmptyHostNameErrorMessage, hostName));
+                    } else if (!DomainValidator.getInstance(true).isValid(hostName)) {
+                        status = ValidationStatus.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, hostName));
+                    }
+                }
+                return status;
+            }
+        };
+        dbc.addValidationStatusProvider(validator);
+        ControlDecorationSupport.create(validator, SWT.LEFT | SWT.TOP);
 
 	}
 
@@ -320,5 +376,13 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			
 		};
 	}
+
+	/**
+	 * Allow Finish for info statuses.
+	 */
+    @Override
+    protected void setupWizardPageSupport(DataBindingContext dbc) {
+        ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
+    }
 
 }

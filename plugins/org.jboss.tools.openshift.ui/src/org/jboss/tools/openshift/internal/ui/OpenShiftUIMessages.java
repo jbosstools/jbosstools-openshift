@@ -42,4 +42,7 @@ public class OpenShiftUIMessages extends NLS {
 	public static String NoOCBinaryLocationErrorMessage;
 	public static String OCBinaryErrorMessage;
 	public static String OCBinaryWarningMessage;
+	
+	public static String InvalidHostNameErrorMessage;
+	public static String EmptyHostNameErrorMessage;
 }
