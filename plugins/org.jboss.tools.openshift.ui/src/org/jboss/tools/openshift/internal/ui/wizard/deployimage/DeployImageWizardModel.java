@@ -58,7 +58,6 @@ public class DeployImageWizardModel
 		implements IDeployImageParameters, IDockerConnectionManagerListener2, PropertyChangeListener {
 
 	private static final int DEFAULT_REPLICA_COUNT = 1;
-	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
 
 	private Connection connection;
 	private IProject project;
@@ -83,6 +82,10 @@ public class DeployImageWizardModel
 	private String targetRegistryLocation;
 	private String targetRegistryUsername;
 	private String targetRegistryPassword;
+    private IServicePort routingPort;
+	
+	
+	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
 	private final List<String> imageNames = new ArrayList<>();
     private List<IDockerConnection> dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections());
     private Comparator<IProject> projectsComparator;
@@ -519,6 +522,9 @@ public class DeployImageWizardModel
 			List<IServicePort> old = new ArrayList<>(this.servicePorts);
 			this.servicePorts.set(pos, target);
 			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, pos, old, Collections.unmodifiableList(servicePorts));
+			if (((ServicePortAdapter)target).isRoutePort()) {
+			    setRoutingPort(target);
+			}
 		}
 	}
 
@@ -607,9 +613,23 @@ public class DeployImageWizardModel
 	public void resetServicePorts() {
 		List<IServicePort> ports = imagePorts.stream().map(sp -> new ServicePortAdapter(sp)).collect(Collectors.toList());
 		setServicePorts(ports);
+		setRoutingPort(null);
 	}
 
-	@Override
+    @Override
+    public void setRoutingPort(IServicePort port) {
+        if (routingPort != null) {
+            ((ServicePortAdapter)routingPort).setRoutePort(false);
+        }
+        firePropertyChange(PROPERTY_ROUTING_PORT, routingPort, this.routingPort = port);
+    }
+
+    @Override
+    public IServicePort getRoutingPort() {
+        return routingPort;
+    }
+
+    @Override
 	public Map<String, String> getImageEnvVars() {
 		return envModel.getImageEnvVars();
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -15,6 +15,8 @@ import java.util.List;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -26,6 +28,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
@@ -46,7 +49,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 	static final String PROPERTY_SERVICE_PORT = "port";
 	static final String PROPERTY_POD_PORT = "targetPort";
 	
-	private final IServicePort model;
+	private final ServicePortAdapter model;
 	private final List<IServicePort> ports;
 
 	/**
@@ -55,7 +58,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 	 * @param message
 	 * @param ports
 	 */
-	public ServicePortDialog(final IServicePort model, final String message, final List<IServicePort> ports) {
+	public ServicePortDialog(final ServicePortAdapter model, final String message, final List<IServicePort> ports) {
 		super("Configure Service Ports", message, "", null);
 		this.model = model;
 		this.ports = ports;
@@ -76,7 +79,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		final Label servicePortLabel = new Label(dialogArea, SWT.NONE);
 		servicePortLabel.setText("Service port:");
 		GridDataFactory.fillDefaults()
-			.align(SWT.RIGHT, SWT.CENTER)
+			.align(SWT.LEFT, SWT.CENTER)
 			.applyTo(servicePortLabel);
 		
 		final Spinner servicePortSpinner = new Spinner(dialogArea, SWT.BORDER);
@@ -99,7 +102,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		final Label podPortLabel = new Label(dialogArea, SWT.NONE);
 		podPortLabel.setText("Pod port:");
 		GridDataFactory.fillDefaults()
-			.align(SWT.RIGHT, SWT.CENTER).applyTo(podPortLabel);
+			.align(SWT.LEFT, SWT.CENTER).applyTo(podPortLabel);
 
 		final Text podPortText = new Text(dialogArea, SWT.BORDER);
 		podPortText.setToolTipText("The port exposed by the pod which will accept traffic.\nIt must be an integer or the name of a port in the backend Pods.");
@@ -115,6 +118,18 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 				.in(dbc);
 		ControlDecorationSupport.create(
 				podPortBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		
+		final Button routePortButton = new Button(dialogArea, SWT.CHECK);
+		routePortButton.setText("Used by route");
+		GridDataFactory.fillDefaults()
+		    .align(SWT.FILL, SWT.CENTER)
+		    .grab(true, false)
+		    .span(2, 1)
+		    .applyTo(routePortButton);
+		ValueBindingBuilder
+		    .bind(WidgetProperties.selection().observe(routePortButton))
+		    .to(BeanProperties.value(ServicePortAdapter.ROUTE_PORT).observe(model))
+		    .in(dbc);
 	}
 	
 	/**
@@ -126,9 +141,9 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		
 		private final int servicePort;
 		
-		private final List<IServicePort> ports;
+		private final List<? extends IServicePort> ports;
 		
-		public ServicePortValidator(final int servicePort, final List<IServicePort> ports) {
+		public ServicePortValidator(final int servicePort, final List<? extends IServicePort> ports) {
 			this.servicePort = servicePort;
 			this.ports = ports;
 		}

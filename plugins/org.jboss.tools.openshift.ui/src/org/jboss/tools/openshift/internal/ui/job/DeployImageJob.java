@@ -49,9 +49,11 @@ import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.IServicePort;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.route.IRoute;
+import com.openshift.restclient.model.route.ITargetPort;
 
 /**
  * Job to deploy docker images to OpenShift with a minimal
@@ -300,6 +302,15 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 		String hostname = parameters.getRouteHostname();
 		if (StringUtils.isNotBlank(hostname)) {
 		    route.setHost(hostname);
+                }
+		IServicePort port = parameters.getRoutingPort();
+		if (port != null) {
+		    ITargetPort targetPort = route.createPort();
+		    if (port.getName() != null) {
+		        targetPort.setTargetPortName(port.getName());
+		    } else {
+		        targetPort.setTargetPort(port.getPort());
+		    }
 		}
 		return route;
 	}

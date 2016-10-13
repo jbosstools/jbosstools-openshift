@@ -53,6 +53,10 @@ public class OpenShiftImages {
 	public static final Image TEMPLATE_IMG = repo.getImage("template.png"); //$NON-NLS-1$
 	public static final ImageDescriptor PROJECT_NEW = PROJECT;
 	public static final Image PROJECT_NEW_IMG = PROJECT_IMG;
+    public static final ImageDescriptor CHECKED = repo.create("checked.png"); //$NON-NLS-1$
+    public static final Image CHECKED_IMG = repo.getImage("checked.png"); //$NON-NLS-1$
+    public static final ImageDescriptor UNCHECKED = repo.create("unchecked.png"); //$NON-NLS-1$
+    public static final Image UNCHECKED_IMG = repo.getImage("unchecked.png"); //$NON-NLS-1$
 
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 
