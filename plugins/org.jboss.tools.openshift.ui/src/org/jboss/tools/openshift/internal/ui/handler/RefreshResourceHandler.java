@@ -36,8 +36,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService()
-				.getSelection();
+		ISelection selection = UIUtils.getCurrentSelection(event);
 		IOpenshiftUIElement<?, ?> element = UIUtils.getFirstElement(selection, IOpenshiftUIElement.class);
 		if (element != null) {
 			refresh(element);

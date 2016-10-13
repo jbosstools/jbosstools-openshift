@@ -47,7 +47,7 @@ public class TriggerDeploymentHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
+		ISelection selection = UIUtils.getCurrentSelection(event);
 		IDeploymentConfig resource = retrieveDeploymentConfig(selection);
 		if(resource == null) {
 			MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Trigger Deployment", "A deployment or deployment config must be selected in order to trigger a new deployment.");

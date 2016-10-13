@@ -38,7 +38,7 @@ public class EditResourceHandler extends OpenInWebBrowserHandler {
 	
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection currentSelection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
+		ISelection currentSelection = UIUtils.getCurrentSelection(event);
 		
 		IResource resource = UIUtils.getFirstElement(currentSelection, IResource.class);
 		Connection connection = null;

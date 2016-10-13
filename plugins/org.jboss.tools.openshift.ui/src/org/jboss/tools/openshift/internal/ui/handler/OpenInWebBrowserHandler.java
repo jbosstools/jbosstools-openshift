@@ -48,7 +48,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final Shell shell = HandlerUtil.getActiveShell(event);
 
-		ISelection currentSelection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
+		ISelection currentSelection = UIUtils.getCurrentSelection(event);
 		final IRoute route = UIUtils.getFirstElement(currentSelection, IRoute.class);
 
 		//Open route

@@ -68,7 +68,7 @@ public class ManageEnvironmentVariablesHandler extends AbstractHandler{
 	 * @return
 	 */
 	IReplicationController findReplicationController(ExecutionEvent event) {
-		ISelection selection = HandlerUtil.getActivePart(event).getSite().getWorkbenchWindow().getSelectionService().getSelection();
+		ISelection selection = UIUtils.getCurrentSelection(event);
 		IDeploymentConfig dc = UIUtils.getFirstElement(selection, IDeploymentConfig.class);
 		if(dc != null) {
 			return dc;
