@@ -183,7 +183,13 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		portsViewer = createTable(tableContainer);
 		ObservableListContentProvider contentProvider = new ObservableListContentProvider();
 		portsViewer.setContentProvider(contentProvider);
-		ObservableMapLabelProvider labelProvider = new ObservableMapLabelProvider(Properties.observeEach(contentProvider.getKnownElements(), BeanProperties.values(ServicePortAdapter.NAME, ServicePortAdapter.PORT, ServicePortAdapter.TARGET_PORT, ServicePortAdapter.ROUTE_PORT))) {
+		ObservableMapLabelProvider labelProvider = 
+		        new ObservableMapLabelProvider(
+		                Properties.observeEach(contentProvider.getKnownElements(),
+		                                       BeanProperties.values(ServicePortAdapter.NAME,
+		                                                             ServicePortAdapter.PORT,
+		                                                             ServicePortAdapter.TARGET_PORT,
+		                                                             ServicePortAdapter.ROUTE_PORT))) {
 		    @Override
 		    public Image getColumnImage(Object element, int columnIndex) {
 		        if (columnIndex == 3) {

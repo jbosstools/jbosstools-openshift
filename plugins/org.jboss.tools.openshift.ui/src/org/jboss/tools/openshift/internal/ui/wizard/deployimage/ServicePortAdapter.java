@@ -56,10 +56,7 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 	}
 	
 	public ServicePortAdapter(ServicePortAdapter port) {
-		this.name = port.getName();
-		this.port = port.getPort();
-		this.containerPort = "0".equals(port.getTargetPort()) ? String.valueOf(this.port) : port.getTargetPort();
-		this.protocol = port.getProtocol();
+	    this((IServicePort) port);
 		this.routePort = port.isRoutePort();
 	}
 
@@ -140,6 +137,7 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 		result = prime * result + ((containerPort == null) ? 0 : containerPort.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
+		result = prime * result + ((routePort) ? 1231 : 1237);
 		return result;
 	}
 
