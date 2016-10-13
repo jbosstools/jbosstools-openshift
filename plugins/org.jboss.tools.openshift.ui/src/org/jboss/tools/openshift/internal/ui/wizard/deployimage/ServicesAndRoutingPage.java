@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
@@ -140,8 +141,12 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
                 IStatus status = ValidationStatus.ok();
                 boolean isAddRoute = addRouteModelObservable.getValue();
                 String hostName = routeHostnameObservable.getValue();
-                if (isAddRoute && StringUtils.isNotBlank(hostName) && !DomainValidator.getInstance(true).isValid(hostName)) {
-                    status = ValidationStatus.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, hostName));
+                if (isAddRoute) {
+                    if (StringUtils.isBlank(hostName)) {
+                        status = ValidationStatus.info(NLS.bind(OpenShiftUIMessages.EmptyHostNameErrorMessage, hostName));
+                    } else if (!DomainValidator.getInstance(true).isValid(hostName)) {
+                        status = ValidationStatus.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, hostName));
+                    }
                 }
                 return status;
             }
@@ -371,5 +376,13 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			
 		};
 	}
+
+	/**
+	 * Allow Finish for info statuses.
+	 */
+    @Override
+    protected void setupWizardPageSupport(DataBindingContext dbc) {
+        ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
+    }
 
 }
