@@ -54,16 +54,16 @@ public class ApplicationSourceTreeItems implements IModelFactory , ICommonAttrib
 			return (List<T>) ((Connection) parent).getResources(ResourceKind.PROJECT);
 		} else if (parent instanceof IProject) {
 			IProject project = (IProject) parent;
-			Collection appSources = loadTemplates(project);
-			appSources.addAll(loadImageStreams(project));
+	        Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
+			Collection appSources = loadTemplates(project, conn);
+			appSources.addAll(loadImageStreams(project, conn));
 			return (List<T>) new ArrayList<>(appSources);
 		}
 		return Collections.emptyList();
 	}
 
 	@SuppressWarnings("rawtypes")
-	private Collection<IApplicationSource> loadImageStreams(IProject project) {
-		Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
+	private Collection<IApplicationSource> loadImageStreams(IProject project, Connection conn) {
 		Collection<IImageStream> streams = conn.getResources(ResourceKind.IMAGE_STREAM, project.getNamespace());
 		try {
 		    if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
@@ -106,13 +106,19 @@ public class ApplicationSourceTreeItems implements IModelFactory , ICommonAttrib
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private Collection<IApplicationSource> loadTemplates(IProject project){
+	private Collection<IApplicationSource> loadTemplates(IProject project, final Connection conn) {
 		return project.accept(new CapabilityVisitor<IProjectTemplateList,  Collection<IApplicationSource>>() {
 
 			@Override
 			public  Collection<IApplicationSource> visit(IProjectTemplateList capability) {
 				Collection<ITemplate> templates = capability.getTemplates();
-				templates.addAll(capability.getCommonTemplates());
+				if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
+				    try {
+		                templates.addAll(capability.getCommonTemplates(conn.getClusterNamespace()));
+				    } catch (OpenShiftException e) {
+				        OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+				    }
+				}
 				return templates.stream().map(t->new TemplateApplicationSource(t)).collect(Collectors.toList());
 			}
 		}, Collections.emptyList());
