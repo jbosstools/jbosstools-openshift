@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -24,8 +25,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.jboss.tools.common.ui.JobUtils;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -58,7 +59,7 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-        IConnection connection = UIUtils.getFirstElement(selection, IConnection.class);
+        Connection connection = UIUtils.getFirstElement(selection, Connection.class);
         if (connection == null) {
             IProject project = UIUtils.getFirstElement(selection, IProject.class);
             if (project != null) {

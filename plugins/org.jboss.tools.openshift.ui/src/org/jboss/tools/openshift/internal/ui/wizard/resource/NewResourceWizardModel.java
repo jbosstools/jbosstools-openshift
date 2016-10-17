@@ -16,7 +16,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.jboss.tools.common.databinding.ObservablePojo;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.utils.ObservableTreeItemUtils;
 
@@ -28,7 +28,7 @@ import com.openshift.restclient.model.IProject;
  */
 public class NewResourceWizardModel extends ObservablePojo implements IResourcePayloadPageModel {
 
-    private IConnection connection;
+    private Connection connection;
     private IProject project;
     private List<ObservableTreeItem> projectItems = new ArrayList<>();
     private String source;
@@ -52,7 +52,7 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
      * @see org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware#getConnection()
      */
     @Override
-    public IConnection getConnection() {
+    public Connection getConnection() {
         return connection;
     }
 
@@ -68,7 +68,7 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
      * @see org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware#setConnection(org.jboss.tools.openshift.common.core.connection.IConnection)
      */
     @Override
-    public void setConnection(IConnection connection) {
+    public void setConnection(Connection connection) {
         if (ObjectUtils.equals(connection, this.connection)) {
             return;
         }

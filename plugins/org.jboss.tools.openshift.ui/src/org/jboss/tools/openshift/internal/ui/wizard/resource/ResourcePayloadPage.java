@@ -10,7 +10,6 @@ package org.jboss.tools.openshift.internal.ui.wizard.resource;
 
 import java.io.File;
 
-import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -101,9 +100,6 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
         final IObservableValue source = WidgetProperties.text(SWT.Modify).observe(sourceText);
         ValueBindingBuilder
                 .bind(source )
-                //.validatingBeforeSet(value->isFile(value.toString())?
-                //        ValidationStatus.ok(): 
-                //            ValidationStatus.error(value +" is not a file"))
                 .to(BeanProperties.value(
                         IResourcePayloadPageModel.PROPERTY_SOURCE).observe(model))
                 .in(dbc);
