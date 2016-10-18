@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -63,13 +64,28 @@ public class DeployImageHandler extends AbstractHandler {
 		if(connection == null) {
 			connection = OpenShiftUIUtils.getExplorerDefaultConnection(Connection.class);
 		}
+		
+		IDockerConnection dockerConnection = null;
+		if(image != null) {
+			dockerConnection = image.getConnection();
+		} else if(OpenShiftUIUtils.hasDockerExplorerSelection()) {
+			ISelection dockerSelection = OpenShiftUIUtils.getDockerExplorerSelection();
+			dockerConnection =  UIUtils.getFirstElement(dockerSelection, IDockerConnection.class);
+			if(dockerConnection == null) {
+				//Action is originated from OpenShift Explorer, do the best to pick up Docker connection from the current selection in Docker Explorer.
+				IDockerImage selectedImage = UIUtils.getFirstElement(dockerSelection, IDockerImage.class);
+				if(selectedImage != null) {
+					dockerConnection = selectedImage.getConnection();
+				}
+			}
+		}
 
-		runWizard(HandlerUtil.getActiveWorkbenchWindow(event).getShell(), image, project, connection);
+		runWizard(HandlerUtil.getActiveWorkbenchWindow(event).getShell(), dockerConnection, image, project, connection);
 
 		return null;
 	}
 
-	public void runWizard(final Shell shell, final IDockerImage image, final IProject project, final Connection connection) {
+	public void runWizard(final Shell shell, final IDockerConnection dockerConnection, final IDockerImage image, final IProject project, final Connection connection) {
 		if(connection != null) {
 			final boolean[] authorized = new boolean[1];
 			Job job = new AbstractDelegatingMonitorJob("Checking connection...") {
@@ -90,7 +106,7 @@ public class DeployImageHandler extends AbstractHandler {
 					shell.getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
-							DeployImageWizard wizard = new DeployImageWizard(image, connection, project, authorized[0]);
+							DeployImageWizard wizard = new DeployImageWizard(dockerConnection, image, connection, project, authorized[0]);
 							WizardUtils.openWizardDialog(500, 500, wizard, shell);
 						}
 					});
@@ -98,7 +114,7 @@ public class DeployImageHandler extends AbstractHandler {
 			});
 			job.schedule();
 		} else {
-			DeployImageWizard wizard = new DeployImageWizard(image, connection, project, false);
+			DeployImageWizard wizard = new DeployImageWizard(dockerConnection, image, connection, project, false);
 			WizardUtils.openWizardDialog(600, 1500, wizard, shell);
 		}
 	}

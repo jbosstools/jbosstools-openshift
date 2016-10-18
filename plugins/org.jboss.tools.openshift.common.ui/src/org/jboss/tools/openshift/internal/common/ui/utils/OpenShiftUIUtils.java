@@ -37,6 +37,7 @@ public class OpenShiftUIUtils {
 	}
 	
 	public static final String OPENSHIFT_EXPLORER_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
+	public static final String DOCKER_EXPLORER_VIEW_ID = "org.eclipse.linuxtools.docker.ui.dockerExplorerView";
 	
 	public static void showOpenShiftExplorer() {
 		showViewAsync(OPENSHIFT_EXPLORER_VIEW_ID);
@@ -171,6 +172,34 @@ public class OpenShiftUIUtils {
 
 	public static boolean hasOpenShiftExplorerSelection() {
 		ISelection selection = getOpenShiftExplorerSelection();
+		return selection != null && !selection.isEmpty();
+	}
+
+	/**
+	 * Returns the Docker Explorer view part.
+	 * 
+	 * @return
+	 */
+	public static IViewPart getDockerExplorer() {
+		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		return window.getActivePage().findView(OpenShiftUIUtils.DOCKER_EXPLORER_VIEW_ID);
+	}
+
+	/**
+	 * Returns the selection that exists in the Docker explorer.
+	 * 
+	 * @return
+	 */
+	public static ISelection getDockerExplorerSelection() {
+		IViewPart part = getDockerExplorer();
+		if (part == null) {
+			return null;
+		}
+		return part.getSite().getSelectionProvider().getSelection();
+	}
+
+	public static boolean hasDockerExplorerSelection() {
+		ISelection selection = getDockerExplorerSelection();
 		return selection != null && !selection.isEmpty();
 	}
 
