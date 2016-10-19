@@ -34,11 +34,7 @@ public class CDKOpenshiftUtility {
 
 
 	public IConnection findExistingOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
-		Properties dotcdkProps = new CDKServerUtility().getDotCDK(server);
-		String authScheme = dotcdkProps.containsKey(DOTCDK_AUTH_SCHEME) ? dotcdkProps.getProperty(DOTCDK_AUTH_SCHEME) : "Basic";
-		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "test-admin";
 		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
-		
 		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
 		for(IConnection c : connections) {
 			if( c.getType() == ConnectionType.Kubernetes) {
@@ -56,7 +52,17 @@ public class CDKOpenshiftUtility {
 	}
 	
 	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment adb, ConnectionsRegistry registry) {
-		Properties dotcdkProps = new CDKServerUtility().getDotCDK(server);
+		
+		// Create the connection
+		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
+		ConnectionsFactoryTracker connectionsFactory = new ConnectionsFactoryTracker();
+		connectionsFactory.open();
+		IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
+		IConnection con = factory.create(soughtHost);
+		
+		
+		// Set some defaults
+		Properties dotcdkProps = CDKServerUtility.getDotCDK(server);
 		String authScheme = dotcdkProps.containsKey(DOTCDK_AUTH_SCHEME) ? dotcdkProps.getProperty(DOTCDK_AUTH_SCHEME) : "Basic";
 		String username = dotcdkProps.containsKey(DOTCDK_AUTH_USERNAME) ? dotcdkProps.getProperty(DOTCDK_AUTH_USERNAME) : "openshift-dev";
 		
@@ -69,15 +75,25 @@ public class CDKOpenshiftUtility {
 				password = "devel";
 			}
 		}
-		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
-		
-		ConnectionsFactoryTracker connectionsFactory = new ConnectionsFactoryTracker();
-		connectionsFactory.open();
-		IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
-		IConnection con = factory.create(soughtHost);
 		((Connection)con).setAuthScheme(authScheme);
 		((Connection)con).setUsername(username);
+		if( password != null ) {
+			((Connection)con).setPassword(password);
+		}
 		((Connection)con).setRememberPassword(true);
+		
+		
+		
+		updateOpenshiftConnection(server, adb, con);
+		
+		
+		if( registry != null )
+			registry.add(con);
+		return con;
+	}
+	
+	public void updateOpenshiftConnection(IServer server, ServiceManagerEnvironment adb, IConnection con) {
+
 		
 		String dockerReg = adb.get(IMAGE_REGISTRY_KEY);
 		if( dockerReg == null ) {
@@ -89,13 +105,6 @@ public class CDKOpenshiftUtility {
 		}
 		
 		((Connection)con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, dockerReg);
-		if( password != null ) {
-			((Connection)con).setPassword(password);
-		}
-		
-		if( registry != null )
-			registry.add(con);
-		return con;
 	}
 	
 }

@@ -22,6 +22,7 @@ import org.eclipse.wst.server.core.ServerEvent;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	@Override
@@ -87,8 +88,11 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	
 	private void configureOpenshift(IServer server, ServiceManagerEnvironment adb) {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		if( util.findExistingOpenshiftConnection(server, adb) == null ) {
+		IConnection con = util.findExistingOpenshiftConnection(server, adb);
+		if( con == null ) {
 			util.createOpenshiftConnection(server, adb);
+		} else {
+			util.updateOpenshiftConnection(server, adb, con);
 		}
 	}
 }
