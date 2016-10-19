@@ -21,7 +21,6 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.property.Properties;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -43,6 +42,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -54,15 +55,14 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.internal.common.ui.TableCellMouseAdapter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.IsNotNull2BooleanConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 
 import com.openshift.restclient.model.IServicePort;
 
@@ -77,6 +77,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 	private static final String PAGE_NAME = "Services && Routing Settings Page";
 	private static final String PAGE_TITLE = "Services && Routing Settings";
 	private static final String PAGE_DESCRIPTION = "";
+	private static final int ROUTE_PORT_COLUMN_INDEX = 3;
 	private IServiceAndRoutingPageModel model;
 
 	TableViewer portsViewer;
@@ -113,7 +114,8 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		btnAddRoute.setToolTipText("Adding a route to the service will make the image accessible\noutside of the OpenShift cluster on all the available service ports. \nYou can target a specific port by editing the route later.");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(false, false).span(2, 1).applyTo(btnAddRoute);
-		final IObservableValue<Boolean> addRouteModelObservable = BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE).observe(model);
+		final IObservableValue<Boolean> addRouteModelObservable = 
+				BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(btnAddRoute))
 			.to(addRouteModelObservable)
 			.in(dbc);
@@ -121,45 +123,48 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		Label labelRouteHostname = new Label(routingContainer, SWT.NONE);
 		labelRouteHostname.setText("Hostname:");
 	    GridDataFactory.fillDefaults()
-          .align(SWT.FILL, SWT.CENTER)
-          .applyTo(labelRouteHostname);
+	    	.align(SWT.FILL, SWT.CENTER)
+	    	.applyTo(labelRouteHostname);
 
 		Text textRouteHostname = new Text(routingContainer, SWT.BORDER);
-        GridDataFactory.fillDefaults()
-        .align(SWT.FILL, SWT.CENTER)
-        .grab(true, false)
-        .applyTo(textRouteHostname);
-        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(textRouteHostname))
-        .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE)
-        .observe(model))
-        .in(dbc);
-        final IObservableValue<String> routeHostnameObservable = WidgetProperties.text(SWT.Modify).observe(textRouteHostname);
-        ValueBindingBuilder.bind(routeHostnameObservable)
-        .converting(new TrimmingStringConverter())
-        .to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME)
-                .observe(model))
-        .in(dbc);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, false)
+			.applyTo(textRouteHostname);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(textRouteHostname))
+        	.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ADD_ROUTE)
+        	.observe(model))
+        	.in(dbc);
+		final IObservableValue<String> routeHostnameObservable = 
+				WidgetProperties.text(SWT.Modify).observe(textRouteHostname);
+		ValueBindingBuilder
+			.bind(routeHostnameObservable)
+			.converting(new TrimmingStringConverter())
+			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME).observe(model))
+			.in(dbc);
         
         MultiValidator validator = new MultiValidator() {
-            
-            @Override
-            protected IStatus validate() {
-                IStatus status = ValidationStatus.ok();
-                boolean isAddRoute = addRouteModelObservable.getValue();
-                String hostName = routeHostnameObservable.getValue();
-                if (isAddRoute) {
-                    if (StringUtils.isBlank(hostName)) {
-                        status = ValidationStatus.info(NLS.bind(OpenShiftUIMessages.EmptyHostNameErrorMessage, hostName));
-                    } else if (!DomainValidator.getInstance(true).isValid(hostName)) {
-                        status = ValidationStatus.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, hostName));
-                    }
-                }
-                return status;
-            }
-        };
+
+			@Override
+			protected IStatus validate() {
+				IStatus status = ValidationStatus.ok();
+				boolean isAddRoute = addRouteModelObservable.getValue();
+				String hostName = routeHostnameObservable.getValue();
+				if (isAddRoute) {
+					if (StringUtils.isBlank(hostName)) {
+						status = ValidationStatus
+								.info(NLS.bind(OpenShiftUIMessages.EmptyHostNameErrorMessage, hostName));
+					} else if (!DomainValidator.getInstance(true).isValid(hostName)) {
+						status = ValidationStatus
+								.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, hostName));
+					}
+				}
+				return status;
+			}
+		};
         dbc.addValidationStatusProvider(validator);
         ControlDecorationSupport.create(validator, SWT.LEFT | SWT.TOP);
-
 	}
 
 	private void createExposedPortsControl(Composite parent, DataBindingContext dbc) {
@@ -189,10 +194,10 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		                                       BeanProperties.values(ServicePortAdapter.NAME,
 		                                                             ServicePortAdapter.PORT,
 		                                                             ServicePortAdapter.TARGET_PORT,
-		                                                             ServicePortAdapter.ROUTE_PORT))) {
+		                       /* ROUTE_PORT_COLUMN_INDEX = 3 */     ServicePortAdapter.ROUTE_PORT))) {
 		    @Override
 		    public Image getColumnImage(Object element, int columnIndex) {
-		        if (columnIndex == 3) {
+		        if (columnIndex == ROUTE_PORT_COLUMN_INDEX) {
                     boolean selected = (boolean) attributeMaps[columnIndex].get(element);
                     return selected?OpenShiftImages.CHECKED_IMG:OpenShiftImages.UNCHECKED_IMG;
 		        }
@@ -226,6 +231,8 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				return Status.OK_STATUS;
 			}
 		});
+
+		portsViewer.getTable().addMouseListener(onTableCellDoubleClicked());
 	
 		Button btnAdd = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -271,6 +278,21 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		btnReset.addSelectionListener(onReset());
 		UIUtils.setDefaultButtonWidth(btnReset);
 		
+	}
+
+	private MouseListener onTableCellDoubleClicked() {
+		return new TableCellMouseAdapter(ROUTE_PORT_COLUMN_INDEX) {
+			
+			@Override
+			public void mouseUpCell(MouseEvent event) {
+				IServicePort port = model.getSelectedServicePort();
+				ServicePortAdapter target = new ServicePortAdapter((ServicePortAdapter)port);
+				target.setRoutePort(!target.isRoutePort());
+				target.setName(NLS.bind("{0}-tcp", target.getPort()));
+				model.updateServicePort(port, target);
+				model.setSelectedServicePort(target);
+			}
+		};
 	}
 
 	private SelectionListener onAdd() {
