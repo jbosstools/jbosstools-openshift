@@ -11,9 +11,13 @@
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+import org.eclipse.linuxtools.docker.core.IDockerContainerConfig;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
 
@@ -31,31 +35,43 @@ public class DockerConfigMetaData implements IDockerImageMetadata {
 		this.info = info;
 	}
 	
-	private <C extends Collection<String>> C select(C config, C containerConfig) {
-	    if ((config != null) 
-	    		&& !(config.isEmpty())) {
-	        return config;
-	    } else {
-	        return containerConfig;
+	/**
+	 * Select info from either config or container config and provides a
+	 * default non null value if nothing is found.
+	 * 
+	 * @param config the image config object
+	 * @param containerConfig the image container config object
+	 * @param accessor the accessor for the target property
+	 * @param defaultFactory the factory for the default value
+	 * @return the mapped value
+	 */
+	private <C extends Collection<String>> C select(IDockerContainerConfig config, IDockerContainerConfig containerConfig, Function<IDockerContainerConfig, C> accessor, Supplier<C> defaultFactory) {
+	    C result = null;
+	    if (config != null) {
+	        result = accessor.apply(config);
 	    }
+	    if (((result == null) || result.isEmpty()) && (containerConfig != null)) {
+	        result = accessor.apply(containerConfig);
+	    }
+	    if (result == null) {
+	        result = defaultFactory.get();
+	    }
+	    return result;
 	}
-
+	
 	@Override
 	public Set<String> exposedPorts() {
-		return select(info.config() != null ? info.config().exposedPorts() : null,
-				info.containerConfig() != null ? info.containerConfig().exposedPorts() : null);
+		return select(info.config(), info.containerConfig(), IDockerContainerConfig::exposedPorts, Collections::emptySet);
 	}
 
 	@Override
 	public List<String> env() {
-		return select(info.config() != null ? info.config().env() : null,
-				info.containerConfig() != null ? info.containerConfig().env() : null);
+		return select(info.config(), info.containerConfig(), IDockerContainerConfig::env, Collections::emptyList);
 	}
 
 	@Override
 	public Set<String> volumes() {
-		return select(info.config() != null ? info.config().volumes() : null,
-				info.containerConfig() != null ? info.containerConfig().volumes() : null);
+        return select(info.config(), info.containerConfig(), IDockerContainerConfig::volumes, Collections::emptySet);
 	}
 	
 }
