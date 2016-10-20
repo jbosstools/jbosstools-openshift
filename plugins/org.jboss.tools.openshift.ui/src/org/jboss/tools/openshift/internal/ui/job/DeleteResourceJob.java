@@ -43,14 +43,17 @@ public class DeleteResourceJob extends AbstractDelegatingMonitorJob {
 		try {
 			monitor.beginTask("Delete Resource", IProgressMonitor.UNKNOWN);
 			Connection connection = ConnectionsRegistryUtil.getConnectionFor(resource);
-			if(connection != null) {
+			if (connection != null) {
 				connection.deleteResource(resource);
-				ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_RESOURCE, resource, null);
+				ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
+						connection, ConnectionProperties.PROPERTY_RESOURCE, resource, null);
 			}
 			return Status.OK_STATUS;
-		}catch(OpenShiftException e) {
-			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind("Error deleting {0} named  {1}.", resource.getKind(), resource.getName()), e);
-		}finally {
+		} catch(OpenShiftException e) {
+			return new Status(Status.ERROR, 
+					OpenShiftUIActivator.PLUGIN_ID, 
+					NLS.bind("Error deleting {0} named  {1}.", resource.getKind(), resource.getName()), e);
+		} finally {
 			monitor.done();
 		}
 	}

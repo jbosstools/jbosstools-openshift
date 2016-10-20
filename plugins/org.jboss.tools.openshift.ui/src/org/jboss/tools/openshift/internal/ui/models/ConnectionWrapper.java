@@ -46,7 +46,8 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 			ResourceKind.REPLICATION_CONTROLLER, 
 			ResourceKind.SERVICE, 
 			ResourceKind.TEMPLATE,
-			ResourceKind.PVC
+			ResourceKind.PVC,
+			ResourceKind.PROJECT
 		};
 
 	private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
@@ -172,6 +173,9 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 							handleUpdate(projectWrapper, newResource);
 						}
 					}
+				} else if (oldValue != null) { 
+					// for Pods, which were marked for deletion and whose projects are already deleted
+					resourceCache.remove((IResource)oldValue);
 				}
 			} else if (oldValue != null) {
 				IResource oldResource = resourceCache.getCachedVersion((IResource) oldValue);
@@ -192,7 +196,13 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 
 	private ProjectWrapper findProjectWrapper(IResource resource) {
 		synchronized (projects) {
-			return projects.get(resource.getProject());
+			// `projects.get(resource.getProject())` was replaced, because project
+			// might have already been deleted on server and then 
+			// resource.getProject() throws exception, that project is forbidden
+			return projects.values().stream()
+					.filter(pw -> pw.getWrapped().getName().equals(resource.getNamespace()))
+					.findFirst()
+					.orElse(null);
 		}
 	}
 
@@ -204,9 +214,11 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 			projects.clear();
 			for (IProject r : newValue) {
 				ProjectWrapper existingWrapper = oldWrappers.remove(r);
-
 				if (existingWrapper == null) {
 					ProjectWrapper newWrapper = new ProjectWrapper(this, r);
+					resourceCache.add(r);
+					WatchManager.getInstance().startWatch(newWrapper.getWrapped(), 
+							newWrapper.getParent().getWrapped(), ResourceKind.PROJECT);
 					projects.put(r, newWrapper);
 					changed = true;
 				} else {
@@ -237,14 +249,23 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 
 	protected void handleRemove(ProjectWrapper projectWrapper, IResource oldResource) {
 		resourceCache.remove(oldResource);
-		Collection<IResource> resources = resourceCache.getResources(oldResource.getProject().getNamespace());
-		projectWrapper.updateWithResources(resources);
+		WatchManager.getInstance().stopWatch(projectWrapper.getWrapped(), projectWrapper.getParent().getWrapped(), oldResource.getKind());
+		if (oldResource instanceof IProject) {
+			synchronized(projects) {
+				projects.remove(oldResource);
+				resourceCache.flush(oldResource.getNamespace());
+				fireChanged();
+			}
+		} else if (projectWrapper != null) {
+			Collection<IResource> resources = resourceCache.getResources(oldResource.getNamespace());
+			projectWrapper.updateWithResources(resources);
+		}
 	}
 
 	protected void handleUpdate(ProjectWrapper projectWrapper, IResource newResource) {
 		resourceCache.remove(newResource);
 		resourceCache.add(newResource);
-		Collection<IResource> resources = resourceCache.getResources(newResource.getProject().getNamespace());
+		Collection<IResource> resources = resourceCache.getResources(newResource.getNamespace());
 		// relying in IResource#equals() definition
 		projectWrapper.updateWithResources(resources);
 	}
