@@ -176,10 +176,12 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
     		String userKey = cdkServer.getUserEnvironmentKey();
     		String passKey = cdkServer.getPasswordEnvironmentKey();
 			if( userKey == null || userKey.trim().isEmpty()) {
+				beh.setServerStopped();
 				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
 						"Username environment variable id cannot be empty when passing credentials via environment variables."));
 			}
 			if( passKey == null || passKey.trim().isEmpty()) {
+				beh.setServerStopped();
 				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
 						"Password environment variable id cannot be empty when passing credentials via environment variables."));				
 			}
