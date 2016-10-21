@@ -52,15 +52,16 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 
 	private static final String TITLE = "Deploy Image to OpenShift";
 
-	public DeployImageWizard(IDockerImage image, Connection connection, IProject project, boolean isAuthorized) {
+	public DeployImageWizard(IDockerConnection dockerConnection, IDockerImage image, Connection connection, IProject project, boolean isAuthorized) {
 		super(TITLE, new DeployImageWizardModel());
 
 		DeployImageWizardModel model = (DeployImageWizardModel)getModel();
-		if(image != null) {
-			IDockerConnection dockerConnection = image.getConnection();
-			model.setOriginatedFromDockerExplorer(true);
-			model.setDockerConnection(dockerConnection);
-			model.setImageName(getImageNameWithTag(image));
+		if(dockerConnection != null || image != null) {
+			model.setDockerConnection(image != null ? image.getConnection() : dockerConnection);
+			if(image != null) {
+				model.setOriginatedFromDockerExplorer(true);
+				model.setImageName(getImageNameWithTag(image));
+			}
 		}
 		model.setStartedWithActiveConnection(isAuthorized);
 		model.setConnection(connection);
