@@ -62,12 +62,12 @@ public class ApplicationSourceTreeItems implements IModelFactory , ICommonAttrib
 		return Collections.emptyList();
 	}
 
-	@SuppressWarnings("rawtypes")
 	private Collection<IApplicationSource> loadImageStreams(IProject project, Connection conn) {
-		Collection<IImageStream> streams = conn.getResources(ResourceKind.IMAGE_STREAM, project.getNamespace());
+		final Collection<IImageStream> streams = conn.getResources(ResourceKind.IMAGE_STREAM, project.getNamespace());
 		try {
 		    if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
-	            streams.addAll(conn.getResources(ResourceKind.IMAGE_STREAM, (String) conn.getClusterNamespace()));
+				Collection<IImageStream> commonStreams = conn.getResources(ResourceKind.IMAGE_STREAM, (String) conn.getClusterNamespace());
+				commonStreams.stream().filter(s -> !streams.contains(s)).forEach(s -> streams.add(s));
 		    }
         } catch (OpenShiftException e) {
             OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
@@ -105,16 +105,16 @@ public class ApplicationSourceTreeItems implements IModelFactory , ICommonAttrib
 		return new ObservableTreeItem(object, this);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	private Collection<IApplicationSource> loadTemplates(IProject project, final Connection conn) {
 		return project.accept(new CapabilityVisitor<IProjectTemplateList,  Collection<IApplicationSource>>() {
 
 			@Override
 			public  Collection<IApplicationSource> visit(IProjectTemplateList capability) {
-				Collection<ITemplate> templates = capability.getTemplates();
+				final Collection<ITemplate> templates = capability.getTemplates();
 				if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
 				    try {
-		                templates.addAll(capability.getCommonTemplates(conn.getClusterNamespace()));
+						Collection<ITemplate> commonTemplates = capability.getCommonTemplates(conn.getClusterNamespace());
+						commonTemplates.stream().filter(t -> !templates.contains(t)).forEach(t -> templates.add(t));
 				    } catch (OpenShiftException e) {
 				        OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
 				    }
