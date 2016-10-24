@@ -10,14 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.resource;
 
-import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
 
 /**
  * @author Jeff Maury
  *
  */
-public interface IResourcePayloadPageModel extends IProjectPageModel<IConnection> {
+public interface IResourcePayloadPageModel extends IProjectPageModel<Connection> {
     public static final String PROPERTY_SOURCE = "source";
     
     /**

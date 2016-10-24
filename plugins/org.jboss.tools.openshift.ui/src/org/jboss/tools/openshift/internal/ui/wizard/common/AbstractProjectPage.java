@@ -82,25 +82,21 @@ import com.openshift.restclient.model.IProject;
  * @param <C> the page model
  *
  */
-public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOpenShiftWizardPage  {
+public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extends AbstractOpenShiftWizardPage  {
 
     protected M model;
 
 	public AbstractProjectPage(IWizard wizard, M model, String title, String description,
 	                           String pageName) {
-		super(title, 
-			  description, 
-			  pageName, 
-			  wizard);
+		super(title, description, pageName, wizard);
 		this.model = model;
 	}
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults()
-			.numColumns(3).margins(10, 6).spacing(6, 6)
+			.numColumns(3)
 			.applyTo(parent);
-
 		createProjectControls(parent, dbc);
 	}
 
@@ -113,7 +109,7 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 
 		StructuredViewer projectsViewer = new ComboViewer(parent);
 		GridDataFactory.fillDefaults()
-		//	.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.align(SWT.FILL, SWT.FILL).grab(true, false)
 			.applyTo(projectsViewer.getControl());
 
 		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();
@@ -152,16 +148,10 @@ public class AbstractProjectPage<M extends IProjectPageModel> extends AbstractOp
 		Button newProjectButton = new Button(parent, SWT.PUSH);
 		newProjectButton.setText("New...");
 		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.CENTER)
+			.align(SWT.LEFT, SWT.FILL)
 			.applyTo(newProjectButton);
 		UIUtils.setDefaultButtonWidth(newProjectButton);
 		newProjectButton.addSelectionListener(onNewProjectClicked());
-
-		Label filler = new Label(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).span(3, 1)
-			
-			.applyTo(filler);
 	}
 	
     private IValueChangeListener onConnectionChanged() {

@@ -117,19 +117,18 @@ import com.openshift.restclient.model.template.ITemplate;
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class ApplicationSourceListPage  extends AbstractProjectPage<IApplicationSourceListPageModel> 
-                                       implements IValueChangeListener<Object> {
+public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationSourceListPageModel> 
+										implements IValueChangeListener<Object> {
 
 	private static final int LOCAL_TEMPLATE_TAB_INDEX = 1;
 	public static final String PAGE_NAME = "appSourceList";
-	
+
 	private TreeViewer templatesViewer;
 
 	public ApplicationSourceListPage(IWizard wizard, IApplicationSourceListPageModel model) {
 		super(wizard, model, "Select template", 
 				"Server template choices may be filtered by typing the name of a tag in the text field.", 
-				"templateList" 
-				);
+				"templateList");
 	}
 
 	@Override
@@ -400,7 +399,6 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 	}
 	
 	private IObservableValue createServerTemplateControls(TabFolder tabFolder, TabFolderTraverseListener tabFolderTraverseListener, IObservableValue uploadTemplate, DataBindingContext dbc) {
-
 		TabItem serverTemplatesTab = new TabItem(tabFolder, SWT.NONE);
 		serverTemplatesTab.setText("Server application source");
 
@@ -457,7 +455,6 @@ public class ApplicationSourceListPage  extends AbstractProjectPage<IApplication
 	}
 
 	private void createDetailsGroup(Composite parent, DataBindingContext dbc) {
-
 		// details
 		Group detailsGroup = new Group(parent, SWT.NONE);
 		detailsGroup.setText("Details");
