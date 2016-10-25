@@ -43,14 +43,18 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -77,6 +81,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 	private static final String PAGE_NAME = "Services && Routing Settings Page";
 	private static final String PAGE_TITLE = "Services && Routing Settings";
 	private static final String PAGE_DESCRIPTION = "";
+	private static final int ROUTE_PORT_COLUMN_INDEX = 3;
 	private IServiceAndRoutingPageModel model;
 
 	TableViewer portsViewer;
@@ -189,10 +194,10 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		                                       BeanProperties.values(ServicePortAdapter.NAME,
 		                                                             ServicePortAdapter.PORT,
 		                                                             ServicePortAdapter.TARGET_PORT,
-		                                                             ServicePortAdapter.ROUTE_PORT))) {
+		                       /* ROUTE_PORT_COLUMN_INDEX = 3 */     ServicePortAdapter.ROUTE_PORT))) {
 		    @Override
 		    public Image getColumnImage(Object element, int columnIndex) {
-		        if (columnIndex == 3) {
+		        if (columnIndex == ROUTE_PORT_COLUMN_INDEX) {
                     boolean selected = (boolean) attributeMaps[columnIndex].get(element);
                     return selected?OpenShiftImages.CHECKED_IMG:OpenShiftImages.UNCHECKED_IMG;
 		        }
@@ -224,6 +229,22 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 					return ValidationStatus.error("At least 1 port is required when generating the service for the deployed image");
 				}
 				return Status.OK_STATUS;
+			}
+		});
+
+		portsViewer.getTable().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent event) {
+				Point pt = new Point(event.x, event.y);
+				TableItem item = portsViewer.getTable().getItem(pt);
+				if (item != null && item.getBounds(ROUTE_PORT_COLUMN_INDEX) != null && item.getBounds(ROUTE_PORT_COLUMN_INDEX).contains(pt)) {
+					IServicePort port = model.getSelectedServicePort();
+					ServicePortAdapter target = new ServicePortAdapter((ServicePortAdapter)port);
+					target.setRoutePort(!target.isRoutePort());
+					target.setName(NLS.bind("{0}-tcp", target.getPort()));
+					model.updateServicePort(port, target);
+					model.setSelectedServicePort(target);
+				}
 			}
 		});
 	
