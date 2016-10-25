@@ -84,7 +84,7 @@ public class CDKOpenshiftUtility {
 		
 		
 		
-		updateOpenshiftConnection(server, adb, con);
+		updateOpenshiftConnection(server, adb, con, false);
 		
 		
 		if( registry != null )
@@ -93,7 +93,10 @@ public class CDKOpenshiftUtility {
 	}
 	
 	public void updateOpenshiftConnection(IServer server, ServiceManagerEnvironment adb, IConnection con) {
-
+		updateOpenshiftConnection(server, adb, con, true);
+	}
+	
+	public void updateOpenshiftConnection(IServer server, ServiceManagerEnvironment adb, IConnection con, boolean fireUpdate) {
 		
 		String dockerReg = adb.get(IMAGE_REGISTRY_KEY);
 		if( dockerReg == null ) {
@@ -105,6 +108,9 @@ public class CDKOpenshiftUtility {
 		}
 		
 		((Connection)con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, dockerReg);
+		if( fireUpdate) {
+			ConnectionsRegistrySingleton.getInstance().update(con, con);
+		}
 	}
 	
 }

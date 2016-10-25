@@ -315,7 +315,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 	private void handleProcessTerminated(ControllableServerBehavior beh) {
 		try {
 			// sleep to allow vagrant to unlock queries. 
-			Thread.sleep(1000);
+			Thread.sleep(3000);
 		} catch( InterruptedException ie) {}
 		
 		// Poll the server once more 
