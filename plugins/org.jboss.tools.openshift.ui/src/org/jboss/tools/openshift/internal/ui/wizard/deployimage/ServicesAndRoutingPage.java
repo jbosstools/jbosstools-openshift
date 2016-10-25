@@ -385,7 +385,6 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			    ServicePortAdapter port = UIUtils.getFirstElement(portsViewer.getSelection(), ServicePortAdapter.class);
 				if(MessageDialog.openQuestion(getShell(), "Remove port", NLS.bind("Are you sure you want to delete the port {0}?", port.getPort()))) {
 					model.removeServicePort(port);
-					portsViewer.refresh();
 				}
 			}
 			
@@ -399,7 +398,6 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			public void widgetSelected(SelectionEvent e) {
 				if(MessageDialog.openQuestion(getShell(), "Reset ports", "Are you sure you want to reset the serviced ports to those exposed by the image?")) {
 					model.resetServicePorts();
-					portsViewer.refresh();
 				}
 			}
 			
