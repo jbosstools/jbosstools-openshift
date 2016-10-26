@@ -49,6 +49,14 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 		setElements(routes.toArray());
 	}
 
+	public SelectRouteDialog(List<IRoute> routes, Shell shell, boolean initialRememberChoice, IRoute initialSelection) {
+		this(routes, shell);
+		rememberChoice = initialRememberChoice;
+		if(initialSelection != null) {
+			setInitialSelections(new Object[]{initialSelection});
+		}
+	}
+
 	private String createMessage(List<IRoute> routes) {
 		StringBuilder message = new StringBuilder();
 		if(!routes.isEmpty()) {
@@ -86,6 +94,9 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 		rememberChoiceButton = new Button(contents, SWT.CHECK);
 		rememberChoiceButton.setText("Remember selected route");
 		rememberChoiceButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		if(rememberChoice) {
+			rememberChoiceButton.setSelection(rememberChoice);
+		}
 		rememberChoiceButton.addSelectionListener(new SelectionListener() {
 
 			@Override

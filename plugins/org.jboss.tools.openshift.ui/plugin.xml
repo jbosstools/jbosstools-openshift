@@ -942,6 +942,12 @@
         icon="icons/open-browser.gif"
         label="Web Browser"
         mnemonic="B" />
+       <command
+        commandId="org.jboss.tools.openshift.ui.command.editDefaultRoute"
+        icon="icons/open-browser.gif"
+        label="Edit Default Route"
+        mnemonic="B" />
+        <separator visible="true" name="org.jboss.tools.openshift.ui.separatorWebBrowser"/>
         <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
         icon="icons/open-web-console.gif"
@@ -1369,12 +1375,20 @@
 			id="org.jboss.tools.openshift.ui.command.openInBrowser"
 			name="Web Browser">
 		</command>
+		<command
+			id="org.jboss.tools.openshift.ui.command.editDefaultRoute"
+			name="Edit Default Route">
+		</command>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler
               commandId="org.jboss.tools.openshift.ui.command.openInBrowser"
               class="org.jboss.tools.openshift.internal.ui.handler.OpenInWebBrowserHandler">
+    	</handler>
+		<handler
+              commandId="org.jboss.tools.openshift.ui.command.editDefaultRoute"
+              class="org.jboss.tools.openshift.internal.ui.handler.EditDefaultRouteHandler">
     	</handler>
 	</extension>
 	<extension
@@ -1405,6 +1419,31 @@
 					</with>
 				</visibleWhen>
 			</command>
+        </menuContribution>
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.showIn">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.editDefaultRoute"
+				icon="icons/open-browser.gif"
+				label="Edit Default Route"
+				mnemonic="B">
+					<visibleWhen>
+						<with
+							variable="selection">
+							<count value="1"/>
+							<iterate
+								ifEmpty="false">
+								<or>
+									<adapt
+										type="com.openshift.restclient.model.IProject" />
+									<instanceof 
+ 					                   value="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper" />
+								</or>
+						</iterate>
+					</with>
+				</visibleWhen>
+			</command>
+			 <separator visible="true" name="org.jboss.tools.openshift.ui.separatorWebBrowser"/>
         </menuContribution>
     </extension>
 	<extension
