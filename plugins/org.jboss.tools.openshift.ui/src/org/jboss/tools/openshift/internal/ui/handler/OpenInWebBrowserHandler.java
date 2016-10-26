@@ -97,7 +97,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 		return nothingToOpenDialog(shell);
 	}
 	
-	private IStatus nothingToOpenDialog(Shell shell) {
+	static IStatus nothingToOpenDialog(Shell shell) {
 		MessageDialog.openWarning(shell,"No Route", NO_ROUTE_MSG);
 		return OpenShiftUIActivator.statusFactory().cancelStatus(NO_ROUTE_MSG);
 	}
@@ -217,6 +217,10 @@ class SelectedRoutePreference {
 			String ancient = history.remove(0);
 			choices.remove(ancient);
 		}
+		save();
+	}
+
+	private void save() {
 		StringBuilder preference = new StringBuilder();
 		for (String _routesKey: history) {
 			String _routeKey = choices.get(_routesKey);
@@ -230,6 +234,15 @@ class SelectedRoutePreference {
 			}
 		} catch (IOException e) {
 			OpenShiftUIActivator.getDefault().getLogger().logError(e);
+		}
+	}
+
+	public void removeSelectedRoute(List<IRoute> routes) {
+		String routesKey = getKey(routes);
+		if(choices.containsKey(routesKey)) {
+			choices.remove(routesKey);
+			history.remove(routesKey);
+			save();
 		}
 	}
 
