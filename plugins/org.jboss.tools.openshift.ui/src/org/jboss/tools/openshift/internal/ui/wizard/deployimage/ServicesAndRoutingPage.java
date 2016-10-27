@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -308,6 +309,9 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 					port.setPort(generateNewPort(ports));
 					ports = servicePorts.stream().map((p) -> getIntegerPort(p.getTargetPort())).collect(Collectors.toSet());
 					port.setTargetPort(generateNewPort(ports));
+				} else {
+					port.setPort(generateNewPort(new HashSet<>()));
+					port.setTargetPort(generateNewPort(new HashSet<>()));
 				}
 				ServicePortDialog dialog = new ServicePortDialog(port, message, servicePorts);
 				if(Window.OK == dialog.open()) {
