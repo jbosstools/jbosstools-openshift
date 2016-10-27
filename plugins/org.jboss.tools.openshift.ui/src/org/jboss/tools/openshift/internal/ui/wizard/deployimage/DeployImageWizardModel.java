@@ -283,6 +283,13 @@ public class DeployImageWizardModel
 		if(StringUtils.isBlank(imageName)) {
 			return;
 		}
+		if(this.imageName != null && !this.imageName.equals(imageName) && this.imageMeta != null) {
+			//Clean container info loaded for old image name.
+			this.imageMeta = null;
+			setEnvironmentVariables(new ArrayList<>());
+			setPortSpecs(new ArrayList<>());
+			setVolumes(new ArrayList<>());
+		}
 		firePropertyChange(PROPERTY_IMAGE_NAME, this.imageName, this.imageName = imageName);
 		final DockerImageURI uri = new DockerImageURI(imageName);
 		setResourceName(dockerImage2OpenshiftResourceConverter.convert(uri));
