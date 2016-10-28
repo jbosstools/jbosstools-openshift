@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Common attribute info about an openshift cluster
  * @author jeff.cantrill
@@ -32,5 +35,16 @@ public interface ICommonAttributes {
 	 * The property key for saving the image registry url
 	 */
 	static final String IMAGE_REGISTRY_URL_KEY = "org.jbosstools.openshift.core.connection.ext.registry.url";
+
+	/**
+	 * Human readable labels for extended properties
+	 */
+	@SuppressWarnings("serial")
+	static final Map<String, String> EXTENDED_PROPERTY_LABELS = new HashMap<String, String>() {
+		{
+			put(CLUSTER_NAMESPACE_KEY, "Cluster Namespace");
+			put(IMAGE_REGISTRY_URL_KEY, "Registry URL");
+		}
+	};
 
 }

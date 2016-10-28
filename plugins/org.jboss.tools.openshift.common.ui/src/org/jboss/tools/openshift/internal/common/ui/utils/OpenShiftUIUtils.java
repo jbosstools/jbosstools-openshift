@@ -23,6 +23,10 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.navigator.CommonNavigator;
+import org.eclipse.ui.part.IPage;
+import org.eclipse.ui.views.properties.PropertySheet;
+import org.eclipse.ui.views.properties.PropertySheetPage;
+import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
@@ -124,8 +128,7 @@ public class OpenShiftUIUtils {
 		}
 		return null;
 	}
-	
-	
+
 	/**
 	 * Returns a connection of the given class that can be used in wizards started from
 	 * a view other than OpenShift explorer to spare user from first selecting the connection.
@@ -153,8 +156,11 @@ public class OpenShiftUIUtils {
 	 * @return
 	 */
 	public static IViewPart getOpenShiftExplorer() {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		return window.getActivePage().findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
+		IWorkbenchPage activePage = getActivePage();
+		if(activePage != null) {
+			return activePage.findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
+		}
+		return null;
 	}
 
 	/**
@@ -181,8 +187,11 @@ public class OpenShiftUIUtils {
 	 * @return
 	 */
 	public static IViewPart getDockerExplorer() {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		return window.getActivePage().findView(OpenShiftUIUtils.DOCKER_EXPLORER_VIEW_ID);
+		IWorkbenchPage activePage = getActivePage();
+		if(activePage != null) {
+			return activePage.findView(OpenShiftUIUtils.DOCKER_EXPLORER_VIEW_ID);
+		}
+		return null;
 	}
 
 	/**
@@ -231,5 +240,36 @@ public class OpenShiftUIUtils {
 			return result;
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the Property Sheet view part.
+	 *
+	 * @return
+	 */
+	public static PropertySheet getPropertySheet() {
+		IWorkbenchPage activePage = getActivePage();
+		if(activePage != null) {
+			return (PropertySheet)activePage.findView("org.eclipse.ui.views.PropertySheet"); //$NON-NLS-1$
+		}
+		return null;
+	}
+
+	/**
+	 * Refreshes the current page sheet of Property Sheet view.
+	 * @param sh
+	 */
+	public static void refreshPropertySheetPage(PropertySheet propertySheet) {
+		if(propertySheet == null) return;
+		IPage page = propertySheet.getCurrentPage();
+		if(page instanceof TabbedPropertySheetPage) {
+			TabbedPropertySheetPage p = (TabbedPropertySheetPage)page;
+			if(p == null || p.getControl() == null || p.getControl().isDisposed()) return;
+			p.refresh();
+		} else if(page instanceof PropertySheetPage) {
+			PropertySheetPage p = (PropertySheetPage)page;
+			if(p == null || p.getControl() == null || p.getControl().isDisposed()) return;
+			p.refresh();
+		}
 	}
 }
