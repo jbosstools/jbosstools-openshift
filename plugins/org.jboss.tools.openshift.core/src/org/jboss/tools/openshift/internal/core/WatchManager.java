@@ -95,7 +95,7 @@ public class WatchManager {
 	}
 	
 	private void stopWatchSafe(IProject project, IOpenShiftConnection connection, String... kinds) {
-		for (String kind : KINDS) {
+		for (String kind : kinds) {
 			AtomicReference<IWatcher> watcherRef = watches.remove(new WatchKey(connection, project, kind));
 			if((watcherRef != null) && (watcherRef.get() != null)) {
 				watcherRef.get().stop();

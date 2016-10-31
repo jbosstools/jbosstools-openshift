@@ -51,7 +51,7 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 		};
 
 	private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
-	private Map<IProject, ProjectWrapper> projects = new HashMap<>();
+	private Map<String, ProjectWrapper> projects = new HashMap<>();
 	private ResourceCache resourceCache = new ResourceCache();
 
 	public ConnectionWrapper(OpenshiftUIModel parent, IOpenShiftConnection wrapped) {
@@ -88,10 +88,10 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 		return state.get();
 	}
 	
-	void initWith(List<IResource> resources) {
+	void initWith(List<IProject> resources) {
 		synchronized (projects) {
 			resources.forEach(project -> {
-				projects.put((IProject) project, new ProjectWrapper(this, (IProject) project));
+				projects.put(project.getName(), new ProjectWrapper(this, project));
 			});
 		}
 		state.set(LoadingState.LOADED);
@@ -139,7 +139,7 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					IOpenShiftConnection connection = getWrapped();
-					List<IResource> projects = connection.getResources(ResourceKind.PROJECT);
+					List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
 					initWith(projects);
 					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
 					fireChanged();
@@ -196,13 +196,7 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 
 	private ProjectWrapper findProjectWrapper(IResource resource) {
 		synchronized (projects) {
-			// `projects.get(resource.getProject())` was replaced, because project
-			// might have already been deleted on server and then 
-			// resource.getProject() throws exception, that project is forbidden
-			return projects.values().stream()
-					.filter(pw -> pw.getWrapped().getName().equals(resource.getNamespace()))
-					.findFirst()
-					.orElse(null);
+			return projects.get(resource.getNamespace());
 		}
 	}
 
@@ -210,19 +204,19 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 		Map<IProject, ProjectWrapper> updated = new HashMap<>();
 		boolean changed = false;
 		synchronized (projects) {
-			HashMap<IProject, ProjectWrapper> oldWrappers = new HashMap<>(projects);
+			HashMap<String, ProjectWrapper> oldWrappers = new HashMap<>(projects);
 			projects.clear();
 			for (IProject r : newValue) {
-				ProjectWrapper existingWrapper = oldWrappers.remove(r);
+				ProjectWrapper existingWrapper = oldWrappers.remove(r.getName());
 				if (existingWrapper == null) {
 					ProjectWrapper newWrapper = new ProjectWrapper(this, r);
 					resourceCache.add(r);
 					WatchManager.getInstance().startWatch(newWrapper.getWrapped(), 
 							newWrapper.getParent().getWrapped(), ResourceKind.PROJECT);
-					projects.put(r, newWrapper);
+					projects.put(r.getName(), newWrapper);
 					changed = true;
 				} else {
-					projects.put(r, existingWrapper);
+					projects.put(r.getName(), existingWrapper);
 					updated.put(r, existingWrapper);
 				}
 			}
@@ -252,8 +246,8 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 		WatchManager.getInstance().stopWatch(projectWrapper.getWrapped(), projectWrapper.getParent().getWrapped(), oldResource.getKind());
 		if (oldResource instanceof IProject) {
 			synchronized(projects) {
-				projects.remove(oldResource);
-				resourceCache.flush(oldResource.getNamespace());
+				projects.remove(oldResource.getName());
+				resourceCache.flush(oldResource.getName());
 				fireChanged();
 			}
 		} else if (projectWrapper != null) {
