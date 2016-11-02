@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler;
 
-import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.commands.AbstractHandler;
@@ -49,11 +49,14 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.api.capabilities.IScalable;
+import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.model.IReplicationController;
 
 /**
@@ -85,12 +88,11 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 	}
 	
 	private IReplicationController getReplicationController(IServiceWrapper deployment) {
-		Collection<IResourceWrapper<?, ?>> rcs = deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER);
-		if(rcs.isEmpty()) {
-			return null;
-		}
-		//there should be only 1 per deployment, we'll assume this is true
-		return (IReplicationController) rcs.iterator().next().getWrapped();
+		return ResourceUtils.selectByDeploymentConfigVersion(
+				deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER)
+					.stream()
+						.map(wrapper -> (IReplicationController) ((IResourceWrapper) wrapper).getWrapped())
+						.collect(Collectors.<IReplicationController>toList()));
 	}
 
 	protected void scaleUsing(ExecutionEvent event, IReplicationController rc, String name) {
@@ -118,8 +120,29 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 	}
 
 	protected void scaleDeployment(ExecutionEvent event, String name, IReplicationController rc, int replicas) {
-		if (replicas < 0) {
-			return;
+		if(replicas >=0 ) {
+			new Job(NLS.bind("Scaling {0} deployment ...", name)){
+				
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						return rc.accept(new CapabilityVisitor<IScalable, IStatus>() {
+
+							@Override
+							public IStatus visit(IScalable capability) {
+								capability.scaleTo(replicas);
+								return Status.OK_STATUS;
+							}
+							
+						}, new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Scaling is not supported for this resource"));
+					}catch(Exception e) {
+						String message = NLS.bind("Unable to scale {0}", name);
+						OpenShiftUIActivator.getDefault().getLogger().logError(message,e);
+						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, e);
+					}
+				}
+				
+			}.schedule();
 		}
 
 		new Job(NLS.bind("Scaling {0} deployment ...", name)){

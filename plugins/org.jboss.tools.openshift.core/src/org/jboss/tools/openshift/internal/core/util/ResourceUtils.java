@@ -361,6 +361,54 @@ public class ResourceUtils {
 				.orElse(null);
 	}
 
+	public static IReplicationController selectByDeploymentConfigVersion(List<IReplicationController> rcs) {
+		if (rcs == null 
+				|| rcs.isEmpty()) {
+			return null;
+		}
+		
+		return rcs.stream()
+				.sorted((IReplicationController rc1, IReplicationController rc2) -> {
+					if (rc1 == null) {
+						if (rc2 == null) {
+							return 0;
+						} else {
+							return 1;
+						}
+					} else {
+						if (rc2 == null) {
+							return -1;
+						} else {
+							return compareVersions(
+									rc1.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION), 
+									rc2.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION));
+						}
+					}
+				})
+				.findFirst()
+				.orElse(null);
+	}
+	
+	private static int compareVersions(String version1, String version2) {
+		int v1 = safeParseInt(version1);
+		int v2 = safeParseInt(version2);
+		if (v1 > v2) {
+			return -1;
+		} else if (v1 == v2) {
+			return 0;
+		} else {
+			return 1;
+		}
+	}
+
+	private static int safeParseInt(String string) {
+		try {
+			return Integer.parseInt(string);
+		} catch(NumberFormatException e1) {
+			return -1;
+		}
+	}
+	
 	/**
 	 * Returns the first build config out of the given list of build configs
 	 * that matches the given service.
