@@ -22,7 +22,7 @@ public interface DebugSessionTracker {
 	void startDebugSession(IServer server, int port) throws CoreException;
 
 	void stopDebugSession(IServer server) throws DebugException;
-
+	
 	boolean isDebugSessionAlive(IServer server);
 
 }
