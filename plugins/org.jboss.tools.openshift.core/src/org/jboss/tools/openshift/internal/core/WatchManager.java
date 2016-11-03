@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -54,7 +56,8 @@ public class WatchManager {
 			ResourceKind.ROUTE,
 			ResourceKind.PVC,
 			ResourceKind.SERVICE, 
-			ResourceKind.TEMPLATE
+			ResourceKind.TEMPLATE,
+			ResourceKind.PROJECT
 	};
 	
 	/**
@@ -77,8 +80,22 @@ public class WatchManager {
 		ConnectionsRegistrySingleton.getInstance().addListener(new DeletedConnectionListener());
 	}
 	
+	private void checkResourceKindsExist(String... kinds) {
+		Assert.isTrue(Arrays.asList(KINDS).containsAll(Arrays.asList(kinds)), 
+				"Some of the resources are unwatchable");
+	}
+	
 	public void stopWatch(IProject project, IOpenShiftConnection connection) {
-		for (String kind : KINDS) {
+		stopWatchSafe(project, connection, KINDS);
+	}
+	
+	public void stopWatch(IProject project, IOpenShiftConnection connection, String... kinds) {
+		checkResourceKindsExist(kinds);
+		stopWatchSafe(project, connection, kinds);
+	}
+	
+	private void stopWatchSafe(IProject project, IOpenShiftConnection connection, String... kinds) {
+		for (String kind : kinds) {
 			AtomicReference<IWatcher> watcherRef = watches.remove(new WatchKey(connection, project, kind));
 			if((watcherRef != null) && (watcherRef.get() != null)) {
 				watcherRef.get().stop();
@@ -86,10 +103,19 @@ public class WatchManager {
 		}
 	}
 	
+	public void startWatch(IProject project, IOpenShiftConnection connection, String... kinds) {
+		checkResourceKindsExist(kinds);
+		startWatchSafe(project, connection, kinds);
+	}
+	
 	public void startWatch(final IProject project, final IOpenShiftConnection connection) {
+		startWatchSafe(project, connection, KINDS);
+	}
+	
+	private void startWatchSafe(final IProject project, final IOpenShiftConnection connection, String... kinds) {
 		AtomicReference<IWatcher> watcherRef = new AtomicReference<>();
-		for (String kind : KINDS) {
-			if(watches.putIfAbsent(new WatchKey(connection, project, kind), watcherRef) == null) {
+		for (String kind : kinds) {
+			if (watches.putIfAbsent(new WatchKey(connection, project, kind), watcherRef) == null) {
 				WatchListener listener = new WatchListener(project, connection, kind, 0, 0);
 				startWatch(project, 0, 0, listener);
 			}

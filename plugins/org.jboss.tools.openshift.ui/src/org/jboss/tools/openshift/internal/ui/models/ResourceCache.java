@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import org.jboss.tools.openshift.internal.core.Trace;
 
-import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
 class ResourceCache {
@@ -128,7 +127,7 @@ class ResourceCache {
 	}
 
 	public String getNamespace(IResource resource) {
-		return (resource instanceof IProject ? "" : resource.getNamespace());
+		return resource.getNamespace();
 	}
 
 	public IResource getCachedVersion(IResource resource) {

@@ -56,7 +56,7 @@ public class OpenShiftJobs {
 				List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT);
 				IStatus status = super.doRun(monitor);
 				if(status.isOK()) {
-					if(waitForServerToReconcileProjectDelete(connection, project)) {
+					if (waitForServerToReconcileProjectDelete(connection, project)) {
 						List<IProject> newProjects = new ArrayList<>(oldProjects);
 						newProjects.remove(project);
 						ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
@@ -79,16 +79,16 @@ public class OpenShiftJobs {
 						Thread.sleep(PROJECT_DELETE_DELAY);
 					} catch (InterruptedException e1) {
 					} catch(OpenShiftException ex) {
-						if(ex.getStatus() != null) {
+						if (ex.getStatus() != null) {
 							final int code = ex.getStatus().getCode();
-							if(code == IHttpConstants.STATUS_NOT_FOUND || code == IHttpConstants.STATUS_FORBIDDEN) {
+							if (code == IHttpConstants.STATUS_NOT_FOUND || code == IHttpConstants.STATUS_FORBIDDEN) {
 								deleted = true;
 							}
 						}
-					}finally {
+					} finally {
 						sleep = sleep + PROJECT_DELETE_DELAY;
 					}
-				}while(!deleted && sleep < MAX_PROJECT_DELETE_DELAY);
+				} while (!deleted && sleep < MAX_PROJECT_DELETE_DELAY);
 				return deleted;
 			}
 		};

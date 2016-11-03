@@ -46,11 +46,12 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 			ResourceKind.REPLICATION_CONTROLLER, 
 			ResourceKind.SERVICE, 
 			ResourceKind.TEMPLATE,
-			ResourceKind.PVC
+			ResourceKind.PVC,
+			ResourceKind.PROJECT
 		};
 
 	private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
-	private Map<IProject, ProjectWrapper> projects = new HashMap<>();
+	private Map<String, ProjectWrapper> projects = new HashMap<>();
 	private ResourceCache resourceCache = new ResourceCache();
 
 	public ConnectionWrapper(OpenshiftUIModel parent, IOpenShiftConnection wrapped) {
@@ -87,10 +88,10 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 		return state.get();
 	}
 	
-	void initWith(List<IResource> resources) {
+	void initWith(List<IProject> resources) {
 		synchronized (projects) {
 			resources.forEach(project -> {
-				projects.put((IProject) project, new ProjectWrapper(this, (IProject) project));
+				projects.put(project.getName(), new ProjectWrapper(this, project));
 			});
 		}
 		state.set(LoadingState.LOADED);
@@ -138,7 +139,7 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					IOpenShiftConnection connection = getWrapped();
-					List<IResource> projects = connection.getResources(ResourceKind.PROJECT);
+					List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
 					initWith(projects);
 					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
 					fireChanged();
@@ -172,6 +173,9 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 							handleUpdate(projectWrapper, newResource);
 						}
 					}
+				} else if (oldValue != null) { 
+					// for Pods, which were marked for deletion and whose projects are already deleted
+					resourceCache.remove((IResource)oldValue);
 				}
 			} else if (oldValue != null) {
 				IResource oldResource = resourceCache.getCachedVersion((IResource) oldValue);
@@ -192,7 +196,7 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 
 	private ProjectWrapper findProjectWrapper(IResource resource) {
 		synchronized (projects) {
-			return projects.get(resource.getProject());
+			return projects.get(resource.getNamespace());
 		}
 	}
 
@@ -200,17 +204,19 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 		Map<IProject, ProjectWrapper> updated = new HashMap<>();
 		boolean changed = false;
 		synchronized (projects) {
-			HashMap<IProject, ProjectWrapper> oldWrappers = new HashMap<>(projects);
+			HashMap<String, ProjectWrapper> oldWrappers = new HashMap<>(projects);
 			projects.clear();
 			for (IProject r : newValue) {
-				ProjectWrapper existingWrapper = oldWrappers.remove(r);
-
+				ProjectWrapper existingWrapper = oldWrappers.remove(r.getName());
 				if (existingWrapper == null) {
 					ProjectWrapper newWrapper = new ProjectWrapper(this, r);
-					projects.put(r, newWrapper);
+					resourceCache.add(r);
+					WatchManager.getInstance().startWatch(newWrapper.getWrapped(), 
+							newWrapper.getParent().getWrapped(), ResourceKind.PROJECT);
+					projects.put(r.getName(), newWrapper);
 					changed = true;
 				} else {
-					projects.put(r, existingWrapper);
+					projects.put(r.getName(), existingWrapper);
 					updated.put(r, existingWrapper);
 				}
 			}
@@ -237,14 +243,23 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 
 	protected void handleRemove(ProjectWrapper projectWrapper, IResource oldResource) {
 		resourceCache.remove(oldResource);
-		Collection<IResource> resources = resourceCache.getResources(oldResource.getProject().getNamespace());
-		projectWrapper.updateWithResources(resources);
+		WatchManager.getInstance().stopWatch(projectWrapper.getWrapped(), projectWrapper.getParent().getWrapped(), oldResource.getKind());
+		if (oldResource instanceof IProject) {
+			synchronized(projects) {
+				projects.remove(oldResource.getName());
+				resourceCache.flush(oldResource.getName());
+				fireChanged();
+			}
+		} else if (projectWrapper != null) {
+			Collection<IResource> resources = resourceCache.getResources(oldResource.getNamespace());
+			projectWrapper.updateWithResources(resources);
+		}
 	}
 
 	protected void handleUpdate(ProjectWrapper projectWrapper, IResource newResource) {
 		resourceCache.remove(newResource);
 		resourceCache.add(newResource);
-		Collection<IResource> resources = resourceCache.getResources(newResource.getProject().getNamespace());
+		Collection<IResource> resources = resourceCache.getResources(newResource.getNamespace());
 		// relying in IResource#equals() definition
 		projectWrapper.updateWithResources(resources);
 	}
