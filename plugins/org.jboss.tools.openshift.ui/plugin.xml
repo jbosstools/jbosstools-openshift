@@ -680,12 +680,17 @@
         tooltip="Refresh" />
       <menu label="%openshift.explorer.properties.menus.showIn">
         <command
-        commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
-        icon="icons/open-web-console.gif"
-        label="Web Console"
-        mnemonic="C" />
+         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
+         icon="icons/open-web-console.gif"
+         label="Web Console"
+         mnemonic="C" />
       </menu>
-      				<separator visible="true" name="org.jboss.tools.openshift.ui.separator4"/>
+      <separator visible="true" name="org.jboss.tools.openshift.ui.separator4"/>
+	  <command
+        commandId="org.jboss.tools.openshift.ui.command.editDefaultRoute"
+        icon="icons/open-browser.gif"
+        label="Edit Default Route..."
+        mnemonic="B" />
       <command
            commandId="org.jboss.tools.openshift.ui.command.editresource"
            style="push" />
@@ -942,7 +947,7 @@
         icon="icons/open-browser.gif"
         label="Web Browser"
         mnemonic="B" />
-        <command
+       <command
         commandId="org.jboss.tools.openshift.ui.command.openInWebConsole"
         icon="icons/open-web-console.gif"
         label="Web Console"
@@ -1285,6 +1290,10 @@
 			name="%openshift.command.openwebconsole">
 		</command>
 		<command
+			id="org.jboss.tools.openshift.ui.command.editDefaultRoute"
+			name="Edit Default Route...">
+		</command>
+		<command
 			id="org.jboss.tools.openshift.ui.command.editresource"
 			name="%openshift.command.editresource">
 		</command>
@@ -1376,6 +1385,10 @@
               commandId="org.jboss.tools.openshift.ui.command.openInBrowser"
               class="org.jboss.tools.openshift.internal.ui.handler.OpenInWebBrowserHandler">
     	</handler>
+		<handler
+              commandId="org.jboss.tools.openshift.ui.command.editDefaultRoute"
+              class="org.jboss.tools.openshift.internal.ui.handler.EditDefaultRouteHandler">
+    	</handler>
 	</extension>
 	<extension
 		point="org.eclipse.ui.menus">
@@ -1433,6 +1446,31 @@
 					</with>
 				</visibleWhen>
 			</command>
+        </menuContribution>
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
+			<command
+				commandId="org.jboss.tools.openshift.ui.command.editDefaultRoute"
+				icon="icons/open-browser.gif"
+				label="Edit Default Route..."
+				mnemonic="B">
+					<visibleWhen>
+						<with
+							variable="selection">
+							<count value="1"/>
+							<iterate
+								ifEmpty="false">
+								<or>
+									<adapt
+										type="com.openshift.restclient.model.IProject" />
+									<instanceof 
+ 					                   value="org.jboss.tools.openshift.internal.ui.models.ServiceWrapper" />
+								</or>
+						</iterate>
+					</with>
+				</visibleWhen>
+			</command>
+		    <separator visible="true" name="org.jboss.tools.openshift.ui.separatorWebBrowser"/>
         </menuContribution>
     </extension>
 	<extension
