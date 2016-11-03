@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
@@ -105,19 +106,7 @@ public class SSLCertificatesPreference {
 	}
 
 	private boolean isValid(String validity) {
-		int expiresOnIndex = validity.indexOf(X509CertificateParser.EXPIRES_ON_PREFIX);
-		if(expiresOnIndex >= 0) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat(X509CertificateParser.DATE_FORMAT);
-			String expiresOn = validity.substring(expiresOnIndex + X509CertificateParser.EXPIRES_ON_PREFIX.length()).trim();
-			try {
-				Date date = dateFormat.parse(expiresOn);
-				return date.getTime() > System.currentTimeMillis();
-			} catch (ParseException e) {
-				OpenShiftUIActivator.getDefault().getLogger().logError("SSLCertificatesPreference.isValid(String): Could not parse '" + expiresOn + "' in format " + X509CertificateParser.DATE_FORMAT);
-			}
-		}
-		//In case of any failure, just assume that certificate is valid.
-		return true;
+		return X509CertificateParser.isValid(validity);
 	}
 
 	private Item findItem(List<Item> items, Item item) {

@@ -14,13 +14,17 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 
 import org.eclipse.core.runtime.Assert;
+import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
 
 /**
  * Parses a given X509 certificate and offers human readable portions of it.
@@ -57,6 +61,29 @@ public class X509CertificateParser {
 			return this.fingerprint;
 		}
 		
+
+		public static boolean isValid(String validity) {
+			int expiresOnIndex = validity.indexOf(X509CertificateParser.EXPIRES_ON_PREFIX);
+			if(expiresOnIndex >= 0) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat(X509CertificateParser.DATE_FORMAT,  Locale.ENGLISH);
+				String expiresOn = validity.substring(expiresOnIndex + X509CertificateParser.EXPIRES_ON_PREFIX.length()).trim();
+				try {
+					Date date = dateFormat.parse(expiresOn);
+					return date.getTime() > System.currentTimeMillis();
+				} catch (ParseException e) {
+					dateFormat = new SimpleDateFormat(X509CertificateParser.DATE_FORMAT);
+					try {
+						Date date = dateFormat.parse(expiresOn);
+						return date.getTime() > System.currentTimeMillis();
+					} catch(ParseException e2) {
+						OpenShiftCommonCoreActivator.log("SSLCertificatesPreference.isValid(String): Could not parse '" + expiresOn + "' in format " + X509CertificateParser.DATE_FORMAT, e2);
+					}
+				}
+			}
+			//In case of any failure, just assume that certificate is valid.
+			return true;
+		}
+		
 		private String getIssuer(X509Certificate certificate) {
 			try {
 				StringBuilder builder = new StringBuilder();
@@ -77,7 +104,7 @@ public class X509CertificateParser {
 		}
 
 		private String getValidity(X509Certificate certificate) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+			SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
 			return new StringBuilder()
 				.append(ISSUED_ON_PREFIX).append(dateFormat.format(certificate.getNotBefore())).append('\n')
 				.append(EXPIRES_ON_PREFIX).append(dateFormat.format(certificate.getNotAfter()))
