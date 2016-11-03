@@ -26,10 +26,12 @@
 	<feature url="features/org.jboss.tools.openshift.test.feature_0.0.0.jar" id="org.jboss.tools.openshift.test.feature" version="0.0.0">
 		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
 	</feature>
-
-        <feature url="features/org.jboss.tools.openshift.cdk.feature_0.0.0.jar" id="org.jboss.tools.openshift.cdk.feature" version="0.0.0">
-                <category name="JBoss Tools OpenShift Nightly Build Update Site" />
-        </feature>
+	<feature url="features/org.jboss.tools.openshift.cdk.feature_0.0.0.jar" id="org.jboss.tools.openshift.cdk.feature" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
+	<feature url="features/org.jboss.tools.openshift.js.feature_0.0.0.jar" id="org.jboss.tools.openshift.js.feature" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
 
 
 	<!-- Sources -->
@@ -54,8 +56,11 @@
 	<feature url="features/org.jboss.tools.openshift.test.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.test.feature.source" version="0.0.0">
 		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
 	</feature>
-        <feature url="features/org.jboss.tools.openshift.cdk.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.cdk.feature.source" version="0.0.0">
-                <category name="JBoss Tools OpenShift Nightly Build Update Site" />
-        </feature>
+	<feature url="features/org.jboss.tools.openshift.cdk.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.cdk.feature.source" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
+	<feature url="features/org.jboss.tools.openshift.js.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.js.feature.source" version="0.0.0">
+		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
+	</feature>
 
 </site>
