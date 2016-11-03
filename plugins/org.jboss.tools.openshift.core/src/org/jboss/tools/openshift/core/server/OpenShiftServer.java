@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.model.IURLProvider;
@@ -24,12 +25,14 @@ import org.jboss.ide.eclipse.as.core.server.internal.IExtendedPropertiesProvider
 import org.jboss.ide.eclipse.as.core.server.internal.JBossServer;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
+import org.jboss.tools.jmx.core.IConnectionFacade;
+import org.jboss.tools.jmx.core.IConnectionWrapper;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 
 /**
  * @author Andre Dietisheim
  */
-public class OpenShiftServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider {
+public class OpenShiftServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider, IConnectionFacade {
 
 	/** The Server Type ID (as defined in plugin.xml) */
 	public static final String SERVER_TYPE_ID = "org.jboss.tools.openshift.server.type";
@@ -82,5 +85,10 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 	public boolean isUseProjectSpecificSchedulingRuleOnPublish() {
 		// ensure we're locking the whole workspace while publishing.
 		return false;
+	}
+
+	@Override
+	public IConnectionWrapper getJMXConnection() {
+		return (IConnectionWrapper) Platform.getAdapterManager().loadAdapter((OpenShiftServer)this, IConnectionWrapper.class.getName());
 	}
 }

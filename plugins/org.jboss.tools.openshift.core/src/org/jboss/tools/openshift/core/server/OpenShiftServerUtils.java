@@ -329,6 +329,9 @@ public class OpenShiftServerUtils {
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
+		if( connection == null ) {
+			return null;
+		}
 		String projectName = OpenShiftResourceUniqueId.getProjectName(uniqueId);
 		List<IService> services = connection.getResources(ResourceKind.SERVICE, projectName);
 		return OpenShiftResourceUniqueId.getByUniqueId(uniqueId, services);

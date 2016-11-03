@@ -30,7 +30,9 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.eclipse.jdt.core,
  org.eclipse.jdt.debug,
  com.fasterxml.jackson.core.jackson-databind;bundle-version="2.5.0",
- com.fasterxml.jackson.core.jackson-core;bundle-version="2.5.0"
+ com.fasterxml.jackson.core.jackson-core;bundle-version="2.5.0",
+ org.jboss.tools.jmx.jolokia;bundle-version="1.8.2",
+ org.jboss.ide.eclipse.as.jmx.integration
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.core,

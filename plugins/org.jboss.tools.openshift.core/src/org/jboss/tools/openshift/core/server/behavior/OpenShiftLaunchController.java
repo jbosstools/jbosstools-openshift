@@ -35,6 +35,7 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
+import org.jboss.ide.eclipse.as.core.util.ClassCollectingHCRListener;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
@@ -159,8 +160,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 		
 		if( state == IServer.STATE_STARTED) {
-			beh.setServerStarted();
 			beh.setRunMode(mode);
+			beh.setServerStarted();
 		} else {
 			beh.setServerStopped();
 			((ControllableServerBehavior)getControllableBehavior()).setRunMode(null);
@@ -394,6 +395,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		return true;
 	}
 	protected IJavaHotCodeReplaceListener getHotCodeReplaceListener(IServer server, ILaunch launch) {
-		return new ServerHotCodeReplaceListener(server, launch);
+		return new ClassCollectingHCRListener(server, launch);
 	}
 }

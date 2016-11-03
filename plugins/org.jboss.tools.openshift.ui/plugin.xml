@@ -1828,5 +1828,17 @@
             class="org.jboss.tools.openshift.internal.ui.wizard.connection.AdvancedConnectionEditor">
       </connectionEditorAdvanced>
    </extension>
+   <extension
+         point="org.jboss.tools.jmx.ui.providerUI">
+      <providerUI
+            editable="false"
+            icon="icons/openshift-logo-white-icon.png"
+            id="org.jboss.tools.openshift.core.server.OpenshiftJMXConnection"
+            name="Openshift JMX">
+         <connectionLabelProvider
+               class="org.jboss.tools.openshift.internal.ui.server.OpenshiftJMXLabelProvider">
+         </connectionLabelProvider>
+      </providerUI>
+   </extension>
 
 </plugin>
