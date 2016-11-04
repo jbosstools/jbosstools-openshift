@@ -51,6 +51,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
@@ -199,15 +200,15 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		    @Override
 		    public Image getColumnImage(Object element, int columnIndex) {
 		        if (columnIndex == ROUTE_PORT_COLUMN_INDEX) {
-                    boolean selected = (boolean) attributeMaps[columnIndex].get(element);
-                    return selected?OpenShiftImages.CHECKED_IMG:OpenShiftImages.UNCHECKED_IMG;
+		        	Object selected = attributeMaps[columnIndex].get(element);
+		        	return selected != null && (boolean)selected ? OpenShiftImages.CHECKED_IMG : OpenShiftImages.UNCHECKED_IMG;
 		        }
 		        return null;
 		    }
 
 		    @Override
 		    public String getColumnText(Object element, int columnIndex) {
-		        if (columnIndex < attributeMaps.length - 1) {
+		        if (columnIndex != ROUTE_PORT_COLUMN_INDEX) {
 		            Object result = attributeMaps[columnIndex].get(element);
 		            return result == null ? "" : result.toString(); //$NON-NLS-1$
 		        }
@@ -292,6 +293,11 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				target.setName(NLS.bind("{0}-tcp", target.getPort()));
 				model.updateServicePort(port, target);
 				model.setSelectedServicePort(target);
+				Display.getDefault().asyncExec(() -> {
+					if(portsViewer != null && portsViewer.getTable() != null && !portsViewer.getTable().isDisposed()) {
+						portsViewer.refresh();
+					}
+				});
 			}
 		};
 	}
