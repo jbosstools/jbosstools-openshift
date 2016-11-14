@@ -216,7 +216,8 @@ public class DeployImageJobTest {
 		assertNotNull("Exp. an IS to be returned", is);
 		assertEquals(RESOURCE_NAME, is.getName());
 		assertEquals(project.getName(), is.getNamespace());
-		assertEquals(DOCKER_TAG, is.getDockerImageRepository());
+		assertEquals(1, is.getTags().size());
+		assertEquals(DOCKER_TAG.toString(), is.getTags().iterator().next().getFrom().getName());
 	}
 
 	@Test
