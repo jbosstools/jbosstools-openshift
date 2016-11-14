@@ -211,8 +211,6 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 				if (existingWrapper == null) {
 					ProjectWrapper newWrapper = new ProjectWrapper(this, r);
 					resourceCache.add(r);
-					WatchManager.getInstance().startWatch(newWrapper.getWrapped(), 
-							newWrapper.getParent().getWrapped(), ResourceKind.PROJECT);
 					projects.put(r.getName(), newWrapper);
 					changed = true;
 				} else {
@@ -243,7 +241,6 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 
 	protected void handleRemove(ProjectWrapper projectWrapper, IResource oldResource) {
 		resourceCache.remove(oldResource);
-		WatchManager.getInstance().stopWatch(projectWrapper.getWrapped(), projectWrapper.getParent().getWrapped(), oldResource.getKind());
 		if (oldResource instanceof IProject) {
 			synchronized(projects) {
 				projects.remove(oldResource.getName());

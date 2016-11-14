@@ -68,7 +68,9 @@ public class RSync {
 				if (shouldSync) {
 					for (IPod pod : service.getPods()) {
 						try {
-							syncPodToDirectory(pod, podPath, deployFolder, consoleWriter);
+						    if (pod.getStatus() == "Running") {
+	                            syncPodToDirectory(pod, podPath, deployFolder, consoleWriter);
+						    }
 						} catch (IOException | OpenShiftException e) {
 							status.add(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, e.getMessage()));
 						}
@@ -86,7 +88,9 @@ public class RSync {
 			protected void runOCBinary(MultiStatus multiStatus) {
 				for (IPod pod : service.getPods()) {
 					try {
-						syncDirectoryToPod(pod, deployFolder, podPath, consoleWriter);
+					    if (pod.getStatus() == "Running") {
+	                        syncDirectoryToPod(pod, deployFolder, podPath, consoleWriter);
+					    }
 					} catch (IOException | OpenShiftException e) {
 						status.add(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, e.getMessage()));
 					}
