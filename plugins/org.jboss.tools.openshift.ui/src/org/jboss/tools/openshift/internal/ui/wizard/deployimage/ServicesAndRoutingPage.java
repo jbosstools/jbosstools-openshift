@@ -10,12 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.DomainValidator;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -38,6 +32,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizard;
@@ -152,6 +147,11 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				IStatus status = ValidationStatus.ok();
 				boolean isAddRoute = addRouteModelObservable.getValue();
 				String hostName = routeHostnameObservable.getValue();
+				final IObservableList<IServicePort> portsObservable = BeanProperties.list(
+		                IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
+		        final IServicePort routingPort = 
+		                (IServicePort) BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTING_PORT).observe(model).getValue();
+
 				if (isAddRoute) {
 					if (StringUtils.isBlank(hostName)) {
 						status = ValidationStatus
@@ -159,6 +159,13 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 					} else if (!DomainValidator.getInstance(true).isValid(hostName)) {
 						status = ValidationStatus
 								.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, hostName));
+					}
+					if (!status.matches(IStatus.ERROR) && isAddRoute && (portsObservable.size() > 1) && (routingPort == null)) {
+					    if (status.matches(IStatus.INFO)) {
+	                        status = ValidationStatus.info(status.getMessage() + "\n " + OpenShiftUIMessages.RoundRobinRoutingMessage);
+					    } else {
+					        status = ValidationStatus.info(OpenShiftUIMessages.RoundRobinRoutingMessage);
+					    }
 					}
 				}
 				return status;
@@ -184,9 +191,10 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			.applyTo(label);
 		Composite tableContainer = new Composite(container, SWT.NONE);
 		
-        IObservableList portsObservable = BeanProperties.list(
+        IObservableList<IServicePort> portsObservable = BeanProperties.list(
                 IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
 		portsViewer = createTable(tableContainer);
+
 		ObservableListContentProvider contentProvider = new ObservableListContentProvider();
 		portsViewer.setContentProvider(contentProvider);
 		ObservableMapLabelProvider labelProvider = 
@@ -235,14 +243,6 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 
 		portsViewer.getTable().addMouseListener(onTableCellClicked());
 	
-		Button btnAdd = new Button(container, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).applyTo(btnAdd);
-		btnAdd.setText("Add...");
-		btnAdd.setToolTipText("Add a port to be exposed by the service which is not explicilty declared by the image.");
-		btnAdd.addSelectionListener(onAdd());
-		UIUtils.setDefaultButtonWidth(btnAdd);
-
 		Button btnEdit = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).applyTo(btnEdit);
@@ -256,20 +256,6 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 			.converting(new IsNotNull2BooleanConverter())
 			.in(dbc);
 		UIUtils.setDefaultButtonWidth(btnEdit);
-
-		Button removeButton = new Button(container, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
-		removeButton.setText("Remove...");
-		removeButton.setToolTipText("Remove a port that will be exposed by the service.");
-		removeButton.addSelectionListener(onRemove());
-		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(removeButton))
-			.notUpdatingParticipant()
-			.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
-			.converting(new IsNotNull2BooleanConverter())
-			.in(dbc);
-		UIUtils.setDefaultButtonWidth(removeButton);
 
 		Button btnReset = new Button(container, SWT.PUSH);
 		GridDataFactory.fillDefaults()
@@ -296,58 +282,6 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 		};
 	}
 
-	private SelectionListener onAdd() {
-		return new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				String message = "Add a port to be exposed by the service";
-				ServicePortAdapter port = new ServicePortAdapter();
-				List<IServicePort> servicePorts = model.getServicePorts();
-				if(!servicePorts.isEmpty()) {
-					Set<Integer> ports = servicePorts.stream().map((p) -> p.getPort()).collect(Collectors.toSet());
-					port.setPort(generateNewPort(ports));
-					ports = servicePorts.stream().map((p) -> getIntegerPort(p.getTargetPort())).collect(Collectors.toSet());
-					port.setTargetPort(generateNewPort(ports));
-				} else {
-					port.setPort(generateNewPort(new HashSet<>()));
-					port.setTargetPort(generateNewPort(new HashSet<>()));
-				}
-				ServicePortDialog dialog = new ServicePortDialog(port, message, servicePorts);
-				if(Window.OK == dialog.open()) {
-					port.setName(NLS.bind("{0}-tcp", port.getPort()));
-					model.addServicePort(port);
-					model.setSelectedServicePort(port);
-				}
-			}
-		};
-	}
-
-	private static final Random seed = new Random();
-
-	private static int generateNewPort(Set<Integer> ports) {
-		while(true) {
-			int n = 1025 + seed.nextInt(65536 - 1025); // port should be in range [1025..65535]
-			if(!ports.contains(n)) {
-				return n;
-			}
-		}
-	}
-
-	/**
-	 * Returns integer if string value is an integer in range [0..65535], or -1.
-	 * @param stringPort
-	 * @return
-	 */
-	private static int getIntegerPort(String stringPort) {
-		if(StringUtils.isBlank(stringPort) || stringPort.length() > 5 || !StringUtils.isNumeric(stringPort)) {
-			return -1;
-		}
-		//Now, string port has only digits, and it length is no more than 5. There may be no NumberFormatException.
-		int value = Integer.parseInt(stringPort);
-		return (value > 65535) ? -1 : value;
-	}
-	
 	class EditHandler extends SelectionAdapter implements IDoubleClickListener{
 		
 		
@@ -400,21 +334,23 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage  {
 				.name("Used by route").align(SWT.LEFT).weight(1).buildColumn()
 				.buildViewer();
 		viewer.addDoubleClickListener(new EditHandler());
+		/*
+		 * required because otherwise values are cached and causes the ObservableMapLabelProvider
+		 * not to be updated because remove are not propagated.
+		 */
+        viewer.setComparer(new IElementComparer() {
+
+            @Override
+            public int hashCode(Object element) {
+                return System.identityHashCode(element);
+            }
+
+            @Override
+            public boolean equals(Object a, Object b) {
+                return a == b;
+            }
+        });
 		return viewer;
-	}
-
-	private SelectionListener onRemove() {
-		return new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-			    ServicePortAdapter port = UIUtils.getFirstElement(portsViewer.getSelection(), ServicePortAdapter.class);
-				if(MessageDialog.openQuestion(getShell(), "Remove port", NLS.bind("Are you sure you want to delete the port {0}?", port.getPort()))) {
-					model.removeServicePort(port);
-				}
-			}
-			
-		};
 	}
 
 	private SelectionListener onReset() {

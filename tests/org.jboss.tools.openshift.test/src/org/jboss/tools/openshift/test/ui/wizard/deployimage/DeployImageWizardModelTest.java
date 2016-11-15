@@ -339,7 +339,9 @@ public class DeployImageWizardModelTest {
         assertThat(model.getServicePorts()).isEqualTo(Collections.singletonList(new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
         model.resetServicePorts();
         assertThat(model.getServicePorts()).hasSize(2);
-        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(new ServicePortAdapter(new PortSpecAdapter("8080-tcp", "TCP", 8080)),
+        ServicePortAdapter first = new ServicePortAdapter(new PortSpecAdapter("8080-tcp", "TCP", 8080));
+        first.setRoutePort(true);
+        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(first,
                                                                     new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
     }
 
@@ -367,7 +369,9 @@ public class DeployImageWizardModelTest {
         port.setTargetPort(9000);
         model.removeServicePort(port);
         assertThat(model.getServicePorts()).hasSize(2);
-        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(new ServicePortAdapter(new PortSpecAdapter("8080-tcp", "TCP", 8080)),
+        ServicePortAdapter first = new ServicePortAdapter(new PortSpecAdapter("8080-tcp", "TCP", 8080));
+        first.setRoutePort(true);
+        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(first,
                                                                     new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
     }
 
