@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.js.debug;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.core.debug.DebugSessionTracker;
 import org.jboss.tools.openshift.internal.js.storage.SessionStorage;
@@ -30,8 +31,16 @@ public class NodeDebugSessionTracker implements DebugSessionTracker {
 	}
 
 	@Override
+	public void stopDebugSession(IServer server) throws DebugException {
+		if (NodeDebuggerUtil.isNodeJsProject(server)) {
+			NodeDebugLauncher.terminate(server);
+		}
+
+	}
+
+	@Override
 	public boolean isDebugSessionAlive(IServer server) {
-		return SessionStorage.get().contains(server);
+		return SessionStorage.get().containsKey(server);
 	}
 
 }

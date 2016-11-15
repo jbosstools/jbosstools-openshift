@@ -12,7 +12,10 @@ package org.jboss.tools.openshift.js.launcher;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
@@ -72,9 +75,23 @@ public final class NodeDebugLauncher {
 			public void run() {
 				DebugUITools.launch(v8debugLaunch, ILaunchManager.DEBUG_MODE);
 				// Debug session has just started - adding server to tracker
-				SessionStorage.get().add(server);
+				SessionStorage.get().put(server, v8debugLaunch);
 			}
 		});
+	}
+	
+
+	public static void terminate(IServer server) throws DebugException {
+		ILaunchConfiguration v8debugLaunch = SessionStorage.get().get(server);
+		if (v8debugLaunch != null) {
+			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+			ILaunch[] runningLaunches = manager.getLaunches();
+			for (ILaunch launch : runningLaunches) {
+				if (v8debugLaunch.equals(launch.getLaunchConfiguration())) {
+					launch.terminate();
+				}
+			}
+		}
 	}
 
 	private static String getPodPath(IServer server) throws CoreException {

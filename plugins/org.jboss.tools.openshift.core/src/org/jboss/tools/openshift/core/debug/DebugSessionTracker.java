@@ -11,15 +11,18 @@
 package org.jboss.tools.openshift.core.debug;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.wst.server.core.IServer;
 
 /**
  * @author "Ilya Buziuk (ibuziuk)"
  */
 public interface DebugSessionTracker {
-	
+
 	void startDebugSession(IServer server, int port) throws CoreException;
-	
+
+	void stopDebugSession(IServer server) throws DebugException;
+
 	boolean isDebugSessionAlive(IServer server);
 
 }

@@ -11,19 +11,20 @@
 package org.jboss.tools.openshift.internal.js.storage;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController;
 
 /**
- * Contains {@link Set} of {@link IServer} with Node.js Debugger attached.
- * {@link OpenShiftPublishController} checks if {@link IServer} is tracked by
- * {@link SessionStorage} in order to verify if 'rsync' is required. If
- * there is a Node.js debug session associated with {@link IServer} 'rsync' must
- * not be performed due to the fact that 'rsync' will cause Node.js app restart
- * and debug state will be lost
+ * Contains mapping between {@link IServer} with Node.js Debugger attached and it's
+ * {@link ILaunchConfiguration}. {@link OpenShiftPublishController}
+ * checks if {@link IServer} is tracked by {@link SessionStorage} in order to
+ * verify if 'rsync' is required. If there is a Node.js debug session associated
+ * with {@link IServer} 'rsync' must not be performed due to the fact that
+ * 'rsync' will cause Node.js app restart and debug state will be lost
  * 
  * @author "Ilya Buziuk (ibuziuk)"
  */
@@ -32,9 +33,9 @@ public final class SessionStorage {
 	private SessionStorage() {
 	}
 
-	private static final Set<IServer> INSTANCE = Collections.synchronizedSet(new HashSet<>());
+	private static final Map<IServer, ILaunchConfiguration> INSTANCE = Collections.synchronizedMap(new HashMap<>());
 
-	public static Set<IServer> get() {
+	public static Map<IServer, ILaunchConfiguration> get() {
 		return INSTANCE;
 	}
 
