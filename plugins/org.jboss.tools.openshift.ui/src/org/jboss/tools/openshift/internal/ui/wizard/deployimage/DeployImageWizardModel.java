@@ -520,6 +520,9 @@ public class DeployImageWizardModel
 		List<IServicePort> old = new ArrayList<>(this.servicePorts);
 		this.servicePorts.add(port);
 		firePropertyChange(PROPERTY_SERVICE_PORTS, old, Collections.unmodifiableList(servicePorts));
+		if (port instanceof ServicePortAdapter && ((ServicePortAdapter)port).isRoutePort()) {
+		    setRoutingPort(port);
+		}
 	}
 	
 	@Override
@@ -528,10 +531,21 @@ public class DeployImageWizardModel
 		if(pos > -1) {
 			List<IServicePort> old = new ArrayList<>(this.servicePorts);
 			this.servicePorts.set(pos, target);
+			/**
+			 * databinding would not replace old object with a new one if only a
+			 * boolean property is modified. I could not understand why it is
+			 * so, but I found that when target port (String) and route port
+			 * (Boolean) are changed in Edit dialog together, everything works.
+			 * 
+			 * @see https://github.com/jbosstools/jbosstools-openshift/pull/1365
+			 */
+			String p = target.getTargetPort();
+			target.setTargetPort("dummy");
 			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, pos, old, Collections.unmodifiableList(servicePorts));
 			if (((ServicePortAdapter)target).isRoutePort()) {
 			    setRoutingPort(target);
 			}
+			target.setTargetPort(p);
 		}
 	}
 
