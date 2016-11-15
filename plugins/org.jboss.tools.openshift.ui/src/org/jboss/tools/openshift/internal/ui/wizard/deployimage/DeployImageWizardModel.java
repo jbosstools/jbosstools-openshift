@@ -520,6 +520,9 @@ public class DeployImageWizardModel
 		List<IServicePort> old = new ArrayList<>(this.servicePorts);
 		this.servicePorts.add(port);
 		firePropertyChange(PROPERTY_SERVICE_PORTS, old, Collections.unmodifiableList(servicePorts));
+		if (port instanceof ServicePortAdapter && ((ServicePortAdapter)port).isRoutePort()) {
+		    setRoutingPort(port);
+		}
 	}
 	
 	@Override
@@ -528,10 +531,13 @@ public class DeployImageWizardModel
 		if(pos > -1) {
 			List<IServicePort> old = new ArrayList<>(this.servicePorts);
 			this.servicePorts.set(pos, target);
+			String p = target.getTargetPort();
+			target.setTargetPort("dummy");
 			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, pos, old, Collections.unmodifiableList(servicePorts));
 			if (((ServicePortAdapter)target).isRoutePort()) {
 			    setRoutingPort(target);
 			}
+			target.setTargetPort(p);
 		}
 	}
 
