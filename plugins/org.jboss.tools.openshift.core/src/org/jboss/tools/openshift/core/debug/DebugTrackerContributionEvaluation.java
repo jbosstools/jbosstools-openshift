@@ -25,9 +25,9 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  * @author "Ilya Buziuk (ibuziuk)"
  */
 public class DebugTrackerContributionEvaluation {
-	
+
 	private static final String ID = "org.jboss.tools.openshift.core.debugSessionTracker"; //$NON-NLS-1$
-	
+
 	public static void startDebugSession(IServer server, int port) throws CoreException {
 		Collection<DebugSessionTracker> trackers = getTrackers();
 		trackers.forEach(tracker -> {
@@ -44,18 +44,38 @@ public class DebugTrackerContributionEvaluation {
 					OpenShiftCoreActivator.logError(e.getMessage(), e);
 				}
 			});
-			
+
 		});
 	}
-	
+
+	public static void stopDebugSession(IServer server) {
+		Collection<DebugSessionTracker> trackers = getTrackers();
+		trackers.forEach(tracker -> {
+
+			SafeRunner.run(new ISafeRunnable() {
+
+				@Override
+				public void run() throws Exception {
+					tracker.stopDebugSession(server);
+				}
+
+				@Override
+				public void handleException(Throwable e) {
+					OpenShiftCoreActivator.logError(e.getMessage(), e);
+				}
+			});
+
+		});
+	}
+
 	public static boolean isDebugSessionAlive(IServer server) {
 		Collection<DebugSessionTracker> trackers = getTrackers();
-		
+
 		// There are no debug session tracker extensions
 		if (trackers.isEmpty()) {
 			return false;
 		}
-		
+
 		for (DebugSessionTracker tracker : trackers) {
 			if (!tracker.isDebugSessionAlive(server)) {
 				return false;
@@ -63,7 +83,7 @@ public class DebugTrackerContributionEvaluation {
 		}
 		return true;
 	}
-	
+
 	private static Collection<DebugSessionTracker> getTrackers() {
 		IConfigurationElement[] elements = getConfigurationElements();
 		Collection<DebugSessionTracker> trackers = new ArrayList<>();
@@ -83,5 +103,5 @@ public class DebugTrackerContributionEvaluation {
 	private static IConfigurationElement[] getConfigurationElements() {
 		return Platform.getExtensionRegistry().getConfigurationElementsFor(ID);
 	}
-	
+
 }
