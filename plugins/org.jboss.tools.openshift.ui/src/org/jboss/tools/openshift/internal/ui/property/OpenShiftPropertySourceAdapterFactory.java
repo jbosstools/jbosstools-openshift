@@ -28,14 +28,18 @@ import com.openshift.restclient.model.route.IRoute;
 import com.openshift.restclient.model.volume.IPersistentVolumeClaim;
 
 public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
+	ConnectionPropertySource currentConnectionPropertySource = null;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adapterType == IPropertySource.class) {
 			Connection connection = Adapters.adapt(adaptableObject, Connection.class);
-			if(connection != null){
-				return new ConnectionPropertySource(connection);
+			if(connection != null) {
+				if(currentConnectionPropertySource != null) {
+					currentConnectionPropertySource.dispose();
+				}
+				return currentConnectionPropertySource = new ConnectionPropertySource(connection);
 			}
 			IResource resource= Adapters.adapt(adaptableObject, IResource.class);
 			if(resource != null){
