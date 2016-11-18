@@ -126,7 +126,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		String currentMode = beh.getServer().getMode();
 		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
 		try {
-			if( DEBUG_MODE.equals(mode)) {
+			if(DEBUG_MODE.equals(mode)) {
 				startDebugging(server, dc, debugContext, monitor);
 			} else {//run, profile
 				stopDebugging(dc, debugContext, monitor);
@@ -139,7 +139,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			checkServerState(beh, currentMode, mode);
 		}
 	}
-
+	
 	/**
 	 * Enables DEV_MODE environment variables in {@link IDeploymentConfig} for
 	 * Node.js project by default
