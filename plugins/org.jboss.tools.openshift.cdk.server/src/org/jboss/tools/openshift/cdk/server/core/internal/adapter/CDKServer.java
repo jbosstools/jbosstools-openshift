@@ -33,6 +33,8 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 public class CDKServer extends ServerDelegate {
 
 	public static final String CDK_SERVER_TYPE = "org.jboss.tools.openshift.cdk.server.type";
+	public static final String CDK_V3_SERVER_TYPE = "org.jboss.tools.openshift.cdk.server.type.v3";
+	
 	public static final String PROP_FOLDER = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.FOLDER";
 	
 	
@@ -42,8 +44,11 @@ public class CDKServer extends ServerDelegate {
 	public static final String PROP_PASS_ENV_VAR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.env.pass"; 
 
 
-	public static final String SUB_USERNAME = "SUB_USERNAME";
-	public static final String SUB_PASSWORD = "SUB_PASSWORD";
+	
+	
+	public static final String MINISHIFT_FILE = "minishift.file.location";
+	
+	
 	
 	public CDKServer() {
 	}
@@ -67,7 +72,11 @@ public class CDKServer extends ServerDelegate {
 	 *    reporting and cancellation are not desired
 	 */
 	public void setDefaultServerName(IProgressMonitor monitor) {
-		getServerWorkingCopy().setName(ServerNamingUtility.getDefaultServerName("Container Development Environment"));
+		getServerWorkingCopy().setName(ServerNamingUtility.getDefaultServerName(getServerTypeBaseName()));
+	}
+	
+	protected String getServerTypeBaseName() {
+		return "Container Development Environment";
 	}
 	
 	@Override

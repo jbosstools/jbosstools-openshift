@@ -96,10 +96,10 @@ public class CDKCredentialSection extends ServerEditorSection {
 		Label environmentVars = toolkit.createLabel(composite, "Environment Variables: ");
 		
 		Label userEnvLabel = toolkit.createLabel(composite, "Username: ");
-		envUserText = toolkit.createText(composite, server.getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKServer.SUB_USERNAME));
+		envUserText = toolkit.createText(composite, cdkServer.getUserEnvironmentKey());
 		
 		Label passEnvLabel = toolkit.createLabel(composite, "Password: ");
-		envPassText = toolkit.createText(composite, server.getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKServer.SUB_PASSWORD));
+		envPassText = toolkit.createText(composite, cdkServer.getPasswordEnvironmentKey());
 		
 		envUserListener = new ModifyListener() {
 			@Override

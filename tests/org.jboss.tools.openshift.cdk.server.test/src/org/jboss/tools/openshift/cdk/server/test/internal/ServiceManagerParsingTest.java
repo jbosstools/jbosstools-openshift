@@ -10,7 +10,10 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.test.internal;
 
+import java.util.HashMap;
+
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerUtility;
 import org.junit.Test;
 
 import junit.framework.TestCase;
@@ -21,13 +24,15 @@ public class ServiceManagerParsingTest extends TestCase {
 	@Test
 	public void testServiceManager101Linux() throws Exception {
 		String[] lines = serviceManager101Linux();
-		ServiceManagerEnvironment env = ServiceManagerEnvironment.parseLines(lines);
+		HashMap<String, String> map = ServiceManagerUtility.parseLines(lines);
+		ServiceManagerEnvironment env = new ServiceManagerEnvironment(map);
 		serviceManager101(env, LIN_CERT_PATH);
 	}
 	@Test
 	public void testServiceManager101Win() throws Exception {
 		String[] lines = serviceManager101Win();
-		ServiceManagerEnvironment env = ServiceManagerEnvironment.parseLines(lines);
+		HashMap<String, String> map = ServiceManagerUtility.parseLines(lines);
+		ServiceManagerEnvironment env = new ServiceManagerEnvironment(map);
 		serviceManager101(env, WIN_CERT_PATH);
 	}
 	
@@ -44,14 +49,16 @@ public class ServiceManagerParsingTest extends TestCase {
 	@Test
 	public void testServiceManager102Linux() throws Exception {
 		String[] lines = serviceManager102Linux();
-		ServiceManagerEnvironment env = ServiceManagerEnvironment.parseLines(lines);
+		HashMap<String, String> map = ServiceManagerUtility.parseLines(lines);
+		ServiceManagerEnvironment env = new ServiceManagerEnvironment(map);
 		serviceManager102(env, LIN_CERT_PATH);
 	}
 
 	@Test
 	public void testServiceManager102Win() throws Exception {
 		String[] lines = serviceManager102Win();
-		ServiceManagerEnvironment env = ServiceManagerEnvironment.parseLines(lines);
+		HashMap<String, String> map = ServiceManagerUtility.parseLines(lines);
+		ServiceManagerEnvironment env = new ServiceManagerEnvironment(map);
 		serviceManager102(env, WIN_CERT_PATH);
 	}
 
@@ -68,14 +75,16 @@ public class ServiceManagerParsingTest extends TestCase {
 	@Test
 	public void testServiceManager110Linux() throws Exception {
 		String[] lines = serviceManager110Linux();
-		ServiceManagerEnvironment env = ServiceManagerEnvironment.parseLines(lines);
+		HashMap<String, String> map = ServiceManagerUtility.parseLines(lines);
+		ServiceManagerEnvironment env = new ServiceManagerEnvironment(map);
 		serviceManager110(env, LIN_CERT_PATH);
 	}
 
 	@Test
 	public void testServiceManager110Win() throws Exception {
 		String[] lines = serviceManager110Win();
-		ServiceManagerEnvironment env = ServiceManagerEnvironment.parseLines(lines);
+		HashMap<String, String> map = ServiceManagerUtility.parseLines(lines);
+		ServiceManagerEnvironment env = new ServiceManagerEnvironment(map);
 		serviceManager110(env, WIN_CERT_PATH);
 	}
 

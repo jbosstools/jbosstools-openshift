@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class VagrantTimeoutException extends TimeoutException {
+public class CommandTimeoutException extends TimeoutException {
 
 	/**
 	 * 
@@ -29,7 +29,7 @@ public class VagrantTimeoutException extends TimeoutException {
 	
 	private List<String> inLines;
 	private List<String> errLines;
-	public VagrantTimeoutException(List<String> inLines, List<String> errLines) {
+	public CommandTimeoutException(List<String> inLines, List<String> errLines) {
 		super(getTimeoutError(inLines, errLines));
 		this.inLines = inLines;
 		this.errLines = errLines;

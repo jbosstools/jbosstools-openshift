@@ -10,37 +10,60 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.eclipse.wst.server.core.IServer;
-import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
-import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
-import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
-import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantLaunchUtility;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantTimeoutException;
 
 public class ServiceManagerEnvironment {
 	
 	public static final String SHARED_INFO_KEY = "cdk.sharedinfo.serviceManagerEnvironment";
 	
+	
+	public static final String KEY_DOCKER_HOST = "DOCKER_HOST";
+	public static final String KEY_DOCKER_TLS_VERIFY="DOCKER_TLS_VERIFY";
+	public static final String KEY_DOCKER_CERT_PATH = "DOCKER_CERT_PATH";
+	public static final String KEY_DOCKER_API_VERSION = "DOCKER_API_VERSION";
+	private static final String IMAGE_REGISTRY_KEY = "DOCKER_REGISTRY";
+	
+	public static final String KEY_OPENSHIFT_HOST = "HOST";
+	public static final String KEY_OPENSHIFT_PORT = "PORT";
+	public static final String KEY_OPENSHIFT_CONSOLE_URL = "CONSOLE_URL";
+	
+	private static final String DOTCDK_AUTH_SCHEME = "openshift.auth.scheme";
+	private static final String DOTCDK_AUTH_USERNAME = "openshift.auth.username";
+	private static final String DOTCDK_AUTH_PASS = "openshift.auth.password";
+	
+	private static final String DEFAULT_IMAGE_REGISTRY_URL = "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io";
+	
+	
+	private static final String HTTPS_SCHEMA = "https://";
+	
 	int openshiftPort = 8443;
 	String openshiftHost = "https://10.1.2.2";
 	
-	Map<String,String> env;
+	private Map<String,String> env;
 	public ServiceManagerEnvironment(Map<String,String> env) throws URISyntaxException {
 		this.env = env;
-		String dockerHost = env.get("DOCKER_HOST");
-		if( dockerHost != null ) {
-			URI url = new URI(dockerHost);
-			String h = url.getHost();
-			openshiftHost = "https://" + h;
+		
+		String osPort = env.get(KEY_OPENSHIFT_PORT);
+		if( osPort != null ) {
+			try {
+				this.openshiftPort = Integer.parseInt(osPort);
+			} catch (NumberFormatException nfe) {
+				// ignore, use default
+			}
 		}
+		
+		String osHost = env.get(KEY_OPENSHIFT_HOST);
+		if( osHost == null ) {
+			String dockerHost = env.get(KEY_DOCKER_HOST);
+			if( dockerHost != null ) {
+				URI url = new URI(dockerHost);
+				osHost = url.getHost();
+			}
+		}
+		if( osHost != null )
+			this.openshiftHost = HTTPS_SCHEMA + osHost;
 	}
 	
 	public String getOpenShiftHost() {
@@ -51,119 +74,47 @@ public class ServiceManagerEnvironment {
 		return openshiftPort;
 	}
 	
-	public String get(String key) {
-		return env == null ? null : env.get(key);
-	}
-	
-	public static ServiceManagerEnvironment getOrLoadServiceManagerEnvironment(IServer server, boolean save) {
-		return getOrLoadServiceManagerEnvironment(server, save, 1);
-	}
-	
-	public static ServiceManagerEnvironment getOrLoadServiceManagerEnvironment(IServer server, boolean save, int maxTries) {
-		IControllableServerBehavior behavior = JBossServerBehaviorUtils.getControllableBehavior(server);
-		Object o = behavior.getSharedData(SHARED_INFO_KEY);
-		ServiceManagerEnvironment ret = null;
-		if( !(o instanceof ServiceManagerEnvironment )) {
-			ret = loadServiceManagerEnvironment(server, maxTries);
-		} else {
-			ret = (ServiceManagerEnvironment)o;
-		}
-		if( save ) {
-			behavior.putSharedData(SHARED_INFO_KEY, ret);
-		}
-		return ret;
-	}
-	
-	public static void clearServiceManagerEnvironment(IServer server) {
-		IControllableServerBehavior behavior = JBossServerBehaviorUtils.getControllableBehavior(server);
-		behavior.putSharedData(SHARED_INFO_KEY, null);
-	}
-	
-	
-	public static ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, int maxTries) {
-		for( int i = 0; i < maxTries; i++ ) {
-			ServiceManagerEnvironment env = loadServiceManagerEnvironment(server);
-			if( env != null )
-				return env;
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Run the remote vagrant command to create an service-manager from a server
-	 * @param server
-	 * @return
-	 */
-	public static ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server) {
-		
-		String[] args = new String[]{
-				CDKConstants.VAGRANT_CMD_SERVICE_MANAGER, 
-				CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV};
 
-    	Map<String,String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
-    	// Docs indicate any value here is fine, so no need to check for existing property
-		env.put("VAGRANT_NO_COLOR", "1");
-    	String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(server);
-	    try {
-	    	String[] lines = VagrantLaunchUtility.callMachineReadable(vagrantcmdloc, args,  CDKServerUtility.getWorkingDirectory(server), env);
-	    	return parseLines(lines);
-		} catch( URISyntaxException urise) {
-			CDKCoreActivator.pluginLog().logError("Environment variable DOCKER_HOST is not a valid uri:  " + env.get("DOCKER_HOST"), urise);
-		} catch(IOException ce) {
-			CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to vagrant service-manager. ", ce);
-		} catch(VagrantTimeoutException ce) {
-			// Try to salvage it, it could be the process never terminated but it got all the output
-			List<String> inLines = ce.getInLines();
-			if( inLines != null ) {
-				String[] asArr = (String[]) inLines.toArray(new String[inLines.size()]);
-				try {
-					ServiceManagerEnvironment ret = parseLines(asArr);
-					if( ret != null ) {
-						return ret;
-					}
-				} catch(URISyntaxException urise) {
-					CDKCoreActivator.pluginLog().logError("Environment variable DOCKER_HOST is not a valid uri:  " + env.get("DOCKER_HOST"), urise);
-				}
+	public String getDockerRegistry() {
+		String dockerReg = env.get(IMAGE_REGISTRY_KEY);
+		if( dockerReg == null ) {
+			dockerReg = DEFAULT_IMAGE_REGISTRY_URL;
+		} else {
+			if( !dockerReg.contains("://")) {
+				dockerReg = "https://" + dockerReg;
 			}
-			CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to vagrant service-manager. ", ce);
 		}
-		return null;
+		return dockerReg;
+	}
+
+	public String getAuthorizationScheme() {
+		String authScheme = env.containsKey(DOTCDK_AUTH_SCHEME) ? env.get(DOTCDK_AUTH_SCHEME) : "Basic";
+		return authScheme;
+	}
+
+	public String getUsername() {
+		String user = env.containsKey(DOTCDK_AUTH_USERNAME) ? env.get(DOTCDK_AUTH_USERNAME) : "openshift-dev";
+		return user;
+	}
+
+	public String getPassword() {
+		String pass = env.containsKey(DOTCDK_AUTH_PASS) ? env.get(DOTCDK_AUTH_PASS) : "devel";
+		return pass;
 	}
 	
-	public static ServiceManagerEnvironment parseLines(String[] lines) throws URISyntaxException {
-		HashMap<String,String> adbEnv = new HashMap<>();
-		
-    	String setEnvWin = "setx ";
-    	String setEnvNix = "export ";
-		
-		for(String oneAppend : lines) {
-			String[] allAppends = oneAppend.split("\n");
-			for( int i = 0; i < allAppends.length; i++ ) {
-				String setEnvVarCommand = null;
-				String setEnvVarDelim = null;
-				if( allAppends[i].trim().startsWith(setEnvWin)) {
-					setEnvVarCommand = setEnvWin;
-					setEnvVarDelim = " ";
-				} else if( allAppends[i].trim().startsWith(setEnvNix)) {
-					setEnvVarCommand = setEnvNix;
-					setEnvVarDelim = "=";
-				}
-				if( setEnvVarCommand != null ) {
-					String lineRemainder = allAppends[i].trim().substring(setEnvVarCommand.length());
-					int eq = lineRemainder.indexOf(setEnvVarDelim);
-					if( eq != -1 ) {
-						String k = lineRemainder.substring(0, eq);
-						String v = lineRemainder.substring(eq+1);
-						adbEnv.put(k, v);
-					}
-				}
-			}
-		}
-		
-		if( adbEnv.size() > 0 ) {
-			return new ServiceManagerEnvironment(adbEnv);
-		}
-		return null;
+	public String getDockerHost() {
+		return env.get(KEY_DOCKER_HOST);
 	}
+	
+	public String getDockerTLSVerify() {
+		return env.get(KEY_DOCKER_TLS_VERIFY);
+	}
+	public String getDockerCertPath() {
+		return env.get(KEY_DOCKER_CERT_PATH);
+	}
+	
+	public String get(String k){
+		return env.get(k);
+	}
+	
 }

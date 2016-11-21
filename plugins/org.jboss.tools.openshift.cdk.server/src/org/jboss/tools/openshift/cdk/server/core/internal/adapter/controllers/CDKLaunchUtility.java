@@ -37,16 +37,18 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
 import org.jboss.ide.eclipse.as.core.util.ArgsUtil;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
-import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
+import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.VagrantBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKServerUtility;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
-public class VagrantLaunchUtility {
+public class CDKLaunchUtility {
 	public ILaunchConfigurationWorkingCopy createExternalToolsLaunchConfig(IServer s, String args, String launchConfigName) throws CoreException {
 		return setupLaunch(s, args, launchConfigName, 
 				s.getLaunchConfiguration(true, new NullProgressMonitor()));
@@ -115,7 +117,7 @@ public class VagrantLaunchUtility {
    		wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
    		
 
-    	String vLoc = CDKConstantUtility.getVagrantLocation();
+    	String vLoc = VagrantBinaryUtility.getVagrantLocation();
 		if( vLoc != null ) {
 			wc.setAttribute(IExternalToolConstants.ATTR_LOCATION, vLoc);
 			String vagrantCmdFolder = new Path(vLoc).removeLastSegments(1).toOSString();
@@ -164,7 +166,7 @@ public class VagrantLaunchUtility {
 	}
 
 	public static String[] callMachineReadable(String rootCommand, String[] args, File vagrantDir, Map<String, String> env)
-			throws IOException, VagrantTimeoutException {
+			throws IOException, CommandTimeoutException {
 		return call(rootCommand, args, vagrantDir, env, 30000, false);
 	}
 	
@@ -179,11 +181,26 @@ public class VagrantLaunchUtility {
 
 	public Process callInteractive(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException, IOException  {
 		Map<String,String> env = getEnvironment(s, startupConfig);
-		String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(s);
+		String vagrantcmdloc = VagrantBinaryUtility.getVagrantLocation(s);
 		File wd =  CDKServerUtility.getWorkingDirectory(s);
 		Process p = callProcess(vagrantcmdloc, ArgsUtil.parse(args), wd, env, true);
 		return p;
 	}
+	
+	
+
+	public Process callMinishiftInteractive(IServer s, String args, String launchConfigName) throws CoreException, IOException {
+		return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+	}
+
+	public Process callMinishiftInteractive(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException, IOException  {
+		Map<String,String> env = getEnvironment(s, startupConfig);
+		String minishiftCmdloc = MinishiftBinaryUtility.getMinishiftLocation(s);
+		File wd =  JBossServerCorePlugin.getServerStateLocation(s).toFile();
+		Process p = callProcess(minishiftCmdloc, ArgsUtil.parse(args), wd, env, true);
+		return p;
+	}
+	
 	
 	public static Process callProcess(String rootCommand, String[] args, File vagrantDir, Map<String, String> env, boolean interactive) throws IOException {
 		ensureCommandOnPath(rootCommand, env);
@@ -203,7 +220,7 @@ public class VagrantLaunchUtility {
 
 	
 	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
-			int timeout, boolean interactive) throws IOException, VagrantTimeoutException {
+			int timeout, boolean interactive) throws IOException, CommandTimeoutException {
 		final Process p = callProcess(rootCommand, args, vagrantDir, env, interactive);
 
 		InputStream errStream = p.getErrorStream();
@@ -240,7 +257,7 @@ public class VagrantLaunchUtility {
 			p.destroyForcibly();
 			inLines = inGob.getOutput();
 			List<String> errLines = errGob.getOutput();
-			throw new VagrantTimeoutException(inLines, errLines);
+			throw new CommandTimeoutException(inLines, errLines);
 		} else {
 			inLines = inGob.getOutput();
 		}

@@ -25,6 +25,10 @@ public interface CDKConstants {
 	
 	public static final String CDK_ENV_SUB_USERNAME = "SUB_USERNAME";
 	public static final String CDK_ENV_SUB_PASSWORD = "SUB_PASSWORD";
+	public static final String CDK3_ENV_SUB_USERNAME = "MINISHIFT_USERNAME";
+	public static final String CDK3_ENV_SUB_PASSWORD = "MINISHIFT_PASSWORD";
+	
+	
 	public static final String CDK_RESOURCE_VAGRANTFILE = "Vagrantfile";
 	public static final String CDK_RESOURCE_DOTCDK= ".cdk";
 

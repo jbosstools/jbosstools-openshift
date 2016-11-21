@@ -31,7 +31,8 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 			if( serverSwitchesToState(event, IServer.STATE_STARTED)) {
 				scheduleConfigureFrameworksJob(event);
 			} else if( serverSwitchesToState(event, IServer.STATE_STOPPED)) {
-				ServiceManagerEnvironment.clearServiceManagerEnvironment(event.getServer());
+				IServer s = event.getServer();
+				ServiceManagerEnvironmentLoader.type(s).clearServiceManagerEnvironment(event.getServer());
 			}
 		}
 	}
@@ -52,7 +53,7 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	}
 	
 	protected void configureFrameworks(IServer server) throws CoreException {
-		ServiceManagerEnvironment adb = ServiceManagerEnvironment.getOrLoadServiceManagerEnvironment(server, true);
+		ServiceManagerEnvironment adb = ServiceManagerEnvironmentLoader.type(server).getOrLoadServiceManagerEnvironment(server, true);
 		if( adb != null ) {
 			configureOpenshift(server, adb);
 			configureDocker(server, adb);
@@ -65,6 +66,8 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	@Override
 	public boolean canHandleServer(IServer server) {
 		if( server.getServerType().getId().equals(CDKServer.CDK_SERVER_TYPE)) 
+			return true;
+		if( server.getServerType().getId().equals(CDKServer.CDK_V3_SERVER_TYPE)) 
 			return true;
 		return false;
 	}

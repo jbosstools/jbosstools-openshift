@@ -24,21 +24,24 @@ public class CDKServerUtility {
 	public static Properties getDotCDK(IServer server) {
 		String cdkFolder = server.getAttribute(CDKServer.PROP_FOLDER, (String)null);
 		if( cdkFolder != null && new File(cdkFolder).exists()) {
-			File dotcdk = new File(cdkFolder, ".cdk");
-			if( dotcdk.exists()) {
-				try {
-					Properties props = new Properties();
-					props.load(new FileInputStream(dotcdk));
-					return props;
-				} catch(IOException ioe) {
-					CDKCoreActivator.pluginLog().logError("Error loading properties from .cdk file " + dotcdk.getAbsolutePath(), ioe);
-				}
-			}
+			return getDotCDK(cdkFolder);
 		}
 		return new Properties();
 	}
 	
-
+	public static Properties getDotCDK(String cdkFolder) {
+		File dotcdk = new File(cdkFolder, ".cdk");
+		if( dotcdk.exists()) {
+			try {
+				Properties props = new Properties();
+				props.load(new FileInputStream(dotcdk));
+				return props;
+			} catch(IOException ioe) {
+				CDKCoreActivator.pluginLog().logError("Error loading properties from .cdk file " + dotcdk.getAbsolutePath(), ioe);
+			}
+		}
+		return new Properties();
+	}
 
 	public static File getWorkingDirectory(IServer s) {
 		String str = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);

@@ -19,6 +19,24 @@
             startTimeout="1800000"
             stopTimeout="900000"
             supportsRemoteHosts="false"/>
+ 
+    
+    <serverType
+            behaviourClass="org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour"
+            class="org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server"
+            name="%openshift.cdk3.name"
+            description="%openshift.cdk3.description"
+            hasConfiguration="false"
+            id="org.jboss.tools.openshift.cdk.server.type.v3"
+            initialState="stopped"
+            launchConfigId="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchType"
+            launchModes="run"
+            runtime="false"
+            runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type"
+            startBeforePublish="false"
+            startTimeout="1800000"
+            stopTimeout="900000"
+            supportsRemoteHosts="false"/>
     </extension>
     
     
@@ -58,7 +76,7 @@
          point="org.eclipse.wst.server.ui.serverImages">
       <image
             icon="$nl$/icons/cdk_box_16.png"
-            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.runtime.type"
+            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3,org.jboss.tools.openshift.cdk.server.runtime.type"
             id="org.jboss.tools.openshift.cdk.server.type.icon"/>
    </extension>
 
@@ -69,6 +87,18 @@
             typeIds="org.jboss.tools.openshift.cdk.server.type"
         	id="org.jboss.tools.openshift.cdk.server.type.VagrantServerWizardFragment"/>
    </extension>
+
+
+   <extension
+         point="org.eclipse.wst.server.ui.wizardFragments">
+      <fragment
+            class="org.jboss.tools.openshift.cdk.server.ui.internal.CDK3ServerWizardFragment"
+            typeIds="org.jboss.tools.openshift.cdk.server.type.v3"
+        	id="org.jboss.tools.openshift.cdk.server.ui.internal.CDK3ServerWizardFragment"/>
+   </extension>
+
+
+
 
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
@@ -84,17 +114,24 @@
    <extension
          point="org.eclipse.wst.server.ui.editorPageSections">
       <section
-            class="org.jboss.tools.openshift.cdk.server.ui.internal.LocationSection"
+            class="org.jboss.tools.openshift.cdk.server.ui.internal.CDK2LocationSection"
             id="org.jboss.tools.openshift.cdk.server.ui.internal.LocationSection"
             insertionId="org.eclipse.wst.server.editor.overview.left"
             order="8"
             typeIds="org.jboss.tools.openshift.cdk.server.type"/>
       <section
+            class="org.jboss.tools.openshift.cdk.server.ui.internal.MinishiftLocationSection"
+            id="org.jboss.tools.openshift.cdk.server.ui.internal.LocationSection2"
+            insertionId="org.eclipse.wst.server.editor.overview.left"
+            order="8"
+            typeIds="org.jboss.tools.openshift.cdk.server.type.v3"/>
+            
+      <section
             class="org.jboss.tools.openshift.cdk.server.ui.internal.CDKCredentialSection"
             id="org.jboss.tools.openshift.cdk.server.ui.internal.CDKCredentialSection"
             insertionId="org.eclipse.wst.server.editor.overview.left"
             order="9"
-            typeIds="org.jboss.tools.openshift.cdk.server.type"/>
+            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3"/>
    </extension>
    
    
@@ -123,7 +160,7 @@
    </extension>
 
 
-   <!-- Launch Controllers -->
+   <!-- CDK 2.x launch / shutdown Controllers -->
    <extension
          point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
       <subsystem
@@ -148,6 +185,36 @@
             id="shutdown.cdk"
             mappedId="shutdown.cdk"
             serverTypes="org.jboss.tools.openshift.cdk.server.type">
+      </subsystemMapping>
+   </extension>
+   
+   
+   
+      <!-- CDK 3 / minishift -  launch / shutdown Controllers -->
+   <extension
+         point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
+      <subsystem
+            system="launch"
+            id="launch.cdk3"
+            name="Launch the CDK 3 Server"
+            class="org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDK3LaunchController">
+      </subsystem>
+      <subsystemMapping
+            id="launch.cdk3"
+            mappedId="launch.cdk3"
+            serverTypes="org.jboss.tools.openshift.cdk.server.type.v3">
+      </subsystemMapping>
+
+      <subsystem
+            system="shutdown"
+            id="shutdown.cdk3"
+            name="Shutdown the CDK 3 Server"
+            class="org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDK3ShutdownController">
+      </subsystem>
+      <subsystemMapping
+            id="shutdown.cdk3"
+            mappedId="shutdown.cdk3"
+            serverTypes="org.jboss.tools.openshift.cdk.server.type.v3">
       </subsystemMapping>
    </extension>
    

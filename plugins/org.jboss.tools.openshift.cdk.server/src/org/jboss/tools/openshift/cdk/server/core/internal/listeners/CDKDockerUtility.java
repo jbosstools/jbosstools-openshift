@@ -61,25 +61,25 @@ public class CDKDockerUtility {
 	
 	/**
 	 * Looks-up the host name and port to connect to Docker.
-	 * @param adb the {@link ServiceManagerEnvironment}
+	 * @param env the {@link ServiceManagerEnvironment}
 	 * @return the host name and port or <code>null</code> if it was not set.
 	 */
-	private String getDockerHost(ServiceManagerEnvironment adb) {
-		return adb.env.get("DOCKER_HOST");
+	private String getDockerHost(ServiceManagerEnvironment env) {
+		return env.getDockerHost();
 	}
 	
 	/**
 	 * Looks-up the path to the client certificates to connect to Docker
-	 * @param adb the {@link ServiceManagerEnvironment}
+	 * @param env the {@link ServiceManagerEnvironment}
 	 * @return the value of {@code DOCKER_CERT_PATH} in the environment variable
 	 *         or <code>null</code> if it was not present or if the {@code DOCKER_TLS_VERIFY} was not present or
 	 *         not set to {@code 1}.
 	 */
-	private String getTlsCertPath(final ServiceManagerEnvironment adb) {
-		final String tlsVerifyString = adb.env.get("DOCKER_TLS_VERIFY");
+	private String getTlsCertPath(final ServiceManagerEnvironment env) {
+		final String tlsVerifyString = env.getDockerTLSVerify();
 		boolean tlsVerify = tlsVerifyString == null ? false : (Integer.parseInt(tlsVerifyString) != 0);
 		if( tlsVerify ) {
-			String tlsCertPath = adb.env.get("DOCKER_CERT_PATH");
+			String tlsCertPath = env.getDockerCertPath();
 			if( tlsCertPath != null ) {
 				tlsCertPath = tlsCertPath.trim();
 				if( tlsCertPath.startsWith("\'") && tlsCertPath.endsWith("\'") && tlsCertPath.length() > 1) {

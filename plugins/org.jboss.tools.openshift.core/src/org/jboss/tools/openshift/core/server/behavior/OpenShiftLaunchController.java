@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -310,6 +311,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		return -1;
 	}
 	
+	private static final String LAUNCH_DEBUG_PORT_PROP = "LOCAL_DEBUG_PORT";
+	
 	private ILaunch attachRemoteDebugger(IServer server, int localDebugPort, IProgressMonitor monitor) throws CoreException {
 		monitor.subTask("Attaching remote debugger");
 		ILaunch ret = null;
@@ -339,6 +342,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			try {
 				//TODO That's fugly. ideally we should see if socket on debug port is responsive instead
 				ret = debuggerLaunchConfig.launch(DEBUG_MODE, new NullProgressMonitor());
+				ret.setAttribute(LAUNCH_DEBUG_PORT_PROP, Integer.toString(localDebugPort));
 				launched = true;
 			} catch (Exception e) {
 				if (monitor.isCanceled()) {
@@ -382,7 +386,45 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 		return true;
 	}
-	protected IJavaHotCodeReplaceListener getHotCodeReplaceListener(IServer server, ILaunch launch) {
-		return new ClassCollectingHCRListener(server, launch);
+	protected IJavaHotCodeReplaceListener getHotCodeReplaceListener(final IServer server, final ILaunch launch) {
+		return new ClassCollectingHCRListener(server, launch) {
+			protected void prePublish(IJavaDebugTarget target, IModule[] modules) {
+				try {
+					getLaunch().terminate();
+				} catch(DebugException de) {
+					OpenShiftCoreActivator.pluginLog().logError(toCoreException("Unable to terminate debug session", de));
+				}
+			}
+			
+			@Override
+			protected void postPublish(IJavaDebugTarget target, IModule[] modules) {
+				IServer server = getServer();
+				waitModulesStarted(modules);
+				executeJMXGarbageCollection(server, modules);
+				
+				try {
+					Thread.sleep(3000);
+				} catch(InterruptedException ie) {
+					// waiting for GC to take effect
+				}
+				
+				String portAttr = launch.getAttribute(LAUNCH_DEBUG_PORT_PROP);
+				int port = -1;
+				try {
+					port = Integer.parseInt(portAttr);
+				} catch(NumberFormatException nfe) {
+					// TODO 
+				}
+				try {
+					ILaunch newLaunch = attachRemoteDebugger(server, port, new NullProgressMonitor());
+					if( newLaunch != null ) {
+						overrideHotcodeReplace(server, newLaunch);
+					}
+					setLaunch(newLaunch);
+				} catch(CoreException ce) {
+					OpenShiftCoreActivator.pluginLog().logError(toCoreException("Unable to restart debug session", ce));
+				}
+			}
+		};
 	}
 }

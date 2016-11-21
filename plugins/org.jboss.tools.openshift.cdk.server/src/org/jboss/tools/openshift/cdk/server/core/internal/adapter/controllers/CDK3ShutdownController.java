@@ -16,20 +16,23 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPoller;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 
-public class CDKShutdownController extends AbstractCDKShutdownController {
+public class CDK3ShutdownController extends AbstractCDKShutdownController {
 
 	protected AbstractCDKPoller getCDKPoller() {
-		return new VagrantPoller();
+		MinishiftPoller vp = new MinishiftPoller();
+		return vp;
 	}
-
+	
 	protected String getShutdownArgs() {
-		String cmd = CDKConstants.VAGRANT_CMD_HALT + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR;
+		String cmd = "stop";
 		return cmd;
 	}
 	
+
 	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
-		return new CDKLaunchUtility().callInteractive(getServer(), cmd, getServer().getName());
+		return new CDKLaunchUtility().callMinishiftInteractive(getServer(), cmd, getServer().getName());
 	}
 }

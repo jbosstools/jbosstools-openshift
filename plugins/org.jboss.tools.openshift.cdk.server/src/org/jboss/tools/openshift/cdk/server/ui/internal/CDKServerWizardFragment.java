@@ -26,6 +26,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -41,12 +42,12 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
 public class CDKServerWizardFragment extends WizardFragment {
-	private IWizardHandle handle;
-	private String homeDir;
-	private Text homeText;
-	private Button browseButton;
-	private String selectedUser = null;
-	private ChooseCredentialComponent credentials;
+	protected IWizardHandle handle;
+	protected String homeDir;
+	protected Text homeText;
+	protected Button browseButton;
+	protected String selectedUser = null;
+	protected ChooseCredentialComponent credentials;
 	
 	
 	@Override
@@ -68,11 +69,19 @@ public class CDKServerWizardFragment extends WizardFragment {
 
 	@Override
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
+		String title = "Red Hat Container Development Environment";
+		String desc = "A server adapter representing a Red Hat Container Development Kit installation folder containing a Vagrantfile.";
+		String label = "Folder: ";
+		return createComposite(parent, handle, title, desc, label);
+	}
+	
+	protected Composite createComposite(Composite parent, IWizardHandle handle,
+			String title, String desc, String homeLabel) {
 		this.handle = handle;
 		selectedUser = null;
 		Composite main = new Composite(parent, SWT.NONE);
-		handle.setTitle("Red Hat Container Development Environment");
-		handle.setDescription("A server adapter representing a Red Hat Container Development Kit installation folder containing a Vagrantfile.");
+		handle.setTitle(title);
+		handle.setDescription(desc);
 		handle.setImageDescriptor(getImageDescriptor());
 		main.setLayout(new GridLayout(3, false));
 		
@@ -90,7 +99,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Folder: ");
+		l.setText(homeLabel);
 		GridData homeData = new GridData();
 		homeData.grabExcessHorizontalSpace = true;
 		homeData.horizontalAlignment = SWT.FILL;
@@ -122,9 +131,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		});
 		
 		selectedUser = credentials.getUser();
-		if( homeDir != null ) {
-			homeText.setText(homeDir);
-		}
+		fillTextField();
 		
 		String err = findError();
 		setComplete(err == null);
@@ -133,7 +140,12 @@ public class CDKServerWizardFragment extends WizardFragment {
 		return main;
 	}
 	
-	private void validate() {
+	protected void fillTextField() {
+		if( homeDir != null ) {
+			homeText.setText(homeDir);
+		}
+	}
+	protected void validate() {
 		String err = findError();
 		if( err != null ) {
 			handle.setMessage(err, IMessageProvider.ERROR);
@@ -150,11 +162,11 @@ public class CDKServerWizardFragment extends WizardFragment {
 		handle.update();
 	}
 
-	private String findWarning() {
+	protected String findWarning() {
 		return null;
 	}
 	
-	private String findError() {
+	protected String findError() {
 		if( homeDir == null || !(new File(homeDir)).exists()) {
 			return "The selected folder does not exist.";
 		}
@@ -168,14 +180,22 @@ public class CDKServerWizardFragment extends WizardFragment {
 	}
 	
 	protected void browseHomeDirClicked() {
+		browseHomeDirClicked(true);
+	}
+	protected void browseHomeDirClicked(boolean folder) {
 		File file = homeDir == null ? null : new File(homeDir);
 		if (file != null && !file.exists()) {
 			file = null;
 		}
 
-		File directory = getDirectory(file, homeText.getShell());
-		if (directory != null) {
-			homeDir = directory.getAbsolutePath();
+		File f = null;
+		if( folder ) 
+			f = getDirectory(file, homeText.getShell());
+		else
+			f = getFile(file, homeText.getShell());
+		
+		if (f != null) {
+			homeDir = f.getAbsolutePath();
 			homeText.setText(homeDir);
 		}
 	}
@@ -183,6 +203,22 @@ public class CDKServerWizardFragment extends WizardFragment {
 
 	protected static File getDirectory(File startingDirectory, Shell shell) {
 		DirectoryDialog fileDialog = new DirectoryDialog(shell, SWT.OPEN);
+		if (startingDirectory != null) {
+			fileDialog.setFilterPath(startingDirectory.getPath());
+		}
+
+		String dir = fileDialog.open();
+		if (dir != null) {
+			dir = dir.trim();
+			if (dir.length() > 0) {
+				return new File(dir);
+			}
+		}
+		return null;
+	}
+
+	protected static File getFile(File startingDirectory, Shell shell) {
+		FileDialog fileDialog = new FileDialog(shell, SWT.OPEN);
 		if (startingDirectory != null) {
 			fileDialog.setFilterPath(startingDirectory.getPath());
 		}
