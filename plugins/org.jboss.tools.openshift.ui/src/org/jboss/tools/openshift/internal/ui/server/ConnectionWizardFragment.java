@@ -12,7 +12,9 @@ package org.jboss.tools.openshift.internal.ui.server;
 
 import java.beans.PropertyChangeListener;
 
+import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.IPageChangingListener;
+import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -66,6 +68,7 @@ public class ConnectionWizardFragment extends WizardFragment {
 		this.connectionPage = createConnectionWizardPage(parent, handle);
 		updateWizardHandle(handle, connectionPage);
 		getContainer(getPage(handle)).addPageChangingListener(onPageChanging(handle));
+		getContainer(getPage(handle)).addPageChangedListener(connectionPage.onPageChanged());
 		return (Composite) connectionPage.getControl();
 	}
 
@@ -141,6 +144,18 @@ public class ConnectionWizardFragment extends WizardFragment {
 
 		public void onPageWillGetDeactivated(Direction direction, PageChangingEvent event) {
 			onPageWillGetDeactivated(direction, event, null);
+		}
+
+		private IPageChangedListener onPageChanged() {
+			return new IPageChangedListener() {
+
+				@Override
+				public void pageChanged(PageChangedEvent event) {
+					if (event.getSelectedPage() == getPage(wizardHandle)) {
+						updateSize();
+					}
+				}
+			};
 		}
 	}
 }
