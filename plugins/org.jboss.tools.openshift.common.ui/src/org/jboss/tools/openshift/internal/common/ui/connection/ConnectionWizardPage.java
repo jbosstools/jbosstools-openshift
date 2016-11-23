@@ -347,6 +347,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
 		super.onPageActivated(dbc);
+		updateSize();
 	}
 
 	@Override

@@ -27,6 +27,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
@@ -80,6 +82,22 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 				dbc = null;
 			}
 		});
+	}
+
+	/**
+	 * Provides vertical size needed by this page, but not more than the display height.
+	 * It is convenient to call it from onPageActivated(dbc).
+	 */
+	protected void updateSize() {
+		Shell shell = getControl().getShell();
+		int y = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).y;
+		int h = Display.getDefault().getBounds().height;
+		if(y > h) {
+			y = h;
+		}
+		if(y > shell.getSize().y) {
+			shell.setSize(shell.getSize().x, y);
+		}
 	}
 
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
