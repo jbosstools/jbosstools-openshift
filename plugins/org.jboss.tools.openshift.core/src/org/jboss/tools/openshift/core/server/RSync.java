@@ -68,7 +68,7 @@ public class RSync {
 				if (shouldSync) {
 					for (IPod pod : service.getPods()) {
 						try {
-						    if (pod.getStatus() == "Running") {
+						    if ("Running".equals(pod.getStatus())) {
 	                            syncPodToDirectory(pod, podPath, deployFolder, consoleWriter);
 						    }
 						} catch (IOException | OpenShiftException e) {
@@ -88,7 +88,7 @@ public class RSync {
 			protected void runOCBinary(MultiStatus multiStatus) {
 				for (IPod pod : service.getPods()) {
 					try {
-					    if (pod.getStatus() == "Running") {
+					    if ("Running".equals(pod.getStatus())) {
 	                        syncDirectoryToPod(pod, deployFolder, podPath, consoleWriter);
 					    }
 					} catch (IOException | OpenShiftException e) {
