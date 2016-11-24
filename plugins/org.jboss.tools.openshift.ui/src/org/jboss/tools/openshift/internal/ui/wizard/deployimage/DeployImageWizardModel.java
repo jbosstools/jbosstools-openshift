@@ -420,6 +420,13 @@ public class DeployImageWizardModel
 	}
 	
 	private void setServicePorts(List<IServicePort> servicePorts) {
+        if (servicePorts.size() > 0) {
+            ServicePortAdapter adapterPort = (ServicePortAdapter) servicePorts.get(0);
+            adapterPort.setRoutePort(true);
+            setRoutingPort(adapterPort);
+        } else {
+            setRoutingPort(null);
+        }
 		firePropertyChange(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS, 
 				this.servicePorts, 
 				this.servicePorts = servicePorts);
@@ -544,6 +551,8 @@ public class DeployImageWizardModel
 			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, pos, old, Collections.unmodifiableList(servicePorts));
 			if (((ServicePortAdapter)target).isRoutePort()) {
 			    setRoutingPort(target);
+			} else if (((ServicePortAdapter)source).isRoutePort() && !((ServicePortAdapter)target).isRoutePort()) {
+			    setRoutingPort(null);
 			}
 			target.setTargetPort(p);
 		}
@@ -634,7 +643,6 @@ public class DeployImageWizardModel
 	public void resetServicePorts() {
 		List<IServicePort> ports = imagePorts.stream().map(sp -> new ServicePortAdapter(sp)).collect(Collectors.toList());
 		setServicePorts(ports);
-		setRoutingPort(null);
 	}
 
     @Override
