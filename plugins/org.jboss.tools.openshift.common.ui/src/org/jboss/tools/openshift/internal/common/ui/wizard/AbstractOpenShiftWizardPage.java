@@ -89,15 +89,19 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	 * It is convenient to call it from onPageActivated(dbc).
 	 */
 	protected void updateSize() {
-		Shell shell = getControl().getShell();
-		int y = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).y;
-		int h = Display.getDefault().getBounds().height;
-		if(y > h) {
-			y = h;
-		}
-		if(y > shell.getSize().y) {
-			shell.setSize(shell.getSize().x, y);
-		}
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				Shell shell = getControl().getShell();
+				int y = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).y;
+				int h = Display.getDefault().getBounds().height;
+				if(y > h) {
+					y = h;
+				}
+				if(y > shell.getSize().y) {
+					shell.setSize(shell.getSize().x, y);
+				}
+			}
+		});
 	}
 
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
