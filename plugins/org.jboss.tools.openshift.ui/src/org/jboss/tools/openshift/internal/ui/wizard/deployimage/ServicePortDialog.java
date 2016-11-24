@@ -15,8 +15,6 @@ import java.util.List;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -86,6 +84,12 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 		servicePortSpinner.setMinimum(1);
 		servicePortSpinner.setMaximum(65535);
 		servicePortSpinner.setToolTipText("The port exposed by the service that will route to the pod.");
+		servicePortSpinner.addModifyListener(e -> {
+		    Spinner source = (Spinner) e.getSource();
+		    if (!String.valueOf(source.getSelection()).equals(source.getText())) {
+		        source.setSelection(source.getSelection());
+		    }
+		});
 
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
