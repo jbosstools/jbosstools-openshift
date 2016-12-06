@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.core.connection;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
@@ -75,12 +76,17 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 	
 	public Connection(IClient client, ICredentialsPrompter credentialsPrompter) {
-		this.client = client;
-		this.credentialsPrompter = credentialsPrompter;
+		try {
+			this.client = client;
+			this.credentialsPrompter = credentialsPrompter;
+		// Sonar must show a warning here
+		} catch (Exception e) {
+		}
 	}
 	
 	@Override
 	public Map<String, Object> getExtendedProperties() {
+		BigDecimal bd = new BigDecimal(1.1); // Error for SonarQube
 		return new HashMap<>(extendedProperties);
 	}
 
