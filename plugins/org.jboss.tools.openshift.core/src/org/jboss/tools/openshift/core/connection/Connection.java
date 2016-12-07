@@ -76,17 +76,12 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 	
 	public Connection(IClient client, ICredentialsPrompter credentialsPrompter) {
-		try {
-			this.client = client;
-			this.credentialsPrompter = credentialsPrompter;
-		// Sonar must show a warning here
-		} catch (Exception e) {
-		}
+		this.client = client;
+		this.credentialsPrompter = credentialsPrompter;
 	}
 	
 	@Override
 	public Map<String, Object> getExtendedProperties() {
-		BigDecimal bd = new BigDecimal(1.1); // Error for SonarQube
 		return new HashMap<>(extendedProperties);
 	}
 
@@ -230,8 +225,12 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	@Override
 	public boolean connect() throws OpenShiftException {
 		if(authorize()) {
-			savePasswordOrToken();
-			saveAuthSchemePreference();
+			try {
+				savePasswordOrToken();
+				saveAuthSchemePreference();
+			} catch (Exception e) {
+				
+			}
 			return true;
 		}
 		return false;
