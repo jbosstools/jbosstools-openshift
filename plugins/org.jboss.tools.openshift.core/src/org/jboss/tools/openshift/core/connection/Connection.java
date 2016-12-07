@@ -225,12 +225,6 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	@Override
 	public boolean connect() throws OpenShiftException {
 		if(authorize()) {
-			try {
-				savePasswordOrToken();
-				saveAuthSchemePreference();
-			} catch (Exception e) {
-				
-			}
 			return true;
 		}
 		return false;
