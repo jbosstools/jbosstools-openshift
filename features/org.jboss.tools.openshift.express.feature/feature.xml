@@ -2,7 +2,7 @@
 <feature
       id="org.jboss.tools.openshift.express.feature"
       label="%featureName"
-      version="3.3.1.qualifier"
+      version="3.3.2.qualifier"
       provider-name="%providerName"
       plugin="org.jboss.tools.openshift.express.client"
       license-feature="org.jboss.tools.foundation.license.feature"
