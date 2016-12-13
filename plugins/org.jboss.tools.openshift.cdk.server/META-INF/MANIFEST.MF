@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.cdk.server;singleton:=true
 Bundle-Vendor: %Bundle-Vendor
-Bundle-Version: 3.3.1.qualifier
+Bundle-Version: 3.3.2.qualifier
 Bundle-Localization: plugin
 Bundle-Activator: org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator
 Require-Bundle: org.jboss.tools.usage;bundle-version="2.1.0",
