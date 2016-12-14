@@ -1,6 +1,6 @@
 # The OpenShift Tools project
 
-Test PR
+Test pull request job
 
 ## Summary
 
