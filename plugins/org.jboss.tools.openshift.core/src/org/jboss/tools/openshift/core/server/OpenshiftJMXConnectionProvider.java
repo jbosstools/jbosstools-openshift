@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.management.MalformedObjectNameException;
-
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.jmx.integration.AbstractJBossJMXConnectionProvider;
 import org.jboss.tools.jmx.core.ExtensionManager;
@@ -24,10 +22,6 @@ import org.jboss.tools.jmx.core.IConnectionWrapper;
 import org.jboss.tools.jmx.jolokia.JolokiaConnectionWrapper;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jolokia.client.J4pClient;
-import org.jolokia.client.request.J4pSearchRequest;
-import org.jolokia.client.request.J4pSearchResponse;
-
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IService;
 

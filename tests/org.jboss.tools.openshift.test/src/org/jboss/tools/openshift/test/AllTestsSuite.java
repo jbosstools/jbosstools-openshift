@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test;
 
-import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.test.common.core.connection.ConnectionsFactoryTest;
 import org.jboss.tools.openshift.test.common.core.util.StringUtilsTest;
 import org.jboss.tools.openshift.test.common.core.util.URIUtilsTest;

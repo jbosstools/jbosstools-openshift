@@ -16,8 +16,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
-
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;

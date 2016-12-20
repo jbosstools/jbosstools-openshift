@@ -12,7 +12,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 
 import com.openshift.restclient.model.route.IRoute;
-import com.openshift.restclient.model.route.ITargetPort;
 
 /**
  * @author jeff.cantrill

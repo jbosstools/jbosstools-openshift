@@ -12,10 +12,6 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,8 +37,6 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.Va
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKLaunchEnvironmentUtil;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
 import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
-import org.jboss.tools.openshift.core.OpenShiftCoreUIIntegration;
-
 import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ISSLCertificateCallback;

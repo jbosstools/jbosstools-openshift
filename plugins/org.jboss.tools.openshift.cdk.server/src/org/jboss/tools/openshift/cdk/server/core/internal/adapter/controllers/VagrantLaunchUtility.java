@@ -40,7 +40,6 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.ArgsUtil;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstantUtility;
-import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKServerUtility;

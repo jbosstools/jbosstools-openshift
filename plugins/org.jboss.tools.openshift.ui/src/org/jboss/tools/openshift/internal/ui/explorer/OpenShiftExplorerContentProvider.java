@@ -29,7 +29,6 @@ import org.jboss.tools.openshift.internal.ui.models.IElementListener;
 import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
-import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
 
 import com.openshift.restclient.ResourceKind;
