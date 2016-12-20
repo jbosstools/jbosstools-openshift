@@ -70,12 +70,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 		launchThread();
 	}
 	protected void launchThread() {
-		Thread t = new Thread(new Runnable(){
-			@Override
-			public void run() {
-				pollerRun();
-			}
-		}, "CDK Poller"); //$NON-NLS-1$
+		Thread t = new Thread(this::pollerRun, "CDK Poller"); //$NON-NLS-1$
 		t.start();
 	}
 	
@@ -188,7 +183,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 			// it got all the output
 			List<String> inLines = vte.getInLines();
 			if (inLines != null) {
-				String[] asArr = (String[]) inLines.toArray(new String[inLines.size()]);
+				String[] asArr = inLines.toArray(new String[inLines.size()]);
 				IStatus ret = parseOutput(asArr);
 				if (ret != null) {
 					return ret;
@@ -263,7 +258,6 @@ public class VagrantPoller implements IServerStatePoller2 {
 			for( int i = 0; i < lines.length; i++ ) {
 				String[] csv = lines[i].split(",");
 				if( csv.length >=2 ) { // avoid arrayindex errors
-					String timestamp = csv[0];
 					String vmId = csv[1];
 					if( vmId != null && !vmId.isEmpty() ) {
 						VagrantStatus vs = status.get(vmId);
@@ -278,16 +272,15 @@ public class VagrantPoller implements IServerStatePoller2 {
 						}
 					} else {
 					   if( csv.length >= 3) {
-						   if( csv[2].equals("error-exit")) {
-							   CoreException ce = null;
-							   IStatus s = null;
+						   if( "error-exit".equals(csv[2])) {
+							   IStatus s;
 							   if( csv.length >= 5) {
 								   s = CDKCoreActivator.statusFactory().errorStatus(csv[4]);
 							   } else {
 								   s = CDKCoreActivator.statusFactory().errorStatus("An error occurred while checking CDK state.");
 							   }
 							   
-							   ce = new CoreException(s);
+							   CoreException ce = new CoreException(s);
 							   CDKCoreActivator.pluginLog().logError("Unable to access CDK status via vagrant status.", ce);
 							   return s;
 						   }
@@ -301,7 +294,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 			}
 		}		
 		Collection<VagrantStatus> stats = status.values();
-		if( stats.size() == 0 ) {
+		if( stats.isEmpty() ) {
 			return CDKCoreActivator.statusFactory().errorStatus("Unable to retrieve vagrant status for the given CDK");
 		}
 		if( allRunning(stats)) {
@@ -335,7 +328,7 @@ public class VagrantPoller implements IServerStatePoller2 {
 	private boolean allStopped(Collection<VagrantStatus> stats) {
 		List<String> off = Arrays.asList(getValidStoppedStates());
 		Iterator<VagrantStatus> i = stats.iterator();
-		VagrantStatus tmp = null;
+		VagrantStatus tmp;
 		while(i.hasNext()) {
 			tmp = i.next();
 			if( !off.contains(tmp.getState())) {
