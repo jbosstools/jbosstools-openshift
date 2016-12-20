@@ -32,6 +32,7 @@ import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.core.model.RuntimeProcess;
@@ -82,7 +83,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		String workingDir = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);
 		workingCopy.setAttribute(ATTR_WORKING_DIR, workingDir);
     	
-    	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map)null);
+    	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String, String>)null);
     	if( env == null ) {
     		env = new HashMap<>();
     	} else {
@@ -213,7 +214,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		IStatus stat = new VagrantPoller().getCurrentStateSynchronous(getServer());
 		if( stat.isOK()) {
 			beh.setServerStarted();
-			((Server)beh.getServer()).setMode("run");
+			((Server)beh.getServer()).setMode(ILaunchManager.RUN_MODE);
 			return;
 		}
 		
@@ -238,14 +239,12 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		
 		IDebugEventSetListener debug = getDebugListener(new IProcess[]{process}, launch);
 		DebugPlugin.getDefault().addDebugEventListener(debug);
-		if( beh != null ) {
-			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
-			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
-		}
+		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
+		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
 	}
 	
 	private IProcess addProcessToLaunch(Process p, ILaunch launch, IServer s) {
-		Map<String, String> processAttributes = new HashMap<String, String>();
+		Map<String, String> processAttributes = new HashMap<>();
 		String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(s);
 		String progName = new Path(vagrantcmdloc).lastSegment();
 		launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
@@ -338,7 +337,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 	private void handleOpenShiftUnavailable(final IControllableServerBehavior beh, final OpenShiftNotReadyPollingException osnrpe) {
 		// Log error?  Show dialog?  
 		((ControllableServerBehavior)beh).setServerStarted();
-		((Server)beh.getServer()).setMode("run");
+		((Server)beh.getServer()).setMode(ILaunchManager.RUN_MODE);
 		new Job(osnrpe.getMessage()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
