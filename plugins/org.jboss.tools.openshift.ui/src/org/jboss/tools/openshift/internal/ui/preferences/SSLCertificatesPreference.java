@@ -12,12 +12,8 @@ package org.jboss.tools.openshift.internal.ui.preferences;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
