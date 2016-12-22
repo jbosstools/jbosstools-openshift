@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -216,12 +217,14 @@ public class ApplicationSourceFromTemplateModel
 		}
 		Map<String, String> projectParams = getProjectParameters(project);
 
-		originalParameters.forEach(p -> { 
+		originalParameters = originalParameters.stream().map(p -> { 
 			String value = projectParams.get(p.getName());
 			if (value != null) {
+			    p = p.clone();
 				p.setValue(value);
 			}
-		});
+			return p;
+		}).collect(Collectors.toList());
 
 		return originalParameters;
 	}
