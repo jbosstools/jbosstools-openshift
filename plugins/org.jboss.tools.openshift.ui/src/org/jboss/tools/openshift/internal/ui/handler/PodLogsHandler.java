@@ -39,7 +39,7 @@ import com.openshift.restclient.model.IPod;
  * @author jeff.cantrill
  */
 public class PodLogsHandler extends AbstractOpenShiftCliHandler {
-	private static final String [] STATES = new String [] {"Running", "Succeeded", "Failed"};
+	private static final String [] STATES = new String [] {"Running", "Succeeded", "Failed", "Completed"};
 
 	@Override
 	protected void handleEvent(ExecutionEvent event){
