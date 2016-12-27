@@ -114,6 +114,11 @@ public class PodLogsHandlerTest {
     }
 
     public static class TestPodLogsHandler extends PodLogsHandler {
+        @Override
+        public Object execute(ExecutionEvent event) throws ExecutionException {
+            handleEvent(event);
+            return null;
+        }
 
         @Override
         public <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
