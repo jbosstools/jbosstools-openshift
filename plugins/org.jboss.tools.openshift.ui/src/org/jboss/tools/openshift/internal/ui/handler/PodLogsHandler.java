@@ -41,13 +41,19 @@ import com.openshift.restclient.model.IPod;
  */
 public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 	private static final String [] STATES = new String [] {"Running", "Succeeded", "Failed", "Completed"};
+	
+	public static final String INVALID_POD_STATUS_MESSAGE = "The log is unavailable while the pod is in {0} state.";
+	
+    protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
+        ISelection selection = UIUtils.getCurrentSelection(event);
+        return UIUtils.getFirstElement(selection, klass);
+    }
 
 	@Override
 	protected void handleEvent(ExecutionEvent event){
-		ISelection selection = UIUtils.getCurrentSelection(event);
-		IPod pod = UIUtils.getFirstElement(selection, IPod.class);
+		IPod pod = getSelectedElement(event, IPod.class);
 		if(pod == null) {
-			pod = getPodFromBuild(selection);
+			pod = getPodFromBuild(event);
 			if(pod == null) {
 				MessageDialog.openError(HandlerUtil.getActiveShell(event), "No pod selected", "Unable to determine the build pod in order to retrieve its log.");
 				return;
@@ -56,18 +62,22 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 		showLogs(pod, event);
 	}
 	
-	private void showLogs(IPod pod, ExecutionEvent event) {
+	protected void showDialog(ExecutionEvent event, String title, String message) {
+	    MessageDialog.openError(HandlerUtil.getActiveShell(event), title, message);
+	}
+	
+	protected void showLogs(IPod pod, ExecutionEvent event) {
 		if(pod == null){
-			MessageDialog.openError(HandlerUtil.getActiveShell(event), "No pod selected", "No pod was selected to retrieve a log.");
+			showDialog(event, "No pod selected", "No pod was selected to retrieve a log.");
 			return;
 		}
 		if(!ArrayUtils.contains(STATES, pod.getStatus())) {
-			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Logs Unavailable", NLS.bind("The log is unavailable while the pod is in {0} state.", pod.getStatus()));
+			showDialog(event, "Logs Unavailable", NLS.bind(INVALID_POD_STATUS_MESSAGE, pod.getStatus()));
 			return;
 		}
 		Collection<IContainer> containers = pod.getContainers();
 		if(containers.isEmpty()) {
-			MessageDialog.openError(HandlerUtil.getActiveShell(event), "Logs Unavailable", "There are no containers from which to retrieve logs");
+			showDialog(event, "Logs Unavailable", "There are no containers from which to retrieve logs");
 			return;
 		}
 		String containerName = null;
@@ -90,8 +100,8 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 		new PodLogsJob(pod, containerName).schedule();
 	}
 
-	private IPod getPodFromBuild(ISelection selection) {
-		IBuild build = UIUtils.getFirstElement(selection, IBuild.class);
+	private IPod getPodFromBuild(ExecutionEvent event) {
+		IBuild build = getSelectedElement(event, IBuild.class);
 		if(build != null) {
 			final String buildName = build.getName();
 			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(build);
