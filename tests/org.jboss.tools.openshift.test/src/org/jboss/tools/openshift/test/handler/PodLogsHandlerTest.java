@@ -126,6 +126,7 @@ public class PodLogsHandlerTest {
 
         @Override
         protected void showDialog(ExecutionEvent event, String title, String message) {
+            //suppressed for non UI interactions
         }
     }
 
