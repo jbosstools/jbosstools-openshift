@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -37,6 +37,7 @@ import com.openshift.restclient.model.IPod;
 
 /**
  * @author jeff.cantrill
+ * @author Jeff Maury
  */
 public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 	private static final String [] STATES = new String [] {"Running", "Succeeded", "Failed", "Completed"};
