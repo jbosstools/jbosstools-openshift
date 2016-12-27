@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.internal.ui.handler.PodLogsHandler;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
@@ -49,48 +50,48 @@ public class PodLogsHandlerTest {
 	private ExecutionEvent event;
 	
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		handler = spy(new TestPodLogsHandler());
 		event = new ExecutionEvent(null, parameters, null, null);
 	}
 
 	@Test
-	public void testGetLogsFromPodWhenRunning() throws Exception{
+	public void testGetLogsFromPodWhenRunning() throws ExecutionException {
 		givenAPodIsSelected("Running");
 		handler.execute(event);
 		thenTheLogsShouldBeShown();
 	}
 
     @Test
-    public void testGetLogsFromPodWhenSucceeded() throws Exception{
+    public void testGetLogsFromPodWhenSucceeded() throws ExecutionException {
         givenAPodIsSelected("Succeeded");
         handler.execute(event);
         thenTheLogsShouldBeShown();
     }
 
     @Test
-    public void testGetLogsFromPodWhenFailed() throws Exception{
+    public void testGetLogsFromPodWhenFailed() throws ExecutionException {
         givenAPodIsSelected("Failed");
         handler.execute(event);
         thenTheLogsShouldBeShown();
     }
 
     @Test
-    public void testGetLogsFromPodWhenCompleted() throws Exception{
+    public void testGetLogsFromPodWhenCompleted() throws ExecutionException {
         givenAPodIsSelected("Completed");
         handler.execute(event);
         thenTheLogsShouldBeShown();
     }
 
     @Test
-    public void testGetLogsFromPodWhenPending() throws Exception{
+    public void testGetLogsFromPodWhenPending() throws ExecutionException {
         givenAPodIsSelected("Pending");
         handler.execute(event);
         thenInvalidStateShouldBeShown("Pending");
     }
 
     @Test
-    public void testGetLogsFromPodWhenUnknown() throws Exception{
+    public void testGetLogsFromPodWhenUnknown() throws ExecutionException {
         givenAPodIsSelected("Unknown");
         handler.execute(event);
         thenInvalidStateShouldBeShown("Unknown");
