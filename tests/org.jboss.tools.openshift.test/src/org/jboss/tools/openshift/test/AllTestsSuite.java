@@ -26,6 +26,7 @@ import org.jboss.tools.openshift.test.core.server.OpenShiftModuleDeploymentPrefs
 import org.jboss.tools.openshift.test.core.server.OpenShiftSubsystemTest;
 import org.jboss.tools.openshift.test.core.util.ResourceUtilsIsMatchingTest;
 import org.jboss.tools.openshift.test.core.util.ResourceUtilsTest;
+import org.jboss.tools.openshift.test.handler.PodLogsHandlerTest;
 import org.jboss.tools.openshift.test.handler.ScaleDeploymentHandlerTest;
 import org.jboss.tools.openshift.test.internal.core.preferences.OpenShiftCorePreferencesTest;
 import org.jboss.tools.openshift.test.ui.comparators.CreationTimestampComparatorTest;
@@ -85,6 +86,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	ResourcePropertySourceTest.class,
 	ResourceUtilsTest.class,
 	ScaleDeploymentHandlerTest.class,
+	PodLogsHandlerTest.class,
 	SmartTooltipTest.class,
 	StringUtilsTest.class,
 	TemplateParameterViewerUtilsTest.class,
