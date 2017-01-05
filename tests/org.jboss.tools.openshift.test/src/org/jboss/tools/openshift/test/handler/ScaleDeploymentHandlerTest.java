@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.internal.ui.handler.ScaleDeploymentHandler;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
@@ -40,6 +41,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IService;
 
@@ -53,13 +55,16 @@ public class ScaleDeploymentHandlerTest {
 	@Mock private IService service;
 	@Mock private IProjectWrapper project;
 	@Mock private IResourceWrapper<IReplicationController, ?> uiModel;
+	@Mock private IPod pod;
 	
 	private TestScaleDeploymentHandler handler;
 	private IServiceWrapper deployment;
+	private IResourceWrapper<IPod, IServiceWrapper> podWrapper;
 	@SuppressWarnings("rawtypes")
 	private Map parameters = new HashMap();
 	private ExecutionEvent event;
 	
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		handler = spy(new TestScaleDeploymentHandler());
@@ -75,6 +80,11 @@ public class ScaleDeploymentHandlerTest {
 		doReturn(RC_DESIRED_REPLICA_COUNT).when(rc).getDesiredReplicaCount();
 
 		doReturn(RC_DESIRED_REPLICA_COUNT).when(dc).getDesiredReplicaCount();
+		
+		podWrapper = Mockito.mock(IResourceWrapper.class);
+		doReturn(deployment).when(podWrapper).getParent();
+		doReturn(pod).when(podWrapper).getWrapped();
+		doReturn(false).when(pod).isAnnotatedWith(OpenShiftAPIAnnotations.BUILD_NAME);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -152,7 +162,28 @@ public class ScaleDeploymentHandlerTest {
 
 		thenTheReplicasShouldNotBeUpdated();
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testScaleReplicasWhenPodIsSelectedAndTheCommandReceivesReplicaDiffCount() throws Exception{
+		parameters.put(ScaleDeploymentHandler.REPLICA_DIFF, "-1");
+		givenAPodIsSelected();
+		
+		handler.execute(event);
+		
+		thenTheReplicasShouldBeUpdated();
+	}
 
+	@Test
+	public void testScaleReplicasWhenPodIsSelectedAndUserSpecifiesTheDesiredCount() throws Exception{
+		givenAPodIsSelected();
+		givenAUserChoosesDesiredReplicas();
+		
+		handler.execute(event);
+		
+		thenTheReplicasShouldBeUpdated();
+	}
+	
 	@Test
 	public void testWhenDeploymentIsNotSelected() throws Exception{
 		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), any());
@@ -175,6 +206,12 @@ public class ScaleDeploymentHandlerTest {
 	private void givenADeploymentConfigIsSelected() {
 		doReturn(dc).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
 		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
+	}
+
+	private void givenAPodIsSelected() {
+		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
+		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
+		doReturn(podWrapper).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IResourceWrapper.class));
 	}
 
 	private void givenAUserCancelsTheReplicaInputDialog() {
