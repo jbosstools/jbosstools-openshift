@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -103,12 +104,16 @@ public class ApplicationSourceFromImageModel
 		if(project != null) {
 			try {
 				setGitRepositoryUrl(EGitUtils.getDefaultRemoteRepo(project));
+				setGitReference(EGitUtils.getCurrentBranch(project));
+				setContextDir(StringUtils.EMPTY);
 				return;
 			} catch (CoreException e) {
 				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to retrieve the remote git repo from " + project.getName(), e);
 			}
 		}
 		setGitRepositoryUrl(null);
+		setGitReference(null);
+		setContextDir(null);
 	}
 
 	private void handleSelectedAppSource(PropertyChangeEvent evt) {
@@ -123,7 +128,7 @@ public class ApplicationSourceFromImageModel
 	public void init() { 
 		if(staleRepoInfo.compareAndSet(true, false)) {
 			loadBuilderImageMetadata();
-			if(this.source != null) {
+			if ((this.source != null) && (this.getGitRepositoryUrl() == null)) {
 				setGitRepositoryUrl(this.source.getAnnotation(ANNOTATION_SAMPLE_REPO));
 				setContextDir(this.source.getAnnotation(ANNOTATION_SAMPLE_CONTEXT_DIR));
 				setGitReference(this.source.getAnnotation(ANNOTATION_SAMPLE_REF));
