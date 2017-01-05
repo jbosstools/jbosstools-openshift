@@ -32,6 +32,7 @@ import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.core.model.RuntimeProcess;
@@ -82,7 +83,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 		String workingDir = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);
 		workingCopy.setAttribute(ATTR_WORKING_DIR, workingDir);
     	
-    	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map)null);
+    	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String, String>)null);
     	if( env == null ) {
     		env = new HashMap<>();
     	} else {
@@ -153,99 +154,123 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
 		final IServer s = ServerUtil.getServer(configuration);
-		if( s == null ) {
-			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Unable to locate server from launch configuration."));
-		}
+		verifyServer(s);
 		
 		final ControllableServerBehavior beh = (ControllableServerBehavior)JBossServerBehaviorUtils.getControllableBehavior(configuration);
 		beh.setServerStarting();
 		
-		String vagrantLoc = CDKConstantUtility.getVagrantLocation(s);
-		if(vagrantLoc == null || !(new File(vagrantLoc).exists())) {
-			beh.setServerStopped();
-			if( vagrantLoc == null )
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Unable to locate vagrant command. Please check to ensure that the command is available on your Path environment variable."));
-			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Expected location of vagrant command does not exist: " + vagrantLoc));
-		}
+		verifyVagrantLocation(beh, CDKConstantUtility.getVagrantLocation(s));
 		
 		CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		boolean passCredentials = cdkServer.passCredentials();
 		
-		if( passCredentials) {
-			
-    		String userKey = cdkServer.getUserEnvironmentKey();
-    		String passKey = cdkServer.getPasswordEnvironmentKey();
-			if( userKey == null || userKey.trim().isEmpty()) {
-				beh.setServerStopped();
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
-						"Username environment variable id cannot be empty when passing credentials via environment variables."));
-			}
-			if( passKey == null || passKey.trim().isEmpty()) {
-				beh.setServerStopped();
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
-						"Password environment variable id cannot be empty when passing credentials via environment variables."));				
-			}
-			
-	    	String pass = null;
-	    	String user = cdkServer.getUsername();
-	    	try {
-	    		pass = cdkServer.getPassword();
-	    	} catch(UsernameChangedException uce) {
-	    		pass = uce.getPassword();
-	    		user = uce.getUser();
-	    	}
-	    	
-	    	if( user == null ) {
-				beh.setServerStopped();
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no username associated with it. Please open the server editor and configure the credentials."));
-	    	}
-	
-	    	if( pass == null ) {
-				beh.setServerStopped();
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no password associated with it. Please open the server editor and configure the credentials."));
-	    	}
-
-			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, pass);
-			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, user);
+		if (passCredentials) {
+			setBehaviourUserAndPassword(s, beh, cdkServer);
 		}
 		
 		// Poll the server once more 
 		IStatus stat = new VagrantPoller().getCurrentStateSynchronous(getServer());
-		if( stat.isOK()) {
+		if (stat.isOK()) {
 			beh.setServerStarted();
-			((Server)beh.getServer()).setMode("run");
+			((Server) beh.getServer()).setMode(ILaunchManager.RUN_MODE);
 			return;
 		}
 		
-		String args = configuration.getAttribute(ATTR_ARGS, (String)null);
+		String args = configuration.getAttribute(ATTR_ARGS, (String) null);
+		Process p = getProcess(s, beh, args);
+		if (p == null) {
+			beh.setServerStopped();
+			throw new CoreException(
+					new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to vagrant up has failed."));
+		}
+
+		IProcess process = addProcessToLaunch(p, launch, s);
+		linkTerminal(p);
 		
-		Process p = null;
+		IDebugEventSetListener debug = getDebugListener(new IProcess[] { process }, launch);
+		DebugPlugin.getDefault().addDebugEventListener(debug);
+		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
+		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
+	}
+
+	private void verifyServer(final IServer s) throws CoreException {
+		if (s == null) {
+			throw new CoreException(
+					CDKCoreActivator.statusFactory().errorStatus("Unable to locate server from launch configuration."));
+		}
+	}
+
+	private void setBehaviourUserAndPassword(final IServer s, final ControllableServerBehavior beh, CDKServer cdkServer)
+			throws CoreException {
+		verifyUser(beh, cdkServer.getUserEnvironmentKey());
+		verifyPassword(beh, cdkServer.getPasswordEnvironmentKey());
+		
+		String pass = null;
+		String user = cdkServer.getUsername();
 		try {
-			p = new VagrantLaunchUtility().callInteractive(s, args, getStartupLaunchName(s));
+			pass = cdkServer.getPassword();
+		} catch(UsernameChangedException uce) {
+			pass = uce.getPassword();
+			user = uce.getUser();
+		}
+		
+		if (user == null) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName()
+					+ " has no username associated with it. Please open the server editor and configure the credentials."));
+		}
+
+		if (pass == null) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName()
+					+ " has no password associated with it. Please open the server editor and configure the credentials."));
+		}
+
+		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, pass);
+		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, user);
+	}
+
+	private Process getProcess(final IServer s, final ControllableServerBehavior beh, String args)
+			throws CoreException {
+		try {
+			return new VagrantLaunchUtility().callInteractive(s, args, getStartupLaunchName(s));
 		} catch(IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(ioe);
 			beh.setServerStopped();
 			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ioe.getMessage(), ioe));
 		}
-		
-		if( p == null ) {
-			beh.setServerStopped();
-			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to vagrant up has failed."));
-		}
+	}
 
-		IProcess process = addProcessToLaunch(p, launch,s);
-		linkTerminal(p);
-		
-		IDebugEventSetListener debug = getDebugListener(new IProcess[]{process}, launch);
-		DebugPlugin.getDefault().addDebugEventListener(debug);
-		if( beh != null ) {
-			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
-			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
+	private void verifyPassword(final ControllableServerBehavior beh, String passKey) throws CoreException {
+		if (passKey == null || passKey.trim().isEmpty()) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
+					"Password environment variable id cannot be empty when passing credentials via environment variables."));
+		}
+	}
+
+	private void verifyUser(final ControllableServerBehavior beh, String userKey) throws CoreException {
+		if (userKey == null || userKey.trim().isEmpty()) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
+					"Username environment variable id cannot be empty when passing credentials via environment variables."));
+		}
+	}
+
+	private void verifyVagrantLocation(final ControllableServerBehavior beh, String vagrantLoc) throws CoreException {
+		if(vagrantLoc == null) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
+					"Unable to locate vagrant command. "
+					+ "Please check to ensure that the command is available on your Path environment variable."));
+		} else if (!(new File(vagrantLoc).exists())) {
+			throw new CoreException(CDKCoreActivator.statusFactory()
+					.errorStatus("Expected location of vagrant command does not exist: " + vagrantLoc));
 		}
 	}
 	
 	private IProcess addProcessToLaunch(Process p, ILaunch launch, IServer s) {
-		Map<String, String> processAttributes = new HashMap<String, String>();
+		Map<String, String> processAttributes = new HashMap<>();
 		String vagrantcmdloc = CDKConstantUtility.getVagrantLocation(s);
 		String progName = new Path(vagrantcmdloc).lastSegment();
 		launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
@@ -338,7 +363,7 @@ public class CDKLaunchController extends AbstractSubsystemController implements 
 	private void handleOpenShiftUnavailable(final IControllableServerBehavior beh, final OpenShiftNotReadyPollingException osnrpe) {
 		// Log error?  Show dialog?  
 		((ControllableServerBehavior)beh).setServerStarted();
-		((Server)beh.getServer()).setMode("run");
+		((Server)beh.getServer()).setMode(ILaunchManager.RUN_MODE);
 		new Job(osnrpe.getMessage()) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
