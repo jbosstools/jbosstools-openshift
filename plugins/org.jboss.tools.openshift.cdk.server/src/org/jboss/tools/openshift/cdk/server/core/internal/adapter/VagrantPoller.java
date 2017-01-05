@@ -36,7 +36,9 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.Va
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.VagrantTimeoutException;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKLaunchEnvironmentUtil;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.LazySSLCertificateCallback;
+
 import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ISSLCertificateCallback;
@@ -247,39 +249,26 @@ public class VagrantPoller implements IServerStatePoller2 {
 	
 	
 	protected IStatus parseOutput(String[] lines) {
-		HashMap<String, VagrantStatus> status = new HashMap<>();
-		if( lines != null && lines.length > 0 ) {
-			for( int i = 0; i < lines.length; i++ ) {
+		Map<String, VagrantStatus> status = new HashMap<>();
+		if (lines != null && lines.length > 0) {
+			for (int i = 0; i < lines.length; i++) {
 				String[] csv = lines[i].split(",");
-				if( csv.length >=2 ) { // avoid arrayindex errors
+				if (csv.length >= 2) { // avoid arrayindex errors
 					String vmId = csv[1];
-					if( vmId != null && !vmId.isEmpty() ) {
-						VagrantStatus vs = status.get(vmId);
-						if( vs == null ) {
-							vs = new VagrantStatus(vmId);
-							status.put(vmId, vs);
-						}
+					if (!StringUtils.isEmpty(vmId)) {
+						VagrantStatus vs = getVagrantStatus(status, vmId);
 						String k = csv[2];
 						String v = csv[3];
-						if( k != null ) {
-							vs.setProperty(k,v);
+						if (k != null) {
+							vs.setProperty(k, v);
 						}
 					} else {
-					   if( csv.length >= 3) {
-						   if( "error-exit".equals(csv[2])) {
-							   IStatus s;
-							   if( csv.length >= 5) {
-								   s = CDKCoreActivator.statusFactory().errorStatus(csv[4]);
-							   } else {
-								   s = CDKCoreActivator.statusFactory().errorStatus("An error occurred while checking CDK state.");
-							   }
-							   
-							   CoreException ce = new CoreException(s);
-							   CDKCoreActivator.pluginLog().logError("Unable to access CDK status via vagrant status.", ce);
-							   return s;
-						   }
-					   }
-					  }
+						if (csv.length >= 3) {
+							if ("error-exit".equals(csv[2])) {
+								return createErrorStatus(csv);
+							}
+						}
+					}
 				} //else {
 				  // The given line isn't csv or doesn't have at least 2 items in the csv array
 				  // and so should be ignored
@@ -298,6 +287,29 @@ public class VagrantPoller implements IServerStatePoller2 {
 			return CDKCoreActivator.statusFactory().errorStatus("Vagrant status indicates the CDK is stopped: " + String.join("\n", Arrays.asList(lines)));
 		}
 		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID, "Vagrant status indicates the CDK is starting.");
+	}
+
+
+	private VagrantStatus getVagrantStatus(Map<String, VagrantStatus> status, String vmId) {
+		VagrantStatus vs = status.get(vmId);
+		if (vs == null) {
+			vs = new VagrantStatus(vmId);
+			status.put(vmId, vs);
+		}
+		return vs;
+	}
+
+
+	private IStatus createErrorStatus(String[] csv) {
+		IStatus s = null;
+		if (csv.length >= 5) {
+			s = CDKCoreActivator.statusFactory().errorStatus(csv[4]);
+		} else {
+			s = CDKCoreActivator.statusFactory().errorStatus("An error occurred while checking CDK state.");
+		}
+
+		CDKCoreActivator.pluginLog().logError("Unable to access CDK status via vagrant status.", new CoreException(s));
+		return s;
 	}
 	
 	private boolean allRunning(Collection<VagrantStatus> stats) {
