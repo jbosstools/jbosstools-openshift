@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.core.WatchManager;
@@ -99,14 +100,14 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 
 	public boolean load(IExceptionHandler handler) {
 		if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {
-			startLoadJob(handler);
+			startLoadJob(getWrapped(), handler);
 			return true;
 		}
 		return false;
 	}
 
 	void startLoadJob(ProjectWrapper projectWrapper, IExceptionHandler handler) {
-		new Job("Load project contents") {
+		new Job(NLS.bind("Loading resources for project {0}...", projectWrapper.getWrapped().getName())) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -132,13 +133,12 @@ class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection,
 		}.schedule();
 	}
 
-	private void startLoadJob(IExceptionHandler handler) {
-		new Job("Load project") {
+	private void startLoadJob(IOpenShiftConnection connection, IExceptionHandler handler) {
+		new Job(NLS.bind("Loading resources for server {0}...", connection.getHost())) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					IOpenShiftConnection connection = getWrapped();
 					List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
 					initWith(projects);
 					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
