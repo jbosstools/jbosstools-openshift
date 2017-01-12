@@ -103,11 +103,19 @@ public class CDKRuntimeDetector extends AbstractRuntimeDetectorDelegate{
 		if( validate(runtimeDefinition.getLocation()) ) {
 			IServer[] all = ServerCore.getServers();
 			for( int i = 0; i < all.length; i++ ) {
-				if( all[i].getServerType().getId().equals(CDKServer.CDK_SERVER_TYPE)) {
-					String s = all[i].getAttribute(CDKServer.PROP_FOLDER, (String)null);
-					if( s != null ) {
-						if( new File(s).equals(runtimeDefinition.getLocation())) {
-							return true;
+				if( all[i] != null ) {
+					// all[i] should never be null
+					IServerType st = all[i].getServerType();
+					if( st != null ) {
+						// st will only be null if someone is using a workspace 
+						// that has a server type that is no longer installed or is missing.
+						if( CDKServer.CDK_SERVER_TYPE.equals(st.getId())) {
+							String s = all[i].getAttribute(CDKServer.PROP_FOLDER, (String)null);
+							if( s != null ) {
+								if( new File(s).equals(runtimeDefinition.getLocation())) {
+									return true;
+								}
+							}
 						}
 					}
 				}
