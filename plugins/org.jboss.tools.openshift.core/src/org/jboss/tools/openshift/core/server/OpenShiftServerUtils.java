@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
@@ -520,6 +521,14 @@ public class OpenShiftServerUtils {
 		}
 		return attribute;
 	}
-
 	
+    public static boolean isJavaProject(IServerAttributes server) {
+        IProject p = getDeployProject(server);
+        try {
+            return p != null && p.isAccessible() && p.hasNature(JavaCore.NATURE_ID);
+        } catch (CoreException e) {
+            OpenShiftCoreActivator.pluginLog().logError(e);
+        }
+        return false;
+    }
 }

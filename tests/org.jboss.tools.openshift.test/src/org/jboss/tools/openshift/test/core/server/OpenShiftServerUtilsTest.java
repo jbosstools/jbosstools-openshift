@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
@@ -237,5 +238,12 @@ public class OpenShiftServerUtilsTest {
 		} catch(CoreException e) {
 			assertThat(e.getMessage().contains("not find deployment config"));
 		}
+	}
+	
+	@Test
+	public void should_not_show_jmx_on_non_java_project() throws CoreException {
+	    IProject eclipseProject = ResourceMocks.createEclipseProject("project1");
+	    doReturn(eclipseProject.getName()).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEPLOYPROJECT), anyString());
+	    assertThat(OpenShiftServerUtils.isJavaProject(server)).isFalse();
 	}
 }
