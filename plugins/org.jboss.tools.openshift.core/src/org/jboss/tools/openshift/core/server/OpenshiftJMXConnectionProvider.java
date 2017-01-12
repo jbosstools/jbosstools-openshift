@@ -28,10 +28,6 @@ import com.openshift.restclient.model.IService;
 public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionProvider {
 	public static final String PROVIDER_ID = "org.jboss.tools.openshift.core.server.OpenshiftJMXConnection"; //$NON-NLS-1$
 
-	public OpenshiftJMXConnectionProvider() {
-		super();
-		System.out.println("Noop constructor");
-	}
 	@Override 
 	protected boolean getConnectionPersistenceBehavior() {
 		return ON_START;
@@ -39,7 +35,8 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 	
 	@Override
 	protected boolean belongsHere(IServer server) {
-		if( server != null && server.getServerType().getId().equals(OpenShiftServer.SERVER_TYPE_ID)) {
+		if( server != null && server.getServerType().getId().equals(OpenShiftServer.SERVER_TYPE_ID) &&
+		        OpenShiftServerUtils.isJavaProject(server)) {
 			return true;
 		}
 		return false;
@@ -89,7 +86,6 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 
 	@Override
 	public String getName(IConnectionWrapper wrapper) {
-		// TODO Auto-generated method stub
 		return ((JolokiaConnectionWrapper)wrapper).getId();
 	}
 }

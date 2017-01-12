@@ -520,6 +520,14 @@ public class OpenShiftServerUtils {
 		}
 		return attribute;
 	}
-
 	
+    public static boolean isJavaProject(IServerAttributes server) {
+        IProject p = getDeployProject(server);
+        try {
+            return p != null && p.isAccessible() && p.hasNature(JavaCore.NATURE_ID);
+        } catch (CoreException e) {
+            OpenShiftCoreActivator.pluginLog().logError(e);
+        }
+        return false;
+    }
 }

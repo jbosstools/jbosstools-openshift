@@ -27,7 +27,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
 import org.eclipse.jdt.launching.SocketUtil;
@@ -184,7 +183,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 				}
 				int localPort = mapPortForwarding(debuggingContext, monitor);
 				
-				if(isJavaProject(server)) {
+				if(OpenShiftServerUtils.isJavaProject(server)) {
 					ILaunch debuggerLaunch = attachRemoteDebugger(server, localPort, monitor);
 					if( debuggerLaunch != null ) {
 						overrideHotcodeReplace(server, debuggerLaunch);
@@ -252,16 +251,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		// Do Nothing
 	}
 	
-	private boolean isJavaProject(IServer server) {
-		IProject p = OpenShiftServerUtils.getDeployProject(server);
-		try {
-			return p != null && p.isAccessible() && p.hasNature(JavaCore.NATURE_ID);
-		} catch (CoreException e) {
-			OpenShiftCoreActivator.pluginLog().logError(e);
-		}
-		return false;
-	}
-
 	/**
 	 * Unmap the port forwarding. 
 	 * @throws CoreException 
