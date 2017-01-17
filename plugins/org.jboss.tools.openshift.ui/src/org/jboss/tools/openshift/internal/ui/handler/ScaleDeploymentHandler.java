@@ -44,8 +44,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
@@ -148,8 +146,8 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 	}
 
 	protected void scaleDeployment(ExecutionEvent event, String name, IReplicationController rc, int replicas) {
-		if(replicas >=0 ) {
-			new Job(NLS.bind("Scaling {0} deployment ...", name)){
+		if (replicas >= 0) {
+			new Job(NLS.bind("Scaling {0} deployment to {1}...", name, replicas)) {
 				
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -163,33 +161,15 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 							}
 							
 						}, new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Scaling is not supported for this resource"));
-					}catch(Exception e) {
+					} catch (Exception e) {
 						String message = NLS.bind("Unable to scale {0}", name);
-						OpenShiftUIActivator.getDefault().getLogger().logError(message,e);
+						OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
 						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, e);
 					}
 				}
 				
 			}.schedule();
 		}
-
-		new Job(NLS.bind("Scaling {0} deployment ...", name)){
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					rc.setDesiredReplicaCount(replicas);
-					Connection conn = ConnectionsRegistryUtil.getConnectionFor(rc);
-					conn.updateResource(rc);
-				} catch (Exception e) {
-					String message = NLS.bind("Unable to scale {0}", name);
-					OpenShiftUIActivator.getDefault().getLogger().logError(message,e);
-					return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, e);
-				}
-				return Status.OK_STATUS;
-			}
-			
-		}.schedule();
 	}
 
 	protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
