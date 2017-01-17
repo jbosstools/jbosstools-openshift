@@ -1,0 +1,43 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RedDeer API for OpenShift UI Tests
+Bundle-SymbolicName: org.jboss.tools.openshift.reddeer
+Bundle-Version: 3.3.2.qualifier
+Bundle-Activator: org.jboss.tools.openshift.reddeer.Activator
+Require-Bundle: 
+ org.jboss.tools.openshift.ui;bundle-version="3.3.0",
+ org.jboss.tools.common.core;bundle-version="3.8.1",
+ org.jboss.tools.openshift.common.core;bundle-version="3.3.0",
+ org.apache.commons.lang;bundle-version="2.6.0",
+ org.jboss.reddeer.go;bundle-version="[1.2.0,2.0.0)",
+ org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jgit,
+ org.junit;bundle-version="4.8.2",
+ org.apache.commons.compress,
+ org.apache.commons.lang;bundle-version="2.6.0",
+ org.jboss.tools.openshift.core;bundle-version="3.3.0",
+ org.jboss.tools.openshift.client;bundle-version="3.3.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Eclipse-BundleShape: jar
+Bundle-Localization: plugin
+Bundle-Vendor: JBoss by Red Hat
+Export-Package: org.jboss.tools.openshift.reddeer.condition,
+ org.jboss.tools.openshift.reddeer.condition.v2,
+ org.jboss.tools.openshift.reddeer.enums,
+ org.jboss.tools.openshift.reddeer.exception,
+ org.jboss.tools.openshift.reddeer.matcher,
+ org.jboss.tools.openshift.reddeer.perspective,
+ org.jboss.tools.openshift.reddeer.preference.page,
+ org.jboss.tools.openshift.reddeer.requirement,
+ org.jboss.tools.openshift.reddeer.utils,
+ org.jboss.tools.openshift.reddeer.utils.v2,
+ org.jboss.tools.openshift.reddeer.view,
+ org.jboss.tools.openshift.reddeer.view.resources,
+ org.jboss.tools.openshift.reddeer.widget,
+ org.jboss.tools.openshift.reddeer.wizard,
+ org.jboss.tools.openshift.reddeer.wizard.page,
+ org.jboss.tools.openshift.reddeer.wizard.page.v2,
+ org.jboss.tools.openshift.reddeer.wizard.v2,
+ org.jboss.tools.openshift.reddeer.wizard.v3
