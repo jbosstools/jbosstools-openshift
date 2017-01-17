@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.handler;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.math.NumberUtils;
@@ -68,20 +69,20 @@ import com.openshift.restclient.model.IReplicationController;
  * @author Andre Dietisheim
  *
  */
-public class ScaleDeploymentHandler extends AbstractHandler{
+public class ScaleDeploymentHandler extends AbstractHandler {
 
 	public static final String REPLICA_DIFF = "org.jboss.tools.openshift.ui.command.deployment.scale.replicadiff";
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IReplicationController rc = getSelectedElement(event, IReplicationController.class);
-		if(rc != null) {
+		if (rc != null) {
 			scaleUsing(event, rc, rc.getName());
 		} else {
 			IServiceWrapper deployment = getSelectedElement(event, IServiceWrapper.class);
-			if(deployment == null) {
+			if (deployment == null) {
 				IResourceWrapper<?, IOpenshiftUIElement<?,?>> wrapper = getSelectedElement(event, IResourceWrapper.class);
-				deployment = getServiceWrapperForRunningPod(wrapper);
+				deployment = getServiceWrapperForPodWrapper(wrapper);
 			}
 			if (deployment != null) {
 				rc = getReplicationController(deployment);
@@ -91,23 +92,38 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 			}
 		}
 		return null;
-	}
+ 	}
 
 	//Returns service UI element if given resource wrapper has a running pod and service wrapper as the parent, otherwise returns null.
-	protected static IServiceWrapper getServiceWrapperForRunningPod(IResourceWrapper<?, IOpenshiftUIElement<?,?>> resourceWrapper) {
-		if(resourceWrapper != null && resourceWrapper.getWrapped() instanceof IPod
-				&& !ResourceUtils.isBuildPod((IPod)resourceWrapper.getWrapped())) {
+	protected static IServiceWrapper getServiceWrapperForPodWrapper(IResourceWrapper<?, IOpenshiftUIElement<?,?>> resourceWrapper) {
+		if (resourceWrapper != null
+				&& resourceWrapper.getWrapped() instanceof IPod
+				&& !ResourceUtils.isBuildPod((IPod) resourceWrapper.getWrapped())) {
 			Object parent = resourceWrapper.getParent();
-			if(parent instanceof IServiceWrapper) {
-				return (IServiceWrapper)parent;
-			} else if(parent instanceof IProjectWrapper) {
-				Collection<IResourceWrapper<?, ?>> services = ((IProjectWrapper)parent).getResourcesOfKind(ResourceKind.SERVICE);
-				for (IResourceWrapper<?, ?> wrapper: services) {
-					IServiceWrapper serviceWrapper = (IServiceWrapper)wrapper;
-					if(ResourceUtils.containsAll(serviceWrapper.getWrapped().getMetadata(), ((IPod)resourceWrapper.getWrapped()).getLabels())) {
-						return serviceWrapper;
-					}
-				}
+			if (parent instanceof IServiceWrapper) {
+				return (IServiceWrapper) parent;
+			} else if (parent instanceof IProjectWrapper) {
+				return getServiceWrapperFor((IPod) resourceWrapper.getWrapped(),
+						((IProjectWrapper) parent).getResourcesOfKind(ResourceKind.SERVICE));
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the service wrapper of the the given service wrappers, that matches the given pod
+	 * 
+	 * @param the pod that shall be matched against
+	 * @param services the services that shall be searched for a matching service
+	 * @return the service that matches the given pod
+	 */
+	private static IServiceWrapper getServiceWrapperFor(IPod pod, Collection<IResourceWrapper<?, ?>> services) {
+		Map<String, String> labels = pod.getLabels();
+		for (IResourceWrapper<?, ?> wrapper : services) {
+			IServiceWrapper serviceWrapper = (IServiceWrapper) wrapper;
+			if (ResourceUtils.containsAll(
+					serviceWrapper.getWrapped().getMetadata(), labels)) {
+				return serviceWrapper;
 			}
 		}
 		return null;
@@ -117,13 +133,13 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 		return ResourceUtils.selectByDeploymentConfigVersion(
 				deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER)
 					.stream()
-						.map(wrapper -> (IReplicationController) ((IResourceWrapper) wrapper).getWrapped())
+						.map(wrapper -> (IReplicationController) wrapper.getWrapped())
 						.collect(Collectors.<IReplicationController>toList()));
 	}
 
 	protected void scaleUsing(ExecutionEvent event, IReplicationController rc, String name) {
 		final int requestedReplicas = getRequestedReplicas(rc, name, event);
-		final int currentReplicas = rc.getDesiredReplicaCount();
+		final int currentReplicas = rc.getCurrentReplicaCount();
 		if (requestedReplicas != -1
 				&& currentReplicas != requestedReplicas) { 
 				if (requestedReplicas == 0
@@ -133,8 +149,8 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 				scaleDeployment(event, name, rc, requestedReplicas);
 		}
 	}
-	
-	private boolean showStopDeploymentWarning(String name, Shell shell) {
+
+	protected boolean showStopDeploymentWarning(String name, Shell shell) {
 		MessageDialog dialog = new MessageDialog(shell, 
 				"Stop all deployments?", 
 				OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG, 
@@ -179,8 +195,8 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 
 	private int getRequestedReplicas(IReplicationController rc, String name, ExecutionEvent event) {
 		String diff = event.getParameter(REPLICA_DIFF);
-		int currentReplicas = rc.getDesiredReplicaCount();
-		if(NumberUtils.isNumber(diff)) {
+		int currentReplicas = rc.getCurrentReplicaCount();
+		if (NumberUtils.isNumber(diff)) {
 			return currentReplicas + Integer.parseInt(diff);
 		} else {
 			return showScaleReplicasDialog(name, currentReplicas, HandlerUtil.getActiveShell(event));
