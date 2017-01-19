@@ -20,6 +20,12 @@
    </license>
 
    <plugin
+         id="org.jboss.tools.openshift.reddeer"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+   <plugin
          id="org.jboss.tools.openshift.test"
          download-size="0"
          install-size="0"

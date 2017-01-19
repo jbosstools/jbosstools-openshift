@@ -17,6 +17,7 @@
 	<modules>
 		<module>plugins</module>
 		<module>tests</module>
+		<module>test-framework</module>
 		<module>features</module>
 		<module>site</module>
 	</modules>
