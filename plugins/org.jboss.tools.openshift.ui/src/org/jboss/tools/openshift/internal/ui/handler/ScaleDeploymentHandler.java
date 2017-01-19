@@ -211,7 +211,7 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 		@Override
 		protected Control createContents(Composite parent) {
 			Control control = super.createContents(parent);
-			setupDialog(parent.getShell());
+			setupDialog(name, parent.getShell());
 			return control;
 		}
 
@@ -288,9 +288,9 @@ public class ScaleDeploymentHandler extends AbstractHandler{
 			return dialogArea;
 		}
 
-		private void setupDialog(Shell shell) {
+		private void setupDialog(String name, Shell shell) {
 			shell.setText("Scale Deployments");
-			setTitle("Enter the desired number of replicas for this deployment");
+			setTitle(NLS.bind("Enter the desired number of replicas for deployment {0}", name));
 			setTitleImage(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 			setHelpAvailable(false);
 		}
