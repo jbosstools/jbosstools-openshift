@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CDK RedDeer
+Bundle-SymbolicName: org.jboss.tools.cdk.reddeer;singleton:=true
+Bundle-Version: 3.3.2.qualifier
+Bundle-Activator: org.jboss.tools.cdk.reddeer.Activator
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: Red Hat
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.junit,
+ org.jboss.reddeer.go;bundle-version="[1.2.0,2.0.0)",
+ org.eclipse.swt
+Export-Package: org.jboss.tools.cdk.reddeer.condition,
+ org.jboss.tools.cdk.reddeer.preferences,
+ org.jboss.tools.cdk.reddeer.requirements,
+ org.jboss.tools.cdk.reddeer.ui,
+ org.jboss.tools.cdk.reddeer.ui.wizard
+
