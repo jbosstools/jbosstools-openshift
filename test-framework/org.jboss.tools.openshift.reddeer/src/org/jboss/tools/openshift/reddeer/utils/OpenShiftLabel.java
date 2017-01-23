@@ -176,6 +176,7 @@ public class OpenShiftLabel {
 		public static final String RESTORE_SNAPSHOT = "Restore/Deploy Snapshot";
 		public static final String SECURE_STORAGE = "Secure Storage";
 		public static final String SECURE_STORAGE_PASSWORD = "Secure Storage Password";
+		public static final String PASSWORD_HINT_NEEDED = "Secure Storage - Password Hint Needed";
 		public static final String STOP_ALL_DEPLOYMENTS = "Stop all deployments?";
 		public static final String TAIL_FILES = "Tail Files";
 		public static final String UNTRUSTED_SSL_CERTIFICATE = "Untrusted SSL Certificate";
