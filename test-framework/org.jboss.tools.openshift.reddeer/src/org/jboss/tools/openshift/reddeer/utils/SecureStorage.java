@@ -14,11 +14,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.jboss.reddeer.common.exception.RedDeerException;
+import org.jboss.reddeer.common.logging.Logger;
 import org.jboss.reddeer.common.wait.WaitUntil;
 import org.jboss.reddeer.common.wait.WaitWhile;
 import org.jboss.reddeer.core.condition.JobIsRunning;
 import org.jboss.reddeer.eclipse.equinox.security.ui.StoragePreferencePage;
 import org.jboss.reddeer.swt.condition.WidgetIsEnabled;
+import org.jboss.reddeer.swt.exception.SWTLayerException;
 import org.jboss.reddeer.swt.impl.button.CheckBox;
 import org.jboss.reddeer.swt.impl.button.FinishButton;
 import org.jboss.reddeer.swt.impl.button.NoButton;
@@ -34,6 +36,12 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView.ServerType;
 import org.jboss.tools.openshift.reddeer.view.resources.AbstractOpenShiftConnection;
 
 public class SecureStorage {
+	
+	private static final Logger LOGGER = new Logger(SecureStorage.class);
+	
+	private SecureStorage() {
+		throw new IllegalAccessError("Utility class");
+	}
 	
 	/**
 	 * Store password in secure storage for specified user.
@@ -86,8 +94,14 @@ public class SecureStorage {
 			boolean firstStorage = provideSecureStoragePassword(SystemProperties.SECURE_STORAGE_PASSWORD);
 			
 			if (firstStorage) {
-				new DefaultShell(OpenShiftLabel.Shell.SECURE_STORAGE).setFocus(); 
-				new NoButton().click();	
+				// Did "Password hint needed" shell appear? Get rid of it.
+				try {
+					new DefaultShell(OpenShiftLabel.Shell.PASSWORD_HINT_NEEDED);
+					new NoButton().click();
+				} catch (SWTLayerException ex) {
+					// do nothing
+					LOGGER.debug("Password hint did not appear. Skipping.");
+				}
 			}
 		// Remove password if it is stored
 		} else if (new CheckBox(1).isChecked() && !storePassword) {
