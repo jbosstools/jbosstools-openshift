@@ -33,4 +33,5 @@ public class OpenShiftResources {
 	public static final String NODEJS_TEMPLATE = "nodejs-example";
 	public static final String NODEJS_SERVICE = "nodejs-example";
 	public static final String NODEJS_APP_REPLICATION_CONTROLLER = "nodejs-example-1";
+	public static final String NODEJS_GIT_NAME = "nodejs-ex";
 }
