@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.reddeer.requirement;
+package org.jboss.tools.openshift.reddeer.utils.v3;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -32,9 +32,9 @@ import com.openshift.restclient.model.IService;
 /**
  * @author adietish@redhat.com
  */
-public class OpenShiftResourceUtils {
+public class OpenShift3NativeResourceUtils {
 	
-	private static final Logger LOGGER = new Logger(OpenShiftResourceUtils.class);
+	private static final Logger LOGGER = new Logger(OpenShift3NativeResourceUtils.class);
 
 	/**
 	 * Returns the project with the given name that exists on the server that

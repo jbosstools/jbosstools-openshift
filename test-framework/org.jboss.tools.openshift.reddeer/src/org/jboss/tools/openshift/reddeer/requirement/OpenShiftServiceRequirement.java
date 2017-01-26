@@ -50,6 +50,7 @@ import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
+import org.jboss.tools.openshift.reddeer.utils.v3.OpenShift3NativeResourceUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
@@ -100,7 +101,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		assertNotNull(NLS.bind("No connection for {0} exists", serviceSpec.connectionURL()), connection);
 		final String projectName = TestUtils.getValueOrDefault(serviceSpec.project(), DatastoreOS3.TEST_PROJECT);
 		assertTrue(NLS.bind("No project {0} exists on server {1}", projectName, connection.getHost()), 
-				OpenShiftResourceUtils.hasProject(projectName, connection));
+				OpenShift3NativeResourceUtils.hasProject(projectName, connection));
 		final String serviceName = serviceSpec.service();
 		final String templateName = serviceSpec.template();
 		
@@ -191,7 +192,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	}
 
 	private IService getOrCreateService(String projectName, String serviceName, String templateName) {
-		IService service = OpenShiftResourceUtils.safeGetResource(
+		IService service = OpenShift3NativeResourceUtils.safeGetResource(
 				ResourceKind.SERVICE, serviceName, projectName, connection);
 		if (service == null) {
 			service = createService(serviceName, templateName, projectName, connection);
@@ -202,7 +203,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	private IService createService(String serviceName, String templateName, String projectName, Connection connection) {
 		LOGGER.debug(NLS.bind("Creating service in project {0} on server {1} using template {2}",
 				new Object[] { projectName, connection.getHost(), templateName }));
-		IProject project = OpenShiftResourceUtils.getProject(projectName, connection);
+		IProject project = OpenShift3NativeResourceUtils.getProject(projectName, connection);
 		assertNotNull(project);
 		ITemplate template = connection.getResource(
 				ResourceKind.TEMPLATE, OpenShiftResources.OPENSHIFT_PROJECT, templateName);
