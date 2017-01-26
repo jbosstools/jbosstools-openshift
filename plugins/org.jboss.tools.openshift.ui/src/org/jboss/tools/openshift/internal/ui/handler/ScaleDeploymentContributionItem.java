@@ -35,8 +35,6 @@ public class ScaleDeploymentContributionItem extends CompoundContributionItem im
 	static final String DYNAMIC_ITEM_ID = "org.jboss.tools.openshift.ui.command.deployment.dynamic.scale";
     private IServiceLocator fServiceLocator;
 
-    public ScaleDeploymentContributionItem() {}
-   
 	@Override
 	public void initialize(IServiceLocator serviceLocator) {
 		fServiceLocator = serviceLocator;
@@ -52,9 +50,6 @@ public class ScaleDeploymentContributionItem extends CompoundContributionItem im
     	if(!isRelevant()) {
     		return;
     	}
-        if (index == -1) {
-			index = menu.getItemCount();
-		}
         Menu m = new Menu(menu);
        	super.fill(m, 0);
        	MenuItem item = new MenuItem(menu, SWT.CASCADE);
@@ -71,7 +66,7 @@ public class ScaleDeploymentContributionItem extends CompoundContributionItem im
 		}
 		IRunningPodHolder runningPod = UIUtils.getFirstElement(selection, IRunningPodHolder.class);
 		if(runningPod == null 
-				|| ScaleDeploymentHandler.getServiceWrapperForRunningPod(UIUtils.getFirstElement(selection, IResourceWrapper.class)) == null) {
+				|| ScaleDeploymentHandler.getServiceWrapperForPodWrapper(UIUtils.getFirstElement(selection, IResourceWrapper.class)) == null) {
 			return false;
 		}
 		return true;
