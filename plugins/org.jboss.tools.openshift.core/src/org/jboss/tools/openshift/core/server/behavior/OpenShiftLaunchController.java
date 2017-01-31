@@ -17,7 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -31,7 +30,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
 import org.eclipse.jdt.launching.SocketUtil;
@@ -74,7 +72,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
 	private static final String DEV_MODE = "DEV_MODE"; //$NON-NLS-1$
-	private static final String PACKAGE_JSON = "package.json"; //$NON-NLS-1$
 
 	/**
 	 * Get access to the ControllableServerBehavior
@@ -179,7 +176,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		String currentMode = beh.getServer().getMode();
 		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
 		try {
-			if(DEBUG_MODE.equals(mode)) {
+			if (DEBUG_MODE.equals(mode)) {
 				startDebugging(server, dc, debugContext, monitor);
 			} else {//run, profile
 				stopDebugging(dc, debugContext, monitor);
@@ -192,7 +189,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			checkServerState(beh, currentMode, mode);
 		}
 	}
-	
+
 	/**
 	 * Enables DEV_MODE environment variables in {@link IDeploymentConfig} for
 	 * Node.js project by default
@@ -200,7 +197,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	 * @see <a href="https://issues.jboss.org/browse/JBIDE-22362">JBIDE-22362</a>
 	 */
 	private void enableDevModeForNodeJsProject(IDeploymentConfig dc, IServer server) {
-		if (isNodeJsProject(server)) {
+		if (OpenShiftServerUtils.isNodeJsProject(server)) {
 
 			new Job("Enabling 'DEV_MODE' for deployment config " + dc.getName()) { //$NON-NLS-1$
 
@@ -337,29 +334,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			ILaunchConfigurationWorkingCopy workingCopy,
 			IProgressMonitor monitor) throws CoreException {
 		// Do Nothing
-	}
-	
-	private boolean isJavaProject(IServer server) {
-		IProject p = OpenShiftServerUtils.getDeployProject(server);
-		try {
-			return p != null && p.isAccessible() && p.hasNature(JavaCore.NATURE_ID);
-		} catch (CoreException e) {
-			OpenShiftCoreActivator.pluginLog().logError(e);
-		}
-		return false;
-	}
-	
-	private boolean isNodeJsProject(IServer server) {
-		IProject p = OpenShiftServerUtils.getDeployProject(server);
-		return (p != null && p.isAccessible() && hasPackageJson(p));
-	}
-	
-	/**
-	 * @return true if {@link IProject} contains package.json file, false otherwise.
-	 */
-	private boolean hasPackageJson(IProject project) {
-		IFile packageJson = project.getFile(PACKAGE_JSON);
-		return (packageJson != null && packageJson.isAccessible());
 	}
 	
 	/**
