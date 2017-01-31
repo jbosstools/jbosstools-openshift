@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -90,6 +91,8 @@ public class OpenShiftServerUtils {
 	public static final String SERVER_START_ON_CREATION = "org.jboss.tools.openshift.SERVER_START_ON_CREATION";
 
 	private static final Collection<String> EAP_LIKE_KEYWORDS = Collections.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
+
+	private static final String PACKAGE_JSON = "package.json"; //$NON-NLS-1$
 
 	public static IServer findServerForService(String serviceName) {
 		final IServerType serverType = getServerType();
@@ -521,14 +524,46 @@ public class OpenShiftServerUtils {
 		}
 		return attribute;
 	}
-	
-    public static boolean isJavaProject(IServerAttributes server) {
-        IProject p = getDeployProject(server);
-        try {
-            return p != null && p.isAccessible() && p.hasNature(JavaCore.NATURE_ID);
-        } catch (CoreException e) {
-            OpenShiftCoreActivator.pluginLog().logError(e);
-        }
-        return false;
-    }
+
+	/**
+	 * Return {@code true} if the given server has a deploy project that is a
+	 * java project.
+	 * 
+	 * @param server
+	 * @return
+	 * 
+	 * @see #getDeployProject(IServerAttributes)
+	 */
+	public static boolean isJavaProject(IServerAttributes server) {
+		IProject p = getDeployProject(server);
+		try {
+			return ProjectUtils.isAccessible(p) && p.hasNature(JavaCore.NATURE_ID);
+		} catch (CoreException e) {
+			OpenShiftCoreActivator.pluginLog().logError(e);
+		}
+		return false;
+	}
+
+	/**
+	 * Return {@code true} if the given server has a deploy project that is
+	 * nodejs project.
+	 * 
+	 * @param server
+	 * @return
+	 * 
+	 * @see #getDeployProject(IServerAttributes)
+	 */
+	public static boolean isNodeJsProject(IServerAttributes server) {
+		IProject p = getDeployProject(server);
+		return ProjectUtils.isAccessible(p) && hasPackageJson(p);
+	}
+
+	/**
+	 * @return true if {@link IProject} contains package.json file, false
+	 *         otherwise.
+	 */
+	private static boolean hasPackageJson(IProject project) {
+		IFile packageJson = project.getFile(PACKAGE_JSON);
+		return (packageJson != null && packageJson.isAccessible());
+	}
 }
