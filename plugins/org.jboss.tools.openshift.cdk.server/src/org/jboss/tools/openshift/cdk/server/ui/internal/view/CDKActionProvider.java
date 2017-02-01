@@ -134,8 +134,12 @@ public class CDKActionProvider extends CommonActionProvider {
 	
 	private boolean acceptsServer(IServer s) {
 		// For now lets just do cdk servers, but we can change this if we wanted it extensible via an adapter?
-		if( s != null && s.getServerType() != null && s.getServerType().getId().equals(CDKServer.CDK_SERVER_TYPE))
-			return true;
+		if( s != null && s.getServerType() != null ) {
+			String typeId = s.getServerType().getId();
+			if(CDKServer.CDK_SERVER_TYPE.equals(typeId) || CDKServer.CDK_V3_SERVER_TYPE.equals(typeId)) {
+				return true;
+			}
+		}
 		return false;
 	}
 	

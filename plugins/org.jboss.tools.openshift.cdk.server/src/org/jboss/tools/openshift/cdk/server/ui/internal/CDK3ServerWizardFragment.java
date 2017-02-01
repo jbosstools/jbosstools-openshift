@@ -20,7 +20,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		String title = "Red Hat Container Development Environment";
 		String desc = "A server adapter representing Red Hat Container Development Kit Version 3.";
-		String label = "Minishift File: ";
+		String label = "Minishift Binary: ";
 		return createComposite(parent, handle, title, desc, label);
 	}
 
