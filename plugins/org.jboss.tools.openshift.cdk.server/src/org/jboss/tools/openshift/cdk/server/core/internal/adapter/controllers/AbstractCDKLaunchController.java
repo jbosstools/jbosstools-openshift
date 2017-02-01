@@ -162,7 +162,7 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 	 * An attempt to start when the CDK is already started
 	 * will return a 0 exit status (ie success)
 	 */
-	protected static final boolean MULTIPLE_START_SUCCESS = false;
+	protected static final boolean MULTIPLE_START_SUCCESS = true;
 	
 	protected boolean getMultipleStartBehavior() {
 		return MULTIPLE_START_SUCCESS;
