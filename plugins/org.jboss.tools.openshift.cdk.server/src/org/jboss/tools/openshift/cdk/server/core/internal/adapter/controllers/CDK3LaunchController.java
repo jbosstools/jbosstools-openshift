@@ -79,8 +79,8 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 		String cmdLoc = server.getAttribute(CDKServer.MINISHIFT_FILE, (String)null);
 		wc.setAttribute(ATTR_LOCATION, cmdLoc);
 		
-		String args =  "start";
-		wc.setAttribute(ATTR_ARGS, args);
+		String currentVal = wc.getAttribute(ATTR_ARGS, "start");
+		wc.setAttribute(ATTR_ARGS, currentVal);
 	}
 
 	
@@ -159,6 +159,10 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
 						"Password environment variable id cannot be empty when passing credentials via environment variables."));				
 			}
+			
+
+			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, null);
+			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, null);
 			
 	    	String pass = null;
 	    	String user = cdkServer.getUsername();

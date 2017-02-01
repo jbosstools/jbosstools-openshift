@@ -169,11 +169,19 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 	}
 	
 	protected void handleProcessTerminated(IProcess p, ControllableServerBehavior beh) {
-		if( getMultipleStartBehavior() == MULTIPLE_START_SUCCESS) {
-			boolean handled = handleStartCommandExitCodeFailure(p, beh);
-			if( handled ) 
-				return;
-		}
+		/* 
+		 * It had seemed as if any non-zero return on the startup process would indicate the 
+		 * cdk was not running. However, multiple scenarios have proven that this is a faulty 
+		 * assumption. The CDK may be started but not registered, and the return code
+		 * would be non-zero. 
+		 * 
+		 *  It seems a full poll is required to guarantee the server state matches the minishift state 
+		 */
+//		if( getMultipleStartBehavior() == MULTIPLE_START_SUCCESS) {
+//			boolean handled = handleStartCommandExitCodeFailure(p, beh);
+//			if( handled ) 
+//				return;
+//		}
 		
 		processTerminatedDelay();
 		
