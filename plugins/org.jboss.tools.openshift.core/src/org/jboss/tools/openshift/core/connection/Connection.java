@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.core.connection;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
@@ -224,8 +225,6 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	@Override
 	public boolean connect() throws OpenShiftException {
 		if(authorize()) {
-			savePasswordOrToken();
-			saveAuthSchemePreference();
 			return true;
 		}
 		return false;
