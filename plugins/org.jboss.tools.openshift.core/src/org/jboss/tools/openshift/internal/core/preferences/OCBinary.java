@@ -86,6 +86,6 @@ public enum OCBinary {
 	 * @see https://github.com/openshift/origin/issues/6109
 	 */
 	public boolean isCompatibleForPublishing(IProgressMonitor monitor) {
-	    return new OCBinaryValidator(getLocation()).isCompatibleForPublishing(monitor);
+	    return new OCBinaryVersionValidator(getLocation()).isCompatibleForPublishing(monitor);
 	}
 }

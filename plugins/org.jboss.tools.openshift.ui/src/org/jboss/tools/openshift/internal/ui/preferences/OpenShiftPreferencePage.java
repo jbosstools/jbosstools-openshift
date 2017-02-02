@@ -41,7 +41,7 @@ import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryVersionValidator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.osgi.framework.Version;
 
@@ -105,13 +105,13 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	@Override
 	protected void performDefaults() {
 		String location = ocBinary.getSystemPathLocation();
-		if(location == null) {
+		if (location == null) {
 			//We have to update default value in preferences even if it is empty.
 			location = "";
 		}
 		getPreferenceStore().setDefault(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC, location);
 
-		if(StringUtils.isBlank(location)) {
+		if (StringUtils.isBlank(location)) {
 			String message = NLS.bind("Could not find the OpenShift client executable \"{0}\" on your path.", ocBinary.getName());
 			OpenShiftUIActivator.getDefault().getLogger().logWarning(message);				
 			MessageDialog.openWarning(getShell(), "No OpenShift client executable", message);
@@ -128,7 +128,8 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	@Override
 	public boolean performOk() {
 		boolean valid = true;
-		if(cliLocationEditor.getStringValue().equals(getPreferenceStore().getDefaultString(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC))) {
+		if (cliLocationEditor.getStringValue()
+				.equals(getPreferenceStore().getDefaultString(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC))) {
 			//Super implementation changes instance value, we need it clean.
 			getPreferenceStore().setToDefault(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC);
 		} else {
@@ -140,32 +141,34 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	}
 
 	private boolean validateLocation(String location) {
-		if(StringUtils.isBlank(location)) {
+		if (StringUtils.isBlank(location)) {
 			return true;
 		}
 		File file = new File(location);
-		//Error messages have to be set to field editor, not directly to the page.
-		if(!ocBinary.getName().equals(file.getName())) {
-			cliLocationEditor.setErrorMessage(NLS.bind("{0} is not the OpenShift client ''{1}'' executable.", file.getName(), ocBinary.getName()));
+		// Error messages have to be set to field editor, not directly to the
+		// page.
+		if (!ocBinary.getName().equals(file.getName())) {
+			cliLocationEditor.setErrorMessage(NLS.bind("{0} is not the OpenShift client ''{1}'' executable.",
+					file.getName(), ocBinary.getName()));
 			return false;
 		}
-		if(!file.exists()) {
+		if (!file.exists()) {
 			cliLocationEditor.setErrorMessage(NLS.bind("{0} was not found.", file));
 			return false;
 		}
-		if(!file.canExecute()) {
+		if (!file.canExecute()) {
 			cliLocationEditor.setErrorMessage(NLS.bind("{0} does not have execute permissions.", file));
 			return false;
 		}
 		setValid(false);
 		ocVersionLabel.setText("Checking OpenShift client version...");
-		versionVerificationJob = new UIUpdatingJob("Checking oc binary") {
+		this.versionVerificationJob = new UIUpdatingJob("Checking oc binary...") {
  
 		    private Version version;
 		    
             @Override
             protected IStatus run(IProgressMonitor monitor) {
-                version = new OCBinaryValidator(location).getVersion(monitor);
+                version = new OCBinaryVersionValidator(location).getVersion(monitor);
                 if (monitor.isCanceled()) {
                 	return Status.CANCEL_STATUS;
                 }
@@ -177,15 +180,17 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
             	if (!getResult().isOK()) {
             		return getResult();
             	}
-                if (!ocMessageComposite.isDisposed() && !monitor.isCanceled()) {
-                    setValid(true);
-                    if (Version.emptyVersion.equals(version)) {
-                    	ocVersionLabel.setText("Could not determine your OpenShift client version");
-                    } else {
-                    	ocVersionLabel.setText(NLS.bind("Your OpenShift client version is {0}.{1}.{2}", new Object[] {version.getMajor(), version.getMinor(), version.getMicro()}));
-                    }
-                    ocMessageLabel.setText(NLS.bind("OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
-                    ocMessageComposite.setVisible(!OCBinaryValidator.isCompatibleForPublishing(version));
+				if (!ocMessageComposite.isDisposed() && !monitor.isCanceled()) {
+					setValid(true);
+					if (Version.emptyVersion.equals(version)) {
+						ocVersionLabel.setText("Could not determine your OpenShift client version");
+					} else {
+						ocVersionLabel.setText(NLS.bind("Your OpenShift client version is {0}.{1}.{2}",
+								new Object[] { version.getMajor(), version.getMinor(), version.getMicro() }));
+					}
+					ocMessageLabel.setText(NLS.bind(
+							"OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
+					ocMessageComposite.setVisible(!OCBinaryVersionValidator.isCompatibleForPublishing(version));
                 }
                 return super.updateUI(monitor);
             }
@@ -201,7 +206,8 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		public CliFileEditor() {
 			//Validation strategy should be set in constructor, later setting it has no effect.
 			super(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC,
-					NLS.bind("''{0}'' executable location", ocBinary.getName()), false, StringFieldEditor.VALIDATE_ON_KEY_STROKE, getFieldEditorParent());
+					NLS.bind("''{0}'' executable location", ocBinary.getName()), 
+					false, StringFieldEditor.VALIDATE_ON_KEY_STROKE, getFieldEditorParent());
 		}
 
 		@Override
