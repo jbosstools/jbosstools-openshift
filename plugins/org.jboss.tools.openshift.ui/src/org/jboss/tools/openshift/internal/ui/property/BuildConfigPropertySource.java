@@ -40,7 +40,7 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		List<IPropertyDescriptor> all = new ArrayList<>();
 		all.addAll(getBuildTriggerPropertyDescriptors());
-		switch(getResource().getBuildStrategy().getType()){
+		switch (getResource().getBuildStrategy().getType()) {
 		case BuildStrategyType.CUSTOM:
 			all.addAll(getCustomPropertyDescriptors());
 			break;
@@ -53,7 +53,7 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 			break;
 		default:
 		}
-		switch(getResource().getBuildSource().getType()){
+		switch (getResource().getBuildSource().getType()) {
 		case BuildSourceType.GIT:
 			all.addAll(getGitBuildSource());
 			break;

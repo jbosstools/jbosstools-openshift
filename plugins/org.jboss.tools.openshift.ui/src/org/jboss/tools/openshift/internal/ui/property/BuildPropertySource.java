@@ -28,7 +28,7 @@ public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 
 	
 	@Override
-	public IPropertyDescriptor[] getPropertyDescriptors() {
+	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		return new IPropertyDescriptor[] {
 			new UneditablePropertyDescriptor("status", "Status"),
 			new UneditablePropertyDescriptor("started", "Started"),
@@ -49,25 +49,27 @@ public class BuildPropertySource extends ResourcePropertySource<IBuild> {
 	@Override
 	public Object getPropertyValue(Object id) {
 		IBuild build = getResource();
-		switch((String)id) {
-		case "status": return build.getStatus();
-		case "started": 
-			return DateTimeUtils.formatSince(build .getCreationTimeStamp());
-		case "build.config": 
-			return build.getLabels().get(OpenShiftAPIAnnotations.BUILD_CONFIG_NAME);
-		case "build.strategy" :
-		case "builder.image" :
-			return handleBuildStrategy((String)id, build.getBuildStrategy());
-		case "source.type" : 
-		case "source.repo" : 
-		case "source.ref" : 
-		case "source.contextDir" :
-			return handleBuildSource((String) id, build.getBuildSource());
-		case "duration": 
-		case "output.image": 
-			return handleBuildStatus((String)id, build.getBuildStatus());
-		case "push.secret" :
-			return build.getPushSecret();
+		if (id instanceof String) {
+			switch((String)id) {
+			case "status": return build.getStatus();
+			case "started": 
+				return DateTimeUtils.formatSince(build .getCreationTimeStamp());
+			case "build.config": 
+				return build.getLabels().get(OpenShiftAPIAnnotations.BUILD_CONFIG_NAME);
+			case "build.strategy" :
+			case "builder.image" :
+				return handleBuildStrategy((String)id, build.getBuildStrategy());
+			case "source.type" : 
+			case "source.repo" : 
+			case "source.ref" : 
+			case "source.contextDir" :
+				return handleBuildSource((String) id, build.getBuildSource());
+			case "duration": 
+			case "output.image": 
+				return handleBuildStatus((String)id, build.getBuildStatus());
+			case "push.secret" :
+				return build.getPushSecret();
+			}
 		}
 		return super.getPropertyValue(id);
 	}
