@@ -818,10 +818,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to reset page fields", e);
 		}
-		// fix GTK3 combo boxes too small
-		// https://issues.jboss.org/browse/JBIDE-16877,
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=431425
-		((Composite) getControl()).layout(true, true);
+
+		UIUtils.ensureGTK3CombosAreCorrectSize((Composite) getControl());
 	}
 	
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {

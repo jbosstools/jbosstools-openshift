@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Adapters;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.ContributionManager;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IContributionManager;
@@ -40,6 +41,8 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.GC;
@@ -523,5 +526,32 @@ public class UIUtils {
     	ISelectionService service = (window != null) ? window.getSelectionService() : null;
     	return service != null ? service.getSelection() : null;
     }
+    
+    /**
+     * Makes sure combos in GTK3 are displayed in the correct size.
+     * 
+     * @param combo the container which contains combos wont have those in too small size
+     * 
+     * @see https://issues.jboss.org/browse/JBIDE-16877,
+	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=431425
+     */
+    public static void ensureGTK3CombosAreCorrectSize(final Composite composite) {
+    	if (!Platform.WS_GTK.equals(Platform.getWS())
+    			|| DisposeUtils.isDisposed(composite)) {
+    		return;
+    	}
 
-}
+		composite.addPaintListener(new PaintListener() {
+
+			@Override
+			public void paintControl(PaintEvent e) {
+				if (!DisposeUtils.isDisposed(composite)
+						&& composite.isVisible()) {
+					composite.layout(true, true);
+					composite.update();
+					composite.removePaintListener(this);
+				}
+			}
+		});
+    }
+   }

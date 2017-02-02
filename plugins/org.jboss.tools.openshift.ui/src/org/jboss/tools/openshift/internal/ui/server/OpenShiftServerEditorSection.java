@@ -44,13 +44,10 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -184,7 +181,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1)
 			.applyTo(projectSettingGroup);
 		GridLayoutFactory.fillDefaults()
-				.margins(10, 10)
 				.applyTo(projectSettingGroup);
 
 		// additional nesting required because of https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
@@ -194,6 +190,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.applyTo(projectSettingsContainer);
 		GridLayoutFactory.fillDefaults()
 			.numColumns(4)
+			.margins(10, 10)
 			.applyTo(projectSettingsContainer);
 		
 		createProjectControls(projectSettingsContainer, dbc);
@@ -208,7 +205,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		Label connectionLabel = new Label(parent, SWT.NONE);
 		connectionLabel.setText("Connection:");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER)
+				.align(SWT.BEGINNING, SWT.CENTER)
 				.applyTo(connectionLabel);
 
 		Combo connectionCombo = new Combo(parent, SWT.DEFAULT);
@@ -216,7 +213,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		connectionViewer.setContentProvider(new ObservableListContentProvider());
 		connectionViewer.setLabelProvider(new ConnectionColumLabelProvider());
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false)
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
 				.applyTo(connectionCombo);
 		connectionViewer.setInput(
 				BeanProperties.list(OpenShiftServerEditorModel.PROPERTY_CONNECTIONS).observe(model));
@@ -241,7 +239,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		Button newConnectionButton = new Button(parent, SWT.PUSH);
 		newConnectionButton.setText("New...");
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT)
+			.align(SWT.FILL, SWT.CENTER)
+			.hint(100, SWT.DEFAULT)
 			.applyTo(newConnectionButton);
 		newConnectionButton.addSelectionListener(onNewConnection(connectionViewer));
 	}
@@ -269,14 +268,17 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		Label projectLabel = new Label(parent, SWT.NONE);
 		projectLabel.setText("Eclipse Project: ");
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
+			.align(SWT.BEGINNING, SWT.CENTER)
 			.applyTo(projectLabel);
 
-		StructuredViewer projectsViewer = new ComboViewer(parent);
+		Combo projectsCombo = new Combo(parent, SWT.DEFAULT);
+		StructuredViewer projectsViewer = new ComboViewer(projectsCombo);
 		GridDataFactory.fillDefaults()
-			.span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-			.applyTo(projectsViewer.getControl());
-
+			.span(2, 1)
+			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, true)
+			.applyTo(projectsCombo);
+		
 		projectsViewer.setContentProvider(new ObservableListContentProvider());
 		projectsViewer.setLabelProvider(new ColumnLabelProvider() {
 
@@ -315,17 +317,11 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		Button browseProjectsButton = new Button(parent, SWT.NONE);
 		browseProjectsButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
+				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(onBrowseProjects(model, browseProjectsButton.getShell()));
-		projectsViewer.getControl().addPaintListener(new PaintListener() {
 
-			@Override
-			public void paintControl(PaintEvent e) {
-				projectsViewer.getControl().getParent().update();
-				projectsViewer.getControl().pack();
-			}
-		});
+		UIUtils.ensureGTK3CombosAreCorrectSize(parent);
 	}
 
 	private SelectionListener onBrowseProjects(OpenShiftServerEditorModel model, final Shell shell) {
@@ -344,17 +340,19 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		};
 	}
 
-	private void createSourcePathControls(Composite container, DataBindingContext dbc) {
-		Label sourcePathLabel = new Label(container, SWT.NONE);
+	private void createSourcePathControls(Composite parent, DataBindingContext dbc) {
+		Label sourcePathLabel = new Label(parent, SWT.NONE);
 		sourcePathLabel.setText("Source Path: ");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
+				.align(SWT.BEGINNING, SWT.CENTER)
 				.applyTo(sourcePathLabel);
 
-		Text sourcePathText = new Text(container, SWT.BORDER | SWT.READ_ONLY);
+		Text sourcePathText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.span(3,1).applyTo(sourcePathText);
+				.span(3,1)
+				.align(SWT.FILL, SWT.FILL)
+				.grab(true, false)
+				.applyTo(sourcePathText);
 		ValueBindingBuilder
 				.bind(WidgetProperties.text(SWT.Modify).observe(sourcePathText))
 				.validatingAfterConvert(new IValidator() {
@@ -377,27 +375,22 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				})
 				.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_SOURCE_PATH).observe(model))
 				.in(dbc);
-		
-		// placeholder labels and a wrapper to hold the two buttons
-		new Label(container, SWT.NONE);
-		new Label(container, SWT.NONE);
-		Composite wrapper = new Composite(container, SWT.NONE);
-		wrapper.setLayout(new GridLayout(2, true));
-		GridDataFactory.fillDefaults().align(SWT.END, SWT.FILL).span(2,1).applyTo(wrapper);
 
-		
-		
-		Button browseSourceButton = new Button(wrapper, SWT.PUSH);
+		// filler
+		new Label(parent, SWT.NONE);
+		new Label(parent, SWT.NONE);
+
+		Button browseSourceButton = new Button(parent, SWT.PUSH);
 		browseSourceButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.END)
+				.align(SWT.END, SWT.CENTER)
 				.applyTo(browseSourceButton);
 		browseSourceButton.addSelectionListener(onBrowseSource(browseSourceButton.getShell()));
 
-		Button browseWorkspaceSourceButton = new Button(wrapper, SWT.PUSH | SWT.READ_ONLY);
+		Button browseWorkspaceSourceButton = new Button(parent, SWT.PUSH | SWT.READ_ONLY);
 		browseWorkspaceSourceButton.setText("Workspace...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.END)
+				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(browseWorkspaceSourceButton);
 		browseWorkspaceSourceButton.addSelectionListener(onBrowseWorkspace(browseWorkspaceSourceButton.getShell()));
 
@@ -440,12 +433,14 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		Label deployPathLabel = new Label(parent, SWT.NONE);
 		deployPathLabel.setText("Pod Deployment Path: ");
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
+			.align(SWT.BEGINNING, SWT.CENTER)
 			.applyTo(deployPathLabel);
 
 		Text deployPathText = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults()
-			.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.span(3, 1)
+			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, false)
 			.applyTo(deployPathText);
 		ValueBindingBuilder
 			.bind(WidgetProperties.text(SWT.Modify).observe(deployPathText))
@@ -471,12 +466,14 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		Label serviceLabel = new Label(parent, SWT.NONE);
 		serviceLabel.setText("Service:");
 		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
+				.align(SWT.BEGINNING, SWT.CENTER)
 				.applyTo(serviceLabel);
 
 		Text serviceText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
-			.span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.span(2, 1)
+			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, false)
 			.applyTo(serviceText);
 		ValueBindingBuilder
 			.bind(WidgetProperties.text(SWT.Modify).observe(serviceText))
