@@ -19,44 +19,48 @@ import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.IModelFactory;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.utils.ObservableTreeItemUtils;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 /**
  * @author Andre Dietisheim
  */
-public class ServiceViewModel extends ObservablePojo {
+public class ServerResourceViewModel extends ObservablePojo {
 
 	public static final String PROPERTY_CONNECTION = "connection";
 	public static final String PROPERTY_CONNECTIONS = "connections";
-	public static final String PROPERTY_SERVICE = "service";
-	public static final String PROPERTY_SERVICE_ITEMS = "serviceItems";
+	public static final String PROPERTY_RESOURCE = "resource";
+	public static final String PROPERTY_RESOURCE_ITEMS = "resourceItems";
 
 	private boolean isLoaded = false;
 	private IConnection connection;
 	private List<IConnection> connections = new ArrayList<>();
-	private List<ObservableTreeItem> serviceItems = new ArrayList<>();
-	protected IService service;
+	private List<ObservableTreeItem> resourceItems = new ArrayList<>();
+	protected IResource resource;
 
-	public ServiceViewModel(IConnection connection) {
+	public ServerResourceViewModel(IConnection connection) {
 		this(null, connection);
 	}
 
-	public ServiceViewModel(IService service, IConnection connection) {
+	public ServerResourceViewModel(IResource resource, IConnection connection) {
 		this.connection = connection;
-		this.service = service;
+		this.resource = resource;
 	}
 
-	protected void update(IConnection connection, List<IConnection> connections, IService service, List<ObservableTreeItem> serviceItems) {
+	protected void update(IConnection connection, List<IConnection> connections, IResource resource, List<ObservableTreeItem> resourceItems) {
 		updateConnections(connections);
 		updateConnection(connection);
-		updateServiceItems(serviceItems);
-		updateService(service, serviceItems);
+		updateResourceItems(resourceItems);
+		updateResource(resource, resourceItems);
 	}
 
 	protected void updateConnection(IConnection connection) {
@@ -75,30 +79,30 @@ public class ServiceViewModel extends ObservablePojo {
 		}
 	}
 
-	private void updateServiceItems(List<ObservableTreeItem> newServiceItems) {
-		List<ObservableTreeItem> oldItems = new ArrayList<>(this.serviceItems);
+	private void updateResourceItems(List<ObservableTreeItem> newResourceItems) {
+		List<ObservableTreeItem> oldItems = new ArrayList<>(this.resourceItems);
 		// ensure we're not operating on the same list
-		if (newServiceItems != this.serviceItems) {
-			this.serviceItems.clear();
-			if (newServiceItems != null) {
-				this.serviceItems.addAll(newServiceItems);
+		if (newResourceItems != this.resourceItems) {
+			this.resourceItems.clear();
+			if (newResourceItems != null) {
+				this.resourceItems.addAll(newResourceItems);
 			}
-			firePropertyChange(PROPERTY_SERVICE_ITEMS, oldItems, this.serviceItems);
+			firePropertyChange(PROPERTY_RESOURCE_ITEMS, oldItems, this.resourceItems);
 		}
 	}
 
-	protected IService updateService(final IService service, final List<ObservableTreeItem> serviceItems) {
+	protected IResource updateResource(final IResource resource, final List<ObservableTreeItem> resourceItems) {
 		if (!isLoaded) {
-			return service;
+			return resource;
 		}
 
-		IService newService = getServiceOrDefault(service, serviceItems);
-		firePropertyChange(PROPERTY_SERVICE, null, this.service = newService);
-		return newService;
+		IResource newResource = getResourceOrDefault(resource, resourceItems);
+		firePropertyChange(PROPERTY_RESOURCE, null, this.resource = newResource);
+		return newResource;
 	}
 
 	public void setConnections(List<IConnection> connections) {
-		update(this.connection, connections, this.service, this.serviceItems);
+		update(this.connection, connections, this.resource, this.resourceItems);
 	}
 
 	public IConnection getConnection() {
@@ -115,60 +119,55 @@ public class ServiceViewModel extends ObservablePojo {
 		}
 	}
 
-	public List<ObservableTreeItem> getServiceItems() {
-		return serviceItems;
+	public List<ObservableTreeItem> getResourceItems() {
+		return resourceItems;
 	}
 
-	protected void setServiceItems(List<ObservableTreeItem> items) {
-		update(this.connection, this.connections, this.service, items);
+	protected void setResourceItems(List<ObservableTreeItem> items) {
+		update(this.connection, this.connections, this.resource, items);
 	}
 
-	public IService getService() {
+	public IResource getResource() {
 		if (!isLoaded) {
 			return null;
 		}
-		// reveal selected service only once model is loaded
-		return service;
+		// reveal selected resource only once model is loaded
+		return resource;
 	}
 	
-	public void setService(IService service) {
-		update(this.connection, this.connections, service, this.serviceItems);
+	public void setResource(IResource resource) {
+		update(this.connection, this.connections, resource, this.resourceItems);
 	}
 	
-	protected IProject getOpenShiftProject(IService service) {
-		if (service == null
-				|| serviceItems.isEmpty()) {
-			return null;
-		}
-		Optional<ObservableTreeItem> projectItem = serviceItems.stream()
-				.filter(item -> ObservableTreeItemUtils.getItemFor(service, item.getChildren()) != null)
-				.findFirst();
-		if(projectItem.isPresent()) {
-			return (IProject) projectItem.get().getModel();
-		} else {
-			return null;
-		}
-		
+	protected IProject getOpenShiftProject(IResource resource) {
+	    return resource.getProject();
 	}
 
-	protected IService getServiceOrDefault(final IService service, final List<ObservableTreeItem> items) {
-		if (service == null
-				|| !ObservableTreeItemUtils.contains(service, items)) {
-			return ObservableTreeItemUtils.getFirstModel(IService.class, items);
-		}
-		return service;
-	}
+    protected IResource getResourceOrDefault(IResource resource, List<ObservableTreeItem> items) {
+        if (resource == null
+                || !ObservableTreeItemUtils.contains(resource, items)) {
+            IResource newResource = ObservableTreeItemUtils.getFirstModel(IService.class, items);
+            if (newResource == null) {
+                newResource = ObservableTreeItemUtils.getFirstModel(IDeploymentConfig.class, items);
+                if (newResource == null) {
+                    newResource = ObservableTreeItemUtils.getFirstModel(IReplicationController.class, items);
+                }
+            }
+            return newResource;
+        }
+        return resource;
+    }
 
 	/**
 	 * @param serviceName
 	 *            the name of the {@link IService} to look-up
 	 * @return the matching {@link IService} previously loaded or
-	 *         <code>null</code> if the {@code serviceItems} were not loaded or
+	 *         <code>null</code> if the {@code resourceItems} were not loaded or
 	 *         not match was found.
 	 */
 	public IService getService(final String serviceName) {
-		if(this.serviceItems != null) {
-			return this.serviceItems.stream().flatMap(ObservableTreeItemUtils::flatten)
+		if(this.resourceItems != null) {
+			return this.resourceItems.stream().flatMap(ObservableTreeItemUtils::flatten)
 					.filter(item -> item.getModel() instanceof IService).map(item -> (IService) item.getModel())
 					.filter(service -> service.getName().equals(serviceName)).findFirst().orElseGet(() -> null);
 		}
@@ -193,10 +192,10 @@ public class ServiceViewModel extends ObservablePojo {
 		setConnection(connection);
 		if (connection != null) {
 			List<ObservableTreeItem> serviceItems = loadServices(connection);
-			setServiceItems(serviceItems);
+			setResourceItems(serviceItems);
 		}
 		this.isLoaded = true;
-		update(this.connection, this.connections, this.service, this.serviceItems);
+		update(this.connection, this.connections, this.resource, this.resourceItems);
 	}
 
 	private List<IConnection> loadConnections() {
@@ -207,21 +206,21 @@ public class ServiceViewModel extends ObservablePojo {
 		if (connection == null) {
 			return null;
 		}
-		ObservableTreeItem connectionItem = ServiceTreeItemsFactory.INSTANCE.create(connection);
+		ObservableTreeItem connectionItem = ResourceTreeItemsFactory.INSTANCE.create(connection);
 		connectionItem.load();
 		return connectionItem.getChildren();
 	}
 
-	static class ServiceTreeItemsFactory implements IModelFactory {
+	static class ResourceTreeItemsFactory implements IModelFactory {
 
-		private static final ServiceTreeItemsFactory INSTANCE = new ServiceTreeItemsFactory();
+		private static final ResourceTreeItemsFactory INSTANCE = new ResourceTreeItemsFactory();
 			
 		/**
-		 * Creates a service items tree with the following structure:
+		 * Creates a resource items tree with the following structure:
 		 * connection
 		 * 	|_ project
-		 *	|	|_ service
-		 *	|	|_ service
+		 *	|	|_ resource
+		 *	|	|_ resource
 		 *	|_project
 		 *		|_service  
 		 */
@@ -231,12 +230,23 @@ public class ServiceViewModel extends ObservablePojo {
 			if (parent instanceof Connection) {
 				return (List<T>) ((Connection) parent).getResources(ResourceKind.PROJECT);
 			} else if (parent instanceof IProject) {
-				return (List<T>) ((IProject) parent).getResources(ResourceKind.SERVICE);
+				return (List<T>) getProjectResources((IProject) parent);
 			}
 			return Collections.emptyList();
 		}
 
-		@Override
+		private List<IResource> getProjectResources(IProject project) {
+		    List<IResource> services = project.getResources(ResourceKind.SERVICE);
+		    /*
+		     * add DeploymentConfig resources not linked to the services
+		     */
+		    List<IDeploymentConfig> dcConfigs = project.getResources(ResourceKind.DEPLOYMENT_CONFIG);
+		    dcConfigs.stream().filter(dc -> !services.stream().anyMatch(service -> ResourceUtils.areRelated((IService) service, dc)))
+		                      .forEach(dc -> services.add(dc));
+		    return services;
+        }
+
+        @Override
 		public ObservableTreeItem create(Object object) {
 			return new ObservableTreeItem(object, this);
 		}

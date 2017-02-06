@@ -59,6 +59,7 @@ import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 public class OpenShiftLaunchController extends AbstractSubsystemController
@@ -226,15 +227,15 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	}
 
 	protected int pollState() {
-		IService service = null;
+		IResource resource = null;
 		Exception e = null;
 		try {
-			service = OpenShiftServerUtils.getService(getServer());
+			resource = OpenShiftServerUtils.getResource(getServer());
 		} catch(OpenShiftException ose ) {
 			e = ose;
 		}
-		if (service == null) {
-			OpenShiftCoreActivator.pluginLog().logError("The OpenShift service for server " + getServer().getName() + " could not be reached.", e);
+		if (resource == null) {
+			OpenShiftCoreActivator.pluginLog().logError("The OpenShift resource for server " + getServer().getName() + " could not be reached.", e);
 			return IServer.STATE_STOPPED;
 		}
 		return IServer.STATE_STARTED;

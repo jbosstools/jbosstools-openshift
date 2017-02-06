@@ -46,6 +46,7 @@ import org.junit.Test;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
@@ -201,9 +202,9 @@ public class OpenShiftServerUtilsTest {
 	public void should_return_service_from_server() {
 		// given
 		// when
-		IService service = OpenShiftServerUtils.getService(server, connection);
+		IResource resource = OpenShiftServerUtils.getResource(server, connection);
 		// then
-		assertThat(service).isEqualTo(ResourceMocks.PROJECT2_SERVICES[1]);
+		assertThat(resource).isEqualTo(ResourceMocks.PROJECT2_SERVICES[1]);
 	}
 
 	@Test

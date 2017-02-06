@@ -477,7 +477,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.applyTo(serviceText);
 		ValueBindingBuilder
 			.bind(WidgetProperties.text(SWT.Modify).observe(serviceText))
-			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_SERVICE).observe(model))
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_RESOURCE).observe(model))
 			.converting(new Converter(IService.class, String.class) {
 				
 				@Override
@@ -504,12 +504,12 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			public void widgetSelected(SelectionEvent e) {
 
 				
-				SelectServiceWizard selectServiceDialog = 
-						new SelectServiceWizard(NLS.bind("Select a service that your server adapter {0} will publish to.", 
-								input.getServer().getName()), model.getService(), model.getConnection());
-				if (WizardUtils.openWizardDialog(selectServiceDialog, shell) 
+				SelectResourceWizard selectResourceDialog = 
+						new SelectResourceWizard(NLS.bind("Select a resource that your server adapter {0} will publish to.", 
+								input.getServer().getName()), model.getResource(), model.getConnection());
+				if (WizardUtils.openWizardDialog(selectResourceDialog, shell) 
 						== Dialog.OK) {
-					model.setService(selectServiceDialog.getService());
+					model.setResource(selectResourceDialog.getResource());
 				}
 			}
 		};
@@ -575,7 +575,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 									model.setDeployProject(deployProject);
 								}
 								model.setConnection(connection);
-								model.setService(OpenShiftServerUtils.getService(server));
+								model.setResource(OpenShiftServerUtils.getResource(server));
 								String sourcePath = OpenShiftServerUtils.getSourcePath(server);
 								if (!StringUtils.isEmpty(sourcePath)) {
 									model.setSourcePath(sourcePath);
