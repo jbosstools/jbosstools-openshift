@@ -78,4 +78,8 @@ public class CommandLocationBinary {
 		foundLoc = searched;
 		return searched;
 	}
+	
+	public String[] getPossibleSuffixes() {
+		return CommandLocationLookupStrategy.get().getSuffixes();
+	}
 }

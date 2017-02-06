@@ -171,6 +171,14 @@ public class CommandLocationLookupStrategy {
 		return (String[]) ret.toArray(new String[ret.size()]);
 	}
 	
+	public String[] getSuffixes() {
+		return suffixes == null ? new String[0] : suffixes;
+	}
+	
+	public String[] getPossibleCommandNames(CommandLocationBinary binary) {
+		return getPossibleCommandNames(binary.getCommand(Platform.getOS()));
+	}
+	
 	private String searchPath(String path, String delim, String commandName) {
 		String[] roots = path.split(delim);
 		String[] withSuffixes = getPossibleCommandNames(commandName);

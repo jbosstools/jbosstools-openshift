@@ -79,7 +79,14 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		});
 		this.cliLocationEditor = new CliFileEditor();
 		cliLocationEditor.setFilterPath(SystemUtils.getUserHome());
-		cliLocationEditor.setFileExtensions(ocBinary.getExtensions());
+		
+		String[] suffixes = ocBinary.getExtensions();
+		String[] filters = new String[suffixes.length];
+		for( int i = 0; i < filters.length; i++ ) {
+			filters[i] = "*" + suffixes[i];
+		}
+		
+		cliLocationEditor.setFileExtensions(filters);
 		cliLocationEditor.setValidateStrategy(FileFieldEditor.VALIDATE_ON_KEY_STROKE);
 		addField(cliLocationEditor);
 		
@@ -147,11 +154,6 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		File file = new File(location);
 		// Error messages have to be set to field editor, not directly to the
 		// page.
-		if (!ocBinary.getName().equals(file.getName())) {
-			cliLocationEditor.setErrorMessage(NLS.bind("{0} is not the OpenShift client ''{1}'' executable.",
-					file.getName(), ocBinary.getName()));
-			return false;
-		}
 		if (!file.exists()) {
 			cliLocationEditor.setErrorMessage(NLS.bind("{0} was not found.", file));
 			return false;

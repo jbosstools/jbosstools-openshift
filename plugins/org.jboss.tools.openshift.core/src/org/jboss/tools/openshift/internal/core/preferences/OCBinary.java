@@ -10,8 +10,6 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.internal.core.preferences;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
@@ -19,34 +17,40 @@ import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary
 
 public enum OCBinary {
 
-	WINDOWS("oc.exe", new String[] { "*.exe"}), 
-	OTHER("oc", new String[] {});
+	WINDOWS("oc.exe"), 
+	OTHER("oc");
 	
+	// The base name, without any suffixes applied
+	private static final String CMD_BASE_NAME = "oc";
+	
+	// The default location on linux. 
 	private static final String OC_DEFAULTLOCATION_LINUX = "/usr/bin/oc";
 	
+	
 	public static OCBinary getInstance() {
-		if (SystemUtils.IS_OS_WINDOWS) {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
 			return WINDOWS;
 		} else {
 			return OTHER;
 		}
 	}
 
-	private String name;
-	private String[] extensions;
+	// The **LIKELY** name for the discovered binary
+	// This isn't a guarantee but it is suitable for error messaging
+	// When the runtime cannot be found
+	private String defaultNameForPlatform;
 	private CommandLocationBinary locationBinary;
 
-	private OCBinary(String name, String[] extensions) {
-		this.name = name;
-		this.extensions = extensions;
+	private OCBinary(String defaultNameForPlatform) {
+		this.defaultNameForPlatform = defaultNameForPlatform;
 	}
 
 	public String getName() {
-		return name;
+		return defaultNameForPlatform;
 	};
 
 	public String[] getExtensions() {
-		return extensions;
+		return getLocationBinary().getPossibleSuffixes();
 	};
 
 	/**
@@ -55,14 +59,23 @@ public enum OCBinary {
 	 * @return the location as found on the system path.
 	 */
 	public String getSystemPathLocation() {
+		return getLocationBinary().findLocation();
+	}
+
+	private CommandLocationBinary getLocationBinary() {
 		if( locationBinary == null ) {
-			locationBinary = new CommandLocationBinary("oc");
+			// CommandLocationBinary holds information for all platforms, 
+			// so we're just setting the name and default location for all platforms 
+			// where this we think we know this.  
+			// We also set the default platform to linux, so if the current platform
+			// has no custom logic, we can failover to linux logic. 
+			locationBinary = new CommandLocationBinary(CMD_BASE_NAME);
 			locationBinary.addPlatformLocation(Platform.OS_LINUX, OC_DEFAULTLOCATION_LINUX);
 			locationBinary.setDefaultPlatform(Platform.OS_LINUX);
 		}
-		return locationBinary.findLocation();
+		return locationBinary;
 	}
-
+	
 	/**
 	 * Returns the location from preferences or looks it up on the path.
 	 * 
@@ -70,7 +83,7 @@ public enum OCBinary {
 	 */
 	public String getLocation() {
 		String location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
-		if (StringUtils.isBlank(location)) {
+		if (location == null || location.trim().isEmpty()) {
 			location = getSystemPathLocation();
 		}
 		return location;
