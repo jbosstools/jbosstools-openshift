@@ -52,7 +52,10 @@ import org.jboss.tools.openshift.internal.ui.utils.ObservableTreeItemUtils;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -60,7 +63,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  * @author Jeff Maury
  */
-public class ServerSettingsWizardPageModel extends ServiceViewModel implements IResourceChangeListener {
+public class ServerSettingsWizardPageModel extends ServerResourceViewModel implements IResourceChangeListener {
 
 	public static final String PROPERTY_DEPLOYPROJECT = "deployProject";
 	public static final String PROPERTY_PROJECTS = "projects";
@@ -88,14 +91,14 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 	private boolean useInferredPodPath = true;
 	private IStatus ocBinaryStatus = Status.OK_STATUS;
 
-	protected ServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, 
+	protected ServerSettingsWizardPageModel(IResource resource, IRoute route, org.eclipse.core.resources.IProject deployProject, 
 			Connection connection, IServerWorkingCopy server) {
-		this(service, route, deployProject, connection, server, Status.OK_STATUS);
+		this(resource, route, deployProject, connection, server, Status.OK_STATUS);
 	}
 
-	protected ServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, 
+	protected ServerSettingsWizardPageModel(IResource resource, IRoute route, org.eclipse.core.resources.IProject deployProject, 
 			Connection connection, IServerWorkingCopy server, IStatus ocBinaryStatus) {
-		super(service, connection);
+		super(resource, connection);
 		this.route = route;
 		this.deployProject = deployProject;
 		this.server = server;
@@ -106,16 +109,16 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 	protected void update(IConnection connection, List<IConnection> connections, 
 			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
 			String sourcePath, String podPath, boolean useInferredPodPath,
-			IService service, List<ObservableTreeItem> serviceItems, 
+			IResource resource, List<ObservableTreeItem> resourceItems, 
 			IRoute route, boolean isSelectDefaultRoute, Map<IProject, List<IRoute>> routesByProject,
 			IStatus ocBinaryStatus) {
-		update(connection, connections, service, serviceItems);
+		update(connection, connections, resource, resourceItems);
 		updateProjects(projects);
 		org.eclipse.core.resources.IProject oldDeployProject = this.deployProject;
-		org.eclipse.core.resources.IProject newDeployProject = updateDeployProject(deployProject, projects, service);
+		org.eclipse.core.resources.IProject newDeployProject = updateDeployProject(deployProject, projects, resource);
 		sourcePath = updateSourcePath(sourcePath, newDeployProject, oldDeployProject);
-		List<IRoute> newRoutes = updateRoutes(service, routesByProject);
-		updateRoute(route, newRoutes, service);
+		List<IRoute> newRoutes = updateRoutes(resource, routesByProject);
+		updateRoute(route, newRoutes, resource);
 		updateSelectDefaultRoute(isSelectDefaultRoute);
 		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath= podPath);
 		updateOCBinaryStatus(ocBinaryStatus);
@@ -139,10 +142,10 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 	}
 
 	protected org.eclipse.core.resources.IProject updateDeployProject(org.eclipse.core.resources.IProject newDeployProject, 
-			List<org.eclipse.core.resources.IProject> projects, IService service) {
+			List<org.eclipse.core.resources.IProject> projects, IResource resource) {
 		if (newDeployProject == null
 				|| !projects.contains(newDeployProject)) {
-			newDeployProject = getDeployProject(service);
+			newDeployProject = getDeployProject(resource);
 			if (newDeployProject == null) {
 				newDeployProject =  getProjectOrDefault(newDeployProject, projects);
 			}
@@ -166,14 +169,14 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 	 * Replaces choices in the route selector as needed.
 	 * If choices are replaced calls updateRoute() to reset its selected value.
 	 * @param routesByProject2 
-	 * @param service 
+	 * @param resource 
 	 * @return 
 	 */
-	protected List<IRoute> updateRoutes(IService service, Map<IProject, List<IRoute>> routesByProject) {
+	protected List<IRoute> updateRoutes(IResource resource, Map<IProject, List<IRoute>> routesByProject) {
 		this.routesByProject = routesByProject;
 
 		List<IRoute> oldRoutes = new ArrayList<>(this.serviceRoutes);
-		List<IRoute> routes = getRoutes(service);
+		List<IRoute> routes = getRoutes(resource);
 		this.serviceRoutes.clear();
 		this.serviceRoutes.addAll(routes);
 		resetSelectedRoute();
@@ -190,12 +193,12 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 	}
 
 	/**
-	 * Updates the route that's selected. Chooses the route for the given service
+	 * Updates the route that's selected. Chooses the route for the given resource
 	 * @param route
 	 * @return 
 	 * @return 
 	 */
-	protected IRoute updateRoute(IRoute route, List<IRoute> routes, IService service) {
+	protected IRoute updateRoute(IRoute route, List<IRoute> routes, IResource resource) {
 		if (!isLoaded) {
 			return null;
 		}
@@ -204,7 +207,9 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 				|| routes.isEmpty()) {
 			route = null;
 		} else if(route == null || !routes.contains(route)) {
-			route = ResourceUtils.getRouteForService(service, routes);
+		    if (resource instanceof IService) {
+	            route = ResourceUtils.getRouteForService((IService) resource, routes);
+		    }
 			if(route == null 
 					|| !routes.contains(route)) {
 				route = routes.get(0);
@@ -218,13 +223,14 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		firePropertyChange(PROPERTY_SELECT_DEFAULT_ROUTE, this.selectDefaultRoute, this.selectDefaultRoute = selectDefaultRoute);
 	}
 
-	protected org.eclipse.core.resources.IProject getDeployProject(IService service) {
-		if (service == null) {
+	protected org.eclipse.core.resources.IProject getDeployProject(IResource resource) {
+	    //TODO: JBIDE-23490 check if association can be done for non service resources
+		if (resource == null) {
 			return null;
 		}
-		IProject openShiftProject = getOpenShiftProject(service);
+		IProject openShiftProject = getOpenShiftProject(resource);
 		List<IBuildConfig> buildConfigs = getBuildConfigs(openShiftProject);
-		IBuildConfig buildConfig = ResourceUtils.getBuildConfigFor(service, buildConfigs);
+		IBuildConfig buildConfig = ResourceUtils.getBuildConfigForResource(resource, buildConfigs);
 		return ResourceUtils.getWorkspaceProjectForBuildConfig(buildConfig, getProjects());
 	}
 
@@ -232,7 +238,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		update(getConnection(), getConnections(), 
 				project, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
-				getService(), getServiceItems(), 
+				getResource(), getResourceItems(), 
 				this.route, this.selectDefaultRoute, this.routesByProject,
 				this.ocBinaryStatus);
 	}
@@ -253,7 +259,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		update(getConnection(), getConnections(), 
 				this.deployProject, this.projects, 
 				sourcePath, this.podPath, this.useInferredPodPath,
-				getService(), getServiceItems(), 
+				getResource(), getResourceItems(), 
 				this.route, this.selectDefaultRoute, this.routesByProject,
 				this.ocBinaryStatus);
 	}
@@ -266,7 +272,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		update(getConnection(), getConnections(), 
 				this.deployProject, this.projects, 
 				this.sourcePath, podPath, this.useInferredPodPath,
-				getService(), getServiceItems(), 
+				getResource(), getResourceItems(), 
 				this.route, this.selectDefaultRoute, this.routesByProject,
 				this.ocBinaryStatus);
 	}
@@ -283,17 +289,17 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		update(getConnection(), getConnections(), 
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, useInferredPodPath,
-				getService(), getServiceItems(), 
+				getResource(), getResourceItems(), 
 				this.route, this.selectDefaultRoute, this.routesByProject,
 				this.ocBinaryStatus);
 	}
 
 	@Override
-	public void setService(IService service) {
+	public void setResource(IResource resource) {
 		update(getConnection(), getConnections(), 
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
-				service, getServiceItems(), 
+				resource, getResourceItems(), 
 				this.route, this.selectDefaultRoute, this.routesByProject,
 				this.ocBinaryStatus);
 	}
@@ -312,28 +318,29 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 
 	@Override
 	public void loadResources(IConnection newConnection) {
-		boolean serviceInitialized = this.service != null;
+		boolean serviceInitialized = this.resource != null;
 		this.isLoaded = false;
 		setProjects(loadProjects());
 		super.loadResources(newConnection);
-		List<IProject> openshiftProjects = ObservableTreeItemUtils.getAllModels(IProject.class, getServiceItems());
+		List<IProject> openshiftProjects = ObservableTreeItemUtils.getAllModels(IProject.class, getResourceItems());
 		setBuildConfigs(loadBuildConfigs(openshiftProjects, newConnection));
-		setRoutes(loadRoutes(getServiceItems()));
+		setProjects(loadProjects());
+		setRoutes(loadRoutes(getResourceItems()));
 
 		this.isLoaded = true;
 
 		if (serviceInitialized) {
-			// initialized via a service/route (launched via openshift explorer)
-			updateDeployProject(getDeployProject(service), projects, service);
+			// initialized via a resource/route (launched via openshift explorer)
+			updateDeployProject(getDeployProject(resource), projects, resource);
 		} else {
 			// initialized via a project (launched via new server wizard)
-			updateService(getService(deployProject, getServiceItems()), getServiceItems());
+			updateResource(getService(deployProject, getResourceItems()), getResourceItems());
 		}
 
 		update(getConnection(), getConnections(), 
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
-				this.service, getServiceItems(),
+				this.resource, getResourceItems(),
 				this.route, selectDefaultRoute, this.routesByProject,
 				this.ocBinaryStatus);
 	}
@@ -346,6 +353,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 	}
 
 	protected IService getService(org.eclipse.core.resources.IProject project, List<ObservableTreeItem> services) {
+	    //JBIDE-23490: check default resource
 		List<IService> allServices = ObservableTreeItemUtils.getAllModels(IService.class, 
 				services.stream().flatMap(ObservableTreeItemUtils::flatten).collect(Collectors.toList()));
 		return allServices.stream()
@@ -353,7 +361,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 			.findFirst().orElse(null);
 	}
 	
-	private Map<IProject, List<IBuildConfig>> loadBuildConfigs(List<IProject> projects, IConnection connection) {
+    private Map<IProject, List<IBuildConfig>> loadBuildConfigs(List<IProject> projects, IConnection connection) {
 		if (projects == null
 				|| projects.isEmpty()) {
 			return Collections.emptyMap();
@@ -390,19 +398,19 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 
 	private void updateServer(IServerWorkingCopy server) throws OpenShiftException {
 		String connectionUrl = getConnectionUrl(getConnection());
-		String serverName = OpenShiftServerUtils.getServerName(getService(), getConnection());
+		String serverName = OpenShiftServerUtils.getServerName(getResource(), getConnection());
 		String host = getHost(getRoute());
 		String routeURL = getRouteURL(isSelectDefaultRoute(), getRoute());
 		String podPath = useInferredPodPath ? "": this.podPath;
 		OpenShiftServerUtils.updateServer(
-				serverName, host, connectionUrl, getService(), sourcePath, podPath, deployProject, routeURL, server);
+				serverName, host, connectionUrl, getResource(), sourcePath, podPath, deployProject, routeURL, server);
 		server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
 		
 		// Set the profile
 		String profile = getProfileId();
 		ServerProfileModel.setProfile(server, profile);
 		
-		updateServerProject(connectionUrl, getService(), sourcePath, podPath, routeURL, deployProject);
+		updateServerProject(connectionUrl, getResource(), sourcePath, podPath, routeURL, deployProject);
 
 		IModule[] matchingModules = ServerUtil.getModules(deployProject);
 		if( matchingModules != null && matchingModules.length > 0) {
@@ -414,24 +422,24 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		}
 	}
 
-	protected void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, 
+	protected void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath, 
 			String routeURL, org.eclipse.core.resources.IProject deployProject) {
 		OpenShiftServerUtils.updateServerProject(
-				connectionUrl, service, sourcePath, podPath, routeURL, deployProject);
+				connectionUrl, resource, sourcePath, podPath, routeURL, deployProject);
 	}
 	
 	private String getProfileId() {
 		// currently supported profiles are openshift3 or openshift3.eap
-		// we need to determine if the current service represents an app that requires
+		// we need to determine if the current resource represents an app that requires
 		// eap-style behavior or normal behavior
 		boolean isEapProfile = false;
-		IService service = getService();
-		if (service != null) {
-			IProject project = getOpenShiftProject(service);
+		IResource resource = getResource();
+		if (resource != null) {
+			IProject project = getOpenShiftProject(resource);
 			if (project != null) {
 				List<IBuildConfig> buildConfigs = getBuildConfigs(project);
 				if (buildConfigs != null) {
-					IBuildConfig buildConfig = ResourceUtils.getBuildConfigFor(service, buildConfigs);
+					IBuildConfig buildConfig = ResourceUtils.getBuildConfigForResource(resource, buildConfigs);
 					isEapProfile = OpenShiftServerUtils.isEapStyle(buildConfig);
 				}
 			}
@@ -465,32 +473,36 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		update(getConnection(), getConnections(), 
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
-				getService(), getServiceItems(),
+				getResource(), getResourceItems(),
 				this.route, selectDefaultRoute, this.routesByProject,
 				this.ocBinaryStatus);
 	}
 
 	protected void setRoutes(Map<IProject, List<IRoute>> routesByProject) {
-		updateRoutes(service, routesByProject);
+		updateRoutes(resource, routesByProject);
 	}
 
 	/**
-	 * Returns the routes that match the service that's currently selected.
+	 * Returns the routes that match the resource that's currently selected.
 	 * 
-	 * @return the routes that match the selected service
+	 * @return the routes that match the selected resource
 	 * 
-	 * @see #getService()
+	 * @see #getResource()
 	 * @see #getAllRoutes(IService)
 	 */
 	public List<IRoute> getRoutes() {
-		if (getService() == null) {
+		if (getResource() == null) {
 			return Collections.emptyList();
 		}
-		return getRoutes(getService());
+		return getRoutes(getResource());
 	}
 
-	protected List<IRoute> getRoutes(IService service) {
-		return ResourceUtils.getRoutesForService(service, getAllRoutes(service));
+	protected List<IRoute> getRoutes(IResource resource) {
+	    if (resource instanceof IService) {
+	        return ResourceUtils.getRoutesForService((IService) resource, getAllRoutes(resource));
+	    } else {
+	        return Collections.emptyList();
+	    }
 	}
 
 	public IRoute getRoute() {
@@ -505,7 +517,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		update(getConnection(), getConnections(), 
 				this.deployProject, this.projects, 
 				this.sourcePath, this.podPath, this.useInferredPodPath,
-				getService(), getServiceItems(),
+				getResource(), getResourceItems(),
 				newRoute, this.selectDefaultRoute, this.routesByProject,
 				this.ocBinaryStatus);
 	}
@@ -522,8 +534,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		return routesByProject;
 	}
 
-	protected List<IRoute> getAllRoutes(IService service) {
-		IProject project = getOpenShiftProject(service);
+	protected List<IRoute> getAllRoutes(IResource resource) {
+		IProject project = resource.getProject();
 		if (project == null) {
 			return Collections.emptyList();
 		}
@@ -535,9 +547,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 	}
 
 	protected IProject getOpenShiftProject(IRoute route) {
-		return routesByProject.keySet().stream()
-					.filter(project -> ((List<IRoute>)routesByProject.get(project)).contains(route))
-					.findFirst().orElseGet(null);
+		return route.getProject();
 	}
 
 	public IServer saveServer(IProgressMonitor monitor) throws CoreException {
@@ -567,7 +577,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
         update(getConnection(), getConnections(), 
                 this.deployProject, this.projects, 
                 this.sourcePath, this.podPath, this.useInferredPodPath,
-                getService(), getServiceItems(),
+                getResource(), getResourceItems(),
                 route, this.selectDefaultRoute, this.routesByProject,
                 ocBinaryStatus);
     }

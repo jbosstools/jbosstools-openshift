@@ -160,7 +160,7 @@ public class ResourceMocks {
 	}
 	
 	public static IProject createProject(String name) {
-		return  createResource(IProject.class, 
+		return  createResource(IProject.class, ResourceKind.PROJECT,
 					project -> { 
 						mockGetResourceProperties(name, project, project);
 				});
@@ -194,7 +194,7 @@ public class ResourceMocks {
 	}
 
 	public static IRoute createRoute(String name, IProject project, String serviceName) {
-		return createResource(IRoute.class, 
+		return createResource(IRoute.class, ResourceKind.ROUTE,
 				route -> {
 					mockGetResourceProperties(name, project, route);
 					when(route.getServiceName()).thenReturn(serviceName);
@@ -207,7 +207,7 @@ public class ResourceMocks {
 	}
 
 	public static IService createService(String name, IProject project, Map<String, String> selectors) {
-		return createResource(IService.class, 
+		return createResource(IService.class, ResourceKind.SERVICE,
 				service -> {
 					mockGetResourceProperties(name, project, service);
 					when(service.getSelector()).thenReturn(selectors);
@@ -215,7 +215,7 @@ public class ResourceMocks {
 	}
 
 	public static IPod createPod(String name, IProject project, Map<String, String> labels) {
-		return createResource(IPod.class, 
+		return createResource(IPod.class, ResourceKind.POD,
 				pod -> {
 					mockGetResourceProperties(name, project, pod);
 					when(pod.getLabels()).thenReturn(labels);
@@ -223,30 +223,31 @@ public class ResourceMocks {
 	}
 
 	public static IDeploymentConfig createDeploymentConfig(String name, IProject project) {
-		return createResource(IDeploymentConfig.class, 
+		return createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG, 
 				dc -> mockGetResourceProperties(name, project, dc));
 	}
 
-	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz) {
-		return createResources(numOf, clazz, null);
+	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz, String kind) {
+		return createResources(numOf, clazz, kind, null);
 	}
 
-	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz, IResourceVisitor<R> visitor) {
+	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz, String kind, IResourceVisitor<R> visitor) {
 		List<R> resources = new ArrayList<>(numOf);
 		
 		for (int i = 0; i< numOf; i++) {
-			R mock = createResource(clazz, visitor);
+			R mock = createResource(clazz, kind, visitor);
 			resources.add(mock);
 		}
 		return resources;
 	}
 
-	public static <R extends IResource> R createResource(Class<R> clazz) {
-		return createResource(clazz, null);
+	public static <R extends IResource> R createResource(Class<R> clazz, String kind) {
+		return createResource(clazz, kind, null);
 	}
 
-	public static <R extends IResource> R createResource(Class<R> clazz, IResourceVisitor<R> visitor) {
+	public static <R extends IResource> R createResource(Class<R> clazz, String kind, IResourceVisitor<R> visitor) {
 		R mock = Mockito.mock(clazz);
+		when(mock.getKind()).thenReturn(kind);
 		if (visitor != null) {
 			visitor.visit(mock);
 		}

@@ -94,12 +94,12 @@ public class NewApplicationWizardModelTest {
 	 * @return 
 	 */
 	private List<ObservableTreeItem> createProjectTemplateItems() {
-		List<ObservableTreeItem> projectItems = createObservableTreeItems(createResources(3, IProject.class,
+		List<ObservableTreeItem> projectItems = createObservableTreeItems(createResources(3, IProject.class, ResourceKind.PROJECT,
 				resource -> {
 					when(resource.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
 					}));
 		for (int i = 0; i < 3; i++) {
-			projectItems.get(i).setChildren(createObservableTreeItems(createResources(i + 1, ITemplate.class)));;
+			projectItems.get(i).setChildren(createObservableTreeItems(createResources(i + 1, ITemplate.class, ResourceKind.TEMPLATE)));;
 		}
 		return projectItems;
 	}

@@ -51,6 +51,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -102,7 +103,7 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void shouldReturnProjectMatchingGitRemoteOfServiceModelWasInitializedWith() {
 		// given
-		// model initialized with service
+		// model initialized with resource
 		// when
 		IProject project = model.getDeployProject();
 		// then
@@ -115,10 +116,10 @@ public class ServerSettingsWizardPageModelTest {
 		// model initialized with project
 		ServerSettingsWizardPageModel model = createModel(null, null, project2, Arrays.asList(project1, project2, project3, project4), connection);
 		// when
-		IService service = model.getService();
+		IResource resource = model.getResource();
 		IProject deployProject = model.getDeployProject();
 		// then
-		assertThat(service).isEqualTo(ResourceMocks.PROJECT2_SERVICES[1]);
+		assertThat(resource).isEqualTo(ResourceMocks.PROJECT2_SERVICES[1]);
 		assertThat(deployProject).isEqualTo(project2);
 	}
 
@@ -137,9 +138,9 @@ public class ServerSettingsWizardPageModelTest {
 		// given
 		ServerSettingsWizardPageModel model = createModel(null, null, project1, Arrays.asList(project1, project2, project3, project4), connection);
 		// when
-		IService service = model.getService();
+		IResource resource = model.getResource();
 		// then
-		assertThat(service).isEqualTo(ResourceMocks.PROJECT2_SERVICES[0]);
+		assertThat(resource).isEqualTo(ResourceMocks.PROJECT2_SERVICES[0]);
 	}
 
 	@Test
@@ -228,7 +229,7 @@ public class ServerSettingsWizardPageModelTest {
 	public void shouldUpdateRoutesWhenServiceIsSwitched() {
 		// given
 		// when
-		model.setService(ResourceMocks.PROJECT3_SERVICES[1]);
+		model.setResource(ResourceMocks.PROJECT3_SERVICES[1]);
 		List<IRoute> routes = model.getRoutes();
 		// then
 		assertThat(routes).containsOnly(ResourceMocks.PROJECT3_ROUTES[1]);
@@ -250,7 +251,7 @@ public class ServerSettingsWizardPageModelTest {
 			}
 		});
 		// when
-		model.setService(ResourceMocks.PROJECT3_SERVICES[1]);
+		model.setResource(ResourceMocks.PROJECT3_SERVICES[1]);
 		// then
 		assertThat(notifiedRoutes).containsOnly(ResourceMocks.PROJECT3_ROUTES[1]);
 	}
@@ -258,14 +259,14 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void should_return_route_that_was_set_if_route_points_to_correct_service() {
 		// given
-		model.setService(ResourceMocks.PROJECT2_SERVICES[1]);
+		model.setResource(ResourceMocks.PROJECT2_SERVICES[1]);
 		// when
 		model.setRoute(ResourceMocks.PROJECT2_ROUTES[1]);
 		// then
 		assertThat(model.getRoute()).isEqualTo(ResourceMocks.PROJECT2_ROUTES[1]);
 
 		// given
-		model.setService(ResourceMocks.PROJECT2_SERVICES[1]);
+		model.setResource(ResourceMocks.PROJECT2_SERVICES[1]);
 		// when
 		model.setRoute(ResourceMocks.PROJECT2_ROUTES[2]);
 		// then
@@ -275,8 +276,8 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void should_return_1st_valid_route_if_invalid_route_is_set() {
 		// given
-		model.setService(ResourceMocks.PROJECT2_SERVICES[1]);
-		// when setting route that is not pointing to selected service
+		model.setResource(ResourceMocks.PROJECT2_SERVICES[1]);
+		// when setting route that is not pointing to selected resource
 		model.setRoute(ResourceMocks.PROJECT2_ROUTES[0]);
 		// then 1st valid route is used
 		assertThat(model.getRoute()).isEqualTo(ResourceMocks.PROJECT2_ROUTES[1]);
@@ -408,15 +409,15 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void should_set_server_service_when_updating_server() throws CoreException {
 		// given
-		IService service = model.getService();
-		assertThat(service).isNotNull();
+		IResource resource = model.getResource();
+		assertThat(resource).isNotNull();
 		// when
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
 		verify(model, atLeastOnce()).updateServerProject(
 				anyString(), 
-				eq(service), 
+				eq(resource), 
 				anyString(), anyString(), anyString(),any(org.eclipse.core.resources.IProject.class));
 	}
 
@@ -496,9 +497,9 @@ public class ServerSettingsWizardPageModelTest {
 		}
 		
 		@Override
-		public void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, 
+		public void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath, 
 				String routeURL, org.eclipse.core.resources.IProject deployProject) {
-				//super.updateServerProject(connectionUrl, service, sourcePath, podPath, routeURL, deployProject);
+				//super.updateServerProject(connectionUrl, resource, sourcePath, podPath, routeURL, deployProject);
 		}
 	}
 
