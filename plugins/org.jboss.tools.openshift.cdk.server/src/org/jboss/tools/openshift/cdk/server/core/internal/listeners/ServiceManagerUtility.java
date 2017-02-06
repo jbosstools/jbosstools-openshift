@@ -17,7 +17,7 @@ public class ServiceManagerUtility {
 	public static HashMap<String, String> parseLines(String[] lines) {
 		HashMap<String, String> adbEnv = new HashMap<>();
 
-		String setEnvWin = "setx ";
+		String setEnvWin = "set ";
 		String setEnvNix = "export ";
 
 		for (String oneAppend : lines) {
@@ -25,9 +25,9 @@ public class ServiceManagerUtility {
 			for (int i = 0; i < allAppends.length; i++) {
 				String setEnvVarCommand = null;
 				String setEnvVarDelim = null;
-				if (allAppends[i].trim().startsWith(setEnvWin)) {
+				if (allAppends[i].trim().toLowerCase().startsWith(setEnvWin)) {
 					setEnvVarCommand = setEnvWin;
-					setEnvVarDelim = " ";
+					setEnvVarDelim = "=";
 				} else if (allAppends[i].trim().startsWith(setEnvNix)) {
 					setEnvVarCommand = setEnvNix;
 					setEnvVarDelim = "=";
