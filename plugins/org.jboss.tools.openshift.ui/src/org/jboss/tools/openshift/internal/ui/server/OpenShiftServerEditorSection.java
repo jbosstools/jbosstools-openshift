@@ -84,7 +84,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.IResource;
 
 /**
  * @author Andre Dietisheim
@@ -196,7 +196,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		createProjectControls(projectSettingsContainer, dbc);
 		createDeploymentControls(projectSettingsContainer, dbc);
 		createSourcePathControls(projectSettingsContainer, dbc);
-		createServiceControls(projectSettingsContainer, dbc);
+		createResourceControls(projectSettingsContainer, dbc);
 
 		return container;
 	}
@@ -462,54 +462,54 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.in(dbc);
 	}
 
-	private void createServiceControls(Composite parent, DataBindingContext dbc) {
-		Label serviceLabel = new Label(parent, SWT.NONE);
-		serviceLabel.setText("Service:");
+	private void createResourceControls(Composite parent, DataBindingContext dbc) {
+		Label resourceLabel = new Label(parent, SWT.NONE);
+		resourceLabel.setText("Resource:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.BEGINNING, SWT.CENTER)
-				.applyTo(serviceLabel);
+				.applyTo(resourceLabel);
 
-		Text serviceText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+		Text resourceText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 			.span(2, 1)
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
-			.applyTo(serviceText);
+			.applyTo(resourceText);
 		ValueBindingBuilder
-			.bind(WidgetProperties.text(SWT.Modify).observe(serviceText))
-			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_SERVICE).observe(model))
-			.converting(new Converter(IService.class, String.class) {
+			.bind(WidgetProperties.text(SWT.Modify).observe(resourceText))
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_RESOURCE).observe(model))
+			.converting(new Converter(IResource.class, String.class) {
 				
 				@Override
 				public Object convert(Object fromObject) {
-					if (!(fromObject instanceof IService)) {
+					if (!(fromObject instanceof IResource)) {
 						return null;
 					};
-					return ((IService) fromObject).getName();
+					return ((IResource) fromObject).getName();
 				}
 			})
 			.in(dbc);
 
-		Button selectServiceButton = new Button(parent, SWT.PUSH);
-		selectServiceButton.setText("Select...");
+		Button selectResourceButton = new Button(parent, SWT.PUSH);
+		selectResourceButton.setText("Select...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT)
-				.applyTo(selectServiceButton);
-		selectServiceButton.addSelectionListener(onSelectService(model, selectServiceButton.getShell()));
+				.applyTo(selectResourceButton);
+		selectResourceButton.addSelectionListener(onSelectResource(model, selectResourceButton.getShell()));
 	}
 
-	private SelectionListener onSelectService(OpenShiftServerEditorModel model, final Shell shell) {
+	private SelectionListener onSelectResource(OpenShiftServerEditorModel model, final Shell shell) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
 				
-				SelectServiceWizard selectServiceDialog = 
-						new SelectServiceWizard(NLS.bind("Select a service that your server adapter {0} will publish to.", 
-								input.getServer().getName()), model.getService(), model.getConnection());
-				if (WizardUtils.openWizardDialog(selectServiceDialog, shell) 
+				SelectResourceWizard selectResourceDialog = 
+						new SelectResourceWizard(NLS.bind("Select a resource that your server adapter {0} will publish to.", 
+								input.getServer().getName()), model.getResource(), model.getConnection());
+				if (WizardUtils.openWizardDialog(selectResourceDialog, shell) 
 						== Dialog.OK) {
-					model.setService(selectServiceDialog.getService());
+					model.setResource(selectResourceDialog.getResource());
 				}
 			}
 		};
@@ -575,7 +575,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 									model.setDeployProject(deployProject);
 								}
 								model.setConnection(connection);
-								model.setService(OpenShiftServerUtils.getService(server));
+								model.setResource(OpenShiftServerUtils.getResource(server));
 								String sourcePath = OpenShiftServerUtils.getSourcePath(server);
 								if (!StringUtils.isEmpty(sourcePath)) {
 									model.setSourcePath(sourcePath);

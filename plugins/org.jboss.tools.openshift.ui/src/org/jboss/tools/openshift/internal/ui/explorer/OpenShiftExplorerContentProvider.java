@@ -10,9 +10,12 @@ package org.jboss.tools.openshift.internal.ui.explorer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -28,12 +31,15 @@ import org.jboss.tools.openshift.internal.ui.models.IConnectionWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IElementListener;
 import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
@@ -174,7 +180,18 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		switch(project.getState()) {
 		case LOADED:
 			removeStub(project);
-			return project.getResourcesOfKind(ResourceKind.SERVICE).toArray();
+			Collection<IResourceWrapper<?, ?>> services = project.getResourcesOfKind(ResourceKind.SERVICE);
+			Collection<IResourceWrapper<?, ?>> pods = project.getResourcesOfKind(ResourceKind.POD);
+			Collection<IResourceWrapper<?, ?>> orpheanPods = pods.stream()
+			             .filter(w -> ResourceUtils.getServicesForPod((IPod)w.getWrapped(), (Collection<IService>)services.stream().map(p -> p.getWrapped()).collect(Collectors.toList())).isEmpty())
+			             .filter(w -> !ResourceUtils.isBuildPod((IPod) w.getWrapped()))
+			             .collect(Collectors.toList());
+			if (!orpheanPods.isEmpty()) {
+			    for(IResourceWrapper<?, ?> wrapper : orpheanPods) {
+			        services.add(wrapper);
+			    }
+			}
+			return services.toArray();
 		case LOAD_STOPPED:
 			LoadingStub stub = removeStub(project);
 			if (stub != null) {

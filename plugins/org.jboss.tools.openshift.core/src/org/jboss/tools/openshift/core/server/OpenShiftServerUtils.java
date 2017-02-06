@@ -46,6 +46,7 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -58,6 +59,8 @@ import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
@@ -91,26 +94,44 @@ public class OpenShiftServerUtils {
 	public static final String SERVER_START_ON_CREATION = "org.jboss.tools.openshift.SERVER_START_ON_CREATION";
 
 	private static final Collection<String> EAP_LIKE_KEYWORDS = Collections.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
+	
+	private static final Collection<String> SERVER_ADDAPTER_ALLOWED_RESOURCE_TYPESS = Collections.unmodifiableCollection(Arrays.asList(ResourceKind.ROUTE,
+	                                                                                                                                   ResourceKind.SERVICE,
+	                                                                                                                                   ResourceKind.REPLICATION_CONTROLLER,
+	                                                                                                                                   ResourceKind.DEPLOYMENT_CONFIG,
+	                                                                                                                                   ResourceKind.POD));
+	
+	/**
+	 * Checks if the resource is allowed for OpenShift server adapter.
+	 * 
+	 * @param resource the OpenShift resource
+	 * @return true if allowed
+	 */
+	public static boolean isAllowedForServerAdapter(IResource resource) {
+	    return SERVER_ADDAPTER_ALLOWED_RESOURCE_TYPESS.stream().anyMatch(kind -> kind.equals(resource.getKind()));
+	}
 
 	private static final String PACKAGE_JSON = "package.json"; //$NON-NLS-1$
 
 	/**
 	 * Returns the first openshift 3 server in the current workspace
-	 * that matches the given service name.
+	 * that matches the given OpenShift resource (service,
+	 * deployment config, replication controller) name.
 	 * 
 	 * @see #ATTR_SERVICE
 	 */
-	public static IServer findServerForService(String serviceName) {
-		return findServerForService(serviceName, ServerCore.getServers());
+	public static IServer findServerForResource(String serviceName) {
+		return findServerForResource(serviceName, ServerCore.getServers());
 	}
 
 	/**
 	 * Returns the first openshift 3 server within the given list of servers
-	 * that matches the given service name.
+	 * that matches the given OpenShift resource (service,
+     * deployment config, replication controller) name.
 	 * 
 	 * @see #ATTR_SERVICE
 	 */
-	public static IServer findServerForService(String serviceName, IServer[] servers) {
+	public static IServer findServerForResource(String serviceName, IServer[] servers) {
 		if (StringUtils.isEmpty(serviceName)
 				|| servers == null
 				|| servers.length == 0) {
@@ -132,22 +153,24 @@ public class OpenShiftServerUtils {
 		return ServerCore.findServerType(OpenShiftServer.SERVER_TYPE_ID);
 	}
 	
-	public static String getServerName(IService service, IConnection connection) {
-		if (service == null) {
+	public static String getServerName(IResource resource, IConnection connection) {
+		if (resource == null) {
 			return null;
 		}
 
-		String baseName = new StringBuilder(service.getName())
-				.append(" at OpenShift 3 (")
+		String baseName = new StringBuilder(resource.getName())
+		        .append(" (")
+		        .append(resource.getKind())
+				.append(") at OpenShift 3 (")
 				.append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
 				.append(")")
 				.toString();
 		return ServerUtils.getServerName(baseName);
 	}
 
-	public static void updateServer(String serverName, String host, String connectionUrl, IService service, String sourcePath, String podPath, IProject deployProject, String routeURL, IServerWorkingCopy server) {
+	public static void updateServer(String serverName, String host, String connectionUrl, IResource resource, String sourcePath, String podPath, IProject deployProject, String routeURL, IServerWorkingCopy server) {
 		String deployProjectName = ProjectUtils.getName(deployProject);
-		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, routeURL, server);
+		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(resource), sourcePath, podPath, routeURL, server);
 	}
 
 	/**
@@ -223,8 +246,8 @@ public class OpenShiftServerUtils {
 		server.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
 	}
 
-	public static void updateServerProject(String connectionUrl, IService service, String sourcePath, String podPath, String routeURL, IProject project) {
-		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(service), sourcePath, podPath, routeURL, project);
+	public static void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath, String routeURL, IProject project) {
+		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(resource), sourcePath, podPath, routeURL, project);
 	}
 
 	public static void updateServerProject(String connectionUrl, String serviceId, String sourcePath, String podPath, String routeURL, IProject project) {
@@ -342,20 +365,21 @@ public class OpenShiftServerUtils {
 		return getAttribute(ATTR_CONNECTIONURL, server);
 	}
 
-	public static IService getService(IServerAttributes server) {
-		return getService(server, getConnection(server));
+	public static IResource getResource(IServerAttributes attributes) {
+		return getResource(attributes, getConnection(attributes));
 	}
 	
 	/**
-	 * Returns the service for the given server. It gets the service name from
-	 * server settings and requests the service from the OpenShit server. It
+	 * Returns the OpenShift resource (service, replication controller) for the given server.
+	 * It gets the resource name and type from
+	 * server settings and requests the resource from the OpenShit server. It
 	 * should thus never be called from the UI thread.
 	 * 
-	 * @param server the server (attributes) to get the service name from
-	 * @param connection the connection (to the OpenShift server) to retrieve the service from
-	 * @return the service 
+	 * @param server the server (attributes) to get the resource name from
+	 * @param connection the connection (to the OpenShift server) to retrieve the resource from
+	 * @return the OpenShift resource 
 	 */
-	public static IService getService(IServerAttributes server, Connection connection) {
+	public static IResource getResource(IServerAttributes server, Connection connection) {
 		// TODO: implement override project settings with server settings
 		String uniqueId = getAttribute(ATTR_SERVICE, server);
 		if (StringUtils.isEmpty(uniqueId)) {
@@ -365,7 +389,8 @@ public class OpenShiftServerUtils {
 			return null;
 		}
 		String projectName = OpenShiftResourceUniqueId.getProjectName(uniqueId);
-		List<IService> services = connection.getResources(ResourceKind.SERVICE, projectName);
+		String kind = OpenShiftResourceUniqueId.getKind(uniqueId);
+		List<IResource> services = connection.getResources(kind, projectName);
 		return OpenShiftResourceUniqueId.getByUniqueId(uniqueId, services);
 	}
 
@@ -394,26 +419,26 @@ public class OpenShiftServerUtils {
 					"Binary for oc-tools could not be found. Please open the OpenShift 3 Preference Page and set the location of the oc binary."));
 		}
 		
-		final IService service = getService(server);
-		if (service == null) {
+		final IResource resource = getResource(server);
+		if (resource == null) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
 					NLS.bind("Server {0} could not determine the service to publish to.", server.getName())));
 		}
 
 		String podPath = getPodPath(server);
 		if (StringUtils.isEmpty(podPath)) {
-			podPath = loadPodPath(service, server);
+			podPath = loadPodPath(resource, server);
 			if (StringUtils.isEmpty(podPath)) {
 				throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
 					NLS.bind("Server {0} could not determine the destination directory to publish to.", server.getName())));
 			}
 		}
 		
-		return new RSync(service, podPath, server);
+		return new RSync(resource, podPath, server);
 	}
 
-	public static String loadPodPath(IService service, IServer server) throws CoreException {
-		return new PodDeploymentPathProvider().load(service, getConnection(server));
+	public static String loadPodPath(IResource resource, IServer server) throws CoreException {
+		return new PodDeploymentPathProvider().load(resource, getConnection(server));
 	}
 
 	public static String getSourcePath(IServerAttributes server) {
@@ -443,18 +468,18 @@ public class OpenShiftServerUtils {
 	}
 	
 	/**
-	 * Returns the deployment config for the given server (attributes). The
+	 * Returns the replication controller for the given server (attributes). The
 	 * match is done by the service that the given (openshift server) is bound
 	 * to. This method does remote calls to the OpenShift server and thus should
 	 * never be called from the UI thread.
 	 * 
 	 * @param server
-	 * @return the deployment config for the given server
+	 * @return the replication controller for the given server
 	 * 
-	 * @see #getService(IServerAttributes)
+	 * @see #getResource(IServerAttributes)
 	 * @see ResourceUtils#getPodsForService(IService, Collection)
 	 */
-	public static IDeploymentConfig getDeploymentConfig(IServerAttributes server) throws CoreException {
+	public static IReplicationController getReplicationController(IServerAttributes server) throws CoreException {
 		assertServerNotNull(server);
 		
 		Connection connection = getConnection(server);
@@ -465,33 +490,45 @@ public class OpenShiftServerUtils {
 							, server.getName())));
 		}
 
-		IService service = getService(server, connection);
-		if (service == null) {
+		IResource resource = getResource(server, connection);
+		if (resource == null) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not find the service for server {0}" 
-							+ "Your server adapter might refer to an inexistant service.",
+					NLS.bind("Could not find the resource for server {0}" 
+							+ "Your server adapter might refer to an inexistant resource.",
 							server.getName())));
 		}
 
-		List<IPod> pods = connection.getResources(ResourceKind.POD, service.getProject().getName());
-		List<IPod> servicePods = ResourceUtils.getPodsForService(service, pods);
-		if (servicePods == null
-				|| servicePods.isEmpty()) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not find pods for service {0} in connection {1}. "
-							+ "OpenShift might be still building the pods for service {0}.", 
-							service.getName(), connection.getHost())));
+		if (resource instanceof IDeploymentConfig) {
+		    return (IDeploymentConfig) resource;
+		} else if (resource instanceof IService) {
+	        List<IPod> pods = connection.getResources(ResourceKind.POD, resource.getProject().getName());
+	        List<IPod> resourcePods = ResourceUtils.getPodsForResource(resource, pods);
+	        if (resourcePods == null
+	                || resourcePods.isEmpty()) {
+	            throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+	                    NLS.bind("Could not find pods for resource {0} in connection {1}. "
+	                            + "OpenShift might be still building the pods for resource {0}.", 
+	                            resource.getName(), connection.getHost())));
+	        }
+	        String dcName = ResourceUtils.getDeploymentConfigNameForPods(resourcePods);
+	        if (dcName == null) {
+	            throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+	                    NLS.bind("Could not find deployment config for {0}. "
+	                            + "Your build might be still running and pods not created yet or "
+	                            + "there might be no labels on your pods pointing to the wanted deployment config.", 
+	                    server.getName())));
+	        }
+	        return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), dcName);
+		} else if (resource instanceof IReplicationController) {
+		    String deploymentConfigName = resource.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
+		    if (deploymentConfigName != null) {
+		        return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), deploymentConfigName);
+		    } else {
+		        return (IReplicationController) resource;
+		    }
+		} else {
+		    return null;
 		}
-		String dcName = ResourceUtils.getDeploymentConfigNameForPods(servicePods);
-		if (dcName == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not find deployment config for {0}. "
-							+ "Your build might be still running and pods not created yet or "
-							+ "there might be no labels on your pods pointing to the wanted deployment config.", 
-					server.getName())));
-		}
-
-		return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, service.getNamespace(), dcName);
 	}
 	
 	public static boolean isEapStyle(IBuildConfig buildConfig) {

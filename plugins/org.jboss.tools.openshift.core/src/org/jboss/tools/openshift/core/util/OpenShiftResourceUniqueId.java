@@ -14,6 +14,7 @@ import java.util.Collection;
 
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -30,7 +31,8 @@ public class OpenShiftResourceUniqueId {
 		}
 
 		return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
-				.append(resource.getName()).toString();
+                                  .append(resource.getKind()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+                                  .append(resource.getName()).toString();   
 	}
 
 	/**
@@ -61,13 +63,26 @@ public class OpenShiftResourceUniqueId {
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
-		int index = uniqueId.indexOf(UNIQUE_ID_PROJECT_NAME_DELIMITER);
-		if (index == -1) {
-			return null;
-		}
-		return uniqueId.substring(index + 1);
+        String[] comps = uniqueId.split("@");
+        if (comps.length > 0) {
+            return comps[comps.length - 1];
+        } else {
+            return null;
+        }
 	}
 
+    public static String getKind(String uniqueId) {
+        if (StringUtils.isEmpty(uniqueId)) {
+            return null;
+        }
+        String[] comps = uniqueId.split("@");
+        if (comps.length == 2) {
+            return ResourceKind.SERVICE;
+        } else {
+            return comps[1];
+        }
+    }
+    
 	/**
 	 * Returns the resource within the given collection of resources that match
 	 * the given uniqueId. Returns {@code null} otherwise
@@ -90,4 +105,5 @@ public class OpenShiftResourceUniqueId {
 		}
 		return null;
 	}
+
 }

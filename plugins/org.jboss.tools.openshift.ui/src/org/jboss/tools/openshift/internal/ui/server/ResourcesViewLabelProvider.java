@@ -16,13 +16,14 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 /**
  * @author Andre Dietisheim
  */
-public class ServicesViewLabelProvider extends StyledCellLabelProvider {
+public class ResourcesViewLabelProvider extends StyledCellLabelProvider {
 
 	@Override
 	public void update(ViewerCell cell) {
@@ -41,6 +42,8 @@ public class ServicesViewLabelProvider extends StyledCellLabelProvider {
 			createProjectLabel(text, (com.openshift.restclient.model.IProject) resource);
 		} else if (resource instanceof IService) {
 			createServiceLabel(text, (IService) resource);
+		} else if (resource instanceof IReplicationController) {
+		    createReplicationControllerLabel(text, (IReplicationController) resource);
 		}
 
 		cell.setText(text.toString());
@@ -48,7 +51,7 @@ public class ServicesViewLabelProvider extends StyledCellLabelProvider {
 		super.update(cell);
 	}
 
-	private void createProjectLabel(StyledString text, com.openshift.restclient.model.IProject resource) {
+    private void createProjectLabel(StyledString text, com.openshift.restclient.model.IProject resource) {
 		text.append(resource.getName());
 	}
 
@@ -60,4 +63,14 @@ public class ServicesViewLabelProvider extends StyledCellLabelProvider {
 			text.append(selectorsDecoration, StyledString.DECORATIONS_STYLER);
 		}
 	}
+
+	private void createReplicationControllerLabel(StyledString text, IReplicationController rc) {
+        text.append(rc.getName());
+        String selectorsDecoration = org.jboss.tools.openshift.common.core.utils.StringUtils.toString(rc.getReplicaSelector());
+        if (!StringUtils.isEmpty(selectorsDecoration)) {
+            text.append(" ", StyledString.DECORATIONS_STYLER);
+            text.append(selectorsDecoration, StyledString.DECORATIONS_STYLER);
+        }
+    }
+
 }

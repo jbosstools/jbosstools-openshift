@@ -32,6 +32,7 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -66,14 +67,14 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 			throw new GetWelcomePageURLException("Connection is not established.");
 		}
 
-		IService service = OpenShiftServerUtils.getService(server, connection);
-		if(service == null) {
-			throw new GetWelcomePageURLException("Service is missing.");
+		IResource resource = OpenShiftServerUtils.getResource(server, connection);
+		if(resource == null) {
+			throw new GetWelcomePageURLException("Resource is missing.");
 		}
 
-		IProject project = service.getProject();
-		if (project != null) {
-			List<IRoute> routes = ResourceUtils.getRoutesForService(service, project.getResources(ResourceKind.ROUTE));
+		IProject project = resource.getProject();
+		if ((project != null) && (resource instanceof IService)) {
+			List<IRoute> routes = ResourceUtils.getRoutesForService((IService) resource, project.getResources(ResourceKind.ROUTE));
 			IRoute route = getRoute(OpenShiftServerUtils.getRouteURL(server), routes);
 			if (route == null) {
 				route = getRoute(routes); 
