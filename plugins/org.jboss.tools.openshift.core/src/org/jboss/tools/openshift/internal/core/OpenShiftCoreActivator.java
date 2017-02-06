@@ -14,9 +14,6 @@ import java.util.Collection;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerLifecycleListener;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
@@ -29,8 +26,6 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
-import org.jboss.tools.openshift.core.server.OpenShiftServer;
-import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.server.resources.OpenshiftResourceChangeListener;
 import org.osgi.framework.BundleContext;
 
@@ -118,29 +113,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 
 	private IServerLifecycleListener getServerListener() {
 		if( serverListener == null ) {
-			serverListener = new IServerLifecycleListener() {
-				@Override
-				public void serverRemoved(IServer server) {
-				}
-				@Override
-				public void serverChanged(IServer server) {
-				}
-				@Override
-				public void serverAdded(IServer server) {
-					if( server != null ) {
-						String typeId = server.getServerType().getId();
-						if( OpenShiftServer.SERVER_TYPE_ID.equals(typeId)) {
-							if( server.getAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false)) {
-								try {
-									server.start("run", new NullProgressMonitor());
-								} catch(CoreException ce) {
-									pluginLog().logError("Error starting server", ce);
-								}
-							}
-						}
-					}
-				}
-			};
+			serverListener = new OpenshiftServerLifecycleListener();
 		}
 		return serverListener;
 	}

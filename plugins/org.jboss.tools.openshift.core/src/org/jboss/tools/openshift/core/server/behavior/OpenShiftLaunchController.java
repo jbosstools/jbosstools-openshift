@@ -11,6 +11,8 @@
 package org.jboss.tools.openshift.core.server.behavior;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -44,6 +46,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.debug.DebugTrackerContributionEvaluation;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
@@ -52,8 +55,10 @@ import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtil
 import org.jboss.tools.openshift.internal.core.server.debug.DebuggingContext;
 import org.jboss.tools.openshift.internal.core.server.debug.IDebugListener;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugUtils;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
@@ -107,6 +112,10 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
         launch.addProcess(new ServerProcess(launch, server, getLabel(launch.getLaunchMode())));
 
 		beh.setServerStarting();
+		
+		waitForDeploymentConfig(server, monitor);
+		
+		
 		try {
 			IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
 			toggleDebugging(mode, monitor, beh, server, dc);
@@ -116,6 +125,50 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 	}
 
+	protected boolean waitForDeploymentConfig(IServer server, IProgressMonitor monitor) {
+		boolean podsReady = podsReady(server, monitor);
+		if( podsReady && !monitor.isCanceled()) {
+			return deploymentConfigReady(server, monitor);
+		}
+		return false;
+	}
+	
+	private boolean deploymentConfigReady(IServer server, IProgressMonitor monitor) {
+		while( !monitor.isCanceled()) {
+			try {
+				OpenShiftServerUtils.getDeploymentConfig(server);
+				return true;
+			} catch(CoreException ce) {
+				sleep(1000);
+			}
+		}
+		return false;
+	}
+	
+	private boolean podsReady(IServer server, IProgressMonitor monitor) {
+		while( !monitor.isCanceled()) {
+			IPod[] pods = findPods(server); // result is possibly null
+			IPod[] buildPods = findBuildPods(pods); 
+			IPod[] other = findRunnablePods(pods);
+			if( !complete(buildPods, other)) {
+				sleep(1000);
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void sleep(long t) {
+		// Delay
+		try {
+			Thread.sleep(t);
+		} catch(InterruptedException ie) {
+			// Ignore
+		}
+	}
+	
+	
 	private void toggleDebugging(String mode, IProgressMonitor monitor, ControllableServerBehavior beh, IServer server,
 			IDeploymentConfig dc) throws CoreException {
 		String currentMode = beh.getServer().getMode();
@@ -402,11 +455,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 				waitModulesStarted(modules);
 				executeJMXGarbageCollection(server, modules);
 				
-				try {
-					Thread.sleep(3000);
-				} catch(InterruptedException ie) {
-					// waiting for GC to take effect
-				}
+				sleep(3000);
 				
 				String portAttr = launch.getAttribute(LAUNCH_DEBUG_PORT_PROP);
 				int port = -1;
@@ -427,4 +476,81 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 		};
 	}
+	
+	
+	
+
+	
+	private boolean complete(IPod[] buildPods, IPod[] other) {
+		if( buildPods == null || other == null )
+			return false;
+		if( buildPods.length != 0 && !allComplete(buildPods)) {
+			return false; // wait longer
+		}
+		if( other.length == 0 && !allRunning(other)) {
+			return false; // wait longer
+		}
+		
+		return true;
+	}
+
+	private boolean allComplete(IPod[] pods) {
+		for( int i = 0; i < pods.length; i++ ) {
+			if( "Running".equalsIgnoreCase(pods[i].getStatus())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean allRunning(IPod[] pods) {
+		for( int i = 0; i < pods.length; i++ ) {
+			if( !"Running".equalsIgnoreCase(pods[i].getStatus())) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private IPod[] findBuildPods(IPod[] pods) {
+		if( pods == null )
+			return null;
+		ArrayList<IPod> ret = new ArrayList<IPod>();
+		for( int i = 0; i < pods.length; i++ ) {
+			if( ResourceUtils.isBuildPod(pods[i]))
+				ret.add(pods[i]);
+		}
+		return ret.toArray(new IPod[ret.size()]);
+	}
+	
+	/*
+	 * Crappy name, but just trying to find pods that aren't build pods
+	 */
+	private IPod[] findRunnablePods(IPod[] pods) {
+		if( pods == null )
+			return null;
+		ArrayList<IPod> ret = new ArrayList<IPod>();
+		for( int i = 0; i < pods.length; i++ ) {
+			if( !ResourceUtils.isBuildPod(pods[i]))
+				ret.add(pods[i]);
+		}
+		return ret.toArray(new IPod[ret.size()]);
+	}
+	
+	private IPod[] findPods(IServer server) {
+		Connection connection = OpenShiftServerUtils.getConnection(server);
+		if (connection != null) {
+			IService service = OpenShiftServerUtils.getService(server, connection);
+			if (service != null) {
+				List<IPod> collection = new ArrayList<IPod>();
+				List<IPod> pods = connection.getResources(ResourceKind.POD, service.getProject().getName());
+				List<IPod> servicePods = ResourceUtils.getPodsForService(service, pods);
+				collection.addAll(pods);
+				collection.addAll(servicePods);
+				return collection.toArray(new IPod[collection.size()]);
+			}
+		}
+		return null;
+	}
+	
 }
