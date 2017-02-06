@@ -98,7 +98,9 @@ public class ServiceManagerEnvironment {
 	}
 
 	public String getPassword() {
-		String pass = env.containsKey(DOTCDK_AUTH_PASS) ? env.get(DOTCDK_AUTH_PASS) : "devel";
+		String user = getUsername();
+		String defPass = "openshift.dev".equals(user) ? "devel" : null;
+		String pass = env.containsKey(DOTCDK_AUTH_PASS) ? env.get(DOTCDK_AUTH_PASS) : defPass;
 		return pass;
 	}
 	

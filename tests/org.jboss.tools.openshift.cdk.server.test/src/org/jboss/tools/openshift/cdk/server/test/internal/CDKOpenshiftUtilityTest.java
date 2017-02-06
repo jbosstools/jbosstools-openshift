@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Plugin;
@@ -30,6 +31,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKOpenshiftUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
+import org.jboss.tools.openshift.cdk.server.core.internal.listeners.VagrantServiceManagerEnvironmentLoader;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.ICommonAttributes;
@@ -42,22 +44,24 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 	@Test
 	public void testOpenshiftConnectionCredentials() throws Exception {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		ServiceManagerEnvironment adb = createADB();
 		IServer s = mockServer("openshift33");
 		
 		createCDKFile("Basic", null, null);
+		ServiceManagerEnvironment adb = createLoader(s);
 		IConnection con = util.createOpenshiftConnection(s, adb, null);
 		assertNotNull(con);
 		assertEquals(con.getUsername(), "openshift-dev");
 		assertEquals(con.getPassword(), "devel");
 		
 		createCDKFile("Basic", "test", null);
+		adb = createLoader(s);
 		con = util.createOpenshiftConnection(s, adb, null);
 		assertNotNull(con);
 		assertEquals(con.getUsername(), "test");
 		assertEquals(con.getPassword(), null);
 
 		createCDKFile("Basic", "test", "pass");
+		adb = createLoader(s);
 		con = util.createOpenshiftConnection(s, adb, null);
 		assertNotNull(con);
 		assertEquals(con.getUsername(), "test");
@@ -67,10 +71,10 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 	@Test
 	public void testOpenshiftConnectionAdded() throws Exception {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		ServiceManagerEnvironment adb = createADB();
 		IServer s = mockServer("openshift33");
 		
 		createCDKFile("Basic", null, null);
+		ServiceManagerEnvironment adb = createLoader(s);
 		ConnectionsRegistry registry = (ConnectionsRegistry) mock(ConnectionsRegistry.class);
 		
 		IConnection con = util.createOpenshiftConnection(s, adb, registry);
@@ -82,10 +86,10 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 	@Test
 	public void testOpenshiftRegistry() throws Exception {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		ServiceManagerEnvironment adb = createADB("10.1.2.2", "2376", "https://custom.url");
 		IServer s = mockServer("openshift35");
 		
 		createCDKFile("Basic", null, null);
+		ServiceManagerEnvironment adb = createLoader(s, "10.1.2.2", "2376", "https://custom.url");
 		ConnectionsRegistry registry = (ConnectionsRegistry) mock(ConnectionsRegistry.class);
 		
 		IConnection con = util.createOpenshiftConnection(s, adb, registry);
@@ -97,10 +101,10 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 	@Test
 	public void testOpenshiftRegistryDefault() throws Exception {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
-		ServiceManagerEnvironment adb = createADB("10.1.2.2", "2376", null);
 		IServer s = mockServer("openshift36");
 		
 		createCDKFile("Basic", null, null);
+		ServiceManagerEnvironment adb = createLoader(s, "10.1.2.2", "2376", null);
 		ConnectionsRegistry registry = (ConnectionsRegistry) mock(ConnectionsRegistry.class);
 		
 		IConnection con = util.createOpenshiftConnection(s, adb, registry);
@@ -164,22 +168,34 @@ public class CDKOpenshiftUtilityTest extends TestCase {
 		return folder.toOSString();
 	}
 
-	private ServiceManagerEnvironment createADB() throws URISyntaxException {
-		return createADB("10.1.2.2");
+	
+	
+	private static class VagrantServiceManagerEnvironmentLoaderMock extends VagrantServiceManagerEnvironmentLoader {
+		private Map<String, String> dockerMap;
+		public VagrantServiceManagerEnvironmentLoaderMock(Map<String, String> dockerMap) {
+			this.dockerMap = dockerMap;
+		}
+		protected Map<String, String> loadDockerEnv(IServer server) {
+			return dockerMap;
+		}
+	}
+	
+	private ServiceManagerEnvironment createLoader(IServer server) throws URISyntaxException {
+		return createLoader(server, "10.1.2.2");
 	}
 
-	private ServiceManagerEnvironment createADB(String host) throws URISyntaxException {
-		return createADB(host, "2376", null);
+	private ServiceManagerEnvironment createLoader(IServer server, String host) throws URISyntaxException {
+		return createLoader(server, host, "2376", null);
 	}
 
-	private ServiceManagerEnvironment createADB(String host, String port, String registry) throws URISyntaxException {
+	private ServiceManagerEnvironment createLoader(IServer server, String host, String port, String registry) throws URISyntaxException {
 		HashMap<String,String> env = new HashMap<>();
 		env.put("DOCKER_HOST","tcp://" + host + ":" + port);
 		env.put("DOCKER_CERT_PATH","/cert/path/.docker");
 		env.put("DOCKER_TLS_VERIFY","1");
 		env.put("DOCKER_MACHINE_NAME","e5d7d0a");
 		env.put("DOCKER_REGISTRY", registry);
-		return new ServiceManagerEnvironment(env);
+		return new VagrantServiceManagerEnvironmentLoaderMock(env).loadServiceManagerEnvironment(server);
 	}
 
 }
