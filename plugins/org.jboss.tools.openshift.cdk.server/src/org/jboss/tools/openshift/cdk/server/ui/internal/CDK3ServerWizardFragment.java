@@ -44,7 +44,9 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 			homeText.setText(homeDir);
 		} else {
 			homeDir = MinishiftBinaryUtility.getMinishiftLocation();
-			homeText.setText(homeDir);
+			if (homeDir != null) {
+	            homeText.setText(homeDir);
+			}
 		}
 	}
 	
