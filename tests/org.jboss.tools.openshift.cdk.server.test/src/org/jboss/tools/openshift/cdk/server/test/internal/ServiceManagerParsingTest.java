@@ -36,6 +36,15 @@ public class ServiceManagerParsingTest extends TestCase {
 		serviceManager101(env, WIN_CERT_PATH);
 	}
 	
+	@Test
+	public void testServiceManagerWinSET() throws Exception {
+		String[] lines = serviceManagerWinSET();
+		HashMap<String, String> map = ServiceManagerUtility.parseLines(lines);
+		ServiceManagerEnvironment env = new ServiceManagerEnvironment(map);
+		serviceManager110(env, WIN_CERT_PATH);
+	}
+	
+	
 	private void serviceManager101(ServiceManagerEnvironment env, String certPath) throws Exception {
 		assertEquals(env.get("DOCKER_HOST"), "tcp://10.1.2.2:2376");
 		assertEquals(env.get("DOCKER_CERT_PATH"), certPath);
@@ -231,5 +240,28 @@ public class ServiceManagerParsingTest extends TestCase {
 				"# eval \"$(vagrant service-manager env)\"",	
 		};
 	}
+
 	
+	private String[] serviceManagerWinSET() {
+		return new String[]{
+				"# docker env:",
+				"# Set the following environment variables to enable access to the",
+				"# docker daemon running inside of the vagrant virtual machine:",
+				"SET DOCKER_HOST=tcp://10.1.2.2:2376",
+				"SET DOCKER_CERT_PATH=C:\\my\\cdk\\components\\rhel\\rhel-ose\\.vagrant\\machines\\default\\virtualbox\\docker",
+				"SET DOCKER_TLS_VERIFY=1",
+				"SET DOCKER_API_VERSION=1.21",
+				"",
+				"# openshift env:",
+				"# You can access the OpenShift console on: https://10.1.2.2:8443/console",
+				"# To use OpenShift CLI, run: oc login https://10.1.2.2:8443",
+				"SET OPENSHIFT_URL=https://10.1.2.2:8443",
+				"SET OPENSHIFT_WEB_CONSOLE=https://10.1.2.2:8443/console",
+				"SET DOCKER_REGISTRY=hub.openshift.rhel-cdk.10.1.2.2.xip.io",
+				"",
+				"# run following command to configure your shell:",
+				"# eval \"$(vagrant service-manager env)\"",	
+		};
+	}
+
 }
