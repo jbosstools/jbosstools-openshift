@@ -261,7 +261,7 @@ public class OpenShiftServerUtilsTest {
 				mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70))
 		};
 		// when
-		IServer serverFound = OpenShiftServerUtils.findServerForService("someService", servers);
+		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
 		assertThat(serverFound).isSameAs(os3Server);
 	}
@@ -277,7 +277,7 @@ public class OpenShiftServerUtilsTest {
 				os3Server2
 		};
 		// when
-		IServer serverFound = OpenShiftServerUtils.findServerForService("someService", servers);
+		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
 		assertThat(serverFound).isSameAs(os3Server1);
 	}
@@ -296,7 +296,7 @@ public class OpenShiftServerUtilsTest {
 				mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70))
 		};
 		// when
-		IServer serverFound = OpenShiftServerUtils.findServerForService("someService", servers);
+		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
 		assertThat(serverFound).isSameAs(os3Server1);
 	}

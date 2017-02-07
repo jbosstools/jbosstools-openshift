@@ -112,21 +112,23 @@ public class OpenShiftServerUtils {
 
 	/**
 	 * Returns the first openshift 3 server in the current workspace
-	 * that matches the given service name.
+	 * that matches the given OpenShift resource (service,
+	 * deployment config, replication controller) name.
 	 * 
 	 * @see #ATTR_SERVICE
 	 */
-	public static IServer findServerForService(String serviceName) {
-		return findServerForService(serviceName, ServerCore.getServers());
+	public static IServer findServerForResource(String serviceName) {
+		return findServerForResource(serviceName, ServerCore.getServers());
 	}
 
 	/**
 	 * Returns the first openshift 3 server within the given list of servers
-	 * that matches the given service name.
+	 * that matches the given OpenShift resource (service,
+     * deployment config, replication controller) name.
 	 * 
 	 * @see #ATTR_SERVICE
 	 */
-	public static IServer findServerForService(String serviceName, IServer[] servers) {
+	public static IServer findServerForResource(String serviceName, IServer[] servers) {
 		if (StringUtils.isEmpty(serviceName)
 				|| servers == null
 				|| servers.length == 0) {
@@ -485,12 +487,12 @@ public class OpenShiftServerUtils {
 							, server.getName())));
 		}
 
-		IResource resource = getResource(attributes, connection);
+		IResource resource = getResource(server, connection);
 		if (resource == null) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
 					NLS.bind("Could not find the resource for server {0}" 
 							+ "Your server adapter might refer to an inexistant resource.",
-							attributes.getName())));
+							server.getName())));
 		}
 
 		if (resource instanceof IDeploymentConfig) {
@@ -511,7 +513,7 @@ public class OpenShiftServerUtils {
 	                    NLS.bind("Could not find deployment config for {0}. "
 	                            + "Your build might be still running and pods not created yet or "
 	                            + "there might be no labels on your pods pointing to the wanted deployment config.", 
-	                    attributes.getName())));
+	                    server.getName())));
 	        }
 	        return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), dcName);
 		} else if (resource instanceof IReplicationController) {
