@@ -241,8 +241,10 @@ public class ServerResourceViewModel extends ObservablePojo {
 		     * add DeploymentConfig resources not linked to the services
 		     */
 		    List<IDeploymentConfig> dcConfigs = project.getResources(ResourceKind.DEPLOYMENT_CONFIG);
+		    List<IDeploymentConfig> nonLinkedDcConfigs = new ArrayList<>();
 		    dcConfigs.stream().filter(dc -> !services.stream().anyMatch(service -> ResourceUtils.areRelated((IService) service, dc)))
-		                      .forEach(dc -> services.add(dc));
+		                      .forEach(dc -> nonLinkedDcConfigs.add(dc));
+		    services.addAll(nonLinkedDcConfigs);
 		    return services;
         }
 
