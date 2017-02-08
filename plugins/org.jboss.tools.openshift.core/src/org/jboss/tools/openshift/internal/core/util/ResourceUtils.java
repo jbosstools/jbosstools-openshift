@@ -604,12 +604,15 @@ public class ResourceUtils {
 
     /**
 	 * Checks whether the service and deployment config are related.
-	 * @param service
-	 * @param dc
-	 * @return
+	 * @param service the service to match
+	 * @param dc the deployment config to match
+	 * @return true if they are related
 	 */
     public static boolean areRelated(final IService service, IDeploymentConfig dc) {
-        return service.getProject().getResources(ResourceKind.DEPLOYMENT_CONFIG).stream().filter(dcItem -> containsAll(dcItem.getLabels(), service.getSelector())).count() > 0; 
+        return service.getProject().getResources(ResourceKind.POD).stream()
+                                                                   .filter(pod -> containsAll(service.getSelector(), pod.getLabels()))   
+                                                                   .filter(pod -> dc.getName().equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))   
+                                                                   .count() > 0; 
     }
 
 

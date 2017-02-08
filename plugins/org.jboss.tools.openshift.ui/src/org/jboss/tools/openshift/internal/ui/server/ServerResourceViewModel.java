@@ -14,10 +14,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.IModelFactory;
@@ -245,6 +247,14 @@ public class ServerResourceViewModel extends ObservablePojo {
 		    dcConfigs.stream().filter(dc -> !services.stream().anyMatch(service -> ResourceUtils.areRelated((IService) service, dc)))
 		                      .forEach(dc -> nonLinkedDcConfigs.add(dc));
 		    services.addAll(nonLinkedDcConfigs);
+		    /* 
+		     * add ReplicationController resources not linked to DeploymentConfig
+		     */
+		    List<IReplicationController> replicationControllers = project.getResources(ResourceKind.REPLICATION_CONTROLLER);
+		    List<IReplicationController> nonLinkedReplicationControllers = 
+		            replicationControllers.stream().filter(rep -> !dcConfigs.stream().anyMatch(dc -> dc.getName().equals(rep.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME))))
+		                                            .collect(Collectors.toList());
+		    services.addAll(nonLinkedReplicationControllers);
 		    return services;
         }
 
