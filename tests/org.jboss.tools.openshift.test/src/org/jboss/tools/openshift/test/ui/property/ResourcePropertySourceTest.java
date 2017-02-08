@@ -43,12 +43,13 @@ public class ResourcePropertySourceTest {
 		annotations.put("efg", "def");
 		
 		when(resource.getName()).thenReturn("aname");
+		when(resource.getNamespace()).thenReturn("anamespace");
+		when(resource.getKind()).thenReturn("akind");
 		when(resource.getLabels()).thenReturn(labels);
 		when(resource.getAnnotations()).thenReturn(annotations);
 		when(resource.getAnnotation("xyz")).thenReturn("abc");
 		when(resource.getAnnotation("efg")).thenReturn("def");
 		when(resource.getCreationTimeStamp()).thenReturn("2014");
-		when(resource.getNamespace()).thenReturn("anamespace");
 		when(resource.getResourceVersion()).thenReturn("9999");
 
 		source = new ResourcePropertySource<>(resource);
@@ -56,10 +57,11 @@ public class ResourcePropertySourceTest {
 	
 	@Test
 	public void getPropertyValue(){
-		assertEquals("aname", source.getPropertyValue(ResourcePropertySource.Ids.Name));
-		assertEquals("anamespace", source.getPropertyValue(ResourcePropertySource.Ids.Namespace));
-		assertEquals("2014", source.getPropertyValue(ResourcePropertySource.Ids.Created));
-		assertEquals("9999", source.getPropertyValue(ResourcePropertySource.Ids.ResourceVersion));
+		assertEquals("aname", source.getPropertyValue(ResourcePropertySource.Ids.NAME));
+		assertEquals("anamespace", source.getPropertyValue(ResourcePropertySource.Ids.NAMESPACE));
+		assertEquals("akind", source.getPropertyValue(ResourcePropertySource.Ids.KIND));
+		assertEquals("2014", source.getPropertyValue(ResourcePropertySource.Ids.CREATED));
+		assertEquals("9999", source.getPropertyValue(ResourcePropertySource.Ids.RESOURCE_VERSION));
 		assertEquals("abc", source.getPropertyValue(new PrefixPropertySourceKey("Annotations", "xyz")));
 		assertEquals("def", source.getPropertyValue(new PrefixPropertySourceKey("Annotations", "efg")));
 		assertEquals("bar", source.getPropertyValue(new PrefixPropertySourceKey("Labels", "foo")));
@@ -68,10 +70,11 @@ public class ResourcePropertySourceTest {
 	@Test
 	public void getPropertyDescriptor() {
 		IPropertyDescriptor [] exp = new IPropertyDescriptor[]{
-				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.Name, "Name", "Basic"),
-				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.Created, "Creation Timestamp", "Basic"),
-				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.Namespace, "Namespace", "Basic"),
-				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.ResourceVersion, "Resource Version", "Basic"),
+				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.KIND, "Kind", "Basic"),
+				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.NAME, "Name", "Basic"),
+				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.NAMESPACE, "Namespace", "Basic"),
+				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.CREATED, "Creation Timestamp", "Basic"),
+				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.RESOURCE_VERSION, "Resource Version", "Basic"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Annotations", "xyz"), "xyz", "Annotations"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Annotations", "efg"), "efg", "Annotations"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Labels", "foo"), "foo", "Labels"),

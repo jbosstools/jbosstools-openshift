@@ -9,37 +9,38 @@
 package org.jboss.tools.openshift.internal.ui.property;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 import com.openshift.restclient.model.IResource;
 
-	
 public class ResourcePropertySource<T extends IResource> implements IPropertySource {
+
+	private static final String BASIC = "Basic";
 	private static final String ANNOTATIONS = "Annotations";
-	private static final String CATEGORY = "Basic";
 	private static final String LABELS = "Labels";
 	
 	private T  resource;
 	
-	public ResourcePropertySource(T resource){
+	public ResourcePropertySource(T resource) {
 		this.resource = resource;
 	}
-	
-	protected T getResource(){
+
+	protected T getResource() {
 		return (T) resource;
 	}
+
 	/**
 	 * Retrieve the list of property descriptors that are specific to the given
 	 * resource type.  Subclasses should override
 	 * @return
 	 */
-	protected IPropertyDescriptor[] getResourcePropertyDescriptors(){
-		return null;
+	protected IPropertyDescriptor[] getResourcePropertyDescriptors() {
+		return new IPropertyDescriptor[] {};
 	}
 
 	@Override
@@ -49,20 +50,21 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		 IPropertyDescriptor[] common = new IPropertyDescriptor[]{
-				new ExtTextPropertyDescriptor(Ids.Name, CATEGORY),
-				new ExtTextPropertyDescriptor(Ids.Created, "Creation Timestamp", CATEGORY),
-				new ExtTextPropertyDescriptor(Ids.Namespace, CATEGORY),
-				new ExtTextPropertyDescriptor(Ids.ResourceVersion, "Resource Version", CATEGORY)
-		};
-		 List<IPropertyDescriptor> annotations = buildPropertyDescriptors(ANNOTATIONS, resource.getAnnotations());
-		 common =  (IPropertyDescriptor[]) ArrayUtils.addAll(common, annotations.toArray());
-		 List<IPropertyDescriptor> labels = buildPropertyDescriptors(LABELS, resource.getLabels());
-		 common =  (IPropertyDescriptor[]) ArrayUtils.addAll(common, labels.toArray());
-		 return (IPropertyDescriptor[]) ArrayUtils.addAll(common, getResourcePropertyDescriptors());
+		List<IPropertyDescriptor> common = new ArrayList<>(Arrays.<IPropertyDescriptor> asList(
+				new ExtTextPropertyDescriptor(Ids.KIND, "Kind", BASIC),
+				new ExtTextPropertyDescriptor(Ids.NAME, "Name", BASIC),
+				new ExtTextPropertyDescriptor(Ids.NAMESPACE, "Namespace", BASIC),
+				new ExtTextPropertyDescriptor(Ids.CREATED, "Creation Timestamp", BASIC),
+				new ExtTextPropertyDescriptor(Ids.RESOURCE_VERSION, "Resource Version", BASIC)
+		));
+		 common.addAll(buildPropertyDescriptors(ANNOTATIONS, resource.getAnnotations()));
+		 common.addAll(buildPropertyDescriptors(LABELS, resource.getLabels()));
+		 common.addAll(Arrays.asList(getResourcePropertyDescriptors()));
+
+		 return common.toArray(new IPropertyDescriptor[common.size()]);
 	}
 	
-	private List<IPropertyDescriptor> buildPropertyDescriptors(String prefix, Map<String, String> values){
+	private List<IPropertyDescriptor> buildPropertyDescriptors(String prefix, Map<String, String> values) {
 		 List<IPropertyDescriptor> descriptors = new ArrayList<>(values.size()); 
 		 for (Map.Entry<String, String> entry : values.entrySet()) {
 			descriptors.add(new ExtTextPropertyDescriptor(new PrefixPropertySourceKey(prefix, entry.getKey()), entry.getKey(), prefix));
@@ -72,17 +74,18 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 	
 	@Override
 	public Object getPropertyValue(Object id) {
-		if(id instanceof Ids){
-			Ids e = (Ids)id;
-			switch(e){
-			case Name: return resource.getName();
-			case Namespace: return resource.getNamespace();
-			case Created: return resource.getCreationTimeStamp();
-			case ResourceVersion: return resource.getResourceVersion();
+		if (id instanceof Ids) {
+			Ids e = (Ids) id;
+			switch (e) {
+			case KIND: return resource.getKind();
+			case NAME: return resource.getName();
+			case NAMESPACE: return resource.getNamespace();
+			case CREATED: return resource.getCreationTimeStamp();
+			case RESOURCE_VERSION: return resource.getResourceVersion();
 			default:
 			}
 		}
-		if(id instanceof PrefixPropertySourceKey){
+		if (id instanceof PrefixPropertySourceKey) {
 			PrefixPropertySourceKey key = (PrefixPropertySourceKey) id;
 			String prefix = key.getPrefix();
 			if(ANNOTATIONS.equals(prefix)){
@@ -108,10 +111,11 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 	public void setPropertyValue(Object id, Object value) {
 	}
 	
-	public static enum Ids{
-		Created,
-		Name,
-		Namespace,
-		ResourceVersion
+	public static enum Ids {
+		KIND,
+		NAME,
+		NAMESPACE,
+		CREATED,
+		RESOURCE_VERSION
 	}
 }
