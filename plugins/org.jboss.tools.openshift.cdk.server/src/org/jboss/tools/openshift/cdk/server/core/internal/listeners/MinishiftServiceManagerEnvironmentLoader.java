@@ -28,6 +28,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		super(TYPE_MINISHIFT);
 	}
 
+	@Override
 	public ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server) {
 		// Load the docker env
 		Map<String, String> adbEnv = loadDockerEnv(server);
@@ -41,7 +42,6 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		String dotMinishift = System.getProperty("user.home") + File.separator + ".minishift";
 		Properties dotCDK = CDKServerUtility.getDotCDK(dotMinishift);
 		merged = merge(merged, dotCDK);
-		
 		try {
 			return new ServiceManagerEnvironment(merged);
 		} catch (URISyntaxException urise) {
