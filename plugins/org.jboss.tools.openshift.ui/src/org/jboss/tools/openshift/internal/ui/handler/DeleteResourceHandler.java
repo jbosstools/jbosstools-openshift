@@ -30,10 +30,13 @@ import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 
+import com.openshift.restclient.model.IResource;
+
 /**
  * @author jeff.cantrill
  * @author fbricon@gmail.com
  * @author Jeff Maury
+ * @author Andre Dietisheim
  */
 public class DeleteResourceHandler extends AbstractHandler {
 
@@ -47,20 +50,36 @@ public class DeleteResourceHandler extends AbstractHandler {
 		try (Stream<IResourceWrapper<?, ?>> stream = Arrays.stream(resources)) {
 			boolean hasProject = stream.anyMatch(resource -> resource instanceof IProjectWrapper);
 
-			String message = (resources.length > 1)
-					? (hasProject) ? OpenShiftUIMessages.ProjectDeletionConfirmationN
-							: OpenShiftUIMessages.ResourceDeletionConfirmationN
-					: (hasProject)
-							? NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation,
-									resources[0].getWrapped().getName())
-							: NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation,
-									resources[0].getWrapped().getName());
-			boolean confirm = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event),
-					hasProject?OpenShiftUIMessages.ProjectDeletionDialogTitle:OpenShiftUIMessages.ResourceDeletionDialogTitle, message);
+			String title = getDialogTitle(hasProject);
+			String message = getDialogMessage(resources, hasProject);
+			boolean confirm = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), title, message);
 			if (confirm) {
 				deleteResources(resources);
 			}
 			return null;
+		}
+	}
+
+	private String getDialogTitle(boolean hasProject) {
+		return hasProject ? 
+				OpenShiftUIMessages.ProjectDeletionDialogTitle
+				: OpenShiftUIMessages.ResourceDeletionDialogTitle;
+	}
+
+	private String getDialogMessage(IResourceWrapper<?, ?>[] resources, boolean hasProject) {
+		if ((resources.length > 1)) {
+			if ((hasProject)) {
+				return OpenShiftUIMessages.ProjectDeletionConfirmationN;
+			} else {
+				return OpenShiftUIMessages.ResourceDeletionConfirmationN;
+			}
+		} else {
+			IResource resource = resources[0].getWrapped();
+			if (hasProject) {
+				return NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation, resource.getName());
+			} else {
+				return NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, resource.getName(), resource.getKind());
+			}
 		}
 	}
 
