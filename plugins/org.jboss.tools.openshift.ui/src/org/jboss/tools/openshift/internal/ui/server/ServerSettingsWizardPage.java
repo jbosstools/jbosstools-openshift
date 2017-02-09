@@ -737,7 +737,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 					
 					@Override
 					public IStatus validate(Object value) {
-						if ((value instanceof IService) && OpenShiftServerUtils.isAllowedForServerAdapter((IResource) value)) {
+						if ((value instanceof IResource) && OpenShiftServerUtils.isAllowedForServerAdapter((IResource) value)) {
 	                        return ValidationStatus.ok();
 						}
                         return ValidationStatus.cancel("Please select a resource that this adapter will be bound to.");
