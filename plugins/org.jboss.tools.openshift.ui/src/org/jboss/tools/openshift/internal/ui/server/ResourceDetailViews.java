@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 
+import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
@@ -28,6 +29,7 @@ import com.openshift.restclient.model.IService;
  */
 public class ResourceDetailViews extends AbstractStackedDetailViews {
 
+	private final IDetailView projectView = new ProjectDetailView();
 	private final IDetailView serviceView = new ServiceDetailView();
 	private final IDetailView replicationControllerView = new ReplicationControllerDetailView();
 
@@ -37,6 +39,7 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 
 	@Override
 	protected void createViewControls(Composite parent, Object context, DataBindingContext dbc) {
+		projectView.createControls(parent, context, dbc);
 		serviceView.createControls(parent, context, dbc);
 		replicationControllerView.createControls(parent, context, dbc);
 		emptyView.createControls(parent, context, dbc);
@@ -44,43 +47,84 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 
 	@Override
 	protected IDetailView[] getDetailViews() {
-		return new IDetailView[] { serviceView, replicationControllerView, emptyView };
+		return new IDetailView[] { projectView, serviceView, replicationControllerView, emptyView };
 	}
 
-    private abstract class ResourceDetailView extends EmptyView {
+	private abstract class ResourceDetailView extends EmptyView {
 
-        private StyledText nameText;
+		private StyledText kindText;
+		private StyledText nameText;
+
+		@Override
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
+			Composite container = setControl(new Composite(parent, SWT.None));
+			GridLayoutFactory.fillDefaults().numColumns(2).margins(8, 2).spacing(6, 2).applyTo(container);
+			this.kindText = createLabeledValue("Kind:", container);
+			this.nameText = createLabeledValue("Name:", container);
+			return container;
+		}
+
+		@Override
+		public void onVisible(IObservableValue resourceObservable, DataBindingContext dbc) {
+			Object value = resourceObservable.getValue();
+			if (!(value instanceof IResource)) {
+				return;
+			}
+
+			IResource resource = (IResource) value;
+			kindText.setText(resource.getKind());
+			nameText.setText(resource.getName());
+		}
+
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof IResource;
+		}
+	   }
+
+	   private abstract class ProjectResourceDetailView extends ResourceDetailView {
+
         private StyledText namespaceText;
         private StyledText labelsText;
 
         @Override
-        public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
-            Composite container = setControl(new Composite(parent, SWT.None));
-            GridLayoutFactory.fillDefaults()
-                    .numColumns(2).margins(8, 2).spacing(6, 2).applyTo(container);
-            this.nameText = createLabeledValue("Name:", container);
-            this.namespaceText = createLabeledValue("Namespace:", container);
-            this.labelsText = createLabeledValue("Labels:", container);
-            return container;
-        }
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
+        	Composite container = super.createControls(parent, context, dbc);
+        	this.namespaceText = createLabeledValue("Namespace:", container);
+			this.labelsText = createLabeledValue("Labels:", container);
+			return container;
+		}
 
         @Override
-        public void onVisible(IObservableValue serviceObservable, DataBindingContext dbc) {
-            Object value = serviceObservable.getValue();
+        public void onVisible(IObservableValue resourceObservable, DataBindingContext dbc) {
+        	super.onVisible(resourceObservable, dbc);
+        	Object value = resourceObservable.getValue();
             if (!(value instanceof IResource)) {
                 return;
-            }
-            IResource resource = (IResource) value;
+			}
 
-            nameText.setText(resource.getName());
-            namespaceText.setText(resource.getNamespace());
-            String labels = StringUtils.toString(resource.getLabels());
+            IResource resource = (IResource) value;
+			namespaceText.setText(resource.getNamespace());
+			String labels = StringUtils.toString(resource.getLabels());
             labels = org.apache.commons.lang.StringUtils.defaultString(labels); //replaces null by empty string
-            labelsText.setText(labels);
+			labelsText.setText(labels);
         }
+
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof IResource;
+		}
+	}
+
+    private class ProjectDetailView extends ResourceDetailView {
+
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof IProject;
+		}
     }
 
-    private class ServiceDetailView extends ResourceDetailView {
+	private class ServiceDetailView extends ProjectResourceDetailView {
 
 		private StyledText selectorsText;
 		private StyledText ipText;
@@ -102,16 +146,16 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 			if (!(value instanceof IService)) {
 				return;
 			}
-			IService service = (IService) value;
 
-            String selectors = StringUtils.toString(service.getSelector());
+			IService service = (IService) value;
+			String selectors = StringUtils.toString(service.getSelector());
             selectors = org.apache.commons.lang.StringUtils.defaultString(selectors); //replaces null by empty string
-            selectorsText.setText(selectors);
-            ipText.setText(
-                    org.apache.commons.lang.StringUtils.join(new String[] {
-                            service.getPortalIP(), StringUtils.toStringOrNull(service.getTargetPort())
-                    }, ':'));
-            portText.setText(StringUtils.toStringOrNull(service.getPort()));
+			selectorsText.setText(selectors);
+			ipText.setText(
+					org.apache.commons.lang.StringUtils.join(new String[] {
+							service.getPortalIP(), StringUtils.toStringOrNull(service.getTargetPort())
+					}, ':'));
+			portText.setText(StringUtils.toStringOrNull(service.getPort()));
 		}
 
 		@Override
@@ -120,7 +164,7 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 		}
 	}
     
-    private class ReplicationControllerDetailView extends ResourceDetailView {
+    private class ReplicationControllerDetailView extends ProjectResourceDetailView {
 
         private StyledText selectorsText;
 
@@ -138,11 +182,11 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
             if (!(value instanceof IReplicationController)) {
                 return;
             }
-            IReplicationController replicationController = (IReplicationController) value;
 
-            String selectors = StringUtils.toString(replicationController.getReplicaSelector());
-            selectors = org.apache.commons.lang.StringUtils.defaultString(selectors); //replaces null by empty string
-            selectorsText.setText(selectors);
+			IReplicationController replicationController = (IReplicationController) value;
+			String selectors = StringUtils.toString(replicationController.getReplicaSelector());
+			selectors = org.apache.commons.lang.StringUtils.defaultString(selectors); //replaces null by empty string
+			selectorsText.setText(selectors);
         }
 
         @Override
