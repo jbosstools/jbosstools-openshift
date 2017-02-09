@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,8 +13,8 @@ package org.jboss.tools.openshift.test.core.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.areRelated;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.containsAll;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigForService;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigsForService;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigFor;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigsFor;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getDeploymentConfigNameForPods;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getImageRefs;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRouteForService;
@@ -392,22 +392,22 @@ public class ResourceUtilsTest {
 	public void testGetBuildConfigsForService() {
 		// given
 		// when
-		List<IBuildConfig> matchingConfigs = getBuildConfigsForService(SERVICE_42, Arrays.asList(BUILDCONFIGS));
+		List<IBuildConfig> matchingConfigs = getBuildConfigsFor(SERVICE_42, Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfigs).containsExactly(BUILDCONFIGS[1], BUILDCONFIGS[3]);
 
 		// when
-		matchingConfigs = getBuildConfigsForService(SERVICE_42, null);
+		matchingConfigs = getBuildConfigsFor(SERVICE_42, null);
 		// then
 		assertThat(matchingConfigs).isEmpty();
 		
 		// when
-		matchingConfigs = getBuildConfigsForService((IService) null, Arrays.asList(BUILDCONFIGS));
+		matchingConfigs = getBuildConfigsFor((IService) null, Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfigs).isEmpty();
 
 		// when
-		matchingConfigs = getBuildConfigsForService(
+		matchingConfigs = getBuildConfigsFor(
 				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
 				Arrays.asList(BUILDCONFIGS));
 		// then
@@ -418,22 +418,22 @@ public class ResourceUtilsTest {
 	public void testGetBuildConfigForService() {
 		// given
 		// when
-		IBuildConfig matchingConfig = getBuildConfigForService(SERVICE_42, Arrays.asList(BUILDCONFIGS));
+		IBuildConfig matchingConfig = getBuildConfigFor(SERVICE_42, Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfig).isEqualTo(BUILDCONFIGS[1]);
 
 		// when
-		matchingConfig = getBuildConfigForService(SERVICE_42, null);
+		matchingConfig = getBuildConfigFor(SERVICE_42, null);
 		// then
 		assertThat(matchingConfig).isNull();
 		
 		// when
-		matchingConfig = getBuildConfigForService((IService) null, Arrays.asList(BUILDCONFIGS));
+		matchingConfig = getBuildConfigFor((IService) null, Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfig).isNull();
 
 		// when
-		matchingConfig = getBuildConfigForService(
+		matchingConfig = getBuildConfigFor(
 				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
 				Arrays.asList(BUILDCONFIGS));
 		// then
@@ -656,7 +656,7 @@ public class ResourceUtilsTest {
 		// given
 		List<IReplicationController> noRcs = Collections.<IReplicationController> emptyList();
 		// when
-		IReplicationController rc = ResourceUtils.selectByDeploymentConfigVersion(noRcs);
+		IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(noRcs);
 		// then
 		assertThat(rc).isNull();
 	}
@@ -666,7 +666,7 @@ public class ResourceUtilsTest {
 		// given
 		List<IReplicationController> nullRcs = null;
 		// when
-		IReplicationController rc = ResourceUtils.selectByDeploymentConfigVersion(nullRcs);
+		IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(nullRcs);
 		// then
 		assertThat(rc).isNull();
 
@@ -694,7 +694,7 @@ public class ResourceUtilsTest {
 				})
 				);
 		// when
-		IReplicationController rc = ResourceUtils.selectByDeploymentConfigVersion(noRcs);
+		IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(noRcs);
 		// then
 		assertThat(rc).isNotNull();
 		assertThat(rc.getName()).isEqualTo("6");

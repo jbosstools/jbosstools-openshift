@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -14,6 +14,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,55 @@ public class ResourceUtils {
 	public static final String DOCKER_IMAGE_KIND = "DockerImage";
 	public static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
 	public static final String DEPLOYMENT_CONFIG_KEY = "deploymentconfig";
+
+	/**
+	 * Returns {@code true} if the given route points to the given service and
+	 * the given service is the service that the given route points to.
+	 * 
+	 * @param route
+	 * @param service
+	 * @return
+	 * 
+	 * @see IRoute#getServiceName()
+	 * @see IService#getName()
+	 */
+	public static boolean areRelated(IRoute route, IService service) {
+		if (service != null 
+				&& !StringUtils.isEmpty(service.getName())
+				&& route != null) {
+			return service.getName().equals(route.getServiceName());
+		}
+		return false;
+	}
+
+	/**
+	 * Returns {@code true} if the given build config matches the name of the
+	 * given service.
+	 * 
+	 * @param config
+	 * @param service
+	 * @return
+	 */
+	public static boolean areRelated(final IBuildConfig config, final IService service) {
+		if (service != null 
+				&& !StringUtils.isEmpty(service.getName())
+				&& config != null) {
+			return service.getName().equals(config.getName());
+		}
+		return false;
+	}
+
+	public static boolean areRelated(IDeploymentConfig dc, IService s) {
+		return containsAll(s.getSelector(), dc.getReplicaSelector());
+	}
+
+	public static boolean areRelated(IReplicationController rc, IService s) {
+		return containsAll(s.getSelector(), rc.getReplicaSelector());
+	}
+
+	public static boolean areRelated(IPod pod, IService s) {
+		return containsAll(s.getSelector(), pod.getLabels());
+	}
 
 	/**
 	 * Returns <code>true</code> if the given resource contains the given text
@@ -141,6 +191,12 @@ public class ResourceUtils {
 				.collect(Collectors.toSet());
 	}
 	
+	public static Collection<IService> getServicesFor(IReplicationController rc, Collection<IService> services){
+		return services.stream()
+				.filter(service -> areRelated(rc, service))
+				.collect(Collectors.toSet());
+	}
+
 	/**
 	 * Find the collection of pods that match the selector of the given service
 	 * @param service
@@ -166,11 +222,22 @@ public class ResourceUtils {
 	}
 	
 	/**
+	 * Returns {@code true} if the given pod is a pod running builds. This is
+	 * the case if the pod is annotated with the build name. Returns
+	 * {@code false} if the given pod is a pod running an application or is
+	 * null.
 	 * 
 	 * @param pod
+	 *            the pod that shall be checked whether it's a build pod
 	 * @return true if pod is annotated with the build name; false otherwise;
+	 * 
+	 * @see IPod
+	 * @see OpenShiftAPIAnnotations#BUILD_NAME
 	 */
 	public static boolean isBuildPod(IPod pod) {
+		if (pod == null) {
+			return false;
+		}
 		return pod.isAnnotatedWith(OpenShiftAPIAnnotations.BUILD_NAME);
 	}
 	
@@ -231,14 +298,13 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * The image reference for an image change trigger used to correlate a 
-	 * build to a deploymentconfig
+	 * Returns the image referenced by a given build. Returns empty string if none is found.
 	 *  
-	 * @param trigger
-	 * @return
+	 * @param build
+	 * @return the image referenced
 	 */
 	public static String imageRef(IBuild build) {
-		if(build != null) {
+		if (build != null) {
 			switch(build.getOutputKind()) {
 				case ResourceKind.IMAGE_STREAM_TAG:
 				case IMAGE_STREAM_IMAGE_KIND:
@@ -247,7 +313,6 @@ public class ResourceUtils {
 			}
 		}
 		return "";
-
 	}
 	
 	/**
@@ -297,26 +362,6 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns {@code true} if the given route points to the given service and
-	 * the given service is the service that the given route points to.
-	 * 
-	 * @param route
-	 * @param service
-	 * @return
-	 * 
-	 * @see IRoute#getServiceName()
-	 * @see IService#getName()
-	 */
-	public static boolean areRelated(IRoute route, IService service) {
-		if (service != null 
-				&& !StringUtils.isEmpty(service.getName())
-				&& route != null) {
-			return service.getName().equals(route.getServiceName());
-		}
-		return false;
-	}
-
-	/**
 	 * Returns build configs of the given list of build configs
 	 * that match the given service.
 	 * 
@@ -328,7 +373,7 @@ public class ResourceUtils {
 	 * @see IBuildConfig
 	 * @see IService
 	 */
-	public static List<IBuildConfig> getBuildConfigsForService(IService service, List<IBuildConfig> buildConfigs) {
+	public static List<IBuildConfig> getBuildConfigsFor(IService service, List<IBuildConfig> buildConfigs) {
 		if (buildConfigs == null
 				|| buildConfigs.isEmpty()) {
 			return Collections.emptyList();
@@ -361,53 +406,78 @@ public class ResourceUtils {
 				.orElse(null);
 	}
 
-	public static IReplicationController selectByDeploymentConfigVersion(List<IReplicationController> rcs) {
+	public static IReplicationController getLatestDeploymentConfigVersion(List<IReplicationController> rcs) {
 		if (rcs == null 
 				|| rcs.isEmpty()) {
 			return null;
 		}
-		
+
 		return rcs.stream()
-				.sorted((IReplicationController rc1, IReplicationController rc2) -> {
-					if (rc1 == null) {
-						if (rc2 == null) {
-							return 0;
-						} else {
-							return 1;
-						}
-					} else {
-						if (rc2 == null) {
-							return -1;
-						} else {
-							return compareVersions(
-									rc1.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION), 
-									rc2.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION));
-						}
+				.max(new NumericResourceAttributeComparator<IReplicationController>() {
+
+					@Override
+					protected int getResourceAttribute(IReplicationController rc) {
+						return safeParseInt(rc.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION));
 					}
 				})
-				.findFirst()
 				.orElse(null);
 	}
 	
-	private static int compareVersions(String version1, String version2) {
-		int v1 = safeParseInt(version1);
-		int v2 = safeParseInt(version2);
-		if (v1 > v2) {
-			return -1;
-		} else if (v1 == v2) {
-			return 0;
-		} else {
-			return 1;
+	public static IDeploymentConfig getLatestResourceVersion(List<IDeploymentConfig> dcs) {
+		if (dcs == null 
+				|| dcs.isEmpty()) {
+			return null;
+		}
+
+		return dcs.stream()
+				.max(new NumericResourceAttributeComparator<IDeploymentConfig>() {
+
+					@Override
+					protected int getResourceAttribute(IDeploymentConfig dc) {
+						return safeParseInt(dc.getResourceVersion());
+					}
+				})
+				.orElse(null);
+	}
+
+	private abstract static class NumericResourceAttributeComparator<R> implements Comparator<R>{
+
+		@Override
+		public int compare(R r1, R r2) {
+			if (r1 == null) {
+				if (r2 == null) {
+					return 0;
+				} else {
+					return 1;
+				}
+			} else {
+				if (r2 == null) {
+					return -1;
+				} else {
+					int attr1 = getResourceAttribute(r1);
+					int attr2 = getResourceAttribute(r2);
+					if (attr1 < attr2) {
+						return -1;
+					} else if (attr1 == attr2) {
+						return 0;
+					} else {
+						return 1;
+					}
+				}
+			}
+		}
+
+		protected abstract int getResourceAttribute(R r); 
+
+		protected int safeParseInt(String string) {
+			try {
+				return Integer.parseInt(string);
+			} catch(NumberFormatException e1) {
+				return -1;
+			}
 		}
 	}
 
-	private static int safeParseInt(String string) {
-		try {
-			return Integer.parseInt(string);
-		} catch(NumberFormatException e1) {
-			return -1;
-		}
-	}
 	
 	/**
 	 * Returns the first build config out of the given list of build configs
@@ -419,35 +489,18 @@ public class ResourceUtils {
 	 *            the build configs that shall be introspected
 	 * @return
 	 * 
-	 * @see #getBuildConfigsForService(IService, List)
+	 * @see #getBuildConfigsFor(IService, List)
 	 * @see #areRelated(IBuildConfig, IService)
 	 * @see IBuildConfig
 	 * @see IService
 	 */
-	public static IBuildConfig getBuildConfigForService(IService service, List<IBuildConfig> buildConfigs) {
-		List<IBuildConfig> matchinBuildConfigs = getBuildConfigsForService(service, buildConfigs);
+	public static IBuildConfig getBuildConfigFor(IService service, List<IBuildConfig> buildConfigs) {
+		List<IBuildConfig> matchinBuildConfigs = getBuildConfigsFor(service, buildConfigs);
 		if (matchinBuildConfigs.isEmpty()) {
 			return null;
 		} else {
 			return matchinBuildConfigs.get(0);
 		}
-	}
-
-	/**
-	 * Returns {@code true} if the given build config matches the name of the
-	 * given service.
-	 * 
-	 * @param config
-	 * @param service
-	 * @return
-	 */
-	public static boolean areRelated(final IBuildConfig config, final IService service) {
-		if (service != null 
-				&& !StringUtils.isEmpty(service.getName())
-				&& config != null) {
-			return service.getName().equals(config.getName());
-		}
-		return false;
 	}
 
 	/**
@@ -481,9 +534,7 @@ public class ResourceUtils {
 					} catch (CoreException | URISyntaxException e) {
 					}
 					return false;
-				}
-	
-				)
+			})
 			.findFirst().orElseGet(() -> null);
 	}
 
@@ -513,6 +564,30 @@ public class ResourceUtils {
 			project = resource.getProject();
 		}
 		return project;
+	}
+
+	public static IDeploymentConfig getDeploymentConfigFor(IReplicationController rc, Collection<IDeploymentConfig> dcs) {
+		if (rc == null) {
+			return null;
+		}
+
+		String dcName = rc.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
+		if (dcs == null
+				|| dcs.isEmpty()
+				|| StringUtils.isEmpty(dcName)) {
+			return null;
+		}
+
+		return dcs.stream()
+			.filter(dc -> dcName.equals(dc.getName()))
+			.max(new NumericResourceAttributeComparator<IDeploymentConfig>() {
+
+				@Override
+				protected int getResourceAttribute(IDeploymentConfig dc) {
+					return safeParseInt(dc.getResourceVersion());
+				}
+			})
+			.orElse(null);
 	}
 
 

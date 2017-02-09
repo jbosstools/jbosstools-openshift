@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.containsAll;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;
 
 import java.util.Collection;
@@ -37,6 +36,7 @@ import com.openshift.restclient.model.route.IRoute;
  * project are related to whilch service.
  * 
  * @author thomas
+ * @author Andre Dietisheim
  *
  */
 public class ServiceResourceMapper {
@@ -45,12 +45,12 @@ public class ServiceResourceMapper {
 
 		resources.forEach(resource -> {
 			if (resource instanceof IPod) {
-				if (isRelated(s, (IPod) resource)) {
+				if (ResourceUtils.areRelated((IPod) resource, s)) {
 					result.add(resource);
 					result.addAll(getRelated(resources, (IPod) resource));
 				}
 			} else if (resource instanceof IDeploymentConfig) {
-				if (isRelated(s, (IDeploymentConfig) resource)) {
+				if (ResourceUtils.areRelated((IDeploymentConfig) resource, s)) {
 					result.add(resource);
 					result.addAll(getRelated(resources, (IDeploymentConfig) resource));
 				}
@@ -61,14 +61,6 @@ public class ServiceResourceMapper {
 			}
 		});
 		return result;
-	}
-
-	private static boolean isRelated(IService s, IDeploymentConfig dc) {
-		return containsAll(s.getSelector(), dc.getReplicaSelector());
-	}
-
-	private static boolean isRelated(IService s, IPod pod) {
-		return containsAll(s.getSelector(), pod.getLabels());
 	}
 
 	private static Collection<IResource> getRelated(Collection<IResource> resources, IPod resource) {

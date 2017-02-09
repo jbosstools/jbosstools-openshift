@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.handler;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.math.NumberUtils;
@@ -51,16 +49,18 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
-import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
+import org.jboss.tools.openshift.internal.ui.utils.ResourceWrapperUtils;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.api.capabilities.IScalable;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
 
 /**
  * Handle for scaling deployments
@@ -75,66 +75,74 @@ public class ScaleDeploymentHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IReplicationController rc = getSelectedElement(event, IReplicationController.class);
-		if (rc != null) {
-			scaleUsing(event, rc, rc.getName());
-		} else {
-			IServiceWrapper deployment = getSelectedElement(event, IServiceWrapper.class);
-			if (deployment == null) {
-				IResourceWrapper<?, IOpenshiftUIElement<?,?>> wrapper = getSelectedElement(event, IResourceWrapper.class);
-				deployment = getServiceWrapperForPodWrapper(wrapper);
-			}
-			if (deployment != null) {
-				rc = getReplicationController(deployment);
-				if (rc != null) {
-					scaleUsing(event, rc, deployment.getWrapped().getName());
-				}
-			}
+		IDeploymentConfig dc = getDeploymentConfig(getSelectedElement(event, IResourceWrapper.class));
+		if (dc == null) {
+			IResource resource = 
+					ResourceWrapperUtils.getResource(UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event)));
+			return OpenShiftUIActivator.statusFactory().errorStatus(
+					NLS.bind("Could not scale {0}: Could not find deployment config", resource == null? "" : resource.getName()));
 		}
+		scaleUsing(event, dc, dc.getName());
 		return null;
  	}
 
-	//Returns service UI element if given resource wrapper has a running pod and service wrapper as the parent, otherwise returns null.
-	protected static IServiceWrapper getServiceWrapperForPodWrapper(IResourceWrapper<?, IOpenshiftUIElement<?,?>> resourceWrapper) {
-		if (resourceWrapper != null
-				&& resourceWrapper.getWrapped() instanceof IPod
-				&& !ResourceUtils.isBuildPod((IPod) resourceWrapper.getWrapped())) {
-			Object parent = resourceWrapper.getParent();
-			if (parent instanceof IServiceWrapper) {
-				return (IServiceWrapper) parent;
-			} else if (parent instanceof IProjectWrapper) {
-				return getServiceWrapperFor((IPod) resourceWrapper.getWrapped(),
-						((IProjectWrapper) parent).getResourcesOfKind(ResourceKind.SERVICE));
-			}
-		}
-		return null;
+	protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
+		ISelection selection = UIUtils.getCurrentSelection(event);
+		return UIUtils.getFirstElement(selection, klass);
 	}
 
-	/**
-	 * Returns the service wrapper of the the given service wrappers, that matches the given pod
-	 * 
-	 * @param the pod that shall be matched against
-	 * @param services the services that shall be searched for a matching service
-	 * @return the service that matches the given pod
-	 */
-	private static IServiceWrapper getServiceWrapperFor(IPod pod, Collection<IResourceWrapper<?, ?>> services) {
-		Map<String, String> labels = pod.getLabels();
-		for (IResourceWrapper<?, ?> wrapper : services) {
-			IServiceWrapper serviceWrapper = (IServiceWrapper) wrapper;
-			if (ResourceUtils.containsAll(
-					serviceWrapper.getWrapped().getMetadata(), labels)) {
-				return serviceWrapper;
-			}
+	private IDeploymentConfig getDeploymentConfig(IResourceWrapper<?,?> wrapper) {
+		if (wrapper == null) {
+			return null;
 		}
-		return null;
+
+		IDeploymentConfig dc = null;
+		IResource wrapped = wrapper.getWrapped();
+		if (wrapper instanceof IServiceWrapper) {
+			// service selected
+			dc = getDeploymentConfig((IServiceWrapper) wrapper);
+		} else if (wrapped instanceof IPod) {
+			// pod selected
+			dc = getDeploymentConfig((IPod) wrapped, wrapper);
+		} else if (wrapped instanceof IDeploymentConfig) {
+			// deployment config selected
+			// has to be tested before IReplicationController, IDeploymentConfig extends IReplicationController
+			dc = (IDeploymentConfig) wrapped;
+		} else if (wrapped instanceof IReplicationController) {
+			// replication controller selected (deployment tab in properties)
+			// has to be tested after IDeploymentConfig, IDeploymentConfig extends IReplicationController
+			dc = getDeploymentConfig((IReplicationController) wrapped, wrapper);
+		}
+		return dc;
 	}
-	
-	private IReplicationController getReplicationController(IServiceWrapper deployment) {
-		return ResourceUtils.selectByDeploymentConfigVersion(
-				deployment.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER)
-					.stream()
-						.map(wrapper -> (IReplicationController) wrapper.getWrapped())
-						.collect(Collectors.<IReplicationController>toList()));
+
+	private IDeploymentConfig getDeploymentConfig(IReplicationController rc, IResourceWrapper<?, ?> wrapper) {
+		IDeploymentConfig dc = null;
+		IServiceWrapper service = ResourceWrapperUtils.getServiceWrapperFor(wrapper, 
+				serviceWrapper -> ResourceUtils.areRelated(rc, (IService) serviceWrapper.getWrapped()));
+		if (service != null) {
+			dc = ResourceUtils.getDeploymentConfigFor(rc, 
+					ResourceWrapperUtils.getResources(service.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG)));
+		}
+		return dc;
+	}
+
+	private IDeploymentConfig getDeploymentConfig(IPod pod, IResourceWrapper<?, ?> wrapper) {
+		IDeploymentConfig dc = null;
+		if (!ResourceUtils.isBuildPod(pod)) {
+			IServiceWrapper service = ResourceWrapperUtils.getServiceWrapperFor(
+					wrapper, 
+					serviceWrapper -> ResourceUtils.areRelated(pod, (IService) serviceWrapper.getWrapped()));
+			dc = getDeploymentConfig(service);
+		}
+		return dc;
+	}
+
+	private IDeploymentConfig getDeploymentConfig(IServiceWrapper service) {
+		return ResourceUtils.getLatestResourceVersion(
+				service.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG).stream()
+						.map(wrapper -> (IDeploymentConfig) wrapper.getWrapped())
+						.collect(Collectors.<IDeploymentConfig>toList()));
 	}
 
 	protected void scaleUsing(ExecutionEvent event, IReplicationController rc, String name) {
@@ -186,11 +194,6 @@ public class ScaleDeploymentHandler extends AbstractHandler {
 				
 			}.schedule();
 		}
-	}
-
-	protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
-		ISelection selection = UIUtils.getCurrentSelection(event);
-		return UIUtils.getFirstElement(selection, klass);
 	}
 
 	private int getRequestedReplicas(IReplicationController rc, String name, ExecutionEvent event) {

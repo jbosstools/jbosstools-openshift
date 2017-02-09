@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -26,9 +26,15 @@ import org.eclipse.ui.menus.CommandContributionItemParameter;
 import org.eclipse.ui.menus.IWorkbenchContribution;
 import org.eclipse.ui.services.IServiceLocator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IRunningPodHolder;
+import org.jboss.tools.openshift.internal.ui.utils.ResourceWrapperUtils;
+
+import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IService;
 
 public class ScaleDeploymentContributionItem extends CompoundContributionItem implements IWorkbenchContribution {
 	static final String COMMAND_ID = "org.jboss.tools.openshift.ui.command.deployment.scale";
@@ -57,16 +63,27 @@ public class ScaleDeploymentContributionItem extends CompoundContributionItem im
        	item.setText("Scale");
     }
     
-    @SuppressWarnings("unchecked")
 	private boolean isRelevant() {
 		ISelectionService service = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
 		ISelection selection = service != null ? service.getSelection() : null;
 		if(selection == null || selection.isEmpty()) {
 			return false;
 		}
-		IRunningPodHolder runningPod = UIUtils.getFirstElement(selection, IRunningPodHolder.class);
-		if(runningPod == null 
-				|| ScaleDeploymentHandler.getServiceWrapperForPodWrapper(UIUtils.getFirstElement(selection, IResourceWrapper.class)) == null) {
+		IRunningPodHolder podHolder = UIUtils.getFirstElement(selection, IRunningPodHolder.class);
+		if (podHolder == null) {
+			return false;
+		}
+		IOpenshiftUIElement<?, IOpenshiftUIElement<?, ?>> podUIElement = podHolder.getPodUIElement();
+		if (!(podUIElement instanceof IResourceWrapper)) {
+			return false;
+		}
+		IResourceWrapper<?,?> podWrapper = (IResourceWrapper<?, ?>) podUIElement;
+		if(ResourceWrapperUtils.getServiceWrapperFor(
+						podWrapper,
+						serviceWrapper -> ResourceUtils.areRelated(
+								(IPod) podWrapper.getWrapped(), 
+								(IService) serviceWrapper.getWrapped())) 
+					== null) {
 			return false;
 		}
 		return true;
