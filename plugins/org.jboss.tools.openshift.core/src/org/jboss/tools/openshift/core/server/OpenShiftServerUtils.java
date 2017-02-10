@@ -598,4 +598,11 @@ public class OpenShiftServerUtils {
 		IFile packageJson = project.getFile(PACKAGE_JSON);
 		return (packageJson != null && packageJson.isAccessible());
 	}
+	
+    private static void assertServerNotNull(IServerAttributes server) throws CoreException {
+        if (server == null) {
+            throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+                    "Could not determine the server to use."));
+        }
+    }	
 }
