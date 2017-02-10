@@ -211,7 +211,7 @@ public class OpenShiftServerUtilsTest {
 	public void should_return_deploymentconfig() throws CoreException {
 		// given
 		// when
-		IDeploymentConfig deploymentConfig = OpenShiftServerUtils.getReplicationController(server);
+		IDeploymentConfig deploymentConfig = (IDeploymentConfig) OpenShiftServerUtils.getReplicationController(server);
 		// then
 		assertThat(deploymentConfig).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2]);
 	}
