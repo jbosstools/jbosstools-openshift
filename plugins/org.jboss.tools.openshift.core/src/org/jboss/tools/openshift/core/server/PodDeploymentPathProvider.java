@@ -61,8 +61,12 @@ public class PodDeploymentPathProvider {
 			IResource imageStreamTag = getImageStreamTag(connection, project, imageRef, imageDigest);
 			return getPodPath(imageStreamTag);
 		} else {
-			
-			return "";
+		    String imageMetaData = getImageMetaData(imageRef, project);
+		    if (imageMetaData != null) {
+		        return getPodPath(imageMetaData);
+		    } else {
+		        return "";
+		    }
 		}
 	}
 
@@ -111,12 +115,12 @@ public class PodDeploymentPathProvider {
 		return imageStreamTag;
 	}
 
-	private ImportImageMetaData getImageMetaData(String imageRef, IProject project) {
+	private String getImageMetaData(String imageRef, IProject project) {
 		IImageStreamImportCapability imageStreamImportCapability = ((IProject) project).getCapability(IImageStreamImportCapability.class);
 		DockerImageURI uri = new DockerImageURI(imageRef);
 		IImageStreamImport imageStreamImport = imageStreamImportCapability.importImageMetadata(uri);
 		if (ResourceUtils.isSuccessful(imageStreamImport)) {
-			return new ImportImageMetaData(((IImageStreamImport) imageStreamImport).getImageJsonFor(uri));
+			return imageStreamImport.getImageJsonFor(uri);
 		} else {
 			return null;
 		}
@@ -133,18 +137,24 @@ public class PodDeploymentPathProvider {
 		if (imageStreamTag == null) {
 			return null;
 		}
-		String podPath = null;
-		String imageStreamTagJson = imageStreamTag.toJson(true);
-		if ((podPath = matchFirstGroup(imageStreamTagJson, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
-			if ((podPath = matchFirstGroup(imageStreamTagJson, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
-				podPath = matchFirstGroup(imageStreamTagJson, PATTERN_WOKRING_DIR);
-			}
-		}
-
-		return podPath;
+		return getPodPath(imageStreamTag.toJson(true));
 	}
 
-	private String matchFirstGroup(String imageStreamTag, Pattern pattern) {
+    private String getPodPath(String json) {
+        if (json == null) {
+            return null;
+        }
+        String podPath = null;
+        if ((podPath = matchFirstGroup(json, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
+            if ((podPath = matchFirstGroup(json, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
+                podPath = matchFirstGroup(json, PATTERN_WOKRING_DIR);
+            }
+        }
+
+        return podPath;
+    }
+
+    private String matchFirstGroup(String imageStreamTag, Pattern pattern) {
 		Matcher matcher = pattern.matcher(imageStreamTag);
 		if (matcher.find() && matcher.groupCount() == 1) {
 			return matcher.group(1);

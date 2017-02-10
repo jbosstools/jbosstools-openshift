@@ -465,18 +465,18 @@ public class OpenShiftServerUtils {
 	}
 	
 	/**
-	 * Returns the deployment config for the given server (attributes). The
+	 * Returns the replication controller for the given server (attributes). The
 	 * match is done by the service that the given (openshift server) is bound
 	 * to. This method does remote calls to the OpenShift server and thus should
 	 * never be called from the UI thread.
 	 * 
 	 * @param server
-	 * @return the deployment config for the given server
+	 * @return the replication controller for the given server
 	 * 
 	 * @see #getResource(IServerAttributes)
 	 * @see ResourceUtils#getPodsForService(IService, Collection)
 	 */
-	public static IDeploymentConfig getDeploymentConfig(IServerAttributes server) throws CoreException {
+	public static IReplicationController getReplicationController(IServerAttributes server) throws CoreException {
 		assertServerNotNull(server);
 		
 		Connection connection = getConnection(server);
@@ -521,7 +521,7 @@ public class OpenShiftServerUtils {
 		    if (deploymentConfigName != null) {
 		        return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), deploymentConfigName);
 		    } else {
-		        return null;
+		        return (IReplicationController) resource;
 		    }
 		} else {
 		    return null;

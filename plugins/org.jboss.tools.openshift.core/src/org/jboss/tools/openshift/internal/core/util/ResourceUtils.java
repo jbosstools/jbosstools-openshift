@@ -161,10 +161,8 @@ public class ResourceUtils {
      * @return the matched pods
      */
     public static List<IPod> getPodsForReplicationController(IReplicationController replicationController, Collection<IPod> pods) {
-        return pods.stream().filter(pod -> {
-            String configName = pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_NAME);
-            return replicationController.getName().equals(configName);
-        }).collect(Collectors.toList());
+        return pods.stream().filter(pod -> containsAll(replicationController.getReplicaSelector(), pod.getLabels()))
+                            .collect(Collectors.toList());
     }
 
     /**
@@ -210,9 +208,7 @@ public class ResourceUtils {
             .filter(dc -> dc.getName().equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))
             .findFirst();
         if (!rcOrDc.isPresent()) {
-            rcOrDc = pod.getProject().getResources(ResourceKind.REPLICATION_CONTROLLER).stream()
-                    .filter(dc -> dc.getName().equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_NAME)))
-                    .findFirst();
+            rcOrDc = Optional.ofNullable(getReplicationControllerForPod(pod, pod.getProject().getResources(ResourceKind.REPLICATION_CONTROLLER)));
         }
         return (IReplicationController) rcOrDc.orElse(null);
     }
@@ -316,14 +312,14 @@ public class ResourceUtils {
 	}
 	
 	/**
-	 * Find the collection of pods for the given deployment config
-	 * @param deploymentConfig
-	 * @param pods
-	 * @return
+	 * Find the collection of pods for the given replication controller
+	 * @param replicationController the replication controller to search pods for
+	 * @param pods the list of pods to search
+	 * @return the list of matched pods
 	 */
-	public static Collection<IPod> getPodsForDeploymentConfig(IDeploymentConfig deploymentConfig) {
-		List<IPod> pods = deploymentConfig.getProject().getResources(ResourceKind.POD);
-		Map<String, String> selector = deploymentConfig.getReplicaSelector();
+	public static Collection<IPod> getPodsForReplicationController(IReplicationController replicationController) {
+		List<IPod> pods = replicationController.getProject().getResources(ResourceKind.POD);
+		Map<String, String> selector = replicationController.getReplicaSelector();
 		return getPodsForSelector(selector, pods);
 	}
 
@@ -449,7 +445,29 @@ public class ResourceUtils {
 				.orElse(null);
 	}
 
-	public static IReplicationController selectByDeploymentConfigVersion(List<IReplicationController> rcs) {
+    /**
+     * Returns the 1st replication controllers that's found matching the given
+     * service. The lookup is done by matching the label in the service and
+     * replication controller pod template. No existing pods are required.
+     * 
+     * @param pod
+     * @param allReplicationControllers
+     * @return
+     */
+    public static IReplicationController getReplicationControllerForPod(IPod pod, List<IReplicationController> allReplicationControllers) {
+        if (allReplicationControllers == null
+                || allReplicationControllers.isEmpty()
+                || pod == null) {
+            return null;
+        }
+
+        return allReplicationControllers.stream()
+                .filter(rc -> containsAll(rc.getReplicaSelector(), pod.getLabels()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static IReplicationController selectByDeploymentConfigVersion(List<IReplicationController> rcs) {
 		if (rcs == null 
 				|| rcs.isEmpty()) {
 			return null;

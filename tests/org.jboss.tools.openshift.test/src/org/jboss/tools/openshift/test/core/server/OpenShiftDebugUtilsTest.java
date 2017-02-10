@@ -51,7 +51,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.core.server.debug.DebuggingContext;
-import org.jboss.tools.openshift.internal.core.server.debug.DeploymentConfigListenerJob;
+import org.jboss.tools.openshift.internal.core.server.debug.ReplicationControllerListenerJob;
 import org.jboss.tools.openshift.internal.core.server.debug.IDebugListener;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugUtils;
 import org.junit.After;
@@ -76,12 +76,12 @@ public class OpenShiftDebugUtilsTest {
 		monitor = new NullProgressMonitor();
 		launchManager = mock(ILaunchManager.class);
 		debugUtils = OpenShiftDebugUtils.get(launchManager);
-		System.setProperty(DeploymentConfigListenerJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, "2000");
+		System.setProperty(ReplicationControllerListenerJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, "2000");
 	}
 	
 	@After
 	public void tearDown() {
-		System.clearProperty(DeploymentConfigListenerJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY);
+		System.clearProperty(ReplicationControllerListenerJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY);
 	}
 	
 
