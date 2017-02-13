@@ -108,6 +108,9 @@ public abstract class ServiceManagerEnvironmentLoader {
 		}
 		
 		HashMap<String, String> adbEnv = ServiceManagerUtility.parseLines(lines);
+		if( adbEnv == null ) {
+			throw new IOException("Error calling " + cmdLoc + " with args " + String.join(", ", args));
+		}
 		return adbEnv;
 	}
 

@@ -30,7 +30,15 @@ public class CDKServerUtility {
 	}
 	
 	public static Properties getDotCDK(String cdkFolder) {
-		File dotcdk = new File(cdkFolder, ".cdk");
+		return getDotCDK(new File(cdkFolder, ".cdk"));
+	}
+	
+	public static Properties getDotCDK(String cdkFolder, String name) {
+		return getDotCDK(new File(cdkFolder, name));
+	}
+
+	
+	public static Properties getDotCDK(File dotcdk) {
 		if( dotcdk.exists()) {
 			try {
 				Properties props = new Properties();
@@ -42,6 +50,7 @@ public class CDKServerUtility {
 		}
 		return new Properties();
 	}
+
 
 	public static File getWorkingDirectory(IServer s) {
 		String str = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);

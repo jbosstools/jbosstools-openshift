@@ -32,7 +32,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 	public ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server) {
 		// Load the docker env
 		Map<String, String> adbEnv = loadDockerEnv(server);
-
+		
 		// Load the minishift console --machine-readable
 		Properties props = loadOpenshiftConsoleDetails(server);
 
@@ -40,7 +40,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		Map<String, String> merged = merge(adbEnv, props);
 		
 		String dotMinishift = System.getProperty("user.home") + File.separator + ".minishift";
-		Properties dotCDK = CDKServerUtility.getDotCDK(dotMinishift);
+		Properties dotCDK = CDKServerUtility.getDotCDK(dotMinishift, "cdk");
 		merged = merge(merged, dotCDK);
 		try {
 			return new ServiceManagerEnvironment(merged);
