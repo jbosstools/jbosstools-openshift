@@ -180,7 +180,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 				startDebugging(server, dc, debugContext, monitor);
 			} else {//run, profile
 				stopDebugging(dc, debugContext, monitor);
-				enableDevModeForNodeJsProject(dc, server);
+				enableDevModeForNodeJsProject(OpenShiftServerUtils.getDeploymentConfig(server), server);
 			}
 		} catch (CoreException e) {
 			mode = currentMode;
