@@ -148,13 +148,17 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	private boolean podsReady(IServer server, IProgressMonitor monitor) {
 		while( !monitor.isCanceled()) {
 			IPod[] pods = findPods(server); // result is possibly null
-			IPod[] buildPods = findBuildPods(pods); 
-			IPod[] other = findRunnablePods(pods);
-			if( !complete(buildPods, other)) {
-				sleep(1000);
-			} else {
-				return true;
-			}
+			if (pods != null) {
+                IPod[] buildPods = findBuildPods(pods);
+                IPod[] other = findRunnablePods(pods);
+                if (!complete(buildPods, other)) {
+                    sleep(1000);
+                } else {
+                    return true;
+                } 
+            } else {
+                return false;
+            }
 		}
 		return false;
 	}
