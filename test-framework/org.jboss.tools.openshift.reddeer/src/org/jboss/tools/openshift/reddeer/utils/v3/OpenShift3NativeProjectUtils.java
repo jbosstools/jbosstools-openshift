@@ -70,7 +70,7 @@ public class OpenShift3NativeProjectUtils {
 		 * 
 		 * @see WatchManager#KINDS
 		 */
-		new WaitUntil(new OpenShiftProjectExists(name, connection));
+		new WaitUntil(new OpenShiftProjectExists(createdProject.getDisplayName(), connection));
 		
 		return createdProject;
 	}
