@@ -22,6 +22,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -38,6 +39,11 @@ import org.jboss.ide.eclipse.as.core.util.ServerAttributeHelper;
 import org.jboss.tools.openshift.cdk.server.ui.internal.util.FormDataUtility;
 
 public abstract class AbstractLocationSection extends ServerEditorSection {
+	
+	private Text location;
+	private Button browse;
+	protected Control lastRow;
+	
 	protected ServerAttributeHelper helper; 
 	private SelectionListener browseListener;
 	private ModifyListener locationListener;
@@ -69,34 +75,40 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		addListeners();
 	}
 	
-	private Text location;
-	private Button browse;
-	
 	protected void createUI(Composite parent) {
 		
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE|ExpandableComposite.TITLE_BAR);
+		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE|ExpandableComposite.TITLE_BAR|ExpandableComposite.EXPANDED);
 		section.setText(sectionTitle);
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 		
 		Composite composite = toolkit.createComposite(section);
 		composite.setLayout(new FormLayout());
 
+		fillUI(toolkit, composite);
 		
+		section.setClient(composite);
+
+	}
+	
+	protected void fillUI(FormToolkit toolkit, Composite composite) {
+		createLocationWidgets(toolkit, composite);
+	}
+	
+	protected void createLocationWidgets(FormToolkit toolkit, Composite composite) {
 		Label l = toolkit.createLabel(composite, labelString);
 		location = toolkit.createText(composite, "");
 		browse = toolkit.createButton(composite, "Browse...", SWT.PUSH);
 		
 		FormDataUtility fdu = new FormDataUtility();
-		l.setLayoutData(fdu.createFormData(0,5,null,0,0,5,null,0));
+		l.setLayoutData(fdu.createFormData(0,12,null,0,0,5,null,0));
 		FormData locationData = fdu.createFormData(0,5,null,0,l,5,browse,-5);
 		locationData.width = 150;
 		location.setLayoutData(locationData);
 		browse.setLayoutData(fdu.createFormData(0,5,null,0,null,0,100,-5));
-		
-		section.setClient(composite);
-
+		lastRow = location;
 	}
+	
 	
 	protected void setDefaultValues() {
 		// set initial values

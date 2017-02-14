@@ -33,6 +33,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
+import org.jboss.ide.eclipse.as.core.util.ArgsUtil;
 import org.jboss.ide.eclipse.as.core.util.JBossServerBehaviorUtils;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
@@ -43,6 +44,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPoller;
@@ -79,7 +81,9 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 		String cmdLoc = server.getAttribute(CDKServer.MINISHIFT_FILE, (String)null);
 		wc.setAttribute(ATTR_LOCATION, cmdLoc);
 		
-		String currentVal = wc.getAttribute(ATTR_ARGS, "start");
+		String defaultArgs = "start --vm-driver=" + cdkServer.getServer().getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
+		
+		String currentVal = wc.getAttribute(ATTR_ARGS, defaultArgs);
 		wc.setAttribute(ATTR_ARGS, currentVal);
 	}
 
@@ -119,6 +123,13 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 			workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, minishiftLoc);
 		}
 		workingCopy.setAttribute(ENVIRONMENT_VARS_KEY, env);
+		
+		// override vm-driver args
+		String targetedHypervisor = cdkServer.getServer().getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
+		String defaultArgs = "start --vm-driver=" + targetedHypervisor;
+		String currentVal = workingCopy.getAttribute(ATTR_ARGS, defaultArgs);
+		String replaced =  ArgsUtil.setArg(currentVal, null, "--vm-driver", targetedHypervisor);
+		workingCopy.setAttribute(ATTR_ARGS, replaced);
 	}
 	
 	@Override

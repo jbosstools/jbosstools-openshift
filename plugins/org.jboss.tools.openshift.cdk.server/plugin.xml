@@ -160,7 +160,7 @@
    </extension>
 
 
-   <!-- CDK 2.x launch / shutdown Controllers -->
+   <!-- CDK 2.x launch / shutdown Controllers  -->
    <extension
          point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
       <subsystem

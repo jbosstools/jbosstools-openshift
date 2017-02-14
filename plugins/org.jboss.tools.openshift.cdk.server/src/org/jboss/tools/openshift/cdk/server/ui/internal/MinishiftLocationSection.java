@@ -11,9 +11,24 @@
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import java.io.File;
+import java.util.Arrays;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
+import org.jboss.tools.openshift.cdk.server.ui.internal.AbstractLocationSection.SetLocationPropertyCommand;
+import org.jboss.tools.openshift.cdk.server.ui.internal.util.FormDataUtility;
 
 public class MinishiftLocationSection extends AbstractLocationSection {
 
@@ -22,10 +37,54 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 	private static String COMMAND_NAME = "Modify Minishift Location";
 	private static String LOC_ATTR = CDKServer.MINISHIFT_FILE;
 	
+	private Combo hypervisorCombo;
+	
 	public MinishiftLocationSection() {
 		super(SECTION_TITLE, LABEL_STRING, COMMAND_NAME, LOC_ATTR);
 	}
 
+
+	protected void fillUI(FormToolkit toolkit, Composite composite) {
+		createLocationWidgets(toolkit, composite);
+		createHypervisorWidgets(toolkit, composite);
+	}
+
+	protected void createHypervisorWidgets(FormToolkit toolkit, Composite composite) {
+		Label l = toolkit.createLabel(composite, "Hypervisor:");
+		hypervisorCombo = new Combo(composite,  SWT.READ_ONLY);
+		
+		FormDataUtility fdu = new FormDataUtility();
+		l.setLayoutData(fdu.createFormData(lastRow,10,null,0,0,5,null,0));
+		FormData comboData = fdu.createFormData(lastRow,5,null,0,l,5,100,-5);
+		hypervisorCombo.setLayoutData(comboData);
+		hypervisorCombo.setItems(CDK3Server.getHypervisors());
+		lastRow = hypervisorCombo;
+	}
+	
+	protected void setDefaultValues() {
+		// set initial values
+		super.setDefaultValues();
+		String hyp = server.getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
+		int ind = Arrays.asList(CDK3Server.getHypervisors()).indexOf(hyp);
+		if( ind != -1 ) {
+			hypervisorCombo.select(ind);
+		}
+	}
+	protected void addListeners() {
+		super.addListeners();
+		SelectionListener sl = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				execute(new SetHypervisorPropertyCommand(server, this));
+			}
+		};
+		hypervisorCombo.addSelectionListener(sl);
+	}
+	public class SetHypervisorPropertyCommand extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyComboCommand {
+		public SetHypervisorPropertyCommand(IServerWorkingCopy server, SelectionListener sl) {
+			super(server, "Change hypervisor", hypervisorCombo, hypervisorCombo.getItem(hypervisorCombo.getSelectionIndex()), CDK3Server.PROP_HYPERVISOR, sl);
+		}
+	}
 	@Override
 	protected File getFile(File selected, Shell shell) {
 		return chooseFile(selected, shell);

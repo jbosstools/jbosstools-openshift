@@ -75,17 +75,22 @@ public class CDKServerWizardFragment extends WizardFragment {
 		return createComposite(parent, handle, title, desc, label);
 	}
 	
-	protected Composite createComposite(Composite parent, IWizardHandle handle,
-			String title, String desc, String homeLabel) {
+	
+	protected Composite setupComposite(Composite parent,  IWizardHandle handle, 
+										String title, String desc) {
+		// boilerplate
 		this.handle = handle;
-		selectedUser = null;
 		Composite main = new Composite(parent, SWT.NONE);
 		handle.setTitle(title);
 		handle.setDescription(desc);
 		handle.setImageDescriptor(getImageDescriptor());
 		main.setLayout(new GridLayout(3, false));
-		
-		
+		return main;
+	}
+	
+	protected void createCredentialWidgets(Composite main) {
+		// create credentials row
+		selectedUser = null;
 		credentials = new ChooseCredentialComponent(new String[]{CredentialService.REDHAT_ACCESS});
 		credentials.addCredentialListener(new ICredentialCompositeListener() {
 			@Override
@@ -96,8 +101,12 @@ public class CDKServerWizardFragment extends WizardFragment {
 		});
 		credentials.create(main);
 		credentials.gridLayout(3);
-		
-		
+		selectedUser = credentials.getUser();
+	}
+	
+	protected void createLocationWidgets(Composite main, String homeLabel) {
+
+		// Point to file / folder to run
 		Label l = new Label(main, SWT.NONE);
 		l.setText(homeLabel);
 		GridData homeData = new GridData();
@@ -130,13 +139,22 @@ public class CDKServerWizardFragment extends WizardFragment {
 
 		});
 		
-		selectedUser = credentials.getUser();
 		fillTextField();
-		
+	}
+	
+	protected void validateAndPack(Composite main) {
 		String err = findError();
 		setComplete(err == null);
 		handle.update();
 		main.pack(true);
+	}
+	protected Composite createComposite(Composite parent, IWizardHandle handle,
+			String title, String desc, String homeLabel) {
+		// boilerplate
+		Composite main = setupComposite(parent, handle, title, desc);
+		createCredentialWidgets(main);
+		createLocationWidgets(main, homeLabel);
+		validateAndPack(main);
 		return main;
 	}
 	
