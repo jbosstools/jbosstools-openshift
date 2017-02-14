@@ -17,9 +17,14 @@ import java.net.URL;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
+import org.jboss.reddeer.common.exception.RedDeerException;
+import org.jboss.reddeer.common.wait.WaitWhile;
+import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
 import org.jboss.reddeer.swt.impl.button.CheckBox;
 import org.jboss.reddeer.swt.impl.button.PushButton;
 import org.jboss.reddeer.swt.impl.button.RadioButton;
+import org.jboss.reddeer.swt.impl.button.YesButton;
+import org.jboss.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.openshift.reddeer.preference.page.OpenShift3PreferencePage;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement;
@@ -133,5 +138,15 @@ public class TestUtils {
         } catch (Exception e) {
             return false;
         }
+	}
+	
+	public static void acceptSSLCertificate() {
+		try {
+			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
+			new YesButton().click();
+			new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE));
+		} catch (RedDeerException ex) {
+			// no dialog was presented
+		}
 	}
 }

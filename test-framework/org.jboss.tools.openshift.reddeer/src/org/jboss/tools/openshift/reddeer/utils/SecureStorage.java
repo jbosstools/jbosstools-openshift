@@ -25,7 +25,6 @@ import org.jboss.reddeer.swt.impl.button.CheckBox;
 import org.jboss.reddeer.swt.impl.button.FinishButton;
 import org.jboss.reddeer.swt.impl.button.NoButton;
 import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.button.YesButton;
 import org.jboss.reddeer.swt.impl.menu.ContextMenu;
 import org.jboss.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.reddeer.swt.impl.text.DefaultText;
@@ -88,7 +87,7 @@ public class SecureStorage {
 			new CheckBox(1).click();
 			new FinishButton().click();
 			
-			acceptSSLCertificate(); 
+			TestUtils.acceptSSLCertificate(); 
 
 			
 			boolean firstStorage = provideSecureStoragePassword(SystemProperties.SECURE_STORAGE_PASSWORD);
@@ -134,16 +133,6 @@ public class SecureStorage {
 			new DefaultShell("Loading OpenShift 2 connection details");
 			connection.select();
 		} catch (RedDeerException ex) {
-		}
-	}
-
-	private static void acceptSSLCertificate() {
-		try {
-			DefaultShell shell = new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
-			shell.setFocus();
-			new YesButton().click();
-		} catch (RedDeerException e) {
-			// there was no certificate dialog
 		}
 	}
 	
