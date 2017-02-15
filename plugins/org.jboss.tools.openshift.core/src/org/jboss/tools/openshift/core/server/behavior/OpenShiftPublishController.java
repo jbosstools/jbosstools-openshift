@@ -206,7 +206,9 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	public int publishModule(int kind,
 			int deltaKind, IModule[] module, IProgressMonitor monitor)
 			throws CoreException {
-		if( syncDownFailed ) {
+		if (isEapProfile()) {
+			return super.publishModule(IServer.PUBLISH_CLEAN, deltaKind, module, monitor);
+		} else if( syncDownFailed ) {
 			return super.publishModule(IServer.PUBLISH_FULL, deltaKind, module, monitor);
 		} else {
 			return super.publishModule(kind, deltaKind, module, monitor);
