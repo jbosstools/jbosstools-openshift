@@ -58,6 +58,10 @@ public class CDKOpenshiftUtility {
 		String authScheme = env.getAuthorizationScheme(); 
 		String username = env.getUsername();
 		String password = env.getPassword();
+		if( authScheme != null && !authScheme.isEmpty()) {
+			authScheme = new String(""+authScheme.charAt(0)).toUpperCase() + authScheme.substring(1);
+			
+		}
 		
 		((Connection)con).setAuthScheme(authScheme);
 		((Connection)con).setUsername(username);
