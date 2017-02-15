@@ -28,7 +28,7 @@
 		<commons-codec.version>1.6</commons-codec.version>
 		<commons-lang.version>2.6</commons-lang.version>
 		<commons-io.version>2.1</commons-io.version>
-		<enforcer.skip>true</enforcer.skip>
+		<!-- <enforcer.skip>true</enforcer.skip> -->
 	</properties>
 
 	<build>
