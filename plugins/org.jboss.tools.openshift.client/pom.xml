@@ -16,7 +16,7 @@
 			https://repository.jboss.org/nexus/content/repositories/snapshots/com/openshift/openshift-restclient-java/5.0.0-SNAPSHOT/
 			https://repository.jboss.org/nexus/content/repositories/snapshots/com/openshift/openshift-restclient-java/5.0.0-SNAPSHOT/openshift-restclient-java-5.0.0-20160809.161416-8.jar
 		-->
-		<openshift-restclient-java.version>5.5.0-SNAPSHOT</openshift-restclient-java.version>
+		<openshift-restclient-java.version>5.5.0.Final</openshift-restclient-java.version>
 		<ok-http.version>3.3.1</ok-http.version>
 		<ok-http-ws.version>3.3.1</ok-http-ws.version>
 		<ok-io.version>1.8.0</ok-io.version>
