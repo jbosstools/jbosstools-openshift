@@ -47,6 +47,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.core.debug.DebugTrackerContributionEvaluation;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
@@ -70,6 +71,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		implements ISubsystemController, ILaunchServerController {
 
 	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
+	private static final String DEV_MODE = "DEV_MODE"; //$NON-NLS-1$
 
 	/**
 	 * Get access to the ControllableServerBehavior
@@ -178,10 +180,11 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		String currentMode = beh.getServer().getMode();
 		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
 		try {
-			if( DEBUG_MODE.equals(mode)) {
+			if (DEBUG_MODE.equals(mode)) {
 				startDebugging(server, dc, debugContext, monitor);
 			} else {//run, profile
 				stopDebugging(dc, debugContext, monitor);
+				enableDevModeForNodeJsProject(OpenShiftServerUtils.getDeploymentConfig(server), server);
 			}
 		} catch (CoreException e) {
 			mode = currentMode;
@@ -191,6 +194,34 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 	}
 
+	/**
+	 * Enables DEV_MODE environment variables in {@link IDeploymentConfig} for
+	 * Node.js project by default
+	 *
+	 * @see <a href="https://issues.jboss.org/browse/JBIDE-22362">JBIDE-22362</a>
+	 */
+	private void enableDevModeForNodeJsProject(IDeploymentConfig dc, IServer server) {
+		if (OpenShiftServerUtils.isNodeJsProject(server)) {
+
+			new Job("Enabling 'DEV_MODE' for deployment config " + dc.getName()) { //$NON-NLS-1$
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						dc.setEnvironmentVariable(DEV_MODE, Boolean.TRUE.toString());
+						Connection conn = ConnectionsRegistryUtil.getConnectionFor(dc);
+						conn.updateResource(dc);
+					} catch (Exception e) {
+						String message = "Unable to enable 'DEV_MODE' for deployment config " + dc.getName(); //$NON-NLS-1$
+						OpenShiftCoreActivator.getDefault().getLogger().logError(message, e);
+						return new Status(Status.ERROR, OpenShiftCoreActivator.PLUGIN_ID, message, e);
+					}
+					return Status.OK_STATUS;
+				}
+
+			}.schedule();
+		}
+	}
 
 	private void checkServerState(ControllableServerBehavior beh, String oldMode, String mode) {
 		int state = pollState();

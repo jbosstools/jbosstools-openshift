@@ -43,6 +43,10 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 		instance = this;
 	}
 
+	public IPluginLog getLogger() {
+		return pluginLogInternal();
+	}
+
 	public static OpenShiftCoreActivator getDefault() {
 	    return instance;
 	}
