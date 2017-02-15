@@ -71,22 +71,22 @@ public class ResourceUtilsTest {
 	private static final String IMAGE_REF = "foo:latest";
 
 	private static final IService SERVICE_42 =
-			ResourceMocks.createResource(IService.class, service -> when(service.getName()).thenReturn("42"));
+			ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, service -> when(service.getName()).thenReturn("42"));
 
 	private static final IBuildConfig[] BUILDCONFIGS = new IBuildConfig[] {
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("41")),
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42")),
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42a")),
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42")),
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("a42a"))
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("41")),
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42")),
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42a")),
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42")),
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("a42a"))
 	};
 
 	private static final IRoute[] ROUTES = new IRoute[] {
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("41")),
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("42")),
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("42a")),
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("42")),
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("a42a"))
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("41")),
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42")),
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42a")),
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42")),
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("a42a"))
 	};
 
 	private Map<String, String> podLabels = new HashMap<>();
@@ -408,7 +408,7 @@ public class ResourceUtilsTest {
 
 		// when
 		matchingConfigs = getBuildConfigsForService(
-				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
 				Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfigs).isEmpty();
@@ -434,7 +434,7 @@ public class ResourceUtilsTest {
 
 		// when
 		matchingConfig = getBuildConfigForService(
-				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
 				Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfig).isNull();
@@ -443,13 +443,13 @@ public class ResourceUtilsTest {
 	@Test
 	public void testGetReplicationControllerForService() {
 		// given
-		IReplicationController rc1 = ResourceMocks.createResource(IReplicationController.class, 
+		IReplicationController rc1 = ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER,
 				r -> 
 					doReturn(new HashMap<String, String>() {{
 						put("name", "42");
 						put("bookaroobanzai", "84"); }})
 					.when(r).getTemplateLabels());
-		IReplicationController rc2 = ResourceMocks.createResource(IReplicationController.class, 
+		IReplicationController rc2 = ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER,
 				r -> {
 					doReturn(new HashMap<String, String>() {{
 						put("name", "42");
@@ -457,7 +457,7 @@ public class ResourceUtilsTest {
 						put("foo", "bar"); }})
 					.when(r).getTemplateLabels();
 				});
-		IService srv1 = ResourceMocks.createResource(IService.class, 
+		IService srv1 = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE,
 				r -> 
 					doReturn(new HashMap<String, String>() {{
 						put("name", "42");
@@ -542,7 +542,7 @@ public class ResourceUtilsTest {
 	public void testGetRoutesForService() {
 		// when
 		List<IRoute> routes = getRoutesForService(
-				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
 				Arrays.asList(ROUTES));
 		// then
 		assertThat(routes).isEmpty();
@@ -577,7 +577,7 @@ public class ResourceUtilsTest {
 	public void testGetRouteForService() {
 		// when
 		IRoute route = getRouteForService(
-				ResourceMocks.createResource(IService.class, service -> when(service.getName()).thenReturn("0")), 
+				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, service -> when(service.getName()).thenReturn("0")), 
 				Arrays.asList(ROUTES));
 		// then
 		assertThat(route).isNull();
@@ -605,9 +605,9 @@ public class ResourceUtilsTest {
 	public void podListWithoutDeploymentConfigKeyShouldReturnNullDeploymentConfigName() {
 		// given
 		List<IPod> pods = Arrays.asList(
-				ResourceMocks.createResource(IPod.class),
+				ResourceMocks.createResource(IPod.class, ResourceKind.POD),
 				pod,
-				ResourceMocks.createResource(IPod.class));
+				ResourceMocks.createResource(IPod.class, ResourceKind.POD));
 		// when
 		String name = getDeploymentConfigNameForPods(pods);
 		// then
@@ -621,10 +621,10 @@ public class ResourceUtilsTest {
 		podLabels.put("foo", "booh");
 		podLabels.put("bar", "car");
 		podLabels.put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, "hooolahoo");
-		IPod pod = ResourceMocks.createResource(IPod.class, p -> when(p.getLabels()).thenReturn(podLabels));
-		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class),
+		IPod pod = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels));
+		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD),
 				pod,
-				ResourceMocks.createResource(IPod.class));
+				ResourceMocks.createResource(IPod.class, ResourceKind.POD));
 		// when
 		String name = getDeploymentConfigNameForPods(pods);
 		// then
@@ -638,13 +638,13 @@ public class ResourceUtilsTest {
 		podLabels1.put("foo", "bar");
 		podLabels1.put("bar", "car");
 		podLabels1.put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, "hooolahoo");
-		IPod pod1 = ResourceMocks.createResource(IPod.class, p -> when(p.getLabels()).thenReturn(podLabels1));		
+		IPod pod1 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels1));		
 
 		final HashMap<String, String> podLabels2 = new HashMap<>();
 		podLabels2.put("kung", "foo");
 		podLabels2.put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, "hookaboo");
-		IPod pod2 = ResourceMocks.createResource(IPod.class, p -> when(p.getLabels()).thenReturn(podLabels2));		
-		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class), pod1, pod2);
+		IPod pod2 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels2));		
+		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD), pod1, pod2);
 		// when
 		String name = getDeploymentConfigNameForPods(pods);
 		// then
@@ -676,19 +676,19 @@ public class ResourceUtilsTest {
 	public void shouldSelectLatestReplicationControllerGiven4Versions() {
 		// given
 		List<IReplicationController> noRcs = Arrays.asList(
-				ResourceMocks.createResource(IReplicationController.class, rc -> {
+				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
 						doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
 						doReturn("4").when(rc).getName();
 					}),
-				ResourceMocks.createResource(IReplicationController.class, rc -> {
+				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
 					doReturn("-1").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
 					doReturn("-1").when(rc).getName();
 				}),
-				ResourceMocks.createResource(IReplicationController.class, rc -> {
+				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
 					doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
 					doReturn("4").when(rc).getName();
 				}),
-				ResourceMocks.createResource(IReplicationController.class, rc -> {
+				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
 					doReturn("6").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
 					doReturn("6").when(rc).getName();
 				})

@@ -25,21 +25,21 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryList
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
-import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
 
-public class DeploymentConfigListenerJob extends Job {
+public class ReplicationControllerListenerJob extends Job {
 	/**
 	 * For testing purposes
 	 */
 	public static final String DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY = "deployment.config.listener.job.timeout";
 
-	private Map<String, String> dcSelector = null;
+	private Map<String, String> selector = null;
 	
 
 	public static final int TIMEOUT = Integer.getInteger(DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY,600_000);//TODO get timeout value from some settings
 
-	private IDeploymentConfig deploymentConfig;
+	private IReplicationController replicationController;
 	
 	private IPod pod = null;
 	
@@ -52,10 +52,10 @@ public class DeploymentConfigListenerJob extends Job {
 				//we're done already
 				return;
 			}
-			if (dcSelector == null) {
-				if (deploymentConfig.equals(oldValue) && newValue instanceof IDeploymentConfig) {
-					deploymentConfig = (IDeploymentConfig)newValue;
-					dcSelector = deploymentConfig.getReplicaSelector();
+			if (selector == null) {
+				if (replicationController.equals(oldValue) && newValue instanceof IReplicationController) {
+					replicationController = (IReplicationController)newValue;
+					selector = replicationController.getReplicaSelector();
 				}
 				return;
 			}
@@ -66,7 +66,7 @@ public class DeploymentConfigListenerJob extends Job {
 				String podName = candidate.getName();
 				if (!oldPods.contains(podName) &&
 					"Running".equals(candidate.getStatus()) &&
-					ResourceUtils.containsAll(dcSelector, candidate.getLabels())
+					ResourceUtils.containsAll(selector, candidate.getLabels())
 						) {
 					pod = candidate;
 				}
@@ -79,10 +79,10 @@ public class DeploymentConfigListenerJob extends Job {
 		return connectionsRegistryListener;
 	}
 
-	public DeploymentConfigListenerJob(IDeploymentConfig deploymentConfig) {
+	public ReplicationControllerListenerJob(IReplicationController replicationController) {
 		super("Waiting for OpenShift Pod redeployment");
-		this.deploymentConfig = deploymentConfig;
-		oldPods = ResourceUtils.getPodsForDeploymentConfig(deploymentConfig).stream().map(p -> p.getName()).collect(Collectors.toList());
+		this.replicationController = replicationController;
+		oldPods = ResourceUtils.getPodsForReplicationController(replicationController).stream().map(p -> p.getName()).collect(Collectors.toList());
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class DeploymentConfigListenerJob extends Job {
 	}
 
 	public IStatus getTimeOutStatus() {
-		return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, "Failed to detect new deployed Pod for "+deploymentConfig.getName());	
+		return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, "Failed to detect new deployed Pod for "+replicationController.getName());	
 	}
 	
 	public IPod getPod() {

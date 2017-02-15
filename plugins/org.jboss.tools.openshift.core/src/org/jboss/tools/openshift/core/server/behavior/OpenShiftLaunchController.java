@@ -64,6 +64,8 @@ import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 public class OpenShiftLaunchController extends AbstractSubsystemController
@@ -117,8 +119,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		
 		
 		try {
-			IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
-			toggleDebugging(mode, monitor, beh, server, dc);
+			IReplicationController rc = OpenShiftServerUtils.getReplicationController(server);
+			toggleDebugging(mode, monitor, beh, server, rc);
 		} catch (CoreException e) {
 			beh.setServerStopped();
 			throw e;
@@ -174,14 +176,14 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	
 	
 	private void toggleDebugging(String mode, IProgressMonitor monitor, ControllableServerBehavior beh, IServer server,
-			IDeploymentConfig dc) throws CoreException {
+			IReplicationController rc) throws CoreException {
 		String currentMode = beh.getServer().getMode();
-		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
+		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(rc);
 		try {
 			if( DEBUG_MODE.equals(mode)) {
-				startDebugging(server, dc, debugContext, monitor);
+				startDebugging(server, rc, debugContext, monitor);
 			} else {//run, profile
-				stopDebugging(dc, debugContext, monitor);
+				stopDebugging(rc, debugContext, monitor);
 			}
 		} catch (CoreException e) {
 			mode = currentMode;
@@ -225,7 +227,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	}
 
 
-	private void startDebugging(IServer server, IDeploymentConfig dc, DebuggingContext debugContext,
+	private void startDebugging(IServer server, IReplicationController rc, DebuggingContext debugContext,
 			IProgressMonitor monitor) throws CoreException {
 		int remotePort = debugContext.getDebugPort();
 		if( remotePort == -1 ) {
@@ -258,11 +260,11 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 		};
 		debugContext.setDebugListener(listener);
-		OpenShiftDebugUtils.get().enableDebugMode(dc, debugContext, monitor);
+		OpenShiftDebugUtils.get().enableDebugMode(rc, debugContext, monitor);
 	}
 
 
-	private void stopDebugging(IDeploymentConfig dc, DebuggingContext debugContext, IProgressMonitor monitor)
+	private void stopDebugging(IReplicationController rc, DebuggingContext debugContext, IProgressMonitor monitor)
 			throws CoreException {
 		IDebugListener listener = new IDebugListener() {
 			
@@ -279,19 +281,19 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 		};
 		debugContext.setDebugListener(listener);
-		OpenShiftDebugUtils.get().disableDebugMode(dc, debugContext, monitor);
+		OpenShiftDebugUtils.get().disableDebugMode(rc, debugContext, monitor);
 	}
 
 	protected int pollState() {
-		IService service = null;
+		IResource resource = null;
 		Exception e = null;
 		try {
-			service = OpenShiftServerUtils.getService(getServer());
+			resource = OpenShiftServerUtils.getResource(getServer());
 		} catch(OpenShiftException ose ) {
 			e = ose;
 		}
-		if (service == null) {
-			OpenShiftCoreActivator.pluginLog().logError("The OpenShift service for server " + getServer().getName() + " could not be reached.", e);
+		if (resource == null) {
+			OpenShiftCoreActivator.pluginLog().logError("The OpenShift resource for server " + getServer().getName() + " could not be reached.", e);
 			return IServer.STATE_STOPPED;
 		}
 		return IServer.STATE_STARTED;

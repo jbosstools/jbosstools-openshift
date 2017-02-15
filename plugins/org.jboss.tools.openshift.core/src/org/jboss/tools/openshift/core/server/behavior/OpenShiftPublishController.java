@@ -39,6 +39,7 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.RSync;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 public class OpenShiftPublishController extends StandardFileSystemPublishController implements IPublishController {
@@ -158,9 +159,9 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		if( rsync != null ) {
 			super.publishFinish(monitor);
 			final File deployFolder = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-			final IService service = OpenShiftServerUtils.getService(getServer());
+			final IResource resource = OpenShiftServerUtils.getResource(getServer());
 			final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
-					NLS.bind("Could not sync {0} to all pods running the service {1}", deployFolder, service.getName()),
+					NLS.bind("Could not sync {0} to all pods running the service {1}", deployFolder, resource.getName()),
 					null);
 			rsync.syncDirectoryToPods(deployFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
 			if (!status.isOK()) {
@@ -176,7 +177,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 			String podPath = OpenShiftServerUtils.getPodPath(getServer());
 			if (StringUtils.isEmpty(podPath)) {
 				// Pod path is empty
-				podPath = OpenShiftServerUtils.loadPodPath(service, getServer());
+				podPath = OpenShiftServerUtils.loadPodPath(resource, getServer());
 				if( !StringUtils.isEmpty(podPath)) {
 					fireUpdatePodPath(getServer(), podPath);
 				}

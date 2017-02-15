@@ -118,7 +118,7 @@ public class DeployImageJobTest {
 	public void shouldNotUpdateIfNoImageChangeTrigger() {
 		givenAConnection();
 		givenTheImageStreamExistsTo("myimagename");
-		IDeploymentConfig dc = createResource(IDeploymentConfig.class);
+		IDeploymentConfig dc = createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
 		when(dc.getTriggers()).thenReturn(Collections.EMPTY_LIST);
 		when(connection.getResource(
 				ResourceKind.DEPLOYMENT_CONFIG, 
@@ -166,7 +166,7 @@ public class DeployImageJobTest {
 	}
 	
 	private void givenTheImageStreamExistsTo(String name) {
-		IImageStream is = createResource(IImageStream.class);
+		IImageStream is = createResource(IImageStream.class, ResourceKind.IMAGE_STREAM);
 		when(connection.getResource(ResourceKind.IMAGE_STREAM, project.getName(), name)).thenReturn(is);
 	}
 
@@ -176,7 +176,7 @@ public class DeployImageJobTest {
 		when(trigger.getNamespace()).thenReturn(triggerNamespace);
 		when(trigger.getKind()).thenReturn(triggerKind);
 		when(trigger.getFrom()).thenReturn(new DockerImageURI(null, null, name, tag));
-		IDeploymentConfig dc = createResource(IDeploymentConfig.class, new IResourceVisitor<IDeploymentConfig>() {
+		IDeploymentConfig dc = createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG, new IResourceVisitor<IDeploymentConfig>() {
 			@Override
 			public void visit(IDeploymentConfig resource) {
 				Collection<IDeploymentTrigger> triggers = new ArrayList<IDeploymentTrigger>();
