@@ -48,6 +48,9 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -69,6 +72,7 @@ import org.eclipse.wst.server.ui.editor.ServerEditorPart;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
+import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -77,6 +81,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder.ISchedulingCondition;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
@@ -84,6 +89,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IService;
 
 /**
@@ -165,18 +171,21 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 
 	private Composite createControls(Composite parent, OpenShiftServerEditorModel model) {
 		Composite container = new Composite(parent, SWT.NONE);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(3)
-				.applyTo(container);
-
+		GridLayout gl = new GridLayout(3, false);
+		container.setLayout(gl);
+		
 		DataBindingContext dbc = new DataBindingContext();
 		
 		// connection
 		createConnectionContols(container, dbc);
-		
+		createProjectSettingsGroup(container, dbc);
+		return container;
+	}
+	
+	protected void createProjectSettingsGroup(Composite container, DataBindingContext dbc) {
 		// project settings
-		Group projectSettingGroup = new Group(container, SWT.NONE);
-		projectSettingGroup.setText("Project Settings:");
+		Group projectSettingGroup = new Group(container, SWT.SHADOW_NONE);
+		projectSettingGroup.setText("Project Settings");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1)
 			.applyTo(projectSettingGroup);
@@ -197,25 +206,22 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		createDeploymentControls(projectSettingsContainer, dbc);
 		createSourcePathControls(projectSettingsContainer, dbc);
 		createServiceControls(projectSettingsContainer, dbc);
-
-		return container;
 	}
 
 	private void createConnectionContols(Composite parent, DataBindingContext dbc) {
 		Label connectionLabel = new Label(parent, SWT.NONE);
 		connectionLabel.setText("Connection:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER)
-				.applyTo(connectionLabel);
-
-		Combo connectionCombo = new Combo(parent, SWT.DEFAULT);
+		
+		Composite comboHolder = new Composite(parent, SWT.NONE);
+		comboHolder.setLayout(new FillLayout());
+		GridData holderData = GridDataFactory.fillDefaults().grab(true,  false).create();
+		holderData.widthHint = 300;
+		comboHolder.setLayoutData(holderData);
+		
+		Combo connectionCombo = new Combo(comboHolder, SWT.DEFAULT);
 		ComboViewer connectionViewer = new ComboViewer(connectionCombo);
 		connectionViewer.setContentProvider(new ObservableListContentProvider());
 		connectionViewer.setLabelProvider(new ConnectionColumLabelProvider());
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.grab(true, false)
-				.applyTo(connectionCombo);
 		connectionViewer.setInput(
 				BeanProperties.list(OpenShiftServerEditorModel.PROPERTY_CONNECTIONS).observe(model));
 		 Binding connectionBinding = ValueBindingBuilder	
@@ -238,10 +244,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		
 		Button newConnectionButton = new Button(parent, SWT.PUSH);
 		newConnectionButton.setText("New...");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.hint(100, SWT.DEFAULT)
-			.applyTo(newConnectionButton);
 		newConnectionButton.addSelectionListener(onNewConnection(connectionViewer));
 	}
 
@@ -297,15 +299,11 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
 		Binding selectedProjectBinding = 
 				ValueBindingBuilder.bind(selectedProjectObservable)
-					.validatingAfterConvert(new IValidator() {
-
-						@Override
-						public IStatus validate(Object value) {
+					.validatingAfterConvert(value -> {
 							if (value instanceof IProject) {
 								return ValidationStatus.ok();
 							}
 							return ValidationStatus.cancel("Please choose a project to deploy.");
-						}
 					})
 					.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_DEPLOYPROJECT)
 					.observe(model))
@@ -515,6 +513,62 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		};
 	}
 
+	
+	private class LoadingProjectsJob extends Job {
+		private OpenShiftServerEditorModel model;
+		private IServerWorkingCopy server;
+		private IProject deployProject;
+		public LoadingProjectsJob(OpenShiftServerEditorModel model, IServerWorkingCopy server, IProject deployProject) {
+			super("Loading OpenShift Server Details...");
+			this.model = model;
+			this.server = server;
+			this.deployProject = deployProject;
+		}
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			model.setInitializing(true);
+			String url = OpenShiftServerUtils.getConnectionURL(server);
+			IConnection con = null;
+			try {
+				if( url != null ) {
+					ConnectionURL conUrl = ConnectionURL.forURL(url);
+					con = ConnectionsRegistrySingleton.getInstance().getByUrl(conUrl);
+					model.loadResources(con);
+				}
+			} catch(UnsupportedEncodingException | MalformedURLException | OpenShiftException e) {
+				IStatus s = OpenShiftUIActivator.getDefault().statusFactory().errorStatus(getConnectionErrorMessage(url, server), e);
+				OpenShiftUIActivator.getDefault().getLogger().logStatus(s);
+			}
+			
+			if (deployProject != null) {
+				model.setDeployProject(deployProject);
+			}
+			String sourcePath = OpenShiftServerUtils.getSourcePath(server);
+			if (!StringUtils.isEmpty(sourcePath)) {
+				model.setSourcePath(sourcePath);
+			}
+			String podPath = OpenShiftServerUtils.getPodPath(server);
+			if(!StringUtils.isEmpty(podPath)) {
+				model.setPodPath(podPath);
+			}
+			
+			if( con != null ) {
+				model.setConnection(con);
+				try {
+					// Do service last, since it's most likely to error
+					model.setService(OpenShiftServerUtils.getService(server));
+				} finally {
+					model.setInitializing(false);
+				}
+			}			
+			return Status.OK_STATUS;
+		}
+	}
+	
+	private Job loadingProjectsJob(OpenShiftServerEditorModel model, IServerWorkingCopy server, IProject project) {
+		return new LoadingProjectsJob(model, server, project);
+	}
+	
 	private void loadResources(final Composite container, OpenShiftServerEditorModel model) {
 		IServerWorkingCopy server = input.getServer();
 
@@ -530,65 +584,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		};
 		new JobChainBuilder(
 				new DisableAllWidgetsJob(true, container, busyCursor), chainProgressMonitor)
-				.runWhenDone(
-						new Job("Loading projects...") {
-
-							@Override
-							protected IStatus run(IProgressMonitor monitor) {
-								model.setInitializing(true);
-								String url = OpenShiftServerUtils.getConnectionURL(server);
-								try {
-									if( url != null ) {
-										ConnectionURL conUrl = ConnectionURL.forURL(url);
-										IConnection con = ConnectionsRegistrySingleton.getInstance().getByUrl(conUrl);
-										model.loadResources(con);
-									}
-								} catch(UnsupportedEncodingException | MalformedURLException e) {
-									OpenShiftUIActivator.log(IStatus.ERROR, getConnectionErrorMessage(url, server));
-								}
-								return Status.OK_STATUS;
-							}
-						})
-				.runWhenDoneIf(job -> {
-							if (connection == null) {
-								container.getDisplay().syncExec(() -> 
-									new ErrorDialog(container.getShell(), "Error", 
-											NLS.bind("Could not initialize server editor {0}", server.getName()),
-											OpenShiftUIActivator.statusFactory().errorStatus(
-													getConnectionErrorMessage(OpenShiftServerUtils.getConnectionURL(server), server)),
-											IStatus.ERROR)
-										.open());
-								model.setInitializing(false);
-								return false;
-							} else {
-								return true;
-							}
-						}, new Job("Setting connection, deploy project...") {
-
-							@Override
-							protected IStatus run(IProgressMonitor monitor) {
-								if (connection == null) {
-									return Status.CANCEL_STATUS;
-								}
-
-								if (deployProject != null) {
-									model.setDeployProject(deployProject);
-								}
-								model.setConnection(connection);
-								model.setService(OpenShiftServerUtils.getService(server));
-								String sourcePath = OpenShiftServerUtils.getSourcePath(server);
-								if (!StringUtils.isEmpty(sourcePath)) {
-									model.setSourcePath(sourcePath);
-								}
-								String podPath = OpenShiftServerUtils.getPodPath(server);
-								if(!StringUtils.isEmpty(podPath)) {
-									model.setPodPath(podPath);
-								}
-
-								model.setInitializing(false);
-								return Status.OK_STATUS;
-							}
-						})
+				.runWhenDone(loadingProjectsJob(model, server, deployProject))
 				.runWhenDone(new DisableAllWidgetsJob(false, container, false, busyCursor))
 				.schedule();
 	}
