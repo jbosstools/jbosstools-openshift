@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Red Hat, Inc.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -224,7 +224,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 		}
 		IProject openShiftProject = getOpenShiftProject(service);
 		List<IBuildConfig> buildConfigs = getBuildConfigs(openShiftProject);
-		IBuildConfig buildConfig = ResourceUtils.getBuildConfigForService(service, buildConfigs);
+		IBuildConfig buildConfig = ResourceUtils.getBuildConfigFor(service, buildConfigs);
 		return ResourceUtils.getWorkspaceProjectForBuildConfig(buildConfig, getProjects());
 	}
 
@@ -431,7 +431,7 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 			if (project != null) {
 				List<IBuildConfig> buildConfigs = getBuildConfigs(project);
 				if (buildConfigs != null) {
-					IBuildConfig buildConfig = ResourceUtils.getBuildConfigForService(service, buildConfigs);
+					IBuildConfig buildConfig = ResourceUtils.getBuildConfigFor(service, buildConfigs);
 					isEapProfile = OpenShiftServerUtils.isEapStyle(buildConfig);
 				}
 			}

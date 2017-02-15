@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Red Hat Inc..
+ * Copyright (c) 2015-2017 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -476,7 +476,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
             public void widgetSelected(SelectionEvent e) {
                 Map<com.openshift.restclient.model.IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = new HashMap<>();
                 List<IBuildConfig> buildConfigs = new ArrayList<>();
-                ResourceUtils.getBuildConfigForService(model.getService(), buildConfigs);
+                ResourceUtils.getBuildConfigFor(model.getService(), buildConfigs);
                 projectsAndBuildConfigs.put(model.getService().getProject(), buildConfigs);
                 ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
                 final boolean done = WizardUtils.openWizardDialog(wizard, shell);

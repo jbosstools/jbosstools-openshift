@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -45,6 +45,11 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IService;
 
+/**
+ * @author jeff.cantrill
+ * @author Andre Dietisheim
+ * @author Viacheslav Kabanovich
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class ScaleDeploymentHandlerTest {
 	
@@ -55,11 +60,14 @@ public class ScaleDeploymentHandlerTest {
 	private static final int DESIRED_REPLICA_COUNT = 2;
 	private static final int CURRENT_REPLICA_COUNT = 1;
 	
+	private static final String DEPLOYMENT_CONFIG_NAME = "aDeploymentConfig";
+	
 	@Mock private IReplicationController rc;
 	@Mock private IDeploymentConfig dc;
 	@Mock private IService service;
 	@Mock private IProjectWrapper project;
-	@Mock private IResourceWrapper<IReplicationController, ?> uiModel;
+	@Mock private IResourceWrapper<IReplicationController, ?> rcWrapper;
+	@Mock private IResourceWrapper<IDeploymentConfig, ?> dcWrapper;
 	@Mock private IPod pod;
 	@Mock private IServiceWrapper serviceWrapper;
 	@Mock private IResourceWrapper<IPod, IServiceWrapper> podWrapper;
@@ -74,14 +82,20 @@ public class ScaleDeploymentHandlerTest {
 		doReturn("aService").when(service).getName();
 
 		doReturn(service).when(serviceWrapper).getWrapped();
-		doReturn(Arrays.asList(uiModel)).when(serviceWrapper).getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER);
+		doReturn(Arrays.asList(rcWrapper)).when(serviceWrapper).getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER);
+		doReturn(Arrays.asList(dcWrapper)).when(serviceWrapper).getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG);
 
-		doReturn(rc).when(uiModel).getWrapped();
-		doReturn(DESIRED_REPLICA_COUNT).when(rc).getDesiredReplicaCount();
-		doReturn(CURRENT_REPLICA_COUNT).when(rc).getCurrentReplicaCount();
-
+		doReturn(serviceWrapper).when(dcWrapper).getParent();
+		doReturn(dc).when(dcWrapper).getWrapped();
 		doReturn(DESIRED_REPLICA_COUNT).when(dc).getDesiredReplicaCount();
 		doReturn(CURRENT_REPLICA_COUNT).when(dc).getCurrentReplicaCount();
+		doReturn(DEPLOYMENT_CONFIG_NAME).when(dc).getName();
+		
+		doReturn(serviceWrapper).when(rcWrapper).getParent();
+		doReturn(rc).when(rcWrapper).getWrapped();
+		doReturn(DESIRED_REPLICA_COUNT).when(rc).getDesiredReplicaCount();
+		doReturn(CURRENT_REPLICA_COUNT).when(rc).getCurrentReplicaCount();
+		doReturn(DEPLOYMENT_CONFIG_NAME).when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
 
 		doReturn(serviceWrapper).when(podWrapper).getParent();
 		doReturn(pod).when(podWrapper).getWrapped();
@@ -90,9 +104,9 @@ public class ScaleDeploymentHandlerTest {
 
 	@Test
 	public void shouldScaleReplicasWhenTheCommandReceivesReplicaDiffCountForDeployConfig() throws ExecutionException {
-		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
 		givenADeploymentConfigIsSelected();
-		
+		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
+
 		handler.execute(event);
 
 		thenTheReplicasShouldBeUpdated(CURRENT_REPLICA_COUNT - 1);
@@ -100,8 +114,8 @@ public class ScaleDeploymentHandlerTest {
 
 	@Test
 	public void shouldNotScaleWhenReplicasWouldGetNegative() throws ExecutionException {
-		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
 		givenADeploymentConfigIsSelected();
+		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
 		doReturn(0).when(dc).getCurrentReplicaCount();
 
 		handler.execute(event);
@@ -110,19 +124,9 @@ public class ScaleDeploymentHandlerTest {
 	}
 
 	@Test
-	public void shouldScaleDownReplicasWhenUserScalesDownRepController() throws Exception{
-		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
+	public void shouldScaleDownReplicasWhenUserScalesDownRepController() throws Exception {
 		givenAReplicationControllerIsSelected();
-
-		handler.execute(event);
-
-		thenTheReplicasShouldBeUpdated(CURRENT_REPLICA_COUNT - 1);
-	}
-
-	@Test
-	public void shouldScaleDownReplicasWhenUserScalesDownDeployments() throws ExecutionException {
 		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
-		givenADeploymentIsSelected();
 
 		handler.execute(event);
 
@@ -130,9 +134,19 @@ public class ScaleDeploymentHandlerTest {
 	}
 
 	@Test
-	public void shouldScaleUpReplicasWhenUserScalesUpDeployments() throws ExecutionException {
+	public void shouldScaleDownWhenUserScalesDownDeployments() throws ExecutionException {
+		givenAReplicationControllerIsSelected();
+		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
+
+		handler.execute(event);
+
+		thenTheReplicasShouldBeUpdated(CURRENT_REPLICA_COUNT - 1);
+	}
+
+	@Test
+	public void shouldScaleUpWhenUserScalesUpDeployments() throws ExecutionException {
+		givenAServiceIsSelected();
 		ExecutionEvent event = createExecutionEvent(SCALE_UP_1);
-		givenADeploymentIsSelected();
 
 		handler.execute(event);
 
@@ -141,30 +155,30 @@ public class ScaleDeploymentHandlerTest {
 
 	@Test
 	public void shouldNotScaleIfUserDoesNotConfirmStopAll() throws ExecutionException {
+		givenAServiceIsSelected();
 		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
-		givenADeploymentIsSelected();
 		givenAUserDoesNotConfirmStopAllPods();
-		
+
 		handler.execute(event);
 
 		thenTheReplicasShouldNotBeUpdated();
 	}
 
 	@Test
-	public void testScaleReplicasWhenUserSpecifiesTheDesiredCount() throws ExecutionException {
+	public void shouldScaleWhenUserSpecifiesTheDesiredCount() throws ExecutionException {
+		givenAServiceIsSelected();
 		ExecutionEvent event = createExecutionEvent(SCALE_REQUEST_USERINPUT);
-		givenADeploymentIsSelected();
 		givenAUserChoosesDesiredReplicas(4);
 
 		handler.execute(event);
 
 		thenTheReplicasShouldBeUpdated(4);
 	}
-	
+
 	@Test
-	public void testNoUpdateWhenUserCancelsInput() throws ExecutionException {
+	public void shouldNotScaleWhenUserCancelsInput() throws ExecutionException {
+		givenAServiceIsSelected();
 		ExecutionEvent event = createExecutionEvent(SCALE_REQUEST_USERINPUT);
-		givenADeploymentIsSelected();
 		givenAUserCancelsTheReplicaInputDialog();
 
 		handler.execute(event);
@@ -173,41 +187,41 @@ public class ScaleDeploymentHandlerTest {
 	}
 
 	@Test
-	public void testWhenDeploymentHasNoRepControllers() throws ExecutionException {
+	public void shouldNotScaleWhenDeploymentHasNoDeploymentConfig() throws ExecutionException {
+		givenAServiceIsSelected();
+		givenNoDeploymentConfigExist();
 		ExecutionEvent event = createExecutionEvent(SCALE_REQUEST_USERINPUT);
-		givenADeploymentIsSelected();
-		when(serviceWrapper.getResourcesOfKind(ResourceKind.REPLICATION_CONTROLLER)).thenReturn(Collections.emptyList());
 
 		handler.execute(event);
 
 		thenTheReplicasShouldNotBeUpdated();
 	}
-	
+
 	@Test
-	public void testScaleReplicasWhenPodIsSelectedAndTheCommandReceivesReplicaDiffCount() throws ExecutionException {
-		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
+	public void shouldScaleDownWhenPodIsSelectedAndTheCommandReceivesReplicaDiffCount() throws ExecutionException {
 		givenAPodIsSelected();
-		
+		ExecutionEvent event = createExecutionEvent(SCALE_DOWN_1);
+
 		handler.execute(event);
-		
+
 		thenTheReplicasShouldBeUpdated(CURRENT_REPLICA_COUNT - 1);
 	}
 
 	@Test
-	public void testScaleReplicasWhenPodIsSelectedAndUserSpecifiesTheDesiredCount() throws ExecutionException {
-		ExecutionEvent event = createExecutionEvent(SCALE_REQUEST_USERINPUT);
+	public void shouldScaleWhenPodIsSelectedAndUserSpecifiesTheDesiredCount() throws ExecutionException {
 		givenAPodIsSelected();
+		ExecutionEvent event = createExecutionEvent(SCALE_REQUEST_USERINPUT);
 		givenAUserChoosesDesiredReplicas(4);
-		
+
 		handler.execute(event);
-		
+
 		thenTheReplicasShouldBeUpdated(4);
 	}
 	
 	@Test
-	public void testWhenDeploymentIsNotSelected() throws Exception{
-		ExecutionEvent event = createExecutionEvent(SCALE_REQUEST_USERINPUT);
+	public void shouldNotScaleWhenNothingIsSelected() throws Exception {
 		givenNothingIsSelected();
+		ExecutionEvent event = createExecutionEvent(SCALE_REQUEST_USERINPUT);
 
 		handler.execute(event);
 
@@ -218,24 +232,19 @@ public class ScaleDeploymentHandlerTest {
 		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), any());
 	}
 
-	private void givenADeploymentIsSelected() {
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(serviceWrapper).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
+	private void givenAServiceIsSelected() {
+		doReturn(serviceWrapper).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IResourceWrapper.class));
 	}
 
 	private void givenAReplicationControllerIsSelected() {
-		doReturn(rc).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
+		doReturn(rcWrapper).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IResourceWrapper.class));
 	}
 
 	private void givenADeploymentConfigIsSelected() {
-		doReturn(dc).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
+		doReturn(dcWrapper).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IResourceWrapper.class));
 	}
 
 	private void givenAPodIsSelected() {
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IReplicationController.class));
-		doReturn(null).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IServiceWrapper.class));
 		doReturn(podWrapper).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IResourceWrapper.class));
 	}
 
@@ -253,6 +262,11 @@ public class ScaleDeploymentHandlerTest {
 
 	private void givenAUserDoesNotConfirmStopAllPods() {
 		doReturn(false).when(handler).showStopDeploymentWarning(anyString(), any(Shell.class));
+	}
+
+	private void givenNoDeploymentConfigExist() {
+		when(serviceWrapper.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG))
+				.thenReturn(Collections.emptyList());
 	}
 
 	private void thenTheReplicasShouldNotBeUpdated() {
