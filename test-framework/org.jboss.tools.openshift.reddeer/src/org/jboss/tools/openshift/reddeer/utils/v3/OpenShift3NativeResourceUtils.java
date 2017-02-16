@@ -114,6 +114,6 @@ public class OpenShift3NativeResourceUtils {
 		assertNotNull(connection);
 		
 		List<IPod> allPods = connection.getResources(ResourceKind.POD, service.getNamespace());
-		return ResourceUtils.getPodsForService(service, allPods);
+		return ResourceUtils.getPodsFor(service, allPods);
 	}
  }

@@ -580,7 +580,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			if (resource != null) {
 				List<IPod> collection = new ArrayList<IPod>();
 				List<IPod> pods = connection.getResources(ResourceKind.POD, resource.getProject().getName());
-				List<IPod> servicePods = ResourceUtils.getPodsForResource(resource, pods);
+				List<IPod> servicePods = ResourceUtils.getPodsFor(resource, pods);
 				collection.addAll(pods);
 				collection.addAll(servicePods);
 				return collection.toArray(new IPod[collection.size()]);

@@ -82,7 +82,7 @@ public class ReplicationControllerListenerJob extends Job {
 	public ReplicationControllerListenerJob(IReplicationController replicationController) {
 		super("Waiting for OpenShift Pod redeployment");
 		this.replicationController = replicationController;
-		oldPods = ResourceUtils.getPodsForReplicationController(replicationController).stream().map(p -> p.getName()).collect(Collectors.toList());
+		oldPods = ResourceUtils.getPodsFor(replicationController).stream().map(p -> p.getName()).collect(Collectors.toList());
 	}
 
 	@Override

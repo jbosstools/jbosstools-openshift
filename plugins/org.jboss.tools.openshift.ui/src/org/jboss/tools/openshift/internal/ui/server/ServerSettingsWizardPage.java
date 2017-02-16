@@ -476,7 +476,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
             public void widgetSelected(SelectionEvent e) {
                 Map<com.openshift.restclient.model.IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = new HashMap<>();
                 List<IBuildConfig> buildConfigs = new ArrayList<>();
-                ResourceUtils.getBuildConfigForResource(model.getResource(), buildConfigs);
+                ResourceUtils.getBuildConfigFor(model.getResource(), buildConfigs);
                 projectsAndBuildConfigs.put(model.getResource().getProject(), buildConfigs);
                 ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
                 final boolean done = WizardUtils.openWizardDialog(wizard, shell);

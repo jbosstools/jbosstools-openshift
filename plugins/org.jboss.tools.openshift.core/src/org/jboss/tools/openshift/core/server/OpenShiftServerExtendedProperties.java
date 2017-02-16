@@ -74,7 +74,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 
 		IProject project = resource.getProject();
 		if ((project != null) && (resource instanceof IService)) {
-			List<IRoute> routes = ResourceUtils.getRoutesForService((IService) resource, project.getResources(ResourceKind.ROUTE));
+			List<IRoute> routes = ResourceUtils.getRoutesFor((IService) resource, project.getResources(ResourceKind.ROUTE));
 			IRoute route = getRoute(OpenShiftServerUtils.getRouteURL(server), routes);
 			if (route == null) {
 				route = getRoute(routes); 

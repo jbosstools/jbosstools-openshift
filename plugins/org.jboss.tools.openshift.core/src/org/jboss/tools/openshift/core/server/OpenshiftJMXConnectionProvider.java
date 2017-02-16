@@ -57,7 +57,7 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 		
 		String token = ((Connection)openshiftCon).getToken();
 		String projName =  resource.getNamespace();
-		List<IPod> pods = ResourceUtils.getPodsForResource(resource, resource.getProject().getResources(ResourceKind.POD));
+		List<IPod> pods = ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD));
 		if( pods.size() == 0 ) {
 			return null;
 		}

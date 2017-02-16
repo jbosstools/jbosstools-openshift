@@ -95,7 +95,7 @@ public class ServerAdapterHandler extends AbstractHandler {
 						+ selectedRoute.getServiceName() + "' from route '" + selectedRoute.getName() + "'");
 			}
 		} else if (resource instanceof IPod) {
-		    final IReplicationController dcOrRc = ResourceUtils.getDeploymentConfigOrReplicationControllerForPod((IPod) resource);
+		    final IReplicationController dcOrRc = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod) resource);
 		    final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(dcOrRc);
 		    return openOrCreateServerAdapter(dcOrRc, null, connection);
 		}

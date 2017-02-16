@@ -84,7 +84,7 @@ public class PodDeploymentPathProvider {
 
 	private IPod getPod(IResource resource, IProject project, Connection connection) throws CoreException {
 		List<IPod> allPods = project.getResources(ResourceKind.POD);
-		List<IPod> pods = ResourceUtils.getPodsForResource(resource, allPods);
+		List<IPod> pods = ResourceUtils.getPodsFor(resource, allPods);
 		if (pods.isEmpty()) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory()
 					.errorStatus(NLS.bind("No pods found for {0} {1} in project {2} on server {3}. "
