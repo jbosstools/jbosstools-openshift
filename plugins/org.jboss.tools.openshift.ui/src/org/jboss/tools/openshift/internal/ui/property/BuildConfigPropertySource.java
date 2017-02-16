@@ -40,27 +40,45 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
 		List<IPropertyDescriptor> all = new ArrayList<>();
 		all.addAll(getBuildTriggerPropertyDescriptors());
-		switch (getResource().getBuildStrategy().getType()) {
-		case BuildStrategyType.CUSTOM:
-			all.addAll(getCustomPropertyDescriptors());
-			break;
-		case BuildStrategyType.DOCKER:
-			all.addAll(getDockerPropertyDescriptors());
-			break;
-		case BuildStrategyType.STI:
-		case BuildStrategyType.SOURCE:
-			all.addAll(getSTIPropertyDescriptors());
-			break;
-		default:
-		}
-		switch (getResource().getBuildSource().getType()) {
-		case BuildSourceType.GIT:
-			all.addAll(getGitBuildSource());
-			break;
-		default:
-		}
+		addBuildStrategyProperties(all, getResource());
+		addBuildSourceProperties(all, getResource());
 		all.add(new ExtTextPropertyDescriptor(BuildConfigPropertySource.Ids.OUTPUT_REPO_NAME, "Image Stream Name", "Output"));
 		return all.toArray(new IPropertyDescriptor[]{});
+	}
+
+	private void addBuildStrategyProperties(List<IPropertyDescriptor> all, IBuildConfig bc) {
+		if (bc == null
+				|| bc.getBuildStrategy() == null) {
+			return;
+		}
+
+		switch (bc.getBuildStrategy().getType()) {
+			case BuildStrategyType.CUSTOM:
+				all.addAll(getCustomPropertyDescriptors());
+				break;
+			case BuildStrategyType.DOCKER:
+				all.addAll(getDockerPropertyDescriptors());
+				break;
+			case BuildStrategyType.STI:
+			case BuildStrategyType.SOURCE:
+				all.addAll(getSTIPropertyDescriptors());
+				break;
+			default:
+		}
+	}
+
+	private void addBuildSourceProperties(List<IPropertyDescriptor> all, IBuildConfig bc) {
+		if (bc == null
+				|| bc.getBuildSource() == null) {
+			return;
+		}
+
+		switch (bc.getBuildSource().getType()) {
+			case BuildSourceType.GIT:
+				all.addAll(getGitBuildSource());
+				break;
+			default:
+		}
 	}
 
 	private List<IPropertyDescriptor> getBuildTriggerPropertyDescriptors() {
