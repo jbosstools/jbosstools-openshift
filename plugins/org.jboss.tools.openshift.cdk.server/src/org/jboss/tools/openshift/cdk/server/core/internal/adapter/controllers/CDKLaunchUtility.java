@@ -245,9 +245,6 @@ public class CDKLaunchUtility {
 			exitCode = p.exitValue();
 		}
 		
-		inGob.cancel();
-		errGob.cancel();
-		
 		List<String> inLines = null;
 		if( exitCode == null ) {
 			inGob.cancel();
@@ -265,22 +262,28 @@ public class CDKLaunchUtility {
 		return (String[]) inLines.toArray(new String[inLines.size()]);
 	}
 	
-	
 	private static class StreamGobbler extends Thread {
 		InputStream is;
 		ArrayList<String> ret = new ArrayList<String>();
 		private boolean canceled = false;
+		private boolean complete = false;
 		public StreamGobbler(InputStream is) {
 			this.is = is;
 		}
-
+		private synchronized void add(String line) {
+			ret.add(line);
+		}
+		private synchronized ArrayList<String> getList() {
+			return ret;
+		}
+		
 		public void run() {
 			try {
 				InputStreamReader isr = new InputStreamReader(is);
 				BufferedReader br = new BufferedReader(isr);
 				String line = null;
-				while (!canceled && (line = br.readLine()) != null)
-					ret.add(line);
+				while (!isCanceled() && (line = br.readLine()) != null)
+					add(line);
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
@@ -292,10 +295,23 @@ public class CDKLaunchUtility {
 					// ignore
 				}
 			}
+			setComplete();
 		}
 		
-		public void cancel() {
+		private synchronized void setComplete() {
+			complete = true;
+		}
+		private synchronized boolean isComplete() {
+			return complete;
+		}
+		private synchronized void setCanceled() {
 			canceled = true;
+		}
+		private synchronized boolean isCanceled() {
+			return canceled;
+		}
+		public void cancel() {
+			setCanceled();
 			if( is != null ) {
 				try {
 					is.close();
@@ -305,9 +321,31 @@ public class CDKLaunchUtility {
 			}
 		}
 		
+		private void waitComplete(long delay, long maxwait) {
+			long start = System.currentTimeMillis();
+			long end = start + maxwait;
+			while( !isComplete() && System.currentTimeMillis() < end) {
+				try {
+					Thread.sleep(delay);
+				} catch(InterruptedException ie) {
+					
+				}
+			}
+			if( !isComplete()) {
+				cancel();
+			}
+		}
+		
+
+		private static final long MAX_WAIT_AFTER_TERMINATION = 5000;
+		private static final long DELAY = 100;
+		/**
+		 * Wait a maximum 5 seconds for the streams to finish reading whatever is in the pipeline
+		 * @return
+		 */
 		public List<String> getOutput() {
-			return ret;
+			waitComplete(DELAY, MAX_WAIT_AFTER_TERMINATION);
+			return getList();
 		}
 	}
-	
 }
