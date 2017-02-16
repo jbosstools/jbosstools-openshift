@@ -368,7 +368,9 @@ public class OpenShiftServerUtils {
 		String projectName = OpenShiftResourceUniqueId.getProjectName(uniqueId);
 		List<IService> services = connection.getResources(ResourceKind.SERVICE, projectName);
 		IService service = OpenShiftResourceUniqueId.getByUniqueId(uniqueId, services);
-		WatchManager.getInstance().startWatch(service.getProject(), connection);
+		if (server != null) {
+			WatchManager.getInstance().startWatch(service.getProject(), connection);
+		}
 		return service;
 	}
 
