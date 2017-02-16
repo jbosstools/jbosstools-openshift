@@ -186,7 +186,7 @@ public class ResourceUtils {
 	 * @param services
 	 * @return
 	 */
-	public static Collection<IService> getServicesForPod(IPod pod, Collection<IService> services){
+	public static Collection<IService> getServicesFor(IPod pod, Collection<IService> services){
 		return services.stream()
 				.filter(s->containsAll(s.getSelector(), pod.getLabels()))
 				.collect(Collectors.toSet());
@@ -204,7 +204,7 @@ public class ResourceUtils {
 	 * @param pods
 	 * @return
 	 */
-	public static List<IPod> getPodsForService(IService service, Collection<IPod> pods) {
+	public static List<IPod> getPodsFor(IService service, Collection<IPod> pods) {
 		final Map<String, String> serviceSelector = service.getSelector();
 		return getPodsForSelector(serviceSelector, pods);
 	}
@@ -215,7 +215,7 @@ public class ResourceUtils {
      * @param pods the list of pods to search for
      * @return the matched pods
      */
-    public static List<IPod> getPodsForReplicationController(IReplicationController replicationController, Collection<IPod> pods) {
+    public static List<IPod> getPodsFor(IReplicationController replicationController, Collection<IPod> pods) {
         return pods.stream().filter(pod -> containsAll(replicationController.getReplicaSelector(), pod.getLabels()))
                             .collect(Collectors.toList());
     }
@@ -226,7 +226,7 @@ public class ResourceUtils {
      * @param pods the list of pods to search for
      * @return the matched pods
      */
-    public static List<IPod> getPodsForDeployementConfig(IDeploymentConfig deploymentConfig, Collection<IPod> pods) {
+    public static List<IPod> getPodsFor(IDeploymentConfig deploymentConfig, Collection<IPod> pods) {
         return pods.stream().filter(pod -> {
             String configName = pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
             return deploymentConfig.getName().equals(configName);
@@ -239,13 +239,13 @@ public class ResourceUtils {
      * @param pods the list of pods to search
      * @return the list of linked pods
      */
-    public static List<IPod> getPodsForResource(IResource resource, Collection<IPod> pods) {
+    public static List<IPod> getPodsFor(IResource resource, Collection<IPod> pods) {
         if (resource instanceof IService) {
-            return getPodsForService((IService) resource, pods);
+            return getPodsFor((IService) resource, pods);
         } else if (resource instanceof IDeploymentConfig) {
-            return getPodsForDeployementConfig((IDeploymentConfig)resource, pods);
+            return getPodsFor((IDeploymentConfig)resource, pods);
         } else if (resource instanceof IReplicationController) {
-            return getPodsForReplicationController((IReplicationController) resource, pods);
+            return getPodsFor((IReplicationController) resource, pods);
         } else {
             return Collections.emptyList();
         }
@@ -258,12 +258,12 @@ public class ResourceUtils {
      * @param pod the pod to look for
      * @return the deployment config or replication controller
      */
-    public static IReplicationController getDeploymentConfigOrReplicationControllerForPod(IPod pod) {
+    public static IReplicationController getDeploymentConfigOrReplicationControllerFor(IPod pod) {
         Optional<IResource> rcOrDc = pod.getProject().getResources(ResourceKind.DEPLOYMENT_CONFIG).stream()
             .filter(dc -> dc.getName().equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))
             .findFirst();
         if (!rcOrDc.isPresent()) {
-            rcOrDc = Optional.ofNullable(getReplicationControllerForPod(pod, pod.getProject().getResources(ResourceKind.REPLICATION_CONTROLLER)));
+            rcOrDc = Optional.ofNullable(getReplicationControllerFor(pod, pod.getProject().getResources(ResourceKind.REPLICATION_CONTROLLER)));
         }
         return (IReplicationController) rcOrDc.orElse(null);
     }
@@ -381,7 +381,7 @@ public class ResourceUtils {
 	 * @param pods the list of pods to search
 	 * @return the list of matched pods
 	 */
-	public static Collection<IPod> getPodsForReplicationController(IReplicationController replicationController) {
+	public static Collection<IPod> getPodsFor(IReplicationController replicationController) {
 		List<IPod> pods = replicationController.getProject().getResources(ResourceKind.POD);
 		Map<String, String> selector = replicationController.getReplicaSelector();
 		return getPodsForSelector(selector, pods);
@@ -394,8 +394,8 @@ public class ResourceUtils {
 	 * @param routes
 	 * @return
 	 */
-	public static IRoute getRouteForService(final IService service, Collection<IRoute> routes) {
-		List<IRoute> matchingRoutes = getRoutesForService(service, routes);
+	public static IRoute getRouteFor(final IService service, Collection<IRoute> routes) {
+		List<IRoute> matchingRoutes = getRoutesFor(service, routes);
 		if (matchingRoutes.isEmpty()) {
 			return null;
 		} else {
@@ -411,7 +411,7 @@ public class ResourceUtils {
 	 * @param routes
 	 * @return
 	 */
-	public static List<IRoute> getRoutesForService(final IService service, Collection<IRoute> routes) {
+	public static List<IRoute> getRoutesFor(final IService service, Collection<IRoute> routes) {
 		if (routes == null
 				|| routes.isEmpty()) {
 			return Collections.emptyList();
@@ -443,29 +443,6 @@ public class ResourceUtils {
 				.filter(bc -> areRelated(bc, service))
 				.collect(Collectors.toList());
 	}
-	
-    /**
-     * Returns build configs of the given list of build configs
-     * that match the given deployment config.
-     * 
-     * @param serv
-     * @param buildConfigs
-     * @return
-     * 
-     * @see #areRelated(IBuildConfig, IService)
-     * @see IBuildConfig
-     * @see IService
-     */
-    public static List<IBuildConfig> getBuildConfigsForDeploymentConfig(IDeploymentConfig deploymentConfig, List<IBuildConfig> buildConfigs) {
-        if (buildConfigs == null
-                || buildConfigs.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return buildConfigs.stream()
-                .filter(bc -> areRelated(bc, deploymentConfig))
-                .collect(Collectors.toList());
-    }
 
     /**
 	 * Returns the 1st replication controllers that's found matching the given
@@ -476,7 +453,7 @@ public class ResourceUtils {
 	 * @param allReplicationControllers
 	 * @return
 	 */
-	public static IReplicationController getReplicationControllerForService(IService service, List<IReplicationController> allReplicationControllers) {
+	public static IReplicationController getReplicationControllerFor(IService service, List<IReplicationController> allReplicationControllers) {
 		if (allReplicationControllers == null
 				|| allReplicationControllers.isEmpty()
 				|| service == null) {
@@ -498,7 +475,7 @@ public class ResourceUtils {
      * @param allReplicationControllers
      * @return
      */
-    public static IReplicationController getReplicationControllerForPod(IPod pod, List<IReplicationController> allReplicationControllers) {
+    public static IReplicationController getReplicationControllerFor(IPod pod, List<IReplicationController> allReplicationControllers) {
         if (allReplicationControllers == null
                 || allReplicationControllers.isEmpty()
                 || pod == null) {
@@ -607,30 +584,6 @@ public class ResourceUtils {
 		}
 	}
 
-	/**
-     * Returns the first build config out of the given list of build configs
-     * that matches the given service.
-     * 
-     * @param resource
-     *            the service that the build configs shall match
-     * @param buildConfigs
-     *            the build configs that shall be introspected
-     * @return
-     * 
-     * @see #getBuildConfigsForService(IService, List)
-     * @see #areRelated(IBuildConfig, IService)
-     * @see IBuildConfig
-     * @see IService
-     */
-    public static IBuildConfig getBuildConfigForService(IService service, List<IBuildConfig> buildConfigs) {
-        List<IBuildConfig> matchinBuildConfigs = getBuildConfigsFor(service, buildConfigs);
-        if (matchinBuildConfigs.isEmpty()) {
-            return null;
-        } else {
-            return matchinBuildConfigs.get(0);
-        }
-    }
-
     /**
      * Returns the first build config out of the given list of build configs
      * that matches the given deployment config.
@@ -646,13 +599,36 @@ public class ResourceUtils {
      * @see IBuildConfig
      * @see IDeploymentConfig
      */
-    private static IBuildConfig getBuildConfigForDeploymentConfig(IDeploymentConfig deploymentConfig, List<IBuildConfig> buildConfigs) {
-        List<IBuildConfig> matchinBuildConfigs = getBuildConfigsForDeploymentConfig(deploymentConfig, buildConfigs);
+    private static IBuildConfig getBuildConfigFor(IDeploymentConfig deploymentConfig, List<IBuildConfig> buildConfigs) {
+        List<IBuildConfig> matchinBuildConfigs = getBuildConfigsFor(deploymentConfig, buildConfigs);
         if (matchinBuildConfigs.isEmpty()) {
             return null;
         } else {
             return matchinBuildConfigs.get(0);
         }
+    }
+
+    /**
+     * Returns build configs of the given list of build configs
+     * that match the given deployment config.
+     * 
+     * @param serv
+     * @param buildConfigs
+     * @return
+     * 
+     * @see #areRelated(IBuildConfig, IService)
+     * @see IBuildConfig
+     * @see IService
+     */
+    public static List<IBuildConfig> getBuildConfigsFor(IDeploymentConfig deploymentConfig, List<IBuildConfig> buildConfigs) {
+        if (buildConfigs == null
+                || buildConfigs.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return buildConfigs.stream()
+                .filter(bc -> areRelated(bc, deploymentConfig))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -668,11 +644,11 @@ public class ResourceUtils {
      * @see #getBuildConfigsForService(IService, List)
      * @see IBuildConfig
      */
-	public static IBuildConfig getBuildConfigForResource(IResource resource, List<IBuildConfig> buildConfigs) {
+	public static IBuildConfig getBuildConfigFor(IResource resource, List<IBuildConfig> buildConfigs) {
 	    if (ResourceKind.SERVICE.equals(resource.getKind())) {
-	        return getBuildConfigForService((IService) resource, buildConfigs);
+	        return getBuildConfigFor((IService) resource, buildConfigs);
 	    } else if (ResourceKind.DEPLOYMENT_CONFIG.equals(resource.getKind())) {
-	        return getBuildConfigForDeploymentConfig((IDeploymentConfig) resource, buildConfigs);
+	        return getBuildConfigFor((IDeploymentConfig) resource, buildConfigs);
 	    } else {
 	        return null;
 	    }
@@ -722,7 +698,7 @@ public class ResourceUtils {
 	 * @see org.eclipse.core.resources.IProject
 	 * @see EGitUtils#isSharedWithGit(org.eclipse.core.resources.IProject)
 	 */
-	public static org.eclipse.core.resources.IProject getWorkspaceProjectForBuildConfig(
+	public static org.eclipse.core.resources.IProject getWorkspaceProjectFor(
 			IBuildConfig buildConfig, List<org.eclipse.core.resources.IProject> workspaceProjects) {
 		if (workspaceProjects == null
 				|| workspaceProjects.isEmpty()) {
@@ -751,7 +727,7 @@ public class ResourceUtils {
 				.filter(s -> s.isSuccess()).findFirst().isPresent();
 	}
 
-	public static String getDeploymentConfigNameForPods(List<IPod> pods) {
+	public static String getDeploymentConfigNameFor(List<IPod> pods) {
 		if (pods == null
 				|| pods.isEmpty()) {
 			return null;

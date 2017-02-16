@@ -15,11 +15,11 @@ import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.areRela
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.containsAll;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigFor;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigsFor;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getDeploymentConfigNameForPods;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getDeploymentConfigNameFor;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getImageRefs;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRouteForService;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRoutesForService;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getServicesForPod;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRouteFor;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRoutesFor;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getServicesFor;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuildPod;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isMatching;
@@ -242,7 +242,7 @@ public class ResourceUtilsTest {
 		
 		Collection<IService> services = Arrays.asList(nomatch,match);
 		IService [] exp = new IService[] {match};
-		assertArrayEquals(exp, getServicesForPod(pod, services).toArray());
+		assertArrayEquals(exp, getServicesFor(pod, services).toArray());
 	}
 	
 	@Test
@@ -464,7 +464,7 @@ public class ResourceUtilsTest {
 						put("deploymentConfig", "84");}})
 					.when(r).getSelector());
 		// when
-		IReplicationController matching = ResourceUtils.getReplicationControllerForService(srv1, Arrays.asList(rc1, rc2));
+		IReplicationController matching = ResourceUtils.getReplicationControllerFor(srv1, Arrays.asList(rc1, rc2));
 		// then
 		assertThat(matching).isEqualTo(rc2);
 	}
@@ -517,7 +517,7 @@ public class ResourceUtilsTest {
 	public void routesWithServiceNameThatMatchServiceByNameShouldGetReturned() {
 		// given
 		// when
-		List<IRoute> routes = getRoutesForService(SERVICE_42, Arrays.asList(ROUTES));
+		List<IRoute> routes = getRoutesFor(SERVICE_42, Arrays.asList(ROUTES));
 		// then
 		assertThat(routes).containsExactly(ROUTES[1], ROUTES[3]);
 	}
@@ -525,7 +525,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void serviceShouldNotMatchNullRoutes() {
 		// when
-		List<IRoute> routes = getRoutesForService(SERVICE_42, null);
+		List<IRoute> routes = getRoutesFor(SERVICE_42, null);
 		// then
 		assertThat(routes).isEmpty();
 	}
@@ -533,7 +533,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void routesShouldNotMatchNullService() {
 		// when
-		List<IRoute> routes = getRoutesForService((IService) null, Arrays.asList(ROUTES));
+		List<IRoute> routes = getRoutesFor((IService) null, Arrays.asList(ROUTES));
 		// then
 		assertThat(routes).isEmpty();
 	}
@@ -541,7 +541,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void testGetRoutesForService() {
 		// when
-		List<IRoute> routes = getRoutesForService(
+		List<IRoute> routes = getRoutesFor(
 				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
 				Arrays.asList(ROUTES));
 		// then
@@ -552,7 +552,7 @@ public class ResourceUtilsTest {
 	public void routeServiceNameShouldMatchServiceInName() {
 		// given
 		// when
-		IRoute route = getRouteForService(SERVICE_42, Arrays.asList(ROUTES));
+		IRoute route = getRouteFor(SERVICE_42, Arrays.asList(ROUTES));
 		// then
 		assertThat(route).isEqualTo(ROUTES[1]);
 	}
@@ -560,7 +560,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void nullRouteShouldBeReturnedIfNullRouteIsGiven() {
 		// when
-		IRoute route = getRouteForService(SERVICE_42, null);
+		IRoute route = getRouteFor(SERVICE_42, null);
 		// then
 		assertThat(route).isNull();
 	}
@@ -568,7 +568,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void nullRouteShouldBeReturnedIfNullServiceIsGiven() {
 		// when
-		IRoute route = getRouteForService((IService) null, Arrays.asList(ROUTES));
+		IRoute route = getRouteFor((IService) null, Arrays.asList(ROUTES));
 		// then
 		assertThat(route).isNull();
 	}
@@ -576,7 +576,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void testGetRouteForService() {
 		// when
-		IRoute route = getRouteForService(
+		IRoute route = getRouteFor(
 				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, service -> when(service.getName()).thenReturn("0")), 
 				Arrays.asList(ROUTES));
 		// then
@@ -587,7 +587,7 @@ public class ResourceUtilsTest {
 	public void nullPodsShouldReturnNullDeploymentConfigName() {
 		// given
 		// when
-		String name = getDeploymentConfigNameForPods(null);
+		String name = getDeploymentConfigNameFor(null);
 		// then
 		assertThat(name).isNull();
 	}
@@ -596,7 +596,7 @@ public class ResourceUtilsTest {
 	public void emptyPodListShouldReturnNullDeploymentConfigName() {
 		// given empty pod list
 		// when
-		String name = getDeploymentConfigNameForPods(Collections.emptyList());
+		String name = getDeploymentConfigNameFor(Collections.emptyList());
 		// then
 		assertThat(name).isNull();
 	}
@@ -609,7 +609,7 @@ public class ResourceUtilsTest {
 				pod,
 				ResourceMocks.createResource(IPod.class, ResourceKind.POD));
 		// when
-		String name = getDeploymentConfigNameForPods(pods);
+		String name = getDeploymentConfigNameFor(pods);
 		// then
 		assertThat(name).isNull();
 	}
@@ -626,7 +626,7 @@ public class ResourceUtilsTest {
 				pod,
 				ResourceMocks.createResource(IPod.class, ResourceKind.POD));
 		// when
-		String name = getDeploymentConfigNameForPods(pods);
+		String name = getDeploymentConfigNameFor(pods);
 		// then
 		assertThat(name).isEqualTo("hooolahoo");
 	}
@@ -646,7 +646,7 @@ public class ResourceUtilsTest {
 		IPod pod2 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels2));		
 		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD), pod1, pod2);
 		// when
-		String name = getDeploymentConfigNameForPods(pods);
+		String name = getDeploymentConfigNameFor(pods);
 		// then
 		assertThat(name).isEqualTo("hooolahoo");
 	}

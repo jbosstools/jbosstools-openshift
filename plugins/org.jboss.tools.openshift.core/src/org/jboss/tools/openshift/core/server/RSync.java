@@ -69,7 +69,7 @@ public class RSync {
 				boolean shouldSync = true;
 				//boolean shouldSync = !deployFolder.exists() || deployFolder.listFiles().length == 0; 
 				if (shouldSync) {
-					for (IPod pod : ResourceUtils.getPodsForResource(resource, resource.getProject().getResources(ResourceKind.POD))) {
+					for (IPod pod : ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD))) {
 						try {
 						    if ("Running".equals(pod.getStatus())) {
 	                            syncPodToDirectory(pod, podPath, deployFolder, consoleWriter);
@@ -89,7 +89,7 @@ public class RSync {
 			
 			@Override
 			protected void runOCBinary(MultiStatus multiStatus) {
-				for (IPod pod : ResourceUtils.getPodsForResource(resource, resource.getProject().getResources(ResourceKind.POD))) {
+				for (IPod pod : ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD))) {
 					try {
 					    if ("Running".equals(pod.getStatus())) {
 	                        syncDirectoryToPod(pod, deployFolder, podPath, consoleWriter);

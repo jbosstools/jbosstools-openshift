@@ -222,7 +222,7 @@ public class OpenShiftDebugUtils {
 	}
 	
 	public IPod getFirstPod(IReplicationController replicationController) {
-		IPod pod = ResourceUtils.getPodsForReplicationController(replicationController).stream().findFirst() 
+		IPod pod = ResourceUtils.getPodsFor(replicationController).stream().findFirst() 
 				.orElse(null);
 		return pod;
 	}

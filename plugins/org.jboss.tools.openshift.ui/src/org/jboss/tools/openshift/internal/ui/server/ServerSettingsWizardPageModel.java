@@ -208,7 +208,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 			route = null;
 		} else if(route == null || !routes.contains(route)) {
 		    if (resource instanceof IService) {
-	            route = ResourceUtils.getRouteForService((IService) resource, routes);
+	            route = ResourceUtils.getRouteFor((IService) resource, routes);
 		    }
 			if(route == null 
 					|| !routes.contains(route)) {
@@ -230,8 +230,8 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		}
 		IProject openShiftProject = getOpenShiftProject(resource);
 		List<IBuildConfig> buildConfigs = getBuildConfigs(openShiftProject);
-		IBuildConfig buildConfig = ResourceUtils.getBuildConfigForResource(resource, buildConfigs);
-		return ResourceUtils.getWorkspaceProjectForBuildConfig(buildConfig, getProjects());
+		IBuildConfig buildConfig = ResourceUtils.getBuildConfigFor(resource, buildConfigs);
+		return ResourceUtils.getWorkspaceProjectFor(buildConfig, getProjects());
 	}
 
 	public void setDeployProject(org.eclipse.core.resources.IProject project) {
@@ -439,7 +439,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 			if (project != null) {
 				List<IBuildConfig> buildConfigs = getBuildConfigs(project);
 				if (buildConfigs != null) {
-					IBuildConfig buildConfig = ResourceUtils.getBuildConfigForResource(resource, buildConfigs);
+					IBuildConfig buildConfig = ResourceUtils.getBuildConfigFor(resource, buildConfigs);
 					isEapProfile = OpenShiftServerUtils.isEapStyle(buildConfig);
 				}
 			}
@@ -499,7 +499,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 
 	protected List<IRoute> getRoutes(IResource resource) {
 	    if (resource instanceof IService) {
-	        return ResourceUtils.getRoutesForService((IService) resource, getAllRoutes(resource));
+	        return ResourceUtils.getRoutesFor((IService) resource, getAllRoutes(resource));
 	    } else {
 	        return Collections.emptyList();
 	    }

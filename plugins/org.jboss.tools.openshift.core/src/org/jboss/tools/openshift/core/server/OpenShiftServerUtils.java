@@ -482,7 +482,7 @@ public class OpenShiftServerUtils {
 	 * @return the replication controller for the given server
 	 * 
 	 * @see #getResource(IServerAttributes)
-	 * @see ResourceUtils#getPodsForService(IService, Collection)
+	 * @see ResourceUtils#getPodsFor(IService, Collection)
 	 */
 	public static IReplicationController getReplicationController(IServerAttributes server) throws CoreException {
 		assertServerNotNull(server);
@@ -507,7 +507,7 @@ public class OpenShiftServerUtils {
 		    return (IDeploymentConfig) resource;
 		} else if (resource instanceof IService) {
 	        List<IPod> pods = connection.getResources(ResourceKind.POD, resource.getProject().getName());
-	        List<IPod> resourcePods = ResourceUtils.getPodsForResource(resource, pods);
+	        List<IPod> resourcePods = ResourceUtils.getPodsFor(resource, pods);
 	        if (resourcePods == null
 	                || resourcePods.isEmpty()) {
 	            throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
@@ -515,7 +515,7 @@ public class OpenShiftServerUtils {
 	                            + "OpenShift might be still building the pods for resource {0}.", 
 	                            resource.getName(), connection.getHost())));
 	        }
-	        String dcName = ResourceUtils.getDeploymentConfigNameForPods(resourcePods);
+	        String dcName = ResourceUtils.getDeploymentConfigNameFor(resourcePods);
 	        if (dcName == null) {
 	            throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
 	                    NLS.bind("Could not find deployment config for {0}. "

@@ -183,7 +183,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			Collection<IResourceWrapper<?, ?>> services = project.getResourcesOfKind(ResourceKind.SERVICE);
 			Collection<IResourceWrapper<?, ?>> pods = project.getResourcesOfKind(ResourceKind.POD);
 			Collection<IResourceWrapper<?, ?>> orpheanPods = pods.stream()
-			             .filter(w -> ResourceUtils.getServicesForPod((IPod)w.getWrapped(), (Collection<IService>)services.stream().map(p -> p.getWrapped()).collect(Collectors.toList())).isEmpty())
+			             .filter(w -> ResourceUtils.getServicesFor((IPod)w.getWrapped(), (Collection<IService>)services.stream().map(p -> p.getWrapped()).collect(Collectors.toList())).isEmpty())
 			             .filter(w -> !ResourceUtils.isBuildPod((IPod) w.getWrapped()))
 			             .collect(Collectors.toList());
 			if (!orpheanPods.isEmpty()) {
