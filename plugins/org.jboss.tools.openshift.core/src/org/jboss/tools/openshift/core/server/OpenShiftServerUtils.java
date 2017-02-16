@@ -49,6 +49,7 @@ import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.osgi.service.prefs.BackingStoreException;
@@ -366,7 +367,9 @@ public class OpenShiftServerUtils {
 		}
 		String projectName = OpenShiftResourceUniqueId.getProjectName(uniqueId);
 		List<IService> services = connection.getResources(ResourceKind.SERVICE, projectName);
-		return OpenShiftResourceUniqueId.getByUniqueId(uniqueId, services);
+		IService service = OpenShiftResourceUniqueId.getByUniqueId(uniqueId, services);
+		WatchManager.getInstance().startWatch(service.getProject(), connection);
+		return service;
 	}
 
 	public static String getRouteURL(IServerAttributes server) {
