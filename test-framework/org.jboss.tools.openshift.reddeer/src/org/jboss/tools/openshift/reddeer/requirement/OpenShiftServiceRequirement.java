@@ -129,7 +129,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 						if (resources.isEmpty()) {
 							return false;
 						}
-						return ResourceUtils.getReplicationControllerForService(service, resources) != null;
+						return ResourceUtils.getReplicationControllerFor(service, resources) != null;
 					}
 
 					@Override
@@ -184,7 +184,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 
 		// wait for replication controller to appear in UI
 		List<IReplicationController> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespace());
-		IReplicationController serviceRc = ResourceUtils.getReplicationControllerForService(service, rcs);
+		IReplicationController serviceRc = ResourceUtils.getReplicationControllerFor(service, rcs);
 		assertThat(serviceRc, not(nullValue()));
 		new WaitUntil(
 				new OpenShiftResourceExists(Resource.DEPLOYMENT, containsString(serviceRc.getName()), ResourceState.UNSPECIFIED, projectName)
@@ -241,7 +241,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 			return null;
 		}
 		List<IReplicationController> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespace());
-		IReplicationController rc = ResourceUtils.getReplicationControllerForService(service, rcs);
+		IReplicationController rc = ResourceUtils.getReplicationControllerFor(service, rcs);
 		return rc;
 	}
 }

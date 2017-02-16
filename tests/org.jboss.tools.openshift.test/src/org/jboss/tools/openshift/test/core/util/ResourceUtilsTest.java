@@ -15,11 +15,11 @@ import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.areRela
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.containsAll;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigFor;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getBuildConfigsFor;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getDeploymentConfigNameForPods;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getDeploymentConfigNameFor;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getImageRefs;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRouteForService;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRoutesForService;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getServicesForPod;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRouteFor;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRoutesFor;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getServicesFor;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuildPod;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isMatching;
@@ -71,22 +71,22 @@ public class ResourceUtilsTest {
 	private static final String IMAGE_REF = "foo:latest";
 
 	private static final IService SERVICE_42 =
-			ResourceMocks.createResource(IService.class, service -> when(service.getName()).thenReturn("42"));
+			ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, service -> when(service.getName()).thenReturn("42"));
 
 	private static final IBuildConfig[] BUILDCONFIGS = new IBuildConfig[] {
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("41")),
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42")),
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42a")),
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("42")),
-			ResourceMocks.createResource(IBuildConfig.class, config -> when(config.getName()).thenReturn("a42a"))
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("41")),
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42")),
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42a")),
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42")),
+			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("a42a"))
 	};
 
 	private static final IRoute[] ROUTES = new IRoute[] {
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("41")),
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("42")),
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("42a")),
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("42")),
-			ResourceMocks.createResource(IRoute.class, route -> when(route.getServiceName()).thenReturn("a42a"))
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("41")),
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42")),
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42a")),
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42")),
+			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("a42a"))
 	};
 
 	private Map<String, String> podLabels = new HashMap<>();
@@ -242,7 +242,7 @@ public class ResourceUtilsTest {
 		
 		Collection<IService> services = Arrays.asList(nomatch,match);
 		IService [] exp = new IService[] {match};
-		assertArrayEquals(exp, getServicesForPod(pod, services).toArray());
+		assertArrayEquals(exp, getServicesFor(pod, services).toArray());
 	}
 	
 	@Test
@@ -408,7 +408,7 @@ public class ResourceUtilsTest {
 
 		// when
 		matchingConfigs = getBuildConfigsFor(
-				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
 				Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfigs).isEmpty();
@@ -434,7 +434,7 @@ public class ResourceUtilsTest {
 
 		// when
 		matchingConfig = getBuildConfigFor(
-				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
 				Arrays.asList(BUILDCONFIGS));
 		// then
 		assertThat(matchingConfig).isNull();
@@ -443,13 +443,13 @@ public class ResourceUtilsTest {
 	@Test
 	public void testGetReplicationControllerForService() {
 		// given
-		IReplicationController rc1 = ResourceMocks.createResource(IReplicationController.class, 
+		IReplicationController rc1 = ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER,
 				r -> 
 					doReturn(new HashMap<String, String>() {{
 						put("name", "42");
 						put("bookaroobanzai", "84"); }})
 					.when(r).getTemplateLabels());
-		IReplicationController rc2 = ResourceMocks.createResource(IReplicationController.class, 
+		IReplicationController rc2 = ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER,
 				r -> {
 					doReturn(new HashMap<String, String>() {{
 						put("name", "42");
@@ -457,14 +457,14 @@ public class ResourceUtilsTest {
 						put("foo", "bar"); }})
 					.when(r).getTemplateLabels();
 				});
-		IService srv1 = ResourceMocks.createResource(IService.class, 
+		IService srv1 = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE,
 				r -> 
 					doReturn(new HashMap<String, String>() {{
 						put("name", "42");
 						put("deploymentConfig", "84");}})
 					.when(r).getSelector());
 		// when
-		IReplicationController matching = ResourceUtils.getReplicationControllerForService(srv1, Arrays.asList(rc1, rc2));
+		IReplicationController matching = ResourceUtils.getReplicationControllerFor(srv1, Arrays.asList(rc1, rc2));
 		// then
 		assertThat(matching).isEqualTo(rc2);
 	}
@@ -517,7 +517,7 @@ public class ResourceUtilsTest {
 	public void routesWithServiceNameThatMatchServiceByNameShouldGetReturned() {
 		// given
 		// when
-		List<IRoute> routes = getRoutesForService(SERVICE_42, Arrays.asList(ROUTES));
+		List<IRoute> routes = getRoutesFor(SERVICE_42, Arrays.asList(ROUTES));
 		// then
 		assertThat(routes).containsExactly(ROUTES[1], ROUTES[3]);
 	}
@@ -525,7 +525,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void serviceShouldNotMatchNullRoutes() {
 		// when
-		List<IRoute> routes = getRoutesForService(SERVICE_42, null);
+		List<IRoute> routes = getRoutesFor(SERVICE_42, null);
 		// then
 		assertThat(routes).isEmpty();
 	}
@@ -533,7 +533,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void routesShouldNotMatchNullService() {
 		// when
-		List<IRoute> routes = getRoutesForService((IService) null, Arrays.asList(ROUTES));
+		List<IRoute> routes = getRoutesFor((IService) null, Arrays.asList(ROUTES));
 		// then
 		assertThat(routes).isEmpty();
 	}
@@ -541,8 +541,8 @@ public class ResourceUtilsTest {
 	@Test
 	public void testGetRoutesForService() {
 		// when
-		List<IRoute> routes = getRoutesForService(
-				ResourceMocks.createResource(IService.class, config -> when(config.getName()).thenReturn("0")), 
+		List<IRoute> routes = getRoutesFor(
+				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
 				Arrays.asList(ROUTES));
 		// then
 		assertThat(routes).isEmpty();
@@ -552,7 +552,7 @@ public class ResourceUtilsTest {
 	public void routeServiceNameShouldMatchServiceInName() {
 		// given
 		// when
-		IRoute route = getRouteForService(SERVICE_42, Arrays.asList(ROUTES));
+		IRoute route = getRouteFor(SERVICE_42, Arrays.asList(ROUTES));
 		// then
 		assertThat(route).isEqualTo(ROUTES[1]);
 	}
@@ -560,7 +560,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void nullRouteShouldBeReturnedIfNullRouteIsGiven() {
 		// when
-		IRoute route = getRouteForService(SERVICE_42, null);
+		IRoute route = getRouteFor(SERVICE_42, null);
 		// then
 		assertThat(route).isNull();
 	}
@@ -568,7 +568,7 @@ public class ResourceUtilsTest {
 	@Test
 	public void nullRouteShouldBeReturnedIfNullServiceIsGiven() {
 		// when
-		IRoute route = getRouteForService((IService) null, Arrays.asList(ROUTES));
+		IRoute route = getRouteFor((IService) null, Arrays.asList(ROUTES));
 		// then
 		assertThat(route).isNull();
 	}
@@ -576,8 +576,8 @@ public class ResourceUtilsTest {
 	@Test
 	public void testGetRouteForService() {
 		// when
-		IRoute route = getRouteForService(
-				ResourceMocks.createResource(IService.class, service -> when(service.getName()).thenReturn("0")), 
+		IRoute route = getRouteFor(
+				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, service -> when(service.getName()).thenReturn("0")), 
 				Arrays.asList(ROUTES));
 		// then
 		assertThat(route).isNull();
@@ -587,7 +587,7 @@ public class ResourceUtilsTest {
 	public void nullPodsShouldReturnNullDeploymentConfigName() {
 		// given
 		// when
-		String name = getDeploymentConfigNameForPods(null);
+		String name = getDeploymentConfigNameFor(null);
 		// then
 		assertThat(name).isNull();
 	}
@@ -596,7 +596,7 @@ public class ResourceUtilsTest {
 	public void emptyPodListShouldReturnNullDeploymentConfigName() {
 		// given empty pod list
 		// when
-		String name = getDeploymentConfigNameForPods(Collections.emptyList());
+		String name = getDeploymentConfigNameFor(Collections.emptyList());
 		// then
 		assertThat(name).isNull();
 	}
@@ -605,11 +605,11 @@ public class ResourceUtilsTest {
 	public void podListWithoutDeploymentConfigKeyShouldReturnNullDeploymentConfigName() {
 		// given
 		List<IPod> pods = Arrays.asList(
-				ResourceMocks.createResource(IPod.class),
+				ResourceMocks.createResource(IPod.class, ResourceKind.POD),
 				pod,
-				ResourceMocks.createResource(IPod.class));
+				ResourceMocks.createResource(IPod.class, ResourceKind.POD));
 		// when
-		String name = getDeploymentConfigNameForPods(pods);
+		String name = getDeploymentConfigNameFor(pods);
 		// then
 		assertThat(name).isNull();
 	}
@@ -621,12 +621,12 @@ public class ResourceUtilsTest {
 		podLabels.put("foo", "booh");
 		podLabels.put("bar", "car");
 		podLabels.put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, "hooolahoo");
-		IPod pod = ResourceMocks.createResource(IPod.class, p -> when(p.getLabels()).thenReturn(podLabels));
-		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class),
+		IPod pod = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels));
+		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD),
 				pod,
-				ResourceMocks.createResource(IPod.class));
+				ResourceMocks.createResource(IPod.class, ResourceKind.POD));
 		// when
-		String name = getDeploymentConfigNameForPods(pods);
+		String name = getDeploymentConfigNameFor(pods);
 		// then
 		assertThat(name).isEqualTo("hooolahoo");
 	}
@@ -638,15 +638,15 @@ public class ResourceUtilsTest {
 		podLabels1.put("foo", "bar");
 		podLabels1.put("bar", "car");
 		podLabels1.put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, "hooolahoo");
-		IPod pod1 = ResourceMocks.createResource(IPod.class, p -> when(p.getLabels()).thenReturn(podLabels1));		
+		IPod pod1 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels1));		
 
 		final HashMap<String, String> podLabels2 = new HashMap<>();
 		podLabels2.put("kung", "foo");
 		podLabels2.put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, "hookaboo");
-		IPod pod2 = ResourceMocks.createResource(IPod.class, p -> when(p.getLabels()).thenReturn(podLabels2));		
-		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class), pod1, pod2);
+		IPod pod2 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels2));		
+		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD), pod1, pod2);
 		// when
-		String name = getDeploymentConfigNameForPods(pods);
+		String name = getDeploymentConfigNameFor(pods);
 		// then
 		assertThat(name).isEqualTo("hooolahoo");
 	}
@@ -676,19 +676,19 @@ public class ResourceUtilsTest {
 	public void shouldSelectLatestReplicationControllerGiven4Versions() {
 		// given
 		List<IReplicationController> noRcs = Arrays.asList(
-				ResourceMocks.createResource(IReplicationController.class, rc -> {
+				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
 						doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
 						doReturn("4").when(rc).getName();
 					}),
-				ResourceMocks.createResource(IReplicationController.class, rc -> {
+				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
 					doReturn("-1").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
 					doReturn("-1").when(rc).getName();
 				}),
-				ResourceMocks.createResource(IReplicationController.class, rc -> {
+				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
 					doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
 					doReturn("4").when(rc).getName();
 				}),
-				ResourceMocks.createResource(IReplicationController.class, rc -> {
+				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
 					doReturn("6").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
 					doReturn("6").when(rc).getName();
 				})

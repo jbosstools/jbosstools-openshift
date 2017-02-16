@@ -36,6 +36,8 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.server.ServerSettingsWizard;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
@@ -89,46 +91,50 @@ public class ServerAdapterHandler extends AbstractHandler {
 				final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(selectedRoute);
 				return openOrCreateServerAdapter(relatedService, selectedRoute, connection);
 			} else {
-				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to locate the service '"
+				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to locate the resource '"
 						+ selectedRoute.getServiceName() + "' from route '" + selectedRoute.getName() + "'");
 			}
+		} else if (resource instanceof IPod) {
+		    final IReplicationController dcOrRc = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod) resource);
+		    final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(dcOrRc);
+		    return openOrCreateServerAdapter(dcOrRc, null, connection);
 		}
 		return null;
 	}
 
 	/**
-	 * Looks for an existing {@link IServer} matching the given {@code service},
+	 * Looks for an existing {@link IServer} matching the given {@code resource},
 	 * otherwise, opens the Server Adapter wizard to create a new one.
 	 * 
-	 * @param service
+	 * @param resource
 	 * @param route 
 	 * @param connection
 	 *            the OpenShift connection
 	 */
-	private IServer openOrCreateServerAdapter(final IService service, IRoute route, final Connection connection) {
-		if (service == null || connection == null) {
+	private IServer openOrCreateServerAdapter(final IResource resource, IRoute route, final Connection connection) {
+		if (resource == null || connection == null) {
 			return null;
 		}
-		final String serviceName = OpenShiftResourceUniqueId.get(service);
-		IServer server = OpenShiftServerUtils.findServerForService(serviceName);
+		final String resourceName = OpenShiftResourceUniqueId.get(resource);
+		IServer server = OpenShiftServerUtils.findServerForResource(resourceName);
 		if (server == null) {
-			server = createServer(serviceName, service, route, connection);
+			server = createServer(resourceName, resource, route, connection);
 		}
 		return server;
 	}
 
-	private IServer createServer(final String serviceName, final IService service, IRoute route, final Connection connection) {
+	private IServer createServer(final String resourceName, final IResource resource, IRoute route, final Connection connection) {
 		IServer server = null;
 		try {
-			IServerWorkingCopy serverWorkingCopy = OpenShiftServerUtils.create(serviceName);
+			IServerWorkingCopy serverWorkingCopy = OpenShiftServerUtils.create(resourceName);
 			final ServerSettingsWizard serverSettingsWizard = 
-					new ServerSettingsWizard(serverWorkingCopy, connection, service, route);
+					new ServerSettingsWizard(serverWorkingCopy, connection, resource, route);
 			if (WizardUtils.openWizardDialog(600, 650, serverSettingsWizard, Display.getDefault().getActiveShell())) {
 				server = serverSettingsWizard.getCreatedServer();
 			}
 		} catch (CoreException e) {
 			OpenShiftUIActivator.getDefault().getLogger().logError(
-					NLS.bind("Failed to create OpenShift Server Adapter for service {0}", serviceName), e);
+					NLS.bind("Failed to create OpenShift Server Adapter for resource {0}", resourceName), e);
 		}
 		return server;
 	}

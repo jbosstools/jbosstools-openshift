@@ -22,8 +22,11 @@ import org.jboss.tools.jmx.core.IConnectionWrapper;
 import org.jboss.tools.jmx.jolokia.JolokiaConnectionWrapper;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
+
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IPod;
-import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.IResource;
 
 public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionProvider {
 	public static final String PROVIDER_ID = "org.jboss.tools.openshift.core.server.OpenshiftJMXConnection"; //$NON-NLS-1$
@@ -50,11 +53,11 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 	@Override
 	protected IConnectionWrapper createConnection(IServer server) {
 		IConnection openshiftCon = OpenShiftServerUtils.getConnection(server);
-		IService service = OpenShiftServerUtils.getService(server);
+		IResource resource = OpenShiftServerUtils.getResource(server);
 		
 		String token = ((Connection)openshiftCon).getToken();
-		String projName =  service.getNamespace();
-		List<IPod> pods = service.getPods();
+		String projName =  resource.getNamespace();
+		List<IPod> pods = ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD));
 		if( pods.size() == 0 ) {
 			return null;
 		}

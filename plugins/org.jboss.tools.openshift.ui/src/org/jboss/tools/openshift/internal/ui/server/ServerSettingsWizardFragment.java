@@ -63,7 +63,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 					if(newConnection != serverSettingsWizardPage.getModel().getConnection() && wizardContainer != null) {
 						serverSettingsWizardPage.needsLoadingResources = true;
 						serverSettingsWizardPage.getModel().setConnection(newConnection);
-						serverSettingsWizardPage.getModel().setServiceItems(new ArrayList<>());
+						serverSettingsWizardPage.getModel().setResourceItems(new ArrayList<>());
 						serverSettingsWizardPage.setComplete(false);
 						wizardContainer.updateButtons();
 					}
@@ -72,7 +72,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 				}
 			} else if(ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS.equals(evt.getPropertyName())) {
 				serverSettingsWizardPage.needsLoadingResources = true;
-				serverSettingsWizardPage.getModel().setServiceItems(new ArrayList<>());
+				serverSettingsWizardPage.getModel().setResourceItems(new ArrayList<>());
 				serverSettingsWizardPage.setComplete(false);
 				wizardContainer.updateButtons();
 			}
@@ -133,7 +133,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		return this.serverSettingsWizardPage != null 
 				&& !this.serverSettingsWizardPage.isLoadingResources() 
 				&& !this.serverSettingsWizardPage.isNeedsLoadingResources() 
-				&& this.serverSettingsWizardPage.getModel().getService() != null
+				&& this.serverSettingsWizardPage.getModel().getResource() != null
 				&& serverSettingsWizardPage.isPageComplete();
 	}
 	

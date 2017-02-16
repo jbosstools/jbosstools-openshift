@@ -28,6 +28,7 @@ import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -49,12 +50,12 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
   	private void update(boolean overrideProject, IConnection connection, List<IConnection> connections,  
   			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
   			String sourcePath, String podPath, boolean isUseInferredPodPath,
-  			IService service, List<ObservableTreeItem> serviceItems, 
+  			IResource resource, List<ObservableTreeItem> resourceItems, 
   			IRoute route, boolean isSelectDefaultRoute, Map<IProject, List<IRoute>> routesByProject) {
   		update(connection, connections, 
   				deployProject, projects, 
   				sourcePath, podPath, isUseInferredPodPath, 
-  				service, serviceItems, 
+  				resource, resourceItems, 
   				route, isSelectDefaultRoute, routesByProject, getOCBinaryStatus());
 	 	firePropertyChange(PROPERTY_OVERRIDE_PROJECT, this.overrideProject, this.overrideProject = overrideProject);
 	}
@@ -66,7 +67,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	public void setOverrideProject(boolean overrideProject) {
 		update(overrideProject, getConnection(), getConnections(), getDeployProject(), getProjects(), 
 				getSourcePath(), getPodPath(), isUseInferredPodPath(), 
-				getService(), getServiceItems(), 
+				getResource(), getResourceItems(), 
 				getRoute(), isSelectDefaultRoute(), getAllRoutes());
 	}
 
@@ -77,9 +78,9 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	}
 
 	@Override
-	protected IService getServiceOrDefault(IService service, List<ObservableTreeItem> services) {
+	protected IResource getResourceOrDefault(IResource resource, List<ObservableTreeItem> services) {
 		// don't default to 1st element
-		return service;
+		return resource;
 	}
 	
 	@Override
@@ -156,32 +157,32 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	}
 
 	@Override
-	public void setService(IService service) {
-		setService(service, !initializing);
+	public void setResource(IResource resource) {
+		setResource(resource, !initializing);
 	}
-	public void setService(IService service, boolean executeCommand) {
-		IService previous = getService();
-		super.setService(service);
+	public void setResource(IResource resource, boolean executeCommand) {
+		IResource previous = getResource();
+		super.setResource(resource);
 		// fire server command 
 		if( executeCommand ) 
-			section.execute(new SetServiceCommand(getServer(), previous, service));
+			section.execute(new SetResourceCommand(getServer(), previous, resource));
 	}
 	
 	
-	public class SetServiceCommand extends ServerWorkingCopyPropertyCommand {
-		private IService oldService, newService;
-		public SetServiceCommand(IServerWorkingCopy server, IService oldService, IService newService) {
-			super(server, "Set Service...", null, OpenShiftResourceUniqueId.get(newService), 
+	public class SetResourceCommand extends ServerWorkingCopyPropertyCommand {
+		private IResource oldResource, newResource;
+		public SetResourceCommand(IServerWorkingCopy server, IResource oldResource, IResource newResource) {
+			super(server, "Set Resource...", null, OpenShiftResourceUniqueId.get(newResource), 
 					OpenShiftServerUtils.ATTR_SERVICE, null);
-			this.oldService = oldService;
-			this.newService = newService;
+			this.oldResource = oldResource;
+			this.newResource = newResource;
 		}
 		public void undo() {
 			super.undo();
-			setService(oldService, false);
+			setResource(oldResource, false);
 		}
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
-			setService(newService, false);
+			setResource(newResource, false);
 			IStatus s = super.redo(monitor, adapt);
 			return s;
 		}
