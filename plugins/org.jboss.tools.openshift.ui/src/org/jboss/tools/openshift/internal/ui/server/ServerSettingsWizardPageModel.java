@@ -314,11 +314,10 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 	public void loadResources(IConnection newConnection) {
 		boolean serviceInitialized = this.service != null;
 		this.isLoaded = false;
-
+		setProjects(loadProjects());
 		super.loadResources(newConnection);
 		List<IProject> openshiftProjects = ObservableTreeItemUtils.getAllModels(IProject.class, getServiceItems());
 		setBuildConfigs(loadBuildConfigs(openshiftProjects, newConnection));
-		setProjects(loadProjects());
 		setRoutes(loadRoutes(getServiceItems()));
 
 		this.isLoaded = true;
@@ -375,7 +374,8 @@ public class ServerSettingsWizardPageModel extends ServiceViewModel implements I
 	}
 
 	protected List<org.eclipse.core.resources.IProject> loadProjects() {
-		return ProjectUtils.getAllAccessibleProjects();
+		List<org.eclipse.core.resources.IProject> p = ProjectUtils.getAllAccessibleProjects();
+		return p;
 	}
 	
 	protected Map<IProject, List<IRoute>> loadRoutes(List<ObservableTreeItem> serviceItems) {
