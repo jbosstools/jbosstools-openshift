@@ -12,14 +12,14 @@ package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import java.io.File;
 
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -36,14 +36,12 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.ide.eclipse.as.core.util.ServerAttributeHelper;
-import org.jboss.tools.openshift.cdk.server.ui.internal.util.FormDataUtility;
 
 public abstract class AbstractLocationSection extends ServerEditorSection {
 	
 	private Text location;
 	private Button browse;
-	protected Control lastRow;
-	
+
 	protected ServerAttributeHelper helper; 
 	private SelectionListener browseListener;
 	private ModifyListener locationListener;
@@ -83,7 +81,7 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 		
 		Composite composite = toolkit.createComposite(section);
-		composite.setLayout(new FormLayout());
+		composite.setLayout(new GridLayout(5, false));
 
 		fillUI(toolkit, composite);
 		
@@ -97,16 +95,10 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 	
 	protected void createLocationWidgets(FormToolkit toolkit, Composite composite) {
 		Label l = toolkit.createLabel(composite, labelString);
-		location = toolkit.createText(composite, "");
+		location = toolkit.createText(composite, "", SWT.SINGLE | SWT.BORDER);
 		browse = toolkit.createButton(composite, "Browse...", SWT.PUSH);
 		
-		FormDataUtility fdu = new FormDataUtility();
-		l.setLayoutData(fdu.createFormData(0,12,null,0,0,5,null,0));
-		FormData locationData = fdu.createFormData(0,5,null,0,l,5,browse,-5);
-		locationData.width = 150;
-		location.setLayoutData(locationData);
-		browse.setLayoutData(fdu.createFormData(0,5,null,0,null,0,100,-5));
-		lastRow = location;
+		location.setLayoutData(GridDataFactory.defaultsFor(location).span(3,1).minSize(150, SWT.DEFAULT).create());
 	}
 	
 	
@@ -161,7 +153,10 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 	protected static File chooseFile(File startingDirectory, Shell shell) {
 		FileDialog fileDialog = new FileDialog(shell, SWT.OPEN);
 		if (startingDirectory != null) {
-			fileDialog.setFilterPath(startingDirectory.getPath());
+			if( startingDirectory.isFile())
+				fileDialog.setFilterPath(startingDirectory.getParentFile().getPath());
+			else
+				fileDialog.setFilterPath(startingDirectory.getPath());
 		}
 
 		String dir = fileDialog.open();

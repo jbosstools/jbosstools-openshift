@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.cdk.server.ui.internal;
 import java.io.File;
 import java.util.Arrays;
 
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -52,13 +53,8 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 	protected void createHypervisorWidgets(FormToolkit toolkit, Composite composite) {
 		Label l = toolkit.createLabel(composite, "Hypervisor:");
 		hypervisorCombo = new Combo(composite,  SWT.READ_ONLY);
-		
-		FormDataUtility fdu = new FormDataUtility();
-		l.setLayoutData(fdu.createFormData(lastRow,10,null,0,0,5,null,0));
-		FormData comboData = fdu.createFormData(lastRow,5,null,0,l,5,100,-5);
-		hypervisorCombo.setLayoutData(comboData);
+		hypervisorCombo.setLayoutData(GridDataFactory.defaultsFor(hypervisorCombo).span(4, 1).create());
 		hypervisorCombo.setItems(CDK3Server.getHypervisors());
-		lastRow = hypervisorCombo;
 	}
 	
 	protected void setDefaultValues() {
