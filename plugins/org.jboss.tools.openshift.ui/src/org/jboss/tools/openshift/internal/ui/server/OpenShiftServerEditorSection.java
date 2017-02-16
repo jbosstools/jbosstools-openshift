@@ -20,6 +20,8 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.IValueChangeListener;
+import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
@@ -56,6 +58,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -208,6 +211,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		createServiceControls(projectSettingsContainer, dbc);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void createConnectionContols(Composite parent, DataBindingContext dbc) {
 		Label connectionLabel = new Label(parent, SWT.NONE);
 		connectionLabel.setText("Connection:");
@@ -238,10 +242,29 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			})
 			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_CONNECTION).observe(model))
 		 	.in(dbc);
-		ControlDecorationSupport.create(
-				connectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		
-		
+		 
+		BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_CONNECTION).observe(model)
+				.addValueChangeListener(new IValueChangeListener() {
+					public void handleValueChange(ValueChangeEvent event) {
+						new Job("Refresh connection details") {
+
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								try {
+									model.loadResources();
+								} catch (OpenShiftException oce) {
+									OpenShiftUIActivator.log(IStatus.ERROR, "Error refreshing connection details", oce);
+								}
+								// TODO Auto-generated method stub
+								return Status.OK_STATUS;
+							}
+
+						}.schedule();
+					}
+				});
+		ControlDecorationSupport.create(connectionBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
+
 		Button newConnectionButton = new Button(parent, SWT.PUSH);
 		newConnectionButton.setText("New...");
 		newConnectionButton.addSelectionListener(onNewConnection(connectionViewer));
