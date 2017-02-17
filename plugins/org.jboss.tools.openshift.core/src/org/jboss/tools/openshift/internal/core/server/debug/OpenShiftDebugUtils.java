@@ -187,8 +187,7 @@ public class OpenShiftDebugUtils {
 		}
 		//TODO the list of env var to set in debug mode should probably be defined in the server settings instead
 		replicationController.setEnvironmentVariable(DEBUG_PORT_KEY, String.valueOf(debugContext.getDebugPort()));
-		replicationController.setEnvironmentVariable(DEV_MODE_KEY, String.valueOf(debugContext.isDebugEnabled()));//for node
-		replicationController.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));//for eap
+		replicationController.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));
 	}
 
 	private IClient getClient(IReplicationController replicationController) {
