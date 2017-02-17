@@ -86,9 +86,16 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 
 	@Override
 	public void setExtendedProperty(String name, Object value) {
-		Map<String, Object> oldExt = new HashMap<>(extendedProperties);
-		extendedProperties.put(name, value);
-		firePropertyChange(PROPERTY_EXTENDED_PROPERTIES, oldExt, this.extendedProperties);
+		try {
+			Map<String, Object> oldExt = new HashMap<>(extendedProperties);
+			extendedProperties.put(name, value);
+			firePropertyChange(PROPERTY_EXTENDED_PROPERTIES, oldExt, this.extendedProperties);
+		//unlogged Exception
+		} catch (Exception e) {	}
+		
+		//jbide-xxx nned to be removed comment
+		//firePropertyChange("property", oldExt, this.extendedProperties);
+		//client.getResourceFactory();
 	}
 
 	@Override
