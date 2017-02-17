@@ -209,8 +209,7 @@ public class OpenShiftDebugUtils {
 		String debugPort = getEnv(replicationController, DEBUG_PORT_KEY);
 		debugContext.setDebugPort(NumberUtils.toInt(debugPort, -1));
 		String debugEnabled = getEnv(replicationController, DEBUG_KEY);
-		String devModeEnabled = getEnv(replicationController, DEV_MODE_KEY);
-		debugContext.setDebugEnabled(Boolean.parseBoolean(debugEnabled) || Boolean.parseBoolean(devModeEnabled));
+		debugContext.setDebugEnabled(Boolean.parseBoolean(debugEnabled));
 		return debugContext;
 	}
 	

@@ -100,14 +100,16 @@ public class OpenShiftDebugUtilsTest {
 		
 		assertEquals(9797, context.getDebugPort());
 		assertTrue(context.isDebugEnabled());
-		
+	
 		vars = Arrays.asList(createVar("DEBUG_PORT", "1234"), createVar("DEV_MODE", "true"));
 		when(dc.getEnvironmentVariables()).thenReturn(vars);
 		context = debugUtils.getDebuggingContext(dc);
 		
 		assertEquals(1234, context.getDebugPort());
-		assertTrue(context.isDebugEnabled());
-
+		// JBIDE-23961
+		// assertTrue(context.isDebugEnabled());
+		assertFalse(context.isDebugEnabled());
+		
 	}
 	
 	
