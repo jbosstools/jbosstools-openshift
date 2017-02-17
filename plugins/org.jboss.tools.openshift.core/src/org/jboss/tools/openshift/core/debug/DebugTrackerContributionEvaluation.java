@@ -25,7 +25,8 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  * @author "Ilya Buziuk (ibuziuk)"
  */
 public class DebugTrackerContributionEvaluation {
-	private static final String ID = "org.jboss.tools.openshift.core.debugSessionTracker"; //$NON-NLS-0$
+
+	private static final String ID = "org.jboss.tools.openshift.core.debugSessionTracker"; //$NON-NLS-1$
 
 	public static void startDebugSession(IServer server, int port) throws CoreException {
 		Collection<DebugSessionTracker> trackers = getTrackers();
@@ -43,6 +44,7 @@ public class DebugTrackerContributionEvaluation {
 					OpenShiftCoreActivator.logError(e.getMessage(), e);
 				}
 			});
+
 		});
 	}
 
@@ -68,6 +70,7 @@ public class DebugTrackerContributionEvaluation {
 
 	public static boolean isDebugSessionAlive(IServer server) {
 		Collection<DebugSessionTracker> trackers = getTrackers();
+
 		// There are no debug session tracker extensions
 		if (trackers.isEmpty()) {
 			return false;
@@ -100,4 +103,5 @@ public class DebugTrackerContributionEvaluation {
 	private static IConfigurationElement[] getConfigurationElements() {
 		return Platform.getExtensionRegistry().getConfigurationElementsFor(ID);
 	}
+
 }
