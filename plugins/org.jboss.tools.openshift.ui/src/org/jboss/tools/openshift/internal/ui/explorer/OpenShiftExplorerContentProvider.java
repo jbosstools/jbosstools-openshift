@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2017 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -14,9 +14,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -28,9 +25,11 @@ import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContent
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider.LoadingStub;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.models.IConnectionWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IReplicationControllerWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IElementListener;
 import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
+import org.jboss.tools.openshift.internal.ui.models.IResourceContainer;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
@@ -38,14 +37,13 @@ import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IPod;
-import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
  * Contributes OpenShift 3 specific content to the OpenShift explorer view
  * 
  * @author jeff.cantrill
+ * @author Jeff Maury
  */
 public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private static final List<String> TERMINATED_STATUS = Arrays.asList("Complete", "Failed", "Error", "Cancelled");
@@ -147,7 +145,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		} else if (parentElement instanceof IProjectWrapper) {
 			return getProjectChildren((IProjectWrapper) parentElement);
 		} else if (parentElement instanceof IServiceWrapper) {
-			return getServiceChildren((IServiceWrapper) parentElement);
+			return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>) parentElement);
+		} else if (parentElement instanceof IReplicationControllerWrapper) {
+		    return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>) parentElement);
 		} else if (parentElement instanceof LoadingStub) {
 			return ((LoadingStub) parentElement).getChildren();
 		}
@@ -181,16 +181,8 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		case LOADED:
 			removeStub(project);
 			Collection<IResourceWrapper<?, ?>> services = project.getResourcesOfKind(ResourceKind.SERVICE);
-			Collection<IResourceWrapper<?, ?>> pods = project.getResourcesOfKind(ResourceKind.POD);
-			Collection<IResourceWrapper<?, ?>> orpheanPods = pods.stream()
-			             .filter(w -> ResourceUtils.getServicesFor((IPod)w.getWrapped(), (Collection<IService>)services.stream().map(p -> p.getWrapped()).collect(Collectors.toList())).isEmpty())
-			             .filter(w -> !ResourceUtils.isBuildPod((IPod) w.getWrapped()))
-			             .collect(Collectors.toList());
-			if (!orpheanPods.isEmpty()) {
-			    for(IResourceWrapper<?, ?> wrapper : orpheanPods) {
-			        services.add(wrapper);
-			    }
-			}
+			Collection<IReplicationControllerWrapper> dcs = project.getResourcesOfType(IReplicationControllerWrapper.class);
+			services.addAll(dcs);
 			return services.toArray();
 		case LOAD_STOPPED:
 			LoadingStub stub = removeStub(project);
@@ -205,7 +197,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		}
 	}
 	
-	protected Object[] getServiceChildren(IServiceWrapper service) {
+	protected Object[] getContainerChildren(IResourceContainer<?, IOpenshiftUIElement<?,?>> service) {
 		ArrayList<Object> result = new ArrayList<>();
 		service.getResourcesOfKind(ResourceKind.BUILD).stream()
 				.filter(b -> !isTerminatedBuild((IBuild) b.getWrapped())).forEach(r -> result.add(r));
@@ -214,7 +206,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		return result.toArray();
 	}
 
-	@Override
+    @Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		// non-structured viewer would be a configuration problem. Crash!
 		this.viewer = (StructuredViewer) viewer;
@@ -243,7 +235,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		}
 		return element instanceof ConnectionsRegistry || element instanceof OpenshiftUIModel
 				|| element instanceof IConnectionWrapper || element instanceof IProjectWrapper
-				|| element instanceof IServiceWrapper;
+				|| element instanceof IServiceWrapper || element instanceof IReplicationControllerWrapper;
 	}
 
 }

@@ -100,7 +100,11 @@ public class ResourceUtils {
 		return containsAll(s.getSelector(), pod.getLabels());
 	}
 
-	/**
+    public static boolean areRelated(IPod pod, IReplicationController rc) {
+        return containsAll(rc.getReplicaSelector(), pod.getLabels());
+    }
+
+    /**
 	 * Returns <code>true</code> if the given resource contains the given text
 	 * in name or tags.
 	 * 

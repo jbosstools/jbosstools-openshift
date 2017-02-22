@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -46,6 +46,7 @@ import com.openshift.restclient.model.route.IRoute;
 /**
  * @author jeff.cantrill
  * @author Andre Dietisheim
+ * @author Jeff Maury
  */
 public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider implements IDescriptionProvider { 
 	//Limit for label length = baseText.length + qualifiedText.length
@@ -105,6 +106,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 				return OpenShiftImages.ROUTE_IMG;
 			case ResourceKind.SERVICE:
 				return OpenShiftImages.SERVICE_IMG;
+			case ResourceKind.REPLICATION_CONTROLLER:
+			case ResourceKind.DEPLOYMENT_CONFIG:
+			    return OpenShiftImages.REPLICATION_CONTROLLER_IMG;
 			default:
 				return OpenShiftCommonImages.FILE;
 			}
