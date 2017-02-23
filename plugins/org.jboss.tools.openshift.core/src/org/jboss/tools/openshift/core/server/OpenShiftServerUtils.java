@@ -96,7 +96,7 @@ public class OpenShiftServerUtils {
 
 	private static final Collection<String> EAP_LIKE_KEYWORDS = Collections.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
 	
-	private static final Collection<String> SERVER_ADDAPTER_ALLOWED_RESOURCE_TYPESS = Collections.unmodifiableCollection(Arrays.asList(ResourceKind.ROUTE,
+	private static final Collection<String> SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES = Collections.unmodifiableCollection(Arrays.asList(ResourceKind.ROUTE,
 	                                                                                                                                   ResourceKind.SERVICE,
 	                                                                                                                                   ResourceKind.REPLICATION_CONTROLLER,
 	                                                                                                                                   ResourceKind.DEPLOYMENT_CONFIG,
@@ -109,7 +109,7 @@ public class OpenShiftServerUtils {
 	 * @return true if allowed
 	 */
 	public static boolean isAllowedForServerAdapter(IResource resource) {
-	    return SERVER_ADDAPTER_ALLOWED_RESOURCE_TYPESS.stream().anyMatch(kind -> kind.equals(resource.getKind()));
+	    return SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES.contains(resource.getKind());
 	}
 
 	private static final String PACKAGE_JSON = "package.json"; //$NON-NLS-1$
