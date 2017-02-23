@@ -11,6 +11,8 @@
 
 package org.jboss.tools.openshift.internal.ui.handler;
 
+import java.util.Collection;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -77,27 +79,31 @@ public class ServerAdapterHandler extends AbstractHandler {
 			return null;
 		}
 		
+		IResource source = null;
+		IRoute route = null;
+		
 		if (resource instanceof IService) {
-			final IService selectedService = (IService) resource;
-			final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(selectedService);
-			return openOrCreateServerAdapter(selectedService, null, connection);
+			source = (IService) resource;
 		} else if (resource instanceof IRoute) {
-			final IRoute selectedRoute = (IRoute) resource;
-			final IService relatedService = (IService) selectedRoute.getProject().getResources(ResourceKind.SERVICE).stream()
-					.filter(s -> ResourceUtils.areRelated(selectedRoute, (IService) s))
+			route = (IRoute) resource;
+			final IRoute localRoute = route;
+			source = (IService) route.getProject().getResources(ResourceKind.SERVICE).stream()
+					.filter(s -> ResourceUtils.areRelated(localRoute, (IService) s))
 					.findFirst()
 					.orElseGet(() -> null);
-			if(relatedService != null) {
-				final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(selectedRoute);
-				return openOrCreateServerAdapter(relatedService, selectedRoute, connection);
-			} else {
-				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to locate the resource '"
-						+ selectedRoute.getServiceName() + "' from route '" + selectedRoute.getName() + "'");
-			}
+       } else if (resource instanceof IReplicationController) {
+		    source = resource;
 		} else if (resource instanceof IPod) {
-		    final IReplicationController dcOrRc = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod) resource);
-		    final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(dcOrRc);
-		    return openOrCreateServerAdapter(dcOrRc, null, connection);
+		    final Collection<IService> services = ResourceUtils.getServicesFor((IPod) resource, resource.getProject().getResources(ResourceKind.SERVICE));
+		    if (!services.isEmpty()) {
+	            source = services.iterator().next();
+		    } else {
+	            source = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod) resource);
+		    }
+		}
+		if (source != null)  {
+	        final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(source);
+	        return openOrCreateServerAdapter(source, route, connection);
 		}
 		return null;
 	}

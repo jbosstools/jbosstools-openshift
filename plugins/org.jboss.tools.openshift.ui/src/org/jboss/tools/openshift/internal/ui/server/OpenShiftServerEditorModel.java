@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -29,15 +29,14 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author Andre Dietisheim
+ * @author Jeff Maury
  */
 public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 
-	public static final String PROPERTY_CONNECTIONS = "connections";
 	public static final String PROPERTY_OVERRIDE_PROJECT = "overrideProject";
 
 	private boolean overrideProject = false;

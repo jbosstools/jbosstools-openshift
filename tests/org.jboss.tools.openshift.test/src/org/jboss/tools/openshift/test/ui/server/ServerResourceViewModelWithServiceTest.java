@@ -39,7 +39,7 @@ import com.openshift.restclient.model.IService;
 /**
  * @author Andre Dietisheim
  */
-public class ServerResourceViewModelTest {
+public class ServerResourceViewModelWithServiceTest {
 
 	private ServerResourceViewModel model;
 	private IService selectedService;
