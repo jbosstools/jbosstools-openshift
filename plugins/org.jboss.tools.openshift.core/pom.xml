@@ -7,6 +7,7 @@
 		<version>3.3.2-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.openshift.plugins</groupId>
-	<artifactId>org.jboss.tools.openshift.core</artifactId> 
+	<artifactId>org.jboss.tools.openshift.core</artifactId>
+	<version>3.3.3-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 </project>

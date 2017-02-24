@@ -8,5 +8,6 @@
 	</parent>
 	<groupId>org.jboss.tools.openshift.features</groupId>
 	<artifactId>org.jboss.tools.openshift.express.feature</artifactId> 
+	<version>3.3.3-SNAPSHOT</version>
 	<packaging>eclipse-feature</packaging>
 </project>
