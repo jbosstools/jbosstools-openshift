@@ -59,14 +59,19 @@ class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> impl
 					service.updateWithResources(relatedResources);
 				} else if (wrapper instanceof ReplicationControllerWrapper) {
 				    ReplicationControllerWrapper dcWrapper = (ReplicationControllerWrapper) wrapper;
-				    Collection<IResource> relatedresources =
-				            (ResourceKind.DEPLOYMENT_CONFIG.equals(wrapper.getWrapped().getKind()))?ServiceResourceMapper.computeRelatedResources((IDeploymentConfig) wrapper.getWrapped(), resources)
-                                                                                                   :ServiceResourceMapper.computeRelatedResources((IReplicationController) wrapper.getWrapped(), resources);
+				    Collection<IResource> relatedresources = getRelatedResources(resources, wrapper);
 				    dcWrapper.updateWithResources(relatedresources);
 				}
 			});
 		}
 	}
+
+    private Collection<IResource> getRelatedResources(Collection<IResource> resources, IResourceWrapper<?, ?> wrapper) {
+        Collection<IResource> relatedresources =
+                (ResourceKind.DEPLOYMENT_CONFIG.equals(wrapper.getWrapped().getKind()))?ServiceResourceMapper.computeRelatedResources((IDeploymentConfig) wrapper.getWrapped(), resources)
+                                                                                       :ServiceResourceMapper.computeRelatedResources((IReplicationController) wrapper.getWrapped(), resources);
+        return relatedresources;
+    }
 
 	protected AbstractResourceWrapper<?, ?> createNewWrapper(Collection<IResource> resources, IResource r) {
 		AbstractResourceWrapper<?, ?> newWrapper;
@@ -80,9 +85,7 @@ class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> impl
 		           (ResourceKind.REPLICATION_CONTROLLER.equals(r.getKind()) && !r.isAnnotatedWith(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME))) &&
 		           ServiceResourceMapper.getServices((IReplicationController) r, resources).isEmpty()) {
 		        ReplicationControllerWrapper dcWrapper = new ReplicationControllerWrapper(this, (IReplicationController) r);
-		        Collection<IResource> relatedResource = 
-		                ResourceKind.DEPLOYMENT_CONFIG.equals(r.getKind())?ServiceResourceMapper.computeRelatedResources((IDeploymentConfig) r, resources)
-		                                                                  :ServiceResourceMapper.computeRelatedResources((IReplicationController) r, resources);
+		        Collection<IResource> relatedResource = getRelatedResources(resources, dcWrapper);
 		        dcWrapper.initWithResources(relatedResource);
 		        newWrapper = dcWrapper;
 		} else {

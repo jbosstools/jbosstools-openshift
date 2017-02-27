@@ -49,6 +49,7 @@ import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.IClient;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IContainer;
@@ -138,7 +139,12 @@ public class OpenShiftDebugUtils {
 		
 		ConnectionsRegistrySingleton.getInstance().addListener(deploymentListenerJob.getConnectionsRegistryListener());
 		deploymentListenerJob.schedule();
-		client.update(replicationController);
+        client.update(replicationController);
+		if (ResourceKind.REPLICATION_CONTROLLER.equals(replicationController.getKind())) {
+		    for(IPod pod : ResourceUtils.getPodsFor(replicationController)) {
+		        client.delete(pod);
+		    }
+		}
 		try {
 			deploymentListenerJob.join(ReplicationControllerListenerJob.TIMEOUT, monitor);
 		} catch (OperationCanceledException | InterruptedException e) {
