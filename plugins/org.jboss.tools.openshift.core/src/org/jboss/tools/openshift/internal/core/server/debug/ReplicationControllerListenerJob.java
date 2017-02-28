@@ -62,18 +62,19 @@ public class ReplicationControllerListenerJob extends Job {
 			
 			//Wait for new pod once deployment is done
 			if (newValue instanceof IPod) {
-				IPod candidate = (IPod) newValue;
-				String podName = candidate.getName();
-				if (!oldPods.contains(podName) &&
-					"Running".equals(candidate.getStatus()) &&
-					ResourceUtils.containsAll(selector, candidate.getLabels())
-						) {
-					pod = candidate;
-				}
+			    if (isNewControlledPod((IPod) newValue)) {
+			        pod = (IPod) newValue;
+			    }
 			}
 			
 		}
 	};
+	
+	private boolean isNewControlledPod(IPod pod) {
+	    return !oldPods.contains(pod.getName()) &&
+	           "Runnning".equals(pod.getStatus()) &&
+	           ResourceUtils.containsAll(selector, pod.getLabels());
+	}
 
 	public IConnectionsRegistryListener getConnectionsRegistryListener() {
 		return connectionsRegistryListener;

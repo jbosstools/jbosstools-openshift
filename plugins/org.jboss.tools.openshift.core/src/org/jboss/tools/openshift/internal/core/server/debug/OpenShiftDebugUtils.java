@@ -121,12 +121,12 @@ public class OpenShiftDebugUtils {
 		
 		IClient client = getClient(replicationController);
 		
-		ReplicationControllerListenerJob deploymentListenerJob = new ReplicationControllerListenerJob(replicationController);
-		deploymentListenerJob.addJobChangeListener(new JobChangeAdapter() {
+		ReplicationControllerListenerJob rcListenerJob = new ReplicationControllerListenerJob(replicationController);
+		rcListenerJob.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
-				ConnectionsRegistrySingleton.getInstance().removeListener(deploymentListenerJob.getConnectionsRegistryListener());
-				debugContext.setPod(deploymentListenerJob.getPod());
+				ConnectionsRegistrySingleton.getInstance().removeListener(rcListenerJob.getConnectionsRegistryListener());
+				debugContext.setPod(rcListenerJob.getPod());
 				if (event.getResult().isOK() && debugContext.getDebugListener() != null) {
 					try {
 						debugContext.getDebugListener().onPodRestart(debugContext, monitor);
@@ -137,8 +137,8 @@ public class OpenShiftDebugUtils {
 			};
 		});
 		
-		ConnectionsRegistrySingleton.getInstance().addListener(deploymentListenerJob.getConnectionsRegistryListener());
-		deploymentListenerJob.schedule();
+		ConnectionsRegistrySingleton.getInstance().addListener(rcListenerJob.getConnectionsRegistryListener());
+		rcListenerJob.schedule();
         client.update(replicationController);
 		if (ResourceKind.REPLICATION_CONTROLLER.equals(replicationController.getKind())) {
 		    for(IPod pod : ResourceUtils.getPodsFor(replicationController)) {
@@ -146,13 +146,13 @@ public class OpenShiftDebugUtils {
 		    }
 		}
 		try {
-			deploymentListenerJob.join(ReplicationControllerListenerJob.TIMEOUT, monitor);
+			rcListenerJob.join(ReplicationControllerListenerJob.TIMEOUT, monitor);
 		} catch (OperationCanceledException | InterruptedException e) {
-			e.printStackTrace();
+			throw new OpenShiftCoreException(e);
 		}
-		IStatus result = deploymentListenerJob.getResult();
+		IStatus result = rcListenerJob.getResult();
 		if (result == null) {//timed out!
-			throw new CoreException(deploymentListenerJob.getTimeOutStatus());
+			throw new CoreException(rcListenerJob.getTimeOutStatus());
 		} else if (!result.isOK()) {
 			throw new CoreException(result);
 		}
