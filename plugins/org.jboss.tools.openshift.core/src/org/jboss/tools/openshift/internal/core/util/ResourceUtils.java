@@ -754,16 +754,23 @@ public class ResourceUtils {
 		return project;
 	}
 
+	public static String getDeploymentConfigName(IReplicationController rc) {
+        String dcName = rc.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
+        if (StringUtils.isEmpty(dcName)) {
+            dcName = null;
+        }
+        return dcName;
+	}
+	
 	public static IDeploymentConfig getDeploymentConfigFor(IReplicationController rc, Collection<IDeploymentConfig> dcs) {
 		if (rc == null) {
 			return null;
 		}
 
-		String dcName = rc.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
-		if (dcs == null
-				|| dcs.isEmpty()
-				|| StringUtils.isEmpty(dcName)) {
-			return null;
+		String dcName = getDeploymentConfigName(rc);
+		if (dcName == null ||
+		     dcs.isEmpty()) {
+		    return null;    
 		}
 
 		return dcs.stream()

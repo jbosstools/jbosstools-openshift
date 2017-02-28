@@ -46,7 +46,6 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
-import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -525,7 +524,7 @@ public class OpenShiftServerUtils {
 	        }
 	        return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), dcName);
 		} else if (resource instanceof IReplicationController) {
-		    String deploymentConfigName = resource.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
+		    String deploymentConfigName = ResourceUtils.getDeploymentConfigName((IReplicationController) resource);
 		    if (deploymentConfigName != null) {
 		        return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), deploymentConfigName);
 		    } else {

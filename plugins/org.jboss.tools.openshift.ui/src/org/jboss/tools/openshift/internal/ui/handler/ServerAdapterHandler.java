@@ -96,10 +96,10 @@ public class ServerAdapterHandler extends AbstractHandler {
 		} else if (resource instanceof IPod) {
 		    final Collection<IService> services = ResourceUtils.getServicesFor((IPod) resource, resource.getProject().getResources(ResourceKind.SERVICE));
 		    if (!services.isEmpty()) {
-	            source = services.iterator().next();
+                source = services.iterator().next();
 		    } else {
-	            source = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod) resource);
-		    }
+                source = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod) resource);
+            }
 		}
 		if (source != null)  {
 	        final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(source);

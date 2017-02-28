@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Red Hat Inc..
+ * Copyright (c) 2015-2017 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,7 +63,7 @@ public class OpenShiftResourceUniqueId {
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
-        String[] comps = uniqueId.split("@");
+        String[] comps = uniqueId.split(String.valueOf(UNIQUE_ID_PROJECT_NAME_DELIMITER));
         if (comps.length > 0) {
             return comps[comps.length - 1];
         } else {
@@ -71,11 +71,18 @@ public class OpenShiftResourceUniqueId {
         }
 	}
 
+	/**
+	 * Return the OpenShift resource kind associated with this resource id. If an old
+	 * resource id is given, then Service is assumed.
+	 * 
+	 * @param uniqueId the OpenShift resource id
+	 * @return the kind of the OpenShift resource
+	 */
     public static String getKind(String uniqueId) {
         if (StringUtils.isEmpty(uniqueId)) {
             return null;
         }
-        String[] comps = uniqueId.split("@");
+        String[] comps = uniqueId.split(String.valueOf(UNIQUE_ID_PROJECT_NAME_DELIMITER));
         if (comps.length == 2) {
             return ResourceKind.SERVICE;
         } else {
@@ -105,5 +112,4 @@ public class OpenShiftResourceUniqueId {
 		}
 		return null;
 	}
-
 }
