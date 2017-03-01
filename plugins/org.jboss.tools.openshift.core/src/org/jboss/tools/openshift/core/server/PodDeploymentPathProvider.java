@@ -62,11 +62,7 @@ public class PodDeploymentPathProvider {
 			return getPodPath(imageStreamTag);
 		} else {
 		    String imageMetaData = getImageMetaData(imageRef, project);
-		    if (imageMetaData != null) {
-		        return getPodPath(imageMetaData);
-		    } else {
-		        return "";
-		    }
+	        return getPodPath(imageMetaData);
 		}
 	}
 

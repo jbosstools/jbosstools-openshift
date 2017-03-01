@@ -85,8 +85,10 @@ public class OpenShiftResourceUniqueId {
         String[] comps = uniqueId.split(String.valueOf(UNIQUE_ID_PROJECT_NAME_DELIMITER));
         if (comps.length == 2) {
             return ResourceKind.SERVICE;
-        } else {
+        } else if (comps.length == 3) {
             return comps[1];
+        } else {
+            return null;
         }
     }
     
