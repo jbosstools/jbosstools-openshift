@@ -2,7 +2,7 @@
 <feature
       id="org.jboss.tools.openshift.feature"
       label="%featureName"
-      version="3.3.2.qualifier"
+      version="3.3.3.qualifier"
       provider-name="%providerName"
       plugin="org.jboss.tools.openshift.ui"
       license-feature="org.jboss.tools.foundation.license.feature"
@@ -25,9 +25,39 @@
       <import feature="org.eclipse.linuxtools.docker.feature"/>
    </requires>
 
-   <plugin id="org.jboss.tools.openshift.client" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
-   <plugin id="org.jboss.tools.openshift.ui" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
-   <plugin id="org.jboss.tools.openshift.core" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
-   <plugin id="org.jboss.tools.openshift.common.core" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
-   <plugin id="org.jboss.tools.openshift.common.ui" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
+   <plugin
+         id="org.jboss.tools.openshift.client"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.tools.openshift.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.tools.openshift.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.tools.openshift.common.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.tools.openshift.common.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
