@@ -121,6 +121,8 @@ public class ApplicationSourceFromImageModel
 				&& ResourceKind.IMAGE_STREAM.equals(((IApplicationSource) evt.getNewValue()).getKind())) {
 			this.source = (ImageStreamApplicationSource) evt.getNewValue();
 			staleRepoInfo.set(true);
+			setGitRepositoryUrl(null);
+			setResourceName(null);
 		}
 	}
 	
