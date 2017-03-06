@@ -10,6 +10,8 @@ package org.jboss.tools.openshift.internal.ui.server;
 
 import java.lang.reflect.InvocationTargetException;
 
+import javax.print.attribute.standard.Finishings;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
@@ -30,10 +32,13 @@ import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -121,6 +126,7 @@ public class SelectServiceWizard extends AbstractOpenShiftWizard<ServiceViewMode
 					.applyTo(selectorText);
 
 			final TreeViewer servicesViewer = createServicesTreeViewer(servicesGroup, selectorText);
+			servicesViewer.addDoubleClickListener(onDoubleClickService());
 			IObservableList serviceItemsObservable = BeanProperties.list(ServiceViewModel.PROPERTY_SERVICE_ITEMS).observe(getModel());
 			DataBindingUtils.addDisposableListChangeListener(
 					onServiceItemsChanged(servicesViewer), serviceItemsObservable, servicesViewer.getTree());
@@ -169,6 +175,19 @@ public class SelectServiceWizard extends AbstractOpenShiftWizard<ServiceViewMode
 			new ServiceDetailViews(selectedService, detailsContainer, dbc).createControls();
 
 			return servicesGroup;
+		}
+
+		private IDoubleClickListener onDoubleClickService() {
+			return new IDoubleClickListener() {
+
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					if (canFinish()) {
+						Button finishButton = getShell().getDefaultButton();
+						UIUtils.clickButton(finishButton);
+					}
+				}
+			};
 		}
 
 		private IListChangeListener onServiceItemsChanged(final TreeViewer servicesViewer) {
