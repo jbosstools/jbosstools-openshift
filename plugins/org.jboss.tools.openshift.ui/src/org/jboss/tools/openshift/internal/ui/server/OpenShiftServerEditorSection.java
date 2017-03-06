@@ -490,9 +490,31 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				.align(SWT.BEGINNING, SWT.CENTER)
 				.applyTo(resourceLabel);
 
-		Text resourceText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+        Text kindText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+        kindText.setText("Kind");
+        GridDataFactory.fillDefaults()
+        .align(SWT.FILL, SWT.CENTER)
+        .grab(true, false)
+                .applyTo(kindText);
+        ValueBindingBuilder
+        .bind(WidgetProperties.text(SWT.Modify).observe(kindText))
+        .to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_RESOURCE).observe(model))
+        .converting(new Converter(IResource.class, String.class) {
+            
+            @Override
+            public Object convert(Object fromObject) {
+                System.out.println("Converting " + fromObject);
+                if (!(fromObject instanceof IResource)) {
+                    return null;
+                };
+                return ((IResource) fromObject).getKind();
+            }
+        })
+        .in(dbc);
+
+        Text resourceText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
-			.span(2, 1)
+			//.span(2, 1)
 			.align(SWT.FILL, SWT.CENTER)
 			.grab(true, false)
 			.applyTo(resourceText);

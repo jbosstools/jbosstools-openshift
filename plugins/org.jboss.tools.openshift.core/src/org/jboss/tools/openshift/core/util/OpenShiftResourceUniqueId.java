@@ -30,9 +30,14 @@ public class OpenShiftResourceUniqueId {
 			return null;
 		}
 
-		return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
-                                  .append(resource.getKind()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
-                                  .append(resource.getName()).toString();   
+		if (ResourceKind.SERVICE.equals(resource.getKind())) {
+	        return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+                    .append(resource.getName()).toString();   
+		} else {
+	        return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+                    .append(resource.getKind()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+                    .append(resource.getName()).toString();   
+		}
 	}
 
 	/**
