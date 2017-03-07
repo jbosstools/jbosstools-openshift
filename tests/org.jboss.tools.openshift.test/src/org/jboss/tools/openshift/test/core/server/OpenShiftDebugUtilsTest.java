@@ -106,10 +106,7 @@ public class OpenShiftDebugUtilsTest {
 		context = debugUtils.getDebuggingContext(dc);
 		
 		assertEquals(1234, context.getDebugPort());
-		// JBIDE-23961
-		// assertTrue(context.isDebugEnabled());
-		assertFalse(context.isDebugEnabled());
-		
+		assertFalse(context.isDebugEnabled());		
 	}
 	
 	
@@ -128,8 +125,6 @@ public class OpenShiftDebugUtilsTest {
 		debugUtils.enableDebugMode(dc, context, monitor);
 		
 		verify(dc).setEnvironmentVariable("DEBUG_PORT", "1234");
-		// JBIDE-23961
-		// verify(dc).setEnvironmentVariable("DEV_MODE", "true");
 		verify(dc).setEnvironmentVariable("DEBUG", "true");
 		verify(listener).onPodRestart(isA(DebuggingContext.class), eq(monitor));
 		verify(client).update(dc);
@@ -168,8 +163,6 @@ public class OpenShiftDebugUtilsTest {
 		
 		new MockRedeploymentJob(dc);
 		debugUtils.disableDebugMode(dc, context, monitor);
-		// JBIDE-23961
-		// verify(dc).setEnvironmentVariable("DEV_MODE", "false");
 		verify(dc).setEnvironmentVariable("DEBUG", "false");
 		
 		verify(listener).onPodRestart(isA(DebuggingContext.class), eq(monitor));

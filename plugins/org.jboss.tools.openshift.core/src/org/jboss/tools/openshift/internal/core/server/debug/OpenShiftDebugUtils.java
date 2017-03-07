@@ -61,7 +61,6 @@ import com.openshift.restclient.model.IReplicationController;
 public class OpenShiftDebugUtils {
 
 	private static final String DEBUG_KEY = "DEBUG";
-	private static final String DEV_MODE_KEY = "DEV_MODE";
 	private static final String DEBUG_PORT_KEY = "DEBUG_PORT";
 	private ILaunchManager launchManager;
 
