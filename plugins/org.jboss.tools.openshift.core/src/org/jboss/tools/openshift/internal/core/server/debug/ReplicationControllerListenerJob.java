@@ -72,7 +72,7 @@ public class ReplicationControllerListenerJob extends Job {
 	
 	private boolean isNewControlledPod(IPod pod) {
 	    return !oldPods.contains(pod.getName()) &&
-	           "Runnning".equals(pod.getStatus()) &&
+	           "Running".equals(pod.getStatus()) &&
 	           ResourceUtils.containsAll(selector, pod.getLabels());
 	}
 

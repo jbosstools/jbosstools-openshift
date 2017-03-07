@@ -503,7 +503,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
             
             @Override
             public Object convert(Object fromObject) {
-                System.out.println("Converting " + fromObject);
                 if (!(fromObject instanceof IResource)) {
                     return null;
                 };
