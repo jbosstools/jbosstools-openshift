@@ -786,6 +786,11 @@
            style="push"
            tooltip="Trigger the latest deployment of a deployment config">
      </command>
+     <command
+        commandId="org.jboss.tools.openshift.ui.command.serverAdapter"
+        id="org.jboss.tools.openshift.ui.command.serverAdapter"
+        icon="icons/openshift-logo-white-icon.png"
+        style="push"/>
   </menuContribution>
 
   <menuContribution
@@ -820,6 +825,11 @@
     <command
         commandId="org.jboss.tools.openshift.ui.command.portforwarding"
         style="push" />
+     <command
+        commandId="org.jboss.tools.openshift.ui.command.serverAdapter"
+        id="org.jboss.tools.openshift.ui.command.serverAdapter"
+        icon="icons/openshift-logo-white-icon.png"
+        style="push"/>
        <dynamic
              id="org.jboss.tools.openshift.ui.dynamic3" 
              class="org.jboss.tools.openshift.internal.ui.handler.ScaleDeploymentContributionItem">
@@ -885,6 +895,11 @@
               tooltip="Scale the number of deployed replicas to a specific value.">
         </command>
      </menu>
+     <command
+        commandId="org.jboss.tools.openshift.ui.command.serverAdapter"
+        id="org.jboss.tools.openshift.ui.command.serverAdapter"
+        icon="icons/openshift-logo-white-icon.png"
+        style="push"/>
   </menuContribution>
 
   <menuContribution
