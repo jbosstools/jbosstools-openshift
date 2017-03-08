@@ -8,6 +8,7 @@
 	</parent>
 	<groupId>org.jboss.tools.openshift.tests</groupId>
 	<artifactId>org.jboss.tools.openshift.test</artifactId> 
+	<version>3.3.3-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
 	<build>
 	<resources>
