@@ -2,10 +2,10 @@
 <feature
       id="org.jboss.tools.openshift.test.feature"
       label="%featureName"
-      version="3.3.2.qualifier"
+      version="3.4.0.qualifier"
       provider-name="%providerName"
       license-feature="org.jboss.tools.foundation.license.feature"
-	  license-feature-version="0.0.0">
+      license-feature-version="0.0.0">
 
    <description url="%descriptionURL">
       %description
@@ -25,6 +25,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
    <plugin
          id="org.jboss.tools.openshift.test"
          download-size="0"
