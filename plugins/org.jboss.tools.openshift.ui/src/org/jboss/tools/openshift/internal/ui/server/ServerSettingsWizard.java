@@ -19,6 +19,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -39,13 +40,13 @@ public class ServerSettingsWizard extends Wizard {
 	 * 
 	 * @param server the working copy of the {@link IServer} to create
 	 * @param connection the current OpenShift {@link Connection}
-	 * @param service the selected service
+	 * @param resource the selected resource
 	 */
 	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, 
-			final IService service, final IRoute route) {
+			final IResource resource, final IRoute route) {
 		setWindowTitle(WIZARD_TITLE);
 		this.serverSettingsWizardPage = 
-				new ServerSettingsWizardPage(this, server, connection, service, route);
+				new ServerSettingsWizardPage(this, server, connection, resource, route);
 	}
 	
 	@Override

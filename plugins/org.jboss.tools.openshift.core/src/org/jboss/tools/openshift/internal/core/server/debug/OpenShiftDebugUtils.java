@@ -49,13 +49,14 @@ import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.IClient;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IContainer;
-import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
+import com.openshift.restclient.model.IReplicationController;
 
 public class OpenShiftDebugUtils {
 
@@ -77,55 +78,55 @@ public class OpenShiftDebugUtils {
 		this.launchManager = launchManager;
 	}
 	
-	public DebuggingContext enableDebugMode(IDeploymentConfig deploymentConfig, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
-		Assert.isNotNull(deploymentConfig);
+	public DebuggingContext enableDebugMode(IReplicationController replicationController, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
+		Assert.isNotNull(replicationController);
 		Assert.isNotNull(debugContext);
 
 		IDebugListener listener = debugContext.getDebugListener();
 		if (debugContext.isDebugEnabled() && listener != null) {
-			IPod pod = getFirstPod(deploymentConfig);
+			IPod pod = getFirstPod(replicationController);
 			debugContext.setPod(pod);
 			listener.onDebugChange(debugContext, monitor);
 		} else {
 			debugContext.setDebugEnabled(true);
-			updateDebugConfig(deploymentConfig, debugContext, monitor);
+			updateDebugConfig(replicationController, debugContext, monitor);
 		}
 		return debugContext;
 	}
 
-	public DebuggingContext disableDebugMode(IDeploymentConfig deploymentConfig, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
-		Assert.isNotNull(deploymentConfig);
+	public DebuggingContext disableDebugMode(IReplicationController replicationController, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
+		Assert.isNotNull(replicationController);
 		Assert.isNotNull(debugContext);
 
 		IDebugListener listener = debugContext.getDebugListener();
 		if (listener != null) {
-			IPod pod = getFirstPod(deploymentConfig);
+			IPod pod = getFirstPod(replicationController);
 			debugContext.setPod(pod);
 			listener.onDebugChange(debugContext, monitor);
 		} 
 		if (debugContext.isDebugEnabled()) {
 			debugContext.setDebugEnabled(false);
-			updateDebugConfig(deploymentConfig, debugContext, monitor);
+			updateDebugConfig(replicationController, debugContext, monitor);
 		}
 		return debugContext;
 	}
 	
-	public void updateDebugConfig(IDeploymentConfig deploymentConfig, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
+	public void updateDebugConfig(IReplicationController replicationController, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
 		monitor.subTask("Updating Deployment Configuration");
-		if (deploymentConfig == null
-				|| deploymentConfig.getEnvironmentVariables() == null) {
+		if (replicationController == null
+				|| replicationController.getEnvironmentVariables() == null) {
 			return;
 		}
-		updateDeploymentConfigValues(deploymentConfig, debugContext);
+		updateDeploymentConfigValues(replicationController, debugContext);
 		
-		IClient client = getClient(deploymentConfig);
+		IClient client = getClient(replicationController);
 		
-		DeploymentConfigListenerJob deploymentListenerJob = new DeploymentConfigListenerJob(deploymentConfig);
-		deploymentListenerJob.addJobChangeListener(new JobChangeAdapter() {
+		ReplicationControllerListenerJob rcListenerJob = new ReplicationControllerListenerJob(replicationController);
+		rcListenerJob.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
-				ConnectionsRegistrySingleton.getInstance().removeListener(deploymentListenerJob.getConnectionsRegistryListener());
-				debugContext.setPod(deploymentListenerJob.getPod());
+				ConnectionsRegistrySingleton.getInstance().removeListener(rcListenerJob.getConnectionsRegistryListener());
+				debugContext.setPod(rcListenerJob.getPod());
 				if (event.getResult().isOK() && debugContext.getDebugListener() != null) {
 					try {
 						debugContext.getDebugListener().onPodRestart(debugContext, monitor);
@@ -136,26 +137,31 @@ public class OpenShiftDebugUtils {
 			};
 		});
 		
-		ConnectionsRegistrySingleton.getInstance().addListener(deploymentListenerJob.getConnectionsRegistryListener());
-		deploymentListenerJob.schedule();
-		client.update(deploymentConfig);
-		try {
-			deploymentListenerJob.join(DeploymentConfigListenerJob.TIMEOUT, monitor);
-		} catch (OperationCanceledException | InterruptedException e) {
-			e.printStackTrace();
+		ConnectionsRegistrySingleton.getInstance().addListener(rcListenerJob.getConnectionsRegistryListener());
+		rcListenerJob.schedule();
+        client.update(replicationController);
+		if (ResourceKind.REPLICATION_CONTROLLER.equals(replicationController.getKind())) {
+		    for(IPod pod : ResourceUtils.getPodsFor(replicationController)) {
+		        client.delete(pod);
+		    }
 		}
-		IStatus result = deploymentListenerJob.getResult();
+		try {
+			rcListenerJob.join(ReplicationControllerListenerJob.TIMEOUT, monitor);
+		} catch (OperationCanceledException | InterruptedException e) {
+			throw new OpenShiftCoreException(e);
+		}
+		IStatus result = rcListenerJob.getResult();
 		if (result == null) {//timed out!
-			throw new CoreException(deploymentListenerJob.getTimeOutStatus());
+			throw new CoreException(rcListenerJob.getTimeOutStatus());
 		} else if (!result.isOK()) {
 			throw new CoreException(result);
 		}
 		
 	}
 
-	private void updateDeploymentConfigValues(IDeploymentConfig deploymentConfig,
+	private void updateDeploymentConfigValues(IReplicationController replicationController,
 			DebuggingContext debugContext) {
-		Collection<IContainer> originalContainers = deploymentConfig.getContainers();
+		Collection<IContainer> originalContainers = replicationController.getContainers();
 		if (originalContainers != null && !originalContainers.isEmpty() && debugContext.isDebugEnabled()) {
 			Collection<IContainer> containers = new ArrayList<>(originalContainers);
 			IContainer container = containers.iterator().next();
@@ -176,17 +182,17 @@ public class OpenShiftDebugUtils {
 			}
 			if (added) {
 				container.setPorts(ports); 
-				deploymentConfig.setContainers(containers);
+				replicationController.setContainers(containers);
 			}
 		}
 		//TODO the list of env var to set in debug mode should probably be defined in the server settings instead
-		deploymentConfig.setEnvironmentVariable(DEBUG_PORT_KEY, String.valueOf(debugContext.getDebugPort()));
-		deploymentConfig.setEnvironmentVariable(DEV_MODE_KEY, String.valueOf(debugContext.isDebugEnabled()));//for node
-		deploymentConfig.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));//for eap
+		replicationController.setEnvironmentVariable(DEBUG_PORT_KEY, String.valueOf(debugContext.getDebugPort()));
+		replicationController.setEnvironmentVariable(DEV_MODE_KEY, String.valueOf(debugContext.isDebugEnabled()));//for node
+		replicationController.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));//for eap
 	}
 
-	private IClient getClient(IDeploymentConfig deploymentConfig) {
-		IClient client = deploymentConfig.accept(new CapabilityVisitor<IClientCapability, IClient>() {
+	private IClient getClient(IReplicationController replicationController) {
+		IClient client = replicationController.accept(new CapabilityVisitor<IClientCapability, IClient>() {
 			@Override
 			public IClient visit(IClientCapability cap) {
 				return cap.getClient();
@@ -195,24 +201,24 @@ public class OpenShiftDebugUtils {
 		return client;
 	}
 
-	public DebuggingContext getDebuggingContext(IDeploymentConfig deploymentConfig) {
-		if (deploymentConfig == null) {
+	public DebuggingContext getDebuggingContext(IReplicationController replicationController) {
+		if (replicationController == null) {
 			return null;
 		}
 		DebuggingContext debugContext = new DebuggingContext();
-		String debugPort = getEnv(deploymentConfig, DEBUG_PORT_KEY);
+		String debugPort = getEnv(replicationController, DEBUG_PORT_KEY);
 		debugContext.setDebugPort(NumberUtils.toInt(debugPort, -1));
-		String debugEnabled = getEnv(deploymentConfig, DEBUG_KEY);
-		String devModeEnabled = getEnv(deploymentConfig, DEV_MODE_KEY);
+		String debugEnabled = getEnv(replicationController, DEBUG_KEY);
+		String devModeEnabled = getEnv(replicationController, DEV_MODE_KEY);
 		debugContext.setDebugEnabled(Boolean.parseBoolean(debugEnabled) || Boolean.parseBoolean(devModeEnabled));
 		return debugContext;
 	}
 	
-	public String getEnv(IDeploymentConfig deploymentConfig, String key) {
-		if (deploymentConfig == null || deploymentConfig.getEnvironmentVariables() == null) {
+	public String getEnv(IReplicationController replicationController, String key) {
+		if (replicationController == null || replicationController.getEnvironmentVariables() == null) {
 			return null;
 		}
-		Optional<IEnvironmentVariable> envVar = deploymentConfig.getEnvironmentVariables().stream()
+		Optional<IEnvironmentVariable> envVar = replicationController.getEnvironmentVariables().stream()
 				.filter(ev -> key.equals(ev.getName()))
 				.findFirst();
 		if (envVar.isPresent()) {
@@ -221,8 +227,8 @@ public class OpenShiftDebugUtils {
 		return null;
 	}
 	
-	public IPod getFirstPod(IDeploymentConfig dc) {
-		IPod pod = ResourceUtils.getPodsForDeploymentConfig(dc).stream().findFirst() 
+	public IPod getFirstPod(IReplicationController replicationController) {
+		IPod pod = ResourceUtils.getPodsFor(replicationController).stream().findFirst() 
 				.orElse(null);
 		return pod;
 	}

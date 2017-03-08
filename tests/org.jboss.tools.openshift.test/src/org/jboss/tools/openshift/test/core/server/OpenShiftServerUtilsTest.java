@@ -46,6 +46,7 @@ import org.junit.Test;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
@@ -201,16 +202,16 @@ public class OpenShiftServerUtilsTest {
 	public void should_return_service_from_server() {
 		// given
 		// when
-		IService service = OpenShiftServerUtils.getService(server, connection);
+		IResource resource = OpenShiftServerUtils.getResource(server, connection);
 		// then
-		assertThat(service).isEqualTo(ResourceMocks.PROJECT2_SERVICES[1]);
+		assertThat(resource).isEqualTo(ResourceMocks.PROJECT2_SERVICES[1]);
 	}
 
 	@Test
 	public void should_return_deploymentconfig() throws CoreException {
 		// given
 		// when
-		IDeploymentConfig deploymentConfig = OpenShiftServerUtils.getDeploymentConfig(server);
+		IDeploymentConfig deploymentConfig = (IDeploymentConfig) OpenShiftServerUtils.getReplicationController(server);
 		// then
 		assertThat(deploymentConfig).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2]);
 	}
@@ -220,7 +221,7 @@ public class OpenShiftServerUtilsTest {
 		// given
 		// when
 		try {
-			OpenShiftServerUtils.getDeploymentConfig(
+			OpenShiftServerUtils.getReplicationController(
 				createServer(ResourceMocks.PROJECT2_SERVICES[0]));
 		// then
 			fail("CoreException expected");
@@ -234,7 +235,7 @@ public class OpenShiftServerUtilsTest {
 		// given
 		// when
 		try {
-			OpenShiftServerUtils.getDeploymentConfig(
+			OpenShiftServerUtils.getReplicationController(
 				createServer(ResourceMocks.PROJECT2_SERVICES[2]));
 		// then
 			fail("CoreException expected");
@@ -260,7 +261,7 @@ public class OpenShiftServerUtilsTest {
 				mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70))
 		};
 		// when
-		IServer serverFound = OpenShiftServerUtils.findServerForService("someService", servers);
+		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
 		assertThat(serverFound).isSameAs(os3Server);
 	}
@@ -276,7 +277,7 @@ public class OpenShiftServerUtilsTest {
 				os3Server2
 		};
 		// when
-		IServer serverFound = OpenShiftServerUtils.findServerForService("someService", servers);
+		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
 		assertThat(serverFound).isSameAs(os3Server1);
 	}
@@ -295,7 +296,7 @@ public class OpenShiftServerUtilsTest {
 				mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70))
 		};
 		// when
-		IServer serverFound = OpenShiftServerUtils.findServerForService("someService", servers);
+		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
 		assertThat(serverFound).isSameAs(os3Server1);
 	}

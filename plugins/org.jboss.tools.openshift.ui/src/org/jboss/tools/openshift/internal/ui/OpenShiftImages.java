@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat Inc..
+ * Copyright (c) 2015-2017 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.jboss.tools.openshift.internal.common.ui.ImageRepository;
 
 /**
  * @author jeff.cantrill
+ * @author Jeff Maury
  */
 public class OpenShiftImages {
 
@@ -51,6 +52,8 @@ public class OpenShiftImages {
 	public static final Image ROUTE_IMG = repo.getImage("route.png"); //$NON-NLS-1$
 	public static final ImageDescriptor TEMPLATE = repo.create("template.png"); //$NON-NLS-1$
 	public static final Image TEMPLATE_IMG = repo.getImage("template.png"); //$NON-NLS-1$
+    public static final ImageDescriptor REPLICATION_CONTROLLER = repo.create("replicator.png"); //$NON-NLS-1$
+    public static final Image REPLICATION_CONTROLLER_IMG = repo.getImage("replicator.png"); //$NON-NLS-1$
 	public static final ImageDescriptor PROJECT_NEW = PROJECT;
 	public static final Image PROJECT_NEW_IMG = PROJECT_IMG;
     public static final ImageDescriptor CHECKED = repo.create("checked.png"); //$NON-NLS-1$

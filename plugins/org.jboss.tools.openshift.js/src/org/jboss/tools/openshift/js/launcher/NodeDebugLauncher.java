@@ -29,6 +29,7 @@ import org.jboss.tools.openshift.internal.js.listeners.NodeDebugTerminateListene
 import org.jboss.tools.openshift.internal.js.storage.SessionStorage;
 import org.jboss.tools.openshift.internal.js.util.NodeDebuggerUtil;
 
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 /**
@@ -95,8 +96,8 @@ public final class NodeDebugLauncher {
 	}
 
 	private static String getPodPath(IServer server) throws CoreException {
-		IService service = OpenShiftServerUtils.getService(server);
-		return OpenShiftServerUtils.loadPodPath(service, server);
+		IResource resource = OpenShiftServerUtils.getResource(server);
+		return OpenShiftServerUtils.loadPodPath(resource, server);
 	}
 
 }

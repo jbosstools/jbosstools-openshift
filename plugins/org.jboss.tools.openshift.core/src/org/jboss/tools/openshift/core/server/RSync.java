@@ -25,24 +25,27 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerConsoleWriter;
 import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IRSyncable;
 import com.openshift.restclient.capability.resources.IRSyncable.LocalPeer;
 import com.openshift.restclient.capability.resources.IRSyncable.PodPeer;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 public class RSync {
 
-	private final IService service;
+	private final IResource resource;
 	private final String podPath;
 	private final IServer server;
 
-	public RSync(final IService service, final String podPath, final IServer server) {
-		this.service = service;
+	public RSync(final IResource resource, final String podPath, final IServer server) {
+		this.resource = resource;
 		this.podPath = sanitizePath(podPath);
 		this.server = server;
 	}
@@ -66,7 +69,7 @@ public class RSync {
 				boolean shouldSync = true;
 				//boolean shouldSync = !deployFolder.exists() || deployFolder.listFiles().length == 0; 
 				if (shouldSync) {
-					for (IPod pod : service.getPods()) {
+					for (IPod pod : ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD))) {
 						try {
 						    if ("Running".equals(pod.getStatus())) {
 	                            syncPodToDirectory(pod, podPath, deployFolder, consoleWriter);
@@ -86,7 +89,7 @@ public class RSync {
 			
 			@Override
 			protected void runOCBinary(MultiStatus multiStatus) {
-				for (IPod pod : service.getPods()) {
+				for (IPod pod : ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD))) {
 					try {
 					    if ("Running".equals(pod.getStatus())) {
 	                        syncDirectoryToPod(pod, deployFolder, podPath, consoleWriter);

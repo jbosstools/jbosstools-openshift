@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Red Hat Inc..
+ * Copyright (c) 2015-2017 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.Collection;
 
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -29,8 +30,14 @@ public class OpenShiftResourceUniqueId {
 			return null;
 		}
 
-		return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
-				.append(resource.getName()).toString();
+		if (ResourceKind.SERVICE.equals(resource.getKind())) {
+	        return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+                    .append(resource.getName()).toString();   
+		} else {
+	        return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+                    .append(resource.getKind()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+                    .append(resource.getName()).toString();   
+		}
 	}
 
 	/**
@@ -61,13 +68,35 @@ public class OpenShiftResourceUniqueId {
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
-		int index = uniqueId.indexOf(UNIQUE_ID_PROJECT_NAME_DELIMITER);
-		if (index == -1) {
-			return null;
-		}
-		return uniqueId.substring(index + 1);
+        String[] comps = uniqueId.split(String.valueOf(UNIQUE_ID_PROJECT_NAME_DELIMITER));
+        if (comps.length > 0) {
+            return comps[comps.length - 1];
+        } else {
+            return null;
+        }
 	}
 
+	/**
+	 * Return the OpenShift resource kind associated with this resource id. If an old
+	 * resource id is given, then Service is assumed.
+	 * 
+	 * @param uniqueId the OpenShift resource id
+	 * @return the kind of the OpenShift resource
+	 */
+    public static String getKind(String uniqueId) {
+        if (StringUtils.isEmpty(uniqueId)) {
+            return null;
+        }
+        String[] comps = uniqueId.split(String.valueOf(UNIQUE_ID_PROJECT_NAME_DELIMITER));
+        if (comps.length == 2) {
+            return ResourceKind.SERVICE;
+        } else if (comps.length == 3) {
+            return comps[1];
+        } else {
+            return null;
+        }
+    }
+    
 	/**
 	 * Returns the resource within the given collection of resources that match
 	 * the given uniqueId. Returns {@code null} otherwise

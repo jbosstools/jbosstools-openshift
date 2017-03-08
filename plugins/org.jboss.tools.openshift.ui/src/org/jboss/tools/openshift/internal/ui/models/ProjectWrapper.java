@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -14,7 +14,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+
+import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
@@ -52,10 +57,21 @@ class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> impl
 					Collection<IResource> relatedResources = ServiceResourceMapper
 							.computeRelatedResources(service.getWrapped(), resources);
 					service.updateWithResources(relatedResources);
+				} else if (wrapper instanceof ReplicationControllerWrapper) {
+				    ReplicationControllerWrapper dcWrapper = (ReplicationControllerWrapper) wrapper;
+				    Collection<IResource> relatedresources = getRelatedResources(resources, wrapper);
+				    dcWrapper.updateWithResources(relatedresources);
 				}
 			});
 		}
 	}
+
+    private Collection<IResource> getRelatedResources(Collection<IResource> resources, IResourceWrapper<?, ?> wrapper) {
+        Collection<IResource> relatedresources =
+                (ResourceKind.DEPLOYMENT_CONFIG.equals(wrapper.getWrapped().getKind()))?ServiceResourceMapper.computeRelatedResources((IDeploymentConfig) wrapper.getWrapped(), resources)
+                                                                                       :ServiceResourceMapper.computeRelatedResources((IReplicationController) wrapper.getWrapped(), resources);
+        return relatedresources;
+    }
 
 	protected AbstractResourceWrapper<?, ?> createNewWrapper(Collection<IResource> resources, IResource r) {
 		AbstractResourceWrapper<?, ?> newWrapper;
@@ -65,6 +81,13 @@ class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> impl
 					resources);
 			newService.initWithResources(relatedResources);
 			newWrapper = newService;
+		} else if ((ResourceKind.DEPLOYMENT_CONFIG.equals(r.getKind()) ||
+		           (ResourceKind.REPLICATION_CONTROLLER.equals(r.getKind()) && !r.isAnnotatedWith(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME))) &&
+		           ServiceResourceMapper.getServices((IReplicationController) r, resources).isEmpty()) {
+		        ReplicationControllerWrapper dcWrapper = new ReplicationControllerWrapper(this, (IReplicationController) r);
+		        Collection<IResource> relatedResource = getRelatedResources(resources, dcWrapper);
+		        dcWrapper.initWithResources(relatedResource);
+		        newWrapper = dcWrapper;
 		} else {
 			newWrapper = new ResourceWrapper(ProjectWrapper.this, r);
 		}

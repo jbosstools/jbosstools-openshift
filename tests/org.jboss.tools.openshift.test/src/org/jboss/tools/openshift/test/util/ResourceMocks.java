@@ -51,6 +51,7 @@ import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
@@ -69,8 +70,10 @@ public class ResourceMocks {
 	public static final IProject PROJECT1 = createProject("project1");
 	public static final IProject PROJECT2 = createProject("project2");
 	public static final IProject PROJECT3 = createProject("project3");
+    public static final IProject PROJECT4 = createProject("project4");
+    public static final IProject PROJECT5 = createProject("project5");
 
-	public static final IProject[] PROJECTS = new IProject[] { PROJECT1, PROJECT2, PROJECT3 };
+	public static final IProject[] PROJECTS = new IProject[] { PROJECT1, PROJECT2, PROJECT3, PROJECT4, PROJECT5 };
 
 	public static final IService[] PROJECT2_SERVICES = new IService[] {
 			// selectors need to match pod labels
@@ -129,7 +132,52 @@ public class ResourceMocks {
 			createRoute("project3-app3-route3", PROJECT3, "bogus")
 	};
 
-	public static Connection create3ProjectsConnection() {
+    public static final String PROJECT4_BUILDCONFIG2_BUILD_SOURCEURI = "git@gitrepo.io/somegroup/someproject.git";
+
+    public static final IBuildConfig[] PROJECT4_BUILDCONFIGS = new IBuildConfig[] {
+            // needs to match service name
+            createBuildConfig("project4-app1", PROJECT4, null, null, null),
+            // needs to match service name
+            createBuildConfig("project4-app2", PROJECT4, null, null, PROJECT4_BUILDCONFIG2_BUILD_SOURCEURI),
+            // needs to match service name
+            createBuildConfig("project4-app3", PROJECT4, null, null, null),
+            // needs to match service name
+            createBuildConfig("project4-app4", PROJECT4, null, null, null)
+    };
+
+    public static final IDeploymentConfig[] PROJECT4_DEPLOYMENTCONFIGS = new IDeploymentConfig[] {
+            createDeploymentConfig("project2-app1-dc", PROJECT4),
+            createDeploymentConfig("project2-app2-dc", PROJECT4),
+            createDeploymentConfig("project2-app3-dc", PROJECT4)
+    };
+
+    public static final IPod[] PROJECT4_PODS = new IPod[] {
+            // labels need to match service selectors and contain dc name
+            createPod("project4-app1", PROJECT4, new HashMap<String, String>() {{ 
+                put("key1", "42"); put("key2", "24"); }}),
+            createPod("project4-app2", PROJECT4, new HashMap<String, String>() {{ 
+                put("key1", "84"); put("key2", "48"); put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, PROJECT4_DEPLOYMENTCONFIGS[2].getName());}}),
+            createPod("project4-app3", PROJECT4, new HashMap<String, String>() {{ 
+                put("key1", "84"); put("key2", "48"); }})
+    };
+
+    public static final IReplicationController[] PROJECT5_REPLICATINCONTROLLERS = new IReplicationController[] {
+            createDeploymentConfig("project2-app1-dc", PROJECT5),
+            createDeploymentConfig("project2-app2-dc", PROJECT5),
+            createDeploymentConfig("project2-app3-dc", PROJECT5)
+    };
+
+    public static final IPod[] PROJECT5_PODS = new IPod[] {
+            // labels need to match service selectors and contain dc name
+            createPod("project5-app1", PROJECT5, new HashMap<String, String>() {{ 
+                put("key1", "42"); put("key2", "24"); }}),
+            createPod("project5-app2", PROJECT5, new HashMap<String, String>() {{ 
+                put("key1", "84"); put("key2", "48");}}),
+            createPod("project5-app3", PROJECT5, new HashMap<String, String>() {{ 
+                put("key1", "84"); put("key2", "48"); }})
+    };
+
+    public static Connection create3ProjectsConnection() {
 		Connection connection = createConnection("http://localhost:8443", "dev@openshift.com");
 		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(PROJECTS));
 		when(PROJECT2.getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT2_SERVICES));
@@ -142,7 +190,19 @@ public class ResourceMocks {
 
 		when(PROJECT3.getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT3_SERVICES));
 		when(PROJECT3.getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT3_ROUTES));
-		return connection;
+
+	    when(connection.getResources(ResourceKind.BUILD_CONFIG, PROJECT4.getName())).thenReturn(Arrays.asList(PROJECT4_BUILDCONFIGS));
+	    when(connection.getResources(ResourceKind.POD, PROJECT4.getName())).thenReturn(Arrays.asList(PROJECT4_PODS));
+	    when(connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, PROJECT4.getName())).thenReturn(Arrays.asList(PROJECT4_DEPLOYMENTCONFIGS));
+        when(PROJECT4.getResources(ResourceKind.DEPLOYMENT_CONFIG)).thenReturn(Arrays.asList(PROJECT4_DEPLOYMENTCONFIGS));
+	    mockConnectionGetResource(PROJECT4_DEPLOYMENTCONFIGS, ResourceKind.DEPLOYMENT_CONFIG, connection);
+
+        when(connection.getResources(ResourceKind.POD, PROJECT5.getName())).thenReturn(Arrays.asList(PROJECT5_PODS));
+        when(connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, PROJECT5.getName())).thenReturn(Arrays.asList(PROJECT5_REPLICATINCONTROLLERS));
+        when(PROJECT5.getResources(ResourceKind.REPLICATION_CONTROLLER)).thenReturn(Arrays.asList(PROJECT5_REPLICATINCONTROLLERS));
+        mockConnectionGetResource(PROJECT5_REPLICATINCONTROLLERS, ResourceKind.REPLICATION_CONTROLLER, connection);
+
+        return connection;
 	}
 
 	private static void mockConnectionGetResource(IResource[] resources, String resourceKind, Connection connection) {
@@ -160,7 +220,7 @@ public class ResourceMocks {
 	}
 	
 	public static IProject createProject(String name) {
-		return  createResource(IProject.class, 
+		return  createResource(IProject.class, ResourceKind.PROJECT,
 					project -> { 
 						mockGetResourceProperties(name, project, project);
 				});
@@ -194,7 +254,7 @@ public class ResourceMocks {
 	}
 
 	public static IRoute createRoute(String name, IProject project, String serviceName) {
-		return createResource(IRoute.class, 
+		return createResource(IRoute.class, ResourceKind.ROUTE,
 				route -> {
 					mockGetResourceProperties(name, project, route);
 					when(route.getServiceName()).thenReturn(serviceName);
@@ -207,7 +267,7 @@ public class ResourceMocks {
 	}
 
 	public static IService createService(String name, IProject project, Map<String, String> selectors) {
-		return createResource(IService.class, 
+		return createResource(IService.class, ResourceKind.SERVICE,
 				service -> {
 					mockGetResourceProperties(name, project, service);
 					when(service.getSelector()).thenReturn(selectors);
@@ -215,7 +275,7 @@ public class ResourceMocks {
 	}
 
 	public static IPod createPod(String name, IProject project, Map<String, String> labels) {
-		return createResource(IPod.class, 
+		return createResource(IPod.class, ResourceKind.POD,
 				pod -> {
 					mockGetResourceProperties(name, project, pod);
 					when(pod.getLabels()).thenReturn(labels);
@@ -223,30 +283,31 @@ public class ResourceMocks {
 	}
 
 	public static IDeploymentConfig createDeploymentConfig(String name, IProject project) {
-		return createResource(IDeploymentConfig.class, 
+		return createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG, 
 				dc -> mockGetResourceProperties(name, project, dc));
 	}
 
-	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz) {
-		return createResources(numOf, clazz, null);
+	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz, String kind) {
+		return createResources(numOf, clazz, kind, null);
 	}
 
-	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz, IResourceVisitor<R> visitor) {
+	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz, String kind, IResourceVisitor<R> visitor) {
 		List<R> resources = new ArrayList<>(numOf);
 		
 		for (int i = 0; i< numOf; i++) {
-			R mock = createResource(clazz, visitor);
+			R mock = createResource(clazz, kind, visitor);
 			resources.add(mock);
 		}
 		return resources;
 	}
 
-	public static <R extends IResource> R createResource(Class<R> clazz) {
-		return createResource(clazz, null);
+	public static <R extends IResource> R createResource(Class<R> clazz, String kind) {
+		return createResource(clazz, kind, null);
 	}
 
-	public static <R extends IResource> R createResource(Class<R> clazz, IResourceVisitor<R> visitor) {
+	public static <R extends IResource> R createResource(Class<R> clazz, String kind, IResourceVisitor<R> visitor) {
 		R mock = Mockito.mock(clazz);
+		when(mock.getKind()).thenReturn(kind);
 		if (visitor != null) {
 			visitor.visit(mock);
 		}

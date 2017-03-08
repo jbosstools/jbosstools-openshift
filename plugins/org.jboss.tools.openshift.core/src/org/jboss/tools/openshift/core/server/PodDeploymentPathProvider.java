@@ -51,9 +51,9 @@ public class PodDeploymentPathProvider {
 
 	private static final String DOCKER_IMAGE_DIGEST_IDENTIFIER = "sha256:";
 
-	public String load(IService service, Connection connection) throws CoreException {
-		IProject project = service.getProject();
-		IPod pod = getPod(service, project, connection);
+	public String load(IResource resource, Connection connection) throws CoreException {
+		IProject project = resource.getProject();
+		IPod pod = getPod(resource, project, connection);
 		String imageRef = getImageRef(connection, project, pod);
 		int imageDigestIndex = imageRef.indexOf(DOCKER_IMAGE_DIGEST_IDENTIFIER);
 		if (imageDigestIndex > 0) {
@@ -61,8 +61,8 @@ public class PodDeploymentPathProvider {
 			IResource imageStreamTag = getImageStreamTag(connection, project, imageRef, imageDigest);
 			return getPodPath(imageStreamTag);
 		} else {
-			
-			return "";
+		    String imageMetaData = getImageMetaData(imageRef, project);
+	        return getPodPath(imageMetaData);
 		}
 	}
 
@@ -78,14 +78,14 @@ public class PodDeploymentPathProvider {
 		return imageRef;
 	}
 
-	private IPod getPod(IService service, IProject project, Connection connection) throws CoreException {
+	private IPod getPod(IResource resource, IProject project, Connection connection) throws CoreException {
 		List<IPod> allPods = project.getResources(ResourceKind.POD);
-		List<IPod> pods = ResourceUtils.getPodsForService(service, allPods);
+		List<IPod> pods = ResourceUtils.getPodsFor(resource, allPods);
 		if (pods.isEmpty()) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory()
-					.errorStatus(NLS.bind("No pods found for service {0} in project {1} on server {2}. "
+					.errorStatus(NLS.bind("No pods found for {0} {1} in project {2} on server {3}. "
 							+ "Ensure your build is finished and a pod has been deployed.",
-							new Object[] { service.getName(), project.getName(), connection.getHost() })));
+							new Object[] { resource.getKind(), resource.getName(), project.getName(), connection.getHost() })));
 		}
 		// TODO: handle if there are 2+ pods
 		IPod pod = pods.get(0);
@@ -111,12 +111,12 @@ public class PodDeploymentPathProvider {
 		return imageStreamTag;
 	}
 
-	private ImportImageMetaData getImageMetaData(String imageRef, IProject project) {
+	private String getImageMetaData(String imageRef, IProject project) {
 		IImageStreamImportCapability imageStreamImportCapability = ((IProject) project).getCapability(IImageStreamImportCapability.class);
 		DockerImageURI uri = new DockerImageURI(imageRef);
 		IImageStreamImport imageStreamImport = imageStreamImportCapability.importImageMetadata(uri);
 		if (ResourceUtils.isSuccessful(imageStreamImport)) {
-			return new ImportImageMetaData(((IImageStreamImport) imageStreamImport).getImageJsonFor(uri));
+			return imageStreamImport.getImageJsonFor(uri);
 		} else {
 			return null;
 		}
@@ -133,18 +133,24 @@ public class PodDeploymentPathProvider {
 		if (imageStreamTag == null) {
 			return null;
 		}
-		String podPath = null;
-		String imageStreamTagJson = imageStreamTag.toJson(true);
-		if ((podPath = matchFirstGroup(imageStreamTagJson, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
-			if ((podPath = matchFirstGroup(imageStreamTagJson, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
-				podPath = matchFirstGroup(imageStreamTagJson, PATTERN_WOKRING_DIR);
-			}
-		}
-
-		return podPath;
+		return getPodPath(imageStreamTag.toJson(true));
 	}
 
-	private String matchFirstGroup(String imageStreamTag, Pattern pattern) {
+    private String getPodPath(String json) {
+        if (json == null) {
+            return null;
+        }
+        String podPath = null;
+        if ((podPath = matchFirstGroup(json, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
+            if ((podPath = matchFirstGroup(json, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
+                podPath = matchFirstGroup(json, PATTERN_WOKRING_DIR);
+            }
+        }
+
+        return podPath;
+    }
+
+    private String matchFirstGroup(String imageStreamTag, Pattern pattern) {
 		Matcher matcher = pattern.matcher(imageStreamTag);
 		if (matcher.find() && matcher.groupCount() == 1) {
 			return matcher.group(1);
