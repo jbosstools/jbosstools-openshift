@@ -61,7 +61,6 @@ import com.openshift.restclient.model.IReplicationController;
 public class OpenShiftDebugUtils {
 
 	private static final String DEBUG_KEY = "DEBUG";
-	private static final String DEV_MODE_KEY = "DEV_MODE";
 	private static final String DEBUG_PORT_KEY = "DEBUG_PORT";
 	private ILaunchManager launchManager;
 
@@ -187,8 +186,7 @@ public class OpenShiftDebugUtils {
 		}
 		//TODO the list of env var to set in debug mode should probably be defined in the server settings instead
 		replicationController.setEnvironmentVariable(DEBUG_PORT_KEY, String.valueOf(debugContext.getDebugPort()));
-		replicationController.setEnvironmentVariable(DEV_MODE_KEY, String.valueOf(debugContext.isDebugEnabled()));//for node
-		replicationController.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));//for eap
+		replicationController.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));
 	}
 
 	private IClient getClient(IReplicationController replicationController) {
@@ -209,8 +207,7 @@ public class OpenShiftDebugUtils {
 		String debugPort = getEnv(replicationController, DEBUG_PORT_KEY);
 		debugContext.setDebugPort(NumberUtils.toInt(debugPort, -1));
 		String debugEnabled = getEnv(replicationController, DEBUG_KEY);
-		String devModeEnabled = getEnv(replicationController, DEV_MODE_KEY);
-		debugContext.setDebugEnabled(Boolean.parseBoolean(debugEnabled) || Boolean.parseBoolean(devModeEnabled));
+		debugContext.setDebugEnabled(Boolean.parseBoolean(debugEnabled));
 		return debugContext;
 	}
 	

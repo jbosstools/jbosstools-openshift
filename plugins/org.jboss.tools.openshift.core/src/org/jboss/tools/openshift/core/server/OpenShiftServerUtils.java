@@ -38,6 +38,7 @@ import org.eclipse.wst.server.core.model.ModuleDelegate;
 import org.eclipse.wst.server.core.util.ProjectModule;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -645,5 +646,13 @@ public class OpenShiftServerUtils {
             throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
                     "Could not determine the server to use."));
         }
-    }	
+    }
+    
+	public static CoreException toCoreException(String msg, Exception e) {
+		return new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, msg, e));
+	}
+
+	public static CoreException toCoreException(String msg) {
+		return toCoreException(msg, null);
+	}
 }
