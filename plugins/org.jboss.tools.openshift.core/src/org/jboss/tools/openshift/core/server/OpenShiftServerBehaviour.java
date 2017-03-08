@@ -31,7 +31,7 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 	public static final String PROFILE_OPENSHIFT3_EAP = "openshift3.eap";
 
 	
-	public static final String CURRENTLY_RESTARTING = "openshift.server.restarting";
+	private static final String CURRENTLY_RESTARTING = "openshift.server.restarting";
 	
 	@Override
 	public void setServerStarted() {
@@ -41,10 +41,18 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 
 	@Override
 	public void restart(String launchMode) throws CoreException {
-		putSharedData(CURRENTLY_RESTARTING, true);
+		setRestarting(true);
 		super.restart(launchMode);
 	}
+
+	public boolean isRestarting() {
+		return Boolean.TRUE.equals(getSharedData(CURRENTLY_RESTARTING));
+	}
 	
+	public void setRestarting(boolean restarting) {
+		putSharedData(CURRENTLY_RESTARTING, restarting);
+	}
+
 	protected void launchPostStartupJobs() {
 		try {
 			// Once the server is marked started, we want to update the deployment scanners and module publish state

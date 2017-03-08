@@ -14,7 +14,9 @@ import com.openshift.restclient.model.IPod;
 
 public class DebuggingContext {
 	
-	private int debugPort = -1;
+	public static final int NO_DEBUG_PORT = -1;
+	
+	private int debugPort = NO_DEBUG_PORT;
 	
 	private boolean isDebugEnabled;
 	
