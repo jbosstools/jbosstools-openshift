@@ -45,11 +45,13 @@ import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IService;
 
 /**
@@ -214,18 +216,27 @@ public class SelectServiceWizard extends AbstractOpenShiftWizard<ServiceViewMode
 		 * Loads the resources for this view, does it in a blocking way.
 		 */
 		private void loadResources() {
+			final IStatus[] stats = new IStatus[1];
 			try {
 				WizardUtils.runInWizard(new Job("Loading services...") {
 					
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
-						getModel().loadResources();
+						try {
+							getModel().loadResources();
+							stats[0] = Status.OK_STATUS;
+						} catch(OpenShiftException ose) {
+							stats[0] = OpenShiftUIActivator.statusFactory().errorStatus("Unable to load services from the given connection", ose);
+						}
 						//initializing the project combo with the project selected in the workspace
 						return Status.OK_STATUS;
 					}
 				}, getWizard().getContainer());
 			} catch (InvocationTargetException | InterruptedException e) {
 				// swallow intentionally
+			}
+			if( !stats[0].isOK()) {
+				setErrorMessage(stats[0].getMessage());
 			}
 		}
 
