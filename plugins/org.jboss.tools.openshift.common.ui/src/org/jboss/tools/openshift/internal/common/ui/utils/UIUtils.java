@@ -554,4 +554,25 @@ public class UIUtils {
 			}
 		});
     }
+
+    /**
+	 * Send a selection event to the given button. If the button is {@code null}
+	 * or disposed, no action is taken.
+	 * 
+	 * @param button
+	 *            that shall be clicked
+	 */
+	public static void clickButton(Button button) {
+		if(button == null || 
+				button.isDisposed()) {
+			return;
+		}
+	
+		button.setFocus();
+		button.setSelection(true);
+		Event evt = new Event();
+		evt.widget = button;
+		evt.display = button.getDisplay();
+		button.notifyListeners(SWT.Selection, evt);
+	}
    }
