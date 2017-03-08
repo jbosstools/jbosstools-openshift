@@ -24,7 +24,7 @@ import java.util.List;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.ui.server.ServiceViewModel;
+import org.jboss.tools.openshift.internal.ui.server.ServerResourceViewModel;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.After;
@@ -33,14 +33,15 @@ import org.junit.Test;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 /**
  * @author Andre Dietisheim
  */
-public class ServiceViewModelTest {
+public class ServerResourceViewModelWithServiceTest {
 
-	private ServiceViewModel model;
+	private ServerResourceViewModel model;
 	private IService selectedService;
 	private Connection connection;
 
@@ -48,7 +49,7 @@ public class ServiceViewModelTest {
 	public void setUp() {
 		this.connection = ResourceMocks.create3ProjectsConnection();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
-		this.model = new ServiceViewModel(this.selectedService = ResourceMocks.PROJECT2_SERVICES[1], connection);
+		this.model = new ServerResourceViewModel(this.selectedService = ResourceMocks.PROJECT2_SERVICES[1], connection);
 		model.loadResources();
 	}
 
@@ -70,7 +71,7 @@ public class ServiceViewModelTest {
 	public void shouldNotLoadResourcesBeforeBeingToldTo() {
 		// given
 		Connection connection = ResourceMocks.createConnection("http://10.1.2.2:8443", "dev@paas.redhat.com");
-		new ServiceViewModel(connection);
+		new ServerResourceViewModel(connection);
 		// when
 		// then
 		verify(connection, never()).getResources(any());
@@ -81,7 +82,7 @@ public class ServiceViewModelTest {
 	public void shouldLoadResourcesWhenToldTo() {
 		// given
 		Connection connection = ResourceMocks.createConnection("http://10.1.2.2:8443", "dev@paas.redhat.com");
-		ServiceViewModel model = new ServiceViewModel(connection);
+		ServerResourceViewModel model = new ServerResourceViewModel(connection);
 		model.loadResources();
 		// when
 		// then
@@ -91,18 +92,18 @@ public class ServiceViewModelTest {
 	@Test
 	public void shouldReturnNullServiceIfNoConnectionIsSet() {
 		// given
-		ServiceViewModel model = new ServiceViewModel(null);
+		ServerResourceViewModel model = new ServerResourceViewModel(null);
 		model.loadResources();
 		// when
-		IService service = model.getService();
+		IResource resource = model.getResource();
 		// then
-		assertThat(service).isNull();
+		assertThat(resource).isNull();
 	}
 
 	@Test
 	public void shouldSetNewConnectionIfLoadingWithConnection() {
 		// given
-		ServiceViewModel model = new ServiceViewModel(null);
+		ServerResourceViewModel model = new ServerResourceViewModel(null);
 		model.loadResources();
 		assertThat(model.getConnection()).isNull();
 		// when
@@ -112,33 +113,33 @@ public class ServiceViewModelTest {
 	}
 
 	@Test
-	public void shouldReturnNullServiceIfResourcesNotLoaded() {
+	public void shouldReturnNullResourceIfResourcesNotLoaded() {
 		// given
-		ServiceViewModel model = new ServiceViewModel(null);
+		ServerResourceViewModel model = new ServerResourceViewModel(null);
 		// when
-		IService service = model.getService();
+		IResource resource = model.getResource();
 		// then
-		assertThat(service).isNull();
+		assertThat(resource).isNull();
 	}
 
 	@Test
-	public void shouldReturnServiceIfResourcesAreLoaded() {
+	public void shouldReturnResourceIfResourcesAreLoaded() {
 		// given
 		model.loadResources();
 		// when
-		IService service = model.getService();
+		IResource resource = model.getResource();
 		// then
-		assertThat(service).isEqualTo(selectedService);
+		assertThat(resource).isEqualTo(selectedService);
 	}
 
 	@Test
 	public void shouldReturn1stServiceInListIfInitializedServiceIsNotInListOfAllServices() {
 		// given
-		IService otherService = ResourceMocks.createResource(IService.class);
-		ServiceViewModel model = new ServiceViewModel(otherService, connection);
+		IService otherService = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE);
+		ServerResourceViewModel model = new ServerResourceViewModel(otherService, connection);
 		model.loadResources();
 		// when
-		IService service = model.getService();
+		IResource service = model.getResource();
 		// then
 		assertThat(service).isEqualTo(ResourceMocks.PROJECT2_SERVICES[0]);
 	}
@@ -155,7 +156,7 @@ public class ServiceViewModelTest {
 	@Test
 	public void shouldSetNewConnectionIfLoadResourcesWithConnection() {
 		// given
-		ServiceViewModel model = new ServiceViewModel(null);
+		ServerResourceViewModel model = new ServerResourceViewModel(null);
 		model.loadResources();
 		assertThat(model.getConnection()).isNull();
 		// when
@@ -167,36 +168,37 @@ public class ServiceViewModelTest {
 	@Test
 	public void shouldReturnNewServiceItemsIfLoadResourcesWithConnection() {
 		// given
-		List<ObservableTreeItem> serviceItems = new ArrayList<>(model.getServiceItems());
+		List<ObservableTreeItem> serviceItems = new ArrayList<>(model.getResourceItems());
 
 		Connection connection = ResourceMocks.createConnection("http://localhost:8080", "dev@42.org");
-		IProject project = ResourceMocks.createResource(IProject.class);
+		IProject project = ResourceMocks.createResource(IProject.class, ResourceKind.PROJECT);
 		when(connection.getResources(ResourceKind.PROJECT))
 				.thenReturn(Collections.singletonList(project));
+		IService service = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE);
 		when(project.getResources(ResourceKind.SERVICE))
-				.thenReturn(Collections.singletonList(ResourceMocks.createResource(IService.class)));
+				.thenReturn(Collections.singletonList(service));
 
 		// when
 		model.loadResources(connection);
 
 		// then
-		List<ObservableTreeItem> newServiceItems = model.getServiceItems();
+		List<ObservableTreeItem> newServiceItems = model.getResourceItems();
 		assertThat(newServiceItems).isNotEqualTo(serviceItems);
 	}
 
 	@Test
 	public void shouldReturnNewSelectedServiceIfLoadResourcesWithConnection() {
 		// given
-		IService selectedService = model.getService();
+		IResource selectedService = model.getResource();
 
 		Connection connection = ResourceMocks.createConnection("https://localhost:8181", "ops@42.org");
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 
 		try {
-			IProject project = ResourceMocks.createResource(IProject.class);
+			IProject project = ResourceMocks.createResource(IProject.class, ResourceKind.PROJECT);
 			when(connection.getResources(ResourceKind.PROJECT))
 					.thenReturn(Collections.singletonList(project));
-			IService service = ResourceMocks.createResource(IService.class);
+			IService service = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE);
 			when(project.getResources(ResourceKind.SERVICE))
 					.thenReturn(Collections.singletonList(service));
 
@@ -204,7 +206,7 @@ public class ServiceViewModelTest {
 			model.loadResources(connection);
 
 			// then
-			IService newSelectedService = model.getService();
+			IResource newSelectedService = model.getResource();
 			assertThat(selectedService).isNotEqualTo(newSelectedService);
 		} finally {
 			ConnectionsRegistrySingleton.getInstance().remove(connection);

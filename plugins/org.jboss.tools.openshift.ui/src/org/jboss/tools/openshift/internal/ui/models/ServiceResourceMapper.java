@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.models;
 
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
@@ -37,6 +39,7 @@ import com.openshift.restclient.model.route.IRoute;
  * 
  * @author thomas
  * @author Andre Dietisheim
+ * @author Jeff Maury
  *
  */
 public class ServiceResourceMapper {
@@ -63,7 +66,17 @@ public class ServiceResourceMapper {
 		return result;
 	}
 
-	private static Collection<IResource> getRelated(Collection<IResource> resources, IPod resource) {
+    public static final Collection<IResource> computeRelatedResources(IDeploymentConfig dc, Collection<IResource> resources) {
+        return getRelated(resources, dc);
+    }
+    
+    public static final Collection<IResource> computeRelatedResources(IReplicationController rc, Collection<IResource> resources) {
+        Collection<IResource> pods = new ArrayList<>();
+        pods.addAll(getRelatedPods(resources, rc));
+        return pods;
+    }
+
+    private static Collection<IResource> getRelated(Collection<IResource> resources, IPod resource) {
 		return getRelatedReplicationControllers(resources, Collections.singleton(resource));
 	}
 
@@ -117,7 +130,15 @@ public class ServiceResourceMapper {
 
 	}
 
-	private static Collection<IBuild> getRelatedBuilds(Collection<IResource> resources, Collection<String> dcImageRefs,
+    private static Collection<IPod> getRelatedPods(Collection<IResource> resources, IReplicationController rc) {
+
+        return resources.stream().filter(r -> {
+            return r instanceof IPod && ResourceUtils.areRelated((IPod) r, rc);
+        }).map(r -> (IPod) r).collect(Collectors.toSet());
+
+    }
+
+    private static Collection<IBuild> getRelatedBuilds(Collection<IResource> resources, Collection<String> dcImageRefs,
 			Collection<IBuildConfig> buildConfigs) {
 
 		Collection<IBuild> result = new HashSet<>();
@@ -165,5 +186,11 @@ public class ServiceResourceMapper {
 		});
 		return imageRefs;
 	}
+
+    public static Collection<IResource> getServices(IReplicationController rc, Collection<IResource> resources) {
+        return resources.stream().filter(r -> ResourceKind.SERVICE.equals(r.getKind()))
+                          .filter(s -> ResourceUtils.areRelated(rc, (IService) s))
+                          .collect(Collectors.toList());
+    }
 
 }

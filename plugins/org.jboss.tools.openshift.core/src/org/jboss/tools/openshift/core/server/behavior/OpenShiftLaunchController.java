@@ -65,6 +65,8 @@ import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 public class OpenShiftLaunchController extends AbstractSubsystemController
@@ -119,8 +121,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		
 		
 		try {
-			IDeploymentConfig dc = OpenShiftServerUtils.getDeploymentConfig(server);
-			toggleDebugging(mode, monitor, beh, server, dc);
+			IReplicationController rc = OpenShiftServerUtils.getReplicationController(server);
+			toggleDebugging(mode, monitor, beh, server, rc);
 		} catch (CoreException e) {
 			beh.setServerStopped();
 			throw e;
@@ -130,15 +132,15 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	protected boolean waitForDeploymentConfig(IServer server, IProgressMonitor monitor) {
 		boolean podsReady = podsReady(server, monitor);
 		if( podsReady && !monitor.isCanceled()) {
-			return deploymentConfigReady(server, monitor);
+			return isReplicationControllerReady(server, monitor);
 		}
 		return false;
 	}
 	
-	private boolean deploymentConfigReady(IServer server, IProgressMonitor monitor) {
+	private boolean isReplicationControllerReady(IServer server, IProgressMonitor monitor) {
 		while( !monitor.isCanceled()) {
 			try {
-				OpenShiftServerUtils.getDeploymentConfig(server);
+				OpenShiftServerUtils.getReplicationController(server);
 				return true;
 			} catch(CoreException ce) {
 				sleep(1000);
@@ -176,15 +178,14 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	
 	
 	private void toggleDebugging(String mode, IProgressMonitor monitor, ControllableServerBehavior beh, IServer server,
-			IDeploymentConfig dc) throws CoreException {
+			IReplicationController rc) throws CoreException {
 		String currentMode = beh.getServer().getMode();
-		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(dc);
+		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(rc);
 		try {
-			if (DEBUG_MODE.equals(mode)) {
-				startDebugging(server, dc, debugContext, monitor);
+			if( DEBUG_MODE.equals(mode)) {
+				startDebugging(server, rc, debugContext, monitor);
 			} else {//run, profile
-				stopDebugging(dc, debugContext, monitor);
-				enableDevModeForNodeJsProject(OpenShiftServerUtils.getDeploymentConfig(server), server);
+				stopDebugging(rc, debugContext, monitor);
 			}
 		} catch (CoreException e) {
 			mode = currentMode;
@@ -256,7 +257,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	}
 
 
-	private void startDebugging(IServer server, IDeploymentConfig dc, DebuggingContext debugContext,
+	private void startDebugging(IServer server, IReplicationController rc, DebuggingContext debugContext,
 			IProgressMonitor monitor) throws CoreException {
 		int remotePort = debugContext.getDebugPort();
 		if( remotePort == -1 ) {
@@ -289,11 +290,11 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 		};
 		debugContext.setDebugListener(listener);
-		OpenShiftDebugUtils.get().enableDebugMode(dc, debugContext, monitor);
+		OpenShiftDebugUtils.get().enableDebugMode(rc, debugContext, monitor);
 	}
 
 
-	private void stopDebugging(IDeploymentConfig dc, DebuggingContext debugContext, IProgressMonitor monitor)
+	private void stopDebugging(IReplicationController rc, DebuggingContext debugContext, IProgressMonitor monitor)
 			throws CoreException {
 		IDebugListener listener = new IDebugListener() {
 			
@@ -310,19 +311,19 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 		};
 		debugContext.setDebugListener(listener);
-		OpenShiftDebugUtils.get().disableDebugMode(dc, debugContext, monitor);
+		OpenShiftDebugUtils.get().disableDebugMode(rc, debugContext, monitor);
 	}
 
 	protected int pollState() {
-		IService service = null;
+		IResource resource = null;
 		Exception e = null;
 		try {
-			service = OpenShiftServerUtils.getService(getServer());
+			resource = OpenShiftServerUtils.getResource(getServer());
 		} catch(OpenShiftException ose ) {
 			e = ose;
 		}
-		if (service == null) {
-			OpenShiftCoreActivator.pluginLog().logError("The OpenShift service for server " + getServer().getName() + " could not be reached.", e);
+		if (resource == null) {
+			OpenShiftCoreActivator.pluginLog().logError("The OpenShift resource for server " + getServer().getName() + " could not be reached.", e);
 			return IServer.STATE_STOPPED;
 		}
 		return IServer.STATE_STARTED;
@@ -575,11 +576,11 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	private IPod[] findPods(IServer server) {
 		Connection connection = OpenShiftServerUtils.getConnection(server);
 		if (connection != null) {
-			IService service = OpenShiftServerUtils.getService(server, connection);
-			if (service != null) {
+			IResource resource = OpenShiftServerUtils.getResource(server, connection);
+			if (resource != null) {
 				List<IPod> collection = new ArrayList<IPod>();
-				List<IPod> pods = connection.getResources(ResourceKind.POD, service.getProject().getName());
-				List<IPod> servicePods = ResourceUtils.getPodsForService(service, pods);
+				List<IPod> pods = connection.getResources(ResourceKind.POD, resource.getProject().getName());
+				List<IPod> servicePods = ResourceUtils.getPodsFor(resource, pods);
 				collection.addAll(pods);
 				collection.addAll(servicePods);
 				return collection.toArray(new IPod[collection.size()]);
