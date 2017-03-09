@@ -94,6 +94,7 @@ public class ConnectionWrapperTest {
 
 	private static class WatchListenerTestable extends WatchListener {
 		
+		@Override
 		public void setState(String state) {
 			super.setState(state);
 		}

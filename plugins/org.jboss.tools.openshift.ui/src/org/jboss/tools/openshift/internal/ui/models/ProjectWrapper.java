@@ -46,6 +46,7 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 		return false;
 	}
 
+	@Override
 	protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated,
 			boolean changed) {
 		if (changed || !updated.isEmpty()) {
@@ -73,6 +74,7 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
         return relatedresources;
     }
 
+    @Override
 	protected AbstractResourceWrapper<?, ?> createNewWrapper(Collection<IResource> resources, IResource r) {
 		AbstractResourceWrapper<?, ?> newWrapper;
 		if (r instanceof IService) {
@@ -94,6 +96,7 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 		return newWrapper;
 	}
 
+    @Override
 	void initWithResources(Collection<IResource> resources) {
 		super.initWithResources(resources);
 		state.set(LoadingState.LOADED);
