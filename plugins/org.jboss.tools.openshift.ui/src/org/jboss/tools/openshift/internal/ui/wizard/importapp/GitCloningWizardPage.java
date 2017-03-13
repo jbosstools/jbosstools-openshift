@@ -154,7 +154,7 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		
 		IObservableValue projectNameObservable =  BeanProperties.value(
 				IGitCloningPageModel.PROPERTY_PROJECT_NAME).observe(model);
-		this.repoPathValidator = new RepoPathValidationStatusProvider(repoPathObservable, projectNameObservable, skipCloneObservable);
+		this.repoPathValidator = new RepoPathValidationStatusProvider(repoPathObservable, projectNameObservable, skipCloneObservable, useDefaultRepoModelObservable);
 		dbc.addValidationStatusProvider(repoPathValidator);
 		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
 
@@ -192,12 +192,15 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		private final IObservableValue repoPathObservable;
 		private final IObservableValue projectNameObservable;
 		private final IObservableValue skipCloneObservable;
+        private final IObservableValue useDefaultRepoObservable;
 		
 		public RepoPathValidationStatusProvider(IObservableValue repoPathObservable,
-				IObservableValue projectNameObservable, IObservableValue skipCloneObservable) {
+				IObservableValue projectNameObservable, IObservableValue skipCloneObservable,
+				IObservableValue useDefaultRepoObservable) {
 			this.repoPathObservable = repoPathObservable;
 			this.projectNameObservable = projectNameObservable;
 			this.skipCloneObservable = skipCloneObservable;
+			this.useDefaultRepoObservable = useDefaultRepoObservable;
 		}
 
 		@Override
@@ -205,6 +208,7 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 			final String repoPath = (String) repoPathObservable.getValue();
 			final String projectName = (String) projectNameObservable.getValue();
 			final Boolean skipClone = (Boolean)skipCloneObservable.getValue();
+			final Boolean useDefaultRepo = (Boolean) useDefaultRepoObservable.getValue();
 			
 			final IPath repoResourcePath = new Path(repoPath);
 			if (repoResourcePath.isEmpty()
