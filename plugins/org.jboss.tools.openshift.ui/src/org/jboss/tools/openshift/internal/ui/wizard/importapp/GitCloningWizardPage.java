@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 
+import java.io.File;
+
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -28,7 +30,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -38,6 +39,7 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.FileUtils;
+import org.jboss.tools.openshift.internal.common.ui.databinding.FileExistsConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 
@@ -51,8 +53,8 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 
 	private IGitCloningPageModel model;
 	private Button useDefaultRepoPathButton;
-	private Button skipCloneOnlyImportButton;
-	private RepoPathValidationStatusProvider repoPathValidator;
+	private Button reuseGitRepositoryButton;
+	private RepoPathValidator repoPathValidator;
 
 	public GitCloningWizardPage(IWizard wizard, IGitCloningPageModel model) {
 		super(
@@ -66,95 +68,120 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		String name = (model == null)? null: model.getApplicationName();
 		return (name == null)?
 				"Import an existing OpenShift application":
-				"Import the '"+ name +"' OpenShift application";
+				NLS.bind("Import the {0} OpenShift application", name);
 	}
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().applyTo(parent);
 		Composite cloneGroup = createCloneGroup(parent, dbc);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(cloneGroup);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, false)
+			.applyTo(cloneGroup);
 		Composite filler = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(filler);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(filler);
 	}
 
 	private Composite createCloneGroup(Composite parent, DataBindingContext dbc) {
 		Group cloneGroup = new Group(parent, SWT.NONE);
 		cloneGroup.setText("Cloning settings");
-		cloneGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.TOP).grab(true, false)
+			.applyTo(cloneGroup);
 		GridLayoutFactory.fillDefaults()
 				.numColumns(3).equalWidth(false).margins(10, 10).applyTo(cloneGroup);
 
 		Composite composite = new Composite(cloneGroup, SWT.NONE);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(composite);
 		GridLayoutFactory.fillDefaults()
-			.numColumns(3).margins(15, 15).applyTo(composite);
-		
-		
+			.numColumns(3).margins(15, 15)
+			.applyTo(composite);
 
-		
-		// Repo Path Management
-		useDefaultRepoPathButton = new Button(composite, SWT.CHECK);
+		// Repo Path
+		this.useDefaultRepoPathButton = new Button(composite, SWT.CHECK);
 		useDefaultRepoPathButton.setText("Use default clone destination");
 		useDefaultRepoPathButton.setToolTipText("Uncheck if you want to use a custom location to clone to");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRepoPathButton);
 		Label labelForRepoPath = new Label(composite, SWT.NONE);
 		labelForRepoPath.setText("Git Clone Location:");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0)
-				.applyTo(labelForRepoPath);
+		GridDataFactory.fillDefaults()
+			.align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0)
+			.applyTo(labelForRepoPath);
 		final Text repoPathText = new Text(composite, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(repoPathText);
-		final IObservableValue repoPathObservable = WidgetProperties.text(SWT.Modify).observe(repoPathText);
-		final IObservableValue repoPathModelObservable =
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(repoPathText);
+		final IObservableValue<String> repoPathObservable = WidgetProperties.text(SWT.Modify).observe(repoPathText);
+		final IObservableValue<String> repoPathModelObservable = 
 				BeanProperties.value(IGitCloningPageModel.PROPERTY_REPOSITORY_PATH).observe(model);
-		ValueBindingBuilder.bind(repoPathObservable).to(repoPathModelObservable).in(dbc);
-		
-		
+		ValueBindingBuilder
+			.bind(repoPathObservable)
+			.to(repoPathModelObservable)
+			.in(dbc);
+
 		Button browseRepoPathButton = new Button(composite, SWT.PUSH);
 		browseRepoPathButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
 		browseRepoPathButton.addSelectionListener(onRepoPath());
-		
-		
-		final IObservableValue isDefaultRepoObservable =
+
+		final IObservableValue<Boolean> useDefaultRepoButtonObservable =
 				WidgetProperties.selection().observe(useDefaultRepoPathButton);
-		final IObservableValue useDefaultRepoModelObservable = BeanProperties.value(
-				IGitCloningPageModel.PROPERTY_USE_DEFAULT_REPOSITORY_PATH).observe(model);
-		ValueBindingBuilder.bind(isDefaultRepoObservable).to(useDefaultRepoModelObservable).in(dbc);
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(repoPathText))
-				.notUpdating(useDefaultRepoModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(browseRepoPathButton))
-				.notUpdating(useDefaultRepoModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
+		final IObservableValue<Boolean> useDefaultRepoModelObservable = 
+				BeanProperties.value(IGitCloningPageModel.PROPERTY_USE_DEFAULT_REPOSITORY_PATH).observe(model);
+		ValueBindingBuilder
+			.bind(useDefaultRepoButtonObservable)
+			.to(useDefaultRepoModelObservable)
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(repoPathText))
+			.notUpdating(useDefaultRepoModelObservable)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(browseRepoPathButton))
+			.notUpdating(useDefaultRepoModelObservable)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
 		// move focus to the project location text control when not choosing the
 		// 'Use default location' option.
 		UIUtils.focusOnSelection(useDefaultRepoPathButton, repoPathText);
 
-		
 		// Skip clone
-		skipCloneOnlyImportButton = new Button(composite, SWT.CHECK);
-		skipCloneOnlyImportButton.setSelection(false);
-		skipCloneOnlyImportButton.setText("Reuse existing repository");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(skipCloneOnlyImportButton);
-		final IObservableValue skipCloneObservable =
-				WidgetProperties.selection().observe(skipCloneOnlyImportButton);
-		final IObservableValue skipCloneModelObservable = BeanProperties.value(
-				IGitCloningPageModel.PROPERTY_SKIP_CLONE_ONLY_IMPORT).observe(model);
-		skipCloneOnlyImportButton.addSelectionListener(new SelectionAdapter() {
+		this.reuseGitRepositoryButton = new Button(composite, SWT.CHECK);
+		reuseGitRepositoryButton.setSelection(false);
+		reuseGitRepositoryButton.setText("Reuse existing repository");
+		GridDataFactory.fillDefaults()
+			.align(SWT.LEFT, SWT.CENTER).span(3, 1)
+			.applyTo(reuseGitRepositoryButton);
+		reuseGitRepositoryButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				model.setSkipClone(skipCloneOnlyImportButton.getSelection());
+				model.setReuseGitRepository(reuseGitRepositoryButton.getSelection());
 			}
 		});
-
-		
-		
-		
-		IObservableValue projectNameObservable =  BeanProperties.value(
-				IGitCloningPageModel.PROPERTY_PROJECT_NAME).observe(model);
-		this.repoPathValidator = new RepoPathValidationStatusProvider(repoPathObservable, projectNameObservable, skipCloneObservable, useDefaultRepoModelObservable);
+		IObservableValue<File> cloneDestinationObservable =
+				BeanProperties.value(IGitCloningPageModel.PROPERTY_CLONE_DESTINATION).observe(model);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(reuseGitRepositoryButton))
+			.notUpdating(cloneDestinationObservable)
+			.converting(new FileExistsConverter())
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.visible().observe(reuseGitRepositoryButton))
+			.notUpdating(cloneDestinationObservable)
+			.converting(new FileExistsConverter())
+			.in(dbc);
+		final IObservableValue<Boolean> reuseGitReposityObservable =
+				BeanProperties.value(IGitCloningPageModel.PROPERTY_REUSE_GIT_REPOSITORY).observe(model);
+		IObservableValue<String> repoNameObservable =
+				BeanProperties.value(IGitCloningPageModel.PROPERTY_REPO_NAME).observe(model);
+		this.repoPathValidator = new RepoPathValidator(
+						useDefaultRepoModelObservable, repoPathObservable, reuseGitReposityObservable, cloneDestinationObservable);
 		dbc.addValidationStatusProvider(repoPathValidator);
 		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
 
@@ -187,62 +214,53 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 	 * A multivalidator for the repo path. Validates the repo path on behalf of
 	 * the selection to use the default repo path and the repo path value.
 	 */
-	class RepoPathValidationStatusProvider extends MultiValidator {
+	class RepoPathValidator extends MultiValidator {
 
-		private final IObservableValue repoPathObservable;
-		private final IObservableValue projectNameObservable;
-		private final IObservableValue skipCloneObservable;
-        private final IObservableValue useDefaultRepoObservable;
-		
-		public RepoPathValidationStatusProvider(IObservableValue repoPathObservable,
-				IObservableValue projectNameObservable, IObservableValue skipCloneObservable,
-				IObservableValue useDefaultRepoObservable) {
-			this.repoPathObservable = repoPathObservable;
-			this.projectNameObservable = projectNameObservable;
-			this.skipCloneObservable = skipCloneObservable;
+		private final IObservableValue<Boolean> useDefaultRepoObservable;
+		private final IObservableValue<String> repoPathObservable;
+		private final IObservableValue<Boolean> reuseGitCloneObservable;
+		private final IObservableValue<File> cloneDestinationObservable;
+
+		public RepoPathValidator(IObservableValue<Boolean> useDefaultRepoObservable, IObservableValue<String> repoPathObservable,
+				IObservableValue<Boolean> skipCloneObservable, IObservableValue<File> cloneDestinationObservable) {
 			this.useDefaultRepoObservable = useDefaultRepoObservable;
+			this.repoPathObservable = repoPathObservable;
+			this.reuseGitCloneObservable = skipCloneObservable;
+			this.cloneDestinationObservable = cloneDestinationObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
-			final String repoPath = (String) repoPathObservable.getValue();
-			final String projectName = (String) projectNameObservable.getValue();
-			final Boolean skipClone = (Boolean)skipCloneObservable.getValue();
-			final Boolean useDefaultRepo = (Boolean) useDefaultRepoObservable.getValue();
-			
+			useDefaultRepoObservable.getValue();
+			final String repoPath = repoPathObservable.getValue();
+			final Boolean reuseGitRepository = reuseGitCloneObservable.getValue();
+			final File cloneDestination = cloneDestinationObservable.getValue();
+
 			final IPath repoResourcePath = new Path(repoPath);
 			if (repoResourcePath.isEmpty()
 					|| !repoResourcePath.isAbsolute()) {
 				return ValidationStatus.cancel("You need to provide an absolute path that we'll clone to.");
 			} 
-			
+
 			if (!FileUtils.canWrite(repoResourcePath.toOSString())) {
 				return ValidationStatus.error(
 						NLS.bind("The location {0} is not writeable.", repoResourcePath.toOSString()));
 			} 
-			final IPath projectPath = projectName != null ?
-					repoResourcePath.append(new Path(projectName)) : null;
-					
-					
-					
-			if( skipClone ) {
-				if( projectPath == null || !projectPath.toFile().exists()) {
+
+			boolean cloneDestinationExists = FileUtils.exists(cloneDestination);
+			if (reuseGitRepository) {
+				if (!cloneDestinationExists) {
 					return ValidationStatus.error(
 							NLS.bind("The location \"{0}\" does not contain a folder named \"{1}\"\n"
 									+ "Please clone the repository or browse to a location containing the repository.",
-									repoResourcePath.toOSString(), projectName));
+									repoResourcePath.toOSString(), model.getRepoName()));
 				}
 			} else {
-				if (projectPath != null && projectPath.toFile().exists()) {
-					skipCloneOnlyImportButton.setEnabled(true);
-					skipCloneOnlyImportButton.setVisible(true);
+				if (cloneDestinationExists) {
 					return ValidationStatus.error(
 							NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"\n"
 									+ "Please choose a different destination, or select 'Reuse existing repository'.",
-									repoResourcePath.toOSString(), projectName));
-				} else {
-					skipCloneOnlyImportButton.setEnabled(false);
-					skipCloneOnlyImportButton.setVisible(false);
+									repoResourcePath.toOSString(), model.getRepoName()));
 				}
 			}
 			return ValidationStatus.ok();
@@ -251,7 +269,6 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		public void forceRevalidate() {
 			revalidate();
 		}
-
 	}
 	
 	@Override
@@ -261,4 +278,5 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		}
 		super.setVisible(visible);
 	}
+
 }

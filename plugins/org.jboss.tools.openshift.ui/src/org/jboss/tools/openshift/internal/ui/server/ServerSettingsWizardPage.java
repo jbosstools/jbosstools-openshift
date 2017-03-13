@@ -496,7 +496,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
                 ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
                 final boolean done = WizardUtils.openWizardDialog(wizard, shell);
                 if (done) {
-                    model.setDeployProject(ResourcesPlugin.getWorkspace().getRoot().getProject(wizard.getModel().getProjectName()));
+                    model.setDeployProject(ResourcesPlugin.getWorkspace().getRoot().getProject(wizard.getModel().getRepoName()));
                 }
             }
         };

@@ -15,11 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.BuildConfigTreeItems.ConnectionTreeItem;
 
@@ -29,6 +32,9 @@ import com.openshift.restclient.model.build.IGitBuildSource;
 
 /**
  * @author Andre Dietisheim
+ * @author Fred Bricon
+ * @author Jeff.Cantrill
+ * @author Rob Stryker
  */
 public class ImportApplicationWizardModel 
 	extends ObservableUIPojo 
@@ -39,15 +45,79 @@ public class ImportApplicationWizardModel
 	private Object selectedItem;
 	private String repoPath;
 	private boolean useDefaultRepoPath;
-	private String projectName;
+	private String repoName;
 	private IProject project;
-	private boolean skipClone = false;
+	private boolean reuseGitRepo = false;
+	private String cloneDestination;
 	
 	private List<ObservableTreeItem> buildConfigs = new ArrayList<>();
 
 	public ImportApplicationWizardModel() {
 		this.useDefaultRepoPath = true;
 		this.repoPath = getDefaultRepoPath();
+	}
+
+	private void update(Connection connection, Object selectedItem,
+			String repoPath, boolean useDefaultRepoPath, IProject project, boolean reuseGitRepo) {
+		this.connectionItem = updateConnection(connection);
+		this.project = project;
+		updateSelectedItem(selectedItem);
+		updateUseDefaultRepositoryPath(useDefaultRepoPath);
+		updateRepositoryPath(useDefaultRepoPath, repoPath);
+		String repoName = updateRepoName(getBuildConfig(selectedItem));
+		updateCloneDestination(repoPath, repoName);
+		updateReuseGitRepo(reuseGitRepo);
+	}
+	
+	private ConnectionTreeItem updateConnection(Connection connection) {
+		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
+		return new ConnectionTreeItem(connection);
+	}
+
+	protected void updateSelectedItem(Object selectedItem) {
+		firePropertyChange(PROPERTY_SELECTED_ITEM, this.selectedItem, this.selectedItem = selectedItem);
+	}
+
+	private String updateRepoName(IBuildConfig config) {
+		String name = getRepoName(config);
+		if (name == null 
+				&& getProject() != null) {
+			name = getProject().getName();
+		}
+		firePropertyChange(PROPERTY_REPO_NAME, this.repoName, this.repoName = name);
+		return name;
+	}
+
+	private void updateRepositoryPath(boolean useDefaultRepo, String repoPath) {
+		if (useDefaultRepo) {
+			repoPath = getDefaultRepoPath();
+		}
+		firePropertyChange(PROPERTY_REPOSITORY_PATH, this.repoPath, this.repoPath = repoPath);
+	}
+
+	private void updateCloneDestination(String repositoryPath, String repoName) {
+		String cloneDestination = this.cloneDestination;
+		if (StringUtils.isNotBlank(repositoryPath)) {
+			IPath cloneDestinationPath = new Path(repositoryPath);
+			if (StringUtils.isNotBlank(repoName)) {
+				cloneDestinationPath = cloneDestinationPath.append(new Path(repoName));
+			}
+			cloneDestination = cloneDestinationPath.toOSString();
+		}
+
+		firePropertyChange(PROPERTY_CLONE_DESTINATION, this.cloneDestination, this.cloneDestination = cloneDestination);
+	}
+
+	private void updateReuseGitRepo(boolean reuseGitRepo) {
+		firePropertyChange(PROPERTY_REUSE_GIT_REPOSITORY, this.reuseGitRepo, this.reuseGitRepo = reuseGitRepo);
+	}
+
+	private static String getRepoName(IBuildConfig config) {
+		String repoName = null;
+		if (config != null) {
+			repoName = ResourceUtils.extractProjectNameFromURI(config.getSourceURI());
+		}
+		return repoName;
 	}
 
 	private String getDefaultRepoPath() {
@@ -74,29 +144,30 @@ public class ImportApplicationWizardModel
 			return config.getSourceURI();
 		}
 	}
-	
+
 	public String getGitRef() {
+		String gitRef = null;
 		IBuildConfig config = getSelectedBuildConfig();
-		if (config != null && config.getBuildSource() instanceof IGitBuildSource){
-			return ((IGitBuildSource)config.getBuildSource()).getRef();
+		if (config != null 
+				&& config.getBuildSource() instanceof IGitBuildSource) {
+			gitRef = ((IGitBuildSource) config.getBuildSource()).getRef();
 		}
-		return null;
+		return gitRef;
 	}
 	
 	@Override
 	public void setSelectedItem(Object selectedItem) {
-		firePropertyChange(PROPERTY_SELECTED_ITEM, this.selectedItem, this.selectedItem = selectedItem);
-		setProjectName(getBuildConfig(selectedItem));
+		update(this.connection, selectedItem, this.repoPath, this.useDefaultRepoPath, this.project, this.reuseGitRepo);
 	}
-	
+
 	@Override
 	public Object getSelectedItem() {
 		return selectedItem;
 	}
 
 	@Override
-	public void setRepositoryPath(String path) {
-		firePropertyChange(PROPERTY_REPOSITORY_PATH, this.repoPath, this.repoPath = path);
+	public void setRepositoryPath(String repoPath) {
+		update(this.connection, this.selectedItem, repoPath, this.useDefaultRepoPath, this.project, this.reuseGitRepo);
 	}
 
 	@Override
@@ -104,20 +175,22 @@ public class ImportApplicationWizardModel
 		return repoPath;
 	}
 
+	@Override
+	public String getRepoName() {
+		return repoName;
+	}
+	
 	public File getCloneDestination() {
-		if (StringUtils.isEmpty(repoPath)
-				|| StringUtils.isEmpty(projectName)) {
-			return null;
-		}
-		return new Path(repoPath).append(projectName).toFile();
+		return new Path(cloneDestination).toFile();
 	}
 	
 	@Override
-	public void setUseDefaultRepositoryPath(boolean useDefault) {
+	public void setUseDefaultRepositoryPath(boolean useDefaultRepoPath) {
+		update(connection, this.selectedItem, this.repoPath, useDefaultRepoPath, this.project, this.reuseGitRepo);
+	}
+
+	public void updateUseDefaultRepositoryPath(boolean useDefault) {
 		firePropertyChange(PROPERTY_USE_DEFAULT_REPOSITORY_PATH, this.useDefaultRepoPath, this.useDefaultRepoPath = useDefault);
-		if (useDefaultRepoPath) {
-			setRepositoryPath(getDefaultRepoPath());
-		}
 	}
 
 	@Override
@@ -125,56 +198,6 @@ public class ImportApplicationWizardModel
 		return useDefaultRepoPath;
 	}
 
-	private void setProjectName(IBuildConfig config) {
-		setProjectName(getProjectName(config));
-	}
-
-	private static String getProjectName(IBuildConfig config) {
-		String projectName = (config == null)? null:extractProjectNameFromURI(config.getSourceURI());
-		return projectName;
-	}
-
-	/**
-	 * Extract the last segment of an URI, stripped from .git suffixes
-	 *
-	 * Made public for testing purposes.
-	 */
-	public static String extractProjectNameFromURI(String uri) {
-		String projectName = null;
-		if (uri != null) {
-			uri = uri.trim();
-			while(uri.endsWith("/")) {
-				//Trailing slashes do not matter.
-				uri = uri.substring(0, uri.length() - 1);
-			}
-			if(uri.endsWith(".git")) {
-				uri = uri.substring(0, uri.length() - 4);
-				if(uri.endsWith("/")) { 
-					// '/' before .git is error
-					return null;
-				}
-			}
-			int b = uri.lastIndexOf("/");
-			if(b >= 0) {
-				projectName = uri.substring(b + 1);
-			}
-		}
-		return projectName;
-	}
-
-	@Override
-	public void setProjectName(String name) {
-		if (name == null && getProject() != null) {
-			name = getProject().getName();
-		}
-		firePropertyChange(PROPERTY_PROJECT_NAME, this.projectName, this.projectName = name);
-	}
-	
-	@Override
-	public String getProjectName() {
-		return projectName;
-	}
-	
 	@Override
 	public Connection getConnection() {
 		return connection;
@@ -187,8 +210,7 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public void setConnection(Connection connection) {
-		this.connectionItem = new ConnectionTreeItem(connection);
-		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
+		update(connection, this.selectedItem, this.repoPath, this.useDefaultRepoPath, this.project, this.reuseGitRepo);
 	}
 
 	@Override
@@ -198,25 +220,30 @@ public class ImportApplicationWizardModel
 	
 	@Override
 	public void loadBuildConfigs() {
+		loadBuildConfigs(connectionItem);
+	}
+
+	public void loadBuildConfigs(ConnectionTreeItem connectionItem) {
 		if (connectionItem == null) {
 				return;
 		}
 		connectionItem.load();
-		setBuildConfigs(filterBuildConfigs(connectionItem.getChildren()));
+		updateBuildConfigs(filterBuildConfigs(project, connectionItem.getChildren()));
 	}
-	
-	private void setBuildConfigs(List<ObservableTreeItem> newBuildConfigs) {
-		if (newBuildConfigs == null) {
+
+	private void updateBuildConfigs(List<ObservableTreeItem> newBuildConfigs) {
+		if (newBuildConfigs == null
+				|| ListUtils.isEqualList(newBuildConfigs, buildConfigs)) {
 			return;
 		}
-		List<ObservableTreeItem> oldItems = new ArrayList<>(this.buildConfigs);
+		List<ObservableTreeItem> oldItems = new ArrayList<>(buildConfigs);
 		List<ObservableTreeItem> newItems = new ArrayList<>(newBuildConfigs);
 		buildConfigs.clear();
 		buildConfigs.addAll(newItems);
 		firePropertyChange(PROPERTY_BUILDCONFIGS, oldItems, newItems);
 	}
 
-	private List<ObservableTreeItem> filterBuildConfigs(List<ObservableTreeItem> children) {
+	private List<ObservableTreeItem> filterBuildConfigs(IProject project, List<ObservableTreeItem> children) {
 		List<ObservableTreeItem> result = children;
 		if (project != null) {
 			result = children.stream()
@@ -234,11 +261,13 @@ public class ImportApplicationWizardModel
 	}
 
 	public String getGitContextDir() {
+		String gitContextDir = null; 
 		IBuildConfig config = getSelectedBuildConfig();
-		if (config != null && config.getBuildSource() instanceof IGitBuildSource){
-			return ((IGitBuildSource)config.getBuildSource()).getContextDir();
+		if (config != null 
+				&& config.getBuildSource() instanceof IGitBuildSource) {
+			gitContextDir = ((IGitBuildSource) config.getBuildSource()).getContextDir();
 		}
-		return null;
+		return gitContextDir;
 	}
 
 	@Override
@@ -258,16 +287,16 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public void setProject(IProject project) {
-		this.project = project;
+		update(this.connection, this.selectedItem, this.repoPath, this.useDefaultRepoPath, project, this.reuseGitRepo);
 	}
 
 	@Override
-	public boolean getSkipClone() {
-		return skipClone;
+	public boolean isReuseGitRepository() {
+		return reuseGitRepo;
 	}
 
 	@Override
-	public void setSkipClone(boolean b) {
-		skipClone = b;
+	public void setReuseGitRepository(boolean reuseGitRepository) {
+		update(this.connection, this.selectedItem, this.repoPath, this.useDefaultRepoPath, this.project, reuseGitRepository);
 	}
 }

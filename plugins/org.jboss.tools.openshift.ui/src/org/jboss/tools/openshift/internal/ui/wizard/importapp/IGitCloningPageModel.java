@@ -15,10 +15,11 @@ package org.jboss.tools.openshift.internal.ui.wizard.importapp;
  */
 public interface IGitCloningPageModel {
 
-	public String PROPERTY_REPOSITORY_PATH = "repositoryPath";
-	public String PROPERTY_USE_DEFAULT_REPOSITORY_PATH = "useDefaultRepositoryPath";
-	public String PROPERTY_SKIP_CLONE_ONLY_IMPORT = "skipCloneOnlyImport";
-	public String PROPERTY_PROJECT_NAME = "projectName";
+	public static final String PROPERTY_REPOSITORY_PATH = "repositoryPath";
+	public static final String PROPERTY_USE_DEFAULT_REPOSITORY_PATH = "useDefaultRepositoryPath";
+	public static final String PROPERTY_REUSE_GIT_REPOSITORY = "reuseGitRepository";
+	public static final String PROPERTY_REPO_NAME = "repoName";
+	public static final String PROPERTY_CLONE_DESTINATION = "cloneDestination";
 	
 	public void setRepositoryPath(String path);
 	public String getRepositoryPath();
@@ -26,12 +27,11 @@ public interface IGitCloningPageModel {
 	public void setUseDefaultRepositoryPath(boolean useDefault);
 	public boolean isUseDefaultRepositoryPath();
 
-	public void setProjectName(String name);
-	public String getProjectName();
-
 	public String getApplicationName();
 	
-	public boolean getSkipClone();
-	public void setSkipClone(boolean b);
+	public String getRepoName();
+
+	public boolean isReuseGitRepository();
+	public void setReuseGitRepository(boolean reuseGitRepository);
 
 }

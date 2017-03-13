@@ -9,6 +9,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.REPO_PATH_KEY;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -36,9 +39,6 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
-
-import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
-import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.REPO_PATH_KEY;
 
 /**
  * The new application wizard that allows you to create an application given an
@@ -81,19 +81,28 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	
 	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
 		this();
-		if (projectsAndBuildConfigs != null 
+		if (projectsAndBuildConfigs != null
 				&& projectsAndBuildConfigs.size() == 1) {
 			Map.Entry<IProject, Collection<IBuildConfig>> entry = projectsAndBuildConfigs.entrySet().iterator().next();
 			IProject project = entry.getKey();
-			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
-			setModelConnection(connection);
-			Collection<IBuildConfig> buildConfigs = entry.getValue();
+			setConnection(project);
 			model.setProject(project);
-			if (buildConfigs != null && buildConfigs.size() == 1) {
-				model.setSelectedItem(buildConfigs.iterator().next());
-			} else {
-				model.setSelectedItem(project);
-			}
+			setSelectedItem(entry, project);
+		}
+	}
+
+	private void setConnection(IProject project) {
+		Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
+		setModelConnection(connection);
+	}
+
+	private void setSelectedItem(Map.Entry<IProject, Collection<IBuildConfig>> entry, IProject project) {
+		Collection<IBuildConfig> buildConfigs = entry.getValue();
+		if (buildConfigs != null 
+				&& buildConfigs.size() == 1) {
+			model.setSelectedItem(buildConfigs.iterator().next());
+		} else {
+			model.setSelectedItem(project);
 		}
 	}
 	
@@ -137,7 +146,7 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	@Override
 	public boolean performFinish() {
 		boolean success = false;
-		if( model.getSkipClone()) {
+		if( model.isReuseGitRepository()) {
 			success = importProjectSkipClone();
 		} else {
 			success = importProject();
@@ -199,7 +208,6 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	@Override
 	public Object getContext() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

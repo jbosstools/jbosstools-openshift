@@ -784,4 +784,32 @@ public class ResourceUtils {
 			})
 			.orElse(null);
 	}
+	
+	/**
+	 * Extracts the last segment of an URI, stripped from .git suffixes
+	 *
+	 * Made public for testing purposes.
+	 */
+	public static String extractProjectNameFromURI(String uri) {
+		String projectName = null;
+		if (uri != null) {
+			uri = uri.trim();
+			while (uri.endsWith("/")) {
+				//Trailing slashes do not matter.
+				uri = uri.substring(0, uri.length() - 1);
+			}
+			if (uri.endsWith(".git")) {
+				uri = uri.substring(0, uri.length() - 4);
+				if (uri.endsWith("/")) {
+					// '/' before .git is error
+					return null;
+				}
+			}
+			int b = uri.lastIndexOf("/");
+			if (b >= 0) {
+				projectName = uri.substring(b + 1);
+			}
+		}
+		return projectName;
+	}
 }

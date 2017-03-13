@@ -26,6 +26,7 @@ import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isMatch
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -699,5 +700,20 @@ public class ResourceUtilsTest {
 		assertThat(rc).isNotNull();
 		assertThat(rc.getName()).isEqualTo("6");
 	}
+	
+	@Test
+	public void extractProjectNameFromURI() {
+		assertNull(ResourceUtils.extractProjectNameFromURI(null));
+		assertEquals("bar", ResourceUtils.extractProjectNameFromURI("http://foo/bar"));
+		assertEquals("bar", ResourceUtils.extractProjectNameFromURI("http://foo/bar.git"));
+		assertEquals("bar", ResourceUtils.extractProjectNameFromURI("http://foo/bar/"));
+		assertEquals("ba.r", ResourceUtils.extractProjectNameFromURI("http://foo/ba.r"));
+
+		assertEquals("quickstart", ResourceUtils.extractProjectNameFromURI("https://github.com/akram/quickstart"));
+		assertEquals("quickstart", ResourceUtils.extractProjectNameFromURI("https://github.com/akram/quickstart.git"));
+		assertEquals("quickstart", ResourceUtils.extractProjectNameFromURI("https://github.com/akram/quickstart/"));
+		assertEquals("quickstart", ResourceUtils.extractProjectNameFromURI("https://github.com/akram/quickstart.git/"));
+	}
+
 	
 }
