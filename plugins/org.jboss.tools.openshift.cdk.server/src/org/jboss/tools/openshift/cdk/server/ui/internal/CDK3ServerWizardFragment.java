@@ -20,10 +20,13 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
 public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 
-	
+	private Combo hypervisorCombo;
+	private String selectedHypervisor;
+
 	public CDK3ServerWizardFragment() {
-		// TODO Auto-generated constructor stub
+		super(); // 0-arg constructor for extension pt creation
 	}
+	
 	@Override
 	public Composite createComposite(Composite parent, IWizardHandle handle) {
 		String title = "Red Hat Container Development Environment";
@@ -46,8 +49,6 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		return main;
 	}
 	
-	private Combo hypervisorCombo;
-	private String selectedHypervisor;
 	protected void createHypervisorWidgets(Composite main) {
 		// Point to file / folder to run
 		Label l = new Label(main, SWT.NONE);
@@ -85,6 +86,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 	}
 	
 
+	@Override
 	protected String findError() {
 		if( homeDir == null || !(new File(homeDir)).exists()) {
 			return "The selected file does not exist.";
@@ -98,11 +100,13 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		return null;
 	}
 	
+	@Override
 	protected void browseHomeDirClicked() {
 		browseHomeDirClicked(false);
 	}
 
 
+	@Override
 	protected void fillTextField() {
 		if( homeDir != null ) {
 			homeText.setText(homeDir);
@@ -121,7 +125,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		IServer s = getServerFromTaskModel();
 		if( s instanceof IServerWorkingCopy ) {
 			IServerWorkingCopy swc = (IServerWorkingCopy) s;
-			swc.setAttribute(CDKServer.MINISHIFT_FILE, homeDir);
+			swc.setAttribute(CDK3Server.MINISHIFT_FILE, homeDir);
 			swc.setAttribute(CDKServer.PROP_USERNAME, selectedUser);
 			swc.setAttribute(CDK3Server.PROP_HYPERVISOR, selectedHypervisor);
 		}

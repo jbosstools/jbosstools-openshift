@@ -157,6 +157,12 @@
             id="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDKRuntimeDetector"
             name="Container Development Environment">
       </runtimeDetector>
+      <runtimeDetector
+            class="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector"
+            enabled="true"
+            id="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector"
+            name="Container Development Environment 3">
+      </runtimeDetector>
    </extension>
 
 
@@ -246,6 +252,13 @@
             icon="icons/cdk_box_16.png"
             configTypeID="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchType"
             id="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchIcon"/>
+   </extension>
+   <extension
+         point="org.jboss.tools.runtime.core.runtimeDetectionResolutionProvider">
+      <resolutionProvider
+            class="org.jboss.tools.openshift.cdk.server.ui.internal.detection.MissingMinishiftResolutionProvider"
+            weight="10">
+      </resolutionProvider>
    </extension>
 	
 </plugin>
