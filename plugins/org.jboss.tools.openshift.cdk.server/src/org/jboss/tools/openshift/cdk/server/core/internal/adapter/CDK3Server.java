@@ -23,7 +23,7 @@ public class CDK3Server extends CDKServer {
 	public static final String HYPERV = "hyperv";
 	
 	public static final String PROP_HYPERVISOR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.hypervisor"; 
-
+	public static final String MINISHIFT_FILE = "minishift.file.location";
 	
 	
 	public static final String[] getHypervisors() {
@@ -46,16 +46,18 @@ public class CDK3Server extends CDKServer {
 	}
 
 	
-	protected String getServerTypeBaseName() {
+	public static String getServerTypeBaseName() {
 		return "Container Development Environment 3";
 	}
 	
+	@Override
 	public String getUserEnvironmentKey() {
-		return getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK3_ENV_SUB_USERNAME);
+		return getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK3_ENV_SUB_USER_KEY);
 	}
 	
+	@Override
 	public String getPasswordEnvironmentKey() {
-		return getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK3_ENV_SUB_PASSWORD);
+		return getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK3_ENV_SUB_PASS_KEY);
 	}
 	
 }

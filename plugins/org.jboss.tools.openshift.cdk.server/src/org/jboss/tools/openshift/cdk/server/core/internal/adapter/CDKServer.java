@@ -44,12 +44,6 @@ public class CDKServer extends ServerDelegate {
 	public static final String PROP_PASS_ENV_VAR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.env.pass"; 
 
 
-	
-	
-	public static final String MINISHIFT_FILE = "minishift.file.location";
-	
-	
-	
 	public CDKServer() {
 	}
 	
@@ -75,7 +69,7 @@ public class CDKServer extends ServerDelegate {
 		getServerWorkingCopy().setName(ServerNamingUtility.getDefaultServerName(getServerTypeBaseName()));
 	}
 	
-	protected String getServerTypeBaseName() {
+	public static String getServerTypeBaseName() {
 		return "Container Development Environment";
 	}
 	
@@ -127,40 +121,45 @@ public class CDKServer extends ServerDelegate {
 				CDKCoreActivator.getDefault().getLog().log(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, se.getMessage(), se));
 			} catch(UsernameChangedException uce) {
 				if( uce.getSaveCredentials()) {
-					// The user has changed the username and is now requesting we save the changes
-					IServerWorkingCopy wc = getServerWorkingCopy();
-					if( wc == null ) {
-						wc = getServer().createWorkingCopy();
-						
-						// a server stored in metadata will have a null file. 
-						IFile f = ((Server)getServer()).getFile();
-						wc.setAttribute(PROP_USERNAME, uce.getUser());
-						if( f == null ) {
-							try {
-								wc.save(true, new NullProgressMonitor());
-							} catch(CoreException ce) {
-								CDKCoreActivator.pluginLog().logError("Error persisting changed username", ce);
-							}
-						} else {
-							// Job scope rules will not allow us to change the credentials most likely, if called from a job
-							// The change to user/pass will be sent through the usernameChangeException and so 
-							// persisting it immediately is not important, since calling client will already have access to it
-							final IServerWorkingCopy wc2 = wc;
-							WorkspaceJob wj = new WorkspaceJob("Saving updated credentials on server " + getServer().getName()) {
-								@Override
-								public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-									wc2.save(true, new NullProgressMonitor());
-									return Status.OK_STATUS;
-								}
-							};
-							wj.schedule();
-						}
-					}
+					saveChangedCredentials(uce);
 				}
 				throw uce;
 			}
 		}
 		return null;
+	}
+	
+	
+	private void saveChangedCredentials(UsernameChangedException uce) {
+		// The user has changed the username and is now requesting we save the changes
+		IServerWorkingCopy wc = getServerWorkingCopy();
+		if( wc == null ) {
+			wc = getServer().createWorkingCopy();
+			
+			// a server stored in metadata will have a null file. 
+			IFile f = ((Server)getServer()).getFile();
+			wc.setAttribute(PROP_USERNAME, uce.getUser());
+			if( f == null ) {
+				try {
+					wc.save(true, new NullProgressMonitor());
+				} catch(CoreException ce) {
+					CDKCoreActivator.pluginLog().logError("Error persisting changed username", ce);
+				}
+			} else {
+				// Job scope rules will not allow us to change the credentials most likely, if called from a job
+				// The change to user/pass will be sent through the usernameChangeException and so 
+				// persisting it immediately is not important, since calling client will already have access to it
+				final IServerWorkingCopy wc2 = wc;
+				WorkspaceJob wj = new WorkspaceJob("Saving updated credentials on server " + getServer().getName()) {
+					@Override
+					public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+						wc2.save(true, new NullProgressMonitor());
+						return Status.OK_STATUS;
+					}
+				};
+				wj.schedule();
+			}
+		}
 	}
 	
 	public boolean passCredentials() {

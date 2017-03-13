@@ -15,11 +15,9 @@ import java.util.Arrays;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -27,16 +25,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
-import org.jboss.tools.openshift.cdk.server.ui.internal.AbstractLocationSection.SetLocationPropertyCommand;
-import org.jboss.tools.openshift.cdk.server.ui.internal.util.FormDataUtility;
 
 public class MinishiftLocationSection extends AbstractLocationSection {
 
 	private static String SECTION_TITLE = "CDK Details";
 	private static String LABEL_STRING = "Minishift Location: ";
 	private static String COMMAND_NAME = "Modify Minishift Location";
-	private static String LOC_ATTR = CDKServer.MINISHIFT_FILE;
+	private static String LOC_ATTR = CDK3Server.MINISHIFT_FILE;
 	
 	private Combo hypervisorCombo;
 	
@@ -44,7 +39,7 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		super(SECTION_TITLE, LABEL_STRING, COMMAND_NAME, LOC_ATTR);
 	}
 
-
+	@Override
 	protected void fillUI(FormToolkit toolkit, Composite composite) {
 		createLocationWidgets(toolkit, composite);
 		createHypervisorWidgets(toolkit, composite);
@@ -57,6 +52,7 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		hypervisorCombo.setItems(CDK3Server.getHypervisors());
 	}
 	
+	@Override
 	protected void setDefaultValues() {
 		// set initial values
 		super.setDefaultValues();
@@ -66,6 +62,8 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 			hypervisorCombo.select(ind);
 		}
 	}
+	
+	@Override
 	protected void addListeners() {
 		super.addListeners();
 		SelectionListener sl = new SelectionAdapter() {
@@ -76,11 +74,13 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		};
 		hypervisorCombo.addSelectionListener(sl);
 	}
+	
 	public class SetHypervisorPropertyCommand extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyComboCommand {
 		public SetHypervisorPropertyCommand(IServerWorkingCopy server, SelectionListener sl) {
 			super(server, "Change hypervisor", hypervisorCombo, hypervisorCombo.getItem(hypervisorCombo.getSelectionIndex()), CDK3Server.PROP_HYPERVISOR, sl);
 		}
 	}
+	
 	@Override
 	protected File getFile(File selected, Shell shell) {
 		return chooseFile(selected, shell);

@@ -53,6 +53,7 @@ import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookup
 
 public class CDK3LaunchController extends AbstractCDKLaunchController implements ILaunchServerController, IExternalLaunchConstants {
 
+	@Override
 	public void initialize(ILaunchConfigurationWorkingCopy wc) throws CoreException {
 		final IServer s = ServerUtil.getServer(wc);
 		final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
@@ -78,7 +79,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 			env.put(userKey, userName);
 			wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
     	}
-		String cmdLoc = server.getAttribute(CDKServer.MINISHIFT_FILE, (String)null);
+		String cmdLoc = server.getAttribute(CDK3Server.MINISHIFT_FILE, (String)null);
 		wc.setAttribute(ATTR_LOCATION, cmdLoc);
 		
 		String defaultArgs = "start --vm-driver=" + cdkServer.getServer().getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
@@ -87,7 +88,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 		wc.setAttribute(ATTR_ARGS, currentVal);
 	}
 
-	
+	@Override
 	protected void performOverrides(ILaunchConfigurationWorkingCopy workingCopy) throws CoreException {
 		// Overrides, things that should always match whats in server editor
 		final IServer s = ServerUtil.getServer(workingCopy);
@@ -96,11 +97,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 		workingCopy.setAttribute(ATTR_WORKING_DIR, workingDir);
     	
     	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map)null);
-    	if( env == null ) {
-    		env = new HashMap<>();
-    	} else {
-    		env = new HashMap<>(env); // no guarantee existing map is editable
-    	}
+    	env = (env == null ? new HashMap<>() : new HashMap<>(env)); 
     	
     	String userKey = cdkServer.getUserEnvironmentKey();
     	boolean passCredentials = cdkServer.passCredentials();
@@ -113,15 +110,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
     		env.remove(userKey);
     	}
 		
-    	String minishiftLoc = cdkServer.getServer().getAttribute(CDKServer.MINISHIFT_FILE, (String)null);
-    	if( minishiftLoc == null )
-    		minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation(workingCopy);
-    	
-		if( minishiftLoc != null ) {
-			String minishiftCmdFolder = new Path(minishiftLoc).removeLastSegments(1).toOSString();
-			CommandLocationLookupStrategy.get().ensureOnPath(env, minishiftCmdFolder);
-			workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, minishiftLoc);
-		}
+    	setMinishiftLocationOnLaunchConfig(cdkServer, workingCopy, env);
 		workingCopy.setAttribute(ENVIRONMENT_VARS_KEY, env);
 		
 		// override vm-driver args
@@ -130,6 +119,19 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 		String currentVal = workingCopy.getAttribute(ATTR_ARGS, defaultArgs);
 		String replaced =  ArgsUtil.setArg(currentVal, null, "--vm-driver", targetedHypervisor);
 		workingCopy.setAttribute(ATTR_ARGS, replaced);
+	}
+	
+	private void setMinishiftLocationOnLaunchConfig(CDKServer cdkServer, ILaunchConfigurationWorkingCopy workingCopy, Map<String, String> env ) throws CoreException {
+
+    	String minishiftLoc = cdkServer.getServer().getAttribute(CDK3Server.MINISHIFT_FILE, (String)null);
+    	if( minishiftLoc == null )
+    		minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation(workingCopy);
+    	
+		if( minishiftLoc != null ) {
+			String minishiftCmdFolder = new Path(minishiftLoc).removeLastSegments(1).toOSString();
+			CommandLocationLookupStrategy.get().ensureOnPath(env, minishiftCmdFolder);
+			workingCopy.setAttribute(IExternalToolConstants.ATTR_LOCATION, minishiftLoc);
+		}
 	}
 	
 	@Override
@@ -153,53 +155,9 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 		
 		CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		boolean passCredentials = cdkServer.passCredentials();
-		
-		
-		
 		if( passCredentials) {
-			
-    		String userKey = cdkServer.getUserEnvironmentKey();
-    		String passKey = cdkServer.getPasswordEnvironmentKey();
-			if( userKey == null || userKey.trim().isEmpty()) {
-				beh.setServerStopped();
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
-						"Username environment variable id cannot be empty when passing credentials via environment variables."));
-			}
-			if( passKey == null || passKey.trim().isEmpty()) {
-				beh.setServerStopped();
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
-						"Password environment variable id cannot be empty when passing credentials via environment variables."));				
-			}
-			
-
-			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, null);
-			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, null);
-			
-	    	String pass = null;
-	    	String user = cdkServer.getUsername();
-	    	try {
-	    		pass = cdkServer.getPassword();
-	    	} catch(UsernameChangedException uce) {
-	    		pass = uce.getPassword();
-	    		user = uce.getUser();
-	    	}
-	    	
-	    	if( user == null ) {
-				beh.setServerStopped();
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no username associated with it. Please open the server editor and configure the credentials."));
-	    	}
-	
-	    	if( pass == null ) {
-				beh.setServerStopped();
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no password associated with it. Please open the server editor and configure the credentials."));
-	    	}
-
-			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, pass);
-			beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, user);
+			handleCredentialsDuringLaunch(s, cdkServer, beh);
 		}
-		
-		
-		
 		
 		// Poll the server once more 
 		IStatus stat = getCDKPoller().getCurrentStateSynchronous(getServer());
@@ -230,21 +188,66 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 		
 		IDebugEventSetListener debug = getDebugListener(new IProcess[]{process}, launch);
 		DebugPlugin.getDefault().addDebugEventListener(debug);
-		if( beh != null ) {
-			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
-			beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
-		}
+		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
+		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
 	}
 	
+	
+	private void handleCredentialsDuringLaunch(IServer s, CDKServer cdkServer,ControllableServerBehavior beh ) throws CoreException {
+		String userKey = cdkServer.getUserEnvironmentKey();
+		String passKey = cdkServer.getPasswordEnvironmentKey();
+		if( userKey == null || userKey.trim().isEmpty()) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
+					"Username environment variable id cannot be empty when passing credentials via environment variables."));
+		}
+		if( passKey == null || passKey.trim().isEmpty()) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
+					"Password environment variable id cannot be empty when passing credentials via environment variables."));				
+		}
+		
+
+		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, null);
+		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, null);
+		
+    	String pass = null;
+    	String user = cdkServer.getUsername();
+    	try {
+    		pass = cdkServer.getPassword();
+    	} catch(UsernameChangedException uce) {
+    		pass = uce.getPassword();
+    		user = uce.getUser();
+    	}
+    	
+    	if( user == null ) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no username associated with it. Please open the server editor and configure the credentials."));
+    	}
+
+    	if( pass == null ) {
+			beh.setServerStopped();
+			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("The server " + s.getName() + " has no password associated with it. Please open the server editor and configure the credentials."));
+    	}
+
+		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD, pass);
+		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, user);
+	}
+	
+	@Override
 	protected AbstractCDKPoller getCDKPoller() {
 		MinishiftPoller vp = new MinishiftPoller();
 		return vp;
 	}
 	
+	@Override
 	protected void processTerminatedDelay() {
 		try {
 			// sleep to allow vagrant to unlock queries. 
 			Thread.sleep(3000);
-		} catch( InterruptedException ie) {}
+		} catch( InterruptedException ie) {
+			// Ignore and continue
+		}
+		
 	}
 }
