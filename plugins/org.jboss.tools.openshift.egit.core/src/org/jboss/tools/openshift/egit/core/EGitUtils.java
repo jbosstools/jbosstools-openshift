@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.EclipseGitProgressTransformer;
 import org.eclipse.egit.core.IteratorService;
 import org.eclipse.egit.core.op.AddToIndexOperation;
+import org.eclipse.egit.core.op.BranchOperation;
 import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.CloneOperation.PostCloneTask;
 import org.eclipse.egit.core.op.CommitOperation;
@@ -51,6 +52,7 @@ import org.eclipse.egit.core.op.PushOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.egit.core.op.PushOperationSpecification;
 import org.eclipse.egit.core.project.RepositoryMapping;
+import org.eclipse.jgit.api.CheckoutResult;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
 import org.eclipse.jgit.api.MergeResult;
@@ -75,6 +77,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
@@ -160,19 +163,18 @@ public class EGitUtils {
 		return new File(project.getLocation().toOSString(), Constants.DOT_GIT)
 				.exists();
 	}
-	
-	@SuppressWarnings("restriction")
+
 	public static boolean isGitFolderInRootOf(IProject project) {
 		RepositoryMapping mapping = RepositoryMapping.getMapping(project);
 		if (mapping == null) {
 			return false;
 		}
-		
+
 		String gitFolderRelativePath = mapping.getGitDir();
 		if (StringUtils.isEmptyOrNull(gitFolderRelativePath)) {
 			return false;
 		}
-		
+
 		return !gitFolderRelativePath.startsWith("..");
 	}
 
@@ -786,6 +788,47 @@ public class EGitUtils {
 	}
 
 	/**
+	 * Returns a {@code Repository} for the given directory Returns {@code null}
+	 * if the given file is not a directory, does not exist or any other io
+	 * error occurs. No effective changes on the file system are executed.
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static Repository getRepository(File file) {
+		if (file == null
+				|| !file.isDirectory()
+				|| !file.exists()) {
+			return null;
+		}
+		
+		try (Repository repository = new FileRepositoryBuilder()
+				.setGitDir(new File(file, Constants.DOT_GIT))
+				.findGitDir()
+				.build()) {
+			return repository;
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Returns {@code true} if the given directory is a git repository. This is
+	 * checked by verifying that it contains a .git folder. Returns {@code false} otherwise.
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static boolean isRepository(File file) {
+		if (file == null
+				|| !file.isDirectory()
+				|| !file.exists()) {
+			return false;
+		}
+		return new File(file, Constants.DOT_GIT).exists();
+	}
+
+	/**
 	 * Gets the repository that is configured to the given project. Throws a
 	 * CoreException if the given project is not git shared.
 	 * 
@@ -872,6 +915,13 @@ public class EGitUtils {
 		return getRemoteConfig(remote, allRemotes);
 	}
 
+	/**
+	 * Returns the current branch for the given repository.
+	 * 
+	 * @param repository
+	 * @return
+	 * @throws CoreException
+	 */
 	public static String getCurrentBranch(Repository repository)
 			throws CoreException {
 		Assert.isLegal(repository != null,
@@ -887,15 +937,28 @@ public class EGitUtils {
 		return branch;
 	}
 
+	/**
+	 * Returns the current branch for the given project.
+	 * 
+	 * @param project
+	 * @return
+	 * @throws CoreException
+	 * 
+	 * @see #getRepository(IProject)
+	 */
 	public static String getCurrentBranch(IProject project)
 			throws CoreException {
 		if (project == null) {
 			return null;
 		}
-		Repository repo = EGitUtils.getRepository(project);
-		return (repo == null)? null: EGitUtils.getCurrentBranch(repo);
+		try (Repository repo = EGitUtils.getRepository(project)) {
+			if (repo == null) {
+				return null;
+			}
+			return EGitUtils.getCurrentBranch(repo);
+		}
 	}
-	
+
 	/**
 	 * Gets the remote config with the given name from the list of remote
 	 * configs. Returns <code>null</code> if it was not found.
@@ -1353,7 +1416,7 @@ public class EGitUtils {
 		if (ref == null) {
 			return false;
 		}
-		Ref currentBranchRef = repo.getRef(repo.getBranch());
+		Ref currentBranchRef = repo.findRef(repo.getBranch());
 
 		RevWalk walk = new RevWalk(repo);
 		RevCommit localCommit = walk.parseCommit(currentBranchRef.getObjectId());
@@ -1479,7 +1542,7 @@ public class EGitUtils {
 			}
 			return resources;
 		}
-		
+
 		private static IndexDiff getIndexChanges(Repository repo, IProgressMonitor monitor) throws IOException {
 			IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD, IteratorService.createInitialIterator(repo));
 			if (!indexDiff.diff(
@@ -1539,5 +1602,42 @@ public class EGitUtils {
 				.map(rc -> getFetchURI(rc))
 				.filter(uri -> uri != null && uri.toString().startsWith("http"))
 				.map(URIish::toString);
+	}
+
+	/**
+	 * Checks out the given branch in the given project. Progress is reported to the given monitor.
+	 * 
+	 * @param ref
+	 * @param project
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 * 
+	 * @see #getRepository(IProject)
+	 * @see Repository
+	 * @see IProject
+	 * @see IProgressMonitor
+	 */
+	public static CheckoutResult branch(String ref, IProject project, IProgressMonitor monitor) throws CoreException {
+		Repository repository = getRepository(project);
+		return branch(ref, repository, monitor);
+	}
+
+	/**
+	 * Checks out the given branch in the given repository. Progress is reported to the given monitor.
+	 * 
+	 * @param ref
+	 * @param project
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 * 
+	 * @see Repository
+	 * @see IProgressMonitor
+	 */
+	public static CheckoutResult branch(String ref, Repository repository, IProgressMonitor monitor) throws CoreException {
+		BranchOperation branchOp = new BranchOperation(repository, ref);
+		branchOp.execute(monitor);
+		return branchOp.getResult();
 	}
 }

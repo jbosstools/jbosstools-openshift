@@ -67,6 +67,7 @@ import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.route.IRoute;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("serial")
 public class ResourceUtilsTest {
 	
 	private static final String IMAGE_REF = "foo:latest";

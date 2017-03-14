@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.importapp.operation;
+package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,22 +23,27 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jgit.api.CheckoutResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.GeneralProjectImportOperation;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.MavenProjectImportOperation;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.WontOverwriteException;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.OpenShiftException;
 
 /**
  * @author André Dietisheim <adietish@redhat.com>
  */
-public class ImportNewProject {
+public class ImportProjectOperation {
 
 	private static final String PLATFORM_SEPARATOR = Matcher.quoteReplacement(File.separator);
 	
@@ -46,38 +51,40 @@ public class ImportNewProject {
 	private String gitUrl;
 	private String gitRef;
 	private Collection<String> filters;
-	private boolean skipClone;
+	private boolean reuseGitRepo;
+	private boolean checkoutBranch;
+
+	/**
+	 * Constructor to skip the clone and simply import the filtered projects from the destination
+	 * @param gitRef the git ref (branch) to import
+	 * @param cloneDestination the destination to clone to
+	 * @param filters the project to import
+	 */
+	public ImportProjectOperation(String gitRef, File cloneDestination, Collection<String> filters, boolean checkoutBranch) {
+		this(null, gitRef, cloneDestination, filters, checkoutBranch);
+	}
 
 	/**
 	 * Constructor to both clone the repository and import the filtered projects
-	 * @param gitUrl
-	 * @param gitRef
-	 * @param cloneDestination
-	 * @param filters
+	 * @param gitUrl the git repo to clone from
+	 * @param gitRef the git ref (branch) to import
+	 * @param cloneDestination the destination to clone to
+	 * @param filters the project to import
 	 */
-	public ImportNewProject(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters) {
+	public ImportProjectOperation(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters) {
+		this(gitUrl, gitRef, cloneDestination, filters, true);
+	}
+
+	protected ImportProjectOperation(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters, 
+			boolean checkoutBranch) {
 		this.gitUrl = gitUrl;
 		this.gitRef = gitRef;
 		this.cloneDestination = cloneDestination;
 		this.filters = sanitize(filters);
-		this.skipClone = false;
+		this.reuseGitRepo = (gitUrl == null);
+		this.checkoutBranch = checkoutBranch;
 	}
 
-	
-	/**
-	 * Constructor to skip the clone and simply import the filtered projects from the destination
-	 * @param cloneDestination
-	 * @param filters
-	 */
-	public ImportNewProject(File cloneDestination, Collection<String> filters) {
-		this.cloneDestination = cloneDestination;
-		this.filters = sanitize(filters);
-		this.skipClone = true;
-	}
-
-	
-	
-	
 	/**
 	 * Imports the (new) project that the user has chosen into the workspace.
 	 * 
@@ -92,29 +99,61 @@ public class ImportNewProject {
 	 * @throws GitAPIException 
 	 * @throws NoWorkTreeException 
 	 */
-	public void execute(IProgressMonitor monitor)
+	public IStatus execute(IProgressMonitor monitor)
 			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
 			InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
-		File repositoryFolder = null;
-		if( !skipClone ) {
-			repositoryFolder = executeClone(monitor);
+		IStatus status = Status.OK_STATUS;
+		if (!reuseGitRepo) {
+			status = importCloning(gitUrl, gitRef, cloneDestination, filters, monitor);
 		} else {
-			repositoryFolder = cloneDestination;
+			status = importReusingExistingRepo(gitRef, cloneDestination, filters, checkoutBranch, monitor);
 		}
 		
+		return status;
+	}
+
+	private IStatus importCloning(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters, IProgressMonitor monitor) 
+			throws CoreException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
+		if (cloneDestinationExists()) {
+			throw new WontOverwriteException(NLS.bind(
+					"There's already a folder at {0}. The new OpenShift project would overwrite it. "
+							+ "Please choose another destination to clone to.",
+					getCloneDestination().getAbsolutePath()));
+		}
+		File repositoryFolder = cloneRepository(gitUrl, cloneDestination, gitRef, monitor);
 		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, filters, monitor);
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
+		return Status.OK_STATUS;
 	}
 	
-	
-	private File executeClone(IProgressMonitor monitor) throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
-		if (cloneDestinationExists()) {
-			throw new WontOverwriteException(
-					NLS.bind("There's already a folder at {0}. The new OpenShift project would overwrite it. " +
-							"Please choose another destination to clone to.",
-							getCloneDestination().getAbsolutePath()));
+	private IStatus importReusingExistingRepo(String gitRef, File repositoryFolder, Collection<String> filters, boolean checkoutBranch, 
+			IProgressMonitor monitor) throws CoreException, InterruptedException {
+		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, filters, monitor);
+		connectToGitRepo(importedProjects, repositoryFolder, monitor);
+		if (checkoutBranch) {
+			return checkoutBranch(gitRef, importedProjects, repositoryFolder, monitor);
 		}
-		return cloneRepository(gitUrl, cloneDestination, gitRef, monitor);
+		return Status.OK_STATUS;
+	}
+	
+	protected IStatus checkoutBranch(String gitRef, List<IProject> importedProjects, File repositoryFolder, IProgressMonitor monitor) throws CoreException {
+		if (!StringUtils.isEmpty(gitRef)
+				&& importedProjects != null
+				&& !importedProjects.isEmpty()) {
+			// all projects are in the same repo
+			IProject project = importedProjects.get(0);
+			CheckoutResult result = EGitUtils.branch(gitRef, project, monitor);
+			switch(result.getStatus()) {
+				case CONFLICTS:
+				case ERROR:
+					return StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
+							NLS.bind("Could not check out the branch {0} of the (reused) local repository at {1} because of {2}."
+									+ " Please resolve the problem and check out the branch manually so that it matches the code that's used in your OpenShift application.",
+									new Object[] { gitRef, repositoryFolder, result.getStatus().toString().toLowerCase() }));
+				default:
+			}
+		}
+		return Status.OK_STATUS;
 	}
 	
 	/**
@@ -143,7 +182,7 @@ public class ImportNewProject {
 		return importedProjects;
 	}
 
-	private void connectToGitRepo(List<IProject> projects, File projectFolder, IProgressMonitor monitor)
+	protected void connectToGitRepo(List<IProject> projects, File projectFolder, IProgressMonitor monitor)
 			throws CoreException {
 		for (IProject project : projects) {
 			if (project != null) {
@@ -188,7 +227,6 @@ public class ImportNewProject {
 		return destination;
 	}
 
-	
 	protected File getCloneDestination() {
 		return cloneDestination;
 	}

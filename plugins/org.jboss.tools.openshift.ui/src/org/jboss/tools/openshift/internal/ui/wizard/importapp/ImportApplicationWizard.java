@@ -146,51 +146,50 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	@Override
 	public boolean performFinish() {
 		boolean success = false;
-		if( model.isReuseGitRepository()) {
-			success = importProjectSkipClone();
-		} else {
-			success = importProject();
-		}
+		success = importProject(model.isReuseGitRepository());
 		if (success) {
-			if(!model.isUseDefaultRepositoryPath()) {
-				getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
-			} else {
-				getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
-			}
+			saveRepoPathValue();
 		}
 		UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
 		return success;
 	}
 
-	private boolean importProjectSkipClone() {
-		final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-		ImportJob importJob = new ImportJob(model.getCloneDestination(), delegatingMonitor)
-				.setGitRef(model.getGitRef());
-		return importProject(importJob, delegatingMonitor);
+	private void saveRepoPathValue() {
+		if(!model.isUseDefaultRepositoryPath()) {
+			getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
+		} else {
+			getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
+		}
 	}
 
-	private boolean importProject() {
+	private boolean importProject(boolean reuseGitRepository) {
 		final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-		ImportJob importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination(), delegatingMonitor)
-				.setGitRef(model.getGitRef());
-		return importProject(importJob, delegatingMonitor);
-	}
-
-	private boolean importProject(ImportJob importJob, DelegatingProgressMonitor delegatingMonitor) {
+		ImportJob job = createImportJob(reuseGitRepository, delegatingMonitor);
 		try {
-			String gitContextDir = model.getGitContextDir();
-			if (StringUtils.isNotEmpty(gitContextDir)) {
-				importJob.setFilters(Collections.singleton(gitContextDir));
-			}
-			IStatus jobResult = WizardUtils.runInWizard(importJob, delegatingMonitor, getContainer());
+			IStatus jobResult = WizardUtils.runInWizard(job, delegatingMonitor, getContainer());
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", 
+			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
 					OpenShiftUIActivator.statusFactory().errorStatus("An exception occurred while creating local git repository.", e));
 			return false;
 		}
 	}
-	
+
+	private ImportJob createImportJob(boolean reuseGitRepository, final DelegatingProgressMonitor delegatingMonitor) {
+		ImportJob importJob = null;
+		if (!reuseGitRepository) {
+			importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination(), delegatingMonitor);
+		} else {
+			importJob = new ImportJob(model.getCloneDestination(), model.isCheckoutBranchReusedRepo(), delegatingMonitor);
+		}
+		importJob.setGitRef(model.getGitRef());
+		String gitContextDir = model.getGitContextDir();
+		if (StringUtils.isNotEmpty(gitContextDir)) {
+			importJob.setFilters(Collections.singleton(gitContextDir));
+		}
+		return importJob;
+	}
+
 	@Override
 	public Connection getConnection() {
 		return model.getConnection();

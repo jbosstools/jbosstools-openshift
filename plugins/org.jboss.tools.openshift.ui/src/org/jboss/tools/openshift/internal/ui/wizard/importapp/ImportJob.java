@@ -29,7 +29,6 @@ import org.jboss.tools.openshift.internal.common.ui.application.importoperation.
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.WontOverwriteException;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.wizard.importapp.operation.ImportNewProject;
 
 import com.openshift.restclient.OpenShiftException;
 
@@ -40,48 +39,44 @@ public class ImportJob extends WorkspaceJob {
 	private File cloneDestination;
 	private String gitRef;
 	private Collection<String> filters;
+	private boolean checkoutBranch;
+	
+	public ImportJob(File cloneDestination, boolean checkoutBranch, DelegatingProgressMonitor delegatingMonitor) {
+		this(null, cloneDestination, checkoutBranch, delegatingMonitor);
+	}
 
 	/**
-	 * A constructor to clone from a git url and then import the project
+	 * A constructor to clone from a git url and then import the project. Wont
+	 * clone if the given git url is null,
+	 * 
 	 * @param gitUrl
 	 * @param cloneDestination
 	 * @param delegatingMonitor
 	 */
-	public ImportJob(String gitUrl, File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
+	protected ImportJob(String gitUrl, File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
+		this(gitUrl, cloneDestination, true, delegatingMonitor);
+	}
+
+	protected ImportJob(String gitUrl, File cloneDestination, boolean checkoutBranch, DelegatingProgressMonitor delegatingMonitor) {
 		super("Importing project to workspace...");
 		setRule(ResourcesPlugin.getWorkspace().getRoot());
 		this.gitUrl = gitUrl;
 		this.cloneDestination = cloneDestination;
 		this.delegatingMonitor = delegatingMonitor;
+		this.checkoutBranch = checkoutBranch;
 	}
-
-	
-	/**
-	 * A constructor to clone from a git url and then import the project
-	 * @param gitUrl
-	 * @param cloneDestination
-	 * @param delegatingMonitor
-	 */
-	public ImportJob(File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
-		super("Importing project to workspace...");
-		setRule(ResourcesPlugin.getWorkspace().getRoot());
-		this.gitUrl = null;
-		this.cloneDestination = cloneDestination;
-		this.delegatingMonitor = delegatingMonitor;
-	}
-
 	
 	@Override
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 		try {
 			delegatingMonitor.add(monitor);
-			if( gitUrl == null ) {
-				new ImportNewProject(cloneDestination, filters).execute(delegatingMonitor);
-				return Status.OK_STATUS;
+			IStatus status = Status.OK_STATUS;
+			if (gitUrl == null) {
+				status = new ImportProjectOperation(gitRef, cloneDestination, filters, checkoutBranch).execute(delegatingMonitor);
 			} else {
-				new ImportNewProject(gitUrl, gitRef, cloneDestination, filters).execute(delegatingMonitor);
-				return Status.OK_STATUS;
+				status = new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters).execute(delegatingMonitor);
 			}
+			return status;
 		} catch (final WontOverwriteException e) {
 			openError("Project already present", e.getMessage());
 			return Status.CANCEL_STATUS;

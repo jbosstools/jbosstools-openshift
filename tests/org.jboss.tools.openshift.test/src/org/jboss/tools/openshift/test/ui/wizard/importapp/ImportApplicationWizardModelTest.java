@@ -15,9 +15,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizardModel;
+import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +38,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
-import com.openshift.restclient.model.build.IGitBuildSource;
 /**
  * @author Fred Bricon
  * @author Andre Dietisheim
@@ -67,14 +68,38 @@ public class ImportApplicationWizardModelTest {
 	}
 
 	@Test
+	public void shouldReturnBuildConfigNameForApplicationName() {
+		// given
+		String bcName = "gargamel";
+		model.loadBuildConfigs();
+		doReturn(bcName).when(p2_bc1).getName();
+		model.setSelectedItem(p2_bc1);
+		// when
+		String appName = model.getApplicationName();
+		// then
+		assertThat(appName).isEqualTo(bcName);
+	}
+	
+	@Test
+	public void shouldReturnNullWhenNoBuildConfigIsSelected() {
+		// given
+		String bcName = "papaSmurf";
+		model.loadBuildConfigs();
+		doReturn(bcName).when(p2_bc1).getName();
+		model.setSelectedItem(p1);
+		// when
+		String appName = model.getApplicationName();
+		// then
+		assertThat(appName).isNull();
+	}
+
+	@Test
 	public void shouldReturn2ProjectsWhenNoProjectIsSelected() {
 		//No project selected -> 2 projects returned
 		// given
 		model.setProject(null);
-
 		// when
 		model.loadBuildConfigs();
-
 		// then
 		List<ObservableTreeItem> results = model.getBuildConfigs();
 		assertEquals(2, results.size());
@@ -87,10 +112,8 @@ public class ImportApplicationWizardModelTest {
 		// p2 selected -> 1 build config returned
 		// given
 		model.setProject(p2);
-		
 		// when
 		model.loadBuildConfigs();
-
 		// then
 		List<ObservableTreeItem> results = model.getBuildConfigs();
 		assertEquals(1, results.size());
@@ -102,15 +125,24 @@ public class ImportApplicationWizardModelTest {
 		//p1 selected -> 2 build configs returned
 		// given
 		model.setProject(p1);
-
 		// when
 		model.loadBuildConfigs();
-
 		// then
 		List<ObservableTreeItem> results = model.getBuildConfigs();
 		assertEquals(2, results.size());
 		assertEquals(p1_bc1, results.get(0).getModel());
 		assertEquals(p1_bc2, results.get(1).getModel());
+	}
+
+	@Test
+	public void shouldProjectThatWasSet() {
+		// given
+		model.loadBuildConfigs();
+		assertThat(model.getProject()).isNull();
+		// when
+		model.setProject(p2);
+		// then
+		assertThat(model.getProject()).isEqualTo(p2);
 	}
 
 	@Test
@@ -123,15 +155,22 @@ public class ImportApplicationWizardModelTest {
 	public void shouldResetRepositoryPathWhenSettingToUseDefaultRepository() {
 		// given
 		model.setUseDefaultRepositoryPath(false);
-		model.setUseDefaultRepositoryPath(false);
 		model.setRepositoryPath(FileUtils.getTempDirectoryPath());
-		
 		// when
 		model.setUseDefaultRepositoryPath(true);
-		
 		// then
 		assertTrue(model.isUseDefaultRepositoryPath());
 		assertEquals(EGitUIUtils.getEGitDefaultRepositoryPath(), model.getRepositoryPath());
+	}
+
+	@Test
+	public void shouldResetUseDefaultRepositoryPathWhenSettingRepositoryPath() {
+		// given
+		model.setUseDefaultRepositoryPath(true);
+		// when
+		model.setRepositoryPath(FileUtils.getTempDirectoryPath());
+		// then
+		assertThat(model.isUseDefaultRepositoryPath()).isFalse();
 	}
 
 	@Test
@@ -139,11 +178,9 @@ public class ImportApplicationWizardModelTest {
 		// given
 		model.setUseDefaultRepositoryPath(true);
 		String repoPath = FileUtils.getTempDirectoryPath();
-		
 		// when
 		model.setUseDefaultRepositoryPath(false);
     	model.setRepositoryPath(repoPath);
-
     	// then
     	assertFalse(model.isUseDefaultRepositoryPath());
         assertEquals(repoPath, model.getRepositoryPath());
@@ -160,24 +197,42 @@ public class ImportApplicationWizardModelTest {
 		model.setUseDefaultRepositoryPath(false);
 		model.setProject(p1);
 		model.loadBuildConfigs();
-
 		// when
 		model.setSelectedItem(p1_bc2);
 		model.setRepositoryPath(repoPath);
-
 		// then
 		assertThat(model.getCloneDestination())
 			.isEqualTo(new Path(repoPath).append(repoName).toFile());
 	}
 
 	@Test
+	public void shouldResetReuseGitRepoIfNewCloneDestinationDoesntExist() throws IOException {
+		// given
+		String repoName = "gargamel";
+		String repoURI = "git@github.com:jbosstools/" + repoName + ".git";
+		doReturn(repoURI).when(p1_bc2).getSourceURI();
+		String repoPath = FileUtils.getTempDirectoryPath();
+		new File(repoPath, repoName).createNewFile();
+		
+		model.setProject(p1);
+		model.loadBuildConfigs();
+		model.setSelectedItem(p1_bc2);
+		model.setRepositoryPath(repoPath);
+		model.setReuseGitRepository(true);
+		assertThat(model.isReuseGitRepository()).isTrue();
+		File newRepoPath = FileUtils.getUserDirectory();
+		// when
+		model.setRepositoryPath(newRepoPath.getAbsolutePath());		
+		// then
+		assertThat(model.isReuseGitRepository()).isFalse();
+	}
+
+	@Test
 	public void shouldReturnNullWhenCallingGetSelectedBuildConfigIfNoBuildConfigIsSelected() {
 		// given
 		model.setSelectedItem(p2);
-
 		// when
 		IBuildConfig bc = model.getSelectedBuildConfig();
-		
 		// then
 		assertThat(bc).isNull();
 	}
@@ -186,10 +241,8 @@ public class ImportApplicationWizardModelTest {
 	public void shouldReturnSelectedBuildConfig() {
 		// given
 		model.setSelectedItem(p2_bc1);
-
 		// when
 		IBuildConfig bc = model.getSelectedBuildConfig();
-		
 		// then
 		assertThat(bc).isEqualTo(p2_bc1);
 	}
@@ -200,10 +253,8 @@ public class ImportApplicationWizardModelTest {
 		String repoURI = "git@github.com:jbosstools/timber.git";
 		doReturn(repoURI).when(p1_bc2).getSourceURI();
 		model.setSelectedItem(p1_bc2);
-
 		// when
 		String gitUrl = model.getGitUrl();
-
 		// then
 		assertThat(gitUrl).isEqualTo(repoURI);
 	}
@@ -214,10 +265,8 @@ public class ImportApplicationWizardModelTest {
 		String repoURI = "git@github.com:jbosstools/timber.git";
 		doReturn(repoURI).when(p1_bc2).getSourceURI();
 		model.setSelectedItem(null);
-
 		// when
 		String gitUrl = model.getGitUrl();
-
 		// then
 		assertThat(gitUrl).isNull();
 	}
@@ -226,14 +275,10 @@ public class ImportApplicationWizardModelTest {
 	public void shouldReturnGitRefFromSelectedBuildConfig() {
 		// given
 		String buildSourceRef = "special-branch-42";
-		IGitBuildSource buildSource = mock(IGitBuildSource.class);
-		doReturn(buildSourceRef).when(buildSource).getRef();
-		doReturn(buildSource).when(p1_bc2).getBuildSource();
+		ResourceMocks.createGitBuildSource(null, buildSourceRef, p1_bc2);
 		model.setSelectedItem(p1_bc2);
-
 		// when
 		String gitRef = model.getGitRef();
-
 		// then
 		assertThat(gitRef).isEqualTo(buildSourceRef);
 	}
@@ -242,15 +287,53 @@ public class ImportApplicationWizardModelTest {
 	public void shouldReturnNullGitRefWhenNoBuildConfigIsSelected() {
 		// given
 		String buildSourceRef = "special-branch-42";
-		IGitBuildSource buildSource = mock(IGitBuildSource.class);
-		doReturn(buildSourceRef).when(buildSource).getRef();
-		doReturn(buildSource).when(p1_bc2).getBuildSource();
+		ResourceMocks.createGitBuildSource(null, buildSourceRef, p1_bc2);
 		model.setSelectedItem(null);
-
 		// when
 		String gitRef = model.getGitRef();
-
 		// then
 		assertThat(gitRef).isNull();
+	}
+
+	@Test
+	public void shouldGetGitContextDirFromSelectedBuildConfig() {
+		// given
+		String contextDir = "contextDir-42";
+		ResourceMocks.createGitBuildSource(contextDir, null, p1_bc2);
+		model.setSelectedItem(p1_bc2);
+		// when
+		String gitContextDir = model.getGitContextDir();
+		// then
+		assertThat(gitContextDir).isEqualTo(contextDir);
+	}
+
+	@Test
+	public void shouldUseUserProvidedGitContextDirOverridingBuildConfigGitContextDir() {
+		// given
+		String resourceGitContextDir = "contextDir-42";
+		ResourceMocks.createGitBuildSource(resourceGitContextDir, null, p1_bc2);
+		model.setSelectedItem(p1_bc2);
+		assertThat(model.getGitContextDir()).isEqualTo(resourceGitContextDir);
+		String userGitContextDir = "42-contextDir";
+		// when
+		model.setGitContextDir(userGitContextDir);
+		String gitContextDir = model.getGitContextDir();
+		// then
+		assertThat(gitContextDir).isEqualTo(userGitContextDir);
+	}
+
+	@Test
+	public void shouldBuildConfigGitContextDirWhenNewBuildConfigIsSet() {
+		// given
+		String userGitContextDir = "42-contextDir";
+		model.setGitContextDir(userGitContextDir);
+		assertThat(model.getGitContextDir()).isEqualTo(userGitContextDir);
+		String resourceGitContextDir = "contextDir-42";
+		ResourceMocks.createGitBuildSource(resourceGitContextDir, null, p1_bc2);
+		// when
+		model.setSelectedItem(p1_bc2);
+		String gitContextDir = model.getGitContextDir();
+		// then
+		assertThat(gitContextDir).isEqualTo(resourceGitContextDir);
 	}
 }

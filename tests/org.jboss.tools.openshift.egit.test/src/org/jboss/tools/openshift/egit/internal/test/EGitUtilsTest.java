@@ -29,6 +29,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.egit.core.Activator;
+import org.eclipse.jgit.api.CheckoutResult;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
@@ -41,11 +42,13 @@ import org.jboss.tools.openshift.egit.internal.test.util.TestProject;
 import org.jboss.tools.openshift.egit.internal.test.util.TestRepository;
 import org.jboss.tools.openshift.egit.internal.test.util.TestUtils;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class EGitUtilsTest {
 
+	private static final String REPO_BRANCH = "myBranch";
 	private static final String GIT_EMAIL = "dummyUser@redhat.com";
 	private static final String GIT_USER = "dummyUser";
 	private static final String REPO2_REMOTE_NAME = "openshift";
@@ -69,7 +72,6 @@ public class EGitUtilsTest {
 		
 		this.testProject2 = new TestProject(true);
 		this.testRepository2 = createTestRepository(testProject2);
-		
 	}
 
 	private TestRepository createTestRepository(TestProject project) throws IOException, Exception {
@@ -90,6 +92,18 @@ public class EGitUtilsTest {
 		return repository.cloneRepository(clonedRepositoryFile);
 	}
 
+	private IFile commitFile(String fileName, String fileContent, TestProject project, TestRepository repository) throws Exception {
+		Assert.assertNotNull(fileName);
+		Assert.assertNotNull(fileContent);
+		Assert.assertNotNull(repository);
+		Assert.assertNotNull(project);
+
+		IFile file = testUtils.addFileToProject(project.getProject(), fileName, fileContent);
+		repository.add(file);
+		repository.commit("someCommit");
+		return file;
+	}
+
 	@After
 	public void tearDown() throws Exception {
 		testRepository.dispose();
@@ -99,6 +113,26 @@ public class EGitUtilsTest {
 		
 		testProject.dispose();
 		testProject2.dispose();		
+	}
+
+	@Test
+	public void shouldReturnRepositoryExists() {
+		// given
+		File repositoryDir = testRepository.getRepository().getDirectory().getParentFile();
+		// when
+		boolean exists = EGitUtils.isRepository(repositoryDir);
+		// then
+		assertTrue(exists);
+	}
+	
+	@Test
+	public void shouldReturnRepositoryDoesntExists() {
+		// given
+		File repositoryDir =  new File(System.getProperty("java.io.tmpdir"));
+		// when
+		boolean exists = EGitUtils.isRepository(repositoryDir);
+		// then
+		assertFalse(exists);
 	}
 
 	@Test
@@ -264,10 +298,46 @@ public class EGitUtilsTest {
 	}
 
 	@Test
+	public void shouldCheckoutBranch() throws Exception {
+		// given file committed in custom branch
+		String branch = testRepository.getCurrentBranchObjectId();
+
+		testRepository.createAndCheckoutBranch(Constants.HEAD, REPO_BRANCH);
+		String fileName = "a.txt";
+		String fileContent = "adietish@redhat.com";
+		IFile file = commitFile(fileName, fileContent, testProject, testRepository);
+		testUtils.assertRepositoryContainsFilesWithContent(
+				testRepository.getRepository(),
+				new String[] { testUtils.getPathInRepository(file), fileContent });
+
+		testRepository.checkoutBranch(branch);
+		testUtils.assertRepositoryMisses(testRepository.getRepository(), testUtils.getPathInRepository(file));
+
+		// when checkout custom branch
+		CheckoutResult result = EGitUtils.branch(REPO_BRANCH, testProject.getProject(), null);
+
+		// then file should be present
+		assertTrue(result.getStatus() == CheckoutResult.Status.OK);
+		assertTrue(testRepository.isCurrentBranch(REPO_BRANCH));
+		testUtils.assertRepositoryContainsFilesWithContent(
+				testRepository.getRepository(),
+				new String[] { testUtils.getPathInRepository(file), fileContent });
+	}
+	
+	@Test
 	public void canGetRepoForProject() throws Exception {
 		Repository repository = EGitUtils.getRepository(testProject.getProject());
 		assertNotNull(repository);
 		assertEquals(testRepository.getRepository(), repository);
+	}
+
+	@Test
+	public void canGetRepoForFile() throws Exception {
+		File repoFile = testRepository.getGitDir().getParentFile();
+		Repository repository = EGitUtils.getRepository(repoFile);
+		assertNotNull(repository);
+		// not the same repository instance
+		assertEquals(testRepository.getRepository().getDirectory(), repository.getDirectory());
 	}
 
 	@Test

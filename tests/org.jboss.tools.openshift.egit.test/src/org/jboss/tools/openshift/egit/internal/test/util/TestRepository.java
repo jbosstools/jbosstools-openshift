@@ -63,6 +63,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FileUtils;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
+import org.junit.Assert;
 
 /**
  * Helper class for creating and filling a test repository
@@ -349,6 +350,22 @@ public class TestRepository {
 		updateRef
 				.setRefLogMessage("branch: Created from " + startBranch, false); //$NON-NLS-1$
 		updateRef.update();
+	}
+
+	/**
+	 * Returns the object id of the current branch.
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	public String getCurrentBranchObjectId() throws IOException {
+		return repository.getBranch();
+	}
+
+	public boolean isCurrentBranch(String name) throws IOException {
+		Assert.assertNotNull(name);
+
+		return getCurrentBranchObjectId().equals(repository.findRef(name).getObjectId().getName());
 	}
 
 	/**

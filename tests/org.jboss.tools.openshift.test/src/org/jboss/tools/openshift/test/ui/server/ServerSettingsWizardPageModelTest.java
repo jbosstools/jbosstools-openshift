@@ -111,7 +111,7 @@ public class ServerSettingsWizardPageModelTest {
 	}
 
 	@Test
-	public void shouldReturnServiceMatchingGitRemoteOfProjectModeldWasInitializedWith() {
+	public void shouldReturnServiceMatchingGitRemoteOfProjectModelWasInitializedWith() {
 		// given
 		// model initialized with project
 		ServerSettingsWizardPageModel model = createModel(null, null, project2, Arrays.asList(project1, project2, project3, project4), connection);
