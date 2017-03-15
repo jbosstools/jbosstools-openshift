@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.view.resources;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.reddeer.common.exception.RedDeerException;
 import org.jboss.reddeer.common.wait.TimePeriod;
 import org.jboss.reddeer.common.wait.WaitWhile;
@@ -40,6 +41,7 @@ public class ServerAdapter {
 	
 	private Version version;
 	private String applicationName;
+	private String type;
 	
 	private TreeItem serverAdapterItem;
 	
@@ -50,11 +52,16 @@ public class ServerAdapter {
 	 * @param version version of an OpenShift server
 	 * @param applicationName name of an application that server adapter binds to
 	 */
-	public ServerAdapter(Version version, String applicationName) {
+	public ServerAdapter(Version version, String applicationName, String type) {
 		this.version = version;
 		this.applicationName = applicationName;
+		this.type = type;
 		
 		updateServerAdapterTreeItem();
+	}
+	
+	public ServerAdapter(Version version, String applicationName){
+		this(version, applicationName, StringUtils.EMPTY);
 	}
 	
 	/**
@@ -90,6 +97,9 @@ public class ServerAdapter {
 		if (version.equals(Version.OPENSHIFT2)) {
 			serverAdapterLabel += getOS2ServerAdapterAppendix();
 		} else {
+			if (type != StringUtils.EMPTY){
+				serverAdapterLabel += String.format(" (%s)", type);	
+			}
 			serverAdapterLabel += getOS3ServerAdapterAppendix();
 		}
 		return serverAdapterLabel;
