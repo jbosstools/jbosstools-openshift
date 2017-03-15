@@ -41,7 +41,7 @@ public class ServerAdapterExists extends AbstractWaitCondition {
 	@Override
 	public boolean test() {
 		try {
-			new ServerAdapter(version, applicationName);
+			new ServerAdapter(version, applicationName, "Service");
 			return true;
 		} catch (OpenShiftToolsException ex) {
 			return false;
