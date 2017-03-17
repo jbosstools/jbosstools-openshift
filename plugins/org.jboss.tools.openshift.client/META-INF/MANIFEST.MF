@@ -21,6 +21,7 @@ Bundle-ClassPath: lib/openshift-restclient-java-5.5.0.Final.jar,
  .
 Export-Package: com.openshift.internal.restclient;x-friends:="org.jboss.tools.openshift.test",
  com.openshift.restclient,
+ com.openshift.restclient.api,
  com.openshift.restclient.api.capabilities,
  com.openshift.restclient.api.models,
  com.openshift.restclient.apis.autoscaling.models,

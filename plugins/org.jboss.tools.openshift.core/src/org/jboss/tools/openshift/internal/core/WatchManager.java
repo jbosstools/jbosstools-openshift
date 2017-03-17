@@ -102,7 +102,7 @@ public class WatchManager {
 		listener.start(backoff, lastConnect);
 	}
 
-	private static enum State {
+	protected static enum State {
 		STARTING,
 		CONNECTED,
 		DISCONNECTED, 
@@ -164,7 +164,7 @@ public class WatchManager {
         }
 	}
 	
-	private class WatchListener implements IOpenShiftWatchListener{
+	public class WatchListener implements IOpenShiftWatchListener{
 		
 		private static final int NOT_FOUND = -1;
 		
@@ -175,8 +175,15 @@ public class WatchManager {
 		private long lastConnect = 0;
 		private AtomicReference<State> state = new AtomicReference<>(State.DISCONNECTED);
 		private List<IResource> resources = Collections.synchronizedList(new ArrayList<>());
+		
+		/**
+		 * Used only for testing purposes
+		 */
+		protected void setState(String state) {
+			this.state.set(State.valueOf(state));
+		}
 
-		public WatchListener(IProject project, IOpenShiftConnection conn, String kind, int backoff, long lastConnect) {
+		protected WatchListener(IProject project, IOpenShiftConnection conn, String kind, int backoff, long lastConnect) {
 			Trace.debug("WatchManager Adding WatchListener for {0} and kind {1}", project.getName(), kind);
 			this.project = project;
 			this.conn = conn;
