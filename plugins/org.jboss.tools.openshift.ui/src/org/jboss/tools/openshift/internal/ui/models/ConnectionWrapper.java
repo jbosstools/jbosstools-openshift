@@ -34,7 +34,7 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
-class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel> implements IConnectionWrapper {
+public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel> implements IConnectionWrapper {
 	public static final String[] RESOURCE_KINDS = { 
 			ResourceKind.BUILD, 
 			ResourceKind.BUILD_CONFIG,

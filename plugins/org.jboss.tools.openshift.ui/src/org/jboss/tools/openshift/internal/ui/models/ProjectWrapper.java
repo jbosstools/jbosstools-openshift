@@ -23,7 +23,7 @@ import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
-class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> implements IProjectWrapper {
+public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> implements IProjectWrapper {
 	private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
 
 	public ProjectWrapper(ConnectionWrapper parent, IProject resource) {
@@ -46,6 +46,7 @@ class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> impl
 		return false;
 	}
 
+	@Override
 	protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated,
 			boolean changed) {
 		if (changed || !updated.isEmpty()) {
@@ -73,6 +74,7 @@ class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> impl
         return relatedresources;
     }
 
+    @Override
 	protected AbstractResourceWrapper<?, ?> createNewWrapper(Collection<IResource> resources, IResource r) {
 		AbstractResourceWrapper<?, ?> newWrapper;
 		if (r instanceof IService) {
@@ -94,6 +96,7 @@ class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> impl
 		return newWrapper;
 	}
 
+    @Override
 	void initWithResources(Collection<IResource> resources) {
 		super.initWithResources(resources);
 		state.set(LoadingState.LOADED);
