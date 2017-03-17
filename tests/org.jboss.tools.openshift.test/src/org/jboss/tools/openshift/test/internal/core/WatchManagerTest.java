@@ -4,6 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,24 +26,19 @@ public class WatchManagerTest {
 	@Mock IProject project;
 	@Mock IOpenShiftConnection connection;
 	@Mock IClient client;
-
-	@Test
-	@SuppressWarnings("unchecked")
-	public void testStartWatch() {
-		when(project.accept(any(CapabilityVisitor.class), isNull())).thenReturn(client);
-		WatchManager.getInstance().startWatch(project, connection);
-		verify(client, times(WatchManager.KINDS.length)).watch(any(), any(), any());
-	}
 	
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testStopWatch() {
+	public void testStartStopWatch() {
+		// given
 		when(project.accept(any(CapabilityVisitor.class), isNull())).thenReturn(client);
 		IWatcher watchClient = mock(IWatcher.class);
 		when(client.watch(any(), any(), any())).thenReturn(watchClient);
+		// when - then
 		WatchManager.getInstance().startWatch(project, connection);
+		verify(client, timeout(200).times(WatchManager.KINDS.length)).watch(any(), any(), any());
 		
 		WatchManager.getInstance().stopWatch(project, connection);
-		verify(watchClient, times(WatchManager.KINDS.length)).stop();
+		verify(watchClient, timeout(200).times(WatchManager.KINDS.length)).stop();
 	}
 }
