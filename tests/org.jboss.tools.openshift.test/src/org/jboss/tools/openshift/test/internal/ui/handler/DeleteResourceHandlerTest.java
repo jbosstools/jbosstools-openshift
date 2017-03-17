@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.openshift.restclient.ResourceKind;
@@ -29,6 +30,7 @@ import com.openshift.restclient.model.IProject;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ UIUtils.class, MessageDialog.class, WatchManager.class, ConnectionsRegistryUtil.class, NLS.class})
+@SuppressStaticInitializationFor( {"org.eclipse.swt.SWT", "org.eclipse.swt.widgets.Canvas", "org.eclipse.swt.widgets.Shell"})
 public class DeleteResourceHandlerTest {
 
 	@Test
