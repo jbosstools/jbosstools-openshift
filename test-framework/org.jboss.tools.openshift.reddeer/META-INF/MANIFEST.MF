@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RedDeer API for OpenShift UI Tests
 Bundle-SymbolicName: org.jboss.tools.openshift.reddeer
-Bundle-Version: 3.3.2.qualifier
+Bundle-Version: 3.3.3.qualifier
 Bundle-Activator: org.jboss.tools.openshift.reddeer.Activator
 Require-Bundle: 
  org.jboss.tools.openshift.ui;bundle-version="3.3.0",
