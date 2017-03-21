@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.jboss.tools.openshift.internal.ui.wizard.builder.ProjectBuilderTypeDetector;
+import org.jboss.tools.openshift.core.server.adapter.ProjectBuilderTypeDetector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

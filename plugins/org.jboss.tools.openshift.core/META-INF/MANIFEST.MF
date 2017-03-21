@@ -39,14 +39,19 @@ Export-Package: org.jboss.tools.openshift.core,
  org.jboss.tools.openshift.core.connection,
  org.jboss.tools.openshift.core.preferences,
  org.jboss.tools.openshift.core.server,
+ org.jboss.tools.openshift.core.server.adapter,
  org.jboss.tools.openshift.core.server.behavior,
+ org.jboss.tools.openshift.core.server.behavior.eap,
  org.jboss.tools.openshift.core.util,
- org.jboss.tools.openshift.core.debug,
  org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.core.models;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.core.portforwarding;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.core.preferences;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
- org.jboss.tools.openshift.internal.core.server.debug;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.server.debug;
+  x-friends:="org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.reddeer,
+   org.jboss.tools.openshift.js",
  org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.ui,org.jboss.tools.openshift.reddeer"
 Service-Component: META-INF/connectionFactory.xml
 

@@ -111,7 +111,7 @@ public class OpenShiftDebugUtilsTest {
 		DebuggingContext context = debugUtils.getDebuggingContext(dc);
 
 		assertEquals(1234, context.getDebugPort());
-		assertTrue(context.isDebugEnabled());
+		assertTrue(context.isDebugEnabled());		
 	}
 
 	@Test

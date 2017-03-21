@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Status;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IServerShutdownController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
-import org.jboss.tools.openshift.core.debug.DebugTrackerContributionEvaluation;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugUtils;
@@ -28,6 +27,11 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 	@Override
 	public IStatus canStop() {
 		return Status.OK_STATUS;
+	}
+	
+	protected void log(int status, String message, Exception e) {
+		OpenShiftCoreActivator.getDefault().getLog().log(
+				new Status(status, OpenShiftCoreActivator.PLUGIN_ID, message, e));
 	}
 
 	public OpenShiftServerBehaviour getBehavior() {
@@ -40,11 +44,9 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 		behavior.setServerStopping();
 		try {
 			OpenShiftDebugUtils.get().terminateRemoteDebugger(behavior.getServer());
-			DebugTrackerContributionEvaluation.stopDebugSession(behavior.getServer());
 			behavior.setServerStopped();
 		} catch(CoreException ce) {
-			OpenShiftCoreActivator.getDefault().getLog().log(
-					new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, "Error shutting down server", ce));
+			log(IStatus.ERROR, "Error shutting down server", ce);
 			getBehavior().setServerStarted();
 		}
 	}

@@ -538,50 +538,6 @@ public class OpenShiftServerUtils {
 		}
 	}
 	
-	public static boolean isEapStyle(IBuildConfig buildConfig) {
-		if (buildConfig == null) {
-			return false;
-		}
-		//First check buildconfig docker image name
-		IBuildStrategy strategy = buildConfig.getBuildStrategy();
-		DockerImageURI image = null;
-		boolean isEapStyle = false;
-		if (strategy instanceof ISourceBuildStrategy) {
-			image = ((ISourceBuildStrategy) strategy).getImage();
-		} else if (strategy instanceof ICustomBuildStrategy) {
-			image = ((ICustomBuildStrategy) strategy).getImage();
-		} else if (strategy instanceof IDockerBuildStrategy) {
-			image = ((IDockerBuildStrategy) strategy).getBaseImage();
-		} else if (strategy instanceof ISTIBuildStrategy) {
-			image = ((ISTIBuildStrategy) strategy).getImage();
-		}
-		if (image != null) {
-			isEapStyle = containsEapLikeKeywords(image.getName());
-		}
-		if (!isEapStyle) {
-			//Check template labels as a last resort
-			//not sure it's even possible to reach this point
-			Map<String, String> labels = buildConfig.getLabels();
-			if (labels != null) {
-				String template = labels.get("template");
-				isEapStyle = containsEapLikeKeywords(template);
-			}
-		}
-		return isEapStyle;
-	}
-		
-	public static boolean containsEapLikeKeywords(String label) {
-		if (org.apache.commons.lang.StringUtils.isBlank(label)) {
-			return false;
-		}
-		String lcLabel = label.toLowerCase();
-		boolean isEapLike = EAP_LIKE_KEYWORDS.stream()
-											 .filter(kw -> lcLabel.contains(kw))
-											 .findFirst()
-											 .isPresent();
-		return isEapLike;
-	}
-	
 	/**
 	 * Returns the value for the given key and server. Will first query the
 	 * server and if no value was found the deploy project is queried.
@@ -618,29 +574,6 @@ public class OpenShiftServerUtils {
 			OpenShiftCoreActivator.pluginLog().logError(e);
 		}
 		return false;
-	}
-
-	/**
-	 * Return {@code true} if the given server has a deploy project that is
-	 * nodejs project.
-	 * 
-	 * @param server
-	 * @return
-	 * 
-	 * @see #getDeployProject(IServerAttributes)
-	 */
-	public static boolean isNodeJsProject(IServerAttributes server) {
-		IProject p = getDeployProject(server);
-		return ProjectUtils.isAccessible(p) && hasPackageJson(p);
-	}
-
-	/**
-	 * @return true if {@link IProject} contains package.json file, false
-	 *         otherwise.
-	 */
-	private static boolean hasPackageJson(IProject project) {
-		IFile packageJson = project.getFile(PACKAGE_JSON);
-		return (packageJson != null && packageJson.isAccessible());
 	}
 	
     private static void assertServerNotNull(IServerAttributes server) throws CoreException {

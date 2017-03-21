@@ -107,9 +107,7 @@
    		schema="schema/org.jboss.tools.openshift.core.routeChooser.exsd"/>
 	
 	<!-- Node.js Debugger integration -->
-   	<extension-point id="org.jboss.tools.openshift.core.debugSessionTracker" 
-   		name="DebugSessionTracker" 
-   		schema="schema/org.jboss.tools.openshift.core.debugSessionTracker.exsd"/>
+    <extension-point id="org.jboss.tools.openshift.core.serverAdapterProfileDetector" name="Openshift Server Adapter Profile Detector" schema="schema/org.jboss.tools.openshift.core.serverAdapterProfileDetector.exsd"/>
    		
    	<extension
          point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
@@ -120,6 +118,12 @@
             id="launch.noop.openshift"
             name="OpenShift Launch Controller"
             class="org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController">
+            <properties>
+               <property
+                     key="default"
+                     value="true">
+               </property>
+            </properties>
          </subsystem>
          <subsystemMapping
             id="launch.noop.openshift"
@@ -133,6 +137,12 @@
             id="shutdown.openshift.default"
             name="OpenShift Shutdown Controller"
             class="org.jboss.tools.openshift.core.server.behavior.OpenShiftShutdownController">
+            <properties>
+               <property
+                     key="default"
+                     value="true">
+               </property>
+            </properties>
          </subsystem>
          <subsystemMapping
             id="shutdown.openshift.default"
@@ -159,6 +169,12 @@
             id="publish.rsync.filesystem"
             name="Local Filesystem Publish with RSync"
             class="org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController">
+         <properties>
+            <property
+                  key="default"
+                  value="true">
+            </property>
+         </properties>
       </subsystem>
       <subsystemMapping
             id="publish.rsync.filesystem"
@@ -183,6 +199,12 @@
             id="deploymentOptions.openshift.metadata"
             name="OpenShift Deployment Options"
             class="org.jboss.tools.openshift.core.server.behavior.OpenShiftDeploymentOptionsController">
+            <properties>
+               <property
+                     key="default"
+                     value="true">
+               </property>
+            </properties>
          </subsystem>
          <subsystemMapping
             id="deploymentOptions.openshift.metadata"
@@ -201,7 +223,7 @@
             system="moduleDeployPath"
             id="moduleDeployPath.xmlprefs.openshift.eap"
             name="OpenShift Deploy Path for EAP applications"
-            class="org.jboss.tools.openshift.core.server.behavior.OpenShiftEapDeployPathController">
+            class="org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapDeployPathController">
          </subsystem>
          <subsystemMapping
             id="moduleDeployPath.xmlprefs.openshift.eap"
@@ -213,12 +235,23 @@
             system="modules"
             id="modules.state.openshift.wf.fs"
             name="OpenShift Module Controller for EAP-style Filesystem Markers"
-            class="org.jboss.tools.openshift.core.server.behavior.OpenShiftEapModulesController">
+            class="org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapModulesController">
          </subsystem>
          <subsystemMapping
             id="modules.state.openshift.wf.fs"
             mappedId="modules.state.openshift.wf.fs"
             serverTypes="org.jboss.tools.openshift.server.type">
+         </subsystemMapping>
+         <subsystem
+               class="org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapPublishController"
+               id="publish.rsync.filesystem.eap"
+               name="Local Filesystem Publish with RSync for EAP"
+               system="publish">
+         </subsystem>
+         <subsystemMapping
+               id="publish.rsync.filesystem.eap"
+               mappedId="publish.rsync.filesystem.eap"
+               serverTypes="org.jboss.tools.openshift.server.type">
          </subsystemMapping>
    	</extension>
    	
@@ -227,11 +260,19 @@
           point="org.jboss.ide.eclipse.as.wtp.core.serverProfile">
        <serverProfile id="openshift3" serverTypes="org.jboss.tools.openshift.server.type">
        	  <description name="openshift3" description="A profile configured to publish to a local folder and rsync to a remote OpenShift"/>
+          <subsystem
+                subsystem="publish.rsync.filesystem"
+                system="publish">
+          </subsystem>
           <subsystem system="modules" subsystem="modules.noop.default"/>
           <subsystem system="moduleDeployPath" subsystem="moduleDeployPath.xmlprefs.openshift"/>
        </serverProfile>
        <serverProfile id="openshift3.eap" serverTypes="org.jboss.tools.openshift.server.type">
        	  <description name="openshift3.eap" description="A profile configured to publish to a local folder and rsync to a remote OpenShift running EAP"/>
+          <subsystem
+                subsystem="publish.rsync.filesystem.eap"
+                system="publish">
+          </subsystem>
           <subsystem system="modules" subsystem="modules.state.openshift.wf.fs"/>
           <subsystem system="moduleDeployPath" subsystem="moduleDeployPath.xmlprefs.openshift.eap"/>
        </serverProfile>
@@ -254,5 +295,11 @@
           </adapter>
        </factory>
     </extension>
+ <extension
+       point="org.jboss.tools.openshift.core.serverAdapterProfileDetector">
+    <detector
+          class="org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector">
+    </detector>
+ </extension>
     
 </plugin>
