@@ -11,14 +11,20 @@
 package org.jboss.tools.openshift.cdk.server.core.internal.detection;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.jboss.dmr.ModelNode;
 import org.jboss.tools.foundation.core.credentials.CredentialService;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
@@ -100,9 +106,34 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 		if( user != null ) {
 			addToCredentialsModel(CredentialService.REDHAT_ACCESS, user, password);
 		}
-		wc.setAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
+		wc.setAttribute(CDK3Server.PROP_HYPERVISOR, getHypervisor(folder));
 		wc.setAttribute(CDKServer.PROP_USERNAME, user);
 		wc.setAttribute(CDK3Server.MINISHIFT_FILE, getMinishiftLoc(runtimeDefinition));
+	}
+	
+	private String getHypervisor(String folder) {
+		String[] validHypervisors = CDK3Server.getHypervisors(); 
+		String hyperV = validHypervisors[0];
+		
+		File config = new File(folder, "config");
+		File configJson = new File(config, "config.json");
+		if( configJson.exists() && configJson.isFile()) {
+			String path = configJson.getAbsolutePath();
+			try {
+				String content = new String(Files.readAllBytes(Paths.get(path)));
+				ModelNode mn = ModelNode.fromJSONString(content);
+				ModelNode o = mn.get("vm-driver");
+				if( o != null ) {
+					String vmDriv = o.asString();
+					if( Arrays.asList(validHypervisors).contains(vmDriv)) {
+						hyperV = vmDriv;
+					}
+				}
+			} catch (IOException e) {
+				CDKCoreActivator.pluginLog().logError(e);
+			}
+		}
+		return hyperV;
 	}
 	
 	private String getMinishiftLoc(RuntimeDefinition runtimeDefinition) {
