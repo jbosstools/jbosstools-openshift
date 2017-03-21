@@ -17,7 +17,7 @@ import org.eclipse.wst.server.core.IModuleType;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerAttributes;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
-import org.jboss.tools.openshift.core.server.behavior.OpenShiftEapDeployPathController.OpenShiftModuleDeploymentPrefsUtil;
+import org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapDeployPathController.OpenShiftModuleDeploymentPrefsUtil;
 import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.junit.After;
 import org.junit.Test;

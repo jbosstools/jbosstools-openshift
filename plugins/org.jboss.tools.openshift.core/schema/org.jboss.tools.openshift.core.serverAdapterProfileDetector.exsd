@@ -3,10 +3,10 @@
 <schema targetNamespace="org.jboss.tools.openshift.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.jboss.tools.openshift.core" id="org.jboss.tools.openshift.core.debugSessionTracker" name="DebugSessionTracker"/>
+         <meta.schema plugin="org.jboss.tools.openshift.core" id="org.jboss.tools.openshift.core.openshiftApplicationServerAdapter" name="Openshift Application Server Adapter"/>
       </appinfo>
       <documentation>
-         Extension point is used for tracking remote debug sessions e.g. Node.js
+         All extensions of this point are used during creation of the server adapters for Openshift applications. Detected profile is set into the &quot;org.jboss.ide.eclipse.as.core.server.serverMode&quot; property of the server adapter, which is then used by estensions of the &quot;org.jboss.ide.eclipse.as.wtp.core.serverProfile&quot; point to get suitable behaviors for various actions, like &quot;launch&quot;, &quot;publish&quot;, &quot;shutdown&quot; etc.
       </documentation>
    </annotation>
 
@@ -17,8 +17,8 @@
          </appinfo>
       </annotation>
       <complexType>
-         <choice minOccurs="0" maxOccurs="unbounded">
-            <element ref="tracker"/>
+         <choice>
+            <element ref="detector" minOccurs="1" maxOccurs="unbounded"/>
          </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,15 +47,15 @@
       </complexType>
    </element>
 
-   <element name="tracker">
+   <element name="detector">
       <complexType>
-         <attribute name="class" type="string">
+         <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The &quot;detect&quot; method is used to check if the server adapter which is being created for the corresponding resource of the connection and eclipse project.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.jboss.tools.openshift.core.debug.DebugSessionTracker"/>
+                  <meta.attribute kind="java" basedOn=":org.jboss.tools.openshift.core.server.adapter.IOpenshiftServerAdapterProfileDetector"/>
                </appinfo>
             </annotation>
          </attribute>
