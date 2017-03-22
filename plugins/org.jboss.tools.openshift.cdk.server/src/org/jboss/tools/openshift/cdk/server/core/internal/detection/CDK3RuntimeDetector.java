@@ -41,7 +41,8 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 	
 	@Override
 	protected boolean validate(File root) {
-		return isHomeDirectory(root.getParentFile()) && root.getName().equals(".minishift") && super.validate(root);
+		return isHomeDirectory(root.getParentFile()) && 
+				".minishift".equals(root.getName()) && super.validate(root);
 	}
 	
 	@Override
@@ -117,21 +118,21 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 		
 		File config = new File(folder, "config");
 		File configJson = new File(config, "config.json");
-		if( configJson.exists() && configJson.isFile()) {
-			String path = configJson.getAbsolutePath();
-			try {
-				String content = new String(Files.readAllBytes(Paths.get(path)));
-				ModelNode mn = ModelNode.fromJSONString(content);
-				ModelNode o = mn.get("vm-driver");
-				if( o != null ) {
-					String vmDriv = o.asString();
-					if( Arrays.asList(validHypervisors).contains(vmDriv)) {
-						hyperV = vmDriv;
-					}
-				}
-			} catch (IOException e) {
-				CDKCoreActivator.pluginLog().logError(e);
+		if( !configJson.exists() || !configJson.isFile()) {
+			return hyperV;
+		}
+		
+		String path = configJson.getAbsolutePath();
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(path)));
+			ModelNode mn = ModelNode.fromJSONString(content);
+			ModelNode o = mn.get("vm-driver");
+			String val = (o == null ? null : o.asString());
+			if( val != null && Arrays.asList(validHypervisors).contains(val)) {
+				return val;
 			}
+		} catch (IOException e) {
+			CDKCoreActivator.pluginLog().logError(e);
 		}
 		return hyperV;
 	}
@@ -141,8 +142,7 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 		if( fromDef != null && !fromDef.isEmpty() && new File(fromDef).exists()) {
 			return fromDef;
 		}
-		String minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation();
-		return minishiftLoc;
+		return MinishiftBinaryUtility.getMinishiftLocation();
 	}
 	
 	@Override
