@@ -24,7 +24,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.ImportFailedException;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.WontOverwriteException;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -34,15 +33,14 @@ import com.openshift.restclient.OpenShiftException;
 
 public class ImportJob extends WorkspaceJob {
 
-	private DelegatingProgressMonitor delegatingMonitor;
 	private String gitUrl;
 	private File cloneDestination;
 	private String gitRef;
 	private Collection<String> filters;
 	private boolean checkoutBranch;
 	
-	public ImportJob(File cloneDestination, boolean checkoutBranch, DelegatingProgressMonitor delegatingMonitor) {
-		this(null, cloneDestination, checkoutBranch, delegatingMonitor);
+	public ImportJob(File cloneDestination, boolean checkoutBranch) {
+		this(null, cloneDestination, checkoutBranch);
 	}
 
 	/**
@@ -53,28 +51,26 @@ public class ImportJob extends WorkspaceJob {
 	 * @param cloneDestination
 	 * @param delegatingMonitor
 	 */
-	protected ImportJob(String gitUrl, File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
-		this(gitUrl, cloneDestination, true, delegatingMonitor);
+	protected ImportJob(String gitUrl, File cloneDestination) {
+		this(gitUrl, cloneDestination, true);
 	}
 
-	protected ImportJob(String gitUrl, File cloneDestination, boolean checkoutBranch, DelegatingProgressMonitor delegatingMonitor) {
+	protected ImportJob(String gitUrl, File cloneDestination, boolean checkoutBranch) {
 		super("Importing project to workspace...");
 		setRule(ResourcesPlugin.getWorkspace().getRoot());
 		this.gitUrl = gitUrl;
 		this.cloneDestination = cloneDestination;
-		this.delegatingMonitor = delegatingMonitor;
 		this.checkoutBranch = checkoutBranch;
 	}
 	
 	@Override
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 		try {
-			delegatingMonitor.add(monitor);
 			IStatus status = Status.OK_STATUS;
 			if (gitUrl == null) {
-				status = new ImportProjectOperation(gitRef, cloneDestination, filters, checkoutBranch).execute(delegatingMonitor);
+				status = new ImportProjectOperation(gitRef, cloneDestination, filters, checkoutBranch).execute(monitor);
 			} else {
-				status = new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters).execute(delegatingMonitor);
+				status = new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters).execute(monitor);
 			}
 			return status;
 		} catch (final WontOverwriteException e) {
@@ -101,12 +97,12 @@ public class ImportJob extends WorkspaceJob {
 						"An exception occurred while creating local git repository.", e);
 			}
 		} catch (InterruptedException e) {
-			if(delegatingMonitor.isCanceled()) return Status.CANCEL_STATUS;
+			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
 			return OpenShiftUIActivator.statusFactory().errorStatus("Could not import project to the workspace.", e);
 		} catch (Exception e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus("Could not import project to the workspace.", e);
 		} finally {
-			delegatingMonitor.done();
+			monitor.done();
 		}
 	}
 

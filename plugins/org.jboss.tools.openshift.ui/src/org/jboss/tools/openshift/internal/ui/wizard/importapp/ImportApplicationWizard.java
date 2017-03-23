@@ -17,17 +17,16 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.DialogSettings;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
-import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
-import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
@@ -54,31 +53,17 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	public ImportApplicationWizard() {
 		setWindowTitle("Import OpenShift Application");
 		setNeedsProgressMonitor(true);
-		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
+		setDialogSettings(
+				DialogSettings.getOrCreateSection(
+						OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
 		this.model = new ImportApplicationWizardModel();
-		String repoPath = getDefaultRepoPath();
+		String repoPath = loadRepoPath();
 		if (StringUtils.isNotBlank(repoPath)) {
 		    model.setRepositoryPath(repoPath);
 		    model.setUseDefaultRepositoryPath(false);
 		}
 	}
 
-	/**
-	 * Get the default Git import path. Check for a section in the openshift.common.ui
-	 * plugin (to share with Openshift v2) and if not found, check for a section in
-	 * openshift.ui (initial implementation that was not shared with Openshift v2).
-	 * 
-	 * @return the found default git path
-	 */
-	private String getDefaultRepoPath() {
-	    String path = getDialogSettings().get(REPO_PATH_KEY);
-	    if (path == null) {
-	        IDialogSettings settings = DialogSettings.getOrCreateSection(OpenShiftUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
-	        path = settings.get(REPO_PATH_KEY);
-	    }
-	    return path;
-	}
-	
 	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
 		this();
 		if (projectsAndBuildConfigs != null
@@ -91,6 +76,23 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		}
 	}
 
+	/**
+	 * Get the default Git import path. Check for a section in the openshift.common.ui
+	 * plugin (to share with Openshift v2) and if not found, check for a section in
+	 * openshift.ui (initial implementation that was not shared with Openshift v2).
+	 * 
+	 * @return the found default git path
+	 */
+	private String loadRepoPath() {
+	    String path = getDialogSettings().get(REPO_PATH_KEY);
+	    if (path == null) {
+	        IDialogSettings settings = DialogSettings.getOrCreateSection(
+	        		OpenShiftUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
+	        path = settings.get(REPO_PATH_KEY);
+	    }
+	    return path;
+	}
+	
 	private void setConnection(IProject project) {
 		Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
 		setModelConnection(connection);
@@ -145,16 +147,23 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	@Override
 	public boolean performFinish() {
-		boolean success = false;
-		success = importProject(model.isReuseGitRepository());
-		if (success) {
-			saveRepoPathValue();
-		}
-		UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
-		return success;
+		Job importJob = createImportJob(model.isReuseGitRepository());
+		importJob.setUser(true);
+		importJob.addJobChangeListener(new JobChangeAdapter() {
+
+			@Override
+			public void done(IJobChangeEvent event) {
+				boolean success = JobUtils.isOk(importJob.getResult());
+				if (success) {
+					saveRepoPath();
+				}
+				UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
+			}});
+		importJob.schedule();
+		return true;
 	}
 
-	private void saveRepoPathValue() {
+	private void saveRepoPath() {
 		if(!model.isUseDefaultRepositoryPath()) {
 			getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
 		} else {
@@ -162,25 +171,12 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		}
 	}
 
-	private boolean importProject(boolean reuseGitRepository) {
-		final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-		ImportJob job = createImportJob(reuseGitRepository, delegatingMonitor);
-		try {
-			IStatus jobResult = WizardUtils.runInWizard(job, delegatingMonitor, getContainer());
-			return JobUtils.isOk(jobResult);
-		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
-					OpenShiftUIActivator.statusFactory().errorStatus("An exception occurred while creating local git repository.", e));
-			return false;
-		}
-	}
-
-	private ImportJob createImportJob(boolean reuseGitRepository, final DelegatingProgressMonitor delegatingMonitor) {
+	private ImportJob createImportJob(boolean reuseGitRepository) {
 		ImportJob importJob = null;
 		if (!reuseGitRepository) {
-			importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination(), delegatingMonitor);
+			importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination());
 		} else {
-			importJob = new ImportJob(model.getCloneDestination(), model.isCheckoutBranchReusedRepo(), delegatingMonitor);
+			importJob = new ImportJob(model.getCloneDestination(), model.isCheckoutBranchReusedRepo());
 		}
 		importJob.setGitRef(model.getGitRef());
 		String gitContextDir = model.getGitContextDir();
