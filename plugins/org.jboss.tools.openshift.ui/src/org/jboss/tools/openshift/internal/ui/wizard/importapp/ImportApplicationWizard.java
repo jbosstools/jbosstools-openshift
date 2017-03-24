@@ -163,27 +163,27 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		return true;
 	}
 
+	private ImportJob createImportJob(boolean reuseGitRepository) {
+		ImportJob importJob = null;
+		if (reuseGitRepository) {
+			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getCloneDestination(),
+					model.isCheckoutBranchReusedRepo());
+		} else {
+			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getCloneDestination());
+		}
+		String gitContextDir = model.getGitContextDir();
+		if (StringUtils.isNotEmpty(gitContextDir)) {
+			importJob.setFilters(Collections.singleton(gitContextDir));
+		}
+		return importJob;
+	}
+
 	private void saveRepoPath() {
 		if(!model.isUseDefaultRepositoryPath()) {
 			getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
 		} else {
 			getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
 		}
-	}
-
-	private ImportJob createImportJob(boolean reuseGitRepository) {
-		ImportJob importJob = null;
-		if (!reuseGitRepository) {
-			importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination());
-		} else {
-			importJob = new ImportJob(model.getCloneDestination(), model.isCheckoutBranchReusedRepo());
-		}
-		importJob.setGitRef(model.getGitRef());
-		String gitContextDir = model.getGitContextDir();
-		if (StringUtils.isNotEmpty(gitContextDir)) {
-			importJob.setFilters(Collections.singleton(gitContextDir));
-		}
-		return importJob;
 	}
 
 	@Override

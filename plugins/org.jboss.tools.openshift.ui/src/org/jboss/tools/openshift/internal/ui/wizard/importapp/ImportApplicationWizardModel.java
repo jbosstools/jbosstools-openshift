@@ -193,7 +193,7 @@ public class ImportApplicationWizardModel
 		firePropertyChange(PROPERTY_GIT_REF, null, gitRef);
 		return gitRef;
 	}
-	
+
 	@Override
 	public IBuildConfig getSelectedBuildConfig() {
 		return getBuildConfig(selectedItem);
