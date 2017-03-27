@@ -19,21 +19,21 @@ import org.eclipse.jgit.lib.Repository;
  */
 public interface IGitCloningPageModel {
 
-	public static final String PROPERTY_REPOSITORY_PATH = "repositoryPath";
-	public static final String PROPERTY_USE_DEFAULT_REPOSITORY_PATH = "useDefaultRepositoryPath";
+	public static final String PROPERTY_CLONE_DESTINATION = "cloneDestination";
+	public static final String PROPERTY_USE_DEFAULT_CLONE_DESTINATION = "useDefaultCloneDestination";
 	public static final String PROPERTY_REUSE_GIT_REPOSITORY = "reuseGitRepository";
 	public static final String PROPERTY_REPO_NAME = "repoName";
-	public static final String PROPERTY_CLONE_DESTINATION = "cloneDestination";
+	public static final String PROPERTY_REPO_PATH = "repoPath";
 	public static final String PROPERTY_CHECKOUT_BRANCH_REUSED_REPO = "checkoutBranchReusedRepo";
 	public static final String PROPERTY_GIT_REF = "gitRef";
-	public static final String PROPERTY_IS_CLONE_DESTINATION_AT_GITREF = "cloneDestinationAtGitRef";
+	public static final String PROPERTY_IS_REPOSITORY_BRANCH_GIT_REF = "repositoryBranchGitRef";
 	public static final String PROPERTY_GIT_CONTEXT_DIR = "gitContextDir";
 
-	public void setRepositoryPath(String path);
-	public String getRepositoryPath();
+	public void setCloneDestination(String path);
+	public String getCloneDestination();
 
-	public void setUseDefaultRepositoryPath(boolean useDefault);
-	public boolean isUseDefaultRepositoryPath();
+	public void setUseDefaultCloneDestination(boolean useDefault);
+	public boolean isUseDefaultCloneDestination();
 
 	public String getApplicationName();
 
@@ -47,8 +47,8 @@ public interface IGitCloningPageModel {
 	 * 
 	 * @see File
 	 */
-	public File getCloneDestination();
-	public Repository getCloneDestinationRepository();
+	public File getRepoPath();
+	public Repository getRepository();
 
 	public boolean isReuseGitRepository();
 	public void setReuseGitRepository(boolean reuseGitRepository);
@@ -63,7 +63,7 @@ public interface IGitCloningPageModel {
 	/**
 	 * Returns {@code true} if this model is set to checkout the branch
 	 * {@link #getGitRef()} in the git repo located at
-	 * {@link #getCloneDestination()}
+	 * {@link #getRepoPath()}
 	 * 
 	 * @return
 	 */
@@ -77,9 +77,9 @@ public interface IGitCloningPageModel {
 	 * @return
 	 * 
 	 * @See #getGitRef()
-	 * @see #getCloneDestination()
+	 * @see #getRepoPath()
 	 * @see Repository
 	 */
-	boolean isCloneDestinationAtGitRef();
+	boolean isRepositoryBranchGitRef();
 
 }

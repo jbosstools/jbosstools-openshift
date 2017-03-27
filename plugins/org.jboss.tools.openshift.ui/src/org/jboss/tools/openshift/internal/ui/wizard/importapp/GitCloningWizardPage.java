@@ -68,7 +68,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 
 	private IGitCloningPageModel model;
-	private RepoPathValidator repoPathValidator;
+	private CloneDestinationPathValidator cloneDestinationPathValidator;
 
 	public GitCloningWizardPage(IWizard wizard, IGitCloningPageModel model) {
 		super(
@@ -112,52 +112,52 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 			.numColumns(3)
 			.applyTo(cloneGroupComposite);
 
-		// use default repo path
-		Button useDefaultRepoPathButton = new Button(cloneGroupComposite, SWT.CHECK);
-		useDefaultRepoPathButton.setText("Use default clone destination");
-		useDefaultRepoPathButton.setToolTipText("Uncheck if you want to use a custom location to clone to");
+		// use default clone destination path
+		Button useDefaultCloneDestinationButton = new Button(cloneGroupComposite, SWT.CHECK);
+		useDefaultCloneDestinationButton.setText("Use default clone destination");
+		useDefaultCloneDestinationButton.setToolTipText("Uncheck if you want to use a custom location to clone to");
 		GridDataFactory.fillDefaults()
-			.span(3, 1).align(SWT.LEFT, SWT.CENTER).applyTo(useDefaultRepoPathButton);
-		final IObservableValue<Boolean> useDefaultRepoObservable = 
-				BeanProperties.value(IGitCloningPageModel.PROPERTY_USE_DEFAULT_REPOSITORY_PATH).observe(model);
+			.span(3, 1).align(SWT.LEFT, SWT.CENTER).applyTo(useDefaultCloneDestinationButton);
+		final IObservableValue<Boolean> useDefaultCloneDestinationObservable = 
+				BeanProperties.value(IGitCloningPageModel.PROPERTY_USE_DEFAULT_CLONE_DESTINATION).observe(model);
 		ValueBindingBuilder
-			.bind(WidgetProperties.selection().observe(useDefaultRepoPathButton))
-			.to(useDefaultRepoObservable)
+			.bind(WidgetProperties.selection().observe(useDefaultCloneDestinationButton))
+			.to(useDefaultCloneDestinationObservable)
 			.in(dbc);
 
-		// repo path
+		// clone destination
 		Label repoPathLabel = new Label(cloneGroupComposite, SWT.NONE);
 		repoPathLabel.setText("Git Clone Location:");
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).applyTo(repoPathLabel);
-		final Text repoPathText = new Text(cloneGroupComposite, SWT.BORDER);
+		final Text cloneDestinationText = new Text(cloneGroupComposite, SWT.BORDER);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(repoPathText);
-		final IObservableValue<String> repoPathObservable = WidgetProperties.text(SWT.Modify).observe(repoPathText);
-		final IObservableValue<String> repoPathModelObservable = 
-				BeanProperties.value(IGitCloningPageModel.PROPERTY_REPOSITORY_PATH).observe(model);
+			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(cloneDestinationText);
+		final IObservableValue<String> cloneDestinationObservable = WidgetProperties.text(SWT.Modify).observe(cloneDestinationText);
+		final IObservableValue<String> cloneDestinationModelObservable = 
+				BeanProperties.value(IGitCloningPageModel.PROPERTY_CLONE_DESTINATION).observe(model);
 		ValueBindingBuilder
-			.bind(repoPathObservable)
-			.to(repoPathModelObservable)
+			.bind(cloneDestinationObservable)
+			.to(cloneDestinationModelObservable)
 			.in(dbc);
-		Button browseRepoPathButton = new Button(cloneGroupComposite, SWT.PUSH);
-		browseRepoPathButton.setText("Browse...");
+		Button browseCloneDestinationButton = new Button(cloneGroupComposite, SWT.PUSH);
+		browseCloneDestinationButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
-		browseRepoPathButton.addSelectionListener(onRepoPath());
+				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseCloneDestinationButton);
+		browseCloneDestinationButton.addSelectionListener(onCloneDestination());
 		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(repoPathText))
-			.notUpdating(useDefaultRepoObservable)
+			.bind(WidgetProperties.enabled().observe(cloneDestinationText))
+			.notUpdating(useDefaultCloneDestinationObservable)
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
 		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(browseRepoPathButton))
-			.notUpdating(useDefaultRepoObservable)
+			.bind(WidgetProperties.enabled().observe(browseCloneDestinationButton))
+			.notUpdating(useDefaultCloneDestinationObservable)
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
 		// move focus to the project location text control when not choosing the
 		// 'Use default location' option.
-		UIUtils.focusOnSelection(useDefaultRepoPathButton, repoPathText);
+		UIUtils.focusOnSelection(useDefaultCloneDestinationButton, cloneDestinationText);
 
 		// Reuse git repository
 		Button reuseRepositoryButton = new Button(cloneGroupComposite, SWT.CHECK);
@@ -171,23 +171,29 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 			.bind(reuseGitReposityObservable)
 			.to(BeanProperties.value(IGitCloningPageModel.PROPERTY_REUSE_GIT_REPOSITORY).observe(model))
 			.in(dbc);
-		IObservableValue<File> cloneDestinationObservable =
-				BeanProperties.value(IGitCloningPageModel.PROPERTY_CLONE_DESTINATION).observe(model);
+		IObservableValue<File> repoPathObservable =
+				BeanProperties.value(IGitCloningPageModel.PROPERTY_REPO_PATH).observe(model);
 		ValueBindingBuilder
 			.bind(WidgetProperties.enabled().observe(reuseRepositoryButton))
-			.notUpdating(cloneDestinationObservable)
+			.notUpdating(repoPathObservable)
 			.converting(new FileExistsConverter())
 			.in(dbc);
 		ISWTObservableValue reuseRepoButtonEnabled = WidgetProperties.enabled().observe(reuseRepositoryButton);
 		ValueBindingBuilder
 			.bind(reuseRepoButtonEnabled)
-			.notUpdating(cloneDestinationObservable)
-			.converting(new FileExistsConverter())
+			.notUpdating(repoPathObservable)
+			.converting(new Converter(File.class, Boolean.class) {
+ 
+				@Override
+				public Object convert(Object fromObject) {
+					return fromObject instanceof File
+							&& EGitUtils.isRepository((File) fromObject);
+				}})
 			.in(dbc);
-		this.repoPathValidator = new RepoPathValidator(
-						useDefaultRepoObservable, repoPathObservable, reuseGitReposityObservable, cloneDestinationObservable);
-		dbc.addValidationStatusProvider(repoPathValidator);
-		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
+		this.cloneDestinationPathValidator = new CloneDestinationPathValidator(
+						useDefaultCloneDestinationObservable, cloneDestinationObservable, reuseGitReposityObservable, repoPathObservable);
+		dbc.addValidationStatusProvider(cloneDestinationPathValidator);
+		ControlDecorationSupport.create(cloneDestinationPathValidator, SWT.LEFT | SWT.TOP);
 
 		// checkout reused repo button
 		Composite checkoutComposite = new Composite(cloneGroupComposite, SWT.NONE);
@@ -200,36 +206,36 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		Button checkoutBranchCheckbox = new Button(checkoutComposite, SWT.CHECK);
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).applyTo(checkoutBranchCheckbox);		
+		ISWTObservableValue checkoutBranchCheckboxObservable = WidgetProperties.selection().observe(checkoutBranchCheckbox);
 		ValueBindingBuilder
-			.bind(WidgetProperties.selection().observe(checkoutBranchCheckbox))
+			.bind(checkoutBranchCheckboxObservable)
 			.validatingAfterConvert(new CheckoutBranchValidator())
 			.to(BeanProperties.value(IGitCloningPageModel.PROPERTY_CHECKOUT_BRANCH_REUSED_REPO).observe(model))
 			.validatingAfterConvert(new CheckoutBranchValidator())
 			.in(dbc);
-
-		// checkout branch checkbox and label
-		IObservableValue<Boolean> isCloneDestinationAtGitRefObservable = 
-				BeanProperties.value(IGitCloningPageModel.PROPERTY_IS_CLONE_DESTINATION_AT_GITREF).observe(model);
+		IObservableValue<Boolean> isRepositoryBranchGitRefObservable = 
+				BeanProperties.value(IGitCloningPageModel.PROPERTY_IS_REPOSITORY_BRANCH_GIT_REF).observe(model);
 		ComputedValue<Boolean> checkoutBranchEnablement = new ComputedValue<Boolean>() {
 
 			@Override
 			protected Boolean calculate() {
 				// access all involved observables
 				Boolean isReuseRepoButtonEnabled = (Boolean) reuseRepoButtonEnabled.getValue();
-				Boolean isCloneDestinationAtGitRef = isCloneDestinationAtGitRefObservable.getValue();
+				Boolean isRepositoryBranchGitRef = isRepositoryBranchGitRefObservable.getValue();
 				Boolean isReuseGitRepository = reuseGitReposityObservable.getValue();
 				return isReuseRepoButtonEnabled
-						&& !isCloneDestinationAtGitRef
+						&& !isRepositoryBranchGitRef
 						&& isReuseGitRepository;
 			}
 		};
+		// checkout branch label
 		Label checkoutBranchLabel = new Label(checkoutComposite, SWT.NONE);
 		GridDataFactory.fillDefaults()
 			.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(checkoutBranchLabel);		
 		checkoutBranchLabel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				checkoutBranchCheckbox.setSelection(!checkoutBranchCheckbox.getSelection());
+				checkoutBranchCheckboxObservable.setValue(!checkoutBranchCheckbox.getSelection());
 			}});
 		ValueBindingBuilder
 			.bind(WidgetProperties.text().observe(checkoutBranchLabel))
@@ -256,7 +262,7 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		return cloneGroup;
 	}
 
-	private SelectionListener onRepoPath() {
+	private SelectionListener onCloneDestination() {
 		return new SelectionAdapter() {
 
 			@Override
@@ -264,10 +270,10 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 				DirectoryDialog dialog = new DirectoryDialog(getShell());
 				dialog.setText("Git clone location");
 				dialog.setMessage("Choose the location for git clone...");
-				dialog.setFilterPath(model.getRepositoryPath());
+				dialog.setFilterPath(model.getCloneDestination());
 				String repositoryPath = dialog.open();
 				if (repositoryPath != null) {
-					model.setRepositoryPath(repositoryPath);
+					model.setCloneDestination(repositoryPath);
 				}
 			}
 		};
@@ -275,8 +281,8 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void onPageActivated(DataBindingContext dbc) {
-		if (repoPathValidator != null) {
-			repoPathValidator.forceRevalidate();
+		if (cloneDestinationPathValidator != null) {
+			cloneDestinationPathValidator.forceRevalidate();
 		}
 	}
 
@@ -284,79 +290,80 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 	 * A multivalidator for the repo path. Validates the repo path on behalf of
 	 * the selection to use the default repo path and the repo path value.
 	 */
-	private class RepoPathValidator extends MultiValidator {
+	private class CloneDestinationPathValidator extends MultiValidator {
 
-		private final IObservableValue<Boolean> useDefaultRepoObservable;
-		private final IObservableValue<String> repoPathObservable;
+		private final IObservableValue<Boolean> useDefaultCloneDestinationObservable;
+		private final IObservableValue<String> cloneDestinationObservable;
 		private final IObservableValue<Boolean> reuseGitCloneObservable;
-		private final IObservableValue<File> cloneDestinationObservable;
+		private final IObservableValue<File> repoPathObservable;
 
-		public RepoPathValidator(IObservableValue<Boolean> useDefaultRepoObservable, IObservableValue<String> repoPathObservable,
-				IObservableValue<Boolean> skipCloneObservable, IObservableValue<File> cloneDestinationObservable) {
-			this.useDefaultRepoObservable = useDefaultRepoObservable;
-			this.repoPathObservable = repoPathObservable;
-			this.reuseGitCloneObservable = skipCloneObservable;
+		public CloneDestinationPathValidator(IObservableValue<Boolean> useDefaultCloneDestinationObservable, 
+				IObservableValue<String> cloneDestinationObservable, IObservableValue<Boolean> skipCloneObservable, 
+				IObservableValue<File> repoPathObservable) {
+			this.useDefaultCloneDestinationObservable = useDefaultCloneDestinationObservable;
 			this.cloneDestinationObservable = cloneDestinationObservable;
+			this.reuseGitCloneObservable = skipCloneObservable;
+			this.repoPathObservable = repoPathObservable;
 		}
 
 		@Override
 		protected IStatus validate() {
 			// access all involved observables
-			useDefaultRepoObservable.getValue();
-			final String repoPath = repoPathObservable.getValue();
+			useDefaultCloneDestinationObservable.getValue();
+			final String cloneDestination = cloneDestinationObservable.getValue();
 			final Boolean reuseGitRepository = reuseGitCloneObservable.getValue();
-			final File cloneDestination = cloneDestinationObservable.getValue();
+			final File repoPath = repoPathObservable.getValue();
 
-			final IPath repoResourcePath = new Path(repoPath);
-			if (repoResourcePath.isEmpty()
-					|| !repoResourcePath.isAbsolute()) {
+			final IPath cloneDestinationPath = new Path(cloneDestination);
+			if (cloneDestinationPath.isEmpty()
+					|| !cloneDestinationPath.isAbsolute()) {
 				return ValidationStatus.cancel("You need to provide an absolute path that we'll clone to.");
 			}
 
-			if (!FileUtils.canWrite(repoResourcePath.toOSString())) {
+			if (!FileUtils.canWrite(cloneDestinationPath.toOSString())) {
 				return ValidationStatus.error(
-						NLS.bind("The location {0} is not writeable.", repoResourcePath.toOSString()));
+						NLS.bind("The location {0} is not writeable.", cloneDestinationPath.toOSString()));
 			}
 
-			boolean cloneDestinationExists = FileUtils.exists(cloneDestination);
+			boolean cloneDestinationExists = FileUtils.exists(repoPath);
 			if (reuseGitRepository) {
-				return validateReuseGitRepo(cloneDestination, repoResourcePath, cloneDestinationExists);
+				return validateReuseGitRepo(repoPath, cloneDestinationPath, cloneDestinationExists);
 			} else {
-				return validateClone(repoResourcePath, cloneDestinationExists);
+				return validateClone(cloneDestinationPath, cloneDestinationExists);
 			}
 		}
 
-		private IStatus validateClone(final IPath repoResourcePath, boolean cloneDestinationExists) {
+		private IStatus validateClone(final IPath cloneDestinationPath, boolean cloneDestinationExists) {
 			if (cloneDestinationExists) {
 				return ValidationStatus.error(
 						NLS.bind("There already is a folder named \"{0}\" in \"{1}\".\n"
 								+ "Please choose a different destination, or select 'Reuse existing repository'.",
-								model.getRepoName(), repoResourcePath.toOSString()));
+								model.getRepoName(), cloneDestinationPath.toOSString()));
 			}
 			return ValidationStatus.ok();
 		}
 
-		private IStatus validateReuseGitRepo(final File cloneDestination, final IPath repoResourcePath,
+		private IStatus validateReuseGitRepo(final File repoPath, final IPath cloneDestinationPath,
 				boolean cloneDestinationExists) {
 			if (!cloneDestinationExists) {
 				return ValidationStatus.error(
 						NLS.bind("There is no folder named \"{0}\" in \"{1}\"\n"
 								+ "Please clone the repository or browse to a location containing the repository.",
-								model.getRepoName(), repoResourcePath.toOSString()));
+								model.getRepoName(), cloneDestinationPath.toOSString()));
 			}
 
-			if (!EGitUtils.isRepository(cloneDestination)) {
+			if (!EGitUtils.isRepository(repoPath)) {
 				return ValidationStatus.error(
 						NLS.bind("There already is a folder named \"{0}\" in \"{1}\" but it isnt a git repository.\n"
 								+ "Please remove this folder or use a different location.",
-								model.getRepoName(), repoResourcePath.toOSString()));
+								model.getRepoName(), cloneDestinationPath.toOSString()));
 			} 
 
-			if (!hasRemoteUrl(model.getGitUrl(), repoResourcePath)) {
+			if (!hasRemoteUrl(model.getGitUrl(), cloneDestinationPath)) {
 				return ValidationStatus.warning(NLS.bind(
 						"The reused git repository has no remote to {2}. "
 								+ "It does not seem to match the source that is used in your OpenShift application.",
-						new String[] { model.getRepoName(), repoResourcePath.toOSString(),
+						new String[] { model.getRepoName(), cloneDestinationPath.toOSString(),
 								model.getGitUrl() }));
 			}
 			return ValidationStatus.ok();
@@ -365,11 +372,11 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 		private boolean hasRemoteUrl(final String gitUrl, final IPath repoResourcePath) {
 			try {
 				return EGitUtils.hasRemoteUrl(
-						Pattern.compile(RegExUtils.escapeRegex(gitUrl)), model.getCloneDestinationRepository());
+						Pattern.compile(RegExUtils.escapeRegex(gitUrl)), model.getRepository());
 			} catch (CoreException e) {
 				OpenShiftUIActivator.getDefault().getLog().log(StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID,
 					NLS.bind("Could not inspect remotes for git repo {0} at {1}.", 
-						model.getRepositoryPath(), repoResourcePath.toOSString()), e));
+						model.getCloneDestination(), repoResourcePath.toOSString()), e));
 				return false;
 			}
 		}
@@ -383,7 +390,7 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 	 * A validator that warns if the repository for the reused git repository
 	 * isnt in the current branch that's used in openshift.
 	 * 
-	 * @see IGitCloningPageModel#getCloneDestination()
+	 * @see IGitCloningPageModel#getRepoPath()
 	 * @see IGitCloningPageModel#getGitRef()
 	 */
 	private class CheckoutBranchValidator implements IValidator {
@@ -395,7 +402,7 @@ public class GitCloningWizardPage extends AbstractOpenShiftWizardPage {
 			}
 
 			boolean checkoutBranch = (boolean) value;
-			Repository repository = model.getCloneDestinationRepository();
+			Repository repository = model.getRepository();
 			if (checkoutBranch 
 					&& repository != null
 					&& !isCurrentBranch(model.getGitRef(), repository)) {

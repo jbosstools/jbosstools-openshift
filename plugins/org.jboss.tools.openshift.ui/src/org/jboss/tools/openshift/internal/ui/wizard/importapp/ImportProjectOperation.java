@@ -256,7 +256,7 @@ public class ImportProjectOperation {
 	 * @throws URISyntaxException
 	 * 
 	 * @see AbstractImportApplicationOperation#getApplication()
-	 * @see #getRepositoryPath()
+	 * @see #getCloneDestination()
 	 */
 	protected File cloneRepository(String gitUrl, File destination, String gitRef, IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {

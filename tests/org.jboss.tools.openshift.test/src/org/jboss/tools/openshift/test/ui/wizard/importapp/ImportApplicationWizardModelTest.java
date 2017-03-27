@@ -148,42 +148,42 @@ public class ImportApplicationWizardModelTest {
 	@Test
 	public void shouldUseDefaultRepositoryByDefault() {
 		// then
-		assertThat(model.isUseDefaultRepositoryPath()).isTrue();
+		assertThat(model.isUseDefaultCloneDestination()).isTrue();
 	}
 
 	@Test
 	public void shouldResetRepositoryPathWhenSettingToUseDefaultRepository() {
 		// given
-		model.setUseDefaultRepositoryPath(false);
-		model.setRepositoryPath(FileUtils.getTempDirectoryPath());
+		model.setUseDefaultCloneDestination(false);
+		model.setCloneDestination(FileUtils.getTempDirectoryPath());
 		// when
-		model.setUseDefaultRepositoryPath(true);
+		model.setUseDefaultCloneDestination(true);
 		// then
-		assertTrue(model.isUseDefaultRepositoryPath());
-		assertEquals(EGitUIUtils.getEGitDefaultRepositoryPath(), model.getRepositoryPath());
+		assertTrue(model.isUseDefaultCloneDestination());
+		assertEquals(EGitUIUtils.getEGitDefaultRepositoryPath(), model.getCloneDestination());
 	}
 
 	@Test
 	public void shouldResetUseDefaultRepositoryPathWhenSettingRepositoryPath() {
 		// given
-		model.setUseDefaultRepositoryPath(true);
+		model.setUseDefaultCloneDestination(true);
 		// when
-		model.setRepositoryPath(FileUtils.getTempDirectoryPath());
+		model.setCloneDestination(FileUtils.getTempDirectoryPath());
 		// then
-		assertThat(model.isUseDefaultRepositoryPath()).isFalse();
+		assertThat(model.isUseDefaultCloneDestination()).isFalse();
 	}
 
 	@Test
     public void shouldHaveCustomRepoPathWhenUseDefaultPathSetToFalse() {
 		// given
-		model.setUseDefaultRepositoryPath(true);
+		model.setUseDefaultCloneDestination(true);
 		String repoPath = FileUtils.getTempDirectoryPath();
 		// when
-		model.setUseDefaultRepositoryPath(false);
-    	model.setRepositoryPath(repoPath);
+		model.setUseDefaultCloneDestination(false);
+    	model.setCloneDestination(repoPath);
     	// then
-    	assertFalse(model.isUseDefaultRepositoryPath());
-        assertEquals(repoPath, model.getRepositoryPath());
+    	assertFalse(model.isUseDefaultCloneDestination());
+        assertEquals(repoPath, model.getCloneDestination());
     }
 
 	@Test
@@ -194,14 +194,14 @@ public class ImportApplicationWizardModelTest {
 		doReturn(repoURI).when(p1_bc2).getSourceURI();
 		String repoPath = FileUtils.getTempDirectoryPath();
 
-		model.setUseDefaultRepositoryPath(false);
+		model.setUseDefaultCloneDestination(false);
 		model.setProject(p1);
 		model.loadBuildConfigs();
 		// when
 		model.setSelectedItem(p1_bc2);
-		model.setRepositoryPath(repoPath);
+		model.setCloneDestination(repoPath);
 		// then
-		assertThat(model.getCloneDestination())
+		assertThat(model.getRepoPath())
 			.isEqualTo(new Path(repoPath).append(repoName).toFile());
 	}
 
@@ -217,12 +217,12 @@ public class ImportApplicationWizardModelTest {
 		model.setProject(p1);
 		model.loadBuildConfigs();
 		model.setSelectedItem(p1_bc2);
-		model.setRepositoryPath(repoPath);
+		model.setCloneDestination(repoPath);
 		model.setReuseGitRepository(true);
 		assertThat(model.isReuseGitRepository()).isTrue();
 		File newRepoPath = FileUtils.getUserDirectory();
 		// when
-		model.setRepositoryPath(newRepoPath.getAbsolutePath());		
+		model.setCloneDestination(newRepoPath.getAbsolutePath());		
 		// then
 		assertThat(model.isReuseGitRepository()).isFalse();
 	}

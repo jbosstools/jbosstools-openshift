@@ -48,41 +48,41 @@ public class ImportApplicationWizardModel
 	private Connection connection;
 	private ConnectionTreeItem connectionItem;
 	private Object selectedItem;
-	private String repoPath;
-	private boolean useDefaultRepoPath;
+	private String cloneDestination;
+	private boolean useDefaultCloneDestination;
 	private String repoName;
 	private IProject project;
 	private boolean reuseGitRepo = false;
 	private boolean checkoutBranchReusedRepo;
-	private String cloneDestination;
-	private Repository cloneDestinationRepository;
+	private String repoPath;
+	private Repository repository;
 	private String gitContextDir;
 	
 	private List<ObservableTreeItem> buildConfigs = new ArrayList<>();
-	private boolean isCloneDestinationAtGitRef;
+	private boolean isRepositoryBranchGitRef;
 
 	public ImportApplicationWizardModel() {
-		this.useDefaultRepoPath = true;
-		this.repoPath = getDefaultRepoPath();
+		this.useDefaultCloneDestination = true;
+		this.cloneDestination = getDefaultCloneDestination();
 	}
 
-	private void update(Connection connection, Object selectedItem,
-			String repoPath, boolean useDefaultRepoPath, IProject project, boolean reuseGitRepo, boolean checkoutBranchReusedRepo, String gitContextDir) {
+	private void update(Connection connection, Object selectedItem, String cloneDestination, boolean useDefaultCloneDestination, 
+			IProject project, boolean reuseGitRepo, boolean checkoutBranchReusedRepo, String gitContextDir) {
 		this.connectionItem = updateConnection(connection);
 		this.project = project;
 		Object oldSelectedItem = this.selectedItem;
 		updateSelectedItem(selectedItem);
-		updateUseDefaultRepositoryPath(useDefaultRepoPath);
-		updateRepositoryPath(useDefaultRepoPath, repoPath);
+		updateUseDefaultCloneDestination(useDefaultCloneDestination);
+		updateCloneDestination(cloneDestination);
 		IBuildConfig buildConfig = getBuildConfig(selectedItem);
 		String repoName = updateRepoName(buildConfig);
-		String oldCloneDestination = this.cloneDestination;
-		String newCloneDestination = updateCloneDestination(repoPath, repoName);
-		reuseGitRepo = updateReuseGitRepo(reuseGitRepo, newCloneDestination, oldCloneDestination);
+		String oldRepoPath = this.repoPath;
+		String newRepoPath = updateRepoPath(cloneDestination, repoName);
+		reuseGitRepo = updateReuseGitRepo(reuseGitRepo, newRepoPath, oldRepoPath);
 		String gitRef = updateGitRef(getGitRef(buildConfig));
-		Repository cloneDestinationRepository = updateCloneDestinationRepository(newCloneDestination, oldCloneDestination);
-		boolean isCloneDestinationAtGitRef = updateIsCloneDestinationAtGitRef(gitRef, cloneDestinationRepository);
-		updateCheckoutBranchReusedRepo(checkoutBranchReusedRepo, isCloneDestinationAtGitRef);
+		Repository repository = updateRepository(newRepoPath, oldRepoPath);
+		boolean isRepositoryAtGitRef = updateIsRepositoryAtGitRef(gitRef, repository);
+		updateCheckoutBranchReusedRepo(checkoutBranchReusedRepo, isRepositoryAtGitRef);
 		updateGitContextDir(gitContextDir, buildConfig, getBuildConfig(oldSelectedItem));
 	}
 
@@ -113,37 +113,37 @@ public class ImportApplicationWizardModel
 		return repoName;
 	}
 
-	private void updateRepositoryPath(boolean useDefaultRepo, String repoPath) {
-		firePropertyChange(PROPERTY_REPOSITORY_PATH, this.repoPath, this.repoPath = repoPath);
+	private void updateCloneDestination(String cloneDestination) {
+		firePropertyChange(PROPERTY_CLONE_DESTINATION, this.cloneDestination, this.cloneDestination = cloneDestination);
 	}
 
-	private String updateCloneDestination(String repositoryPath, String repoName) {
-		String cloneDestination = this.cloneDestination;
+	private String updateRepoPath(String repositoryPath, String repoName) {
+		String repoPath = this.repoPath;
 		if (StringUtils.isNotBlank(repositoryPath)) {
 			IPath cloneDestinationPath = new Path(repositoryPath);
 			if (StringUtils.isNotBlank(repoName)) {
 				cloneDestinationPath = cloneDestinationPath.append(new Path(repoName));
 			}
-			cloneDestination = cloneDestinationPath.toOSString();
+			repoPath = cloneDestinationPath.toOSString();
 		}
 
-		firePropertyChange(PROPERTY_CLONE_DESTINATION, this.cloneDestination, this.cloneDestination = cloneDestination);
-		return cloneDestination;
+		firePropertyChange(PROPERTY_REPO_PATH, this.repoPath, this.repoPath = repoPath);
+		return repoPath;
 	}
 
-	private Repository updateCloneDestinationRepository(String newCloneDestination, String oldCloneDestination) {
-		Repository repository = this.cloneDestinationRepository;
-		if (!StringUtils.equals(newCloneDestination, oldCloneDestination)) {
+	private Repository updateRepository(String newRepoPath, String oldRepoPath) {
+		Repository repository = this.repository;
+		if (!StringUtils.equals(newRepoPath, oldRepoPath)) {
 			if (repository != null) {
 				repository.close();
 			}
-			repository = EGitUtils.getRepository(getCloneDestination(newCloneDestination));
+			repository = EGitUtils.getRepository(getCloneDestination(newRepoPath));
 		}
-		return this.cloneDestinationRepository = repository;
+		return this.repository = repository;
 	}
 
-	private boolean updateIsCloneDestinationAtGitRef(String gitRef, Repository cloneDestination) {
-		boolean isCloneDestinationAtGitRef = this.isCloneDestinationAtGitRef;
+	private boolean updateIsRepositoryAtGitRef(String gitRef, Repository cloneDestination) {
+		boolean isCloneDestinationAtGitRef = this.isRepositoryBranchGitRef;
 		String cloneDestinationBranch = null;
 		if (cloneDestination == null) {
 			return false;
@@ -153,8 +153,8 @@ public class ImportApplicationWizardModel
 		} catch (CoreException e) {
 		}
 		isCloneDestinationAtGitRef = StringUtils.equals(gitRef, cloneDestinationBranch);
-		firePropertyChange(PROPERTY_IS_CLONE_DESTINATION_AT_GITREF, this.isCloneDestinationAtGitRef, 
-				this.isCloneDestinationAtGitRef = isCloneDestinationAtGitRef);
+		firePropertyChange(PROPERTY_IS_REPOSITORY_BRANCH_GIT_REF, this.isRepositoryBranchGitRef, 
+				this.isRepositoryBranchGitRef = isCloneDestinationAtGitRef);
 		return isCloneDestinationAtGitRef;
 	}
 
@@ -232,7 +232,7 @@ public class ImportApplicationWizardModel
 	
 	@Override
 	public void setSelectedItem(Object selectedItem) {
-		update(this.connection, selectedItem, this.repoPath, this.useDefaultRepoPath, this.project, 
+		update(this.connection, selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
 				this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
 	}
 
@@ -242,14 +242,14 @@ public class ImportApplicationWizardModel
 	}
 
 	@Override
-	public void setRepositoryPath(String repoPath) {
-		update(this.connection, this.selectedItem, repoPath, false, this.project, 
+	public void setCloneDestination(String cloneDestination) {
+		update(this.connection, this.selectedItem, cloneDestination, false, this.project, 
 				this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
 	}
 
 	@Override
-	public String getRepositoryPath() {
-		return repoPath;
+	public String getCloneDestination() {
+		return cloneDestination;
 	}
 
 	@Override
@@ -258,8 +258,8 @@ public class ImportApplicationWizardModel
 	}
 	
 	@Override
-	public File getCloneDestination() {
-		return getCloneDestination(cloneDestination);
+	public File getRepoPath() {
+		return getCloneDestination(repoPath);
 	}
 	
 	private File getCloneDestination(String cloneDestination) {
@@ -267,32 +267,32 @@ public class ImportApplicationWizardModel
 	}
 
 	@Override
-	public Repository getCloneDestinationRepository() {
-		return this.cloneDestinationRepository;
+	public Repository getRepository() {
+		return this.repository;
 	}
 
 	@Override
-	public boolean isCloneDestinationAtGitRef() {
-		return this.isCloneDestinationAtGitRef;
+	public boolean isRepositoryBranchGitRef() {
+		return this.isRepositoryBranchGitRef;
 	}
 	
 	@Override
-	public void setUseDefaultRepositoryPath(boolean useDefaultRepoPath) {
-		update(this.connection, this.selectedItem, useDefaultRepoPath? getDefaultRepoPath() : this.repoPath, 
-				useDefaultRepoPath, this.project, this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
+	public void setUseDefaultCloneDestination(boolean useDefaultCloneDestination) {
+		update(this.connection, this.selectedItem, useDefaultCloneDestination? getDefaultCloneDestination() : this.cloneDestination, 
+				useDefaultCloneDestination, this.project, this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
 	}
 
-	private String getDefaultRepoPath() {
+	private String getDefaultCloneDestination() {
 		return EGitUIUtils.getEGitDefaultRepositoryPath();
 	}
 
-	public void updateUseDefaultRepositoryPath(boolean useDefault) {
-		firePropertyChange(PROPERTY_USE_DEFAULT_REPOSITORY_PATH, this.useDefaultRepoPath, this.useDefaultRepoPath = useDefault);
+	private void updateUseDefaultCloneDestination(boolean useDefault) {
+		firePropertyChange(PROPERTY_USE_DEFAULT_CLONE_DESTINATION, this.useDefaultCloneDestination, this.useDefaultCloneDestination = useDefault);
 	}
 
 	@Override
-	public boolean isUseDefaultRepositoryPath() {
-		return useDefaultRepoPath;
+	public boolean isUseDefaultCloneDestination() {
+		return useDefaultCloneDestination;
 	}
 
 	@Override
@@ -307,7 +307,7 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public void setConnection(Connection connection) {
-		update(connection, this.selectedItem, this.repoPath, this.useDefaultRepoPath, this.project, 
+		update(connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
 				this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
 	}
 
@@ -374,7 +374,7 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public void setGitContextDir(String gitContextDir) {
-		update(this.connection, this.selectedItem, this.repoPath, this.useDefaultRepoPath, this.project, 
+		update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
 				this.reuseGitRepo, this.checkoutBranchReusedRepo, gitContextDir);
 	}
 	
@@ -395,7 +395,7 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public void setProject(IProject project) {
-		update(this.connection, this.selectedItem, this.repoPath, this.useDefaultRepoPath, project, 
+		update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, project, 
 				this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
 	}
 
@@ -406,7 +406,7 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public void setReuseGitRepository(boolean reuseGitRepo) {
-		update(this.connection, this.selectedItem, this.repoPath, this.useDefaultRepoPath, this.project, 
+		update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
 				reuseGitRepo, reuseGitRepo, this.gitContextDir);
 	}
 	
@@ -417,7 +417,7 @@ public class ImportApplicationWizardModel
 
 	@Override
 	public void setCheckoutBranchReusedRepo(boolean checkout) {
-		update(this.connection, this.selectedItem, this.repoPath, this.useDefaultRepoPath, this.project, 
+		update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
 				this.reuseGitRepo, checkout, this.gitContextDir);
 	}
 }

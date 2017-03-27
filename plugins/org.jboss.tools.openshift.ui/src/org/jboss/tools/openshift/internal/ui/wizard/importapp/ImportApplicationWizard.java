@@ -59,8 +59,8 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		this.model = new ImportApplicationWizardModel();
 		String repoPath = loadRepoPath();
 		if (StringUtils.isNotBlank(repoPath)) {
-		    model.setRepositoryPath(repoPath);
-		    model.setUseDefaultRepositoryPath(false);
+		    model.setCloneDestination(repoPath);
+		    model.setUseDefaultCloneDestination(false);
 		}
 	}
 
@@ -166,10 +166,10 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	private ImportJob createImportJob(boolean reuseGitRepository) {
 		ImportJob importJob = null;
 		if (reuseGitRepository) {
-			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getCloneDestination(),
+			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath(),
 					model.isCheckoutBranchReusedRepo());
 		} else {
-			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getCloneDestination());
+			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath());
 		}
 		String gitContextDir = model.getGitContextDir();
 		if (StringUtils.isNotEmpty(gitContextDir)) {
@@ -179,8 +179,8 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	}
 
 	private void saveRepoPath() {
-		if(!model.isUseDefaultRepositoryPath()) {
-			getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
+		if(!model.isUseDefaultCloneDestination()) {
+			getDialogSettings().put(REPO_PATH_KEY, model.getCloneDestination());
 		} else {
 			getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
 		}
