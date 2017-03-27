@@ -40,7 +40,7 @@ import com.openshift.restclient.model.IPod;
  * @author Jeff Maury
  */
 public class PodLogsHandler extends AbstractOpenShiftCliHandler {
-	private static final String [] STATES = new String [] {"Running", "Succeeded", "Failed", "Completed"};
+	private static final String [] STATES = new String [] {"Running", "Succeeded", "Failed", "Completed", "Error"};
 	
 	public static final String INVALID_POD_STATUS_MESSAGE = "The log is unavailable while the pod is in {0} state.";
 	
