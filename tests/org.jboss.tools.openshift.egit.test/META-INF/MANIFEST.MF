@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.jboss.tools.openshift.egit.test
-Bundle-Version: 3.3.2.qualifier
+Bundle-Version: 3.3.3.qualifier
 Bundle-Activator: org.jboss.tools.openshift.egit.internal.test.EGitTestActivator
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin

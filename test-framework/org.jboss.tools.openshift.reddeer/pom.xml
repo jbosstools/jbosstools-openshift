@@ -5,11 +5,10 @@
 	<parent>
 		<groupId>org.jboss.tools.openshift</groupId>
 		<artifactId>test-framework</artifactId>
-		<version>3.3.2-SNAPSHOT</version>
+		<version>3.3.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.openshift</groupId>
 	<artifactId>org.jboss.tools.openshift.reddeer</artifactId>
-	<version>3.3.3-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 	
 	<dependencies>

@@ -4,11 +4,10 @@
 	<parent>
 		<groupId>org.jboss.tools.openshift</groupId>
 		<artifactId>plugins</artifactId>
-		<version>3.3.2-SNAPSHOT</version>
+		<version>3.3.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.openshift.plugins</groupId>
 	<artifactId>org.jboss.tools.openshift.client</artifactId> 
-	<version>3.3.3-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>
