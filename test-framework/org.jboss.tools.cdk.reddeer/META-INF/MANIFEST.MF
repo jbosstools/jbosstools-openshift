@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CDK RedDeer
 Bundle-SymbolicName: org.jboss.tools.cdk.reddeer;singleton:=true
-Bundle-Version: 3.3.2.qualifier
+Bundle-Version: 3.4.0.qualifier
 Bundle-Activator: org.jboss.tools.cdk.reddeer.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Red Hat
