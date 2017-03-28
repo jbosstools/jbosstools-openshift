@@ -60,6 +60,8 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -441,6 +443,19 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
         dbc.addValidationStatusProvider(validator);
 	}
 
+	private IDoubleClickListener onDoubleClickService() {
+		return new IDoubleClickListener() {
+
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				if (getWizard().canFinish()) {
+					Button finishButton = getShell().getDefaultButton();
+					UIUtils.clickButton(finishButton);
+				}
+			}
+		};
+	}
+
 	/**
 	 * Open a dialog box to select an open project when clicking on the 'Browse' button.
 	 * 
@@ -721,6 +736,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				.applyTo(selectorText);
 
 		final TreeViewer resourcesViewer = createResourcesTreeViewer(resourcesGroup, model, selectorText);
+		resourcesViewer.addDoubleClickListener(onDoubleClickService());
 		IObservableList resourceItemsObservable = BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_RESOURCE_ITEMS).observe(model);
 		DataBindingUtils.addDisposableListChangeListener(
 				onResourceItemsChanged(resourcesViewer), resourceItemsObservable, resourcesViewer.getTree());
