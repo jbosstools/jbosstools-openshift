@@ -10,8 +10,6 @@ package org.jboss.tools.openshift.internal.ui.server;
 
 import java.lang.reflect.InvocationTargetException;
 
-import javax.print.attribute.standard.Finishings;
-
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
@@ -129,6 +127,7 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 					.applyTo(selectorText);
 
 			final TreeViewer resourcesViewer = createServicesTreeViewer(servicesGroup, selectorText);
+			resourcesViewer.addDoubleClickListener(onDoubleClickService());
 			IObservableList resourceItemsObservable = BeanProperties.list(ServerResourceViewModel.PROPERTY_RESOURCE_ITEMS).observe(getModel());
 			DataBindingUtils.addDisposableListChangeListener(
 					onServiceItemsChanged(resourcesViewer), resourceItemsObservable, resourcesViewer.getTree());
@@ -167,7 +166,7 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 			GridDataFactory.fillDefaults()
 					.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
 					.applyTo(detailsContainer);
-			IObservableValue selectedResource = new WritableValue();
+			IObservableValue<? extends IResource> selectedResource = new WritableValue<>();
 			ValueBindingBuilder
 				.bind(selectedResourceTreeItem)
 				.converting(new ObservableTreeItem2ModelConverter())
@@ -192,11 +191,11 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 			};
 		}
 
-		private IListChangeListener onServiceItemsChanged(final TreeViewer servicesViewer) {
-			return new IListChangeListener() {
+		private IListChangeListener<Object> onServiceItemsChanged(final TreeViewer servicesViewer) {
+			return new IListChangeListener<Object>() {
 				
 				@Override
-				public void handleListChange(ListChangeEvent event) {
+				public void handleListChange(ListChangeEvent<? extends Object> event) {
 					servicesViewer.expandAll();
 				}
 			};
