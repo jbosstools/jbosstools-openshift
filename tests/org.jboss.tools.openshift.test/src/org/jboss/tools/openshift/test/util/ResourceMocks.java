@@ -54,12 +54,13 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.build.IGitBuildSource;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
  * @author Andre Dietisheim
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "serial"})
 public class ResourceMocks {
 	
 	public static final IPath SERVER_PROJECT_PREFS_FILE_PATH = 
@@ -240,17 +241,33 @@ public class ResourceMocks {
 
 	public static IBuildConfig createBuildConfig(String name, IProject project, 
 			String buildOutputReferenceKind, String buildOutputReferenceName, String buildSourceURI) {
+		return createBuildConfig(name, project, buildOutputReferenceKind, buildOutputReferenceName, buildSourceURI ,null, null);
+	}
+
+	public static IBuildConfig createBuildConfig(String name, IProject project, 
+			String buildOutputReferenceKind, String buildOutputReferenceName, String buildSourceURI, String contextDir, String ref) {
 		IBuildConfig bc = mock(IBuildConfig.class);
-		
-		IObjectReference reference = mock(IObjectReference.class);
-		when(reference.getKind()).thenReturn(buildOutputReferenceKind);
-		when(reference.getName()).thenReturn(buildOutputReferenceName);
-		when(bc.getBuildOutputReference()).thenReturn(reference);
-		
+
+		createBuildOutputReference(buildOutputReferenceKind, buildOutputReferenceName, bc);
+		createGitBuildSource(contextDir, ref, bc);
 		mockGetResourceProperties(name, project, bc);
-		when(bc.getSourceURI()).thenReturn(buildSourceURI);
+		doReturn(buildSourceURI).when(bc).getSourceURI();
 
 		return bc;
+	}
+
+	public static void createBuildOutputReference(String buildOutputReferenceKind, String buildOutputReferenceName, IBuildConfig bc) {
+		IObjectReference reference = mock(IObjectReference.class);
+		doReturn(buildOutputReferenceKind).when(reference).getKind();
+		doReturn(buildOutputReferenceName).when(reference).getName();
+		doReturn(reference).when(bc).getBuildOutputReference();
+	}
+
+	public static void createGitBuildSource(String contextDir, String ref, IBuildConfig bc) {
+		IGitBuildSource buildSource = mock(IGitBuildSource.class);
+		doReturn(contextDir).when(buildSource).getContextDir();
+		doReturn(ref).when(buildSource).getRef();
+		doReturn(buildSource).when(bc).getBuildSource();
 	}
 
 	public static IRoute createRoute(String name, IProject project, String serviceName) {
@@ -315,7 +332,7 @@ public class ResourceMocks {
 	}
 
 	public static void mockGetResourceProperties(String name, IProject project, IResource resource) {
-		when(resource.getName()).thenReturn(name);
+		doReturn(name).when(resource).getName();
 		if (project != null) {
 			doReturn(project.getName()).when(resource).getNamespace();
 			doReturn(project).when(resource).getProject();

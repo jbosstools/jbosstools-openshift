@@ -681,11 +681,11 @@ public class ResourceUtils {
 	 * @param dc the deployment config to match
 	 * @return true if they are related
 	 */
-    public static boolean areRelated(final IService service, IDeploymentConfig dc) {
+    public static boolean areRelated(final IService service, final IDeploymentConfig dc) {
         return service.getProject().getResources(ResourceKind.POD).stream()
-                                                                   .filter(pod -> containsAll(service.getSelector(), pod.getLabels()))   
-                                                                   .filter(pod -> dc.getName().equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))   
-                                                                   .count() > 0; 
+       		.filter(pod -> dc.getName().equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))   
+        	.filter(pod -> containsAll(service.getSelector(), pod.getLabels()))   
+            .count() > 0; 
     }
 
 
@@ -783,5 +783,33 @@ public class ResourceUtils {
 				}
 			})
 			.orElse(null);
+	}
+	
+	/**
+	 * Extracts the last segment of an URI, stripped from .git suffixes
+	 *
+	 * Made public for testing purposes.
+	 */
+	public static String extractProjectNameFromURI(String uri) {
+		String projectName = null;
+		if (uri != null) {
+			uri = uri.trim();
+			while (uri.endsWith("/")) {
+				//Trailing slashes do not matter.
+				uri = uri.substring(0, uri.length() - 1);
+			}
+			if (uri.endsWith(".git")) {
+				uri = uri.substring(0, uri.length() - 4);
+				if (uri.endsWith("/")) {
+					// '/' before .git is error
+					return null;
+				}
+			}
+			int b = uri.lastIndexOf("/");
+			if (b >= 0) {
+				projectName = uri.substring(b + 1);
+			}
+		}
+		return projectName;
 	}
 }

@@ -30,18 +30,21 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.egit.core.Activator;
 import org.eclipse.egit.core.RepositoryCache;
-import org.eclipse.egit.core.op.BranchOperation;
 import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.egit.core.op.DisconnectProviderOperation;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.NoMessageException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.dircache.DirCache;
@@ -51,7 +54,6 @@ import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -63,6 +65,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FileUtils;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.SystemReader;
+import org.junit.Assert;
 
 /**
  * Helper class for creating and filling a test repository
@@ -332,23 +335,41 @@ public class TestRepository {
 	 *            starting point for the new branch
 	 * @param newRefName
 	 * @throws IOException
+	 * @throws GitAPIException 
+	 * @throws InvalidRefNameException 
+	 * @throws RefNotFoundException 
+	 * @throws RefAlreadyExistsException 
 	 */
 	public void createBranch(String refName, String newRefName)
-			throws IOException {
-		RefUpdate updateRef;
-		updateRef = repository.updateRef(newRefName);
-		Ref startRef = repository.getRef(refName);
-		ObjectId startAt = repository.resolve(refName);
-		String startBranch;
-		if (startRef != null)
-			startBranch = refName;
-		else
-			startBranch = startAt.name();
-		startBranch = Repository.shortenRefName(startBranch);
-		updateRef.setNewObjectId(startAt);
-		updateRef
-				.setRefLogMessage("branch: Created from " + startBranch, false); //$NON-NLS-1$
-		updateRef.update();
+			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, GitAPIException {
+		try (Git git = new Git(repository)) {
+			git
+				.branchCreate()
+				.setName(newRefName)
+				.setStartPoint(refName)
+				.call();
+		}
+	}
+
+	/**
+	 * Returns the object id of the current branch.
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	public String getCurrentBranch() throws IOException {
+		return repository.getBranch();
+	}
+
+	public boolean isCurrentBranch(String name) throws IOException {
+		Assert.assertNotNull(name);
+
+		Ref ref = repository.findRef(name);
+		if (ref == null) {
+			return false;
+		}
+		return Repository.shortenRefName(ref.getName()).equals(
+				getCurrentBranch());
 	}
 
 	/**
@@ -357,9 +378,19 @@ public class TestRepository {
 	 * @param refName
 	 *            full name of branch
 	 * @throws CoreException
+	 * @throws GitAPIException 
+	 * @throws CheckoutConflictException 
+	 * @throws InvalidRefNameException 
+	 * @throws RefNotFoundException 
+	 * @throws RefAlreadyExistsException 
 	 */
-	public void checkoutBranch(String refName) throws CoreException {
-		new BranchOperation(repository, refName).execute(null);
+	public void checkoutBranch(String refName) throws CoreException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, GitAPIException {
+		try (Git git = new Git(repository)) {
+			git
+				.checkout()
+				.setName(refName)
+				.call();
+		}
 	}
 
 	/**
