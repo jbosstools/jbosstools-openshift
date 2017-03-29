@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
@@ -117,9 +118,7 @@ public class OpenShiftDebugUtils {
 			return;
 		}
 		updateDeploymentConfigValues(replicationController, debugContext);
-		
-		IClient client = getClient(replicationController);
-		
+
 		ReplicationControllerListenerJob rcListenerJob = new ReplicationControllerListenerJob(replicationController);
 		rcListenerJob.addJobChangeListener(new JobChangeAdapter() {
 			@Override
@@ -138,12 +137,9 @@ public class OpenShiftDebugUtils {
 		
 		ConnectionsRegistrySingleton.getInstance().addListener(rcListenerJob.getConnectionsRegistryListener());
 		rcListenerJob.schedule();
+		IClient client = getClient(replicationController);
         client.update(replicationController);
-		if (ResourceKind.REPLICATION_CONTROLLER.equals(replicationController.getKind())) {
-		    for(IPod pod : ResourceUtils.getPodsFor(replicationController)) {
-		        client.delete(pod);
-		    }
-		}
+		deleteAllPods(replicationController, client);
 		try {
 			rcListenerJob.join(ReplicationControllerListenerJob.TIMEOUT, monitor);
 		} catch (OperationCanceledException | InterruptedException e) {
@@ -156,6 +152,14 @@ public class OpenShiftDebugUtils {
 			throw new CoreException(result);
 		}
 		
+	}
+
+	private void deleteAllPods(IReplicationController replicationController, IClient client) {
+		if (ResourceKind.REPLICATION_CONTROLLER.equals(replicationController.getKind())) {
+		    for(IPod pod : ResourceUtils.getPodsFor(replicationController)) {
+		        client.delete(pod);
+		    }
+		}
 	}
 
 	private void updateDeploymentConfigValues(IReplicationController replicationController,
@@ -185,7 +189,11 @@ public class OpenShiftDebugUtils {
 			}
 		}
 		//TODO the list of env var to set in debug mode should probably be defined in the server settings instead
-		replicationController.setEnvironmentVariable(DEBUG_PORT_KEY, String.valueOf(debugContext.getDebugPort()));
+		if (debugContext.isDebugEnabled()) {
+			replicationController.setEnvironmentVariable(DEBUG_PORT_KEY, String.valueOf(debugContext.getDebugPort()));			
+		} else {
+			replicationController.setEnvironmentVariable(DEBUG_PORT_KEY, "");
+		}
 		replicationController.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));
 	}
 
@@ -206,8 +214,8 @@ public class OpenShiftDebugUtils {
 		DebuggingContext debugContext = new DebuggingContext();
 		String debugPort = getEnv(replicationController, DEBUG_PORT_KEY);
 		debugContext.setDebugPort(NumberUtils.toInt(debugPort, -1));
-		String debugEnabled = getEnv(replicationController, DEBUG_KEY);
-		debugContext.setDebugEnabled(Boolean.parseBoolean(debugEnabled));
+		boolean debugEnabled = StringUtils.isNotBlank(getEnv(replicationController, DEBUG_PORT_KEY));
+		debugContext.setDebugEnabled(debugEnabled);
 		return debugContext;
 	}
 	

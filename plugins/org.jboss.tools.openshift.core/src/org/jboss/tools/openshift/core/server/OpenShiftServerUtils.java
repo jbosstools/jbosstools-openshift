@@ -96,11 +96,13 @@ public class OpenShiftServerUtils {
 
 	private static final Collection<String> EAP_LIKE_KEYWORDS = Collections.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
 	
-	private static final Collection<String> SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES = Collections.unmodifiableCollection(Arrays.asList(ResourceKind.ROUTE,
-	                                                                                                                                   ResourceKind.SERVICE,
-	                                                                                                                                   ResourceKind.REPLICATION_CONTROLLER,
-	                                                                                                                                   ResourceKind.DEPLOYMENT_CONFIG,
-	                                                                                                                                   ResourceKind.POD));
+	private static final Collection<String> SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES = Collections.unmodifiableCollection(
+			Arrays.asList(
+					ResourceKind.ROUTE,
+					ResourceKind.SERVICE,
+	                ResourceKind.REPLICATION_CONTROLLER,
+	                ResourceKind.DEPLOYMENT_CONFIG,
+	                ResourceKind.POD));
 	
 	/**
 	 * Checks if the resource is allowed for OpenShift server adapter.
@@ -535,6 +537,59 @@ public class OpenShiftServerUtils {
 		    return null;
 		}
 	}
+	
+	/**
+	 * Returns the deployment config for the given server (attributes). The
+	 * match is done by the service that the given (openshift server) is bound
+	 * to. This method does remote calls to the OpenShift server and thus should
+	 * never be called from the UI thread.
+	 * 
+	 * @param server
+	 * @return the deployment config for the given server
+	 * 
+	 * @see #getService(IServerAttributes)
+	 * @see ResourceUtils#getPodsForService(IService, Collection)
+	 */
+	public static IDeploymentConfig getDeploymentConfig(IServerAttributes server) throws CoreException {
+		assertServerNotNull(server);
+		
+		Connection connection = getConnection(server);
+		if (connection == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find the connection for server {0}"
+							+ "Your server adapter might refer to an inexistant connection."
+							, server.getName())));
+		}
+
+		IResource resource = getResource(server, connection);
+		if (resource == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find the service for server {0}" 
+							+ "Your server adapter might refer to an inexistant service.",
+							server.getName())));
+		}
+
+		List<IPod> allPods = connection.getResources(ResourceKind.POD, resource.getProject().getName());
+		List<IPod> resourcePods = ResourceUtils.getPodsFor(resource, allPods);
+		if (resourcePods == null
+				|| resourcePods.isEmpty()) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find pods for service {0} in connection {1}. "
+							+ "OpenShift might be still building the pods for service {0}.", 
+							resource.getName(), connection.getHost())));
+		}
+		String dcName = ResourceUtils.getDeploymentConfigNameFor(resourcePods);
+		if (dcName == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find deployment config for {0}. "
+							+ "Your build might be still running and pods not created yet or "
+							+ "there might be no labels on your pods pointing to the wanted deployment config.", 
+					server.getName())));
+		}
+
+		return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), dcName);
+	}
+
 	
 	public static boolean isEapStyle(IBuildConfig buildConfig) {
 		if (buildConfig == null) {
