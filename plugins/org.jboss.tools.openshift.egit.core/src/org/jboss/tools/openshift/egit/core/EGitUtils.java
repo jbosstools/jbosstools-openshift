@@ -41,16 +41,19 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.EclipseGitProgressTransformer;
 import org.eclipse.egit.core.IteratorService;
 import org.eclipse.egit.core.op.AddToIndexOperation;
+import org.eclipse.egit.core.op.BranchOperation;
 import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.CloneOperation.PostCloneTask;
 import org.eclipse.egit.core.op.CommitOperation;
 import org.eclipse.egit.core.op.ConnectProviderOperation;
+import org.eclipse.egit.core.op.CreateLocalBranchOperation;
 import org.eclipse.egit.core.op.FetchOperation;
 import org.eclipse.egit.core.op.MergeOperation;
 import org.eclipse.egit.core.op.PushOperation;
 import org.eclipse.egit.core.op.PushOperationResult;
 import org.eclipse.egit.core.op.PushOperationSpecification;
 import org.eclipse.egit.core.project.RepositoryMapping;
+import org.eclipse.jgit.api.CheckoutResult;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
 import org.eclipse.jgit.api.MergeResult;
@@ -75,6 +78,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
@@ -96,6 +100,7 @@ import org.jboss.tools.openshift.egit.core.internal.utils.RegexUtils;
 @SuppressWarnings("restriction")
 public class EGitUtils {
 
+	private static final String DEFAULT_FETCH_REMOTE_REFSPEC = "+refs/heads/*:refs/remotes/%s/*";
 	private static final String ORIGIN = "origin";
 	private static final String EGIT_UI_PLUGIN_ID = "org.eclipse.egit.ui";
 	/*
@@ -103,7 +108,7 @@ public class EGitUtils {
 	 */
 	private static final String REMOTE_CONNECTION_TIMEOUT = "remote_connection_timeout";
 	private static final int DEFAULT_TIMEOUT = 2 * 60 * 1000;
-	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD; // HEAD
+	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD;
 	private static final String DEFAULT_REFSPEC_DESTINATION = Constants.R_HEADS
 			+ Constants.MASTER; // refs/heads/master
 	private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core.GitProvider";
@@ -160,19 +165,18 @@ public class EGitUtils {
 		return new File(project.getLocation().toOSString(), Constants.DOT_GIT)
 				.exists();
 	}
-	
-	@SuppressWarnings("restriction")
+
 	public static boolean isGitFolderInRootOf(IProject project) {
 		RepositoryMapping mapping = RepositoryMapping.getMapping(project);
 		if (mapping == null) {
 			return false;
 		}
-		
+
 		String gitFolderRelativePath = mapping.getGitDir();
 		if (StringUtils.isEmptyOrNull(gitFolderRelativePath)) {
 			return false;
 		}
-		
+
 		return !gitFolderRelativePath.startsWith("..");
 	}
 
@@ -786,6 +790,47 @@ public class EGitUtils {
 	}
 
 	/**
+	 * Returns a {@code Repository} for the given directory Returns {@code null}
+	 * if the given file is not a directory, does not exist or any other io
+	 * error occurs. No effective changes on the file system are executed.
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static Repository getRepository(File file) {
+		if (file == null
+				|| !file.isDirectory()
+				|| !file.exists()) {
+			return null;
+		}
+		
+		try (Repository repository = new FileRepositoryBuilder()
+				.setGitDir(new File(file, Constants.DOT_GIT))
+				.findGitDir()
+				.build()) {
+			return repository;
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Returns {@code true} if the given directory is a git repository. This is
+	 * checked by verifying that it contains a .git folder. Returns {@code false} otherwise.
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static boolean isRepository(File file) {
+		if (file == null
+				|| !file.isDirectory()
+				|| !file.exists()) {
+			return false;
+		}
+		return new File(file, Constants.DOT_GIT).exists();
+	}
+
+	/**
 	 * Gets the repository that is configured to the given project. Throws a
 	 * CoreException if the given project is not git shared.
 	 * 
@@ -872,6 +917,13 @@ public class EGitUtils {
 		return getRemoteConfig(remote, allRemotes);
 	}
 
+	/**
+	 * Returns the current branch for the given repository.
+	 * 
+	 * @param repository
+	 * @return
+	 * @throws CoreException
+	 */
 	public static String getCurrentBranch(Repository repository)
 			throws CoreException {
 		Assert.isLegal(repository != null,
@@ -887,15 +939,28 @@ public class EGitUtils {
 		return branch;
 	}
 
+	/**
+	 * Returns the current branch for the given project.
+	 * 
+	 * @param project
+	 * @return
+	 * @throws CoreException
+	 * 
+	 * @see #getRepository(IProject)
+	 */
 	public static String getCurrentBranch(IProject project)
 			throws CoreException {
 		if (project == null) {
 			return null;
 		}
-		Repository repo = EGitUtils.getRepository(project);
-		return (repo == null)? null: EGitUtils.getCurrentBranch(repo);
+		try (Repository repo = EGitUtils.getRepository(project)) {
+			if (repo == null) {
+				return null;
+			}
+			return EGitUtils.getCurrentBranch(repo);
+		}
 	}
-	
+
 	/**
 	 * Gets the remote config with the given name from the list of remote
 	 * configs. Returns <code>null</code> if it was not found.
@@ -1251,7 +1316,8 @@ public class EGitUtils {
 	 * @return
 	 */
 	public static URIish getFetchURI(RemoteConfig config) {
-		if (!config.getURIs().isEmpty()) {
+		if (config != null
+				&& !config.getURIs().isEmpty()) {
 			return config.getURIs().get(0);
 		} else {
 			return null;
@@ -1273,19 +1339,38 @@ public class EGitUtils {
 	 * @throws InvocationTargetException
 	 */
 	public static FetchResult fetch(RemoteConfig config, Repository repo, IProgressMonitor monitor) throws InvocationTargetException {
-		FetchOperation op = null;
-		if (!config.getFetchRefSpecs().isEmpty()) {
-			op = new FetchOperation(repo, config, getEgitTimeout(), false);
+		if (config != null
+				&& !config.getFetchRefSpecs().isEmpty()) {
+			FetchOperation op = new FetchOperation(repo, config, getEgitTimeout(), false);
+			op.run(monitor);
+			return op.getOperationResult();
 		} else {
-			List<RefSpec> refSpecs = Arrays.asList(new RefSpec("+refs/heads/*:refs/remotes/" + config.getName() + "/*"));
-			URIish fetchURI = getFetchURI(config);
-			op = new FetchOperation(repo, fetchURI, refSpecs, getEgitTimeout(), false);
+			List<RefSpec> refSpecs = Arrays.asList(new RefSpec(String.format(DEFAULT_FETCH_REMOTE_REFSPEC, config.getName())));
+			return fetch(config, refSpecs, repo, monitor);
 		}
 		
+	}
+
+	/**
+	 * Fetches the given ref specs from the given remote configs in the given repository.
+	 * 
+	 * @param config
+	 * @param refSpecs
+	 * @param repo
+	 * @param monitor
+	 * @return
+	 * @throws InvocationTargetException
+	 * 
+	 * @see RemoteConfig
+	 * @see RefSpec
+	 * @see Repository
+	 */
+	public static FetchResult fetch(RemoteConfig config, List<RefSpec> refSpecs, Repository repo, IProgressMonitor monitor) throws InvocationTargetException {
+		URIish fetchURI = getFetchURI(config);
+		FetchOperation op = new FetchOperation(repo, fetchURI, refSpecs, getEgitTimeout(), false);
 		op.run(monitor);
 		return op.getOperationResult();
 	}
-
 
 	public static boolean isAhead(IProject project, String remote, IProgressMonitor monitor) throws IOException,
 			InvocationTargetException, URISyntaxException {
@@ -1353,7 +1438,7 @@ public class EGitUtils {
 		if (ref == null) {
 			return false;
 		}
-		Ref currentBranchRef = repo.getRef(repo.getBranch());
+		Ref currentBranchRef = repo.findRef(repo.getBranch());
 
 		RevWalk walk = new RevWalk(repo);
 		RevCommit localCommit = walk.parseCommit(currentBranchRef.getObjectId());
@@ -1479,7 +1564,7 @@ public class EGitUtils {
 			}
 			return resources;
 		}
-		
+
 		private static IndexDiff getIndexChanges(Repository repo, IProgressMonitor monitor) throws IOException {
 			IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD, IteratorService.createInitialIterator(repo));
 			if (!indexDiff.diff(
@@ -1540,4 +1625,142 @@ public class EGitUtils {
 				.filter(uri -> uri != null && uri.toString().startsWith("http"))
 				.map(URIish::toString);
 	}
+
+	/**
+	 * Checks out the given branch in the given project. Progress is reported to the given monitor.
+	 * 
+	 * @param ref
+	 * @param project
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 * 
+	 * @see #getRepository(IProject)
+	 * @see Repository
+	 * @see IProject
+	 * @see IProgressMonitor
+	 */
+	public static CheckoutResult branch(String ref, IProject project, IProgressMonitor monitor) throws CoreException {
+		Repository repository = getRepository(project);
+		return checkoutBranch(ref, repository, monitor);
+	}
+
+	/**
+	 * Checks out the given branch in the given repository. Progress is reported to the given monitor.
+	 * 
+	 * @param ref
+	 * @param project
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 * 
+	 * @see Repository
+	 * @see IProgressMonitor
+	 */
+	public static CheckoutResult checkoutBranch(String ref, Repository repository, IProgressMonitor monitor) throws CoreException {
+		BranchOperation branchOp = new BranchOperation(repository, ref);
+		branchOp.execute(monitor);
+		return branchOp.getResult();
+	}
+
+	public static boolean hasBranch(String ref, IProject project) throws IOException {
+		return hasBranch(ref, getRepository(project));
+	}
+
+	/**
+	 * Returns {@code true} if the given repository has a branch that's called by the name given.
+	 * @param name
+	 * @param repository
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean hasBranch(String name, Repository repository) throws IOException {
+		if (repository == null) {
+			return false;
+		}
+		return repository.findRef(name) != null;
+	}
+
+	public static void createBranch(String name, RevCommit startinPoint, IProject project, IProgressMonitor monitor) throws IOException, CoreException {
+		createBranch(name, startinPoint, getRepository(project), monitor);
+	}
+
+	/**
+	 * Creates a branch with the given name that starts at the given commit in the given repository.
+	 * 
+	 * @param name
+	 * @param startingPoint
+	 * @param repository
+	 * @param monitor
+	 * @throws IOException
+	 * @throws CoreException
+	 */
+	public static void createBranch(String name, RevCommit startingPoint, Repository repository, IProgressMonitor monitor) throws IOException, CoreException {
+		if (repository == null) {
+			return;
+		}
+		if (startingPoint != null) {
+			new CreateLocalBranchOperation(repository, name, startingPoint).execute(monitor);
+		}
+	}
+	
+	/**
+	 * Returns the latest commit for the given branch name and remote name. If
+	 * no remote name is given a local branch is assumed. To be sure to get the
+	 * most accurate results for remote branches, those should be fetched via
+	 * {@link #fetch(RemoteConfig, List, Repository, IProgressMonitor)} prior to
+	 * executing this
+	 * 
+	 * @param branchName the name of the branch to get the latest commit fromm
+	 * @param remoteName the name of the remote that the branch resides on
+	 * @param repository the repository that shall be used 
+	 * @return
+	 * @throws IOException 
+	 * 
+	 * @see 
+	 */
+	public static RevCommit getLatestCommit(String branchName, String remoteName, Repository repository) throws IOException {
+		String fullBranchName = getFullBranchName(branchName, remoteName);
+		try (RevWalk walk = new RevWalk(repository)) {
+			Ref branch = repository.exactRef(fullBranchName);
+			if (branch == null 
+					|| branch.getObjectId() == null)
+				return null;
+
+			return walk.parseCommit(branch.getObjectId());
+		}
+	}
+
+	/**
+	 * Returns the fully qualified branch name for the given name and remote
+	 * name. If no remote is given the fully qualified local branch name is
+	 * returned. Branch names in the fully qualified form are returned as-is.
+	 * 
+	 * ex. refs/remotes/origin/aBranch, refs/heads/aBranch
+	 * 
+	 * @param name
+	 * @param remoteName
+	 * @return
+	 */
+	public static String getFullBranchName(String name, String remoteName) {
+		if (StringUtils.isEmptyOrNull(name)) {
+			return name;
+		}
+
+		if (name.startsWith(Constants.R_REFS)) {
+			// already full name
+			return name;
+		}
+		String fullName = null;
+		if (!StringUtils.isEmptyOrNull(remoteName)) {
+			fullName = Constants.R_REMOTES + remoteName + "/" + name;
+		} else if (Constants.HEAD.equals(name)
+				|| Constants.FETCH_HEAD.equals(name)) {
+			return name;
+		} else {
+			fullName = Constants.R_HEADS + name;
+		}
+		return fullName;
+	}
+	
 }

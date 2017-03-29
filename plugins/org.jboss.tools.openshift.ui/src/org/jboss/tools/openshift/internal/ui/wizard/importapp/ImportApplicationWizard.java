@@ -9,22 +9,24 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.REPO_PATH_KEY;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.DialogSettings;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
-import org.jboss.tools.common.ui.DelegatingProgressMonitor;
 import org.jboss.tools.common.ui.JobUtils;
-import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
@@ -36,9 +38,6 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
-
-import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
-import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.REPO_PATH_KEY;
 
 /**
  * The new application wizard that allows you to create an application given an
@@ -54,12 +53,26 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	public ImportApplicationWizard() {
 		setWindowTitle("Import OpenShift Application");
 		setNeedsProgressMonitor(true);
-		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
+		setDialogSettings(
+				DialogSettings.getOrCreateSection(
+						OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
 		this.model = new ImportApplicationWizardModel();
-		String repoPath = getDefaultRepoPath();
+		String repoPath = loadRepoPath();
 		if (StringUtils.isNotBlank(repoPath)) {
-		    model.setRepositoryPath(repoPath);
-		    model.setUseDefaultRepositoryPath(false);
+		    model.setCloneDestination(repoPath);
+		    model.setUseDefaultCloneDestination(false);
+		}
+	}
+
+	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
+		this();
+		if (projectsAndBuildConfigs != null
+				&& projectsAndBuildConfigs.size() == 1) {
+			Map.Entry<IProject, Collection<IBuildConfig>> entry = projectsAndBuildConfigs.entrySet().iterator().next();
+			IProject project = entry.getKey();
+			setConnection(project);
+			model.setProject(project);
+			setSelectedItem(entry, project);
 		}
 	}
 
@@ -70,30 +83,28 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	 * 
 	 * @return the found default git path
 	 */
-	private String getDefaultRepoPath() {
+	private String loadRepoPath() {
 	    String path = getDialogSettings().get(REPO_PATH_KEY);
 	    if (path == null) {
-	        IDialogSettings settings = DialogSettings.getOrCreateSection(OpenShiftUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
+	        IDialogSettings settings = DialogSettings.getOrCreateSection(
+	        		OpenShiftUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
 	        path = settings.get(REPO_PATH_KEY);
 	    }
 	    return path;
 	}
 	
-	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
-		this();
-		if (projectsAndBuildConfigs != null 
-				&& projectsAndBuildConfigs.size() == 1) {
-			Map.Entry<IProject, Collection<IBuildConfig>> entry = projectsAndBuildConfigs.entrySet().iterator().next();
-			IProject project = entry.getKey();
-			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
-			setModelConnection(connection);
-			Collection<IBuildConfig> buildConfigs = entry.getValue();
-			model.setProject(project);
-			if (buildConfigs != null && buildConfigs.size() == 1) {
-				model.setSelectedItem(buildConfigs.iterator().next());
-			} else {
-				model.setSelectedItem(project);
-			}
+	private void setConnection(IProject project) {
+		Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
+		setModelConnection(connection);
+	}
+
+	private void setSelectedItem(Map.Entry<IProject, Collection<IBuildConfig>> entry, IProject project) {
+		Collection<IBuildConfig> buildConfigs = entry.getValue();
+		if (buildConfigs != null 
+				&& buildConfigs.size() == 1) {
+			model.setSelectedItem(buildConfigs.iterator().next());
+		} else {
+			model.setSelectedItem(project);
 		}
 	}
 	
@@ -136,52 +147,45 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	@Override
 	public boolean performFinish() {
-		boolean success = false;
-		if( model.getSkipClone()) {
-			success = importProjectSkipClone();
+		Job importJob = createImportJob(model.isReuseGitRepository());
+		importJob.setUser(true);
+		importJob.addJobChangeListener(new JobChangeAdapter() {
+
+			@Override
+			public void done(IJobChangeEvent event) {
+				boolean success = JobUtils.isOk(importJob.getResult());
+				if (success) {
+					saveRepoPath();
+				}
+				UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
+			}});
+		importJob.schedule();
+		return true;
+	}
+
+	private ImportJob createImportJob(boolean reuseGitRepository) {
+		ImportJob importJob = null;
+		if (reuseGitRepository) {
+			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath(),
+					model.isCheckoutBranchReusedRepo());
 		} else {
-			success = importProject();
+			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath());
 		}
-		if (success) {
-			if(!model.isUseDefaultRepositoryPath()) {
-				getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
-			} else {
-				getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
-			}
+		String gitContextDir = model.getGitContextDir();
+		if (StringUtils.isNotEmpty(gitContextDir)) {
+			importJob.setFilters(Collections.singleton(gitContextDir));
 		}
-		UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
-		return success;
+		return importJob;
 	}
 
-	private boolean importProjectSkipClone() {
-		final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-		ImportJob importJob = new ImportJob(model.getCloneDestination(), delegatingMonitor)
-				.setGitRef(model.getGitRef());
-		return importProject(importJob, delegatingMonitor);
-	}
-
-	private boolean importProject() {
-		final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-		ImportJob importJob = new ImportJob(model.getGitUrl(), model.getCloneDestination(), delegatingMonitor)
-				.setGitRef(model.getGitRef());
-		return importProject(importJob, delegatingMonitor);
-	}
-
-	private boolean importProject(ImportJob importJob, DelegatingProgressMonitor delegatingMonitor) {
-		try {
-			String gitContextDir = model.getGitContextDir();
-			if (StringUtils.isNotEmpty(gitContextDir)) {
-				importJob.setFilters(Collections.singleton(gitContextDir));
-			}
-			IStatus jobResult = WizardUtils.runInWizard(importJob, delegatingMonitor, getContainer());
-			return JobUtils.isOk(jobResult);
-		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", 
-					OpenShiftUIActivator.statusFactory().errorStatus("An exception occurred while creating local git repository.", e));
-			return false;
+	private void saveRepoPath() {
+		if(!model.isUseDefaultCloneDestination()) {
+			getDialogSettings().put(REPO_PATH_KEY, model.getCloneDestination());
+		} else {
+			getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
 		}
 	}
-	
+
 	@Override
 	public Connection getConnection() {
 		return model.getConnection();
@@ -199,7 +203,6 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	@Override
 	public Object getContext() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

@@ -24,64 +24,66 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jgit.errors.TransportException;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.ImportFailedException;
 import org.jboss.tools.openshift.internal.common.ui.application.importoperation.WontOverwriteException;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.wizard.importapp.operation.ImportNewProject;
 
 import com.openshift.restclient.OpenShiftException;
 
 public class ImportJob extends WorkspaceJob {
 
-	private DelegatingProgressMonitor delegatingMonitor;
 	private String gitUrl;
 	private File cloneDestination;
 	private String gitRef;
 	private Collection<String> filters;
+	private boolean checkoutBranch;
+	private boolean reuseGitRepository;
+	
+	/**
+	 * Creates an import job that will import a project from an eixisting git
+	 * repo at given repo location and will checkout the branch (provided in
+	 * #setGitRef) if told to do so via the switch checkoutBranch.
+	 * 
+	 * @param gitUrl
+	 * @param repoLocation
+	 * @param checkoutBranch
+	 */
+	public ImportJob(String gitUrl, String gitRef, File repoLocation, boolean checkoutBranch) {
+		this(gitUrl, gitRef, repoLocation, checkoutBranch, true);
+	}
 
 	/**
-	 * A constructor to clone from a git url and then import the project
+	 * A constructor to clone from a git url and then import the project.
+	 * 
 	 * @param gitUrl
 	 * @param cloneDestination
 	 * @param delegatingMonitor
 	 */
-	public ImportJob(String gitUrl, File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
+	protected ImportJob(String gitUrl, String gitRef, File cloneDestination) {
+		this(gitUrl, gitRef, cloneDestination, false, false);
+	}
+
+	protected ImportJob(String gitUrl, String gitRef, File cloneDestination, boolean checkoutBranch, boolean reuseGitRepository) {
 		super("Importing project to workspace...");
 		setRule(ResourcesPlugin.getWorkspace().getRoot());
 		this.gitUrl = gitUrl;
+		this.gitRef = gitRef;
 		this.cloneDestination = cloneDestination;
-		this.delegatingMonitor = delegatingMonitor;
+		this.checkoutBranch = checkoutBranch;
+		this.reuseGitRepository = reuseGitRepository;
 	}
 
-	
-	/**
-	 * A constructor to clone from a git url and then import the project
-	 * @param gitUrl
-	 * @param cloneDestination
-	 * @param delegatingMonitor
-	 */
-	public ImportJob(File cloneDestination, DelegatingProgressMonitor delegatingMonitor) {
-		super("Importing project to workspace...");
-		setRule(ResourcesPlugin.getWorkspace().getRoot());
-		this.gitUrl = null;
-		this.cloneDestination = cloneDestination;
-		this.delegatingMonitor = delegatingMonitor;
-	}
-
-	
 	@Override
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 		try {
-			delegatingMonitor.add(monitor);
-			if( gitUrl == null ) {
-				new ImportNewProject(cloneDestination, filters).execute(delegatingMonitor);
-				return Status.OK_STATUS;
+			if (reuseGitRepository) {
+				new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters, checkoutBranch).execute(monitor);
 			} else {
-				new ImportNewProject(gitUrl, gitRef, cloneDestination, filters).execute(delegatingMonitor);
-				return Status.OK_STATUS;
+				new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters).execute(monitor);
 			}
+			return Status.OK_STATUS;
 		} catch (final WontOverwriteException e) {
 			openError("Project already present", e.getMessage());
 			return Status.CANCEL_STATUS;
@@ -105,13 +107,16 @@ public class ImportJob extends WorkspaceJob {
 				return OpenShiftUIActivator.statusFactory().errorStatus(
 						"An exception occurred while creating local git repository.", e);
 			}
+		} catch (CoreException e) {
+			return StatusFactory.getMultiStatusInstance(
+					0, OpenShiftUIActivator.PLUGIN_ID, "Could not import project to the workspace.", null, e.getStatus() );
 		} catch (InterruptedException e) {
-			if(delegatingMonitor.isCanceled()) return Status.CANCEL_STATUS;
+			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
 			return OpenShiftUIActivator.statusFactory().errorStatus("Could not import project to the workspace.", e);
 		} catch (Exception e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus("Could not import project to the workspace.", e);
 		} finally {
-			delegatingMonitor.done();
+			monitor.done();
 		}
 	}
 
@@ -140,11 +145,6 @@ public class ImportJob extends WorkspaceJob {
 				}
 			});
 		}
-	}
-
-	public ImportJob setGitRef(String gitRef) {
-		this.gitRef = gitRef;
-		return this;
 	}
 
 	public ImportJob setFilters(Collection<String> filters) {
