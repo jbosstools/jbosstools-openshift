@@ -4,10 +4,9 @@
 	<parent>
 		<groupId>org.jboss.tools.openshift</groupId>
 		<artifactId>features</artifactId>
-		<version>3.3.2-SNAPSHOT</version>
+		<version>3.3.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.openshift.features</groupId>
 	<artifactId>org.jboss.tools.openshift.cdk.feature</artifactId> 
-	<version>3.3.3-SNAPSHOT</version>
 	<packaging>eclipse-feature</packaging>
 </project>
