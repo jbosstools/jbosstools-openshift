@@ -42,7 +42,6 @@ import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.ide.eclipse.as.core.util.ClassCollectingHCRListener;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
@@ -69,7 +68,6 @@ import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 public class OpenShiftLaunchController extends AbstractSubsystemController
 		implements ISubsystemController, ILaunchServerController {
@@ -118,7 +116,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
         launch.addProcess(new ServerProcess(launch, server, getLabel(launch.getLaunchMode())));
 		beh.setServerStarting();
 		waitForDeploymentConfigAndPods(server, monitor);
-
+		enableDevModeForNodeJsProject(OpenShiftServerUtils.getReplicationController(server), server);
 		try {
 			IReplicationController rc = OpenShiftServerUtils.getReplicationController(server);
 			toggleDebugging(mode, monitor, beh, server, rc);
@@ -183,12 +181,13 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 	}
 
-	private void toggleDebugging(String mode, IProgressMonitor monitor, OpenShiftServerBehaviour beh, IServer server,
+	private boolean toggleDebugging(String mode, IProgressMonitor monitor, OpenShiftServerBehaviour beh, IServer server,
 			IReplicationController rc) throws CoreException {
 		String currentMode = beh.getServer().getMode();
 		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(rc);
+		boolean enableDebugging = DEBUG_MODE.equals(mode);
 		try {
-			if( DEBUG_MODE.equals(mode)) {
+			if (enableDebugging) {
 				startDebugging(server, rc, debugContext, monitor);
 			} else {//run, profile
 				stopDebugging(rc, debugContext, monitor);
@@ -199,6 +198,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		} finally {
 			setServerState(beh, currentMode, mode);
 		}
+		return enableDebugging;
 	}
 
 	/**
@@ -207,22 +207,22 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	 *
 	 * @see <a href="https://issues.jboss.org/browse/JBIDE-22362">JBIDE-22362</a>
 	 */
-	private void enableDevModeForNodeJsProject(IDeploymentConfig dc, IServer server) {
+	private void enableDevModeForNodeJsProject(IReplicationController rc, IServer server) {
 		if (!OpenShiftServerUtils.isNodeJsProject(server)) {
 			return;
 		}
 
-		new Job(NLS.bind("Enabling {0} for deployment config {1}",  DEV_MODE, dc.getName())) {
+		new Job(NLS.bind("Enabling {0} for replication controller {1}",  DEV_MODE, rc.getName())) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					dc.setEnvironmentVariable(DEV_MODE, Boolean.TRUE.toString());
-					Connection conn = ConnectionsRegistryUtil.getConnectionFor(dc);
-					conn.updateResource(dc);
+					rc.setEnvironmentVariable(DEV_MODE, Boolean.TRUE.toString());
+					Connection conn = ConnectionsRegistryUtil.getConnectionFor(rc);
+					conn.updateResource(rc);
 					return Status.OK_STATUS;
 				} catch (Exception e) {
-					String message = NLS.bind("Unable to enable {0} for deployment config {1}",  DEV_MODE, dc.getName());
+					String message = NLS.bind("Unable to enable {0} for deployment config {1}",  DEV_MODE, rc.getName());
 					OpenShiftCoreActivator.getDefault().getLogger().logError(message, e);
 					return new Status(Status.ERROR, OpenShiftCoreActivator.PLUGIN_ID, message, e);
 				}

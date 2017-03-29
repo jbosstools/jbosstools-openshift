@@ -30,7 +30,6 @@ import org.jboss.tools.openshift.internal.js.storage.SessionStorage;
 import org.jboss.tools.openshift.internal.js.util.NodeDebuggerUtil;
 
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 /**
  * @author "Ilya Buziuk (ibuziuk)"

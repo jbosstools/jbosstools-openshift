@@ -96,11 +96,13 @@ public class OpenShiftServerUtils {
 
 	private static final Collection<String> EAP_LIKE_KEYWORDS = Collections.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
 	
-	private static final Collection<String> SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES = Collections.unmodifiableCollection(Arrays.asList(ResourceKind.ROUTE,
-	                                                                                                                                   ResourceKind.SERVICE,
-	                                                                                                                                   ResourceKind.REPLICATION_CONTROLLER,
-	                                                                                                                                   ResourceKind.DEPLOYMENT_CONFIG,
-	                                                                                                                                   ResourceKind.POD));
+	private static final Collection<String> SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES = Collections.unmodifiableCollection(
+			Arrays.asList(
+					ResourceKind.ROUTE,
+					ResourceKind.SERVICE,
+	                ResourceKind.REPLICATION_CONTROLLER,
+	                ResourceKind.DEPLOYMENT_CONFIG,
+	                ResourceKind.POD));
 	
 	/**
 	 * Checks if the resource is allowed for OpenShift server adapter.
