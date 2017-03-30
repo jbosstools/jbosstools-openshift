@@ -45,6 +45,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -154,7 +155,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		domainLabel.setText("Domain:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(domainLabel);
-		ComboViewer domainViewer = new ComboViewer(parent);
+		ComboViewer domainViewer = new ComboViewer(new CCombo(parent, SWT.READ_ONLY | SWT.BORDER));
 		domainViewer.setContentProvider(new ObservableListContentProvider());
 		domainViewer.setLabelProvider(new AbstractLabelProvider() {
 
@@ -299,7 +300,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER).applyTo(gearProfileLabel);
 
-		ComboViewer gearViewer = new ComboViewer(parent);
+		ComboViewer gearViewer = new ComboViewer(new CCombo(parent, SWT.READ_ONLY | SWT.BORDER));
 		gearViewer.setContentProvider(new ObservableListContentProvider());
 		gearViewer.setLabelProvider(new AbstractLabelProvider() {
 
