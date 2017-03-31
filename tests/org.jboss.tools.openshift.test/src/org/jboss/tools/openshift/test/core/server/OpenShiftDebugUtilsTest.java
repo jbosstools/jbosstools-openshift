@@ -65,12 +65,11 @@ import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.IPod;
 
 public class OpenShiftDebugUtilsTest {
-
 	
 	private IProgressMonitor monitor;
 	private OpenShiftDebugUtils debugUtils;
 	private ILaunchManager launchManager;
-	
+
 	@Before
 	public void setUp() {
 		monitor = new NullProgressMonitor();
@@ -78,52 +77,60 @@ public class OpenShiftDebugUtilsTest {
 		debugUtils = OpenShiftDebugUtils.get(launchManager);
 		System.setProperty(ReplicationControllerListenerJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, "2000");
 	}
-	
+
 	@After
 	public void tearDown() {
 		System.clearProperty(ReplicationControllerListenerJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY);
 	}
-	
 
 	@Test
-	public void testGetDebuggingContext() {
+	public void shouldReturnNullContextWhenUsingNullReplicationController() {
 		assertNull(debugUtils.getDebuggingContext(null));
-		
+	}
+	
+	@Test
+	public void debuggingContextShouldDefaultToNoDebugPortDebugPortAndDebuggingNotEnabled() {
 		IDeploymentConfig dc = mockDeploymentConfig();
 		DebuggingContext context = debugUtils.getDebuggingContext(dc);
-		assertEquals(-1, context.getDebugPort());
+		assertEquals(DebuggingContext.NO_DEBUG_PORT, context.getDebugPort());
 		assertFalse(context.isDebugEnabled());
-		
+	}
+
+	@Test
+	public void shouldReturnDebuggingContextWithDebugPortAndDebuggingEnabledGivenPortAndDebugEnvVarExist() {
+		IDeploymentConfig dc = mockDeploymentConfig();
 		List<IEnvironmentVariable> vars = Arrays.asList(createVar("DEBUG_PORT", "9797"), createVar("DEBUG", "true"));
 		when(dc.getEnvironmentVariables()).thenReturn(vars);
-		context = debugUtils.getDebuggingContext(dc);
-		
+		DebuggingContext context = debugUtils.getDebuggingContext(dc);
+
 		assertEquals(9797, context.getDebugPort());
 		assertTrue(context.isDebugEnabled());
-	
-		vars = Arrays.asList(createVar("DEBUG_PORT", "1234"), createVar("DEV_MODE", "true"));
+	}
+
+	@Test
+	public void shouldCreateDebuggingContextWithDebugPortAndDebuggingEnabledDCGivenEnvVariables() {
+		IDeploymentConfig dc = mockDeploymentConfig();
+		List<IEnvironmentVariable> vars = Arrays.asList(createVar("DEBUG_PORT", "1234"), createVar("DEV_MODE", "true"));
 		when(dc.getEnvironmentVariables()).thenReturn(vars);
-		context = debugUtils.getDebuggingContext(dc);
-		
+		DebuggingContext context = debugUtils.getDebuggingContext(dc);
+
 		assertEquals(1234, context.getDebugPort());
 		assertFalse(context.isDebugEnabled());		
 	}
-	
-	
+
 	@Test
 	public void testEnableDebug() throws CoreException {
 		DebuggingContext context = new DebuggingContext();
 		context.setDebugPort(1234);
 		IDebugListener listener = mock(IDebugListener.class);
 		context.setDebugListener(listener);
-		
 
 		IDeploymentConfig dc = mockDeploymentConfig();
 		IClient client = mock(IClient.class);
 		when(dc.accept(any(), any())).thenReturn(client);
 		new MockRedeploymentJob(dc);
 		debugUtils.enableDebugMode(dc, context, monitor);
-		
+
 		verify(dc).setEnvironmentVariable("DEBUG_PORT", "1234");
 		verify(dc).setEnvironmentVariable("DEBUG", "true");
 		verify(listener).onPodRestart(isA(DebuggingContext.class), eq(monitor));
@@ -133,7 +140,6 @@ public class OpenShiftDebugUtilsTest {
 		assertNotNull("RunningPod", pod.getName());
 	}
 
-	
 	@Test
 	public void testAlreadyDebugging() throws CoreException {
 		DebuggingContext context = new DebuggingContext();
@@ -141,45 +147,44 @@ public class OpenShiftDebugUtilsTest {
 		context.setDebugEnabled(true);
 		IDebugListener listener = mock(IDebugListener.class);
 		context.setDebugListener(listener);
-		
+
 		IDeploymentConfig dc = mockDeploymentConfig();
-		
+
 		debugUtils.enableDebugMode(dc, context, monitor);
-		
+
 		verify(listener).onDebugChange(isA(DebuggingContext.class), eq(monitor));
 	}
-	
+
 	@Test
 	public void testDisableDebug() throws CoreException {
 		DebuggingContext context = new DebuggingContext();
 		context.setDebugEnabled(true);
 		IDebugListener listener = mock(IDebugListener.class);
 		context.setDebugListener(listener);
-		
 
 		IDeploymentConfig dc = mockDeploymentConfig();
 		IClient client = mock(IClient.class);
 		when(dc.accept(any(), any())).thenReturn(client);
-		
+
 		new MockRedeploymentJob(dc);
 		debugUtils.disableDebugMode(dc, context, monitor);
 		verify(dc).setEnvironmentVariable("DEBUG", "false");
-		
+
 		verify(listener).onPodRestart(isA(DebuggingContext.class), eq(monitor));
 
 		verify(client).update(dc);
 	}
-	
+
 	@Test
 	public void testSetupRemoteDebuggerLaunchConfiguration() throws CoreException {
 		ILaunchConfigurationWorkingCopy workingCopy = mock(ILaunchConfigurationWorkingCopy.class);
-		
+
 		IProject project = mock(IProject.class);
 		String name = "baymax";
 		when(project.getName()).thenReturn(name);
-		
+
 		debugUtils.setupRemoteDebuggerLaunchConfiguration(workingCopy, project, 1234);
-		
+
 		//pretty stoopid test
 		verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,name);
 		Map<String, String> connectMap = new HashMap<>();
@@ -187,7 +192,7 @@ public class OpenShiftDebugUtilsTest {
 		connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
 		verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);
 	}
-	
+
 	@Test
 	public void getRemoteDebuggerLaunchConfiguration() throws CoreException {
 		String name = "Remote debugger to foo";
@@ -195,79 +200,77 @@ public class OpenShiftDebugUtilsTest {
 		when(good.getName()).thenReturn(name);
 		ILaunchConfiguration bad = mock(ILaunchConfiguration.class);
 		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{bad, good});
-		
+
 		IServer server = mockServer("foo");
 		assertSame(good, debugUtils.getRemoteDebuggerLaunchConfiguration(server));
-		
+
 		server = mockServer("bar");
 		assertNull(debugUtils.getRemoteDebuggerLaunchConfiguration(server));
 	}
-	
+
 	@Test
 	public void testCreateRemoteDebuggerLaunchConfiguration() throws CoreException {
 		IServer server = mockServer("foo");
 		ILaunchConfigurationType launchConfigurationType = mock(ILaunchConfigurationType.class);
 		when(launchManager.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION)).thenReturn(launchConfigurationType);
-		
+
 		debugUtils.createRemoteDebuggerLaunchConfiguration(server);
-		
+
 		verify(launchConfigurationType).newInstance(null, "Remote debugger to foo");
 	}
-	
-	
+
 	@Test
 	public void testTerminateRemoteDebugger() throws CoreException {
 		ILaunchConfiguration launchConfig = mock(ILaunchConfiguration.class);
-		
+
 		String name = "foo";
 		IServer server = mockServer(name);
 		when(launchConfig.getName()).thenReturn("Remote debugger to "+ name);
-		
+
 		ILaunch matchingLaunch1 = mock(ILaunch.class);
 		when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
 
 		ILaunch matchingLaunch2 = mock(ILaunch.class);
 		when(matchingLaunch2.getLaunchConfiguration()).thenReturn(launchConfig);
 		when(matchingLaunch2.canTerminate()).thenReturn(true);
-		
+
 		ILaunch otherLaunch1 = mock(ILaunch.class);
 		ILaunch otherLaunch2 = mock(ILaunch.class);
-		
+
 		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{launchConfig});
-		
+
 		when(launchManager.getLaunches()).thenReturn(new ILaunch[]{otherLaunch1, matchingLaunch1, matchingLaunch2, otherLaunch2});
-		
+
 		debugUtils.terminateRemoteDebugger(server);
-		
+
 		verify(matchingLaunch1, never()).terminate();
 		verify(matchingLaunch2).terminate();
 		verify(otherLaunch1, never()).terminate();
 		verify(otherLaunch2, never()).terminate();
 	}
-	
+
 	@Test
 	public void testTerminateRemoteDebuggerWithException() throws CoreException {
 		String name = "foo";
 		IServer server = mockServer(name);
-		
+
 		ILaunchConfiguration launchConfig = mock(ILaunchConfiguration.class);
 		when(launchConfig.getName()).thenReturn("Remote debugger to "+ name);
-		
+
 		ILaunch matchingLaunch1 = mock(ILaunch.class);
 		when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
 		when(matchingLaunch1.canTerminate()).thenReturn(true);
 		IStatus error = new Status(IStatus.ERROR, "foo", "buuuurned!", null);
 		doThrow(new DebugException(error)).when(matchingLaunch1).terminate();
-		
+
 		ILaunch matchingLaunch2 = mock(ILaunch.class);
 		when(matchingLaunch2.canTerminate()).thenReturn(true);
 		when(matchingLaunch2.getLaunchConfiguration()).thenReturn(launchConfig);
-		
+
 		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{launchConfig});
-		
+
 		when(launchManager.getLaunches()).thenReturn(new ILaunch[]{matchingLaunch1, matchingLaunch2});
-		
-		
+
 		try {
 			debugUtils.terminateRemoteDebugger(server);
 			fail();
@@ -276,14 +279,14 @@ public class OpenShiftDebugUtilsTest {
 			assertEquals(error, e.getStatus().getChildren()[0]);
 		}
 	}
-	
+
 	private IEnvironmentVariable createVar(String key, String value) {
 		IEnvironmentVariable var = mock(IEnvironmentVariable.class);
 		when(var.getName()).thenReturn(key);
 		when(var.getValue()).thenReturn(value);
 		return var;
 	}
-	
+
 	private IDeploymentConfig mockDeploymentConfig() {
 		IDeploymentConfig dc = mock(IDeploymentConfig.class);
 		when(dc.getName()).thenReturn("foo-dc");
@@ -296,13 +299,13 @@ public class OpenShiftDebugUtilsTest {
 		when(dc.getReplicaSelector()).thenReturn(Collections.singletonMap("foo", "bar"));
 		return dc;
 	}
-	
+
 	private IServer mockServer(String name) {
 		IServer server = mock(IServer.class);
 		when(server.getName()).thenReturn(name);
 		return server;
 	}
-	
+
 	private static class MockRedeploymentJob extends Job {
 
 		private IDeploymentConfig dc;
@@ -335,7 +338,7 @@ public class OpenShiftDebugUtilsTest {
 			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, null, pendingPod, runningPod);
 			return Status.OK_STATUS;
 		}
-		
+
 		private void waitFor(long millis) {
 			try {
 				Thread.sleep(millis);
@@ -343,7 +346,5 @@ public class OpenShiftDebugUtilsTest {
 				e.printStackTrace();
 			}
 		}
-		
 	}
-	
 }

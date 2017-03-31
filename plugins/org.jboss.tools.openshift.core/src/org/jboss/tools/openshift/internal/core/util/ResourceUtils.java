@@ -29,8 +29,10 @@ import org.eclipse.jgit.transport.URIish;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 
+import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.capability.resources.ITags;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
@@ -50,6 +52,16 @@ public class ResourceUtils {
 	public static final String DOCKER_IMAGE_KIND = "DockerImage";
 	public static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
 	public static final String DEPLOYMENT_CONFIG_KEY = "deploymentconfig";
+
+	public static IClient getClient(IResource resource) {
+		IClient client = resource.accept(new CapabilityVisitor<IClientCapability, IClient>() {
+			@Override
+			public IClient visit(IClientCapability cap) {
+				return cap.getClient();
+			}
+		}, null);
+		return client;
+	}
 
 	/**
 	 * Returns {@code true} if the given route points to the given service and

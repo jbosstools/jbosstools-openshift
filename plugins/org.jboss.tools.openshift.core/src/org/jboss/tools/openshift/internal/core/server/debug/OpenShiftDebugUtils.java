@@ -42,7 +42,9 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -51,18 +53,22 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.capability.CapabilityVisitor;
-import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IReplicationController;
 
+/**
+ * @author Fred Bricon
+ * @author Jeff Maury
+ * @author Andre Dietisheim
+ */
 public class OpenShiftDebugUtils {
 
 	private static final String DEBUG_KEY = "DEBUG";
 	private static final String DEBUG_PORT_KEY = "DEBUG_PORT";
+	
 	private ILaunchManager launchManager;
 
 	public static OpenShiftDebugUtils get() {
@@ -111,13 +117,15 @@ public class OpenShiftDebugUtils {
 		return debugContext;
 	}
 	
-	public void updateDebugConfig(IReplicationController replicationController, DebuggingContext debugContext, IProgressMonitor monitor) throws CoreException {
-		monitor.subTask("Updating Deployment Configuration");
+	public void updateDebugConfig(IReplicationController replicationController, DebuggingContext debugContext, IProgressMonitor monitor)
+			throws CoreException {
+		monitor.subTask(NLS.bind("Updating replication controller {0}", replicationController.getName()));
 		if (replicationController == null
 				|| replicationController.getEnvironmentVariables() == null) {
 			return;
 		}
-		updateDeploymentConfigValues(replicationController, debugContext);
+		setDebugPort(replicationController, debugContext);
+		setEnvVariables(replicationController, debugContext.isDebugEnabled(), debugContext.getDebugPort());
 
 		ReplicationControllerListenerJob rcListenerJob = new ReplicationControllerListenerJob(replicationController);
 		rcListenerJob.addJobChangeListener(new JobChangeAdapter() {
@@ -125,7 +133,8 @@ public class OpenShiftDebugUtils {
 			public void done(IJobChangeEvent event) {
 				ConnectionsRegistrySingleton.getInstance().removeListener(rcListenerJob.getConnectionsRegistryListener());
 				debugContext.setPod(rcListenerJob.getPod());
-				if (event.getResult().isOK() && debugContext.getDebugListener() != null) {
+				if (event.getResult().isOK() 
+						&& debugContext.getDebugListener() != null) {
 					try {
 						debugContext.getDebugListener().onPodRestart(debugContext, monitor);
 					} catch (CoreException e) {
@@ -138,20 +147,33 @@ public class OpenShiftDebugUtils {
 		ConnectionsRegistrySingleton.getInstance().addListener(rcListenerJob.getConnectionsRegistryListener());
 		rcListenerJob.schedule();
 		IClient client = getClient(replicationController);
-        client.update(replicationController);
+		client.update(replicationController);
 		deleteAllPods(replicationController, client);
-		try {
-			rcListenerJob.join(ReplicationControllerListenerJob.TIMEOUT, monitor);
-		} catch (OperationCanceledException | InterruptedException e) {
-			throw new OpenShiftCoreException(e);
-		}
+		waitFor(rcListenerJob, monitor);
 		IStatus result = rcListenerJob.getResult();
 		if (result == null) {//timed out!
 			throw new CoreException(rcListenerJob.getTimeOutStatus());
 		} else if (!result.isOK()) {
 			throw new CoreException(result);
 		}
-		
+	}
+
+	private void waitFor(ReplicationControllerListenerJob rcListenerJob, IProgressMonitor monitor) {
+		try {
+			rcListenerJob.join(ReplicationControllerListenerJob.TIMEOUT, monitor);
+		} catch (OperationCanceledException | InterruptedException e) {
+			throw new OpenShiftCoreException(e);
+		}
+	}
+
+	private IClient getClient(IReplicationController replicationController) throws CoreException {
+		IClient client = ResourceUtils.getClient(replicationController);
+		if (client == null) {
+			throw new CoreException(
+					StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
+							NLS.bind("Could not get client for resource {0}", replicationController.getName())));
+		}
+		return client;
 	}
 
 	private void deleteAllPods(IReplicationController replicationController, IClient client) {
@@ -162,58 +184,65 @@ public class OpenShiftDebugUtils {
 		}
 	}
 
-	private void updateDeploymentConfigValues(IReplicationController replicationController,
+	private void setDebugPort(IReplicationController replicationController,
 			DebuggingContext debugContext) {
 		Collection<IContainer> originalContainers = replicationController.getContainers();
-		if (originalContainers != null && !originalContainers.isEmpty() && debugContext.isDebugEnabled()) {
+		if (originalContainers != null 
+				&& !originalContainers.isEmpty() 
+				&& debugContext.isDebugEnabled()) {
 			Collection<IContainer> containers = new ArrayList<>(originalContainers);
 			IContainer container = containers.iterator().next();
 			Set<IPort> ports = new HashSet<>(container.getPorts());
 			
-			IPort existing = ports.stream().filter(p -> p.getContainerPort() == debugContext.getDebugPort())
-										.findFirst().orElse(null);
-			boolean added = false;
-			if (existing == null) {
-				PortSpecAdapter newPort = new PortSpecAdapter("debug", "TCP", debugContext.getDebugPort());
-				added = ports.add(newPort);
-			} else {
-				PortSpecAdapter newPort = new PortSpecAdapter(existing.getName(), existing.getProtocol(), debugContext.getDebugPort());
-				if (!existing.equals(newPort)) {
-					ports.remove(existing);
-					added = ports.add(newPort);
-				}
-			}
+			IPort existing = ports.stream()
+					.filter(p -> p.getContainerPort() == debugContext.getDebugPort())
+					.findFirst()
+					.orElse(null);
+			boolean added = addDebugPort(debugContext, ports, existing);
 			if (added) {
 				container.setPorts(ports); 
 				replicationController.setContainers(containers);
 			}
 		}
-		//TODO the list of env var to set in debug mode should probably be defined in the server settings instead
-		if (debugContext.isDebugEnabled()) {
-			replicationController.setEnvironmentVariable(DEBUG_PORT_KEY, String.valueOf(debugContext.getDebugPort()));			
-		} else {
-			replicationController.removeEnvironmentVariable(DEBUG_PORT_KEY);
-		}
-		replicationController.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugContext.isDebugEnabled()));
 	}
 
-	private IClient getClient(IReplicationController replicationController) {
-		IClient client = replicationController.accept(new CapabilityVisitor<IClientCapability, IClient>() {
-			@Override
-			public IClient visit(IClientCapability cap) {
-				return cap.getClient();
+	private void setEnvVariables(IReplicationController replicationController, boolean debugEnabled, int debugPort) {
+		//TODO the list of env var to set in debug mode should probably be defined in the server settings instead
+		if (debugEnabled) {
+			replicationController.setEnvironmentVariable(DEBUG_PORT_KEY, String.valueOf(debugPort));			
+			replicationController.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugEnabled));
+		} else {
+			replicationController.removeEnvironmentVariable(DEBUG_PORT_KEY);
+			replicationController.setEnvironmentVariable(DEBUG_KEY, String.valueOf(debugEnabled));
+		}
+	}
+
+	private boolean addDebugPort(DebuggingContext debugContext, Set<IPort> ports, IPort existing) {
+		boolean added = false;
+		if (existing == null) {
+			PortSpecAdapter newPort = new PortSpecAdapter("debug", "TCP", debugContext.getDebugPort());
+			added = ports.add(newPort);
+		} else {
+			PortSpecAdapter newPort = new PortSpecAdapter(existing.getName(), existing.getProtocol(), debugContext.getDebugPort());
+			if (!existing.equals(newPort)) {
+				ports.remove(existing);
+				added = ports.add(newPort);
 			}
-		}, null);
-		return client;
+		}
+		return added;
 	}
 
 	public DebuggingContext getDebuggingContext(IReplicationController replicationController) {
 		if (replicationController == null) {
 			return null;
 		}
-		DebuggingContext debugContext = new DebuggingContext();
+		DebuggingContext debugContext = initDebuggingContext(replicationController, new DebuggingContext());
+		return debugContext;
+	}
+
+	private DebuggingContext initDebuggingContext(IReplicationController replicationController, DebuggingContext debugContext) {
 		String debugPort = getEnv(replicationController, DEBUG_PORT_KEY);
-		debugContext.setDebugPort(NumberUtils.toInt(debugPort, -1));
+		debugContext.setDebugPort(NumberUtils.toInt(debugPort, DebuggingContext.NO_DEBUG_PORT));
 		boolean debugEnabled = StringUtils.isNotBlank(getEnv(replicationController, DEBUG_PORT_KEY));
 		debugContext.setDebugEnabled(debugEnabled);
 		return debugContext;

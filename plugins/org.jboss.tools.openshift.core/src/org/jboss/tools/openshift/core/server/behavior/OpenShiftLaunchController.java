@@ -425,8 +425,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 			workingCopy = debuggerLaunchConfig.getWorkingCopy();
 		}
-				
-		
+
 		IProject project = OpenShiftServerUtils.getDeployProject(server);
 		debugUtils.setupRemoteDebuggerLaunchConfiguration(workingCopy, project, localDebugPort);
 		debuggerLaunchConfig = workingCopy.doSave();
@@ -495,7 +494,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 				sleep(3000);
 				
 				String portAttr = launch.getAttribute(LAUNCH_DEBUG_PORT_PROP);
-				int port = -1;
+				int port = DebuggingContext.NO_DEBUG_PORT;
 				try {
 					port = Integer.parseInt(portAttr);
 				} catch(NumberFormatException nfe) {
@@ -513,11 +512,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 		};
 	}
-	
-	
-	
 
-	
 	private boolean complete(IPod[] buildPods, IPod[] other) {
 		if( buildPods == null || other == null )
 			return false;
