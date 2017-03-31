@@ -38,13 +38,12 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.dialog.DismissableNagDialog;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.capability.CapabilityVisitor;
-import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IResource;
 
 public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider {
@@ -110,13 +109,7 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 		}
 
 		IResource resource = input.getResource();
-		IClient client = resource.accept(new CapabilityVisitor<IClientCapability, IClient>() {
-			@Override
-			public IClient visit(IClientCapability cap) {
-				return cap.getClient();
-			}
-		}, null);
-		
+		IClient client = ResourceUtils.getClient(resource);
 		IProgressService service = PlatformUI.getWorkbench().getProgressService();
 		Connection connection = input.getConnection();
 		String resourceName = input.getName();

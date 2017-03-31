@@ -97,10 +97,8 @@ public class OpenShiftDebugUtilsTest {
 	}
 
 	@Test
-	public void shouldReturnDebuggingContextWithDebugPortAndDebuggingEnabledGivenPortAndDebugEnvVarExist() {
-		IDeploymentConfig dc = mockDeploymentConfig();
-		List<IEnvironmentVariable> vars = Arrays.asList(createVar("DEBUG_PORT", "9797"), createVar("DEBUG", "true"));
-		when(dc.getEnvironmentVariables()).thenReturn(vars);
+	public void shouldHaveDebugEnabledGivenDebugAndPortEnvVarsExist() {
+		IDeploymentConfig dc = mockDeploymentConfig(createVar("DEBUG_PORT", "9797"), createVar("DEBUG", "true"));
 		DebuggingContext context = debugUtils.getDebuggingContext(dc);
 
 		assertEquals(9797, context.getDebugPort());
@@ -108,14 +106,28 @@ public class OpenShiftDebugUtilsTest {
 	}
 
 	@Test
-	public void shouldCreateDebuggingContextWithDebugPortAndDebuggingEnabledDCGivenEnvVariables() {
-		IDeploymentConfig dc = mockDeploymentConfig();
-		List<IEnvironmentVariable> vars = Arrays.asList(createVar("DEBUG_PORT", "1234"), createVar("DEV_MODE", "true"));
-		when(dc.getEnvironmentVariables()).thenReturn(vars);
+	public void shouldHaveDebugEnabledGivenDevModeAndPortEnvVarsExist() {
+		IDeploymentConfig dc = mockDeploymentConfig(createVar("DEBUG_PORT", "1234"), createVar("DEV_MODE", "true"));
 		DebuggingContext context = debugUtils.getDebuggingContext(dc);
 
 		assertEquals(1234, context.getDebugPort());
-		assertFalse(context.isDebugEnabled());		
+		assertTrue(context.isDebugEnabled());
+	}
+
+	@Test
+	public void shouldHaveDebugDisabledGivenOnlyDevModeEnvVarExist() {
+		IDeploymentConfig dc = mockDeploymentConfig(createVar("DEV_MODE", "true"));
+		DebuggingContext context = debugUtils.getDebuggingContext(dc);
+
+		assertFalse(context.isDebugEnabled());
+	}
+
+	@Test
+	public void shouldHaveDebugEnabledGivenOnlyDebugEnvVarExist() {
+		IDeploymentConfig dc = mockDeploymentConfig(createVar("DEBUG_PORT", "true"));
+		DebuggingContext context = debugUtils.getDebuggingContext(dc);
+
+		assertTrue(context.isDebugEnabled());
 	}
 
 	@Test
@@ -287,7 +299,7 @@ public class OpenShiftDebugUtilsTest {
 		return var;
 	}
 
-	private IDeploymentConfig mockDeploymentConfig() {
+	private IDeploymentConfig mockDeploymentConfig(IEnvironmentVariable... vars) {
 		IDeploymentConfig dc = mock(IDeploymentConfig.class);
 		when(dc.getName()).thenReturn("foo-dc");
 		//when(dc.equals(dc)).thenReturn(Boolean.TRUE);
@@ -297,6 +309,9 @@ public class OpenShiftDebugUtilsTest {
 		when(project.getResources(ResourceKind.POD)).thenReturn(Arrays.asList(somePod));
 		when(dc.getProject()).thenReturn(project);
 		when(dc.getReplicaSelector()).thenReturn(Collections.singletonMap("foo", "bar"));
+		if (vars != null) {
+			when(dc.getEnvironmentVariables()).thenReturn(Arrays.asList(vars));
+		}
 		return dc;
 	}
 
