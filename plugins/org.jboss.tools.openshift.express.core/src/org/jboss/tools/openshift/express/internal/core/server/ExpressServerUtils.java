@@ -222,6 +222,9 @@ public class ExpressServerUtils {
 	}
 
 	public static ConnectionURL getConnectionUrl(IServerAttributes attributes) {
+		if (attributes == null) {
+			return null;
+		}
 		try {
 			String connectionUrlString = getProjectAttribute(
 					SETTING_CONNECTIONURL, 
@@ -288,6 +291,9 @@ public class ExpressServerUtils {
 	}
 	
 	public static String getDefaultDeployFolder(IApplication application) {
+		if (application == null) {
+			return null;
+		}
 		Assert.isNotNull(application);
 		DeployFolder deployFolder = DeployFolder.getByCartridgeName(application.getCartridge().getName());
 		if (deployFolder == null) {
