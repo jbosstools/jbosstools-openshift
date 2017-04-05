@@ -11,14 +11,17 @@
 package org.jboss.tools.openshift.test.ui.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -51,8 +54,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.images.DockerImageURI;
+import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.build.ISourceBuildStrategy;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
@@ -473,6 +480,34 @@ public class ServerSettingsWizardPageModelTest {
 		verify(server, atLeastOnce()).setAutoPublishSetting(Server.AUTO_PUBLISH_RESOURCE);
 	}
 	
+	@Test
+	public void testGetStandartOpenshiftProfile() {
+		assertEquals("openshift3", this.model.getProfileId());
+	}
+	
+	@Test
+	public void testGetNodejsOpenshiftProfile() {
+		org.eclipse.core.resources.IFile appJsonFile = mock(org.eclipse.core.resources.IFile.class);
+		when(appJsonFile.exists()).thenReturn(true);
+		when(project2.getFile(eq("app.json"))).thenReturn(appJsonFile);
+		
+		assertEquals("openshift3.nodejs", this.model.getProfileId());
+	}
+	
+	@Test
+	public void testGetEapOpenshiftProfile() {
+		DockerImageURI image = mock(DockerImageURI.class);
+		when(image.getName()).thenReturn("super-puper-eap-name");
+		ISourceBuildStrategy buildStrategy = mock(ISourceBuildStrategy.class);
+		when(buildStrategy.getImage()).thenReturn(image);
+		IBuildConfig buildConfig = (IBuildConfig) connection
+				//take buildconfig "project2-app2" from ResourceMocks
+				.getResources(ResourceKind.BUILD_CONFIG, ResourceMocks.PROJECT2.getName()).get(1);
+		when(buildConfig.getBuildStrategy()).thenReturn(buildStrategy);
+
+		assertEquals("openshift3.eap", this.model.getProfileId());
+	}
+	
 	private ServerSettingsWizardPageModel createModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, List<IProject> projects, Connection connection) {
 		return createModel(service, route, deployProject, projects, connection, null);
 	}
@@ -500,6 +535,11 @@ public class ServerSettingsWizardPageModelTest {
 		public void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath, 
 				String routeURL, org.eclipse.core.resources.IProject deployProject) {
 				//super.updateServerProject(connectionUrl, resource, sourcePath, podPath, routeURL, deployProject);
+		}
+		
+		@Override
+		public String getProfileId() {
+			return super.getProfileId();
 		}
 	}
 

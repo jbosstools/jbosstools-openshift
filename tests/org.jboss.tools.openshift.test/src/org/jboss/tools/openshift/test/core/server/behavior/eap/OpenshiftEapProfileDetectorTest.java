@@ -20,25 +20,27 @@ import com.openshift.restclient.model.build.ISTIBuildStrategy;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
 public class OpenshiftEapProfileDetectorTest {
+	
+	private static final String FOO_BAR = "foo.bar";
 
 	@Test
 	public void testIsEapStyle() {
 		assertIsNotEapStyle(null);
 		//docker
-		assertIsNotEapStyle(createBuildConfig(IDockerBuildStrategy.class, "foo.bar"));
+		assertIsNotEapStyle(createBuildConfig(IDockerBuildStrategy.class, FOO_BAR));
 		assertIsEapStyle(createBuildConfig(IDockerBuildStrategy.class, "foo.wildflybar"));
 		//source
-		assertIsNotEapStyle(createBuildConfig(ISourceBuildStrategy.class, "foo.bar"));
+		assertIsNotEapStyle(createBuildConfig(ISourceBuildStrategy.class, FOO_BAR));
 		assertIsEapStyle(createBuildConfig(ISourceBuildStrategy.class, "foo.bar.eap70"));
 		//custom source
-		assertIsNotEapStyle(createBuildConfig(ICustomBuildStrategy.class, "foo.bar"));
+		assertIsNotEapStyle(createBuildConfig(ICustomBuildStrategy.class, FOO_BAR));
 		assertIsEapStyle(createBuildConfig(ICustomBuildStrategy.class, "foo.bar.EAP64"));
 		//deprecated STI
-		assertIsNotEapStyle(createBuildConfig(ISTIBuildStrategy.class, "foo.bar"));
+		assertIsNotEapStyle(createBuildConfig(ISTIBuildStrategy.class, FOO_BAR));
 		assertIsEapStyle(createBuildConfig(ISTIBuildStrategy.class, "wildflyyy"));
 		
 		//fallback on template name check
-		assertIsNotEapStyle(createBuildConfig(null, "foo.bar"));
+		assertIsNotEapStyle(createBuildConfig(null, FOO_BAR));
 		assertIsEapStyle(createBuildConfig(IBuildStrategy.class, "wildflyyy"));
 
 	}

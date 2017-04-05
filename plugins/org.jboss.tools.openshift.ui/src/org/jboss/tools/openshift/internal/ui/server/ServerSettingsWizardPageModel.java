@@ -432,7 +432,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 				connectionUrl, resource, sourcePath, podPath, routeURL, deployProject);
 	}
 	
-	private String getProfileId() {
+	protected String getProfileId() {
 		Collection<IConfigurationElement> configurationElements = ExtensionUtils
 				.getExtensionConfigurations(PROFILE_DETECTOR_EP_ID);
 		for (IConfigurationElement configurationElement : configurationElements) {
