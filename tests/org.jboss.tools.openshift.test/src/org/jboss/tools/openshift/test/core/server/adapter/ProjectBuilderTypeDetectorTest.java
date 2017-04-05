@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.test.ui.wizard.builder;
+package org.jboss.tools.openshift.test.core.server.adapter;
 
 
 import static org.junit.Assert.assertEquals;

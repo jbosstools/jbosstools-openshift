@@ -16,10 +16,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -56,18 +54,11 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.images.DockerImageURI;
-import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
-import com.openshift.restclient.model.build.IBuildStrategy;
-import com.openshift.restclient.model.build.ICustomBuildStrategy;
-import com.openshift.restclient.model.build.IDockerBuildStrategy;
-import com.openshift.restclient.model.build.ISTIBuildStrategy;
-import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
 /**
  * @author Andre Dietisheim
@@ -94,8 +85,6 @@ public class OpenShiftServerUtils {
 
 	public static final String SERVER_START_ON_CREATION = "org.jboss.tools.openshift.SERVER_START_ON_CREATION";
 
-	private static final Collection<String> EAP_LIKE_KEYWORDS = Collections.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
-	
 	private static final Collection<String> SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES = Collections.unmodifiableCollection(
 			Arrays.asList(
 					ResourceKind.ROUTE,
@@ -113,9 +102,7 @@ public class OpenShiftServerUtils {
 	public static boolean isAllowedForServerAdapter(IResource resource) {
 	    return SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES.contains(resource.getKind());
 	}
-
-	private static final String PACKAGE_JSON = "package.json"; //$NON-NLS-1$
-
+	
 	/**
 	 * Returns the first openshift 3 server in the current workspace
 	 * that matches the given OpenShift resource (service,

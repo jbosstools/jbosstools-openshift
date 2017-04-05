@@ -60,7 +60,8 @@ public class ProjectBuilderTypeDetector {
 			return UNKNOWN;
 		}
 		return detectors.stream()
-						.filter(d -> d.applies(project))
+						.filter(d -> 
+							d.applies(project))
 						.findFirst()
 						.orElse(UNKNOWN);
 	}
@@ -91,7 +92,8 @@ public class ProjectBuilderTypeDetector {
 
 		protected boolean hasAnyFile(final IProject project, Collection<String> files) {
 			return files.stream()
-						.filter(f -> project.getFile(f).exists())
+						.filter(f -> 
+							project.getFile(f).exists())
 						.findFirst()
 						.isPresent();
 		}
