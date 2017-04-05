@@ -29,8 +29,10 @@ import org.eclipse.jgit.transport.URIish;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 
+import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.capability.resources.ITags;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
@@ -50,6 +52,15 @@ public class ResourceUtils {
 	public static final String DOCKER_IMAGE_KIND = "DockerImage";
 	public static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
 	public static final String DEPLOYMENT_CONFIG_KEY = "deploymentconfig";
+
+	public static IClient getClient(IResource resource) {
+		return resource.accept(new CapabilityVisitor<IClientCapability, IClient>() {
+			@Override
+			public IClient visit(IClientCapability cap) {
+				return cap.getClient();
+			}
+		}, null);
+	}
 
 	/**
 	 * Returns {@code true} if the given route points to the given service and
@@ -682,10 +693,14 @@ public class ResourceUtils {
 	 * @return true if they are related
 	 */
     public static boolean areRelated(final IService service, final IDeploymentConfig dc) {
-        return service.getProject().getResources(ResourceKind.POD).stream()
-       		.filter(pod -> dc.getName().equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))   
-        	.filter(pod -> containsAll(service.getSelector(), pod.getLabels()))   
-            .count() > 0; 
+    	if (dc == null) {
+    		return false;
+    	}
+    	String dcName = dc.getName();
+    	return service.getProject().getResources(ResourceKind.POD).stream()
+    			.filter(pod -> dcName.equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))   
+    			.filter(pod -> containsAll(service.getSelector(), pod.getLabels()))   
+    			.count() > 0; 
     }
 
 
@@ -790,26 +805,52 @@ public class ResourceUtils {
 	 *
 	 * Made public for testing purposes.
 	 */
-	public static String extractProjectNameFromURI(String uri) {
+	public static String getProjectNameForURI(String uri) {
 		String projectName = null;
-		if (uri != null) {
-			uri = uri.trim();
-			while (uri.endsWith("/")) {
-				//Trailing slashes do not matter.
-				uri = uri.substring(0, uri.length() - 1);
-			}
-			if (uri.endsWith(".git")) {
-				uri = uri.substring(0, uri.length() - 4);
-				if (uri.endsWith("/")) {
-					// '/' before .git is error
-					return null;
-				}
-			}
-			int b = uri.lastIndexOf("/");
-			if (b >= 0) {
-				projectName = uri.substring(b + 1);
+		if (StringUtils.isNotEmpty(uri)) {
+			String mangledUri = uri.trim();
+			mangledUri = stripTrailingSlashes(mangledUri);
+			mangledUri = stripDotGit(mangledUri);
+			if (mangledUri != null) {
+				projectName = getLastPathSegment(mangledUri);
 			}
 		}
 		return projectName;
+	}
+
+	private static String stripDotGit(String uri) {
+		String strippedUri = uri;
+		if (strippedUri.endsWith(".git")) {
+			strippedUri = strippedUri.substring(0, strippedUri.length() - 4);
+			if (strippedUri.endsWith("/")) {
+				// '/' before .git is error
+				return null;
+			}
+		}
+		return strippedUri;
+	}
+
+	private static String getLastPathSegment(String mangledUri) {
+		int index = mangledUri.lastIndexOf("/");
+		if (index >= 0) {
+			return mangledUri.substring(index + 1);
+		} else {
+			return mangledUri;
+		}
+	}
+
+	/**
+	 * Removes (multiple) trailing "/" from the given uri
+	 * 
+	 * @param uri
+	 * @return
+	 */
+	private static String stripTrailingSlashes(String uri) {
+		String strippedUri = uri;
+		while (strippedUri.endsWith("/")) {
+			// Trailing slashes do not matter.
+			strippedUri = strippedUri.substring(0, strippedUri.length() - 1);
+		}
+		return strippedUri;
 	}
 }

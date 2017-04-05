@@ -109,8 +109,8 @@ public class EGitUtils {
 	private static final String REMOTE_CONNECTION_TIMEOUT = "remote_connection_timeout";
 	private static final int DEFAULT_TIMEOUT = 2 * 60 * 1000;
 	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD;
-	private static final String DEFAULT_REFSPEC_DESTINATION = Constants.R_HEADS
-			+ Constants.MASTER; // refs/heads/master
+	private static final String DEFAULT_REFSPEC_DESTINATION = 
+			Constants.R_HEADS + Constants.MASTER; // refs/heads/master
 	private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core.GitProvider";
 
 	private static final Pattern GIT_URL_PATTERN =

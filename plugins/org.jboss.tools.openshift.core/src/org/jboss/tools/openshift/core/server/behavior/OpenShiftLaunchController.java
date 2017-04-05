@@ -76,8 +76,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 	private static final int RETRY_DELAY = 1000;
 	private static final int PUBLISH_DELAY = 3000;
-	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
-	private static final String DEV_MODE = "DEV_MODE"; //$NON-NLS-1$
+	private static final String SERVER_MODE_DEBUG = "debug"; //$NON-NLS-1$
+	private static final String REPLICATIONCONTROLLER_MODE_DEV_KEY = "DEV_MODE"; //$NON-NLS-1$
 
 	/**
 	 * Get access to the ControllableServerBehavior
@@ -185,7 +185,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			IReplicationController rc) throws CoreException {
 		String currentMode = beh.getServer().getMode();
 		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(rc);
-		boolean enableDebugging = DEBUG_MODE.equals(mode);
+		boolean enableDebugging = SERVER_MODE_DEBUG.equals(mode);
 		try {
 			if (enableDebugging) {
 				startDebugging(server, rc, debugContext, monitor);
@@ -212,17 +212,17 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			return;
 		}
 
-		new Job(NLS.bind("Enabling {0} for replication controller {1}",  DEV_MODE, rc.getName())) {
+		new Job(NLS.bind("Enabling {0} for replication controller {1}",  REPLICATIONCONTROLLER_MODE_DEV_KEY, rc.getName())) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					rc.setEnvironmentVariable(DEV_MODE, Boolean.TRUE.toString());
+					rc.setEnvironmentVariable(REPLICATIONCONTROLLER_MODE_DEV_KEY, Boolean.TRUE.toString());
 					Connection conn = ConnectionsRegistryUtil.getConnectionFor(rc);
 					conn.updateResource(rc);
 					return Status.OK_STATUS;
 				} catch (Exception e) {
-					String message = NLS.bind("Unable to enable {0} for deployment config {1}",  DEV_MODE, rc.getName());
+					String message = NLS.bind("Unable to enable {0} for deployment config {1}",  REPLICATIONCONTROLLER_MODE_DEV_KEY, rc.getName());
 					OpenShiftCoreActivator.getDefault().getLogger().logError(message, e);
 					return new Status(Status.ERROR, OpenShiftCoreActivator.PLUGIN_ID, message, e);
 				}
@@ -425,8 +425,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 			workingCopy = debuggerLaunchConfig.getWorkingCopy();
 		}
-				
-		
+
 		IProject project = OpenShiftServerUtils.getDeployProject(server);
 		debugUtils.setupRemoteDebuggerLaunchConfiguration(workingCopy, project, localDebugPort);
 		debuggerLaunchConfig = workingCopy.doSave();
@@ -439,7 +438,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		while(!launched && elapsed < maxWait) {
 			try {
 				//TODO That's fugly. ideally we should see if socket on debug port is responsive instead
-				ret = debuggerLaunchConfig.launch(DEBUG_MODE, new NullProgressMonitor());
+				ret = debuggerLaunchConfig.launch(SERVER_MODE_DEBUG, new NullProgressMonitor());
 				ret.setAttribute(LAUNCH_DEBUG_PORT_PROP, Integer.toString(localDebugPort));
 				launched = true;
 			} catch (Exception e) {
@@ -495,7 +494,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 				sleep(3000);
 				
 				String portAttr = launch.getAttribute(LAUNCH_DEBUG_PORT_PROP);
-				int port = -1;
+				int port = DebuggingContext.NO_DEBUG_PORT;
 				try {
 					port = Integer.parseInt(portAttr);
 				} catch(NumberFormatException nfe) {
@@ -513,11 +512,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			}
 		};
 	}
-	
-	
-	
 
-	
 	private boolean complete(IPod[] buildPods, IPod[] other) {
 		if( buildPods == null || other == null )
 			return false;
