@@ -28,13 +28,12 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.IOpenShiftWatchListener;
 import com.openshift.restclient.IWatcher;
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.capability.CapabilityVisitor;
-import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
@@ -293,19 +292,13 @@ public class WatchManager {
 		}
 		
 		private IClient getClientFor(IProject project) {
-			IClient client = project.accept(new CapabilityVisitor<IClientCapability, IClient>() {
-				
-				@Override
-				public IClient visit(IClientCapability cap) {
-					return cap.getClient();
-				}
-			}, null);
-			if(client == null) {
+			IClient client = ResourceUtils.getClient(project);
+			if (client == null) {
 				Trace.warn("Unable to start watch.  Project {0} does not support IClientCapability", null, project.getName());
 			}
 			return client;
 		}
-		
+
 		@Override
 		public void received(IResource resource, ChangeType change) {
 			Trace.debug("Watch received change in {0} state\n{1}", state, resource.toJson(false));

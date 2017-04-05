@@ -37,6 +37,7 @@ import org.jboss.tools.openshift.internal.common.core.security.OpenShiftSecureSt
 import org.jboss.tools.openshift.internal.common.core.security.SecureStore;
 import org.jboss.tools.openshift.internal.common.core.security.SecureStoreException;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
@@ -46,9 +47,7 @@ import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.UnauthorizedException;
-import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.ICapability;
-import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IResourceBuilder;
 
@@ -616,13 +615,6 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		if (resource == null) {
 			return false;
 		}
-		IClient client =  resource.accept(new CapabilityVisitor<IClientCapability, IClient>() {
-
-			@Override
-			public IClient visit(IClientCapability capability) {
-				return capability.getClient();
-			}
-		}, null);
-		return ObjectUtils.equals(this.client, client);
+		return ObjectUtils.equals(this.client, ResourceUtils.getClient(resource));
 	}
 }

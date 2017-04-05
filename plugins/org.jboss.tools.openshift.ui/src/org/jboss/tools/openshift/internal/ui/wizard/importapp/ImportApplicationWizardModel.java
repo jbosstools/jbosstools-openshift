@@ -108,7 +108,7 @@ public class ImportApplicationWizardModel
 	private static String getRepoName(IBuildConfig config) {
 		String repoName = null;
 		if (config != null) {
-			repoName = ResourceUtils.extractProjectNameFromURI(config.getSourceURI());
+			repoName = ResourceUtils.getProjectNameForURI(config.getSourceURI());
 		}
 		return repoName;
 	}

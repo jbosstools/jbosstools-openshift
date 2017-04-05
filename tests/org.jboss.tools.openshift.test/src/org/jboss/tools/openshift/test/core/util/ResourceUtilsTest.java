@@ -704,17 +704,17 @@ public class ResourceUtilsTest {
 	
 	@Test
 	public void extractProjectNameFromURI() {
-		assertNull(ResourceUtils.extractProjectNameFromURI(null));
-		assertEquals("bar", ResourceUtils.extractProjectNameFromURI("http://foo/bar"));
-		assertEquals("bar", ResourceUtils.extractProjectNameFromURI("http://foo/bar.git"));
-		assertEquals("bar", ResourceUtils.extractProjectNameFromURI("http://foo/bar/"));
-		assertEquals("ba.r", ResourceUtils.extractProjectNameFromURI("http://foo/ba.r"));
+		assertNull(ResourceUtils.getProjectNameForURI(null));
+		assertEquals("bar", ResourceUtils.getProjectNameForURI("http://foo/bar"));
+		assertEquals("bar", ResourceUtils.getProjectNameForURI("http://foo/bar.git"));
+		assertEquals("bar", ResourceUtils.getProjectNameForURI("http://foo/bar/"));
+		assertEquals("ba.r", ResourceUtils.getProjectNameForURI("http://foo/ba.r"));
+		assertNull(ResourceUtils.getProjectNameForURI("http://foo/bar/.git"));
 
-		assertEquals("quickstart", ResourceUtils.extractProjectNameFromURI("https://github.com/akram/quickstart"));
-		assertEquals("quickstart", ResourceUtils.extractProjectNameFromURI("https://github.com/akram/quickstart.git"));
-		assertEquals("quickstart", ResourceUtils.extractProjectNameFromURI("https://github.com/akram/quickstart/"));
-		assertEquals("quickstart", ResourceUtils.extractProjectNameFromURI("https://github.com/akram/quickstart.git/"));
+		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart"));
+		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart.git"));
+		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart/"));
+		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart.git/"));
+		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart.git///"));
 	}
-
-	
 }
