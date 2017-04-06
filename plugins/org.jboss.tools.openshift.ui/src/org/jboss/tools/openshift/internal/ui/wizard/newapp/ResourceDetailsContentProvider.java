@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -25,7 +26,6 @@ import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.build.BuildStrategyType;
 import com.openshift.restclient.model.build.IBuildStrategy;
-import com.openshift.restclient.model.build.IBuildTrigger;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
 import com.openshift.restclient.model.build.IDockerBuildStrategy;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
@@ -90,6 +90,21 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 
 	private void getBuildConfigChildren(Collection<ResourceProperty> properties, IBuildConfig config) {
 		IBuildStrategy buildStrategy = config.getBuildStrategy();
+		addStrategyTypeProperties(properties, buildStrategy);
+		properties.add(new ResourceProperty("source URL", config.getSourceURI()));
+		properties.add(new ResourceProperty("output to", config.getOutputRepositoryName()));
+		List<String> triggers = config.getBuildTriggers().stream()
+				.map(trigger -> trigger.getType().toString())
+				.collect(Collectors.toList());
+		properties.add(new ResourceProperty("build triggers", triggers));
+	}
+
+	private void addStrategyTypeProperties(Collection<ResourceProperty> properties, IBuildStrategy buildStrategy) {
+		if (buildStrategy == null) {
+			properties.add(new ResourceProperty("strategy", "<UNKNOWN>"));
+			return;
+		}
+
 		properties.add(new ResourceProperty("strategy", buildStrategy.getType().toString()));
 		switch(buildStrategy.getType()) {
 		case BuildStrategyType.SOURCE:
@@ -106,13 +121,6 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 			break;
 		default:
 		}
-		properties.add(new ResourceProperty("source URL", config.getSourceURI()));
-		properties.add(new ResourceProperty("output to", config.getOutputRepositoryName()));
-		Collection<String> triggers = new ArrayList<>();
-		for (IBuildTrigger trigger : config.getBuildTriggers()) {
-			triggers.add(trigger.getType().toString());
-		}
-		properties.add(new ResourceProperty("build triggers", triggers));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -138,8 +146,6 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -148,7 +154,6 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 
 	@Override
 	public Object getParent(Object paramObject) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -159,10 +164,7 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		
 		private Object value;
 		private String property;
-		/**
-		 * @param property
-		 * @param value
-		 */
+
 		ResourceProperty(String property, Object value){
 			this.property = property;
 			this.value = value;
