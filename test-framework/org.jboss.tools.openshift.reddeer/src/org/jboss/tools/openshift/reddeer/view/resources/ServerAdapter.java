@@ -35,7 +35,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
  * @author mlabuda@redhat.com
  *
  */
-public class ServerAdapter {
+public class ServerAdapter{
 
 	private TreeViewerHandler treeViewerHandler = TreeViewerHandler.getInstance();
 
