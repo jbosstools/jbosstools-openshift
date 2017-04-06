@@ -13,6 +13,7 @@
 	<packaging>pom</packaging>
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-openshift.git</tycho.scmUrl>
+		<sonar.test.inclusions>**/*Test.*,**/test/**/*</sonar.test.inclusions>
 	</properties>
 	<modules>
 		<module>plugins</module>
@@ -35,4 +36,54 @@
 			<url>${jbosstools-base-site}</url>
 		</repository>
 	</repositories>
+	
+	<profiles>
+		<profile>
+			<id>quality</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<!-- sonar properties -->
+				<sonar.code.codeCoveragePlugin>jacoco</sonar.code.codeCoveragePlugin>
+				<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+				<!-- points to the target folder of the global parent project -->
+				<sonar.jacoco.reportPath>../../target/jacoco.exec</sonar.jacoco.reportPath>
+				<sonar.jacoco.reportPaths>${sonar.jacoco.reportPath}</sonar.jacoco.reportPaths>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.7.9</version>
+						<configuration>
+							<append>true</append>
+							<includes>
+								<include>org.jboss.tools.openshift.*</include>
+							</includes>
+						</configuration>
+						<executions>
+							<execution>
+								<id>agent-for-ut</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+								<configuration>
+									<destFile>${sonar.jacoco.reportPath}</destFile>
+								</configuration>
+							</execution>
+							<execution>
+								<id>jacoco-site</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
