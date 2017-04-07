@@ -38,6 +38,8 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class ResourceDetailsContentProvider implements ITreeContentProvider{
 
+	public static final String LABEL_STRATEGY = "strategy";
+
 	@Override
 	public Object[] getChildren(Object node) {
 		if(node instanceof IResource) {
@@ -46,19 +48,19 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 			properties.add(new ResourceProperty("labels", resource.getLabels()));
 			switch(resource.getKind()) {
 			case ResourceKind.BUILD_CONFIG:
-				getBuildConfigChildren(properties, (IBuildConfig) resource); 
+				addBuildConfigProperties(properties, (IBuildConfig) resource); 
 				break;
 			case ResourceKind.DEPLOYMENT_CONFIG:
-				getDeploymentConfigChildren(properties, (IDeploymentConfig) resource); 
+				addDeploymentConfigProperties(properties, (IDeploymentConfig) resource); 
 				break;
 			case ResourceKind.SERVICE:
-				getServiceChildren(properties, (IService) resource); 
+				addServiceProperties(properties, (IService) resource); 
 				break;
 			case ResourceKind.ROUTE:
-				getRouteChildren(properties, (IRoute) resource); 
+				addRouteProperties(properties, (IRoute) resource); 
 				break;
 			case ResourceKind.IMAGE_STREAM:
-				getImageStreamChildren(properties, (IImageStream) resource); 
+				addImageStreamProperties(properties, (IImageStream) resource); 
 				break;
 			default:
 			}
@@ -67,28 +69,28 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		return new Object[] {};
 	}
 	
-	private void getRouteChildren(Collection<ResourceProperty> properties, IRoute resource) {
+	private void addRouteProperties(Collection<ResourceProperty> properties, IRoute resource) {
 		properties.add(new ResourceProperty("host", resource.getHost()));
 		properties.add(new ResourceProperty("path", resource.getPath()));
 		properties.add(new ResourceProperty("service", resource.getServiceName()));
 	}
 
-	private void getImageStreamChildren(Collection<ResourceProperty> properties, IImageStream resource) {
+	private void addImageStreamProperties(Collection<ResourceProperty> properties, IImageStream resource) {
 		properties.add(new ResourceProperty("registry", resource.getDockerImageRepository()));
 	}
 
-	private void getServiceChildren(Collection<ResourceProperty> properties, IService resource) {
+	private void addServiceProperties(Collection<ResourceProperty> properties, IService resource) {
 		properties.add(new ResourceProperty("selector", resource.getSelector()));
 		properties.add(new ResourceProperty("port", resource.getPort()));
 	}
 
-	private void getDeploymentConfigChildren(Collection<ResourceProperty> properties, IDeploymentConfig resource) {
+	private void addDeploymentConfigProperties(Collection<ResourceProperty> properties, IDeploymentConfig resource) {
 		properties.add(new ResourceProperty("triggers", resource.getTriggerTypes()));
-		properties.add(new ResourceProperty("strategy", resource.getDeploymentStrategyType()));
+		properties.add(new ResourceProperty(LABEL_STRATEGY, resource.getDeploymentStrategyType()));
 		properties.add(new ResourceProperty("template selector", resource.getReplicaSelector()));
 	}
 
-	private void getBuildConfigChildren(Collection<ResourceProperty> properties, IBuildConfig config) {
+	private void addBuildConfigProperties(Collection<ResourceProperty> properties, IBuildConfig config) {
 		IBuildStrategy buildStrategy = config.getBuildStrategy();
 		addStrategyTypeProperties(properties, buildStrategy);
 		properties.add(new ResourceProperty("source URL", config.getSourceURI()));
@@ -100,12 +102,13 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 	}
 
 	private void addStrategyTypeProperties(Collection<ResourceProperty> properties, IBuildStrategy buildStrategy) {
-		if (buildStrategy == null) {
-			properties.add(new ResourceProperty("strategy", "<UNKNOWN>"));
+		if (buildStrategy == null
+				|| buildStrategy.getType() == null) {
+			properties.add(new UnknownResourceProperty(LABEL_STRATEGY));
 			return;
 		}
 
-		properties.add(new ResourceProperty("strategy", buildStrategy.getType().toString()));
+		properties.add(new ResourceProperty(LABEL_STRATEGY, buildStrategy.getType().toString()));
 		switch(buildStrategy.getType()) {
 		case BuildStrategyType.SOURCE:
 			ISourceBuildStrategy sti = (ISourceBuildStrategy) buildStrategy;
@@ -126,16 +129,12 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object[] getElements(Object rootElements) {
-		if(!(rootElements instanceof Collection)) return new Object[] {};
-		List<IResource> resources = new ArrayList<>( (Collection<IResource>)rootElements);
-		Collections.sort(resources, new Comparator<IResource>() {
-			@Override
-			public int compare(IResource first, IResource second) {
-				int result = first.getKind().toString().compareTo(second.getKind().toString());
-				if(result !=0) return result;
-				return first.getName().compareTo(second.getName());
-			}
-		});
+		if(!(rootElements instanceof Collection)) {
+			return new Object[] {};
+		}
+	
+		List<IResource> resources = new ArrayList<>((Collection<IResource>) rootElements);
+		Collections.sort(resources, new ResourceKindAndNameComparator());
 		return resources.toArray();
 	}
 
@@ -170,13 +169,49 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 			this.value = value;
 		}
 		
-		String getProperty() {
+		public String getProperty() {
 			return property;
 		}
 		
-		Object getValue() {
+		public Object getValue() {
 			return value;
 		}
 
+		public boolean isUnknownValue() {
+			return false;
+		}
+		
+	}
+
+	public static class UnknownResourceProperty extends ResourceProperty {
+
+		UnknownResourceProperty(String property) {
+			super(property, null);
+		}
+
+		@Override
+		public boolean isUnknownValue() {
+			return true;
+		}
+	}
+	
+	private static class ResourceKindAndNameComparator implements Comparator<IResource> {
+		@Override
+		public int compare(IResource first, IResource second) {
+			int result = compareKind(first, second);
+			if (result != 0) {
+				return result;
+			}
+			return compareName(first, second);
+		}
+
+		private int compareName(IResource first, IResource second) {
+			return first.getName().compareTo(second.getName());
+		}
+
+		private int compareKind(IResource first, IResource second) {
+			int result = first.getKind().toString().compareTo(second.getKind().toString());
+			return result;
+		}
 	}
 }

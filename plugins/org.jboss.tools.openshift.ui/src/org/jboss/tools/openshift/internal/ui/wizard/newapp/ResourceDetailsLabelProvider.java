@@ -27,6 +27,9 @@ import com.openshift.restclient.model.IResource;
  */
 public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implements IStyledLabelProvider {
 
+	private static final String LABEL_NOT_PROVIDED = "(Not Provided)";
+	private static final String LABEL_UNKNOWN = "(Unknown)";
+
 	@Override
 	public void update(ViewerCell cell) {
 		final Object element = cell.getElement();
@@ -59,8 +62,13 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 			} else {
 				value = property.getValue() != null ? property.getValue().toString() : "";
 			}
+
 			if(StringUtils.isBlank(value)) {
-				value = ("(Not Provided)");
+				if (property.isUnknownValue()) {
+					value = LABEL_UNKNOWN;
+				} else {
+					value = LABEL_NOT_PROVIDED;
+				}
 			}
 			text.append(value, StyledString.QUALIFIER_STYLER);
 			return text;
