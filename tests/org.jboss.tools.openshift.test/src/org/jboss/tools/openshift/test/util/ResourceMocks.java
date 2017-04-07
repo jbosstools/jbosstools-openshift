@@ -46,6 +46,7 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.mockito.Mockito;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IObjectReference;
@@ -54,7 +55,10 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.build.BuildStrategyType;
+import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.IGitBuildSource;
+import com.openshift.restclient.model.build.ISourceBuildStrategy;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
@@ -178,6 +182,10 @@ public class ResourceMocks {
                 put("key1", "84"); put("key2", "48"); }})
     };
 
+	private ResourceMocks() {
+		// inhibit instantiation
+	}
+
     public static Connection create3ProjectsConnection() {
 		Connection connection = createConnection("http://localhost:8443", "dev@openshift.com");
 		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(PROJECTS));
@@ -241,17 +249,20 @@ public class ResourceMocks {
 
 	public static IBuildConfig createBuildConfig(String name, IProject project, 
 			String buildOutputReferenceKind, String buildOutputReferenceName, String buildSourceURI) {
-		return createBuildConfig(name, project, buildOutputReferenceKind, buildOutputReferenceName, buildSourceURI ,null, null);
+		return createBuildConfig(name, project, buildOutputReferenceKind, buildOutputReferenceName, buildSourceURI ,null, null, null);
 	}
 
 	public static IBuildConfig createBuildConfig(String name, IProject project, 
-			String buildOutputReferenceKind, String buildOutputReferenceName, String buildSourceURI, String contextDir, String ref) {
+			String buildOutputReferenceKind, String buildOutputReferenceName, String buildSourceURI, String contextDir, String ref,
+			IBuildStrategy strategy) {
 		IBuildConfig bc = mock(IBuildConfig.class);
 
+		doReturn(ResourceKind.BUILD_CONFIG).when(bc).getKind();
 		createBuildOutputReference(buildOutputReferenceKind, buildOutputReferenceName, bc);
 		createGitBuildSource(contextDir, ref, bc);
 		mockGetResourceProperties(name, project, bc);
 		doReturn(buildSourceURI).when(bc).getSourceURI();
+		doReturn(strategy).when(bc).getBuildStrategy();
 
 		return bc;
 	}
@@ -268,6 +279,17 @@ public class ResourceMocks {
 		doReturn(contextDir).when(buildSource).getContextDir();
 		doReturn(ref).when(buildSource).getRef();
 		doReturn(buildSource).when(bc).getBuildSource();
+	}
+
+	public static IBuildStrategy createSourceBuildStrategy(String uri) {
+		DockerImageURI dockerUri = mock(DockerImageURI.class);
+		doReturn(uri).when(dockerUri).getAbsoluteUri();
+
+		ISourceBuildStrategy strategy = mock(ISourceBuildStrategy.class);
+		doReturn(BuildStrategyType.SOURCE).when(strategy).getType();
+		doReturn(dockerUri).when(strategy).getImage();
+
+		return strategy;
 	}
 
 	public static IRoute createRoute(String name, IProject project, String serviceName) {
@@ -337,7 +359,6 @@ public class ResourceMocks {
 			doReturn(project.getName()).when(resource).getNamespace();
 			doReturn(project).when(resource).getProject();
 		}
-		
 	}
 
 	public static List<ObservableTreeItem> createObservableTreeItems(Collection<? extends IResource> resources) {
@@ -368,7 +389,7 @@ public class ResourceMocks {
 		return project;
 	}
 
-	public static org.eclipse.core.resources.IProject mockGitSharedProject(String name, String gitRemoteUri) throws CoreException {
+	public static org.eclipse.core.resources.IProject createGitSharedProject(String name, String gitRemoteUri) throws CoreException {
 		org.eclipse.core.resources.IProject project = createEclipseProject(name);
 
 		when(project.getPersistentProperty(TeamPlugin.PROVIDER_PROP_KEY)).thenReturn(GitProvider.ID);

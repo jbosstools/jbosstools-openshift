@@ -77,9 +77,9 @@ public class ServerSettingsWizardPageModelTest {
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 
 		this.project1 = ResourceMocks.createEclipseProject("project1");
-		this.project2 = ResourceMocks.mockGitSharedProject("project2", ResourceMocks.PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI);
+		this.project2 = ResourceMocks.createGitSharedProject("project2", ResourceMocks.PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI);
 		this.project3 = ResourceMocks.createEclipseProject("project3");
-		this.project4 = ResourceMocks.mockGitSharedProject("project4", "git@42.git");
+		this.project4 = ResourceMocks.createGitSharedProject("project4", "git@42.git");
 
 		this.model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, null, Arrays.asList(project1, project2, project3, project4), connection, server);
 	}
