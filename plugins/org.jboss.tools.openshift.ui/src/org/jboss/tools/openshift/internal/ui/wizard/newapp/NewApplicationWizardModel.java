@@ -293,8 +293,10 @@ public class NewApplicationWizardModel
                 IApplicationSource source = getLocalAppSource(monitor, localAppSourceFilename);
                 updateSelectedAppSource(useLocalAppSource, serverAppSource, source, localAppSourceFilename);
             }
-        } catch (OpenShiftException | NotATemplateException e) {
+        } catch (OpenShiftException e) {
             status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage(), e);
+        } catch (NotATemplateException e) {
+            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage());
         }
         updateAppSourceStatus(status);
     }
