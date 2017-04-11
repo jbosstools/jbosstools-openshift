@@ -296,7 +296,8 @@ public class NewApplicationWizardModel
         } catch (OpenShiftException e) {
             status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage(), e);
         } catch (NotATemplateException e) {
-            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage());
+            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, 
+            		NLS.bind("{0} is not a template: {1}", localAppSourceFilename, e.getLocalizedMessage()));
         }
         updateAppSourceStatus(status);
     }
