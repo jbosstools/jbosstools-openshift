@@ -310,9 +310,15 @@ public class StringUtils {
 	 * @return the value without trailing <code>/</code>
 	 */
 	public static String removeTrailingSlashes(String value) {
-		if (value == null){
-			return null;
+		return removeAll("/*$", value);
+	}
+
+	public static String removeAll(String regex, String value) {
+		if (isEmpty(value)
+				|| isEmpty(regex)) {
+			return value;
 		}
-		return value.replaceAll("/*$", "");
+
+		return value.replaceAll(regex, "");
 	}
 }
