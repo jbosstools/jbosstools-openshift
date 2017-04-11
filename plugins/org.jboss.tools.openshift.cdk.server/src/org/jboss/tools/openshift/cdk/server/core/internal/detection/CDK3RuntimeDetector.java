@@ -63,7 +63,7 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 			return fromProblemResolver.equals(fromServer);
 		}
 		
-		return fromPath == null ? false : fromPath.equals(fromServer);
+		return fromPath == null ? true : fromPath.equals(fromServer);
 	}
 	
 

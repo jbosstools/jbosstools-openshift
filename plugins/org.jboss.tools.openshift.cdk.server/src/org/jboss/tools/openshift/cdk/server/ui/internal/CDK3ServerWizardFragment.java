@@ -1,15 +1,27 @@
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
@@ -17,12 +29,20 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDKLaunchUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CommandTimeoutException;
 
 public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 
 	private Combo hypervisorCombo;
 	private String selectedHypervisor;
 
+	private Job longValidation;
+	private Properties minishiftVersionProps = null;
+	public static String ERROR_KEY = "properties.load.error";
+	public static String VERSION_KEY = "Minishift version"; 
+
+	
 	public CDK3ServerWizardFragment() {
 		super(); // 0-arg constructor for extension pt creation
 	}
@@ -91,11 +111,21 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		if( homeDir == null || !(new File(homeDir)).exists()) {
 			return "The selected file does not exist.";
 		}
+		if( !(new File(homeDir).canExecute())) {
+			return "The selected file is not executable.";
+		}
 		if( credentials.getDomain() == null || credentials.getUser() == null) {
 			return "The Container Development Environment Server Adapter requries Red Hat Access credentials.";
 		}
 		if( selectedHypervisor == null ) {
 			return "You must choose a hypervisor.";
+		}
+		if( minishiftVersionProps != null && minishiftVersionProps.getProperty(VERSION_KEY) == null ) {
+			if( minishiftVersionProps.getProperty(ERROR_KEY) != null ) {
+				return minishiftVersionProps.getProperty(ERROR_KEY);
+			} else {
+				return "Unknown error while checking minishift version";
+			}
 		}
 		return null;
 	}
@@ -105,7 +135,72 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		browseHomeDirClicked(false);
 	}
 
+	@Override
+	protected SelectionListener createBrowseListener() {
+		return new BrowseListener() {
 
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				minishiftVersionProps = null;
+				super.widgetSelected(e);
+				kickValidationJob();
+			}
+		};
+	}
+	
+	@Override
+	protected ModifyListener createHomeModifyListener() {
+		return new HomeModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				minishiftVersionProps = null;
+				super.modifyText(e);
+				kickValidationJob();
+			}
+		};
+	}
+
+	private synchronized void kickValidationJob() {
+		if( longValidation != null ) {
+			longValidation.cancel(); 
+		} 
+		File f = new File(homeDir);
+		if( !f.exists() || !f.canExecute()) {
+			validate();
+			return;
+		}
+		handle.setMessage("Checking minishift version...", IMessageProvider.INFORMATION);
+		setComplete(false);
+		handle.update();
+
+		longValidation = new Job("Validate minishift location") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Properties ret = new Properties();
+				try {
+					String[] lines = CDKLaunchUtility.call(homeDir, new String[] {"version"}, 
+						new File(homeDir).getParentFile(),
+						new HashMap<String,String>(), 5000, false);
+					String imploded = String.join("\n", Arrays.asList(lines));
+					ret.load(new ByteArrayInputStream(imploded.getBytes()));
+				} catch(IOException | CommandTimeoutException e )  {
+					ret.put(ERROR_KEY, e.getMessage());
+				}
+				minishiftVersionProps = ret;
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						validate();
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		longValidation.setSystem(true);
+		longValidation.schedule(750);
+	}
+	
+	
+	
 	@Override
 	protected void fillTextField() {
 		if( homeDir != null ) {

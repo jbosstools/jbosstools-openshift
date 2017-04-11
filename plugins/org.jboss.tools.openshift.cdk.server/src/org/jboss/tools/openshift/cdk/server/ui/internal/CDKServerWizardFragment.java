@@ -117,29 +117,39 @@ public class CDKServerWizardFragment extends WizardFragment {
 		browseButton = new Button(main, SWT.PUSH);
 		browseButton.setText("Browse...");
 		
-
-		homeText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				homeDir = homeText.getText();
-				validate();
-			}
-		});
-		browseButton.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				widgetSelected(e);
-			}
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				browseHomeDirClicked();
-				validate();
-			}
-
-		});
+		homeText.addModifyListener(createHomeModifyListener());
+		browseButton.addSelectionListener(createBrowseListener());
 		
 		fillTextField();
+	}
+
+	protected SelectionListener createBrowseListener() {
+		return new BrowseListener();
+	}
+	
+	protected ModifyListener createHomeModifyListener() {
+		return new HomeModifyListener();
+	}
+	
+	protected class BrowseListener implements SelectionListener {
+		@Override
+		public void widgetDefaultSelected(SelectionEvent e) {
+			widgetSelected(e);
+		}
+
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			browseHomeDirClicked();
+			validate();
+		}
+	}
+
+	protected class HomeModifyListener implements ModifyListener {
+		@Override
+		public void modifyText(ModifyEvent e) {
+			homeDir = homeText.getText();
+			validate();
+		}
 	}
 	
 	protected void validateAndPack(Composite main) {

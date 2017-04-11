@@ -12,12 +12,16 @@ package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import java.io.File;
 
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -52,6 +56,8 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 	private String sectionTitle;
 	private String labelString;
 	
+	protected ControlDecoration txtDecorator;
+	
 	public AbstractLocationSection(String sectionTitle, String labelString, 
 			String commandName, String locationAttribute) {
 		this.sectionTitle = sectionTitle;
@@ -71,6 +77,7 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		createUI(parent);
 		setDefaultValues();
 		addListeners();
+		validate();
 	}
 	
 	protected void createUI(Composite parent) {
@@ -99,8 +106,17 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		browse = toolkit.createButton(composite, "Browse...", SWT.PUSH);
 		
 		location.setLayoutData(GridDataFactory.defaultsFor(location).span(3,1).minSize(150, SWT.DEFAULT).create());
+		
+		txtDecorator = new ControlDecoration(location, SWT.TOP|SWT.RIGHT);
+		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry .DEC_ERROR);
+		Image img = fieldDecoration.getImage();
+		txtDecorator.setImage(img);
+		txtDecorator.hide(); // hiding it initially
 	}
 	
+	protected Text getLocationText() {
+		return location;
+	}
 	
 	protected void setDefaultValues() {
 		// set initial values
@@ -114,6 +130,7 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				browseHomeDirClicked();
+				validate();
 			}
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -121,7 +138,6 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		};
 		browse.addSelectionListener(browseListener);
 
-		
 		locationListener = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -129,7 +145,15 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 			}
 		};
 		location.addModifyListener(locationListener);
-
+		location.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				validate();
+			}
+		});
+	}
+	
+	protected void validate() {
+		// Subclass override
 	}
 	
 	protected void browseHomeDirClicked() {
