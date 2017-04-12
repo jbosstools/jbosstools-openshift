@@ -260,10 +260,6 @@
           point="org.jboss.ide.eclipse.as.wtp.core.serverProfile">
        <serverProfile id="openshift3" serverTypes="org.jboss.tools.openshift.server.type">
        	  <description name="openshift3" description="A profile configured to publish to a local folder and rsync to a remote OpenShift"/>
-          <subsystem
-                subsystem="publish.rsync.filesystem"
-                system="publish">
-          </subsystem>
           <subsystem system="modules" subsystem="modules.noop.default"/>
           <subsystem system="moduleDeployPath" subsystem="moduleDeployPath.xmlprefs.openshift"/>
        </serverProfile>
