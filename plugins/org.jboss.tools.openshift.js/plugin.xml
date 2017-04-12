@@ -54,6 +54,14 @@
                subsystem="publish.rsync.filesystem.nodejs"
                system="publish">
          </subsystem>
+         <subsystem
+               subsystem="moduleDeployPath.xmlprefs.openshift"
+               system="moduleDeployPath">
+         </subsystem>
+         <subsystem
+               subsystem="modules.noop.default"
+               system="modules">
+         </subsystem>
       </serverProfile>
    </extension>
    <extension
