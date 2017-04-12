@@ -108,4 +108,10 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 		state.set(LoadingState.LOADED);
 		fireChanged();
 	}
+
+    @Override
+    public Collection<IResourceWrapper<?, ?>> getResources() {
+        load(IExceptionHandler.NULL_HANDLER);
+        return super.getResources();
+    }
 }
