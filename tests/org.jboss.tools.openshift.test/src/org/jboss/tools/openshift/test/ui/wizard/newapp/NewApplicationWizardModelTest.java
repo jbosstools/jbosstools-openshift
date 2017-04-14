@@ -16,6 +16,7 @@ import static org.jboss.tools.openshift.test.util.ResourceMocks.createResources;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -256,9 +257,7 @@ public class NewApplicationWizardModelTest {
 		model.setLocalAppSourceFileName("resources/jboss_infinispan-server_ImageStreamImport.json");
 		model.loadAppSource(null);
 		assertFalse(model.getAppSourceStatus().isOK());
-		assertNotNull(model.getAppSourceStatus().getException());
-		assertTrue(model.getAppSourceStatus().getException() instanceof NotATemplateException);
-		assertEquals(ResourceKind.ROUTE, ((NotATemplateException)model.getAppSourceStatus().getException()).getResourceKind());
+		assertNull(model.getAppSourceStatus().getException());
 	}
 	
 	private IProject getProject(int i) {
