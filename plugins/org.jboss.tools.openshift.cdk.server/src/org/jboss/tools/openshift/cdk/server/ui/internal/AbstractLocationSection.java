@@ -107,7 +107,7 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		
 		location.setLayoutData(GridDataFactory.defaultsFor(location).span(3,1).minSize(150, SWT.DEFAULT).create());
 		
-		txtDecorator = new ControlDecoration(location, SWT.TOP|SWT.RIGHT);
+		txtDecorator = new ControlDecoration(location, SWT.TOP|SWT.LEFT);
 		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry .DEC_ERROR);
 		Image img = fieldDecoration.getImage();
 		txtDecorator.setImage(img);
