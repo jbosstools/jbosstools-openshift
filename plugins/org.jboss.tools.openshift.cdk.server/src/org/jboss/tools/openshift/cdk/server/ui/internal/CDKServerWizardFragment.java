@@ -15,16 +15,21 @@ import java.io.File;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -45,6 +50,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 	protected IWizardHandle handle;
 	protected String homeDir;
 	protected Text homeText;
+	protected ControlDecoration homeDecorator;
 	protected Button browseButton;
 	protected String selectedUser = null;
 	protected ChooseCredentialComponent credentials;
@@ -120,6 +126,12 @@ public class CDKServerWizardFragment extends WizardFragment {
 		homeText.addModifyListener(createHomeModifyListener());
 		browseButton.addSelectionListener(createBrowseListener());
 		
+		homeDecorator = new ControlDecoration(homeText, SWT.TOP|SWT.LEFT);
+		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry .DEC_ERROR);
+		Image img = fieldDecoration.getImage();
+		homeDecorator.setImage(img);
+		homeDecorator.hide(); // hiding it initially
+		
 		fillTextField();
 	}
 
@@ -157,6 +169,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		setComplete(err == null);
 		handle.update();
 		main.pack(true);
+		homeDecorator.hide();
 	}
 	protected Composite createComposite(Composite parent, IWizardHandle handle,
 			String title, String desc, String homeLabel) {
@@ -194,17 +207,30 @@ public class CDKServerWizardFragment extends WizardFragment {
 		return null;
 	}
 	
+	protected void toggleDecorator(Control c, String message) {
+		if( c == homeText ) {
+			if( message == null ) {
+				homeDecorator.hide();
+			} else {
+				homeDecorator.setDescriptionText(message);
+				homeDecorator.show();
+			}
+		}
+	}
 	protected String findError() {
-		if( homeDir == null || !(new File(homeDir)).exists()) {
-			return "The selected folder does not exist.";
-		}
-		if( !(new File(homeDir, "Vagrantfile").exists())) {
-			return "The selected folder does not have a Vagrantfile";
-		}
+
 		if( credentials.getDomain() == null || credentials.getUser() == null) {
 			return "The Container Development Environment Server Adapter requries Red Hat Access credentials.";
 		}
-		return null;
+		
+		String retString = null;
+		if( homeDir == null || !(new File(homeDir)).exists()) {
+			retString = "The selected folder does not exist.";
+		} else if( !(new File(homeDir, "Vagrantfile").exists())) {
+			retString = "The selected folder does not have a Vagrantfile";
+		}
+		toggleDecorator(homeText, retString);
+		return retString;
 	}
 	
 	protected void browseHomeDirClicked() {
