@@ -10,19 +10,24 @@ package org.jboss.tools.openshift.internal.ui.property;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.ui.property.build.ImageChangePropertySource;
 import org.jboss.tools.openshift.internal.ui.property.build.WebHooksPropertySource;
 
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.build.BuildSourceType;
 import com.openshift.restclient.model.build.BuildStrategyType;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
 import com.openshift.restclient.model.build.IDockerBuildStrategy;
 import com.openshift.restclient.model.build.IGitBuildSource;
+import com.openshift.restclient.model.build.IJenkinsPipelineStrategy;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
+import com.openshift.restclient.utils.EnvironmentVariableUtils;
 
 public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConfig> {
 	
@@ -62,6 +67,9 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 			case BuildStrategyType.STI:
 			case BuildStrategyType.SOURCE:
 				all.addAll(getSTIPropertyDescriptors());
+				break;
+			case BuildStrategyType.JENKINS_PIPELINE:
+				all.addAll(getJenkinsPipelinePropertyDescriptors());
 				break;
 			default:
 		}
@@ -126,6 +134,14 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 				return getResource().<ISourceBuildStrategy>getBuildStrategy().getImage();
 			case STI_ENV:
 				return new KeyValuePropertySource(getResource().<ISourceBuildStrategy>getBuildStrategy().getEnvironmentVariables());
+			case JENKINS_FILE: 
+				String jenkinsfile = getResource().<IJenkinsPipelineStrategy>getBuildStrategy().getJenkinsfile();
+				return StringUtils.removeAll(StringUtils.getLineSeparator(), jenkinsfile);
+			case JENKINS_FILEPATH:
+				return getResource().<IJenkinsPipelineStrategy>getBuildStrategy().getJenkinsfilePath();
+			case JENKINS_ENV:
+				Collection<IEnvironmentVariable> envVars = getResource().<IJenkinsPipelineStrategy>getBuildStrategy().getEnvVars();
+				return new KeyValuePropertySource(EnvironmentVariableUtils.toMapOfStrings(envVars));
 			case TRIGGERS_IMAGE_CHANGE:
 				return new ImageChangePropertySource(getResource().getBuildTriggers());
 			case TRIGGERS_WEB:
@@ -162,6 +178,16 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 			new ExtTextPropertyDescriptor(Ids.STI_ENV, ENVIRONMENT_VARIABLES, STRATEGY),
 		});
 	}
+
+	private  List<IPropertyDescriptor>  getJenkinsPipelinePropertyDescriptors(){
+		return Arrays.asList(new  IPropertyDescriptor[]{
+			new ExtTextPropertyDescriptor(Ids.Type, "Type", STRATEGY),
+			new ExtTextPropertyDescriptor(Ids.JENKINS_FILE, "Jenkins File", STRATEGY),
+			new ExtTextPropertyDescriptor(Ids.JENKINS_FILEPATH, "Jenkins File Path", STRATEGY),
+			new ExtTextPropertyDescriptor(Ids.JENKINS_ENV, ENVIRONMENT_VARIABLES, STRATEGY),
+		});
+	}
+	
 	public static enum Ids{
 		Type,
 		CUSTOM_EXPOSE_DOCKER_SOCKET, 
@@ -173,6 +199,9 @@ public class BuildConfigPropertySource extends ResourcePropertySource<IBuildConf
 		STI_SCRIPT_LOCATION,
 		STI_IMAGE,
 		STI_ENV, 
+		JENKINS_FILE,
+		JENKINS_FILEPATH,
+		JENKINS_ENV,
 		SOURCE_TYPE, 
 		SOURCE_GIT_REF, 
 		SOURCE_URI, 
