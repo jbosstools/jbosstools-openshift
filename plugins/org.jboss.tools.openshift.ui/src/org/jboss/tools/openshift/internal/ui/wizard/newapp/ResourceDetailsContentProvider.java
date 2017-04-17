@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
@@ -28,6 +29,7 @@ import com.openshift.restclient.model.build.BuildStrategyType;
 import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.ICustomBuildStrategy;
 import com.openshift.restclient.model.build.IDockerBuildStrategy;
+import com.openshift.restclient.model.build.IJenkinsPipelineStrategy;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
 import com.openshift.restclient.model.route.IRoute;
 
@@ -112,20 +114,25 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		switch(buildStrategy.getType()) {
 		case BuildStrategyType.SOURCE:
 			ISourceBuildStrategy sti = (ISourceBuildStrategy) buildStrategy;
-			properties.add(new ResourceProperty("builder image", sti.getImage().toString()));
+			properties.add(new ResourceProperty("builder image", StringUtils.toStringOrNull(sti.getImage())));
 			break;
 		case BuildStrategyType.DOCKER:
 			IDockerBuildStrategy docker = (IDockerBuildStrategy) buildStrategy;
-			properties.add(new ResourceProperty("base image", docker.getBaseImage().toString()));
+			properties.add(new ResourceProperty("base image", StringUtils.toStringOrNull(docker.getBaseImage())));
 			break;
 		case BuildStrategyType.CUSTOM:
 			ICustomBuildStrategy custom = (ICustomBuildStrategy) buildStrategy;
-			properties.add(new ResourceProperty("builder image", custom.getImage().toString()));
+			properties.add(new ResourceProperty("builder image", StringUtils.toStringOrNull(custom.getImage())));
+			break;
+		case BuildStrategyType.JENKINS_PIPELINE:
+			IJenkinsPipelineStrategy jenkins = (IJenkinsPipelineStrategy) buildStrategy;
+			properties.add(new ResourceProperty("jenkins file", StringUtils.removeAll(StringUtils.getLineSeparator(), jenkins.getJenkinsfile())));
+			properties.add(new ResourceProperty("jenkins file path", StringUtils.toStringOrNull(jenkins.getJenkinsfilePath())));
 			break;
 		default:
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object[] getElements(Object rootElements) {
