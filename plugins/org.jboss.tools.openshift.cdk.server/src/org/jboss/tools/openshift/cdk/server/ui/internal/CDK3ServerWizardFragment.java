@@ -1,9 +1,7 @@
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -108,26 +106,28 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 
 	@Override
 	protected String findError() {
-		if( homeDir == null || !(new File(homeDir)).exists()) {
-			return "The selected file does not exist.";
-		}
-		if( !(new File(homeDir).canExecute())) {
-			return "The selected file is not executable.";
-		}
 		if( credentials.getDomain() == null || credentials.getUser() == null) {
 			return "The Container Development Environment Server Adapter requries Red Hat Access credentials.";
 		}
 		if( selectedHypervisor == null ) {
 			return "You must choose a hypervisor.";
 		}
-		if( minishiftVersionProps != null && minishiftVersionProps.getProperty(VERSION_KEY) == null ) {
+
+		
+		String retString = null;
+		if( homeDir == null || !(new File(homeDir)).exists()) {
+			retString = "The selected file does not exist.";
+		} else if( !(new File(homeDir).canExecute())) {
+			retString = "The selected file is not executable.";
+		} else if( minishiftVersionProps != null && minishiftVersionProps.getProperty(VERSION_KEY) == null ) {
 			if( minishiftVersionProps.getProperty(ERROR_KEY) != null ) {
-				return minishiftVersionProps.getProperty(ERROR_KEY);
+				retString = minishiftVersionProps.getProperty(ERROR_KEY);
 			} else {
-				return "Unknown error while checking minishift version";
+				retString = "Unknown error while checking minishift version";
 			}
 		}
-		return null;
+		toggleDecorator(homeText, retString);
+		return retString;
 	}
 	
 	@Override
@@ -181,8 +181,11 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 					String[] lines = CDKLaunchUtility.call(homeDir, new String[] {"version"}, 
 						new File(homeDir).getParentFile(),
 						new HashMap<String,String>(), 5000, false);
-					String imploded = String.join("\n", Arrays.asList(lines));
-					ret.load(new ByteArrayInputStream(imploded.getBytes()));
+					for( int i = 0; i < lines.length; i++ ) {
+						String[] split = lines[i].split(":");
+						if( split.length == 2 )
+							ret.put(split[0], split[1]);
+					}
 				} catch(IOException | CommandTimeoutException e )  {
 					ret.put(ERROR_KEY, e.getMessage());
 				}
