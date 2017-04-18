@@ -42,7 +42,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.Co
 public class MinishiftLocationSection extends AbstractLocationSection {
 
 	private static String SECTION_TITLE = "CDK Details";
-	private static String LABEL_STRING = "Minishift Location: ";
+	private static String LABEL_STRING = "Minishift Binary: ";
 	private static String COMMAND_NAME = "Modify Minishift Location";
 	private static String LOC_ATTR = CDK3Server.MINISHIFT_FILE;
 	
@@ -61,8 +61,8 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 
 	@Override
 	protected void fillUI(FormToolkit toolkit, Composite composite) {
-		createLocationWidgets(toolkit, composite);
 		createHypervisorWidgets(toolkit, composite);
+		createLocationWidgets(toolkit, composite);
 	}
 
 	protected void createHypervisorWidgets(FormToolkit toolkit, Composite composite) {
