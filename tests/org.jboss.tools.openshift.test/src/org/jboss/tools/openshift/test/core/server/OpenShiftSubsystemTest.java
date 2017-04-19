@@ -19,6 +19,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.tools.as.core.server.controllable.systems.IDeploymentOptionsController;
 import org.jboss.tools.as.core.server.controllable.systems.IModuleDeployPathController;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
+import org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector;
 import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -77,7 +78,7 @@ public class OpenShiftSubsystemTest extends TestCase {
 	
 	@Test
 	public void testSubsystemsEAP() throws Exception {
-		IServer s1 = OpenShiftServerTestUtils.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3_EAP);
+		IServer s1 = OpenShiftServerTestUtils.createOpenshift3Server("example", OpenshiftEapProfileDetector.PROFILE);
 		IControllableServerBehavior beh = (IControllableServerBehavior)s1.loadAdapter(IControllableServerBehavior.class, new NullProgressMonitor());
 		String[] systems = new String[]{
 				IControllableServerBehavior.SYSTEM_LAUNCH, IControllableServerBehavior.SYSTEM_MODULES,
@@ -87,12 +88,12 @@ public class OpenShiftSubsystemTest extends TestCase {
 		};
 		String[] expected = new String[]{
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController",
-			"org.jboss.tools.openshift.core.server.behavior.OpenShiftEapModulesController",
-			"org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController",
+			"org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapModulesController",
+			"org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapPublishController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftShutdownController",
 			"org.jboss.ide.eclipse.as.wtp.core.server.behavior.LocalFilesystemController",
 			"org.jboss.tools.openshift.core.server.behavior.OpenShiftDeploymentOptionsController",
-			"org.jboss.tools.openshift.core.server.behavior.OpenShiftEapDeployPathController",
+			"org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapDeployPathController",
 		};
 		for( int i = 0; i < systems.length; i++ ) {
 			ISubsystemController c = beh.getController(systems[i]);

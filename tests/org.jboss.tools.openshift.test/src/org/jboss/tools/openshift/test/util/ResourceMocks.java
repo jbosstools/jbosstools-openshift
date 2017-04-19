@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -385,7 +386,7 @@ public class ResourceMocks {
 		IProjectDescription description = mock(IProjectDescription.class);
 		when(description.getNatureIds()).thenReturn(new String[] {});
 		when(project.getDescription()).thenReturn(description);
-
+		when(project.getFile(anyString())).thenReturn(mock(org.eclipse.core.resources.IFile.class));
 		return project;
 	}
 

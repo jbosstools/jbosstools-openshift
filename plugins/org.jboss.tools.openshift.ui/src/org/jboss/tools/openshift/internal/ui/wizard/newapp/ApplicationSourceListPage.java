@@ -85,6 +85,7 @@ import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
+import org.jboss.tools.openshift.core.server.adapter.ProjectBuilderTypeDetector;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
@@ -101,8 +102,8 @@ import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemCo
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemStyledCellLabelProvider;
-import org.jboss.tools.openshift.internal.ui.wizard.builder.ProjectBuilderTypeDetector;
 import org.jboss.tools.openshift.internal.ui.wizard.common.AbstractProjectPage;
+
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.UnsupportedVersionException;

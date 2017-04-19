@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.ui.server;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -36,6 +38,7 @@ import org.eclipse.wst.server.core.ServerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.utils.ExtensionUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
@@ -43,6 +46,7 @@ import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.core.server.adapter.IOpenshiftServerAdapterProfileDetector;
 import org.jboss.tools.openshift.internal.common.core.util.CollectionUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -73,6 +77,8 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	public static final String PROPERTY_ROUTE = "route";
 	public static final String PROPERTY_ROUTES = "routes";
 	public static final String PROPERTY_OC_BINARY_STATUS = "OCBinaryStatus";
+	
+	private static final String PROFILE_DETECTOR_EP_ID = "org.jboss.tools.openshift.core.serverAdapterProfileDetector";
 
 	protected org.eclipse.core.resources.IProject deployProject;
 	protected List<org.eclipse.core.resources.IProject> projects = new ArrayList<>();
@@ -426,25 +432,21 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 				connectionUrl, resource, sourcePath, podPath, routeURL, deployProject);
 	}
 	
-	private String getProfileId() {
-		// currently supported profiles are openshift3 or openshift3.eap
-		// we need to determine if the current resource represents an app that requires
-		// eap-style behavior or normal behavior
-		boolean isEapProfile = false;
-		IResource resource = getResource();
-		if (resource != null) {
-			IProject project = getOpenShiftProject(resource);
-			if (project != null) {
-				List<IBuildConfig> buildConfigs = getBuildConfigs(project);
-				if (buildConfigs != null) {
-					IBuildConfig buildConfig = ResourceUtils.getBuildConfigFor(resource, buildConfigs);
-					isEapProfile = OpenShiftServerUtils.isEapStyle(buildConfig);
+	protected String getProfileId() {
+		Collection<IConfigurationElement> configurationElements = ExtensionUtils
+				.getExtensionConfigurations(PROFILE_DETECTOR_EP_ID);
+		for (IConfigurationElement configurationElement : configurationElements) {
+			try {
+				Object extension = configurationElement.createExecutableExtension("class");
+				if (extension instanceof IOpenshiftServerAdapterProfileDetector) {
+					IOpenshiftServerAdapterProfileDetector detector = (IOpenshiftServerAdapterProfileDetector)extension;
+					if (detector.detect(getConnection(), getResource(), getDeployProject())) {
+						return detector.getProfile();
+					}
 				}
+			} catch (CoreException e) {
+				throw new RuntimeException(e);
 			}
-		}
-
-		if(isEapProfile) {
-			return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3_EAP;
 		}
 		return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3;
 	}

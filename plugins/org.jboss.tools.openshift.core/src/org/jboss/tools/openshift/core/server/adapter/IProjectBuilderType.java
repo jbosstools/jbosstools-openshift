@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2015 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,21 +8,16 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.core.debug;
+package org.jboss.tools.openshift.core.server.adapter;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.DebugException;
-import org.eclipse.wst.server.core.IServer;
+import org.eclipse.core.resources.IProject;
 
 /**
- * @author "Ilya Buziuk (ibuziuk)"
+ * @author Fred Bricon
  */
-public interface DebugSessionTracker {
+/* package level */ interface IProjectBuilderType {
 
-	void startDebugSession(IServer server, int port) throws CoreException;
+	boolean applies(IProject project);
 
-	void stopDebugSession(IServer server) throws DebugException;
-	
-	boolean isDebugSessionAlive(IServer server);
-
+	String getTags(IProject project);
 }

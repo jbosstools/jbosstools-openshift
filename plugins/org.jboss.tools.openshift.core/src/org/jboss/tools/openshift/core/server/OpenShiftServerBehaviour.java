@@ -28,8 +28,6 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  */
 public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 	public static final String PROFILE_OPENSHIFT3 = "openshift3";
-	public static final String PROFILE_OPENSHIFT3_EAP = "openshift3.eap";
-
 	
 	private static final String CURRENTLY_RESTARTING = "openshift.server.restarting";
 	

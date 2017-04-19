@@ -35,7 +35,6 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
 import org.eclipse.jdt.launching.SocketUtil;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
@@ -48,8 +47,6 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
-import org.jboss.tools.openshift.core.debug.DebugTrackerContributionEvaluation;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
@@ -64,7 +61,6 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
-import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
@@ -76,7 +72,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 	private static final int RETRY_DELAY = 1000;
 	private static final int PUBLISH_DELAY = 3000;
-	private static final String SERVER_MODE_DEBUG = "debug"; //$NON-NLS-1$
+	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
 	private static final String REPLICATIONCONTROLLER_MODE_DEV_KEY = "DEV_MODE"; //$NON-NLS-1$
 
 	/**
@@ -111,20 +107,25 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		OpenShiftServerBehaviour beh = getOpenShiftServerBehaviour(configuration);
-		IServer server = beh.getServer();
-        launch.addProcess(new ServerProcess(launch, server, getLabel(launch.getLaunchMode())));
-		beh.setServerStarting();
-		waitForDeploymentConfigAndPods(server, monitor);
-		enableDevModeForNodeJsProject(OpenShiftServerUtils.getReplicationController(server), server);
+		OpenShiftServerBehaviour beh = launchServerProcessAndWaitForResources(configuration, launch, monitor);
 		try {
-			IReplicationController rc = OpenShiftServerUtils.getReplicationController(server);
-			toggleDebugging(mode, monitor, beh, server, rc);
+			toggleDebugging(mode, monitor, beh);
 		} catch (CoreException e) {
 			beh.setServerStopped();
 			throw e;
 		}
 	}
+	
+	protected OpenShiftServerBehaviour launchServerProcessAndWaitForResources(ILaunchConfiguration configuration, ILaunch launch,
+			IProgressMonitor monitor) throws CoreException {
+		OpenShiftServerBehaviour beh = getOpenShiftServerBehaviour(configuration);
+		IServer server = beh.getServer();
+		launch.addProcess(new ServerProcess(launch, server, getLabel(launch.getLaunchMode())));
+		beh.setServerStarting();
+		waitForDeploymentConfigAndPods(server, monitor);
+		return beh;
+	}
+	
 
 	protected boolean waitForDeploymentConfigAndPods(IServer server, IProgressMonitor monitor) {
 		boolean podsReady = waitForPodsReady(server, monitor);
@@ -181,11 +182,12 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 	}
 
-	private boolean toggleDebugging(String mode, IProgressMonitor monitor, OpenShiftServerBehaviour beh, IServer server,
-			IReplicationController rc) throws CoreException {
-		String currentMode = beh.getServer().getMode();
+	protected boolean toggleDebugging(String mode, IProgressMonitor monitor, OpenShiftServerBehaviour beh) throws CoreException {
+		IServer server = beh.getServer();
+		String currentMode = server.getMode();
+		IReplicationController rc = OpenShiftServerUtils.getReplicationController(beh.getServer());
 		DebuggingContext debugContext = OpenShiftDebugUtils.get().getDebuggingContext(rc);
-		boolean enableDebugging = SERVER_MODE_DEBUG.equals(mode);
+		boolean enableDebugging = DEBUG_MODE.equals(mode);
 		try {
 			if (enableDebugging) {
 				startDebugging(server, rc, debugContext, monitor);
@@ -200,37 +202,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 		return enableDebugging;
 	}
-
-	/**
-	 * Enables the DEV_MODE environment variable in {@link IDeploymentConfig} for
-	 * Node.js projects (by default)
-	 *
-	 * @see <a href="https://issues.jboss.org/browse/JBIDE-22362">JBIDE-22362</a>
-	 */
-	private void enableDevModeForNodeJsProject(IReplicationController rc, IServer server) {
-		if (!OpenShiftServerUtils.isNodeJsProject(server)) {
-			return;
-		}
-
-		new Job(NLS.bind("Enabling {0} for replication controller {1}",  REPLICATIONCONTROLLER_MODE_DEV_KEY, rc.getName())) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					rc.setEnvironmentVariable(REPLICATIONCONTROLLER_MODE_DEV_KEY, Boolean.TRUE.toString());
-					Connection conn = ConnectionsRegistryUtil.getConnectionFor(rc);
-					conn.updateResource(rc);
-					return Status.OK_STATUS;
-				} catch (Exception e) {
-					String message = NLS.bind("Unable to enable {0} for deployment config {1}",  REPLICATIONCONTROLLER_MODE_DEV_KEY, rc.getName());
-					OpenShiftCoreActivator.getDefault().getLogger().logError(message, e);
-					return new Status(Status.ERROR, OpenShiftCoreActivator.PLUGIN_ID, message, e);
-				}
-			}
-
-		}.schedule();
-	}
-
+	
 	private void setServerState(OpenShiftServerBehaviour beh, String oldMode, String mode) {
 		int state = pollState();
 
@@ -269,7 +241,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}.schedule(PUBLISH_DELAY);
 	}
 
-	private void startDebugging(IServer server, IReplicationController rc, DebuggingContext debugContext,
+	protected void startDebugging(IServer server, IReplicationController rc, DebuggingContext debugContext,
 			IProgressMonitor monitor) throws CoreException {
 		int remotePort = debugContext.getDebugPort();
 		if (remotePort == DebuggingContext.NO_DEBUG_PORT) {
@@ -284,14 +256,9 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 					throw toCoreException("Unable to connect to remote pod");
 				}
 				int localPort = mapPortForwarding(debuggingContext, monitor);
-
-				if(OpenShiftServerUtils.isJavaProject(server)) {
-					ILaunch debuggerLaunch = attachRemoteDebugger(server, localPort, monitor);
-					if( debuggerLaunch != null ) {
-						overrideHotcodeReplace(server, debuggerLaunch);
-					}
-				} else {
-					DebugTrackerContributionEvaluation.startDebugSession(server, localPort);
+				ILaunch debuggerLaunch = attachRemoteDebugger(server, localPort, monitor);
+				if( debuggerLaunch != null ) {
+					overrideHotcodeReplace(server, debuggerLaunch);
 				}
 			}
 
@@ -374,7 +341,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	 * @param remotePort
 	 * @return the local debug port or -1 if port forwarding did not start or was cancelled.
 	 */
-	private int mapPortForwarding(final DebuggingContext debuggingContext, final IProgressMonitor monitor) {
+	protected int mapPortForwarding(final DebuggingContext debuggingContext, final IProgressMonitor monitor) {
 		monitor.subTask("Enabling port forwarding");
 		IPod pod = debuggingContext.getPod();
 		int remotePort = debuggingContext.getDebugPort();
@@ -438,7 +405,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		while(!launched && elapsed < maxWait) {
 			try {
 				//TODO That's fugly. ideally we should see if socket on debug port is responsive instead
-				ret = debuggerLaunchConfig.launch(SERVER_MODE_DEBUG, new NullProgressMonitor());
+				ret = debuggerLaunchConfig.launch(DEBUG_MODE, new NullProgressMonitor());
 				ret.setAttribute(LAUNCH_DEBUG_PORT_PROP, Integer.toString(localDebugPort));
 				launched = true;
 			} catch (Exception e) {
