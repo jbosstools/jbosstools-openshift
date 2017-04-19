@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.ui;
 
+import static org.junit.Assert.fail;
+
 import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.jboss.reddeer.common.logging.Logger;
 import org.jboss.reddeer.common.wait.TimePeriod;
@@ -35,24 +37,33 @@ public class CDEServer extends Server {
 	
 	private static Logger log = Logger.getLogger(CDEServer.class);
 	
-	private static final TimePeriod TIMEOUT = TimePeriod.getCustom(600);
+	private boolean certificateAccepted = false;
 	
 	public CDEServer(TreeItem item, ServersView view) {
 		super(item, view);
 	}
 	
+	public void setCertificateAccepted(boolean accepted) {
+		this.certificateAccepted = accepted;
+	}
+	
 	@Override
 	protected void operateServerState(String menuItem, final ServerState resultState) {
 		ServerState actualState = this.getLabel().getState();
-		log.debug("Operate server's state: '" + menuItem + "'");
+		TimePeriod timeout = TimePeriod.VERY_LONG;
+		if (menuItem == "Restart") {
+			timeout = TimePeriod.getCustom(480);
+		}
+		log.debug("Operate server's state from: + '" + actualState + "' to '" + menuItem + "'");
 		select();
 		new ContextMenu(menuItem).select();
-		new WaitUntil(new JobIsRunning(), menuItem == "Restart" ? TimePeriod.getCustom(900) : TIMEOUT);
-		if (actualState == ServerState.STOPPING || actualState == ServerState.STOPPED) {
+		new WaitWhile(new ServerHasState(this, actualState), TimePeriod.LONG);
+		new WaitUntil(new JobIsRunning(), TimePeriod.NORMAL);
+		if ((actualState == ServerState.STOPPING || actualState == ServerState.STOPPED) && !certificateAccepted) {
 			confirmSSLCertificateDialog();
 		}
-		new WaitUntil(new ServerHasState(this, resultState), TIMEOUT);
-		new WaitWhile(new JobIsRunning(), TIMEOUT);
+		new WaitUntil(new ServerHasState(this, resultState), timeout); // maybe add wait while job is running
+		new WaitWhile(new JobIsRunning(), TimePeriod.NORMAL);
 		log.debug("Operate server's state finished, the result server's state is: '" + getLabel().getState() + "'");
 	}
 	
@@ -68,8 +79,9 @@ public class CDEServer extends Server {
 			new PushButton("Yes").click();
 			log.info("SSL Certificate Dialog appeared during " + this.getLabel().getState().toString());
 			new WaitWhile(new ShellWithTextIsAvailable("Untrusted SSL Certificate"));
+			setCertificateAccepted(true);
 		} catch (WaitTimeoutExpiredException ex) {
-			log.info("WaitTimeoutExpiredException occured when handling Certificate dialog. "
+			fail("WaitTimeoutExpiredException occured when handling Certificate dialog. "
 					+ "Dialog has not been shown");
 		}
 	}
