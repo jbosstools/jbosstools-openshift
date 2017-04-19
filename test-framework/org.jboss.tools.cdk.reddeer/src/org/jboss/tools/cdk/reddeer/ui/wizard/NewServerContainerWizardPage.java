@@ -25,12 +25,9 @@ import org.jboss.reddeer.swt.impl.text.LabeledText;
 
 public class NewServerContainerWizardPage {
 
-	private static Logger log = Logger.getLogger(NewServerContainerWizardPage.class);
+	protected static final String WIZARD_NAME = "New Server";
 	
-	public void setFolder(String folder) {
-		new DefaultShell("New Server");
-		new LabeledText("Folder: ").setText(folder);
-	}
+	private static Logger log = Logger.getLogger(NewServerContainerWizardPage.class);
 	
 	public String getDomain() {
 		return new LabeledText("Domain: ").getText();
@@ -40,7 +37,7 @@ public class NewServerContainerWizardPage {
 		return new PushButton("Add...");
 	}
 	
-	private void disposeSecureStoragePassword() {
+	private static void disposeSecureStoragePassword() {
 		try {
 			new WaitUntil(new ShellWithTextIsAvailable("Secure Storage Password"), TimePeriod.NORMAL, true);
 			new DefaultShell("Secure Storage Password").close();
