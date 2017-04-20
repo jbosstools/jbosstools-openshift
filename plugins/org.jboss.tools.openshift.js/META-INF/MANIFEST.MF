@@ -16,7 +16,7 @@ Require-Bundle: org.eclipse.jdt.core,
  org.eclipse.wst.jsdt.chromium.debug.core;bundle-version="0.5.0",
  org.jboss.ide.eclipse.as.wtp.core;bundle-version="3.2.3",
  org.jboss.tools.common.core;bundle-version="3.8.3",
- org.jboss.tools.openshift.common.core;bundle-version="3.4.0",
+ org.jboss.tools.openshift.common.core;bundle-version="3.3.3",
  org.jboss.ide.eclipse.as.core;bundle-version="3.2.3"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
