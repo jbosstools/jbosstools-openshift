@@ -77,6 +77,8 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 	public static final String PAGE_NAME = "Template Parameter Page";
 	private ITemplateParametersPageModel model;
 	private TableViewer viewer;
+	
+	private static final String CELL_NOT_PARAMETER_ERROR = "cell element is not a IParameter";
 
 	public TemplateParametersPage(IWizard wizard, ITemplateParametersPageModel model) {
 		super("Template Parameters", 
@@ -87,6 +89,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults()
 			.numColumns(2).margins(10, 10)
@@ -219,96 +222,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 				onParametersChanged(decorations, cellsValidationStatusObservable), 
 				parametersObservable, 
 				table);
-		final TableViewerBuilder builder = new TableViewerBuilder(table, tableContainer);
-		TableViewer viewer = builder
-				.contentProvider(new ArrayContentProvider())
-				.column(new CellLabelProvider() {
-							
-							@Override
-							public void update(ViewerCell cell) {
-								Assert.isLegal(cell.getElement() instanceof IParameter, "cell element is not a IParameter");
-
-								IParameter parameter = (IParameter) cell.getElement();
-								String label = parameter.getName();
-								if (parameter.isRequired()) {
-									label = markRequired(label);
-								}
-								cell.setText(label);
-							}
-
-							private String markRequired(String label) {
-								return label += " *";
-							}
-
-							@Override
-							public String getToolTipText(Object object) {
-								Assert.isLegal(object instanceof IParameter, "cell element is not a IParameter");
-
-								return ((IParameter) object).getDescription();
-							}
-
-							@Override
-							public int getToolTipDisplayDelayTime(Object object) {
-								return 0;
-							}
-					})
-					.name("Name")
-					.align(SWT.LEFT)
-					.weight(1)
-					.minWidth(180)
-					.buildColumn()
-				.column(new CellLabelProvider() {
-
-							@Override
-							public void update(ViewerCell cell) {
-								Assert.isLegal(cell.getElement() instanceof IParameter, "cell element is not a IParameter");
-
-								final IParameter parameter = (IParameter) cell.getElement();
-								String label = TemplateParameterViewerUtils.getValueLabel(parameter);
-								cell.setText(label);
-
-								boolean italic = ((ApplicationSourceFromTemplateModel)model).isParameterModified(parameter);
-								builder.applyFont(cell, italic);
-
-								IStatus validationStatus = validate(parameter);
-								cellsValidationStatusObservable.put(parameter.getName(), validationStatus);
-								decorations.toggle(!validationStatus.isOK(), cell);
-							}
-
-							private IStatus validate(IParameter parameter) {
-								if (parameter.isRequired()) {
-									if (StringUtils.isEmpty(parameter.getValue())
-													&& StringUtils.isEmpty(parameter.getGeneratorName())) {
-										return ValidationStatus.error(
-												NLS.bind("Parameter {0} is required, please provide a value.", parameter.getName()));
-									};
-								} 
-								IStatus status = gitSourceValidator.validate(parameter);
-								if(!status.isOK()) {
-									return status;
-								}
-								return ValidationStatus.ok();
-							}
-
-							@Override
-							public String getToolTipText(Object object) {
-								Assert.isLegal(object instanceof IParameter, "cell element is not a IParameter");
-
-								return ((IParameter) object).getDescription();
-							}
-
-							@Override
-							public int getToolTipDisplayDelayTime(Object object) {
-								return 0;
-							}
-
-						})
-						.name("Value")
-						.align(SWT.LEFT)
-						.weight(1)
-						.buildColumn()
-			.buildViewer();
-
+		TableViewer viewer = buildTableViewer(table, tableContainer, cellsValidationStatusObservable, decorations);
 		viewer.setComparator(new TemplateParameterViewerUtils.ParameterNameViewerComparator());
 		viewer.setContentProvider(new ObservableListContentProvider());
 
@@ -330,6 +244,101 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		});
 		return viewer;
 	}
+	
+	private TableViewer buildTableViewer(Table table, Composite tableContainer,
+			ObservableMap<String, IStatus> cellsValidationStatusObservable,
+			TableViewerCellDecorationManager decorations) {
+		final TableViewerBuilder builder = new TableViewerBuilder(table, tableContainer);
+		TableViewer viewer = builder
+				.contentProvider(new ArrayContentProvider())
+				.column(new CellLabelProvider() {
+							
+							@Override
+							public void update(ViewerCell cell) {
+								Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+
+								IParameter parameter = (IParameter) cell.getElement();
+								String label = parameter.getName();
+								if (parameter.isRequired()) {
+									label = markRequired(label);
+								}
+								cell.setText(label);
+							}
+
+							private String markRequired(String label) {
+								return label += " *";
+							}
+
+							@Override
+							public String getToolTipText(Object object) {
+								Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+
+								return ((IParameter) object).getDescription();
+							}
+
+							@Override
+							public int getToolTipDisplayDelayTime(Object object) {
+								return 0;
+							}
+					})
+					.name("Name")
+					.align(SWT.LEFT)
+					.weight(1)
+					.minWidth(180)
+					.buildColumn()
+				.column(new CellLabelProvider() {
+
+							@Override
+							public void update(ViewerCell cell) {
+								Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+
+								final IParameter parameter = (IParameter) cell.getElement();
+								String label = TemplateParameterViewerUtils.getValueLabel(parameter);
+								cell.setText(label);
+
+								boolean italic = ((ApplicationSourceFromTemplateModel)model).isParameterModified(parameter);
+								builder.applyFont(cell, italic);
+
+								IStatus validationStatus = validate(parameter);
+								cellsValidationStatusObservable.put(parameter.getName(), validationStatus);
+								decorations.toggle(!validationStatus.isOK(), cell);
+							}
+
+							private IStatus validate(IParameter parameter) {
+								if (parameter.isRequired()) {
+									if (StringUtils.isEmpty(parameter.getValue())
+													&& StringUtils.isEmpty(parameter.getGeneratorName())) {
+										return ValidationStatus.error(
+												NLS.bind("Parameter {0} is required, please provide a value.", parameter.getName()));
+									}
+								} 
+								IStatus status = gitSourceValidator.validate(parameter);
+								if(!status.isOK()) {
+									return status;
+								}
+								return ValidationStatus.ok();
+							}
+
+							@Override
+							public String getToolTipText(Object object) {
+								Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+
+								return ((IParameter) object).getDescription();
+							}
+
+							@Override
+							public int getToolTipDisplayDelayTime(Object object) {
+								return 0;
+							}
+
+						})
+						.name("Value")
+						.align(SWT.LEFT)
+						.weight(1)
+						.buildColumn()
+			.buildViewer();
+		return viewer;
+	}
 
 	private static boolean isGitSourceParameterName(String name) {
 		return ITemplateParametersPageModel.PARAMETER_SOURCE_REPOSITORY_URL.equals(name)
@@ -344,9 +353,6 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 	 */
 	class GitSourceValidator implements IValidator {
 		private IParameter parameter;
-
-		public GitSourceValidator() {
-		}
 	
 		public void setParameter(IParameter parameter) {
 			this.parameter = parameter;

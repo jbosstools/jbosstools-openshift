@@ -14,6 +14,7 @@
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-openshift.git</tycho.scmUrl>
 		<sonar.test.inclusions>**/*Test.*,**/test/**/*</sonar.test.inclusions>
+		<sonar.exclusions>**/openshift/reddeer/**/*</sonar.exclusions>
 	</properties>
 	<modules>
 		<module>plugins</module>

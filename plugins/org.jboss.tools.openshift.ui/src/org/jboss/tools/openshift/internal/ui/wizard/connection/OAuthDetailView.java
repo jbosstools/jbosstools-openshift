@@ -254,44 +254,47 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	}
 
 	private void onRetrieveLinkClicked(final Shell shell, final DataBindingContext dbc) {
-				if (StringUtils.isBlank(pageModel.getHost())) {
-					return;
-				}
-
-				Job job = new AuthDetailsJob(pageModel.getHost());
-				job.addJobChangeListener(new JobChangeAdapter() {
-					@Override
-					public void done(final IJobChangeEvent event) {
-						if(event.getJob() instanceof AuthDetailsJob) {
-							shell.getDisplay().asyncExec(new Runnable() {
-								@Override
-								public void run() {
-									AuthDetailsJob job = (AuthDetailsJob)event.getJob();
-									final IAuthorizationDetails details = job.getDetails();
-									if(details != null) {
-										//TODO fix this to handle other authschemes
-										if(IAuthorizationContext.AUTHSCHEME_BASIC.equals(details.getScheme())) {
-											MessageDialog.openError(shell, "Authorization Information", NLS.bind("This server utilizes {0} authorization protocol", details.getScheme()));
-											authSchemeObservable.setValue(details.getScheme());
-										} else {
-											OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
-											dialog.open();
-											String token = dialog.getToken();
-											if (StringUtils.isNotBlank(token)) {
-											    tokenObservable.setValue(token);
-											}
-										}
+		if (StringUtils.isBlank(pageModel.getHost())) {
+			return;
+		}
+		try {
+			WizardUtils.runInWizard(createAuthDetailsJob(shell), wizard.getContainer(), dbc);
+		} catch (InvocationTargetException | InterruptedException ex) {
+			showErrorDialog(shell, ex);
+		}
+	}
+	
+	protected Job createAuthDetailsJob(Shell shell) {
+		Job job = new AuthDetailsJob(pageModel.getHost());
+		job.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(final IJobChangeEvent event) {
+				if(event.getJob() instanceof AuthDetailsJob) {
+					shell.getDisplay().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							AuthDetailsJob job = (AuthDetailsJob)event.getJob();
+							final IAuthorizationDetails details = job.getDetails();
+							if(details != null) {
+								//TODO fix this to handle other authschemes
+								if(IAuthorizationContext.AUTHSCHEME_BASIC.equals(details.getScheme())) {
+									MessageDialog.openError(shell, "Authorization Information", NLS.bind("This server utilizes {0} authorization protocol", details.getScheme()));
+									authSchemeObservable.setValue(details.getScheme());
+								} else {
+									OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
+									dialog.open();
+									String token = dialog.getToken();
+									if (StringUtils.isNotBlank(token)) {
+									    tokenObservable.setValue(token);
 									}
 								}
-							});
+							}
 						}
-					}
-				});
-				try {
-					WizardUtils.runInWizard(job, wizard.getContainer(), dbc);
-				} catch (InvocationTargetException | InterruptedException ex) {
-					showErrorDialog(shell,ex);
-				}				
+					});
+				}
+			}
+		});
+		return job;
 	}
 	
 	private void showErrorDialog(final Shell shell, final Throwable e) {
@@ -420,7 +423,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 				public void changed(ProgressEvent event) {
 					if (event.total <= 0) return;
 					int ratio = event.current * 100 / event.total;
-					progressBar.setSelection(ratio);;
+					progressBar.setSelection(ratio);
 				}
 
 				@Override

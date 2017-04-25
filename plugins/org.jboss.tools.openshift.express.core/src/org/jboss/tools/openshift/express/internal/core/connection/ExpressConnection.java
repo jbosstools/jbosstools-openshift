@@ -60,7 +60,7 @@ import com.openshift.internal.client.utils.StreamUtils;
  * @author Xavier Coulon
  * @author Andre Dietisheim
  */
-public class ExpressConnection extends AbstractConnection {
+public class ExpressConnection extends AbstractConnection implements Cloneable {
 
 	private static final String SECURE_STORAGE_PASSWORD = "pass";
 

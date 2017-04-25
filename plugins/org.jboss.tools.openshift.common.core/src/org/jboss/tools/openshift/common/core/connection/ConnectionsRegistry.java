@@ -30,22 +30,14 @@ import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
  * @author Jeff Cantrill
  */
 public class ConnectionsRegistry {
-
-	/** event that a connection was added */
-	private static final int ADDED = 0;
-	/** event that a connection was removed */
-	private static final int REMOVED = 1;
-	/** event that a connection was changed */
-	private static final int CHANGED = 2;
+	
+	private enum EventType { ADDED, REMOVED, CHANGED }
 
 	/** The most recent user connected on OpenShift. */
 	private IConnection recentConnection = null;
 	private Map<ConnectionURL, IConnection> connectionsByUrl = new HashMap<>();
 	private List<IConnectionsRegistryListener> listeners = new ArrayList<>();
 	private PropertyChangeListener connectionListener = new ConnectionListener();
-
-	public ConnectionsRegistry() {
-	}
 
 	public synchronized void addListener(IConnectionsRegistryListener listener) {
 		listeners.add(listener);
@@ -93,7 +85,7 @@ public class ConnectionsRegistry {
 		addPropertyChangeListener(connection);
 		connectionsByUrl.put(connectionUrl, connection);
 		this.recentConnection = connection;
-		fireChange(connection, ADDED);
+		fireChange(connection, EventType.ADDED);
 		return true;
 	}
 
@@ -118,7 +110,7 @@ public class ConnectionsRegistry {
 		if (connection == null) {
 			return;
 		}
-		fireChange(connection, CHANGED, property, oldValue, newValue);
+		fireChange(connection, EventType.CHANGED, property, oldValue, newValue);
 	}
 
 	public boolean remove(IConnection connection) {
@@ -133,7 +125,7 @@ public class ConnectionsRegistry {
 			if (this.recentConnection == connection) {
 				this.recentConnection = null;
 			}
-			fireChange(connection, REMOVED);
+			fireChange(connection, EventType.REMOVED);
 			return true;
 		} catch (UnsupportedEncodingException e) {
 			throw new OpenShiftCoreException(e, NLS.bind("Could not remove connection {0}", connection.getHost()));
@@ -142,17 +134,17 @@ public class ConnectionsRegistry {
 		}
 	}
 
-	private void fireChange(IConnection connection, int event) {
-		fireChange(connection, event, null, null, null);
+	private void fireChange(IConnection connection, EventType eventType) {
+		fireChange(connection, eventType, null, null, null);
 	}
 
-	private void fireChange(IConnection connection, int event, String property, Object oldValue, Object newValue) {
+	private void fireChange(IConnection connection, EventType eventType, String property, Object oldValue, Object newValue) {
 		if (connection == null) {
 			return;
 		}
 
 		for (IConnectionsRegistryListener l : getListeners()) {
-			switch (event) {
+			switch (eventType) {
 			case ADDED:
 				l.connectionAdded(connection);
 				break;
@@ -228,8 +220,6 @@ public class ConnectionsRegistry {
 		}
 
 		((ObservablePojo) connection).addPropertyChangeListener(connectionListener);
-		;
-
 	}
 
 	private void removePropertyChangeListener(IConnection connection) {
@@ -238,8 +228,6 @@ public class ConnectionsRegistry {
 		}
 
 		((ObservablePojo) connection).removePropertyChangeListener(connectionListener);
-		;
-
 	}
 
 	private class ConnectionListener implements PropertyChangeListener {
@@ -292,7 +280,7 @@ public class ConnectionsRegistry {
 		} else if (credentialsChange) {
 			// Property is defined in
 			// org.jboss.tools.openshift.core.connection.ConnectionProperties
-			fireChange(currentConnection, CHANGED, "openshift.resource.refresh", currentConnection, currentConnection);
+			fireChange(currentConnection, EventType.CHANGED, "openshift.resource.refresh", currentConnection, currentConnection);
 		}
 		this.recentConnection = currentConnection;
 	}

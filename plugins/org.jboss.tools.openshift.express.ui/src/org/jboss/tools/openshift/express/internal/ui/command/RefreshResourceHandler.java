@@ -81,7 +81,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 		IConnection connection = getConnection(element);
 		if (connection != null) {
 			new JobChainBuilder(job)
-			.runWhenSuccessfullyDone(new FireConnectionsChangedJob(connection)).schedule();;
+			.runWhenSuccessfullyDone(new FireConnectionsChangedJob(connection)).schedule();
 		} else {
 			job.schedule();
 		}

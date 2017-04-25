@@ -195,7 +195,7 @@ public class TableViewerBuilder {
 						} else {
 							return super.getToolTipText(object);
 						}
-					};
+					}
 
 					@SuppressWarnings("unchecked")
 					@Override

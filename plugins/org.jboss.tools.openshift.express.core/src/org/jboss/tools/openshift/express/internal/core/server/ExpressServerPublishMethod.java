@@ -221,9 +221,9 @@ public class ExpressServerPublishMethod  {
 	protected PushOperationResult publish(final IProject project, final IServer server, final IProgressMonitor monitor) 
 			throws CoreException {
 		IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 200);
-		try {
+		try (Repository repo = EGitUtils.getRepository(project)) {
 			boolean uncommittedChanges = EGitUtils.countChanges(
-					EGitUtils.getRepository(project), true, new NullProgressMonitor()) > 0;
+					repo, true, new NullProgressMonitor()) > 0;
 			if (uncommittedChanges) {
 				String remote = ExpressServerUtils.getRemoteName(server);
 				String applicationName = ExpressServerUtils.getApplicationName(server);

@@ -65,7 +65,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 	private final Map<String, Snapshots> snapshotsByUUID = new HashMap<>();
 	
 	private final StringsPreferenceValue downloadableStandaloneCartUrls =
-			new StringsPreferenceValue('|', 10, DOWNLOADABLE_STANDALONECART_URLS, ExpressCoreActivator.PLUGIN_ID);;
+			new StringsPreferenceValue('|', 10, DOWNLOADABLE_STANDALONECART_URLS, ExpressCoreActivator.PLUGIN_ID);
 
 	private ExpressCorePreferences() {
 

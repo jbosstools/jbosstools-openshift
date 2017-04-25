@@ -24,13 +24,10 @@ import org.jboss.tools.openshift.express.core.IEGitUI;
  */
 public class EGitUI implements IEGitUI {
 
-	public EGitUI() {
-	}
-
 	@Override
 	public void publish(IProject project, final String remote, final String applicationName, final Job pushJob) throws CoreException {
 		final Repository repository = EGitUtils.checkedGetRepository(project);
-
+		
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 
 			@Override

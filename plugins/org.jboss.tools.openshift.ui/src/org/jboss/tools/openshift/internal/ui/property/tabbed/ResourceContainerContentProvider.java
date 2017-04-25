@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.jboss.tools.openshift.internal.ui.models.IElementListener;
 import org.jboss.tools.openshift.internal.ui.models.IOpenshiftUIElement;
-import org.jboss.tools.openshift.internal.ui.models.IResourceContainer;;
+import org.jboss.tools.openshift.internal.ui.models.IResourceContainer;
 
 public class ResourceContainerContentProvider implements IStructuredContentProvider {
 	private String resourceKind;

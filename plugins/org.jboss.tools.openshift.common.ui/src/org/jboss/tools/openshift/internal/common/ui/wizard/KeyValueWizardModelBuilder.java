@@ -31,14 +31,16 @@ public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
 	private String keyDescription;
 	private String valueDescription;
 	private String windowTitle = "";
-	private boolean keyEditable = true;;
+	private boolean keyEditable = true;
 
 	public KeyValueWizardModelBuilder() {
 		this(null);
 	}
 	
 	public KeyValueWizardModelBuilder(T  label) {
-		if(label == null) return;
+		if (label == null) {
+			return;
+		}
 		this.key = label.getKey();
 		this.value = label.getValue();
 	}

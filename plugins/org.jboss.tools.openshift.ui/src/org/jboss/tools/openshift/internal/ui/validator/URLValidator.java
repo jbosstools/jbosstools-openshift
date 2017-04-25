@@ -30,12 +30,14 @@ public class URLValidator implements IValidator{
 	private boolean allowEmpty = false;
 	@SuppressWarnings("serial")
 	private UrlValidator validator = new UrlValidator(SCHEMES, UrlValidator.ALLOW_LOCAL_URLS) {
+		
+		@Override
 		protected boolean isValidAuthority(String domain) {
 			//default implementation doesn't recognize *.cdk domains as valid authorities
 			//so we bypass that check altogether. An alternative would be to provide a RegexValidator, 
 			//but to use what regexp?
 			return true;
-		};
+		}
 	};
 	
 	/**

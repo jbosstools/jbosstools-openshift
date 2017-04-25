@@ -62,9 +62,7 @@ public class SSHUserConfig {
 			return null;
 		}
 
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(configFile));
+		try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
 			for (String data = reader.readLine(); data != null; data = reader.readLine()) {
 				if (!data.startsWith(KEY_CONFIGBLOCK_HOST_START)
 						|| !data.endsWith(VALUE_LIBRA_SSH_HOST)) {
@@ -88,14 +86,6 @@ public class SSHUserConfig {
 			return null;
 		} catch (IOException e) {
 			throw new OpenShiftException("Could not read file {0}", configFile);
-		} finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-			} catch (IOException e) {
-				// ignore THIS IS INTENTIONAL
-			}
 		}
 	}
 }

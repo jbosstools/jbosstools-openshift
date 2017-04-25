@@ -197,7 +197,6 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
                                     model.setProject(selectedProject);
                                 }
                             }
-                            ;
                             return Status.OK_STATUS;
                         }
 
@@ -240,7 +239,7 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
                     public IStatus runInUIThread(IProgressMonitor monitor) {
                         if(!model.hasProjects()) {
                             List<IProject> projects = new ObservableTreeItem2ModelConverter().convert(model.getProjectItems());
-                            Connection connection = (Connection) model.getConnection();
+                            Connection connection = model.getConnection();
                             NewProjectWizard newProjectWizard = new NewProjectWizard(connection, projects);
                             if (Dialog.CANCEL ==
                                     WizardUtils.openWizardDialog(newProjectWizard, getShell())) {

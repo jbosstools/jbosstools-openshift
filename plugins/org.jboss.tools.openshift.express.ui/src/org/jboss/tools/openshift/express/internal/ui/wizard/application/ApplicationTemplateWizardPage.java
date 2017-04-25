@@ -195,7 +195,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 				.notUpdatingParticipant()
 				.to(useExistingApplication)
 				.in(dbc);
-		browseAppsButton.addSelectionListener(onBrowseExistingApps(dbc));
+		browseAppsButton.addSelectionListener(onBrowseExistingApps());
 	}
 
 	private AutoCompleteField createExistingAppNameContentAssist(Text existingAppNameText) {
@@ -226,7 +226,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	private SelectionListener onBrowseExistingApps(final DataBindingContext dbc) {
+	private SelectionListener onBrowseExistingApps() {
 		return new SelectionAdapter() {
 
 			@Override
@@ -439,7 +439,7 @@ public class ApplicationTemplateWizardPage extends AbstractOpenShiftWizardPage {
 					NLS.bind("Could not lookup ssh keys in OpenShift connection {0}", connection.getId()),
 					status, IStatus.ERROR)
 					.open();
-			ExpressUIActivator.log(status);;
+			ExpressUIActivator.log(status);
 			return false;
 		}
 	}
