@@ -90,13 +90,10 @@ public class X509CertificateParser {
 				LdapName ldapDN = new LdapName(certificate.getSubjectX500Principal().getName());
 				for (Rdn rdn : ldapDN.getRdns()) {
 					String type = getTypeFullName(rdn.getType());
-					if (StringUtils.isEmpty(type)) {
-						builder.append("Serial Number: ").append(toHexString(rdn.getValue().toString().getBytes()));
-					} else {
+					if (!StringUtils.isEmpty(type)) {
 						builder.append(type).append(": ").append(rdn.getValue()).append('\n');
 					}
 				}
-
 				return builder.toString();
 			} catch (InvalidNameException e) {
 				return "<Could not determine certificate issuer>";
@@ -134,17 +131,21 @@ public class X509CertificateParser {
 		}
 
 		private String getTypeFullName(String type) {
-			if ("C".equals(type)) {
+			switch(type) {
+			case "C":
 				return "Country (C)";
-			} else if ("ST".equals(type)) {
+			case "ST":
 				return "State (ST)";
-			} else if ("CN".equals(type)) {
-				return "Common Name (CN)";
-			} else if ("O".equals(type)) {
+			case "L":
+				return "Locality (L)";
+			case "O":
 				return "Organization (O)";
-			} else if ("OU".equals(type)) {
+			case "OU":
 				return "Organizational Unit (OU)";
+			case "CN":
+				return "Common Name (CN)";
+			default:
+				return null;
 			}
-			return null;
 		}
 	}
