@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.core.server;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.jmx.integration.AbstractJBossJMXConnectionProvider;
@@ -61,30 +62,28 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 		String token = ((Connection)openshiftCon).getToken();
 		String projName =  resource.getNamespace();
 		List<IPod> pods = ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD));
-		if( pods.size() == 0 ) {
+		if( pods.isEmpty() ) {
 			return null;
 		}
 		String pod =  pods.get(0).getName();
 		
-		String host = server.getHost(); 
+		String host = server.getHost();
 		String url = "https://" + host + ":8443/api/v1/namespaces/" 
 				+ projName + "/pods/https:" + pod + ":8778/proxy/jolokia/";
 		String headerKey = "Authorization";
 		String headerVal = "Bearer " + token;
 		
 		JolokiaConnectionWrapper cw = new JolokiaConnectionWrapper() {
+			@Override
 			public IConnectionProvider getProvider() {
 				return ExtensionManager.getProvider(PROVIDER_ID);
-			}
-			protected void verifyServerReachable() throws IOException {
-				super.verifyServerReachable();
 			}
 		};
 		cw.setId(server.getName());
 		cw.setUrl(url);
 		cw.setType("POST");
 		cw.setIgnoreSSLErrors(true);
-		HashMap<String, String> headers = new HashMap<String, String>();
+		Map<String, String> headers = new HashMap<>();
 		headers.put(headerKey, headerVal);
 		cw.setHeaders(headers);
 		return cw;
