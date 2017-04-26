@@ -144,8 +144,11 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 					String[] lines = CDKLaunchUtility.call(homeDir, new String[] {"version"}, 
 						new File(homeDir).getParentFile(),
 						new HashMap<String,String>(), 5000, false);
-					String imploded = String.join("\n", Arrays.asList(lines));
-					ret.load(new ByteArrayInputStream(imploded.getBytes()));
+					for( int i = 0; i < lines.length; i++ ) {
+						String[] split = lines[i].split(":");
+						if( split.length == 2 )
+							ret.put(split[0], split[1]);
+					}
 				} catch(IOException | CommandTimeoutException e )  {
 					ret.put(ERROR_KEY, e.getMessage());
 				}
@@ -174,8 +177,12 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 				return "File " + v + " is not executable.";
 			} else if( minishiftVersionProps == null ) {
 				return "Unknown error when checking minishift version: " + v;
-			} else if( minishiftVersionProps.getProperty(ERROR_KEY) != null ) {
-				return minishiftVersionProps.getProperty(ERROR_KEY);
+			} else if( minishiftVersionProps.getProperty(VERSION_KEY) == null ) {
+				if( minishiftVersionProps.getProperty(ERROR_KEY) != null ) {
+					return minishiftVersionProps.getProperty(ERROR_KEY);
+				} else {
+					return "Unknown error while checking minishift version";
+				}
 			}
 		}
 		return null;
