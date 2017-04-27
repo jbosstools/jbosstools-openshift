@@ -31,19 +31,20 @@ import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivat
  *  
  * @author Andre Dietisheim
  */
-public class X509CertificateParser {
+public class HumanReadableX509Certificate {
 	public static final String DATE_FORMAT = "E, d MMM yyyy HH:mm:ss";
 	public static final String ISSUED_ON_PREFIX = "Issued On: ";
 	public static final String EXPIRES_ON_PREFIX = "Expires On: ";
 
 		private static final String HEX_CHARS = new String("0123456789ABCDEF");
-		
+
 		private String issuer;
 		private String validity;
 		private String fingerprint;
 
-		public X509CertificateParser(X509Certificate certificate) {
+		public HumanReadableX509Certificate(X509Certificate certificate) {
 			Assert.isLegal(certificate != null);
+
 			this.issuer = getIssuer(certificate);
 			this.validity = getValidity(certificate);
 			this.fingerprint = getFingerprint(certificate);
@@ -60,23 +61,22 @@ public class X509CertificateParser {
 		public String getFingerprint() {
 			return this.fingerprint;
 		}
-		
 
 		public static boolean isValid(String validity) {
-			int expiresOnIndex = validity.indexOf(X509CertificateParser.EXPIRES_ON_PREFIX);
+			int expiresOnIndex = validity.indexOf(HumanReadableX509Certificate.EXPIRES_ON_PREFIX);
 			if(expiresOnIndex >= 0) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat(X509CertificateParser.DATE_FORMAT,  Locale.ENGLISH);
-				String expiresOn = validity.substring(expiresOnIndex + X509CertificateParser.EXPIRES_ON_PREFIX.length()).trim();
+				SimpleDateFormat dateFormat = new SimpleDateFormat(HumanReadableX509Certificate.DATE_FORMAT,  Locale.ENGLISH);
+				String expiresOn = validity.substring(expiresOnIndex + HumanReadableX509Certificate.EXPIRES_ON_PREFIX.length()).trim();
 				try {
 					Date date = dateFormat.parse(expiresOn);
 					return date.getTime() > System.currentTimeMillis();
 				} catch (ParseException e) {
-					dateFormat = new SimpleDateFormat(X509CertificateParser.DATE_FORMAT);
+					dateFormat = new SimpleDateFormat(HumanReadableX509Certificate.DATE_FORMAT);
 					try {
 						Date date = dateFormat.parse(expiresOn);
 						return date.getTime() > System.currentTimeMillis();
 					} catch(ParseException e2) {
-						OpenShiftCommonCoreActivator.log("SSLCertificatesPreference.isValid(String): Could not parse '" + expiresOn + "' in format " + X509CertificateParser.DATE_FORMAT, e2);
+						OpenShiftCommonCoreActivator.log("SSLCertificatesPreference.isValid(String): Could not parse '" + expiresOn + "' in format " + HumanReadableX509Certificate.DATE_FORMAT, e2);
 					}
 				}
 			}

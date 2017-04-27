@@ -43,53 +43,45 @@ import com.openshift.restclient.ISSLCertificateCallback;
 public class SSLCertificateCallback implements ISSLCertificateCallback {
 	
 	private static final boolean REMEMBER_DECISION_DEFAULT = true;
-
-	private boolean rememberDecision = REMEMBER_DECISION_DEFAULT;
-	
 	private static final Object LOCK = new Object();
 
-	// TODO: store certificates and decision in Eclipse preferences
-//	private Map<X509Certificate, Boolean> allowByCertificate = new HashMap<X509Certificate, Boolean>();
-	
+	private boolean rememberDecision = REMEMBER_DECISION_DEFAULT;
+
 	@Override
 	public boolean allowCertificate(final X509Certificate[] certificateChain) {
 		Boolean result = SSLCertificatesPreference.getInstance().getAllowedByCertificate(certificateChain[0]);
-		if(result != null) {
+		if (result != null) {
 			return result;
 		}
-		
-//		if(allowByCertificate.containsKey(certificateChain[0])) {
-//			return allowByCertificate.get(certificateChain[0]);
-//		};
-		
+
 		boolean allow = false;
-		if(Display.getCurrent() != null) {
-			//This prompt is usually called from non-ui threads, so that this should not happen,
-			//but in case it is called from ui thread, synchronization may cause a deadlock. 
+		if (Display.getCurrent() != null) {
+			// This prompt is usually called from non-ui threads, so that this should not happen,
+			// but in case it is called from ui thread, synchronization may cause a deadlock. 
 			allow = openCertificateDialog(certificateChain);
-		} else synchronized(LOCK) {
-			//If another instance of dialog is opened, wait for it and check the result.  
-			result = SSLCertificatesPreference.getInstance().getAllowedByCertificate(certificateChain[0]);
-			if(result != null) {
-				return result;
-			} else {
-				allow = openCertificateDialog(certificateChain);
-			}
+		} else
+			synchronized (LOCK) {
+				// If another instance of dialog is opened, wait for it and check the result.  
+				result = SSLCertificatesPreference.getInstance().getAllowedByCertificate(certificateChain[0]);
+				if (result != null) {
+					return result;
+				} else {
+					allow = openCertificateDialog(certificateChain);
+				}
 		}
 		return allow;
 	}
-	
+
 	protected boolean openCertificateDialog(final X509Certificate[] certificateChain) {
 		final AtomicBoolean atomicBoolean = new AtomicBoolean();
 		Display.getDefault().syncExec(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				atomicBoolean.set(
 						new SSLCertificateDialog(UIUtils.getShell(), certificateChain).open() == Dialog.OK);
 				if (rememberDecision) {
-					//Save the choice as soon as possible
-//					allowByCertificate.put(certificateChain[0], allow);
+					// Save the choice as soon as possible
 					SSLCertificatesPreference.getInstance().setAllowedByCertificate(certificateChain[0], atomicBoolean.get());
 				}
 			}
@@ -101,7 +93,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 	public boolean allowHostname(String hostname, SSLSession sslSession) {
 		return true;
 	}
-	
+
 	private class SSLCertificateDialog extends TitleAreaDialog {
 
 		private X509Certificate[] certificateChain;
@@ -139,15 +131,14 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 			GridDataFactory.fillDefaults()
 					.align(SWT.FILL, SWT.FILL).grab(false, true).hint(400, SWT.DEFAULT).applyTo(certificateText);
 			writeCertificate(certificateChain, certificateText);
-			
+
 			Button rememberCheckbox = new Button(container, SWT.CHECK);
-//			rememberCheckbox.setText("Remember decision for the current Eclipse session");
 			rememberCheckbox.setText("Remember decision (it can be changed in preferences 'OpenShift 3/SSL certificates')");
 			rememberCheckbox.setSelection(rememberDecision);
 			rememberCheckbox.addSelectionListener(onRememberCertificate(certificateChain[0]));
 			GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(rememberCheckbox);
-			
+
 			return container;
 		}
 
@@ -157,14 +148,13 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.NO_LABEL, false);
 		}
 
-		SSLCertificateUIHelper certificateUIHelper = new SSLCertificateUIHelper();
-
 		private void writeCertificate(X509Certificate[] certificateChain, StyledText styledText) {
 			if (certificateChain == null
 					|| certificateChain.length == 0) {
 				return;
 			}
-			certificateUIHelper.writeCertificate(certificateChain[0], styledText);
+
+			SSLCertificateUIHelper.INSTANCE.writeCertificate(certificateChain[0], styledText);
 		}
 
 		private SelectionListener onRememberCertificate(final X509Certificate certificate) {

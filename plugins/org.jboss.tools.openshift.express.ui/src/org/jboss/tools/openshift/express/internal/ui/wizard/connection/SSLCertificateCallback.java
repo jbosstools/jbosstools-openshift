@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.common.core.utils.X509CertificateParser;
+import org.jboss.tools.openshift.common.core.utils.HumanReadableX509Certificate;
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
@@ -159,7 +159,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 				return;
 			}
 			
-			X509CertificateParser certificateParser = new X509CertificateParser(certificate);
+			HumanReadableX509Certificate certificateParser = new HumanReadableX509Certificate(certificate);
 			appendLabeledValue("Issued By:\n", certificateParser.getIssuer(), builder, styles);
 			appendLabeledValue("Validity:\n", certificateParser.getValidity(), builder, styles);
 			appendLabeledValue("SHA1 Fingerprint:\n", certificateParser.getFingerprint(), builder, styles);

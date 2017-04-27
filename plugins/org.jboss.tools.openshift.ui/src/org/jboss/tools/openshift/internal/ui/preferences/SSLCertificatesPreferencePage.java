@@ -35,17 +35,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.jboss.tools.openshift.core.connection.HostCertificate;
+import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.ui.preferences.SSLCertificatesPreference.Item;
 import org.jboss.tools.openshift.internal.ui.wizard.connection.SSLCertificateUIHelper;
 
 public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
-	List<Item> items = new ArrayList<>();
-
-	CheckboxTableViewer listViewer;
-	Button remove;
-	
-	StyledText details;
+	private List<HostCertificate> items = new ArrayList<>();
+	private CheckboxTableViewer listViewer;
+	private Button remove;
+	private StyledText details;
 	
 	public SSLCertificatesPreferencePage() {
 		super(GRID);
@@ -93,29 +92,12 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 
 		remove = new Button(composite, SWT.PUSH);
 		remove.setText("Delete");
-		remove.addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteSelection();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				widgetSelected(e);
-			}
-		});
+		remove.addSelectionListener(onRemoveClicked());
 		GridData d = new GridData();
 		d.verticalAlignment = SWT.BEGINNING;
 		remove.setLayoutData(d);
 		UIUtils.setDefaultButtonWidth(remove);
-		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				updateRemoveButton();
-				updateDetails();
-			}
-		});
+		listViewer.addSelectionChangedListener(onListItemSelected());
 		updateRemoveButton();
 		
 		Label detailsLabel = new Label(composite, SWT.NONE);
@@ -135,22 +117,46 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 		updateDetails();
 	}
 
+	private ISelectionChangedListener onListItemSelected() {
+		return new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateRemoveButton();
+				updateDetails();
+			}
+		};
+	}
+
+	private SelectionListener onRemoveClicked() {
+		return new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteSelection();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		};
+	}
+
 	private void updateRemoveButton() {
-		if(isActive()) {
+		if (!DisposeUtils.isDisposed(listViewer)) {
 			remove.setEnabled(!listViewer.getSelection().isEmpty());
 		}
 	}
 
-	SSLCertificateUIHelper uiHelper = new SSLCertificateUIHelper();
-
 	private void updateDetails() {
-		if(isActive()) {
+		if (!DisposeUtils.isDisposed(listViewer)) {
 			if(listViewer.getSelection().isEmpty()) {
-				uiHelper.clean(details);
+				SSLCertificateUIHelper.INSTANCE.clean(details);
 			} else {
 				IStructuredSelection s = listViewer.getStructuredSelection();
-				Item item = (Item)s.getFirstElement();
-				uiHelper.writeCertificate(item.getIssuer(), item.getValidity(), item.getFingerprint(), details);
+				HostCertificate item = (HostCertificate)s.getFirstElement();
+				SSLCertificateUIHelper.INSTANCE.writeCertificate(
+						item.getIssuer(), item.getValidity(), item.getFingerprint(), details);
 			}
 		}
 	}
@@ -163,7 +169,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 
 	void deleteSelection() {
 		IStructuredSelection s = listViewer.getStructuredSelection();
-		if(!s.isEmpty()) {
+		if (!s.isEmpty()) {
 			for (Object item: s.toArray()) {
 				items.remove(item);
 			}
@@ -171,7 +177,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 		}
 	}
 
-	class CP implements IStructuredContentProvider {
+	private class CP implements IStructuredContentProvider {
 
 		@Override
 		public void dispose() {
@@ -188,7 +194,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 
 	}
 
-	class LP extends LabelProvider implements ITableLabelProvider {
+	private class LP extends LabelProvider implements ITableLabelProvider {
 
 		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
@@ -197,7 +203,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
-			Item i = (Item)element;
+			HostCertificate i = (HostCertificate)element;
 			if(columnIndex == 0) {
 				return "";
 			} else if(columnIndex == 2) {
@@ -210,8 +216,8 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 
 	@Override
 	public boolean performOk() {
-		for (Item i: items) {
-			i.checked = listViewer.getChecked(i);
+		for (HostCertificate i: items) {
+			i.setAccepted(listViewer.getChecked(i));
 		}
 		SSLCertificatesPreference.getInstance().saveWorkingCopy(items);
 		return true;
@@ -229,9 +235,9 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 	}
 
 	private void updateChecked() {
-		if(isActive()) {
-			for (Item i: items) {
-				listViewer.setChecked(i, i.checked);
+		if (!DisposeUtils.isDisposed(listViewer)) {
+			for (HostCertificate i: items) {
+				listViewer.setChecked(i, i.isAccepted());
 			}
 		}
 	}
@@ -245,9 +251,5 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 		if(remove != null) {
 			remove = null;
 		}
-	}
-
-	boolean isActive() {
-		return listViewer != null && listViewer.getTable() != null && !listViewer.getTable().isDisposed();
 	}
 }

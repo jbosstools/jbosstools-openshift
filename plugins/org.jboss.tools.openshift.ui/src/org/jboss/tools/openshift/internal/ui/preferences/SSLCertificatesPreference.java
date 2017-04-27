@@ -14,28 +14,26 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.common.core.utils.X509CertificateParser;
+import org.jboss.tools.openshift.common.core.utils.HumanReadableX509Certificate;
+import org.jboss.tools.openshift.core.connection.HostCertificate;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 public class SSLCertificatesPreference {
-	final static String ALLOWED_CERTIFICATES = "allowed_certificates";
-	final static String SEPARATOR = ";";
-	final static String NL = StringUtils.getLineSeparator();
+	private final static String ALLOWED_CERTIFICATES = "allowed_certificates";
+	private final static String SEPARATOR = ";";
 
-	final static SSLCertificatesPreference instance = new SSLCertificatesPreference();
+	private final static SSLCertificatesPreference INSTANCE = new SSLCertificatesPreference();
+
+	private List<HostCertificate> savedItems = null;
+	private SSLCertificatesPreference() {}
 
 	public static SSLCertificatesPreference getInstance() {
-		return instance;
+		return INSTANCE;
 	}
 
-	private List<Item> savedItems = null;
-
-	private SSLCertificatesPreference() {}
 
 	protected IPreferenceStore getPreferenceStore() {
 		return OpenShiftUIActivator.getDefault().getCorePreferenceStore();
@@ -48,10 +46,10 @@ public class SSLCertificatesPreference {
 	 * @return
 	 */
 	public Boolean getAllowedByCertificate(X509Certificate certificate) {
-		X509CertificateParser p = new X509CertificateParser(certificate);
-		Item i = new Item(false, p.getIssuer(), p.getValidity(), p.getFingerprint());
-		Item item = findItem(getSavedItems(), i);
-		return item != null ? item.checked : null;
+		HumanReadableX509Certificate p = new HumanReadableX509Certificate(certificate);
+		HostCertificate i = new HostCertificate(false, p.getIssuer(), p.getValidity(), p.getFingerprint());
+		HostCertificate item = findItem(getSavedItems(), i);
+		return item != null ? item.isAccepted() : null;
 	}
 
 	/**
@@ -61,14 +59,14 @@ public class SSLCertificatesPreference {
 	 * @return
 	 */
 	public void setAllowedByCertificate(X509Certificate certificate, boolean result) {
-		X509CertificateParser p = new X509CertificateParser(certificate);
-		Item i = new Item(result, p.getIssuer(), p.getValidity(), p.getFingerprint());
-		List<Item> savedItems = getSavedItems();
-		Item item = findItem(savedItems, i);
-		if(item == null) {
+		HumanReadableX509Certificate p = new HumanReadableX509Certificate(certificate);
+		HostCertificate i = new HostCertificate(result, p.getIssuer(), p.getValidity(), p.getFingerprint());
+		List<HostCertificate> savedItems = getSavedItems();
+		HostCertificate item = findItem(savedItems, i);
+		if (item == null) {
 			savedItems.add(i);
 		} else {
-			item.checked = result;
+			item.setAccepted(result);
 		}
 		saveItemsToPreference(savedItems);
 	}
@@ -80,9 +78,9 @@ public class SSLCertificatesPreference {
 	 * 
 	 * @return the single list instance, which is never replaced, only its content is changed
 	 */
-	List<Item> getSavedItems() {
+	List<HostCertificate> getSavedItems() {
 		if(savedItems == null) {
-			List<Item> savedItems = new ArrayList<>();
+			List<HostCertificate> savedItems = new ArrayList<>();
 			String value = getPreferenceStore().getString(ALLOWED_CERTIFICATES);
 			if(value != null && value.length() > 0) {
 				String[] tokens = value.split(SEPARATOR);
@@ -92,7 +90,7 @@ public class SSLCertificatesPreference {
 					String validity = tokens[i++];
 					String fingerprint = tokens[i++];
 					if(isValid(validity)) {
-						savedItems.add(new Item(checked, issuedBy, validity, fingerprint));
+						savedItems.add(new HostCertificate(checked, issuedBy, validity, fingerprint));
 					}
 				}
 			}
@@ -102,10 +100,10 @@ public class SSLCertificatesPreference {
 	}
 
 	private boolean isValid(String validity) {
-		return X509CertificateParser.isValid(validity);
+		return HumanReadableX509Certificate.isValid(validity);
 	}
 
-	private Item findItem(List<Item> items, Item item) {
+	private HostCertificate findItem(List<HostCertificate> items, HostCertificate item) {
 		if (items == null || items.isEmpty()) {
 			return null;
 		}
@@ -116,92 +114,37 @@ public class SSLCertificatesPreference {
 	 * Called by preference page
 	 * @param items
 	 */
-	void saveWorkingCopy(List<Item> items) {
-		List<Item> savedItems = getSavedItems();
+	void saveWorkingCopy(List<HostCertificate> items) {
+		List<HostCertificate> savedItems = getSavedItems();
 		savedItems.clear();
 		savedItems.addAll(items);
 		saveItemsToPreference(savedItems);
 	}
 
-	private void saveItemsToPreference(List<Item> items) {
+	private void saveItemsToPreference(List<HostCertificate> items) {
 		StringBuilder sb = new StringBuilder();
-		items.stream().forEach(i->sb.append(i.toPreferenceValue()));
+		items.stream().forEach(i -> sb.append(toPreferenceValue(i)));
 		getPreferenceStore().setValue(ALLOWED_CERTIFICATES, sb.toString());
-		if(getPreferenceStore() instanceof IPersistentPreferenceStore) {
+		if (getPreferenceStore() instanceof IPersistentPreferenceStore) {
 			try {
-				((IPersistentPreferenceStore)getPreferenceStore()).save();
+				((IPersistentPreferenceStore) getPreferenceStore()).save();
 			} catch (IOException e) {
 				OpenShiftUIActivator.getDefault().getLogger().logError(e);
 			}
 		}
 	}
-
-	/**
-	 * Used by preference page to show in the checkbox table viewer.
-	 * @param items
-	 */
-	static class Item {
-		boolean checked = false;
-		String issuedBy;
-		String validity;
-		String fingerprint;
-
-		Item(boolean checked, String issuedBy, String validity, String fingerprint) {
-			this.checked = checked;
-			this.issuedBy = issuedBy;
-			this.validity = validity;
-			this.fingerprint = fingerprint;
-		}
-
-		/**
-		 * Returns human readable presentation to be shown in the table,
-		 * with same text as in SSLCertificateDialog.
-		 * 
-		 * @return
-		 */
-		@Override
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("Issued By:").append(NL).append('\t').append(issuedBy).append(NL);
-			sb.append("Validity:").append(NL).append('\t').append(validity).append(NL);
-			sb.append("SHA1 Fingerprint:").append(NL).append('\t').append(fingerprint).append(NL);
-			return sb.toString();
-		}
 	
-		public String getIssuer() {
-			return issuedBy;
-		}
-
-		public String getValidity() {
-			return validity;
-		}
-
-		public String getFingerprint() {
-			return fingerprint;
-		}
-
-		/**
-		 * Returns text to be stored in preferences.
-		 * 
-		 * @return
-		 */
-		public String toPreferenceValue() {
-			StringBuilder sb = new StringBuilder();
-			sb.append(checked).append(SEPARATOR)
-			  .append(issuedBy).append(SEPARATOR)
-			  .append(validity).append(SEPARATOR)
-			  .append(fingerprint).append(SEPARATOR);
-			return sb.toString();
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if(!(o instanceof Item)) return false;
-			Item other = (Item)o;
-			return Objects.equals(this.issuedBy, other.issuedBy)
-				&& Objects.equals(this.validity, other.validity)
-				&& Objects.equals(this.fingerprint, other.fingerprint);
-		}
+	/**
+	 * Returns text to be stored in preferences.
+	 * 
+	 * @return
+	 */
+	public String toPreferenceValue(HostCertificate certificate) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(certificate.isAccepted()).append(SEPARATOR)
+		  .append(certificate.getIssuer()).append(SEPARATOR)
+		  .append(certificate.getValidity()).append(SEPARATOR)
+		  .append(certificate.getFingerprint()).append(SEPARATOR);
+		return sb.toString();
 	}
-
 }

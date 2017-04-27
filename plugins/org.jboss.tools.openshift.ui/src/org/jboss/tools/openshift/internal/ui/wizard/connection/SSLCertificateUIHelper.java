@@ -18,11 +18,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.common.core.utils.X509CertificateParser;
+import org.jboss.tools.openshift.common.core.utils.HumanReadableX509Certificate;
 
 public class SSLCertificateUIHelper {
 
-	public SSLCertificateUIHelper() {
+	public final static SSLCertificateUIHelper INSTANCE = new SSLCertificateUIHelper();
+	
+	private SSLCertificateUIHelper() {
 	}
 
 	public void createTextAndStyle(X509Certificate certificate, StringBuilder builder, List<StyleRange> styles) {
@@ -30,7 +32,7 @@ public class SSLCertificateUIHelper {
 			return;
 		}
 		
-		X509CertificateParser certificateParser = new X509CertificateParser(certificate);
+		HumanReadableX509Certificate certificateParser = new HumanReadableX509Certificate(certificate);
 		createTextAndStyle(certificateParser.getIssuer(), certificateParser.getValidity(), certificateParser.getFingerprint(), builder, styles);
 	}
 
