@@ -17,8 +17,8 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.jboss.tools.openshift.common.core.connection.HumanReadableX509Certificate;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.common.core.utils.HumanReadableX509Certificate;
 
 public class SSLCertificateUIHelper {
 
@@ -27,17 +27,8 @@ public class SSLCertificateUIHelper {
 	private SSLCertificateUIHelper() {
 	}
 
-	public void createTextAndStyle(X509Certificate certificate, StringBuilder builder, List<StyleRange> styles) {
+	public void setTextAndStyle(X509Certificate certificate, StyledText styledText) {
 		if (certificate == null) {
-			return;
-		}
-		
-		HumanReadableX509Certificate certificateParser = new HumanReadableX509Certificate(certificate);
-		createTextAndStyle(certificateParser.getIssuer(), certificateParser.getValidity(), certificateParser.getFingerprint(), builder, styles);
-	}
-
-	public void writeCertificate(X509Certificate certificate, StyledText styledText) {
-		if(certificate == null) {
 			return;
 		}
 		List<StyleRange> styles = new ArrayList<>();
@@ -47,24 +38,22 @@ public class SSLCertificateUIHelper {
 		setStyleRanges(styledText, styles);
 	}
 
-	public void writeCertificate(String issuedBy, String validity, String fingerprint, StyledText styledText) {
-		clean(styledText);
-		List<StyleRange> styles = new ArrayList<>();
-		StringBuilder builder = new StringBuilder();
-		createTextAndStyle(issuedBy, validity, fingerprint, builder, styles);
-		styledText.setText(builder.toString());
-		setStyleRanges(styledText, styles);
-	}
-
 	public void clean(StyledText styledText) {
 		setStyleRanges(styledText, new ArrayList<StyleRange>());
 		styledText.setText("");
 	}
 
-	public void createTextAndStyle(String issuedBy, String validity, String fingerprint, StringBuilder builder, List<StyleRange> styles) {
-		appendLabeledValue("Issued By:\n", issuedBy, builder, styles);
-		appendLabeledValue("Validity:\n", validity, builder, styles);
-		appendLabeledValue("SHA1 Fingerprint:\n", fingerprint, builder, styles);
+	public void createTextAndStyle(X509Certificate certificate, StringBuilder builder, List<StyleRange> styles) {
+		if (certificate == null) {
+			return;
+		}
+		HumanReadableX509Certificate cert = new HumanReadableX509Certificate(certificate);
+		appendLabel(cert.getIssuedTo(HumanReadableX509Certificate.PRINCIPAL_COMMON_NAME) + "\n\n",
+				builder, styles);
+		appendLabeledValue("Issued To:\n", cert.getIssuedTo(), builder, styles);
+		appendLabeledValue("\nIssued By:\n", cert.getIssuedBy(), builder, styles);
+		appendLabeledValue("\nValidity:\n", cert.getValidity(), builder, styles);
+		appendLabeledValue("\nSHA1 Fingerprint:\n", cert.getFingerprint(), builder, styles);
 	}
 
 	private void appendLabeledValue(String label, String value, StringBuilder builder, List<StyleRange> styles) {
@@ -75,7 +64,6 @@ public class SSLCertificateUIHelper {
 	private void appendValue(String value, StringBuilder builder) {
 		builder
 				.append(value)
-				.append(StringUtils.getLineSeparator())
 				.append(StringUtils.getLineSeparator());
 	}
 
