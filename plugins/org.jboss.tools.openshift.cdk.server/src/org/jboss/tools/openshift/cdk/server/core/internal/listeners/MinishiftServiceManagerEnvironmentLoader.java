@@ -35,6 +35,9 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		
 		// Load the minishift console --machine-readable
 		Properties props = loadOpenshiftConsoleDetails(server);
+		String registry = getOpenshiftRegistry(server);
+		if( registry != null )
+			props.put(ServiceManagerEnvironment.IMAGE_REGISTRY_KEY, registry);
 
 		// merge the two
 		Map<String, String> merged = merge(adbEnv, props);
@@ -51,6 +54,22 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		}
 	}
 
+	protected String getOpenshiftRegistry(IServer server) {
+		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
+		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
+		String[] args = new String[] { "openshift", "registry" };
+		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
+		try {
+			String[] lines = callAndGetLines(env, args, cmdLoc, wd);
+			if( lines != null && lines.length > 0) {
+				return lines[0];
+			}
+		} catch(IOException ioe) {
+			CDKCoreActivator.pluginLog().logError(
+					"Unable to successfully complete a call to minishift docker-env ",ioe);
+		}
+		return null;
+	}
 
 	protected Map<String, String> loadDockerEnv(IServer server) {
 		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);

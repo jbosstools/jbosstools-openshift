@@ -23,7 +23,7 @@ public class ServiceManagerEnvironment {
 	public static final String KEY_DOCKER_TLS_VERIFY="DOCKER_TLS_VERIFY";
 	public static final String KEY_DOCKER_CERT_PATH = "DOCKER_CERT_PATH";
 	public static final String KEY_DOCKER_API_VERSION = "DOCKER_API_VERSION";
-	private static final String IMAGE_REGISTRY_KEY = "DOCKER_REGISTRY";
+	public static final String IMAGE_REGISTRY_KEY = "DOCKER_REGISTRY";
 	
 	public static final String KEY_OPENSHIFT_HOST = "HOST";
 	public static final String KEY_OPENSHIFT_PORT = "PORT";

@@ -89,9 +89,7 @@ public abstract class ServiceManagerEnvironmentLoader {
 		return null;
 	}
 	
-	
-
-	protected HashMap<String, String> callAndParseEnvVar(Map<String, String> env, String[] args, 
+	protected String[] callAndGetLines(Map<String, String> env, String[] args, 
 			String cmdLoc, File wd) throws IOException {
 		String[] lines = null;
 		try {
@@ -106,7 +104,12 @@ public abstract class ServiceManagerEnvironmentLoader {
 			// Try to salvage it, it could be the process never terminated but it got all the output
 			lines = ce.getInLines() == null ? null : (String[]) ce.getInLines().toArray(new String[ce.getInLines().size()]); 
 		}
-		
+		return lines;
+	}
+
+	protected HashMap<String, String> callAndParseEnvVar(Map<String, String> env, String[] args, 
+			String cmdLoc, File wd) throws IOException {
+		String[] lines = callAndGetLines(env, args, cmdLoc, wd);
 		HashMap<String, String> adbEnv = ServiceManagerUtility.parseLines(lines);
 		if( adbEnv == null ) {
 			throw new IOException("Error calling " + cmdLoc + " with args " + String.join(", ", args));
