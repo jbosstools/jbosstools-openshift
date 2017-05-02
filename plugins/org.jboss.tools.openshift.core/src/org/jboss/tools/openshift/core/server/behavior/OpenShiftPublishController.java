@@ -34,33 +34,22 @@ import org.jboss.tools.as.core.server.controllable.subsystems.internal.StandardF
 import org.jboss.tools.common.util.FileUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.core.debug.DebugTrackerContributionEvaluation;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.RSync;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 public class OpenShiftPublishController extends StandardFileSystemPublishController implements IPublishController {
 
 	private RSync rsync = null;
-	private boolean syncDownFailed = false;
+	protected boolean syncDownFailed = false;
 	
 	
 	@Override
-	public void publishStart(final IProgressMonitor monitor) 
-			throws CoreException {
-		
+	public void publishStart(final IProgressMonitor monitor) throws CoreException {
 		syncDownFailed = false;
 		IServer server = getServer();
-		
-		
-		// Noode.js Debug session is running - do *not* perform rsync!
-		if (DebugTrackerContributionEvaluation.isDebugSessionAlive(server)) {
-			return;
-		}
-
 		final IProject deployProject = OpenShiftServerUtils.getDeployProject(server);
 		
 		if (!ProjectUtils.isAccessible(deployProject)) {
@@ -204,13 +193,12 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	}
 	
 	@Override
+	@SuppressWarnings("restriction")
 	public int publishModule(int kind,
 			int deltaKind, IModule[] module, IProgressMonitor monitor)
 			throws CoreException {
-		if (isEapProfile()) {
+		if (syncDownFailed) {
 			return super.publishModule(IServer.PUBLISH_CLEAN, deltaKind, module, monitor);
-		} else if( syncDownFailed ) {
-			return super.publishModule(IServer.PUBLISH_FULL, deltaKind, module, monitor);
 		} else {
 			return super.publishModule(kind, deltaKind, module, monitor);
 		}

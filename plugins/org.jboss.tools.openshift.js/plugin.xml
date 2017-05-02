@@ -2,9 +2,72 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.jboss.tools.openshift.core.debugSessionTracker">
-      <tracker
-            class="org.jboss.tools.openshift.js.debug.NodeDebugSessionTracker">
-      </tracker>
+         point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
+      <subsystem
+            class="org.jboss.tools.openshift.js.server.behaviour.OpenshiftNodejsShutdownController"
+            id="shutdown.openshift.nodejs"
+            name="OpenShift NodeJS Shutdown Controller"
+            system="shutdown">
+      </subsystem>
+      <subsystemMapping
+            id="shutdown.openshift.nodejs"
+            mappedId="shutdown.openshift.nodejs"
+            serverTypes="org.jboss.tools.openshift.server.type">
+      </subsystemMapping>
+      <subsystem
+            class="org.jboss.tools.openshift.js.server.behaviour.OpenshiftNodejsLaunchController"
+            id="launch.openshift.nodejs"
+            name="OpenShift NodeJS Launch Controller"
+            system="launch">
+      </subsystem>
+      <subsystemMapping
+            id="launch.openshift.nodejs"
+            mappedId="launch.openshift.nodejs"
+            serverTypes="org.jboss.tools.openshift.server.type">
+      </subsystemMapping>
+      <subsystem
+            class="org.jboss.tools.openshift.js.server.behaviour.OpenhiftNodejsPublishController"
+            id="publish.rsync.filesystem.nodejs"
+            name="Local Filesystem Nodejs Publish with RSync"
+            system="publish">
+      </subsystem>
+      <subsystemMapping
+            id="publish.rsync.filesystem.nodejs"
+            mappedId="publish.rsync.filesystem.nodejs"
+            serverTypes="org.jboss.tools.openshift.server.type">
+      </subsystemMapping>
+   </extension>
+   <extension
+         point="org.jboss.ide.eclipse.as.wtp.core.serverProfile">
+      <serverProfile
+            id="openshift3.nodejs"
+            serverTypes="org.jboss.tools.openshift.server.type">
+         <subsystem
+               subsystem="shutdown.openshift.nodejs"
+               system="shutdown">
+         </subsystem>
+         <subsystem
+               subsystem="launch.openshift.nodejs"
+               system="launch">
+         </subsystem>
+         <subsystem
+               subsystem="publish.rsync.filesystem.nodejs"
+               system="publish">
+         </subsystem>
+         <subsystem
+               subsystem="moduleDeployPath.xmlprefs.openshift"
+               system="moduleDeployPath">
+         </subsystem>
+         <subsystem
+               subsystem="modules.noop.default"
+               system="modules">
+         </subsystem>
+      </serverProfile>
+   </extension>
+   <extension
+         point="org.jboss.tools.openshift.core.serverAdapterProfileDetector">
+      <detector
+            class="org.jboss.tools.openshift.js.server.OpenshiftNodejsApplicationProfileDetector">
+      </detector>
    </extension>
 </plugin>

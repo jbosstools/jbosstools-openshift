@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat Incorporated - initial API and implementation
  *******************************************************************************/
-package org.jboss.tools.openshift.core.server.behavior;
+package org.jboss.tools.openshift.core.server.behavior.eap;
 
 import java.io.File;
 import java.util.stream.Stream;
