@@ -19,8 +19,10 @@ import java.lang.annotation.Target;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.reddeer.common.wait.WaitWhile;
 import org.jboss.reddeer.junit.requirement.Requirement;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
@@ -67,6 +69,11 @@ public class OpenShiftProjectRequirement implements Requirement<RequiredProject>
 		 * {@link #name()} is used
 		 */
 		String description() default StringUtils.EMPTY;
+		
+		/**
+		 * whether the project created by the requirement should be automatically deleted after test class, default false
+		 */
+		boolean cleanup() default false;
 	}
 
 	@Override
@@ -91,6 +98,11 @@ public class OpenShiftProjectRequirement implements Requirement<RequiredProject>
 
 	@Override
 	public void cleanUp() {
+		if (projectSpec.cleanup()) {
+			Connection connection = ConnectionUtils.getConnectionOrDefault(projectSpec.connectionURL());
+			connection.deleteResource(project);
+			new WaitWhile(new OpenShiftProjectExists(project.getName()));
+		}
 	}
 
 	public IProject getProject() {
