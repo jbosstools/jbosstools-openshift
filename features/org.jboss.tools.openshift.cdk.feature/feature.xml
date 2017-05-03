@@ -21,8 +21,8 @@
    </license>
 
    <requires>
-       <import feature="org.eclipse.linuxtools.docker.feature"/>
-       <import feature="org.jboss.tools.openshift.feature"/>
+      <import feature="org.jboss.tools.openshift.feature" version="3.3.3" match="greaterOrEqual"/>
+      <import feature="org.eclipse.linuxtools.docker.feature" version="2.3.0.201704251823" match="greaterOrEqual"/>
    </requires>
 
    <plugin id="org.jboss.tools.openshift.cdk.server" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
