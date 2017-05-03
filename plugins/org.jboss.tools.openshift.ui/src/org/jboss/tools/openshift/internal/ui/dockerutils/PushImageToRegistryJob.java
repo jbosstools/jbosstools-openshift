@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat.
+ * Copyright (c) 2016-2017 Red Hat.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,7 +83,6 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 			}
 			monitor.done();
 		}
-		// TODO Auto-generated method stub
 		return Status.OK_STATUS;
 	}
 
@@ -98,7 +97,8 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 	 */
 	public String getPushToRegistryImageName() {
 		try {
-			final String registryHostname = new URL(this.registryAccount.getServerAddress()).getHost();
+		    final URL registryURL = new URL(this.registryAccount.getServerAddress());
+			final String registryHostname = (registryURL.getPort() == (-1))?registryURL.getHost():registryURL.getHost() + ':' + registryURL.getPort();
 			final String tmpImageName = registryHostname + '/' + this.openshiftProject + '/' + DockerImageUtils.extractImageNameAndTag(this.imageName);
 			return tmpImageName;
 		} catch (MalformedURLException e) {
