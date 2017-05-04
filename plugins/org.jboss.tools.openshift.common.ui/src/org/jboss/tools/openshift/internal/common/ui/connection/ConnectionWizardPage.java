@@ -148,7 +148,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		connectionLabel.setText("Connection:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(connectionLabel);
-		Combo connectionCombo = new Combo(parent, SWT.DEFAULT);
+		Combo connectionCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 				.span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(connectionCombo);
 		ComboViewer connectionComboViewer = new ComboViewer(connectionCombo);
@@ -172,7 +172,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		connectionFactoryLabel.setText("Server type:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(connectionFactoryLabel);
-		Combo connectionFactoryCombo = new Combo(parent, SWT.DEFAULT);
+		Combo connectionFactoryCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 				.span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(connectionFactoryCombo);
 		ComboViewer connectionFactoriesViewer = new ComboViewer(connectionFactoryCombo);
