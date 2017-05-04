@@ -133,7 +133,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		authTypeLabel.setText("Protocol:");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).applyTo(authTypeLabel);
-		Combo authTypeCombo = new Combo(composite, SWT.DEFAULT);
+		Combo authTypeCombo = new Combo(composite, SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(authTypeCombo);
 		this.authTypeViewer = new ComboViewer(authTypeCombo);
