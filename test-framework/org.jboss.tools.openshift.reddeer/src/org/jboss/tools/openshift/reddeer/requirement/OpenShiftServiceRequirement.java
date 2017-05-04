@@ -37,6 +37,7 @@ import org.jboss.reddeer.common.wait.WaitUntil;
 import org.jboss.reddeer.common.wait.WaitWhile;
 import org.jboss.reddeer.core.condition.JobIsRunning;
 import org.jboss.reddeer.junit.requirement.Requirement;
+import org.jboss.tools.common.reddeer.utils.StackTraceUtils;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
@@ -55,7 +56,9 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.capability.resources.IProjectTemplateProcessing;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
@@ -84,6 +87,8 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		String service();
 		/** the name of a template that should be used to create the service if it doesn't exist */
 		String template();
+		/** whether the resources created by the requirement should be automatically deleted after test class, default false */
+		boolean cleanup() default false;
 	}
 
 	private RequiredService serviceSpec;
@@ -229,6 +234,50 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 
 	@Override
 	public void cleanUp() {
+		if (serviceSpec.cleanup()) {
+			final ITemplate template = connection.getResource(
+					ResourceKind.TEMPLATE, OpenShiftResources.OPENSHIFT_PROJECT, serviceSpec.template());
+
+			String projectName = TestUtils.getValueOrDefault(serviceSpec.project(), DatastoreOS3.TEST_PROJECT);
+			final IProject project = OpenShift3NativeResourceUtils.getProject(projectName, connection);
+			
+			IProjectTemplateProcessing capability = project.getCapability(IProjectTemplateProcessing.class);
+			ITemplate processed = capability.process(template);			
+			
+			for(IResource resource : processed.getObjects()) {
+				IResource res = connection.getResource(resource.getKind(), projectName, resource.getName());
+				try {
+					connection.deleteResource(res);
+				} catch (OpenShiftException ex) {
+					LOGGER.error("Unable to remove " + res.getKind() + " named " + res.getName());
+					LOGGER.error(StackTraceUtils.stackTraceToString(ex));
+				}
+			}
+
+			cleanResources(connection, ResourceKind.BUILD, project, template);
+			cleanResources(connection, ResourceKind.REPLICATION_CONTROLLER, project, template);
+			cleanResources(connection, ResourceKind.POD, project, template);
+			
+			new WaitWhile(new AbstractWaitCondition() {				
+				
+				@Override
+				public boolean test() {
+					for (IResource resource : project.getResources(ResourceKind.POD)) {
+						if (resource.getName().startsWith(template.getName())) {
+							return true;
+						}
+					}
+					return false;
+				}
+				
+				@Override
+				public String description() {
+					return "at least one application pod is running";
+				}
+				
+			}, TimePeriod.LONG);
+			new OpenShiftExplorerView().getOpenShift3Connection(connection).refresh();
+		}
 	}
 
 	public IService getService() {
@@ -243,5 +292,18 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		List<IReplicationController> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespace());
 		IReplicationController rc = ResourceUtils.getReplicationControllerFor(service, rcs);
 		return rc;
+	}
+	
+	private void cleanResources(Connection connection, String kind, IProject project, ITemplate template) {
+		for (IResource resource : project.getResources(kind)) {
+			if (resource.getName().startsWith(template.getName())) {
+				try {
+					connection.deleteResource(resource);
+				} catch (OpenShiftException ex) {
+					LOGGER.error("Unable to remove " + resource.getKind() + " named " + resource.getName());
+					LOGGER.error(StackTraceUtils.stackTraceToString(ex));
+				}
+			}
+		}
 	}
 }
