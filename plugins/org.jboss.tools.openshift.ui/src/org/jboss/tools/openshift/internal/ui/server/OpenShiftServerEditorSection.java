@@ -37,7 +37,6 @@ import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -58,7 +57,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -75,7 +73,6 @@ import org.eclipse.wst.server.ui.editor.ServerEditorPart;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -84,7 +81,6 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
-import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder.ISchedulingCondition;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
@@ -102,6 +98,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 
 	private IServerEditorPartInput input;
 	private OpenShiftServerEditorModel model;
+	//A copy in super class is private, we have to do one more for our needs.
+	private ServerEditorPart editorPart;
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input) {
@@ -110,9 +108,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			this.input = (IServerEditorPartInput) input;
 		}
 	}
-
-	//A copy in super class is private, we have to do one more for our needs.
-	private ServerEditorPart editorPart;
 
 	@Override
 	public void setServerEditorPart(ServerEditorPart editor) {
@@ -137,7 +132,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 
 		this.model = new OpenShiftServerEditorModel(server, this, null);
 
-		Composite container = createControls(section, model);
+		Composite container = createControls(section);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.FILL).grab(true, true)
 				.applyTo(container);
@@ -172,7 +167,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		}
 	}
 
-	private Composite createControls(Composite parent, OpenShiftServerEditorModel model) {
+	private Composite createControls(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout(3, false);
 		container.setLayout(gl);
@@ -245,6 +240,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		 
 		BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_CONNECTION).observe(model)
 				.addValueChangeListener(new IValueChangeListener() {
+					@Override
 					public void handleValueChange(ValueChangeEvent event) {
 						new Job("Refresh connection details") {
 
@@ -255,7 +251,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 								} catch (OpenShiftException oce) {
 									OpenShiftUIActivator.log(IStatus.ERROR, "Error refreshing connection details", oce);
 								}
-								// TODO Auto-generated method stub
 								return Status.OK_STATUS;
 							}
 
@@ -556,7 +551,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			}
 		};
 	}
-
 	
 	private class LoadingProjectsJob extends Job {
 		private OpenShiftServerEditorModel model;
@@ -580,7 +574,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 					model.loadResources(con);
 				}
 			} catch(UnsupportedEncodingException | MalformedURLException | OpenShiftException e) {
-				IStatus s = OpenShiftUIActivator.getDefault().statusFactory().errorStatus(getConnectionErrorMessage(url, server), e);
+				IStatus s = OpenShiftUIActivator.statusFactory().errorStatus(getConnectionErrorMessage(url, server), e);
 				OpenShiftUIActivator.getDefault().getLogger().logStatus(s);
 			}
 			
@@ -607,6 +601,16 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			}			
 			return Status.OK_STATUS;
 		}
+		
+		private String getConnectionErrorMessage(String url, IServerAttributes server) {
+			ConnectionURL connectionUrl = ConnectionURL.safeForURL(OpenShiftServerUtils.getConnectionURL(server));
+			if (connectionUrl == null) {
+				return "Could not find OpenShift connection for server \"{0}\"";
+			} else {
+				return NLS.bind("Could not find OpenShift connection to host \"{0}\" with user \"{1}\" for server \"{2}\"", 
+					new String[] { connectionUrl.getHost(), connectionUrl.getUsername(), server.getName() } );
+			}
+		}
 	}
 	
 	private Job loadingProjectsJob(OpenShiftServerEditorModel model, IServerWorkingCopy server, IProject project) {
@@ -616,7 +620,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	private void loadResources(final Composite container, OpenShiftServerEditorModel model) {
 		IServerWorkingCopy server = input.getServer();
 
-		final Connection connection = OpenShiftServerUtils.getConnection(server);
+		OpenShiftServerUtils.getConnection(server);
 		final IProject deployProject = OpenShiftServerUtils.getDeployProject(server);
 
 		Cursor busyCursor = new Cursor(container.getDisplay(), SWT.CURSOR_WAIT);
@@ -633,15 +637,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				.schedule();
 	}
 	
-	private String getConnectionErrorMessage(String url, IServerAttributes server) {
-		ConnectionURL connectionUrl = ConnectionURL.safeForURL(OpenShiftServerUtils.getConnectionURL(server));
-		if (connectionUrl == null) {
-			return "Could not find OpenShift connection for server \"{0}\"";
-		} else {
-			return NLS.bind("Could not find OpenShift connection to host \"{0}\" with user \"{1}\" for server \"{2}\"", 
-				new String[] { connectionUrl.getHost(), connectionUrl.getUsername(), server.getName() } );
-		}
-	}
+
 
 	//Temporal fix until superclass is fixed. Then just remove this class.
 	private class DisableAllWidgetsJob extends org.jboss.tools.foundation.ui.jobs.DisableAllWidgetsJob {
@@ -665,9 +661,4 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		}
 	}
 	
-	@Override
-	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-		super.doSave(monitor);
-	}
 }

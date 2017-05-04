@@ -403,7 +403,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	private void updateServer(IServerWorkingCopy server) throws OpenShiftException {
 		String connectionUrl = getConnectionUrl(getConnection());
 		String serverName = OpenShiftServerUtils.getServerName(getResource(), getConnection());
-		String host = getHost(getRoute());
+		String host = getHost(getRoute(), getConnection());
 		String routeURL = getRouteURL(isSelectDefaultRoute(), getRoute());
 		String podPath = useInferredPodPath ? "": this.podPath;
 		OpenShiftServerUtils.updateServer(
@@ -450,12 +450,18 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		}
 		return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3;
 	}
-
+	
 	protected String getHost(IRoute route) {
-		if (route == null) {
-			return "";
+		return getHost(route, null);
+	}
+
+	protected String getHost(IRoute route, IConnection connection) {
+		if (route != null) {
+			return UrlUtils.getHost(route.getURL());
+		} else if(connection != null) {
+			return UrlUtils.getHost(connection.getHost());
 		}
-		return UrlUtils.getHost(route.getURL());
+		return "";
 	}
 
 	protected String getRouteURL(boolean isSelectDefaultRoute, IRoute route) {
