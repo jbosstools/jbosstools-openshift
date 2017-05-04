@@ -7,6 +7,7 @@ Bundle-Activator: org.jboss.tools.openshift.reddeer.Activator
 Require-Bundle: 
  org.jboss.tools.openshift.ui;bundle-version="3.3.0",
  org.jboss.tools.common.core;bundle-version="3.8.1",
+ org.jboss.tools.common.reddeer;bundle-version="[3.9.0,3.10.0]",
  org.jboss.tools.openshift.common.core;bundle-version="3.3.0",
  org.apache.commons.lang;bundle-version="2.6.0",
  org.jboss.reddeer.go;bundle-version="[1.2.0,2.0.0)",

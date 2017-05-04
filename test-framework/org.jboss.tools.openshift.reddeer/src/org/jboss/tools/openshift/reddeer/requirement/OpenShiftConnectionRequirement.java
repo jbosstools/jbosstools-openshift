@@ -20,7 +20,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.reddeer.common.condition.AbstractWaitCondition;
 import org.jboss.reddeer.common.logging.Logger;
+import org.jboss.reddeer.common.wait.WaitWhile;
 import org.jboss.reddeer.junit.requirement.Requirement;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -29,6 +31,7 @@ import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
+import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 
 import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
@@ -66,6 +69,11 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 		 * the password to use when authenticating. If nothing is provided {@link DatastoreOS3#PASSWORD} is used
 		 */
 		String password() default StringUtils.EMPTY;
+		
+		/**
+		 * whether the connection created by the requirement should be automatically deleted after test class, default false
+		 */
+		boolean cleanup() default false;
 	}
 
 	@Override
@@ -124,6 +132,10 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 
 	@Override
 	public void cleanUp() {
+		if (connectionSpec.cleanup()) {
+			ConnectionsRegistrySingleton.getInstance().remove(connection);
+			new WaitWhile(new ConnectionExists(connection.getHost(), connection.getUsername()));
+		}
 	}
 	
 	public Connection getConnection() {
@@ -144,4 +156,22 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 		return connection.getHost();
 	}
 	
+	private class ConnectionExists extends AbstractWaitCondition {
+		
+		private OpenShiftExplorerView view;
+		private String server;
+		private String user;
+
+		public ConnectionExists(String server, String user) {
+			view = new OpenShiftExplorerView();
+			this.server = server;
+			this.user = user;
+		}
+		
+		@Override
+		public boolean test() {
+			return view.connectionExists(server, user);
+		}
+		
+	}
 }
