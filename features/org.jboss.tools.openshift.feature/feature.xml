@@ -21,8 +21,8 @@
    </license>
 
    <requires>
-      <import feature="org.eclipse.m2e.feature" version="1.2.0.20120903-1050" match="greaterOrEqual"/>
-      <import feature="org.eclipse.linuxtools.docker.feature"/>
+      <import feature="org.eclipse.m2e.feature" version="1.7.1.20161104-1805" match="greaterOrEqual"/>
+      <import feature="org.eclipse.linuxtools.docker.feature" version="2.3.0.201704251823" match="greaterOrEqual"/>
    </requires>
 
    <plugin
