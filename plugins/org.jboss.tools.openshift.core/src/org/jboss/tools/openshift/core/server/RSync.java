@@ -36,7 +36,6 @@ import com.openshift.restclient.capability.resources.IRSyncable.LocalPeer;
 import com.openshift.restclient.capability.resources.IRSyncable.PodPeer;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 public class RSync {
 
@@ -46,20 +45,27 @@ public class RSync {
 
 	public RSync(final IResource resource, final String podPath, final IServer server) {
 		this.resource = resource;
-		this.podPath = sanitizePath(podPath);
+		this.podPath = sanitizeUnixPath(podPath);
 		this.server = server;
 	}
-
-	private static String sanitizePath(String path) {
+	
+	protected String sanitizePath(String path) {
+		return sanitizePath(path, File.separator);
+	}
+	
+	protected String sanitizeUnixPath(String path) {
+		return sanitizePath(path, "/");
+	}
+	
+	private String sanitizePath(String path, String slash)  {
 		if (path == null) {
 			return null;
 		}
-		if (path.endsWith("/") || path.endsWith("/.")) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (path.endsWith(slash) || path.endsWith(slash + ".")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return path;
 		}
-		return path+"/"; //$NON-NLS-1$
+		return path + slash; //$NON-NLS-1$
 	}
-	
 	
 	public void syncPodsToDirectory(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter) {
 		new OCBinaryOperation() {
@@ -107,7 +113,6 @@ public class RSync {
 		destination.mkdirs();
 		String destinationPath = sanitizePath(destination.getAbsolutePath());
 		pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
-			@SuppressWarnings("resource") //$NON-NLS-1$
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
 				final InputStream syncStream = rsyncable.sync(new PodPeer(podPath, pod),
