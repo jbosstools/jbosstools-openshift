@@ -36,8 +36,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.openshift.common.core.connection.HumanReadableX509Certificate;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.common.core.utils.X509CertificateParser;
 import org.jboss.tools.openshift.express.internal.ui.ExpressImages;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
@@ -159,10 +159,10 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 				return;
 			}
 			
-			X509CertificateParser certificateParser = new X509CertificateParser(certificate);
-			appendLabeledValue("Issued By:\n", certificateParser.getIssuer(), builder, styles);
-			appendLabeledValue("Validity:\n", certificateParser.getValidity(), builder, styles);
-			appendLabeledValue("SHA1 Fingerprint:\n", certificateParser.getFingerprint(), builder, styles);
+			HumanReadableX509Certificate humanReadableCertificate = new HumanReadableX509Certificate(certificate);
+			appendLabeledValue("Issued By:\n", humanReadableCertificate.getIssuedBy(), builder, styles);
+			appendLabeledValue("Validity:\n", humanReadableCertificate.getValidity(), builder, styles);
+			appendLabeledValue("SHA1 Fingerprint:\n", humanReadableCertificate.getFingerprint(), builder, styles);
 		}
 
 		private void appendLabeledValue(String label, String value, StringBuilder builder, List<StyleRange> styles) {
