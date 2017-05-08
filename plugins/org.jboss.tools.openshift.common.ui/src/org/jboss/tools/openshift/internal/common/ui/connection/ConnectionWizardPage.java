@@ -302,7 +302,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		if (signupUrlExists) {
 			IConnectionFactory factory = pageModel.getConnectionFactory();
 			if (factory != null) {
-				StyledTextUtils.emulateLinkWidget(NLS.bind("New to OpenShift {0}? Explore the <a>getting started documentation</a>.", factory.getName()), userdocLink);
+				StyledTextUtils.emulateLinkWidget(factory.getUserDocText(), userdocLink);
 			}
 		}
 		UIUtils.setVisibleAndExclude(signupUrlExists, userdocLink);

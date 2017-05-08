@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.express.internal.core.connection;
 import java.io.IOException;
 
-import org.apache.commons.lang.StringUtils;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
@@ -68,12 +67,9 @@ public class ExpressConnectionFactory implements IConnectionFactory {
 		return ExpressConnection.class == clazz;
 	}
 
-	public String getSignupUrl(String host) {
-		if (StringUtils.isEmpty(host)
-				|| !host.equals(getDefaultHost())) {
-			return null;
-		}
-		return host + "/app/user/new/express";
+	@Override
+	public String getUserDocText() {
+		return "New to OpenShift 2? Explore the <a>getting started documentation</a>.";
 	}
 
 	@Override
