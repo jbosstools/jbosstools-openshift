@@ -46,7 +46,7 @@ public class HumanReadableX509Certificate {
 	public static final String LABEL_PRINCIPAL_STATE = "State (ST)";
 	public static final String LABEL_PRINCIPAL_COUNTRY = "Country (C)";
 
-	private static final String DATE_FORMAT = "E, d MMM yyyy HH:mm:ss";
+	private static final String DATE_FORMAT = "E, d MMM yyyy HH:mm:ss z";
 	public static final String LABEL_VALIDITY_ISSUED_ON = "Issued On ";
 	public static final String LABEL_VALIDITY_EXPIRES_ON = "Expires On ";
 
