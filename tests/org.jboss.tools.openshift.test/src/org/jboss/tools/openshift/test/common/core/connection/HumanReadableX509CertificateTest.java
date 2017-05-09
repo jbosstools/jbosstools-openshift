@@ -20,6 +20,10 @@ import static org.jboss.tools.openshift.common.core.connection.HumanReadableX509
 import static org.jboss.tools.openshift.test.util.SSLCertificateMocks.CERTIFICATE_REDHAT_COM;
 
 import java.security.cert.CertificateException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.jboss.tools.openshift.common.core.connection.HumanReadableX509Certificate;
 import org.jboss.tools.openshift.internal.ui.utils.SSLCertificateUtils;
@@ -33,6 +37,8 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class HumanReadableX509CertificateTest {
+
+	private static final String DATE_FORMAT = "E, d MMM yyyy HH:mm:ss z";
 
 	private HumanReadableX509Certificate certificate;
 
@@ -96,15 +102,26 @@ public class HumanReadableX509CertificateTest {
 	}
 
 	@Test
-	public void shouldReportValidity() throws CertificateException {
+	public void shouldReportValidity() throws CertificateException, ParseException {
 		// given
+		SimpleDateFormat dateParser = new SimpleDateFormat(DATE_FORMAT);
+		Calendar expectedIssuedOn = getCalendar(dateParser.parse("Sat, 5 Sep 2015 01:00:00 CET"));
+		Calendar expectedExpiresOn = getCalendar(dateParser.parse("Sun, 3 Sep 2017 00:59:59 CET"));
 		// when
 		String validity = certificate.getValidity();
 		// then
-		assertThat(getValue(LABEL_VALIDITY_ISSUED_ON, validity)).isEqualTo("Sat, 5 Sep 2015 02:00:00");
-		assertThat(getValue(LABEL_VALIDITY_EXPIRES_ON, validity)).isEqualTo("Sun, 3 Sep 2017 01:59:59");
+		Calendar issuedOn = getCalendar(dateParser.parse(getValue(LABEL_VALIDITY_ISSUED_ON, validity)));
+		assertThat(issuedOn).isEqualTo(expectedIssuedOn);
+		Calendar expiresOn = getCalendar(dateParser.parse(getValue(LABEL_VALIDITY_EXPIRES_ON, validity)));
+		assertThat(expiresOn).isEqualTo(expectedExpiresOn);
 	}
 
+	private Calendar getCalendar(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		return calendar;
+	}
+	
 	private String getValue(String identifier, String string) {
 		assertThat(string).isNotEmpty();
 
