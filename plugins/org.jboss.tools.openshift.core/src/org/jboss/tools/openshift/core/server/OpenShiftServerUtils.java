@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat Inc..
+ * Copyright (c) 2015-2017 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,7 @@ import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
+import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
@@ -512,11 +513,19 @@ public class OpenShiftServerUtils {
 	                            + "there might be no labels on your pods pointing to the wanted deployment config.", 
 	                    server.getName())));
 	        }
-	        return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), dcName);
+	        try {
+                return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), dcName);
+            } catch (NotFoundException e) {
+                return null;
+            }
 		} else if (resource instanceof IReplicationController) {
 		    String deploymentConfigName = ResourceUtils.getDeploymentConfigName((IReplicationController) resource);
 		    if (deploymentConfigName != null) {
-		        return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), deploymentConfigName);
+		        try {
+                    return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), deploymentConfigName);
+                } catch (NotFoundException e) {
+                    return (IReplicationController) resource;
+                }
 		    } else {
 		        return (IReplicationController) resource;
 		    }
