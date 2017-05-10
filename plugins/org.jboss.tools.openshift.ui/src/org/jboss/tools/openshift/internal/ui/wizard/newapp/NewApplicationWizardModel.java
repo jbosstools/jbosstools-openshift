@@ -271,7 +271,7 @@ public class NewApplicationWizardModel
 
 	@Override
 	public void setLocalAppSourceFileName(String filename) {
-		update(true, this.project, this.projectItems, this.serverAppSource, filename, this.appSourceStatus);
+		update(true, this.project, this.projectItems, this.serverAppSource, filename, Status.OK_STATUS);
 	}
 
 	@Override
@@ -296,7 +296,8 @@ public class NewApplicationWizardModel
                 updateSelectedAppSource(useLocalAppSource, serverAppSource, source, localAppSourceFilename);
             }
         } catch (OpenShiftException e) {
-            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, e.getLocalizedMessage(), e);
+            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, 
+            		NLS.bind("Could not load template from {0}: {1}", localAppSourceFilename, e.getLocalizedMessage()), e);
         } catch (NotATemplateException e) {
             status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, 
             		NLS.bind("{0} is not a template: {1}", localAppSourceFilename, e.getLocalizedMessage()));

@@ -165,9 +165,6 @@ public class NewApplicationWizard
 
 			@Override
 			public IWizardPage getNextPage() {
-				if(model.getSelectedAppSource() == null) {
-					return null;
-				}
 				if(isTemplateFlow()){
 					return getPage(TemplateParametersPage.PAGE_NAME);
 				}

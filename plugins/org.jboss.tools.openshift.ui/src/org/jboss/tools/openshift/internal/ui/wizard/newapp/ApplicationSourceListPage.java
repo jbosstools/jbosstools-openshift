@@ -43,6 +43,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -118,8 +119,7 @@ import com.openshift.restclient.model.template.ITemplate;
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationSourceListPageModel> 
-										implements IValueChangeListener<Object> {
+public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationSourceListPageModel> { 
 
 	private static final int LOCAL_TEMPLATE_TAB_INDEX = 1;
 	public static final String PAGE_NAME = "appSourceList";
@@ -177,17 +177,6 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 				createServerTemplateControls(tabContainer, tabFolderTraverseListener, useLocalTemplateObservable, dbc);
 		IObservableValue localTemplateFilename = 
 				createLocalTemplateControls(tabContainer, tabFolderTraverseListener, useLocalTemplateObservable, dbc);
-		/*
-		 * listen for change on local template file name, server app and use local flag to trigger
-		 * template loading. Also add a status validation provider bound to the app status of the model
-		 * to enable/disable page buttons based on the status
-		 */
-		BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_LOCAL_APP_SOURCE_FILENAME).observe(model)
-				.addValueChangeListener(this);
-		BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SERVER_APP_SOURCE).observe(model)
-				.addValueChangeListener(this);
-		BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_USE_LOCAL_APP_SOURCE).observe(model)
-				.addValueChangeListener(this);
         dbc.addValidationStatusProvider(new MultiValidator() {
             @Override
             protected IStatus validate() {
@@ -289,7 +278,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	private IObservableValue createLocalTemplateControls(TabFolder tabContainer, TabFolderTraverseListener tabFolderTraverseListener, IObservableValue useLocalTemplate, DataBindingContext dbc) {
 
 		TabItem localTemplatesTab = new TabItem(tabContainer, SWT.NONE);
-		localTemplatesTab.setText("Local template");
+		localTemplatesTab.setText("Custom template");
 
 		Composite parent = new Composite(tabContainer, SWT.NONE);
 		GridLayoutFactory.fillDefaults()
@@ -805,33 +794,36 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		UIUtils.setVisibleAndExclude(showLink, gitLabel);
 	}
 
-    @Override
-    public void handleValueChange(ValueChangeEvent<? extends Object> event) {
-        if (model.isUseLocalAppSource()) {
-            if (StringUtils.isNotBlank(model.getLocalAppSourceFileName())) {
-                Job job = new Job("Loading application source") {
-                    @Override
-                    protected IStatus run(IProgressMonitor monitor) {
-                        model.loadAppSource(monitor);
-                        return Status.OK_STATUS;
-                    }
-                };
-                try {
-                    WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
-                } catch (InvocationTargetException | InterruptedException e) {
-                    OpenShiftUIActivator.getDefault().getLogger().logError(e);
-                }
-            } else {
-                model.resetLocalAppSource();
-            }
-        }
-    }
-
+	@Override
+	protected void onPageWillGetDeactivated(Direction progress, PageChangingEvent event, DataBindingContext dbc) {
+		if (model.isUseLocalAppSource()) {
+			String filename = model.getLocalAppSourceFileName();
+			if (StringUtils.isNotBlank(filename)) {
+				Job job = new Job(NLS.bind("Loading application source", filename)) {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						model.loadAppSource(monitor);
+						return Status.OK_STATUS;
+					}
+				};
+				try {
+					WizardUtils.runInWizard(job, getContainer(), getDatabindingContext());
+					event.doit = model.getAppSourceStatus().isOK();
+				} catch (InvocationTargetException | InterruptedException e) {
+					OpenShiftUIActivator.getDefault().getLogger().logError(e);
+					event.doit = false;
+				}
+			} else {
+				model.resetLocalAppSource();
+				event.doit = false;
+			}
+		}
+	}
+	
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
 		ParametrizableWizardPageSupport.create(
 				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
 				dbc);
 	}
-
 }
