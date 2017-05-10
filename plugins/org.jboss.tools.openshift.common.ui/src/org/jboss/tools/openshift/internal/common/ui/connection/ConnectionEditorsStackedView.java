@@ -28,7 +28,7 @@ public class ConnectionEditorsStackedView extends AbstractStackedDetailViews {
 
 	private Collection<IConnectionEditor> connectionEditors;
 
-	ConnectionEditorsStackedView(IObservableValue detailViewModel, ConnectionWizardPage wizardPage, Composite parent, DataBindingContext dbc) {
+	ConnectionEditorsStackedView(IObservableValue<?> detailViewModel, ConnectionWizardPage wizardPage, Composite parent, DataBindingContext dbc) {
 		super(detailViewModel, wizardPage, parent, dbc);
 		this.connectionEditors = getConnectionEditors();
 	}

@@ -12,8 +12,6 @@ package org.jboss.tools.openshift.core.connection;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.tools.foundation.core.properties.IPropertiesProvider;
-import org.jboss.tools.foundation.core.properties.PropertiesHelper;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
 import org.jboss.tools.openshift.core.LazyCredentialsPrompter;
@@ -30,6 +28,7 @@ import com.openshift.restclient.OpenShiftException;
  */
 public class ConnectionFactory implements IConnectionFactory {
 
+	private static final String SIGNUP_URL = "https://manage.openshift.com/openshiftio";
 	public static final String OPENSHIFT_USERDOC = "openshift.userdoc.url"; //$NON-NLS-1$
 
 	public ConnectionFactory() {
@@ -81,13 +80,15 @@ public class ConnectionFactory implements IConnectionFactory {
 
 	@Override
 	public String getUserDocUrl() {
-		// use commandline override -Dopenshift.userdoc.url
-		String userdoc = System.getProperty(OPENSHIFT_USERDOC, null);
-		if (userdoc == null) {
-			IPropertiesProvider pp = PropertiesHelper.getPropertiesProvider();
-			// fall back to hard-coded default, if not found in ide-config.properties file
-			userdoc = pp.getValue(OPENSHIFT_USERDOC, "http://tools.jboss.org/documentation/howto/openshift3_getting_started.html"); //$NON-NLS-1$
-		}
-		return userdoc;
+		return getSignupUrl();
+	}
+
+	private String getSignupUrl() {
+		return SIGNUP_URL;
+	}	
+
+	@Override
+	public String getUserDocText() {
+		return "Want to try OpenShift 3 online? You can sign up for an account <a>here</a>";
 	}
 }

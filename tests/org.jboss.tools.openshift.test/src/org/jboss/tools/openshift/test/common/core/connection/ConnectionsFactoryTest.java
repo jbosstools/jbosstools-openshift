@@ -160,7 +160,12 @@ public class ConnectionsFactoryTest {
 			public String getUserDocUrl() {
 				return null;
 			}
-		};
+
+			@Override
+			public String getUserDocText() {
+				return null;
+			}
+};
 	}
 
 	private static String createConnectionFactoryId(Class<? extends IConnection> clazz) {
