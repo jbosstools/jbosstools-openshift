@@ -453,37 +453,31 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	}
 
 	private void createResourceControls(Composite parent, DataBindingContext dbc) {
-		Label resourceLabel = new Label(parent, SWT.NONE);
-		resourceLabel.setText("Resource:");
+		Label kindLabel = new Label(parent, SWT.None);
 		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER)
-				.applyTo(resourceLabel);
-
-        Text kindText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-        kindText.setText("Kind");
-        GridDataFactory.fillDefaults()
-        .align(SWT.FILL, SWT.CENTER)
-        .grab(true, false)
-                .applyTo(kindText);
-        ValueBindingBuilder
-        .bind(WidgetProperties.text(SWT.Modify).observe(kindText))
-        .to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_RESOURCE).observe(model))
-        .converting(new Converter(IResource.class, String.class) {
-            
-            @Override
-            public Object convert(Object fromObject) {
-                if (!(fromObject instanceof IResource)) {
-                    return null;
-                };
-                return ((IResource) fromObject).getKind();
-            }
-        })
-        .in(dbc);
-
-        Text resourceText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults()
-			//.span(2, 1)
 			.align(SWT.FILL, SWT.CENTER)
+			.grab(true, false)
+			.applyTo(kindLabel);
+		ValueBindingBuilder
+			.bind(WidgetProperties.text().observe(kindLabel))
+			.notUpdatingParticipant()
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_RESOURCE).observe(model))
+			.converting(new Converter(IResource.class, String.class) {
+
+				@Override
+				public Object convert(Object fromObject) {
+					if (!(fromObject instanceof IResource)) {
+						return "Resource:";
+					}
+					return ((IResource) fromObject).getKind() + ":";
+				}
+			})
+			.in(dbc);
+
+		Text resourceText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
+        GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.span(2, 1)
 			.grab(true, false)
 			.applyTo(resourceText);
 		ValueBindingBuilder
@@ -494,9 +488,10 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				@Override
 				public Object convert(Object fromObject) {
 					if (!(fromObject instanceof IResource)) {
-						return null;
+						return "<not found>";
 					};
-					return ((IResource) fromObject).getName();
+					IResource resource = (IResource) fromObject;
+					return resource.getNamespace() + "/" + resource.getName();
 				}
 			})
 			.in(dbc);
@@ -608,8 +603,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				.runWhenDone(new DisableAllWidgetsJob(false, container, false, busyCursor))
 				.schedule();
 	}
-	
-
 
 	//Temporal fix until superclass is fixed. Then just remove this class.
 	private class DisableAllWidgetsJob extends org.jboss.tools.foundation.ui.jobs.DisableAllWidgetsJob {
