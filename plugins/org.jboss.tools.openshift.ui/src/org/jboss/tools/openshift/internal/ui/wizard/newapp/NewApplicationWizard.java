@@ -147,7 +147,9 @@ public class NewApplicationWizard
 			public boolean isPageComplete() {
 				return isTemplateFlow() ? 
 						//force visiting parameters page
-						getContainer() != null && !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage) && super.isPageComplete()  
+						getContainer() != null 
+						&& !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage) 
+						&& super.isPageComplete()  
 						: true;
 			}
 
@@ -163,9 +165,6 @@ public class NewApplicationWizard
 
 			@Override
 			public IWizardPage getNextPage() {
-				if(model.getSelectedAppSource() == null) {
-					return null;
-				}
 				if(isTemplateFlow()){
 					return getPage(TemplateParametersPage.PAGE_NAME);
 				}
