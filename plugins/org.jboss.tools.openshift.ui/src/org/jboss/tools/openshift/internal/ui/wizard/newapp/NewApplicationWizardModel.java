@@ -76,16 +76,20 @@ public class NewApplicationWizardModel
 	private org.eclipse.core.resources.IProject eclipseProject;
 	private Comparator<ObservableTreeItem> comparator;
 	
-	private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems, IApplicationSource appSource, String localAppSourceFilename, IStatus appSourceStatus) {
+	private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems, 
+			IApplicationSource appSource, String localAppSourceFilename, IStatus appSourceStatus) {
 		updateProjectItems(projectItems);
-		firePropertyChange(PROPERTY_PROJECT, this.project, this.project = selectedProject = getProjectOrDefault(selectedProject, projectItems));
-		firePropertyChange(PROPERTY_APP_SOURCES, this.projectTemplates, this.projectTemplates = getProjectTemplates(selectedProject, projectItems) );
+		firePropertyChange(PROPERTY_PROJECT, this.project, 
+				this.project = selectedProject = getProjectOrDefault(selectedProject, projectItems));
+		firePropertyChange(PROPERTY_APP_SOURCES, this.projectTemplates, 
+				this.projectTemplates = getProjectTemplates(selectedProject, projectItems));
 		updateAppSourceStatus(appSourceStatus);
 		firePropertyChange(PROPERTY_USE_LOCAL_APP_SOURCE, this.useLocalAppSource, this.useLocalAppSource = useLocalAppSource);
 		updateSelectedAppSource(useLocalAppSource, appSource, localAppSource, localAppSourceFilename);
 	}
 
-	private void updateSelectedAppSource(boolean useLocalAppSource, IApplicationSource serverAppSource, IApplicationSource localAppSource, String localAppSourceFilename) {
+	private void updateSelectedAppSource(boolean useLocalAppSource, IApplicationSource serverAppSource, 
+			IApplicationSource localAppSource, String localAppSourceFilename) {
 		IApplicationSource source;
 		if (useLocalAppSource) {
 			source = this.localAppSource = localAppSource;
@@ -152,7 +156,6 @@ public class NewApplicationWizardModel
 		}
 		throw new OpenShiftException("Creating applications from local files is only allowed using a template");
 	}
-	
 	
 	private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject, List<ObservableTreeItem> allProjects) {
 		if (allProjects == null) {
@@ -241,7 +244,6 @@ public class NewApplicationWizardModel
 		List<ObservableTreeItem> projects = connectionItem.getChildren();
 		setProjectItems(projects);
 	}
-
 
 	@Override
 	public void setUseLocalAppSource(boolean useLocalTemplate) {
@@ -342,7 +344,8 @@ public class NewApplicationWizardModel
 	}
 	
 	protected void setProjectItems(List<ObservableTreeItem> projects) {
-		update(useLocalAppSource, findProject(this.project, projects), projects, serverAppSource, localAppSourceFilename, this.appSourceStatus);
+		update(useLocalAppSource, findProject(this.project, projects), projects, serverAppSource, 
+				localAppSourceFilename, this.appSourceStatus);
 	}
 
 	private IProject findProject(final IProject project, List<ObservableTreeItem> projects) {

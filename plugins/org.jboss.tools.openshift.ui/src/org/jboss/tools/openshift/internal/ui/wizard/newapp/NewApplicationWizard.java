@@ -147,7 +147,9 @@ public class NewApplicationWizard
 			public boolean isPageComplete() {
 				return isTemplateFlow() ? 
 						//force visiting parameters page
-						getContainer() != null && !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage) && super.isPageComplete()  
+						getContainer() != null 
+						&& !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage) 
+						&& super.isPageComplete()  
 						: true;
 			}
 
