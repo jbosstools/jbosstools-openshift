@@ -16,6 +16,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAuthenticationProvider;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
@@ -27,7 +28,7 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 
 	protected ConnectionWizardPage wizardPage;
 	protected ConnectionWizardPageModel pageModel;
-	protected IObservableValue selectedConnection;
+	protected IObservableValue<? extends IConnection> selectedConnection;
 	protected IValueChangeListener changeListener;
 	protected IConnectionAuthenticationProvider connectionAuthenticationProvider;
 	protected boolean visible;

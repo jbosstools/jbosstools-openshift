@@ -302,15 +302,14 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		if (signupUrlExists) {
 			IConnectionFactory factory = pageModel.getConnectionFactory();
 			if (factory != null) {
-				StyledTextUtils.emulateLinkWidget(NLS.bind("New to OpenShift {0}? Explore the <a>getting started documentation</a>.", factory.getName()), userdocLink);
+				StyledTextUtils.emulateLinkWidget(factory.getUserDocText(), userdocLink);
 			}
 		}
 		UIUtils.setVisibleAndExclude(signupUrlExists, userdocLink);
 	}
 
-	private FocusAdapter onServerFocusLost(final IObservableValue serverUrlObservable) {
+	private FocusAdapter onServerFocusLost(final IObservableValue<String> serverUrlObservable) {
 		return new FocusAdapter() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void focusLost(FocusEvent e) {
 				String value = (String) serverUrlObservable.getValue();
@@ -333,7 +332,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		};
 	}
 
-	protected void onUserdocLinkClicked(final IObservableValue userdocUrlObservable) {
+	protected void onUserdocLinkClicked(final IObservableValue<String> userdocUrlObservable) {
 		String userdocUrl = (String) userdocUrlObservable.getValue();
 		if (StringUtils.isEmpty(userdocUrl)) {
 			return;
