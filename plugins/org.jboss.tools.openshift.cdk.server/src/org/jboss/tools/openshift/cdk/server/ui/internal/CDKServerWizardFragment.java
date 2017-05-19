@@ -220,7 +220,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 	protected String findError() {
 
 		if( credentials.getDomain() == null || credentials.getUser() == null) {
-			return "The Container Development Environment Server Adapter requries Red Hat Access credentials.";
+			return "The Container Development Environment Server Adapter requires Red Hat Access credentials.";
 		}
 		
 		String retString = null;
