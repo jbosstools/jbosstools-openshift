@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.ui;
+package org.jboss.tools.cdk.reddeer.server.ui;
 
 import static org.junit.Assert.fail;
 
@@ -35,12 +35,21 @@ import org.jboss.tools.cdk.reddeer.condition.ServerHasState;
  */
 public class CDEServer extends Server {
 	
+	private static final String SSL_DIALOG_NAME = "Untrusted SSL Certificate";
+	
 	private static Logger log = Logger.getLogger(CDEServer.class);
 	
 	private boolean certificateAccepted = false;
 	
+	protected boolean cdk3 = false;
+	
 	public CDEServer(TreeItem item, ServersView view) {
 		super(item, view);
+	}
+	
+	public CDEServer(TreeItem item, ServersView view, boolean cdk3) {
+		super(item, view);
+		this.cdk3 = cdk3;
 	}
 	
 	public void setCertificateAccepted(boolean accepted) {
@@ -57,8 +66,7 @@ public class CDEServer extends Server {
 		log.debug("Operate server's state from: + '" + actualState + "' to '" + menuItem + "'");
 		select();
 		new ContextMenu(menuItem).select();
-		new WaitWhile(new ServerHasState(this, actualState), TimePeriod.LONG);
-		new WaitUntil(new JobIsRunning(), TimePeriod.NORMAL);
+		new WaitWhile(new ServerHasState(this, actualState), TimePeriod.NORMAL);
 		if ((actualState == ServerState.STOPPING || actualState == ServerState.STOPPED) && !certificateAccepted) {
 			confirmSSLCertificateDialog();
 		}
@@ -74,11 +82,11 @@ public class CDEServer extends Server {
 	 */
 	private void confirmSSLCertificateDialog() {
 		try {
-			new WaitUntil(new ShellWithTextIsAvailable("Untrusted SSL Certificate"), TimePeriod.getCustom(300));
-			new DefaultShell("Untrusted SSL Certificate");
+			new WaitUntil(new ShellWithTextIsAvailable(SSL_DIALOG_NAME), this.cdk3 ? TimePeriod.getCustom(600) : TimePeriod.getCustom(300));
+			new DefaultShell(SSL_DIALOG_NAME);
 			new PushButton("Yes").click();
 			log.info("SSL Certificate Dialog appeared during " + this.getLabel().getState().toString());
-			new WaitWhile(new ShellWithTextIsAvailable("Untrusted SSL Certificate"));
+			new WaitWhile(new ShellWithTextIsAvailable(SSL_DIALOG_NAME));
 			setCertificateAccepted(true);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("WaitTimeoutExpiredException occured when handling Certificate dialog. "

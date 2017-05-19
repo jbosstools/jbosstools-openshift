@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.ui.wizard;
+package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
 import org.jboss.reddeer.swt.impl.combo.LabeledCombo;
 import org.jboss.reddeer.swt.impl.shell.DefaultShell;
@@ -21,7 +21,7 @@ public class NewCDK3ServerContainerWizardPage extends NewServerContainerWizardPa
 		new LabeledText("Minishift Binary: ").setText(binary);
 	}
 	
-	public void setHypevisor(final String text) {
+	public void setHypervisor(final String text) {
 		new DefaultShell(WIZARD_NAME);
 		new LabeledCombo("Hypervisor:").setSelection(text);
 	}

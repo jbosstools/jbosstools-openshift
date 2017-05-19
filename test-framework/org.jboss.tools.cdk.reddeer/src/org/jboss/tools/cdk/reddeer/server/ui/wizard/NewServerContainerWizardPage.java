@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.ui.wizard;
+package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
 import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.jboss.reddeer.common.logging.Logger;
@@ -20,17 +20,20 @@ import org.jboss.reddeer.core.exception.CoreLayerException;
 import org.jboss.reddeer.swt.api.Button;
 import org.jboss.reddeer.swt.impl.button.OkButton;
 import org.jboss.reddeer.swt.impl.button.PushButton;
+import org.jboss.reddeer.swt.impl.combo.LabeledCombo;
 import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
 
 public class NewServerContainerWizardPage {
+	
+	private static final String SECURE_STORAGE = "Secure Storage Password";
 
 	protected static final String WIZARD_NAME = "New Server";
 	
 	private static Logger log = Logger.getLogger(NewServerContainerWizardPage.class);
 	
 	public String getDomain() {
-		return new LabeledText("Domain: ").getText();
+		new DefaultShell(WIZARD_NAME);
+		return new LabeledCombo("Domain: ").getSelection();
 	}
 	
 	public Button getAddButton() {
@@ -39,15 +42,16 @@ public class NewServerContainerWizardPage {
 	
 	private static void disposeSecureStoragePassword() {
 		try {
-			new WaitUntil(new ShellWithTextIsAvailable("Secure Storage Password"), TimePeriod.NORMAL, true);
-			new DefaultShell("Secure Storage Password").close();
-			new WaitWhile(new ShellWithTextIsAvailable("Secure Storage Password"));
+			new WaitUntil(new ShellWithTextIsAvailable(SECURE_STORAGE), TimePeriod.NORMAL, true);
+			new DefaultShell(SECURE_STORAGE).close();
+			new WaitWhile(new ShellWithTextIsAvailable(SECURE_STORAGE));
 		} catch (WaitTimeoutExpiredException exc) {
 			log.info("WaitTimeoutExpiredException occurred while waiting for Secure Storage Password dialog");
 		}
 	}
 	
 	public void setCredentials(String username, String password) {
+		log.info("Setting Red Hat Access credentials");
 		getAddButton().click();
 		CredentialsWizardPage credentialsPage = new CredentialsWizardPage();
 		credentialsPage.setUsername(username);
@@ -56,8 +60,18 @@ public class NewServerContainerWizardPage {
 		if (ok.isEnabled()) {
 			ok.click();
 		} else {
-			throw new CoreLayerException("Setting credentials was not successful, "
-					+ "OK button is not enabled");
+			String text = credentialsPage.getDescriptionText().getText();
+			if (text.length() > 0) {
+				log.info("Adding new credential failed to add new user " + username);
+				log.info("There is an error while setting Red Hat Credentials: \r\n" + text);
+			}
+			if (text.contains("already exists for domain access.redhat.com")) {
+				credentialsPage.cancelAddingUser();
+				return;
+			}
+			throw new CoreLayerException("Setting the credentials was not successful, "
+					+ "OK button is not enabled, error: \n\r" +
+					text);	
 		}
 		disposeSecureStoragePassword();
 	}
