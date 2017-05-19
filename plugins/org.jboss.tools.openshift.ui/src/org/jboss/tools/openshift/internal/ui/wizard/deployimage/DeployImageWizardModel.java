@@ -27,7 +27,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
-import org.eclipse.linuxtools.docker.core.IDockerConnectionManagerListener2;
+import org.eclipse.linuxtools.docker.core.IDockerConnectionManagerListener;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -55,7 +55,7 @@ import com.openshift.restclient.model.IServicePort;
  */
 public class DeployImageWizardModel 
 		extends ResourceLabelsPageModel 
-		implements IDeployImageParameters, IDockerConnectionManagerListener2, PropertyChangeListener {
+		implements IDeployImageParameters, IDockerConnectionManagerListener, PropertyChangeListener {
 
 	private static final int DEFAULT_REPLICA_COUNT = 1;
 
@@ -662,10 +662,7 @@ public class DeployImageWizardModel
 	public Map<String, String> getImageEnvVars() {
 		return envModel.getImageEnvVars();
 	}
-	
-	@Override
-    public void changeEvent(int event) {
-    }
+
     @Override
     public void changeEvent(IDockerConnection connection, int event) {
         if ((event == ADD_EVENT) 
