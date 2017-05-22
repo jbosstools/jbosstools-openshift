@@ -30,7 +30,8 @@ import com.openshift.restclient.model.IProject;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ UIUtils.class, MessageDialog.class, WatchManager.class, ConnectionsRegistryUtil.class, NLS.class})
-@SuppressStaticInitializationFor( {"org.eclipse.swt.SWT", "org.eclipse.swt.widgets.Canvas", "org.eclipse.swt.widgets.Shell"})
+@SuppressStaticInitializationFor({ "org.eclipse.swt.SWT", "org.eclipse.swt.widgets.Canvas",
+		"org.eclipse.swt.widgets.Shell", "org.eclipse.swt.widgets.Control" })
 public class DeleteResourceHandlerTest {
 
 	@Test
