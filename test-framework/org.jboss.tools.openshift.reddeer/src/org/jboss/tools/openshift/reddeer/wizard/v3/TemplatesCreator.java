@@ -214,7 +214,7 @@ public class TemplatesCreator {
 	}
 
 	private void selectLocalTemplate(final String templateLocalPath) {
-		new DefaultTabItem(OpenShiftLabel.TextLabels.LOCAL_TEMPLATE).activate();
+		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
 		
 		new WaitWhile(new TreeIsAvailable());
 		

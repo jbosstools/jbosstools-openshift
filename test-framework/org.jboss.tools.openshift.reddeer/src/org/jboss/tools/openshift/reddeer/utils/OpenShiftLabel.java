@@ -302,7 +302,7 @@ public class OpenShiftLabel {
 		public static final String EMBEDDED_CARTRIDGE_URL = "Cartridge URL:";
 		
 		// Application related
-		public static final String LOCAL_TEMPLATE = "Local template";
+		public static final String CUSTOM_TEMPLATE = "Custom template";
 		public static final String DESTINATION = "Destination:";
 		public static final String SERVER_TEMPLATE = "Server application source";
 		public static final String TAIL_OPTIONS = "Tail options:";	
