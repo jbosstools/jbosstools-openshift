@@ -456,7 +456,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		Label kindLabel = new Label(parent, SWT.None);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
 			.applyTo(kindLabel);
 		ValueBindingBuilder
 			.bind(WidgetProperties.text().observe(kindLabel))
