@@ -19,14 +19,22 @@ import java.util.Properties;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -38,6 +46,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CommandTimeoutException;
+import org.jboss.tools.openshift.cdk.server.ui.internal.AbstractLocationSection.SetLocationPropertyCommand;
 
 public class MinishiftLocationSection extends AbstractLocationSection {
 
@@ -63,6 +72,7 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 	protected void fillUI(FormToolkit toolkit, Composite composite) {
 		createHypervisorWidgets(toolkit, composite);
 		createLocationWidgets(toolkit, composite);
+		createMinishiftHomeWidgets(toolkit, composite);
 	}
 
 	protected void createHypervisorWidgets(FormToolkit toolkit, Composite composite) {
@@ -70,6 +80,25 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		hypervisorCombo = new Combo(composite,  SWT.READ_ONLY);
 		hypervisorCombo.setLayoutData(GridDataFactory.defaultsFor(hypervisorCombo).span(4, 1).create());
 		hypervisorCombo.setItems(CDK3Server.getHypervisors());
+	}
+	
+	Text msHomeText;
+	Button msHomeBrowse;
+	ControlDecoration msHomeDecor;
+	SelectionListener msHomeSelListener;
+	ModifyListener msHomeModListener;
+	protected void createMinishiftHomeWidgets(FormToolkit toolkit, Composite composite) {
+		Label l = toolkit.createLabel(composite, "Minishift Home:");
+		msHomeText = toolkit.createText(composite, "", SWT.SINGLE | SWT.BORDER);
+		msHomeBrowse = toolkit.createButton(composite, "Browse...", SWT.PUSH);
+		
+		msHomeText.setLayoutData(GridDataFactory.defaultsFor(msHomeText).span(3,1).minSize(150, SWT.DEFAULT).create());
+		
+		msHomeDecor = new ControlDecoration(msHomeText, SWT.TOP|SWT.LEFT);
+		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry .DEC_ERROR);
+		Image img = fieldDecoration.getImage();
+		msHomeDecor.setImage(img);
+		msHomeDecor.hide(); // hiding it initially
 	}
 	
 	@Override
@@ -81,7 +110,12 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		if( ind != -1 ) {
 			hypervisorCombo.select(ind);
 		}
+		String defMSHome = new Path(System.getProperty("user.home")).append(".minishift").toOSString();
+		String msHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, defMSHome);
+		msHomeText.setText(msHome);
 	}
+	
+	
 	
 	@Override
 	protected void addListeners() {
@@ -93,6 +127,33 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 			}
 		};
 		hypervisorCombo.addSelectionListener(sl);
+		
+		msHomeSelListener = new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				browseHomeDirClicked();
+				validate();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		};
+		msHomeBrowse.addSelectionListener(msHomeSelListener);
+
+		msHomeModListener = new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				execute(new SetLocationPropertyCommand(server));
+			}
+		};
+		msHomeText.addModifyListener(msHomeModListener);
+		msHomeText.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				validate();
+			}
+		});
+
+		
 	}
 	
 	public class SetHypervisorPropertyCommand extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyComboCommand {

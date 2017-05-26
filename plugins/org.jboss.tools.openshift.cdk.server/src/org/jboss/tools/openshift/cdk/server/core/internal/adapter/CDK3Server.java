@@ -24,6 +24,7 @@ public class CDK3Server extends CDKServer {
 	
 	public static final String PROP_HYPERVISOR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.hypervisor"; 
 	public static final String MINISHIFT_FILE = "minishift.file.location";
+	public static final String MINISHIFT_HOME = "minishift.home.location";
 	
 	
 	public static final String[] getHypervisors() {

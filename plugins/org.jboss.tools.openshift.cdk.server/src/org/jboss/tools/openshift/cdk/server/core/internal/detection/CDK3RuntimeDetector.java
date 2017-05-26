@@ -41,8 +41,15 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 	
 	@Override
 	protected boolean validate(File root) {
-		return isHomeDirectory(root.getParentFile()) && 
+		boolean matchesHomeMinishift = isHomeDirectory(root.getParentFile()) && 
 				".minishift".equals(root.getName()) && super.validate(root);
+		if( matchesHomeMinishift )
+			return true;
+		
+		String envvar = System.getenv("MINISHIFT_HOME");
+		boolean matchesEnvVar = envvar != null && new File(envvar).exists() && super.validate(root);
+		return matchesEnvVar;
+		
 	}
 	
 	@Override
@@ -107,9 +114,11 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 		if( user != null ) {
 			addToCredentialsModel(CredentialService.REDHAT_ACCESS, user, password);
 		}
+		wc.setAttribute(CDK3Server.MINISHIFT_HOME, folder);
 		wc.setAttribute(CDK3Server.PROP_HYPERVISOR, getHypervisor(folder));
 		wc.setAttribute(CDKServer.PROP_USERNAME, user);
 		wc.setAttribute(CDK3Server.MINISHIFT_FILE, getMinishiftLoc(runtimeDefinition));
+		
 	}
 	
 	private String getHypervisor(String folder) {

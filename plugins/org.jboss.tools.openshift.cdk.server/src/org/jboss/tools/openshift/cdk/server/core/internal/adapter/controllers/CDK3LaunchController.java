@@ -98,6 +98,11 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
     	
     	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map)null);
     	env = (env == null ? new HashMap<>() : new HashMap<>(env)); 
+    	String msHome = s.getAttribute(CDK3Server.MINISHIFT_HOME, (String)null);
+    	if( msHome != null ) {
+    		env.put("MINISHIFT_HOME", msHome);
+    	}
+    	
     	
     	String userKey = cdkServer.getUserEnvironmentKey();
     	boolean passCredentials = cdkServer.passCredentials();
