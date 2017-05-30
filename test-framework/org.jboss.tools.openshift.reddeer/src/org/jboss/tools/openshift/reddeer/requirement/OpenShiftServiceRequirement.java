@@ -17,10 +17,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -56,6 +62,8 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 
+import com.openshift.restclient.ClientBuilder;
+import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.resources.IProjectTemplateProcessing;
@@ -85,7 +93,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		String project() default StringUtils.EMPTY;
 		/** the name of the service that should exist, triggering the use of the template (specified below) otherwise */
 		String service();
-		/** the name of a template that should be used to create the service if it doesn't exist */
+		/** the name of a template, URL of a remote template, or path to a local template file that should be used to create the service if it doesn't exist */
 		String template();
 		/** whether the resources created by the requirement should be automatically deleted after test class, default false */
 		boolean cleanup() default false;
@@ -94,6 +102,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	private RequiredService serviceSpec;
 	private Connection connection;
 	private IService service;
+	private ITemplate template;
 
 	@Override
 	public boolean canFulfill() {
@@ -110,7 +119,31 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		final String serviceName = serviceSpec.service();
 		final String templateName = serviceSpec.template();
 		
-		this.service = getOrCreateService(projectName, serviceName, templateName);
+		IResourceFactory factory = new ClientBuilder(connection.getHost()).build().getResourceFactory();
+		try {
+			// try if template comes from a URL
+			URL url = new URL(templateName);
+			template = factory.create(url.openStream());
+		} catch (MalformedURLException ex) {
+			// template is not a URL, try a path to local file instead
+			if (new File(templateName).exists()) {
+				try {	
+					template = factory.create(new FileInputStream(templateName));
+				} catch (FileNotFoundException e) {
+					throw new RedDeerException("Unable to read local template", e);
+				}
+			} else {
+				// it is not an external template
+				template = connection.getResource(
+						ResourceKind.TEMPLATE, OpenShiftResources.OPENSHIFT_PROJECT, templateName);
+			}
+		} catch (IOException ex) {
+			throw new RedDeerException("Unable to read template from URL", ex);
+		}
+		
+		
+		assertNotNull(template);
+		this.service = getOrCreateService(projectName, serviceName, template);
 
 		waitForResources(serviceName, projectName, service);
 		waitForUI(serviceName, projectName);
@@ -196,23 +229,21 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 				, TimePeriod.VERY_LONG);
 	}
 
-	private IService getOrCreateService(String projectName, String serviceName, String templateName) {
+	private IService getOrCreateService(String projectName, String serviceName, ITemplate template) {
 		IService service = OpenShift3NativeResourceUtils.safeGetResource(
 				ResourceKind.SERVICE, serviceName, projectName, connection);
 		if (service == null) {
-			service = createService(serviceName, templateName, projectName, connection);
+			service = createService(serviceName, template, projectName, connection);
 		}
 		return service;
 	}
 
-	private IService createService(String serviceName, String templateName, String projectName, Connection connection) {
+	private IService createService(String serviceName, ITemplate template, String projectName, Connection connection) {
+		
 		LOGGER.debug(NLS.bind("Creating service in project {0} on server {1} using template {2}",
-				new Object[] { projectName, connection.getHost(), templateName }));
+				new Object[] { projectName, connection.getHost(), template.getName() }));
 		IProject project = OpenShift3NativeResourceUtils.getProject(projectName, connection);
 		assertNotNull(project);
-		ITemplate template = connection.getResource(
-				ResourceKind.TEMPLATE, OpenShiftResources.OPENSHIFT_PROJECT, templateName);
-		assertNotNull(template);
 
 		CreateApplicationFromTemplateJob job = new CreateApplicationFromTemplateJob(project, template);
 		job.schedule();
@@ -235,9 +266,6 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	@Override
 	public void cleanUp() {
 		if (serviceSpec.cleanup()) {
-			final ITemplate template = connection.getResource(
-					ResourceKind.TEMPLATE, OpenShiftResources.OPENSHIFT_PROJECT, serviceSpec.template());
-
 			String projectName = TestUtils.getValueOrDefault(serviceSpec.project(), DatastoreOS3.TEST_PROJECT);
 			final IProject project = OpenShift3NativeResourceUtils.getProject(projectName, connection);
 			
