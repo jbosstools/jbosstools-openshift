@@ -15,11 +15,14 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.reddeer.common.condition.AbstractWaitCondition;
 import org.jboss.reddeer.common.logging.Logger;
 import org.jboss.reddeer.common.wait.WaitUntil;
+import org.jboss.tools.common.reddeer.utils.StackTraceUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 
+import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.project.IProjectRequest;
@@ -58,8 +61,10 @@ public class OpenShift3NativeProjectUtils {
 		IProjectRequest request = connection.getResourceFactory().stub(ResourceKind.PROJECT_REQUEST, name);
 		request.setDisplayName(StringUtils.isEmpty(displayName) ? name : displayName);
 		request.setDescription(StringUtils.isEmpty(description) ? name : description);
-
-		IProject createdProject = (IProject) connection.createResource(request);
+		
+		CreateProjectWaitCondition createProjectWaitCondition = new CreateProjectWaitCondition(connection, request);
+		new WaitUntil(createProjectWaitCondition);
+		IProject createdProject = createProjectWaitCondition.getProject();
 		
 		/**
 		 * WORKAROUND: explorer wont get notified of the the new project and
@@ -73,6 +78,36 @@ public class OpenShift3NativeProjectUtils {
 		new WaitUntil(new OpenShiftProjectExists(createdProject.getDisplayName(), connection));
 		
 		return createdProject;
+	}
+	
+	private static class CreateProjectWaitCondition extends AbstractWaitCondition{
+
+		private IProject createdProject;
+		private Connection connection;
+		private IProjectRequest request;
+		
+		
+		
+		public CreateProjectWaitCondition(Connection connection, IProjectRequest request) {
+			super();
+			this.connection = connection;
+			this.request = request;
+		}
+
+		@Override
+		public boolean test() {
+			try{
+				createdProject = (IProject) connection.createResource(request);
+				return true;
+			}catch(OpenShiftException ex){
+				LOGGER.debug(StackTraceUtils.stackTraceToString(ex));
+				return false;
+			}
+		}
+		
+		public IProject getProject(){
+			return createdProject;
+		}
 	}
 
 }
