@@ -136,7 +136,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 				StringUtils.isBlank(trigger.getNamespace()) ||  
 				connection.getResource(ResourceKind.IMAGE_STREAM, trigger.getNamespace(), trigger.getFrom().getName()) == null) {
 				return false;
-			};
+			}
 			DockerImageURI sourceImage = getSourceImage();
 			if (sourceImage.getName().equals(trigger.getFrom().getName()) &&
 					!sourceImage.getTag().equals(trigger.getFrom().getTag())) {
@@ -201,7 +201,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 	}
 	
 	protected void addToGeneratedResources(Map<String, IResource> resources, final Connection connection, final String name, final IProject project) {
-		
+		// if needed, should be overriden in the extensions; see CreateApplicationFromImageJob as an example
 	}
 	
 	protected DockerImageURI getSourceImage() {

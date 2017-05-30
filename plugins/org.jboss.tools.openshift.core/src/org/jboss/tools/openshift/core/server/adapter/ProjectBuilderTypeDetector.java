@@ -33,7 +33,7 @@ public class ProjectBuilderTypeDetector {
 		@Override
 		public String getTags(IProject project) {
 			return "";
-		};
+		}
 	};
 	private Collection<IProjectBuilderType> detectors;
 

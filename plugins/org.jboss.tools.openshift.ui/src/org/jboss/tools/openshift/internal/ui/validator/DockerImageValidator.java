@@ -78,7 +78,7 @@ public class DockerImageValidator implements IValidator {
 		IStatus status = validateImageName(name);
 		if (status.isOK()) {
 			status = additionalValidation(name);
-		};
+		}
 		return status;
 	}
 

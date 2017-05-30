@@ -33,11 +33,14 @@ import org.eclipse.core.runtime.Assert;
 public class FileUtils {
 
 	private static final String EXT_TAR_GZ = ".tar.gz";
-	private static final char SUFFIX_DELIMITER = '.';
 	private static final String NUMERIC_SUFFIX_FILENAME_PATTERN = "{0}/{1}({2}){3}";
 	private static final Pattern NUMERIC_SUFFIX_FILENAME_REGEX = Pattern.compile("(.*)\\([0-9]+\\)");
 
 	private static final byte[] buffer = new byte[1024];
+	
+	private FileUtils() {
+		// private default constructor for utils class
+	}
 
 	public static boolean canRead(String path) {
 		if (path == null) {
@@ -192,16 +195,13 @@ public class FileUtils {
 		Assert.isLegal(in != null);
 		Assert.isLegal(destination != null);
 
-		OutputStream out = null;
-		try {
-			out = new BufferedOutputStream(new FileOutputStream(destination));
+		try (OutputStream out = new BufferedOutputStream(new FileOutputStream(destination))) {
 			for (int read = -1; (read = in.read(buffer)) != -1;) {
 				out.write(buffer, 0, read);
 			}
 			out.flush();
 		} finally {
 			silentlyClose(in);
-			silentlyClose(out);
 		}
 	}
 

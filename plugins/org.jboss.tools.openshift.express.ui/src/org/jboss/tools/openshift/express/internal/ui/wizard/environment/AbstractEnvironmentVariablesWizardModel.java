@@ -44,7 +44,7 @@ public abstract class AbstractEnvironmentVariablesWizardModel extends Observable
 	}
 
 	public void setSelected(EnvironmentVariableItem variable) {
-		firePropertyChange(PROPERTY_SELECTED, selected, this.selected = variable);;
+		firePropertyChange(PROPERTY_SELECTED, selected, this.selected = variable);
 	}
 
 	public void add(EnvironmentVariableItem variable) {

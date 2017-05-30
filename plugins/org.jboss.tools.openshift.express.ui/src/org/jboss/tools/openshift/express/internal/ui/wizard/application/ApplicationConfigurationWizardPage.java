@@ -646,7 +646,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if (new OkCancelButtonWizardDialog(getShell(), cartridgesWizard).open()
 						== IDialogConstants.OK_ID) {
 					pageModel.setEmbeddedCartridges(cartridgesWizard.getCheckedCartridges());
-				};
+				}
 			}
 
 		};
@@ -698,9 +698,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					wizardModel.removeEmbeddedCartridges(additionalOperations.getRemovals());
 					wizardModel.addEmbeddedCartridges(additionalOperations.getAdditions());
 					break;
-				case RESULT_CANCEL:
-					break;
-				case RESULT_IGNORE:
+				default:
 					break;
 				}
 				return result;
@@ -737,8 +735,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						== IDialogConstants.OK_ID) {
 					ICartridge checkedCartridge = cartridgesWizard.getCheckedCartridge();
 					replaceSelectedCartridge(selectedCartridge, checkedCartridge);
-				};
-
+				}
 			}
 
 			protected void replaceSelectedCartridge(ICartridge selectedCartridge, ICartridge checkedCartridge) {

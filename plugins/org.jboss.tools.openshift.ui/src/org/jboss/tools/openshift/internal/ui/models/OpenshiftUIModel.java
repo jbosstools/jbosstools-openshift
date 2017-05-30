@@ -30,7 +30,7 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 	
 	protected static class OpenshiftUIModelSingletonHolder {
 		public static final OpenshiftUIModel INSTANCE = new OpenshiftUIModel(ConnectionsRegistrySingleton.getInstance());
-	};
+	}
 	
 	private Map<IOpenShiftConnection, ConnectionWrapper> connections = new HashMap<>();
 	private List<IElementListener> listeners = new ArrayList<IElementListener>();

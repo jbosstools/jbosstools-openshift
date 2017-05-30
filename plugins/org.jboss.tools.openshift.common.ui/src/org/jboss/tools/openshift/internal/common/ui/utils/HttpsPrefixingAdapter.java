@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.utils;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -25,9 +29,11 @@ public class HttpsPrefixingAdapter {
 	private static final String HTTP_SCHEME = "http://";
 	private static final String HTTPS_SCHEME = "https://";
 	
-	public HttpsPrefixingAdapter() {
-	}
-
+	@SuppressWarnings("rawtypes")
+	private static final Collection CHARACTERS = 
+			Arrays.asList(SWT.CR, SWT.TAB, SWT.DEL, SWT.BS, SWT.ALT, SWT.CTRL, SWT.SHIFT,
+					SWT.ESC, SWT.HOME, SWT.END, SWT.PAGE_DOWN, SWT.PAGE_UP, SWT.INSERT, SWT.CURSOR_ARROW);
+			
 	public void addTo(final Text text) {
 		text.addKeyListener(new SchemePrefixingKeyAdapter() {
 
@@ -103,20 +109,7 @@ public class HttpsPrefixingAdapter {
 
 
 		private boolean isCharacter(char character) {
-			return character != SWT.CR
-					&& character != SWT.TAB
-					&& character != SWT.DEL
-					&& character != SWT.BS
-					&& character != SWT.ALT
-					&& character != SWT.CTRL
-					&& character != SWT.SHIFT
-					&& character != SWT.ESC
-					&& character != SWT.HOME
-					&& character != SWT.END
-					&& character != SWT.PAGE_DOWN
-					&& character != SWT.PAGE_UP
-					&& character != SWT.INSERT
-					&& character != SWT.CURSOR_ARROW;
+			return !CHARACTERS.contains(character);
 		}
 
 		protected boolean matchesAllOrSubstring(String inspected, String requiredBeginning) {
@@ -127,5 +120,5 @@ public class HttpsPrefixingAdapter {
 		protected abstract void setCursorPosition(int pos);
 		protected abstract String getText();
 		protected abstract void setText(String text);
-	};
+	}
 }

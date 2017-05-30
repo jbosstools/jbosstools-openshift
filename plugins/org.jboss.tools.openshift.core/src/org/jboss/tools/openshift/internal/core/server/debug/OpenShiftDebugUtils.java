@@ -141,7 +141,7 @@ public class OpenShiftDebugUtils {
 						throw new OpenShiftCoreException(e);
 					}
 				}
-			};
+			}
 		});
 		
 		ConnectionsRegistrySingleton.getInstance().addListener(rcListenerJob.getConnectionsRegistryListener());
@@ -298,21 +298,20 @@ public class OpenShiftDebugUtils {
 		}
 	}
 	
-	public boolean isRunning(ILaunchConfiguration launchConfiguration, int localDebugPort) {
+	public boolean isRunning(ILaunchConfiguration launchConfiguration) {
 		boolean isRunning = getLaunches()
-				.filter(l -> !l.isTerminated() && launchMatches(l, launchConfiguration, localDebugPort))
+				.filter(l -> !l.isTerminated() && launchMatches(l, launchConfiguration))
 				.findFirst().isPresent();
 		return isRunning;
 	}
 	
 	
-	private boolean launchMatches(ILaunch l, ILaunchConfiguration launchConfiguration, int localDebugPort) {
+	private boolean launchMatches(ILaunch l, ILaunchConfiguration launchConfiguration) {
 		return Objects.equals(l.getLaunchConfiguration(), launchConfiguration);
 	}
 
 	public static String getRemoteDebuggerLaunchConfigurationName(IServer server) {
-		String name ="Remote debugger to "+server.getName();
-		return name;
+		return "Remote debugger to " + server.getName();
 	}
 	
 	public void terminateRemoteDebugger(IServer server) throws CoreException {

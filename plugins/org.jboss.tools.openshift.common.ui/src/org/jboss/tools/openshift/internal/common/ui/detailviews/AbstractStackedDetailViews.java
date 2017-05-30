@@ -63,7 +63,7 @@ public abstract class AbstractStackedDetailViews {
 	}
 
 	public void createControls(boolean showView) {
-		DataBindingUtils.addDisposableValueChangeListener(onDetailViewModelChanged(detailViewModel), detailViewModel, parent);
+		DataBindingUtils.addDisposableValueChangeListener(onDetailViewModelChanged(), detailViewModel, parent);
 
 		parent.setLayout(stackLayout);
 		createViewControls(parent, context, dbc);
@@ -73,7 +73,7 @@ public abstract class AbstractStackedDetailViews {
 
 	protected abstract IDetailView[] getDetailViews();
 	
-	private IValueChangeListener onDetailViewModelChanged(final IObservableValue detailViewsModel) {
+	private IValueChangeListener onDetailViewModelChanged() {
 		return new IValueChangeListener() {
 
 			@Override
@@ -105,11 +105,11 @@ public abstract class AbstractStackedDetailViews {
 		for (IDetailView detailView : getDetailViews()) {
 			detailView.createControls(parent, context, dbc);
 		}
-	};
+	}
 
 	protected IDetailView getView(IObservableValue detailViewsModel) {
 		return getViewFor(detailViewsModel, getDetailViews());
-	};
+	}
 
 	protected IDetailView getViewFor(IObservableValue detailViewsModel, IDetailView... detailViews) {
 		Object value = detailViewsModel.getValue();
@@ -215,6 +215,7 @@ public abstract class AbstractStackedDetailViews {
 
 			@Override
 			public void focusGained(FocusEvent e) {
+				//nothing to do
 			}
 
 			@Override

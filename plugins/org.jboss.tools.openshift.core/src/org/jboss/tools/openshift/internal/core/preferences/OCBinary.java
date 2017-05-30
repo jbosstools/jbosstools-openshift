@@ -47,11 +47,11 @@ public enum OCBinary {
 
 	public String getName() {
 		return defaultNameForPlatform;
-	};
+	}
 
 	public String[] getExtensions() {
 		return getLocationBinary().getPossibleSuffixes();
-	};
+	}
 
 	/**
 	 * Tries to find the binary on the system path.

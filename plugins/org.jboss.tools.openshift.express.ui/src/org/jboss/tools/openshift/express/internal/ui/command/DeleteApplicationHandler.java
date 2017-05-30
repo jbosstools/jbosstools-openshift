@@ -75,8 +75,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 
 	private List<IUser> getUsers(List<IApplication> applications) {
 		List<IUser> users = new ArrayList<>();
-		if (applications == null
-				|| applications.size() == 0) {
+		if (applications.isEmpty()) {
 			return users;
 		}
 
@@ -132,7 +131,6 @@ public class DeleteApplicationHandler extends AbstractHandler {
 					})
 					.schedule();
 		}
-		;
 		return Status.OK_STATUS;
 
 	}

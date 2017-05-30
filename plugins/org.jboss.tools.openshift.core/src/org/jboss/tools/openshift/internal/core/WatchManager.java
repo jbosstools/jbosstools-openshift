@@ -215,14 +215,13 @@ public class WatchManager {
 			restart();
 		}
 		
-		@SuppressWarnings("incomplete-switch")
 		private void restart() {
-			switch(state.get()) {
-			case STARTING:
-				Trace.debug("Returning early from restart.  Already starting for project {0} and kind {1}", project.getName(), kind);
-			case DISCONNECTED:
-				Trace.debug("Endpoint disconnected and skipping restart for project {0} and kind {1}", project.getName(), kind);
+			if (State.DISCONNECTED.equals(state.get())) {
+				Trace.debug("Endpoint disconnected and skipping restart for project {0} and kind {1}",
+						project.getName(), kind);
 				return;
+			} else if (State.STARTING.equals(state.get())) {
+				Trace.debug("Returning early from restart.  Already starting for project {0} and kind {1}", project.getName(), kind);
 			}
 			try {
 				// TODO enhance fix to only check project once

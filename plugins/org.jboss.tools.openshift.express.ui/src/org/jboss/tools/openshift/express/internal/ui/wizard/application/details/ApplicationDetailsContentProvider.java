@@ -54,7 +54,7 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 								new ApplicationPropertyGetter(application) {
 									@Override
 									protected String doGet(IApplication application) {
-										return application.getApplicationUrl().toString();
+										return application.getApplicationUrl();
 									}
 								}.safeGet(), true));
 				elements.add(new StringElement("Type",
@@ -117,7 +117,7 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 	}
 
 	private ContainerElement createCartridges(ContainerElement cartridgesContainer, IApplication application)
-			throws OpenShiftException, SocketTimeoutException {
+			throws OpenShiftException {
 		for (IEmbeddedCartridge cartridge : application.getEmbeddedCartridges()) {
 			cartridgesContainer.add(
 					new StringElement(
@@ -150,6 +150,6 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 						NLS.bind("Could not display details for OpenShift application {0}", application.getName()), e);
 				return "<could not get property>";
 			}
-		};
+		}
 	}
 }

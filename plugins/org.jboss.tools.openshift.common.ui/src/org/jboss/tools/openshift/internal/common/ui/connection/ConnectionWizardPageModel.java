@@ -242,7 +242,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			if (!factory.hasDefaultHost()) {
 				useDefaultHost = false;
 			}
-		};
+		}
 		return useDefaultHost;
 	}
 

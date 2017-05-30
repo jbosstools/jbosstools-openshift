@@ -387,7 +387,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		if (debuggerLaunchConfig == null) {
 			workingCopy = debugUtils.createRemoteDebuggerLaunchConfiguration(server);
 		} else {
-			if (debugUtils.isRunning(debuggerLaunchConfig, localDebugPort)) {
+			if (debugUtils.isRunning(debuggerLaunchConfig)) {
 				return null;
 			}
 			workingCopy = debuggerLaunchConfig.getWorkingCopy();

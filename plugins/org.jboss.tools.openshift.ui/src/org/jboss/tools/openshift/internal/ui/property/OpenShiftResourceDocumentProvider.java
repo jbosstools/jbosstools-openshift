@@ -92,10 +92,6 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 	}
 
 	@Override
-	protected synchronized void disconnected() {
-	}
-
-	@Override
 	protected IAnnotationModel createAnnotationModel(Object element) throws CoreException {
 		return null;
 	}
@@ -242,6 +238,7 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 					switch (dialog.open()) {
 					case DismissableNagDialog.ALWAYS:
 						nag.set(false);
+						break;
 					case DismissableNagDialog.YES:
 						break;
 					case DismissableNagDialog.NO:
@@ -265,18 +262,22 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 
 		@Override
 		public void elementContentAboutToBeReplaced(Object element) {
+			// No implementation necessary
 		}
 
 		@Override
 		public void elementContentReplaced(Object element) {
+			// No implementation necessary
 		}
 
 		@Override
 		public void elementDeleted(Object element) {
+			// No implementation necessary
 		}
 
 		@Override
 		public void elementMoved(Object originalElement, Object movedElement) {
+			// No implementation necessary
 		}
 
 	}

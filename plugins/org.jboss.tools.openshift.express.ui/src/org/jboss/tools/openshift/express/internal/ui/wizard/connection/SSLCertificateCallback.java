@@ -60,7 +60,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 
 		if(allowByCertificate.containsKey(certificateChain[0])) {
 			return allowByCertificate.get(certificateChain[0]);
-		};
+		}
 		
 		boolean allow = openCertificateDialog(certificateChain);
 		if (rememberDecision) {
