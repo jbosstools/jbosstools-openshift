@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CommandTimeoutException;
@@ -248,4 +249,15 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		}
 		return null;
 	}
+	
+	public IStatus[] getSaveStatus() {
+		String err = getErrorString();
+		if( err != null ) {
+			return new Status[] {
+					new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, err)
+			};
+		}
+		return new IStatus[] { Status.OK_STATUS };
+	}
+
 }
