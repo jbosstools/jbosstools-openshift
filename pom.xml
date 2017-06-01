@@ -40,9 +40,6 @@
 	<profiles>
 		<profile>
 			<id>quality</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<!-- sonar properties -->
 				<sonar.code.codeCoveragePlugin>jacoco</sonar.code.codeCoveragePlugin>
