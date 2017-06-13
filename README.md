@@ -1,3 +1,5 @@
+#DO NOT MERGE THIS COMMIT. Just for testing purposes.
+
 # The OpenShift Tools project
 
 ## Summary
