@@ -8,17 +8,23 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.ui;
+package org.jboss.tools.cdk.reddeer.server.ui;
 
 import org.jboss.reddeer.eclipse.wst.server.ui.view.Server;
 import org.jboss.reddeer.eclipse.wst.server.ui.view.ServersView;
 import org.jboss.reddeer.swt.api.TreeItem;
-import org.jboss.tools.cdk.reddeer.ui.CDEServer;
+import org.jboss.tools.cdk.reddeer.server.ui.CDEServer;
 
 public class CDEServersView extends ServersView {
 	
+	protected boolean cdk3 = false;
+	
+	public CDEServersView(boolean cdk3) {
+		this.cdk3 = cdk3;
+	}
+	
 	@Override
 	protected Server createServer(TreeItem item) {
-		return new CDEServer(item, this);
+		return new CDEServer(item, this, this.cdk3);
 	}
 }

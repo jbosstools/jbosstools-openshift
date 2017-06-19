@@ -13,6 +13,7 @@ Require-Bundle: org.junit,
 Export-Package: org.jboss.tools.cdk.reddeer.condition,
  org.jboss.tools.cdk.reddeer.preferences,
  org.jboss.tools.cdk.reddeer.requirements,
- org.jboss.tools.cdk.reddeer.ui,
- org.jboss.tools.cdk.reddeer.ui.wizard
+ org.jboss.tools.cdk.reddeer.server.ui,
+ org.jboss.tools.cdk.reddeer.server.ui.editor,
+ org.jboss.tools.cdk.reddeer.server.ui.wizard
 

@@ -23,7 +23,7 @@ public class OpenShift3SSLCertificatePreferencePage extends PreferencePage {
 	private static Logger log = Logger.getLogger(OpenShift3SSLCertificatePreferencePage.class);
 	
 	public OpenShift3SSLCertificatePreferencePage() {
-		super(new String[] {"JBoss Tools", "OpenShift 3", "SSL certificates"});
+		super("JBoss Tools", "OpenShift 3", "SSL certificates");
 	}
 	
 	public void printCertificates() {

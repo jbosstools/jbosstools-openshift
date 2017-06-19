@@ -8,12 +8,25 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.ui.wizard;
+package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
+import org.jboss.reddeer.core.exception.CoreLayerException;
+import org.jboss.reddeer.swt.api.Button;
+import org.jboss.reddeer.swt.api.Text;
+import org.jboss.reddeer.swt.impl.button.CancelButton;
 import org.jboss.reddeer.swt.impl.button.CheckBox;
+import org.jboss.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.reddeer.swt.impl.text.LabeledText;
 
 public class CredentialsWizardPage {
+	
+	public void activate() {
+		new DefaultShell("Add a Credential");
+	}
+	
+	public Text getDescriptionText() {
+		return new LabeledText("Add a Credential");
+	}
 	
 	public void setUsername(String user) {
 		new LabeledText("Username: ").setText(user);
@@ -29,5 +42,14 @@ public class CredentialsWizardPage {
 	
 	public void toggleShowPassword(boolean checked) {
 		new CheckBox("Show password").toggle(checked);
+	}
+	
+	public void cancelAddingUser() {
+		try {
+			Button cancel = new CancelButton();
+			cancel.click();
+		} catch (CoreLayerException exc) {
+			throw new CoreLayerException("Canceling setting the credentials was not successful");	
+		}
 	}
 }
