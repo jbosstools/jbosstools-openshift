@@ -69,6 +69,12 @@ public class CDKOpenshiftUtility {
 			((Connection)con).setPassword(password);
 		}
 		((Connection)con).setRememberPassword(true);
+
+		String ocLoc = env.get(ServiceManagerEnvironmentLoader.OC_LOCATION_KEY); 
+		if( ocLoc != null ) {
+			((Connection)con).setExtendedProperty(ICommonAttributes.OC_LOCATION_KEY, ocLoc);
+			((Connection)con).setExtendedProperty(ICommonAttributes.OC_OVERRIDE_KEY, true);
+		}
 		
 		updateOpenshiftConnection(server, env, con, false);
 		

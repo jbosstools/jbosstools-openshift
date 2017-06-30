@@ -24,6 +24,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
@@ -100,6 +101,14 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 		new PodLogsJob(pod, containerName).schedule();
 	}
 
+	private IConnection getConnectionFromBuild(ExecutionEvent event) {
+		IBuild build = getSelectedElement(event, IBuild.class);
+		if(build != null) {
+			return ConnectionsRegistryUtil.safeGetConnectionFor(build);
+		}
+		return null;
+	}
+	
 	private IPod getPodFromBuild(ExecutionEvent event) {
 		IBuild build = getSelectedElement(event, IBuild.class);
 		if(build != null) {
@@ -113,6 +122,11 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	protected IConnection getConnection(ExecutionEvent event) {
+		return getConnectionFromBuild(event);
 	}
 
 }

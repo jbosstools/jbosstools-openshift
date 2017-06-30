@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.MultiStatus;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
@@ -125,7 +126,7 @@ public class PortForwardingUtils {
 							protected void runOCBinary(MultiStatus multiStatus) {
 								portForwarding.forwardPorts(ports, options);
 							}
-						}.run(null);
+						}.run(ConnectionsRegistryUtil.safeGetConnectionFor(pod), null);
 						return portForwarding;
 					}
 				}, null);

@@ -36,6 +36,11 @@ public interface ICommonAttributes {
 	 */
 	static final String IMAGE_REGISTRY_URL_KEY = "org.jbosstools.openshift.core.connection.ext.registry.url";
 
+	
+	static final String OC_LOCATION_KEY = "org.jbosstools.openshift.core.connection.ext.oc.location";
+	static final String OC_OVERRIDE_KEY = "org.jbosstools.openshift.core.connection.ext.oc.override";
+	
+	
 	/**
 	 * Human readable labels for extended properties
 	 */

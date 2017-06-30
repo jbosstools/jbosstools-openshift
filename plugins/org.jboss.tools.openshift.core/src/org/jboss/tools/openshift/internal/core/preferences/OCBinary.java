@@ -12,6 +12,10 @@ package org.jboss.tools.openshift.internal.core.preferences;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.core.ICommonAttributes;
+import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
 
@@ -78,15 +82,40 @@ public enum OCBinary {
 	
 	/**
 	 * Returns the location from preferences or looks it up on the path.
+	 * This method is used to get the global workspace setting for the oc location.
+	 * However, individual connections may override this setting. 
+	 * It is advised to use getLocation(IConnection c) instead. 
+	 * 
+	 * @deprecated
+	 * @return
+	 */
+	@Deprecated
+	public String getLocation() {
+		return getWorkspaceLocation();
+	}
+	
+	/**
+	 * Get the location of the workspace preference pointing to an oc install. 
 	 * 
 	 * @return
 	 */
-	public String getLocation() {
+	public String getWorkspaceLocation() {
 		String location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
 		if (location == null || location.trim().isEmpty()) {
 			location = getSystemPathLocation();
 		}
 		return location;
+	}
+	
+	public String getLocation(IConnection connection) {
+		if( connection instanceof IOpenShiftConnection ) {
+			IOpenShiftConnection c = (IOpenShiftConnection)connection;
+			String loc = (String)c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
+			if( loc != null )
+				return loc;
+		}
+		
+		return getWorkspaceLocation();
 	}
 	
 	/**
@@ -99,6 +128,16 @@ public enum OCBinary {
 	 * @see https://github.com/openshift/origin/issues/6109
 	 */
 	public boolean isCompatibleForPublishing(IProgressMonitor monitor) {
-	    return new OCBinaryVersionValidator(getLocation()).isCompatibleForPublishing(monitor);
+	    return isCompatibleForPublishing(null, monitor);
+	}
+	
+	/**
+	 * Checks if an arbitrary oc binary is compatible for rsync publishing
+	 * @param location
+	 * @param monitor
+	 * @return
+	 */
+	public boolean isCompatibleForPublishing(IConnection connection, IProgressMonitor monitor) {
+	    return new OCBinaryVersionValidator(getLocation(connection)).isCompatibleForPublishing(monitor);
 	}
 }

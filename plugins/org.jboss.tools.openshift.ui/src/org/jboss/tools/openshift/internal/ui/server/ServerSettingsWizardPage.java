@@ -173,8 +173,10 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				"Create an OpenShift 3 Server Adapter", 
 				wizard);
 		OCBinary ocBinary = OCBinary.getInstance();
-		boolean valid = ocBinary.isCompatibleForPublishing(new NullProgressMonitor());
-		this.model = new ServerSettingsWizardPageModel(resource, route, deployProject, connection, server, getOCBinaryStatus(valid, ocBinary.getLocation()));
+		String loc = ocBinary.getLocation(connection);
+		boolean valid = ocBinary.isCompatibleForPublishing(connection, new NullProgressMonitor());
+		this.model = new ServerSettingsWizardPageModel(resource, route, deployProject, connection, server, 
+				getOCBinaryStatus(valid, loc));
 	}
 	
 	/**
@@ -415,8 +417,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
                             @Override
                             protected IStatus run(IProgressMonitor monitor) {
                                 OCBinary ocBinary = OCBinary.getInstance();
-                                boolean valid = ocBinary.isCompatibleForPublishing(monitor);
-                                ServerSettingsWizardPage.this.model.setOCBinaryStatus(getOCBinaryStatus(valid, ocBinary.getLocation()));
+                                boolean valid = ocBinary.isCompatibleForPublishing(model.getConnection(), monitor);
+                                ServerSettingsWizardPage.this.model.setOCBinaryStatus(getOCBinaryStatus(valid, 
+                                		ocBinary.getLocation(model.getConnection())));
                                 return Status.OK_STATUS;
                             }
                         }.schedule();

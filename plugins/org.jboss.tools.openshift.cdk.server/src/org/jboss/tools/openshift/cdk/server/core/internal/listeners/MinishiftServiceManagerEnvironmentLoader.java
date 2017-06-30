@@ -13,17 +13,19 @@ package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 
 public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvironmentLoader {
-
+	
 	public MinishiftServiceManagerEnvironmentLoader() {
 		super(TYPE_MINISHIFT);
 	}
@@ -45,6 +47,12 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		String dotMinishift = System.getProperty("user.home") + File.separator + ".minishift";
 		Properties dotCDK = CDKServerUtility.getDotCDK(dotMinishift, "cdk");
 		merged = merge(merged, dotCDK);
+		
+		File ocLocation = findOCLocation();
+		if( ocLocation != null ) {
+			merged.put(OC_LOCATION_KEY, ocLocation.getAbsolutePath());
+		}
+
 		try {
 			return new ServiceManagerEnvironment(merged);
 		} catch (URISyntaxException urise) {
@@ -52,7 +60,32 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 					.logError("Environment variable DOCKER_HOST is not a valid uri:  " + merged.get("DOCKER_HOST"), urise);
 			return null;
 		}
+		
+		
 	}
+	
+	private File findOCLocation() {
+		String dotMinishift = System.getProperty("user.home") + File.separator + ".minishift";
+		File root = new File(dotMinishift);
+		if( root.exists()) {
+			File cache = new File(root, "cache");
+			File oc = new File(cache, "oc");
+			if( oc.exists()) {
+				String[] names = oc.list();
+				if( names != null && names.length > 0) {
+					Arrays.sort(names);
+					String latest = names[names.length-1];
+					File latestF = new File(oc, latest);
+					String platformDep = (Platform.getOS().equals(Platform.OS_WIN32) ? "oc.exe" : "oc");
+					File ocBin = new File(latestF, platformDep);
+					if( ocBin.exists())
+						return ocBin;
+				}
+			}
+		}
+		return null;
+	}
+	
 
 	protected String getOpenshiftRegistry(IServer server) {
 		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);

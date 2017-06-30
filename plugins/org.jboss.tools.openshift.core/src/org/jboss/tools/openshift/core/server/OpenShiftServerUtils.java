@@ -408,7 +408,12 @@ public class OpenShiftServerUtils {
 	public static RSync createRSync(final IServer server) throws CoreException {
 		assertServerNotNull(server);
 
-		final String location = OCBinary.getInstance().getLocation();
+		IConnection connection = getConnection(server);
+		if( connection == null ) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					"Could not locate the OpenShift connection for server " + server.getName()));
+		}
+		final String location = OCBinary.getInstance().getLocation((Connection)connection);
 		if( location == null ) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
 					"Binary for oc-tools could not be found. Please open the OpenShift 3 Preference Page and set the location of the oc binary."));

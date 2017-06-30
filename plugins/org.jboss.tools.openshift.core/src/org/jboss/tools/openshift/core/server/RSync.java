@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerConsoleWriter;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
@@ -68,6 +69,7 @@ public class RSync {
 	}
 	
 	public void syncPodsToDirectory(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter) {
+		IConnection con = OpenShiftServerUtils.getConnection(server);
 		new OCBinaryOperation() {
 			@Override
 			protected void runOCBinary(MultiStatus multiStatus) {
@@ -86,11 +88,12 @@ public class RSync {
 					}
 				}
 			}
-		}.run(status);
+		}.run(con, status);
 	}
 
 	// Sync the directory back to all pods
 	public void syncDirectoryToPods(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter, final OpenShiftBinaryOption... options) {
+		IConnection con = OpenShiftServerUtils.getConnection(server);
 		new OCBinaryOperation() {
 			
 			@Override
@@ -105,7 +108,7 @@ public class RSync {
 					}
 				}
 			}
-		}.run(status);
+		}.run(con, status);
 	}
 	
 	private void syncPodToDirectory(IPod pod, String podPath, File destination,

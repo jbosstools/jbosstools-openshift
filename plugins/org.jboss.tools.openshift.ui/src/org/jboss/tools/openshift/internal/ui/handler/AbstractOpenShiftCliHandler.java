@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
 import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.OPEN_SHIFT_PREFERENCE_PAGE_ID;
@@ -41,9 +42,11 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 	
 	protected abstract void handleEvent(ExecutionEvent event);
 	
+	protected abstract IConnection getConnection(ExecutionEvent event);
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		String location = OCBinary.getInstance().getLocation();
+		String location = OCBinary.getInstance().getLocation(getConnection(event));
 		if(StringUtils.isBlank(location)) {
 			
 			final MessageDialog dialog = new MessageDialog(HandlerUtil.getActiveShell(event),

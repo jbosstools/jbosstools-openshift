@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.core;
 
 import org.eclipse.core.runtime.MultiStatus;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
@@ -24,11 +25,17 @@ public abstract class OCBinaryOperation {
 
 	/**
 	 * Runs the operation
+	 * 
+	 * @deprecated please use run(IConnection, MultiStatus).
 	 * @param status the status to update during the operation
 	 */
+	@Deprecated
 	public void run(final MultiStatus status) {
+		run(null, status);
+	}
+	public void run(IConnection connection, final MultiStatus status) {
 		String oldLocation = OpenShiftContext.get().get(IBinaryCapability.OPENSHIFT_BINARY_LOCATION);
-		String location = OCBinary.getInstance().getLocation();
+		String location = OCBinary.getInstance().getLocation(connection);
 		OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, location);
 		try {
 			runOCBinary(status);
