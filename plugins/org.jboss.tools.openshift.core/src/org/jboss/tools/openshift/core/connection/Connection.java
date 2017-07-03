@@ -39,6 +39,7 @@ import org.jboss.tools.openshift.internal.common.core.security.SecureStoreExcept
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
+import com.openshift.internal.restclient.DefaultClient;
 import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
@@ -616,5 +617,15 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			return false;
 		}
 		return ObjectUtils.equals(this.client, ResourceUtils.getClient(resource));
+	}
+	
+	@Override
+	public String getOpenShiftMasterVersion() {
+		return client.getOpenshiftMasterVersion();
+	}
+	
+	@Override
+	public String getKubernetesMasterVersion() {
+		return client.getKubernetesMasterVersion();
 	}
 }
