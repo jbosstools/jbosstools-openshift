@@ -188,8 +188,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to minishift up has failed."));
 		}
 
-		IProcess process = addProcessToLaunch(p, launch,s);
-		linkTerminal(p);
+		IProcess process = addProcessToLaunch(p, launch,s, false, minishiftLoc);
 		
 		IDebugEventSetListener debug = getDebugListener(new IProcess[]{process}, launch);
 		DebugPlugin.getDefault().addDebugEventListener(debug);

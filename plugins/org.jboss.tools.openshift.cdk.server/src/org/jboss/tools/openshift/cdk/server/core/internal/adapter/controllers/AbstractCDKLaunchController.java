@@ -81,18 +81,44 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 			ILaunch launch, IProgressMonitor monitor) throws CoreException;
 
 	
+	@Deprecated
 	protected IProcess addProcessToLaunch(Process p, ILaunch launch, IServer s) {
+		return addProcessToLaunch(p, launch, s, true);
+	}
+	
+	protected IProcess addProcessToLaunch(Process p, ILaunch launch, IServer s, boolean terminal) {
+		String cmdLoc = VagrantBinaryUtility.getVagrantLocation(s);
+		return addProcessToLaunch(p, launch, s, terminal, cmdLoc);
+	}
+	
+	protected IProcess addProcessToLaunch(Process p, ILaunch launch, IServer s, boolean terminal, String cmdLoc) {
 		Map<String, String> processAttributes = new HashMap<String, String>();
-		String vagrantcmdloc = VagrantBinaryUtility.getVagrantLocation(s);
-		String progName = new Path(vagrantcmdloc).lastSegment();
-		launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
+		String progName = new Path(cmdLoc).lastSegment();
+		if( terminal ) {
+			launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
+		}
 		processAttributes.put(IProcess.ATTR_PROCESS_TYPE, progName);
-		IProcess process = new RuntimeProcess(launch, p, vagrantcmdloc, processAttributes) {
-			protected IStreamsProxy createStreamsProxy() {
-				return null;
-			}
-		};
+		IProcess process = createProcess(terminal, launch, p, cmdLoc, processAttributes);
 		launch.addProcess(process);
+		
+		if( terminal ) {
+			linkTerminal(p);
+		}
+		return process;
+	}
+
+	protected IProcess createProcess(boolean terminal, ILaunch launch, Process p, String cmd,
+			Map<String, String> attr) {
+		IProcess process = null;
+		if (terminal) {
+			process = new RuntimeProcess(launch, p, cmd, attr) {
+				protected IStreamsProxy createStreamsProxy() {
+					return null;
+				}
+			};
+		} else {
+			process = new RuntimeProcess(launch, p, cmd, attr);
+		}
 		return process;
 	}
 	

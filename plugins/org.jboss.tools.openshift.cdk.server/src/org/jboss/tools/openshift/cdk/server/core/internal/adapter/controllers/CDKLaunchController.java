@@ -163,8 +163,7 @@ public class CDKLaunchController extends AbstractCDKLaunchController implements 
 					new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to vagrant up has failed."));
 		}
 
-		IProcess process = addProcessToLaunch(p, launch, s);
-		linkTerminal(p);
+		IProcess process = addProcessToLaunch(p, launch, s, true);
 		
 		IDebugEventSetListener debug = getDebugListener(new IProcess[] { process }, launch);
 		DebugPlugin.getDefault().addDebugEventListener(debug);

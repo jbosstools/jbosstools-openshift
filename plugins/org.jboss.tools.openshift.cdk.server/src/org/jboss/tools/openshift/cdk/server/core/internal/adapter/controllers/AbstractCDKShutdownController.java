@@ -20,9 +20,15 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
 import org.eclipse.tm.terminal.view.core.interfaces.ITerminalService;
 import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
@@ -95,13 +101,20 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 		}
 		
 		try {
-			shutdownViaTerminal();
+			if( useTerminal() )
+				shutdownViaTerminal();
+			else
+				shutdownViaLaunch();
 		} catch(CoreException ce) {
 			CDKCoreActivator.getDefault().getLog().log(
 					new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Error shutting down server", ce));
 			getBehavior().setServerStarted();
 		}
 	}
+	
+	protected abstract boolean useTerminal();
+	
+	protected abstract String getCommandLocation();
 	
 	private void shutdownViaTerminal() throws CoreException {
 		String args = getShutdownArgs(); 
@@ -138,6 +151,48 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 		processTerminated(getServer(), null);
 	}
 	
+
+	private void shutdownViaLaunch() throws CoreException {
+		String args = getShutdownArgs(); 
+		String cmd = getCommandLocation();
+		ILaunchConfiguration lc = getServer().getLaunchConfiguration(true, new NullProgressMonitor());
+		ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(getServer(), args, 
+				new Path(cmd).lastSegment(), lc, cmd);
+		IProcess p = null;
+		ILaunch launch = null;
+		try {
+			launch = lc2.launch("run", new NullProgressMonitor());
+			IProcess[] all = launch.getProcesses();
+			if( all.length > 0 )
+				p = all[0];
+		} catch(CoreException ce) {
+			CDKCoreActivator.pluginLog().logError(ce);
+			getBehavior().setServerStarted();
+			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ce.getMessage(), ce));
+		}
+		
+		if( p == null ) {
+			getBehavior().setServerStopped();
+			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to shutdown command has failed."));
+		}
+		final IProcess myProcess = p;
+		
+		IDebugEventSetListener listener = (new IDebugEventSetListener() {
+			public void handleDebugEvents(DebugEvent[] events) {
+				if (events != null) {
+					int size = events.length;
+					for (int i = 0; i < size; i++) {
+						if (myProcess != null && myProcess.equals(events[i].getSource()) 
+								&& events[i].getKind() == DebugEvent.TERMINATE) {
+							processTerminated(getServer(), null);
+							DebugPlugin.getDefault().removeDebugEventListener(this);
+						}
+					}
+				}
+			}
+		});
+		DebugPlugin.getDefault().addDebugEventListener(listener);
+	}
 	
 	private void linkTerminal(Process p) {
 		InputStream in = p.getInputStream();

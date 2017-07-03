@@ -54,6 +54,19 @@ public class CDKLaunchUtility {
 				s.getLaunchConfiguration(true, new NullProgressMonitor()));
 	}
 	
+	public ILaunchConfigurationWorkingCopy createExternalToolsVagrantLaunch(IServer s, String args, 
+			String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
+		String commandLoc = VagrantBinaryUtility.getVagrantLocation();
+		return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
+	}
+
+	public ILaunchConfigurationWorkingCopy createExternalToolsMinishiftLaunch(IServer s, String args, 
+			String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
+		String commandLoc = MinishiftBinaryUtility.getMinishiftLocation();
+		return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
+	}
+
+	
 	private static final String[] getUserPass(IServer server) {
 		final CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		String user = cdkServer.getUsername();
@@ -107,8 +120,21 @@ public class CDKLaunchUtility {
     	}
 	}
 	
+	@Deprecated
 	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, 
 			String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
+		String commandLoc = VagrantBinaryUtility.getVagrantLocation();
+		return setupLaunch(s, args, launchConfigName, startupConfig, commandLoc);
+	}
+	
+	@Deprecated // Bad naming here
+	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, 
+			String launchConfigName, ILaunchConfiguration startupConfig, String commandLoc) throws CoreException {
+		return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
+	}
+	
+	public ILaunchConfigurationWorkingCopy createExternalToolsLaunch(IServer s, String args, 
+			String launchConfigName, ILaunchConfiguration startupConfig, String commandLoc) throws CoreException {
 		ILaunchConfigurationWorkingCopy wc = findLaunchConfig(s, launchConfigName);
 		wc.setAttributes(startupConfig.getAttributes());
 		wc.setAttribute(ATTR_ARGS, args);
@@ -117,11 +143,10 @@ public class CDKLaunchUtility {
    		wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
    		
 
-    	String vLoc = VagrantBinaryUtility.getVagrantLocation();
-		if( vLoc != null ) {
-			wc.setAttribute(IExternalToolConstants.ATTR_LOCATION, vLoc);
-			String vagrantCmdFolder = new Path(vLoc).removeLastSegments(1).toOSString();
-			CommandLocationLookupStrategy.get().ensureOnPath(env, vagrantCmdFolder);
+		if( commandLoc != null ) {
+			wc.setAttribute(IExternalToolConstants.ATTR_LOCATION, commandLoc);
+			String cmdFolder = new Path(commandLoc).removeLastSegments(1).toOSString();
+			CommandLocationLookupStrategy.get().ensureOnPath(env, cmdFolder);
 		}
    		
 		return wc;
