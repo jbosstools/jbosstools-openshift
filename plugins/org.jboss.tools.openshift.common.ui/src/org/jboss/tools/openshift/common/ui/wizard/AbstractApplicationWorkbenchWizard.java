@@ -65,20 +65,18 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 		@Override
 		public IWizardPage getNextPage() {
 			IWizardPage page = null;
-			if (isConnected()) {
-				if (wizard != null) {
-					page = wizard.getStartingPage();
-				}
-			} else if (DataBindingUtils.isValid(getDatabindingContext())
-					&& connect()) {
-				IConnection connection = getConnection();
-				this.wizard = getWizard(connection);
-				if (wizard != null) {
-					wizard.setConnection(connection);
-					page = wizard.getStartingPage();
+			if (isConnected() && wizard != null) {
+				page = wizard.getStartingPage();
+			} else if (DataBindingUtils.isValid(getDatabindingContext())) {
+				if (connect()) {
+					IConnection connection = getConnection();
+					this.wizard = getWizard(connection);
+					if (wizard != null) {
+						wizard.setConnection(connection);
+						page = wizard.getStartingPage();
+					}
 				}
 			}
-			
 			return page;
 		}
 
