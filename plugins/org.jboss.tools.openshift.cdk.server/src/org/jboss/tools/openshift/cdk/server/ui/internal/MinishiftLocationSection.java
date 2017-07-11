@@ -250,6 +250,7 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		return null;
 	}
 	
+	@Override
 	public IStatus[] getSaveStatus() {
 		String err = getErrorString();
 		if( err != null ) {
