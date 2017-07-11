@@ -17,18 +17,26 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 
 public class AmountOfResourcesExists extends AbstractWaitCondition {
 
-	OpenShiftExplorerView explorer;
+	private static OpenShiftExplorerView explorer;
 	private OpenShiftProject project;
 	private Resource resource;
 	private int amount;
 	
 	public AmountOfResourcesExists(Resource resource, int amount) {
+		this(resource, amount, null);
+	}
+
+	public AmountOfResourcesExists(Resource resource, int amount, String projectName) {
 		explorer = new OpenShiftExplorerView();
-		project = explorer.getOpenShift3Connection().getProject();
+		if (projectName == null) {
+			this.project = explorer.getOpenShift3Connection().getProject();
+		}else {
+			this.project = explorer.getOpenShift3Connection().getProject(projectName);
+		}
 		this.resource = resource;
 		this.amount = amount;
 	}
-
+	
 	@Override
 	public boolean test() {
 		// workaround for disposed project
