@@ -28,6 +28,8 @@ public class ConnectionPropertySource implements IPropertySource {
 	
 	private static final String HOST = "host";
 	private static final String USERNAME = "username";
+	private static final String OPENSHIFT_MASTER_VERSION = "openshift-version";
+	private static final String KUBERNETES_MASTER_VERSION = "kubernetes-version";
 	private IConnection connection;
 
 	private ConnectionListener listener = new ConnectionListener();
@@ -74,6 +76,8 @@ public class ConnectionPropertySource implements IPropertySource {
 		List<IPropertyDescriptor>  descriptors = new ArrayList<>();
 		descriptors.add(new UneditablePropertyDescriptor(HOST, "Host"));
 		descriptors.add(new UneditablePropertyDescriptor(USERNAME, "User Name"));
+		descriptors.add(new UneditablePropertyDescriptor(OPENSHIFT_MASTER_VERSION, "OpenShift Master Version"));
+		descriptors.add(new UneditablePropertyDescriptor(KUBERNETES_MASTER_VERSION, "Kubernetes Master Version"));
 		if(connection instanceof IOpenShiftConnection) {
 			Set<String> set = new TreeSet<>(((IOpenShiftConnection)connection).getExtendedProperties().keySet());
 			for (String name: set) {
@@ -96,13 +100,24 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		if(HOST.equals(id)){
-			return connection.toString();
+		if (id == null) {
+			return null;
 		}
-		if(USERNAME.equals(id))
-			return connection.getUsername();
-		if(connection instanceof IOpenShiftConnection && id != null) {
-			Object result = ((IOpenShiftConnection)connection).getExtendedProperties().get(id);
+		if (HOST.equals(id)){
+			return this.connection.toString();
+		}
+		if (USERNAME.equals(id)) {
+			return this.connection.getUsername();
+		}
+		if(connection instanceof IOpenShiftConnection) {
+			IOpenShiftConnection openshiftConnection = (IOpenShiftConnection)this.connection;
+			if(OPENSHIFT_MASTER_VERSION.equals(id)) {
+				return openshiftConnection.getOpenShiftMasterVersion();
+			}
+			if(KUBERNETES_MASTER_VERSION.equals(id)) {
+				return openshiftConnection.getKubernetesMasterVersion();
+			}
+			Object result = openshiftConnection.getExtendedProperties().get(id);
 			return result == null ? "" : result.toString();
 		}
 		return null;

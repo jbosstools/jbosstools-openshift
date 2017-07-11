@@ -617,4 +617,14 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		}
 		return ObjectUtils.equals(this.client, ResourceUtils.getClient(resource));
 	}
+	
+	@Override
+	public String getOpenShiftMasterVersion() {
+		return client.getOpenshiftMasterVersion();
+	}
+	
+	@Override
+	public String getKubernetesMasterVersion() {
+		return client.getKubernetesMasterVersion();
+	}
 }

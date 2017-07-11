@@ -85,4 +85,14 @@ public interface IOpenShiftConnection extends IConnection {
 	 * @param value
 	 */
 	void setExtendedProperty(String name, Object value);
+	
+	/**
+	 * Get the server Openshift version
+	 */
+	String getOpenShiftMasterVersion();
+	
+	/**
+	 * Get the server Kubernetes version
+	 */
+	String getKubernetesMasterVersion();
 }
