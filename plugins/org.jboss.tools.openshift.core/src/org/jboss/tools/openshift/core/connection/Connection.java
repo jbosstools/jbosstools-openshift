@@ -39,7 +39,6 @@ import org.jboss.tools.openshift.internal.common.core.security.SecureStoreExcept
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
-import com.openshift.internal.restclient.DefaultClient;
 import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.IResourceFactory;
