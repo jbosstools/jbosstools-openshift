@@ -287,6 +287,19 @@ public class ResourceUtils {
     }
     
     /**
+     * Return the deployment config associated with this pod. Uses
+     * annotations to do the matching.
+     * 
+     * @param pod the pod to look for
+     * @return the deployment config
+     */
+    public static Optional<IDeploymentConfig> getDeploymentConfig(IPod pod, Collection<IDeploymentConfig> deploymentConfigs) {
+        return deploymentConfigs.stream()
+        .filter(dc -> dc.getName().equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))
+        .findFirst();
+    }
+    
+    /**
      * Return the deployment config or replication controller associated with this pod. Uses
      * annotations to do the matching.
      * 
@@ -294,9 +307,7 @@ public class ResourceUtils {
      * @return the deployment config or replication controller
      */
     public static IReplicationController getDeploymentConfigOrReplicationControllerFor(IPod pod) {
-        Optional<IResource> rcOrDc = pod.getProject().getResources(ResourceKind.DEPLOYMENT_CONFIG).stream()
-            .filter(dc -> dc.getName().equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))
-            .findFirst();
+        Optional<? extends IResource> rcOrDc = getDeploymentConfig(pod, pod.getProject().getResources(ResourceKind.DEPLOYMENT_CONFIG));
         if (!rcOrDc.isPresent()) {
             rcOrDc = Optional.ofNullable(getReplicationControllerFor(pod, pod.getProject().getResources(ResourceKind.REPLICATION_CONTROLLER)));
         }
@@ -319,7 +330,8 @@ public class ResourceUtils {
 	/**
 	 * Returns {@code true} if the given pod is a pod running builds. This is
 	 * the case if the pod is annotated with the build name. Returns
-	 * {@code false} otherwise
+	 * {@code false} if the given pod is a pod running an application or is
+	 * null.
 	 * 
 	 * @param pod
 	 *            the pod that shall be checked whether it's a build pod

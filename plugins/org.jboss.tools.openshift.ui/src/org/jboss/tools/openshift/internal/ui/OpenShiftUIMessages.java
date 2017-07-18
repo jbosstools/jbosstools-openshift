@@ -43,4 +43,14 @@ public class OpenShiftUIMessages extends NLS {
 	public static String InvalidHostNameErrorMessage;
 	public static String EmptyHostNameErrorMessage;
 	public static String RoundRobinRoutingMessage;
+	
+	public static String EditResourceLimitsPageTitle;
+	public static String EditResourceLimitsPageDescription;
+	public static String EditResourceLimitsJobTitle;
+	public static String EditResourceLimitsJobErrorMessage;
+	public static String CPULabel;
+	public static String MemoryLabel;
+	public static String RequestLabel;
+	public static String LimitLabel;
+	
 }

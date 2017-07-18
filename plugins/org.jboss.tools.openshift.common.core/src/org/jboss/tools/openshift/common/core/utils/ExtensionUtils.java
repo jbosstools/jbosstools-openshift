@@ -85,7 +85,7 @@ public class ExtensionUtils {
 			return (T) object;
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new IllegalStateException(
-					NLS.bind("Could not instantiate class {0}", className)); //$NON-NLS-1$
+					NLS.bind("Could not instantiate class {0}", className), e); //$NON-NLS-1$
 		}
 	}
 
