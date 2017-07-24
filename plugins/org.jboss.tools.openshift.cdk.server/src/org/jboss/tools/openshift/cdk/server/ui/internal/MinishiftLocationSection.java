@@ -10,19 +10,14 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Properties;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -45,9 +40,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDKLaunchUtility;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CommandTimeoutException;
-import org.jboss.tools.openshift.cdk.server.ui.internal.AbstractLocationSection.SetLocationPropertyCommand;
+import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader;
+import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader.MinishiftVersions;
 
 public class MinishiftLocationSection extends AbstractLocationSection {
 
@@ -60,9 +54,7 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 	
 
 	private Job longValidation;
-	private Properties minishiftVersionProps = null;
-	private static String ERROR_KEY = CDK3ServerWizardFragment.ERROR_KEY;
-	private static String VERSION_KEY = CDK3ServerWizardFragment.VERSION_KEY; 
+	private MinishiftVersions minishiftVersionProps = null;
 
 	
 	public MinishiftLocationSection() {
@@ -201,20 +193,7 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		longValidation = new Job("Validate minishift location") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Properties ret = new Properties();
-				try {
-					String[] lines = CDKLaunchUtility.call(homeDir, new String[] {"version"}, 
-						new File(homeDir).getParentFile(),
-						new HashMap<String,String>(), 5000, false);
-					for( int i = 0; i < lines.length; i++ ) {
-						String[] split = lines[i].split(":");
-						if( split.length == 2 )
-							ret.put(split[0], split[1]);
-					}
-				} catch(IOException | CommandTimeoutException e )  {
-					ret.put(ERROR_KEY, e.getMessage());
-				}
-				minishiftVersionProps = ret;
+				minishiftVersionProps = MinishiftVersionLoader.getVersionProperties(homeDir);
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						validate2();
@@ -239,12 +218,12 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 				return "File " + v + " is not executable.";
 			} else if( minishiftVersionProps == null ) {
 				return "Unknown error when checking minishift version: " + v;
-			} else if( minishiftVersionProps.getProperty(VERSION_KEY) == null ) {
-				if( minishiftVersionProps.getProperty(ERROR_KEY) != null ) {
-					return minishiftVersionProps.getProperty(ERROR_KEY);
-				} else {
-					return "Unknown error while checking minishift version";
+			} else if( !minishiftVersionProps.isValid()) {
+				String err = minishiftVersionProps.getError();
+				if( err == null ) {
+					err = "Unknown error while checking minishift version";
 				}
+				return err;
 			}
 		}
 		return null;

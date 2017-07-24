@@ -1,9 +1,6 @@
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,8 +24,8 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDKLaunchUtility;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CommandTimeoutException;
+import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader;
+import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader.MinishiftVersions;
 
 public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 
@@ -36,9 +33,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 	private String selectedHypervisor;
 
 	private Job longValidation;
-	private Properties minishiftVersionProps = null;
-	public static String ERROR_KEY = "properties.load.error";
-	public static String VERSION_KEY = "Minishift version"; 
+	private MinishiftVersions minishiftVersionProps = null;
 
 	
 	public CDK3ServerWizardFragment() {
@@ -119,12 +114,11 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 			retString = "The selected file does not exist.";
 		} else if( !(new File(homeDir).canExecute())) {
 			retString = "The selected file is not executable.";
-		} else if( minishiftVersionProps != null && minishiftVersionProps.getProperty(VERSION_KEY) == null ) {
-			if( minishiftVersionProps.getProperty(ERROR_KEY) != null ) {
-				retString = minishiftVersionProps.getProperty(ERROR_KEY);
-			} else {
-				retString = "Unknown error while checking minishift version";
-			}
+		} else if( minishiftVersionProps != null && !minishiftVersionProps.isValid()) {
+			// We have props but it's missing the expected version key
+			String err = minishiftVersionProps.getError();
+			String defErr = "Unknown error while checking minishift version";
+			retString = (err == null ? defErr : err);
 		}
 		toggleDecorator(homeText, retString);
 		return retString;
@@ -176,20 +170,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		longValidation = new Job("Validate minishift location") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Properties ret = new Properties();
-				try {
-					String[] lines = CDKLaunchUtility.call(homeDir, new String[] {"version"}, 
-						new File(homeDir).getParentFile(),
-						new HashMap<String,String>(), 5000, false);
-					for( int i = 0; i < lines.length; i++ ) {
-						String[] split = lines[i].split(":");
-						if( split.length == 2 )
-							ret.put(split[0], split[1]);
-					}
-				} catch(IOException | CommandTimeoutException e )  {
-					ret.put(ERROR_KEY, e.getMessage());
-				}
-				minishiftVersionProps = ret;
+				minishiftVersionProps = MinishiftVersionLoader.getVersionProperties(homeDir);
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
 						validate();
