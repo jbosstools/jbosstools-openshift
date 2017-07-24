@@ -17,43 +17,6 @@ package org.jboss.tools.openshift.reddeer.utils;
  *
  */
 public class OpenShiftLabel {
-
-	/**
-	 * Cartridges for application creation. Basic and downloadable.
-	 */
-	public static class Cartridge {
-		// Basic cartridges
-		public static final String DIY = "Do-It-Yourself 0.1";
-		public static final String JENKINS = "Jenkins Server";
-		public static final String JBOSS_AS = "JBoss Application Server 7";
-		public static final String JBOSS_EAP = "JBoss Enterprise Application Platform 6";
-		public static final String JBOSS_EWS = "Tomcat 7 (JBoss EWS 2.0)";
-		public static final String PERL = "Perl 5.10";
-		public static final String PHP = "PHP 5.3";
-		public static final String PYTHON = "Python 2.7";
-		public static final String RUBY_1_9 = "Ruby 1.9";
-		
-		// Quickstarts
-		public static final String DJANGO = "Django (Quickstart)";
-		
-		// Downloadable cartridge
-		public static final String DOWNLOADABLE_CARTRIDGE = "Code Anything";
-	}
-
-	/**
-	 * Embeddable cartridges.
-	 */
-	public static class EmbeddableCartridge {
-		public static final String CRON = "Cron 1.4 (cron-1.4)";
-		public static final String JENKINS = "Jenkins Client (jenkins-client-1)";
-		public static final String MY_SQL = "MySQL 5.5 (mysql-5.5)";
-		public static final String MONGO_DB = "MongoDB 2.4 (mongodb-2.4)";
-		public static final String PHP_MYADMIN = "phpMyAdmin 4.0 (phpmyadmin-4)";
-		public static final String POSTGRE_SQL = "PostgreSQL 9.2 (postgresql-9.2)";
-		public static final String ROCK_MONGO = "RockMongo 1.1 (rockmongo-1.1)";
-		
-		public static final String DOWNLOADABLE_CARTRIDGE = "Code Anything (Downloadable Cartridge)";
-	}
 	
 	/**
 	 * OpenShift explorer context menu labels.
@@ -345,6 +308,7 @@ public class OpenShiftLabel {
 		public static final String OPENSHIFT_CENTRAL_SCRIPT = "$(\"#wizards\" ).find('a').filter(\""
 				+ ":contains('OpenShift Application')\").click()";
 		
+		public static final String OPENSHIFT3 = "OpenShift 3";
 		// Server adapter
 		public static final String[] OS2_SERVER_ADAPTER = new String[] {"OpenShift", 
 				"OpenShift 2 Server Adapter"};

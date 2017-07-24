@@ -26,15 +26,11 @@ Eclipse-BundleShape: jar
 Bundle-Localization: plugin
 Bundle-Vendor: JBoss by Red Hat
 Export-Package: org.jboss.tools.openshift.reddeer.condition,
- org.jboss.tools.openshift.reddeer.condition.v2,
  org.jboss.tools.openshift.reddeer.enums,
  org.jboss.tools.openshift.reddeer.exception,
- org.jboss.tools.openshift.reddeer.matcher,
- org.jboss.tools.openshift.reddeer.perspective,
  org.jboss.tools.openshift.reddeer.preference.page,
  org.jboss.tools.openshift.reddeer.requirement,
  org.jboss.tools.openshift.reddeer.utils,
- org.jboss.tools.openshift.reddeer.utils.v2,
  org.jboss.tools.openshift.reddeer.utils.v3,
  org.jboss.tools.openshift.reddeer.view,
  org.jboss.tools.openshift.reddeer.view.resources,
@@ -42,7 +38,5 @@ Export-Package: org.jboss.tools.openshift.reddeer.condition,
  org.jboss.tools.openshift.reddeer.wizard,
  org.jboss.tools.openshift.reddeer.wizard.importapp,
  org.jboss.tools.openshift.reddeer.wizard.page,
- org.jboss.tools.openshift.reddeer.wizard.page.v2,
  org.jboss.tools.openshift.reddeer.wizard.server,
- org.jboss.tools.openshift.reddeer.wizard.v2,
  org.jboss.tools.openshift.reddeer.wizard.v3

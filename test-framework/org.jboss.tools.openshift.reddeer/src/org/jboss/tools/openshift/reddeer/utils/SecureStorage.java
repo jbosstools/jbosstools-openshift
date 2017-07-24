@@ -30,8 +30,8 @@ import org.jboss.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.reddeer.swt.impl.text.DefaultText;
 import org.jboss.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.jboss.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
+import org.jboss.tools.common.reddeer.label.IDELabel.ServerType;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
-import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView.ServerType;
 import org.jboss.tools.openshift.reddeer.view.resources.AbstractOpenShiftConnection;
 
 public class SecureStorage {
@@ -47,8 +47,8 @@ public class SecureStorage {
 	 * 
 	 * @param username
 	 */
-	public static void storeOpenShiftPassword(String username, String server, ServerType serverType) {
-		triggerSecureStorageOfPasswordInConnectionDialog(username, server, true, serverType);
+	public static void storeOpenShiftPassword(String username, String server) {
+		triggerSecureStorageOfPasswordInConnectionDialog(username, server, true);
 	}
 
 	/**
@@ -56,8 +56,8 @@ public class SecureStorage {
 	 * 
 	 * @param username
 	 */
-	public static void removeOpenShiftPassword(String username, String server, ServerType serverType) {
-		triggerSecureStorageOfPasswordInConnectionDialog(username, server, false, serverType);
+	public static void removeOpenShiftPassword(String username, String server) {
+		triggerSecureStorageOfPasswordInConnectionDialog(username, server, false);
 	}
 
 	/**
@@ -74,14 +74,10 @@ public class SecureStorage {
 	 *            type of a server
 	 */
 	private static void triggerSecureStorageOfPasswordInConnectionDialog(String username, String server,
-			boolean storePassword, ServerType serverType) {
+			boolean storePassword) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		AbstractOpenShiftConnection connection = explorer.getOpenShiftConnection(username, server, serverType);
+		AbstractOpenShiftConnection connection = explorer.getOpenShiftConnection(username, server);
 		connection.select();
-
-		if (ServerType.OPENSHIFT_2.equals(serverType)) {
-			waitForLoadingConnectionDetails(connection);
-		}
 
 		new ContextMenu(OpenShiftLabel.ContextMenu.EDIT_CONNECTION).select();
 
@@ -137,15 +133,6 @@ public class SecureStorage {
 		return firstStorage;
 	}
 
-	private static void waitForLoadingConnectionDetails(AbstractOpenShiftConnection connection) {
-		try {
-			// if loading connection shell is opened
-			new DefaultShell("Loading OpenShift 2 connection details");
-			connection.select();
-		} catch (RedDeerException ex) {
-		}
-	}
-
 	/**
 	 * Verifies whether state of password storage for specified user is in correct
 	 * state.
@@ -160,8 +147,7 @@ public class SecureStorage {
 	 * @param serverType
 	 *            OpenShift v2 or v3 server
 	 */
-	public static void verifySecureStorageOfPassword(String username, String server, boolean shouldExist,
-			ServerType serverType) {
+	public static void verifySecureStorageOfPassword(String username, String server, boolean shouldExist) {
 		WorkbenchPreferenceDialog workbenchPreferenceDialog = new WorkbenchPreferenceDialog();
 		StoragePreferencePage secureStoragePreferencePage = new StoragePreferencePage();
 		new WorkbenchShell().setFocus();
@@ -169,7 +155,7 @@ public class SecureStorage {
 		new WorkbenchPreferenceDialog().select(secureStoragePreferencePage);
 
 		secureStoragePreferencePage.selectContentTab();
-		boolean exists = secureStoragePreferencePage.passwordExists("[Default Secure Storage]", getPluginId(serverType),
+		boolean exists = secureStoragePreferencePage.passwordExists("[Default Secure Storage]", getPluginId(),
 				server, username);
 
 		workbenchPreferenceDialog.ok();
@@ -178,17 +164,8 @@ public class SecureStorage {
 				: "Password was present in secure storage but it shouldn't.", shouldExist == exists);
 	}
 
-	private static String getPluginId(ServerType serverType) {
-		String pluginId = null;
-		switch (serverType) {
-		case OPENSHIFT_2:
-			pluginId = "org.jboss.tools.openshift.express.ui";
-			break;
-		case OPENSHIFT_3:
-			pluginId = "org.jboss.tools.openshift.core";
-			break;
-		}
-		assertNotNull("server type " + serverType + " is not recognized.");
+	private static String getPluginId() {
+		String pluginId = "org.jboss.tools.openshift.core";
 		return pluginId;
 	}
 }
