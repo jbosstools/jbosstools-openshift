@@ -386,6 +386,9 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 					connectJob, new DelegatingProgressMonitor(), getContainer(), getDatabindingContext());
 			boolean connected = JobUtils.isOk(connectJob.getConnectionStatus());
 			if (connected) {
+				
+				// update the connection and save it
+				advConnectionEditors.saveChanges(pageModel);
 				boolean result = pageModel.saveConnection();
 				if(result) {
 					SecureStoreException e = pageModel.getRecentSecureStoreException();

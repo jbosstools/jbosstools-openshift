@@ -49,7 +49,6 @@ import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionFactory;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
-import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivator;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAdvancedPropertiesProvider;
 import org.jboss.tools.openshift.internal.common.ui.connection.IAdvancedConnectionPropertiesEditor;
@@ -225,72 +224,79 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	
 
 	private void validateOCLocation(String location, boolean override) {
-		kickOCLocationValidation(location, override);
+		if( override )
+			kickOCLocationValidation(location);
+		else
+			decoration.hide();
+	}
+	
+	
+	private class OCVersionUIJob extends UIUpdatingJob {
+
+	    private Version version;
+	    private String error;
+	    private String location;
+	    public OCVersionUIJob(String location) {
+	    	super("Checking oc binary...");
+	    	this.location = location;
+	    }
+	    
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+        	
+    		if (StringUtils.isBlank(location)) {
+    			error = "OC Location cannot be empty";
+    		} else {
+        		File file = new File(location);
+        		// Error messages have to be set to field editor, not directly to the
+        		// page.
+        		if (!file.exists()) {
+        			error = (NLS.bind("{0} was not found.", file));
+        		} else if (!file.canExecute()) {
+        			error = (NLS.bind("{0} does not have execute permissions.", file));
+        		}
+    		}
+    		
+    		if( error == null ) {
+    			version = new OCBinaryVersionValidator(location).getVersion(monitor);
+    		}
+            if (monitor.isCanceled()) {
+            	return Status.CANCEL_STATUS;
+            }
+            return Status.OK_STATUS;
+        }
+
+        @Override
+        protected IStatus updateUI(IProgressMonitor monitor) {
+        	if( error == null ) {
+				if (Version.emptyVersion.equals(version)) {
+					error = ("Could not determine your OpenShift client version");
+				} else if( !OCBinaryVersionValidator.isCompatibleForPublishing(version)) {
+					error = NLS.bind("OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version);
+				}
+        	}
+        	
+        	//  now we have an error string
+        	if( error == null ) {
+        		// hide decorator
+        		decoration.hide();
+        	} else {
+        		// show decorator, set message to error
+        		decoration.setDescriptionText(error);
+        		decoration.show();
+        	}
+        	
+        	return Status.OK_STATUS;
+        }
 	}
 	
 	private UIUpdatingJob versionVerificationJob;
-	private void kickOCLocationValidation(String location, boolean override) {
-		if( !override ) {
-			return;
-		}
-		
+	private void kickOCLocationValidation(String location) {
 		if( versionVerificationJob != null ) {
 			versionVerificationJob.cancel();
 		}
 		
-		versionVerificationJob = new UIUpdatingJob("Checking oc binary...") {
- 
-		    private Version version;
-		    private String error;
-		    
-            @Override
-            protected IStatus run(IProgressMonitor monitor) {
-            	
-        		if (StringUtils.isBlank(location)) {
-        			error = "OC Location cannot be empty";
-        		} else {
-	        		File file = new File(location);
-	        		// Error messages have to be set to field editor, not directly to the
-	        		// page.
-	        		if (!file.exists()) {
-	        			error = (NLS.bind("{0} was not found.", file));
-	        		} else if (!file.canExecute()) {
-	        			error = (NLS.bind("{0} does not have execute permissions.", file));
-	        		}
-        		}
-        		
-        		if( error == null ) {
-        			version = new OCBinaryVersionValidator(location).getVersion(monitor);
-        		}
-                if (monitor.isCanceled()) {
-                	return Status.CANCEL_STATUS;
-                }
-                return Status.OK_STATUS;
-            }
-
-            @Override
-            protected IStatus updateUI(IProgressMonitor monitor) {
-            	if( error == null ) {
-					if (Version.emptyVersion.equals(version)) {
-						error = ("Could not determine your OpenShift client version");
-					} else if( !OCBinaryVersionValidator.isCompatibleForPublishing(version)) {
-						error = NLS.bind("OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version);
-					}
-            	}
-            	
-            	//  now we have an error string
-            	if( error == null ) {
-            		// hide decorator
-            		decoration.hide();
-            	} else {
-            		// show decorator, set message to error
-            		decoration.setDescriptionText(error);
-            		decoration.show();
-            	}
-            	
-            	return Status.OK_STATUS;
-            }
-        };
+		versionVerificationJob = new OCVersionUIJob(location);
         versionVerificationJob.schedule();
 	}
 	
@@ -343,9 +349,17 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		return object instanceof ConnectionFactory;
 	}
 
-	private Connection getConnection() {
+	Map<String, Object> map = null;
+	public Map<String, Object> getExtendedProperties() {
+		if( map != null ) {
+			return map;
+		}
 		IConnection connection = pageModel.getSelectedConnection();
-		return connection instanceof Connection ? (Connection) connection : null;
+		if( connection != null ) {
+			map = ((Connection)connection).getExtendedProperties();
+			return map;
+		}
+		return null;
 	}
 	
 	class AdvancedConnectionEditorModel extends ObservablePojo{
@@ -358,39 +372,35 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		static final String PROP_OC_OVERRIDE_LOCATION = "ocOverrideLocation";
 
 		public void setOcOverride(boolean value) {
-			Connection connection = getConnection();
-			if(connection != null) {
-				Map<String, Object> properties = connection.getExtendedProperties();
+			Map<String, Object> properties = getExtendedProperties();
+			if( properties != null ) {
 				Object old = properties.get(ICommonAttributes.OC_OVERRIDE_KEY);
-				connection.setExtendedProperty(ICommonAttributes.OC_OVERRIDE_KEY, value);
+				properties.put(ICommonAttributes.OC_OVERRIDE_KEY, value);
 				firePropertyChange(PROP_OC_OVERRIDE, old, value);
 			}			
 		}
 		
 		public boolean getOcOverride() {
-			Connection connection = getConnection();
-			if(connection != null) {
-				Map<String, Object> properties = connection.getExtendedProperties();
+			Map<String, Object> properties = getExtendedProperties();
+			if( properties != null ) {
 				return ((Boolean)(ObjectUtils.defaultIfNull(properties.get(ICommonAttributes.OC_OVERRIDE_KEY), false))).booleanValue(); 
 			}
 			return false;
 		}
 		
 		public void setOcOverrideLocation(String value) {
-			Connection connection = getConnection();
-			if(connection != null) {
-				Map<String, Object> properties = connection.getExtendedProperties();
+			Map<String, Object> properties = getExtendedProperties();
+			if( properties != null ) {
 				Object old = properties.get(ICommonAttributes.OC_LOCATION_KEY);
-				connection.setExtendedProperty(ICommonAttributes.OC_LOCATION_KEY, value);
+				properties.put(ICommonAttributes.OC_LOCATION_KEY, value);
 				firePropertyChange(PROP_OC_OVERRIDE_LOCATION, old, value);
 			}			
 		}
 		
 		public String getOcOverrideLocation() {
 			if( getOcOverride()) {
-				Connection connection = getConnection();
-				if(connection != null) {
-					Map<String, Object> properties = connection.getExtendedProperties();
+				Map<String, Object> properties = getExtendedProperties();
+				if( properties != null ) {
 					return (String) ObjectUtils.defaultIfNull(properties.get(ICommonAttributes.OC_LOCATION_KEY), ""); 
 				}
 			}
@@ -398,43 +408,38 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		}
 		
 		public void setRegistryURL(String value) {
-			Connection connection = getConnection();
-			if(connection != null) {
-				Map<String, Object> properties = connection.getExtendedProperties();
+			Map<String, Object> properties = getExtendedProperties();
+			if( properties != null ) {
 				Object old = properties.get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY);
-				connection.setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, value);
+				properties.put(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, value);
 				firePropertyChange(PROP_REGISTRY_URL, old, value);
 			}			
 		}
 		
 		public String getRegistryURL() {
-			Connection connection = getConnection();
-			if(connection != null) {
-				Map<String, Object> properties = connection.getExtendedProperties();
+			Map<String, Object> properties = getExtendedProperties();
+			if( properties != null ) {
 				return (String) ObjectUtils.defaultIfNull(properties.get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY), ""); 
 			}
 			return "";
 		}
 		
         public void setClusterNamespace(String value) {
-            Connection connection = getConnection();
-            if(connection != null) {
-                Map<String, Object> properties = connection.getExtendedProperties();
+			Map<String, Object> properties = getExtendedProperties();
+			if( properties != null ) {
                 Object old = properties.get(ICommonAttributes.CLUSTER_NAMESPACE_KEY);
-                connection.setExtendedProperty(ICommonAttributes.CLUSTER_NAMESPACE_KEY, value);
+                properties.put(ICommonAttributes.CLUSTER_NAMESPACE_KEY, value);
                 firePropertyChange(PROP_CLUSTER_NAMESPACE, old, value);
             }           
         }
-        
+
         public String getClusterNamespace() {
-            Connection connection = getConnection();
-            if(connection != null) {
-                return connection.getClusterNamespace(); 
-            }
+			Map<String, Object> properties = getExtendedProperties();
+			if( properties != null ) {
+				return (String)properties.getOrDefault(ICommonAttributes.CLUSTER_NAMESPACE_KEY, ICommonAttributes.COMMON_NAMESPACE);
+			}
             return ICommonAttributes.COMMON_NAMESPACE;
         }
-		
-		
 	}
 	
 	private class ConnectionAdvancedPropertiesProvider implements IConnectionAdvancedPropertiesProvider {
@@ -455,5 +460,13 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 			return connection;
 		}
 		
+	}
+
+	@Override
+	public void saveChanges(ConnectionWizardPageModel pageModel) {
+		IConnection c = pageModel.getConnection();
+		if( c instanceof Connection && getExtendedProperties() != null ) {
+				((Connection)c).setExtendedProperties(getExtendedProperties());
+		}
 	}
 }

@@ -43,4 +43,13 @@ public class AdvancedConnectionEditorsStackedView extends AbstractStackedDetailV
 		return ExtensionUtils.getExtensions(EXTENSION, ATTRIBUTE_CLASS);
 	}
 
+	public void saveChanges(ConnectionWizardPageModel pageModel) {
+		IAdvancedConnectionPropertiesEditor[] ed = editors.toArray(new IAdvancedConnectionPropertiesEditor[editors.size()]);
+		for( int i = 0; i < ed.length; i++ ) {
+			ed[i].saveChanges(pageModel);
+		}
+	}
+	
+	
+
 }

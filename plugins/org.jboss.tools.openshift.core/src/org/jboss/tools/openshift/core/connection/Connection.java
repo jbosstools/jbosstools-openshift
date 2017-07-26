@@ -402,6 +402,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		this.rememberPassword = otherConnection.rememberPassword;
 		this.tokenLoaded = otherConnection.tokenLoaded;
 		this.rememberPassword = otherConnection.rememberPassword;
+		this.extendedProperties = otherConnection.getExtendedProperties();
 
 		IAuthorizationContext otherContext = otherConnection.client.getAuthorizationContext();
 		IAuthorizationContext context = this.client.getAuthorizationContext();
