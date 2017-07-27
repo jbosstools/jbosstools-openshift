@@ -38,7 +38,7 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	}
 	
 	private void scheduleConfigureFrameworksJob(final ServerEvent event) {
-		new Job("Loading service-manager to configure additional frameworks that CDK depends on.") {
+		new Job("Inspecting CDK environment...") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
