@@ -39,8 +39,6 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
-import org.jboss.tools.openshift.reddeer.view.resources.AbstractOpenShiftConnection;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShift2Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 
 /**
@@ -103,19 +101,6 @@ public class OpenShiftExplorerView extends WorkbenchView {
 			throw new OpenShiftToolsException("no valid authentication method found. Could not connect.");
 		}
 	}
-
-	/**
-	 * Connects to OpenShift server. OpenShift connection shell has to be opened at the 
-	 * moment of method invocation.
-	 * @param server URL of a server
-	 * @param username
-	 * @param password
-	 * @param storePassword whether password should be stored or not in security storage
-	 * @param useDefaultServer
-	 */
-	public void connectToOpenShift2(String server, String username, String password, boolean storePassword, boolean useDefaultServer, boolean certificateShown) {
-		connectToOpenShift(server, username, password, storePassword, useDefaultServer, ServerType.OPENSHIFT_2, OpenShiftExplorerView.AuthenticationMethod.DEFAULT, certificateShown);
-	}
 	
 	/**
 	 * Connects to OpenShift server. OpenShift connection shell has to be opened at the 
@@ -127,7 +112,7 @@ public class OpenShiftExplorerView extends WorkbenchView {
 	 * @param useDefaultServer
 	 */
 	public void connectToOpenShift3Basic(String server, String username, String password, boolean storePassword, boolean useDefaultServer) {
-		connectToOpenShift(server, username, password, storePassword, useDefaultServer, ServerType.OPENSHIFT_3, OpenShiftExplorerView.AuthenticationMethod.BASIC, true);
+		connectToOpenShift(server, username, password, storePassword, useDefaultServer, OpenShiftExplorerView.AuthenticationMethod.BASIC, false);
 	}
 	
 	/**
@@ -139,14 +124,11 @@ public class OpenShiftExplorerView extends WorkbenchView {
 	 * @param useDefaultServer
 	 */
 	public void connectToOpenShift3OAuth(String server, String token, boolean storeToken, boolean useDefaultServer) {
-		connectToOpenShift(server, null, token, storeToken, useDefaultServer, ServerType.OPENSHIFT_3, OpenShiftExplorerView.AuthenticationMethod.OAUTH, true);
+		connectToOpenShift(server, null, token, storeToken, useDefaultServer,  OpenShiftExplorerView.AuthenticationMethod.OAUTH, true);
 	}
 	
-	public void connectToOpenShift(String server, String username, String password, boolean storePassword, boolean useDefaultServer, 
-			ServerType serverType, OpenShiftExplorerView.AuthenticationMethod authMethod, boolean certificateShown) {
+	public void connectToOpenShift(String server, String username, String password, boolean storePassword, boolean useDefaultServer, OpenShiftExplorerView.AuthenticationMethod authMethod, boolean certificateShown) {
 		new DefaultShell(OpenShiftLabel.Shell.NEW_CONNECTION);
-		
-		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER_TYPE).setSelection(serverType.toString());
 				
 		if (new CheckBox(0).isChecked() != useDefaultServer) {
 			new CheckBox(0).click();
@@ -156,30 +138,17 @@ public class OpenShiftExplorerView extends WorkbenchView {
 			new LabeledCombo(OpenShiftLabel.TextLabels.SERVER).setText(server);
 		}
 		
-		if (ServerType.OPENSHIFT_3.equals(serverType)) {
-			new LabeledCombo(OpenShiftLabel.TextLabels.SERVER_TYPE).setSelection(serverType.toString());
-			new LabeledCombo(OpenShiftLabel.TextLabels.PROTOCOL).setSelection(authMethod.toString());
+		new LabeledCombo(OpenShiftLabel.TextLabels.PROTOCOL).setSelection(authMethod.toString());
+
+		if (OpenShiftExplorerView.AuthenticationMethod.OAUTH.equals(authMethod)) {
+			new LabeledText(OpenShiftLabel.TextLabels.TOKEN).setText(password);
 		}
-		
-		if (ServerType.OPENSHIFT_2.equals(serverType) || (ServerType.OPENSHIFT_3.equals(serverType)
-				&& OpenShiftExplorerView.AuthenticationMethod.BASIC.equals(authMethod))) {
+
+		if (OpenShiftExplorerView.AuthenticationMethod.BASIC.equals(authMethod)) { 
 			new LabeledText(OpenShiftLabel.TextLabels.USERNAME).setText(username);
-			new LabeledText(OpenShiftLabel.TextLabels.PASSWORD).setText(password);			
-		} else {
-			if (ServerType.OPENSHIFT_3.equals(serverType) 
-					&& OpenShiftExplorerView.AuthenticationMethod.OAUTH.equals(authMethod)) {
-				new LabeledText(OpenShiftLabel.TextLabels.TOKEN).setText(password);
-			}
-		}
-	
-		if (ServerType.OPENSHIFT_2.equals(serverType) || 
-				(ServerType.OPENSHIFT_3.equals(serverType) && OpenShiftExplorerView.AuthenticationMethod.BASIC.equals(authMethod))) { 
+			new LabeledText(OpenShiftLabel.TextLabels.PASSWORD).setText(password);	
 			if (new CheckBox(OpenShiftLabel.TextLabels.STORE_PASSWORD).isChecked() != storePassword) {
 				new CheckBox(OpenShiftLabel.TextLabels.STORE_PASSWORD).click();
-			}
-		} else {
-			if (new CheckBox(OpenShiftLabel.TextLabels.STORE_TOKEN).isChecked() != storePassword) {
-				new CheckBox(OpenShiftLabel.TextLabels.STORE_TOKEN).click();
 			}
 		}
 				
@@ -225,36 +194,13 @@ public class OpenShiftExplorerView extends WorkbenchView {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <C extends AbstractOpenShiftConnection> C getOpenShiftConnection(String username, String server, ServerType serverType) {
-		AbstractOpenShiftConnection connection = null;
-		if (ServerType.OPENSHIFT_2.equals(serverType)) {
-			connection = getOpenShift2Connection(username, server);
-		} else if (ServerType.OPENSHIFT_3.equals(serverType)) {
-			connection = getOpenShift3Connection(server, username);
-		}
-		assertNotNull("connection type " + serverType + " is not recognized", connection);
-		return (C) connection;
-	}
+	public OpenShift3Connection getOpenShiftConnection(String username, String server) {
+		OpenShift3Connection connection = null;
 
-	/**
-	 * Gets OpenShift 2 connection for a specified user.
-	 * 
-	 * @param username user name
-	 * @return OpenShift 2 connection
-	 */
-	public OpenShift2Connection getOpenShift2Connection(String username) {
-		return new OpenShift2Connection(getConnectionItem(null, username));
-	}
-	
-	/**
-	 * Gets OpenShift 2 connection for a specified server and user.
-	 * @param username user name
-	 * @param server server
-	 * @return OpenShift 2 connection
-	 */
-	public OpenShift2Connection getOpenShift2Connection(String username, String server) {
-		return new OpenShift2Connection(getConnectionItem(server, username));
+		connection = getOpenShift3Connection(server, username);
+		
+		assertNotNull("Unable to get openshift 3 connection.", connection);
+		return connection;
 	}
 	
 	/**
@@ -297,23 +243,6 @@ public class OpenShiftExplorerView extends WorkbenchView {
 			}
 		} else {
 			return connectionItem;
-		}
-	}
-
-	public enum ServerType {
-		
-		OPENSHIFT_2("OpenShift 2"), 
-		OPENSHIFT_3("OpenShift 3");
-		
-		private final String text;
-		
-		private ServerType(String text) {
-			this.text = text;
-		}
-		
-		@Override
-		public String toString() {
-			return text;
 		}
 	}
 
