@@ -75,6 +75,8 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	private IObservableValue clusterNamespaceObservable;
 	private IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider;
 	private ControlDecoration decoration;
+	Map<String, Object> map = null;
+
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -82,8 +84,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		
 		this.pageModel =  (ConnectionWizardPageModel) context;
 		this.selectedConnection = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION).observe(pageModel);
-		
-		model = new AdvancedConnectionEditorModel();
+		this.model = new AdvancedConnectionEditorModel();
 		
 		Composite composite = setControl(new Composite(parent, SWT.None));
 		GridLayoutFactory.fillDefaults().applyTo(composite);
@@ -349,17 +350,12 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		return object instanceof ConnectionFactory;
 	}
 
-	Map<String, Object> map = null;
 	public Map<String, Object> getExtendedProperties() {
-		if( map != null ) {
-			return map;
-		}
 		IConnection connection = pageModel.getSelectedConnection();
-		if( connection != null ) {
-			map = ((Connection)connection).getExtendedProperties();
-			return map;
+		if (!(connection instanceof Connection)) {
+			return null;
 		}
-		return null;
+		return ((Connection)connection).getExtendedProperties();
 	}
 	
 	class AdvancedConnectionEditorModel extends ObservablePojo{
@@ -465,8 +461,9 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	@Override
 	public void saveChanges(ConnectionWizardPageModel pageModel) {
 		IConnection c = pageModel.getConnection();
-		if( c instanceof Connection && getExtendedProperties() != null ) {
-				((Connection)c).setExtendedProperties(getExtendedProperties());
+		if( c instanceof Connection 
+				&& getExtendedProperties() != null ) {
+			((Connection)c).setExtendedProperties(getExtendedProperties());
 		}
 	}
 }
