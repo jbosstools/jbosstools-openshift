@@ -20,7 +20,6 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.route.IRoute;
 
 /**

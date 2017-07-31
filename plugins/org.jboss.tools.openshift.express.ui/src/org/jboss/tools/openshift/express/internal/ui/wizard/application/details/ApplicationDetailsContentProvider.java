@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.details;
 
-import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;

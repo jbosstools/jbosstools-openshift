@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
@@ -39,8 +38,6 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLaunchDelegate;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
-import org.jboss.tools.openshift.cdk.server.core.internal.VagrantBinaryUtility;
-import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
@@ -48,7 +45,6 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPoller;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 
 public class CDK3LaunchController extends AbstractCDKLaunchController implements ILaunchServerController, IExternalLaunchConstants {

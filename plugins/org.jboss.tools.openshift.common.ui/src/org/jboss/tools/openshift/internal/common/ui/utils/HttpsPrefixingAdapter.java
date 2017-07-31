@@ -12,8 +12,6 @@ package org.jboss.tools.openshift.internal.common.ui.utils;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;

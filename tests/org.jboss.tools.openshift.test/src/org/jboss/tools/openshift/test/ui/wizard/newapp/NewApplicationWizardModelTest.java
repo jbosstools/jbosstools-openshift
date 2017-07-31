@@ -15,9 +15,7 @@ import static org.jboss.tools.openshift.test.util.ResourceMocks.createObservable
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createResources;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyObject;
@@ -35,7 +33,6 @@ import java.util.stream.Collectors;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizardModel;
-import org.jboss.tools.openshift.internal.ui.wizard.newapp.NotATemplateException;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
 import org.junit.Before;
 import org.junit.Test;
