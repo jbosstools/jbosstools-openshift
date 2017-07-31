@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.ObjectUtils;
@@ -76,7 +77,6 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	private IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider;
 	private ControlDecoration decoration;
 	Map<String, Object> map = null;
-
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -351,11 +351,19 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	}
 
 	public Map<String, Object> getExtendedProperties() {
-		IConnection connection = pageModel.getSelectedConnection();
-		if (!(connection instanceof Connection)) {
-			return null;
+		if( map != null ) {
+			return map;
 		}
-		return ((Connection)connection).getExtendedProperties();
+		IConnection connection = pageModel.getSelectedConnection();
+		if( connection != null ) {
+			if( connection instanceof Connection) {
+				map = ((Connection)connection).getExtendedProperties();
+			} else {
+				map = new HashMap<String, Object>();
+			}
+			return map;
+		}
+		return null;
 	}
 	
 	class AdvancedConnectionEditorModel extends ObservablePojo{
