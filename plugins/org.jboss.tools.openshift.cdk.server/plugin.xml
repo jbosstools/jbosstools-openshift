@@ -155,13 +155,13 @@
             class="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDKRuntimeDetector"
             enabled="true"
             id="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDKRuntimeDetector"
-            name="Container Development Environment">
+            name="%cdk.detector.2x">
       </runtimeDetector>
       <runtimeDetector
             class="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector"
             enabled="true"
             id="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector"
-            name="Container Development Environment 3">
+            name="%cdk.detector.3">
       </runtimeDetector>
    </extension>
 
