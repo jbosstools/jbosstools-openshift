@@ -14,12 +14,9 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
-import org.jboss.tools.openshift.cdk.server.core.internal.VagrantBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPoller;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 
 public class CDK3ShutdownController extends AbstractCDKShutdownController {
 

@@ -20,7 +20,6 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.dmr.ModelNode;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.core.ImportImageMetaData;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
@@ -30,7 +29,6 @@ import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.image.IImageStreamImport;
 
 /**

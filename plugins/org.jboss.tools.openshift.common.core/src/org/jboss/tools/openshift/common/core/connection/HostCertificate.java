@@ -14,7 +14,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.util.Objects;
 
 /**
  * A host certificate that the user can accept or refute
