@@ -32,6 +32,7 @@ public class DockerConfigMetaData implements IDockerImageMetadata {
 	private IDockerImageInfo info;
 
 	public DockerConfigMetaData(IDockerImageInfo info) {
+		// TODO: throw illegal arg exception if info is null?
 		this.info = info;
 	}
 	
@@ -61,16 +62,25 @@ public class DockerConfigMetaData implements IDockerImageMetadata {
 	
 	@Override
 	public Set<String> exposedPorts() {
+		if (info == null ) {
+			return Collections.emptySet();
+		}
 		return select(info.config(), info.containerConfig(), IDockerContainerConfig::exposedPorts, Collections::emptySet);
 	}
 
 	@Override
 	public List<String> env() {
+		if (info == null ) {
+			return Collections.emptyList();
+		}
 		return select(info.config(), info.containerConfig(), IDockerContainerConfig::env, Collections::emptyList);
 	}
 
 	@Override
 	public Set<String> volumes() {
+		if (info == null ) {
+			return Collections.emptySet();
+		}
         return select(info.config(), info.containerConfig(), IDockerContainerConfig::volumes, Collections::emptySet);
 	}
 	
