@@ -23,6 +23,8 @@ public class MinishiftVersionLoader {
 			
 			
 			for( int i = 0; i < lines.length; i++ ) {
+				if( lines[i].trim().isEmpty()) 
+					continue;
 				if( lines[i].contains(":")) {
 					// Old format,  Some Key: 1.2.3
 					String[] split = lines[i].split(":");
