@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
@@ -355,23 +356,47 @@ public class DeployImageWizardModel
 		if (this.imageMeta == null) {
 			return false;
 		}
-		final List<EnvironmentVariable> envVars = this.imageMeta.env().stream().filter(env -> env.indexOf('=') != -1)
-				.map(env -> env.split("="))
-				.map(splittedEnv -> new EnvironmentVariable(splittedEnv[0], splittedEnv.length > 1 ? splittedEnv[1] : StringUtils.EMPTY))
-				.collect(Collectors.toList());
-		setEnvironmentVariables(envVars);
-		final List<IPort> portSpecs = this.imageMeta.exposedPorts().stream().map(spec -> new PortSpecAdapter(spec))
-				.collect(Collectors.toList());
-		setPortSpecs(portSpecs);
-		if(this.imageMeta.volumes() != null && !this.imageMeta.volumes().isEmpty()) {
-			setVolumes(new ArrayList<>(this.imageMeta.volumes()));
-		} else {
-			setVolumes(new ArrayList<>());
-		}
+		initEnvVariables();
+		initExposedPorts();
+		initVolumes();
 		setReplicas(DEFAULT_REPLICA_COUNT);
 		return true;
 	}
-	
+
+	private void initExposedPorts() {
+		List<IPort> portSpecs = Collections.emptyList();
+		if (imageMeta != null
+				&& !CollectionUtils.isEmpty(imageMeta.exposedPorts())) {
+			portSpecs = imageMeta.exposedPorts().stream()
+					.map(spec -> new PortSpecAdapter(spec))
+					.collect(Collectors.toList());
+		}
+		setPortSpecs(portSpecs);
+	}
+
+	private void initEnvVariables() {
+		List<EnvironmentVariable> envVars = Collections.emptyList();
+		if (imageMeta != null
+				&& !CollectionUtils.isEmpty(imageMeta.env())) {
+			envVars = imageMeta.env().stream()
+					.filter(env -> env != null && env.indexOf('=') != -1)
+					.map(env -> env.split("="))
+					.map(splittedEnv -> 
+						new EnvironmentVariable(splittedEnv[0], splittedEnv.length > 1 ? splittedEnv[1] : StringUtils.EMPTY))
+					.collect(Collectors.toList());
+		}
+		setEnvironmentVariables(envVars);
+	}
+
+	private void initVolumes() {
+		List<String> volumes = Collections.emptyList();
+		if (imageMeta != null
+				&& !CollectionUtils.isEmpty(imageMeta.volumes())) {
+			volumes = new ArrayList<>(imageMeta.volumes());
+		}
+		setVolumes(volumes);
+	}
+
 	@Override
 	public List<EnvironmentVariable> getEnvironmentVariables() {
 		return envModel.getEnvironmentVariables();
@@ -629,6 +654,9 @@ public class DeployImageWizardModel
 		
 		if (dockerConnection != null && DockerImageUtils.hasImage(dockerConnection, repo, tag)) {
 			final IDockerImageInfo info = dockerConnection.getImageInfo(this.imageName);
+			if (info == null) {
+				return null;
+			}
 			return new DockerConfigMetaData(info);
 		} else if (this.project != null) {
 			return OpenShiftProjectUtils.lookupImageMetadata(project, imageURI);
