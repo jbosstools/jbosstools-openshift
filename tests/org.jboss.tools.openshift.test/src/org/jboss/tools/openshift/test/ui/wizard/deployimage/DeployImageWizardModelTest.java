@@ -71,16 +71,22 @@ public class DeployImageWizardModelTest {
     
     @Before
     public void setUp() {
-    	this.dockerConnection = mock(IDockerConnection.class);
-    	this.connection = createConnection();
-    	this.project = mock(IProject.class);
-    	this.model = new TestableDeployImageWizardModel();
-    	model.setConnection(connection);
-    	createModelProjects(connection, project, mock(IProject.class));
-    	model.setDockerConnection(dockerConnection);
-        model.setProject(project);
-        model.loadResources();
+		this.dockerConnection = mock(IDockerConnection.class);
+		this.connection = createConnection();
+		this.project = mock(IProject.class);
+		this.model = createModel(project, connection, dockerConnection);
+		model.loadResources();
     }
+
+	private TestableDeployImageWizardModel createModel(IProject project, Connection connection, IDockerConnection dockerConnection) {
+		TestableDeployImageWizardModel model = new TestableDeployImageWizardModel();
+		model.setConnection(connection);
+		createModelProjects(connection, 
+				project, mock(IProject.class));
+		model.setDockerConnection(dockerConnection);
+		model.setProject(project);
+		return model;
+	}
 
 	private Connection createConnection() {
 		Connection connection = mock(Connection.class);
@@ -88,7 +94,8 @@ public class DeployImageWizardModelTest {
 	}
 
 	private void createModelProjects(Connection connection, IProject... projects) {
-		doReturn(new ArrayList<IProject>(Arrays.asList(projects))).when(connection).getResources(ResourceKind.PROJECT);
+		doReturn(new ArrayList<IProject>(Arrays.asList(projects)))
+			.when(connection).getResources(ResourceKind.PROJECT);
 	}
 	
 	@Test
@@ -238,61 +245,87 @@ public class DeployImageWizardModelTest {
     
     @Test
     public void loadResources_should_load_projects() {
-    	// given
-        IProject project1 = mock(IProject.class);
-        IProject project2 = mock(IProject.class);
-    	createModelProjects(this.connection, project1, project2) ;
-    	model.setResourcesLoaded(false);
-    	// when
-    	model.loadResources();
-    	// then
-        assertThat(model.getProjects()).isEqualTo(Arrays.asList(project1, project2));
+		// given
+		IProject project1 = mock(IProject.class);
+		IProject project2 = mock(IProject.class);
+		createModelProjects(this.connection, project1, project2);
+		model.setResourcesLoaded(false);
+		// when
+		model.loadResources();
+		// then
+		assertThat(model.getProjects()).isEqualTo(Arrays.asList(project1, project2));
     }
 
     @Test
     public void loadResources_should_reset_project_if_not_contained_in_loaded_project() {
-    	// given
-    	IProject selectedProject = mock(IProject.class);
-    	model.setProject(selectedProject);
-    	IProject project1 = mock(IProject.class);
-    	IProject project2 = mock(IProject.class);
-    	createModelProjects(this.connection, project1, project2) ;
-    	model.setResourcesLoaded(false);
-    	// when
-    	model.loadResources();
-    	// then
-        assertThat(model.getProject()).isNotEqualTo(selectedProject);
-        assertThat(model.getProject()).isEqualTo(project1);
+		// given
+		IProject selectedProject = mock(IProject.class);
+		model.setProject(selectedProject);
+		IProject project1 = mock(IProject.class);
+		IProject project2 = mock(IProject.class);
+		createModelProjects(this.connection, project1, project2);
+		model.setResourcesLoaded(false);
+		// when
+		model.loadResources();
+		// then
+		assertThat(model.getProject()).isNotEqualTo(selectedProject);
+		assertThat(model.getProject()).isEqualTo(project1);
     }
     
     @Test
     public void addProject_should_not_reset_project() {
-    	// given
-    	IProject project1 = mock(IProject.class);
-    	// when
-    	model.addProject(project1);
-        assertThat(model.getProject()).isEqualTo(project);
+		// given
+		IProject project1 = mock(IProject.class);
+		// when
+		model.addProject(project1);
+		assertThat(model.getProject()).isEqualTo(project);
     }
     
     @Test
     public void should_not_load_resources_twice() {
-    	// given
-    	verify(connection, times(1)).getResources(ResourceKind.PROJECT); // loaded in #setUp
-    	reset(connection);
-    	// when
-    	model.loadResources();
-    	verify(connection, never()).getResources(ResourceKind.PROJECT);
+		// given
+		verify(connection, times(1)).getResources(ResourceKind.PROJECT); // loaded in #setUp
+		reset(connection);
+		// when
+		model.loadResources();
+		verify(connection, never()).getResources(ResourceKind.PROJECT);
     }
 
     @Test
     public void should_reload_resources_if_connection_was_changed() {
-    	// given
-    	Connection connection2 = mock(Connection.class);
-    	model.setConnection(connection2);
-    	// when
-    	model.loadResources();
-    	// then
-    	verify(connection2, times(1)).getResources(ResourceKind.PROJECT);
+		// given
+		Connection connection2 = mock(Connection.class);
+		model.setConnection(connection2);
+		// when
+		model.loadResources();
+		// then
+		verify(connection2, times(1)).getResources(ResourceKind.PROJECT);
+    }
+
+    @Test
+    public void should_not_reload_resources_if_same_connection_was_set_again() {
+	    	// given
+		verify(connection, times(1)).getResources(ResourceKind.PROJECT); // loaded in #setUp
+		reset(connection);
+		// when
+		model.setConnection(connection);
+		model.loadResources();
+		// then
+		verify(connection, never()).getResources(ResourceKind.PROJECT);
+    }
+
+    @Test
+    public void should_load_resources_if_were_not_loaded_yet_and_same_connection_is_set_again() {
+    		// JBIDE-24499
+    		// given
+    		Connection connection2 = mock(Connection.class);
+    		TestableDeployImageWizardModel model = createModel(project, connection2, dockerConnection);
+    		verify(connection2, never()).getResources(ResourceKind.PROJECT); // not loaded yet
+		model.setConnection(connection2); // set same connection
+		// when
+		model.loadResources();
+		// then
+		verify(connection2, times(1)).getResources(ResourceKind.PROJECT); // still load resources
     }
 
     @Test
@@ -314,7 +347,8 @@ public class DeployImageWizardModelTest {
         assertThat(result).isTrue();
         model.removeServicePort(model.getServicePorts().get(0));
         assertThat(model.getServicePorts()).hasSize(1);
-        assertThat(model.getServicePorts()).isEqualTo(Collections.singletonList(new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
+        assertThat(model.getServicePorts()).isEqualTo(Collections.singletonList(
+        		new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
     }
     
     @Test
@@ -336,13 +370,15 @@ public class DeployImageWizardModelTest {
         assertThat(result).isTrue();
         model.removeServicePort(model.getServicePorts().get(0));
         assertThat(model.getServicePorts()).hasSize(1);
-        assertThat(model.getServicePorts()).isEqualTo(Collections.singletonList(new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
+        assertThat(model.getServicePorts()).isEqualTo(Collections.singletonList(
+        		new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
         model.resetServicePorts();
         assertThat(model.getServicePorts()).hasSize(2);
         ServicePortAdapter first = new ServicePortAdapter(new PortSpecAdapter("8080-tcp", "TCP", 8080));
         first.setRoutePort(true);
-        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(first,
-                                                                    new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
+        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(
+				first,
+				new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
     }
 
     @Test
@@ -371,8 +407,9 @@ public class DeployImageWizardModelTest {
         assertThat(model.getServicePorts()).hasSize(2);
         ServicePortAdapter first = new ServicePortAdapter(new PortSpecAdapter("8080-tcp", "TCP", 8080));
         first.setRoutePort(true);
-        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(first,
-                                                                    new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
+        assertThat(model.getServicePorts()).isEqualTo(Arrays.asList(
+				first,
+				new ServicePortAdapter(new PortSpecAdapter("9990-tcp", "TCP", 9990))));
     }
 
    @Test
@@ -421,8 +458,9 @@ public class DeployImageWizardModelTest {
         assertThat(result).isTrue();
         model.removeEnvironmentVariable(new EnvironmentVariable("V3", "value3"));
         assertThat(model.getEnvironmentVariables()).hasSize(2);
-        assertThat(model.getEnvironmentVariables()).isEqualTo(Arrays.asList(new EnvironmentVariable("V1", "value1"),
-                                                                            new EnvironmentVariable("V2", "value2")));
+        assertThat(model.getEnvironmentVariables()).isEqualTo(Arrays.asList(
+				new EnvironmentVariable("V1", "value1"),
+				new EnvironmentVariable("V2", "value2")));
     }
     
 	@Test
@@ -455,11 +493,10 @@ public class DeployImageWizardModelTest {
 
     private static final class TestableDeployImageWizardModel extends DeployImageWizardModel {
     	
-    	public void setResourcesLoaded(boolean loaded) {
-    		this.resourcesLoaded = loaded;
-    	}
-    	
-    }
+		public void setResourcesLoaded(boolean loaded) {
+			this.resourcesLoaded = loaded;
+		}
+	}
     
     @Test
     public void checkThatRoutingHostnameIsNullByDefault() {

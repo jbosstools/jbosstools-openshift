@@ -71,7 +71,7 @@ public class DeployImageWizardModel
 	private List<IPort> portSpecs = Collections.emptyList();
 	private int replicas;
 	private boolean addRoute = true;
-        private String routeHostname;
+	private String routeHostname;
 	List<IServicePort> servicePorts = new ArrayList<>();
 	IServicePort selectedServicePort = null;
 	private IDockerConnection dockerConnection;
@@ -84,8 +84,7 @@ public class DeployImageWizardModel
 	private String targetRegistryUsername;
 	private String targetRegistryPassword;
     private IServicePort routingPort;
-	
-	
+
 	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
 	private final List<String> imageNames = new ArrayList<>();
     private List<IDockerConnection> dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections());
@@ -188,7 +187,7 @@ public class DeployImageWizardModel
 		Connection oldConnection = this.connection;
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
 		initImageRegistry(connection);
-		this.resourcesLoaded = ObjectUtils.equals(oldConnection, connection);
+		this.resourcesLoaded = resourcesLoaded && ObjectUtils.equals(oldConnection, connection);
 	}
 
 	@Override
