@@ -91,8 +91,6 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		GridLayoutFactory.fillDefaults().applyTo(composite);
 		
 		DialogAdvancedPart part = new DialogAdvancedPart() {
-			
-
 
 			@Override
 			protected void createAdvancedContent(Composite advancedComposite) {
@@ -130,60 +128,51 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
                     .converting(new TrimmingStringConverter())
                     .to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_CLUSTER_NAMESPACE).observe(model))
                     .in(dbc);
-                
-                
-                // Override OC location widgets
-                
-                Button overrideOC = new Button(advancedComposite, SWT.CHECK);
-                overrideOC.setText("Override 'oc' location: ");
-                GridDataFactory.fillDefaults()
-                .align(SWT.LEFT, SWT.CENTER).hint(150, SWT.DEFAULT).applyTo(lblRegistry);
-                
-                Composite ocTextAndBrowse = new Composite(advancedComposite, SWT.NONE);
-                ocTextAndBrowse.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).create());
-                GridDataFactory.fillDefaults()
-                .align(SWT.FILL, SWT.CENTER)
-                .grab(true, false)
-                .applyTo(ocTextAndBrowse);
-                
-                final Text ocText = new Text(ocTextAndBrowse, SWT.SINGLE | SWT.BORDER);
-                GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(250, SWT.DEFAULT).applyTo(ocText);
-                Button ocBrowse = new Button(ocTextAndBrowse, SWT.PUSH);
-                ocBrowse.setText("Browse...");
-                
-                
-                GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(ocBrowse);
-                
-                // Most likely will be changed
-                IObservableValue overrideOCObservable = WidgetProperties.selection().observeDelayed(DELAY, overrideOC);
-                ValueBindingBuilder.bind(overrideOCObservable)
-                    .to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE).observe(model))
-                    .in(dbc);
-                
-                IObservableValue ocLocationObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, ocText);
-                ValueBindingBuilder.bind(ocLocationObservable)
-                    .converting(new TrimmingStringConverter())
-                    .to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE_LOCATION).observe(model))
-                    .in(dbc);
-                
 
-                // Validation here is done via a listener rather than dbc validators
-                // because dbc validators will validate in the UI thread, but validation
-                // of this field requires a background job. 
-                ocBrowse.addSelectionListener(new SelectionAdapter() {
-                	@Override
+				// Override OC location widgets
+				Button overrideOC = new Button(advancedComposite, SWT.CHECK);
+				overrideOC.setText("Override 'oc' location: ");
+				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(150, SWT.DEFAULT).applyTo(lblRegistry);
+
+				Composite ocTextAndBrowse = new Composite(advancedComposite, SWT.NONE);
+				ocTextAndBrowse.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).create());
+				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(ocTextAndBrowse);
+
+				final Text ocText = new Text(ocTextAndBrowse, SWT.SINGLE | SWT.BORDER);
+				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(250, SWT.DEFAULT).applyTo(ocText);
+				Button ocBrowse = new Button(ocTextAndBrowse, SWT.PUSH);
+				ocBrowse.setText("Browse...");
+
+				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(ocBrowse);
+
+				// Most likely will be changed
+				IObservableValue overrideOCObservable = WidgetProperties.selection().observeDelayed(DELAY, overrideOC);
+				ValueBindingBuilder.bind(overrideOCObservable)
+						.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE).observe(model))
+						.in(dbc);
+
+				IObservableValue ocLocationObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, ocText);
+				ValueBindingBuilder.bind(ocLocationObservable).converting(new TrimmingStringConverter()).to(
+						BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE_LOCATION).observe(model))
+						.in(dbc);
+
+				// Validation here is done via a listener rather than dbc validators
+				// because dbc validators will validate in the UI thread, but validation
+				// of this field requires a background job.
+				ocBrowse.addSelectionListener(new SelectionAdapter() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						FileDialog fd = new FileDialog(ocBrowse.getShell());
 						fd.setText(ocText.getText());
 						String result = fd.open();
-						if( result != null ) {
+						if (result != null) {
 							ocLocationObservable.setValue(result);
 							validateOCLocation(ocText.getText(), overrideOC.getSelection());
 						}
 					}
 				});
-                
-                overrideOC.addSelectionListener(new SelectionAdapter() {
+
+				overrideOC.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						ocText.setEnabled(overrideOC.getSelection());
@@ -191,39 +180,34 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 						validateOCLocation(ocText.getText(), overrideOC.getSelection());
 					}
 				});
-                
-                ocText.addModifyListener(new ModifyListener() {
+
+				ocText.addModifyListener(new ModifyListener() {
 					public void modifyText(ModifyEvent e) {
 						validateOCLocation(ocText.getText(), overrideOC.getSelection());
-					}});
-                
-        		decoration = new ControlDecoration(ocText,SWT.LEFT | SWT.TOP);
-        		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault()
-        				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
-        		decoration.setImage(fieldDecoration.getImage());
+					}
+				});
 
-                
-                
+				decoration = new ControlDecoration(ocText, SWT.LEFT | SWT.TOP);
+				FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault()
+						.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
+				decoration.setImage(fieldDecoration.getImage());
+
 				ocText.setEnabled(overrideOC.getSelection());
 				ocBrowse.setEnabled(overrideOC.getSelection());
-				
-				validateOCLocation(ocText.getText(), overrideOC.getSelection());
 
+				validateOCLocation(ocText.getText(), overrideOC.getSelection());
 			}
 
 			@Override
 			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
 				return gridLayoutFactory.numColumns(2);
 			}
-			
-			
 		};
 		part.createAdvancedGroup(composite, 1);
 		this.connectionAdvancedPropertiesProvider = new ConnectionAdvancedPropertiesProvider();
-		
+
 		return composite;
 	}
-	
 
 	private void validateOCLocation(String location, boolean override) {
 		if( override )
