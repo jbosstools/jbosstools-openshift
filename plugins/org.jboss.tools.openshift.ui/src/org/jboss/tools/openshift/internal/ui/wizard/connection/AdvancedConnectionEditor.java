@@ -97,12 +97,11 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				Label lblRegistry = new Label(advancedComposite, SWT.NONE);
 				lblRegistry.setText("Image Registry URL:");
 				GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.CENTER).hint(150, SWT.DEFAULT).applyTo(lblRegistry);
+					.align(SWT.LEFT, SWT.CENTER).applyTo(lblRegistry);
 				
 				Text txtRegistry = new Text(advancedComposite, SWT.BORDER);
 				GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.CENTER)
-					.grab(true, false)
+					.align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
 					.applyTo(txtRegistry);
 				
 				registryURLObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, txtRegistry);
@@ -115,12 +114,12 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
                 Label lblNamespace = new Label(advancedComposite, SWT.NONE);
                 lblNamespace.setText("Cluster namespace:");
                 GridDataFactory.fillDefaults()
-                    .align(SWT.LEFT, SWT.CENTER).hint(150, SWT.DEFAULT).applyTo(lblNamespace);
+                    .align(SWT.LEFT, SWT.CENTER).applyTo(lblNamespace);
                 
                 Text txtClusterNamespace = new Text(advancedComposite, SWT.BORDER);
                 GridDataFactory.fillDefaults()
                     .align(SWT.FILL, SWT.CENTER)
-                    .grab(true, false)
+                    .grab(true, false).span(2, 1)
                     .applyTo(txtClusterNamespace);
                 
                 clusterNamespaceObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, txtClusterNamespace);
@@ -132,30 +131,29 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				// Override OC location widgets
 				Button overrideOC = new Button(advancedComposite, SWT.CHECK);
 				overrideOC.setText("Override 'oc' location: ");
-				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(150, SWT.DEFAULT).applyTo(lblRegistry);
+				GridDataFactory.fillDefaults()
+					.align(SWT.LEFT, SWT.CENTER)
+					.applyTo(lblRegistry);
+				ValueBindingBuilder
+					.bind(WidgetProperties.selection().observeDelayed(DELAY, overrideOC))
+					.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE).observe(model))
+					.in(dbc);
 
-				Composite ocTextAndBrowse = new Composite(advancedComposite, SWT.NONE);
-				ocTextAndBrowse.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).create());
-				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(ocTextAndBrowse);
-
-				final Text ocText = new Text(ocTextAndBrowse, SWT.SINGLE | SWT.BORDER);
-				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(250, SWT.DEFAULT).applyTo(ocText);
-				Button ocBrowse = new Button(ocTextAndBrowse, SWT.PUSH);
-				ocBrowse.setText("Browse...");
-
-				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(ocBrowse);
-
-				// Most likely will be changed
-				IObservableValue overrideOCObservable = WidgetProperties.selection().observeDelayed(DELAY, overrideOC);
-				ValueBindingBuilder.bind(overrideOCObservable)
-						.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE).observe(model))
-						.in(dbc);
+				final Text ocText = new Text(advancedComposite, SWT.SINGLE | SWT.BORDER);
+				GridDataFactory.fillDefaults()
+					.align(SWT.FILL, SWT.CENTER).grab(true, false)
+					.applyTo(ocText);
 
 				IObservableValue ocLocationObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, ocText);
 				ValueBindingBuilder.bind(ocLocationObservable).converting(new TrimmingStringConverter()).to(
 						BeanProperties.value(AdvancedConnectionEditorModel.PROP_OC_OVERRIDE_LOCATION).observe(model))
 						.in(dbc);
 
+				Button ocBrowse = new Button(advancedComposite, SWT.PUSH);
+				ocBrowse.setText("Browse...");
+				GridDataFactory.fillDefaults()
+					.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
+					.applyTo(ocBrowse);
 				// Validation here is done via a listener rather than dbc validators
 				// because dbc validators will validate in the UI thread, but validation
 				// of this field requires a background job.
@@ -198,9 +196,8 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				validateOCLocation(ocText.getText(), overrideOC.getSelection());
 			}
 
-			@Override
 			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
-				return gridLayoutFactory.numColumns(2);
+				return gridLayoutFactory.numColumns(3);
 			}
 		};
 		part.createAdvancedGroup(composite, 1);

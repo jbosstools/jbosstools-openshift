@@ -16,7 +16,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
@@ -42,9 +41,8 @@ public abstract class DialogAdvancedPart {
 
 		// advanced composite
 		Composite advancedComposite = new Composite(parent, SWT.NONE);
-		GridData advancedCompositeGridData = GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).span(numColumns, 1).create();
-		advancedComposite.setLayoutData(advancedCompositeGridData);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.FILL).grab(true, false).span(numColumns, 1).applyTo(advancedComposite);
 		adjustAdvancedCompositeLayout(GridLayoutFactory.fillDefaults()).applyTo(advancedComposite);
 		
 		this.advancedSectionVisibilityAdapter = new DialogChildVisibilityAdapter(advancedComposite, false);
