@@ -8,5 +8,9 @@
 	</parent>
 	<groupId>org.jboss.tools.openshift</groupId>
 	<artifactId>openshift.site</artifactId> 
+	
 	<packaging>eclipse-repository</packaging>
+	<properties>
+		<skipDeployToJBossOrg>false</skipDeployToJBossOrg>
+	</properties>
 </project>
