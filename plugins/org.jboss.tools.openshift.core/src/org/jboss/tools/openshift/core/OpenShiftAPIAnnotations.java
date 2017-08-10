@@ -27,6 +27,8 @@ public interface OpenShiftAPIAnnotations {
 	static final String DEPLOYMENT_CONFIG_NAME = "openshift.io/deployment-config.name";
 	static final String DEPLOYMENT_NAME = "openshift.io/deployment.name";
 
+	static final String DEPLOYER_POD_FOR = "openshift.io/deployer-pod-for.name";
+	
 	static final String GENERATED_BY = "openshift.io/generated-by";
 
 	static final String DESCRIPTION = "description";

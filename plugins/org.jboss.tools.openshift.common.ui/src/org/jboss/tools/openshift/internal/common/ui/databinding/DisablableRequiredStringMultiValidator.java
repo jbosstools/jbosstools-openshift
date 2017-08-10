@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2015 Red Hat, Inc. 
+ * Copyright (c) 2017 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.common.ui.databinding;
 
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
@@ -20,25 +19,25 @@ import org.eclipse.core.runtime.IStatus;
  * 
  * @author Andre Dietisheim
  */
-public class RequiredStringValidationProvider extends MultiValidator {
+public class DisablableRequiredStringMultiValidator extends RequiredStringMultiValidator {
 
-	private IObservableValue observableValue;
-	private String name;
+	private IObservableValue<Boolean> disabledObservable;
 
-	public RequiredStringValidationProvider(IObservableValue value, String name) {
-		this.observableValue = value;
-		observableValue.getValue();
-		this.name = name;
+	public DisablableRequiredStringMultiValidator(IObservableValue<String> value, IObservableValue<Boolean> disabledObservable, String errorMessage) {
+		super(errorMessage, value);
+		this.disabledObservable = disabledObservable;
 	}
 
 	@Override
 	protected IStatus validate() {
-		Object value = observableValue.getValue();
-		if (!(value instanceof String)
-				|| ((String) value).isEmpty()) {
-			return ValidationStatus.cancel("You have to provide a " + name);
+		if (!isDisabled()) {
+			return super.validate();
 		}
 		return ValidationStatus.ok();
 	}
 
+	protected boolean isDisabled() {
+		Boolean disabled = this.disabledObservable.getValue();
+		return Boolean.TRUE.equals(disabled);
+	}	
 }		

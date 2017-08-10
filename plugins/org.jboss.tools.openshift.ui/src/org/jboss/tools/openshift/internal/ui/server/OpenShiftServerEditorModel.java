@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyCommand;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
@@ -46,16 +45,21 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 		this.section = section;
 	}
 
-  	private void update(boolean overrideProject, IConnection connection, List<IConnection> connections,  
+  	private void update(boolean overrideProject, Connection connection, List<Connection> connections,  
   			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
   			String sourcePath, String podPath, boolean isUseInferredPodPath,
   			IResource resource, List<ObservableTreeItem> resourceItems, 
-  			IRoute route, boolean isSelectDefaultRoute, Map<IProject, List<IRoute>> routesByProject) {
+  			IRoute route, boolean isSelectDefaultRoute, Map<IProject, List<IRoute>> routesByProject,
+  			boolean useImageDevmodeKey, String devmodeKey, 
+			boolean useImageDebugPortKey, String debugPortKey, String debugPortValue) {
   		update(connection, connections, 
   				deployProject, projects, 
   				sourcePath, podPath, isUseInferredPodPath, 
   				resource, resourceItems, 
-  				route, isSelectDefaultRoute, routesByProject, getOCBinaryStatus());
+  				route, isSelectDefaultRoute, routesByProject, 
+  				getOCBinaryStatus(),
+  				useImageDevmodeKey, devmodeKey, 
+  				useImageDebugPortKey, debugPortKey, debugPortValue);
 	 	firePropertyChange(PROPERTY_OVERRIDE_PROJECT, this.overrideProject, this.overrideProject = overrideProject);
 	}
 
@@ -67,7 +71,9 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 		update(overrideProject, getConnection(), getConnections(), getDeployProject(), getProjects(), 
 				getSourcePath(), getPodPath(), isUseInferredPodPath(), 
 				getResource(), getResourceItems(), 
-				getRoute(), isSelectDefaultRoute(), getAllRoutes());
+				getRoute(), isSelectDefaultRoute(), getAllRoutes(),
+				isUseImageDevmodeKey(), getDevmodeKey(),
+				isUseImageDebugPortKey(), getDebugPortKey(), getDebugPortValue());
 	}
 
 	@Override
@@ -118,15 +124,15 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 			server.setHost(newHost);
 			return s;
 		}
-		
 	}
 
 	@Override
-	public void setConnection(IConnection connection) {
+	public void setConnection(Connection connection) {
 		setConnection(connection, !initializing);
 	}
-	public void setConnection(IConnection connection, boolean executeCommand) {
-		IConnection previous = getConnection();
+
+	public void setConnection(Connection connection, boolean executeCommand) {
+		Connection previous = getConnection();
 		String previousUrl = previous == null ? null : getConnectionUrl(previous);
 		String newUrl = connection == null ? null : getConnectionUrl(connection);
 		super.setConnection(connection);
@@ -137,8 +143,10 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	}
 	
 	public class SetConnectionCommand extends ServerWorkingCopyPropertyCommand {
-		private IConnection oldConnection, newConnection;
-		public SetConnectionCommand(IServerWorkingCopy server, IConnection oldConnection, IConnection newConnection, String conUrl) {
+
+		private Connection oldConnection, newConnection;
+
+		public SetConnectionCommand(IServerWorkingCopy server, Connection oldConnection, Connection newConnection, String conUrl) {
 			super(server, "Set Connection...", null, conUrl, 
 					OpenShiftServerUtils.ATTR_CONNECTIONURL, null);
 			this.oldConnection = oldConnection;
@@ -159,27 +167,31 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	public void setResource(IResource resource) {
 		setResource(resource, !initializing);
 	}
+
 	public void setResource(IResource resource, boolean executeCommand) {
 		IResource previous = getResource();
 		super.setResource(resource);
 		// fire server command 
-		if( executeCommand ) 
+		if (executeCommand)
 			section.execute(new SetResourceCommand(getServer(), previous, resource));
 	}
-	
-	
-	public class SetResourceCommand extends ServerWorkingCopyPropertyCommand {
+
+	private class SetResourceCommand extends ServerWorkingCopyPropertyCommand {
+
 		private IResource oldResource, newResource;
+
 		public SetResourceCommand(IServerWorkingCopy server, IResource oldResource, IResource newResource) {
 			super(server, "Set Resource...", null, OpenShiftResourceUniqueId.get(newResource), 
 					OpenShiftServerUtils.ATTR_SERVICE, null);
 			this.oldResource = oldResource;
 			this.newResource = newResource;
 		}
+
 		public void undo() {
 			super.undo();
 			setResource(oldResource, false);
 		}
+
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setResource(newResource, false);
 			IStatus s = super.redo(monitor, adapt);

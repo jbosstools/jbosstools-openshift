@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Red Hat, Inc.
+ * Copyright (c) 2015-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -31,9 +31,8 @@ import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.core.Trace;
-import org.jboss.tools.openshift.internal.core.util.OpenShiftProjectUtils;
+import org.jboss.tools.openshift.internal.core.docker.DockerImageUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.dockerutils.DockerImageUtils;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.IDeployImageParameters;
@@ -292,7 +291,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 	 * @return
 	 */
 	protected boolean isImageVisibleByOpenShift(IProject project, DockerImageURI uri) {
-		return OpenShiftProjectUtils.lookupImageMetadata(project, uri) != null;
+		return DockerImageUtils.lookupImageMetadata(project, uri) != null;
 	}
 	
 
@@ -301,8 +300,8 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob
 		route.setServiceName(serviceName);
 		String hostname = parameters.getRouteHostname();
 		if (StringUtils.isNotBlank(hostname)) {
-		    route.setHost(hostname);
-                }
+			route.setHost(hostname);
+		}
 		IServicePort port = parameters.getRoutingPort();
 		if (port != null) {
 		    ITargetPort targetPort = route.createPort();

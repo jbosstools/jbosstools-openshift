@@ -58,7 +58,6 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.comparators;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.dialog;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
- org.jboss.tools.openshift.internal.ui.dockerutils;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.explorer;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.handler;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.job;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",

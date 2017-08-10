@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.models;
 
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
+
 import com.openshift.restclient.model.IResource;
 
 abstract class AbstractResourceWrapper<R extends IResource, P extends AbstractOpenshiftUIElement<?, ?>>
@@ -21,7 +23,7 @@ abstract class AbstractResourceWrapper<R extends IResource, P extends AbstractOp
 
 	@SuppressWarnings("unchecked")
 	void updateWith(IResource r) {
-		if (OpenshiftUIModel.isOlder(getWrapped(), r)) {
+		if (ResourceUtils.isOlder(getWrapped(), r)) {
 			super.updateWith((R) r);
 		}
 	}

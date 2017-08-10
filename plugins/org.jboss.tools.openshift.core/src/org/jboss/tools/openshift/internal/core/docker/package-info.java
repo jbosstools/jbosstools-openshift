@@ -12,4 +12,4 @@
 /**
  * 
  */
-package org.jboss.tools.openshift.internal.ui.dockerutils;
+package org.jboss.tools.openshift.internal.core.docker;

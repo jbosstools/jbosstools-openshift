@@ -25,16 +25,17 @@ public class OpenShiftResourceUniqueId {
 	private static final char UNIQUE_ID_PROJECT_NAME_DELIMITER = '@';
 
 	public static String get(IResource resource) {
-		if (resource == null || StringUtils.isEmpty(resource.getName()) || resource.getProject() == null
-				|| StringUtils.isEmpty(resource.getProject().getName())) {
+		if (resource == null 
+				|| StringUtils.isEmpty(resource.getName())
+				|| StringUtils.isEmpty(resource.getNamespace())) {
 			return null;
 		}
 
 		if (ResourceKind.SERVICE.equals(resource.getKind())) {
-	        return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+	        return new StringBuilder().append(resource.getNamespace()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
                     .append(resource.getName()).toString();   
 		} else {
-	        return new StringBuilder().append(resource.getProject().getName()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+	        return new StringBuilder().append(resource.getNamespace()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
                     .append(resource.getKind()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
                     .append(resource.getName()).toString();   
 		}

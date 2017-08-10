@@ -17,6 +17,4 @@ import org.jboss.ide.eclipse.as.wtp.core.server.launch.ControllableServerLaunchC
  */
 public class OpenShiftStartLaunchConfiguration 
 	extends ControllableServerLaunchConfiguration {
-
-
 }

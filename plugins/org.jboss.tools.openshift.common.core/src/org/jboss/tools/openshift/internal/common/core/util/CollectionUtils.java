@@ -60,5 +60,5 @@ public class CollectionUtils {
 		}
 		
 		return collection.iterator().next();
-	}	
+	}
 }

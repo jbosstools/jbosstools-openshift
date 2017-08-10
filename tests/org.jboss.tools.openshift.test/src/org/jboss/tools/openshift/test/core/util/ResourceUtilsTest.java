@@ -42,7 +42,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.Before;
@@ -59,6 +61,7 @@ import com.openshift.restclient.capability.resources.ITags;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuild;
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
@@ -589,7 +592,7 @@ public class ResourceUtilsTest {
 	public void nullPodsShouldReturnNullDeploymentConfigName() {
 		// given
 		// when
-		String name = getDeploymentConfigNameFor(null);
+		String name = getDeploymentConfigNameFor((List<IPod>) null);
 		// then
 		assertThat(name).isNull();
 	}
@@ -622,7 +625,7 @@ public class ResourceUtilsTest {
 		final HashMap<String, String> podLabels = new HashMap<>();
 		podLabels.put("foo", "booh");
 		podLabels.put("bar", "car");
-		podLabels.put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, "hooolahoo");
+		podLabels.put(ResourceUtils.DEPLOYMENT_CONFIG, "hooolahoo");
 		IPod pod = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels));
 		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD),
 				pod,
@@ -639,12 +642,12 @@ public class ResourceUtilsTest {
 		HashMap<String, String> podLabels1 = new HashMap<>();
 		podLabels1.put("foo", "bar");
 		podLabels1.put("bar", "car");
-		podLabels1.put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, "hooolahoo");
+		podLabels1.put(ResourceUtils.DEPLOYMENT_CONFIG, "hooolahoo");
 		IPod pod1 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels1));		
 
 		final HashMap<String, String> podLabels2 = new HashMap<>();
 		podLabels2.put("kung", "foo");
-		podLabels2.put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, "hookaboo");
+		podLabels2.put(ResourceUtils.DEPLOYMENT_CONFIG, "hookaboo");
 		IPod pod2 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels2));		
 		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD), pod1, pod2);
 		// when
@@ -652,7 +655,40 @@ public class ResourceUtilsTest {
 		// then
 		assertThat(name).isEqualTo("hooolahoo");
 	}
-	
+
+	@Test
+	public void shouldReturnDeploymentConfigForServiceByNameGivenServiceHasDCNameSelector() throws CoreException {
+		// given
+		Connection connection = ResourceMocks.create3ProjectsConnection();
+		IService service = ResourceMocks.PROJECT2_SERVICES[1];
+		// when
+		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
+		// then
+		assertThat(dc).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2]);
+	}
+
+	@Test
+	public void shouldReturnDeploymentConfigForServiceByRCAndPodGivenServiceHasNoDCNameSelector() throws CoreException {
+		// given
+		Connection connection = ResourceMocks.create3ProjectsConnection();
+		IService service = ResourceMocks.PROJECT2_SERVICES[2];
+		// when
+		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
+		// then
+		assertThat(dc).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[0]);
+	}
+
+	@Test(expected=CoreException.class)
+	public void shouldThrowCoreExceptionGivenNoDCNameSelectorNorRCisFoundForService() throws CoreException {
+		// given
+		Connection connection = ResourceMocks.create3ProjectsConnection();
+		IService service = ResourceMocks.PROJECT2_SERVICES[0];
+		// when
+		ResourceUtils.getDeploymentConfigFor(service, connection);
+		// then 
+		// exception expected
+	}
+
 	@Test
 	public void shouldReturnNullIfSelectReplicationControllerByDeploymentConfigOnEmptyList() {
 		// given

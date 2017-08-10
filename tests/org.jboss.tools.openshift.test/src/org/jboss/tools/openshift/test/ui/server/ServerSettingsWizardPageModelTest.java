@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
@@ -88,7 +89,8 @@ public class ServerSettingsWizardPageModelTest {
 		this.project3 = ResourceMocks.createEclipseProject("project3");
 		this.project4 = ResourceMocks.createGitSharedProject("project4", "git@42.git");
 
-		this.model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, null, Arrays.asList(project1, project2, project3, project4), connection, server);
+		this.model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, null, 
+				Arrays.asList(project1, project2, project3, project4), connection, server);
 	}
 
 	@After
@@ -121,7 +123,8 @@ public class ServerSettingsWizardPageModelTest {
 	public void shouldReturnServiceMatchingGitRemoteOfProjectModelWasInitializedWith() {
 		// given
 		// model initialized with project
-		ServerSettingsWizardPageModel model = createModel(null, null, project2, Arrays.asList(project1, project2, project3, project4), connection);
+		ServerSettingsWizardPageModel model = 
+				createModel(null, null, project2, Arrays.asList(project1, project2, project3, project4), connection);
 		// when
 		IResource resource = model.getResource();
 		IProject deployProject = model.getDeployProject();
@@ -133,7 +136,8 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void shouldReturn1stAvailableProjectIfModelInitializingProjectIsNotContainedInAvailableProjects() {
 		// given
-		ServerSettingsWizardPageModel model = createModel(null, null, project2, Arrays.asList(project1, project3, project4), connection);
+		ServerSettingsWizardPageModel model = 
+				createModel(null, null, project2, Arrays.asList(project1, project3, project4), connection);
 		// when
 		IProject deployProject = model.getDeployProject();
 		// then
@@ -143,7 +147,8 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void shouldReturn1stServiceIfNoServiceMatchesGitRemoteOfProjectModelWasInitializedWith() {
 		// given
-		ServerSettingsWizardPageModel model = createModel(null, null, project1, Arrays.asList(project1, project2, project3, project4), connection);
+		ServerSettingsWizardPageModel model = 
+				createModel(null, null, project1, Arrays.asList(project1, project2, project3, project4), connection);
 		// when
 		IResource resource = model.getResource();
 		// then
@@ -163,7 +168,8 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void shouldReturnProjectMatchingServiceByGitRemoteIfSettingUnavailableDeployProject() {
 		// given
-		ServerSettingsWizardPageModel model = createModel(ResourceMocks.PROJECT2_SERVICES[1], null, null, Arrays.asList(project2, project3, project4), connection);
+		ServerSettingsWizardPageModel model = 
+				createModel(ResourceMocks.PROJECT2_SERVICES[1], null, null, Arrays.asList(project2, project3, project4), connection);
 		assertThat(model.getDeployProject()).isEqualTo(project2); 
 		// when
 		model.setDeployProject(project1);
@@ -346,9 +352,10 @@ public class ServerSettingsWizardPageModelTest {
 		// then
 		verify(server, atLeastOnce()).setAttribute(
 				OpenShiftServerUtils.ATTR_CONNECTIONURL, connectionURL);
-		verify(model, atLeastOnce()).updateServerProject(
+		verify(model, atLeastOnce()).updateServer(
 				eq(connectionURL), 
-				any(IService.class), anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
+				any(com.openshift.restclient.model.IResource.class), anyString(), anyString(), anyString(), anyString(), anyString(), 
+				anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -361,8 +368,8 @@ public class ServerSettingsWizardPageModelTest {
 		// then
 		verify(server, atLeastOnce()).setAttribute(
 				OpenShiftServerUtils.ATTR_DEPLOYPROJECT, deployProject.getName());
-		verify(model, atLeastOnce()).updateServerProject(
-				anyString(),any(IService.class), anyString(), anyString(), anyString(), 
+		verify(model, atLeastOnce()).updateServer(
+				anyString(),any(IService.class), anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),  
 				eq(deployProject));
 	}
 
@@ -375,10 +382,10 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_SOURCE_PATH), eq(sourcePath));
-		verify(model, atLeastOnce()).updateServerProject(
+		verify(model, atLeastOnce()).updateServer(
 				anyString(), any(IService.class), 
 				eq(sourcePath), 
-				anyString(), anyString(),any(org.eclipse.core.resources.IProject.class));
+				anyString(), anyString(),anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -391,10 +398,10 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_POD_PATH), anyString());
-		verify(model, atLeastOnce()).updateServerProject(
-				anyString(), any(IService.class), anyString(), 
-				eq(podPath), 
-				anyString(), any(org.eclipse.core.resources.IProject.class));
+		verify(model, atLeastOnce()).updateServer(
+				anyString(), any(IService.class), anyString(), anyString(),
+				eq(podPath),
+				anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -407,25 +414,27 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_POD_PATH), eq(""));
-		verify(model, atLeastOnce()).updateServerProject(
-				anyString(), any(IService.class), anyString(), 
+		verify(model, atLeastOnce()).updateServer(
+				anyString(), any(IService.class), anyString(), anyString(),
 				eq(""), 
-				anyString(), any(org.eclipse.core.resources.IProject.class));
+				anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
 	public void should_set_server_service_when_updating_server() throws CoreException {
 		// given
+		model.setSelectDefaultRoute(true);
 		IResource resource = model.getResource();
 		assertThat(resource).isNotNull();
 		// when
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
-		verify(model, atLeastOnce()).updateServerProject(
+		verify(model, atLeastOnce()).updateServer(
 				anyString(), 
 				eq(resource), 
-				anyString(), anyString(), anyString(),any(org.eclipse.core.resources.IProject.class));
+				anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), 
+				any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -439,10 +448,10 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_ROUTE), eq(routeURL));
-		verify(model, atLeastOnce()).updateServerProject(
-				anyString(), any(IService.class), anyString(), anyString(), 
-				eq(routeURL),
-				any(org.eclipse.core.resources.IProject.class));
+		verify(model, atLeastOnce()).updateServer(
+				anyString(), any(IService.class), anyString(), 
+				eq(routeURL), 
+				anyString(), anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
 	@Test
@@ -455,8 +464,8 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_ROUTE), isNull(String.class));
-		verify(model, atLeastOnce()).updateServerProject(
-				anyString(), any(IService.class), anyString(), anyString(), 
+		verify(model, atLeastOnce()).updateServer(
+				anyString(), any(IService.class), anyString(), anyString(), anyString(), anyString(), anyString(),
 				isNull(String.class),
 				any(org.eclipse.core.resources.IProject.class));
 	}
@@ -508,13 +517,15 @@ public class ServerSettingsWizardPageModelTest {
 		assertEquals("openshift3.eap", this.model.getProfileId());
 	}
 	
-	private ServerSettingsWizardPageModel createModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, List<IProject> projects, Connection connection) {
+	private ServerSettingsWizardPageModel createModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject,
+			List<IProject> projects, Connection connection) {
 		return createModel(service, route, deployProject, projects, connection, null);
 	}
 
-	private TestableServerSettingsWizardPageModel createModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, List<IProject> projects, Connection connection, IServerWorkingCopy server) {
+	private TestableServerSettingsWizardPageModel createModel(IService service, IRoute route,
+			org.eclipse.core.resources.IProject deployProject, List<IProject> projects, Connection connection, IServerWorkingCopy server) {
 		TestableServerSettingsWizardPageModel model = 
-				spy(new TestableServerSettingsWizardPageModel(service, null, deployProject, connection, server));
+				spy(new TestableServerSettingsWizardPageModel(service, route, deployProject, connection, server));
 		doReturn(projects).when(model).loadProjects();
 		model.loadResources();
 		return model;
@@ -522,7 +533,8 @@ public class ServerSettingsWizardPageModelTest {
 
 	public class TestableServerSettingsWizardPageModel extends ServerSettingsWizardPageModel {
 
-		public TestableServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, Connection connection, IServerWorkingCopy server) {
+		public TestableServerSettingsWizardPageModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject, 
+				Connection connection, IServerWorkingCopy server) {
 			super(service, route, deployProject, connection, server);
 		}
 
@@ -530,13 +542,18 @@ public class ServerSettingsWizardPageModelTest {
 		public List<org.eclipse.core.resources.IProject> loadProjects() {
 			return super.loadProjects();
 		}
-		
+
 		@Override
-		public void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath, 
-				String routeURL, org.eclipse.core.resources.IProject deployProject) {
-				//super.updateServerProject(connectionUrl, resource, sourcePath, podPath, routeURL, deployProject);
+		protected void updateServer(String connectionUrl, com.openshift.restclient.model.IResource resource, String sourcePath, 
+				String routeURL, String podPath, String devmodeKey, String debugPortKey, String debugPortValue, 
+				org.eclipse.core.resources.IProject deployProject) {
+			//super.updateServerProject(connectionUrl, resource, sourcePath, podPath, routeURL, deployProject);
 		}
-		
+
+		@Override
+		public void resourceChanged(IResourceChangeEvent event) {
+		}
+
 		@Override
 		public String getProfileId() {
 			return super.getProfileId();

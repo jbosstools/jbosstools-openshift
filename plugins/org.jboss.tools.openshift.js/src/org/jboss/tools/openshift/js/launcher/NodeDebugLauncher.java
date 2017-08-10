@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.js.launcher;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -63,7 +65,7 @@ public final class NodeDebugLauncher {
 		v8debugLaunch.setAttribute(LaunchParams.ATTR_APP_PROJECT_RELATIVE_PATH,
 				project.getFile(NodeDebuggerUtil.PACKAGE_JSON).getProjectRelativePath().toOSString());
 
-		v8debugLaunch.setAttribute(LaunchParams.ATTR_REMOTE_HOME_DIR, getPodPath(server));
+		v8debugLaunch.setAttribute(LaunchParams.ATTR_REMOTE_HOME_DIR, getPodPath(server, new NullProgressMonitor()));
 
 		v8debugLaunch.setAttribute(LaunchParams.PredefinedSourceWrapperIds.CONFIG_PROPERTY,
 				NodeDebuggerUtil.encode(NodeDebuggerUtil.PREDEFIENED_WRAPPERS));
@@ -94,8 +96,8 @@ public final class NodeDebugLauncher {
 		}
 	}
 
-	private static String getPodPath(IServer server) throws CoreException {
-		IResource resource = OpenShiftServerUtils.getResource(server);
+	private static String getPodPath(IServer server, IProgressMonitor monitor) throws CoreException {
+		IResource resource = OpenShiftServerUtils.getResource(server, monitor);
 		return OpenShiftServerUtils.loadPodPath(resource, server);
 	}
 

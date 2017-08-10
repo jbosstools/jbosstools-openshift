@@ -34,10 +34,10 @@ import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
+import org.jboss.tools.openshift.internal.core.docker.DockerConfigMetaData;
+import org.jboss.tools.openshift.internal.core.docker.DockerImageUtils;
+import org.jboss.tools.openshift.internal.core.docker.IDockerImageMetadata;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
-import org.jboss.tools.openshift.internal.core.util.OpenShiftProjectUtils;
-import org.jboss.tools.openshift.internal.ui.dockerutils.DockerImageUtils;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariable;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablesPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
@@ -658,7 +658,7 @@ public class DeployImageWizardModel
 			}
 			return new DockerConfigMetaData(info);
 		} else if (this.project != null) {
-			return OpenShiftProjectUtils.lookupImageMetadata(project, imageURI);
+			return DockerImageUtils.lookupImageMetadata(project, imageURI);
 		}
 		return null;
 	}

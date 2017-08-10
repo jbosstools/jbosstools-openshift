@@ -12,11 +12,12 @@ package org.jboss.tools.openshift.internal.core.server.debug;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode.DebugContext;
 
 public interface IDebugListener {
 	
-	public void onDebugChange(DebuggingContext debuggingContext, IProgressMonitor monitor) throws CoreException;
+	public void onDebugChange(DebugContext debuggingContext, IProgressMonitor monitor) throws CoreException;
 	
-	public void onPodRestart(DebuggingContext debuggingContext, IProgressMonitor monitor) throws CoreException;
+	public void onPodRestart(DebugContext debuggingContext, IProgressMonitor monitor) throws CoreException;
 
 }

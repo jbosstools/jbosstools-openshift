@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.test.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,11 +41,15 @@ import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.team.internal.core.TeamPlugin;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.core.OpenShiftResourceSelectors;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
@@ -81,11 +86,23 @@ public class ResourceMocks {
 
 	public static final IProject[] PROJECTS = new IProject[] { PROJECT1, PROJECT2, PROJECT3, PROJECT4, PROJECT5 };
 
+	public static final IDeploymentConfig[] PROJECT2_DEPLOYMENTCONFIGS = new IDeploymentConfig[] {
+			createDeploymentConfig("project2-app1-dc", PROJECT2),
+			createDeploymentConfig("project2-app2-dc", PROJECT2),
+			createDeploymentConfig("project2-app3-dc", PROJECT2)
+	};
+
 	public static final IService[] PROJECT2_SERVICES = new IService[] {
 			// selectors need to match pod labels
-			createService("project2-app1", PROJECT2, new HashMap<String, String>() {{ put("key1", "42"); put("key2", "24"); put("key3", "48"); }}),
-			createService("project2-app2", PROJECT2, new HashMap<String, String>() {{ put("key1", "84"); put("key2", "48"); }}),
-			createService("project2-app3", PROJECT2, new HashMap<String, String>() {{ put("key1", "42"); put("key2", "24"); }})
+			createService("project2-app1", PROJECT2, new HashMap<String, String>() {{ 
+				put("key1", "42"); put("key2", "24"); put("key3", "48"); }}), 
+			createService("project2-app2", PROJECT2, new HashMap<String, String>() {{ 
+				put("key1", "84"); put("key2", "48");
+				put(OpenShiftResourceSelectors.DEPLOYMENT_CONFIG, PROJECT2_DEPLOYMENTCONFIGS[2].getName());}}),
+			createService("project2-app3", PROJECT2, new HashMap<String, String>() {{ 
+				put("key1", "42"); put("key2", "24"); }}),
+			createService("project2-app4", PROJECT2, new HashMap<String, String>() {{ 
+				put("key1", "84"); put("key2", "48"); }})
 	};
 
 	public static final String PROJECT2_BUILDCONFIG2_BUILD_SOURCEURI = "git@gitrepo.io/somegroup/someproject.git";
@@ -109,20 +126,27 @@ public class ResourceMocks {
 			createRoute("project2-app3-route4", PROJECT2, "project2-app3")
 	};
 
-	public static final IDeploymentConfig[] PROJECT2_DEPLOYMENTCONFIGS = new IDeploymentConfig[] {
-			createDeploymentConfig("project2-app1-dc", PROJECT2),
-			createDeploymentConfig("project2-app2-dc", PROJECT2),
-			createDeploymentConfig("project2-app3-dc", PROJECT2)
+	public static final IReplicationController[] PROJECT2_REPLICATION_CONTROLLERS = new IReplicationController[] {
+			// labels need to match rc replica selectors
+			createReplicationController("project2-app2-rc", PROJECT2, new HashMap<String, String>() {{ 
+				put("key1", "84"); put("key2", "48"); }}),
+			createReplicationController("project2-app3-rc", PROJECT2, new HashMap<String, String>() {{ 
+				put("key1", "42"); put("key2", "24"); }})
 	};
 
 	public static final IPod[] PROJECT2_PODS = new IPod[] {
-			// labels need to match service selectors and contain dc name
-			createPod("project2-app1", PROJECT2, new HashMap<String, String>() {{ 
-				put("key1", "42"); put("key2", "24"); }}),
-			createPod("project2-app2", PROJECT2, new HashMap<String, String>() {{ 
-				put("key1", "84"); put("key2", "48"); put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, PROJECT2_DEPLOYMENTCONFIGS[2].getName());}}),
-			createPod("project2-app3", PROJECT2, new HashMap<String, String>() {{ 
-				put("key1", "84"); put("key2", "48"); }})
+			/**
+			 * labels need to match service selectors and contain dc name. 
+			 * 
+			 * @See ResourceUtils#areRelated(IService, IDeploymentConfig, Collection<IPod>)
+			 */
+			createPod("project2-app1", PROJECT2, 
+					new HashMap<String, String>() {{ put("key1", "42"); put("key2", "24"); }},
+					new HashMap<String, String>() {{ put(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME, PROJECT2_DEPLOYMENTCONFIGS[0].getName());}}),
+			createPod("project2-app2", PROJECT2, 
+					new HashMap<String, String>() {{ put("key1", "84"); put("key2", "48"); }}), // needs to NOT have deployment config label
+			createPod("project2-app3", PROJECT2, 
+					new HashMap<String, String>() {{ put("key1", "24"); put("key2", "48"); }})
 	};
 
 	public static final IService[] PROJECT3_SERVICES = new IService[] {
@@ -162,9 +186,9 @@ public class ResourceMocks {
             createPod("project4-app1", PROJECT4, new HashMap<String, String>() {{ 
                 put("key1", "42"); put("key2", "24"); }}),
             createPod("project4-app2", PROJECT4, new HashMap<String, String>() {{ 
-                put("key1", "84"); put("key2", "48"); put(ResourceUtils.DEPLOYMENT_CONFIG_KEY, PROJECT4_DEPLOYMENTCONFIGS[2].getName());}}),
+                put("key1", "84"); put("key2", "48"); put(ResourceUtils.DEPLOYMENT_CONFIG, PROJECT4_DEPLOYMENTCONFIGS[2].getName());}}),
             createPod("project4-app3", PROJECT4, new HashMap<String, String>() {{ 
-                put("key1", "84"); put("key2", "48"); }})
+                put("key1", "84"); put("key2", "48"); }}) 
     };
 
     public static final IReplicationController[] PROJECT5_REPLICATINCONTROLLERS = new IReplicationController[] {
@@ -195,6 +219,8 @@ public class ResourceMocks {
 		when(PROJECT2.getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT2_ROUTES));
 		when(connection.getResources(ResourceKind.BUILD_CONFIG, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_BUILDCONFIGS));
 		when(connection.getResources(ResourceKind.POD, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_PODS));
+		when(connection.getResources(ResourceKind.REPLICATION_CONTROLLER, PROJECT2.getName()))
+			.thenReturn(Arrays.asList(PROJECT2_REPLICATION_CONTROLLERS));
 		when(connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_DEPLOYMENTCONFIGS));
 		mockConnectionGetResource(PROJECT2_DEPLOYMENTCONFIGS, ResourceKind.DEPLOYMENT_CONFIG, connection);
 
@@ -315,16 +341,37 @@ public class ResourceMocks {
 	}
 
 	public static IPod createPod(String name, IProject project, Map<String, String> labels) {
+		return createPod(name, project, labels, Collections.emptyMap());
+	}
+
+	public static IPod createPod(final String name, final IProject project, final Map<String, String> labels, final Map<String, String> annotations) {
 		return createResource(IPod.class, ResourceKind.POD,
 				pod -> {
 					mockGetResourceProperties(name, project, pod);
 					when(pod.getLabels()).thenReturn(labels);
+					when(pod.getAnnotations()).thenReturn(annotations);
+					// return value in mocked map for requested key
+					doAnswer(new Answer<String>() {
+						@Override
+						public String answer(InvocationOnMock invocation) throws Throwable {
+							return annotations.get(invocation.getArguments()[0]);
+						}
+					}).when(pod).getAnnotation(anyString());
 				});
 	}
 
 	public static IDeploymentConfig createDeploymentConfig(String name, IProject project) {
 		return createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG, 
 				dc -> mockGetResourceProperties(name, project, dc));
+	}
+
+	public static IReplicationController createReplicationController(String name, IProject project, Map<String, String> labels) {
+		return createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER,
+				rc -> {
+					mockGetResourceProperties(name, project, rc);
+					when(rc.getReplicaSelector()).thenReturn(labels); // match pod 
+					when(rc.getTemplateLabels()).thenReturn(labels); // match service
+				});
 	}
 
 	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz, String kind) {
