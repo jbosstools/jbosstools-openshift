@@ -41,9 +41,17 @@ import org.eclipse.wst.server.core.internal.Server;
 import org.jboss.tools.openshift.core.server.OpenShiftServer;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.Trace;
 
-public class OpenshiftResourceChangeListener implements IResourceChangeListener {
+/**
+ * A server adapter publisher that listens to changes in the local (magic)
+ * project and publishes the server adapter upon those.
+ * 
+ * @author Xaveir Coulon
+ * @author Rob Stryker
+ */
+public class ResourceChangePublisher implements IResourceChangeListener {
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
@@ -74,15 +82,15 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 		}
 	}
 	private List<IResource> getDeltaResourceChanges(IResourceDelta delta) {
-		final ArrayList<IResource> changed = new ArrayList<>();
+		final List<IResource> changed = new ArrayList<>();
 		IResourceDeltaVisitor visitor = new IResourceDeltaVisitor() {
 			@Override
 			public boolean visit(IResourceDelta delta2) throws CoreException {
 				// has this deltaResource been changed?
 				if (delta2.getKind() == IResourceDelta.NO_CHANGE) {
 					return false;
-				} else if(delta2.getResource() instanceof IFolder
-						&& (delta2.getKind() == IResourceDelta.ADDED || delta2.getKind() == IResourceDelta.REMOVED)) {
+				} else if (delta2.getResource() instanceof IFolder && (delta2.getKind() == IResourceDelta.ADDED 
+						|| delta2.getKind() == IResourceDelta.REMOVED)) {
 					// only take folders additions and removals into account.
 					changed.add(delta2.getResource());
 				} else if (delta2.getResource() instanceof IFile) {
@@ -103,18 +111,18 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 		try {
 			delta.accept(visitor);
 		} catch(CoreException ce) {
-			// TODO log
+			OpenShiftCoreActivator.logError("Could not determine the changed OpenShift resources.", ce);
 		}
 		return changed;
 	}
-	
+
 	protected void publishHandleProjectChange(IResourceDelta delta, IResourceChangeEvent event) {
 		IProject project = (IProject) delta.getResource();
 		if (project == null)
 			return;
 
 		List<IResource> changes = getDeltaResourceChanges(delta); 
-		if( changes.size() > 0) {
+		if (!changes.isEmpty()) {
 			OpenShiftServer[] servers2 = getPublishRequiredServers(delta);
 			int size2 = servers2.length;
 			for (int j = 0; j < size2; j++) {
@@ -122,7 +130,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 			}
 		}
 	}
-	
+
 	private OpenShiftServer[] getPublishRequiredServers(IResourceDelta delta){		
 		// The list of servers that will require publish
 		final List<OpenShiftServer> servers2 = new ArrayList<>();
@@ -142,7 +150,7 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 				}
 			}
 		}
-		return (OpenShiftServer[]) servers2.toArray(new OpenShiftServer[servers2.size()]);
+		return servers2.toArray(new OpenShiftServer[servers2.size()]);
 	}
 	
 
@@ -181,12 +189,16 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 			this.delta = delta;
 			this.changes = change;
 			this.event = event;
-			
+
+			setRule(createResourcesRule(openshiftServer, delta));
+		}
+
+		private ISchedulingRule createResourcesRule(OpenShiftServer openshiftServer, IResourceDelta delta) {
 			ISchedulingRule[] rules = new ISchedulingRule[2];
 			IResourceRuleFactory ruleFactory = ResourcesPlugin.getWorkspace().getRuleFactory();
 			rules[0] = ruleFactory.createRule(delta.getResource());
 			rules[1] = openshiftServer.getServer();
-			setRule(MultiRule.combine(rules));
+			return MultiRule.combine(rules);
 		}
 		
 		@Override
@@ -226,8 +238,9 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 			if (auto == Server.AUTO_PUBLISH_DISABLE)
 				return;
 			
-			if( (auto == Server.AUTO_PUBLISH_BUILD) && 
-					!buildOccurred && !projectClosedOrDeleted)
+			if( (auto == Server.AUTO_PUBLISH_BUILD) 
+					&& !buildOccurred 
+					&& !projectClosedOrDeleted)
 				return;
 			
 			int time = ((Server)openshiftServer.getServer()).getAutoPublishTime();
@@ -239,8 +252,8 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 
 		private boolean isProjectCloseOrDeleteEvent(IResourceChangeEvent event) {
 			int kind = event.getType();
-			if( (kind & IResourceChangeEvent.PRE_CLOSE) > 0 || 
-					(kind & IResourceChangeEvent.PRE_DELETE) > 0)
+			if( (kind & IResourceChangeEvent.PRE_CLOSE) > 0 
+					|| (kind & IResourceChangeEvent.PRE_DELETE) > 0)
 				return true;
 			return false;
 		}
@@ -248,10 +261,10 @@ public class OpenshiftResourceChangeListener implements IResourceChangeListener 
 		private boolean didBuildOccur(IResourceChangeEvent event) {
 			int kind = event.getBuildKind();
 			final boolean eventOccurred = 
-				   (kind == IncrementalProjectBuilder.INCREMENTAL_BUILD) || 
-				   (kind == IncrementalProjectBuilder.FULL_BUILD) || 
-				   ((kind == IncrementalProjectBuilder.AUTO_BUILD && 
-						ResourcesPlugin.getWorkspace().isAutoBuilding()));
+				   kind == IncrementalProjectBuilder.INCREMENTAL_BUILD 
+				   || kind == IncrementalProjectBuilder.FULL_BUILD
+				   || (kind == IncrementalProjectBuilder.AUTO_BUILD 
+						&& ResourcesPlugin.getWorkspace().isAutoBuilding());
 			return eventOccurred;
 		}
 	}

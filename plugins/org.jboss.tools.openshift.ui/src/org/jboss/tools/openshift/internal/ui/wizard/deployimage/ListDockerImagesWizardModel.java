@@ -23,7 +23,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
 import org.jboss.tools.common.databinding.ObservablePojo;
-import org.jboss.tools.openshift.internal.ui.dockerutils.DockerImageUtils;
+import org.jboss.tools.openshift.internal.core.docker.DockerImageUtils;
 
 /**
  * {@link WizardPage} to list and select a Docker Image.

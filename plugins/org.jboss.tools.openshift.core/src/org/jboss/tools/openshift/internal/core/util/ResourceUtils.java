@@ -22,12 +22,21 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jgit.transport.URIish;
+import org.eclipse.osgi.util.NLS;
+import org.jboss.dmr.ModelNode;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.core.OpenShiftResourceSelectors;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.ResourceKind;
@@ -51,7 +60,7 @@ public class ResourceUtils {
 
 	public static final String DOCKER_IMAGE_KIND = "DockerImage";
 	public static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
-	public static final String DEPLOYMENT_CONFIG_KEY = "deploymentconfig";
+	public static final String DEPLOYMENT_CONFIG = "deploymentconfig";
 
 	public static IClient getClient(IResource resource) {
 		return resource.accept(new CapabilityVisitor<IClientCapability, IClient>() {
@@ -62,6 +71,17 @@ public class ResourceUtils {
 		}, null);
 	}
 
+	public static IClient checkedGetClient(IResource resource) throws CoreException {
+		IClient client = getClient(resource);
+		if (client == null) {
+			throw new CoreException(
+					StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
+							NLS.bind("Could not get client for resource {0}", resource.getName())));
+		}
+		return client;
+	}
+
+	
 	/**
 	 * Returns {@code true} if the given route points to the given service and
 	 * the given service is the service that the given route points to.
@@ -105,6 +125,14 @@ public class ResourceUtils {
 
 	public static boolean areRelated(IReplicationController rc, IService s) {
 		return containsAll(s.getSelector(), rc.getReplicaSelector());
+	}
+
+	public static boolean areRelated(IReplicationController rc, IDeploymentConfig dc) {
+		if (dc == null
+				|| rc == null) {
+			return false;
+		}
+		return StringUtils.equals(dc.getName(), getDeploymentConfigNameFor(rc));
 	}
 
 	public static boolean areRelated(IPod pod, IService s) {
@@ -219,7 +247,7 @@ public class ResourceUtils {
 	 * @param pods
 	 * @return
 	 */
-	public static List<IPod> getPodsFor(IService service, Collection<IPod> pods) {
+	public static List<IPod> getPodsFor(IService service, List<IPod> pods) {
 		final Map<String, String> serviceSelector = service.getSelector();
 		return getPodsForSelector(serviceSelector, pods);
 	}
@@ -230,22 +258,14 @@ public class ResourceUtils {
      * @param pods the list of pods to search for
      * @return the matched pods
      */
-    public static List<IPod> getPodsFor(IReplicationController replicationController, Collection<IPod> pods) {
-        return pods.stream().filter(pod -> containsAll(replicationController.getReplicaSelector(), pod.getLabels()))
-                            .collect(Collectors.toList());
-    }
-
-    /**
-     * Find the collection of pods that match the deployment name annotation
-     * @param replicationController the replication controller to match
-     * @param pods the list of pods to search for
-     * @return the matched pods
-     */
-    public static List<IPod> getPodsFor(IDeploymentConfig deploymentConfig, Collection<IPod> pods) {
-        return pods.stream().filter(pod -> {
-            String configName = pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
-            return deploymentConfig.getName().equals(configName);
-        }).collect(Collectors.toList());
+    public static List<IPod> getPodsFor(IDeploymentConfig deploymentConfig, List<IPod> pods) {
+        return pods
+        		.stream()
+			.filter(pod -> {
+		            String configName = pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
+		            return deploymentConfig.getName().equals(configName);
+			})
+			.collect(Collectors.toList());
     }
 
     /**
@@ -254,7 +274,7 @@ public class ResourceUtils {
      * @param pods the list of pods to search
      * @return the list of linked pods
      */
-    public static List<IPod> getPodsFor(IResource resource, Collection<IPod> pods) {
+    public static List<IPod> getPodsFor(IResource resource, List<IPod> pods) {
         if (resource instanceof IService) {
             return getPodsFor((IService) resource, pods);
         } else if (resource instanceof IDeploymentConfig) {
@@ -299,8 +319,7 @@ public class ResourceUtils {
 	/**
 	 * Returns {@code true} if the given pod is a pod running builds. This is
 	 * the case if the pod is annotated with the build name. Returns
-	 * {@code false} if the given pod is a pod running an application or is
-	 * null.
+	 * {@code false} otherwise
 	 * 
 	 * @param pod
 	 *            the pod that shall be checked whether it's a build pod
@@ -315,7 +334,64 @@ public class ResourceUtils {
 		}
 		return pod.isAnnotatedWith(OpenShiftAPIAnnotations.BUILD_NAME);
 	}
+
+	public static Collection<IPod> getBuildPods(Collection<IPod> allPods) {
+		return allPods.stream()
+				.filter(pod -> isBuildPod(pod))
+				.collect(Collectors.toList());
+	}
 	
+	/**
+	 * Returns {@code true} if the given pod is a pod running deployments. This is
+	 * the case if the pod has a label which tells it to be a deployer for some pod. Returns
+	 * {@code false} otherwise.
+	 * 
+	 * @param pod
+	 *            the pod that shall be checked whether it's a deployer pod
+	 * @return true if pod is annotated with the build name; false otherwise;
+	 * 
+	 * @see IPod
+	 * @see OpenShiftAPIAnnotations#DEPLOYER_POD_FOR
+	 */
+	public static boolean isDeployerPod(IPod pod) {
+		if (pod == null) {
+			return false;
+		}
+		return pod.getLabels().containsKey(OpenShiftAPIAnnotations.DEPLOYER_POD_FOR);
+	}
+
+	/**
+	 * Returns {@code true} if the given pod is a pod running applications. This is
+	 * the case if the pod is neither a build nor deployer pod. Returns
+	 * {@code false} otherwise.
+	 * example:
+	 * <pre>
+	 *  "labels": {
+     *       "openshift.io/deployer-pod-for.name": "nodejs-5"
+     *   },
+	 * </pre>
+	 * 
+	 * @param pod
+	 *            the pod that shall be checked whether it's a runtime/application pod
+	 * @return true if pod is annotated with the build name; false otherwise;
+	 * 
+	 * @see IPod
+	 * @see OpenShiftAPIAnnotations#DEPLOYER_POD_FOR
+	 */
+	public static boolean isRuntimePod(IPod pod) {
+		if (pod == null) {
+			return false;
+		}
+		return !isBuildPod(pod)
+				&& !isDeployerPod(pod);
+	}
+
+	public static Collection<IPod> getRuntimePods(Collection<IPod> allPods) {
+		return allPods.stream()
+				.filter(pod -> isRuntimePod(pod))
+				.collect(Collectors.toList());
+	}
+
 	/**
 	 * The image reference for an image change trigger used to correlate a 
 	 * deploymentconfig to a buildconfig
@@ -389,6 +465,24 @@ public class ResourceUtils {
 		}
 		return "";
 	}
+
+	/**
+	 * Returns the image stream tag among the given ones that matches the given docker
+	 * image digest. The image stream tag property in "image.metadata.name" is being
+	 * matched against the given digest.
+	 * 
+	 * @param digest the digest that the image stream tag shall match in the property "image.metadata.name"
+	 * @param imageStreamTags the image stream tags to inspect
+	 * @return
+	 */
+	public static IResource getImageStreamTagForDigest(String digest, Collection<? extends IResource> imageStreamTags) {
+		return imageStreamTags.stream()
+				.filter(istag -> {
+					String imageName = ModelNode.fromJSONString(istag.toJson()).get("image").get("metadata").get("name").asString();
+					return digest.equals(imageName);
+				})
+				.findFirst().orElse(null);
+	}
 	
 	/**
 	 * Find the collection of pods for the given replication controller
@@ -396,10 +490,9 @@ public class ResourceUtils {
 	 * @param pods the list of pods to search
 	 * @return the list of matched pods
 	 */
-	public static Collection<IPod> getPodsFor(IReplicationController replicationController) {
-		List<IPod> pods = replicationController.getProject().getResources(ResourceKind.POD);
+	public static List<IPod> getPodsFor(IReplicationController replicationController, List<IPod> allPods) {
 		Map<String, String> selector = replicationController.getReplicaSelector();
-		return getPodsForSelector(selector, pods);
+		return getPodsForSelector(selector, allPods);
 	}
 
 	/**
@@ -474,11 +567,10 @@ public class ResourceUtils {
 				|| service == null) {
 			return null;
 		}
-
-		return allReplicationControllers.stream()
+		List<IReplicationController> rcs = allReplicationControllers.stream()
 				.filter(rc -> containsAll(service.getSelector(), rc.getTemplateLabels()))
-				.findFirst()
-				.orElse(null);
+				.collect(Collectors.toList());
+		return getLatestDeploymentConfigVersion(rcs);
 	}
 
     /**
@@ -519,19 +611,46 @@ public class ResourceUtils {
 				})
 				.orElse(null);
 	}
-	
-	public static IDeploymentConfig getLatestResourceVersion(List<IDeploymentConfig> dcs) {
-		if (dcs == null 
-				|| dcs.isEmpty()) {
+
+	/**
+	 * Returns {@code true} if the given 1st resource has a lower resource version
+	 * as the given 2nd resource. Failing to retrieve the resource version on any of
+	 * the 2 resources also returns {@code true}.
+	 * 
+	 * @param thisResource
+	 * @param thatResource
+	 * @return true if the 1st resource is older than the 2nd one
+	 * 
+	 * @see
+	 */
+	public static boolean isOlder(IResource thisResource, IResource thatResource) {
+		try {
+			int thisVersion = Integer.valueOf(thisResource.getResourceVersion());
+			int thatVersion = Integer.valueOf(thatResource.getResourceVersion());
+			return thisVersion < thatVersion;
+		} catch (NumberFormatException e) {
+			return true;
+		}
+	}
+
+	/**
+	 * Returns the latest version of the given collection of deployment configs.
+	 * 
+	 * @param resources
+	 * @return
+	 */
+	public static <R extends IResource> R getLatestResourceVersion(List<R> resources) {
+		if (resources == null 
+				|| resources.isEmpty()) {
 			return null;
 		}
 
-		return dcs.stream()
-				.max(new NumericResourceAttributeComparator<IDeploymentConfig>() {
+		return resources.stream()
+				.max(new NumericResourceAttributeComparator<R>() {
 
 					@Override
-					protected int getResourceAttribute(IDeploymentConfig dc) {
-						return safeParseInt(dc.getResourceVersion());
+					protected int getResourceAttribute(R resource) {
+						return safeParseInt(resource.getResourceVersion());
 					}
 				})
 				.orElse(null);
@@ -687,24 +806,21 @@ public class ResourceUtils {
     }
 
     /**
-	 * Checks whether the service and deployment config are related.
+	 * Returns {@code true} if the given service and given deployment config are related given the existing pods.
 	 * @param service the service to match
 	 * @param dc the deployment config to match
 	 * @return true if they are related
 	 */
-    public static boolean areRelated(final IService service, final IDeploymentConfig dc) {
-    	if (dc == null) {
-    		return false;
-    	}
-    	String dcName = dc.getName();
-    	return service.getProject().getResources(ResourceKind.POD).stream()
-    			.filter(pod -> dcName.equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))   
-    			.filter(pod -> containsAll(service.getSelector(), pod.getLabels()))   
-    			.count() > 0; 
+    public static boolean areRelated(final IService service, IDeploymentConfig dc, Collection<IPod> allPods) {
+		if (dc == null) {
+			return false;
+		}
+		String dcName = dc.getName();
+		return allPods.stream()
+				.filter(pod -> dcName.equals(pod.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))
+				.filter(pod -> areRelated(pod, service))
+				.count() > 0;
     }
-
-
-
 
 	/**
 	 * Returns git controlled workspace projects that match the uri of the given build config.
@@ -753,9 +869,10 @@ public class ResourceUtils {
 		}
 
 		return pods.stream()
-				.filter(pod -> pod.getLabels().containsKey(DEPLOYMENT_CONFIG_KEY))
+				.filter(pod -> 
+					!StringUtils.isBlank(getSelectorMatchingAny(pod.getLabels(), OpenShiftResourceSelectors.DEPLOYMENT_CONFIG)))
 				.findFirst()
-				.map(pod -> pod.getLabels().get(DEPLOYMENT_CONFIG_KEY))
+				.map(pod -> getDeploymentConfigNameFor(pod))
 				.orElse(null);
 	}
 	
@@ -769,27 +886,190 @@ public class ResourceUtils {
 		return project;
 	}
 
-	public static String getDeploymentConfigName(IReplicationController rc) {
-        String dcName = rc.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
-        if (StringUtils.isEmpty(dcName)) {
-            dcName = null;
-        }
-        return dcName;
+	/**
+	 * Returns the name of the deployment config that created the given resource.
+	 * The name is taken from the annotation for the given resource. Returns
+	 * {@code null} if no reference was found within the annotation of the given
+	 * resource.
+	 * 
+	 * @param rc
+	 * @return
+	 */
+	private static String getDeploymentConfigNameFor(IReplicationController rc) {
+		return rc.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
+		/**
+		 * alternatively, the deployment config name is also in the replicaSelectors
+		 * with the key OpenShiftResourceSelectors#DEPLOYMENT_CONFIG
+		 * 
+		 * example:
+		 * 
+		 * <pre>
+		 * "spec": {
+		 *     "replicas": 1,
+		 *     "selector": {
+		 *         "deployment": "eap-app-2",
+		 *         "deploymentConfig": "eap-app",
+		 *         "deploymentconfig": "eap-app",
+		 * </pre>
+		 */
+	}
+
+	private static String getDeploymentConfigNameFor(IService svc) {
+		return getDeploymentConfigNameFor(svc.getSelector());
+	}
+
+	private static String getDeploymentConfigNameFor(Map<String, String> selector) {
+		if (MapUtils.isEmpty(selector)) {
+			return null;
+		}
+		return getSelectorMatchingAny(selector,
+				OpenShiftResourceSelectors.DEPLOYMENT_CONFIG);
+	}
+
+	/**
+	 * Returns the deployment config for the given resource and given connection.
+	 * Returns {@code null} otherwise. Resource types supported are
+	 * <ul>
+	 * <li>IDeploymentConfig</li>
+	 * <li>IService</li>
+	 * <li>IReplicationController</li>
+	 * </ul>
+	 * Should <strong>NOT</strong> be called from UI thread since it does remote
+	 * lookups to list and match existing deployment configs.
+	 * 
+	 * @param resource the resource to get the deployment config for
+	 * @param connection the connection to use for further resource queries on server
+	 * @return
+	 * @throws CoreException
+	 */
+	public static IDeploymentConfig getDeploymentConfigFor(IResource resource, Connection connection) throws CoreException {
+		IDeploymentConfig dc = null;
+		if (resource instanceof IDeploymentConfig) {
+			dc = (IDeploymentConfig) resource;
+		} else if (resource instanceof IService) {
+			dc = getDeploymentConfigFor((IService) resource, connection);
+		} else if (resource instanceof IReplicationController) {
+			dc = getDeploymentConfigFor((IReplicationController) resource, connection);
+		}
+		return dc;
+	}
+
+	private static IDeploymentConfig getDeploymentConfigFor(IService service, Connection connection) throws CoreException {
+		if (service == null) {
+			return null;
+		}
+		String dcName = getDeploymentConfigNameFor(service);
+		if (dcName != null) {
+			return getDeploymentConfigByName(dcName, service, connection);
+		} else {
+			String namespace = service.getNamespace();
+			IReplicationController rc = getReplicationControllerFor(
+					service, connection.getResources(ResourceKind.REPLICATION_CONTROLLER, namespace));
+			if (rc == null) {
+				throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, NLS.bind(
+						"Could not find a deployment config for service {0}: no replication controller was found.",
+								service.getName())));
+			}
+			List<IPod> allPods = connection.getResources(ResourceKind.POD, namespace);
+			List<IPod> pods = allPods.stream()
+				.filter(pod -> areRelated((IPod) pod, rc))
+				.collect(Collectors.toList());
+			if (CollectionUtils.isEmpty(pods)) {
+				// TODO: wait for pods to appear
+				throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, NLS.bind(
+						"Could not find a deployment config for replication controller {0}: no pods found."
+						+ "You may have to wait for your build to finish and create your pods.", 
+						rc.getName())));
+			}
+			List<IDeploymentConfig> dcs = connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, namespace);
+			return dcs.stream()
+				.filter(dc -> areRelated((IService) service, (IDeploymentConfig) dc, pods))
+				.findFirst()
+				.orElse(null);
+		}
+	}
+
+	public static IDeploymentConfig getDeploymentConfigFor(IReplicationController rc, Connection connection) {
+		String dcName = getDeploymentConfigNameFor(rc);
+		if (dcName != null) {
+			return getDeploymentConfigByName(dcName, rc, connection);
+		} else {
+			List<IDeploymentConfig> allDcs = connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, rc.getNamespace());
+			return allDcs.stream()
+					.filter(dc -> ResourceUtils.areRelated(rc, dc))
+					// TODO: what if several dc are found?
+					.findFirst().orElse(null);
+		}
 	}
 	
+	private static IDeploymentConfig getDeploymentConfigByName(String dcName, IResource resource, Connection connection) {
+		if (StringUtils.isBlank(dcName) 
+				|| resource == null) {
+			return null;
+		}
+		return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), dcName);
+	}
+	
+	/**
+	 * Returns the value of the selector that matches one of the matching keys.
+	 * Returns {@code null} otherwise.
+	 * 
+	 * @param selectors
+	 * @param keys
+	 * @return
+	 */
+	private static String getSelectorMatchingAny(Map<String, String> selectors, String... keys) {
+		if (keys == null
+				|| keys.length == 0) {
+			return null;
+		}
+		Optional<String> matchingSelector = selectors.keySet().stream()
+				.filter(selector -> Stream.of(keys)
+						.anyMatch(key -> selector.equalsIgnoreCase(key)))
+				.findFirst();
+		if (!matchingSelector.isPresent()) {
+			return null;
+		}
+		return selectors.get(matchingSelector.get());
+	}
+
+	private static String getDeploymentConfigNameFor(IPod pod) {
+		return getSelectorMatchingAny(pod.getLabels(), OpenShiftResourceSelectors.DEPLOYMENT_CONFIG);
+	}
+
+	/**
+	 * Returns the deployment config from the given collection of configs for the given replication controller.
+	 * Returns {@code null} if the given replication controller is {@code null}.
+	 * 
+	 * @param r the replication controller that is related to the requested deployment config
+	 * @param dcs all the deployments configs to choose from
+	 * @return
+	 */
 	public static IDeploymentConfig getDeploymentConfigFor(IReplicationController rc, Collection<IDeploymentConfig> dcs) {
 		if (rc == null) {
 			return null;
 		}
 
-		String dcName = getDeploymentConfigName(rc);
-		if (dcName == null ||
-		     dcs.isEmpty()) {
-		    return null;    
+		return getDeploymentConfigByName(getDeploymentConfigNameFor(rc), dcs);
+	}
+
+	/**
+	 * Returns the latest version of the given collection of deployment configs
+	 * whose name is matching the given name.
+	 * Returns {@code null} if the given name or the collection
+	 * 
+	 * @param dcs
+	 * @param name
+	 * @return
+	 */
+	private static IDeploymentConfig getDeploymentConfigByName(String name, Collection<IDeploymentConfig> dcs) {
+		if (name == null 
+				|| CollectionUtils.isEmpty(dcs)) {
+			return null;
 		}
 
 		return dcs.stream()
-			.filter(dc -> dcName.equals(dc.getName()))
+			.filter(dc -> name.equals(dc.getName()))
 			.max(new NumericResourceAttributeComparator<IDeploymentConfig>() {
 
 				@Override
@@ -799,7 +1079,7 @@ public class ResourceUtils {
 			})
 			.orElse(null);
 	}
-	
+
 	/**
 	 * Extracts the last segment of an URI, stripped from .git suffixes
 	 *

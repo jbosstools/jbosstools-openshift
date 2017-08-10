@@ -96,6 +96,7 @@ public class ScaleDeploymentHandlerTest {
 		doReturn(DESIRED_REPLICA_COUNT).when(rc).getDesiredReplicaCount();
 		doReturn(CURRENT_REPLICA_COUNT).when(rc).getCurrentReplicaCount();
 		doReturn(DEPLOYMENT_CONFIG_NAME).when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
+		doReturn(Collections.singletonMap(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME, DEPLOYMENT_CONFIG_NAME)).when(rc).getAnnotations();
 
 		doReturn(serviceWrapper).when(podWrapper).getParent();
 		doReturn(pod).when(podWrapper).getWrapped();

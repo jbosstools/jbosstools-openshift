@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
-import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.IModelFactory;
@@ -27,6 +26,7 @@ import org.jboss.tools.openshift.internal.ui.utils.ObservableTreeItemUtils;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
@@ -43,32 +43,32 @@ public class ServerResourceViewModel extends ObservablePojo {
 	public static final String PROPERTY_RESOURCE_ITEMS = "resourceItems";
 
 	private boolean isLoaded = false;
-	private IConnection connection;
-	private List<IConnection> connections = new ArrayList<>();
+	private Connection connection;
+	private List<Connection> connections = new ArrayList<>();
 	private List<ObservableTreeItem> resourceItems = new ArrayList<>();
 	protected IResource resource;
 
-	public ServerResourceViewModel(IConnection connection) {
+	public ServerResourceViewModel(Connection connection) {
 		this(null, connection);
 	}
 
-	public ServerResourceViewModel(IResource resource, IConnection connection) {
+	public ServerResourceViewModel(IResource resource, Connection connection) {
 		this.connection = connection;
 		this.resource = resource;
 	}
 
-	protected void update(IConnection connection, List<IConnection> connections, IResource resource, List<ObservableTreeItem> resourceItems) {
+	protected void update(Connection connection, List<Connection> connections, IResource resource, List<ObservableTreeItem> resourceItems) {
 		updateConnections(connections);
 		updateConnection(connection);
 		updateResourceItems(resourceItems);
 		updateResource(resource, resourceItems);
 	}
 
-	protected void updateConnection(IConnection connection) {
+	protected void updateConnection(Connection connection) {
 		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
 	}
 
-	private void updateConnections(List<IConnection> newConnections) {
+	private void updateConnections(List<Connection> newConnections) {
 		List<IConnection> oldItems = new ArrayList<>(this.connections);
 		// ensure we're not operating on the same list
 		if (newConnections != this.connections) {
@@ -102,19 +102,19 @@ public class ServerResourceViewModel extends ObservablePojo {
 		return newResource;
 	}
 
-	public void setConnections(List<IConnection> connections) {
+	public void setConnections(List<Connection> connections) {
 		update(this.connection, connections, this.resource, this.resourceItems);
 	}
 
-	public IConnection getConnection() {
+	public Connection getConnection() {
 		return connection;
 	}
 	
-	public List<IConnection> getConnections() {
+	public List<Connection> getConnections() {
 		return this.connections;
 	}
 
-	public void setConnection(IConnection connection) {
+	public void setConnection(Connection connection) {
 		if(this.connection != connection) {
 			update(connection, this.connections, null, Collections.emptyList());
 		}
@@ -187,7 +187,7 @@ public class ServerResourceViewModel extends ObservablePojo {
 	 * This method should be invoked in an ui job.
 	 * @param connection the connection to use to load the resources.
 	 */
-	public void loadResources(final IConnection connection) {
+	public void loadResources(final Connection connection) {
 		this.isLoaded = false;
 		setConnections(loadConnections());
 		setConnection(connection);
@@ -199,11 +199,11 @@ public class ServerResourceViewModel extends ObservablePojo {
 		update(this.connection, this.connections, this.resource, this.resourceItems);
 	}
 
-	private List<IConnection> loadConnections() {
-		return new ArrayList<IConnection>(ConnectionsRegistrySingleton.getInstance().getAll());
+	private List<Connection> loadConnections() {
+		return new ArrayList<Connection>(ConnectionsRegistrySingleton.getInstance().getAll(Connection.class));
 	}
 
-	protected List<ObservableTreeItem> loadServices(IConnection connection) {
+	protected List<ObservableTreeItem> loadServices(Connection connection) {
 		if (connection == null) {
 			return null;
 		}
@@ -238,24 +238,38 @@ public class ServerResourceViewModel extends ObservablePojo {
 
 		private List<IResource> getProjectResources(IProject project) {
 		    List<IResource> services = project.getResources(ResourceKind.SERVICE);
-		    /*
-		     * add DeploymentConfig resources not linked to the services
-		     */
 		    List<IDeploymentConfig> dcConfigs = project.getResources(ResourceKind.DEPLOYMENT_CONFIG);
-		    List<IDeploymentConfig> nonLinkedDcConfigs = new ArrayList<>();
-		    dcConfigs.stream().filter(dc -> !services.stream().anyMatch(service -> ResourceUtils.areRelated((IService) service, dc)))
-		                      .forEach(dc -> nonLinkedDcConfigs.add(dc));
-		    services.addAll(nonLinkedDcConfigs);
-		    /* 
-		     * add ReplicationController resources not linked to DeploymentConfig
-		     */
-		    List<IReplicationController> replicationControllers = project.getResources(ResourceKind.REPLICATION_CONTROLLER);
-		    List<IReplicationController> nonLinkedReplicationControllers = 
-		            replicationControllers.stream().filter(rep -> !dcConfigs.stream().anyMatch(dc -> dc.getName().equals(rep.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME))))
-		                                            .collect(Collectors.toList());
-		    services.addAll(nonLinkedReplicationControllers);
+		    services.addAll(getNonLinkedDcs(services, dcConfigs, project));
+		    services.addAll(getNonLinkeRcs(dcConfigs, project));
 		    return services;
         }
+
+	    /**
+	     * Returns the DeploymentConfig resources not linked to the services
+	     */
+		private List<IDeploymentConfig> getNonLinkedDcs(List<IResource> services, List<IDeploymentConfig> dcConfigs, IProject project) {
+			List<IDeploymentConfig> nonLinkedDcConfigs = new ArrayList<>();
+		    List<IPod> allPods = project.getResources(ResourceKind.POD);
+		    dcConfigs.stream()
+		    		.filter(dc -> 
+		    			!services.stream()
+		    				.anyMatch(service -> ResourceUtils.areRelated((IService) service, dc, allPods)))
+		    		.forEach(dc -> nonLinkedDcConfigs.add(dc));
+			return nonLinkedDcConfigs;
+		}
+
+		/**
+	     * Returns the ReplicationController resources not linked to DeploymentConfig
+	     */
+		private List<IReplicationController> getNonLinkeRcs(List<IDeploymentConfig> dcConfigs, IProject project) {
+			List<IReplicationController> allRcs = project.getResources(ResourceKind.REPLICATION_CONTROLLER);
+			List<IReplicationController> nonLinkedReplicationControllers = 
+					allRcs.stream()
+						.filter(rc -> !dcConfigs.stream()
+								.anyMatch(dc -> ResourceUtils.areRelated(rc, dc)))
+						.collect(Collectors.toList());
+			return nonLinkedReplicationControllers;
+		}
 
         @Override
 		public ObservableTreeItem create(Object object) {

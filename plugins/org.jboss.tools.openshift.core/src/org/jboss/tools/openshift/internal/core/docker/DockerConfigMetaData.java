@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,18 +8,18 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
+package org.jboss.tools.openshift.internal.core.docker;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.eclipse.linuxtools.docker.core.IDockerContainerConfig;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
-import org.jboss.tools.openshift.internal.core.IDockerImageMetadata;
 
 /**
  * Metadata about an image fetched from a docker connection.
@@ -83,5 +83,19 @@ public class DockerConfigMetaData implements IDockerImageMetadata {
 		}
         return select(info.config(), info.containerConfig(), IDockerContainerConfig::volumes, Collections::emptySet);
 	}
-	
+
+	@Override
+	public Map<String, String> labels() {
+		Map<String, String> result = null;
+		if (info.config() != null) {
+			result = info.config().labels();
+		}
+		if (((result == null) || result.isEmpty()) && (info.containerConfig() != null)) {
+			result = info.containerConfig().labels();
+		}
+		if (result == null) {
+			result = Collections.emptyMap();
+		}
+		return result;
+	}
 }

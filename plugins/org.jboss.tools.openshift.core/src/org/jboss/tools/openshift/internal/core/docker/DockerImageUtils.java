@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat.
+ * Copyright (c) 2016-2017 Red Hat.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,7 @@
  *     Red Hat - Initial Contribution
  *******************************************************************************/
 
-package org.jboss.tools.openshift.internal.ui.dockerutils;
+package org.jboss.tools.openshift.internal.core.docker;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,13 +18,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.linuxtools.docker.core.IDockerConnection;
 import org.eclipse.linuxtools.docker.core.IDockerImage;
+import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
+
+import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.capability.resources.IImageStreamImportCapability;
+import com.openshift.restclient.images.DockerImageURI;
+import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.image.IImageStreamImport;
 
 /**
  * Utility class for {@link IDockerImage}s
  */
 public class DockerImageUtils {
+	
+	private DockerImageUtils() {
+	}
 
 	/**
 	 * Checks if an image with the given {@code repo} and {@code tag} exists in
@@ -96,5 +109,34 @@ public class DockerImageUtils {
 			return imageName;
 		}
 		return imageName.substring(lastIndexOfSlash + 1);
+	}
+
+	/**
+	 * Returns the docker image meta data for the given project and image uri.
+	 * 
+	 * @param project the OpenShift project that the image resides in
+	 * @param imageURI the image uri for the image to look up
+	 * @return
+	 */
+	public static IDockerImageMetadata lookupImageMetadata(IProject project, DockerImageURI imageURI) {
+		if (project != null 
+				&& project.supports(IImageStreamImportCapability.class)) {
+			final IImageStreamImportCapability cap = project.getCapability(IImageStreamImportCapability.class);
+			try {
+				final IImageStreamImport streamImport = cap.importImageMetadata(imageURI);
+				if (ResourceUtils.isSuccessful(streamImport)) {
+					String json = streamImport.getImageJsonFor(imageURI.getTag());
+					if(StringUtils.isBlank(json)) {
+						OpenShiftCoreActivator.logError("Did not find metadata during ImportImageStream for " + imageURI.getAbsoluteUri(), null);
+						return null;
+					}
+					return new ImageStreamTagMetaData(json);
+				}
+			} catch (OpenShiftException e) {
+				OpenShiftCoreActivator.logError(NLS.bind(
+						"Could not retrieve metadata for docker image {0}", imageURI),e);
+			}
+		}
+		return null;
 	}
 }

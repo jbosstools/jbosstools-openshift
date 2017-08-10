@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2017 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -43,8 +43,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -65,7 +65,7 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 
 	private String description;
 
-	public SelectResourceWizard(String description, IResource resource, IConnection connection) {
+	public SelectResourceWizard(String description, IResource resource, Connection connection) {
 		super("Select Resource", new ServerResourceViewModel(resource, connection));
 		this.description = description;
 	}

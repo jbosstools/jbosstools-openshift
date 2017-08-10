@@ -26,7 +26,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionPersistency;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
-import org.jboss.tools.openshift.internal.core.server.resources.OpenshiftResourceChangeListener;
+import org.jboss.tools.openshift.internal.core.server.resources.ResourceChangePublisher;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -37,7 +37,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.core"; //$NON-NLS-1$
 	private static OpenShiftCoreActivator instance;
 	private IServerLifecycleListener serverListener;
-	private OpenshiftResourceChangeListener resourceChangeListener;
+	private ResourceChangePublisher resourceChangeListener;
 	public OpenShiftCoreActivator() {
 		super();
 		instance = this;
@@ -102,7 +102,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
         });
         ServerCore.addServerLifecycleListener(getServerListener());
         // A clone of the auto-publish thread implementation
-        resourceChangeListener = new OpenshiftResourceChangeListener();
+        resourceChangeListener = new ResourceChangePublisher();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
 	}

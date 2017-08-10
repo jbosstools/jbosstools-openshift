@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.test.ui.wizard.deployimage;
 
 import org.eclipse.linuxtools.docker.core.IDockerContainerConfig;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
-import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DockerConfigMetaData;
+import org.jboss.tools.openshift.internal.core.docker.DockerConfigMetaData;
 import org.junit.Before;
 import org.junit.Test;
 

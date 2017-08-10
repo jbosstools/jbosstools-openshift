@@ -67,7 +67,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 			throw new GetWelcomePageURLException("Connection is not established.");
 		}
 
-		IResource resource = OpenShiftServerUtils.getResource(server, connection);
+		IResource resource = OpenShiftServerUtils.getResource(server, connection, new NullProgressMonitor());
 		if(resource == null) {
 			throw new GetWelcomePageURLException("Resource is missing.");
 		}

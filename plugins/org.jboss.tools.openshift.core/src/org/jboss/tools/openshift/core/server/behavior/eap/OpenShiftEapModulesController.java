@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc..
+ * Copyright (c) 2016-2017 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.ide.eclipse.as.core.server.internal.v7.DeploymentMarkerUtils;
 import org.jboss.ide.eclipse.as.core.server.internal.v7.JBoss7FSModuleStateVerifier;
 import org.jboss.ide.eclipse.as.wtp.core.console.ServerConsoleModel;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
@@ -27,10 +28,6 @@ import org.jboss.tools.openshift.core.server.RSync;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier implements ISubsystemController {
-
-	public OpenShiftEapModulesController() {
-		// TODO Auto-generated constructor stub
-	}
 
 	@Override
 	protected int getRootModuleState(IServer server, IModule root,
@@ -45,31 +42,32 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 		syncDown(monitor);
 		super.changeModuleStateTo(module, state, monitor);
 		syncUp(monitor);
-		deleteMarkers(".dodeploy");
+		deleteMarkers(DeploymentMarkerUtils.DO_DEPLOY);
 		return state;
 	}
 	
 	private void deleteMarkers(String suffix) throws CoreException {
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
 		Stream.of(localDeploymentDirectory.listFiles())
-		.filter(p->p.getName().endsWith(suffix))
-		.forEach(p->p.delete());
+			.filter(p->p.getName().endsWith(suffix))
+			.forEach(p->p.delete());
 	}
 	
 	private MultiStatus syncDown(IProgressMonitor monitor) throws CoreException {
-		final RSync rsync = OpenShiftServerUtils.createRSync(getServer());
+		final RSync rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
 		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, 
-				NLS.bind("Could not sync all pods to folder {0}", localDeploymentDirectory.getAbsolutePath()), null);
+				NLS.bind("Could not sync all pods to folder {0}.", localDeploymentDirectory.getAbsolutePath()), null);
 		rsync.syncPodsToDirectory(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		return status;
 	}
+
 	private MultiStatus syncUp(IProgressMonitor monitor) throws CoreException {
 		// do rsync local to remote
-		final RSync rsync = OpenShiftServerUtils.createRSync(getServer());
+		final RSync rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
 		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, 
-				NLS.bind("Could not sync all pods to folder {0}", localDeploymentDirectory.getAbsolutePath()), null);
+				NLS.bind("Could not sync folder {0} to all pods.", localDeploymentDirectory.getAbsolutePath()), null);
 		rsync.syncDirectoryToPods(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		return status;
 	}

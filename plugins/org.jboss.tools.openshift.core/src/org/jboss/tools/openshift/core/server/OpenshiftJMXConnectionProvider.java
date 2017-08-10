@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.jmx.integration.AbstractJBossJMXConnectionProvider;
 import org.jboss.tools.jmx.core.ExtensionManager;
@@ -53,7 +54,7 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 	@Override
 	protected IConnectionWrapper createConnection(IServer server) {
 		IConnection openshiftCon = OpenShiftServerUtils.getConnection(server);
-		IResource resource = OpenShiftServerUtils.getResource(server);
+		IResource resource = OpenShiftServerUtils.getResource(server, new NullProgressMonitor());
 		
 		if (resource == null) {
 		    return null;

@@ -28,6 +28,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.core.WatchManager;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.ResourceKind;
@@ -168,7 +169,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 						if (oldVersion == null) {
 							// it's an add
 							handleAdd(projectWrapper, newResource);
-						} else if (OpenshiftUIModel.isOlder(oldVersion, newResource)) {
+						} else if (ResourceUtils.isOlder(oldVersion, newResource)) {
 							// it's an update
 							handleUpdate(projectWrapper, newResource);
 						}

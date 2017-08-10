@@ -19,7 +19,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IServerShutdownControll
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugUtils;
+import org.jboss.tools.openshift.internal.core.server.debug.DebugLaunchConfigs;
 
 public class OpenShiftShutdownController extends AbstractSubsystemController
 		implements ISubsystemController, IServerShutdownController {
@@ -43,7 +43,7 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 		OpenShiftServerBehaviour behavior = getBehavior();
 		behavior.setServerStopping();
 		try {
-			OpenShiftDebugUtils.get().terminateRemoteDebugger(behavior.getServer());
+			DebugLaunchConfigs.get().terminateRemoteDebugger(behavior.getServer());
 			behavior.setServerStopped();
 		} catch(CoreException ce) {
 			log(IStatus.ERROR, "Error shutting down server", ce);

@@ -22,8 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
@@ -108,6 +110,7 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
+import org.jboss.tools.openshift.internal.common.ui.databinding.DisablableRequiredStringMultiValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport.IFormPresenter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
@@ -136,8 +139,10 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Jeff Maury
  */
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
-	static final String IS_LOADING_SERVICES = "isLoadingServices";
-
+	private static final int RESOURCE_TREE_WIDTH = 400;
+	private static final int DETAILS_PANE_WIDTH = 400;
+	private static final int RESOURCE_TREE_HEIGHT = 120;
+	
 	protected ServerSettingsWizardPageModel model;
 	protected boolean needsLoadingResources = true;
 	protected boolean isLoadingResources = false;
@@ -263,7 +268,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		setComplete(true);
 		loadResources(getContainer());		
 	}
-	
+
 	/**
 	 * Loads the resources for this view, does it in a blocking way.
 	 * @param model
@@ -295,63 +300,29 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		}
 	}
 	
-	private final int numColumns = 4;
-	
 	private Composite createControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
 		final Composite container = new Composite(parent, SWT.NONE);
+		GridDataFactory.fillDefaults()
+			.grab(true, true)
+			.applyTo(container);
 		GridLayoutFactory.fillDefaults()
-			.numColumns(numColumns)
 			.margins(6, 6)
 			.applyTo(container);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
-		createInfoControls(container, model, dbc);
-		createProjectControls(container, model, dbc);
-		createResourceControls(container, model, dbc);
+
+		createOCWarningControls(container, model, dbc);
+		createEclipseProjectSourceControls(container, model, dbc);
+		createOpenShiftDestinationControls(container, model, dbc);
 		createAdvancedGroup(container, dbc);
-		uiHook = container;
+
+		this.uiHook = container;
 		return container;
 	}
 
-	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
-		DialogAdvancedPart advancedPart = new DialogAdvancedPart() {
-			
-			@Override
-			protected void createAdvancedContent(Composite advancedComposite) {
-				createSourcePathControls(advancedComposite, model, dbc);
-				createDeploymentControls(advancedComposite, model, dbc);
-				createRouteControls(advancedComposite, model, dbc);
-			}
-
-			@Override
-			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
-				return gridLayoutFactory.numColumns(numColumns).margins(0, 0);
-			}
-		};
-		advancedPart.createAdvancedGroup(parent, numColumns);
-	}
-	
-	private void createProjectControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
-		IObservableValue<IProject> eclipseProjectObservable = BeanProperties.value(
-				ServerSettingsWizardPageModel.PROPERTY_DEPLOYPROJECT).observe(model);
-		new SelectProjectComponentBuilder()
-			.setTextLabel("Eclipse Project: ")
-			.setHorisontalSpan(1)
-			.setEclipseProjectObservable(eclipseProjectObservable)
-			.setSelectionListener(onBrowseProjects(model, container.getShell()))
-			.build(container, dbc);
-		Button importButton = new Button(container, SWT.PUSH);
-		importButton.setText(OpenShiftCommonUIMessages.ImportButtonLabel);
-	    GridDataFactory.fillDefaults()
-          .align(SWT.LEFT, SWT.CENTER)
-          .grab(false, false)
-          .applyTo(importButton);
-		UIUtils.setDefaultButtonWidth(importButton);
-		importButton.addSelectionListener(onImportProject(model, container.getShell()));
-	}
-	
-	private void createInfoControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+	@SuppressWarnings("unchecked")
+	private void createOCWarningControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
         Composite composite = new Composite(container, SWT.NONE);
-        GridDataFactory.fillDefaults().span(4, 1).applyTo(composite);
+        GridDataFactory.fillDefaults()
+        		.applyTo(composite);
         GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
         
         ValueBindingBuilder
@@ -387,18 +358,16 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
             .in(dbc);
    
         Link link = new Link(composite, SWT.WRAP);
-        ValueBindingBuilder
-        .bind(WidgetProperties.text().observe(link))
-        .to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model))
-        .converting(new Converter(IStatus.class, String.class) {
-
-            @Override
-            public Object convert(Object fromObject) {
-                return ((IStatus)fromObject).getMessage();
-            }
-            
-        })
-        .in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.text().observe(link))
+			.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model))
+			.converting(new Converter(IStatus.class, String.class) {
+	            @Override
+	            public Object convert(Object fromObject) {
+	                return ((IStatus)fromObject).getMessage();
+	            }
+			})
+			.in(dbc);
         link.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -407,10 +376,10 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
                             OpenShiftUIActivator.PLUGIN_ID, 
                             OpenShiftUIActivator.getDefault().getLog());
                 } else {
-                    int rc = PreferencesUtil.createPreferenceDialogOn(getShell(),
-                                                                      OPEN_SHIFT_PREFERENCE_PAGE_ID,
-                                                                      new String[] {OPEN_SHIFT_PREFERENCE_PAGE_ID},
-                                                                      null).open();
+					int rc = PreferencesUtil.createPreferenceDialogOn(getShell(), 
+							OPEN_SHIFT_PREFERENCE_PAGE_ID,
+							new String[] { OPEN_SHIFT_PREFERENCE_PAGE_ID }, null)
+							.open();
                     if (rc == Dialog.OK) {
                         new Job("Checking oc binary") {
 
@@ -427,12 +396,14 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
                 }
             }
         });
-        GridDataFactory.fillDefaults().hint(600, SWT.DEFAULT).applyTo(link);
+        GridDataFactory.fillDefaults()
+        		.hint(600, SWT.DEFAULT)
+        		.applyTo(link);
         MultiValidator validator = new MultiValidator() {
             
             @Override
             protected IStatus validate() {
-                IObservableValue<IStatus> observable = BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model);
+				IObservableValue<IStatus> observable = BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model);
                 Status status = (Status)observable.getValue();
                 switch (status.getSeverity()) {
                 case IStatus.ERROR:
@@ -445,6 +416,39 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
         };
         dbc.addValidationStatusProvider(validator);
 	}
+	
+	private void createEclipseProjectSourceControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+		Group container = new Group(parent, SWT.NONE);
+		container.setText("Eclipse Project Source (From)");
+		GridDataFactory.fillDefaults()
+			.grab(true, false)
+			.applyTo(container);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(4).margins(10,10).spacing(4, 4)
+			.applyTo(container);
+
+		createProjectControls(container, model, dbc);
+		createSourcePathControls(container, model, dbc);
+	}
+	
+	private void createProjectControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+		@SuppressWarnings("unchecked")
+		IObservableValue<IProject> eclipseProjectObservable = 
+				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_DEPLOYPROJECT).observe(model);
+		new SelectProjectComponentBuilder()
+			.setTextLabel("Eclipse Project: ")
+			.setEclipseProjectObservable(eclipseProjectObservable)
+			.setSelectionListener(onBrowseProjects(model, parent.getShell()))
+			.build(parent, dbc);
+		Button importButton = new Button(parent, SWT.PUSH);
+		importButton.setText(OpenShiftCommonUIMessages.ImportButtonLabel);
+		GridDataFactory.fillDefaults()
+			.align(SWT.LEFT, SWT.CENTER)
+			.applyTo(importButton);
+		UIUtils.setDefaultButtonWidth(importButton);
+		importButton.addSelectionListener(onImportProject(model, parent.getShell()));
+	}
+	
 
 	private IDoubleClickListener onDoubleClickService() {
 		return new IDoubleClickListener() {
@@ -505,15 +509,16 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
         };
     }
 
-    private void createSourcePathControls(Composite container, ServerSettingsWizardPageModel model,
-			DataBindingContext dbc) {
-		Label sourcePathLabel = new Label(container, SWT.NONE);
+	@SuppressWarnings("unchecked")
+    private void createSourcePathControls(Composite parent, ServerSettingsWizardPageModel model,
+			DataBindingContext dbc) {    		
+		Label sourcePathLabel = new Label(parent, SWT.NONE);
 		sourcePathLabel.setText("Source Path: ");
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(sourcePathLabel);
 
-		Text sourcePathText = new Text(container, SWT.BORDER);
+		Text sourcePathText = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(sourcePathText);
@@ -550,14 +555,14 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		ControlDecorationSupport.create(
 				sourcePathBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 		
-		Button browseSourceButton = new Button(container, SWT.PUSH);
+		Button browseSourceButton = new Button(parent, SWT.PUSH);
 		browseSourceButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(browseSourceButton);		
 		browseSourceButton.addSelectionListener(onBrowseSource(browseSourceButton.getShell()));
 
-		Button browseWorkspaceSourceButton = new Button(container, SWT.PUSH | SWT.READ_ONLY);
+		Button browseWorkspaceSourceButton = new Button(parent, SWT.PUSH | SWT.READ_ONLY);
 		browseWorkspaceSourceButton.setText("Workspace...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER)
@@ -651,51 +656,6 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		return dialog;
 	}
 
-	private void createDeploymentControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
-		Button useInferredPodPathButton = new Button(container, SWT.CHECK);
-		useInferredPodPathButton.setText("&Use inferred Pod Deployment Path");
-		GridDataFactory.fillDefaults()
-			.span(4,1).align(SWT.FILL, SWT.CENTER)
-			.applyTo(useInferredPodPathButton);
-		ISWTObservableValue useInferredPodPathObservable = WidgetProperties.selection().observe(useInferredPodPathButton);
-		ValueBindingBuilder
-				.bind(useInferredPodPathObservable)
-				.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_INFERRED_POD_PATH).observe(model))
-				.in(dbc);
-		
-		Label podPathLabel = new Label(container, SWT.NONE);
-		podPathLabel.setText("Pod Deployment Path: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(podPathLabel);
-
-		Text podPathText = new Text(container, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-			.span(3, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-			.applyTo(podPathText);
-		ISWTObservableValue podPathObservable = WidgetProperties.text(SWT.Modify).observe(podPathText);
-		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(podPathText))
-			.notUpdatingParticipant()
-			.to(useInferredPodPathObservable)
-			.converting(new InvertingBooleanConverter())
-			.in(dbc);
-		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(podPathLabel))
-			.notUpdatingParticipant()
-			.to(useInferredPodPathObservable)
-			.converting(new InvertingBooleanConverter())
-			.in(dbc);
-		ValueBindingBuilder
-			.bind(podPathObservable)
-			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_POD_PATH).observe(model))
-			.in(dbc);
-		PodPathValidator podPathValidator = new PodPathValidator(useInferredPodPathObservable, podPathObservable);
-		ControlDecorationSupport.create(
-				podPathValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		dbc.addValidationStatusProvider(podPathValidator);
-	}
-
 	private static class PodPathValidator extends MultiValidator {
 		
 		private IObservableValue<Boolean> useDefaultPodPath;
@@ -721,31 +681,73 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		
 	}
 	
-	private void createResourceControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
-		Group resourcesGroup = new Group(container, SWT.NONE);
-		resourcesGroup.setText("Resources");
+	private void createOpenShiftDestinationControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+		Group container = new Group(parent, SWT.NONE);
+		container.setText("OpenShift Application Destination (To)");
 		GridDataFactory.fillDefaults()
-			.span(4, 1).align(SWT.FILL, SWT.FILL).grab(true, true)
-			.applyTo(resourcesGroup);
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(container);
 		GridLayoutFactory.fillDefaults()
 			.numColumns(2).margins(10,10)
-			.applyTo(resourcesGroup);
+			.applyTo(container);
 
-		Label selectorLabel = new Label(resourcesGroup, SWT.NONE);
-		selectorLabel.setText("Selector:");
-		Text selectorText = UIUtils.createSearchText(resourcesGroup);
+		createResourceControls(container, model, dbc);
+		createResourcePathControls(container, model, dbc);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void createResourceControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+		Label resourceLabel = new Label(parent, SWT.NONE);
+		resourceLabel.setText("OpenShift Resource:");
+		GridDataFactory.fillDefaults()
+			.span(2, 1).align(SWT.FILL, SWT.FILL)
+			.applyTo(resourceLabel);
+
+		// filter
+		Text selectorText = UIUtils.createSearchText(parent);
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER)
 				.applyTo(selectorText);
 
-		final TreeViewer resourcesViewer = createResourcesTreeViewer(resourcesGroup, model, selectorText);
+		// details
+		ExpandableComposite expandable = new ExpandableComposite(parent, SWT.None);
+		expandable.setText("Resource Details");
+		expandable.setExpanded(true);
+		GridDataFactory.fillDefaults()
+			.span(1, 2).align(SWT.FILL, SWT.FILL).grab(false, true).hint(DETAILS_PANE_WIDTH, 150)
+			.applyTo(expandable);
+		GridLayoutFactory.fillDefaults()
+			.margins(0, 0)
+			.applyTo(expandable);		
+		Composite detailsContainer = new Composite(expandable, SWT.NONE);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(detailsContainer);
+		expandable.setClient(detailsContainer);
+		expandable.addExpansionListener(new IExpansionListener() {
+			@Override
+			public void expansionStateChanging(ExpansionEvent e) {
+			}
+			
+			@Override
+			public void expansionStateChanged(ExpansionEvent e) {
+				parent.update();
+				parent.layout(true);
+			}
+		});
+		IObservableValue<IResource> selectedResource = new WritableValue<IResource>();
+		new ResourceDetailViews(selectedResource, detailsContainer, dbc).createControls();
+
+		// resource tree
+		final TreeViewer resourcesViewer = createResourcesTreeViewer(parent, model, selectorText);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true).hint(RESOURCE_TREE_WIDTH, RESOURCE_TREE_HEIGHT)
+			.applyTo(resourcesViewer.getControl());
 		resourcesViewer.addDoubleClickListener(onDoubleClickService());
-		IObservableList resourceItemsObservable = BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_RESOURCE_ITEMS).observe(model);
+		IObservableList<ObservableTreeItem> resourceItemsObservable = 
+				BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_RESOURCE_ITEMS).observe(model);
 		DataBindingUtils.addDisposableListChangeListener(
 				onResourceItemsChanged(resourcesViewer), resourceItemsObservable, resourcesViewer.getTree());
-		GridDataFactory.fillDefaults()
-			.span(2, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 160).grab(true, true)
-			.applyTo(resourcesViewer.getControl());
 		selectorText.addModifyListener(onFilterTextModified(resourcesViewer));
 		IViewerObservableValue selectedResourceTreeItem = ViewerProperties.singleSelection().observe(resourcesViewer);
 		ValueBindingBuilder
@@ -765,51 +767,240 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				.converting(new Model2ObservableTreeItemConverter(new ServerSettingsWizardPageModel.ResourceTreeItemsFactory()))
 				.in(dbc);
 
-		// details
-		ExpandableComposite expandable = new ExpandableComposite(resourcesGroup, SWT.None);
-		GridDataFactory.fillDefaults()
-			.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
-			.applyTo(expandable);
-		expandable.setText("Resource Details");
-		expandable.setExpanded(true);
-		GridLayoutFactory.fillDefaults().numColumns(2).margins(0, 0).spacing(0, 0).applyTo(expandable);
-		GridDataFactory.fillDefaults()
-		.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
-		.applyTo(expandable);
-		
-		Composite detailsContainer = new Composite(expandable, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
-				.applyTo(detailsContainer);
-		IObservableValue<IResource> selectedResource = new WritableValue<IResource>();
+		// selected resource details binding
 		ValueBindingBuilder
 			.bind(selectedResourceTreeItem)
 			.converting(new ObservableTreeItem2ModelConverter())
 			.to(selectedResource)
 			.notUpdatingParticipant()
 			.in(dbc);
-		new ResourceDetailViews(selectedResource, detailsContainer, dbc).createControls();
-		
-		expandable.setClient(detailsContainer);
-		expandable.addExpansionListener(new IExpansionListener() {
-			@Override
-			public void expansionStateChanging(ExpansionEvent e) {
-			}
-			
-			@Override
-			public void expansionStateChanged(ExpansionEvent e) {
-				resourcesGroup.update();
-				resourcesGroup.layout(true);
-			}
-		});
-		
+
 	}
 
+	@SuppressWarnings("unchecked")
+	private void createResourcePathControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+		Composite container = new Composite(parent, SWT.NONE);
+		GridDataFactory.fillDefaults()
+			.span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, true)
+			.applyTo(container);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(2).margins(0, 0)
+			.applyTo(container);
+		
+		Button useInferredPodPathButton = new Button(container, SWT.CHECK);
+		useInferredPodPathButton.setText("&Use inferred Pod Deployment Path");
+		GridDataFactory.fillDefaults()
+			.span(2,1).align(SWT.FILL, SWT.CENTER)
+			.applyTo(useInferredPodPathButton);
+		ISWTObservableValue useInferredPodPathObservable = WidgetProperties.selection().observe(useInferredPodPathButton);
+		ValueBindingBuilder
+				.bind(useInferredPodPathObservable)
+				.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_INFERRED_POD_PATH).observe(model))
+				.in(dbc);
+		
+		Label podPathLabel = new Label(container, SWT.NONE);
+		podPathLabel.setText("Pod Deployment Path: ");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(podPathLabel);
+
+		Text podPathText = new Text(container, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(podPathText);
+		ISWTObservableValue podPathObservable = WidgetProperties.text(SWT.Modify).observe(podPathText);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(podPathText))
+			.notUpdatingParticipant()
+			.to(useInferredPodPathObservable)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(podPathLabel))
+			.notUpdatingParticipant()
+			.to(useInferredPodPathObservable)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(podPathObservable)
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_POD_PATH).observe(model))
+			.in(dbc);
+		PodPathValidator podPathValidator = new PodPathValidator(useInferredPodPathObservable, podPathObservable);
+		ControlDecorationSupport.create(
+				podPathValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		dbc.addValidationStatusProvider(podPathValidator);
+	}
+
+	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
+		DialogAdvancedPart advancedPart = new DialogAdvancedPart() {
+			
+			@Override
+			protected void createAdvancedContent(Composite advancedComposite) {
+				createDebuggingSettingsControls(advancedComposite, model, dbc);
+				createRouteControls(advancedComposite, model, dbc);
+			}
+
+			@Override
+			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
+				return gridLayoutFactory.numColumns(1).margins(0, 0);
+			}
+		};
+		advancedPart.createAdvancedGroup(parent, 1);
+	}
+
+	private void createDebuggingSettingsControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+		Group container = new Group(parent, SWT.NONE);
+		container.setText("Debugging Settings");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, false)
+			.applyTo(container);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(5).margins(10, 10)
+			.applyTo(container);
+
+		createEnableDebuggingControls(container, model, dbc);
+		createDebuggingPortControls(container, model, dbc);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void createEnableDebuggingControls(Composite parent, ServerSettingsWizardPageModel model,
+			DataBindingContext dbc) {
+		Label enableDevmodeLabel = new Label(parent, SWT.None);
+		enableDevmodeLabel.setText("Enable debugging:");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(enableDevmodeLabel);
+		Button useImageDevmodeKey = new Button(parent, SWT.CHECK);
+		useImageDevmodeKey.setText("use image provided key");
+		GridDataFactory.fillDefaults()
+			.span(4, 1).align(SWT.FILL, SWT.CENTER)
+			.applyTo(useImageDevmodeKey);
+		IObservableValue<Boolean> useImageDevmodeKeyObservable = 
+				BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEVMODE_KEY).observe(model);
+		ValueBindingBuilder
+			.bind(WidgetProperties.selection().observe(useImageDevmodeKey))
+			.to(useImageDevmodeKeyObservable)
+			.in(dbc);
+		// filler
+		new Label(parent, SWT.NONE);
+		Label keyLabel = new Label(parent, SWT.NONE);
+		keyLabel.setText("Key:");
+		GridDataFactory.fillDefaults()
+			.align(SWT.BEGINNING, SWT.CENTER)
+			.applyTo(keyLabel);
+		Text devmodeKeyText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+			.span(3,1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(devmodeKeyText);
+		IObservableValue<String> devmodeKeyObservable = WidgetProperties.text(SWT.Modify).observe(devmodeKeyText);
+		ValueBindingBuilder
+			.bind(devmodeKeyObservable)
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_DEVMODE_KEY).observe(model))
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(devmodeKeyText))
+			.notUpdating(useImageDevmodeKeyObservable)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		ValidationStatusProvider devmodeKeyValidator = 
+				new DisablableRequiredStringMultiValidator(devmodeKeyObservable, useImageDevmodeKeyObservable,
+						"Please provide an environment variable key to use when enabling debugging.");
+		ControlDecorationSupport.create(devmodeKeyValidator, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
+	}
+
+	@SuppressWarnings("unchecked")
+	private void createDebuggingPortControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+		Label debugPortLabel = new Label(parent, SWT.None);
+		debugPortLabel.setText("Debugging Port:");
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER)
+			.applyTo(debugPortLabel);
+
+		// use image key & value checkbox
+		Button useImageDebugPortKeyText = new Button(parent, SWT.CHECK);
+		useImageDebugPortKeyText.setText("use image provided key and value");
+		GridDataFactory.fillDefaults()
+			.span(3, 1).align(SWT.FILL, SWT.CENTER)
+			.applyTo(useImageDebugPortKeyText);
+		IObservableValue<Boolean> useImageDebugPortKey = 
+				BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_KEY).observe(model);
+		ValueBindingBuilder
+			.bind(WidgetProperties.selection().observe(useImageDebugPortKeyText))
+			.to(useImageDebugPortKey)
+			.in(dbc);
+		//filler
+		new Label(parent, SWT.NONE);
+
+		// key text field
+		new Label(parent, SWT.NONE); // filler
+		Label keyLabel = new Label(parent, SWT.NONE);
+		keyLabel.setText("Key:");
+		GridDataFactory.fillDefaults()
+			.align(SWT.BEGINNING, SWT.CENTER)
+			.applyTo(keyLabel);
+		Text debugPortKeyText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(debugPortKeyText);
+		IObservableValue<String> debugPortKeyTextObservable = 
+				WidgetProperties.text(SWT.Modify).observe(debugPortKeyText);
+		ValueBindingBuilder
+			.bind(debugPortKeyTextObservable)
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_DEBUG_PORT_KEY).observe(model))
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(debugPortKeyText))
+			.notUpdating(useImageDebugPortKey)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		ControlDecorationSupport.create(
+				new DisablableRequiredStringMultiValidator(debugPortKeyTextObservable, useImageDebugPortKey, "Please provide a port to use.")
+				, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+
+		// port text field
+		Label portLabel = new Label(parent, SWT.NONE);
+		portLabel.setText("Port:");
+		GridDataFactory.fillDefaults()
+			.align(SWT.BEGINNING, SWT.CENTER)
+			.applyTo(portLabel);
+		Text debugPortText = new Text(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.CENTER).grab(true, false)
+			.applyTo(debugPortText);
+		IObservableValue<String> debugPortTextObservable = 
+				WidgetProperties.text(SWT.Modify).observe(debugPortText);
+		ValueBindingBuilder
+			.bind(debugPortTextObservable)
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_DEBUG_PORT_VALUE).observe(model))
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(debugPortText))
+			.notUpdating(useImageDebugPortKey)
+			.converting(new InvertingBooleanConverter())
+			.in(dbc);
+		ControlDecorationSupport.create(
+				new DisablableRequiredStringMultiValidator(debugPortTextObservable, useImageDebugPortKey, "Please provide a port to use.") {
+
+					@Override
+					protected IStatus validateValue(String value) {
+						if (!NumberUtils.isDigits(value)) {
+							return ValidationStatus.error(
+									"Please provide a numeric port value");
+						}
+						return ValidationStatus.ok();
+					}
+					
+				}
+				, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+	}
+	
+	@SuppressWarnings("unchecked")
 	private void createRouteControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
 		Group routeGroup = new Group(container, SWT.NONE);
 		routeGroup.setText("Route");
 		GridDataFactory.fillDefaults()
-			.span(4, 1).align(SWT.FILL, SWT.FILL).grab(true, false)
+			.align(SWT.FILL, SWT.FILL).grab(true, false)
 			.applyTo(routeGroup);
 		GridLayoutFactory.fillDefaults()
 			.applyTo(routeGroup);
@@ -916,6 +1107,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		};
 	}
 
+	@SuppressWarnings("unchecked")
 	private TreeViewer createResourcesTreeViewer(Composite parent, ServerSettingsWizardPageModel model, Text selectorText) {
 		TreeViewer applicationTemplatesViewer =
 				new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -962,7 +1154,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
     }
 
     public IServer saveServer(IProgressMonitor monitor) throws CoreException {
-    	model.updateServer();
+    		model.updateServer();
 		return model.saveServer(monitor);
 	}
 

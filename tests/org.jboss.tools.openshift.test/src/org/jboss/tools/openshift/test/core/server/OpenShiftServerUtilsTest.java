@@ -24,16 +24,15 @@ import java.net.MalformedURLException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerType;
-import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
-import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
-import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
+import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.After;
 import org.junit.Before;
@@ -41,7 +40,6 @@ import org.junit.Test;
 
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 /**
  * @author Fred Bricon
@@ -51,7 +49,7 @@ import com.openshift.restclient.model.IService;
  */
 public class OpenShiftServerUtilsTest {
 
-	private IServerWorkingCopy server;
+	private IServer server;
 	private Connection connection;
 
 	@Before
@@ -59,16 +57,7 @@ public class OpenShiftServerUtilsTest {
 		this.connection = ResourceMocks.create3ProjectsConnection();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 
-		this.server = createServer(ResourceMocks.PROJECT2_SERVICES[1]);
-	}
-
-	private IServerWorkingCopy createServer(IService serverService) throws UnsupportedEncodingException, MalformedURLException {
-		IServerWorkingCopy server = mock(IServerWorkingCopy.class);
-		doReturn(ConnectionURL.forConnection(connection).getUrl())
-			.when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), anyString());
-		doReturn(OpenShiftResourceUniqueId.get(serverService))
-			.when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
-		return server;
+		this.server = OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[1], connection);
 	}
 
 	@After
@@ -113,7 +102,7 @@ public class OpenShiftServerUtilsTest {
 	public void should_return_service_from_server() {
 		// given
 		// when
-		IResource resource = OpenShiftServerUtils.getResource(server, connection);
+		IResource resource = OpenShiftServerUtils.getResource(server, connection, new NullProgressMonitor());
 		// then
 		assertThat(resource).isEqualTo(ResourceMocks.PROJECT2_SERVICES[1]);
 	}
@@ -122,18 +111,18 @@ public class OpenShiftServerUtilsTest {
 	public void should_return_deploymentconfig() throws CoreException {
 		// given
 		// when
-		IDeploymentConfig deploymentConfig = (IDeploymentConfig) OpenShiftServerUtils.getReplicationController(server);
+		IDeploymentConfig deploymentConfig = (IDeploymentConfig) OpenShiftServerUtils.getDeploymentConfig(server, new NullProgressMonitor());
 		// then
 		assertThat(deploymentConfig).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2]);
 	}
 
 	@Test
-	public void should_throw_exception_no_pods_for_service() throws CoreException, UnsupportedEncodingException, MalformedURLException {
+	public void should_throw_exception_no_connection() throws UnsupportedEncodingException, MalformedURLException {
 		// given
 		// when
 		try {
-			OpenShiftServerUtils.getReplicationController(
-				createServer(ResourceMocks.PROJECT2_SERVICES[0]));
+			OpenShiftServerUtils.getDeploymentConfig(
+				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[0], connection), new NullProgressMonitor());
 		// then
 			fail("CoreException expected");
 		} catch(CoreException e) {
@@ -146,8 +135,8 @@ public class OpenShiftServerUtilsTest {
 		// given
 		// when
 		try {
-			OpenShiftServerUtils.getReplicationController(
-				createServer(ResourceMocks.PROJECT2_SERVICES[2]));
+			OpenShiftServerUtils.getDeploymentConfig(
+				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[3], connection), new NullProgressMonitor());
 		// then
 			fail("CoreException expected");
 		} catch(CoreException e) {

@@ -4,7 +4,7 @@
    <extension
          point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
       <subsystem
-            class="org.jboss.tools.openshift.js.server.behaviour.OpenshiftNodejsShutdownController"
+            class="org.jboss.tools.openshift.js.server.behaviour.OpenShiftNodejsShutdownController"
             id="shutdown.openshift.nodejs"
             name="OpenShift NodeJS Shutdown Controller"
             system="shutdown">
@@ -15,7 +15,7 @@
             serverTypes="org.jboss.tools.openshift.server.type">
       </subsystemMapping>
       <subsystem
-            class="org.jboss.tools.openshift.js.server.behaviour.OpenshiftNodejsLaunchController"
+            class="org.jboss.tools.openshift.js.server.behaviour.OpenShiftNodejsLaunchController"
             id="launch.openshift.nodejs"
             name="OpenShift NodeJS Launch Controller"
             system="launch">
@@ -26,7 +26,7 @@
             serverTypes="org.jboss.tools.openshift.server.type">
       </subsystemMapping>
       <subsystem
-            class="org.jboss.tools.openshift.js.server.behaviour.OpenhiftNodejsPublishController"
+            class="org.jboss.tools.openshift.js.server.behaviour.OpenShiftNodejsPublishController"
             id="publish.rsync.filesystem.nodejs"
             name="Local Filesystem Nodejs Publish with RSync"
             system="publish">
@@ -67,7 +67,7 @@
    <extension
          point="org.jboss.tools.openshift.core.serverAdapterProfileDetector">
       <detector
-            class="org.jboss.tools.openshift.js.server.OpenshiftNodejsApplicationProfileDetector">
+            class="org.jboss.tools.openshift.js.server.OpenShiftNodejsApplicationProfileDetector">
       </detector>
    </extension>
 </plugin>

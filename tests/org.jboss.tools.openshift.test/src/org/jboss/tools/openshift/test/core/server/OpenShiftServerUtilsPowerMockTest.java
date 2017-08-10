@@ -1,10 +1,10 @@
 package org.jboss.tools.openshift.test.core.server;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
@@ -85,7 +86,7 @@ public class OpenShiftServerUtilsPowerMockTest {
 		PowerMockito.mockStatic(WatchManager.class);
 		PowerMockito.when(WatchManager.getInstance()).thenReturn(watchManager);
 		// when
-		OpenShiftServerUtils.getResource(server, connection);
+		OpenShiftServerUtils.getResource(server, connection, new NullProgressMonitor());
 		// then
 		verify(watchManager, times(1)).startWatch(any(IProject.class), eq(connection));
 	}

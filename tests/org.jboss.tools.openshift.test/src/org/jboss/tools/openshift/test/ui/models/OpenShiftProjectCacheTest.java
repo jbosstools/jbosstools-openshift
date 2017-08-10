@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeoutException;
 
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionProperties;
@@ -34,7 +35,6 @@ import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 import org.jboss.tools.openshift.internal.ui.models.OpenshiftUIModel;
 import org.jboss.tools.openshift.test.util.UITestUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +48,7 @@ import com.openshift.restclient.model.IProject;
 public class OpenShiftProjectCacheTest {
 
 	private IConnectionWrapper connectionWrapper;
-	private OpenshiftUIModel root;
+	private OpenshiftUIModel model;
 
 	@Mock
 	private IProject project;
@@ -59,16 +59,14 @@ public class OpenShiftProjectCacheTest {
 
 	@Before
 	public void setUp() throws Exception {
-		this.conn = spy(createConnection("aUser", "123", "https://localhost:8443"));
+		this.conn = spy(createConnection("spacecat", "42", "https://localhost:8880"));
 		doReturn(Arrays.asList(project)).when(conn).getResources(ResourceKind.PROJECT);
-		ConnectionsRegistrySingleton.getInstance().clear();
-		ConnectionsRegistrySingleton.getInstance().add(conn);
-		root = OpenshiftUIModel.getInstance();
-		connectionWrapper = root.getConnections().iterator().next();
-	}
-	
-	@After
-	public void tearDown() {
+		ConnectionsRegistry registry = ConnectionsRegistrySingleton.getInstance();
+		registry.clear();
+		registry.add(conn);
+
+		this.model = new OpenshiftUIModel(registry) {};
+		this.connectionWrapper = model.getConnections().iterator().next();
 	}
 	
 	@Test

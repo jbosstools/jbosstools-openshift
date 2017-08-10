@@ -9,7 +9,7 @@
  *     Red Hat - Initial Contribution
  *******************************************************************************/
 
-package org.jboss.tools.openshift.internal.ui.dockerutils;
+package org.jboss.tools.openshift.internal.core.docker;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,7 +25,7 @@ import org.eclipse.linuxtools.docker.core.IDockerConnection2;
 import org.eclipse.linuxtools.docker.core.IDockerProgressHandler;
 import org.eclipse.linuxtools.docker.core.IRegistryAccount;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 /**
  * {@link Job} to push an image from a Docker daemon into the OpenShift registry
@@ -70,14 +70,14 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 		// catch (DockerException | InterruptedException e) {
 		// see https://issues.jboss.org/browse/JBIDE-22764
 		} catch (Exception e) {
-			return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+			return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
 					"Failed to push the selected Docker image into OpenShift registry", e);
 		} finally {
 			// we need to untag the image, even if the push operation failed
 			try {
 				this.dockerConnection.removeTag(tmpImageName);
 			} catch (DockerException | InterruptedException e) {
-				return new Status(IStatus.WARNING, OpenShiftUIActivator.PLUGIN_ID,
+				return new Status(IStatus.WARNING, OpenShiftCoreActivator.PLUGIN_ID,
 						"Pushed the selected Docker image into OpenShift registry but failed to untag it afterwards",
 						e);
 			}
@@ -98,12 +98,15 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 	public String getPushToRegistryImageName() {
 		try {
 		    final URL registryURL = new URL(this.registryAccount.getServerAddress());
-			final String registryHostname = (registryURL.getPort() == (-1))?registryURL.getHost():registryURL.getHost() + ':' + registryURL.getPort();
+			final String registryHostname = (registryURL.getPort() == (-1)) ?
+					registryURL.getHost()
+					: registryURL.getHost() + ':' + registryURL.getPort();
 			final String tmpImageName = registryHostname + '/' + this.openshiftProject + '/' + DockerImageUtils.extractImageNameAndTag(this.imageName);
 			return tmpImageName;
 		} catch (MalformedURLException e) {
-			OpenShiftUIActivator.getDefault().getLog().log(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-					"Failed to push the selected Docker image into OpenShift registry", e));
+			OpenShiftCoreActivator.getDefault().getLog().log(
+					new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
+							"Failed to push the selected Docker image into OpenShift registry", e));
 			return null;
 		}
 		

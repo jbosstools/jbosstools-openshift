@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,22 +24,20 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryList
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 
-import com.openshift.restclient.model.IResource;
-
 public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegistry, OpenshiftUIModel> {
 	
 	protected static class OpenshiftUIModelSingletonHolder {
 		public static final OpenshiftUIModel INSTANCE = new OpenshiftUIModel(ConnectionsRegistrySingleton.getInstance());
 	}
 	
+	public static OpenshiftUIModel getInstance() {
+		return OpenshiftUIModelSingletonHolder.INSTANCE;
+	}
+
 	private Map<IOpenShiftConnection, ConnectionWrapper> connections = new HashMap<>();
 	private List<IElementListener> listeners = new ArrayList<IElementListener>();
 
 	private IConnectionsRegistryListener listener;
-	
-	public static OpenshiftUIModel getInstance() {
-		return OpenshiftUIModelSingletonHolder.INSTANCE;
-	}
 
 	/**
 	 * Explicitly call this method, only for testing purposes!
@@ -50,9 +48,7 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 
 			@Override
 			public void connectionRemoved(IConnection connection) {
-				synchronized (connections) {
-					connections.remove(connection);
-				}
+				removeConnection(connection);
 				fireChanged(OpenshiftUIModel.this);
 			}
 
@@ -70,16 +66,11 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 				if (!(connection instanceof IOpenShiftConnection)) {
 					return;
 				}
-				synchronized (connections) {
-					if (connections.containsKey(connection)) {
-						return;
-					}
-					connections.put((IOpenShiftConnection) connection,
-							new ConnectionWrapper(OpenshiftUIModel.this, (IOpenShiftConnection) connection));
-				}
+				addConnection(connection);
 				fireChanged(OpenshiftUIModel.this);
 			}
 		};
+
 		Collection<Connection> allConnections = registry.getAll(Connection.class);
 		synchronized (connections) {
 			for (IConnection connection : allConnections) {
@@ -91,14 +82,20 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 		}
 		registry.addListener(listener);
 	}
-	public static boolean isOlder(IResource oldResource, IResource newResource) {
-		try {
-			int oldVersion = Integer.valueOf(oldResource.getResourceVersion());
-			int newVersion = Integer.valueOf(newResource.getResourceVersion());
-			return oldVersion < newVersion;
-		} catch (NumberFormatException e) {
-			// treat this as an update
-			return true;
+
+	protected void addConnection(IConnection connection) {
+		synchronized (connections) {
+			if (connections.containsKey(connection)) {
+				return;
+			}
+			connections.put((IOpenShiftConnection) connection,
+					new ConnectionWrapper(OpenshiftUIModel.this, (IOpenShiftConnection) connection));
+		}
+	}
+
+	protected void removeConnection(IConnection connection) {
+		synchronized (connections) {
+			connections.remove(connection);
 		}
 	}
 
