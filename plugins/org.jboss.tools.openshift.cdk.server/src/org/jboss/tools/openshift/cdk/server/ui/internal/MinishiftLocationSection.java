@@ -136,7 +136,7 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		msHomeModListener = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				execute(new SetLocationPropertyCommand(server));
+				execute(new SetMinishiftHomePropertyCommand(server));
 			}
 		};
 		msHomeText.addModifyListener(msHomeModListener);
@@ -147,6 +147,11 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		});
 
 		
+	}
+	public class SetMinishiftHomePropertyCommand extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyTextCommand {
+		public SetMinishiftHomePropertyCommand(IServerWorkingCopy server) {
+			super(server, "Change Minishift Home", msHomeText, msHomeText.getText(), CDK3Server.MINISHIFT_HOME, msHomeModListener);
+		}
 	}
 	
 	public class SetHypervisorPropertyCommand extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyComboCommand {

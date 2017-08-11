@@ -92,7 +92,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 		String workingDir = JBossServerCorePlugin.getServerStateLocation(s).toOSString();
 		workingCopy.setAttribute(ATTR_WORKING_DIR, workingDir);
     	
-    	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map)null);
+    	Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String,String>)null);
     	env = (env == null ? new HashMap<>() : new HashMap<>(env)); 
     	String msHome = s.getAttribute(CDK3Server.MINISHIFT_HOME, (String)null);
     	if( msHome != null ) {
