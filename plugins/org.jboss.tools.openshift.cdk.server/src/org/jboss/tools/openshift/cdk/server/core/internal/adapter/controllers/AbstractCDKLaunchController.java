@@ -142,22 +142,37 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 	protected LaunchManager getLaunchManager() {
 		return (LaunchManager)DebugPlugin.getDefault().getLaunchManager();
 	}
-	 
-	protected IDebugEventSetListener getDebugListener(final IProcess[] processes, final ILaunch launch) {
-		return new IDebugEventSetListener() { 
-			@Override
-			public void handleDebugEvents(DebugEvent[] events) {
-				if (events != null) {
-					int size = events.length;
-					for (int i = 0; i < size; i++) {
-						if (processes[0] != null && processes[0].equals(events[i].getSource()) && events[i].getKind() == DebugEvent.TERMINATE) {
-							// Register this launch as terminated
-							((LaunchManager)getLaunchManager()).fireUpdate(new ILaunch[] {launch}, LaunchManager.TERMINATE);
-							processTerminated(getServer(), processes[0], this);
-							DebugPlugin.getDefault().removeDebugEventListener(this);
-						}
+	
+	protected abstract class DebugEventListener implements IDebugEventSetListener {
+		public void handleDebugEvents(DebugEvent[] events, ILaunch launch, IProcess[] processes) {
+			if (events != null) {
+				int size = events.length;
+				for (int i = 0; i < size; i++) {
+					if (processes != null && processes.length > 0 && processes[0] != null && processes[0].equals(events[i].getSource()) && events[i].getKind() == DebugEvent.TERMINATE) {
+						// Register this launch as terminated
+						((LaunchManager)getLaunchManager()).fireUpdate(new ILaunch[] {launch}, LaunchManager.TERMINATE);
+						processTerminated(getServer(), processes[0], this);
+						DebugPlugin.getDefault().removeDebugEventListener(this);
 					}
 				}
+			}
+		}
+	}
+	 
+	protected IDebugEventSetListener getDebugListener(final IProcess[] processes, final ILaunch launch) {
+		return new DebugEventListener() { 
+			@Override
+			public void handleDebugEvents(DebugEvent[] events) {
+				handleDebugEvents(events, launch, processes);
+			}
+		};
+	}
+	
+	protected IDebugEventSetListener getDebugListener(final ILaunch launch) {
+		return new DebugEventListener() { 
+			@Override
+			public void handleDebugEvents(DebugEvent[] events) {
+				handleDebugEvents(events, launch, launch.getProcesses());
 			}
 		};
 	}

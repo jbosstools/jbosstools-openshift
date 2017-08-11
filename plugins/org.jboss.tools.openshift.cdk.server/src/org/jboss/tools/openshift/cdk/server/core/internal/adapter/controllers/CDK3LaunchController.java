@@ -170,26 +170,32 @@ public class CDK3LaunchController extends AbstractCDKLaunchController implements
 		
 		String args = configuration.getAttribute(ATTR_ARGS, (String)null);
 		
+		// Add listener first
+		IDebugEventSetListener debug = getDebugListener(launch);
+		DebugPlugin.getDefault().addDebugEventListener(debug);
+		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
+
+		
+		
 		Process p = null;
 		try {
 			p = new CDKLaunchUtility().callMinishiftInteractive(s, args, getStartupLaunchName(s));
 		} catch(IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(ioe);
 			beh.setServerStopped();
+			DebugPlugin.getDefault().removeDebugEventListener(debug);
 			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ioe.getMessage(), ioe));
 		}
 		
 		if( p == null ) {
 			beh.setServerStopped();
+			DebugPlugin.getDefault().removeDebugEventListener(debug);
 			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to minishift up has failed."));
 		}
 
 		IProcess process = addProcessToLaunch(p, launch,s, false, minishiftLoc);
-		
-		IDebugEventSetListener debug = getDebugListener(new IProcess[]{process}, launch);
-		DebugPlugin.getDefault().addDebugEventListener(debug);
 		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
-		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
+		
 	}
 	
 	
