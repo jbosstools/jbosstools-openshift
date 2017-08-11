@@ -12,9 +12,6 @@ package org.jboss.tools.openshift.test.core.server.debug;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -24,14 +21,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode.DebugContext;
 import org.jboss.tools.openshift.internal.core.util.NewPodDetectorJob;
-import org.jboss.tools.openshift.test.core.connection.ConnectionTestUtils;
 import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.After;
@@ -45,7 +39,7 @@ import com.openshift.restclient.model.IService;
 public class OpenShiftDebugModeTest {
 	
 	private Connection connection;
-	private IControllableServerBehavior serverBehaviour;
+	private IServer server;
 	private IDeploymentConfig dc;
 	private IService service;
 	private DebugContext context;
@@ -58,12 +52,8 @@ public class OpenShiftDebugModeTest {
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 		this.service = ResourceMocks.PROJECT2_SERVICES[1];
 		this.dc = ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[1];
-//		IServer server = OpenShiftServerTestUtils.createOpenshift3Server("dummy", "", service, connection);
-		IServer server = OpenShiftServerTestUtils.mockServer(service, connection);
-		this.serverBehaviour = OpenShiftServerTestUtils.mockServerBehaviour(server);
-//		this.serverBehaviour = spy(new OpenShiftServerBehaviour());
-//		when(serverBehaviour.getServer()).thenReturn(server);
-		this.context = OpenShiftDebugMode.createContext(serverBehaviour, "devmode", "debugPort", "42");
+		this.server = OpenShiftServerTestUtils.mockServer(service, connection);
+		this.context = OpenShiftDebugMode.createContext(server, "devmode", "debugPort", "42");
 //		System.setProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, "2000");
 	}
 
@@ -76,7 +66,7 @@ public class OpenShiftDebugModeTest {
 	public void debuggingContextShouldDefaultToDefaultDebugPortAndDebuggingNotEnabled() {
 		// given
 		// when
-		DebugContext context = OpenShiftDebugMode.createContext(serverBehaviour, null, null, null);
+		DebugContext context = OpenShiftDebugMode.createContext(server, null, null, null);
 		// then
 		assertEquals(NumberUtils.toInt(OpenShiftDebugMode.DEFAULT_DEBUG_PORT), context.getDebugPort());
 		assertFalse(context.isDebugEnabled());
@@ -232,18 +222,5 @@ public class OpenShiftDebugModeTest {
 //			}
 //		}
 //	}
-	
-	private IServer mockServer(Connection connection) {
-		IServer server = mock(IServer.class);
-		doReturn("aServer").when(server).getName();
-		doReturn(connection.getHost()).when(server).getAttribute(OpenShiftServerUtils.ATTR_CONNECTIONURL, anyString());
-		return server;
-	}
-
-	private Connection mockConnection(String url) throws MalformedURLException {
-		Connection connection = ConnectionTestUtils.createConnection("gargamel", "42", url);
-		ConnectionsRegistrySingleton.getInstance().add(connection);
-		return connection;
-	}
 
 }

@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
+import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -70,7 +70,7 @@ public class OpenShiftDebugMode {
 	 *            the debug port to use in the deployment config
 	 * @return
 	 */
-	public static DebugContext createContext(IControllableServerBehavior behaviour, String devmodeKey, String debugPortKey, String debugPort) {
+	public static DebugContext createContext(IServer behaviour, String devmodeKey, String debugPortKey, String debugPort) {
 		Assert.isNotNull(behaviour);
 		
 		DebugContext context = new DebugContext(behaviour, 
@@ -296,7 +296,7 @@ public class OpenShiftDebugMode {
 	}
 	
 	private static IDeploymentConfig getDeploymentConfig(DebugContext context, IProgressMonitor monitor) throws CoreException {
-		return OpenShiftServerUtils.getDeploymentConfig(context.getServerBehaviour().getServer(), monitor);
+		return OpenShiftServerUtils.getDeploymentConfig(context.getServer(), monitor);
 	}
 
 	private static IPod waitForNewPod(IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
@@ -324,7 +324,7 @@ public class OpenShiftDebugMode {
 		
 		public static final int NO_DEBUG_PORT = -1;
 		
-		private IControllableServerBehavior behaviour;
+		private IServer server;
 		
 		private boolean debugEnabled;
 		private boolean devmodeEnabled;
@@ -334,15 +334,15 @@ public class OpenShiftDebugMode {
 		private IDebugListener listener;
 		private IPod pod;
 
-		private DebugContext(IControllableServerBehavior behaviour, String devmodeKey, String debugPortKey, String debugPort) {
-			this.behaviour = behaviour;
+		private DebugContext(IServer server, String devmodeKey, String debugPortKey, String debugPort) {
+			this.server = server;
 			this.devmodeKey = devmodeKey;
 			this.debugPortKey = debugPortKey;
 			this.debugPort = getDebugPort(debugPort);
 		}
 
-		public IControllableServerBehavior getServerBehaviour() {
-			return behaviour;
+		public IServer getServer() {
+			return server;
 		}
 
 		private void setDebugEnabled(boolean debugEnabled) {

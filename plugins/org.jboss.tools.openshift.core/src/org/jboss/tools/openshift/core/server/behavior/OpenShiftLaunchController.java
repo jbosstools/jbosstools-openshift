@@ -162,7 +162,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		String devmodeKey = getDevmodeKey(beh.getServer(), imageLabels);
 		String debugPortKey = getDebugPortKey(beh.getServer(), imageLabels);
 		String debugPort = getDebugPort(beh.getServer(), imageLabels);
-		DebugContext debugContext = OpenShiftDebugMode.createContext(beh, devmodeKey, debugPortKey, debugPort);
+		DebugContext debugContext = OpenShiftDebugMode.createContext(beh.getServer(), devmodeKey, debugPortKey, debugPort);
 		return debugContext;
 	}
 
