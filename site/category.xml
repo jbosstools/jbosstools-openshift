@@ -2,65 +2,28 @@
 <site>
 	<description>To install these features, point Eclipse at this site.</description>
 	<!-- JBoss Tools as Nightly Build Update Site -->
-	<category-def label="JBoss Tools OpenShift Nightly Build Update Site" name="JBoss Tools OpenShift Nightly Build Update Site">
+	<category-def label="JBoss Tools OpenShift Nightly Build Update Site" name="site">
 		<description>JBoss Tools OpenShift Nightly Build Update Site: contains all features in this build.</description>
 	</category-def>
-	<feature url="features/org.jboss.tools.openshift.egit.integration.feature_0.0.0.jar" id="org.jboss.tools.openshift.egit.integration.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.express.feature_0.0.0.jar" id="org.jboss.tools.openshift.express.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.egit.integration.test.feature_0.0.0.jar" id="org.jboss.tools.openshift.egit.integration.test.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.express.test.feature_0.0.0.jar" id="org.jboss.tools.openshift.express.test.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.cdk.test.feature_0.0.0.jar" id="org.jboss.tools.openshift.cdk.test.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.feature_0.0.0.jar" id="org.jboss.tools.openshift.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.test.feature_0.0.0.jar" id="org.jboss.tools.openshift.test.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.cdk.feature_0.0.0.jar" id="org.jboss.tools.openshift.cdk.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.js.feature_0.0.0.jar" id="org.jboss.tools.openshift.js.feature" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-
+	<feature id="org.jboss.tools.openshift.egit.integration.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.express.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.egit.integration.test.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.express.test.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.cdk.test.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.test.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.cdk.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.js.feature"><category name="site" /></feature>
 
 	<!-- Sources -->
-	<feature url="features/org.jboss.tools.openshift.egit.integration.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.egit.integration.feature.source" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.express.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.express.feature.source" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.egit.integration.test.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.egit.integration.test.feature.source" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.express.test.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.express.test.feature.source" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.cdk.test.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.cdk.test.feature.source" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.feature.source" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.test.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.test.feature.source" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.cdk.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.cdk.feature.source" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
-	<feature url="features/org.jboss.tools.openshift.js.feature.source_0.0.0.jar" id="org.jboss.tools.openshift.js.feature.source" version="0.0.0">
-		<category name="JBoss Tools OpenShift Nightly Build Update Site" />
-	</feature>
+	<feature id="org.jboss.tools.openshift.egit.integration.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.express.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.egit.integration.test.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.express.test.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.cdk.test.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.test.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.cdk.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.js.feature.source"><category name="site" /></feature>
 
 </site>
