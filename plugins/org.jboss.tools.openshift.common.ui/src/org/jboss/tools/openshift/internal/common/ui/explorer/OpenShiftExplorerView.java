@@ -115,6 +115,7 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		this.explanationsPane = createExplanationPane(connectionsPane, pageBook, toolkit);
 		showConnectionsOrExplanations(connectionsPane, explanationsPane);
 		ConnectionsRegistrySingleton.getInstance().addListener(this);
+		getCommonViewer().refresh();
 	}
 
 	private Control createExplanationPane(Control connectionsPane, PageBook pageBook, FormToolkit kit) {
