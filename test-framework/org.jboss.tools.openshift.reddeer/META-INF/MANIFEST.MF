@@ -20,7 +20,7 @@ Require-Bundle:
  org.jboss.tools.openshift.core;bundle-version="3.3.0",
  org.jboss.tools.openshift.client;bundle-version="3.3.0",
  org.jboss.tools.common.reddeer;bundle-version="3.9.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: jar
 Bundle-Localization: plugin

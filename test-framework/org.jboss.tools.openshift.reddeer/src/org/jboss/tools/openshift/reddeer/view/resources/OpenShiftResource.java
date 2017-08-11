@@ -97,8 +97,13 @@ public class OpenShiftResource {
 		new DefaultShell(OpenShiftLabel.Shell.DELETE_RESOURCE);
 		new OkButton().click();
 		
+<<<<<<< HEAD
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_RESOURCE), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+=======
+		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.DELETE_RESOURCE), TimePeriod.LONG);
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+>>>>>>> JBIDE-23131 Move openshift integration tests from
 	}
 	
 }

@@ -73,14 +73,12 @@ public class TestUtils {
 		dialog.ok();
 	}
 	
-	public static void cleanupGitFolder(String appname) {
-		File gitDir = new File(System.getProperty("user.home") + File.separatorChar + "git");
-		
+	public static void cleanupGitFolder(File gitDir, String repoName) {
 		boolean exists = gitDir.exists() ? true : gitDir.mkdir();
 
 		if (exists && gitDir.isDirectory() && gitDir.listFiles().length > 0) {
 			for (File file : gitDir.listFiles()) {
-				if (file.getName().contains(appname)) {
+				if (file.getName().contains(repoName)) {
 					if (file.isDirectory()) {
 						closeGitRepository(file);
 					}
@@ -92,6 +90,11 @@ public class TestUtils {
 				}
 			}
 		}
+	}
+	
+	public static void cleanupGitFolder(String appname) {
+		File gitDir = new File(System.getProperty("user.home") + File.separatorChar + "git");
+		cleanupGitFolder(gitDir, appname);
 	}
 
 	public static void closeGitRepository(File repoDir) {

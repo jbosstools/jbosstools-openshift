@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.jboss.tools.openshift.test.feature"
+      id="org.jboss.tools.openshift.integration.tests.feature"
       label="%featureName"
       version="3.4.1.qualifier"
       provider-name="%providerName"
       license-feature="org.jboss.tools.foundation.license.feature"
-      license-feature-version="0.0.0">
+	  license-feature-version="0.0.0">
 
    <description url="%descriptionURL">
       %description
@@ -20,20 +20,6 @@
    </license>
 
    <plugin
-         id="org.jboss.tools.openshift.reddeer"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.jboss.tools.openshift.test"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-   
-    <plugin
          id="org.jboss.tools.openshift.ui.bot.test"
          download-size="0"
          install-size="0"
