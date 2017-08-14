@@ -55,6 +55,7 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IProject;
@@ -213,36 +214,47 @@ public class ResourceMocks {
 
     public static Connection create3ProjectsConnection() {
 		Connection connection = createConnection("http://localhost:8443", "dev@openshift.com");
-		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(PROJECTS));
-		when(PROJECT2.getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT2_SERVICES));
-		when(connection.getResources(ResourceKind.SERVICE, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_SERVICES));
-		when(PROJECT2.getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT2_ROUTES));
-		when(connection.getResources(ResourceKind.BUILD_CONFIG, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_BUILDCONFIGS));
-		when(connection.getResources(ResourceKind.POD, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_PODS));
-		when(connection.getResources(ResourceKind.REPLICATION_CONTROLLER, PROJECT2.getName()))
-			.thenReturn(Arrays.asList(PROJECT2_REPLICATION_CONTROLLERS));
-		when(connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, PROJECT2.getName())).thenReturn(Arrays.asList(PROJECT2_DEPLOYMENTCONFIGS));
+		doReturn(Arrays.asList(PROJECTS)).when(connection).getResources(ResourceKind.PROJECT);
+
+		// project 2
+		mockGetResources(PROJECT2_SERVICES, ResourceKind.SERVICE, PROJECT2, connection);
+		mockGetResources(PROJECT2_ROUTES, ResourceKind.ROUTE, PROJECT2, connection);
+		mockGetResources(PROJECT2_BUILDCONFIGS, ResourceKind.BUILD_CONFIG, PROJECT2, connection);
+		mockGetResources(PROJECT2_PODS, ResourceKind.POD, PROJECT2, connection);
+		mockGetResources(PROJECT2_REPLICATION_CONTROLLERS, ResourceKind.REPLICATION_CONTROLLER, PROJECT2, connection);
+		mockGetResources(PROJECT2_DEPLOYMENTCONFIGS, ResourceKind.DEPLOYMENT_CONFIG, PROJECT2, connection);
 		mockConnectionGetResource(PROJECT2_DEPLOYMENTCONFIGS, ResourceKind.DEPLOYMENT_CONFIG, connection);
 
-		when(PROJECT3.getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(PROJECT3_SERVICES));
-		when(PROJECT3.getResources(ResourceKind.ROUTE)).thenReturn(Arrays.asList(PROJECT3_ROUTES));
+		// project 3
+		mockGetResources(PROJECT3_SERVICES, ResourceKind.SERVICE, PROJECT3, connection);
+		mockGetResources(PROJECT3_ROUTES, ResourceKind.ROUTE, PROJECT3, connection);
 
-	    when(connection.getResources(ResourceKind.BUILD_CONFIG, PROJECT4.getName())).thenReturn(Arrays.asList(PROJECT4_BUILDCONFIGS));
-	    when(connection.getResources(ResourceKind.POD, PROJECT4.getName())).thenReturn(Arrays.asList(PROJECT4_PODS));
-	    when(connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, PROJECT4.getName())).thenReturn(Arrays.asList(PROJECT4_DEPLOYMENTCONFIGS));
-        when(PROJECT4.getResources(ResourceKind.DEPLOYMENT_CONFIG)).thenReturn(Arrays.asList(PROJECT4_DEPLOYMENTCONFIGS));
-	    mockConnectionGetResource(PROJECT4_DEPLOYMENTCONFIGS, ResourceKind.DEPLOYMENT_CONFIG, connection);
+		// project 4
+		mockGetResources(PROJECT4_BUILDCONFIGS, ResourceKind.BUILD_CONFIG, PROJECT4, connection);
+		mockGetResources(PROJECT4_PODS, ResourceKind.POD, PROJECT4, connection);
+		mockGetResources(PROJECT4_DEPLOYMENTCONFIGS, ResourceKind.DEPLOYMENT_CONFIG, PROJECT4, connection);
+		mockConnectionGetResource(PROJECT4_DEPLOYMENTCONFIGS, ResourceKind.DEPLOYMENT_CONFIG, connection);
 
-        when(connection.getResources(ResourceKind.POD, PROJECT5.getName())).thenReturn(Arrays.asList(PROJECT5_PODS));
-        when(connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, PROJECT5.getName())).thenReturn(Arrays.asList(PROJECT5_REPLICATINCONTROLLERS));
-        when(PROJECT5.getResources(ResourceKind.REPLICATION_CONTROLLER)).thenReturn(Arrays.asList(PROJECT5_REPLICATINCONTROLLERS));
-        mockConnectionGetResource(PROJECT5_REPLICATINCONTROLLERS, ResourceKind.REPLICATION_CONTROLLER, connection);
+		// project 5
+		mockGetResources(PROJECT5_PODS, ResourceKind.POD, PROJECT5, connection);
+		mockGetResources(PROJECT5_REPLICATINCONTROLLERS, ResourceKind.REPLICATION_CONTROLLER, PROJECT5, connection);
+		mockConnectionGetResource(PROJECT5_REPLICATINCONTROLLERS, ResourceKind.REPLICATION_CONTROLLER, connection);
 
-        return connection;
+		return connection;
+	}
+
+	private static <R extends IResource> void mockGetResources(R[] resources, String resourceKind, IProject project, Connection connection) {
+		assertThat(resources).isNotEmpty();
+		assertThat(resourceKind).isNotNull();
+		assertThat(connection).isNotNull();
+		assertThat(project).isNotNull();
+
+		when(connection.getResources(resourceKind, project.getName())).thenReturn(new ArrayList<>(Arrays.asList(resources)));
+		when(project.getResources(resourceKind)).thenReturn(new ArrayList<>(Arrays.asList(resources)));
 	}
 
 	private static void mockConnectionGetResource(IResource[] resources, String resourceKind, Connection connection) {
-		for (IResource resource : resources) {
+		Arrays.stream(resources).forEach(resource -> {
 
 			assertThat(resource).isNotNull();
 			assertThat(resource.getName()).isNotEmpty();
@@ -250,9 +262,9 @@ public class ResourceMocks {
 			assertThat(resource.getProject().getName()).isNotEmpty();
 			assertThat(resourceKind).isNotNull();
 
-			when(connection.getResource(resourceKind, resource.getProject().getName(), resource.getName()))
-					.thenReturn(resource);
-		}
+			when(connection.getResource(resourceKind, resource.getProject().getName(), resource.getName())).thenReturn(resource);
+			when(connection.ownsResource(resource)).thenReturn(true);
+		});
 	}
 	
 	public static IProject createProject(String name) {
@@ -361,8 +373,15 @@ public class ResourceMocks {
 	}
 
 	public static IDeploymentConfig createDeploymentConfig(String name, IProject project) {
+		return createDeploymentConfig(name, project, null);
+	}
+
+	public static IDeploymentConfig createDeploymentConfig(String name, IProject project, List<IEnvironmentVariable> envVariables) {
 		return createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG, 
-				dc -> mockGetResourceProperties(name, project, dc));
+				dc -> {
+					mockGetResourceProperties(name, project, dc);
+					doReturn(envVariables).when(dc).getEnvironmentVariables();
+				});
 	}
 
 	public static IReplicationController createReplicationController(String name, IProject project, Map<String, String> labels) {
@@ -380,7 +399,7 @@ public class ResourceMocks {
 
 	public static <R extends IResource> List<R> createResources(int numOf, Class<R> clazz, String kind, IResourceVisitor<R> visitor) {
 		List<R> resources = new ArrayList<>(numOf);
-		
+
 		for (int i = 0; i< numOf; i++) {
 			R mock = createResource(clazz, kind, visitor);
 			resources.add(mock);
@@ -408,15 +427,26 @@ public class ResourceMocks {
 			doReturn(project).when(resource).getProject();
 		}
 	}
+	
+	public static interface IResourceVisitor<R extends IResource> {
+		public void visit(R resource);
+	}
 
+	public static void mockEnvironmentVariables(List<IEnvironmentVariable> envVariables, IDeploymentConfig dc) {
+		doReturn(envVariables).when(dc).getEnvironmentVariables();	
+	}
+	
+	public static IEnvironmentVariable createEnvironmentVariable(String name, String value) {
+		IEnvironmentVariable var = mock(IEnvironmentVariable.class);
+		doReturn(name).when(var).getName();
+		doReturn(value).when(var).getValue();
+		return var;
+	}
+	
 	public static List<ObservableTreeItem> createObservableTreeItems(Collection<? extends IResource> resources) {
 		return resources.stream()
 				.map(r -> new ObservableTreeItem(r))
 				.collect(Collectors.toList());
-	}
-	
-	public static interface IResourceVisitor<R extends IResource> {
-		public void visit(R resource);
 	}
 
 	public static org.eclipse.core.resources.IProject createEclipseProject(String name) throws CoreException {
