@@ -23,6 +23,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 
 public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvironmentLoader {
 	
@@ -41,11 +42,13 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		if( registry != null )
 			props.put(ServiceManagerEnvironment.IMAGE_REGISTRY_KEY, registry);
 
-		// merge the two
+		// merge the two 
 		Map<String, String> merged = merge(adbEnv, props);
 		
-		String dotMinishift = System.getProperty("user.home") + File.separator + ".minishift";
-		Properties dotCDK = CDKServerUtility.getDotCDK(dotMinishift, "cdk");
+		String minishiftHomeDefault = System.getProperty("user.home") + File.separator + ".minishift";
+		String minishiftHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, minishiftHomeDefault);
+		
+		Properties dotCDK = CDKServerUtility.getDotCDK(minishiftHome, "cdk");
 		merged = merge(merged, dotCDK);
 		
 		File ocLocation = findOCLocation();
