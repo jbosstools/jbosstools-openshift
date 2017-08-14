@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -47,38 +46,15 @@ import com.openshift.restclient.model.IPort;
  * @author Andre Dietisheim
  */
 public class OpenShiftDebugMode {
-
-	public static final String DEFAULT_DEVMODE_KEY = "DEV_MODE";
-	public static final String DEFAULT_DEBUG_PORT_KEY = "DEBUG_PORT";
-	public static final String DEFAULT_DEBUG_PORT = "8787";
 	
-	private OpenShiftDebugMode() {
-	}
+	private DebugContext context;
 
 	/**
-	 * Creates a debugging context instance for the given server behaviour with the
-	 * given environment keys/values that should be used in the OpenShift deployment
-	 * config.
-	 * 
-	 * @param behaviour the server behaviour that will be used for this context.
-	 * @param devmodeKey
-	 *            the env key to use to get/set devmode in the deployment config
-	 * @param debugPortKey
-	 *            the env key to use to get/set the debug port in the deployment
-	 *            config
-	 * @param debugPort
-	 *            the debug port to use in the deployment config
-	 * @return
+	 * For testing purposes
 	 */
-	public static DebugContext createContext(IServer behaviour, String devmodeKey, String debugPortKey, String debugPort) {
-		Assert.isNotNull(behaviour);
-		
-		DebugContext context = new DebugContext(behaviour, 
-				StringUtils.defaultIfBlank(devmodeKey, DEFAULT_DEVMODE_KEY),
-				StringUtils.defaultIfBlank(debugPortKey, DEFAULT_DEBUG_PORT_KEY),
-				StringUtils.defaultIfBlank(debugPort, DEFAULT_DEBUG_PORT));
-
-		return context;
+	public OpenShiftDebugMode(DebugContext context) {
+		Assert.isNotNull(context);
+		this.context = context;
 	}
 
 	/**
@@ -90,11 +66,11 @@ public class OpenShiftDebugMode {
 	 * @param context
 	 * @param monitor
 	 */
-	public static void enableDebugging(DebugContext context) {
-		Assert.isNotNull(context);
-
+	public OpenShiftDebugMode enableDebugging() {
 		context.setDebugEnabled(true);
 		context.setDevmodeEnabled(true);
+
+		return this;
 	}
 
 	/**
@@ -107,14 +83,14 @@ public class OpenShiftDebugMode {
 	 * 
 	 * @see {@link #sendChanges(DebugContext, IProgressMonitor)}
 	 */
-	public static void disableDebugging(DebugContext context) {
-		Assert.isNotNull(context);
-
+	public OpenShiftDebugMode disableDebugging() {
 		context.setDebugEnabled(false);
 		context.setDevmodeEnabled(false);
+
+		return this;
 	}
 
-	private static void updateDebugEnvVariables(IDeploymentConfig dc, DebugContext context) {
+	private void updateDebugEnvVariables(IDeploymentConfig dc, DebugContext context) {
 		if (context.isDebugEnabled()) {
 			setDebugPort(context.getDebugPort(), dc);
 			dc.setEnvironmentVariable(context.getDebugPortKey(), String.valueOf(context.getDebugPort()));
@@ -125,7 +101,7 @@ public class OpenShiftDebugMode {
 		}
 	}
 
-	private static void setDebugPort(int debugPort, IDeploymentConfig dc) {
+	private void setDebugPort(int debugPort, IDeploymentConfig dc) {
 		Collection<IContainer> originalContainers = dc.getContainers();
 		if (originalContainers != null 
 				&& !originalContainers.isEmpty()) {
@@ -145,7 +121,7 @@ public class OpenShiftDebugMode {
 		}
 	}
 
-	private static boolean addDebugPort(int debugPort, Set<IPort> ports, IPort existing) {
+	private boolean addDebugPort(int debugPort, Set<IPort> ports, IPort existing) {
 		boolean added = false;
 		if (existing == null) {
 			PortSpecAdapter newPort = new PortSpecAdapter("debug", "TCP", debugPort);
@@ -160,7 +136,8 @@ public class OpenShiftDebugMode {
 		return added;
 	}
 
-	private static boolean isDebugEnabled(IDeploymentConfig dc, String devmodeKey, String debugPortKey) {
+	
+	private boolean isDebugEnabled(IDeploymentConfig dc, String devmodeKey, String debugPortKey) {
 		boolean debugEnabled = false;
 		boolean devmodeEnabled = isDevmodeEnabled(dc, devmodeKey);
 		if (devmodeEnabled) {
@@ -179,8 +156,10 @@ public class OpenShiftDebugMode {
 	 * 
 	 * @param context
 	 */
-	public static void enableDevmode(DebugContext context) {
+	public OpenShiftDebugMode enableDevmode() {
 		context.setDevmodeEnabled(true);
+		
+		return this;
 	}
 	
 	/**
@@ -191,8 +170,10 @@ public class OpenShiftDebugMode {
 	 * 
 	 * @param context
 	 */
-	public static void disableDevmode(DebugContext context) {
+	public OpenShiftDebugMode disableDevmode() {
 		context.setDevmodeEnabled(false);
+
+		return this;
 	}
 
 	/**
@@ -205,7 +186,7 @@ public class OpenShiftDebugMode {
 	 * @param monitor
 	 * @throws CoreException
 	 */
-	public static void sendChanges(DebugContext context, IProgressMonitor monitor) throws CoreException {
+	public OpenShiftDebugMode execute(IProgressMonitor monitor) throws CoreException {
 		IDeploymentConfig dc = getDeploymentConfig(context, monitor);
 		if (dc == null) {
 			throw new CoreException(StatusFactory.errorStatus(
@@ -223,9 +204,11 @@ public class OpenShiftDebugMode {
 				listener.onDebugChange(context, monitor);
 			}
 		}
+		
+		return this;
 	}
 
-	private static boolean updateDebugmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
+	private boolean updateDebugmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
 		monitor.subTask(NLS.bind(context.isDebugEnabled()? "Enabling" : "Disabling" 
 			+ " debugging for deployment config {0}", dc.getName()));
 
@@ -236,12 +219,12 @@ public class OpenShiftDebugMode {
 		return needsUpdate;
 	}
 
-	private static boolean needsDebugUpdate(IDeploymentConfig dc, DebugContext context) {
+	private boolean needsDebugUpdate(IDeploymentConfig dc, DebugContext context) {
 		boolean debugEnabled = isDebugEnabled(dc, context.getDevmodeKey(), context.getDebugPortKey());
 		return debugEnabled != context.isDebugEnabled();
 	}
 
-	private static boolean updateDevmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
+	private boolean updateDevmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
 		monitor.subTask(NLS.bind("Enabling devmode for deployment config {0}", dc.getName()));
 		boolean needsUpdate = needsDevmodeUpdate(dc, context);
 		if (!needsUpdate) {
@@ -252,17 +235,17 @@ public class OpenShiftDebugMode {
 		return true;
 	}
 
-	private static boolean needsDevmodeUpdate(IDeploymentConfig dc, DebugContext context) {
+	private boolean needsDevmodeUpdate(IDeploymentConfig dc, DebugContext context) {
 		boolean devmodeEnabled = isDevmodeEnabled(dc, context.getDevmodeKey());
 		return devmodeEnabled != context.isDevmodeEnabled();
 	}
 
-	private static boolean isDevmodeEnabled(IDeploymentConfig dc, String devmodeKey) {
+	private boolean isDevmodeEnabled(IDeploymentConfig dc, String devmodeKey) {
 		return Boolean.parseBoolean(getEnv(dc, devmodeKey));
 	}
 
-	private static String getEnv(IDeploymentConfig dc, String key) {
-		if (dc == null 
+	private String getEnv(IDeploymentConfig dc, String key) {
+		if (dc == null
 				|| dc.getEnvironmentVariables() == null
 				|| StringUtils.isEmpty(key)) {
 			return null;
@@ -276,7 +259,7 @@ public class OpenShiftDebugMode {
 		return null;
 	}
 
-	private static void updateDevmodeEnvVar(boolean enable, IDeploymentConfig dc, DebugContext context) {
+	private void updateDevmodeEnvVar(boolean enable, IDeploymentConfig dc, DebugContext context) {
 		if (enable) {
 			dc.setEnvironmentVariable(context.getDevmodeKey(), String.valueOf(enable));
 		} else {
@@ -284,7 +267,7 @@ public class OpenShiftDebugMode {
 		}
 	}
 
-	private static void sendUpdated(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) throws CoreException {
+	protected void sendUpdated(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) throws CoreException {
 		monitor.subTask(NLS.bind("Updating replication controller {0} and waiting for new pods to run.", dc.getName()));
 
 		Connection connection = ConnectionsRegistryUtil.getConnectionFor(dc);
@@ -295,17 +278,17 @@ public class OpenShiftDebugMode {
 		context.setPod(pod);
 	}
 	
-	private static IDeploymentConfig getDeploymentConfig(DebugContext context, IProgressMonitor monitor) throws CoreException {
+	private IDeploymentConfig getDeploymentConfig(DebugContext context, IProgressMonitor monitor) throws CoreException {
 		return OpenShiftServerUtils.getDeploymentConfig(context.getServer(), monitor);
 	}
 
-	private static IPod waitForNewPod(IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
+	private IPod waitForNewPod(IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
 		NewPodDetectorJob newPodDetector = new NewPodDetectorJob(dc);
 		newPodDetector.schedule();
 		return waitFor(newPodDetector, monitor);
 	}
 
-	private static IPod waitFor(NewPodDetectorJob podDetector, IProgressMonitor monitor) throws CoreException {
+	private IPod waitFor(NewPodDetectorJob podDetector, IProgressMonitor monitor) throws CoreException {
 		try {
 			podDetector.join(NewPodDetectorJob.TIMEOUT, monitor);
 			IStatus result = podDetector.getResult();
@@ -320,86 +303,5 @@ public class OpenShiftDebugMode {
 		}
 	}
 
-	public static class DebugContext {
-		
-		public static final int NO_DEBUG_PORT = -1;
-		
-		private IServer server;
-		
-		private boolean debugEnabled;
-		private boolean devmodeEnabled;
-		private String devmodeKey;
-		private String debugPortKey;
-		private int debugPort = NO_DEBUG_PORT;
-		private IDebugListener listener;
-		private IPod pod;
 
-		private DebugContext(IServer server, String devmodeKey, String debugPortKey, String debugPort) {
-			this.server = server;
-			this.devmodeKey = devmodeKey;
-			this.debugPortKey = debugPortKey;
-			this.debugPort = getDebugPort(debugPort);
-		}
-
-		public IServer getServer() {
-			return server;
-		}
-
-		private void setDebugEnabled(boolean debugEnabled) {
-			this.debugEnabled = debugEnabled;
-		}
-
-		public boolean isDebugEnabled() {
-			return debugEnabled;
-		}
-
-		public void setDevmodeEnabled(boolean devmodeEnabled) {
-			this.devmodeEnabled = devmodeEnabled;
-		}
-
-		public boolean isDevmodeEnabled() {
-			return devmodeEnabled;
-		}
-
-		public int getDebugPort() {
-			return debugPort;
-		}
-
-		private int getDebugPort(String debugPort) {
-			if (StringUtils.isBlank(debugPort)) {
-				return NO_DEBUG_PORT;
-			}
-			
-			try {
-				return Integer.parseInt(debugPort);
-			} catch(NumberFormatException e) {
-				return NO_DEBUG_PORT;
-			}
-		}
-
-		public IDebugListener getDebugListener() {
-			return listener;
-		}
-
-		public void setDebugListener(IDebugListener listener) {
-			this.listener = listener;
-		}
-
-		private String getDevmodeKey() {
-			return devmodeKey;
-		}
-
-		private String getDebugPortKey() {
-			return debugPortKey;
-		}
-
-		private void setPod(IPod pod) {
-			this.pod = pod;
-		}
-
-		public IPod getPod() {
-			return this.pod;
-		}
-
-	}
 }

@@ -12,6 +12,11 @@ package org.jboss.tools.openshift.test.core.server.debug;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -23,14 +28,13 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
-import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode.DebugContext;
 import org.jboss.tools.openshift.internal.core.util.NewPodDetectorJob;
 import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.openshift.restclient.model.IDeploymentConfig;
@@ -53,7 +57,7 @@ public class OpenShiftDebugModeTest {
 		this.service = ResourceMocks.PROJECT2_SERVICES[1];
 		this.dc = ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[1];
 		this.server = OpenShiftServerTestUtils.mockServer(service, connection);
-		this.context = OpenShiftDebugMode.createContext(server, "devmode", "debugPort", "42");
+		this.context = new DebugContext(server, "devmode", "debugPort", "42");
 //		System.setProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, "2000");
 	}
 
@@ -66,21 +70,21 @@ public class OpenShiftDebugModeTest {
 	public void debuggingContextShouldDefaultToDefaultDebugPortAndDebuggingNotEnabled() {
 		// given
 		// when
-		DebugContext context = OpenShiftDebugMode.createContext(server, null, null, null);
+		DebugContext context = new DebugContext(server);
 		// then
-		assertEquals(NumberUtils.toInt(OpenShiftDebugMode.DEFAULT_DEBUG_PORT), context.getDebugPort());
+		assertEquals(NumberUtils.toInt(DebugContext.DEFAULT_DEBUG_PORT), context.getDebugPort());
 		assertFalse(context.isDebugEnabled());
 	}
 
-	@Ignore
 	@Test
 	public void shouldEnableDCDebugEnvVarGivenItIsDisabled() throws CoreException {
 		// given
+		TestableDebugMode debugMode = spy((TestableDebugMode) new TestableDebugMode(context));
 		// when
 		context.setDevmodeEnabled(true);
-		OpenShiftDebugMode.sendChanges(context, monitor);
+		debugMode.execute(monitor);
 		// then
-		
+		verify(debugMode, times(1)).sendUpdated(eq(dc), any(DebugContext.class), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -222,5 +226,17 @@ public class OpenShiftDebugModeTest {
 //			}
 //		}
 //	}
+	
+	public class TestableDebugMode extends OpenShiftDebugMode {
+
+		public TestableDebugMode(DebugContext context) {
+			super(context);
+		}
+
+		@Override
+		public void sendUpdated(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor)
+				throws CoreException {
+		}
+	}
 
 }

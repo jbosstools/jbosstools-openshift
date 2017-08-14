@@ -50,10 +50,10 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
+import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugLaunchConfigs;
 import org.jboss.tools.openshift.internal.core.server.debug.IDebugListener;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
-import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode.DebugContext;
 
 import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IPortForwardable;
@@ -85,7 +85,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 			if (waitForDeploymentConfigReady(beh.getServer(), monitor)) {
 				DebugContext context = createDebugContext(beh, monitor);
 				toggleDebugging(mode, beh, context, monitor);
-				OpenShiftDebugMode.sendChanges(context, monitor);
+				new OpenShiftDebugMode(context).execute(monitor);
 			}
 		} catch (Exception e) {
 			mode = currentMode;
@@ -162,7 +162,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		String devmodeKey = getDevmodeKey(beh.getServer(), imageLabels);
 		String debugPortKey = getDebugPortKey(beh.getServer(), imageLabels);
 		String debugPort = getDebugPort(beh.getServer(), imageLabels);
-		DebugContext debugContext = OpenShiftDebugMode.createContext(beh.getServer(), devmodeKey, debugPortKey, debugPort);
+		DebugContext debugContext = new DebugContext(beh.getServer(), devmodeKey, debugPortKey, debugPort);
 		return debugContext;
 	}
 
@@ -278,10 +278,10 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 			}
 		};
 		context.setDebugListener(listener);
-		OpenShiftDebugMode.enableDebugging(context);
+		new OpenShiftDebugMode(context).enableDebugging();
 	}
 
-	private void stopDebugging(DebugContext debugContext, IProgressMonitor monitor) {
+	private void stopDebugging(DebugContext context, IProgressMonitor monitor) {
 		IDebugListener listener = new IDebugListener() {
 			
 			@Override
@@ -296,8 +296,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 					throws CoreException {
 			}
 		};
-		debugContext.setDebugListener(listener);
-		OpenShiftDebugMode.disableDebugging(debugContext);
+		context.setDebugListener(listener);
+		new OpenShiftDebugMode(context).disableDebugging();
 	}
 
 	@Override

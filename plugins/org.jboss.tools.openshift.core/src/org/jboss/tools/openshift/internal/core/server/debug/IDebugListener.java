@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.core.server.debug;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode.DebugContext;
 
 public interface IDebugListener {
 	
