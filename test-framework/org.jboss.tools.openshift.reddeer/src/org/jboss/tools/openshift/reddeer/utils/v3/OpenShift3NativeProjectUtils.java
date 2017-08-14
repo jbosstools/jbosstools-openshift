@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.reddeer.common.condition.AbstractWaitCondition;
 import org.jboss.reddeer.common.logging.Logger;
+import org.jboss.reddeer.common.wait.TimePeriod;
 import org.jboss.reddeer.common.wait.WaitUntil;
 import org.jboss.tools.common.reddeer.utils.StackTraceUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -63,7 +64,7 @@ public class OpenShift3NativeProjectUtils {
 		request.setDescription(StringUtils.isEmpty(description) ? name : description);
 		
 		CreateProjectWaitCondition createProjectWaitCondition = new CreateProjectWaitCondition(connection, request);
-		new WaitUntil(createProjectWaitCondition);
+		new WaitUntil(createProjectWaitCondition, TimePeriod.LONG);
 		IProject createdProject = createProjectWaitCondition.getProject();
 		
 		/**
