@@ -137,13 +137,20 @@ public class OpenShiftDebugMode {
 	}
 
 	
-	private boolean isDebugEnabled(IDeploymentConfig dc, String devmodeKey, String debugPortKey) {
+	private boolean isDebugEnabled(IDeploymentConfig dc, String devmodeKey, String debugPortKey, int requestedDebugPort, boolean enableRequested) {
 		boolean debugEnabled = false;
 		boolean devmodeEnabled = isDevmodeEnabled(dc, devmodeKey);
 		if (devmodeEnabled) {
 			// debugging is enabled if devmode and debug port are set
 			String debugPort = getEnv(dc, debugPortKey);
-			debugEnabled = !StringUtils.isBlank(debugPort);
+			if (enableRequested) {
+				// if we should enable, compare current port to requested one
+				debugEnabled = !StringUtils.isBlank(debugPort) 
+						&& context.getDebugPort(debugPort) == requestedDebugPort;
+			} else {
+				// if we should disable, simply check if debug port exists
+				debugEnabled = !StringUtils.isBlank(debugPort);
+			}
 		}
 		return debugEnabled;
 	}
@@ -220,19 +227,18 @@ public class OpenShiftDebugMode {
 	}
 
 	private boolean needsDebugUpdate(IDeploymentConfig dc, DebugContext context) {
-		boolean debugEnabled = isDebugEnabled(dc, context.getDevmodeKey(), context.getDebugPortKey());
+		boolean debugEnabled = isDebugEnabled(dc, 
+				context.getDevmodeKey(), context.getDebugPortKey(), context.getDebugPort(), context.isDebugEnabled());
 		return debugEnabled != context.isDebugEnabled();
 	}
 
 	private boolean updateDevmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
 		monitor.subTask(NLS.bind("Enabling devmode for deployment config {0}", dc.getName()));
 		boolean needsUpdate = needsDevmodeUpdate(dc, context);
-		if (!needsUpdate) {
-			return false;
+		if (needsUpdate) {
+			updateDevmodeEnvVar(context.isDevmodeEnabled(), dc, context);
 		}
-
-		updateDevmodeEnvVar(context.isDevmodeEnabled(), dc, context);
-		return true;
+		return needsUpdate;
 	}
 
 	private boolean needsDevmodeUpdate(IDeploymentConfig dc, DebugContext context) {
@@ -273,7 +279,7 @@ public class OpenShiftDebugMode {
 		Connection connection = ConnectionsRegistryUtil.getConnectionFor(dc);
 		connection.updateResource(dc);
 		// do not kill all existing pods, the rc will re-create new ones before the
-		// updated dc eventually then kills that one and re-creates a new one.
+		// updated dc eventually then kills them and re-creates new ones.
 		IPod pod = waitForNewPod(dc, monitor);
 		context.setPod(pod);
 	}

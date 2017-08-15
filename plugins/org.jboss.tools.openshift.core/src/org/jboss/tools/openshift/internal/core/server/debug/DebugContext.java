@@ -87,6 +87,11 @@ public class DebugContext {
 		return devmodeEnabled;
 	}
 
+	protected void setDebugEnabled(boolean debugEnabled) {
+		this.debugEnabled = debugEnabled;
+		this.devmodeEnabled = debugEnabled;
+	}
+
 	public int getDebugPort() {
 		return debugPort;
 	}
@@ -97,10 +102,6 @@ public class DebugContext {
 
 	public void setDebugListener(IDebugListener listener) {
 		this.listener = listener;
-	}
-
-	void setDebugEnabled(boolean debugEnabled) {
-		this.debugEnabled = debugEnabled;
 	}
 
 	IDebugListener getDebugListener() {
@@ -119,7 +120,7 @@ public class DebugContext {
 		this.pod = pod;
 	}
 
-	private int getDebugPort(String debugPort) {
+	int getDebugPort(String debugPort) {
 		if (StringUtils.isBlank(debugPort)) {
 			return NO_DEBUG_PORT;
 		}
