@@ -69,7 +69,7 @@ public class OpenShiftServerTestUtils {
 			throws UnsupportedEncodingException, MalformedURLException {
 		IServer server = mock(IServer.class);
 
-		String connectionUrl = ConnectionURL.forConnection(connection).getUrl();
+		String connectionUrl = ConnectionURL.forConnection(connection).toString();
 		doReturn(connectionUrl).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), anyString());
 
 		String resourceUniqueId = OpenShiftResourceUniqueId.get(resource);

@@ -47,7 +47,7 @@ import com.openshift.restclient.model.IPort;
  */
 public class OpenShiftDebugMode {
 	
-	private DebugContext context;
+	protected DebugContext context;
 
 	/**
 	 * For testing purposes

@@ -79,7 +79,7 @@ public class DebugContext {
 		return debugEnabled;
 	}
 
-	public void setDevmodeEnabled(boolean devmodeEnabled) {
+	protected void setDevmodeEnabled(boolean devmodeEnabled) {
 		this.devmodeEnabled = devmodeEnabled;
 	}
 

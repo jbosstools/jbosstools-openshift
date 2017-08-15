@@ -88,9 +88,9 @@ public class ResourceMocks {
 	public static final IProject[] PROJECTS = new IProject[] { PROJECT1, PROJECT2, PROJECT3, PROJECT4, PROJECT5 };
 
 	public static final IDeploymentConfig[] PROJECT2_DEPLOYMENTCONFIGS = new IDeploymentConfig[] {
-			createDeploymentConfig("project2-app1-dc", PROJECT2),
-			createDeploymentConfig("project2-app2-dc", PROJECT2),
-			createDeploymentConfig("project2-app3-dc", PROJECT2)
+			createDeploymentConfig("project2-app1-dc", PROJECT2, null),
+			createDeploymentConfig("project2-app2-dc", PROJECT2, null),
+			createDeploymentConfig("project2-app3-dc", PROJECT2, null)
 	};
 
 	public static final IService[] PROJECT2_SERVICES = new IService[] {
@@ -177,9 +177,9 @@ public class ResourceMocks {
     };
 
     public static final IDeploymentConfig[] PROJECT4_DEPLOYMENTCONFIGS = new IDeploymentConfig[] {
-            createDeploymentConfig("project2-app1-dc", PROJECT4),
-            createDeploymentConfig("project2-app2-dc", PROJECT4),
-            createDeploymentConfig("project2-app3-dc", PROJECT4)
+            createDeploymentConfig("project2-app1-dc", PROJECT4, null),
+            createDeploymentConfig("project2-app2-dc", PROJECT4, null),
+            createDeploymentConfig("project2-app3-dc", PROJECT4, null)
     };
 
     public static final IPod[] PROJECT4_PODS = new IPod[] {
@@ -193,9 +193,9 @@ public class ResourceMocks {
     };
 
     public static final IReplicationController[] PROJECT5_REPLICATINCONTROLLERS = new IReplicationController[] {
-            createDeploymentConfig("project2-app1-dc", PROJECT5),
-            createDeploymentConfig("project2-app2-dc", PROJECT5),
-            createDeploymentConfig("project2-app3-dc", PROJECT5)
+            createDeploymentConfig("project2-app1-dc", PROJECT5, null),
+            createDeploymentConfig("project2-app2-dc", PROJECT5, null),
+            createDeploymentConfig("project2-app3-dc", PROJECT5, null)
     };
 
     public static final IPod[] PROJECT5_PODS = new IPod[] {
@@ -244,13 +244,17 @@ public class ResourceMocks {
 	}
 
 	private static <R extends IResource> void mockGetResources(R[] resources, String resourceKind, IProject project, Connection connection) {
+		mockGetResources(Arrays.asList(resources), resourceKind, project, connection);
+	}
+
+	public static <R extends IResource> void mockGetResources(List<R> resources, String resourceKind, IProject project, Connection connection) {
 		assertThat(resources).isNotEmpty();
 		assertThat(resourceKind).isNotNull();
 		assertThat(connection).isNotNull();
 		assertThat(project).isNotNull();
 
-		when(connection.getResources(resourceKind, project.getName())).thenReturn(new ArrayList<>(Arrays.asList(resources)));
-		when(project.getResources(resourceKind)).thenReturn(new ArrayList<>(Arrays.asList(resources)));
+		when(connection.getResources(resourceKind, project.getName())).thenReturn(new ArrayList<>(resources));
+		when(project.getResources(resourceKind)).thenReturn(new ArrayList<>(resources));
 	}
 
 	private static void mockConnectionGetResource(IResource[] resources, String resourceKind, Connection connection) {
@@ -372,8 +376,10 @@ public class ResourceMocks {
 				});
 	}
 
-	public static IDeploymentConfig createDeploymentConfig(String name, IProject project) {
-		return createDeploymentConfig(name, project, null);
+	public static IDeploymentConfig createDeploymentConfig(String name, IProject project, List<IEnvironmentVariable> envVariables, Connection connection) {
+		IDeploymentConfig dc = createDeploymentConfig(name, project, (List<IEnvironmentVariable>) null);
+		mockGetResources(Arrays.asList(dc), ResourceKind.DEPLOYMENT_CONFIG, project, connection);
+		return dc;
 	}
 
 	public static IDeploymentConfig createDeploymentConfig(String name, IProject project, List<IEnvironmentVariable> envVariables) {
