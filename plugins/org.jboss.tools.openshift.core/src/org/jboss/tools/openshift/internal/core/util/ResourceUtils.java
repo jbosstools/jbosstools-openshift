@@ -779,7 +779,11 @@ public class ResourceUtils {
      * @see IBuildConfig
      */
 	public static IBuildConfig getBuildConfigFor(IResource resource, List<IBuildConfig> buildConfigs) {
-	    if (ResourceKind.SERVICE.equals(resource.getKind())) {
+		if (resource == null) {
+			return null;
+		}
+
+		if (ResourceKind.SERVICE.equals(resource.getKind())) {
 	        return getBuildConfigFor((IService) resource, buildConfigs);
 	    } else if (ResourceKind.DEPLOYMENT_CONFIG.equals(resource.getKind())) {
 	        return getBuildConfigFor((IDeploymentConfig) resource, buildConfigs);
