@@ -21,9 +21,9 @@ import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController;
+import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
 import org.jboss.tools.openshift.internal.core.server.debug.IDebugListener;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
-import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode.DebugContext;
 import org.jboss.tools.openshift.internal.js.OpenShiftNodejsActivator;
 import org.jboss.tools.openshift.js.launcher.NodeDebugLauncher;
 
@@ -49,7 +49,7 @@ public class OpenShiftNodejsLaunchController extends OpenShiftLaunchController i
 				if (!isDebugMode(mode)) {
 					enableDevMode(context);
 				}
-				OpenShiftDebugMode.sendChanges(context, monitor);
+				new OpenShiftDebugMode(context).execute(monitor);
 			}
 		} catch (Exception e) {
 			mode = currentMode;
@@ -70,7 +70,7 @@ public class OpenShiftNodejsLaunchController extends OpenShiftLaunchController i
 	 * @see <a href="https://issues.jboss.org/browse/JBIDE-22362">JBIDE-22362</a>
 	 */
 	private void enableDevMode(DebugContext context) {
-		OpenShiftDebugMode.enableDevmode(context);
+		new OpenShiftDebugMode(context).enableDevmode();
 	}
 	
 	@Override
@@ -91,6 +91,6 @@ public class OpenShiftNodejsLaunchController extends OpenShiftLaunchController i
 			}
 		};
 		context.setDebugListener(listener);
-		OpenShiftDebugMode.enableDebugging(context);
+		new OpenShiftDebugMode(context).enableDebugging();
 	}
 }

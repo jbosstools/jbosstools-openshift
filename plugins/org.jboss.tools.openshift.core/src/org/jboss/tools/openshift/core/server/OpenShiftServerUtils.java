@@ -523,16 +523,16 @@ public class OpenShiftServerUtils {
 		Connection connection = getConnection(server);
 		if (connection == null) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not find the connection for server {0}"
-							+ "Your server adapter might refer to an inexistant connection."
+					NLS.bind("Could not find the connection for server {0}."
+							+ " Your server adapter might refer to an inexistant connection."
 							, server.getName())));
 		}
 
 		IResource resource = getResource(server, connection, monitor);
 		if (resource == null) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not find the resource for server {0}" 
-							+ "Your server adapter might refer to an inexistant resource.",
+					NLS.bind("Could not find the resource for server {0}." 
+							+ " Your server adapter might refer to an inexistant resource.",
 							server.getName())));
 		}
 

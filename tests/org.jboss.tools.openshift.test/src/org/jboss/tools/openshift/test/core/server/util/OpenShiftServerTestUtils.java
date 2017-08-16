@@ -31,6 +31,7 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 public class OpenShiftServerTestUtils {
@@ -64,15 +65,15 @@ public class OpenShiftServerTestUtils {
 		return wc.save(false, null);
 	}
 
-	public static IServer mockServer(IService service, Connection connection)
+	public static IServer mockServer(IResource resource, Connection connection)
 			throws UnsupportedEncodingException, MalformedURLException {
 		IServer server = mock(IServer.class);
 
-		String connectionUrl = ConnectionURL.forConnection(connection).getUrl();
+		String connectionUrl = ConnectionURL.forConnection(connection).toString();
 		doReturn(connectionUrl).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), anyString());
 
-		String serviceUniqueId = OpenShiftResourceUniqueId.get(service);
-		doReturn(serviceUniqueId).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
+		String resourceUniqueId = OpenShiftResourceUniqueId.get(resource);
+		doReturn(resourceUniqueId).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
 
 		return server;
 	}

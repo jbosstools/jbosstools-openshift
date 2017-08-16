@@ -237,17 +237,18 @@ public class ServerResourceViewModel extends ObservablePojo {
 		}
 
 		private List<IResource> getProjectResources(IProject project) {
-		    List<IResource> services = project.getResources(ResourceKind.SERVICE);
+		    List<IService> services = project.getResources(ResourceKind.SERVICE);
 		    List<IDeploymentConfig> dcConfigs = project.getResources(ResourceKind.DEPLOYMENT_CONFIG);
-		    services.addAll(getNonLinkedDcs(services, dcConfigs, project));
-		    services.addAll(getNonLinkeRcs(dcConfigs, project));
-		    return services;
+		    List<IResource> resources = new ArrayList<>(services);	
+		    resources.addAll(getNonLinkedDcs(services, dcConfigs, project));
+		    resources.addAll(getNonLinkeRcs(dcConfigs, project));
+		    return resources;
         }
 
 	    /**
 	     * Returns the DeploymentConfig resources not linked to the services
 	     */
-		private List<IDeploymentConfig> getNonLinkedDcs(List<IResource> services, List<IDeploymentConfig> dcConfigs, IProject project) {
+		private List<IDeploymentConfig> getNonLinkedDcs(List<? extends IResource> services, List<IDeploymentConfig> dcConfigs, IProject project) {
 			List<IDeploymentConfig> nonLinkedDcConfigs = new ArrayList<>();
 		    List<IPod> allPods = project.getResources(ResourceKind.POD);
 		    dcConfigs.stream()
