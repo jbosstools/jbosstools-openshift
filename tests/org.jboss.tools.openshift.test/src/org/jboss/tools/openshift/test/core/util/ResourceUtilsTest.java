@@ -678,15 +678,15 @@ public class ResourceUtilsTest {
 		assertThat(dc).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[0]);
 	}
 
-	@Test(expected=CoreException.class)
-	public void shouldThrowCoreExceptionGivenNoDCNameSelectorNorRCisFoundForService() throws CoreException {
+	@Test
+	public void shouldReturnNullGivenNoDCNameSelectorNorRCisFoundForService() throws CoreException {
 		// given
 		Connection connection = ResourceMocks.create3ProjectsConnection();
 		IService service = ResourceMocks.PROJECT2_SERVICES[0];
 		// when
-		ResourceUtils.getDeploymentConfigFor(service, connection);
+		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
 		// then 
-		// exception expected
+		assertThat(dc).isNull();
 	}
 
 	@Test

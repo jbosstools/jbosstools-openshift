@@ -45,6 +45,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.ServerProcess;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.DockerImageLabels;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
@@ -54,6 +55,7 @@ import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugLaunchConfigs;
 import org.jboss.tools.openshift.internal.core.server.debug.IDebugListener;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IPortForwardable;
@@ -73,6 +75,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 	private static final int RECHECK_DELAY = 1000;
 	private static final int PUBLISH_DELAY = 3000;
 	private static final int DEBUGGER_LAUNCHED_TIMEOUT =  60_000; //TODO Get from server settings?
+	private static final long WAIT_FOR_DEPLOYMENTCONFIG_TIMEOUT = 3 * 60 * 1024;
+	private static final long WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT = 3 * 60 * 1024;
 	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
 	
 	@Override
@@ -120,29 +124,40 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 	}
 
 	protected boolean waitForDeploymentConfigReady(IServer server, IProgressMonitor monitor) throws CoreException {
-		while ((OpenShiftServerUtils.getDeploymentConfig(server, monitor)) == null 
-				&& monitor.isCanceled()) {
-			sleep(RECHECK_DELAY);
+		monitor.subTask("Waiting for deployment configs to become available...");
+		Connection connection = OpenShiftServerUtils.getConnectionChecked(server);
+		IResource resource = OpenShiftServerUtils.getResourceChecked(server, connection, monitor);
+		long timeout = System.currentTimeMillis() + WAIT_FOR_DEPLOYMENTCONFIG_TIMEOUT;
+		while ((ResourceUtils.getDeploymentConfigFor(resource, connection)) == null) {
+			if (!sleep(RECHECK_DELAY, timeout, monitor)) {
+				return false;
+			}
 		}
 		return true;
 	}
 
 	protected boolean waitForDockerImageLabelsReady(DockerImageLabels metadata, IProgressMonitor monitor) throws CoreException {
-		monitor.subTask("waiting for docker image to become available...");
-		while (!monitor.isCanceled()) {
-			while (!metadata.load() 
-					&& sleep(RECHECK_DELAY)) {
-				}
-				return true;
+		monitor.subTask("Waiting for docker image to become available...");
+		long timeout = System.currentTimeMillis() + WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT;
+		while (!metadata.load()) {
+			if (!sleep(RECHECK_DELAY, timeout, monitor)) {
+				return false;
+			}
 		}
-		return false;
+		return true;
+	}
+
+	private boolean sleep(int sleep, long timeout, IProgressMonitor monitor) {
+		return sleep(sleep)
+				&& System.currentTimeMillis() < timeout
+				&& !monitor.isCanceled();
 	}
 
 	private boolean sleep(int sleep) {
 		try {
 			Thread.sleep(sleep);
 			return true;
-		} catch(InterruptedException ie) {
+		} catch (InterruptedException e) {
 			return false;
 		}
 	}
