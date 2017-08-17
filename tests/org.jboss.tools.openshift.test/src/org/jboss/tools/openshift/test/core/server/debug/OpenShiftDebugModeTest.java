@@ -10,7 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.server.debug;
 
+import static java.util.Arrays.asList;
+import static org.apache.commons.lang.math.NumberUtils.toInt;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.createConnection;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.createDeploymentConfig;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.createEnvironmentVariable;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.createProject;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.mockGetEnvironmentVariables;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -21,9 +28,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 
-import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -33,57 +38,47 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
 import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
-import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.openshift.restclient.model.IDeploymentConfig;
-import com.openshift.restclient.model.IService;
 
 public class OpenShiftDebugModeTest {
 	
 	private static final String KEY_DEBUGPORT = "debugPort";
 	private static final String VALUE_DEBUGPORT = "42";
 	private static final String KEY_DEVMODE = "DEV_MODE";
-	
-	private Connection connection;
-	private IServer server;
-	private IDeploymentConfig dc;
-	private IService service;
-	private TestableDebugContext context;
-	private IProgressMonitor monitor;
 
-	private Connection connection2;
-	private IDeploymentConfig dc2;
-	private IServer server2;
-	private TestableDebugContext context2;
-	private TestableDebugMode debugMode2;
+	private Connection connection;
+	private IDeploymentConfig dc;
+	private IServer server;
+	private TestableDebugContext context;
+	private TestableDebugMode debugMode;
 	
 	@Before
 	public void setUp() throws CoreException, UnsupportedEncodingException, MalformedURLException {
-		this.monitor = new NullProgressMonitor();
-		this.connection = ResourceMocks.create3ProjectsConnection();
-		ConnectionsRegistrySingleton.getInstance().add(connection);
-		this.service = ResourceMocks.PROJECT2_SERVICES[1];
-		this.dc = ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2];
-		this.server = OpenShiftServerTestUtils.mockServer(service, connection);
-		this.context = new TestableDebugContext(server, KEY_DEVMODE, KEY_DEBUGPORT, VALUE_DEBUGPORT);
 //		System.setProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, "2000");
 
-		this.connection2 = ResourceMocks.createConnection("https://localhost:8181", "aUser");
-		ConnectionsRegistrySingleton.getInstance().add(connection2);
-		// no env var
-		this.dc2 = ResourceMocks.createDeploymentConfig("someDc", ResourceMocks.createProject("someProject"), null, connection2);
-		this.server2 = OpenShiftServerTestUtils.mockServer(dc2, connection2);
-		this.context2 = new TestableDebugContext(server2, KEY_DEVMODE, KEY_DEBUGPORT, "42");
-		this.debugMode2 = spy((TestableDebugMode) new TestableDebugMode(context2));	
+		this.connection = createConnection("https://localhost:8181", "aUser");
+		ConnectionsRegistrySingleton.getInstance().add(connection);
+		this.dc = createDeploymentConfig(
+				"someDc", 
+				createProject("someProject"), 
+				// no env var
+				null,
+				// no containers
+				null,
+				connection);
+		this.server = OpenShiftServerTestUtils.mockServer(dc, connection);
+		this.context = new TestableDebugContext(server, KEY_DEVMODE, KEY_DEBUGPORT, VALUE_DEBUGPORT);
+		this.debugMode = spy((TestableDebugMode) new TestableDebugMode(context));	
 	}
 
 	@After
 	public void tearDown() {
 //		System.clearProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY);
-		ConnectionsRegistrySingleton.getInstance().remove(connection2);
+		ConnectionsRegistrySingleton.getInstance().remove(connection);
 	}
 
 	@Test
@@ -92,22 +87,46 @@ public class OpenShiftDebugModeTest {
 		// when
 		DebugContext context = new DebugContext(server);
 		// then
-		assertThat(context.getDebugPort()).isEqualTo(NumberUtils.toInt(DebugContext.DEFAULT_DEBUG_PORT));
+		assertThat(context.getDebugPort()).isEqualTo(toInt(DebugContext.DEFAULT_DEBUG_PORT));
 		assertThat(context.isDebugEnabled()).isFalse();
+	}
+
+	@Test
+	public void shouldDisableContextDevmode() {
+		// given
+		context.setDebugEnabled(true);
+		context.setDevmodeEnabled(true);
+		// when
+		debugMode.disableDevmode();
+		// then
+		assertThat(context.isDebugEnabled()).isTrue();
+		assertThat(context.isDevmodeEnabled()).isFalse();
+	}
+	
+	@Test
+	public void shouldEnableContextDevmode() {
+		// given
+		context.setDebugEnabled(false);
+		context.setDevmodeEnabled(false);
+		// when
+		debugMode.enableDevmode();
+		// then
+		assertThat(context.isDebugEnabled()).isFalse();
+		assertThat(context.isDevmodeEnabled()).isTrue();
 	}
 
 	@Test
 	public void shouldEnableDevmodeGivenItIsDisabled() throws CoreException {
 		// given
-		ResourceMocks.mockEnvironmentVariables(
-				Arrays.asList(ResourceMocks.createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString())), dc2);
+		mockGetEnvironmentVariables(
+				asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString())), dc);
 		// when
-		context2.setDevmodeEnabled(true);
-		debugMode2.execute(monitor);
+		context.setDevmodeEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
 		// then		
-		verify(dc2, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
+		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
 		// send updated dc
-		verify(debugMode2, times(1)).sendUpdated(eq(dc2), eq(context2), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).sendUpdated(eq(dc), eq(context), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -115,141 +134,165 @@ public class OpenShiftDebugModeTest {
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
 		// when
-		context2.setDevmodeEnabled(true);
-		debugMode2.execute(monitor);
+		context.setDevmodeEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
 		// then
-		verify(dc2, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
-		verify(debugMode2, times(1)).sendUpdated(eq(dc2), eq(context2), any(IProgressMonitor.class));
+		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
+		verify(debugMode, times(1)).sendUpdated(eq(dc), eq(context), any(IProgressMonitor.class));
 	}
 
 	public void shouldNotEnableDevmodeNorSendItGivenItIsAlreadyEnabled() 
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		ResourceMocks.mockEnvironmentVariables(
-				Arrays.asList(ResourceMocks.createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), dc2);
+		mockGetEnvironmentVariables(
+				asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), dc);
 		// when
-		context2.setDevmodeEnabled(true);
-		debugMode2.execute(monitor);
+		context.setDevmodeEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
 		// then
 		// dont alter dc
-		verify(dc2, never()).setEnvironmentVariable(eq(KEY_DEVMODE), any()); 
+		verify(dc, never()).setEnvironmentVariable(eq(KEY_DEVMODE), any()); 
 		// dont send potentially altered dc
-		verify(debugMode2, never()).sendUpdated(any(IDeploymentConfig.class), any(DebugContext.class), any(IProgressMonitor.class));
+		verify(debugMode, never()).sendUpdated(any(IDeploymentConfig.class), any(DebugContext.class), any(IProgressMonitor.class));
 	}
 
 	@Test
 	public void shouldDisableDevmodeAndSendItGivenItIsEnabled() throws CoreException {
 		// given
-		ResourceMocks.mockEnvironmentVariables(
-				Arrays.asList(ResourceMocks.createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), dc2);
+		mockGetEnvironmentVariables(
+				asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), dc);
 		// when
-		context2.setDevmodeEnabled(false);
-		debugMode2.execute(monitor);
+		context.setDevmodeEnabled(false);
+		debugMode.execute(new NullProgressMonitor());
 		// then
-		verify(dc2, atLeastOnce()).removeEnvironmentVariable(KEY_DEVMODE);
+		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEVMODE);
 		// send updated dc
-		verify(debugMode2, times(1)).sendUpdated(eq(dc2), eq(context2), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).sendUpdated(eq(dc), eq(context), any(IProgressMonitor.class));
 	}
+
+	@Test
+	public void shouldDisableContextDebugAndDevmode() {
+		// given
+		context.setDebugEnabled(true);
+		context.setDevmodeEnabled(true);
+		// when
+		debugMode.disableDebugging();
+		// then
+		assertThat(context.isDebugEnabled()).isFalse();
+		assertThat(context.isDevmodeEnabled()).isFalse();
+	}	
+	
+	@Test
+	public void shouldEnableContextDebugAndDevmode() {
+		// given
+		context.setDebugEnabled(false);
+		context.setDevmodeEnabled(false);
+		// when
+		debugMode.enableDebugging();
+		// then
+		assertThat(context.isDebugEnabled()).isTrue();
+		assertThat(context.isDevmodeEnabled()).isTrue();
+	}	
 
 	@Test
 	public void shouldSendUpdatedDebugAndDevmodeGivenUserEnablesDebugAndNoEnvVarExisted() 
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
 		// when
-		context2.setDebugEnabled(true);
-		debugMode2.execute(monitor);
+		context.setDebugEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
 		// then
-		verify(dc2, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
-		verify(dc2, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
-		verify(debugMode2, times(1)).sendUpdated(eq(dc2), eq(context2), any(IProgressMonitor.class));
+		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
+		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
+		verify(debugMode, times(1)).sendUpdated(eq(dc), eq(context), any(IProgressMonitor.class));
 	}
 
 	@Test
 	public void shouldSendUpdatedDebugGivenUserEnablesDebugAndOnlyDevmodeIsSet() 
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		ResourceMocks.mockEnvironmentVariables(
-				Arrays.asList(ResourceMocks.createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), dc2);
+		mockGetEnvironmentVariables(
+				asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), dc);
 		// when
-		context2.setDebugEnabled(true);
-		debugMode2.execute(monitor);
+		context.setDebugEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
 		// then
-		verify(dc2, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
-		verify(dc2, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
+		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
+		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
 		// send updated dc
-		verify(debugMode2, times(1)).sendUpdated(eq(dc2), eq(context2), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).sendUpdated(eq(dc), eq(context), any(IProgressMonitor.class));
 	}
 
 	@Test
 	public void shouldNotSetDebugGivenUserEnablesDebugAndDevmodeAndDebugEnvVarAreSet() 
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		ResourceMocks.mockEnvironmentVariables(
-				Arrays.asList(
-						ResourceMocks.createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()), 
-						ResourceMocks.createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc2);
+		mockGetEnvironmentVariables(
+				asList(
+						createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()), 
+						createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
 		// when
-		context2.setDebugEnabled(true);
-		debugMode2.execute(monitor);
+		context.setDebugEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
 		// then
-		verify(dc2, never()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
-		verify(dc2, never()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
+		verify(dc, never()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
+		verify(dc, never()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
 		// dont send untouched dc
-		verify(debugMode2, never()).sendUpdated(any(IDeploymentConfig.class), any(DebugContext.class), any(IProgressMonitor.class));
+		verify(debugMode, never()).sendUpdated(any(IDeploymentConfig.class), any(DebugContext.class), any(IProgressMonitor.class));
 	}
 
 	@Test
 	public void shouldSendUpdatedDebugGivenUserEnablesDebugAndDebugEnvVarIsEnabledWithDifferentPort() 
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		ResourceMocks.mockEnvironmentVariables(
-				Arrays.asList(
-						ResourceMocks.createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-						ResourceMocks.createEnvironmentVariable(KEY_DEBUGPORT, "84")), dc2);
+		mockGetEnvironmentVariables(
+				asList(
+						createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+						createEnvironmentVariable(KEY_DEBUGPORT, "84")), dc);
 		// when
-		context2.setDebugEnabled(true);
-		debugMode2.execute(monitor);
+		context.setDebugEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
 		// then
-		verify(dc2, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
-		verify(dc2, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
+		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
+		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
 		// send updated dc
-		verify(debugMode2, times(1)).sendUpdated(eq(dc2), eq(context2), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).sendUpdated(eq(dc), eq(context), any(IProgressMonitor.class));
 	}
 
 	@Test
 	public void shouldDisableDebugAndSendGivenUserDisablesDebugAndDebugEnvVarIsEnabled() 
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		ResourceMocks.mockEnvironmentVariables(
-				Arrays.asList(
-						ResourceMocks.createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-						ResourceMocks.createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc2);
+		mockGetEnvironmentVariables(
+				asList(
+						createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+						createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
 		// when
-		context2.setDebugEnabled(false);
-		debugMode2.execute(monitor);
+		context.setDebugEnabled(false);
+		debugMode.execute(new NullProgressMonitor());
 		// then
-		verify(dc2, atLeastOnce()).removeEnvironmentVariable(KEY_DEVMODE);
-		verify(dc2, atLeastOnce()).removeEnvironmentVariable(KEY_DEBUGPORT);
+		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEVMODE);
+		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEBUGPORT);
 		// send updated dc
-		verify(debugMode2, times(1)).sendUpdated(eq(dc2), eq(context2), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).sendUpdated(eq(dc), eq(context), any(IProgressMonitor.class));
 	}
 
 	@Test
 	public void shouldDisableDebugAndSendGivenUserDisablesDebugAndDebugEnvVarIsEnabledButOnDifferentPort() 
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		ResourceMocks.mockEnvironmentVariables(
-				Arrays.asList(
-						ResourceMocks.createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-						ResourceMocks.createEnvironmentVariable(KEY_DEBUGPORT, "99")), dc2);
+		mockGetEnvironmentVariables(
+				asList(
+						createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+						createEnvironmentVariable(KEY_DEBUGPORT, "99")), dc);
 		// when
-		context2.setDebugEnabled(false);
-		debugMode2.execute(monitor);
+		context.setDebugEnabled(false);
+		debugMode.execute(new NullProgressMonitor());
 		// then
-		verify(dc2, atLeastOnce()).removeEnvironmentVariable(KEY_DEVMODE);
-		verify(dc2, atLeastOnce()).removeEnvironmentVariable(KEY_DEBUGPORT);
+		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEVMODE);
+		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEBUGPORT);
 		// send updated dc
-		verify(debugMode2, times(1)).sendUpdated(eq(dc2), eq(context2), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).sendUpdated(eq(dc), eq(context), any(IProgressMonitor.class));
 	}
 
 //	private static class MockRedeploymentJob extends Job {
