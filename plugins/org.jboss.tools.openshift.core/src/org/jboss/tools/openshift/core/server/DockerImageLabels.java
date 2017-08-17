@@ -68,32 +68,41 @@ public class DockerImageLabels {
 		return metadata;
 	}
 	
-	private DockerImageLabels(IResource resource, Connection connection) {
+	protected DockerImageLabels(IResource resource, Connection connection) {
 		this.resource = resource;
 		this.connection = connection;
 	}
 
-	public String getDevmodeKey() throws CoreException {
-		loadIfRequired();
+	public String getDevmodeKey() {
+		if (!loadIfRequired()) {
+			return null;
+		}
 		return devmodeMetadata.getEnablementKey();
 	}
 	
-	public String getDevmodePortKey() throws CoreException {
-		loadIfRequired();
+	public String getDevmodePortKey() {
+		if (!loadIfRequired()) {
+			return null;
+		}
+
 		return devmodeMetadata.getPortKey();
 	}
 
-	public String getDevmodePortValue() throws CoreException {
-		loadIfRequired();
+	public String getDevmodePortValue() {
+		if (!loadIfRequired()) {
+			return null;
+		}
 		return devmodeMetadata.getPortValue();
 	}
 
-	public String getPodPath() throws CoreException {
-		loadIfRequired();
+	public String getPodPath() {
+		if (!loadIfRequired()) {
+			return null;
+		}
 		return this.podPathMetadata.get();
 	}
 
-	public boolean load() throws CoreException {
+	public boolean load() {
 		return loadIfRequired();
 	}
 	
@@ -101,7 +110,7 @@ public class DockerImageLabels {
 		return metadata != null;
 	}
 	
-	public boolean loadIfRequired() throws CoreException {
+	protected boolean loadIfRequired() {
 		if (isLoaded()) {
 			return true;
 		}
@@ -113,7 +122,7 @@ public class DockerImageLabels {
 		this.podPathMetadata = new PodDeploymentPathMetadata(metadata);
 		return true;
 	}
-	
+
 	public boolean isAvailable() {
 		return isLoaded();
 	}
@@ -126,9 +135,8 @@ public class DockerImageLabels {
 	 * @param reosurce
 	 *            the openshift resource to load the image metadata for
 	 * @return
-	 * @throws CoreException
 	 */
-	private String load(IResource resource) throws CoreException {
+	protected String load(IResource resource) {
 		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(resource, connection);
 		if (dc == null) {
 			return null;

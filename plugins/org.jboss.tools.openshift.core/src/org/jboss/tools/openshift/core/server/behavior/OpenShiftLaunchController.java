@@ -136,7 +136,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		return true;
 	}
 
-	protected boolean waitForDockerImageLabelsReady(DockerImageLabels metadata, IProgressMonitor monitor) throws CoreException {
+	protected boolean waitForDockerImageLabelsReady(DockerImageLabels metadata, IProgressMonitor monitor) {
 		monitor.subTask("Waiting for docker image to become available...");
 		long timeout = System.currentTimeMillis() + WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT;
 		while (!metadata.load()) {
@@ -171,7 +171,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		}
 	}
 
-	protected DebugContext createDebugContext(OpenShiftServerBehaviour beh, IProgressMonitor monitor) throws CoreException {
+	protected DebugContext createDebugContext(OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
 		monitor.subTask("Initialising debugging...");
 		DockerImageLabels imageLabels = getDockerImageLabels(beh, monitor);
 		String devmodeKey = getDevmodeKey(beh.getServer(), imageLabels);
@@ -181,14 +181,14 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		return debugContext;
 	}
 
-	private DockerImageLabels getDockerImageLabels(OpenShiftServerBehaviour beh, IProgressMonitor monitor) throws CoreException {
+	private DockerImageLabels getDockerImageLabels(OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
 		IResource resource = OpenShiftServerUtils.getResource(beh.getServer(), monitor);
 		DockerImageLabels metadata = DockerImageLabels.getInstance(resource, beh);
 		waitForDockerImageLabelsReady(metadata, monitor);
 		return metadata;
 	}
 
-	private static String getDevmodeKey(IServer server, DockerImageLabels metadata) throws CoreException {
+	private static String getDevmodeKey(IServer server, DockerImageLabels metadata) {
 		String devmodeKey = OpenShiftServerUtils.getDevmodeKey(server);
 		if (StringUtils.isBlank(devmodeKey)) {
 			devmodeKey = metadata.getDevmodeKey();
@@ -196,7 +196,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		return devmodeKey;
 	}
 
-	private static String getDebugPortKey(IServer server, DockerImageLabels metadata) throws CoreException {
+	private static String getDebugPortKey(IServer server, DockerImageLabels metadata) {
 		String debugPortKey = OpenShiftServerUtils.getDebugPortKey(server);
 		if (StringUtils.isBlank(debugPortKey)) {
 			debugPortKey = metadata.getDevmodePortKey();
@@ -204,7 +204,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		return debugPortKey;
 	}
 
-	private static String getDebugPort(IServer server, DockerImageLabels metadata) throws CoreException {
+	private static String getDebugPort(IServer server, DockerImageLabels metadata) {
 		String debugPort = OpenShiftServerUtils.getDebugPort(server);
 		if (StringUtils.isBlank(debugPort)) {
 			debugPort = metadata.getDevmodePortValue();

@@ -464,9 +464,8 @@ public class OpenShiftServerUtils {
 	 * @param resource the resource to derive the pod and docker image from
 	 * @param server the server to derive the openshift connection from
 	 * @return
-	 * @throws CoreException
 	 */
-	public static String loadPodPath(IResource resource, IServer server) throws CoreException {
+	public static String loadPodPath(IResource resource, IServer server) {
 		DockerImageLabels metaData = DockerImageLabels.getInstance(resource, getBehaviour(server));
 		return metaData.getPodPath();
 	}

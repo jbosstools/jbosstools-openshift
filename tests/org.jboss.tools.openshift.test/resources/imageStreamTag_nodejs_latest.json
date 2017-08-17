@@ -1,0 +1,185 @@
+{
+    "kind" : "ImageStreamTag",
+    "apiVersion" : "v1",
+    "metadata" : {
+        "name" : "nodejs:latest",
+        "namespace" : "node",
+        "selfLink" : "/oapi/v1/namespaces/node/imagestreamtags/nodejs%3Alatest",
+        "uid" : "35a140a5-8374-11e7-8fe1-0251082287a6",
+        "resourceVersion" : "340183",
+        "creationTimestamp" : "2017-08-17T17:48:57Z"
+    },
+    "generation" : 1,
+    "image" : {
+        "metadata" : {
+            "name" : "sha256:4bc2b9f8ab9d75b9cfb8feb287f5c29633c2ccf9c39303635161df7ab04c9688",
+            "uid" : "57c46c0a-8374-11e7-8fe1-0251082287a6",
+            "resourceVersion" : "340182",
+            "creationTimestamp" : "2017-08-17T17:48:57Z",
+            "annotations" : {"openshift.io/image.managed" : "true"}
+        },
+        "dockerImageReference" : "172.30.1.1:5000/node/nodejs@sha256:4bc2b9f8ab9d75b9cfb8feb287f5c29633c2ccf9c39303635161df7ab04c9688",
+        "dockerImageMetadata" : {
+            "kind" : "DockerImage",
+            "apiVersion" : "1.0",
+            "Id" : "7d911ae263e85fc78f26118da6e45bc215120fbe990c50d8327fac5792be2126",
+            "Parent" : "c944cfc946f48b99ffb181afc81cd69f771ba8e25cb1d6ee77c005ee28c74686",
+            "Created" : "2017-08-17T17:48:53Z",
+            "Container" : "dbea7a956a3d477c95160fa5b30e9b104f07b5c3164bc340c0aca98de915b75c",
+            "ContainerConfig" : {
+                "Hostname" : "nodejs-1-build",
+                "User" : "1001",
+                "AttachStdout" : true,
+                "ExposedPorts" : {"8080/tcp" : {}},
+                "OpenStdin" : true,
+                "StdinOnce" : true,
+                "Env" : [
+                    "OPENSHIFT_BUILD_NAME=nodejs-1",
+                    "OPENSHIFT_BUILD_NAMESPACE=node",
+                    "OPENSHIFT_BUILD_SOURCE=https://github.com/openshift/nodejs-ex.git",
+                    "OPENSHIFT_BUILD_COMMIT=7c814b0d2cbb0f57bd74f2c0c197a3b375b13d1a",
+                    "PATH=/opt/app-root/src/node_modules/.bin/:/opt/app-root/src/.npm-global/bin/:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "container=oci",
+                    "STI_SCRIPTS_URL=image:///usr/libexec/s2i",
+                    "STI_SCRIPTS_PATH=/usr/libexec/s2i",
+                    "HOME=/opt/app-root/src",
+                    "BASH_ENV=/opt/app-root/etc/scl_enable",
+                    "ENV=/opt/app-root/etc/scl_enable",
+                    "PROMPT_COMMAND=. /opt/app-root/etc/scl_enable",
+                    "NODEJS_VERSION=4",
+                    "NPM_RUN=start",
+                    "NPM_CONFIG_PREFIX=/opt/app-root/src/.npm-global"
+                ],
+                "Cmd" : [
+                    "/bin/sh",
+                    "-c",
+                    "tar -C /tmp -xf - && /usr/libexec/s2i/assemble"
+                ],
+                "Image" : "registry.access.redhat.com/rhscl/nodejs-4-rhel7@sha256:c5b21dc08cf5da8b6b0485147d946d8202f2be211c17bcef3a0fc26570217dd3",
+                "WorkingDir" : "/opt/app-root/src",
+                "Entrypoint" : ["container-entrypoint"],
+                "Labels" : {
+                    "architecture" : "x86_64",
+                    "authoritative-source-url" : "registry.access.redhat.com",
+                    "build-date" : "2017-04-21T09:41:19.146364",
+                    "com.redhat.build-host" : "ip-10-29-120-133.ec2.internal",
+                    "com.redhat.component" : "rh-nodejs4-docker",
+                    "com.redhat.deployments-dir" : "/opt/app-root/src",
+                    "com.redhat.dev-mode" : "DEV_MODE:false",
+                    "com.redhat.dev-mode.port" : "DEBUG_PORT:5858",
+                    "description" : "The Red Hat Enterprise Linux Base image is designed to be a fully supported foundation for your containerized applications.  This base image provides your operations and application teams with the packages, language runtimes and tools necessary to run, maintain, and troubleshoot all of your applications. This image is maintained by Red Hat and updated regularly. It is designed and engineered to be the base layer for all of your containerized applications, middleware and utilites. When used as the source for all of your containers, only one copy will ever be downloaded and cached in your production environment. Use this image just like you would a regular Red Hat Enterprise Linux distribution. Tools like yum, gzip, and bash are provided by default. For further information on how this image was built look at the /root/anacanda-ks.cfg file.",
+                    "distribution-scope" : "public",
+                    "io.k8s.description" : "Platform for building and running Node.js 4 applications",
+                    "io.k8s.display-name" : "node/nodejs-1:39768781",
+                    "io.openshift.build.commit.author" : "Ben Parees <bparees@users.noreply.github.com>",
+                    "io.openshift.build.commit.date" : "Wed Aug 16 14:19:01 2017 -0400",
+                    "io.openshift.build.commit.id" : "7c814b0d2cbb0f57bd74f2c0c197a3b375b13d1a",
+                    "io.openshift.build.commit.message" : "Merge pull request #131 from jim-minter/trello135-completion-detection",
+                    "io.openshift.build.commit.ref" : "master",
+                    "io.openshift.build.image" : "registry.access.redhat.com/rhscl/nodejs-4-rhel7@sha256:c5b21dc08cf5da8b6b0485147d946d8202f2be211c17bcef3a0fc26570217dd3",
+                    "io.openshift.build.source-location" : "https://github.com/openshift/nodejs-ex.git",
+                    "io.openshift.expose-services" : "8080:http",
+                    "io.openshift.s2i.scripts-url" : "image:///usr/libexec/s2i",
+                    "io.openshift.tags" : "builder,nodejs,nodejs4",
+                    "io.s2i.scripts-url" : "image:///usr/libexec/s2i",
+                    "name" : "rhscl/nodejs-4-rhel7",
+                    "release" : "11.16",
+                    "summary" : "Platform for building and running Node.js 4 applications",
+                    "vcs-ref" : "e688e26c75b1418982bef6a87b9bbacd6d47604c",
+                    "vcs-type" : "git",
+                    "vendor" : "Red Hat, Inc.",
+                    "version" : "4"
+                }
+            },
+            "DockerVersion" : "1.12.6",
+            "Config" : {
+                "User" : "1001",
+                "ExposedPorts" : {"8080/tcp" : {}},
+                "Env" : [
+                    "OPENSHIFT_BUILD_NAME=nodejs-1",
+                    "OPENSHIFT_BUILD_NAMESPACE=node",
+                    "OPENSHIFT_BUILD_SOURCE=https://github.com/openshift/nodejs-ex.git",
+                    "OPENSHIFT_BUILD_COMMIT=7c814b0d2cbb0f57bd74f2c0c197a3b375b13d1a",
+                    "PATH=/opt/app-root/src/node_modules/.bin/:/opt/app-root/src/.npm-global/bin/:/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "container=oci",
+                    "STI_SCRIPTS_URL=image:///usr/libexec/s2i",
+                    "STI_SCRIPTS_PATH=/usr/libexec/s2i",
+                    "HOME=/opt/app-root/src",
+                    "BASH_ENV=/opt/app-root/etc/scl_enable",
+                    "ENV=/opt/app-root/etc/scl_enable",
+                    "PROMPT_COMMAND=. /opt/app-root/etc/scl_enable",
+                    "NODEJS_VERSION=4",
+                    "NPM_RUN=start",
+                    "NPM_CONFIG_PREFIX=/opt/app-root/src/.npm-global"
+                ],
+                "Cmd" : ["/usr/libexec/s2i/run"],
+                "WorkingDir" : "/opt/app-root/src",
+                "Entrypoint" : ["container-entrypoint"],
+                "Labels" : {
+                    "architecture" : "x86_64",
+                    "authoritative-source-url" : "registry.access.redhat.com",
+                    "build-date" : "2017-04-21T09:41:19.146364",
+                    "com.redhat.build-host" : "ip-10-29-120-133.ec2.internal",
+                    "com.redhat.component" : "rh-nodejs4-docker",
+                    "com.redhat.deployments-dir" : "/opt/app-root/src",
+                    "com.redhat.dev-mode" : "DEV_MODE:false",
+                    "com.redhat.dev-mode.port" : "DEBUG_PORT:5858",
+                    "description" : "The Red Hat Enterprise Linux Base image is designed to be a fully supported foundation for your containerized applications.  This base image provides your operations and application teams with the packages, language runtimes and tools necessary to run, maintain, and troubleshoot all of your applications. This image is maintained by Red Hat and updated regularly. It is designed and engineered to be the base layer for all of your containerized applications, middleware and utilites. When used as the source for all of your containers, only one copy will ever be downloaded and cached in your production environment. Use this image just like you would a regular Red Hat Enterprise Linux distribution. Tools like yum, gzip, and bash are provided by default. For further information on how this image was built look at the /root/anacanda-ks.cfg file.",
+                    "distribution-scope" : "public",
+                    "io.k8s.description" : "Platform for building and running Node.js 4 applications",
+                    "io.k8s.display-name" : "node/nodejs-1:39768781",
+                    "io.openshift.build.commit.author" : "Ben Parees <bparees@users.noreply.github.com>",
+                    "io.openshift.build.commit.date" : "Wed Aug 16 14:19:01 2017 -0400",
+                    "io.openshift.build.commit.id" : "7c814b0d2cbb0f57bd74f2c0c197a3b375b13d1a",
+                    "io.openshift.build.commit.message" : "Merge pull request #131 from jim-minter/trello135-completion-detection",
+                    "io.openshift.build.commit.ref" : "master",
+                    "io.openshift.build.image" : "registry.access.redhat.com/rhscl/nodejs-4-rhel7@sha256:c5b21dc08cf5da8b6b0485147d946d8202f2be211c17bcef3a0fc26570217dd3",
+                    "io.openshift.build.source-location" : "https://github.com/openshift/nodejs-ex.git",
+                    "io.openshift.expose-services" : "8080:http",
+                    "io.openshift.s2i.scripts-url" : "image:///usr/libexec/s2i",
+                    "io.openshift.tags" : "builder,nodejs,nodejs4",
+                    "io.s2i.scripts-url" : "image:///usr/libexec/s2i",
+                    "name" : "rhscl/nodejs-4-rhel7",
+                    "release" : "11.16",
+                    "summary" : "Platform for building and running Node.js 4 applications",
+                    "vcs-ref" : "e688e26c75b1418982bef6a87b9bbacd6d47604c",
+                    "vcs-type" : "git",
+                    "vendor" : "Red Hat, Inc.",
+                    "version" : "4"
+                }
+            },
+            "Architecture" : "amd64",
+            "Size" : 169535922
+        },
+        "dockerImageMetadataVersion" : "1.0",
+        "dockerImageLayers" : [
+            {
+                "name" : "sha256:5a865e48f2fdb4c48700b9aa800ecd8d0aff8611bec51fb4ab0f70ba09a0fb8e",
+                "size" : 73863785,
+                "mediaType" : "application/vnd.docker.container.image.rootfs.diff+x-gtar"
+            },
+            {
+                "name" : "sha256:a778b52f148e84ec73f4ad7f7a1e67690dd0a36ddf1ed2926ad223901d196bf7",
+                "size" : 1195,
+                "mediaType" : "application/vnd.docker.container.image.rootfs.diff+x-gtar"
+            },
+            {
+                "name" : "sha256:9cc048a8a74a05eabd2f114d56d759435b8e2d76091e40edbff1d137b08de613",
+                "size" : 69958078,
+                "mediaType" : "application/vnd.docker.container.image.rootfs.diff+x-gtar"
+            },
+            {
+                "name" : "sha256:83617f92ddeab393b821a1ef9ab688b59ea2e18093e918758e0d2715e4b3dc3f",
+                "size" : 20371400,
+                "mediaType" : "application/vnd.docker.container.image.rootfs.diff+x-gtar"
+            },
+            {
+                "name" : "sha256:4b1cbde816d93f511e33c65871fb243c46120d136885337051ce705e96a542de",
+                "size" : 5341464,
+                "mediaType" : "application/vnd.docker.container.image.rootfs.diff+x-gtar"
+            }
+        ],
+        "dockerImageSignatures" : ["eyJoZWFkZXIiOnsiandrIjp7ImNydiI6IlAtMjU2Iiwia2lkIjoiVU00UTpSWVE0OjY2M1M6NzMzSjpGUllWOktUSVY6VEVBVDo0WExNOk9JT086QTROWjpUWjJROkxSRkoiLCJrdHkiOiJFQyIsIngiOiJWdlJURExtQ1RDTjJJTlJrNjVPaU1NTTBNWm15RHpNZHVSX1lvbXFaaWt3IiwieSI6Ii1zV2RRdXBkWWpYam1qZXpsbkZKcVRaa1RkeTFyN3M5V09xVzJlbHlnbzAifSwiYWxnIjoiRVMyNTYifSwic2lnbmF0dXJlIjoiNEk2d1ZORnM2bE93V0Z0NmFtdWh3d0ljQ0l3V3FSZzA0Ml81MjN2dXpZQnFDc21KM0VZbUJZRkJCU21DVUg0UDdPdk42RllGQXpDSHY2UXVXb2pCWVEiLCJwcm90ZWN0ZWQiOiJleUptYjNKdFlYUk1aVzVuZEdnaU9qazVOVFlzSW1admNtMWhkRlJoYVd3aU9pSkRiakFpTENKMGFXMWxJam9pTWpBeE55MHdPQzB4TjFReE56bzBPRG8xTmxvaWZRIn0="],
+        "dockerImageManifestMediaType" : "application/vnd.docker.distribution.manifest.v1+json"
+    }
+}
