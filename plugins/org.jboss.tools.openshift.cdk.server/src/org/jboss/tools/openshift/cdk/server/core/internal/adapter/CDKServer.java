@@ -66,7 +66,11 @@ public class CDKServer extends ServerDelegate {
 	 *    reporting and cancellation are not desired
 	 */
 	public void setDefaultServerName(IProgressMonitor monitor) {
-		getServerWorkingCopy().setName(ServerNamingUtility.getDefaultServerName(getServerTypeBaseName()));
+		getServerWorkingCopy().setName(ServerNamingUtility.getDefaultServerName(getBaseName()));
+	}
+	
+	protected String getBaseName() {
+		return CDKServer.getServerTypeBaseName();
 	}
 	
 	public static String getServerTypeBaseName() {

@@ -46,6 +46,10 @@ public class CDK3Server extends CDKServer {
 		};
 	}
 
+
+	protected String getBaseName() {
+		return CDK3Server.getServerTypeBaseName();
+	}
 	
 	public static String getServerTypeBaseName() {
 		return "Container Development Environment 3";
