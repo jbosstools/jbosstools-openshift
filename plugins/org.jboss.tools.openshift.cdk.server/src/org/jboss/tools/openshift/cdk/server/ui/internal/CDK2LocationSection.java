@@ -10,9 +10,6 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
-import java.io.File;
-
-import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
 public class CDK2LocationSection extends AbstractLocationSection {
@@ -27,8 +24,7 @@ public class CDK2LocationSection extends AbstractLocationSection {
 	}
 
 	@Override
-	protected File getFile(File selected, Shell shell) {
-		return chooseDirectory(selected, shell);
+	protected void locationBrowseClicked() {
+		browseClicked(getLocationText(), FOLDER);
 	}
-	
 }

@@ -41,6 +41,10 @@ import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.ide.eclipse.as.core.util.ServerAttributeHelper;
 
 public abstract class AbstractLocationSection extends ServerEditorSection {
+
+	protected static final boolean FILE = true;
+	protected static final boolean FOLDER = false;
+	
 	
 	private Text location;
 	private Button browse;
@@ -128,7 +132,7 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		browseListener = new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				browseHomeDirClicked();
+				locationBrowseClicked();
 				validate();
 			}
 			@Override
@@ -155,23 +159,31 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		// Subclass override
 	}
 	
-	protected void browseHomeDirClicked() {
-		File file = location.getText() == null ? null : new File( location.getText());
+	protected abstract void locationBrowseClicked();
+	
+	
+	protected void browseClicked(Text text, boolean type) {
+		if( text == null )
+			return;
+
+		File file = text.getText() == null ? null : new File( text.getText());
 		if (file != null && !file.exists()) {
 			file = null;
 		}
 
-		File directory = getFile(file,  location.getShell());
-		if (directory != null) {
-			String newHomeVal = directory.getAbsolutePath();
-			if( newHomeVal != null && !newHomeVal.equals(location.getText())) {
-				location.setText(newHomeVal);
+		File f2 = null;
+		if( type == FILE )
+			f2 = chooseFile(file,  text.getShell());
+		else if( type == FOLDER)
+			f2 = chooseDirectory(file,  text.getShell());
+		
+		if (f2 != null) {
+			String newVal = f2.getAbsolutePath();
+			if( newVal != null && !newVal.equals(text.getText())) {
+				text.setText(newVal);
 			}
 		}
 	}
-	
-
-	protected abstract File getFile(File selected, Shell shell);
 	
 	protected static File chooseFile(File startingDirectory, Shell shell) {
 		FileDialog fileDialog = new FileDialog(shell, SWT.OPEN);

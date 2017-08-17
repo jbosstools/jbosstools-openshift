@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
@@ -124,7 +123,7 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		msHomeSelListener = new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				browseHomeDirClicked();
+				browseClicked(msHomeText, FOLDER);
 				validate();
 			}
 			@Override
@@ -160,11 +159,12 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		}
 	}
 	
+
 	@Override
-	protected File getFile(File selected, Shell shell) {
-		return chooseFile(selected, shell);
+	protected void locationBrowseClicked() {
+		browseClicked(getLocationText(), FILE);
 	}
-	
+
 	@Override
 	protected void validate() {
 		kickValidationJob();
