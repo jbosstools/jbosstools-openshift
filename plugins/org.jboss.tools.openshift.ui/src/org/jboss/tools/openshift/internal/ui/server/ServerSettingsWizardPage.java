@@ -57,6 +57,7 @@ import org.eclipse.jface.databinding.viewers.ObservableListTreeContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
@@ -446,7 +447,6 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		UIUtils.setDefaultButtonWidth(importButton);
 		importButton.addSelectionListener(onImportProject(model, parent.getShell()));
 	}
-	
 
 	private IDoubleClickListener onDoubleClickService() {
 		return new IDoubleClickListener() {
@@ -494,10 +494,12 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
         return new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+            	if (model.getResource() == null) {
+            		MessageDialog.openWarning(shell, "No Build Configurations found", "A build config is used to import a project to Eclipse");
+            		return;
+            	}
                 Map<com.openshift.restclient.model.IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = new HashMap<>();
-                if (model.getResource() != null) {
-                	projectsAndBuildConfigs.put(model.getResource().getProject(), Collections.emptyList());
-                }
+                projectsAndBuildConfigs.put(model.getResource().getProject(), Collections.emptyList());
                 ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
                 final boolean done = WizardUtils.openWizardDialog(wizard, shell);
                 if (done) {
