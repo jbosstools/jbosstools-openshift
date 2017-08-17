@@ -15,10 +15,9 @@ import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.BooleanUtils;
@@ -119,7 +118,6 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
-import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
@@ -497,9 +495,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
             @Override
             public void widgetSelected(SelectionEvent e) {
                 Map<com.openshift.restclient.model.IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = new HashMap<>();
-                List<IBuildConfig> buildConfigs = new ArrayList<>();
-                ResourceUtils.getBuildConfigFor(model.getResource(), buildConfigs);
-                projectsAndBuildConfigs.put(model.getResource().getProject(), buildConfigs);
+                if (model.getResource() != null) {
+                	projectsAndBuildConfigs.put(model.getResource().getProject(), Collections.emptyList());
+                }
                 ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
                 final boolean done = WizardUtils.openWizardDialog(wizard, shell);
                 if (done) {
