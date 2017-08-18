@@ -13,10 +13,11 @@ package org.jboss.tools.openshift.internal.core.server.debug;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,7 +35,6 @@ import org.jboss.tools.openshift.internal.core.util.NewPodDetectorJob;
 
 import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
-import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
 
@@ -92,7 +92,7 @@ public class OpenShiftDebugMode {
 
 	private void updateDebugEnvVariables(IDeploymentConfig dc, DebugContext context) {
 		if (context.isDebugEnabled()) {
-			setDebugPort(context.getDebugPort(), dc);
+			setDebugPort(context.getDebugPort(), context.getDebugPortKey(), dc);
 			dc.setEnvironmentVariable(context.getDebugPortKey(), String.valueOf(context.getDebugPort()));
 			dc.setEnvironmentVariable(context.getDevmodeKey(), String.valueOf(context.isDebugEnabled()));
 		} else {
@@ -101,24 +101,34 @@ public class OpenShiftDebugMode {
 		}
 	}
 
-	private void setDebugPort(int debugPort, IDeploymentConfig dc) {
+	private void setDebugPort(int requestedDebugPort, String debugPortKey, IDeploymentConfig dc) {
 		Collection<IContainer> originalContainers = dc.getContainers();
-		if (originalContainers != null 
-				&& !originalContainers.isEmpty()) {
-			Collection<IContainer> containers = new ArrayList<>(originalContainers);
-			IContainer container = containers.iterator().next();
-			Set<IPort> ports = new HashSet<>(container.getPorts());
-			
-			IPort existing = ports.stream()
-					.filter(p -> p.getContainerPort() == debugPort)
+		if (CollectionUtils.isEmpty(originalContainers)) {
+			return;
+		}
+
+		Collection<IContainer> containers = new ArrayList<>(originalContainers);
+		// TODO: support multiple containers
+		IContainer firstContainer = containers.iterator().next();
+		Set<IPort> ports = new HashSet<>(firstContainer.getPorts());
+		int currentDebugPort = NumberUtils.toInt(getEnv(dc, debugPortKey));
+		IPort current = getCurrentPort(currentDebugPort, ports);
+		boolean added = addDebugPort(requestedDebugPort, ports, current);
+		if (added) {
+			firstContainer.setPorts(ports); 
+			dc.setContainers(containers);
+		}
+	}
+
+	private IPort getCurrentPort(int currentDebugPort, Set<IPort> ports) {
+		IPort current = null;
+		if (currentDebugPort > 0) {
+			current = ports.stream()
+					.filter(p -> p.getContainerPort() == currentDebugPort)
 					.findFirst()
 					.orElse(null);
-			boolean added = addDebugPort(debugPort, ports, existing);
-			if (added) {
-				container.setPorts(ports); 
-				dc.setContainers(containers);
-			}
 		}
+		return current;
 	}
 
 	private boolean addDebugPort(int debugPort, Set<IPort> ports, IPort existing) {
@@ -256,13 +266,11 @@ public class OpenShiftDebugMode {
 				|| StringUtils.isEmpty(key)) {
 			return null;
 		}
-		Optional<IEnvironmentVariable> envVar = dc.getEnvironmentVariables().stream()
+		return dc.getEnvironmentVariables().stream()
 				.filter(ev -> key.equals(ev.getName()))
-				.findFirst();
-		if (envVar.isPresent()) {
-			return envVar.get().getValue();
-		}
-		return null;
+				.findFirst()
+				.map(ev -> ev.getValue())
+				.orElse(null);
 	}
 
 	private void updateDevmodeEnvVar(boolean enable, IDeploymentConfig dc, DebugContext context) {

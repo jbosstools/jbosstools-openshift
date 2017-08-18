@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.internal.preferences.EclipsePreferences;
@@ -45,6 +46,7 @@ import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.OpenShiftResourceSelectors;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.mockito.Mockito;
@@ -54,10 +56,12 @@ import org.mockito.stubbing.Answer;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IBuildConfig;
+import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.IObjectReference;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
@@ -88,9 +92,9 @@ public class ResourceMocks {
 	public static final IProject[] PROJECTS = new IProject[] { PROJECT1, PROJECT2, PROJECT3, PROJECT4, PROJECT5 };
 
 	public static final IDeploymentConfig[] PROJECT2_DEPLOYMENTCONFIGS = new IDeploymentConfig[] {
-			createDeploymentConfig("project2-app1-dc", PROJECT2, null),
-			createDeploymentConfig("project2-app2-dc", PROJECT2, null),
-			createDeploymentConfig("project2-app3-dc", PROJECT2, null)
+			createDeploymentConfig("project2-app1-dc", PROJECT2, null, null),
+			createDeploymentConfig("project2-app2-dc", PROJECT2, null, null),
+			createDeploymentConfig("project2-app3-dc", PROJECT2, null, null)
 	};
 
 	public static final IService[] PROJECT2_SERVICES = new IService[] {
@@ -177,9 +181,9 @@ public class ResourceMocks {
     };
 
     public static final IDeploymentConfig[] PROJECT4_DEPLOYMENTCONFIGS = new IDeploymentConfig[] {
-            createDeploymentConfig("project2-app1-dc", PROJECT4, null),
-            createDeploymentConfig("project2-app2-dc", PROJECT4, null),
-            createDeploymentConfig("project2-app3-dc", PROJECT4, null)
+            createDeploymentConfig("project2-app1-dc", PROJECT4, null, null),
+            createDeploymentConfig("project2-app2-dc", PROJECT4, null, null),
+            createDeploymentConfig("project2-app3-dc", PROJECT4, null, null)
     };
 
     public static final IPod[] PROJECT4_PODS = new IPod[] {
@@ -193,9 +197,9 @@ public class ResourceMocks {
     };
 
     public static final IReplicationController[] PROJECT5_REPLICATINCONTROLLERS = new IReplicationController[] {
-            createDeploymentConfig("project2-app1-dc", PROJECT5, null),
-            createDeploymentConfig("project2-app2-dc", PROJECT5, null),
-            createDeploymentConfig("project2-app3-dc", PROJECT5, null)
+            createDeploymentConfig("project2-app1-dc", PROJECT5, null, null),
+            createDeploymentConfig("project2-app2-dc", PROJECT5, null, null),
+            createDeploymentConfig("project2-app3-dc", PROJECT5, null, null)
     };
 
     public static final IPod[] PROJECT5_PODS = new IPod[] {
@@ -376,16 +380,19 @@ public class ResourceMocks {
 				});
 	}
 
-	public static IDeploymentConfig createDeploymentConfig(String name, IProject project, List<IEnvironmentVariable> envVariables, Connection connection) {
-		IDeploymentConfig dc = createDeploymentConfig(name, project, (List<IEnvironmentVariable>) null);
+	public static IDeploymentConfig createDeploymentConfig(String name, IProject project, List<IEnvironmentVariable> envVariables, 
+			List<IContainer> containers, Connection connection) {
+		IDeploymentConfig dc = createDeploymentConfig(name, project, envVariables, containers);
 		mockGetResources(Arrays.asList(dc), ResourceKind.DEPLOYMENT_CONFIG, project, connection);
 		return dc;
 	}
 
-	public static IDeploymentConfig createDeploymentConfig(String name, IProject project, List<IEnvironmentVariable> envVariables) {
+	public static IDeploymentConfig createDeploymentConfig(String name, IProject project, List<IEnvironmentVariable> envVariables, 
+			List<IContainer> containers) {
 		return createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG, 
 				dc -> {
 					mockGetResourceProperties(name, project, dc);
+					doReturn(containers).when(dc).getContainers();
 					doReturn(envVariables).when(dc).getEnvironmentVariables();
 				});
 	}
@@ -430,7 +437,7 @@ public class ResourceMocks {
 		doReturn(name).when(resource).getName();
 		if (project != null) {
 			doReturn(project.getName()).when(resource).getNamespace();
-			doReturn(project).when(resource).getProject();
+			doReturn(project).	when(resource).getProject();
 		}
 	}
 	
@@ -438,7 +445,7 @@ public class ResourceMocks {
 		public void visit(R resource);
 	}
 
-	public static void mockEnvironmentVariables(List<IEnvironmentVariable> envVariables, IDeploymentConfig dc) {
+	public static void mockGetEnvironmentVariables(List<IEnvironmentVariable> envVariables, IDeploymentConfig dc) {
 		doReturn(envVariables).when(dc).getEnvironmentVariables();	
 	}
 	
@@ -449,6 +456,21 @@ public class ResourceMocks {
 		return var;
 	}
 	
+	public static void mockGetContainers(List<IContainer> containers, IDeploymentConfig dc) {
+		doReturn(containers).when(dc).getContainers();	
+	}
+
+	public static IContainer createContainer(String name, Set<IPort> ports) {
+		IContainer container = mock(IContainer.class);
+		doReturn(name).when(container).getName();
+		doReturn(ports).when(container).getPorts();
+		return container;
+	}
+
+	public static IPort createPort(int port) {
+		return new PortSpecAdapter("debug", "TCP", port);
+	}
+
 	public static List<ObservableTreeItem> createObservableTreeItems(Collection<? extends IResource> resources) {
 		return resources.stream()
 				.map(r -> new ObservableTreeItem(r))
