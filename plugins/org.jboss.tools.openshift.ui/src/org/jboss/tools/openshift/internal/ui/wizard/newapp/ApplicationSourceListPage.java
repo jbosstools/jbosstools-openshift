@@ -280,7 +280,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		TabItem localTemplatesTab = new TabItem(tabContainer, SWT.NONE);
 		localTemplatesTab.setText("Custom template");
 
-		Composite parent = new Composite(tabContainer, SWT.NONE);
+		final Composite parent = new Composite(tabContainer, SWT.NONE);
 		GridLayoutFactory.fillDefaults()
 			.numColumns(3).margins(10, 10).spacing(6, 2)
 			.applyTo(parent);
@@ -297,12 +297,14 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 				.applyTo(txtLocalTemplateFileName);
 		IObservableValue localTemplateFilename = WidgetProperties.text(SWT.Modify).observe(txtLocalTemplateFileName);
 		IValidator validator = (o -> {
-		    IStatus status = ValidationStatus.ok();
-		    if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(o.toString()) 
-		    		&& StringUtils.isNotBlank(o.toString()) 
-		    		&& !isFile(o.toString())) {
-		        status = ValidationStatus.error(o +" is not a file");
+			IStatus status = ValidationStatus.ok();
+			if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(o.toString()) && StringUtils.isNotBlank(o.toString())
+					&& !isFile(o.toString())) {
+				status = ValidationStatus.error(o + " is not a file");
 			}
+			// force redraw since removed decorations somehow stay visible, GTK3 bug?
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
+			asyncRedraw(parent);
 			return status;
 		});
 		ValueBindingBuilder
@@ -336,6 +338,16 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		return localTemplateFilename;
 	}
 
+	private void asyncRedraw(final Composite c) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				c.redraw();
+				c.update();
+			}
+		});
+	}
+	
 	private SelectionListener onBrowseWorkspaceClicked() {
 		return new SelectionAdapter() {
 
@@ -723,7 +735,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			}
 			// force redraw since removed decorations somehow stay visible, GTK3 bug?
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
-			composite.redraw();
+			asyncRedraw(composite);
 
 			return status;
 		}
