@@ -207,13 +207,38 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	}
 
 	private void validateOCLocation(String location, boolean override) {
-		if( override )
-			kickOCLocationValidation(location);
-		else
+		if (override) {
+			String shallowError = validateOCLocationFast(location);
+			if (shallowError != null) {
+				// show decorator, set message to error
+				decoration.setDescriptionText(shallowError);
+				decoration.show();
+			} else {
+				kickOCLocationValidation(location);
+			}
+		} else
 			decoration.hide();
 	}
-	
-	
+
+	private String validateOCLocationFast(String location) {
+		String error = null;
+		if (StringUtils.isBlank(location)) {
+			error = "OC Location cannot be empty";
+		} else {
+			File file = new File(location);
+			// Error messages have to be set to field editor, not directly to
+			// the page.
+			if (!file.exists()) {
+				error = (NLS.bind("{0} was not found.", file));
+			} else if (file.isDirectory()) {
+				error = (NLS.bind("OC Location must be a file.", file));
+			} else if (!file.canExecute()) {
+				error = (NLS.bind("{0} does not have execute permissions.", file));
+			}
+		}
+		return error;
+	}
+
 	private class OCVersionUIJob extends UIUpdatingJob {
 
 	    private Version version;
@@ -226,20 +251,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	    
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-        	
-    		if (StringUtils.isBlank(location)) {
-    			error = "OC Location cannot be empty";
-    		} else {
-        		File file = new File(location);
-        		// Error messages have to be set to field editor, not directly to the
-        		// page.
-        		if (!file.exists()) {
-        			error = (NLS.bind("{0} was not found.", file));
-        		} else if (!file.canExecute()) {
-        			error = (NLS.bind("{0} does not have execute permissions.", file));
-        		}
-    		}
-    		
+        	error = validateOCLocationFast(location);
     		if( error == null ) {
     			version = new OCBinaryVersionValidator(location).getVersion(monitor);
     		}
