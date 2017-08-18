@@ -70,6 +70,7 @@ import com.openshift.restclient.model.build.BuildStrategyType;
 import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.IGitBuildSource;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
+import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
@@ -471,6 +472,32 @@ public class ResourceMocks {
 		return new PortSpecAdapter("debug", "TCP", port);
 	}
 
+	/**
+	 * mocks the #getTriggers method of the given {@link IDeploymentConfig} so that it returns the list of {@link IDeploymentImageChangeTrigger}.
+	 * @param triggers
+	 * @param dc
+	 * 
+	 * @see #createDeploymentImageChangeTrigger(String, String)
+	 */
+	public static void mockGetTriggers(List<IDeploymentImageChangeTrigger> triggers, IDeploymentConfig dc) {
+		doReturn(triggers).when(dc).getTriggers();	
+	}
+
+	/**
+	 * Returns a mock of a {@link IDeploymentImageChangeTrigger} of the given type and with the given (from-) uri. 
+	 * @param type
+	 * @param uri
+	 * @return
+	 * 
+	 * @see #mockGetTriggers(List, IDeploymentConfig)
+	 */
+	public static IDeploymentImageChangeTrigger createDeploymentImageChangeTrigger(String type, String uri) {
+		IDeploymentImageChangeTrigger trigger = mock(IDeploymentImageChangeTrigger.class);
+		doReturn(new DockerImageURI(uri)).when(trigger).getFrom();
+		doReturn(type).when(trigger).getType();
+		return trigger;
+	}
+	
 	public static List<ObservableTreeItem> createObservableTreeItems(Collection<? extends IResource> resources) {
 		return resources.stream()
 				.map(r -> new ObservableTreeItem(r))

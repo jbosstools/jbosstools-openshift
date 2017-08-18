@@ -944,9 +944,8 @@ public class ResourceUtils {
 	 * @param resource the resource to get the deployment config for
 	 * @param connection the connection to use for further resource queries on server
 	 * @return
-	 * @throws CoreException
 	 */
-	public static IDeploymentConfig getDeploymentConfigFor(IResource resource, Connection connection) throws CoreException {
+	public static IDeploymentConfig getDeploymentConfigFor(IResource resource, Connection connection) {
 		IDeploymentConfig dc = null;
 		if (resource instanceof IDeploymentConfig) {
 			dc = (IDeploymentConfig) resource;
@@ -958,7 +957,7 @@ public class ResourceUtils {
 		return dc;
 	}
 
-	private static IDeploymentConfig getDeploymentConfigFor(IService service, Connection connection) throws CoreException {
+	private static IDeploymentConfig getDeploymentConfigFor(IService service, Connection connection) {
 		if (service == null) {
 			return null;
 		}
@@ -970,20 +969,14 @@ public class ResourceUtils {
 			IReplicationController rc = getReplicationControllerFor(
 					service, connection.getResources(ResourceKind.REPLICATION_CONTROLLER, namespace));
 			if (rc == null) {
-				throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, NLS.bind(
-						"Could not find a deployment config for service {0}: no replication controller was found.",
-								service.getName())));
+				return null;
 			}
 			List<IPod> allPods = connection.getResources(ResourceKind.POD, namespace);
 			List<IPod> pods = allPods.stream()
 				.filter(pod -> areRelated((IPod) pod, rc))
 				.collect(Collectors.toList());
 			if (CollectionUtils.isEmpty(pods)) {
-				// TODO: wait for pods to appear
-				throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, NLS.bind(
-						"Could not find a deployment config for replication controller {0}: no pods found."
-						+ "You may have to wait for your build to finish and create your pods.", 
-						rc.getName())));
+				return null;
 			}
 			List<IDeploymentConfig> dcs = connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, namespace);
 			return dcs.stream()

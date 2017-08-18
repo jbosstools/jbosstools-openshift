@@ -323,7 +323,28 @@ public class OpenShiftServerUtils {
 	}
 
 	/**
-	 * Returns the connection for the given server
+	 * Returns the {@link Connection} for the given server. Throws a
+	 * {@link CoreException} it none was found.
+	 * 
+	 * @param server
+	 * @return
+	 * @throws CoreException
+	 */
+	public static Connection getConnectionChecked(IServerAttributes server) throws CoreException {
+		Connection connection = getConnection(server);
+		if (connection == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find the connection for server {0}."
+							+ " Your server adapter might refer to an inexistant connection."
+							, server == null? "" : server.getName())));
+		}
+		return connection;
+	}
+
+	/**
+	 * Returns the connection for the given server. Returns {@code null} if none was
+	 * found.
+	 * 
 	 * @param server
 	 * @return
 	 */
@@ -352,16 +373,42 @@ public class OpenShiftServerUtils {
 	public static IResource getResource(IServerAttributes attributes, IProgressMonitor monitor) {
 		return getResource(attributes, getConnection(attributes), monitor);
 	}
-	
+
 	/**
-	 * Returns the OpenShift resource (service, replication controller) for the given server.
-	 * It gets the resource name and type from
-	 * server settings and requests the resource from the OpenShit server. It
-	 * should thus never be called from the UI thread.
+	 * Returns the {@link IResource} that's stored in the given server. Throws a
+	 * {@link CoreException} if none was found.
 	 * 
-	 * @param server the server (attributes) to get the resource name from
-	 * @param connection the connection (to the OpenShift server) to retrieve the resource from
-	 * @return the OpenShift resource 
+	 * @param server
+	 * @param connection
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 */
+	public static IResource getResourceChecked(IServerAttributes server, Connection connection, IProgressMonitor monitor) 
+			throws CoreException {
+		IResource resource = getResource(server, connection, monitor);
+		if (resource == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not find the resource for server {0}." 
+							+ " Your server adapter might refer to an inexistant resource.",
+							server == null? "" : server.getName())));
+		}
+		return resource;
+	}
+
+	/**
+	 * Returns the OpenShift resource (service, replication controller) for the
+	 * given server. Returns {@code null} if none was found. 
+	 * It gets the resource name and type from server settings and requests the
+	 * resource from the OpenShit server. It should thus <strong>NOT</strong> be called from the 
+	 * UI thread.
+	 * 
+	 * @param server
+	 *            the server (attributes) to get the resource name from
+	 * @param connection
+	 *            the connection (to the OpenShift server) to retrieve the resource
+	 *            from
+	 * @return the OpenShift resource
 	 */
 	public static IResource getResource(IServerAttributes server, Connection connection, IProgressMonitor monitor) {
 		// TODO: implement override project settings with server settings
@@ -417,9 +464,8 @@ public class OpenShiftServerUtils {
 	 * @param resource the resource to derive the pod and docker image from
 	 * @param server the server to derive the openshift connection from
 	 * @return
-	 * @throws CoreException
 	 */
-	public static String loadPodPath(IResource resource, IServer server) throws CoreException {
+	public static String loadPodPath(IResource resource, IServer server) {
 		DockerImageLabels metaData = DockerImageLabels.getInstance(resource, getBehaviour(server));
 		return metaData.getPodPath();
 	}
@@ -520,22 +566,8 @@ public class OpenShiftServerUtils {
 	public static IDeploymentConfig getDeploymentConfig(IServerAttributes server, IProgressMonitor monitor) throws CoreException {
 		assertServerNotNull(server);
 		
-		Connection connection = getConnection(server);
-		if (connection == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not find the connection for server {0}."
-							+ " Your server adapter might refer to an inexistant connection."
-							, server.getName())));
-		}
-
-		IResource resource = getResource(server, connection, monitor);
-		if (resource == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not find the resource for server {0}." 
-							+ " Your server adapter might refer to an inexistant resource.",
-							server.getName())));
-		}
-
+		Connection connection = getConnectionChecked(server);
+		IResource resource = getResourceChecked(server, connection, monitor);
 		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(resource, connection);
 		if (dc == null) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(

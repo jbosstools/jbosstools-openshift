@@ -59,7 +59,6 @@ import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPort;
 
-
 public class OpenShiftDebugModeTest {
 	
 	private static final String KEY_DEBUGPORT = "debugPort";
