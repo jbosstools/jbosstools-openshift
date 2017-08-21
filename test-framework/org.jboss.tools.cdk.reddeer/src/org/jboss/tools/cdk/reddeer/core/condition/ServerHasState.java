@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.condition;
+package org.jboss.tools.cdk.reddeer.core.condition;
 
 import org.jboss.reddeer.common.condition.AbstractWaitCondition;
 import org.jboss.reddeer.eclipse.wst.server.ui.view.Server;

@@ -10,9 +10,11 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit,
  org.jboss.reddeer.go;bundle-version="[1.2.0,2.0.0)",
  org.eclipse.swt
-Export-Package: org.jboss.tools.cdk.reddeer.condition,
+Export-Package: org.jboss.tools.cdk.reddeer.core.condition,
+ org.jboss.tools.cdk.reddeer.core.matcher,
  org.jboss.tools.cdk.reddeer.preferences,
  org.jboss.tools.cdk.reddeer.requirements,
+ org.jboss.tools.cdk.reddeer.server.exception,
  org.jboss.tools.cdk.reddeer.server.ui,
  org.jboss.tools.cdk.reddeer.server.ui.editor,
  org.jboss.tools.cdk.reddeer.server.ui.wizard
