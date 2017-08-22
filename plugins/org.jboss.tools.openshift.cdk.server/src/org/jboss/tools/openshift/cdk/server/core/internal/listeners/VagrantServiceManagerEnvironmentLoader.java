@@ -23,7 +23,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.VagrantBinaryUtility;
 
 public class VagrantServiceManagerEnvironmentLoader extends ServiceManagerEnvironmentLoader {
-
+	private static final String DEFAULT_IMAGE_REGISTRY_URL = "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io";
 	public VagrantServiceManagerEnvironmentLoader() {
 		super(TYPE_VAGRANT);
 	}
@@ -38,8 +38,13 @@ public class VagrantServiceManagerEnvironmentLoader extends ServiceManagerEnviro
 			
 			// merge the two
 			Map<String, String> merged = merge(adbEnv, dotcdkProps);
+			
+			
 			try {
 				if (merged != null) {
+					// Manually set default for image registry url
+					merged.put(ServiceManagerEnvironment.KEY_DEFAULT_IMAGE_REGISTRY, DEFAULT_IMAGE_REGISTRY_URL);
+					
 					return new ServiceManagerEnvironment(merged);
 				}
 			} catch (URISyntaxException urise) {

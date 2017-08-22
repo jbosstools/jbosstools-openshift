@@ -24,6 +24,8 @@ public class ServiceManagerEnvironment {
 	public static final String KEY_DOCKER_CERT_PATH = "DOCKER_CERT_PATH";
 	public static final String KEY_DOCKER_API_VERSION = "DOCKER_API_VERSION";
 	public static final String IMAGE_REGISTRY_KEY = "DOCKER_REGISTRY";
+	public static final String KEY_DEFAULT_IMAGE_REGISTRY = "jbt.default.DOCKER_REGISTRY";
+	
 	
 	public static final String KEY_OPENSHIFT_HOST = "HOST";
 	public static final String KEY_OPENSHIFT_PORT = "PORT";
@@ -32,9 +34,6 @@ public class ServiceManagerEnvironment {
 	private static final String DOTCDK_AUTH_SCHEME = "openshift.auth.scheme";
 	private static final String DOTCDK_AUTH_USERNAME = "openshift.auth.username";
 	private static final String DOTCDK_AUTH_PASS = "openshift.auth.password";
-	
-	private static final String DEFAULT_IMAGE_REGISTRY_URL = "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io";
-	
 	
 	private static final String HTTPS_SCHEMA = "https://";
 	
@@ -78,11 +77,10 @@ public class ServiceManagerEnvironment {
 	public String getDockerRegistry() {
 		String dockerReg = env.get(IMAGE_REGISTRY_KEY);
 		if( dockerReg == null ) {
-			dockerReg = DEFAULT_IMAGE_REGISTRY_URL;
-		} else {
-			if( !dockerReg.contains("://")) {
-				dockerReg = "https://" + dockerReg;
-			}
+			dockerReg = env.get(KEY_DEFAULT_IMAGE_REGISTRY);
+		} 
+		if (dockerReg != null && !dockerReg.contains("://")) {
+			dockerReg = "https://" + dockerReg;
 		}
 		return dockerReg;
 	}

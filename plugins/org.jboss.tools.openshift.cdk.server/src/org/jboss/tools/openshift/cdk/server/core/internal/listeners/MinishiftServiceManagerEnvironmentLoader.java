@@ -98,11 +98,15 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		try {
 			String[] lines = callAndGetLines(env, args, cmdLoc, wd);
 			if( lines != null && lines.length > 0) {
-				return lines[0];
+				if( lines[0] != null )
+					return lines[0];
+				else
+					CDKCoreActivator.pluginLog().logWarning(
+							"Call to '" + cmdLoc + " openshift registry' was unable to locate an image registry for server " + server.getName());
 			}
 		} catch(IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(
-					"Unable to successfully complete a call to minishift docker-env ",ioe);
+					"Unable to successfully complete a call to minishift openshift registry ",ioe);
 		}
 		return null;
 	}
