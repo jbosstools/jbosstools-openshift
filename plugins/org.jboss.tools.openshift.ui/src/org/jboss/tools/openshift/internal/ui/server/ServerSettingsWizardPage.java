@@ -70,7 +70,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -176,11 +175,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				"Create an OpenShift 3 Server Adapter by selecting the project, resource and folders used for file synchronization.", 
 				"Create an OpenShift 3 Server Adapter", 
 				wizard);
-		OCBinary ocBinary = OCBinary.getInstance();
-		String loc = ocBinary.getLocation(connection);
-		boolean valid = ocBinary.isCompatibleForPublishing(connection, new NullProgressMonitor());
 		this.model = new ServerSettingsWizardPageModel(resource, route, deployProject, connection, server, 
-				getOCBinaryStatus(valid, loc));
+				OCBinary.getInstance().getOCBinaryStatus(connection, new NullProgressMonitor()));
 	}
 	
 	/**
@@ -192,27 +188,6 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	
 	void updateServer() throws OpenShiftException {
 		model.updateServer();
-	}
-	
-	/**
-	 * Compute the error message for the OCBinary state and path.
-	 * 
-	 * @param valid if the oc binary is valid or not
-	 * @param location the location of the oc binary
-	 * @return the error message (may be null)
-	 */
-	IStatus getOCBinaryStatus(boolean valid, String location) {
-	    IStatus status = Status.OK_STATUS;
-	    if (!valid) {
-	        if (location == null) {
-	            status = OpenShiftUIActivator.statusFactory().errorStatus(OpenShiftUIMessages.NoOCBinaryLocationErrorMessage);
-	        } else if (!new File(location).exists()) {
-	            status = OpenShiftUIActivator.statusFactory().errorStatus(NLS.bind(OpenShiftUIMessages.OCBinaryLocationDontExistsErrorMessage, location));
-	        } else {
-	            status = OpenShiftUIActivator.statusFactory().warningStatus(OpenShiftUIMessages.OCBinaryLocationIncompatibleErrorMessage);
-	        }
-	    }
-	    return status;
 	}
 	
 	/**
@@ -384,11 +359,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
                             @Override
                             protected IStatus run(IProgressMonitor monitor) {
-                                OCBinary ocBinary = OCBinary.getInstance();
-                                boolean valid = ocBinary.isCompatibleForPublishing(model.getConnection(), monitor);
-                                ServerSettingsWizardPage.this.model.setOCBinaryStatus(getOCBinaryStatus(valid, 
-                                		ocBinary.getLocation(model.getConnection())));
-                                return Status.OK_STATUS;
+                            	return OCBinary.getInstance().getOCBinaryStatus(model.getConnection(), monitor);
                             }
                         }.schedule();
                     }

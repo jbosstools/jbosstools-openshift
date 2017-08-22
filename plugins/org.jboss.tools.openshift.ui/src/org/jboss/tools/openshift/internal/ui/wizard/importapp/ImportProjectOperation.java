@@ -106,17 +106,17 @@ public class ImportProjectOperation {
 	 * @throws GitAPIException 
 	 * @throws NoWorkTreeException 
 	 */
-	public void execute(IProgressMonitor monitor)
+	public List<IProject> execute(IProgressMonitor monitor)
 			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
 			InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
 		if (!reuseGitRepo) {
-			importCloning(gitUrl, gitRef, cloneDestination, filters, monitor);
+			return importCloning(gitUrl, gitRef, cloneDestination, filters, monitor);
 		} else {
-			importReusingExistingRepo(gitUrl, gitRef, cloneDestination, filters, checkoutBranch, monitor);
+			return importReusingExistingRepo(gitUrl, gitRef, cloneDestination, filters, checkoutBranch, monitor);
 		}
 	}
 
-	private void importCloning(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters, IProgressMonitor monitor) 
+	private List<IProject> importCloning(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters, IProgressMonitor monitor) 
 			throws CoreException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		if (cloneDestinationExists()) {
 			throw new WontOverwriteException(NLS.bind(
@@ -127,15 +127,17 @@ public class ImportProjectOperation {
 		File repositoryFolder = cloneRepository(gitUrl, cloneDestination, gitRef, monitor);
 		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, filters, monitor);
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
+		return importedProjects;
 	}
 	
-	private void importReusingExistingRepo(String gitUrl, String gitRef, File repositoryFolder, Collection<String> filters, boolean checkoutBranch, 
+	private List<IProject>  importReusingExistingRepo(String gitUrl, String gitRef, File repositoryFolder, Collection<String> filters, boolean checkoutBranch, 
 			IProgressMonitor monitor) throws CoreException, InterruptedException {
 		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, filters, monitor);
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
 		if (checkoutBranch) {
 			checkoutBranch(gitRef, gitUrl, importedProjects, repositoryFolder, monitor);
 		}
+		return importedProjects;
 	}
 	
 	protected void checkoutBranch(String gitRef, String gitUrl, List<IProject> importedProjects, File repositoryFolder, IProgressMonitor monitor) throws CoreException {
