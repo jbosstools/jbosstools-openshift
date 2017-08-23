@@ -17,9 +17,9 @@ public class OpenShiftCoreMessages extends NLS {
     public static String DebugOnOpenshift;
     public static String ProfileOnOpenshift;
     public static String RunOnOpenshift;
-	public static String OCBinaryLocationIncompatibleErrorMessage;
-	public static String OCBinaryLocationDontExistsErrorMessage;
-	public static String NoOCBinaryLocationErrorMessage;
+    public static String OCBinaryLocationIncompatibleErrorMessage;
+    public static String OCBinaryLocationDontExistsErrorMessage;
+    public static String NoOCBinaryLocationErrorMessage;
 	
     static {
         // initialize resource bundle

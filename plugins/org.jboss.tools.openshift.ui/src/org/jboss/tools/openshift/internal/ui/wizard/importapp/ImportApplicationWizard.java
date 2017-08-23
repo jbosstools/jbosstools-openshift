@@ -151,7 +151,22 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	@Override
 	public boolean performFinish() {
-		this.importJob = createImportJob(model.isReuseGitRepository());
+		createImportJob(model.isReuseGitRepository());
+		importJob.schedule();
+		return true;
+	}
+
+	private void createImportJob(boolean reuseGitRepository) {
+		if (reuseGitRepository) {
+			this.importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath(),
+					model.isCheckoutBranchReusedRepo());
+		} else {
+			this.importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath());
+		}
+		String gitContextDir = model.getGitContextDir();
+		if (StringUtils.isNotEmpty(gitContextDir)) {
+			importJob.setFilters(Collections.singleton(gitContextDir));
+		}
 		importJob.setUser(true);
 		importJob.addJobChangeListener(new JobChangeAdapter() {
 
@@ -166,23 +181,6 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		for (IJobChangeListener importJobChangeListener: importJobChangeListenersList) {
 			importJob.addJobChangeListener(importJobChangeListener);
 		}
-		importJob.schedule();
-		return true;
-	}
-
-	private ImportJob createImportJob(boolean reuseGitRepository) {
-		ImportJob importJob = null;
-		if (reuseGitRepository) {
-			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath(),
-					model.isCheckoutBranchReusedRepo());
-		} else {
-			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath());
-		}
-		String gitContextDir = model.getGitContextDir();
-		if (StringUtils.isNotEmpty(gitContextDir)) {
-			importJob.setFilters(Collections.singleton(gitContextDir));
-		}
-		return importJob;
 	}
 
 	private void saveRepoPath() {
