@@ -29,6 +29,10 @@ public class VagrantServiceManagerEnvironmentLoader extends ServiceManagerEnviro
 	}
 
 	public ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server) {
+		return loadServiceManagerEnvironment(server, false);
+	}
+	
+	public ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, boolean suppressErrors) {
 		// loading service-manager env
 		Map<String, String> adbEnv = loadDockerEnv(server);
 		
@@ -48,9 +52,11 @@ public class VagrantServiceManagerEnvironmentLoader extends ServiceManagerEnviro
 					return new ServiceManagerEnvironment(merged);
 				}
 			} catch (URISyntaxException urise) {
-				CDKCoreActivator.pluginLog()
-						.logError("Environment variable DOCKER_HOST is not a valid uri:  " +
-								merged.get(ServiceManagerEnvironment.KEY_DOCKER_HOST), urise);
+				if( !suppressErrors) {
+					String err = "Environment variable DOCKER_HOST is not a valid uri:  " +
+							merged.get(ServiceManagerEnvironment.KEY_DOCKER_HOST);
+					CDKCoreActivator.pluginLog().logError(err, urise);
+				}
 			}
 		}
 		return null;

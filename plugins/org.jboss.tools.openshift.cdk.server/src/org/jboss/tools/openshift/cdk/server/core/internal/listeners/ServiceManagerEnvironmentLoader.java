@@ -57,15 +57,21 @@ public abstract class ServiceManagerEnvironmentLoader {
 	
 	
 	public  ServiceManagerEnvironment getOrLoadServiceManagerEnvironment(IServer server, boolean save) {
-		return getOrLoadServiceManagerEnvironment(server, save, 1);
+		return getOrLoadServiceManagerEnvironment(server, save, false);
 	}
 	
-	public  ServiceManagerEnvironment getOrLoadServiceManagerEnvironment(IServer server, boolean save, int maxTries) {
+	public  ServiceManagerEnvironment getOrLoadServiceManagerEnvironment(IServer server, boolean save, boolean suppressErrors) {
+		return getOrLoadServiceManagerEnvironment(server, save, 1, suppressErrors);
+	}
+
+	
+	public  ServiceManagerEnvironment getOrLoadServiceManagerEnvironment(IServer server, boolean save, 
+			int maxTries, boolean suppressErrors) {
 		IControllableServerBehavior behavior = JBossServerBehaviorUtils.getControllableBehavior(server);
 		Object o = behavior.getSharedData(SHARED_INFO_KEY);
 		ServiceManagerEnvironment ret = null;
 		if( !(o instanceof ServiceManagerEnvironmentLoader )) {
-			ret = loadServiceManagerEnvironment(server, maxTries);
+			ret = loadServiceManagerEnvironment(server, maxTries, suppressErrors);
 		} else {
 			ret = (ServiceManagerEnvironment)o;
 		}
@@ -81,9 +87,9 @@ public abstract class ServiceManagerEnvironmentLoader {
 	}
 	
 	
-	public  ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, int maxTries) {
+	public  ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, int maxTries, boolean suppressErrors) {
 		for( int i = 0; i < maxTries; i++ ) {
-			ServiceManagerEnvironment env = loadServiceManagerEnvironment(server);
+			ServiceManagerEnvironment env = loadServiceManagerEnvironment(server, suppressErrors);
 			if( env != null )
 				return env;
 		}
@@ -157,6 +163,6 @@ public abstract class ServiceManagerEnvironmentLoader {
 	 * @param server
 	 * @return
 	 */
-	public abstract ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server);
+	public abstract ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, boolean suppressErrors);
 
 }

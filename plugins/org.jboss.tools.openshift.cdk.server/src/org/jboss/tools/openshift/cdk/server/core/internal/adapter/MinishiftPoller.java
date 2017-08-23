@@ -106,7 +106,7 @@ public class MinishiftPoller extends AbstractCDKPoller {
 	
 	private boolean checkOpenShiftHealth(IServer server, int timeout) throws OpenShiftNotReadyPollingException {
 		ServiceManagerEnvironment adb = ServiceManagerEnvironmentLoader.type(server) 
-				.getOrLoadServiceManagerEnvironment(server, true);
+				.getOrLoadServiceManagerEnvironment(server, true, true);
 		
 		if( adb == null ) {
 			return false;
