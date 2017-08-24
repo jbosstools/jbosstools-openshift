@@ -41,7 +41,7 @@ public class CommandLocationLookupStrategy {
 	public static final CommandLocationLookupStrategy LINUX_STRATEGY = 
 			new CommandLocationLookupStrategy(LINUX_WHICH, LINUX_SEPARATOR, LINUX_PATHVAR, new String[]{}, null);
 	public static final CommandLocationLookupStrategy MAC_STRATEGY = 
-			new CommandLocationLookupStrategy(LINUX_WHICH, LINUX_SEPARATOR, LINUX_PATHVAR, new String[]{}, new String[]{"bash", "-l", "-i", "-c", "echo $PATH"}, true);
+			new CommandLocationLookupStrategy(LINUX_WHICH, LINUX_SEPARATOR, LINUX_PATHVAR, new String[]{}, new String[]{"bash", "-l", "-c", "echo $PATH"}, true);
 	
 	public static CommandLocationLookupStrategy get() {
 		String os = Platform.getOS();
