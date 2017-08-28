@@ -81,7 +81,10 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 
 	@Override
 	protected String[] getRequiredChildren() {
-		return new String[]{CDKConstants.CDK_RESOURCE_CDK};
+		return new String[]{CDKConstants.CDK_RESOURCE_CDK,
+				"config", 
+				"config/config.json"
+				};
 	}
 	
 
