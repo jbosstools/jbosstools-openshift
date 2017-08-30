@@ -186,8 +186,8 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 
 		Process p = null;
 		try {
-			p = new CDKLaunchUtility().callMinishiftInteractive(s, args, getStartupLaunchName(s));
-		} catch (IOException ioe) {
+			p = new CDKLaunchUtility().callMinishiftConsole(s, args, getStartupLaunchName(s));
+		} catch(IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(ioe);
 			beh.setServerStopped();
 			DebugPlugin.getDefault().removeDebugEventListener(debug);
