@@ -312,7 +312,7 @@ public class NewApplicationWizard
 					IServerWorkingCopy server = OpenShiftServerUtils.create(OpenShiftResourceUniqueId.get(service));
 					ServerSettingsWizardPageModel serverModel = new ServerSettingsWizardPageModel(service, route,
 							project, connection, server,
-							OCBinary.getInstance().getOCBinaryStatus(connection, new NullProgressMonitor()));
+							OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()));
 					serverModel.loadResources();
 					serverModel.updateServer();
 					server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false);

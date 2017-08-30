@@ -176,7 +176,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				"Create an OpenShift 3 Server Adapter", 
 				wizard);
 		this.model = new ServerSettingsWizardPageModel(resource, route, deployProject, connection, server, 
-				OCBinary.getInstance().getOCBinaryStatus(connection, new NullProgressMonitor()));
+				OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()));
 	}
 	
 	/**
@@ -359,7 +359,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
                             @Override
                             protected IStatus run(IProgressMonitor monitor) {
-                            	return OCBinary.getInstance().getOCBinaryStatus(model.getConnection(), monitor);
+                            	return OCBinary.getInstance().getStatus(model.getConnection(), monitor);
                             }
                         }.schedule();
                     }

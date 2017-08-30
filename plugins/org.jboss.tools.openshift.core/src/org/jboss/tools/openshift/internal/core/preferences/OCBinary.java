@@ -125,39 +125,16 @@ public enum OCBinary {
 	}
 	
 	/**
-	 * Checks if the oc binary is compatible for rsync publishing.
-	 * 
-	 * @param monitor the progress monitor
-	 * 
-	 * @return true if the oc binary is compatible
-	 * @see https://issues.jboss.org/browse/JBIDE-21307
-	 * @see https://github.com/openshift/origin/issues/6109
-	 */
-	public boolean isCompatibleForPublishing(IProgressMonitor monitor) {
-	    return isCompatibleForPublishing(null, monitor);
-	}
-	
-	/**
-	 * Checks if an arbitrary oc binary is compatible for rsync publishing
-	 * @param location
-	 * @param monitor
-	 * @return
-	 */
-	public boolean isCompatibleForPublishing(IConnection connection, IProgressMonitor monitor) {
-	    return new OCBinaryVersionValidator(getLocation(connection)).isCompatibleForPublishing(monitor);
-	}
-	
-	/**
 	 * Compute the error message for the OCBinary state and path.
 	 * 
 	 * @param valid if the oc binary is valid or not
 	 * @param location the location of the oc binary
 	 * @return the error message (may be null)
 	 */
-	public IStatus getOCBinaryStatus(IConnection connection, IProgressMonitor monitor) {
+	public IStatus getStatus(IConnection connection, IProgressMonitor monitor) {
 		String location = getLocation(connection);
 	    IStatus status = Status.OK_STATUS;
-	    if (!isCompatibleForPublishing(connection, monitor)) {
+	    if (new OCBinaryVersionValidator(getLocation(connection)).isCompatibleForPublishing(monitor)) {
 	        if (location == null) {
 	            status = OpenShiftCoreActivator.statusFactory().errorStatus(OpenShiftCoreMessages.NoOCBinaryLocationErrorMessage);
 	        } else if (!new File(location).exists()) {
