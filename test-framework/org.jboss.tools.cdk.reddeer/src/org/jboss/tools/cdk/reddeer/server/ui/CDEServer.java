@@ -10,21 +10,20 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui;
 
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.eclipse.wst.server.ui.view.Server;
-import org.jboss.reddeer.eclipse.wst.server.ui.view.ServersView;
-import org.jboss.reddeer.eclipse.wst.server.ui.view.ServersViewEnums.ServerState;
-import org.jboss.reddeer.swt.api.TreeItem;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.tools.cdk.reddeer.core.condition.ServerHasState;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.eclipse.condition.ServerHasState;
+import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.DefaultServer;
+import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
+import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
@@ -34,7 +33,7 @@ import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
  * @author odockal
  *
  */
-public class CDEServer extends Server {
+public class CDEServer extends DefaultServer {
 	
 	private static final String SSL_DIALOG_NAME = "Untrusted SSL Certificate";
 	
@@ -44,12 +43,12 @@ public class CDEServer extends Server {
 	
 	protected boolean cdk3 = false;
 	
-	public CDEServer(TreeItem item, ServersView view) {
-		super(item, view);
+	public CDEServer(TreeItem item) {
+		super(item);
 	}
 	
-	public CDEServer(TreeItem item, ServersView view, boolean cdk3) {
-		super(item, view);
+	public CDEServer(TreeItem item, boolean cdk3) {
+		super(item);
 		this.cdk3 = cdk3;
 	}
 	
@@ -66,14 +65,14 @@ public class CDEServer extends Server {
 		}
 		log.debug("Operate server's state from: + '" + actualState + "' to '" + menuItem + "'");
 		select();
-		new ContextMenu(menuItem).select();
+		new ContextMenuItem(menuItem).select();
 		// waiting until servers's state has changed from initial state into something else, 
 		// ie. stopped -> starting or started -> stopping
-		new WaitWhile(new ServerHasState(this, actualState), TimePeriod.NORMAL);
+		new WaitWhile(new ServerHasState(this, actualState), TimePeriod.DEFAULT);
 		// we might expect that after the state is changed it should not go back into initial state
 		// or that problem dialog appears
 		try {
-			new WaitUntil(new ShellWithTextIsAvailable("Problem Occured"), TimePeriod.NORMAL);
+			new WaitUntil(new ShellIsAvailable("Problem Occured"), TimePeriod.DEFAULT);
 			new DefaultShell("Problem Occured");
 			new OkButton().click();
 			String message = "Problem occured when trying to " + menuItem
@@ -83,7 +82,7 @@ public class CDEServer extends Server {
 			log.info("Problem Occured dialog did not appear on CDK server " + menuItem);
 		}
 		try {
-			new WaitUntil(new ServerHasState(this, actualState), TimePeriod.NORMAL);
+			new WaitUntil(new ServerHasState(this, actualState), TimePeriod.DEFAULT);
 			String message = "Server's state went back to " + actualState;
 			throw new CDKServerException(message);	
 		} catch (WaitTimeoutExpiredException exc) {
@@ -93,7 +92,7 @@ public class CDEServer extends Server {
 			confirmSSLCertificateDialog();
 		}
 		new WaitUntil(new ServerHasState(this, resultState), timeout);
-		new WaitWhile(new SystemJobIsRunning(new JobMatcher("Inspecting CDK environment")), TimePeriod.LONG);
+		new WaitWhile(new SystemJobIsRunning(new JobMatcher("Inspecting CDK environment")), TimePeriod.DEFAULT);
 		log.debug("Operate server's state finished, the result server's state is: '" + getLabel().getState() + "'");
 	}
 	
@@ -104,11 +103,11 @@ public class CDEServer extends Server {
 	 */
 	private void confirmSSLCertificateDialog() {
 		try {
-			new WaitUntil(new ShellWithTextIsAvailable(SSL_DIALOG_NAME), this.cdk3 ? TimePeriod.getCustom(600) : TimePeriod.getCustom(300));
+			new WaitUntil(new ShellIsAvailable(SSL_DIALOG_NAME), this.cdk3 ? TimePeriod.getCustom(600) : TimePeriod.getCustom(300));
 			new DefaultShell(SSL_DIALOG_NAME);
 			new PushButton("Yes").click();
 			log.info("SSL Certificate Dialog appeared during " + this.getLabel().getState().toString());
-			new WaitWhile(new ShellWithTextIsAvailable(SSL_DIALOG_NAME));
+			new WaitWhile(new ShellIsAvailable(SSL_DIALOG_NAME));
 			setCertificateAccepted(true);
 		} catch (WaitTimeoutExpiredException ex) {
 			String message ="WaitTimeoutExpiredException occured when handling Certificate dialog. "

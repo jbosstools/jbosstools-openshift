@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
 
 public class NewCDKServerContainerWizardPage extends NewServerContainerWizardPage {
 

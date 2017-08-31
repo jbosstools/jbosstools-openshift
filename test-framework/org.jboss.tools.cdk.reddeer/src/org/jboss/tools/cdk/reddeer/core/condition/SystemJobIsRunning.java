@@ -11,10 +11,10 @@
 package org.jboss.tools.cdk.reddeer.core.condition;
 
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.core.condition.JobIsRunning;
 
 /**
  * Specific condition class testing existence of matching system job(s)

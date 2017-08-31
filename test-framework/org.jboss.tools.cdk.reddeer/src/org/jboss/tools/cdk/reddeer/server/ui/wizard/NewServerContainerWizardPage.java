@@ -10,18 +10,18 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.core.exception.CoreLayerException;
-import org.jboss.reddeer.swt.api.Button;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.combo.LabeledCombo;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.swt.api.Button;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 
 public class NewServerContainerWizardPage {
 	
@@ -40,11 +40,12 @@ public class NewServerContainerWizardPage {
 		return new PushButton("Add...");
 	}
 	
+	@SuppressWarnings("unused")
 	private static void disposeSecureStoragePassword() {
 		try {
-			new WaitUntil(new ShellWithTextIsAvailable(SECURE_STORAGE), TimePeriod.NORMAL, true);
+			new WaitUntil(new ShellIsAvailable(SECURE_STORAGE), TimePeriod.MEDIUM, true);
 			new DefaultShell(SECURE_STORAGE).close();
-			new WaitWhile(new ShellWithTextIsAvailable(SECURE_STORAGE));
+			new WaitWhile(new ShellIsAvailable(SECURE_STORAGE));
 		} catch (WaitTimeoutExpiredException exc) {
 			log.info("WaitTimeoutExpiredException occurred while waiting for Secure Storage Password dialog");
 		}
@@ -73,7 +74,7 @@ public class NewServerContainerWizardPage {
 					+ "OK button is not enabled, error: \n\r" +
 					text);	
 		}
-		disposeSecureStoragePassword();
+		// here might be placed code for disposal of secure storage 
 	}
 
 }
