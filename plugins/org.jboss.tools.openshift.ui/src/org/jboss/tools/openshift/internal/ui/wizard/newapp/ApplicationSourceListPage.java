@@ -57,6 +57,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -138,10 +139,18 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 
 		IObservableValue selectedEclipseProject = createEclipseProjectControls(parent, dbc);
 
-		TabFolder tabContainer= new TabFolder(parent, SWT.NONE);
+		SashForm listAndDetailsContainer = new SashForm(parent, SWT.VERTICAL);
 		GridDataFactory.fillDefaults()
 			.span(3, 1)
-			.align(SWT.FILL, SWT.CENTER)
+			.align(SWT.FILL, SWT.FILL)
+			.grab(true, true)
+			.applyTo(listAndDetailsContainer);
+		GridLayoutFactory.fillDefaults()
+			.applyTo(listAndDetailsContainer);
+		
+		TabFolder tabContainer= new TabFolder(listAndDetailsContainer, SWT.NONE);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL)
 			.grab(true, false)
 			.applyTo(tabContainer);
 		tabContainer.addListener(SWT.Selection, new Listener() {
@@ -149,9 +158,10 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			@Override
 			public void handleEvent(Event event) {
 				// JBIDE-21072: force re-layout of the parent upon tab switching
-				parent.layout(true, false);
+				parent.layout(true, true);
 			}
 		});
+
 
 		IObservableValue useLocalTemplateObservable = 
 				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_USE_LOCAL_APP_SOURCE).observe(model);
@@ -170,6 +180,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 				}
 			})
 			.in(dbc);
+		model.setUseLocalAppSource(false);
 
 		TabFolderTraverseListener tabFolderTraverseListener = new TabFolderTraverseListener(tabContainer);
 
@@ -185,8 +196,9 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			}
         });
 
-		createDetailsGroup(parent, dbc);
-		model.setUseLocalAppSource(false);
+		createDetailsGroup(listAndDetailsContainer, dbc);
+		// template list initially takes twice the height of the details pane
+		listAndDetailsContainer.setWeights(new int[] { 2, 1 });
 
 		// validate required template
 		IObservableValue selectedTemplate = 
@@ -461,8 +473,9 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		// details
 		Group detailsGroup = new Group(parent, SWT.NONE);
 		detailsGroup.setText("Details");
+
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, false).span(3, 1).hint(SWT.DEFAULT, 106)
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
 			.applyTo(detailsGroup);
 		GridLayoutFactory.fillDefaults()
 			.margins(10, 6).spacing(2, 2) //TODO fix margins

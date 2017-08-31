@@ -78,7 +78,7 @@ public class ApplicationSourceDetailViews  extends AbstractStackedDetailViews {
 			txtDescription.setWordWrap(true);
 			StyledTextUtils.setTransparent(txtDescription);
 			GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.FILL)
+				.align(SWT.FILL, SWT.FILL)
 				.grab(true, true)
 				.span(3, 1)
 				.applyTo(txtDescription);
