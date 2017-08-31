@@ -13,9 +13,9 @@ package org.jboss.tools.cdk.reddeer.core.matcher;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.jboss.reddeer.common.exception.RedDeerException;
 
 /**
  * Matcher class matching given string parameter, it is used in SystemJobIsRunning wait condition
@@ -31,7 +31,6 @@ public class JobMatcher extends BaseMatcher<Job> {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				// TODO Auto-generated method stub
 				return null;
 			}
 		};

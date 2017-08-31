@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.exception;
 
-import org.jboss.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.exception.RedDeerException;
 
 /**
  * Exception class for CDK server failures

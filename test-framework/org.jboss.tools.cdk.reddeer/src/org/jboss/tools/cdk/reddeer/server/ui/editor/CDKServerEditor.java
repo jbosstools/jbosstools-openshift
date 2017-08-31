@@ -10,10 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.editor;
 
-import org.jboss.reddeer.swt.api.Button;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
-import org.jboss.reddeer.uiforms.impl.section.DefaultSection;
+import org.eclipse.reddeer.swt.api.Button;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
 
 /**
  * Class representing CDK 2.x Server Editor page
