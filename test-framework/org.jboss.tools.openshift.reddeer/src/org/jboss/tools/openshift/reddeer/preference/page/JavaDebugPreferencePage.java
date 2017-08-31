@@ -10,8 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.preference.page;
 
-import org.jboss.reddeer.jface.preference.PreferencePage;
-import org.jboss.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.core.reference.ReferencedComposite;
+import org.eclipse.reddeer.jface.preference.PreferencePage;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
 
 
 /**
@@ -19,10 +20,10 @@ import org.jboss.reddeer.swt.impl.button.CheckBox;
  * @author rhopp
  *
  */
-public class JavaDebugPreferencePage extends PreferencePage{
+public class JavaDebugPreferencePage extends PreferencePage {
 	
-	public JavaDebugPreferencePage() {
-		super("Java", "Debug");
+	public JavaDebugPreferencePage(ReferencedComposite composite) {
+		super(composite, new String[] {"Java", "Debug"});
 	}
 
 	public void setSuspendOnUncaughtExceptions(boolean checked){

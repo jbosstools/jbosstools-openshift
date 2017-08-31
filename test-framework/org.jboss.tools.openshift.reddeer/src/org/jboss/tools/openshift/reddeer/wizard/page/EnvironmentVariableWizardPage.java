@@ -10,14 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard.page;
 
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.button.YesButton;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.table.DefaultTable;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.button.YesButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
@@ -42,7 +42,7 @@ public class EnvironmentVariableWizardPage {
 		new DefaultShell(OpenShiftLabel.Shell.REMOVE_ENV_VAR);
 		new YesButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.REMOVE_ENV_VAR));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.REMOVE_ENV_VAR));
 		
 		return !(table.containsItem(envVar.getName(), 0) && table.containsItem(envVar.getValue(), 1));
 	}
@@ -63,7 +63,7 @@ public class EnvironmentVariableWizardPage {
 		new LabeledText("Value:").setText(envVar.getValue());
 		new OkButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.ENVIRONMENT_VARIABLE));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.ENVIRONMENT_VARIABLE));
 		
 		return table.containsItem(envVar.getName(), 0) && table.containsItem(envVar.getValue(), 1);
 	}
@@ -90,7 +90,7 @@ public class EnvironmentVariableWizardPage {
 		new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText(newVar.getValue());
 		new OkButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.ENVIRONMENT_VARIABLE));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.ENVIRONMENT_VARIABLE));
 		
 		return (table.containsItem(newVar.getName(), 0) && table.containsItem(newVar.getValue(), 1)) &&
 				!(table.containsItem(oldVar.getName(), 0) && table.containsItem(oldVar.getValue(), 1)); 
@@ -112,7 +112,7 @@ public class EnvironmentVariableWizardPage {
 		new DefaultShell(OpenShiftLabel.Shell.RESET_ENV_VAR);
 		new YesButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.RESET_ENV_VAR));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.RESET_ENV_VAR));
 		
 		return table.containsItem(defaultVar.getName(), 0) && table.containsItem(defaultVar.getValue(), 1);
 	}
@@ -131,7 +131,7 @@ public class EnvironmentVariableWizardPage {
 		new DefaultShell(OpenShiftLabel.Shell.RESET_ENV_VAR);
 		new YesButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.RESET_ENV_VAR));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.RESET_ENV_VAR));
 		
 		// If any of environment variables passed as argument were not reset, return false
 		if (envVars != null && envVars.length > 0) {

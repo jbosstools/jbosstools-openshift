@@ -10,14 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.view.resources;
 
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.jface.handler.TreeViewerHandler;
+import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.jface.viewer.handler.TreeViewerHandler;
-import org.jboss.reddeer.swt.api.TreeItem;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 
@@ -38,7 +38,7 @@ public abstract class AbstractOpenShiftExplorerItem {
 	
 	public void refresh() {
 		select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.REFRESH).select();	
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.REFRESH).select();	
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
@@ -53,7 +53,7 @@ public abstract class AbstractOpenShiftExplorerItem {
 		item.expand();
 		
 		// There can be some processing, wait for it
-		new WaitWhile(new JobIsRunning(new Matcher[] {new IsEqual<String>("Loading OpenShift resources...")}), TimePeriod.NORMAL);
+		new WaitWhile(new JobIsRunning(new Matcher[] {new IsEqual<String>("Loading OpenShift resources...")}), TimePeriod.DEFAULT);
 	}
 	
 	public TreeItem getTreeItem() {

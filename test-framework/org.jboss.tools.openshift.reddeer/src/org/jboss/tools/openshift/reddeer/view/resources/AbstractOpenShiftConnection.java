@@ -10,15 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.view.resources;
 
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.swt.api.TreeItem;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 public abstract class AbstractOpenShiftConnection extends AbstractOpenShiftExplorerItem {
@@ -33,14 +33,14 @@ public abstract class AbstractOpenShiftConnection extends AbstractOpenShiftExplo
 	public void remove() {
 		item.select();
 		
-		new ContextMenu(OpenShiftLabel.ContextMenu.DELETE_CONNECTION).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.DELETE_CONNECTION).select();
 		
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.REMOVE_CONNECTION));
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.REMOVE_CONNECTION));
 		
 		new DefaultShell(OpenShiftLabel.Shell.REMOVE_CONNECTION);
 		new OkButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.REMOVE_CONNECTION));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.REMOVE_CONNECTION));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 	

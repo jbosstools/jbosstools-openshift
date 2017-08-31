@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.reddeer.condition;
 import static org.junit.Assert.assertNotNull;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;

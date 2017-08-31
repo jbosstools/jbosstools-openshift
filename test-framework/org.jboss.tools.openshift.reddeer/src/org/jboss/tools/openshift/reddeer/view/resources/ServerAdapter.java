@@ -11,19 +11,19 @@
 package org.jboss.tools.openshift.reddeer.view.resources;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.eclipse.wst.server.ui.editor.ServerEditor;
-import org.jboss.reddeer.eclipse.wst.server.ui.view.ServersView;
-import org.jboss.reddeer.jface.viewer.handler.TreeViewerHandler;
-import org.jboss.reddeer.swt.api.TreeItem;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.tree.DefaultTree;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
+import org.eclipse.reddeer.eclipse.wst.server.ui.editor.ServerEditor;
+import org.eclipse.reddeer.jface.handler.TreeViewerHandler;
+import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -83,12 +83,12 @@ public class ServerAdapter{
 	 */
 	public void delete() {
 		select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.DELETE).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.DELETE).select();
 
 		new DefaultShell(OpenShiftLabel.Shell.DELETE_ADAPTER);
 		new OkButton().click();
 
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.DELETE_ADAPTER));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_ADAPTER));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 
@@ -157,7 +157,7 @@ public class ServerAdapter{
 	 * Useful if focus on a server view was lost or if view was closed.
 	 */
 	private void activateView() {
-		new ServersView().open();
+		new ServersView2().open();
 	}
 
 	private static String getOS2ServerAdapterAppendix() {

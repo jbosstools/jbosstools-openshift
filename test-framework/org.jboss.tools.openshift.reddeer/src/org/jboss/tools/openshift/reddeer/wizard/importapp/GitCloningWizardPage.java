@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard.importapp;
 
-import org.jboss.reddeer.swt.impl.button.CheckBox;
-import org.jboss.reddeer.swt.impl.group.DefaultGroup;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.swt.impl.group.DefaultGroup;
 
 /**
  * @author jnovak@redhat.com
@@ -27,7 +27,7 @@ public class GitCloningWizardPage {
 	}
 	
 	public boolean projectExists(){
-		return new ImportApplicationWizard().getPageDescription()
+		return new ImportApplicationWizard().getMessage()
 				.trim().startsWith("There already is a folder named");
 	}
 	

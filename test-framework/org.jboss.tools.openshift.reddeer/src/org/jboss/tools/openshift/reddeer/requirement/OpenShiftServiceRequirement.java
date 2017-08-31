@@ -31,18 +31,18 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.requirement.Requirement;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.junit.requirement.Requirement;
 import org.jboss.tools.common.reddeer.utils.StackTraceUtils;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -103,11 +103,6 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	private Connection connection;
 	private IService service;
 	private ITemplate template;
-
-	@Override
-	public boolean canFulfill() {
-		return true;
-	}
 
 	@Override
 	public void fulfill() {
@@ -333,5 +328,10 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 				}
 			}
 		}
+	}
+
+	@Override
+	public RequiredService getDeclaration() {
+		return this.serviceSpec;
 	}
 }
