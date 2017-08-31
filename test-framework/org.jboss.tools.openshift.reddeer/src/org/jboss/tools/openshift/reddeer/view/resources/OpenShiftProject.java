@@ -13,20 +13,20 @@ package org.jboss.tools.openshift.reddeer.view.resources;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.eclipse.ui.views.properties.PropertiesView;
-import org.jboss.reddeer.eclipse.ui.views.properties.TabbedPropertyList;
-import org.jboss.reddeer.swt.api.TableItem;
-import org.jboss.reddeer.swt.api.ToolItem;
-import org.jboss.reddeer.swt.api.TreeItem;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.table.DefaultTable;
-import org.jboss.reddeer.swt.impl.toolbar.DefaultToolItem;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
+import org.eclipse.reddeer.eclipse.ui.views.properties.TabbedPropertyList;
+import org.eclipse.reddeer.swt.api.TableItem;
+import org.eclipse.reddeer.swt.api.ToolItem;
+import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
+import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -144,12 +144,12 @@ public class OpenShiftProject extends AbstractOpenShiftExplorerItem {
 	 */
 	public void delete() {
 		item.select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.DELETE_OS_PROJECT).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.DELETE_OS_PROJECT).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.DELETE_OS_PROJECT);
 		new OkButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.DELETE_OS_PROJECT), TimePeriod.LONG);
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_OS_PROJECT), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		
 		new WaitWhile(new OpenShiftProjectExists(projectName));
@@ -168,9 +168,9 @@ public class OpenShiftProject extends AbstractOpenShiftExplorerItem {
 	public void openProperties(TreeItem treeItem) {
 		activateOpenShiftExplorerView();
 		select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.PROPERTIES).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.PROPERTIES).select();
 		
-		PropertiesView propertiesView = new PropertiesView();
+		PropertySheet propertiesView = new PropertySheet();
 		propertiesView.activate();
 	}
 	

@@ -26,7 +26,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.logging.Logger;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 
 public class FileHelper {

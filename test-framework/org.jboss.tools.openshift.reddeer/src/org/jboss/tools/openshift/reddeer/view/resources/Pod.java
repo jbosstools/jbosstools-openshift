@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.view.resources;
 
-import org.jboss.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.api.TreeItem;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 
 

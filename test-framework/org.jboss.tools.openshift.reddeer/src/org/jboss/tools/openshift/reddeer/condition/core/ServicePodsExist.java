@@ -14,7 +14,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 

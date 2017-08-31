@@ -27,8 +27,8 @@ import java.nio.file.Paths;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.junit.requirement.Requirement;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.junit.requirement.Requirement;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.utils.FileHelper;
@@ -53,11 +53,6 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
     @Target(ElementType.TYPE)
     public @interface OCBinary {
     }
-
-	@Override
-	public boolean canFulfill() {
-		return true;
-	}
 
 	@Override
 	public void fulfill() {
@@ -239,5 +234,10 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 			}
 
 		}
+	}
+
+	@Override
+	public OCBinary getDeclaration() {
+		return null;
 	}
 }

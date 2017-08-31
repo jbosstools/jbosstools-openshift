@@ -10,8 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.preference.page;
 
-import org.jboss.reddeer.jface.preference.PreferencePage;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.core.reference.ReferencedComposite;
+import org.eclipse.reddeer.jface.preference.PreferencePage;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
@@ -24,8 +25,8 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
  */
 public class OpenShift3PreferencePage extends PreferencePage {
 	
-	public OpenShift3PreferencePage() {
-		super("JBoss Tools", "OpenShift 3");
+	public OpenShift3PreferencePage(ReferencedComposite composite) {
+		super(composite, new String[]{"JBoss Tools", "OpenShift 3"});
 	}
 	
 	/**

@@ -17,7 +17,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.logging.Logger;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 

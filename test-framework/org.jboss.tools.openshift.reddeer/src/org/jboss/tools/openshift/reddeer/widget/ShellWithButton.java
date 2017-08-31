@@ -10,17 +10,17 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.widget;
 
+import org.eclipse.reddeer.common.matcher.AndMatcher;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.core.lookup.ShellLookup;
+import org.eclipse.reddeer.core.matcher.WithTextMatcher;
+import org.eclipse.reddeer.core.reference.ReferencedComposite;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.shell.AbstractShell;
 import org.eclipse.swt.widgets.Control;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.jboss.reddeer.core.exception.CoreLayerException;
-import org.jboss.reddeer.core.lookup.ShellLookup;
-import org.jboss.reddeer.core.matcher.AndMatcher;
-import org.jboss.reddeer.core.matcher.WithTextMatcher;
-import org.jboss.reddeer.core.reference.ReferencedComposite;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.shell.AbstractShell;
 
 public class ShellWithButton extends AbstractShell {
 	

@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.reddeer.condition.core;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.jboss.tools.openshift.core.connection.Connection;
 
 import com.openshift.restclient.OpenShiftException;

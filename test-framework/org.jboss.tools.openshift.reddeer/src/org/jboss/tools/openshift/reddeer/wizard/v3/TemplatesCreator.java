@@ -12,28 +12,28 @@ package org.jboss.tools.openshift.reddeer.wizard.v3;
 
 import java.util.List;
 
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.swt.condition.WidgetIsEnabled;
-import org.jboss.reddeer.swt.impl.button.BackButton;
-import org.jboss.reddeer.swt.impl.button.CancelButton;
-import org.jboss.reddeer.swt.impl.button.CheckBox;
-import org.jboss.reddeer.swt.impl.button.FinishButton;
-import org.jboss.reddeer.swt.impl.button.NextButton;
-import org.jboss.reddeer.swt.impl.button.NoButton;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.tab.DefaultTabItem;
-import org.jboss.reddeer.swt.impl.table.DefaultTable;
-import org.jboss.reddeer.swt.impl.text.DefaultText;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
-import org.jboss.reddeer.swt.impl.tree.DefaultTree;
-import org.jboss.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.BackButton;
+import org.eclipse.reddeer.swt.impl.button.CancelButton;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.button.NextButton;
+import org.eclipse.reddeer.swt.impl.button.NoButton;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.tab.DefaultTabItem;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
+import org.eclipse.reddeer.swt.impl.text.DefaultText;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.condition.TreeIsAvailable;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
@@ -189,26 +189,26 @@ public class TemplatesCreator {
 			selectLocalTemplate(templateLocalPath);
 		}		
 		
-		new WaitUntil(new WidgetIsEnabled(new NextButton()), TimePeriod.NORMAL);
+		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.DEFAULT);
 		new NextButton().click();
 
-		new WaitUntil(new WidgetIsEnabled(new BackButton()), TimePeriod.LONG);
+		new WaitUntil(new ControlIsEnabled(new BackButton()), TimePeriod.LONG);
 		if (parameters != null && parameters.length != 0) {
 			setTemplateParameters(parameters);
 		}
 		new NextButton().click();
 
-		new WaitWhile(new WidgetIsEnabled(new NextButton()), TimePeriod.LONG);
+		new WaitWhile(new ControlIsEnabled(new NextButton()), TimePeriod.LONG);
 		if (labels != null && labels.size() != 0) {
 			createOpenShiftLabels(labels);
 		}
 		
 		new FinishButton().click();
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.APPLICATION_SUMMARY), TimePeriod.LONG);
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.APPLICATION_SUMMARY), TimePeriod.LONG);
 		
 		new DefaultShell(OpenShiftLabel.Shell.APPLICATION_SUMMARY);
 		new OkButton().click();
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
 
 		executeImport(importProject);
 	}
@@ -234,18 +234,18 @@ public class TemplatesCreator {
 		for (TemplateParameter parameter: parameters) {
 				new DefaultTable().select(parameter.getName());
 				
-				new WaitUntil(new WidgetIsEnabled(new PushButton(OpenShiftLabel.Button.EDIT)));
+				new WaitUntil(new ControlIsEnabled(new PushButton(OpenShiftLabel.Button.EDIT)));
 				
 				new PushButton(OpenShiftLabel.Button.EDIT).click();
 				
 				new DefaultShell(OpenShiftLabel.Shell.EDIT_TEMPLATE_PARAMETER);
 				new DefaultText().setText(parameter.getValue());
 				
-				new WaitUntil(new WidgetIsEnabled(new OkButton()));
+				new WaitUntil(new ControlIsEnabled(new OkButton()));
 				
 				new OkButton().click();
 				
-				new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.EDIT_TEMPLATE_PARAMETER));
+				new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.EDIT_TEMPLATE_PARAMETER));
 
 				new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		}
@@ -259,10 +259,10 @@ public class TemplatesCreator {
 			new LabeledText(OpenShiftLabel.TextLabels.LABEL).setText(label.getName());
 			new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText(label.getValue());
 			
-			new WaitUntil(new WidgetIsEnabled(new OkButton()));
+			new WaitUntil(new ControlIsEnabled(new OkButton()));
 			new OkButton().click();
 			
-			new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.RESOURCE_LABEL));
+			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.RESOURCE_LABEL));
 			
 			new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		}
@@ -275,18 +275,18 @@ public class TemplatesCreator {
 		} else {
 			new FinishButton().click();
 			try {
-				new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.CHEATSHEET), TimePeriod.LONG);
+				new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.CHEATSHEET), TimePeriod.LONG);
 				
 				new DefaultShell(OpenShiftLabel.Shell.CHEATSHEET);
 				new CheckBox(0).click();
 				new NoButton().click();
 				
-				new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.CHEATSHEET));
+				new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.CHEATSHEET));
 			} catch (WaitTimeoutExpiredException ex) {
 				// do nothing if cheat sheet is not provided
 			}
 
-			new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD), TimePeriod.LONG);
+			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD), TimePeriod.LONG);
 			new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		}
 	}

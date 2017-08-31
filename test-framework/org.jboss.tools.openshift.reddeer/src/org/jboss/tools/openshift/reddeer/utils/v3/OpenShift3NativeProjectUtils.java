@@ -15,10 +15,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.jboss.tools.common.reddeer.utils.StackTraceUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;

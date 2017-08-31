@@ -14,9 +14,9 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Matcher;
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
 import org.jboss.tools.openshift.core.connection.Connection;
 
 import com.openshift.restclient.OpenShiftException;

@@ -12,9 +12,9 @@ package org.jboss.tools.openshift.reddeer.condition;
 
 import java.util.List;
 
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
 import org.hamcrest.Matcher;
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
-import org.jboss.reddeer.eclipse.ui.views.properties.PropertiesView;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
@@ -50,7 +50,7 @@ public class ResourceIsUpdated extends AbstractWaitCondition {
 		this.propertyValueMatcher = propertyValueMatcher;
 		
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		new PropertiesView().open();
+		new PropertySheet().open();
 		explorer.open();
 		List<OpenShiftResource> resources = explorer.getOpenShift3Connection().
 				getProject(project).getOpenShiftResources(resourceType, true);

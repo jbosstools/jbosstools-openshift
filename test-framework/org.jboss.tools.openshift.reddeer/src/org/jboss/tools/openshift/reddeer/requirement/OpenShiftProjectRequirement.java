@@ -19,8 +19,8 @@ import java.lang.annotation.Target;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.junit.requirement.Requirement;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.requirement.Requirement;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -77,11 +77,6 @@ public class OpenShiftProjectRequirement implements Requirement<RequiredProject>
 	}
 
 	@Override
-	public boolean canFulfill() {
-		return true;
-	}
-
-	@Override
 	public void fulfill() {
 		String projectName = TestUtils.getValueOrDefault(projectSpec.name(), DatastoreOS3.TEST_PROJECT);
 		Connection connection = ConnectionUtils.getConnectionOrDefault(projectSpec.connectionURL());
@@ -114,5 +109,10 @@ public class OpenShiftProjectRequirement implements Requirement<RequiredProject>
 			return null;
 		}
 		return project.getName();
+	}
+
+	@Override
+	public RequiredProject getDeclaration() {
+		return this.projectSpec;
 	}
 }

@@ -17,15 +17,15 @@ import java.net.URL;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.Git;
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.swt.impl.button.CheckBox;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.button.RadioButton;
-import org.jboss.reddeer.swt.impl.button.YesButton;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.button.RadioButton;
+import org.eclipse.reddeer.swt.impl.button.YesButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.openshift.reddeer.preference.page.OpenShift3PreferencePage;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement;
 
@@ -41,7 +41,7 @@ public class TestUtils {
 	
 	private static void setOCBinaryPath(boolean setUp) {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
-		OpenShift3PreferencePage page = new OpenShift3PreferencePage();
+		OpenShift3PreferencePage page = new OpenShift3PreferencePage(dialog);
 		dialog.open();
 		dialog.select(page);
 		if (setUp) {
@@ -144,7 +144,7 @@ public class TestUtils {
 		try {
 			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
 			new YesButton().click();
-			new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE));
+			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE));
 		} catch (RedDeerException ex) {
 			// no dialog was presented
 		}

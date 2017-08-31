@@ -10,9 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.condition;
 
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
-import org.jboss.reddeer.core.exception.CoreLayerException;
-import org.jboss.reddeer.swt.impl.browser.InternalBrowser;
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.swt.impl.browser.InternalBrowser;
 
 /**
  * Wait until JBoss Central is fully loaded (meaning jQuery is loaded).

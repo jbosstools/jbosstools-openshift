@@ -19,9 +19,9 @@ import java.lang.annotation.Target;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.junit.requirement.Requirement;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.requirement.Requirement;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.condition.core.ProjectExists;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
@@ -46,11 +46,6 @@ public class CleanOpenShiftConnectionRequirement implements Requirement<CleanCon
 	}
 
 	@Override
-	public boolean canFulfill() {
-		return true;
-	}
-
-	@Override
 	public void fulfill() {
 		Connection connection = ConnectionUtils.getConnectionOrDefault(cleanConnection.connectionURL());
 		assertNotNull("There is no connection with URL " + cleanConnection.connectionURL(), connection);
@@ -71,6 +66,12 @@ public class CleanOpenShiftConnectionRequirement implements Requirement<CleanCon
 	@Override
 	public void cleanUp() {
 		// NOTHING TO DO
+	}
+
+	@Override
+	public CleanConnection getDeclaration() {
+		// TODO Auto-generated method stub
+		return this.cleanConnection;
 	}
 	
 }
