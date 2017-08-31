@@ -14,33 +14,43 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWizard;
+import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.tools.common.ui.JobUtils;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
+import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.job.IResourcesModelJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
+import org.jboss.tools.openshift.internal.ui.server.ServerSettingsWizardPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPage;
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeploymentConfigPage;
@@ -55,6 +65,8 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * The new application wizard that allows you to create an application given an
@@ -207,7 +219,7 @@ public class NewApplicationWizard
 				? fromTemplateModel.createFinishJob() 
 				: fromImageModel.createFinishJob();
 		
-		createJob.addJobChangeListener(new JobChangeAdapter(){
+		createJob.addJobChangeListener(new JobChangeAdapter() {
 
 			@Override
 			public void done(IJobChangeEvent event) {
@@ -220,14 +232,37 @@ public class NewApplicationWizard
 						//No need to import the project from git, it's already here
 						return;
 					}
-					final Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = getBuildConfigs(createJob.getResources());
+					Collection<IResource> resources = createJob.getResources();
+					final Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = getBuildConfigs(resources);
 					if (projectsAndBuildConfigs.isEmpty()) {
 						return;
 					}
+					Connection connection = model.getConnection();
 					Display.getDefault().asyncExec(new Runnable() {
 						@Override
 						public void run() {
 							ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
+							wizard.addImportJobChangeListener(new JobChangeAdapter() {
+								
+								@Override
+								public void done(IJobChangeEvent event) {
+									IService service = getService(resources);
+									List<org.eclipse.core.resources.IProject> importedProjects = wizard.getImportJob().getImportedProjects();
+									if (service != null && importedProjects.size() == 1) {
+										Display.getDefault().asyncExec(new Runnable() {
+
+								            @Override
+								            public void run() {
+								            	if (MessageDialog.openQuestion(getShell(), "Create server adapter", NLS.bind(
+														"Would you like to create a server adapter for the imported {0} project?",
+														importedProjects.get(0).getName()))) {
+								            		createServerAdapter(importedProjects.get(0), connection, service, getRoute(resources));
+								            	}
+								            }
+										});
+									}
+								}
+							});
 							new WizardDialog(getShell(), wizard).open();
 						}
 					});
@@ -252,7 +287,43 @@ public class NewApplicationWizard
 				}
 				return projects;
 			}
+			
+			protected IService getService(Collection<IResource> resources) {
+				IResource service = getResourceOfType(resources, IService.class);
+				return service == null ? null : (IService)service;
+			}
+			
+			protected IRoute getRoute(Collection<IResource> resources) {
+				IResource route = getResourceOfType(resources, IRoute.class);
+				return route == null ? null : (IRoute)route;
+			}
+			
+			private IResource getResourceOfType(Collection<IResource> resources, Class<? extends IResource> type) {
+				for (IResource resource : resources) {
+					if (type.isInstance(resource)) {
+						return resource;
+					}
+				}
+				return null;
+			}
+			
+			protected void createServerAdapter(org.eclipse.core.resources.IProject project, Connection connection, IService service, IRoute route) {
+				try {
+					IServerWorkingCopy server = OpenShiftServerUtils.create(OpenShiftResourceUniqueId.get(service));
+					ServerSettingsWizardPageModel serverModel = new ServerSettingsWizardPageModel(service, route,
+							project, connection, server,
+							OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()));
+					serverModel.loadResources();
+					serverModel.updateServer();
+					server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false);
+					serverModel.saveServer(null);
+				} catch(CoreException ce) {
+					OpenShiftUIActivator.getDefault().getLogger().logError("Error occured while creating a server adapter", ce);
+					return;
+				}
+			}
 		});
+		
 		boolean success = false;
 		try {
 			Job job = new JobChainBuilder(createJob.getJob())

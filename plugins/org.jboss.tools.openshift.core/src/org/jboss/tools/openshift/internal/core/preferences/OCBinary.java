@@ -10,13 +10,20 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.internal.core.preferences;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.ICommonAttributes;
+import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 public enum OCBinary {
 
@@ -118,25 +125,24 @@ public enum OCBinary {
 	}
 	
 	/**
-	 * Checks if the oc binary is compatible for rsync publishing.
+	 * Compute the error message for the OCBinary state and path.
 	 * 
-	 * @param monitor the progress monitor
-	 * 
-	 * @return true if the oc binary is compatible
-	 * @see https://issues.jboss.org/browse/JBIDE-21307
-	 * @see https://github.com/openshift/origin/issues/6109
+	 * @param valid if the oc binary is valid or not
+	 * @param location the location of the oc binary
+	 * @return the error message (may be null)
 	 */
-	public boolean isCompatibleForPublishing(IProgressMonitor monitor) {
-	    return isCompatibleForPublishing(null, monitor);
-	}
-	
-	/**
-	 * Checks if an arbitrary oc binary is compatible for rsync publishing
-	 * @param location
-	 * @param monitor
-	 * @return
-	 */
-	public boolean isCompatibleForPublishing(IConnection connection, IProgressMonitor monitor) {
-	    return new OCBinaryVersionValidator(getLocation(connection)).isCompatibleForPublishing(monitor);
+	public IStatus getStatus(IConnection connection, IProgressMonitor monitor) {
+		String location = getLocation(connection);
+	    IStatus status = Status.OK_STATUS;
+	    if (new OCBinaryVersionValidator(getLocation(connection)).isCompatibleForPublishing(monitor)) {
+	        if (location == null) {
+	            status = OpenShiftCoreActivator.statusFactory().errorStatus(OpenShiftCoreMessages.NoOCBinaryLocationErrorMessage);
+	        } else if (!new File(location).exists()) {
+	            status = OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind(OpenShiftCoreMessages.OCBinaryLocationDontExistsErrorMessage, location));
+	        } else {
+	            status = OpenShiftCoreActivator.statusFactory().warningStatus(OpenShiftCoreMessages.OCBinaryLocationIncompatibleErrorMessage);
+	        }
+	    }
+	    return status;
 	}
 }

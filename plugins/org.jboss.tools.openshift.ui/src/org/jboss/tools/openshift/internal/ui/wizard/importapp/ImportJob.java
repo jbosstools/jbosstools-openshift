@@ -13,7 +13,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -40,6 +43,7 @@ public class ImportJob extends WorkspaceJob {
 	private Collection<String> filters;
 	private boolean checkoutBranch;
 	private boolean reuseGitRepository;
+	private List<IProject> importedProjects = Collections.emptyList();
 	
 	/**
 	 * Creates an import job that will import a project from an eixisting git
@@ -79,9 +83,9 @@ public class ImportJob extends WorkspaceJob {
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 		try {
 			if (reuseGitRepository) {
-				new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters, checkoutBranch).execute(monitor);
+				this.importedProjects = new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters, checkoutBranch).execute(monitor);
 			} else {
-				new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters).execute(monitor);
+				this.importedProjects = new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters).execute(monitor);
 			}
 			return Status.OK_STATUS;
 		} catch (final WontOverwriteException e) {
@@ -150,5 +154,9 @@ public class ImportJob extends WorkspaceJob {
 	public ImportJob setFilters(Collection<String> filters) {
 		this.filters = filters;
 		return this;
+	}
+
+	public List<IProject> getImportedProjects() {
+		return importedProjects;
 	}
 }

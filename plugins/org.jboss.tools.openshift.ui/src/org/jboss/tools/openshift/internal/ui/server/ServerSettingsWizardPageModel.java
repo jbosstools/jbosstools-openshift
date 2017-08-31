@@ -110,7 +110,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		this(resource, route, deployProject, connection, server, Status.OK_STATUS);
 	}
 
-	protected ServerSettingsWizardPageModel(IResource resource, IRoute route, org.eclipse.core.resources.IProject deployProject, 
+	public ServerSettingsWizardPageModel(IResource resource, IRoute route, org.eclipse.core.resources.IProject deployProject, 
 			Connection connection, IServerWorkingCopy server, IStatus ocBinaryStatus) {
 		super(resource, connection);
 		this.route = route;

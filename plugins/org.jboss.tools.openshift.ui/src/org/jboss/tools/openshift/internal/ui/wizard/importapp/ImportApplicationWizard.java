@@ -12,13 +12,15 @@ package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
 import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.REPO_PATH_KEY;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -49,6 +51,8 @@ import com.openshift.restclient.model.IResource;
 public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
 
 	private ImportApplicationWizardModel model;
+	private ImportJob importJob;
+	private List<IJobChangeListener> importJobChangeListenersList = new ArrayList<IJobChangeListener>();
 
 	public ImportApplicationWizard() {
 		setWindowTitle("Import OpenShift Application");
@@ -147,7 +151,22 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	@Override
 	public boolean performFinish() {
-		Job importJob = createImportJob(model.isReuseGitRepository());
+		createImportJob(model.isReuseGitRepository());
+		importJob.schedule();
+		return true;
+	}
+
+	private void createImportJob(boolean reuseGitRepository) {
+		if (reuseGitRepository) {
+			this.importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath(),
+					model.isCheckoutBranchReusedRepo());
+		} else {
+			this.importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath());
+		}
+		String gitContextDir = model.getGitContextDir();
+		if (StringUtils.isNotEmpty(gitContextDir)) {
+			importJob.setFilters(Collections.singleton(gitContextDir));
+		}
 		importJob.setUser(true);
 		importJob.addJobChangeListener(new JobChangeAdapter() {
 
@@ -159,23 +178,9 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 				}
 				UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
 			}});
-		importJob.schedule();
-		return true;
-	}
-
-	private ImportJob createImportJob(boolean reuseGitRepository) {
-		ImportJob importJob = null;
-		if (reuseGitRepository) {
-			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath(),
-					model.isCheckoutBranchReusedRepo());
-		} else {
-			importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath());
+		for (IJobChangeListener importJobChangeListener: importJobChangeListenersList) {
+			importJob.addJobChangeListener(importJobChangeListener);
 		}
-		String gitContextDir = model.getGitContextDir();
-		if (StringUtils.isNotEmpty(gitContextDir)) {
-			importJob.setFilters(Collections.singleton(gitContextDir));
-		}
-		return importJob;
 	}
 
 	private void saveRepoPath() {
@@ -184,6 +189,10 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		} else {
 			getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
 		}
+	}
+	
+	public void addImportJobChangeListener(IJobChangeListener importJobChangeListener) {
+		importJobChangeListenersList.add(importJobChangeListener);
 	}
 
 	@Override
@@ -210,6 +219,16 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 		if (connection != null) {
 			model.setConnection(connection);
 		}
+	}
+
+	public ImportJob getImportJob() {
+		return importJob;
+	}
+	
+	@Override
+	public void dispose() {
+		importJobChangeListenersList.clear();
+		super.dispose();
 	}
 	
 }
