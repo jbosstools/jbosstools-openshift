@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.core.server.debug;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -32,7 +33,9 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.util.NewPodDetectorJob;
+import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
@@ -210,10 +213,17 @@ public class OpenShiftDebugMode {
 					OpenShiftCoreActivator.PLUGIN_ID, "No deployment config present that can be updated."));
 		}
 
+		Connection connection = ConnectionsRegistryUtil.getConnectionFor(dc);
+		IPod pod = null;
 		if (updateDebugmode(dc, context, monitor)
 				| updateDevmode(dc, context, monitor)) {
-			sendUpdated(dc, context, monitor);
+			pod = sendAndGetNewPod(dc, connection, monitor);
+		} else {
+			// dc already correctly set, so just get the pod
+			pod = getPod(dc, connection, monitor);
 		}
+
+		context.setPod(pod);
 
 		if (context.isDebugEnabled()) {
 			IDebugListener listener = context.getDebugListener();
@@ -223,6 +233,17 @@ public class OpenShiftDebugMode {
 		}
 		
 		return this;
+	}
+
+	protected IPod getPod(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) {
+		monitor.subTask(NLS.bind("Retrieving existing pod for deployment config {0}.", dc.getName()));
+
+		List<IPod> allPods = connection.getResources(ResourceKind.POD, dc.getNamespace());
+		// TODO: support multiple pods
+		return ResourceUtils.getPodsFor(dc, allPods).stream()
+				.findFirst()
+				.orElse(null);
+		
 	}
 
 	private boolean updateDebugmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
@@ -281,15 +302,13 @@ public class OpenShiftDebugMode {
 		}
 	}
 
-	protected void sendUpdated(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) throws CoreException {
-		monitor.subTask(NLS.bind("Updating replication controller {0} and waiting for new pods to run.", dc.getName()));
+	protected IPod sendAndGetNewPod(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) throws CoreException {
+		monitor.subTask(NLS.bind("Updating deployment config {0} and waiting for new pods to run.", dc.getName()));
 
-		Connection connection = ConnectionsRegistryUtil.getConnectionFor(dc);
 		connection.updateResource(dc);
 		// do not kill all existing pods, the rc will re-create new ones before the
 		// updated dc eventually then kills them and re-creates new ones.
-		IPod pod = waitForNewPod(dc, monitor);
-		context.setPod(pod);
+		return waitForNewPod(dc, monitor);
 	}
 	
 	private IDeploymentConfig getDeploymentConfig(DebugContext context, IProgressMonitor monitor) throws CoreException {
