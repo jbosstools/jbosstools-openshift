@@ -100,1667 +100,1548 @@ import org.jboss.tools.openshift.egit.core.internal.utils.RegexUtils;
 @SuppressWarnings("restriction")
 public class EGitUtils {
 
-	private static final String DEFAULT_FETCH_REMOTE_REFSPEC = "+refs/heads/*:refs/remotes/%s/*";
-	private static final String ORIGIN = "origin";
-	private static final String EGIT_UI_PLUGIN_ID = "org.eclipse.egit.ui";
-	/*
-	 * @see org.eclipse.egit.ui.UIPreferences#REMOTE_CONNECTION_TIMEOUT
-	 */
-	private static final String REMOTE_CONNECTION_TIMEOUT = "remote_connection_timeout";
-	private static final int DEFAULT_TIMEOUT = 2 * 60 * 1000;
-	private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD;
-	private static final String DEFAULT_REFSPEC_DESTINATION = 
-			Constants.R_HEADS + Constants.MASTER; // refs/heads/master
-	private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core.GitProvider";
-
-	private static final Pattern GIT_URL_PATTERN =
-			Pattern.compile("(\\w+://)(([^@]+)@)*(([\\w\\d\\.-]+)(:[\\d]+){0,1}/*(.*))");
-	/* @see http://git-scm.com/book/it/v2/Git-on-the-Server-The-Protocols#The-SSH-Protocol */
-	private static final Pattern GIT_SSH_URL_PATTERN = 
-			Pattern.compile("(ssh:\\/\\/){0,1}[^@]+@*[\\w\\d\\.-]+(:|\\/).+");
-	
-	private EGitUtils() {
-		// inhibit instantiation
-	}
-
-	/**
-	 * Returns <code>true</code> if the given project is associated to any team
-	 * provider (git, svn, cvs, etc.). Returns <code>false</code> otherwise.
-	 * 
-	 * @param project
-	 *            the project to check
-	 * @return <code>true</code> if the project is associated with any team
-	 *         provider.
-	 */
-	public static boolean isShared(IProject project) {
-		return RepositoryProvider.getProvider(project) != null;
-	}
-
-	/**
-	 * Returns <code>true</code> if the given project is associated to the egit
-	 * team provider. Returns <code>false</code> otherwise.
-	 * 
-	 * @param project
-	 *            the project to check
-	 * @return <code>true</code> if the project is associated with the git team
-	 *         provider.
-	 */
-	public static boolean isSharedWithGit(IProject project) {
-		RepositoryProvider provider = RepositoryProvider.getProvider(project);
-		return provider != null
-				&& EGIT_TEAM_PROVIDER_ID.equals(provider.getID());
-	}
-
-	/**
-	 * Returns <code>true</code> if the given project exists and has a .git
-	 * folder in it.
-	 * 
-	 * @param project
-	 * @return
-	 */
-	public static boolean hasDotGitFolder(IProject project) {
-		if (project == null || !project.exists()) {
-			return false;
-		}
-		return new File(project.getLocation().toOSString(), Constants.DOT_GIT)
-				.exists();
-	}
-
-	public static boolean isGitFolderInRootOf(IProject project) {
-		RepositoryMapping mapping = RepositoryMapping.getMapping(project);
-		if (mapping == null) {
-			return false;
-		}
-
-		String gitFolderRelativePath = mapping.getGitDir();
-		if (StringUtils.isEmptyOrNull(gitFolderRelativePath)) {
-			return false;
-		}
-
-		return !gitFolderRelativePath.startsWith("..");
-	}
-
-	/**
-	 * Shares the given project. A repository is created within the given
-	 * project and the project is connected to the freshly created repository.
-	 * 
-	 * @param project
-	 * @param monitor
-	 * @return
-	 * @throws CoreException
-	 */
-	public static Repository share(IProject project, IProgressMonitor monitor)
-			throws CoreException {
-		Repository repository = createRepository(project, monitor);
-		connect(project, repository, monitor);
-		addToRepository(project, repository, monitor);
-		commit(project, monitor);
-		return repository;
-	}
-
-	/**
-	 * Creates a repository for the given project. The repository is created in
-	 * the .git directory within the given project. The project is not connected
-	 * with the new repository
-	 * 
-	 * @param project
-	 *            the project to create the repository for.
-	 * @param monitor
-	 *            the monitor to report the progress to
-	 * @return
-	 * @throws CoreException
-	 * 
-	 * @see #connect(IProject, Repository, IProgressMonitor)
-	 */
-	public static Repository createRepository(IProject project,
-			IProgressMonitor monitor) throws CoreException {
-		try {
-			InitCommand init = Git.init();
-			init.setBare(false).setDirectory(project.getLocation().toFile());
-			Git git = init.call();
-			return git.getRepository();
-		} catch (JGitInternalException | GitAPIException e) {
-			throw new CoreException(EGitCoreActivator.createErrorStatus(NLS
-					.bind("Could not initialize a git repository at {0}: {1}",
-							getRepositoryPathFor(project), e.getMessage()), e));
-		}
-	}
-
-	public static File getRepositoryPathFor(IProject project) {
-		File f = new File(project.getLocationURI().getPath());
-		while( f != null && !new File(f, Constants.DOT_GIT).exists()) {
-			f = f.getParentFile();
-		}
-		return f == null ? null : new File(f, Constants.DOT_GIT);
-	}
-
-	public static void addToRepository(IProject project, Repository repository,
-			IProgressMonitor monitor) throws CoreException {
-		AddToIndexOperation add = new AddToIndexOperation(Collections.singletonList(project));
-		add.execute(monitor);
-	}
-
-	public static void addToRepository(Collection<IResource> resources, IProgressMonitor monitor) throws CoreException {
-		AddToIndexOperation add = new AddToIndexOperation(resources);
-		add.execute(monitor);
-	}
-
-	/**
-	 * Connects the given project to the repository within it.
-	 * 
-	 * @param project
-	 *            the project to connect
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @throws CoreException
-	 */
-	public static void connect(IProject project, IProgressMonitor monitor)
-			throws CoreException {
-		File path = getRepositoryPathFor(project);
-		if( path == null ) {
-			throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID, 
-					"Unable to locate git repository for project " + project.getName()));
-		}
-		connect(project, path, monitor);
-	}
-
-	/**
-	 * Connects the given project to the given repository.
-	 * 
-	 * @param project
-	 *            the project to connect
-	 * @param repository
-	 *            the repository to connect the project to
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @throws CoreException
-	 */
-	private static void connect(IProject project, Repository repository,
-			IProgressMonitor monitor) throws CoreException {
-		connect(project, repository.getDirectory(), monitor);
-	}
-
-	private static void connect(IProject project, File repositoryFolder,
-			IProgressMonitor monitor) throws CoreException {
-		new ConnectProviderOperation(project, repositoryFolder)
-				.execute(monitor);
-	}
-
-	public static void cloneRepository(String uri, String remoteName,
-			File destination, IProgressMonitor monitor)
-			throws URISyntaxException, InvocationTargetException,
-			InterruptedException {
-		cloneRepository(uri, remoteName, Constants.HEAD, destination, null, monitor);
-	}
-
-	public static void cloneRepository(String uri, String remoteName,
-			String ref, File destination, IProgressMonitor monitor)
-			throws URISyntaxException, InvocationTargetException,
-			InterruptedException {
-		cloneRepository(uri, remoteName, ref, destination, null, monitor);
-	}
-	
-	public static void cloneRepository(String uri, String remoteName,
-			File destination, PostCloneTask postCloneTask,
-			IProgressMonitor monitor) throws URISyntaxException,
-			InvocationTargetException, InterruptedException {
-		cloneRepository(uri, remoteName, Constants.HEAD, destination, postCloneTask, monitor);
-	}
-
-	public static void cloneRepository(String uri, String remoteName, String ref,
-			File destination, PostCloneTask postCloneTask,
-			IProgressMonitor monitor) throws URISyntaxException,
-			InvocationTargetException, InterruptedException {
-		URIish gitUri = new URIish(uri);
-		if (StringUtils.isEmptyOrNull(ref)) {
-			ref = Constants.HEAD;
-		}
-		CloneOperation cloneOperation = new CloneOperation(gitUri, true, null,
-				destination, ref, remoteName, getEgitTimeout());
-		if (postCloneTask != null) {
-			cloneOperation.addPostCloneTask(postCloneTask);
-		}
-		cloneOperation.run(monitor);
-	}
-
-	/**
-	 * Merges the given uri to HEAD in the given repository. The given branch is
-	 * the branch in the local repo the fetched HEAD is fetched to.
-	 * 
-	 * @param branch
-	 * @param uri
-	 * @param repository
-	 * @param monitor
-	 * @throws CoreException
-	 * @throws InvocationTargetException
-	 */
-	public static void mergeWithRemote(URIish uri, String branch,
-			Repository repository, IProgressMonitor monitor)
-			throws CoreException, InvocationTargetException {
-		RefSpec ref = new RefSpec().setSource(Constants.HEAD).setDestination(
-				branch);
-		fetch(uri, Collections.singletonList(ref), repository, monitor);
-		merge(branch, repository, monitor);
-	}
-
-	/**
-	 * Merges current master with the given branch. The strategy used is Resolve
-	 * since egit does still not support the Recusive stragety.
-	 * 
-	 * @param branch
-	 *            the branch to merge
-	 * @param repository
-	 *            the repository the branch is in
-	 * @param monitor
-	 *            the monitor to report the progress to
-	 * @return the result of the merge
-	 * @throws CoreException
-	 * 
-	 * @see MergeStrategy#RESOLVE
-	 * @link 
-	 *       http://www.eclipse.org/forums/index.php/mv/msg/261278/753913/#msg_753913
-	 * @link https://bugs.eclipse.org/bugs/show_bug.cgi?id=354099
-	 * @link https://bugs.eclipse.org/bugs/show_bug.cgi?id=359951
-	 */
-	private static MergeResult merge(String branch, Repository repository,
-			IProgressMonitor monitor) throws CoreException {
-		MergeOperation merge = new MergeOperation(repository, branch,
-				MergeStrategy.RESOLVE.getName());
-		merge.execute(monitor);
-		return merge.getResult();
-	}
-
-	/**
-	 * Fetches the source ref(s) (from the given ref spec(s)) from the given uri
-	 * to the given destination(s) (in the given ref spec(s)) to the given
-	 * repository.
-	 * 
-	 * @param uri
-	 *            the uri to fetch from
-	 * @param fetchRefsRefSpecs
-	 *            the references with the sources and destinations
-	 * @param repository
-	 *            the repository to fetch to
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @return
-	 * @throws InvocationTargetException
-	 * @throws CoreException
-	 */
-	private static Collection<Ref> fetch(URIish uri,
-			List<RefSpec> fetchRefsRefSpecs, Repository repository,
-			IProgressMonitor monitor) throws InvocationTargetException,
-			CoreException {
-		FetchOperation fetch = new FetchOperation(repository, uri,
-				fetchRefsRefSpecs, 10 * 1024, false);
-		fetch.run(monitor);
-		FetchResult result = fetch.getOperationResult();
-		return result.getAdvertisedRefs();
-	}
-
-	/**
-	 * Commits the changes within the given project to it's configured
-	 * repository. The project has to be connected to a repository.
-	 * 
-	 * @param project
-	 *            the project whose changes shall be committed
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @throws CoreException
-	 * 
-	 * @see #connect(IProject, Repository)
-	 */
-	public static RevCommit commit(IProject project, String commitMessage,
-			IProgressMonitor monitor) throws CoreException {
-		Repository repository = getRepository(project);
-		Assert.isLegal(repository != null,
-				"Cannot commit project to repository. ");
-		return commit(project, commitMessage, repository, monitor);
-	}
-
-	public static RevCommit commit(IProject project, IProgressMonitor monitor)
-			throws CoreException {
-		return commit(project, "Commit from JBoss Tools", monitor);
-	}
-
-	private static RevCommit commit(IProject project, String commitMessage,
-			Repository repository, IProgressMonitor monitor)
-			throws CoreException {
-		Assert.isLegal(project != null,
-				"Could not commit project. No project provided");
-		Assert.isLegal(
-				repository != null,
-				MessageFormat
-						.format("Could not commit. Project \"{0}\" is not connected to a repository (call #connect(project, repository) first)",
-								project.getName()));
-		/**
-		 * TODO: add capability to commit selectively
-		 */
-		UserConfig userConfig = getUserConfig(repository);
-		CommitOperation op = new CommitOperation(null, null, null,
-				getFormattedUser(userConfig.getAuthorName(),
-						userConfig.getAuthorEmail()), getFormattedUser(
-						userConfig.getCommitterName(),
-						userConfig.getCommitterEmail()), commitMessage);
-		op.setCommitAll(true);
-		op.setRepository(repository);
-		op.execute(monitor);
-		return op.getCommit();
-	}
-
-	/**
-	 * Returns the URIish's for the remote on the given project.
-	 * 
-	 * @param remoteName
-	 * @param project
-	 * @return
-	 * @throws CoreException
-	 */
-	public static List<URIish> getRemoteURIs(String remoteName, IProject project)
-			throws CoreException {
-		List<URIish> uris = Collections.emptyList();
-		RemoteConfig remoteConfig = getRemoteByName(remoteName,
-				getRepository(project));
-		if (remoteConfig != null) {
-			uris = remoteConfig.getURIs();
-		}
-		return uris;
-	}
-	
-	/**
-	 * Returns <code>true</code> if the given project has a given remote that
-	 * matches the given git uri. If the given remote is null or empty, all
-	 * remotes are examined. Returns <code>false</code> otherwise.
-	 * 
-	 * @param gitURI
-	 * @param project
-	 * @return
-	 * @throws CoreException
-	 */
-	public static boolean hasGitUri(String gitURI, String remote, IProject project) throws CoreException {
-		Pattern gitURIPattern = Pattern.compile(escapeRegex(gitURI));
-		Repository repository = EGitUtils.getRepository(project);
-		if (!StringUtils.isEmptyOrNull(remote)) {
-			return hasRemoteUrl(gitURIPattern, getRemoteByName(remote, repository));
-		} else {
-			return hasRemoteUrl(gitURIPattern, repository);
-		}
-	}
-
-	public static String escapeRegex(String value) {
-		StringBuilder builder = new StringBuilder();
-		for(char character : value.toCharArray()) {
-			if ('/' == character) {
-				builder.append('\\');
-			} 
-			builder.append(character);
-		}
-		return builder.toString();
-	}
-
-	public static List<URIish> getDefaultRemoteURIs(IProject project)
-			throws CoreException {
-		RemoteConfig remoteConfig = getRemoteConfig(getRepository(project));
-		if (remoteConfig != null) {
-			return remoteConfig.getURIs();
-		}
-		return new ArrayList<>();
-	}
-
-	/**
-	 * Returns all uris of alls remotes for the given project.
-	 * 
-	 * @param project
-	 *            the project to get all remotes and all uris from
-	 * @return all uris
-	 * @throws CoreException
-	 */
-	public static List<URIish> getAllRemoteURIs(IProject project)
-			throws CoreException {
-		List<RemoteConfig> remoteConfigs = getAllRemoteConfigs(getRepository(project));
-		List<URIish> uris = new ArrayList<>();
-		if (remoteConfigs != null) {
-			for (RemoteConfig remoteConfig : remoteConfigs) {
-				uris.addAll(remoteConfig.getURIs());
-			}
-		}
-		return uris;
-	}
-
-	/**
-	 * Pushes the current branch of the given repository to the remote
-	 * repository that it originates from.
-	 * 
-	 * @param repository
-	 *            the repository that shall be pushed
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @throws CoreException
-	 *             core exception is thrown if the push could not be executed
-	 */
-	public static PushOperationResult push(Repository repository, IProgressMonitor monitor, OutputStream out)
-			throws CoreException {
-		return push(repository, getRemoteConfig(repository), false, monitor, out);
-	}
-
-	public static PushOperationResult push(Repository repository, IProgressMonitor monitor)
-			throws CoreException {
-		return push(repository, monitor, null);
-	}
-
-	public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor) throws CoreException {
-		return push(remote, repository, monitor, null);
-	}
-	
-	/**
-	 * Pushes the given repository to the remote repo with the given name.
-	 * 
-	 * @param remote
-	 * @param repository
-	 * @param monitor
-	 * @throws CoreException
-	 * 
-	 * @see git config file: "[remote..."
-	 * @see #getAllRemoteConfigs(Repository)
-	 * @see RemoteConfig#getName()
-	 */
-	public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor, OutputStream out)
-			throws CoreException {
-		RemoteConfig remoteConfig = getRemoteByName(remote, repository);
-		return push(repository, remoteConfig, false, monitor, out);
-	}
-
-	public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor) throws CoreException {
-		return pushForce(remote, repository, monitor, null);
-	}
-	
-	public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor, OutputStream out)
-			throws CoreException {
-		RemoteConfig remoteConfig = getRemoteByName(remote, repository);
-		return push(repository, remoteConfig, true, monitor, out);
-	}
-
-	private static PushOperationResult push(Repository repository, RemoteConfig remoteConfig,
-			boolean force, IProgressMonitor monitor, OutputStream out) throws CoreException {
-		try {
-			if (remoteConfig == null) {
-				throw new CoreException(
-						createStatus(
-								null,
-								"Repository \"{0}\" has no remote repository configured",
-								repository.toString()));
-			}
-			PushOperation op = createPushOperation(remoteConfig, repository, force, out);
-			op.run(monitor);
-			PushOperationResult pushResult = op.getOperationResult();
-			if (hasFailedEntries(pushResult)) {
-				throw new CoreException(EGitCoreActivator.createErrorStatus(NLS
-						.bind("Could not push repository {0}: {1}",
-								repository.toString(), getErrors(pushResult)),
-						null));
-			}
-			return pushResult;
-		} catch (CoreException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new CoreException(createStatus(e, "Could not push repo {0}",
-					repository.toString()));
-		}
-	}
-
-	private static String getErrors(PushOperationResult pushResult) {
-		StringBuilder builder = new StringBuilder();
-		for (RemoteRefUpdate failedUpdate : getFailedUpdates(pushResult)) {
-			builder.append(MessageFormat.format("push from {0} to {1} was {2}",
-					failedUpdate.getSrcRef(), failedUpdate.getRemoteName(),
-					failedUpdate.getStatus()));
-		}
-		return builder.toString();
-	}
-
-	private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository, boolean force, OutputStream out)
-			throws CoreException {
-
-		Collection<URIish> pushURIs = getPushURIs(remoteConfig);
-		Collection<RefSpec> fetchRefSpecs = getFetchRefSpec(remoteConfig);
-		Collection<RefSpec> pushRefSpecs = setForceUpdate(force, getPushRefSpecs(remoteConfig));
-		PushOperationSpecification pushSpec = createPushSpec(pushURIs, pushRefSpecs, fetchRefSpecs, repository);
-		PushOperation pushOperation = new PushOperation(repository, pushSpec, false, getEgitTimeout());
-		pushOperation.setOutputStream(out);
-		return pushOperation;
-	}
-
-	private static Collection<RefSpec> getFetchRefSpec(RemoteConfig remoteConfig) {
-		if (remoteConfig == null) {
-			return null;
-		}
-		return remoteConfig.getFetchRefSpecs();
-	}
-
-	/**
-	 * Creates a push operation specification for the given push uris to the
-	 * given push operation specification.
-	 * 
-	 * @param pushURIs
-	 *            the push uri's
-	 * @param pushRefSpecs
-	 *            the push ref specs
-	 * @param fetchRefSpecs 
-	 * @param repository
-	 *            the repository
-	 * @return the push operation specification
-	 * @throws CoreException
-	 *             the core exception
-	 */
-	private static PushOperationSpecification createPushSpec(Collection<URIish> pushURIs,
-			Collection<RefSpec> pushRefSpecs, Collection<RefSpec> fetchRefSpecs, Repository repository) throws CoreException {
-		try {
-			PushOperationSpecification pushSpec = new PushOperationSpecification();
-			final Collection<RemoteRefUpdate> updates = 
-					Transport.findRemoteRefUpdatesFor(repository, pushRefSpecs, fetchRefSpecs);
-			if (updates.isEmpty()) {
-				throw new CoreException(
-						new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
-									"There's no local source ref that match the remote refs (local refs changed?)"));
-			}
-			for (URIish uri : pushURIs) {
-				pushSpec.addURIRefUpdates(uri, copy(updates));
-			}
-			return pushSpec;
-		} catch (NotSupportedException e) {
-			throw new CoreException(createStatus(e,
-					"Could not connect repository \"{0}\" to a remote",
-					repository.toString()));
-		} catch (IOException e) {
-			throw new CoreException(
-					createStatus(
-							e,
-							"Could not convert remote specifications for repository \"{0}\" to a remote",
-							repository.toString()));
-		}
-	}
-
-	private static Collection<RemoteRefUpdate> copy(Collection<RemoteRefUpdate> refUpdates) throws IOException {
-		final Collection<RemoteRefUpdate> copy = new ArrayList<>(refUpdates.size());
-		for (final RemoteRefUpdate rru : refUpdates)
-			copy.add(new RemoteRefUpdate(rru, null));
-		return copy;
-	}
-	
-	/**
-	 * Gets the push uris from the given remoteConfig.
-	 * 
-	 * @param remoteConfig
-	 *            the remote config
-	 * @return the push ur is
-	 */
-	private static Collection<URIish> getPushURIs(RemoteConfig remoteConfig) {
-		List<URIish> pushURIs = new ArrayList<>();
-		for (URIish uri : remoteConfig.getPushURIs()) {
-			pushURIs.add(uri);
-		}
-		if (pushURIs.isEmpty() && !remoteConfig.getURIs().isEmpty()) {
-			pushURIs.add(remoteConfig.getURIs().get(0));
-		}
-		return pushURIs;
-	}
-
-	/**
-	 * Gets the push RefSpecs from the given remote configuration. If none is
-	 * defined, a default refspec is returned with
-	 * {@link #DEFAULT_REFSPEC_SOURCE} and {@link #DEFAULT_REFSPEC_DESTINATION}.
-	 * 
-	 * @param config
-	 *            the remote config to get the push specs from
-	 * @return the push specs to use for the given remote configuration.
-	 */
-	private static List<RefSpec> getPushRefSpecs(RemoteConfig config) {
-		List<RefSpec> pushRefSpecs = new ArrayList<>();
-		List<RefSpec> remoteConfigPushRefSpecs = config.getPushRefSpecs();
-		if (!remoteConfigPushRefSpecs.isEmpty()) {
-			pushRefSpecs.addAll(remoteConfigPushRefSpecs);
-		} else {
-			// default is to push current HEAD to remote MASTER
-			pushRefSpecs.add(new RefSpec().setSource(DEFAULT_REFSPEC_SOURCE)
-					.setDestination(DEFAULT_REFSPEC_DESTINATION));
-		}
-		return pushRefSpecs;
-	}
-
-	private static Collection<RefSpec> setForceUpdate(boolean forceUpdate,
-			Collection<RefSpec> refSpecs) {
-		List<RefSpec> newRefSpecs = new ArrayList<>();
-		for (RefSpec refSpec : refSpecs) {
-			newRefSpecs.add(refSpec.setForceUpdate(forceUpdate));
-		}
-		return newRefSpecs;
-	}
-	
-	public static boolean hasFailedEntries(
-			PushOperationResult pushOperationResult) {
-		return !getFailedUpdates(pushOperationResult).isEmpty();
-	}
-
-	public static Collection<RemoteRefUpdate> getFailedUpdates(
-			PushOperationResult pushOperationResult) {
-		List<RemoteRefUpdate> allFailedRefUpdates = new ArrayList<>();
-		for (URIish uri : pushOperationResult.getURIs()) {
-			allFailedRefUpdates.addAll(getFailedUpdates(uri,
-					pushOperationResult));
-		}
-		return allFailedRefUpdates;
-	}
-
-	public static Collection<RemoteRefUpdate> getFailedUpdates(URIish uri,
-			PushOperationResult pushOperationResult) {
-		return getFailedUpdates(pushOperationResult.getPushResult(uri));
-	}
-
-	private static Collection<RemoteRefUpdate> getFailedUpdates(
-			PushResult pushResult) {
-		List<RemoteRefUpdate> failedRefUpdates = new ArrayList<>();
-		if (pushResult == null || pushResult.getRemoteUpdates() == null) {
-			return failedRefUpdates;
-		}
-		for (RemoteRefUpdate update : pushResult.getRemoteUpdates()) {
-			if (org.eclipse.jgit.transport.RemoteRefUpdate.Status.OK != update
-					.getStatus()) {
-				failedRefUpdates.add(update);
-			}
-		}
-		return failedRefUpdates;
-	}
-
-	/**
-	 * Gets the repository that is configured to the given project. Returns
-	 * <code>null</code> if the given project is not git shared.
-	 * 
-	 * @param project
-	 *            the project
-	 * @return the repository
-	 */
-	public static Repository getRepository(IProject project) {
-		Assert.isLegal(project != null, "Could not get repository. No project provided");
-
-		RepositoryMapping repositoryMapping = RepositoryMapping.getMapping(project);
-		if (repositoryMapping == null) {
-			return null;
-		}
-		return repositoryMapping.getRepository();
-	}
-
-	/**
-	 * Returns a {@code Repository} for the given directory Returns {@code null}
-	 * if the given file is not a directory, does not exist or any other io
-	 * error occurs. No effective changes on the file system are executed.
-	 * 
-	 * @param file
-	 * @return
-	 */
-	public static Repository getRepository(File file) {
-		if (file == null
-				|| !file.isDirectory()
-				|| !file.exists()) {
-			return null;
-		}
-		
-		try (Repository repository = new FileRepositoryBuilder()
-				.setGitDir(new File(file, Constants.DOT_GIT))
-				.findGitDir()
-				.build()) {
-			return repository;
-		} catch (IOException e) {
-			return null;
-		}
-	}
-
-	/**
-	 * Returns {@code true} if the given directory is a git repository. This is
-	 * checked by verifying that it contains a .git folder. Returns {@code false} otherwise.
-	 * 
-	 * @param file
-	 * @return
-	 */
-	public static boolean isRepository(File file) {
-		if (file == null
-				|| !file.isDirectory()
-				|| !file.exists()) {
-			return false;
-		}
-		return new File(file, Constants.DOT_GIT).exists();
-	}
-
-	/**
-	 * Gets the repository that is configured to the given project. Throws a
-	 * CoreException if the given project is not git shared.
-	 * 
-	 * @param project
-	 *            the project
-	 * @return the repository
-	 * 
-	 * @throws CoreException if the project is not git shared
-	 */
-	public static Repository checkedGetRepository(IProject project) throws CoreException {
-		Repository repository = getRepository(project);
-		if (repository == null) {
-			throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
-					NLS.bind("No repository found for project {0}. Please ensure it is shared via git.", project.getName())));
-		}
-		return repository;
-	}
-	
-	/**
-	 * Gets the UserConfig from the given repository. The UserConfig of a repo
-	 * holds the default author and committer.
-	 * 
-	 * @param repository
-	 *            the repository
-	 * @return the user configuration
-	 * @throws CoreException
-	 * 
-	 * @see PersonIdent(Repository)
-	 * @see CommittHelper#calculateCommitInfo
-	 */
-	private static UserConfig getUserConfig(Repository repository)
-			throws CoreException {
-		Assert.isLegal(repository != null,
-				"Could not get user configuration. No repository provided.");
-
-		if (repository.getConfig() == null) {
-			throw new CoreException(createStatus(
-					null,
-					"no user configuration (author, committer) are present in repository \"{0}\"",
-					repository.toString()));
-		}
-		return repository.getConfig().get(UserConfig.KEY);
-	}
-
-	private static String getFormattedUser(String name, String email) {
-		return new StringBuilder(name).append(" <").append(email).append('>').toString();
-	}
-
-	/**
-	 * Returns the configuration of the remote repository that is set to the
-	 * given repository.
-	 * <code>null</null> if none was configured or if there's no remote repo configured.
-	 * 
-	 * @param repository
-	 *            the repository to get the remote repo configuration from
-	 * @return the configurtion of the remote repository
-	 * @throws CoreException
-	 *             the core exception
-	 */
-	private static RemoteConfig getRemoteConfig(Repository repository)
-			throws CoreException {
-		Assert.isLegal(repository != null,
-				"Could not get configuration. No repository provided.");
-
-		String currentBranch = getCurrentBranch(repository);
-		String remote = getRemoteName(currentBranch, repository);
-		return getRemoteByName(remote, repository);
-	}
-
-	/**
-	 * Returns the remote config for the given remote in the given repository
-	 * 
-	 * @param remote
-	 * @param repository
-	 * @return
-	 * @throws CoreException
-	 */
-	public static RemoteConfig getRemoteByName(String remote,
-			Repository repository) throws CoreException {
-		Assert.isLegal(repository != null,
-				"Could not get configuration. No repository provided.");
-
-		List<RemoteConfig> allRemotes = getAllRemoteConfigs(repository);
-		return getRemoteConfig(remote, allRemotes);
-	}
-
-	/**
-	 * Returns the current branch for the given repository.
-	 * 
-	 * @param repository
-	 * @return
-	 * @throws CoreException
-	 */
-	public static String getCurrentBranch(Repository repository)
-			throws CoreException {
-		Assert.isLegal(repository != null,
-				"Could not get configuration. No repository provided.");
-		String branch = null;
-		try {
-			branch = repository.getBranch();
-		} catch (IOException e) {
-			throw new CoreException(createStatus(e,
-					"Could not get current branch on repository \"{0}\"",
-					repository.toString()));
-		}
-		return branch;
-	}
-
-	/**
-	 * Returns the current branch for the given project.
-	 * 
-	 * @param project
-	 * @return
-	 * @throws CoreException
-	 * 
-	 * @see #getRepository(IProject)
-	 */
-	public static String getCurrentBranch(IProject project)
-			throws CoreException {
-		if (project == null) {
-			return null;
-		}
-		try (Repository repo = EGitUtils.getRepository(project)) {
-			if (repo == null) {
-				return null;
-			}
-			return EGitUtils.getCurrentBranch(repo);
-		}
-	}
-
-	/**
-	 * Gets the remote config with the given name from the list of remote
-	 * configs. Returns <code>null</code> if it was not found.
-	 * 
-	 * @param remoteName
-	 *            the remote name
-	 * @param remoteRepositories
-	 *            the remote repositories
-	 * @return the remote config
-	 * 
-	 * @see #getAllRemoteConfigs(Repository)
-	 */
-	public static RemoteConfig getRemoteConfig(String name,
-			List<RemoteConfig> remoteConfigs) {
-		Assert.isLegal(name != null);
-		RemoteConfig remoteConfig = null;
-		for (RemoteConfig config : remoteConfigs) {
-			if (name != null && config.getName().equals(name)) {
-				remoteConfig = config;
-				break;
-			}
-		}
-		return remoteConfig;
-	}
-
-	/**
-	 * Returns all the remote configs from the given repository.
-	 * 
-	 * @param repository
-	 *            the repository to retrieve the remote configs of
-	 * @return the remote configs that are available on the repository
-	 * @throws CoreException
-	 */
-	public static List<RemoteConfig> getAllRemoteConfigs(Repository repository)
-			throws CoreException {
-		if (repository == null) {
-			return Collections.emptyList();
-		}
-		try {
-			return RemoteConfig.getAllRemoteConfigs(repository.getConfig());
-		} catch (URISyntaxException e) {
-			throw new CoreException(
-					createStatus(
-							e,
-							"Could not get all remote repositories for repository \"{0}\"",
-							repository.toString()));
-		}
-	}
-
-	/**
-	 * Returns the first configured remote in the given repository whose url
-	 * matches the given pattern.
-	 * 
-	 * @param pattern
-	 * @param repository
-	 * @return
-	 * @throws CoreException
-	 */
-	public static RemoteConfig getRemoteByUrl(Pattern pattern,
-			Repository repository) throws CoreException {
-		if (repository == null) {
-			return null;
-		}
-
-		for (RemoteConfig config : getAllRemoteConfigs(repository)) {
-			if (hasRemoteUrl(pattern, config)) {
-				return config;
-			}
-		}
-		return null;
-	}
-
-	public static boolean hasRemoteUrl(Pattern pattern, Repository repository)
-			throws CoreException {
-		return getRemoteByUrl(pattern, repository) != null;
-	}
-
-	public static boolean hasRemoteUrl(Pattern pattern, RemoteConfig config) {
-		if (config == null) {
-			return false;
-		}
-		for (URIish uri : config.getURIs()) {
-			Matcher matcher = pattern.matcher(uri.toString());
-			if (matcher.find()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Returns <code>true</code> if the given repository has a remote with the
-	 * given name,
-	 * 
-	 * @param name
-	 *            the remote name that we're looking for
-	 * @param repository
-	 *            the repository to look at
-	 * @return true if the given repo has a remote with the given name
-	 * @throws CoreException
-	 */
-	public static boolean hasRemote(String name, Repository repository)
-			throws CoreException {
-		return getRemoteByName(name, repository) != null;
-	}
-
-	/**
-	 * Returns <code>true</code> if the given repository has a remote config
-	 * with the given name and url.
-	 * 
-	 * @param name
-	 *            the name that the remote config shall match
-	 * @param url
-	 *            the url that the remote config shall match
-	 * @param repository
-	 *            the repository that is searched
-	 * @return
-	 * @throws CoreException
-	 */
-	public static boolean hasRemote(String name, String url,
-			Repository repository) throws CoreException {
-		RemoteConfig remoteConfig = getRemoteByName(name, repository);
-		if (remoteConfig == null) {
-			return false;
-		}
-
-		return hasRemoteUrl(Pattern.compile(RegexUtils.toPatternString(url)),
-				remoteConfig);
-	}
-
-	/**
-	 * Returns <code>true</code> if the given repository has several configured
-	 * remotes
-	 * 
-	 * @param repository
-	 * @return
-	 * @throws CoreException
-	 * 
-	 * @see git config file: "[remote..."
-	 * @see #getAllRemoteConfigs
-	 * @see RemoteConfig#getAllRemoteConfigs
-	 * 
-	 */
-	public static boolean hasMultipleRemotes(Repository repository)
-			throws CoreException {
-		return getAllRemoteConfigs(repository).size() > 1;
-	}
-
-	/**
-	 * Returns the name of the remote repository for the given branch. If
-	 * there's no current branch or no remote configured to it, the default
-	 * remote is returned ("origin").
-	 * 
-	 * @param branch
-	 *            the branch
-	 * @param repository
-	 *            the repository
-	 * @return the remote name
-	 */
-	private static String getRemoteName(String branch, Repository repository) {
-		String remoteName = null;
-		if (ObjectId.isId(branch)) {
-			remoteName = Constants.DEFAULT_REMOTE_NAME;
-		} else {
-			remoteName = repository.getConfig().getString(
-					ConfigConstants.CONFIG_BRANCH_SECTION, branch,
-					ConfigConstants.CONFIG_REMOTE_SECTION);
-			if (remoteName == null) {
-				remoteName = Constants.DEFAULT_REMOTE_NAME;
-			}
-		}
-
-		return remoteName;
-	}
-
-	public static void addRemoteTo(String remoteName, String uri,
-			Repository repository) throws MalformedURLException,
-			URISyntaxException, IOException {
-		addRemoteTo(remoteName, new URIish(uri), repository);
-	}
-
-	/**
-	 * Adds the given uri of a remote repository to the given repository by the
-	 * given name.
-	 * 
-	 * @param remoteName
-	 *            the name to use for the remote repository
-	 * @param uri
-	 *            the uri of the remote repository
-	 * @param repository
-	 *            the repository to add the remote to
-	 * @throws URISyntaxException
-	 *             the uRI syntax exception
-	 * @throws MalformedURLException
-	 *             the malformed url exception
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	public static void addRemoteTo(String remoteName, URIish uri,
-			Repository repository) throws URISyntaxException,
-			MalformedURLException, IOException {
-		StoredConfig config = repository.getConfig();
-		RemoteConfig remoteConfig = new RemoteConfig(config, remoteName);
-		remoteConfig.addURI(uri);
-		remoteConfig.update(config);
-		config.save();
-	}
-
-	private static IStatus createStatus(Exception e, String message,
-			String... arguments) throws CoreException {
-		IStatus status = null;
-		if (e == null) {
-			status = new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
-					NLS.bind(message, arguments));
-		} else {
-			status = new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
-					NLS.bind(message, arguments), e);
-		}
-		return status;
-	}
-
-
-	public static boolean isDirty(IProject project, boolean includeUntracked, IProgressMonitor monitor)
-			throws NoWorkTreeException, IOException, GitAPIException {
-		return isDirty(getRepository(project), includeUntracked, monitor);
-	}
-	
-	public static boolean isDirty(IProject project, IProgressMonitor monitor)
-			throws NoWorkTreeException, IOException, GitAPIException {
-		return isDirty(getRepository(project), monitor);
-	}
-
-	/**
-	 * Returns <code>true</code> if the given repository has uncommitted and
-	 * non-tracked resources.
-	 */
-	public static boolean isDirty(Repository repository, IProgressMonitor monitor) throws IOException {
-		return isDirty(repository, true, monitor);
-	}
-
-	/**
-	 * Returns <code>true</code> if the given repository has uncommitted and (if
-	 * includeTracked is <code>true</code>) non-tracked resources. Uncommitted
-	 * changes taken into account are:
-	 * <ul>
-	 * <li>added (but uncommitted resources)</li>
-	 * <li>changed (but uncommitted resources)</li>
-	 * <li>removed (but uncommitted resources)</li>
-	 * <li>missing</li>
-	 * <li>modified</li>
-	 * <li>conflicting</li>
-	 * <li>untracked files/folders</li>
-	 * </ul>
-	 * 
-	 * @param repository
-	 *            the repository to check for being dirty
-	 * @param includeUntracked
-	 *            if true untracked resources will taken into account. Otherwise
-	 *            they wont.
-	 * @return
-	 * @throws IOException
-	 */
-	public static boolean isDirty(Repository repository, boolean includeUntracked, IProgressMonitor monitor) throws IOException {
-		return countChanges(repository, includeUntracked, monitor) > 0;
-	}
-
-	/**
-	 * Returns the number of changes for a given repository. If
-	 * <strong>includeUntracked</strong> is set to <code>true</code> then
-	 * non-tracked changes are taken into account.
-	 * 
-	 * @param repository
-	 *            the repository to check changes for
-	 * @param includeUntracked
-	 *            whether to take untracked changes into account
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @return the number of changes
-	 * @throws IOException
-	 */
-	public static int countChanges(Repository repository, boolean includeUntracked, IProgressMonitor monitor)
-			throws IOException {
-		Assert.isLegal(repository != null);
-		
-		Collection<String> uncommittedChanges = new GitIndexDiffBuilder(repository)
-				.changed(true)
-				.removed(true)
-				.missing(true)
-				.conflicting(true)
-				.untracked(includeUntracked)
-				.build(monitor);
-		return uncommittedChanges.size();
-	}
-	
-	/**
-	 * Returns <code>true</code> if the given branch in the given repository has
-	 * local commits that were not pushed to its remote yet.
-	 * 
-	 * @param repository
-	 * @param branchName
-	 * @return
-	 * @throws IOException
-	 */
-	public static boolean hasCommitsToBePushed(Repository repository) throws IOException {
-		BranchTrackingStatus status = BranchTrackingStatus.of(repository, Constants.MASTER);
-		if (status == null) {
-			return false;
-		}
-		return status.getAheadCount() > 0;
-	}
-
-	/**
-	 * Returns the push uri for the given remote config. The logic implemented
-	 * is taken from RepositoriesViewContentProvider#getChildren - case REMOTE:
-	 * 
-	 * <pre>
-	 * <code>
-	 * if (!rc.getPushURIs().isEmpty())
-	 * 			firstUri = rc.getPushURIs().get(0);
-	 * 		else
-	 * 			firstUri = rc.getURIs().get(0);
-	 * </code>
-	 * </pre>
-	 * 
-	 * 
-	 * 
-	 * @param config
-	 * @return
-	 */
-	public static URIish getPushURI(RemoteConfig config) {
-		if (config.getPushURIs().isEmpty()) {
-			return config.getURIs().get(0);
-		} else {
-			return config.getPushURIs().get(0);
-		}
-	}
-	
-	/**
-	 * Returns the fetch uri for the given remote config. The logic implemented
-	 * is taken from RepositoriesViewContentProvider#getChildren - case REMOTE:
-	 * 
-	 * <pre>
-	 * <code>
-	 * 			if (!rc.getURIs().isEmpty())
-	 * 				children.add(new FetchNode(node, node.getRepository(), rc
-	 * 						.getURIs().get(0).toPrivateString()));
-	 * </code>
-	 * </pre>
-	 * 
-	 * 
-	 * 
-	 * @param config
-	 * @return
-	 */
-	public static URIish getFetchURI(RemoteConfig config) {
-		if (config != null
-				&& !config.getURIs().isEmpty()) {
-			return config.getURIs().get(0);
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Fetches according to the fetch specs in the given remote config to the
-	 * given repo. If the given remote config has no fetch spec, then
-	 * +refs/heads/*:refs/remotes/<remote-name>/* is used
-	 * 
-	 * @param config
-	 *            the remote config to use when fetching
-	 * @param repo
-	 *            the repo to fetch to
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @return
-	 * @throws InvocationTargetException
-	 */
-	public static FetchResult fetch(RemoteConfig config, Repository repo, IProgressMonitor monitor) throws InvocationTargetException {
-		if (config != null
-				&& !config.getFetchRefSpecs().isEmpty()) {
-			FetchOperation op = new FetchOperation(repo, config, getEgitTimeout(), false);
-			op.run(monitor);
-			return op.getOperationResult();
-		} else {
-			List<RefSpec> refSpecs = Arrays.asList(new RefSpec(String.format(DEFAULT_FETCH_REMOTE_REFSPEC, config.getName())));
-			return fetch(config, refSpecs, repo, monitor);
-		}
-		
-	}
-
-	/**
-	 * Fetches the given ref specs from the given remote configs in the given repository.
-	 * 
-	 * @param config
-	 * @param refSpecs
-	 * @param repo
-	 * @param monitor
-	 * @return
-	 * @throws InvocationTargetException
-	 * 
-	 * @see RemoteConfig
-	 * @see RefSpec
-	 * @see Repository
-	 */
-	public static FetchResult fetch(RemoteConfig config, List<RefSpec> refSpecs, Repository repo, IProgressMonitor monitor) throws InvocationTargetException {
-		URIish fetchURI = getFetchURI(config);
-		FetchOperation op = new FetchOperation(repo, fetchURI, refSpecs, getEgitTimeout(), false);
-		op.run(monitor);
-		return op.getOperationResult();
-	}
-
-	public static boolean isAhead(IProject project, String remote, IProgressMonitor monitor) throws IOException,
-			InvocationTargetException, URISyntaxException {
-		return isAhead(getRepository(project), remote, monitor);
-	}
-	
-	/**
-	 * Returns <code>true</code> if the given repo has commits that are not
-	 * contained withing the repo attached to it via the given remote. It is
-	 * ahead of the given remote config.
-	 * This will work for non{@link BranchTrackingStatus#of(Repository, String)} will tell you if the
-	 * given branch is ahead of it's tracking branch. It only works with a
-	 * branch that is tracking another branch. 
-	 * 
-	 * @param repo
-	 *            the repo to check
-	 * @param remote
-	 *            the name of the remote to check against
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @return
-	 * @throws IOException
-	 * @throws InvocationTargetException
-	 * @throws URISyntaxException
-	 * 
-	 * @see BranchTrackingStatus#of
-	 */
-	public static boolean isAhead(Repository repo, String remote, IProgressMonitor monitor) throws IOException, URISyntaxException, InvocationTargetException {
-		Assert.isLegal(remote != null);
-		Assert.isLegal(repo != null);
-		if (remote.equals(getRemote(repo.getBranch(), repo.getConfig()))) {
-			BranchTrackingStatus status = BranchTrackingStatus.of(repo, repo.getBranch());
-			if (status != null) {
-				return status.getAheadCount() > 0; 
-			}
-		}
-		return isNonTrackingBranchAhead(repo, remote, monitor);
-	}
-
-	/**
-	 * Returns the remote for a given branch and config. Returns
-	 * <code>null</code> if none is explicitly configured.
-	 * 
-	 * <pre>
-	 * [branch "master"]
-	 * remote = origin
-	 * </pre>
-	 * 
-	 * @param branch
-	 *            the branch to get the configured remote for the
-	 * @param config
-	 *            the configuration to look into
-	 * @return the configured remote or null.
-	 */
-	public static String getRemote(String branch, Config config) {
-		return config.getString(
-				ConfigConstants.CONFIG_BRANCH_SECTION, branch,
-				ConfigConstants.CONFIG_KEY_REMOTE);
-	}
-	
-	private static boolean isNonTrackingBranchAhead(Repository repo, String remote, IProgressMonitor monitor) throws URISyntaxException, MissingObjectException, IncorrectObjectTypeException, IOException, InvocationTargetException {
-		RemoteConfig remoteConfig = new RemoteConfig(repo.getConfig(), remote);
-		FetchResult fetchResult = fetch(remoteConfig, repo, monitor);
-		Ref ref = fetchResult.getAdvertisedRef(Constants.HEAD);
-		if (ref == null) {
-			return false;
-		}
-		Ref currentBranchRef = repo.findRef(repo.getBranch());
-
-		RevWalk walk = new RevWalk(repo);
-		RevCommit localCommit = walk.parseCommit(currentBranchRef.getObjectId());
-		RevCommit trackingCommit = walk.parseCommit(ref.getObjectId());
-		walk.setRevFilter(RevFilter.MERGE_BASE);
-		walk.markStart(localCommit);
-		walk.markStart(trackingCommit);
-		RevCommit mergeBase = walk.next();
-		walk.reset();
-		walk.setRevFilter(RevFilter.ALL);
-		int aheadCount = RevWalkUtils.count(walk, localCommit, mergeBase);
-
-		return aheadCount > 0;
-	}	
-
-	public static boolean isValidGitUrl(String url) {
-		return GIT_SSH_URL_PATTERN.matcher(url).matches()
-				|| GIT_URL_PATTERN.matcher(url).matches();
-	}
-	
-	public static String getGitHost(String gitUrl) {
-		return getGitUrlGroup(5, gitUrl);		
-	}
-
-	public static String getGitUsername(String gitUrl) {
-		return getGitUrlGroup(3, gitUrl);
-	}
-
-	private static String getGitUrlGroup(int group, String gitUrl) {
-		if (gitUrl == null
-				|| gitUrl.isEmpty()) {
-			return null;
-		}
-		Matcher matcher = GIT_URL_PATTERN.matcher(gitUrl);
-		if (!matcher.find()
-				|| matcher.groupCount() < 7) {
-			return null;
-		}
-		return matcher.group(group);
-	}
-
-	private static final int getEgitTimeout() {
-		return Platform.getPreferencesService().
-		    	  getInt(EGIT_UI_PLUGIN_ID, REMOTE_CONNECTION_TIMEOUT, DEFAULT_TIMEOUT, null);
-	}
-	
-	public static class GitIndexDiffBuilder {
-
-		private Repository repository;
-		
-		private boolean added = true;
-		private boolean changed= true;
-		private boolean conflicting = true;
-		private boolean missing = true;
-		private boolean modified = true;
-		private boolean removed = true;
-		private boolean untracked = true;
-		
-		GitIndexDiffBuilder(Repository repository) {
-			this.repository = repository;
-		}
-		
-		public GitIndexDiffBuilder added(boolean include) {
-			this.added = include;
-			return this;
-		}
-
-		public GitIndexDiffBuilder changed(boolean include) {
-			this.changed = include;
-			return this;
-		}
-	
-		public GitIndexDiffBuilder conflicting(boolean include) {
-			this.conflicting = include;
-			return this;
-		}
-		
-		public GitIndexDiffBuilder missing(boolean include) {
-			this.missing = include;
-			return this;
-		}
-		
-		public GitIndexDiffBuilder modified(boolean include) {
-			this.modified = include;
-			return this;
-		}
-
-		public GitIndexDiffBuilder removed(boolean include) {
-			this.removed = include;
-			return this;
-		}
-
-		public GitIndexDiffBuilder untracked(boolean include) {
-			this.untracked = include;
-			return this;
-		}
-		
-		public Collection<String> build(IProgressMonitor monitor) throws IOException {
-			Set<String> resources = new HashSet<>();
-			IndexDiff diff = getIndexChanges(repository, monitor);
-			if (diff != null) {
-				if (added) {
-					resources.addAll(diff.getAdded());
-				}
-				if (changed) {
-					resources.addAll(diff.getChanged());
-				}
-				if (conflicting) {
-					resources.addAll(diff.getConflicting());
-				}
-				if (missing) {
-					resources.addAll(diff.getMissing());
-				}
-				if (modified) {
-					resources.addAll(diff.getModified());
-				}
-				if (removed) {
-					resources.addAll(diff.getRemoved());
-				}
-				if (untracked) {
-					resources.addAll(diff.getUntracked());
-				}
-			}
-			return resources;
-		}
-
-		private static IndexDiff getIndexChanges(Repository repo, IProgressMonitor monitor) throws IOException {
-			IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD, IteratorService.createInitialIterator(repo));
-			if (!indexDiff.diff(
-					new EclipseGitProgressTransformer(monitor), 0, 0,
-					NLS.bind("Repository: {0}", repo.getDirectory().getPath()))) {
-				return null;
-			}
-			return indexDiff;
-		}
-	}
-
-	/**
-	 * Return the names of remote http(s)-based git repositories. The <code>origin</code> repository, if present will be listed first.
-	 * Following repositories are listed lexicographically, ignoring case differences.
-	 * 
-	 * @throws CoreException
-	 */
-	public static List<String> getRemoteGitRepos(IProject project) throws CoreException {
-		Stream<String> stream = getRemoteGitReposFilteredStream(project);
-		return stream == null ? null : stream.collect(Collectors.toList());
-	}
-
-	/**
-	 * Returns the name of the first http(s)-based git remote repository of a project, or <code>null</code>, if no matching repository is found.
-	 *
-	 * @throws CoreException
-	 */
-	public static String getDefaultRemoteRepo(org.eclipse.core.resources.IProject project) throws CoreException {
-		Stream<String> stream = getRemoteGitReposFilteredStream(project);
-		return stream == null ? null : stream.findFirst().orElse(null);
-	}
-
-	private static Stream<String> getRemoteGitReposFilteredStream(IProject project) throws CoreException {
-		if (project == null) {
-			return null;
-		}
-		Repository repo = getRepository(project);
-		if (repo == null) {
-		  return null;
-		}
-		//Returned configurations are ordered lexicographically by names.
-		List<RemoteConfig> remoteConfigs = getAllRemoteConfigs(repo);
-		Collections.sort(remoteConfigs, new Comparator<RemoteConfig>() {
-
-			@Override
-			public int compare(RemoteConfig o1, RemoteConfig o2) {
-				if (ORIGIN.equals(o1.getName())) {
-					return -1;
-				}
-				if (ORIGIN.equals(o2.getName())) {
-					return 1;
-				}
-				return o1.getName().compareToIgnoreCase(o2.getName());
-			}
-		});
-		return remoteConfigs.stream()
-				.map(rc -> getFetchURI(rc))
-				.filter(uri -> uri != null && uri.toString().startsWith("http"))
-				.map(URIish::toString);
-	}
-
-	/**
-	 * Checks out the given branch in the given project. Progress is reported to the given monitor.
-	 * 
-	 * @param ref
-	 * @param project
-	 * @param monitor
-	 * @return
-	 * @throws CoreException
-	 * 
-	 * @see #getRepository(IProject)
-	 * @see Repository
-	 * @see IProject
-	 * @see IProgressMonitor
-	 */
-	public static CheckoutResult branch(String ref, IProject project, IProgressMonitor monitor) throws CoreException {
-		Repository repository = getRepository(project);
-		return checkoutBranch(ref, repository, monitor);
-	}
-
-	/**
-	 * Checks out the given branch in the given repository. Progress is reported to the given monitor.
-	 * 
-	 * @param ref
-	 * @param project
-	 * @param monitor
-	 * @return
-	 * @throws CoreException
-	 * 
-	 * @see Repository
-	 * @see IProgressMonitor
-	 */
-	public static CheckoutResult checkoutBranch(String ref, Repository repository, IProgressMonitor monitor) throws CoreException {
-		BranchOperation branchOp = new BranchOperation(repository, ref);
-		branchOp.execute(monitor);
-		return branchOp.getResult();
-	}
-
-	public static boolean hasBranch(String ref, IProject project) throws IOException {
-		return hasBranch(ref, getRepository(project));
-	}
-
-	/**
-	 * Returns {@code true} if the given repository has a branch that's called by the name given.
-	 * @param name
-	 * @param repository
-	 * @return
-	 * @throws IOException
-	 */
-	public static boolean hasBranch(String name, Repository repository) throws IOException {
-		if (repository == null) {
-			return false;
-		}
-		return repository.findRef(name) != null;
-	}
-
-	public static void createBranch(String name, RevCommit startinPoint, IProject project, IProgressMonitor monitor) throws IOException, CoreException {
-		createBranch(name, startinPoint, getRepository(project), monitor);
-	}
-
-	/**
-	 * Creates a branch with the given name that starts at the given commit in the given repository.
-	 * 
-	 * @param name
-	 * @param startingPoint
-	 * @param repository
-	 * @param monitor
-	 * @throws IOException
-	 * @throws CoreException
-	 */
-	public static void createBranch(String name, RevCommit startingPoint, Repository repository, IProgressMonitor monitor) throws IOException, CoreException {
-		if (repository == null) {
-			return;
-		}
-		if (startingPoint != null) {
-			new CreateLocalBranchOperation(repository, name, startingPoint).execute(monitor);
-		}
-	}
-	
-	/**
-	 * Returns the latest commit for the given branch name and remote name. If
-	 * no remote name is given a local branch is assumed. To be sure to get the
-	 * most accurate results for remote branches, those should be fetched via
-	 * {@link #fetch(RemoteConfig, List, Repository, IProgressMonitor)} prior to
-	 * executing this
-	 * 
-	 * @param branchName the name of the branch to get the latest commit fromm
-	 * @param remoteName the name of the remote that the branch resides on
-	 * @param repository the repository that shall be used 
-	 * @return
-	 * @throws IOException 
-	 * 
-	 * @see 
-	 */
-	public static RevCommit getLatestCommit(String branchName, String remoteName, Repository repository) throws IOException {
-		String fullBranchName = getFullBranchName(branchName, remoteName);
-		try (RevWalk walk = new RevWalk(repository)) {
-			Ref branch = repository.exactRef(fullBranchName);
-			if (branch == null 
-					|| branch.getObjectId() == null)
-				return null;
-
-			return walk.parseCommit(branch.getObjectId());
-		}
-	}
-
-	/**
-	 * Returns the fully qualified branch name for the given name and remote
-	 * name. If no remote is given the fully qualified local branch name is
-	 * returned. Branch names in the fully qualified form are returned as-is.
-	 * 
-	 * ex. refs/remotes/origin/aBranch, refs/heads/aBranch
-	 * 
-	 * @param name
-	 * @param remoteName
-	 * @return
-	 */
-	public static String getFullBranchName(String name, String remoteName) {
-		if (StringUtils.isEmptyOrNull(name)) {
-			return name;
-		}
-
-		if (name.startsWith(Constants.R_REFS)) {
-			// already full name
-			return name;
-		}
-		String fullName = null;
-		if (!StringUtils.isEmptyOrNull(remoteName)) {
-			fullName = Constants.R_REMOTES + remoteName + "/" + name;
-		} else if (Constants.HEAD.equals(name)
-				|| Constants.FETCH_HEAD.equals(name)) {
-			return name;
-		} else {
-			fullName = Constants.R_HEADS + name;
-		}
-		return fullName;
-	}
-	
+    private static final String DEFAULT_FETCH_REMOTE_REFSPEC = "+refs/heads/*:refs/remotes/%s/*";
+    private static final String ORIGIN = "origin";
+    private static final String EGIT_UI_PLUGIN_ID = "org.eclipse.egit.ui";
+    /*
+     * @see org.eclipse.egit.ui.UIPreferences#REMOTE_CONNECTION_TIMEOUT
+     */
+    private static final String REMOTE_CONNECTION_TIMEOUT = "remote_connection_timeout";
+    private static final int DEFAULT_TIMEOUT = 2 * 60 * 1000;
+    private static final String DEFAULT_REFSPEC_SOURCE = Constants.HEAD;
+    private static final String DEFAULT_REFSPEC_DESTINATION = Constants.R_HEADS + Constants.MASTER; // refs/heads/master
+    private static final String EGIT_TEAM_PROVIDER_ID = "org.eclipse.egit.core.GitProvider";
+
+    private static final Pattern GIT_URL_PATTERN = Pattern.compile("(\\w+://)(([^@]+)@)*(([\\w\\d\\.-]+)(:[\\d]+){0,1}/*(.*))");
+    /* @see http://git-scm.com/book/it/v2/Git-on-the-Server-The-Protocols#The-SSH-Protocol */
+    private static final Pattern GIT_SSH_URL_PATTERN = Pattern.compile("(ssh:\\/\\/){0,1}[^@]+@*[\\w\\d\\.-]+(:|\\/).+");
+
+    private EGitUtils() {
+        // inhibit instantiation
+    }
+
+    /**
+     * Returns <code>true</code> if the given project is associated to any team
+     * provider (git, svn, cvs, etc.). Returns <code>false</code> otherwise.
+     * 
+     * @param project
+     *            the project to check
+     * @return <code>true</code> if the project is associated with any team
+     *         provider.
+     */
+    public static boolean isShared(IProject project) {
+        return RepositoryProvider.getProvider(project) != null;
+    }
+
+    /**
+     * Returns <code>true</code> if the given project is associated to the egit
+     * team provider. Returns <code>false</code> otherwise.
+     * 
+     * @param project
+     *            the project to check
+     * @return <code>true</code> if the project is associated with the git team
+     *         provider.
+     */
+    public static boolean isSharedWithGit(IProject project) {
+        RepositoryProvider provider = RepositoryProvider.getProvider(project);
+        return provider != null && EGIT_TEAM_PROVIDER_ID.equals(provider.getID());
+    }
+
+    /**
+     * Returns <code>true</code> if the given project exists and has a .git
+     * folder in it.
+     * 
+     * @param project
+     * @return
+     */
+    public static boolean hasDotGitFolder(IProject project) {
+        if (project == null || !project.exists()) {
+            return false;
+        }
+        return new File(project.getLocation().toOSString(), Constants.DOT_GIT).exists();
+    }
+
+    public static boolean isGitFolderInRootOf(IProject project) {
+        RepositoryMapping mapping = RepositoryMapping.getMapping(project);
+        if (mapping == null) {
+            return false;
+        }
+
+        String gitFolderRelativePath = mapping.getGitDir();
+        if (StringUtils.isEmptyOrNull(gitFolderRelativePath)) {
+            return false;
+        }
+
+        return !gitFolderRelativePath.startsWith("..");
+    }
+
+    /**
+     * Shares the given project. A repository is created within the given
+     * project and the project is connected to the freshly created repository.
+     * 
+     * @param project
+     * @param monitor
+     * @return
+     * @throws CoreException
+     */
+    public static Repository share(IProject project, IProgressMonitor monitor) throws CoreException {
+        Repository repository = createRepository(project, monitor);
+        connect(project, repository, monitor);
+        addToRepository(project, repository, monitor);
+        commit(project, monitor);
+        return repository;
+    }
+
+    /**
+     * Creates a repository for the given project. The repository is created in
+     * the .git directory within the given project. The project is not connected
+     * with the new repository
+     * 
+     * @param project
+     *            the project to create the repository for.
+     * @param monitor
+     *            the monitor to report the progress to
+     * @return
+     * @throws CoreException
+     * 
+     * @see #connect(IProject, Repository, IProgressMonitor)
+     */
+    public static Repository createRepository(IProject project, IProgressMonitor monitor) throws CoreException {
+        try {
+            InitCommand init = Git.init();
+            init.setBare(false).setDirectory(project.getLocation().toFile());
+            Git git = init.call();
+            return git.getRepository();
+        } catch (JGitInternalException | GitAPIException e) {
+            throw new CoreException(EGitCoreActivator.createErrorStatus(
+                    NLS.bind("Could not initialize a git repository at {0}: {1}", getRepositoryPathFor(project), e.getMessage()), e));
+        }
+    }
+
+    public static File getRepositoryPathFor(IProject project) {
+        File f = new File(project.getLocationURI().getPath());
+        while (f != null && !new File(f, Constants.DOT_GIT).exists()) {
+            f = f.getParentFile();
+        }
+        return f == null ? null : new File(f, Constants.DOT_GIT);
+    }
+
+    public static void addToRepository(IProject project, Repository repository, IProgressMonitor monitor) throws CoreException {
+        AddToIndexOperation add = new AddToIndexOperation(Collections.singletonList(project));
+        add.execute(monitor);
+    }
+
+    public static void addToRepository(Collection<IResource> resources, IProgressMonitor monitor) throws CoreException {
+        AddToIndexOperation add = new AddToIndexOperation(resources);
+        add.execute(monitor);
+    }
+
+    /**
+     * Connects the given project to the repository within it.
+     * 
+     * @param project
+     *            the project to connect
+     * @param monitor
+     *            the monitor to report progress to
+     * @throws CoreException
+     */
+    public static void connect(IProject project, IProgressMonitor monitor) throws CoreException {
+        File path = getRepositoryPathFor(project);
+        if (path == null) {
+            throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
+                    "Unable to locate git repository for project " + project.getName()));
+        }
+        connect(project, path, monitor);
+    }
+
+    /**
+     * Connects the given project to the given repository.
+     * 
+     * @param project
+     *            the project to connect
+     * @param repository
+     *            the repository to connect the project to
+     * @param monitor
+     *            the monitor to report progress to
+     * @throws CoreException
+     */
+    private static void connect(IProject project, Repository repository, IProgressMonitor monitor) throws CoreException {
+        connect(project, repository.getDirectory(), monitor);
+    }
+
+    private static void connect(IProject project, File repositoryFolder, IProgressMonitor monitor) throws CoreException {
+        new ConnectProviderOperation(project, repositoryFolder).execute(monitor);
+    }
+
+    public static void cloneRepository(String uri, String remoteName, File destination, IProgressMonitor monitor)
+            throws URISyntaxException, InvocationTargetException, InterruptedException {
+        cloneRepository(uri, remoteName, Constants.HEAD, destination, null, monitor);
+    }
+
+    public static void cloneRepository(String uri, String remoteName, String ref, File destination, IProgressMonitor monitor)
+            throws URISyntaxException, InvocationTargetException, InterruptedException {
+        cloneRepository(uri, remoteName, ref, destination, null, monitor);
+    }
+
+    public static void cloneRepository(String uri, String remoteName, File destination, PostCloneTask postCloneTask,
+            IProgressMonitor monitor) throws URISyntaxException, InvocationTargetException, InterruptedException {
+        cloneRepository(uri, remoteName, Constants.HEAD, destination, postCloneTask, monitor);
+    }
+
+    public static void cloneRepository(String uri, String remoteName, String ref, File destination, PostCloneTask postCloneTask,
+            IProgressMonitor monitor) throws URISyntaxException, InvocationTargetException, InterruptedException {
+        URIish gitUri = new URIish(uri);
+        if (StringUtils.isEmptyOrNull(ref)) {
+            ref = Constants.HEAD;
+        }
+        CloneOperation cloneOperation = new CloneOperation(gitUri, true, null, destination, ref, remoteName, getEgitTimeout());
+        if (postCloneTask != null) {
+            cloneOperation.addPostCloneTask(postCloneTask);
+        }
+        cloneOperation.run(monitor);
+    }
+
+    /**
+     * Merges the given uri to HEAD in the given repository. The given branch is
+     * the branch in the local repo the fetched HEAD is fetched to.
+     * 
+     * @param branch
+     * @param uri
+     * @param repository
+     * @param monitor
+     * @throws CoreException
+     * @throws InvocationTargetException
+     */
+    public static void mergeWithRemote(URIish uri, String branch, Repository repository, IProgressMonitor monitor)
+            throws CoreException, InvocationTargetException {
+        RefSpec ref = new RefSpec().setSource(Constants.HEAD).setDestination(branch);
+        fetch(uri, Collections.singletonList(ref), repository, monitor);
+        merge(branch, repository, monitor);
+    }
+
+    /**
+     * Merges current master with the given branch. The strategy used is Resolve
+     * since egit does still not support the Recusive stragety.
+     * 
+     * @param branch
+     *            the branch to merge
+     * @param repository
+     *            the repository the branch is in
+     * @param monitor
+     *            the monitor to report the progress to
+     * @return the result of the merge
+     * @throws CoreException
+     * 
+     * @see MergeStrategy#RESOLVE
+     * @link 
+     *       http://www.eclipse.org/forums/index.php/mv/msg/261278/753913/#msg_753913
+     * @link https://bugs.eclipse.org/bugs/show_bug.cgi?id=354099
+     * @link https://bugs.eclipse.org/bugs/show_bug.cgi?id=359951
+     */
+    private static MergeResult merge(String branch, Repository repository, IProgressMonitor monitor) throws CoreException {
+        MergeOperation merge = new MergeOperation(repository, branch, MergeStrategy.RESOLVE.getName());
+        merge.execute(monitor);
+        return merge.getResult();
+    }
+
+    /**
+     * Fetches the source ref(s) (from the given ref spec(s)) from the given uri
+     * to the given destination(s) (in the given ref spec(s)) to the given
+     * repository.
+     * 
+     * @param uri
+     *            the uri to fetch from
+     * @param fetchRefsRefSpecs
+     *            the references with the sources and destinations
+     * @param repository
+     *            the repository to fetch to
+     * @param monitor
+     *            the monitor to report progress to
+     * @return
+     * @throws InvocationTargetException
+     * @throws CoreException
+     */
+    private static Collection<Ref> fetch(URIish uri, List<RefSpec> fetchRefsRefSpecs, Repository repository, IProgressMonitor monitor)
+            throws InvocationTargetException, CoreException {
+        FetchOperation fetch = new FetchOperation(repository, uri, fetchRefsRefSpecs, 10 * 1024, false);
+        fetch.run(monitor);
+        FetchResult result = fetch.getOperationResult();
+        return result.getAdvertisedRefs();
+    }
+
+    /**
+     * Commits the changes within the given project to it's configured
+     * repository. The project has to be connected to a repository.
+     * 
+     * @param project
+     *            the project whose changes shall be committed
+     * @param monitor
+     *            the monitor to report progress to
+     * @throws CoreException
+     * 
+     * @see #connect(IProject, Repository)
+     */
+    public static RevCommit commit(IProject project, String commitMessage, IProgressMonitor monitor) throws CoreException {
+        Repository repository = getRepository(project);
+        Assert.isLegal(repository != null, "Cannot commit project to repository. ");
+        return commit(project, commitMessage, repository, monitor);
+    }
+
+    public static RevCommit commit(IProject project, IProgressMonitor monitor) throws CoreException {
+        return commit(project, "Commit from JBoss Tools", monitor);
+    }
+
+    private static RevCommit commit(IProject project, String commitMessage, Repository repository, IProgressMonitor monitor)
+            throws CoreException {
+        Assert.isLegal(project != null, "Could not commit project. No project provided");
+        Assert.isLegal(repository != null,
+                MessageFormat.format(
+                        "Could not commit. Project \"{0}\" is not connected to a repository (call #connect(project, repository) first)",
+                        project.getName()));
+        /**
+         * TODO: add capability to commit selectively
+         */
+        UserConfig userConfig = getUserConfig(repository);
+        CommitOperation op = new CommitOperation(null, null, null,
+                getFormattedUser(userConfig.getAuthorName(), userConfig.getAuthorEmail()),
+                getFormattedUser(userConfig.getCommitterName(), userConfig.getCommitterEmail()), commitMessage);
+        op.setCommitAll(true);
+        op.setRepository(repository);
+        op.execute(monitor);
+        return op.getCommit();
+    }
+
+    /**
+     * Returns the URIish's for the remote on the given project.
+     * 
+     * @param remoteName
+     * @param project
+     * @return
+     * @throws CoreException
+     */
+    public static List<URIish> getRemoteURIs(String remoteName, IProject project) throws CoreException {
+        List<URIish> uris = Collections.emptyList();
+        RemoteConfig remoteConfig = getRemoteByName(remoteName, getRepository(project));
+        if (remoteConfig != null) {
+            uris = remoteConfig.getURIs();
+        }
+        return uris;
+    }
+
+    /**
+     * Returns <code>true</code> if the given project has a given remote that
+     * matches the given git uri. If the given remote is null or empty, all
+     * remotes are examined. Returns <code>false</code> otherwise.
+     * 
+     * @param gitURI
+     * @param project
+     * @return
+     * @throws CoreException
+     */
+    public static boolean hasGitUri(String gitURI, String remote, IProject project) throws CoreException {
+        Pattern gitURIPattern = Pattern.compile(escapeRegex(gitURI));
+        Repository repository = EGitUtils.getRepository(project);
+        if (!StringUtils.isEmptyOrNull(remote)) {
+            return hasRemoteUrl(gitURIPattern, getRemoteByName(remote, repository));
+        } else {
+            return hasRemoteUrl(gitURIPattern, repository);
+        }
+    }
+
+    public static String escapeRegex(String value) {
+        StringBuilder builder = new StringBuilder();
+        for (char character : value.toCharArray()) {
+            if ('/' == character) {
+                builder.append('\\');
+            }
+            builder.append(character);
+        }
+        return builder.toString();
+    }
+
+    public static List<URIish> getDefaultRemoteURIs(IProject project) throws CoreException {
+        RemoteConfig remoteConfig = getRemoteConfig(getRepository(project));
+        if (remoteConfig != null) {
+            return remoteConfig.getURIs();
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Returns all uris of alls remotes for the given project.
+     * 
+     * @param project
+     *            the project to get all remotes and all uris from
+     * @return all uris
+     * @throws CoreException
+     */
+    public static List<URIish> getAllRemoteURIs(IProject project) throws CoreException {
+        List<RemoteConfig> remoteConfigs = getAllRemoteConfigs(getRepository(project));
+        List<URIish> uris = new ArrayList<>();
+        if (remoteConfigs != null) {
+            for (RemoteConfig remoteConfig : remoteConfigs) {
+                uris.addAll(remoteConfig.getURIs());
+            }
+        }
+        return uris;
+    }
+
+    /**
+     * Pushes the current branch of the given repository to the remote
+     * repository that it originates from.
+     * 
+     * @param repository
+     *            the repository that shall be pushed
+     * @param monitor
+     *            the monitor to report progress to
+     * @throws CoreException
+     *             core exception is thrown if the push could not be executed
+     */
+    public static PushOperationResult push(Repository repository, IProgressMonitor monitor, OutputStream out) throws CoreException {
+        return push(repository, getRemoteConfig(repository), false, monitor, out);
+    }
+
+    public static PushOperationResult push(Repository repository, IProgressMonitor monitor) throws CoreException {
+        return push(repository, monitor, null);
+    }
+
+    public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor) throws CoreException {
+        return push(remote, repository, monitor, null);
+    }
+
+    /**
+     * Pushes the given repository to the remote repo with the given name.
+     * 
+     * @param remote
+     * @param repository
+     * @param monitor
+     * @throws CoreException
+     * 
+     * @see git config file: "[remote..."
+     * @see #getAllRemoteConfigs(Repository)
+     * @see RemoteConfig#getName()
+     */
+    public static PushOperationResult push(String remote, Repository repository, IProgressMonitor monitor, OutputStream out)
+            throws CoreException {
+        RemoteConfig remoteConfig = getRemoteByName(remote, repository);
+        return push(repository, remoteConfig, false, monitor, out);
+    }
+
+    public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor) throws CoreException {
+        return pushForce(remote, repository, monitor, null);
+    }
+
+    public static PushOperationResult pushForce(String remote, Repository repository, IProgressMonitor monitor, OutputStream out)
+            throws CoreException {
+        RemoteConfig remoteConfig = getRemoteByName(remote, repository);
+        return push(repository, remoteConfig, true, monitor, out);
+    }
+
+    private static PushOperationResult push(Repository repository, RemoteConfig remoteConfig, boolean force, IProgressMonitor monitor,
+            OutputStream out) throws CoreException {
+        try {
+            if (remoteConfig == null) {
+                throw new CoreException(
+                        createStatus(null, "Repository \"{0}\" has no remote repository configured", repository.toString()));
+            }
+            PushOperation op = createPushOperation(remoteConfig, repository, force, out);
+            op.run(monitor);
+            PushOperationResult pushResult = op.getOperationResult();
+            if (hasFailedEntries(pushResult)) {
+                throw new CoreException(EGitCoreActivator.createErrorStatus(
+                        NLS.bind("Could not push repository {0}: {1}", repository.toString(), getErrors(pushResult)), null));
+            }
+            return pushResult;
+        } catch (CoreException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CoreException(createStatus(e, "Could not push repo {0}", repository.toString()));
+        }
+    }
+
+    private static String getErrors(PushOperationResult pushResult) {
+        StringBuilder builder = new StringBuilder();
+        for (RemoteRefUpdate failedUpdate : getFailedUpdates(pushResult)) {
+            builder.append(MessageFormat.format("push from {0} to {1} was {2}", failedUpdate.getSrcRef(), failedUpdate.getRemoteName(),
+                    failedUpdate.getStatus()));
+        }
+        return builder.toString();
+    }
+
+    private static PushOperation createPushOperation(RemoteConfig remoteConfig, Repository repository, boolean force, OutputStream out)
+            throws CoreException {
+
+        Collection<URIish> pushURIs = getPushURIs(remoteConfig);
+        Collection<RefSpec> fetchRefSpecs = getFetchRefSpec(remoteConfig);
+        Collection<RefSpec> pushRefSpecs = setForceUpdate(force, getPushRefSpecs(remoteConfig));
+        PushOperationSpecification pushSpec = createPushSpec(pushURIs, pushRefSpecs, fetchRefSpecs, repository);
+        PushOperation pushOperation = new PushOperation(repository, pushSpec, false, getEgitTimeout());
+        pushOperation.setOutputStream(out);
+        return pushOperation;
+    }
+
+    private static Collection<RefSpec> getFetchRefSpec(RemoteConfig remoteConfig) {
+        if (remoteConfig == null) {
+            return null;
+        }
+        return remoteConfig.getFetchRefSpecs();
+    }
+
+    /**
+     * Creates a push operation specification for the given push uris to the
+     * given push operation specification.
+     * 
+     * @param pushURIs
+     *            the push uri's
+     * @param pushRefSpecs
+     *            the push ref specs
+     * @param fetchRefSpecs 
+     * @param repository
+     *            the repository
+     * @return the push operation specification
+     * @throws CoreException
+     *             the core exception
+     */
+    private static PushOperationSpecification createPushSpec(Collection<URIish> pushURIs, Collection<RefSpec> pushRefSpecs,
+            Collection<RefSpec> fetchRefSpecs, Repository repository) throws CoreException {
+        try {
+            PushOperationSpecification pushSpec = new PushOperationSpecification();
+            final Collection<RemoteRefUpdate> updates = Transport.findRemoteRefUpdatesFor(repository, pushRefSpecs, fetchRefSpecs);
+            if (updates.isEmpty()) {
+                throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
+                        "There's no local source ref that match the remote refs (local refs changed?)"));
+            }
+            for (URIish uri : pushURIs) {
+                pushSpec.addURIRefUpdates(uri, copy(updates));
+            }
+            return pushSpec;
+        } catch (NotSupportedException e) {
+            throw new CoreException(createStatus(e, "Could not connect repository \"{0}\" to a remote", repository.toString()));
+        } catch (IOException e) {
+            throw new CoreException(
+                    createStatus(e, "Could not convert remote specifications for repository \"{0}\" to a remote", repository.toString()));
+        }
+    }
+
+    private static Collection<RemoteRefUpdate> copy(Collection<RemoteRefUpdate> refUpdates) throws IOException {
+        final Collection<RemoteRefUpdate> copy = new ArrayList<>(refUpdates.size());
+        for (final RemoteRefUpdate rru : refUpdates)
+            copy.add(new RemoteRefUpdate(rru, null));
+        return copy;
+    }
+
+    /**
+     * Gets the push uris from the given remoteConfig.
+     * 
+     * @param remoteConfig
+     *            the remote config
+     * @return the push ur is
+     */
+    private static Collection<URIish> getPushURIs(RemoteConfig remoteConfig) {
+        List<URIish> pushURIs = new ArrayList<>();
+        for (URIish uri : remoteConfig.getPushURIs()) {
+            pushURIs.add(uri);
+        }
+        if (pushURIs.isEmpty() && !remoteConfig.getURIs().isEmpty()) {
+            pushURIs.add(remoteConfig.getURIs().get(0));
+        }
+        return pushURIs;
+    }
+
+    /**
+     * Gets the push RefSpecs from the given remote configuration. If none is
+     * defined, a default refspec is returned with
+     * {@link #DEFAULT_REFSPEC_SOURCE} and {@link #DEFAULT_REFSPEC_DESTINATION}.
+     * 
+     * @param config
+     *            the remote config to get the push specs from
+     * @return the push specs to use for the given remote configuration.
+     */
+    private static List<RefSpec> getPushRefSpecs(RemoteConfig config) {
+        List<RefSpec> pushRefSpecs = new ArrayList<>();
+        List<RefSpec> remoteConfigPushRefSpecs = config.getPushRefSpecs();
+        if (!remoteConfigPushRefSpecs.isEmpty()) {
+            pushRefSpecs.addAll(remoteConfigPushRefSpecs);
+        } else {
+            // default is to push current HEAD to remote MASTER
+            pushRefSpecs.add(new RefSpec().setSource(DEFAULT_REFSPEC_SOURCE).setDestination(DEFAULT_REFSPEC_DESTINATION));
+        }
+        return pushRefSpecs;
+    }
+
+    private static Collection<RefSpec> setForceUpdate(boolean forceUpdate, Collection<RefSpec> refSpecs) {
+        List<RefSpec> newRefSpecs = new ArrayList<>();
+        for (RefSpec refSpec : refSpecs) {
+            newRefSpecs.add(refSpec.setForceUpdate(forceUpdate));
+        }
+        return newRefSpecs;
+    }
+
+    public static boolean hasFailedEntries(PushOperationResult pushOperationResult) {
+        return !getFailedUpdates(pushOperationResult).isEmpty();
+    }
+
+    public static Collection<RemoteRefUpdate> getFailedUpdates(PushOperationResult pushOperationResult) {
+        List<RemoteRefUpdate> allFailedRefUpdates = new ArrayList<>();
+        for (URIish uri : pushOperationResult.getURIs()) {
+            allFailedRefUpdates.addAll(getFailedUpdates(uri, pushOperationResult));
+        }
+        return allFailedRefUpdates;
+    }
+
+    public static Collection<RemoteRefUpdate> getFailedUpdates(URIish uri, PushOperationResult pushOperationResult) {
+        return getFailedUpdates(pushOperationResult.getPushResult(uri));
+    }
+
+    private static Collection<RemoteRefUpdate> getFailedUpdates(PushResult pushResult) {
+        List<RemoteRefUpdate> failedRefUpdates = new ArrayList<>();
+        if (pushResult == null || pushResult.getRemoteUpdates() == null) {
+            return failedRefUpdates;
+        }
+        for (RemoteRefUpdate update : pushResult.getRemoteUpdates()) {
+            if (org.eclipse.jgit.transport.RemoteRefUpdate.Status.OK != update.getStatus()) {
+                failedRefUpdates.add(update);
+            }
+        }
+        return failedRefUpdates;
+    }
+
+    /**
+     * Gets the repository that is configured to the given project. Returns
+     * <code>null</code> if the given project is not git shared.
+     * 
+     * @param project
+     *            the project
+     * @return the repository
+     */
+    public static Repository getRepository(IProject project) {
+        Assert.isLegal(project != null, "Could not get repository. No project provided");
+
+        RepositoryMapping repositoryMapping = RepositoryMapping.getMapping(project);
+        if (repositoryMapping == null) {
+            return null;
+        }
+        return repositoryMapping.getRepository();
+    }
+
+    /**
+     * Returns a {@code Repository} for the given directory Returns {@code null}
+     * if the given file is not a directory, does not exist or any other io
+     * error occurs. No effective changes on the file system are executed.
+     * 
+     * @param file
+     * @return
+     */
+    public static Repository getRepository(File file) {
+        if (file == null || !file.isDirectory() || !file.exists()) {
+            return null;
+        }
+
+        try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(file, Constants.DOT_GIT)).findGitDir().build()) {
+            return repository;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns {@code true} if the given directory is a git repository. This is
+     * checked by verifying that it contains a .git folder. Returns {@code false} otherwise.
+     * 
+     * @param file
+     * @return
+     */
+    public static boolean isRepository(File file) {
+        if (file == null || !file.isDirectory() || !file.exists()) {
+            return false;
+        }
+        return new File(file, Constants.DOT_GIT).exists();
+    }
+
+    /**
+     * Gets the repository that is configured to the given project. Throws a
+     * CoreException if the given project is not git shared.
+     * 
+     * @param project
+     *            the project
+     * @return the repository
+     * 
+     * @throws CoreException if the project is not git shared
+     */
+    public static Repository checkedGetRepository(IProject project) throws CoreException {
+        Repository repository = getRepository(project);
+        if (repository == null) {
+            throw new CoreException(new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID,
+                    NLS.bind("No repository found for project {0}. Please ensure it is shared via git.", project.getName())));
+        }
+        return repository;
+    }
+
+    /**
+     * Gets the UserConfig from the given repository. The UserConfig of a repo
+     * holds the default author and committer.
+     * 
+     * @param repository
+     *            the repository
+     * @return the user configuration
+     * @throws CoreException
+     * 
+     * @see PersonIdent(Repository)
+     * @see CommittHelper#calculateCommitInfo
+     */
+    private static UserConfig getUserConfig(Repository repository) throws CoreException {
+        Assert.isLegal(repository != null, "Could not get user configuration. No repository provided.");
+
+        if (repository.getConfig() == null) {
+            throw new CoreException(createStatus(null, "no user configuration (author, committer) are present in repository \"{0}\"",
+                    repository.toString()));
+        }
+        return repository.getConfig().get(UserConfig.KEY);
+    }
+
+    private static String getFormattedUser(String name, String email) {
+        return new StringBuilder(name).append(" <").append(email).append('>').toString();
+    }
+
+    /**
+     * Returns the configuration of the remote repository that is set to the
+     * given repository.
+     * <code>null</null> if none was configured or if there's no remote repo configured.
+     * 
+     * @param repository
+     *            the repository to get the remote repo configuration from
+     * @return the configurtion of the remote repository
+     * @throws CoreException
+     *             the core exception
+     */
+    private static RemoteConfig getRemoteConfig(Repository repository) throws CoreException {
+        Assert.isLegal(repository != null, "Could not get configuration. No repository provided.");
+
+        String currentBranch = getCurrentBranch(repository);
+        String remote = getRemoteName(currentBranch, repository);
+        return getRemoteByName(remote, repository);
+    }
+
+    /**
+     * Returns the remote config for the given remote in the given repository
+     * 
+     * @param remote
+     * @param repository
+     * @return
+     * @throws CoreException
+     */
+    public static RemoteConfig getRemoteByName(String remote, Repository repository) throws CoreException {
+        Assert.isLegal(repository != null, "Could not get configuration. No repository provided.");
+
+        List<RemoteConfig> allRemotes = getAllRemoteConfigs(repository);
+        return getRemoteConfig(remote, allRemotes);
+    }
+
+    /**
+     * Returns the current branch for the given repository.
+     * 
+     * @param repository
+     * @return
+     * @throws CoreException
+     */
+    public static String getCurrentBranch(Repository repository) throws CoreException {
+        Assert.isLegal(repository != null, "Could not get configuration. No repository provided.");
+        String branch = null;
+        try {
+            branch = repository.getBranch();
+        } catch (IOException e) {
+            throw new CoreException(createStatus(e, "Could not get current branch on repository \"{0}\"", repository.toString()));
+        }
+        return branch;
+    }
+
+    /**
+     * Returns the current branch for the given project.
+     * 
+     * @param project
+     * @return
+     * @throws CoreException
+     * 
+     * @see #getRepository(IProject)
+     */
+    public static String getCurrentBranch(IProject project) throws CoreException {
+        if (project == null) {
+            return null;
+        }
+        try (Repository repo = EGitUtils.getRepository(project)) {
+            if (repo == null) {
+                return null;
+            }
+            return EGitUtils.getCurrentBranch(repo);
+        }
+    }
+
+    /**
+     * Gets the remote config with the given name from the list of remote
+     * configs. Returns <code>null</code> if it was not found.
+     * 
+     * @param remoteName
+     *            the remote name
+     * @param remoteRepositories
+     *            the remote repositories
+     * @return the remote config
+     * 
+     * @see #getAllRemoteConfigs(Repository)
+     */
+    public static RemoteConfig getRemoteConfig(String name, List<RemoteConfig> remoteConfigs) {
+        Assert.isLegal(name != null);
+        RemoteConfig remoteConfig = null;
+        for (RemoteConfig config : remoteConfigs) {
+            if (name != null && config.getName().equals(name)) {
+                remoteConfig = config;
+                break;
+            }
+        }
+        return remoteConfig;
+    }
+
+    /**
+     * Returns all the remote configs from the given repository.
+     * 
+     * @param repository
+     *            the repository to retrieve the remote configs of
+     * @return the remote configs that are available on the repository
+     * @throws CoreException
+     */
+    public static List<RemoteConfig> getAllRemoteConfigs(Repository repository) throws CoreException {
+        if (repository == null) {
+            return Collections.emptyList();
+        }
+        try {
+            return RemoteConfig.getAllRemoteConfigs(repository.getConfig());
+        } catch (URISyntaxException e) {
+            throw new CoreException(createStatus(e, "Could not get all remote repositories for repository \"{0}\"", repository.toString()));
+        }
+    }
+
+    /**
+     * Returns the first configured remote in the given repository whose url
+     * matches the given pattern.
+     * 
+     * @param pattern
+     * @param repository
+     * @return
+     * @throws CoreException
+     */
+    public static RemoteConfig getRemoteByUrl(Pattern pattern, Repository repository) throws CoreException {
+        if (repository == null) {
+            return null;
+        }
+
+        for (RemoteConfig config : getAllRemoteConfigs(repository)) {
+            if (hasRemoteUrl(pattern, config)) {
+                return config;
+            }
+        }
+        return null;
+    }
+
+    public static boolean hasRemoteUrl(Pattern pattern, Repository repository) throws CoreException {
+        return getRemoteByUrl(pattern, repository) != null;
+    }
+
+    public static boolean hasRemoteUrl(Pattern pattern, RemoteConfig config) {
+        if (config == null) {
+            return false;
+        }
+        for (URIish uri : config.getURIs()) {
+            Matcher matcher = pattern.matcher(uri.toString());
+            if (matcher.find()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns <code>true</code> if the given repository has a remote with the
+     * given name,
+     * 
+     * @param name
+     *            the remote name that we're looking for
+     * @param repository
+     *            the repository to look at
+     * @return true if the given repo has a remote with the given name
+     * @throws CoreException
+     */
+    public static boolean hasRemote(String name, Repository repository) throws CoreException {
+        return getRemoteByName(name, repository) != null;
+    }
+
+    /**
+     * Returns <code>true</code> if the given repository has a remote config
+     * with the given name and url.
+     * 
+     * @param name
+     *            the name that the remote config shall match
+     * @param url
+     *            the url that the remote config shall match
+     * @param repository
+     *            the repository that is searched
+     * @return
+     * @throws CoreException
+     */
+    public static boolean hasRemote(String name, String url, Repository repository) throws CoreException {
+        RemoteConfig remoteConfig = getRemoteByName(name, repository);
+        if (remoteConfig == null) {
+            return false;
+        }
+
+        return hasRemoteUrl(Pattern.compile(RegexUtils.toPatternString(url)), remoteConfig);
+    }
+
+    /**
+     * Returns <code>true</code> if the given repository has several configured
+     * remotes
+     * 
+     * @param repository
+     * @return
+     * @throws CoreException
+     * 
+     * @see git config file: "[remote..."
+     * @see #getAllRemoteConfigs
+     * @see RemoteConfig#getAllRemoteConfigs
+     * 
+     */
+    public static boolean hasMultipleRemotes(Repository repository) throws CoreException {
+        return getAllRemoteConfigs(repository).size() > 1;
+    }
+
+    /**
+     * Returns the name of the remote repository for the given branch. If
+     * there's no current branch or no remote configured to it, the default
+     * remote is returned ("origin").
+     * 
+     * @param branch
+     *            the branch
+     * @param repository
+     *            the repository
+     * @return the remote name
+     */
+    private static String getRemoteName(String branch, Repository repository) {
+        String remoteName = null;
+        if (ObjectId.isId(branch)) {
+            remoteName = Constants.DEFAULT_REMOTE_NAME;
+        } else {
+            remoteName = repository.getConfig().getString(ConfigConstants.CONFIG_BRANCH_SECTION, branch,
+                    ConfigConstants.CONFIG_REMOTE_SECTION);
+            if (remoteName == null) {
+                remoteName = Constants.DEFAULT_REMOTE_NAME;
+            }
+        }
+
+        return remoteName;
+    }
+
+    public static void addRemoteTo(String remoteName, String uri, Repository repository)
+            throws MalformedURLException, URISyntaxException, IOException {
+        addRemoteTo(remoteName, new URIish(uri), repository);
+    }
+
+    /**
+     * Adds the given uri of a remote repository to the given repository by the
+     * given name.
+     * 
+     * @param remoteName
+     *            the name to use for the remote repository
+     * @param uri
+     *            the uri of the remote repository
+     * @param repository
+     *            the repository to add the remote to
+     * @throws URISyntaxException
+     *             the uRI syntax exception
+     * @throws MalformedURLException
+     *             the malformed url exception
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
+    public static void addRemoteTo(String remoteName, URIish uri, Repository repository)
+            throws URISyntaxException, MalformedURLException, IOException {
+        StoredConfig config = repository.getConfig();
+        RemoteConfig remoteConfig = new RemoteConfig(config, remoteName);
+        remoteConfig.addURI(uri);
+        remoteConfig.update(config);
+        config.save();
+    }
+
+    private static IStatus createStatus(Exception e, String message, String... arguments) throws CoreException {
+        IStatus status = null;
+        if (e == null) {
+            status = new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID, NLS.bind(message, arguments));
+        } else {
+            status = new Status(IStatus.ERROR, EGitCoreActivator.PLUGIN_ID, NLS.bind(message, arguments), e);
+        }
+        return status;
+    }
+
+    public static boolean isDirty(IProject project, boolean includeUntracked, IProgressMonitor monitor)
+            throws NoWorkTreeException, IOException, GitAPIException {
+        return isDirty(getRepository(project), includeUntracked, monitor);
+    }
+
+    public static boolean isDirty(IProject project, IProgressMonitor monitor) throws NoWorkTreeException, IOException, GitAPIException {
+        return isDirty(getRepository(project), monitor);
+    }
+
+    /**
+     * Returns <code>true</code> if the given repository has uncommitted and
+     * non-tracked resources.
+     */
+    public static boolean isDirty(Repository repository, IProgressMonitor monitor) throws IOException {
+        return isDirty(repository, true, monitor);
+    }
+
+    /**
+     * Returns <code>true</code> if the given repository has uncommitted and (if
+     * includeTracked is <code>true</code>) non-tracked resources. Uncommitted
+     * changes taken into account are:
+     * <ul>
+     * <li>added (but uncommitted resources)</li>
+     * <li>changed (but uncommitted resources)</li>
+     * <li>removed (but uncommitted resources)</li>
+     * <li>missing</li>
+     * <li>modified</li>
+     * <li>conflicting</li>
+     * <li>untracked files/folders</li>
+     * </ul>
+     * 
+     * @param repository
+     *            the repository to check for being dirty
+     * @param includeUntracked
+     *            if true untracked resources will taken into account. Otherwise
+     *            they wont.
+     * @return
+     * @throws IOException
+     */
+    public static boolean isDirty(Repository repository, boolean includeUntracked, IProgressMonitor monitor) throws IOException {
+        return countChanges(repository, includeUntracked, monitor) > 0;
+    }
+
+    /**
+     * Returns the number of changes for a given repository. If
+     * <strong>includeUntracked</strong> is set to <code>true</code> then
+     * non-tracked changes are taken into account.
+     * 
+     * @param repository
+     *            the repository to check changes for
+     * @param includeUntracked
+     *            whether to take untracked changes into account
+     * @param monitor
+     *            the monitor to report progress to
+     * @return the number of changes
+     * @throws IOException
+     */
+    public static int countChanges(Repository repository, boolean includeUntracked, IProgressMonitor monitor) throws IOException {
+        Assert.isLegal(repository != null);
+
+        Collection<String> uncommittedChanges = new GitIndexDiffBuilder(repository).changed(true).removed(true).missing(true)
+                .conflicting(true).untracked(includeUntracked).build(monitor);
+        return uncommittedChanges.size();
+    }
+
+    /**
+     * Returns <code>true</code> if the given branch in the given repository has
+     * local commits that were not pushed to its remote yet.
+     * 
+     * @param repository
+     * @param branchName
+     * @return
+     * @throws IOException
+     */
+    public static boolean hasCommitsToBePushed(Repository repository) throws IOException {
+        BranchTrackingStatus status = BranchTrackingStatus.of(repository, Constants.MASTER);
+        if (status == null) {
+            return false;
+        }
+        return status.getAheadCount() > 0;
+    }
+
+    /**
+     * Returns the push uri for the given remote config. The logic implemented
+     * is taken from RepositoriesViewContentProvider#getChildren - case REMOTE:
+     * 
+     * <pre>
+     * <code>
+     * if (!rc.getPushURIs().isEmpty())
+     * 			firstUri = rc.getPushURIs().get(0);
+     * 		else
+     * 			firstUri = rc.getURIs().get(0);
+     * </code>
+     * </pre>
+     * 
+     * 
+     * 
+     * @param config
+     * @return
+     */
+    public static URIish getPushURI(RemoteConfig config) {
+        if (config.getPushURIs().isEmpty()) {
+            return config.getURIs().get(0);
+        } else {
+            return config.getPushURIs().get(0);
+        }
+    }
+
+    /**
+     * Returns the fetch uri for the given remote config. The logic implemented
+     * is taken from RepositoriesViewContentProvider#getChildren - case REMOTE:
+     * 
+     * <pre>
+     * <code>
+     * 			if (!rc.getURIs().isEmpty())
+     * 				children.add(new FetchNode(node, node.getRepository(), rc
+     * 						.getURIs().get(0).toPrivateString()));
+     * </code>
+     * </pre>
+     * 
+     * 
+     * 
+     * @param config
+     * @return
+     */
+    public static URIish getFetchURI(RemoteConfig config) {
+        if (config != null && !config.getURIs().isEmpty()) {
+            return config.getURIs().get(0);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Fetches according to the fetch specs in the given remote config to the
+     * given repo. If the given remote config has no fetch spec, then
+     * +refs/heads/*:refs/remotes/<remote-name>/* is used
+     * 
+     * @param config
+     *            the remote config to use when fetching
+     * @param repo
+     *            the repo to fetch to
+     * @param monitor
+     *            the monitor to report progress to
+     * @return
+     * @throws InvocationTargetException
+     */
+    public static FetchResult fetch(RemoteConfig config, Repository repo, IProgressMonitor monitor) throws InvocationTargetException {
+        if (config != null && !config.getFetchRefSpecs().isEmpty()) {
+            FetchOperation op = new FetchOperation(repo, config, getEgitTimeout(), false);
+            op.run(monitor);
+            return op.getOperationResult();
+        } else {
+            List<RefSpec> refSpecs = Arrays.asList(new RefSpec(String.format(DEFAULT_FETCH_REMOTE_REFSPEC, config.getName())));
+            return fetch(config, refSpecs, repo, monitor);
+        }
+
+    }
+
+    /**
+     * Fetches the given ref specs from the given remote configs in the given repository.
+     * 
+     * @param config
+     * @param refSpecs
+     * @param repo
+     * @param monitor
+     * @return
+     * @throws InvocationTargetException
+     * 
+     * @see RemoteConfig
+     * @see RefSpec
+     * @see Repository
+     */
+    public static FetchResult fetch(RemoteConfig config, List<RefSpec> refSpecs, Repository repo, IProgressMonitor monitor)
+            throws InvocationTargetException {
+        URIish fetchURI = getFetchURI(config);
+        FetchOperation op = new FetchOperation(repo, fetchURI, refSpecs, getEgitTimeout(), false);
+        op.run(monitor);
+        return op.getOperationResult();
+    }
+
+    public static boolean isAhead(IProject project, String remote, IProgressMonitor monitor)
+            throws IOException, InvocationTargetException, URISyntaxException {
+        return isAhead(getRepository(project), remote, monitor);
+    }
+
+    /**
+     * Returns <code>true</code> if the given repo has commits that are not
+     * contained withing the repo attached to it via the given remote. It is
+     * ahead of the given remote config.
+     * This will work for non{@link BranchTrackingStatus#of(Repository, String)} will tell you if the
+     * given branch is ahead of it's tracking branch. It only works with a
+     * branch that is tracking another branch. 
+     * 
+     * @param repo
+     *            the repo to check
+     * @param remote
+     *            the name of the remote to check against
+     * @param monitor
+     *            the monitor to report progress to
+     * @return
+     * @throws IOException
+     * @throws InvocationTargetException
+     * @throws URISyntaxException
+     * 
+     * @see BranchTrackingStatus#of
+     */
+    public static boolean isAhead(Repository repo, String remote, IProgressMonitor monitor)
+            throws IOException, URISyntaxException, InvocationTargetException {
+        Assert.isLegal(remote != null);
+        Assert.isLegal(repo != null);
+        if (remote.equals(getRemote(repo.getBranch(), repo.getConfig()))) {
+            BranchTrackingStatus status = BranchTrackingStatus.of(repo, repo.getBranch());
+            if (status != null) {
+                return status.getAheadCount() > 0;
+            }
+        }
+        return isNonTrackingBranchAhead(repo, remote, monitor);
+    }
+
+    /**
+     * Returns the remote for a given branch and config. Returns
+     * <code>null</code> if none is explicitly configured.
+     * 
+     * <pre>
+     * [branch "master"]
+     * remote = origin
+     * </pre>
+     * 
+     * @param branch
+     *            the branch to get the configured remote for the
+     * @param config
+     *            the configuration to look into
+     * @return the configured remote or null.
+     */
+    public static String getRemote(String branch, Config config) {
+        return config.getString(ConfigConstants.CONFIG_BRANCH_SECTION, branch, ConfigConstants.CONFIG_KEY_REMOTE);
+    }
+
+    private static boolean isNonTrackingBranchAhead(Repository repo, String remote, IProgressMonitor monitor)
+            throws URISyntaxException, MissingObjectException, IncorrectObjectTypeException, IOException, InvocationTargetException {
+        RemoteConfig remoteConfig = new RemoteConfig(repo.getConfig(), remote);
+        FetchResult fetchResult = fetch(remoteConfig, repo, monitor);
+        Ref ref = fetchResult.getAdvertisedRef(Constants.HEAD);
+        if (ref == null) {
+            return false;
+        }
+        Ref currentBranchRef = repo.findRef(repo.getBranch());
+
+        RevWalk walk = new RevWalk(repo);
+        RevCommit localCommit = walk.parseCommit(currentBranchRef.getObjectId());
+        RevCommit trackingCommit = walk.parseCommit(ref.getObjectId());
+        walk.setRevFilter(RevFilter.MERGE_BASE);
+        walk.markStart(localCommit);
+        walk.markStart(trackingCommit);
+        RevCommit mergeBase = walk.next();
+        walk.reset();
+        walk.setRevFilter(RevFilter.ALL);
+        int aheadCount = RevWalkUtils.count(walk, localCommit, mergeBase);
+
+        return aheadCount > 0;
+    }
+
+    public static boolean isValidGitUrl(String url) {
+        return GIT_SSH_URL_PATTERN.matcher(url).matches() || GIT_URL_PATTERN.matcher(url).matches();
+    }
+
+    public static String getGitHost(String gitUrl) {
+        return getGitUrlGroup(5, gitUrl);
+    }
+
+    public static String getGitUsername(String gitUrl) {
+        return getGitUrlGroup(3, gitUrl);
+    }
+
+    private static String getGitUrlGroup(int group, String gitUrl) {
+        if (gitUrl == null || gitUrl.isEmpty()) {
+            return null;
+        }
+        Matcher matcher = GIT_URL_PATTERN.matcher(gitUrl);
+        if (!matcher.find() || matcher.groupCount() < 7) {
+            return null;
+        }
+        return matcher.group(group);
+    }
+
+    private static final int getEgitTimeout() {
+        return Platform.getPreferencesService().getInt(EGIT_UI_PLUGIN_ID, REMOTE_CONNECTION_TIMEOUT, DEFAULT_TIMEOUT, null);
+    }
+
+    public static class GitIndexDiffBuilder {
+
+        private Repository repository;
+
+        private boolean added = true;
+        private boolean changed = true;
+        private boolean conflicting = true;
+        private boolean missing = true;
+        private boolean modified = true;
+        private boolean removed = true;
+        private boolean untracked = true;
+
+        GitIndexDiffBuilder(Repository repository) {
+            this.repository = repository;
+        }
+
+        public GitIndexDiffBuilder added(boolean include) {
+            this.added = include;
+            return this;
+        }
+
+        public GitIndexDiffBuilder changed(boolean include) {
+            this.changed = include;
+            return this;
+        }
+
+        public GitIndexDiffBuilder conflicting(boolean include) {
+            this.conflicting = include;
+            return this;
+        }
+
+        public GitIndexDiffBuilder missing(boolean include) {
+            this.missing = include;
+            return this;
+        }
+
+        public GitIndexDiffBuilder modified(boolean include) {
+            this.modified = include;
+            return this;
+        }
+
+        public GitIndexDiffBuilder removed(boolean include) {
+            this.removed = include;
+            return this;
+        }
+
+        public GitIndexDiffBuilder untracked(boolean include) {
+            this.untracked = include;
+            return this;
+        }
+
+        public Collection<String> build(IProgressMonitor monitor) throws IOException {
+            Set<String> resources = new HashSet<>();
+            IndexDiff diff = getIndexChanges(repository, monitor);
+            if (diff != null) {
+                if (added) {
+                    resources.addAll(diff.getAdded());
+                }
+                if (changed) {
+                    resources.addAll(diff.getChanged());
+                }
+                if (conflicting) {
+                    resources.addAll(diff.getConflicting());
+                }
+                if (missing) {
+                    resources.addAll(diff.getMissing());
+                }
+                if (modified) {
+                    resources.addAll(diff.getModified());
+                }
+                if (removed) {
+                    resources.addAll(diff.getRemoved());
+                }
+                if (untracked) {
+                    resources.addAll(diff.getUntracked());
+                }
+            }
+            return resources;
+        }
+
+        private static IndexDiff getIndexChanges(Repository repo, IProgressMonitor monitor) throws IOException {
+            IndexDiff indexDiff = new IndexDiff(repo, Constants.HEAD, IteratorService.createInitialIterator(repo));
+            if (!indexDiff.diff(new EclipseGitProgressTransformer(monitor), 0, 0,
+                    NLS.bind("Repository: {0}", repo.getDirectory().getPath()))) {
+                return null;
+            }
+            return indexDiff;
+        }
+    }
+
+    /**
+     * Return the names of remote http(s)-based git repositories. The <code>origin</code> repository, if present will be listed first.
+     * Following repositories are listed lexicographically, ignoring case differences.
+     * 
+     * @throws CoreException
+     */
+    public static List<String> getRemoteGitRepos(IProject project) throws CoreException {
+        Stream<String> stream = getRemoteGitReposFilteredStream(project);
+        return stream == null ? null : stream.collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the name of the first http(s)-based git remote repository of a project, or <code>null</code>, if no matching repository is found.
+     *
+     * @throws CoreException
+     */
+    public static String getDefaultRemoteRepo(org.eclipse.core.resources.IProject project) throws CoreException {
+        Stream<String> stream = getRemoteGitReposFilteredStream(project);
+        return stream == null ? null : stream.findFirst().orElse(null);
+    }
+
+    private static Stream<String> getRemoteGitReposFilteredStream(IProject project) throws CoreException {
+        if (project == null) {
+            return null;
+        }
+        Repository repo = getRepository(project);
+        if (repo == null) {
+            return null;
+        }
+        //Returned configurations are ordered lexicographically by names.
+        List<RemoteConfig> remoteConfigs = getAllRemoteConfigs(repo);
+        Collections.sort(remoteConfigs, new Comparator<RemoteConfig>() {
+
+            @Override
+            public int compare(RemoteConfig o1, RemoteConfig o2) {
+                if (ORIGIN.equals(o1.getName())) {
+                    return -1;
+                }
+                if (ORIGIN.equals(o2.getName())) {
+                    return 1;
+                }
+                return o1.getName().compareToIgnoreCase(o2.getName());
+            }
+        });
+        return remoteConfigs.stream().map(rc -> getFetchURI(rc)).filter(uri -> uri != null && uri.toString().startsWith("http"))
+                .map(URIish::toString);
+    }
+
+    /**
+     * Checks out the given branch in the given project. Progress is reported to the given monitor.
+     * 
+     * @param ref
+     * @param project
+     * @param monitor
+     * @return
+     * @throws CoreException
+     * 
+     * @see #getRepository(IProject)
+     * @see Repository
+     * @see IProject
+     * @see IProgressMonitor
+     */
+    public static CheckoutResult branch(String ref, IProject project, IProgressMonitor monitor) throws CoreException {
+        Repository repository = getRepository(project);
+        return checkoutBranch(ref, repository, monitor);
+    }
+
+    /**
+     * Checks out the given branch in the given repository. Progress is reported to the given monitor.
+     * 
+     * @param ref
+     * @param project
+     * @param monitor
+     * @return
+     * @throws CoreException
+     * 
+     * @see Repository
+     * @see IProgressMonitor
+     */
+    public static CheckoutResult checkoutBranch(String ref, Repository repository, IProgressMonitor monitor) throws CoreException {
+        BranchOperation branchOp = new BranchOperation(repository, ref);
+        branchOp.execute(monitor);
+        return branchOp.getResult();
+    }
+
+    public static boolean hasBranch(String ref, IProject project) throws IOException {
+        return hasBranch(ref, getRepository(project));
+    }
+
+    /**
+     * Returns {@code true} if the given repository has a branch that's called by the name given.
+     * @param name
+     * @param repository
+     * @return
+     * @throws IOException
+     */
+    public static boolean hasBranch(String name, Repository repository) throws IOException {
+        if (repository == null) {
+            return false;
+        }
+        return repository.findRef(name) != null;
+    }
+
+    public static void createBranch(String name, RevCommit startinPoint, IProject project, IProgressMonitor monitor)
+            throws IOException, CoreException {
+        createBranch(name, startinPoint, getRepository(project), monitor);
+    }
+
+    /**
+     * Creates a branch with the given name that starts at the given commit in the given repository.
+     * 
+     * @param name
+     * @param startingPoint
+     * @param repository
+     * @param monitor
+     * @throws IOException
+     * @throws CoreException
+     */
+    public static void createBranch(String name, RevCommit startingPoint, Repository repository, IProgressMonitor monitor)
+            throws IOException, CoreException {
+        if (repository == null) {
+            return;
+        }
+        if (startingPoint != null) {
+            new CreateLocalBranchOperation(repository, name, startingPoint).execute(monitor);
+        }
+    }
+
+    /**
+     * Returns the latest commit for the given branch name and remote name. If
+     * no remote name is given a local branch is assumed. To be sure to get the
+     * most accurate results for remote branches, those should be fetched via
+     * {@link #fetch(RemoteConfig, List, Repository, IProgressMonitor)} prior to
+     * executing this
+     * 
+     * @param branchName the name of the branch to get the latest commit fromm
+     * @param remoteName the name of the remote that the branch resides on
+     * @param repository the repository that shall be used 
+     * @return
+     * @throws IOException 
+     * 
+     * @see 
+     */
+    public static RevCommit getLatestCommit(String branchName, String remoteName, Repository repository) throws IOException {
+        String fullBranchName = getFullBranchName(branchName, remoteName);
+        try (RevWalk walk = new RevWalk(repository)) {
+            Ref branch = repository.exactRef(fullBranchName);
+            if (branch == null || branch.getObjectId() == null)
+                return null;
+
+            return walk.parseCommit(branch.getObjectId());
+        }
+    }
+
+    /**
+     * Returns the fully qualified branch name for the given name and remote
+     * name. If no remote is given the fully qualified local branch name is
+     * returned. Branch names in the fully qualified form are returned as-is.
+     * 
+     * ex. refs/remotes/origin/aBranch, refs/heads/aBranch
+     * 
+     * @param name
+     * @param remoteName
+     * @return
+     */
+    public static String getFullBranchName(String name, String remoteName) {
+        if (StringUtils.isEmptyOrNull(name)) {
+            return name;
+        }
+
+        if (name.startsWith(Constants.R_REFS)) {
+            // already full name
+            return name;
+        }
+        String fullName = null;
+        if (!StringUtils.isEmptyOrNull(remoteName)) {
+            fullName = Constants.R_REMOTES + remoteName + "/" + name;
+        } else if (Constants.HEAD.equals(name) || Constants.FETCH_HEAD.equals(name)) {
+            return name;
+        } else {
+            fullName = Constants.R_HEADS + name;
+        }
+        return fullName;
+    }
+
 }

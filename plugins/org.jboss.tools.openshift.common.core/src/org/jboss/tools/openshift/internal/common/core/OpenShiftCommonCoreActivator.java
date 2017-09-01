@@ -23,69 +23,69 @@ import org.osgi.framework.BundleContext;
  */
 public class OpenShiftCommonCoreActivator extends BaseCorePlugin {
 
-	// The plug-in ID
-	public static final String PLUGIN_ID = "org.jboss.tools.openshift.common.core"; //$NON-NLS-1$
-	private static OpenShiftCommonCoreActivator instance;
-	private static BundleContext myContext;
-	
-	public OpenShiftCommonCoreActivator() {
-		super();
-		instance = this;
-	}
+    // The plug-in ID
+    public static final String PLUGIN_ID = "org.jboss.tools.openshift.common.core"; //$NON-NLS-1$
+    private static OpenShiftCommonCoreActivator instance;
+    private static BundleContext myContext;
 
-	public static OpenShiftCommonCoreActivator getDefault() {
-	    return instance;
-	}
+    public OpenShiftCommonCoreActivator() {
+        super();
+        instance = this;
+    }
 
-	public static BundleContext getBundleContext() {
-	    return myContext;
-	}
+    public static OpenShiftCommonCoreActivator getDefault() {
+        return instance;
+    }
+
+    public static BundleContext getBundleContext() {
+        return myContext;
+    }
 
     @Override
-	public void start(BundleContext context) throws Exception {
+    public void start(BundleContext context) throws Exception {
         super.start(context);
         myContext = context;
     }
 
-	/**
-	 * Gets message from plugin.properties
-	 * @param key
-	 * @return
-	 */
-	public static String getMessage(String key)	{
-		return Platform.getResourceString(instance.getBundle(), key);
-	}
+    /**
+     * Gets message from plugin.properties
+     * @param key
+     * @return
+     */
+    public static String getMessage(String key) {
+        return Platform.getResourceString(instance.getBundle(), key);
+    }
 
-	/**
-	 * Get the IPluginLog for this plugin. This method 
-	 * helps to make logging easier, for example:
-	 * 
-	 *     FoundationCorePlugin.pluginLog().logError(etc)
-	 *  
-	 * @return IPluginLog object
-	 */
-	public static IPluginLog pluginLog() {
-		return getDefault().pluginLogInternal();
-	}
+    /**
+     * Get the IPluginLog for this plugin. This method 
+     * helps to make logging easier, for example:
+     * 
+     *     FoundationCorePlugin.pluginLog().logError(etc)
+     *  
+     * @return IPluginLog object
+     */
+    public static IPluginLog pluginLog() {
+        return getDefault().pluginLogInternal();
+    }
 
-	/**
-	 * Get a status factory for this plugin
-	 * @return status factory
-	 */
-	public static StatusFactory statusFactory() {
-		return getDefault().statusFactoryInternal();
-	}
+    /**
+     * Get a status factory for this plugin
+     * @return status factory
+     */
+    public static StatusFactory statusFactory() {
+        return getDefault().statusFactoryInternal();
+    }
 
-	public static void log(Throwable t) {
-		log(null, t);
-	}
+    public static void log(Throwable t) {
+        log(null, t);
+    }
 
-	public static void log(String message, Throwable t) {
-		log(StatusFactory.errorStatus(PLUGIN_ID, message, t));
-	}
-	
-	public static void log(IStatus status) {
-		getDefault().getLog().log(status);
-	}
+    public static void log(String message, Throwable t) {
+        log(StatusFactory.errorStatus(PLUGIN_ID, message, t));
+    }
+
+    public static void log(IStatus status) {
+        getDefault().getLog().log(status);
+    }
 
 }

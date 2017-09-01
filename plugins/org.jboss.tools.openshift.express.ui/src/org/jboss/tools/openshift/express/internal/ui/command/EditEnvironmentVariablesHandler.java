@@ -33,56 +33,55 @@ import com.openshift.client.OpenShiftException;
  */
 public class EditEnvironmentVariablesHandler extends AbstractDomainHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
-		if (application != null) {
-			return openEnvironmentVariablesWizard(application, HandlerUtil.getActiveShell(event));
-		} else {
-			IServer server = UIUtils.getFirstElement(selection, IServer.class);
-			if (server == null) {
-				return null;
-			}
-			return openEnvironmentVariablesWizard(server, HandlerUtil.getActiveShell(event));
-		}
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        ISelection selection = HandlerUtil.getCurrentSelection(event);
+        IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
+        if (application != null) {
+            return openEnvironmentVariablesWizard(application, HandlerUtil.getActiveShell(event));
+        } else {
+            IServer server = UIUtils.getFirstElement(selection, IServer.class);
+            if (server == null) {
+                return null;
+            }
+            return openEnvironmentVariablesWizard(server, HandlerUtil.getActiveShell(event));
+        }
+    }
 
-	private Object openEnvironmentVariablesWizard(IApplication application, Shell shell) {
-		try {
-			WizardUtils.openWizardDialog(
-					new EditEnvironmentVariablesWizard(application), shell);
-			return null;
-		} catch (OpenShiftException e) {
-			Logger.error("Failed to edit cartridges", e);
-			return ExpressUIActivator.createErrorStatus("Failed to edit cartridges", e);
-		}
-	}
+    private Object openEnvironmentVariablesWizard(IApplication application, Shell shell) {
+        try {
+            WizardUtils.openWizardDialog(new EditEnvironmentVariablesWizard(application), shell);
+            return null;
+        } catch (OpenShiftException e) {
+            Logger.error("Failed to edit cartridges", e);
+            return ExpressUIActivator.createErrorStatus("Failed to edit cartridges", e);
+        }
+    }
 
-	private Object openEnvironmentVariablesWizard(IServer server, final Shell shell) {
-		final LoadApplicationJob job = new LoadApplicationJob(server);
-		job.addJobChangeListener(new JobChangeAdapter() {
+    private Object openEnvironmentVariablesWizard(IServer server, final Shell shell) {
+        final LoadApplicationJob job = new LoadApplicationJob(server);
+        job.addJobChangeListener(new JobChangeAdapter() {
 
-			@Override
-			public void done(IJobChangeEvent event) {
-				if (!event.getJob().getResult().isOK()) {
-					return;
-				}
-				final IApplication application = job.getApplication();
-				if (application == null) {
-					return;
-				}
-				shell.getDisplay().asyncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-						openEnvironmentVariablesWizard(application, shell);
-					}
-				});
-			}
-		});
-		job.schedule();
-		return null;
-	}
+            @Override
+            public void done(IJobChangeEvent event) {
+                if (!event.getJob().getResult().isOK()) {
+                    return;
+                }
+                final IApplication application = job.getApplication();
+                if (application == null) {
+                    return;
+                }
+                shell.getDisplay().asyncExec(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        openEnvironmentVariablesWizard(application, shell);
+                    }
+                });
+            }
+        });
+        job.schedule();
+        return null;
+    }
 
 }

@@ -19,24 +19,23 @@ import com.openshift.client.cartridge.IEmbeddableCartridge;
  * @author Andre Dietisheim
  */
 public class EmbeddableCartridgeViewerSorter extends ViewerComparator {
-	@Override
-	public int compare(Viewer viewer, Object thisCartridge, Object thatCartridge) {
-		if (thisCartridge instanceof IEmbeddableCartridge
-				&& thatCartridge instanceof IEmbeddableCartridge) {
-			String thisDisplayName = ((IEmbeddableCartridge) thisCartridge).getDisplayName();
-			String thatDisplayName = ((IEmbeddableCartridge) thatCartridge).getDisplayName();
-			if (thisDisplayName == null) {
-				if (thatDisplayName != null) {
-					return 1;
-				} else {
-					return 0;
-				}
-			} else if (thatDisplayName == null) {
-				return -1;
-			} else {
-				return thisDisplayName.compareTo(thatDisplayName);
-			}
-		}
-		return super.compare(viewer, thisCartridge, thatCartridge);
-	}
+    @Override
+    public int compare(Viewer viewer, Object thisCartridge, Object thatCartridge) {
+        if (thisCartridge instanceof IEmbeddableCartridge && thatCartridge instanceof IEmbeddableCartridge) {
+            String thisDisplayName = ((IEmbeddableCartridge)thisCartridge).getDisplayName();
+            String thatDisplayName = ((IEmbeddableCartridge)thatCartridge).getDisplayName();
+            if (thisDisplayName == null) {
+                if (thatDisplayName != null) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else if (thatDisplayName == null) {
+                return -1;
+            } else {
+                return thisDisplayName.compareTo(thatDisplayName);
+            }
+        }
+        return super.compare(viewer, thisCartridge, thatCartridge);
+    }
 }

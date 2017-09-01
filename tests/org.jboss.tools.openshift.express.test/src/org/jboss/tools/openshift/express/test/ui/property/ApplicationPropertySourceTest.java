@@ -27,36 +27,34 @@ import com.openshift.client.IApplication;
  * @author Jeff Cantrill
  */
 public class ApplicationPropertySourceTest {
-	
-	private IApplication app;
-	private ApplicationPropertySource propertySource;
-	
-	@Before
-	public void setup(){
-		app = new ApplicationDetailsFake(); 
-		propertySource = new ApplicationPropertySource(app);
-	}
 
-	@Test
-	public void testGetPropertyDescriptors() {
-		String [] exp = new String [] {
-				"Created on", "Public URL", "Name", "UUID", "Git URL", "Type", "Port Forwarding", "Scalable"
-		};
-		assertPropertyDescriptors(exp,propertySource.getPropertyDescriptors());
-	}
-	
-	@Test
-	public void testGetPropertyValueForScalable(){
-		assertEquals("", app.getApplicationScale().getValue(), propertySource.getPropertyValue("8.Scalable"));
-	}
-	
-	private void assertPropertyDescriptors(String [] properties, IPropertyDescriptor [] descriptors){
-		String [] actuals = new String [descriptors.length] ;
-		for (int i = 0; i < descriptors.length; i++) {
-			actuals[i] = descriptors[i].getDisplayName();
-		}
-		Arrays.sort(properties);
-		Arrays.sort(actuals);
-		assertArrayEquals("Exp. certain set of property descriptors", properties, actuals);
-	}
+    private IApplication app;
+    private ApplicationPropertySource propertySource;
+
+    @Before
+    public void setup() {
+        app = new ApplicationDetailsFake();
+        propertySource = new ApplicationPropertySource(app);
+    }
+
+    @Test
+    public void testGetPropertyDescriptors() {
+        String[] exp = new String[] { "Created on", "Public URL", "Name", "UUID", "Git URL", "Type", "Port Forwarding", "Scalable" };
+        assertPropertyDescriptors(exp, propertySource.getPropertyDescriptors());
+    }
+
+    @Test
+    public void testGetPropertyValueForScalable() {
+        assertEquals("", app.getApplicationScale().getValue(), propertySource.getPropertyValue("8.Scalable"));
+    }
+
+    private void assertPropertyDescriptors(String[] properties, IPropertyDescriptor[] descriptors) {
+        String[] actuals = new String[descriptors.length];
+        for (int i = 0; i < descriptors.length; i++) {
+            actuals[i] = descriptors[i].getDisplayName();
+        }
+        Arrays.sort(properties);
+        Arrays.sort(actuals);
+        assertArrayEquals("Exp. certain set of property descriptors", properties, actuals);
+    }
 }

@@ -30,87 +30,85 @@ import org.eclipse.jgit.lib.Constants;
  */
 public class GitIgnore {
 
-	public static final String NL = System.getProperty("line.separator");
+    public static final String NL = System.getProperty("line.separator");
 
-	private Set<String> entries;
-	private IFile file;
+    private Set<String> entries;
+    private IFile file;
 
-	public GitIgnore(IProject project) throws IOException, CoreException {
-		this(project.getFile(Constants.GITIGNORE_FILENAME));
-	}
+    public GitIgnore(IProject project) throws IOException, CoreException {
+        this(project.getFile(Constants.GITIGNORE_FILENAME));
+    }
 
-	public GitIgnore(IFile gitIgnoreFile) throws IOException, CoreException {
-		this.file = gitIgnoreFile;
-		initEntries(gitIgnoreFile);
-	}
+    public GitIgnore(IFile gitIgnoreFile) throws IOException, CoreException {
+        this.file = gitIgnoreFile;
+        initEntries(gitIgnoreFile);
+    }
 
-	private void initEntries(IFile gitIgnore) throws IOException, CoreException {
-		this.entries = new LinkedHashSet<>();
-		if (gitIgnore == null
-				|| !gitIgnore.isAccessible()) {
-			return;
-		}
-		BufferedReader reader = null;
-		try {
+    private void initEntries(IFile gitIgnore) throws IOException, CoreException {
+        this.entries = new LinkedHashSet<>();
+        if (gitIgnore == null || !gitIgnore.isAccessible()) {
+            return;
+        }
+        BufferedReader reader = null;
+        try {
 
-			reader = new BufferedReader(new InputStreamReader(gitIgnore.getContents()));
-			for (String line = null; (line = reader.readLine()) != null;) {
-				if (line != null) {
-					entries.add(line);
-				}
-			}
-		} finally {
-			safeClose(reader);
-		}
-	}
+            reader = new BufferedReader(new InputStreamReader(gitIgnore.getContents()));
+            for (String line = null; (line = reader.readLine()) != null;) {
+                if (line != null) {
+                    entries.add(line);
+                }
+            }
+        } finally {
+            safeClose(reader);
+        }
+    }
 
-	public GitIgnore add(String entry) {
-		this.entries.add(entry);
-		return this;
-	}
+    public GitIgnore add(String entry) {
+        this.entries.add(entry);
+        return this;
+    }
 
-	public boolean contains(String entry) {
-		return entries.contains(entry);
-	}
+    public boolean contains(String entry) {
+        return entries.contains(entry);
+    }
 
-	public int size() {
-		return entries.size();
-	}
+    public int size() {
+        return entries.size();
+    }
 
-	/**
-	 * Writes the entries in this instance to the .gitignore file. Overwrites
-	 * and existing file
-	 * 
-	 * @throws IOException
-	 * @throws CoreException
-	 */
-	public IFile write(IProgressMonitor monitor) throws CoreException {
-		StringBuilder builder = new StringBuilder();
-		for (String entry : entries) {
-			builder.append(entry);
-			builder.append(NL);
-		}
-		if (!file.exists()) {
-			file.create(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, monitor);
-		} else {
-			file.setContents(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, monitor);
-		}
-		return file;
-	}
+    /**
+     * Writes the entries in this instance to the .gitignore file. Overwrites
+     * and existing file
+     * 
+     * @throws IOException
+     * @throws CoreException
+     */
+    public IFile write(IProgressMonitor monitor) throws CoreException {
+        StringBuilder builder = new StringBuilder();
+        for (String entry : entries) {
+            builder.append(entry);
+            builder.append(NL);
+        }
+        if (!file.exists()) {
+            file.create(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, monitor);
+        } else {
+            file.setContents(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, monitor);
+        }
+        return file;
+    }
 
-	public boolean exists() {
-		return file != null
-				&& file.exists();
-	}
+    public boolean exists() {
+        return file != null && file.exists();
+    }
 
-	private void safeClose(Reader reader) {
-		if (reader == null) {
-			return;
-		}
-		try {
-			reader.close();
-		} catch (IOException e) {
-			// swallow
-		}
-	}
+    private void safeClose(Reader reader) {
+        if (reader == null) {
+            return;
+        }
+        try {
+            reader.close();
+        } catch (IOException e) {
+            // swallow
+        }
+    }
 }

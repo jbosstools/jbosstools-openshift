@@ -40,251 +40,250 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class SSLCertificatePreferencesTest {
-	
-	private TestableSSLCertificatesPreference preference;
 
-	@Before
-	public void setUp() throws Exception {
-		this.preference = new TestableSSLCertificatesPreference();
-		List<HostCertificate> certificates = Arrays.asList(
-				createHostCertificate(true, CERTIFICATE_REDHAT_COM), 
-				createHostCertificate(false, CERTIFICATE_OPEN_PAAS_REDHAT_COM));
-		preference.save(certificates);
-	}
+    private TestableSSLCertificatesPreference preference;
 
-	@Test
-	public void shouldSaveAndLoad2Certificates() throws Exception {
-		// given
-		// when
-		// then
-		assertThat(preference.getSavedCertificates()).hasSize(2);
-	}
+    @Before
+    public void setUp() throws Exception {
+        this.preference = new TestableSSLCertificatesPreference();
+        List<HostCertificate> certificates = Arrays.asList(createHostCertificate(true, CERTIFICATE_REDHAT_COM),
+                createHostCertificate(false, CERTIFICATE_OPEN_PAAS_REDHAT_COM));
+        preference.save(certificates);
+    }
 
-	@Test
-	public void shouldReplaceExistingCertificatesWhenSaving() throws Exception {
-		// given
-		// when
-		preference.save(Collections.singletonList(createHostCertificate(true, CERTIFICATE_OPENSHIFT_REDHAT_COM)));
-		// then
-		assertThat(preference.getSavedCertificates()).hasSize(1);
-	}
+    @Test
+    public void shouldSaveAndLoad2Certificates() throws Exception {
+        // given
+        // when
+        // then
+        assertThat(preference.getSavedCertificates()).hasSize(2);
+    }
 
-	@Test
-	public void shouldAddCertificate() throws CertificateException {
-		// given
-		assertThat(preference.getSavedCertificates()).hasSize(2);
-		X509Certificate x509 = createX509Certificate(CERTIFICATE_OPENSHIFT_REDHAT_COM);
-		// when
-		preference.addOrReplaceCertificate(x509, true);
-		// then
-		assertThat(preference.getSavedCertificates()).hasSize(3);
-	}
+    @Test
+    public void shouldReplaceExistingCertificatesWhenSaving() throws Exception {
+        // given
+        // when
+        preference.save(Collections.singletonList(createHostCertificate(true, CERTIFICATE_OPENSHIFT_REDHAT_COM)));
+        // then
+        assertThat(preference.getSavedCertificates()).hasSize(1);
+    }
 
-	@Test
-	public void shouldReplaceCertificate() throws CertificateException {
-		// given
-		assertThat(preference.getSavedCertificates()).hasSize(2);
-		X509Certificate x509 = createX509Certificate(CERTIFICATE_REDHAT_COM);
-		assertThat(preference.isAllowed(x509)).isSameAs(CertificateState.ACCEPTED);
-		// when
-		preference.addOrReplaceCertificate(x509, false);
-		// then
-		assertThat(preference.getSavedCertificates()).hasSize(2);
-		assertThat(preference.isAllowed(x509)).isSameAs(CertificateState.REJECTED);
-	}
+    @Test
+    public void shouldAddCertificate() throws CertificateException {
+        // given
+        assertThat(preference.getSavedCertificates()).hasSize(2);
+        X509Certificate x509 = createX509Certificate(CERTIFICATE_OPENSHIFT_REDHAT_COM);
+        // when
+        preference.addOrReplaceCertificate(x509, true);
+        // then
+        assertThat(preference.getSavedCertificates()).hasSize(3);
+    }
 
-	@Test
-	public void shouldReturnAcceptanceForExistingCertificate() throws CertificateException {
-		// given
-		X509Certificate x509 = createX509Certificate(CERTIFICATE_REDHAT_COM);
-		// when
-		CertificateState allowed = preference.isAllowed(x509);
-		// then
-		assertThat(allowed).isSameAs(CertificateState.ACCEPTED);
-	}
+    @Test
+    public void shouldReplaceCertificate() throws CertificateException {
+        // given
+        assertThat(preference.getSavedCertificates()).hasSize(2);
+        X509Certificate x509 = createX509Certificate(CERTIFICATE_REDHAT_COM);
+        assertThat(preference.isAllowed(x509)).isSameAs(CertificateState.ACCEPTED);
+        // when
+        preference.addOrReplaceCertificate(x509, false);
+        // then
+        assertThat(preference.getSavedCertificates()).hasSize(2);
+        assertThat(preference.isAllowed(x509)).isSameAs(CertificateState.REJECTED);
+    }
 
-	@Test
-	public void shouldReturnNotPresentForNonExistingCertificate() throws CertificateException {
-		// given
-		X509Certificate x509 = createX509Certificate(CERTIFICATE_OPENSHIFT_REDHAT_COM);
-		// when
-		CertificateState allowed = preference.isAllowed(x509);
-		// then
-		assertThat(allowed).isSameAs(CertificateState.NOT_PRESENT);
-	}
+    @Test
+    public void shouldReturnAcceptanceForExistingCertificate() throws CertificateException {
+        // given
+        X509Certificate x509 = createX509Certificate(CERTIFICATE_REDHAT_COM);
+        // when
+        CertificateState allowed = preference.isAllowed(x509);
+        // then
+        assertThat(allowed).isSameAs(CertificateState.ACCEPTED);
+    }
 
-	private class TestableSSLCertificatesPreference extends SSLCertificatesPreference {
+    @Test
+    public void shouldReturnNotPresentForNonExistingCertificate() throws CertificateException {
+        // given
+        X509Certificate x509 = createX509Certificate(CERTIFICATE_OPENSHIFT_REDHAT_COM);
+        // when
+        CertificateState allowed = preference.isAllowed(x509);
+        // then
+        assertThat(allowed).isSameAs(CertificateState.NOT_PRESENT);
+    }
 
-		private IPreferenceStore store = new PreferenceStoreFake();
+    private class TestableSSLCertificatesPreference extends SSLCertificatesPreference {
 
-		@Override
-		protected IPreferenceStore getPreferenceStore() {
-			return store;
-		}
+        private IPreferenceStore store = new PreferenceStoreFake();
 
-		private class PreferenceStoreFake implements IPreferenceStore {
+        @Override
+        protected IPreferenceStore getPreferenceStore() {
+            return store;
+        }
 
-			private Map<String, String> store = new HashMap<>();
-			
-			@Override
-			public void addPropertyChangeListener(IPropertyChangeListener listener) {
-				throw new UnsupportedOperationException();
-			}
+        private class PreferenceStoreFake implements IPreferenceStore {
 
-			@Override
-			public boolean contains(String name) {
-				return store.containsKey(name);
-			}
+            private Map<String, String> store = new HashMap<>();
 
-			@Override
-			public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
-			}
+            @Override
+            public void addPropertyChangeListener(IPropertyChangeListener listener) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public boolean getBoolean(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public boolean contains(String name) {
+                return store.containsKey(name);
+            }
 
-			@Override
-			public boolean getDefaultBoolean(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
+            }
 
-			@Override
-			public double getDefaultDouble(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public boolean getBoolean(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public float getDefaultFloat(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public boolean getDefaultBoolean(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public int getDefaultInt(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public double getDefaultDouble(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public long getDefaultLong(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public float getDefaultFloat(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public String getDefaultString(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public int getDefaultInt(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public double getDouble(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public long getDefaultLong(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public float getFloat(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public String getDefaultString(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public int getInt(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public double getDouble(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public long getLong(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public float getFloat(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public String getString(String name) {
-				return store.get(name);
-			}
+            @Override
+            public int getInt(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public boolean isDefault(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public long getLong(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public boolean needsSaving() {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public String getString(String name) {
+                return store.get(name);
+            }
 
-			@Override
-			public void putValue(String name, String value) {
-				store.put(name, value);
-			}
+            @Override
+            public boolean isDefault(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void removePropertyChangeListener(IPropertyChangeListener listener) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public boolean needsSaving() {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setDefault(String name, double value) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void putValue(String name, String value) {
+                store.put(name, value);
+            }
 
-			@Override
-			public void setDefault(String name, float value) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void removePropertyChangeListener(IPropertyChangeListener listener) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setDefault(String name, int value) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void setDefault(String name, double value) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setDefault(String name, long value) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void setDefault(String name, float value) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setDefault(String name, String defaultObject) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void setDefault(String name, int value) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setDefault(String name, boolean value) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void setDefault(String name, long value) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setToDefault(String name) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void setDefault(String name, String defaultObject) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setValue(String name, double value) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void setDefault(String name, boolean value) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setValue(String name, float value) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void setToDefault(String name) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setValue(String name, int value) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void setValue(String name, double value) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setValue(String name, long value) {
-				throw new UnsupportedOperationException();
-			}
+            @Override
+            public void setValue(String name, float value) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setValue(String name, String value) {
-				putValue(name, value);
-			}
+            @Override
+            public void setValue(String name, int value) {
+                throw new UnsupportedOperationException();
+            }
 
-			@Override
-			public void setValue(String name, boolean value) {
-				throw new UnsupportedOperationException();
-			}
-		}
+            @Override
+            public void setValue(String name, long value) {
+                throw new UnsupportedOperationException();
+            }
 
-	}
+            @Override
+            public void setValue(String name, String value) {
+                putValue(name, value);
+            }
+
+            @Override
+            public void setValue(String name, boolean value) {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+    }
 }

@@ -23,49 +23,52 @@ import org.eclipse.core.runtime.IStatus;
  */
 public abstract class AbstractValidatorTest {
 
-	private static final IStatus PASS = ValidationStatus.ok();
-	private IValidator validator;
-	
-	protected AbstractValidatorTest(IValidator validator) {
-		this.validator = validator;
-	}
-	protected IValidator getValidator() {
-		return this.validator;
-	}
-	
-	protected void assertFailure(Object value) {
-		IStatus act = getValidator().validate(value);
-		assertEquals(String.format("Exp. to receive ERROR status but got %s", getStatus(act.getSeverity())),IStatus.ERROR, act.getSeverity());
-	}
+    private static final IStatus PASS = ValidationStatus.ok();
+    private IValidator validator;
 
-	protected void assertCancel(Object value) {
-		IStatus act = getValidator().validate(value);
-		assertEquals(String.format("Exp. to receive CANCEL status but got %s", getStatus(act.getSeverity())),IStatus.CANCEL, act.getSeverity());
-	}
+    protected AbstractValidatorTest(IValidator validator) {
+        this.validator = validator;
+    }
 
-	protected void assertPass(Object value) {
-		assertEquals(PASS, getValidator().validate(value));
-	}
-	
-	protected String getStatus(int severity) {
-		String status = null;
-		switch(severity) {
-		case IStatus.OK:
-			status = "OK";
-			break;
-		case IStatus.CANCEL:
-			status = "CANCEL";
-			break;
-		case IStatus.ERROR:
-			status = "ERROR";
-			break;
-		case IStatus.WARNING:
-			status = "WARNING";
-			break;
-		case IStatus.INFO:
-			status = "INFO";
-			break;
-		}
-		return status;
-	}
+    protected IValidator getValidator() {
+        return this.validator;
+    }
+
+    protected void assertFailure(Object value) {
+        IStatus act = getValidator().validate(value);
+        assertEquals(String.format("Exp. to receive ERROR status but got %s", getStatus(act.getSeverity())), IStatus.ERROR,
+                act.getSeverity());
+    }
+
+    protected void assertCancel(Object value) {
+        IStatus act = getValidator().validate(value);
+        assertEquals(String.format("Exp. to receive CANCEL status but got %s", getStatus(act.getSeverity())), IStatus.CANCEL,
+                act.getSeverity());
+    }
+
+    protected void assertPass(Object value) {
+        assertEquals(PASS, getValidator().validate(value));
+    }
+
+    protected String getStatus(int severity) {
+        String status = null;
+        switch (severity) {
+        case IStatus.OK:
+            status = "OK";
+            break;
+        case IStatus.CANCEL:
+            status = "CANCEL";
+            break;
+        case IStatus.ERROR:
+            status = "ERROR";
+            break;
+        case IStatus.WARNING:
+            status = "WARNING";
+            break;
+        case IStatus.INFO:
+            status = "INFO";
+            break;
+        }
+        return status;
+    }
 }

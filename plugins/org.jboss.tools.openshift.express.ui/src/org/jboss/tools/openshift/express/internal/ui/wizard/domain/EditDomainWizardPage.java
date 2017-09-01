@@ -38,109 +38,102 @@ import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
  */
 public class EditDomainWizardPage extends NewDomainWizardPage {
 
-	public EditDomainWizardPage(DomainWizardModel model, IWizard wizard) {
-		super("OpenShift Domain Name", "Please provide a new name for your OpenShift domain", model, wizard);
-	}
+    public EditDomainWizardPage(DomainWizardModel model, IWizard wizard) {
+        super("OpenShift Domain Name", "Please provide a new name for your OpenShift domain", model, wizard);
+    }
 
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		super.doCreateControls(parent, dbc);
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        super.doCreateControls(parent, dbc);
 
-		// edit domain members
-		Link editMembersLink = new Link(parent, SWT.NONE);
-		editMembersLink.setText("<a>Edit domain members</a>");
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.LEFT, SWT.CENTER).applyTo(editMembersLink);
-		editMembersLink.addSelectionListener(onEditMembers());
-	}
+        // edit domain members
+        Link editMembersLink = new Link(parent, SWT.NONE);
+        editMembersLink.setText("<a>Edit domain members</a>");
+        GridDataFactory.fillDefaults().span(2, 1).align(SWT.LEFT, SWT.CENTER).applyTo(editMembersLink);
+        editMembersLink.addSelectionListener(onEditMembers());
+    }
 
-	private SelectionListener onEditMembers() {
-		return new SelectionAdapter() {
+    private SelectionListener onEditMembers() {
+        return new SelectionAdapter() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				final GetUrlJob getURLJob = new GetUrlJob();
-				new JobChainBuilder(getURLJob)
-						.runWhenSuccessfullyDone(new UIJob("Open Browser to Edit domain members") {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                final GetUrlJob getURLJob = new GetUrlJob();
+                new JobChainBuilder(getURLJob).runWhenSuccessfullyDone(new UIJob("Open Browser to Edit domain members") {
 
-							@Override
-							public IStatus runInUIThread(IProgressMonitor monitor) {
-								String webUIDomainPage = getURLJob.getWebUIDomainPageUrl();
-								if (webUIDomainPage != null) {
-									new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPage,
-											ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
-								} else {
-									new WebUIDomainPageNotFoundDialog(getShell(), getModel().getOriginWebUIDomainPageUrl()).open();
-								}
-								return Status.OK_STATUS;
-							}
-						})
-						.schedule();
-			}
-		};
-	}
+                    @Override
+                    public IStatus runInUIThread(IProgressMonitor monitor) {
+                        String webUIDomainPage = getURLJob.getWebUIDomainPageUrl();
+                        if (webUIDomainPage != null) {
+                            new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPage, ExpressUIActivator.PLUGIN_ID,
+                                    ExpressUIActivator.getDefault().getLog());
+                        } else {
+                            new WebUIDomainPageNotFoundDialog(getShell(), getModel().getOriginWebUIDomainPageUrl()).open();
+                        }
+                        return Status.OK_STATUS;
+                    }
+                }).schedule();
+            }
+        };
+    }
 
-	private class GetUrlJob extends Job {
+    private class GetUrlJob extends Job {
 
-		private String webUIDomainPageUrl;
+        private String webUIDomainPageUrl;
 
-		public GetUrlJob() {
-			super("Get Domain Web UI URL");
-		}
+        public GetUrlJob() {
+            super("Get Domain Web UI URL");
+        }
 
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			this.webUIDomainPageUrl = getModel().getWebUIDomainPageUrl();
-			return Status.OK_STATUS;
-		}
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+            this.webUIDomainPageUrl = getModel().getWebUIDomainPageUrl();
+            return Status.OK_STATUS;
+        }
 
-		public String getWebUIDomainPageUrl() {
-			return webUIDomainPageUrl;
-		}
-	}
+        public String getWebUIDomainPageUrl() {
+            return webUIDomainPageUrl;
+        }
+    }
 
-	private class WebUIDomainPageNotFoundDialog extends MessageDialog {
+    private class WebUIDomainPageNotFoundDialog extends MessageDialog {
 
-		private String webUIDomainPageUrl;
+        private String webUIDomainPageUrl;
 
-		public WebUIDomainPageNotFoundDialog(Shell parentShell, String webUIDomainPageUrl) {
-			super(
-					parentShell,
-					"Could not find web console",
-					null,
-					"Could not find the web page in the web console where you can edit your domain members.\n"
-							+ "To get there manually, please log into the web console and open the page that shows the details of your domain.\n"
-							+ (webUIDomainPageUrl != null ? "The url normally looks as follows:" : ""),
-					MessageDialog.ERROR,
-					new String[] { IDialogConstants.OK_LABEL }, 0);
-			this.webUIDomainPageUrl = webUIDomainPageUrl;
-		}
+        public WebUIDomainPageNotFoundDialog(Shell parentShell, String webUIDomainPageUrl) {
+            super(parentShell, "Could not find web console", null,
+                    "Could not find the web page in the web console where you can edit your domain members.\n"
+                            + "To get there manually, please log into the web console and open the page that shows the details of your domain.\n"
+                            + (webUIDomainPageUrl != null ? "The url normally looks as follows:" : ""),
+                    MessageDialog.ERROR, new String[] { IDialogConstants.OK_LABEL }, 0);
+            this.webUIDomainPageUrl = webUIDomainPageUrl;
+        }
 
-		@Override
-		protected Control createCustomArea(Composite parent) {
-			Composite container = new Composite(parent, SWT.None);
-			GridLayoutFactory.fillDefaults().applyTo(container);
-			if (webUIDomainPageUrl != null) {
-				Link link = new Link(container, SWT.NONE);
-				link.setText("<a>" + webUIDomainPageUrl + "</a>");
-				link.addSelectionListener(onLinkClicked(webUIDomainPageUrl));
-				GridDataFactory.fillDefaults().indent(60, 0).applyTo(link);
-			}
-			return container;
-		}
+        @Override
+        protected Control createCustomArea(Composite parent) {
+            Composite container = new Composite(parent, SWT.None);
+            GridLayoutFactory.fillDefaults().applyTo(container);
+            if (webUIDomainPageUrl != null) {
+                Link link = new Link(container, SWT.NONE);
+                link.setText("<a>" + webUIDomainPageUrl + "</a>");
+                link.addSelectionListener(onLinkClicked(webUIDomainPageUrl));
+                GridDataFactory.fillDefaults().indent(60, 0).applyTo(link);
+            }
+            return container;
+        }
 
-		private SelectionListener onLinkClicked(final String webUIDomainPageUrl) {
-			return new SelectionAdapter() {
+        private SelectionListener onLinkClicked(final String webUIDomainPageUrl) {
+            return new SelectionAdapter() {
 
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPageUrl,
-							ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
-				}
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPageUrl, ExpressUIActivator.PLUGIN_ID,
+                            ExpressUIActivator.getDefault().getLog());
+                }
 
-			};
-		}
+            };
+        }
 
-	}
+    }
 
 }

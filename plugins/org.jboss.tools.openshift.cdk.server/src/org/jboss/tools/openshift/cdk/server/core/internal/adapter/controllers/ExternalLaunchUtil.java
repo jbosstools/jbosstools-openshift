@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
 import org.eclipse.core.runtime.CoreException;
@@ -20,16 +20,16 @@ import org.eclipse.wst.server.core.IServer;
 
 public class ExternalLaunchUtil implements IExternalLaunchConstants {
 
-	public static ILaunchConfigurationWorkingCopy findExternalToolsLaunchConfig(IServer s, String launchName) throws CoreException {
-		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType type = manager.getLaunchConfigurationType(EXTERNAL_TOOLS);
-		ILaunchConfiguration[] all = manager.getLaunchConfigurations(type);
-		for( int i = 0; i < all.length; i++ ) {
-			if( all[i].getName().equals(launchName)) {
-				return all[i].getWorkingCopy();
-			}
-		}
-		ILaunchConfigurationWorkingCopy wc = type.newInstance(null, launchName);
-		return wc;
-	}
+    public static ILaunchConfigurationWorkingCopy findExternalToolsLaunchConfig(IServer s, String launchName) throws CoreException {
+        ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+        ILaunchConfigurationType type = manager.getLaunchConfigurationType(EXTERNAL_TOOLS);
+        ILaunchConfiguration[] all = manager.getLaunchConfigurations(type);
+        for (int i = 0; i < all.length; i++) {
+            if (all[i].getName().equals(launchName)) {
+                return all[i].getWorkingCopy();
+            }
+        }
+        ILaunchConfigurationWorkingCopy wc = type.newInstance(null, launchName);
+        return wc;
+    }
 }

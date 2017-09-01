@@ -18,28 +18,28 @@ import org.jboss.tools.as.core.server.controllable.systems.IDeploymentOptionsCon
 
 public class OpenShiftDeploymentOptionsController extends AbstractSubsystemController implements IDeploymentOptionsController {
 
-	public OpenShiftDeploymentOptionsController() {
-		// TODO Auto-generated constructor stub
-	}
+    public OpenShiftDeploymentOptionsController() {
+        // TODO Auto-generated constructor stub
+    }
 
-	@Override
-	public char getPathSeparatorCharacter() {
-		return File.separatorChar;
-	}
+    @Override
+    public char getPathSeparatorCharacter() {
+        return File.separatorChar;
+    }
 
-	@Override
-	public String getDeploymentsRootFolder(boolean absolute) {
-		return ServerUtil.getServerStateLocation(getServer()).append("deploy").toFile().getAbsolutePath();
-	}
+    @Override
+    public String getDeploymentsRootFolder(boolean absolute) {
+        return ServerUtil.getServerStateLocation(getServer()).append("deploy").toFile().getAbsolutePath();
+    }
 
-	@Override
-	public String getDeploymentsTemporaryFolder(boolean absolute) {
-		return ServerUtil.getServerStateLocation(getServer()).append("tempDeploy").toFile().getAbsolutePath();
-	}
+    @Override
+    public String getDeploymentsTemporaryFolder(boolean absolute) {
+        return ServerUtil.getServerStateLocation(getServer()).append("tempDeploy").toFile().getAbsolutePath();
+    }
 
-	@Override
-	public boolean prefersZippedDeployments() {
-		return false;
-	}
+    @Override
+    public boolean prefersZippedDeployments() {
+        return false;
+    }
 
 }

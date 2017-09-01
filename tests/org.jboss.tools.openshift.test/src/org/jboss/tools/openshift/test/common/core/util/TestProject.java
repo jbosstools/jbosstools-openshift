@@ -27,87 +27,86 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.test.internal.OpenShiftTestActivator;
 
 public class TestProject {
-	public IProject project;
+    public IProject project;
 
-	private String location;
+    private String location;
 
-	/**
-	 * @throws CoreException
-	 *             If project already exists
-	 */
-	public TestProject() throws CoreException {
-		this(false);
-	}
+    /**
+     * @throws CoreException
+     *             If project already exists
+     */
+    public TestProject() throws CoreException {
+        this(false);
+    }
 
-	public TestProject(boolean remove) throws CoreException {
-		this(remove, "Project-" + System.currentTimeMillis());
-	}
+    public TestProject(boolean remove) throws CoreException {
+        this(remove, "Project-" + System.currentTimeMillis());
+    }
 
-	/**
-	 * @param remove
-	 *            should project be removed if already exists
-	 * @param projectName
-	 * @throws CoreException
-	 */
-	public TestProject(final boolean remove, String projectName) throws CoreException {
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		project = root.getProject(projectName);
-		if (remove)
-			project.delete(true, null);
-		project.create(null);
-		project.open(null);
-		location = project.getLocation().toOSString();
-	}
+    /**
+     * @param remove
+     *            should project be removed if already exists
+     * @param projectName
+     * @throws CoreException
+     */
+    public TestProject(final boolean remove, String projectName) throws CoreException {
+        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+        project = root.getProject(projectName);
+        if (remove)
+            project.delete(true, null);
+        project.create(null);
+        project.open(null);
+        location = project.getLocation().toOSString();
+    }
 
-	public IProject getProject() {
-		return project;
-	}
+    public IProject getProject() {
+        return project;
+    }
 
-	public IFile createFile(String name, byte[] content) throws Exception {
-		IFile file = project.getFile(name);
-		InputStream inputStream = new ByteArrayInputStream(content);
-		file.create(inputStream, true, null);
+    public IFile createFile(String name, byte[] content) throws Exception {
+        IFile file = project.getFile(name);
+        InputStream inputStream = new ByteArrayInputStream(content);
+        file.create(inputStream, true, null);
 
-		return file;
-	}
+        return file;
+    }
 
-	public IFolder createFolder(String name) throws Exception {
-		IFolder folder = project.getFolder(name);
-		folder.create(true, true, null);
+    public IFolder createFolder(String name) throws Exception {
+        IFolder folder = project.getFolder(name);
+        folder.create(true, true, null);
 
-		IFile keep = project.getFile(name + "/keep");
-		keep.create(new ByteArrayInputStream(new byte[] {0}), true, null);
+        IFile keep = project.getFile(name + "/keep");
+        keep.create(new ByteArrayInputStream(new byte[] { 0 }), true, null);
 
-		return folder;
-	}
+        return folder;
+    }
 
-	public void dispose() throws CoreException, IOException {
-		if (project.exists())
-			project.delete(true, true, null);
-		else {
-			File f = new File(location);
-			if (f.exists())
-				FileUtils.deleteDirectory(f);
-		}
-	}
+    public void dispose() throws CoreException, IOException {
+        if (project.exists())
+            project.delete(true, true, null);
+        else {
+            File f = new File(location);
+            if (f.exists())
+                FileUtils.deleteDirectory(f);
+        }
+    }
 
-	public void silentlyDispose() {
-		try {
-			dispose();
-		} catch (CoreException | IOException e) {
-			OpenShiftTestActivator.logError(
-					NLS.bind("Error removing project {0}", getProject().getName()), e);
-		}
-	}
+    public void silentlyDispose() {
+        try {
+            dispose();
+        } catch (CoreException | IOException e) {
+            OpenShiftTestActivator.logError(NLS.bind("Error removing project {0}", getProject().getName()), e);
+        }
+    }
 
-	public IFile getFile(String filepath) throws Exception {
-		return project.getFile(filepath);
-	}
-	
-	public String getFileContent(String filepath) throws Exception {
-		IFile file = project.getFile(filepath);
-		try (InputStream stream = file.getContents()) {
-			return IOUtils.toString(stream);
-		}
-	}
+    public IFile getFile(String filepath) throws Exception {
+        return project.getFile(filepath);
+    }
+
+    public String getFileContent(String filepath) throws Exception {
+        IFile file = project.getFile(filepath);
+        try (InputStream stream = file.getContents()) {
+            return IOUtils.toString(stream);
+        }
+    }
 }

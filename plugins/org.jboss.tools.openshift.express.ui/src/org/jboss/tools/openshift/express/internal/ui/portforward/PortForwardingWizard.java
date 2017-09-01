@@ -14,25 +14,24 @@ import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 
 import com.openshift.client.IApplication;
 
-
 /**
  * @author Xavier Coulon
  *
  */
 public class PortForwardingWizard extends AbstractOpenShiftWizard<PortForwardingWizardModel> {
 
-	public PortForwardingWizard(IApplication application) {
-		super("Application port forwarding", new PortForwardingWizardModel(application));
-	}
+    public PortForwardingWizard(IApplication application) {
+        super("Application port forwarding", new PortForwardingWizardModel(application));
+    }
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new PortForwardingWizardPage(getModel(), this));
-	}
+    @Override
+    public void addPages() {
+        addPage(new PortForwardingWizardPage(getModel(), this));
+    }
 
 }

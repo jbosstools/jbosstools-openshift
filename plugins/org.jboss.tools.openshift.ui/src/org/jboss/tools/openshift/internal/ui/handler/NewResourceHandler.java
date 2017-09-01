@@ -27,15 +27,15 @@ import org.jboss.tools.openshift.internal.ui.wizard.resource.NewResourceWizard;
  */
 public class NewResourceHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		try {
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        try {
             WizardUtils.openWizardDialog(new NewResourceWizard(), HandlerUtil.getActiveShell(event));
-		} catch (ConnectionNotFoundException e) {
-			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to find the connection", e);
-		}
+        } catch (ConnectionNotFoundException e) {
+            return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to find the connection", e);
+        }
 
-		return Status.OK_STATUS;
-	}
+        return Status.OK_STATUS;
+    }
 
 }

@@ -34,11 +34,11 @@ public class TestUtils {
 	public static void setUpOcBinary() {
 		setOCBinaryPath(true);
 	}
-	
+
 	public static void cleanUpOCBinary() {
 		setOCBinaryPath(false);
 	}
-	
+
 	private static void setOCBinaryPath(boolean setUp) {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
 		OpenShift3PreferencePage page = new OpenShift3PreferencePage();
@@ -52,30 +52,30 @@ public class TestUtils {
 		page.apply();
 		dialog.ok();
 	}
-	
+
 	public static void setVisualEditorToUseHTML5() {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
 		dialog.open();
-		
+
 		dialog.select("JBoss Tools", "Web", "Editors", "Visual Page Editor");
-		
+
 		RadioButton button = new RadioButton("HTML5 (use WebKit)");
 		if (button.isEnabled() && !button.isSelected()) {
 			button.click();
 		}
-		
+
 		CheckBox checkBox = new CheckBox("Do not show Browser Engine dialog");
 		if (checkBox.isEnabled() && !checkBox.isChecked()) {
 			checkBox.click();
 		}
-		
+
 		new PushButton("Apply").click();
 		dialog.ok();
 	}
-	
+
 	public static void cleanupGitFolder(String appname) {
 		File gitDir = new File(System.getProperty("user.home") + File.separatorChar + "git");
-		
+
 		boolean exists = gitDir.exists() ? true : gitDir.mkdir();
 
 		if (exists && gitDir.isDirectory() && gitDir.listFiles().length > 0) {
@@ -103,7 +103,7 @@ public class TestUtils {
 			// DO NOTHING
 		}
 	}
-	
+
 	public static void delete(File file) throws IOException {
 		if (file.isDirectory() && file.list().length > 0) {
 			String files[] = file.list();
@@ -112,10 +112,10 @@ public class TestUtils {
 				delete(fileToDelete);
 			}
 		}
-		
+
 		file.delete();
 	}
-	
+
 	public static String getValueOrDefault(String value, String defaultValue) {
 		if (StringUtils.isBlank(value)) {
 			return defaultValue;
@@ -131,15 +131,15 @@ public class TestUtils {
 	 */
 	public static boolean isURLAccessible(String URL) {
 		try {
-            HttpURLConnection.setFollowRedirects(false);
-            HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
-            connection.setRequestMethod("HEAD");
-            return (connection.getResponseCode() == HttpURLConnection.HTTP_OK);
-        } catch (Exception e) {
-            return false;
-        }
+			HttpURLConnection.setFollowRedirects(false);
+			HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
+			connection.setRequestMethod("HEAD");
+			return (connection.getResponseCode() == HttpURLConnection.HTTP_OK);
+		} catch (Exception e) {
+			return false;
+		}
 	}
-	
+
 	public static void acceptSSLCertificate() {
 		try {
 			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);

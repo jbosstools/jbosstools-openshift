@@ -19,52 +19,53 @@ import com.openshift.restclient.model.build.IBuildTrigger;
 import com.openshift.restclient.model.build.IImageChangeTrigger;
 
 public class ImageChangePropertySource implements IPropertySource {
-	
-	private IImageChangeTrigger trigger;
-	
-	public ImageChangePropertySource(List<IBuildTrigger> buildTriggers) {
-		for (IBuildTrigger trigger : buildTriggers) {
-			if(trigger.getType() == BuildTriggerType.imageChange){
-				this.trigger = (IImageChangeTrigger) trigger;
-				break;
-			}
-		}
-	}
 
-	@Override
-	public Object getEditableValue() {
-		return null;
-	}
+    private IImageChangeTrigger trigger;
 
-	@Override
-	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new UneditablePropertyDescriptor("image", "Image"),
-				new UneditablePropertyDescriptor("from", "From"),
-				new UneditablePropertyDescriptor("tag", "Tag")
-		};
-	}
+    public ImageChangePropertySource(List<IBuildTrigger> buildTriggers) {
+        for (IBuildTrigger trigger : buildTriggers) {
+            if (trigger.getType() == BuildTriggerType.imageChange) {
+                this.trigger = (IImageChangeTrigger)trigger;
+                break;
+            }
+        }
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		if(trigger == null) return null;
-		if("image".equals(id)) return trigger.getImage();
-		if("from".equals(id)) return trigger.getFrom();
-		if("tag".equals(id)) return trigger.getTag();
-		return null;
-	}
+    @Override
+    public Object getEditableValue() {
+        return null;
+    }
 
-	@Override
-	public boolean isPropertySet(Object arg0) {
-		return false;
-	}
+    @Override
+    public IPropertyDescriptor[] getPropertyDescriptors() {
+        return new IPropertyDescriptor[] { new UneditablePropertyDescriptor("image", "Image"),
+                new UneditablePropertyDescriptor("from", "From"), new UneditablePropertyDescriptor("tag", "Tag") };
+    }
 
-	@Override
-	public void resetPropertyValue(Object arg0) {
-	}
+    @Override
+    public Object getPropertyValue(Object id) {
+        if (trigger == null)
+            return null;
+        if ("image".equals(id))
+            return trigger.getImage();
+        if ("from".equals(id))
+            return trigger.getFrom();
+        if ("tag".equals(id))
+            return trigger.getTag();
+        return null;
+    }
 
-	@Override
-	public void setPropertyValue(Object arg0, Object arg1) {
-	}
+    @Override
+    public boolean isPropertySet(Object arg0) {
+        return false;
+    }
+
+    @Override
+    public void resetPropertyValue(Object arg0) {
+    }
+
+    @Override
+    public void setPropertyValue(Object arg0, Object arg1) {
+    }
 
 }

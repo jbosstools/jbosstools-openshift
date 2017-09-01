@@ -27,49 +27,50 @@ import com.openshift.internal.client.StandaloneCartridgeResource;
 @SuppressWarnings({ "deprecation", "restriction" })
 public class ApplicationDetailsFake extends NoopApplicationFake {
 
-	@Override
-	public String getName() {
-		return "appName";
-	}
+    @Override
+    public String getName() {
+        return "appName";
+    }
 
-	@Override
-	public String getUUID() {
-		return "appuuid";
-	}
+    @Override
+    public String getUUID() {
+        return "appuuid";
+    }
 
-	@Override
-	public String getGitUrl() {
-		return "git://username@githost.com/project.git";
-	}
+    @Override
+    public String getGitUrl() {
+        return "git://username@githost.com/project.git";
+    }
 
-	@Override
-	public String getApplicationUrl() {
-		return "http://nowhere.appdomain.com";
-	}
+    @Override
+    public String getApplicationUrl() {
+        return "http://nowhere.appdomain.com";
+    }
 
-	@Override
-	public ApplicationScale getApplicationScale() {
-		return ApplicationScale.SCALE;
-	}
+    @Override
+    public ApplicationScale getApplicationScale() {
+        return ApplicationScale.SCALE;
+    }
 
-	@Override
-	public Date getCreationTime() {
-		return new Date();
-	}
+    @Override
+    public Date getCreationTime() {
+        return new Date();
+    }
 
-	@Override
-	public IGearProfile getGearProfile() {
-		return null;
-	}
+    @Override
+    public IGearProfile getGearProfile() {
+        return null;
+    }
 
-	@Override
-	public IDeployedStandaloneCartridge getCartridge() {
-		return new StandaloneCartridgeResource(
-				"mockApplicationName", "mockApplicationName","mockApplicationName", null, null, false, null, null, null, null) {};
-		}
+    @Override
+    public IDeployedStandaloneCartridge getCartridge() {
+        return new StandaloneCartridgeResource("mockApplicationName", "mockApplicationName", "mockApplicationName", null, null, false, null,
+                null, null, null) {
+        };
+    }
 
-	@Override
-	public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {
-		return new ArrayList<>();
-	}
+    @Override
+    public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {
+        return new ArrayList<>();
+    }
 }

@@ -38,79 +38,78 @@ import com.openshift.client.IApplication;
  */
 public class ListAllEnvironmentVariablesHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
-		if (application != null) {
-			showEnvironmentPropertiesFor(application);
-		} else {
-			IServer server = UIUtils.getFirstElement(selection, IServer.class);
-			if (server == null) {
-				return Status.CANCEL_STATUS;
-			}
-			showEnvironmentPropertiesFor(server);
-		}
-		return Status.OK_STATUS;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        ISelection selection = HandlerUtil.getCurrentSelection(event);
+        IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
+        if (application != null) {
+            showEnvironmentPropertiesFor(application);
+        } else {
+            IServer server = UIUtils.getFirstElement(selection, IServer.class);
+            if (server == null) {
+                return Status.CANCEL_STATUS;
+            }
+            showEnvironmentPropertiesFor(server);
+        }
+        return Status.OK_STATUS;
+    }
 
-	/**
-	 * Retrieves the application from the given server, then opens the dialog.
-	 * Since retrieving the application can be time consuming, the task is
-	 * performed in a separate job (ie, in a background thread).
-	 * 
-	 * @param server
-	 */
-	private void showEnvironmentPropertiesFor(final IServer server) {
-		final LoadApplicationJob job = new LoadApplicationJob(server);
-		job.addJobChangeListener(new JobChangeAdapter() {
-			@Override
-			public void done(IJobChangeEvent event) {
-				if (event.getResult().isOK()) {
-					final IApplication application = job.getApplication();
-					showEnvironmentPropertiesFor(application);
-				}
-			}
-		});
-		job.setUser(true);
-		job.schedule();
-	}
+    /**
+     * Retrieves the application from the given server, then opens the dialog.
+     * Since retrieving the application can be time consuming, the task is
+     * performed in a separate job (ie, in a background thread).
+     * 
+     * @param server
+     */
+    private void showEnvironmentPropertiesFor(final IServer server) {
+        final LoadApplicationJob job = new LoadApplicationJob(server);
+        job.addJobChangeListener(new JobChangeAdapter() {
+            @Override
+            public void done(IJobChangeEvent event) {
+                if (event.getResult().isOK()) {
+                    final IApplication application = job.getApplication();
+                    showEnvironmentPropertiesFor(application);
+                }
+            }
+        });
+        job.setUser(true);
+        job.schedule();
+    }
 
-	private void showEnvironmentPropertiesFor(final IApplication application) {
-		final CreateSSHSessionJob job = new CreateSSHSessionJob(application);
-		job.addJobChangeListener(new JobChangeAdapter() {
-			@Override
-			public void done(IJobChangeEvent event) {
-				if (event.getResult().isOK() 
-						&& job.isValidSession()) {
-					showEnvironmentProperties(application);
-				}
-			}
-		});
+    private void showEnvironmentPropertiesFor(final IApplication application) {
+        final CreateSSHSessionJob job = new CreateSSHSessionJob(application);
+        job.addJobChangeListener(new JobChangeAdapter() {
+            @Override
+            public void done(IJobChangeEvent event) {
+                if (event.getResult().isOK() && job.isValidSession()) {
+                    showEnvironmentProperties(application);
+                }
+            }
+        });
 
-		job.setUser(true);
-		job.schedule();
-	}
+        job.setUser(true);
+        job.schedule();
+    }
 
-	private void showEnvironmentProperties(final IApplication application) {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					if (!application.hasSSHSession()) {
-						application.setSSHSession(SSHSessionRepository.getInstance().getSession(application));
-					}
-					List<String> props = application.getEnvironmentProperties();
-					final MessageConsole console = ConsoleUtils.displayConsoleView(application);
-					MessageConsoleStream stream = console.newMessageStream();
-					for (String prop : props) {
-						stream.println(prop);
-					}
-					ConsoleUtils.displayConsoleView(console);
-				} catch (Exception e) {
-					ExpressUIActivator.createErrorStatus("Failed to display remote environment variables", e);
-				}
-			}
-		});
-	}
+    private void showEnvironmentProperties(final IApplication application) {
+        Display.getDefault().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (!application.hasSSHSession()) {
+                        application.setSSHSession(SSHSessionRepository.getInstance().getSession(application));
+                    }
+                    List<String> props = application.getEnvironmentProperties();
+                    final MessageConsole console = ConsoleUtils.displayConsoleView(application);
+                    MessageConsoleStream stream = console.newMessageStream();
+                    for (String prop : props) {
+                        stream.println(prop);
+                    }
+                    ConsoleUtils.displayConsoleView(console);
+                } catch (Exception e) {
+                    ExpressUIActivator.createErrorStatus("Failed to display remote environment variables", e);
+                }
+            }
+        });
+    }
 }

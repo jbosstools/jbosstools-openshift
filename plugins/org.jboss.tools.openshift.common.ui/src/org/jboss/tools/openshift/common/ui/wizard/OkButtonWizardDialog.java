@@ -24,22 +24,22 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class OkButtonWizardDialog extends WizardDialog {
 
-	public OkButtonWizardDialog(Shell parentShell, IWizard newWizard) {
-		super(parentShell, newWizard);
-	}
-	
-	@Override
-	protected Control createButtonBar(Composite parent) {
-		Control control = super.createButtonBar(parent);
-		getButton(IDialogConstants.FINISH_ID).setText(IDialogConstants.OK_LABEL);
-		hideButton(getButton(CANCEL));
-		return control;
-	}
+    public OkButtonWizardDialog(Shell parentShell, IWizard newWizard) {
+        super(parentShell, newWizard);
+    }
 
-	protected void hideButton(Button button) {
-		if (button != null) {
-			button.setVisible(false);
-			GridDataFactory.fillDefaults().exclude(true).applyTo(button);
-		}
-	}
+    @Override
+    protected Control createButtonBar(Composite parent) {
+        Control control = super.createButtonBar(parent);
+        getButton(IDialogConstants.FINISH_ID).setText(IDialogConstants.OK_LABEL);
+        hideButton(getButton(CANCEL));
+        return control;
+    }
+
+    protected void hideButton(Button button) {
+        if (button != null) {
+            button.setVisible(false);
+            GridDataFactory.fillDefaults().exclude(true).applyTo(button);
+        }
+    }
 }

@@ -24,41 +24,41 @@ import com.openshift.restclient.model.IResource;
  *
  */
 public class ConnectionsRegistryUtil {
-	
-	private ConnectionsRegistryUtil() {
-	}
-	
-	/**
-	 * Retrieve the connection for the given resource
-	 * 
-	 * @param resource
-	 * @return a connection
-	 * @throws ConnectionNotFoundException  if the connection can't be found
-	 */
-	public static Connection getConnectionFor(IResource resource) {
-		if (resource == null) {
-			return null;
-		}
-		Connection connection = safeGetConnectionFor(resource);
-		if(connection == null) {
-			throw new ConnectionNotFoundException(resource);
-		}
-		return connection;
-	}
-	
-	/**
-	 * Retrieve the connection for the given resources
-	 * @param resource
-	 * @return the connection or null if not found
-	 */
-	public static Connection safeGetConnectionFor(IResource resource) {
-		Collection<Connection> all = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
-		for (Connection connection : all) {
-			if(connection.ownsResource(resource)) {
-				return connection;
-			}
-		}
-		return null;
-	}
+
+    private ConnectionsRegistryUtil() {
+    }
+
+    /**
+     * Retrieve the connection for the given resource
+     * 
+     * @param resource
+     * @return a connection
+     * @throws ConnectionNotFoundException  if the connection can't be found
+     */
+    public static Connection getConnectionFor(IResource resource) {
+        if (resource == null) {
+            return null;
+        }
+        Connection connection = safeGetConnectionFor(resource);
+        if (connection == null) {
+            throw new ConnectionNotFoundException(resource);
+        }
+        return connection;
+    }
+
+    /**
+     * Retrieve the connection for the given resources
+     * @param resource
+     * @return the connection or null if not found
+     */
+    public static Connection safeGetConnectionFor(IResource resource) {
+        Collection<Connection> all = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
+        for (Connection connection : all) {
+            if (connection.ownsResource(resource)) {
+                return connection;
+            }
+        }
+        return null;
+    }
 
 }

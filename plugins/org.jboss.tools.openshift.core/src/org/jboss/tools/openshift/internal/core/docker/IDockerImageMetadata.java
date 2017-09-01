@@ -16,16 +16,16 @@ import java.util.Set;
 
 public interface IDockerImageMetadata {
 
-	Set<String> exposedPorts();
-	
-	List<String> env();
+    Set<String> exposedPorts();
 
-	/**
-	 * Returns the labels that are defined for the Config section this docker image
-	 * 
-	 * @return
-	 */
-	Map<String, String> labels();
+    List<String> env();
 
-	Set<String> volumes();
+    /**
+     * Returns the labels that are defined for the Config section this docker image
+     * 
+     * @return
+     */
+    Map<String, String> labels();
+
+    Set<String> volumes();
 }

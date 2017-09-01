@@ -22,14 +22,14 @@ import org.jboss.reddeer.eclipse.wst.server.ui.view.ServersViewEnums.ServerState
 public class ServerHasState extends AbstractWaitCondition {
 
 	private ServerState state;
-	
+
 	private Server server;
-	
+
 	public ServerHasState(Server server, ServerState state) {
 		this.server = server;
 		this.state = state;
 	}
-	
+
 	@Override
 	public boolean test() {
 		return state.equals(server.getLabel().getState());
@@ -39,5 +39,5 @@ public class ServerHasState extends AbstractWaitCondition {
 	public String description() {
 		return "server's state is: " + state.getText();
 	}
-	
+
 }

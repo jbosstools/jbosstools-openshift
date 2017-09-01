@@ -16,7 +16,8 @@ import org.jboss.reddeer.swt.impl.tree.DefaultTree;
 
 public class TreeIsAvailable extends AbstractWaitCondition {
 
-	public TreeIsAvailable() { }
+	public TreeIsAvailable() {
+	}
 
 	@Override
 	public boolean test() {

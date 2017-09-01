@@ -26,49 +26,48 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IProject;
 
-
 /**
  * @author jeff.cantrill
  */
 public class NewProjectWizard extends AbstractOpenShiftWizard<NewProjectWizardModel> {
 
-	private NewProjectWizardPage newProjectWizardPage;
+    private NewProjectWizardPage newProjectWizardPage;
 
-	public NewProjectWizard(Connection connection, List<IProject> projects) {
-		super("Create OpenShift Project", new NewProjectWizardModel(connection, projects));
-	}
+    public NewProjectWizard(Connection connection, List<IProject> projects) {
+        super("Create OpenShift Project", new NewProjectWizardModel(connection, projects));
+    }
 
-	@Override
-	public boolean performFinish() {
-		AbstractDelegatingMonitorJob job = 
-				new AbstractDelegatingMonitorJob(NLS.bind("Creating project {0}...", getModel().getProjectName())) {
-			@Override
-			protected IStatus doRun(IProgressMonitor monitor) {
-				try {
-					getModel().createProject();
-					return Status.OK_STATUS;
-				} catch (OpenShiftException e) {
-					String problem = e.getStatus()==null?e.getMessage():e.getStatus().getMessage();
-					return	OpenShiftUIActivator.statusFactory().errorStatus(
-							NLS.bind("Could not create project \"{0}\": {1}", getModel().getProjectName(), problem), e);
-				}
-			}
-		};
-		
-		try {
-			WizardUtils.runInWizard(job, getContainer());
-		} catch (InvocationTargetException | InterruptedException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError("Could not create project", e);
-		}
-		return job.getResult() != null && job.getResult().isOK();
-	}
+    @Override
+    public boolean performFinish() {
+        AbstractDelegatingMonitorJob job = new AbstractDelegatingMonitorJob(
+                NLS.bind("Creating project {0}...", getModel().getProjectName())) {
+            @Override
+            protected IStatus doRun(IProgressMonitor monitor) {
+                try {
+                    getModel().createProject();
+                    return Status.OK_STATUS;
+                } catch (OpenShiftException e) {
+                    String problem = e.getStatus() == null ? e.getMessage() : e.getStatus().getMessage();
+                    return OpenShiftUIActivator.statusFactory()
+                            .errorStatus(NLS.bind("Could not create project \"{0}\": {1}", getModel().getProjectName(), problem), e);
+                }
+            }
+        };
 
-	@Override
-	public void addPages() {
-		addPage(this.newProjectWizardPage = new NewProjectWizardPage(getModel(), this));
-	}
-	
-	public IProject getProject() {
-		return newProjectWizardPage.getProject();
-	}
+        try {
+            WizardUtils.runInWizard(job, getContainer());
+        } catch (InvocationTargetException | InterruptedException e) {
+            OpenShiftUIActivator.getDefault().getLogger().logError("Could not create project", e);
+        }
+        return job.getResult() != null && job.getResult().isOK();
+    }
+
+    @Override
+    public void addPages() {
+        addPage(this.newProjectWizardPage = new NewProjectWizardPage(getModel(), this));
+    }
+
+    public IProject getProject() {
+        return newProjectWizardPage.getProject();
+    }
 }

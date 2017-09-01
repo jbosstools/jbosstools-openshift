@@ -36,258 +36,245 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
 public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel> implements IConnectionWrapper {
-	public static final String[] RESOURCE_KINDS = { 
-			ResourceKind.BUILD, 
-			ResourceKind.BUILD_CONFIG,
-			ResourceKind.DEPLOYMENT_CONFIG, 
-			ResourceKind.EVENT, 
-			ResourceKind.IMAGE_STREAM, 
-			ResourceKind.IMAGE_STREAM_TAG, 
-			ResourceKind.POD,
-			ResourceKind.ROUTE, 
-			ResourceKind.REPLICATION_CONTROLLER, 
-			ResourceKind.SERVICE, 
-			ResourceKind.TEMPLATE,
-			ResourceKind.PVC,
-			ResourceKind.PROJECT
-		};
+    public static final String[] RESOURCE_KINDS = { ResourceKind.BUILD, ResourceKind.BUILD_CONFIG, ResourceKind.DEPLOYMENT_CONFIG,
+            ResourceKind.EVENT, ResourceKind.IMAGE_STREAM, ResourceKind.IMAGE_STREAM_TAG, ResourceKind.POD, ResourceKind.ROUTE,
+            ResourceKind.REPLICATION_CONTROLLER, ResourceKind.SERVICE, ResourceKind.TEMPLATE, ResourceKind.PVC, ResourceKind.PROJECT };
 
-	private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
-	private Map<String, ProjectWrapper> projects = new HashMap<>();
-	private ResourceCache resourceCache = new ResourceCache();
+    private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
+    private Map<String, ProjectWrapper> projects = new HashMap<>();
+    private ResourceCache resourceCache = new ResourceCache();
 
-	public ConnectionWrapper(OpenshiftUIModel parent, IOpenShiftConnection wrapped) {
-		super(parent, wrapped);
-	}
+    public ConnectionWrapper(OpenshiftUIModel parent, IOpenShiftConnection wrapped) {
+        super(parent, wrapped);
+    }
 
-	public Collection<IResourceWrapper<?, ?>> getResources() {
-		synchronized (projects) {
-			return new ArrayList<IResourceWrapper<?, ?>>(projects.values());
-		}
-	}
+    public Collection<IResourceWrapper<?, ?>> getResources() {
+        synchronized (projects) {
+            return new ArrayList<IResourceWrapper<?, ?>>(projects.values());
+        }
+    }
 
-	@Override
-	public Collection<IResourceWrapper<?, ?>> getResourcesOfKind(String kind) {
-		if (!ResourceKind.PROJECT.equals(kind)) {
-			return Collections.emptyList();
-		}
-		return getResources();
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends IResourceWrapper<?, ?>> Collection<T> getResourcesOfType(Class<T> clazz) {
-		ArrayList<T> result= new ArrayList<>();
-		for (IResourceWrapper<?, ?> r : getResources()) {
-			if (clazz.isInstance(r)) {
-				result.add((T) r);
-			}
-		}
-		return result;
-	}
-	
-	public LoadingState getState() {
-		return state.get();
-	}
-	
-	void initWith(List<IProject> resources) {
-		synchronized (projects) {
-			resources.forEach(project -> {
-				projects.put(project.getName(), new ProjectWrapper(this, project));
-			});
-		}
-		state.set(LoadingState.LOADED);
-	}
+    @Override
+    public Collection<IResourceWrapper<?, ?>> getResourcesOfKind(String kind) {
+        if (!ResourceKind.PROJECT.equals(kind)) {
+            return Collections.emptyList();
+        }
+        return getResources();
+    }
 
-	public boolean load(IExceptionHandler handler) {
-		if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {
-			startLoadJob(getWrapped(), handler);
-			return true;
-		}
-		return false;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends IResourceWrapper<?, ?>> Collection<T> getResourcesOfType(Class<T> clazz) {
+        ArrayList<T> result = new ArrayList<>();
+        for (IResourceWrapper<?, ?> r : getResources()) {
+            if (clazz.isInstance(r)) {
+                result.add((T)r);
+            }
+        }
+        return result;
+    }
 
-	void startLoadJob(ProjectWrapper projectWrapper, IExceptionHandler handler) {
-		new Job(NLS.bind("Loading OpenShift project {0}...", projectWrapper.getWrapped().getName())) {
+    public LoadingState getState() {
+        return state.get();
+    }
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					IProject project = projectWrapper.getWrapped();
-					IOpenShiftConnection connection = projectWrapper.getParent().getWrapped();
-					WatchManager.getInstance().startWatch(project, connection);
-					Collection<IResource> resources = new HashSet<>();
-					for (String kind : RESOURCE_KINDS) {
-						resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
-					}
-					resources.forEach(r -> resourceCache.add(r));
-					projectWrapper.initWithResources(resources);
-					projectWrapper.fireChanged();
-				} catch (OperationCanceledException e) {
-					projectWrapper.setLoadingState(LoadingState.LOAD_STOPPED);
-				} catch (Throwable e) {
-					projectWrapper.setLoadingState(LoadingState.LOAD_STOPPED);
-					handler.handleException(e);
-				}
-				return Status.OK_STATUS;
-			}
-		}.schedule();
-	}
+    void initWith(List<IProject> resources) {
+        synchronized (projects) {
+            resources.forEach(project -> {
+                projects.put(project.getName(), new ProjectWrapper(this, project));
+            });
+        }
+        state.set(LoadingState.LOADED);
+    }
 
-	private void startLoadJob(IOpenShiftConnection connection, IExceptionHandler handler) {
-		new Job(NLS.bind("Loading OpenShift server {0}...", connection.getHost())) {
+    public boolean load(IExceptionHandler handler) {
+        if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {
+            startLoadJob(getWrapped(), handler);
+            return true;
+        }
+        return false;
+    }
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
-					initWith(projects);
-					state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
-					fireChanged();
-				} catch (OperationCanceledException e) {
-					state.compareAndSet(LoadingState.LOADING, LoadingState.LOAD_STOPPED);
-				} catch (Throwable e) {
-					state.compareAndSet(LoadingState.LOADING, LoadingState.LOAD_STOPPED);
-					handler.handleException(e);
-				}
-				return Status.OK_STATUS;
-			}
-		}.schedule();
-	}
+    void startLoadJob(ProjectWrapper projectWrapper, IExceptionHandler handler) {
+        new Job(NLS.bind("Loading OpenShift project {0}...", projectWrapper.getWrapped().getName())) {
 
-	@SuppressWarnings("unchecked")
-	void connectionChanged(String property, Object oldValue, Object newValue) {
-		if (ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
-			if (newValue != null) {
-				IResource newResource = (IResource) newValue;
-				ProjectWrapper projectWrapper = findProjectWrapper(newResource);
-				if (projectWrapper != null) {
-					if (projectWrapper.getWrapped().equals(newResource)) {
-						projectWrapper.updateWith((IProject) newResource);
-					} else {
-						IResource oldVersion = resourceCache.getCachedVersion(newResource);
-						if (oldVersion == null) {
-							// it's an add
-							handleAdd(projectWrapper, newResource);
-						} else if (ResourceUtils.isOlder(oldVersion, newResource)) {
-							// it's an update
-							handleUpdate(projectWrapper, newResource);
-						}
-					}
-				} else if (oldValue != null) { 
-					// for Pods, which were marked for deletion and whose projects are already deleted
-					resourceCache.remove((IResource)oldValue);
-				}
-			} else if (oldValue != null) {
-				IResource oldResource = resourceCache.getCachedVersion((IResource) oldValue);
-				if (oldResource != null) {
-					ProjectWrapper projectWrapper = findProjectWrapper(oldResource);
-					// it's a remove
-					handleRemove(projectWrapper, oldResource);
-				}
-			} else {
-				// old value == null, new value == null, ignore
-				OpenShiftUIActivator.log(IStatus.WARNING, "old and new value are null",
-						new RuntimeException("Warning origing"));
-			}
-		} else if (ConnectionProperties.PROPERTY_PROJECTS.equals(property) && (newValue instanceof List)) {
-			updateWithResources((List<IProject>)newValue);
-		}
-	}
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                try {
+                    IProject project = projectWrapper.getWrapped();
+                    IOpenShiftConnection connection = projectWrapper.getParent().getWrapped();
+                    WatchManager.getInstance().startWatch(project, connection);
+                    Collection<IResource> resources = new HashSet<>();
+                    for (String kind : RESOURCE_KINDS) {
+                        resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
+                    }
+                    resources.forEach(r -> resourceCache.add(r));
+                    projectWrapper.initWithResources(resources);
+                    projectWrapper.fireChanged();
+                } catch (OperationCanceledException e) {
+                    projectWrapper.setLoadingState(LoadingState.LOAD_STOPPED);
+                } catch (Throwable e) {
+                    projectWrapper.setLoadingState(LoadingState.LOAD_STOPPED);
+                    handler.handleException(e);
+                }
+                return Status.OK_STATUS;
+            }
+        }.schedule();
+    }
 
-	private ProjectWrapper findProjectWrapper(IResource resource) {
-		synchronized (projects) {
-			return projects.get(resource.getNamespace());
-		}
-	}
+    private void startLoadJob(IOpenShiftConnection connection, IExceptionHandler handler) {
+        new Job(NLS.bind("Loading OpenShift server {0}...", connection.getHost())) {
 
-	private void updateWithResources(List<IProject> newValue) {
-		Map<IProject, ProjectWrapper> updated = new HashMap<>();
-		boolean changed = false;
-		synchronized (projects) {
-			HashMap<String, ProjectWrapper> oldWrappers = new HashMap<>(projects);
-			projects.clear();
-			for (IProject r : newValue) {
-				ProjectWrapper existingWrapper = oldWrappers.remove(r.getName());
-				if (existingWrapper == null) {
-					ProjectWrapper newWrapper = new ProjectWrapper(this, r);
-					resourceCache.add(r);
-					projects.put(r.getName(), newWrapper);
-					changed = true;
-				} else {
-					projects.put(r.getName(), existingWrapper);
-					updated.put(r, existingWrapper);
-				}
-			}
-			if (!oldWrappers.isEmpty()) {
-				changed = true;
-			}
-		}
-		updated.keySet().forEach(r -> {
-			ProjectWrapper wrapper = updated.get(r);
-			wrapper.updateWith(r);
-		});		
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                try {
+                    List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
+                    initWith(projects);
+                    state.compareAndSet(LoadingState.LOADING, LoadingState.LOADED);
+                    fireChanged();
+                } catch (OperationCanceledException e) {
+                    state.compareAndSet(LoadingState.LOADING, LoadingState.LOAD_STOPPED);
+                } catch (Throwable e) {
+                    state.compareAndSet(LoadingState.LOADING, LoadingState.LOAD_STOPPED);
+                    handler.handleException(e);
+                }
+                return Status.OK_STATUS;
+            }
+        }.schedule();
+    }
 
-		if (changed) {
-			fireChanged();
-		}
-	}
+    @SuppressWarnings("unchecked")
+    void connectionChanged(String property, Object oldValue, Object newValue) {
+        if (ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
+            if (newValue != null) {
+                IResource newResource = (IResource)newValue;
+                ProjectWrapper projectWrapper = findProjectWrapper(newResource);
+                if (projectWrapper != null) {
+                    if (projectWrapper.getWrapped().equals(newResource)) {
+                        projectWrapper.updateWith((IProject)newResource);
+                    } else {
+                        IResource oldVersion = resourceCache.getCachedVersion(newResource);
+                        if (oldVersion == null) {
+                            // it's an add
+                            handleAdd(projectWrapper, newResource);
+                        } else if (ResourceUtils.isOlder(oldVersion, newResource)) {
+                            // it's an update
+                            handleUpdate(projectWrapper, newResource);
+                        }
+                    }
+                } else if (oldValue != null) {
+                    // for Pods, which were marked for deletion and whose projects are already deleted
+                    resourceCache.remove((IResource)oldValue);
+                }
+            } else if (oldValue != null) {
+                IResource oldResource = resourceCache.getCachedVersion((IResource)oldValue);
+                if (oldResource != null) {
+                    ProjectWrapper projectWrapper = findProjectWrapper(oldResource);
+                    // it's a remove
+                    handleRemove(projectWrapper, oldResource);
+                }
+            } else {
+                // old value == null, new value == null, ignore
+                OpenShiftUIActivator.log(IStatus.WARNING, "old and new value are null", new RuntimeException("Warning origing"));
+            }
+        } else if (ConnectionProperties.PROPERTY_PROJECTS.equals(property) && (newValue instanceof List)) {
+            updateWithResources((List<IProject>)newValue);
+        }
+    }
 
-	protected void handleAdd(ProjectWrapper projectWrapper, IResource newResource) {
-		resourceCache.add(newResource);
-		Collection<IResource> resources = resourceCache.getResources(newResource.getProject().getNamespace());
-		// relying in IResource#equals() definition
-		projectWrapper.updateWithResources(resources);
-	}
+    private ProjectWrapper findProjectWrapper(IResource resource) {
+        synchronized (projects) {
+            return projects.get(resource.getNamespace());
+        }
+    }
 
-	protected void handleRemove(ProjectWrapper projectWrapper, IResource oldResource) {
-		resourceCache.remove(oldResource);
-		if (oldResource instanceof IProject) {
-			synchronized(projects) {
-				projects.remove(oldResource.getName());
-				resourceCache.flush(oldResource.getName());
-				fireChanged();
-			}
-		} else if (projectWrapper != null) {
-			Collection<IResource> resources = resourceCache.getResources(oldResource.getNamespace());
-			projectWrapper.updateWithResources(resources);
-		}
-	}
+    private void updateWithResources(List<IProject> newValue) {
+        Map<IProject, ProjectWrapper> updated = new HashMap<>();
+        boolean changed = false;
+        synchronized (projects) {
+            HashMap<String, ProjectWrapper> oldWrappers = new HashMap<>(projects);
+            projects.clear();
+            for (IProject r : newValue) {
+                ProjectWrapper existingWrapper = oldWrappers.remove(r.getName());
+                if (existingWrapper == null) {
+                    ProjectWrapper newWrapper = new ProjectWrapper(this, r);
+                    resourceCache.add(r);
+                    projects.put(r.getName(), newWrapper);
+                    changed = true;
+                } else {
+                    projects.put(r.getName(), existingWrapper);
+                    updated.put(r, existingWrapper);
+                }
+            }
+            if (!oldWrappers.isEmpty()) {
+                changed = true;
+            }
+        }
+        updated.keySet().forEach(r -> {
+            ProjectWrapper wrapper = updated.get(r);
+            wrapper.updateWith(r);
+        });
 
-	protected void handleUpdate(ProjectWrapper projectWrapper, IResource newResource) {
-		resourceCache.remove(newResource);
-		resourceCache.add(newResource);
-		Collection<IResource> resources = resourceCache.getResources(newResource.getNamespace());
-		// relying in IResource#equals() definition
-		projectWrapper.updateWithResources(resources);
-	}
+        if (changed) {
+            fireChanged();
+        }
+    }
 
-	@Override
-	public void refresh() {
-		updateWithResources(loadProjects());
-		state.set(LoadingState.LOADED);
-		fireChanged();
-		for (ProjectWrapper project : projects.values()) {
-			project.refresh();
-		}
-	}
+    protected void handleAdd(ProjectWrapper projectWrapper, IResource newResource) {
+        resourceCache.add(newResource);
+        Collection<IResource> resources = resourceCache.getResources(newResource.getProject().getNamespace());
+        // relying in IResource#equals() definition
+        projectWrapper.updateWithResources(resources);
+    }
 
-	private List<IProject> loadProjects() {
-		return getWrapped().getResources(ResourceKind.PROJECT);
-	}
+    protected void handleRemove(ProjectWrapper projectWrapper, IResource oldResource) {
+        resourceCache.remove(oldResource);
+        if (oldResource instanceof IProject) {
+            synchronized (projects) {
+                projects.remove(oldResource.getName());
+                resourceCache.flush(oldResource.getName());
+                fireChanged();
+            }
+        } else if (projectWrapper != null) {
+            Collection<IResource> resources = resourceCache.getResources(oldResource.getNamespace());
+            projectWrapper.updateWithResources(resources);
+        }
+    }
 
-	void refresh(ProjectWrapper projectWrapper) {
-		resourceCache.flush(projectWrapper.getWrapped().getNamespace());
-		IProject project = projectWrapper.getWrapped();
-		IOpenShiftConnection connection = projectWrapper.getParent().getWrapped();
-		WatchManager.getInstance().stopWatch(project, connection);
-		WatchManager.getInstance().startWatch(project, connection);
-		Collection<IResource> resources = new HashSet<>();
-		for (String kind : RESOURCE_KINDS) {
-			resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
-		}
-		resources.forEach(r -> resourceCache.add(r));
-		projectWrapper.updateWithResources(resources);
-	}
+    protected void handleUpdate(ProjectWrapper projectWrapper, IResource newResource) {
+        resourceCache.remove(newResource);
+        resourceCache.add(newResource);
+        Collection<IResource> resources = resourceCache.getResources(newResource.getNamespace());
+        // relying in IResource#equals() definition
+        projectWrapper.updateWithResources(resources);
+    }
+
+    @Override
+    public void refresh() {
+        updateWithResources(loadProjects());
+        state.set(LoadingState.LOADED);
+        fireChanged();
+        for (ProjectWrapper project : projects.values()) {
+            project.refresh();
+        }
+    }
+
+    private List<IProject> loadProjects() {
+        return getWrapped().getResources(ResourceKind.PROJECT);
+    }
+
+    void refresh(ProjectWrapper projectWrapper) {
+        resourceCache.flush(projectWrapper.getWrapped().getNamespace());
+        IProject project = projectWrapper.getWrapped();
+        IOpenShiftConnection connection = projectWrapper.getParent().getWrapped();
+        WatchManager.getInstance().stopWatch(project, connection);
+        WatchManager.getInstance().startWatch(project, connection);
+        Collection<IResource> resources = new HashSet<>();
+        for (String kind : RESOURCE_KINDS) {
+            resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
+        }
+        resources.forEach(r -> resourceCache.add(r));
+        projectWrapper.updateWithResources(resources);
+    }
 
 }

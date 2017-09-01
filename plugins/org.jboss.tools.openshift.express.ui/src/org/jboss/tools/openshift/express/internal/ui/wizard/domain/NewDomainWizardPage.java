@@ -40,88 +40,77 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
  */
 public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 
-	private DomainWizardModel pageModel;
+    private DomainWizardModel pageModel;
 
-	public NewDomainWizardPage(DomainWizardModel model, IWizard wizard) {
-		this("New OpenShift Domain", "Please provide a new name for your new OpenShift domain", model, wizard);
-	}
+    public NewDomainWizardPage(DomainWizardModel model, IWizard wizard) {
+        this("New OpenShift Domain", "Please provide a new name for your new OpenShift domain", model, wizard);
+    }
 
-	protected NewDomainWizardPage(String title, String description, DomainWizardModel model, IWizard wizard) {
-		super(title, description, "", wizard);
-		this.pageModel = model;
-	}
-	
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(parent);
-		GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(2).applyTo(parent);
+    protected NewDomainWizardPage(String title, String description, DomainWizardModel model, IWizard wizard) {
+        super(title, description, "", wizard);
+        this.pageModel = model;
+    }
 
-		// domain name
-		Label namespaceLabel = new Label(parent, SWT.NONE);
-		namespaceLabel.setText(ExpressUIMessages.DomainName);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
-		Text namespaceText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(namespaceText);
-		ISWTObservableValue namespaceTextObservable =
-				WidgetProperties.text(SWT.Modify).observe(namespaceText);
-		NamespaceValidator namespaceValidator = new NamespaceValidator(namespaceTextObservable);
-		dbc.addValidationStatusProvider(namespaceValidator);
-		ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null,
-				new RequiredControlDecorationUpdater());
-		IObservableValue namespaceModelObservable =
-				BeanProperties.value(DomainWizardModel.PROPERTY_DOMAIN_ID).observe(pageModel);
-		ValueBindingBuilder
-				.bind(namespaceTextObservable)
-				.to(namespaceModelObservable)
-				.in(dbc);
-	}
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(parent);
+        GridLayoutFactory.fillDefaults().margins(6, 6).numColumns(2).applyTo(parent);
 
-	protected DomainWizardModel getModel() {
-		return pageModel;
-	}
-	
-	@Override
-	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
-	}
+        // domain name
+        Label namespaceLabel = new Label(parent, SWT.NONE);
+        namespaceLabel.setText(ExpressUIMessages.DomainName);
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
+        Text namespaceText = new Text(parent, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(namespaceText);
+        ISWTObservableValue namespaceTextObservable = WidgetProperties.text(SWT.Modify).observe(namespaceText);
+        NamespaceValidator namespaceValidator = new NamespaceValidator(namespaceTextObservable);
+        dbc.addValidationStatusProvider(namespaceValidator);
+        ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+        IObservableValue namespaceModelObservable = BeanProperties.value(DomainWizardModel.PROPERTY_DOMAIN_ID).observe(pageModel);
+        ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
+    }
 
-	class NamespaceValidator extends MultiValidator {
+    protected DomainWizardModel getModel() {
+        return pageModel;
+    }
 
-		private final ISWTObservableValue domainNameObservable;
+    @Override
+    protected void setupWizardPageSupport(DataBindingContext dbc) {
+        ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
+    }
 
-		public NamespaceValidator(ISWTObservableValue domainNameObservable) {
-			this.domainNameObservable = domainNameObservable;
-		}
+    class NamespaceValidator extends MultiValidator {
 
-		@Override
-		protected IStatus validate() {
-			final String domainName = (String) domainNameObservable.getValue();
-			if (pageModel.isCurrentDomainId(domainName)) {
-				return ValidationStatus.cancel(getDescription());
-			}
-			if (domainName.isEmpty()) {
-				return ValidationStatus.cancel(
-						ExpressUIMessages.EnterDomainName);
-			}
-			if (!StringUtils.isAlphaNumeric(domainName)) {
-				return ValidationStatus.error(
-						ExpressUIMessages.DomainNameMayHaveLettersAndDigits);
-			}
-			if (domainName.length() > 16) {
-				return ValidationStatus.error(
-						ExpressUIMessages.DomainNameMaximumLength);
-			}
-			return ValidationStatus.ok();
-		}
+        private final ISWTObservableValue domainNameObservable;
 
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(domainNameObservable);
-			return targets;
-		}
-	}
+        public NamespaceValidator(ISWTObservableValue domainNameObservable) {
+            this.domainNameObservable = domainNameObservable;
+        }
+
+        @Override
+        protected IStatus validate() {
+            final String domainName = (String)domainNameObservable.getValue();
+            if (pageModel.isCurrentDomainId(domainName)) {
+                return ValidationStatus.cancel(getDescription());
+            }
+            if (domainName.isEmpty()) {
+                return ValidationStatus.cancel(ExpressUIMessages.EnterDomainName);
+            }
+            if (!StringUtils.isAlphaNumeric(domainName)) {
+                return ValidationStatus.error(ExpressUIMessages.DomainNameMayHaveLettersAndDigits);
+            }
+            if (domainName.length() > 16) {
+                return ValidationStatus.error(ExpressUIMessages.DomainNameMaximumLength);
+            }
+            return ValidationStatus.ok();
+        }
+
+        @Override
+        public IObservableList getTargets() {
+            WritableList targets = new WritableList();
+            targets.add(domainNameObservable);
+            return targets;
+        }
+    }
 
 }

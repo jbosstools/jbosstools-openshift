@@ -40,60 +40,54 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  */
 public class EditCartridgesHandler extends AbstractDomainHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		IApplication application = getApplication(HandlerUtil.getCurrentSelection(event));
-		if (application != null) {
-			// openshift explorer
-			return openEditEmbeddedCartridgesWizard(application, HandlerUtil.getActiveShell(event));
-		} else {
-			// servers view
-			IServer server = (IServer) 
-					UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
-			if (server == null) {
-				return ExpressUIActivator.createErrorStatus("Could not find application to restart");
-			}
-			final LoadApplicationJob job = new LoadApplicationJob(server);
-			new JobChainBuilder(job)
-					.runWhenSuccessfullyDone(new UIJob("Opening Edit Embedded Cartridges wizard...") {
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        IApplication application = getApplication(HandlerUtil.getCurrentSelection(event));
+        if (application != null) {
+            // openshift explorer
+            return openEditEmbeddedCartridgesWizard(application, HandlerUtil.getActiveShell(event));
+        } else {
+            // servers view
+            IServer server = (IServer)UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
+            if (server == null) {
+                return ExpressUIActivator.createErrorStatus("Could not find application to restart");
+            }
+            final LoadApplicationJob job = new LoadApplicationJob(server);
+            new JobChainBuilder(job).runWhenSuccessfullyDone(new UIJob("Opening Edit Embedded Cartridges wizard...") {
 
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							IApplication application = job.getApplication();
-							if (application == null) {
-								return ExpressUIActivator
-										.createCancelStatus("Could not find application to edit the embedded cartridges of");
-							}
-							return openEditEmbeddedCartridgesWizard(application, HandlerUtil.getActiveShell(event));
-						}
-					})
-					.schedule();
-			return Status.OK_STATUS;
-		}
-	}
+                @Override
+                public IStatus runInUIThread(IProgressMonitor monitor) {
+                    IApplication application = job.getApplication();
+                    if (application == null) {
+                        return ExpressUIActivator.createCancelStatus("Could not find application to edit the embedded cartridges of");
+                    }
+                    return openEditEmbeddedCartridgesWizard(application, HandlerUtil.getActiveShell(event));
+                }
+            }).schedule();
+            return Status.OK_STATUS;
+        }
+    }
 
-	protected IApplication getApplication(ISelection selection) {
-		IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
-		if (application == null) {
-			IEmbeddedCartridge cartridge = UIUtils.getFirstElement(selection, IEmbeddedCartridge.class);
-			if (cartridge != null) {
-				application = cartridge.getApplication();
-			}
-		}
-		return application;
-	}
-	
-	protected IStatus openEditEmbeddedCartridgesWizard(IApplication application, Shell shell) {
-		try {
-			WizardUtils.openWizardDialog(
-					new EditEmbeddedCartridgesWizard(
-							application, ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance())),
-							shell);
-			return Status.OK_STATUS;
-		} catch (OpenShiftException e) {
-			Logger.error("Failed to edit cartridges", e);
-			return ExpressUIActivator.createErrorStatus(
-					NLS.bind("Failed to edit cartridges for application {0}", application.getName()), e);
-		}
-	}
+    protected IApplication getApplication(ISelection selection) {
+        IApplication application = UIUtils.getFirstElement(selection, IApplication.class);
+        if (application == null) {
+            IEmbeddedCartridge cartridge = UIUtils.getFirstElement(selection, IEmbeddedCartridge.class);
+            if (cartridge != null) {
+                application = cartridge.getApplication();
+            }
+        }
+        return application;
+    }
+
+    protected IStatus openEditEmbeddedCartridgesWizard(IApplication application, Shell shell) {
+        try {
+            WizardUtils.openWizardDialog(new EditEmbeddedCartridgesWizard(application,
+                    ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance())), shell);
+            return Status.OK_STATUS;
+        } catch (OpenShiftException e) {
+            Logger.error("Failed to edit cartridges", e);
+            return ExpressUIActivator.createErrorStatus(NLS.bind("Failed to edit cartridges for application {0}", application.getName()),
+                    e);
+        }
+    }
 }

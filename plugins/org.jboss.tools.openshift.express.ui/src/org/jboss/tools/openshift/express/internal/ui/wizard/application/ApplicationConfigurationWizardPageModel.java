@@ -38,422 +38,391 @@ import com.openshift.client.cartridge.IEmbeddableCartridge;
  */
 public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
-	public static final String PROPERTY_APPLICATION_SCALE = "scale";
-	public static final String PROPERTY_CAN_ADDREMOVE_CARTRIDGES = "canAddRemoveCartridges";
-	public static final String PROPERTY_DOMAIN = "domain";
-	public static final String PROPERTY_DOMAINS = "domains";
-	public static final String PROPERTY_EMBEDDED_CARTRIDGES = "embeddedCartridges";
-	public static final String PROPERTY_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
-	public static final String PROPERTY_ENVIRONMENT_VARIABLES = "environmentVariables";
-	public static final String PROPERTY_ENVIRONMENT_VARIABLES_SUPPORTED = "environmentVariablesSupported";
-	public static final String PROPERTY_EXISTING_APPLICATIONS = "existingApplications";
-	public static final String PROPERTY_GEAR_PROFILES = "gearProfiles";
-	public static final String PROPERTY_INITIAL_GITURL = "initialGitUrl";
-	public static final String PROPERTY_RESOURCES_LOADED = "resourcesLoaded";
-	public static final String PROPERTY_SCALABLE_APPLICATION = "scalableApplication";
-	public static final String PROPERTY_SELECTED_APPLICATION_TEMPLATE = "selectedApplicationTemplate";
-	public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
-	public static final String PROPERTY_SELECTED_GEAR_PROFILE = "selectedGearProfile";
-	public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
-	public static final String PROPERTY_USE_INITIAL_GITURL = "useInitialGitUrl";
-	public static final String PROPERTY_INITIAL_GITURL_EDITABLE = "initialGitUrlEditable";
-	public static final String PROPERTY_INITIAL_GITURL_USEREDITABLE = "initialGitUrlUsereditable";
-	
-	private final OpenShiftApplicationWizardModel wizardModel;
+    public static final String PROPERTY_APPLICATION_NAME = "applicationName";
+    public static final String PROPERTY_APPLICATION_SCALE = "scale";
+    public static final String PROPERTY_CAN_ADDREMOVE_CARTRIDGES = "canAddRemoveCartridges";
+    public static final String PROPERTY_DOMAIN = "domain";
+    public static final String PROPERTY_DOMAINS = "domains";
+    public static final String PROPERTY_EMBEDDED_CARTRIDGES = "embeddedCartridges";
+    public static final String PROPERTY_EMBEDDABLE_CARTRIDGES = "embeddableCartridges";
+    public static final String PROPERTY_ENVIRONMENT_VARIABLES = "environmentVariables";
+    public static final String PROPERTY_ENVIRONMENT_VARIABLES_SUPPORTED = "environmentVariablesSupported";
+    public static final String PROPERTY_EXISTING_APPLICATIONS = "existingApplications";
+    public static final String PROPERTY_GEAR_PROFILES = "gearProfiles";
+    public static final String PROPERTY_INITIAL_GITURL = "initialGitUrl";
+    public static final String PROPERTY_RESOURCES_LOADED = "resourcesLoaded";
+    public static final String PROPERTY_SCALABLE_APPLICATION = "scalableApplication";
+    public static final String PROPERTY_SELECTED_APPLICATION_TEMPLATE = "selectedApplicationTemplate";
+    public static final String PROPERTY_SELECTED_CARTRIDGE = "selectedCartridge";
+    public static final String PROPERTY_SELECTED_GEAR_PROFILE = "selectedGearProfile";
+    public static final String PROPERTY_USE_EXISTING_APPLICATION = "useExistingApplication";
+    public static final String PROPERTY_USE_INITIAL_GITURL = "useInitialGitUrl";
+    public static final String PROPERTY_INITIAL_GITURL_EDITABLE = "initialGitUrlEditable";
+    public static final String PROPERTY_INITIAL_GITURL_USEREDITABLE = "initialGitUrlUsereditable";
 
-	private List<IApplication> existingApplications = new ArrayList<>();
-	private List<IGearProfile> gearProfiles = new ArrayList<>();
-	private String existingApplicationName;
-	private boolean resourcesLoaded = false;
-	private ICartridge selectedCartridge;
+    private final OpenShiftApplicationWizardModel wizardModel;
 
-	protected ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
-		this.wizardModel = wizardModel;
-		setupWizardModelListeners(wizardModel);
-	}
+    private List<IApplication> existingApplications = new ArrayList<>();
+    private List<IGearProfile> gearProfiles = new ArrayList<>();
+    private String existingApplicationName;
+    private boolean resourcesLoaded = false;
+    private ICartridge selectedCartridge;
 
-	protected void setupWizardModelListeners(OpenShiftApplicationWizardModel wizardModel) {
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAIN, wizardModel)
-				.forwardTo(PROPERTY_DOMAIN, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAINS, wizardModel)
-				.forwardTo(PROPERTY_DOMAINS, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
-				.forwardTo(PROPERTY_APPLICATION_NAME, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
-				.forwardTo(PROPERTY_EMBEDDED_CARTRIDGES, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_EXISTING_APPLICATION, wizardModel)
-				.forwardTo(PROPERTY_USE_EXISTING_APPLICATION, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
-				.forwardTo(PROPERTY_EMBEDDABLE_CARTRIDGES, this);
-		new PojoEventBridge() {
+    protected ApplicationConfigurationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
+        this.wizardModel = wizardModel;
+        setupWizardModelListeners(wizardModel);
+    }
 
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				fireCanAddRemoveCartridges();
-				fireInitialGitUrlEditable();
-				fireInitialGitUrlUsereditable();
-				firePropertyChange(PROPERTY_SELECTED_APPLICATION_TEMPLATE, event.getOldValue(), event.getNewValue());
-			}
-		}
-		.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_APPLICATION_TEMPLATE, wizardModel);
-		new PojoEventBridge() {
+    protected void setupWizardModelListeners(OpenShiftApplicationWizardModel wizardModel) {
+        new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAIN, wizardModel).forwardTo(PROPERTY_DOMAIN, this);
+        new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAINS, wizardModel).forwardTo(PROPERTY_DOMAINS, this);
+        new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
+                .forwardTo(PROPERTY_APPLICATION_NAME, this);
+        new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
+                .forwardTo(PROPERTY_EMBEDDED_CARTRIDGES, this);
+        new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_USE_EXISTING_APPLICATION, wizardModel)
+                .forwardTo(PROPERTY_USE_EXISTING_APPLICATION, this);
+        new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
+                .forwardTo(PROPERTY_EMBEDDABLE_CARTRIDGES, this);
+        new PojoEventBridge() {
 
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				fireUseInitialGitUrl();
-				fireInitialGitUrlUsereditable();
-			}
-		}
-		.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_INITIAL_GIT_URL, wizardModel);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_INITIAL_GIT_URL, wizardModel)
-				.forwardTo(PROPERTY_INITIAL_GITURL, this);
-	}
+            @Override
+            public void propertyChange(PropertyChangeEvent event) {
+                fireCanAddRemoveCartridges();
+                fireInitialGitUrlEditable();
+                fireInitialGitUrlUsereditable();
+                firePropertyChange(PROPERTY_SELECTED_APPLICATION_TEMPLATE, event.getOldValue(), event.getNewValue());
+            }
+        }.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_APPLICATION_TEMPLATE, wizardModel);
+        new PojoEventBridge() {
 
-	public ExpressConnection getConnection() {
-		return wizardModel.getConnection();
-	}
+            @Override
+            public void propertyChange(PropertyChangeEvent event) {
+                fireUseInitialGitUrl();
+                fireInitialGitUrlUsereditable();
+            }
+        }.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_INITIAL_GIT_URL, wizardModel);
+        new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_INITIAL_GIT_URL, wizardModel)
+                .forwardTo(PROPERTY_INITIAL_GITURL, this);
+    }
 
-	public ApplicationScale getScale() {
-		return wizardModel.getApplicationScale();
-	}
+    public ExpressConnection getConnection() {
+        return wizardModel.getConnection();
+    }
 
-	public void setScale(ApplicationScale scale) {
-		firePropertyChange(PROPERTY_APPLICATION_SCALE
-				, wizardModel.getApplicationScale()
-				, wizardModel.setApplicationScale(scale));
-	}
+    public ApplicationScale getScale() {
+        return wizardModel.getApplicationScale();
+    }
 
-	public String getExistingApplicationName() {
-		return existingApplicationName;
-	}
+    public void setScale(ApplicationScale scale) {
+        firePropertyChange(PROPERTY_APPLICATION_SCALE, wizardModel.getApplicationScale(), wizardModel.setApplicationScale(scale));
+    }
 
-	protected IApplication getApplicationByName(String applicationName, IDomain domain) {
-		IApplication application = null;
-		if (domain != null
-				&& !StringUtils.isEmpty(applicationName)
-				&& isExistingApplication(applicationName)) {
-			application = domain.getApplicationByName(applicationName);
-		}
-		return application;
-	}
+    public String getExistingApplicationName() {
+        return existingApplicationName;
+    }
 
-	public void loadExistingApplications() throws OpenShiftException {
-		IDomain domain = getDomain();
-		if (domain == null) {
-			return;
-		}
+    protected IApplication getApplicationByName(String applicationName, IDomain domain) {
+        IApplication application = null;
+        if (domain != null && !StringUtils.isEmpty(applicationName) && isExistingApplication(applicationName)) {
+            application = domain.getApplicationByName(applicationName);
+        }
+        return application;
+    }
 
-		setResourcesLoaded(false);
-		
-		setExistingApplications(domain.getApplications());
-		
-		setResourcesLoaded(true);
-	}
+    public void loadExistingApplications() throws OpenShiftException {
+        IDomain domain = getDomain();
+        if (domain == null) {
+            return;
+        }
 
-	public void setResourcesLoaded(boolean loaded) {
-		firePropertyChange(PROPERTY_RESOURCES_LOADED, this.resourcesLoaded, this.resourcesLoaded = loaded);
-	}
+        setResourcesLoaded(false);
 
-	public boolean isResourcesLoaded() {
-		return resourcesLoaded;
-	}
+        setExistingApplications(domain.getApplications());
 
-	public boolean isExistingApplication(String applicationName) {
-		return getExistingApplication(applicationName, getDomain()) != null;
-	}
+        setResourcesLoaded(true);
+    }
 
-	private IApplication getExistingApplication(String applicationName, IDomain domain) {
-		if (domain == null
-				|| applicationName == null) {
-			return null;
-		}
+    public void setResourcesLoaded(boolean loaded) {
+        firePropertyChange(PROPERTY_RESOURCES_LOADED, this.resourcesLoaded, this.resourcesLoaded = loaded);
+    }
 
-		return domain.getApplicationByName(applicationName);
-	}
+    public boolean isResourcesLoaded() {
+        return resourcesLoaded;
+    }
 
-	public void setExistingApplications(List<IApplication> existingApplications) {
-		firePropertyChange(PROPERTY_EXISTING_APPLICATIONS
-				, this.existingApplications
-				, this.existingApplications = existingApplications);
-	}
+    public boolean isExistingApplication(String applicationName) {
+        return getExistingApplication(applicationName, getDomain()) != null;
+    }
 
-	public List<IApplication> getExistingApplications() {
-		return existingApplications;
-	}
+    private IApplication getExistingApplication(String applicationName, IDomain domain) {
+        if (domain == null || applicationName == null) {
+            return null;
+        }
 
-	public void loadResources() throws OpenShiftException {
-		ExpressConnection connection = getConnection();
-		if (!wizardModel.isValid(connection)) {
-			return;
-		}
+        return domain.getApplicationByName(applicationName);
+    }
 
-		setResourcesLoaded(false);
+    public void setExistingApplications(List<IApplication> existingApplications) {
+        firePropertyChange(PROPERTY_EXISTING_APPLICATIONS, this.existingApplications, this.existingApplications = existingApplications);
+    }
 
-		loadGearProfiles(getDomain());
-		setEmbeddableCartridges(new ArrayList<ICartridge>(connection.getEmbeddableCartridges()));
+    public List<IApplication> getExistingApplications() {
+        return existingApplications;
+    }
 
-		setResourcesLoaded(true);
-	}
+    public void loadResources() throws OpenShiftException {
+        ExpressConnection connection = getConnection();
+        if (!wizardModel.isValid(connection)) {
+            return;
+        }
 
-	public IApplicationTemplate getSelectedApplicationTemplate() {
-		return wizardModel.getSelectedApplicationTemplate();
-	}
+        setResourcesLoaded(false);
 
-	private void loadGearProfiles(IDomain domain) throws OpenShiftException {
-		if (domain == null) {
-			return;
-		}
-		setGearProfiles(domain.getAvailableGearProfiles());
-	}
+        loadGearProfiles(getDomain());
+        setEmbeddableCartridges(new ArrayList<ICartridge>(connection.getEmbeddableCartridges()));
 
-	public void setGearProfiles(List<IGearProfile> gearProfiles) {
-		firePropertyChange(PROPERTY_GEAR_PROFILES, this.gearProfiles, this.gearProfiles = gearProfiles);
-	}
+        setResourcesLoaded(true);
+    }
 
-	public List<IGearProfile> getGearProfiles() {
-		return gearProfiles;
-	}
+    public IApplicationTemplate getSelectedApplicationTemplate() {
+        return wizardModel.getSelectedApplicationTemplate();
+    }
 
-	public IGearProfile getSelectedGearProfile() {
-		return wizardModel.getApplicationGearProfile();
-	}
+    private void loadGearProfiles(IDomain domain) throws OpenShiftException {
+        if (domain == null) {
+            return;
+        }
+        setGearProfiles(domain.getAvailableGearProfiles());
+    }
 
-	public void setSelectedGearProfile(IGearProfile gearProfile) {
-		firePropertyChange(PROPERTY_SELECTED_GEAR_PROFILE
-				, wizardModel.getApplicationGearProfile()
-				, wizardModel.setApplicationGearProfile(gearProfile));
-	}
+    public void setGearProfiles(List<IGearProfile> gearProfiles) {
+        firePropertyChange(PROPERTY_GEAR_PROFILES, this.gearProfiles, this.gearProfiles = gearProfiles);
+    }
 
-	public IGearProfile getGearProfileByName(String name) {
-		List<IGearProfile> gearProfiles = getGearProfiles();
-		if (gearProfiles == null || name == null) {
-			return null;
-		}
+    public List<IGearProfile> getGearProfiles() {
+        return gearProfiles;
+    }
 
-		IGearProfile matchingGearProfile = null;
-		for (IGearProfile gearProfile : gearProfiles) {
-			if (name.equals(gearProfile.getName())) {
-				matchingGearProfile = gearProfile;
-				break;
-			}
-		}
+    public IGearProfile getSelectedGearProfile() {
+        return wizardModel.getApplicationGearProfile();
+    }
 
-		return matchingGearProfile;
-	}
+    public void setSelectedGearProfile(IGearProfile gearProfile) {
+        firePropertyChange(PROPERTY_SELECTED_GEAR_PROFILE, wizardModel.getApplicationGearProfile(),
+                wizardModel.setApplicationGearProfile(gearProfile));
+    }
 
-	public void setApplicationName(String applicationName) {
-		wizardModel.setApplicationName(applicationName);
-	}
+    public IGearProfile getGearProfileByName(String name) {
+        List<IGearProfile> gearProfiles = getGearProfiles();
+        if (gearProfiles == null || name == null) {
+            return null;
+        }
 
-	public String getApplicationName() {
-		return wizardModel.getApplicationName();
-	}
+        IGearProfile matchingGearProfile = null;
+        for (IGearProfile gearProfile : gearProfiles) {
+            if (name.equals(gearProfile.getName())) {
+                matchingGearProfile = gearProfile;
+                break;
+            }
+        }
 
-	public IApplication getApplication() {
-		return wizardModel.getApplication();
-	}
+        return matchingGearProfile;
+    }
 
-	public void setEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
-		wizardModel.setAvailableEmbeddableCartridges(embeddableCartridges);
-	}
+    public void setApplicationName(String applicationName) {
+        wizardModel.setApplicationName(applicationName);
+    }
 
-	public List<ICartridge> getEmbeddableCartridges() {
-		return wizardModel.getAvailableEmbeddableCartridges();
-	}
+    public String getApplicationName() {
+        return wizardModel.getApplicationName();
+    }
 
-	public void setEmbeddedCartridges(Set<ICartridge> selectedEmbeddableCartridges) {
-		wizardModel.setEmbeddedCartridges(selectedEmbeddableCartridges);
-	}
+    public IApplication getApplication() {
+        return wizardModel.getApplication();
+    }
 
-	public Set<ICartridge> getEmbeddedCartridges() throws OpenShiftException {
-		return wizardModel.getEmbeddedCartridges();
-	}
+    public void setEmbeddableCartridges(List<ICartridge> embeddableCartridges) {
+        wizardModel.setAvailableEmbeddableCartridges(embeddableCartridges);
+    }
 
-	public void addEmbeddedCartridges(ICartridge cartridge) throws OpenShiftException {
-		wizardModel.addEmbeddedCartridges(Collections.<ICartridge> singletonList(cartridge));
-	}
+    public List<ICartridge> getEmbeddableCartridges() {
+        return wizardModel.getAvailableEmbeddableCartridges();
+    }
 
-	public void removeEmbeddedCartridges(ICartridge cartridge) throws OpenShiftException {
-		wizardModel.removeEmbeddedCartridges(Collections.<ICartridge> singletonList(cartridge));
-	}
+    public void setEmbeddedCartridges(Set<ICartridge> selectedEmbeddableCartridges) {
+        wizardModel.setEmbeddedCartridges(selectedEmbeddableCartridges);
+    }
 
-	public ICartridge getSelectedCartridge() throws OpenShiftException {
-		return selectedCartridge;
-	}
+    public Set<ICartridge> getEmbeddedCartridges() throws OpenShiftException {
+        return wizardModel.getEmbeddedCartridges();
+    }
 
-	public void setSelectedCartridge(ICartridge selectedEmbeddableCartridge) {
-		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE,
-				this.selectedCartridge, this.selectedCartridge = selectedEmbeddableCartridge);
-	}
+    public void addEmbeddedCartridges(ICartridge cartridge) throws OpenShiftException {
+        wizardModel.addEmbeddedCartridges(Collections.<ICartridge>singletonList(cartridge));
+    }
 
-	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
-		wizardModel.removeEmbeddedCartridge(cartridge);
-	}
+    public void removeEmbeddedCartridges(ICartridge cartridge) throws OpenShiftException {
+        wizardModel.removeEmbeddedCartridges(Collections.<ICartridge>singletonList(cartridge));
+    }
 
-	protected void fireCanAddRemoveCartridges() {
-		firePropertyChange(PROPERTY_CAN_ADDREMOVE_CARTRIDGES, 
-				!isCanAddRemoveCartridges(), isCanAddRemoveCartridges());
-	}
+    public ICartridge getSelectedCartridge() throws OpenShiftException {
+        return selectedCartridge;
+    }
 
-	/**
-	 * Returns <code>true</code> if the user may modify the cartridges. This is
-	 * not the case when we're using a quickstart. For quickstart the user may
-	 * only choose among alternative, he may neither add/remove cartridges
-	 * modify the downloadable cartridges.
-	 * 
-	 * @return
-	 * 
-	 * @see #getSelectedApplicationTemplate()
-	 * @see IApplicationTemplate#canAddRemoveCartridges()
-	 */
-	public boolean isCanAddRemoveCartridges() {
-		return getSelectedApplicationTemplate() != null
-				&& getSelectedApplicationTemplate().canAddRemoveCartridges();
-	}
+    public void setSelectedCartridge(ICartridge selectedEmbeddableCartridge) {
+        firePropertyChange(PROPERTY_SELECTED_CARTRIDGE, this.selectedCartridge, this.selectedCartridge = selectedEmbeddableCartridge);
+    }
 
-	protected void fireInitialGitUrlEditable() {
-		firePropertyChange(PROPERTY_INITIAL_GITURL_EDITABLE,
-				null, isInitialGitUrlEditable());
-	}
+    public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
+        wizardModel.removeEmbeddedCartridge(cartridge);
+    }
 
-	/**
-	 * Returns <code>true</code> if initial git url is editable. This is not the
-	 * case for quickstarts. For quickstarts the user may not change the initial
-	 * git url.
-	 * 
-	 * @return true if the git url may be edited
-	 * 
-	 * @see IApplicationTemplate#isInitialGitUrlEditable()
-	 * @see #getSelectedApplicationTemplate()
-	 */
-	public boolean isInitialGitUrlEditable() {
-		return getSelectedApplicationTemplate() != null
-				&& getSelectedApplicationTemplate().isInitialGitUrlEditable();
-	}
-	
-	protected void fireInitialGitUrlUsereditable() {
-		firePropertyChange(PROPERTY_INITIAL_GITURL_USEREDITABLE,
-				null, isInitialGitUrlUsereditable());
-	}
-	
-	/**
-	 * Returns <code>true</code> if initial git url exists and is editable. This
-	 * is true if the model is set to use initial git url (#isUseInitialGitUrl)
-	 * and the git url is editable (#isInitialGitUrlEditable).
-	 * 
-	 * @return true if the git url is editable and the user set this model to have an initial git url
-	 * 
-	 * @see #setUseInitialGitUrl(boolean)
-	 * @see #isInitialGitUrlEditable()
-	 */
-	public boolean isInitialGitUrlUsereditable() {
-		return isUseInitialGitUrl()
-				&& isInitialGitUrlEditable();
-	}
-	
-	public boolean hasApplication(String applicationName) throws OpenShiftException {
-		ExpressConnection connection = getConnection();
-		if (wizardModel.isValid(connection)) {
-			return false;
-		}
-		return connection.hasApplication(applicationName, getDomain());
-	}
+    protected void fireCanAddRemoveCartridges() {
+        firePropertyChange(PROPERTY_CAN_ADDREMOVE_CARTRIDGES, !isCanAddRemoveCartridges(), isCanAddRemoveCartridges());
+    }
 
-	public boolean isCurrentDomain(IDomain domain) {
-		if (getDomain() == null) {
-			return domain == null;
-		} else {
-			return getDomain().equals(domain);
-		}
-	}
+    /**
+     * Returns <code>true</code> if the user may modify the cartridges. This is
+     * not the case when we're using a quickstart. For quickstart the user may
+     * only choose among alternative, he may neither add/remove cartridges
+     * modify the downloadable cartridges.
+     * 
+     * @return
+     * 
+     * @see #getSelectedApplicationTemplate()
+     * @see IApplicationTemplate#canAddRemoveCartridges()
+     */
+    public boolean isCanAddRemoveCartridges() {
+        return getSelectedApplicationTemplate() != null && getSelectedApplicationTemplate().canAddRemoveCartridges();
+    }
 
-	public IDomain getDomain() throws OpenShiftException {
-		return wizardModel.getDomain();
-	}
+    protected void fireInitialGitUrlEditable() {
+        firePropertyChange(PROPERTY_INITIAL_GITURL_EDITABLE, null, isInitialGitUrlEditable());
+    }
 
-	public void setDomain(IDomain domain) throws OpenShiftException {
-		wizardModel.setDomain(domain);
-		setEnvironmentVariablesSupported(isEnvironmentVariablesSupported());
-	}
+    /**
+     * Returns <code>true</code> if initial git url is editable. This is not the
+     * case for quickstarts. For quickstarts the user may not change the initial
+     * git url.
+     * 
+     * @return true if the git url may be edited
+     * 
+     * @see IApplicationTemplate#isInitialGitUrlEditable()
+     * @see #getSelectedApplicationTemplate()
+     */
+    public boolean isInitialGitUrlEditable() {
+        return getSelectedApplicationTemplate() != null && getSelectedApplicationTemplate().isInitialGitUrlEditable();
+    }
 
-	public List<IDomain> getDomains() throws OpenShiftException {
-		return wizardModel.getDomains();
-	}
+    protected void fireInitialGitUrlUsereditable() {
+        firePropertyChange(PROPERTY_INITIAL_GITURL_USEREDITABLE, null, isInitialGitUrlUsereditable());
+    }
 
-	public void setDomains(List<IDomain> domains) throws OpenShiftException {
-		wizardModel.setDomains(domains);
-	}
-	
-	public boolean isUseInitialGitUrl() {
-		return wizardModel.isUseInitialGitUrl();
-	}
-	
-	/**
-	 * if <code>true</code> is given this model is set to use an initial git
-	 * url. An initial git url wont get used if <code>false</code> is given.
-	 * 
-	 * @param useInitialGitUrl
-	 */
-	public void setUseInitialGitUrl(boolean useInitialGitUrl) {
-		wizardModel.setUseInitialGitUrl(useInitialGitUrl);
-	}
+    /**
+     * Returns <code>true</code> if initial git url exists and is editable. This
+     * is true if the model is set to use initial git url (#isUseInitialGitUrl)
+     * and the git url is editable (#isInitialGitUrlEditable).
+     * 
+     * @return true if the git url is editable and the user set this model to have an initial git url
+     * 
+     * @see #setUseInitialGitUrl(boolean)
+     * @see #isInitialGitUrlEditable()
+     */
+    public boolean isInitialGitUrlUsereditable() {
+        return isUseInitialGitUrl() && isInitialGitUrlEditable();
+    }
 
-	protected void fireUseInitialGitUrl() {
-		firePropertyChange(PROPERTY_USE_INITIAL_GITURL,
-				null, isUseInitialGitUrl());
-	}
-	
-	public String getInitialGitUrl() {
-		return wizardModel.getInitialGitUrl();
-	}
+    public boolean hasApplication(String applicationName) throws OpenShiftException {
+        ExpressConnection connection = getConnection();
+        if (wizardModel.isValid(connection)) {
+            return false;
+        }
+        return connection.hasApplication(applicationName, getDomain());
+    }
 
-	public void setInitialGitUrl(String initialGitUrl) {
-		firePropertyChange(PROPERTY_INITIAL_GITURL,
-				wizardModel.getInitialGitUrl(),
-				wizardModel.setInitialGitUrl(initialGitUrl));
-	}
+    public boolean isCurrentDomain(IDomain domain) {
+        if (getDomain() == null) {
+            return domain == null;
+        } else {
+            return getDomain().equals(domain);
+        }
+    }
 
-	public void resetInitialGitUrl() {
-		setInitialGitUrl(null);
-	}
+    public IDomain getDomain() throws OpenShiftException {
+        return wizardModel.getDomain();
+    }
 
-	public Map<String, String> getEnvironmentVariables() {
-		return wizardModel.getEnvironmentVariables();
-	}
+    public void setDomain(IDomain domain) throws OpenShiftException {
+        wizardModel.setDomain(domain);
+        setEnvironmentVariablesSupported(isEnvironmentVariablesSupported());
+    }
 
-	public void setEnvironmentVariables(Map<String, String> environmentVariables) {
-		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES,
-				wizardModel.getEnvironmentVariables(),
-				wizardModel.setEnvironmentVariables(environmentVariables));
+    public List<IDomain> getDomains() throws OpenShiftException {
+        return wizardModel.getDomains();
+    }
 
-	}
+    public void setDomains(List<IDomain> domains) throws OpenShiftException {
+        wizardModel.setDomains(domains);
+    }
 
-	public void setEnvironmentVariablesSupported(boolean supported) {
-		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES_SUPPORTED, null, isEnvironmentVariablesSupported());
-	}
+    public boolean isUseInitialGitUrl() {
+        return wizardModel.isUseInitialGitUrl();
+    }
 
-	/**
-	 * Returns <code>true</code> if the domain used in this model supports
-	 * environment variables.
-	 * 
-	 * @return true if environment variables are supported.
-	 * 
-	 * @see IDomain#canCreateApplicationWithEnvironmentVariables()
-	 */
-	public boolean isEnvironmentVariablesSupported() {
-		return getDomain() != null
-				&& getDomain().canCreateApplicationWithEnvironmentVariables();
-	}
-	
-	public boolean isUseExistingApplication() {
-		return wizardModel.isUseExistingApplication();
-	}
+    /**
+     * if <code>true</code> is given this model is set to use an initial git
+     * url. An initial git url wont get used if <code>false</code> is given.
+     * 
+     * @param useInitialGitUrl
+     */
+    public void setUseInitialGitUrl(boolean useInitialGitUrl) {
+        wizardModel.setUseInitialGitUrl(useInitialGitUrl);
+    }
+
+    protected void fireUseInitialGitUrl() {
+        firePropertyChange(PROPERTY_USE_INITIAL_GITURL, null, isUseInitialGitUrl());
+    }
+
+    public String getInitialGitUrl() {
+        return wizardModel.getInitialGitUrl();
+    }
+
+    public void setInitialGitUrl(String initialGitUrl) {
+        firePropertyChange(PROPERTY_INITIAL_GITURL, wizardModel.getInitialGitUrl(), wizardModel.setInitialGitUrl(initialGitUrl));
+    }
+
+    public void resetInitialGitUrl() {
+        setInitialGitUrl(null);
+    }
+
+    public Map<String, String> getEnvironmentVariables() {
+        return wizardModel.getEnvironmentVariables();
+    }
+
+    public void setEnvironmentVariables(Map<String, String> environmentVariables) {
+        firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, wizardModel.getEnvironmentVariables(),
+                wizardModel.setEnvironmentVariables(environmentVariables));
+
+    }
+
+    public void setEnvironmentVariablesSupported(boolean supported) {
+        firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES_SUPPORTED, null, isEnvironmentVariablesSupported());
+    }
+
+    /**
+     * Returns <code>true</code> if the domain used in this model supports
+     * environment variables.
+     * 
+     * @return true if environment variables are supported.
+     * 
+     * @see IDomain#canCreateApplicationWithEnvironmentVariables()
+     */
+    public boolean isEnvironmentVariablesSupported() {
+        return getDomain() != null && getDomain().canCreateApplicationWithEnvironmentVariables();
+    }
+
+    public boolean isUseExistingApplication() {
+        return wizardModel.isUseExistingApplication();
+    }
 }

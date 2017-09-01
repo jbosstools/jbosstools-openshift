@@ -48,105 +48,109 @@ import com.openshift.restclient.model.template.ITemplate;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CreateApplicationFromTemplateJobTest {
-	
-	@Mock private IProjectTemplateProcessing capability;
-	@Mock private IClientCapability clientCapability;
-	@Mock private IClient client;
-	@Mock private ITemplate template;
-	@Mock private IProject project;
-	
-	private Collection<Label> labels = new ArrayList<>();
-	private Collection<IParameter> parameters = new ArrayList<>();
-	
-	private CreateApplicationFromTemplateJobRunner job;
-	private Collection<IResource> resources = new ArrayList<>();
-	
-	@SuppressWarnings("unchecked")
-	@Before
-	public void setUp() throws Exception {
-		labels.add(new Label("foo", "bar"));
-		job = spy(new CreateApplicationFromTemplateJobRunner(project, template, parameters, labels));
-		when(client.get(anyString(), anyString(), anyString())).thenThrow(OpenShiftException.class);
-		when(clientCapability.getClient()).thenReturn(client);
-		
-		
-		when(project.accept(isA(CapabilityVisitor.class), any()))
-		.thenAnswer(new Answer() {
-				@Override
-				public Object answer(InvocationOnMock args) throws Throwable {
-					if( args.getArguments()[1] instanceof IStatus) {
-						CapabilityVisitor<IProjectTemplateProcessing, IStatus> visitor = (CapabilityVisitor<IProjectTemplateProcessing, IStatus>) args.getArguments()[0];
-						return visitor.visit(capability);
-						
-					} else if (args.getArguments()[1] instanceof Collection) {
-						CapabilityVisitor<IClientCapability, Collection> visitor = (CapabilityVisitor<IClientCapability, Collection>) args.getArguments()[0];
-						return visitor.visit(clientCapability);
-					}
-					return null;
-				}
-			});
 
-	}
+    @Mock
+    private IProjectTemplateProcessing capability;
+    @Mock
+    private IClientCapability clientCapability;
+    @Mock
+    private IClient client;
+    @Mock
+    private ITemplate template;
+    @Mock
+    private IProject project;
 
-	/*
-	 * Display failed resources and end wizard
-	 */
-	@Test
-	public void shouldNotifyAndReturnWarningStatusWhenResourcesAlreadyExist() {
-		IResource resource = mock(IResource.class);
-		when(resource.getKind()).thenReturn(ResourceKind.IMAGE_STREAM);
-		IResource status = mock(com.openshift.restclient.model.IStatus.class);
-		when(status.getKind()).thenReturn(ResourceKind.STATUS);
-		resources.add(resource);
-		resources.add(status);
-		
-		when(capability.process(template)).thenReturn(template);
-		when(capability.apply(template)).thenReturn(resources);
+    private Collection<Label> labels = new ArrayList<>();
+    private Collection<IParameter> parameters = new ArrayList<>();
 
-		IStatus result = job.runMe();
+    private CreateApplicationFromTemplateJobRunner job;
+    private Collection<IResource> resources = new ArrayList<>();
 
-		assertEquals(IStatus.WARNING, result.getSeverity());
-	}
-	
-	/*
-	 * End wizard
-	 */
-	@Test
-	public void shouldReturnInfoStatusWhenAllResourcesCreatedWithoutErrors() {
-		when(capability.process(template)).thenReturn(template);
-		when(capability.apply(template)).thenReturn(resources);
-		
-		IStatus result = job.runMe();
-		
-		assertEquals(IStatus.OK, result.getSeverity());
-		assertEquals(resources, job.getResources());
-		verify(template).updateParameterValues(anyCollectionOf(IParameter.class));
-		verify(template).addObjectLabel(anyString(), anyString());
-	}
-	
-	/*
-	 * Display failed resources and end wizard
-	 */
-	@Test
-	public void shouldReturnErrorWhenThereIsAnException() {
-		final String message = "Test with exception";
-		when(capability.process(template)).thenThrow(new OpenShiftException(message));
-		IStatus result = job.runMe();
-		assertEquals(IStatus.ERROR, result.getSeverity());
-		assertEquals(message, result.getMessage());
-	}
-	
-	public static class CreateApplicationFromTemplateJobRunner extends CreateApplicationFromTemplateJob{
+    @SuppressWarnings("unchecked")
+    @Before
+    public void setUp() throws Exception {
+        labels.add(new Label("foo", "bar"));
+        job = spy(new CreateApplicationFromTemplateJobRunner(project, template, parameters, labels));
+        when(client.get(anyString(), anyString(), anyString())).thenThrow(OpenShiftException.class);
+        when(clientCapability.getClient()).thenReturn(client);
 
-		public CreateApplicationFromTemplateJobRunner(IProject project,
-				ITemplate template, Collection<IParameter> parameters,
-				Collection<Label> labels) {
-			super(project, template, parameters, labels);
-		}
-		
-		public IStatus runMe() {
-			return doRun(null);
-		}
-		
-	}
+        when(project.accept(isA(CapabilityVisitor.class), any())).thenAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock args) throws Throwable {
+                if (args.getArguments()[1] instanceof IStatus) {
+                    CapabilityVisitor<IProjectTemplateProcessing, IStatus> visitor = (CapabilityVisitor<IProjectTemplateProcessing, IStatus>)args
+                            .getArguments()[0];
+                    return visitor.visit(capability);
+
+                } else if (args.getArguments()[1] instanceof Collection) {
+                    CapabilityVisitor<IClientCapability, Collection> visitor = (CapabilityVisitor<IClientCapability, Collection>)args
+                            .getArguments()[0];
+                    return visitor.visit(clientCapability);
+                }
+                return null;
+            }
+        });
+
+    }
+
+    /*
+     * Display failed resources and end wizard
+     */
+    @Test
+    public void shouldNotifyAndReturnWarningStatusWhenResourcesAlreadyExist() {
+        IResource resource = mock(IResource.class);
+        when(resource.getKind()).thenReturn(ResourceKind.IMAGE_STREAM);
+        IResource status = mock(com.openshift.restclient.model.IStatus.class);
+        when(status.getKind()).thenReturn(ResourceKind.STATUS);
+        resources.add(resource);
+        resources.add(status);
+
+        when(capability.process(template)).thenReturn(template);
+        when(capability.apply(template)).thenReturn(resources);
+
+        IStatus result = job.runMe();
+
+        assertEquals(IStatus.WARNING, result.getSeverity());
+    }
+
+    /*
+     * End wizard
+     */
+    @Test
+    public void shouldReturnInfoStatusWhenAllResourcesCreatedWithoutErrors() {
+        when(capability.process(template)).thenReturn(template);
+        when(capability.apply(template)).thenReturn(resources);
+
+        IStatus result = job.runMe();
+
+        assertEquals(IStatus.OK, result.getSeverity());
+        assertEquals(resources, job.getResources());
+        verify(template).updateParameterValues(anyCollectionOf(IParameter.class));
+        verify(template).addObjectLabel(anyString(), anyString());
+    }
+
+    /*
+     * Display failed resources and end wizard
+     */
+    @Test
+    public void shouldReturnErrorWhenThereIsAnException() {
+        final String message = "Test with exception";
+        when(capability.process(template)).thenThrow(new OpenShiftException(message));
+        IStatus result = job.runMe();
+        assertEquals(IStatus.ERROR, result.getSeverity());
+        assertEquals(message, result.getMessage());
+    }
+
+    public static class CreateApplicationFromTemplateJobRunner extends CreateApplicationFromTemplateJob {
+
+        public CreateApplicationFromTemplateJobRunner(IProject project, ITemplate template, Collection<IParameter> parameters,
+                Collection<Label> labels) {
+            super(project, template, parameters, labels);
+        }
+
+        public IStatus runMe() {
+            return doRun(null);
+        }
+
+    }
 }

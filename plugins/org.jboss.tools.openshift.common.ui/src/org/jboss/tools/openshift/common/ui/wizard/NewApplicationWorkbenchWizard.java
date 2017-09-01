@@ -19,15 +19,15 @@ import org.eclipse.ui.INewWizard;
  * 
  */
 public class NewApplicationWorkbenchWizard extends AbstractApplicationWorkbenchWizard implements INewWizard {
-	
-	public NewApplicationWorkbenchWizard() {
-		super("New OpenShift Application");
-	}
 
-	private static final String NEW_APPLICATION_WIZARD_EXTENSION = "org.jboss.tools.openshift.ui.newApplicationWizard";
+    public NewApplicationWorkbenchWizard() {
+        super("New OpenShift Application");
+    }
 
-	@Override
-	protected String getWizardsExtensionId() {
-		return NEW_APPLICATION_WIZARD_EXTENSION;
-	}
+    private static final String NEW_APPLICATION_WIZARD_EXTENSION = "org.jboss.tools.openshift.ui.newApplicationWizard";
+
+    @Override
+    protected String getWizardsExtensionId() {
+        return NEW_APPLICATION_WIZARD_EXTENSION;
+    }
 }

@@ -29,7 +29,7 @@ public class SystemProperties {
 	private static final String KEY_SECURE_STORAGE_PASSWORD = "securestorage.password";
 
 	// secure storage
-	public static final String SECURE_STORAGE_PASSWORD = getRequiredProperty(KEY_SECURE_STORAGE_PASSWORD, 
+	public static final String SECURE_STORAGE_PASSWORD = getRequiredProperty(KEY_SECURE_STORAGE_PASSWORD,
 			"Please add '-D" + KEY_SECURE_STORAGE_PASSWORD + "=[Eclipse secure storage password]' to your launch arguments");
 
 	public static String getRequiredProperty(String key, String errorMessage) {

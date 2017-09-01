@@ -22,32 +22,32 @@ import com.openshift.client.IDomain;
  */
 public class ManageDomainsWizard extends AbstractOpenShiftWizard<ManageDomainsWizardPageModel> {
 
-	private String description;
+    private String description;
 
-	public ManageDomainsWizard(String title, String description, ExpressConnection connection) {
-		this(title, description, null, connection);
-	}
+    public ManageDomainsWizard(String title, String description, ExpressConnection connection) {
+        this(title, description, null, connection);
+    }
 
-	public ManageDomainsWizard(String title, String description, IDomain domain, ExpressConnection connection) {
-		super(title, new ManageDomainsWizardPageModel(domain, connection));
-		this.description = description;
-	}
+    public ManageDomainsWizard(String title, String description, IDomain domain, ExpressConnection connection) {
+        super(title, new ManageDomainsWizardPageModel(domain, connection));
+        this.description = description;
+    }
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
-	
-	@Override
-	public void addPages() {
-		addPage(new ManageDomainsWizardPage(getWindowTitle(), description, getModel(), this));
-	}
-	
-	public List<IDomain> getDomains() {
-		return getModel().getDomains();
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
 
-	public IDomain getDomain() {
-		return getModel().getSelectedDomain();
-	}
+    @Override
+    public void addPages() {
+        addPage(new ManageDomainsWizardPage(getWindowTitle(), description, getModel(), this));
+    }
+
+    public List<IDomain> getDomains() {
+        return getModel().getDomains();
+    }
+
+    public IDomain getDomain() {
+        return getModel().getSelectedDomain();
+    }
 }

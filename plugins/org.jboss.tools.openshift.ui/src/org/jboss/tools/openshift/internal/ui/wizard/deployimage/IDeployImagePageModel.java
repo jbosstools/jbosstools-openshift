@@ -25,163 +25,161 @@ import com.openshift.restclient.model.IProject;
  * @author jeff.cantrill
  *
  */
-public interface IDeployImagePageModel extends IConnectionAware<Connection>{
+public interface IDeployImagePageModel extends IConnectionAware<Connection> {
 
-	static final String PROPERTY_CONNECTIONS = "connections";
-	static final String PROPERTY_DOCKER_CONNECTIONS = "dockerConnections";
-	static final String PROPERTY_DOCKER_CONNECTION = "dockerConnection";
-	static final String PROPERTY_PROJECTS = "projects";
-	static final String PROPERTY_PROJECT = "project";
-	static final String PROPERTY_RESOURCE_NAME = "resourceName";
-	static final String PROPERTY_IMAGE_NAME = "imageName";
-	static final String PROPERTY_PUSH_IMAGE_TO_REGISTRY = "pushImageToRegistry";
-	static final String PROPERTY_TARGET_REGISTRY_LOCATION = "targetRegistryLocation";
-	static final String PROPERTY_TARGET_REGISTRY_USERNAME = "targetRegistryUsername";
-	static final String PROPERTY_TARGET_REGISTRY_PASSWORD = "targetRegistryPassword";
-	
-	
-	/**
-	 * 
-	 */
-	boolean originatedFromDockerExplorer();
+    static final String PROPERTY_CONNECTIONS = "connections";
+    static final String PROPERTY_DOCKER_CONNECTIONS = "dockerConnections";
+    static final String PROPERTY_DOCKER_CONNECTION = "dockerConnection";
+    static final String PROPERTY_PROJECTS = "projects";
+    static final String PROPERTY_PROJECT = "project";
+    static final String PROPERTY_RESOURCE_NAME = "resourceName";
+    static final String PROPERTY_IMAGE_NAME = "imageName";
+    static final String PROPERTY_PUSH_IMAGE_TO_REGISTRY = "pushImageToRegistry";
+    static final String PROPERTY_TARGET_REGISTRY_LOCATION = "targetRegistryLocation";
+    static final String PROPERTY_TARGET_REGISTRY_USERNAME = "targetRegistryUsername";
+    static final String PROPERTY_TARGET_REGISTRY_PASSWORD = "targetRegistryPassword";
 
-	/**
-	 * Returns true if model is initialized with active connection selected project and
-	 * when wizard is originated from docker explorer connection page may be skipped.
-	 * @return
-	 */
-	boolean isStartedWithActiveConnection();
-	
-	/**
-	 * The set of known OpenShift connections
-	 * @return
-	 */
-	Collection<Connection> getConnections();
+    /**
+     * 
+     */
+    boolean originatedFromDockerExplorer();
 
-	List<IDockerConnection> getDockerConnections();
-	
-	IDockerConnection getDockerConnection();
-	
-	void setDockerConnection(IDockerConnection connection);
-	
-	/**
-	 * The list of OpenShift projects associated with a the selected
-	 * OpenShift connection
-	 * @return
-	 */
-	List<IProject> getProjects();
-	
-	/**
-	 * Adds the given project to the list of projects in this model.
-	 * Does nothing if the project is {@code null}.
-	 * 
-	 * @param project the project that should be added
-	 */
-	void addProject(IProject project);
-	
-	void setProjectsComparator(Comparator<IProject> comparator);
+    /**
+     * Returns true if model is initialized with active connection selected project and
+     * when wizard is originated from docker explorer connection page may be skipped.
+     * @return
+     */
+    boolean isStartedWithActiveConnection();
 
-	/**
-	 * The project to associate with this deployment
-	 * @return
-	 */
-	IProject getProject();
-	
-	void setProject(IProject project);
-	
-	/**
-	 * @return the name to be used for the deployed resources
-	 */
-	String getResourceName();
-	
-	/**
-	 * Sets the name to be used for the deployed resources
-	 * @param resourceName the name to be used for the deployed resources
-	 */
-	void setResourceName(String resourceName);
-	
-	/**
-	 * @return the name of the Docker Image to use
-	 */
-	String getImageName();
-	
-	/**
-	 * Sets the name of the Docker Image to use
-	 * @param imageName the name of the Docker Image to use
-	 */
-	void setImageName(String imageName);
+    /**
+     * The set of known OpenShift connections
+     * @return
+     */
+    Collection<Connection> getConnections();
 
-	/**
-	 * Since method setImageName(String) ignores attempts to set an empty value, 
-	 * ui gets not synchronized with model as soon as image name is cleared.
-	 * Then, if the previous value is selected again, model will not be changed
-	 * if that method is called, and will not fire change event. This method forces it.
-	 * @param imageName
-	 * @param forceUpdate
-	 */
-	void setImageName(String imageName, boolean forceUpdate);
+    List<IDockerConnection> getDockerConnections();
 
-	/**
-	 * @return the list of names of all images for the current Docker connection.
-	 */
-	List<String> getImageNames();
-	
+    IDockerConnection getDockerConnection();
 
-	/**
-	 * @return flag to indicate if the image should be pushed to the Docker registry on OpenShift
-	 */
-	boolean isPushImageToRegistry();
+    void setDockerConnection(IDockerConnection connection);
 
-	/**
-	 * @param pushImageToRegistry flag to indicate if the image should be pushed to the Docker registry on OpenShift
-	 */
-	void setPushImageToRegistry(boolean pushImageToRegistry);
-	
-	/**
-	 * @return the URL to the target registry where the image will be pushed
-	 */
-	String getTargetRegistryLocation();
-	
-	/**
-	 * @param targetRegistryLocation the URL to the target registry where the image will be pushed
-	 */
-	void setTargetRegistryLocation(String targetRegistryLocation);
-	
-	/**
-	 * @return the username to connect to the target registry where the image will be pushed
-	 */
-	String getTargetRegistryUsername();
-	
-	/**
-	 * @param targetRegistryUsername the username to connect to the target registry where the image will be pushed
-	 */
-	void setTargetRegistryUsername(String targetRegistryUsername);
-	
-	/**
-	 * @return the password to connect to the target registry where the image will be pushed
-	 */
-	String getTargetRegistryPassword();
-	
-	/**
-	 * @param targetRegistryPassword the password to connect to the target registry where the image will be pushed
-	 */
-	void setTargetRegistryPassword(String targetRegistryPassword);
-	
-	/**
-	 * Initializes the container info from the selected Docker Image.
-	 * 
-	 * <p>
-	 * <strong>Note:</strong> This operation can be consuming since it may
-	 * involve remote calls to retrive the Docker Image metadata.
-	 * 
-	 * @return <code>true</code> if the initialization succeeded, <code>false</code> otherwise.
-	 */
-	boolean initializeContainerInfo();
-	
-	public void loadResources();
+    /**
+     * The list of OpenShift projects associated with a the selected
+     * OpenShift connection
+     * @return
+     */
+    List<IProject> getProjects();
 
-	/**
-	 * Free any resource
-	 */
-	void dispose();
+    /**
+     * Adds the given project to the list of projects in this model.
+     * Does nothing if the project is {@code null}.
+     * 
+     * @param project the project that should be added
+     */
+    void addProject(IProject project);
+
+    void setProjectsComparator(Comparator<IProject> comparator);
+
+    /**
+     * The project to associate with this deployment
+     * @return
+     */
+    IProject getProject();
+
+    void setProject(IProject project);
+
+    /**
+     * @return the name to be used for the deployed resources
+     */
+    String getResourceName();
+
+    /**
+     * Sets the name to be used for the deployed resources
+     * @param resourceName the name to be used for the deployed resources
+     */
+    void setResourceName(String resourceName);
+
+    /**
+     * @return the name of the Docker Image to use
+     */
+    String getImageName();
+
+    /**
+     * Sets the name of the Docker Image to use
+     * @param imageName the name of the Docker Image to use
+     */
+    void setImageName(String imageName);
+
+    /**
+     * Since method setImageName(String) ignores attempts to set an empty value, 
+     * ui gets not synchronized with model as soon as image name is cleared.
+     * Then, if the previous value is selected again, model will not be changed
+     * if that method is called, and will not fire change event. This method forces it.
+     * @param imageName
+     * @param forceUpdate
+     */
+    void setImageName(String imageName, boolean forceUpdate);
+
+    /**
+     * @return the list of names of all images for the current Docker connection.
+     */
+    List<String> getImageNames();
+
+    /**
+     * @return flag to indicate if the image should be pushed to the Docker registry on OpenShift
+     */
+    boolean isPushImageToRegistry();
+
+    /**
+     * @param pushImageToRegistry flag to indicate if the image should be pushed to the Docker registry on OpenShift
+     */
+    void setPushImageToRegistry(boolean pushImageToRegistry);
+
+    /**
+     * @return the URL to the target registry where the image will be pushed
+     */
+    String getTargetRegistryLocation();
+
+    /**
+     * @param targetRegistryLocation the URL to the target registry where the image will be pushed
+     */
+    void setTargetRegistryLocation(String targetRegistryLocation);
+
+    /**
+     * @return the username to connect to the target registry where the image will be pushed
+     */
+    String getTargetRegistryUsername();
+
+    /**
+     * @param targetRegistryUsername the username to connect to the target registry where the image will be pushed
+     */
+    void setTargetRegistryUsername(String targetRegistryUsername);
+
+    /**
+     * @return the password to connect to the target registry where the image will be pushed
+     */
+    String getTargetRegistryPassword();
+
+    /**
+     * @param targetRegistryPassword the password to connect to the target registry where the image will be pushed
+     */
+    void setTargetRegistryPassword(String targetRegistryPassword);
+
+    /**
+     * Initializes the container info from the selected Docker Image.
+     * 
+     * <p>
+     * <strong>Note:</strong> This operation can be consuming since it may
+     * involve remote calls to retrive the Docker Image metadata.
+     * 
+     * @return <code>true</code> if the initialization succeeded, <code>false</code> otherwise.
+     */
+    boolean initializeContainerInfo();
+
+    public void loadResources();
+
+    /**
+     * Free any resource
+     */
+    void dispose();
 }

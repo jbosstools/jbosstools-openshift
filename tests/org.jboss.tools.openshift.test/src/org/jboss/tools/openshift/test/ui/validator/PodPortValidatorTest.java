@@ -27,71 +27,72 @@ import com.openshift.restclient.model.IServicePort;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PodPortValidatorTest extends AbstractValidatorTest {
-	static final String CURRENT_VALUE = "999";
-	
-	static PodPortValidator createPodPortValidator() {
-		IServicePort port1 = Mockito.mock(IServicePort.class);
-		Mockito.when(port1.getPort()).thenReturn(1000);
-		Mockito.when(port1.getTargetPort()).thenReturn("3000");
-		
-		IServicePort port2 = Mockito.mock(IServicePort.class);
-		Mockito.when(port2.getPort()).thenReturn(2000);
-		Mockito.when(port2.getTargetPort()).thenReturn("home");
-		return new PodPortValidator(CURRENT_VALUE, Arrays.asList(port1, port2));
-	}
-	public PodPortValidatorTest() {
-		super(createPodPortValidator());
-	}
-	
-	@Test
-	public void testShouldReturnPassIfSameValue() {
-		assertPass(CURRENT_VALUE);
-	}
+    static final String CURRENT_VALUE = "999";
 
-	@Test
-	public void testShouldReturnPassIfConforms() {
-		assertPass("30000");
-		assertPass("name");
-		assertPass("name5");
-		assertPass("name-09-09");
-	}
+    static PodPortValidator createPodPortValidator() {
+        IServicePort port1 = Mockito.mock(IServicePort.class);
+        Mockito.when(port1.getPort()).thenReturn(1000);
+        Mockito.when(port1.getTargetPort()).thenReturn("3000");
 
-	@Test
-	public void testShouldReturnFalseIfEmptyValue() {
-		assertCancel("");
-	}
+        IServicePort port2 = Mockito.mock(IServicePort.class);
+        Mockito.when(port2.getPort()).thenReturn(2000);
+        Mockito.when(port2.getTargetPort()).thenReturn("home");
+        return new PodPortValidator(CURRENT_VALUE, Arrays.asList(port1, port2));
+    }
 
-	@Test
-	public void testShouldReturnFalseIfLargeNumber() {
-		assertFailure("100000");
-	}
+    public PodPortValidatorTest() {
+        super(createPodPortValidator());
+    }
 
-	@Test
-	public void testShouldReturnFalseIfNegative() {
-		assertFailure("-1");
-	}
+    @Test
+    public void testShouldReturnPassIfSameValue() {
+        assertPass(CURRENT_VALUE);
+    }
 
-	@Test
-	public void testShouldReturnFalseIfLong() {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < 63; i++) {
-			sb.append("x");
-		}
-		assertPass(sb.toString());
-		sb.append("x");
-		assertFailure(sb.toString());
-	}
+    @Test
+    public void testShouldReturnPassIfConforms() {
+        assertPass("30000");
+        assertPass("name");
+        assertPass("name5");
+        assertPass("name-09-09");
+    }
 
-	@Test
-	public void testShouldReturnFalseIfUsedTargetPort() {
-		assertFailure("3000");
-		assertFailure("home");
-	}
+    @Test
+    public void testShouldReturnFalseIfEmptyValue() {
+        assertCancel("");
+    }
 
-	@Test
-	public void testShouldReturnFalseIfNotValidName() {
-		assertFailure("-g");
-		assertFailure("@x");
-		assertFailure("x$x");
-	}
+    @Test
+    public void testShouldReturnFalseIfLargeNumber() {
+        assertFailure("100000");
+    }
+
+    @Test
+    public void testShouldReturnFalseIfNegative() {
+        assertFailure("-1");
+    }
+
+    @Test
+    public void testShouldReturnFalseIfLong() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 63; i++) {
+            sb.append("x");
+        }
+        assertPass(sb.toString());
+        sb.append("x");
+        assertFailure(sb.toString());
+    }
+
+    @Test
+    public void testShouldReturnFalseIfUsedTargetPort() {
+        assertFailure("3000");
+        assertFailure("home");
+    }
+
+    @Test
+    public void testShouldReturnFalseIfNotValidName() {
+        assertFailure("-g");
+        assertFailure("@x");
+        assertFailure("x$x");
+    }
 }

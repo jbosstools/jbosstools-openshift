@@ -15,27 +15,26 @@ package org.jboss.tools.openshift.internal.common.core.security;
  *
  */
 public class SecureStoreException extends Exception {
-	public static final String ID = "secureStoreException";
+    public static final String ID = "secureStoreException";
 
-	/** generated serialVersionUID. */
-	private static final long serialVersionUID = -1732042851833545771L;
+    /** generated serialVersionUID. */
+    private static final long serialVersionUID = -1732042851833545771L;
 
-	/**
-	 * Full constructor
-	 * @param message the message to print
-	 * @param cause the underlying cause
-	 */
-	public SecureStoreException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * Full constructor
+     * @param message the message to print
+     * @param cause the underlying cause
+     */
+    public SecureStoreException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	/**
-	 * Full constructor
-	 * @param message the message to print
-	 */
-	public SecureStoreException(String message) {
-		super(message);
-	}
-
+    /**
+     * Full constructor
+     * @param message the message to print
+     */
+    public SecureStoreException(String message) {
+        super(message);
+    }
 
 }

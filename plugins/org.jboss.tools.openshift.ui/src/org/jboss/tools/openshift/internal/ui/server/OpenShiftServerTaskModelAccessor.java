@@ -19,27 +19,27 @@ import org.jboss.tools.openshift.core.connection.Connection;
  */
 public class OpenShiftServerTaskModelAccessor {
 
-	public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";
-	public static final String TASK_WIZARD_ATTR_PROJECT = "project";
+    public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";
+    public static final String TASK_WIZARD_ATTR_PROJECT = "project";
 
-	public static void set(Connection connection, TaskModel model) {
-		if (model == null) {
-			return;
-		}
-		model.putObject(TASK_WIZARD_ATTR_CONNECTION, connection);
-	}
+    public static void set(Connection connection, TaskModel model) {
+        if (model == null) {
+            return;
+        }
+        model.putObject(TASK_WIZARD_ATTR_CONNECTION, connection);
+    }
 
-	public static Connection getConnection(TaskModel model) {
-		if (model == null) {
-			return null;
-		}
-		return (Connection) model.getObject(TASK_WIZARD_ATTR_CONNECTION);
-	}
+    public static Connection getConnection(TaskModel model) {
+        if (model == null) {
+            return null;
+        }
+        return (Connection)model.getObject(TASK_WIZARD_ATTR_CONNECTION);
+    }
 
-	public static IServerWorkingCopy getServer(TaskModel model) {
-		if (model == null) {
-			return null;
-		}
-		return (IServerWorkingCopy) model.getObject(TaskModel.TASK_SERVER);
-	}
+    public static IServerWorkingCopy getServer(TaskModel model) {
+        if (model == null) {
+            return null;
+        }
+        return (IServerWorkingCopy)model.getObject(TaskModel.TASK_SERVER);
+    }
 }

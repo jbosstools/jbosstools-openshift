@@ -36,72 +36,70 @@ import com.openshift.restclient.model.IResource;
  * @author Jeff Maury
  */
 public class OpenShiftJobs {
-	
-	private static final long PROJECT_DELETE_DELAY = 500;
-	private static final long MAX_PROJECT_DELETE_DELAY = 5000;
 
-	private OpenShiftJobs() {}
-	
-	/**
-	 * Creates a {@link DeleteResourceJob} to delete an OpenShift {@link IProject}.
-	 */
-	public static DeleteResourceJob createDeleteProjectJob(final IProject project) {
-		Assert.isNotNull(project, "A project must not be null");
-		DeleteResourceJob deleteProjectJob = new DeleteResourceJob(project) {
+    private static final long PROJECT_DELETE_DELAY = 500;
+    private static final long MAX_PROJECT_DELETE_DELAY = 5000;
 
-			@Override
-			protected IStatus doRun(IProgressMonitor monitor) {
-				Connection connection = ConnectionsRegistryUtil.getConnectionFor(project);
-				WatchManager.getInstance().stopWatch(project, connection);
-				List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT);
-				IStatus status = super.doRun(monitor);
-				if(status.isOK()) {
-					if (waitForServerToReconcileProjectDelete(connection, project)) {
-						List<IProject> newProjects = new ArrayList<>(oldProjects);
-						newProjects.remove(project);
-						ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
-								connection , 
-								ConnectionProperties.PROPERTY_PROJECTS, 
-								oldProjects, 
-								newProjects);
-						
-					}
-				}
-				return status;
-			}
+    private OpenShiftJobs() {
+    }
 
-			private boolean waitForServerToReconcileProjectDelete(Connection conn, IProject project) {
-				boolean deleted = false;
-				long sleep = 0;
-				do {
-					try {
-						conn.refresh(project);
-						Thread.sleep(PROJECT_DELETE_DELAY);
-					} catch (InterruptedException e1) {
-					} catch(OpenShiftException ex) {
-						if (ex.getStatus() != null) {
-							final int code = ex.getStatus().getCode();
-							if (code == IHttpConstants.STATUS_NOT_FOUND || code == IHttpConstants.STATUS_FORBIDDEN) {
-								deleted = true;
-							}
-						}
-					} finally {
-						sleep = sleep + PROJECT_DELETE_DELAY;
-					}
-				} while (!deleted && sleep < MAX_PROJECT_DELETE_DELAY);
-				return deleted;
-			}
-		};
-		
-		return deleteProjectJob;
-	}
+    /**
+     * Creates a {@link DeleteResourceJob} to delete an OpenShift {@link IProject}.
+     */
+    public static DeleteResourceJob createDeleteProjectJob(final IProject project) {
+        Assert.isNotNull(project, "A project must not be null");
+        DeleteResourceJob deleteProjectJob = new DeleteResourceJob(project) {
 
-	/**
+            @Override
+            protected IStatus doRun(IProgressMonitor monitor) {
+                Connection connection = ConnectionsRegistryUtil.getConnectionFor(project);
+                WatchManager.getInstance().stopWatch(project, connection);
+                List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT);
+                IStatus status = super.doRun(monitor);
+                if (status.isOK()) {
+                    if (waitForServerToReconcileProjectDelete(connection, project)) {
+                        List<IProject> newProjects = new ArrayList<>(oldProjects);
+                        newProjects.remove(project);
+                        ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_PROJECTS,
+                                oldProjects, newProjects);
+
+                    }
+                }
+                return status;
+            }
+
+            private boolean waitForServerToReconcileProjectDelete(Connection conn, IProject project) {
+                boolean deleted = false;
+                long sleep = 0;
+                do {
+                    try {
+                        conn.refresh(project);
+                        Thread.sleep(PROJECT_DELETE_DELAY);
+                    } catch (InterruptedException e1) {
+                    } catch (OpenShiftException ex) {
+                        if (ex.getStatus() != null) {
+                            final int code = ex.getStatus().getCode();
+                            if (code == IHttpConstants.STATUS_NOT_FOUND || code == IHttpConstants.STATUS_FORBIDDEN) {
+                                deleted = true;
+                            }
+                        }
+                    } finally {
+                        sleep = sleep + PROJECT_DELETE_DELAY;
+                    }
+                } while (!deleted && sleep < MAX_PROJECT_DELETE_DELAY);
+                return deleted;
+            }
+        };
+
+        return deleteProjectJob;
+    }
+
+    /**
      * Creates a {@link DeleteResourceJob} to delete an OpenShift {@link IResource}.
      */
     public static DeleteResourceJob createDeleteResourceJob(final IResource resource) {
         if (resource instanceof IProject) {
-            return createDeleteProjectJob((IProject) resource);
+            return createDeleteProjectJob((IProject)resource);
         } else {
             return new DeleteResourceJob(resource);
         }

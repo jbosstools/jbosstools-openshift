@@ -47,204 +47,205 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ConnectionValidatorsTest {
-	static final String HOST1 = "http://host1";
-	static final String HOST2 = "http://host2";
-	static final String HOST3 = "http://host3";
+    static final String HOST1 = "http://host1";
+    static final String HOST2 = "http://host2";
+    static final String HOST3 = "http://host3";
 
-	static final String USER1 = "user1";
-	static final String USER2 = "user2";
-	static final String USER3 = "user3";
+    static final String USER1 = "user1";
+    static final String USER2 = "user2";
+    static final String USER3 = "user3";
 
-	static final String TOKEN1 = "token1";
-	static final String TOKEN2 = "token2";
-	static final String TOKEN3 = "token3";
+    static final String TOKEN1 = "token1";
+    static final String TOKEN2 = "token2";
+    static final String TOKEN3 = "token3";
 
-	ConnectionsRegistry registry;
-	List<Connection> connections;
+    ConnectionsRegistry registry;
+    List<Connection> connections;
 
-	@Before
-	public void init() {
-		registry = ConnectionsRegistrySingleton.getInstance();
-		connections = new ArrayList<>();
-	}
+    @Before
+    public void init() {
+        registry = ConnectionsRegistrySingleton.getInstance();
+        connections = new ArrayList<>();
+    }
 
-	@Test
-	public void testBasicAuthenticationValidator() {
-		Connection connection1 = mockConnection(HOST1, USER1, null);
-		mockConnection(HOST2, USER2, null);
+    @Test
+    public void testBasicAuthenticationValidator() {
+        Connection connection1 = mockConnection(HOST1, USER1, null);
+        mockConnection(HOST2, USER2, null);
 
-		ConnectionWizardPageModel pageModel = mockConnectionWizardPageModel(connection1);
+        ConnectionWizardPageModel pageModel = mockConnectionWizardPageModel(connection1);
 
-		WritableValue<String> usernameObservable = new WritableValue<String>();
-		WritableValue<String> urlObservable = new WritableValue<String>();
-		MultiValidator v = ConnectionValidatorFactory.createBasicAuthenticationValidator(pageModel, usernameObservable, urlObservable);
+        WritableValue<String> usernameObservable = new WritableValue<String>();
+        WritableValue<String> urlObservable = new WritableValue<String>();
+        MultiValidator v = ConnectionValidatorFactory.createBasicAuthenticationValidator(pageModel, usernameObservable, urlObservable);
 
-		v.observeValidatedValue(urlObservable);
+        v.observeValidatedValue(urlObservable);
 
-		//New connection
-		urlObservable.setValue(HOST3);
-		usernameObservable.setValue(USER3);
-		Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
+        //New connection
+        urlObservable.setValue(HOST3);
+        usernameObservable.setValue(USER3);
+        Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
 
-		urlObservable.setValue(HOST2);
-		//Host exists, but token is different
-		Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
+        urlObservable.setValue(HOST2);
+        //Host exists, but token is different
+        Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
 
-		usernameObservable.setValue(USER2);
-		//Existing not selected connection
-		Assert.assertEquals(IStatus.ERROR, getStatusSeverity(v));
+        usernameObservable.setValue(USER2);
+        //Existing not selected connection
+        Assert.assertEquals(IStatus.ERROR, getStatusSeverity(v));
 
-		//Selected connection
-		urlObservable.setValue(HOST1);
-		usernameObservable.setValue(USER1);
-		Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
-	}
+        //Selected connection
+        urlObservable.setValue(HOST1);
+        usernameObservable.setValue(USER1);
+        Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
+    }
 
-	@Test
-	public void testBasicAuthenticationValidatorInUI() {
-		Connection connection1 = mockConnection(HOST1, USER1, null);
-		mockConnection(HOST2, USER2, null);
+    @Test
+    public void testBasicAuthenticationValidatorInUI() {
+        Connection connection1 = mockConnection(HOST1, USER1, null);
+        mockConnection(HOST2, USER2, null);
 
-		ConnectionWizardPageModel pageModel = mockConnectionWizardPageModel(connection1);
-		Mockito.when(pageModel.getHost()).thenReturn(HOST2);
+        ConnectionWizardPageModel pageModel = mockConnectionWizardPageModel(connection1);
+        Mockito.when(pageModel.getHost()).thenReturn(HOST2);
 
-		IValueChangeListener<Object> l = new IValueChangeListener<Object>() {
-			@Override
-			public void handleValueChange(ValueChangeEvent<? extends Object> event) {
-			}
-		};
-		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		Composite composite = new Composite(shell, SWT.NONE);
-		try {
-			BasicAuthenticationDetailView view = new BasicAuthenticationDetailView(pageModel, l, null);
-			DataBindingContext dbc = new DataBindingContext();
-			view.createControls(shell, null, dbc);
-			view.onVisible(null, dbc);
-			view.getPasswordTextControl().setText("pass");
-			view.getUsernameTextControl().setText(USER2);
+        IValueChangeListener<Object> l = new IValueChangeListener<Object>() {
+            @Override
+            public void handleValueChange(ValueChangeEvent<? extends Object> event) {
+            }
+        };
+        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+        Composite composite = new Composite(shell, SWT.NONE);
+        try {
+            BasicAuthenticationDetailView view = new BasicAuthenticationDetailView(pageModel, l, null);
+            DataBindingContext dbc = new DataBindingContext();
+            view.createControls(shell, null, dbc);
+            view.onVisible(null, dbc);
+            view.getPasswordTextControl().setText("pass");
+            view.getUsernameTextControl().setText(USER2);
 
-			MultiValidator v = findValidator(dbc);
+            MultiValidator v = findValidator(dbc);
 
-			Assert.assertEquals(IStatus.ERROR, getStatusSeverity(v));
+            Assert.assertEquals(IStatus.ERROR, getStatusSeverity(v));
 
-			view.getUsernameTextControl().setText(USER3);
-			Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
-		} finally {
-			composite.dispose();
-		}
-	}
+            view.getUsernameTextControl().setText(USER3);
+            Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
+        } finally {
+            composite.dispose();
+        }
+    }
 
-	private MultiValidator findValidator(DataBindingContext dbc) {
-		MultiValidator result = null;
-		for (Object o: dbc.getValidationStatusProviders()) {
-			if(o instanceof MultiValidator) {
-				Assert.assertNull("Multiple validators: " + result + ", " + o + ". Please improve the test to pick the right validator.", result);
-				result = (MultiValidator)o;
-			}
-		}
-		Assert.assertNotNull("Validator not found", result);
-		return result;
-	}
+    private MultiValidator findValidator(DataBindingContext dbc) {
+        MultiValidator result = null;
+        for (Object o : dbc.getValidationStatusProviders()) {
+            if (o instanceof MultiValidator) {
+                Assert.assertNull("Multiple validators: " + result + ", " + o + ". Please improve the test to pick the right validator.",
+                        result);
+                result = (MultiValidator)o;
+            }
+        }
+        Assert.assertNotNull("Validator not found", result);
+        return result;
+    }
 
-	@Test
-	public void testOAuthAuthenticationValidator() {
-		Connection connection1 = mockConnection(HOST1, null, TOKEN1);
-		mockConnection(HOST2, null, TOKEN2);
+    @Test
+    public void testOAuthAuthenticationValidator() {
+        Connection connection1 = mockConnection(HOST1, null, TOKEN1);
+        mockConnection(HOST2, null, TOKEN2);
 
-		ConnectionWizardPageModel pageModel = mockConnectionWizardPageModel(connection1);
+        ConnectionWizardPageModel pageModel = mockConnectionWizardPageModel(connection1);
 
-		WritableValue<String> tokenObservable = new WritableValue<String>();
-		WritableValue<String> urlObservable = new WritableValue<String>();
-		MultiValidator v = ConnectionValidatorFactory.createOAuthAuthenticationValidator(pageModel, tokenObservable, urlObservable);
+        WritableValue<String> tokenObservable = new WritableValue<String>();
+        WritableValue<String> urlObservable = new WritableValue<String>();
+        MultiValidator v = ConnectionValidatorFactory.createOAuthAuthenticationValidator(pageModel, tokenObservable, urlObservable);
 
-		v.observeValidatedValue(urlObservable);
+        v.observeValidatedValue(urlObservable);
 
-		//New connection
-		urlObservable.setValue(HOST3);
-		tokenObservable.setValue(TOKEN3);
-		Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
+        //New connection
+        urlObservable.setValue(HOST3);
+        tokenObservable.setValue(TOKEN3);
+        Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
 
-		urlObservable.setValue(HOST2);
-		//Host exists, but token is different
-		Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
+        urlObservable.setValue(HOST2);
+        //Host exists, but token is different
+        Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
 
-		tokenObservable.setValue(TOKEN2);
-		//Existing not selected connection
-		Assert.assertEquals(IStatus.ERROR, getStatusSeverity(v));
+        tokenObservable.setValue(TOKEN2);
+        //Existing not selected connection
+        Assert.assertEquals(IStatus.ERROR, getStatusSeverity(v));
 
-		//Selected connection
-		urlObservable.setValue(HOST1);
-		tokenObservable.setValue(TOKEN1);
-		Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
-	}
+        //Selected connection
+        urlObservable.setValue(HOST1);
+        tokenObservable.setValue(TOKEN1);
+        Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
+    }
 
-	@Test
-	public void testOAuthAuthenticationValidatorInUI() {
-		Connection connection1 = mockConnection(HOST1, null, TOKEN1);
-		mockConnection(HOST2, null, TOKEN2);
+    @Test
+    public void testOAuthAuthenticationValidatorInUI() {
+        Connection connection1 = mockConnection(HOST1, null, TOKEN1);
+        mockConnection(HOST2, null, TOKEN2);
 
-		ConnectionWizardPageModel pageModel = mockConnectionWizardPageModel(connection1);
-		Mockito.when(pageModel.getHost()).thenReturn(HOST2);
+        ConnectionWizardPageModel pageModel = mockConnectionWizardPageModel(connection1);
+        Mockito.when(pageModel.getHost()).thenReturn(HOST2);
 
-		IValueChangeListener<Object> l = new IValueChangeListener<Object>() {
-			@Override
-			public void handleValueChange(ValueChangeEvent<? extends Object> event) {
-			}
-		};
-		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		Composite composite = new Composite(shell, SWT.NONE);
-		try {
-			OAuthDetailView view = new OAuthDetailView(null, pageModel, l, null, null);
-			DataBindingContext dbc = new DataBindingContext();
-			view.createControls(shell, null, dbc);
-			view.onVisible(null, dbc);
-			view.getTokenTextControl().setText(TOKEN2);
+        IValueChangeListener<Object> l = new IValueChangeListener<Object>() {
+            @Override
+            public void handleValueChange(ValueChangeEvent<? extends Object> event) {
+            }
+        };
+        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+        Composite composite = new Composite(shell, SWT.NONE);
+        try {
+            OAuthDetailView view = new OAuthDetailView(null, pageModel, l, null, null);
+            DataBindingContext dbc = new DataBindingContext();
+            view.createControls(shell, null, dbc);
+            view.onVisible(null, dbc);
+            view.getTokenTextControl().setText(TOKEN2);
 
-			MultiValidator v = findValidator(dbc);
+            MultiValidator v = findValidator(dbc);
 
-			Assert.assertEquals(IStatus.ERROR, getStatusSeverity(v));
+            Assert.assertEquals(IStatus.ERROR, getStatusSeverity(v));
 
-			view.getTokenTextControl().setText(TOKEN3);
-			Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
-		} finally {
-			composite.dispose();
-		}
-	}
+            view.getTokenTextControl().setText(TOKEN3);
+            Assert.assertEquals(IStatus.OK, getStatusSeverity(v));
+        } finally {
+            composite.dispose();
+        }
+    }
 
-	/**
-	 * Creates a connection instance and adds it to the registry.
-	 * @param host
-	 * @param username
-	 * @param token
-	 * @return
-	 */
-	private Connection mockConnection(String host, String username, String token) {
-		boolean isOAuth = token != null;
-		Connection connection = Mockito.mock(Connection.class);
-		Mockito.when(connection.getHost()).thenReturn(host);
-		Mockito.when(connection.getUsername()).thenReturn(username);
-		Mockito.when(connection.getToken()).thenReturn(token);
-		Mockito.when(connection.getAuthScheme())
-			.thenReturn(isOAuth ? IAuthorizationContext.AUTHSCHEME_OAUTH : IAuthorizationContext.AUTHSCHEME_BASIC);
-		registry.add(connection);
-		connections.add(connection);
-		return connection;
-	}
+    /**
+     * Creates a connection instance and adds it to the registry.
+     * @param host
+     * @param username
+     * @param token
+     * @return
+     */
+    private Connection mockConnection(String host, String username, String token) {
+        boolean isOAuth = token != null;
+        Connection connection = Mockito.mock(Connection.class);
+        Mockito.when(connection.getHost()).thenReturn(host);
+        Mockito.when(connection.getUsername()).thenReturn(username);
+        Mockito.when(connection.getToken()).thenReturn(token);
+        Mockito.when(connection.getAuthScheme())
+                .thenReturn(isOAuth ? IAuthorizationContext.AUTHSCHEME_OAUTH : IAuthorizationContext.AUTHSCHEME_BASIC);
+        registry.add(connection);
+        connections.add(connection);
+        return connection;
+    }
 
-	private ConnectionWizardPageModel mockConnectionWizardPageModel(Connection selected) {
-		ConnectionWizardPageModel pageModel = Mockito.mock(ConnectionWizardPageModel.class);
-		Mockito.when(pageModel.getSelectedConnection()).thenReturn(selected);
-		return pageModel;
-	}
+    private ConnectionWizardPageModel mockConnectionWizardPageModel(Connection selected) {
+        ConnectionWizardPageModel pageModel = Mockito.mock(ConnectionWizardPageModel.class);
+        Mockito.when(pageModel.getSelectedConnection()).thenReturn(selected);
+        return pageModel;
+    }
 
-	@After
-	public void clear() {
-		if(registry != null && !connections.isEmpty()) {
-			connections.stream().forEach(c -> registry.remove(c));
-		}
-	}
+    @After
+    public void clear() {
+        if (registry != null && !connections.isEmpty()) {
+            connections.stream().forEach(c -> registry.remove(c));
+        }
+    }
 
-	private int getStatusSeverity(MultiValidator v) {
-		return ((IStatus)v.getValidationStatus().getValue()).getSeverity();
-	}
+    private int getStatusSeverity(MultiValidator v) {
+        return ((IStatus)v.getValidationStatus().getValue()).getSeverity();
+    }
 }

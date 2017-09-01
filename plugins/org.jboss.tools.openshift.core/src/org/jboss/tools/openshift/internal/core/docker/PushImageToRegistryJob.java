@@ -32,84 +32,82 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  */
 public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 
-	private final IDockerConnection dockerConnection;
+    private final IDockerConnection dockerConnection;
 
-	private final IRegistryAccount registryAccount;
-	
-	private final String imageName;
-	
-	private final String openshiftProject;
-	
-	/**
-	 * Constructor
-	 * @param dockerConnection the Docker connection to use
-	 * @param registryAccount the registry account to push the image into 
-	 * @param openshiftProject the name of the OpenShift project, because the image has to be into the same namespace
-	 * @param imageName the name of the image
-	 */
-	public PushImageToRegistryJob(final IDockerConnection dockerConnection, final IRegistryAccount registryAccount, final String openshiftProject, final String imageName) {
-		super("Pushing Docker image to OpenShift registry...");
-		this.dockerConnection = dockerConnection;
-		this.registryAccount = registryAccount;
-		this.imageName = imageName;
-		this.openshiftProject = openshiftProject;
-	}
+    private final IRegistryAccount registryAccount;
 
-	@Override
-	protected IStatus doRun(final IProgressMonitor monitor) {
-		monitor.beginTask("Pushing image to registry", 1);
-		final String tmpImageName = getPushToRegistryImageName();
-		try {
-			// first, we need to tag the image with the OpenShift target
-			// project
-			this.dockerConnection.tagImage(imageName, tmpImageName);
-			// then we can push that image with the new name
-			this.dockerConnection.pushImage(tmpImageName, registryAccount,
-					getPushProgressHandler(tmpImageName));
-		// FIXME: needs more fined tuned error handling once Neon.0 is no longer supported:
-		// catch (DockerException | InterruptedException e) {
-		// see https://issues.jboss.org/browse/JBIDE-22764
-		} catch (Exception e) {
-			return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
-					"Failed to push the selected Docker image into OpenShift registry", e);
-		} finally {
-			// we need to untag the image, even if the push operation failed
-			try {
-				this.dockerConnection.removeTag(tmpImageName);
-			} catch (DockerException | InterruptedException e) {
-				return new Status(IStatus.WARNING, OpenShiftCoreActivator.PLUGIN_ID,
-						"Pushed the selected Docker image into OpenShift registry but failed to untag it afterwards",
-						e);
-			}
-			monitor.done();
-		}
-		return Status.OK_STATUS;
-	}
+    private final String imageName;
 
-	private IDockerProgressHandler getPushProgressHandler(final String tmpImageName) {
-		Assert.isTrue(this.dockerConnection instanceof IDockerConnection2);
+    private final String openshiftProject;
 
-		return ((IDockerConnection2) this.dockerConnection).getDefaultPushImageProgressHandler(tmpImageName);
-	}
+    /**
+     * Constructor
+     * @param dockerConnection the Docker connection to use
+     * @param registryAccount the registry account to push the image into 
+     * @param openshiftProject the name of the OpenShift project, because the image has to be into the same namespace
+     * @param imageName the name of the image
+     */
+    public PushImageToRegistryJob(final IDockerConnection dockerConnection, final IRegistryAccount registryAccount,
+            final String openshiftProject, final String imageName) {
+        super("Pushing Docker image to OpenShift registry...");
+        this.dockerConnection = dockerConnection;
+        this.registryAccount = registryAccount;
+        this.imageName = imageName;
+        this.openshiftProject = openshiftProject;
+    }
 
-	/**
-	 * @return the name used to push to the registry.
-	 */
-	public String getPushToRegistryImageName() {
-		try {
-		    final URL registryURL = new URL(this.registryAccount.getServerAddress());
-			final String registryHostname = (registryURL.getPort() == (-1)) ?
-					registryURL.getHost()
-					: registryURL.getHost() + ':' + registryURL.getPort();
-			final String tmpImageName = registryHostname + '/' + this.openshiftProject + '/' + DockerImageUtils.extractImageNameAndTag(this.imageName);
-			return tmpImageName;
-		} catch (MalformedURLException e) {
-			OpenShiftCoreActivator.getDefault().getLog().log(
-					new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
-							"Failed to push the selected Docker image into OpenShift registry", e));
-			return null;
-		}
-		
-	}
+    @Override
+    protected IStatus doRun(final IProgressMonitor monitor) {
+        monitor.beginTask("Pushing image to registry", 1);
+        final String tmpImageName = getPushToRegistryImageName();
+        try {
+            // first, we need to tag the image with the OpenShift target
+            // project
+            this.dockerConnection.tagImage(imageName, tmpImageName);
+            // then we can push that image with the new name
+            this.dockerConnection.pushImage(tmpImageName, registryAccount, getPushProgressHandler(tmpImageName));
+            // FIXME: needs more fined tuned error handling once Neon.0 is no longer supported:
+            // catch (DockerException | InterruptedException e) {
+            // see https://issues.jboss.org/browse/JBIDE-22764
+        } catch (Exception e) {
+            return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
+                    "Failed to push the selected Docker image into OpenShift registry", e);
+        } finally {
+            // we need to untag the image, even if the push operation failed
+            try {
+                this.dockerConnection.removeTag(tmpImageName);
+            } catch (DockerException | InterruptedException e) {
+                return new Status(IStatus.WARNING, OpenShiftCoreActivator.PLUGIN_ID,
+                        "Pushed the selected Docker image into OpenShift registry but failed to untag it afterwards", e);
+            }
+            monitor.done();
+        }
+        return Status.OK_STATUS;
+    }
+
+    private IDockerProgressHandler getPushProgressHandler(final String tmpImageName) {
+        Assert.isTrue(this.dockerConnection instanceof IDockerConnection2);
+
+        return ((IDockerConnection2)this.dockerConnection).getDefaultPushImageProgressHandler(tmpImageName);
+    }
+
+    /**
+     * @return the name used to push to the registry.
+     */
+    public String getPushToRegistryImageName() {
+        try {
+            final URL registryURL = new URL(this.registryAccount.getServerAddress());
+            final String registryHostname = (registryURL.getPort() == (-1)) ? registryURL.getHost()
+                    : registryURL.getHost() + ':' + registryURL.getPort();
+            final String tmpImageName = registryHostname + '/' + this.openshiftProject + '/'
+                    + DockerImageUtils.extractImageNameAndTag(this.imageName);
+            return tmpImageName;
+        } catch (MalformedURLException e) {
+            OpenShiftCoreActivator.getDefault().getLog().log(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
+                    "Failed to push the selected Docker image into OpenShift registry", e));
+            return null;
+        }
+
+    }
 
 }

@@ -61,218 +61,202 @@ import com.openshift.client.cartridge.IEmbeddableCartridge;
  */
 public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 
-	private ConfigureMarkersWizardPageModel pageModel;
-	private CheckboxTableViewer viewer;
+    private ConfigureMarkersWizardPageModel pageModel;
+    private CheckboxTableViewer viewer;
 
-	public ConfigureMarkersWizardPage(IProject project, IWizard wizard) {
-		super(
-				"Configure OpenShift Markers",
-				NLS.bind("Add or remove markers to enable OpenShift features in the application {0}. "
-						+ "\nThe markers will be created/deleted directly in {1}", 
-						ExpressServerUtils.getProjectAttribute(ExpressServerUtils.SETTING_APPLICATION_NAME, "unknown", project),
-						OpenShiftProjectUtils.getMarkersFolder(project).getFullPath()),
-				"ConfigureMarkers", wizard);
-		this.pageModel = new ConfigureMarkersWizardPageModel(project);
-	}
+    public ConfigureMarkersWizardPage(IProject project, IWizard wizard) {
+        super("Configure OpenShift Markers",
+                NLS.bind(
+                        "Add or remove markers to enable OpenShift features in the application {0}. "
+                                + "\nThe markers will be created/deleted directly in {1}",
+                        ExpressServerUtils.getProjectAttribute(ExpressServerUtils.SETTING_APPLICATION_NAME, "unknown", project),
+                        OpenShiftProjectUtils.getMarkersFolder(project).getFullPath()),
+                "ConfigureMarkers", wizard);
+        this.pageModel = new ConfigureMarkersWizardPageModel(project);
+    }
 
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
-		// markers table
-		Composite tableContainer = new Composite(parent, SWT.NONE);
-		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 250).grab(true, true).applyTo(tableContainer);
-		dbc.bindSet(
-				ViewerProperties.checkedElements(IOpenShiftMarker.class).observe(viewer),
-				BeanProperties.set(
-						ConfigureMarkersWizardPageModel.PROPERTY_CHECKED_MARKERS)
-						.observe(pageModel));
-		ValueBindingBuilder
-				.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(BeanProperties.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER)
-						.observe(pageModel))
-				.in(dbc);
+        // markers table
+        Composite tableContainer = new Composite(parent, SWT.NONE);
+        this.viewer = createTable(tableContainer);
+        GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 250).grab(true, true).applyTo(tableContainer);
+        dbc.bindSet(ViewerProperties.checkedElements(IOpenShiftMarker.class).observe(viewer),
+                BeanProperties.set(ConfigureMarkersWizardPageModel.PROPERTY_CHECKED_MARKERS).observe(pageModel));
+        ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
+                .to(BeanProperties.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER).observe(pageModel)).in(dbc);
 
-		// marker description
-		Group descriptionGroup = new Group(parent, SWT.NONE);
-		descriptionGroup.setText("Marker Description");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionGroup);
-		GridLayoutFactory.fillDefaults()
-				.margins(6, 6).applyTo(descriptionGroup);
-		StyledText descriptionText = new StyledText(descriptionGroup, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
-		descriptionText.setAlwaysShowScrollBars(false);
-		StyledTextUtils.setTransparent(descriptionText);
-		GridDataFactory.fillDefaults()
-				.hint(SWT.DEFAULT, 80).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionText);
-		dbc.bindSet(
-				ViewersObservables.observeCheckedElements(viewer, IOpenShiftMarker.class),
-				BeanProperties.set(ConfigureMarkersWizardPageModel.PROPERTY_CHECKED_MARKERS).observe(pageModel));
-		ValueBindingBuilder
-				.bind(WidgetProperties.text().observe(descriptionText))
-				.notUpdating(BeanProperties.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER)
-						.observe(pageModel))
-				.converting(new Converter(IOpenShiftMarker.class, String.class) {
+        // marker description
+        Group descriptionGroup = new Group(parent, SWT.NONE);
+        descriptionGroup.setText("Marker Description");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionGroup);
+        GridLayoutFactory.fillDefaults().margins(6, 6).applyTo(descriptionGroup);
+        StyledText descriptionText = new StyledText(descriptionGroup, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
+        descriptionText.setAlwaysShowScrollBars(false);
+        StyledTextUtils.setTransparent(descriptionText);
+        GridDataFactory.fillDefaults().hint(SWT.DEFAULT, 80).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionText);
+        dbc.bindSet(ViewersObservables.observeCheckedElements(viewer, IOpenShiftMarker.class),
+                BeanProperties.set(ConfigureMarkersWizardPageModel.PROPERTY_CHECKED_MARKERS).observe(pageModel));
+        ValueBindingBuilder.bind(WidgetProperties.text().observe(descriptionText))
+                .notUpdating(BeanProperties.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER).observe(pageModel))
+                .converting(new Converter(IOpenShiftMarker.class, String.class) {
 
-					@Override
-					public Object convert(Object fromObject) {
-						if (!(fromObject instanceof BaseOpenShiftMarker)) {
-							return null;
-						}
-						return ((IOpenShiftMarker) fromObject).getDescription();
-					}
+                    @Override
+                    public Object convert(Object fromObject) {
+                        if (!(fromObject instanceof BaseOpenShiftMarker)) {
+                            return null;
+                        }
+                        return ((IOpenShiftMarker)fromObject).getDescription();
+                    }
 
-				})
-				.in(dbc);
-	}
+                }).in(dbc);
+    }
 
-	protected CheckboxTableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		TableColumnLayout tableLayout = new TableColumnLayout();
-		tableContainer.setLayout(tableLayout);
-		CheckboxTableViewer viewer = new CheckboxTableViewer(table);
-		viewer.setComparer(new EqualityComparer());
-		viewer.setContentProvider(new ArrayContentProvider());
+    protected CheckboxTableViewer createTable(Composite tableContainer) {
+        Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
+        table.setLinesVisible(true);
+        table.setHeaderVisible(true);
+        TableColumnLayout tableLayout = new TableColumnLayout();
+        tableContainer.setLayout(tableLayout);
+        CheckboxTableViewer viewer = new CheckboxTableViewer(table);
+        viewer.setComparer(new EqualityComparer());
+        viewer.setContentProvider(new ArrayContentProvider());
 
-		viewer.setComparator(new ViewerComparator() {
+        viewer.setComparator(new ViewerComparator() {
 
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				if (e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge) {
-					return ((IEmbeddableCartridge) e1).getDisplayName().compareTo(
-							((IEmbeddableCartridge) e2).getDisplayName());
-				}
-				return super.compare(viewer, e1, e2);
-			}
-		});
+            @Override
+            public int compare(Viewer viewer, Object e1, Object e2) {
+                if (e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge) {
+                    return ((IEmbeddableCartridge)e1).getDisplayName().compareTo(((IEmbeddableCartridge)e2).getDisplayName());
+                }
+                return super.compare(viewer, e1, e2);
+            }
+        });
 
-		createTableColumn("Marker", 1, new CellLabelProvider() {
+        createTableColumn("Marker", 1, new CellLabelProvider() {
 
-			@Override
-			public void update(ViewerCell cell) {
-				IOpenShiftMarker marker = (IOpenShiftMarker) cell.getElement();
-				cell.setText(marker.getName());
-			}
-		}, viewer, tableLayout);
-		createTableColumn("File", 1, new CellLabelProvider() {
+            @Override
+            public void update(ViewerCell cell) {
+                IOpenShiftMarker marker = (IOpenShiftMarker)cell.getElement();
+                cell.setText(marker.getName());
+            }
+        }, viewer, tableLayout);
+        createTableColumn("File", 1, new CellLabelProvider() {
 
-			@Override
-			public void update(ViewerCell cell) {
-				IOpenShiftMarker marker = (IOpenShiftMarker) cell.getElement();
-				cell.setText(marker.getFileName());
-			}
-		}, viewer, tableLayout);
-		return viewer;
-	}
+            @Override
+            public void update(ViewerCell cell) {
+                IOpenShiftMarker marker = (IOpenShiftMarker)cell.getElement();
+                cell.setText(marker.getFileName());
+            }
+        }, viewer, tableLayout);
+        return viewer;
+    }
 
-	private void createTableColumn(String name, int weight, CellLabelProvider cellLabelProvider, TableViewer viewer,
-			TableColumnLayout layout) {
-		TableViewerColumn column = new TableViewerColumn(viewer, SWT.LEFT);
-		column.getColumn().setText(name);
-		column.setLabelProvider(cellLabelProvider);
-		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
-	}
+    private void createTableColumn(String name, int weight, CellLabelProvider cellLabelProvider, TableViewer viewer,
+            TableColumnLayout layout) {
+        TableViewerColumn column = new TableViewerColumn(viewer, SWT.LEFT);
+        column.getColumn().setText(name);
+        column.setLabelProvider(cellLabelProvider);
+        layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
+    }
 
-	@Override
-	protected void onPageActivated(DataBindingContext dbc) {
-		try {
-			WizardUtils.runInWizard(new LoadMarkersJob(), getContainer(), getDataBindingContext());
-		} catch (Exception e) {
-			// ignore
-		}
-	}
-	
-	private void setViewerCheckedElements(final Collection<IOpenShiftMarker> markers) {
-		getShell().getDisplay().syncExec(new Runnable() {
+    @Override
+    protected void onPageActivated(DataBindingContext dbc) {
+        try {
+            WizardUtils.runInWizard(new LoadMarkersJob(), getContainer(), getDataBindingContext());
+        } catch (Exception e) {
+            // ignore
+        }
+    }
 
-			@Override
-			public void run() {
-				viewer.setCheckedElements(markers.toArray());
-			}
-		});
-	}
+    private void setViewerCheckedElements(final Collection<IOpenShiftMarker> markers) {
+        getShell().getDisplay().syncExec(new Runnable() {
 
-	private void setViewerInput(final Collection<IOpenShiftMarker> marker) {
-		getShell().getDisplay().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                viewer.setCheckedElements(markers.toArray());
+            }
+        });
+    }
 
-			@Override
-			public void run() {
-				viewer.setInput(marker);
-			}
-		});
-	}
-	
-	/**
-	 * Returns the markers that the user has removed.
-	 * 
-	 * @return the markers that the user removed
-	 */
-	public Collection<IOpenShiftMarker> getRemovedMarkers() {
-		return pageModel.getRemovedMarkers();
-	}
-	
-	/**
-	 * Returns the markers that the user has added.
-	 * 
-	 * @return the markers that the user added
-	 */
-	public Collection<IOpenShiftMarker> getAddedMarkers() {
-		return pageModel.getAddedMarkers();
-	}
+    private void setViewerInput(final Collection<IOpenShiftMarker> marker) {
+        getShell().getDisplay().syncExec(new Runnable() {
 
-	/**
-	 * Viewer element comparer based on #equals(). The default implementation in
-	 * CheckboxTableViewer compares elements based on instance identity.
-	 * <p>
-	 * We need this since the available cartridges (item listed in the viewer)
-	 * are not the same instance as the ones in the embedded application (items
-	 * to check in the viewer).
-	 */
-	private static class EqualityComparer implements IElementComparer {
+            @Override
+            public void run() {
+                viewer.setInput(marker);
+            }
+        });
+    }
 
-		@Override
-		public boolean equals(Object thisObject, Object thatObject) {
-			if (thisObject == null) {
-				return thatObject != null;
-			}
+    /**
+     * Returns the markers that the user has removed.
+     * 
+     * @return the markers that the user removed
+     */
+    public Collection<IOpenShiftMarker> getRemovedMarkers() {
+        return pageModel.getRemovedMarkers();
+    }
 
-			if (thatObject == null) {
-				return false;
-			}
+    /**
+     * Returns the markers that the user has added.
+     * 
+     * @return the markers that the user added
+     */
+    public Collection<IOpenShiftMarker> getAddedMarkers() {
+        return pageModel.getAddedMarkers();
+    }
 
-			return thisObject.equals(thatObject);
-		}
+    /**
+     * Viewer element comparer based on #equals(). The default implementation in
+     * CheckboxTableViewer compares elements based on instance identity.
+     * <p>
+     * We need this since the available cartridges (item listed in the viewer)
+     * are not the same instance as the ones in the embedded application (items
+     * to check in the viewer).
+     */
+    private static class EqualityComparer implements IElementComparer {
 
-		@Override
-		public int hashCode(Object element) {
-			return element.hashCode();
-		}
-	}
+        @Override
+        public boolean equals(Object thisObject, Object thatObject) {
+            if (thisObject == null) {
+                return thatObject != null;
+            }
 
-	private class LoadMarkersJob extends AbstractDelegatingMonitorJob {
+            if (thatObject == null) {
+                return false;
+            }
 
-		public LoadMarkersJob() {
-			super("Loading markers");
-		}
+            return thisObject.equals(thatObject);
+        }
 
-		@Override
-		protected IStatus doRun(IProgressMonitor monitor) {
-			try {
-				pageModel.loadMarkers();
-				setViewerInput(pageModel.getAvailableMarkers());
-				setViewerCheckedElements(pageModel.getCheckedMarkers());
-				return Status.OK_STATUS;
-			} catch (CoreException e) {
-				return ExpressUIActivator.createErrorStatus(
-						NLS.bind("Could not load markers for project {0}", pageModel.getProject().getName()), e);
-			}
+        @Override
+        public int hashCode(Object element) {
+            return element.hashCode();
+        }
+    }
 
-		}
-	}
+    private class LoadMarkersJob extends AbstractDelegatingMonitorJob {
+
+        public LoadMarkersJob() {
+            super("Loading markers");
+        }
+
+        @Override
+        protected IStatus doRun(IProgressMonitor monitor) {
+            try {
+                pageModel.loadMarkers();
+                setViewerInput(pageModel.getAvailableMarkers());
+                setViewerCheckedElements(pageModel.getCheckedMarkers());
+                return Status.OK_STATUS;
+            } catch (CoreException e) {
+                return ExpressUIActivator
+                        .createErrorStatus(NLS.bind("Could not load markers for project {0}", pageModel.getProject().getName()), e);
+            }
+
+        }
+    }
 
 }

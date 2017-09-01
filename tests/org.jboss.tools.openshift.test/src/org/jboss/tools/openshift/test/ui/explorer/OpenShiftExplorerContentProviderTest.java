@@ -52,113 +52,112 @@ import com.openshift.restclient.model.IResource;
 @RunWith(MockitoJUnitRunner.class)
 public class OpenShiftExplorerContentProviderTest {
 
-	private static final String OPENSHIFT_SERVER_URL = "https://localhost:8442";
+    private static final String OPENSHIFT_SERVER_URL = "https://localhost:8442";
 
-	private OpenShiftExplorerContentProvider provider;
-	private Connection connection;
-	private IConnectionWrapper connectionWrapper;
-	private OpenshiftUIModel model;
-	private ConnectionsRegistry registry;
-	@Mock private IProject project;
-	
-	@Before
-	public void setup() throws Exception{
-		this.connection = spy(ConnectionTestUtils.createConnection("auser", "atoken", OPENSHIFT_SERVER_URL));
-		doReturn(true).when(connection).ownsResource(any(IResource.class));
-		this.registry = ConnectionsRegistrySingleton.getInstance();
-		registry.clear();
-		registry.add(connection);
+    private OpenShiftExplorerContentProvider provider;
+    private Connection connection;
+    private IConnectionWrapper connectionWrapper;
+    private OpenshiftUIModel model;
+    private ConnectionsRegistry registry;
+    @Mock
+    private IProject project;
 
-		this.model = new OpenshiftUIModel(registry) {};
-		this.connectionWrapper = model.getConnections().iterator().next();
-		this.provider = new OpenShiftExplorerContentProvider(model) {};
-	}
+    @Before
+    public void setup() throws Exception {
+        this.connection = spy(ConnectionTestUtils.createConnection("auser", "atoken", OPENSHIFT_SERVER_URL));
+        doReturn(true).when(connection).ownsResource(any(IResource.class));
+        this.registry = ConnectionsRegistrySingleton.getInstance();
+        registry.clear();
+        registry.add(connection);
 
-	@Test
-	public void getChildrenForConnectionReturnsProjectAdapters() throws InterruptedException, TimeoutException{
-		List<IProject> projects = Arrays.asList(new IProject[] { project });
-		doReturn(projects).when(connection).getResources(anyString());
-		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
-		UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
-		
-		assertArrayEquals("Exp. to get all the projects for a Connection", 
-				projects.toArray(),
-				Arrays.asList(
-						provider.getChildren(connectionWrapper)).stream()
-							.map(a -> ((IProjectWrapper) a).getWrapped())
-					.toArray());
-	}
+        this.model = new OpenshiftUIModel(registry) {
+        };
+        this.connectionWrapper = model.getConnections().iterator().next();
+        this.provider = new OpenShiftExplorerContentProvider(model) {
+        };
+    }
 
-	@Test
-	public void getExplorerElementsForRegistryReturnsConnections(){
-		assertArrayEquals("Exp. to get all the connections from the ConnectionsRegistry", 
-				new Object[] { connectionWrapper },
-				provider.getElements(registry));
-	}
+    @Test
+    public void getChildrenForConnectionReturnsProjectAdapters() throws InterruptedException, TimeoutException {
+        List<IProject> projects = Arrays.asList(new IProject[] { project });
+        doReturn(projects).when(connection).getResources(anyString());
+        connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
+        UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
 
-	@Test
-	public void connectionsRegistryShouldHaveChildren(){
-		assertTrue("Exp. #hasChildren to return true for ConnectionsRegistry", provider.hasChildren(model));
-	}
+        assertArrayEquals("Exp. to get all the projects for a Connection", projects.toArray(),
+                Arrays.asList(provider.getChildren(connectionWrapper)).stream().map(a -> ((IProjectWrapper)a).getWrapped()).toArray());
+    }
 
-	@Test
-	public void connectionsShouldHaveChildren(){
-		assertTrue("Exp. #hasChildren to return true for Connections", provider.hasChildren(connectionWrapper));
-	}
+    @Test
+    public void getExplorerElementsForRegistryReturnsConnections() {
+        assertArrayEquals("Exp. to get all the connections from the ConnectionsRegistry", new Object[] { connectionWrapper },
+                provider.getElements(registry));
+    }
 
-	@Test
-	public void projectsShouldHaveChildren(){
-		assertTrue("Exp. #hasChildren to return true for IProject", provider.hasChildren(mock(IProjectWrapper.class)));
-	}
+    @Test
+    public void connectionsRegistryShouldHaveChildren() {
+        assertTrue("Exp. #hasChildren to return true for ConnectionsRegistry", provider.hasChildren(model));
+    }
 
-	@Test
-	public void modelShouldHaveConnectionThatIsAddedInRegistry() throws MalformedURLException{
-		// given
-		int numOfConnections = model.getConnections().size();
-		Connection connection2 = ConnectionTestUtils.createConnection("aUser", "123456", "https://127.0.0.1:8080");
-		// when
-		registry.add(connection2);
-		// then
-		assertThat(model.getConnections()).hasSize(numOfConnections + 1);
-	}
+    @Test
+    public void connectionsShouldHaveChildren() {
+        assertTrue("Exp. #hasChildren to return true for Connections", provider.hasChildren(connectionWrapper));
+    }
 
-	@Test
-	public void modelShouldRemoveConnectionIfItIsRemovedFromRegistry() throws InterruptedException{
-		// given
-		int numOfConnections = model.getConnections().size();
-		// when
-		registry.remove(connection);
-		// then
-		assertThat(model.getConnections()).hasSize(numOfConnections - 1);
-	}
+    @Test
+    public void projectsShouldHaveChildren() {
+        assertTrue("Exp. #hasChildren to return true for IProject", provider.hasChildren(mock(IProjectWrapper.class)));
+    }
 
-	@Test
-	public void modelShouldNotifyConnectionAddedInRegistry() throws InterruptedException, MalformedURLException{
-		// given
-		Connection connection2 = ConnectionTestUtils.createConnection("anotherUser", "654321", "https://127.0.0.1:8181");
-		IElementListener listener = spy(new VoidElementListener());
-		model.addListener(listener);
-		// when
-		registry.add(connection2);
-		// then
-		verify(listener, timeout(10 * 1000)).elementChanged(any());
-	}
-	
-	@Test
-	public void modelShouldNotifyConnectionRemovedInRegistry() throws InterruptedException, MalformedURLException{
-		// given
-		IElementListener listener = spy(new VoidElementListener());
-		model.addListener(listener);
-		// when
-		registry.remove(connection);
-		// then
-		verify(listener, timeout(10 * 1000)).elementChanged(any());
-	}
+    @Test
+    public void modelShouldHaveConnectionThatIsAddedInRegistry() throws MalformedURLException {
+        // given
+        int numOfConnections = model.getConnections().size();
+        Connection connection2 = ConnectionTestUtils.createConnection("aUser", "123456", "https://127.0.0.1:8080");
+        // when
+        registry.add(connection2);
+        // then
+        assertThat(model.getConnections()).hasSize(numOfConnections + 1);
+    }
 
-	public class VoidElementListener implements IElementListener {
+    @Test
+    public void modelShouldRemoveConnectionIfItIsRemovedFromRegistry() throws InterruptedException {
+        // given
+        int numOfConnections = model.getConnections().size();
+        // when
+        registry.remove(connection);
+        // then
+        assertThat(model.getConnections()).hasSize(numOfConnections - 1);
+    }
 
-		@Override
-		public void elementChanged(IOpenshiftUIElement<?, ?> element) {}
-	}
+    @Test
+    public void modelShouldNotifyConnectionAddedInRegistry() throws InterruptedException, MalformedURLException {
+        // given
+        Connection connection2 = ConnectionTestUtils.createConnection("anotherUser", "654321", "https://127.0.0.1:8181");
+        IElementListener listener = spy(new VoidElementListener());
+        model.addListener(listener);
+        // when
+        registry.add(connection2);
+        // then
+        verify(listener, timeout(10 * 1000)).elementChanged(any());
+    }
+
+    @Test
+    public void modelShouldNotifyConnectionRemovedInRegistry() throws InterruptedException, MalformedURLException {
+        // given
+        IElementListener listener = spy(new VoidElementListener());
+        model.addListener(listener);
+        // when
+        registry.remove(connection);
+        // then
+        verify(listener, timeout(10 * 1000)).elementChanged(any());
+    }
+
+    public class VoidElementListener implements IElementListener {
+
+        @Override
+        public void elementChanged(IOpenshiftUIElement<?, ?> element) {
+        }
+    }
 
 }

@@ -19,24 +19,23 @@ import com.openshift.client.IApplication;
  */
 public class SelectApplicationWizard extends AbstractOpenShiftWizard<OpenShiftApplicationWizardModel> {
 
+    private SelectApplicationWizardPage selectApplicationPage;
 
-	private SelectApplicationWizardPage selectApplicationPage;
+    public SelectApplicationWizard(OpenShiftApplicationWizardModel wizardModel) {
+        super("Select Existing Application", wizardModel);
+    }
 
-	public SelectApplicationWizard(OpenShiftApplicationWizardModel wizardModel) {
-		super("Select Existing Application", wizardModel);
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
-	
-	@Override
-	public void addPages() {
-		addPage(this.selectApplicationPage = new SelectApplicationWizardPage(getModel(), this));
-	}
-	
-	public IApplication getSelectedApplication() {
-		return selectApplicationPage.getSelectedApplication();
-	}
+    @Override
+    public void addPages() {
+        addPage(this.selectApplicationPage = new SelectApplicationWizardPage(getModel(), this));
+    }
+
+    public IApplication getSelectedApplication() {
+        return selectApplicationPage.getSelectedApplication();
+    }
 }

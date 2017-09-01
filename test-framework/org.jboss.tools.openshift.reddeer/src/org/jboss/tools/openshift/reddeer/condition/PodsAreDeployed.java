@@ -31,10 +31,10 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
  *
  */
 public class PodsAreDeployed extends AbstractWaitCondition {
-	
+
 	private final OpenShiftResource replicationController;
 	private final String podAmountValue;
-	
+
 	/**
 	 * Constructor to wait for a specific amount of pods to be running
 	 * @param projectName name of project with a replication controller
@@ -45,12 +45,11 @@ public class PodsAreDeployed extends AbstractWaitCondition {
 		assertNotNull(this.replicationController = project.getOpenShiftResource(Resource.DEPLOYMENT, replicationControllerName));
 		this.podAmountValue = desiredAmountOfPods + " current / " + desiredAmountOfPods + " desired";
 	}
-	
+
 	@Override
 	public boolean test() {
 		replicationController.select();
-		return replicationController.getPropertyValue("Misc", "Replicas").trim().equals(
-				podAmountValue);
+		return replicationController.getPropertyValue("Misc", "Replicas").trim().equals(podAmountValue);
 	}
 
 	public static int getNumberOfCurrentReplicas(String project, String replicationControllerName) {
@@ -65,11 +64,12 @@ public class PodsAreDeployed extends AbstractWaitCondition {
 		return getReplicas(getReplicasInfo(server, username, project, replicationControllerName));
 	}
 
-	public static String getReplicasInfo(String server, String username, String project, String replicationControllerName) { 
-		return getReplicasInfo(new OpenShiftExplorerView().getOpenShift3Connection(server, username).getProject(project), replicationControllerName);
+	public static String getReplicasInfo(String server, String username, String project, String replicationControllerName) {
+		return getReplicasInfo(new OpenShiftExplorerView().getOpenShift3Connection(server, username).getProject(project),
+				replicationControllerName);
 	}
 
-	public static String getReplicasInfo(String project, String replicationControllerName) { 
+	public static String getReplicasInfo(String project, String replicationControllerName) {
 		return getReplicasInfo(new OpenShiftExplorerView().getOpenShift3Connection().getProject(project), replicationControllerName);
 	}
 
@@ -80,10 +80,9 @@ public class PodsAreDeployed extends AbstractWaitCondition {
 
 		return Integer.valueOf(replicaInfo.split(" ")[0]);
 	}
-	
-	public static String getReplicasInfo(OpenShiftProject project, String replicationControllerName) { 
-		if (project == null
-				|| StringUtils.isEmpty(replicationControllerName)) {
+
+	public static String getReplicasInfo(OpenShiftProject project, String replicationControllerName) {
+		if (project == null || StringUtils.isEmpty(replicationControllerName)) {
 			return null;
 		}
 

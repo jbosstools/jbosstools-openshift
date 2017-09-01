@@ -28,18 +28,18 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
  */
 public class ManageDomainsHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		final ExpressConnection connection = UIUtils.getFirstElement(selection, ExpressConnection.class);
-		if (connection == null) {
-			return Status.OK_STATUS;
-		}
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        ISelection selection = HandlerUtil.getCurrentSelection(event);
+        final ExpressConnection connection = UIUtils.getFirstElement(selection, ExpressConnection.class);
+        if (connection == null) {
+            return Status.OK_STATUS;
+        }
 
-		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), 
-				new ManageDomainsWizard("Domains", 
-						NLS.bind("Manage your domains for connection {0}", connection.getId()), connection)).open();
-		new FireExpressConnectionsChangedJob(connection).schedule();
-		return Status.OK_STATUS;
-	}
+        new OkButtonWizardDialog(HandlerUtil.getActiveShell(event),
+                new ManageDomainsWizard("Domains", NLS.bind("Manage your domains for connection {0}", connection.getId()), connection))
+                        .open();
+        new FireExpressConnectionsChangedJob(connection).schedule();
+        return Status.OK_STATUS;
+    }
 }

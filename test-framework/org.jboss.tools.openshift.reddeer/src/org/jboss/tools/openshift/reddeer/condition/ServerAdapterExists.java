@@ -28,7 +28,7 @@ public class ServerAdapterExists extends AbstractWaitCondition {
 	private String applicationName;
 	private ServerAdapter.Version version;
 	private String resourceKind;
-	
+
 	/**
 	 * Constructs a new Server adapter exists wait condition.
 	 * 
@@ -45,7 +45,7 @@ public class ServerAdapterExists extends AbstractWaitCondition {
 		this.version = version;
 		this.resourceKind = resourceKind;
 	}
-	
+
 	public ServerAdapterExists(Version version, String applicationName) {
 		this(version, applicationName, StringUtils.EMPTY);
 	}

@@ -29,11 +29,9 @@ public class DockerImage2OpenshiftResourceConverter {
         String name = dockerImage.getName();
         StringBuilder builder = new StringBuilder(name.length());
         boolean lastSpecialChar = true;
-        for(int i=0; i < name.length() && builder.length() < MAXLENGTH;++i) {
+        for (int i = 0; i < name.length() && builder.length() < MAXLENGTH; ++i) {
             char c = name.charAt(i);
-            if (((c >= '0') && (c <= '9')) ||
-                ((c >= 'a') && (c <= 'z')) ||
-                ((c >= 'A') && (c <= 'Z'))) {
+            if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {
                 if ((c >= '0') && (c <= '9') && (builder.length() == 0)) {
                     /*Openshift does not allow resource beginning with numeric*/
                     builder.append('a');
@@ -50,5 +48,5 @@ public class DockerImage2OpenshiftResourceConverter {
         }
         return builder.toString();
     }
- 
+
 }

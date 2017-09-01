@@ -15,15 +15,15 @@ package org.jboss.tools.openshift.common.core.connection;
  */
 public class ConnectionsRegistrySingleton {
 
-	private static ConnectionsRegistry model;
+    private static ConnectionsRegistry model;
 
-	public static ConnectionsRegistry getInstance() {
-		if (model == null)
-			model = new ConnectionsRegistry();
-		return model;
-	}
+    public static ConnectionsRegistry getInstance() {
+        if (model == null)
+            model = new ConnectionsRegistry();
+        return model;
+    }
 
-	private ConnectionsRegistrySingleton() {
-		// inhibit instantiation
-	}
+    private ConnectionsRegistrySingleton() {
+        // inhibit instantiation
+    }
 }

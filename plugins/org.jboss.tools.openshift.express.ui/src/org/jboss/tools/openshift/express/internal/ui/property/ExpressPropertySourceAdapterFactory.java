@@ -23,25 +23,25 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  */
 public class ExpressPropertySourceAdapterFactory implements IAdapterFactory {
 
-	@Override
-	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
-		if (adapterType == IPropertySource.class) {
-			if (adaptableObject instanceof ExpressConnection) {
-				return new ConnectionPropertySource((ExpressConnection) adaptableObject);
-			} else if (adaptableObject instanceof IDomain) {
-				return new DomainPropertySource((IDomain) adaptableObject);
-			} else if (adaptableObject instanceof IApplication) {
-				return new ApplicationPropertySource((IApplication) adaptableObject);
-			} else if (adaptableObject instanceof IEmbeddedCartridge) {
-				return new EmbeddedCartridgePropertySource((IEmbeddedCartridge) adaptableObject);
-			}
-		}
-		return null;
-	}
+    @Override
+    public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
+        if (adapterType == IPropertySource.class) {
+            if (adaptableObject instanceof ExpressConnection) {
+                return new ConnectionPropertySource((ExpressConnection)adaptableObject);
+            } else if (adaptableObject instanceof IDomain) {
+                return new DomainPropertySource((IDomain)adaptableObject);
+            } else if (adaptableObject instanceof IApplication) {
+                return new ApplicationPropertySource((IApplication)adaptableObject);
+            } else if (adaptableObject instanceof IEmbeddedCartridge) {
+                return new EmbeddedCartridgePropertySource((IEmbeddedCartridge)adaptableObject);
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public Class<?>[] getAdapterList() {
-		return new Class[] { IPropertySource.class };
-	}
+    @Override
+    public Class<?>[] getAdapterList() {
+        return new Class[] { IPropertySource.class };
+    }
 
 }

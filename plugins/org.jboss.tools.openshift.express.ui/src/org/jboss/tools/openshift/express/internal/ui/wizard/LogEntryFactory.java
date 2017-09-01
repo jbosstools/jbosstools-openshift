@@ -26,80 +26,65 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
 
 public class LogEntryFactory {
 
+    public static LogEntry[] create(IApplication application, boolean isTimeouted) {
+        LogEntry[] logEntry = new LogEntry[] {};
+        if (application != null) {
+            List<LogEntry> entries = new ArrayList<>();
+            Collection<Message> messages = getMessages(application.getMessages());
+            if (messages != null) {
+                for (Message message : messages) {
+                    if (message != null && !StringUtils.isEmpty(message.getText())) {
+                        entries.add(new LogEntry(application.getName(), message.getText(), isTimeouted, application));
+                    } else if (isTimeouted) {
+                        // report timeout to the user
+                        entries.add(new LogEntry(application.getName(), null, isTimeouted, application));
+                    }
+                }
+            } else if (isTimeouted) {
+                // report timeout to the user
+                entries.add(new LogEntry(application.getName(), null, isTimeouted, application));
+            }
 
-	public static LogEntry[] create(IApplication application, boolean isTimeouted){
-		LogEntry[] logEntry = new LogEntry[]{};
-		if (application != null) {
-			List<LogEntry> entries = new ArrayList<>();
-			Collection<Message> messages = getMessages(application.getMessages());
-			if (messages != null) {
-				for(Message message : messages) {
-					if (message != null
-							&& !StringUtils.isEmpty(message.getText())) {
-						entries.add(
-								new LogEntry(
-								application.getName(),
-								message.getText(),
-								isTimeouted,
-								application));
-					} else if (isTimeouted) {
-						// report timeout to the user
-						entries.add(new LogEntry(application.getName(), null, isTimeouted, application));
-					}
-				}
-			} else if (isTimeouted) {
-				// report timeout to the user
-				entries.add(new LogEntry(application.getName(), null, isTimeouted, application));
-			}
-			
-			return entries.toArray(new LogEntry[entries.size()]);
-		}
-		return logEntry;
-	}
+            return entries.toArray(new LogEntry[entries.size()]);
+        }
+        return logEntry;
+    }
 
-	
-	public static LogEntry[] create(Collection<IEmbeddedCartridge> cartridges, boolean isTimeouted) {
-		if (cartridges == null
-				|| cartridges.isEmpty()) {
-			return new LogEntry[] {};
-		}
-		
-		List<LogEntry> entries = new ArrayList<>();
-		for (IEmbeddedCartridge cartridge : cartridges) {
-			Collection<Message> messages = getMessages(cartridge.getMessages());
-			if (messages != null) {
-				for (Message message : messages) {
-					if (message != null
-							&& !StringUtils.isEmpty(message.getText())) {
-						entries.add(new LogEntry(
-								cartridge.getName(),
-								message.getText(),
-								isTimeouted,
-								cartridge));
-					} else if (isTimeouted) {
-						// report timeout to the user
-						entries.add(new LogEntry(cartridge.getName(), null, isTimeouted, cartridge));
-					}
-				}
-			} else if (isTimeouted) {
-				// report timeout to the user
-				entries.add(new LogEntry(cartridge.getName(), null, isTimeouted, cartridge));
-			}
-		}
-			
-		return entries.toArray(new LogEntry[entries.size()]);
-	}	
-	
-	private static List<Message> getMessages(Messages messages) {
-		if (messages == null) {
-			return null;
-		}
-		List<Message> resultMessages = messages.getBy(IField.RESULT);
-		// workaround(s) for https://issues.jboss.org/browse/JBIDE-15115
-		if (resultMessages == null
-				|| resultMessages.isEmpty()) {
-			resultMessages = messages.getBy(IField.DEFAULT, ISeverity.RESULT);
-		}
-		return resultMessages;
-	}
+    public static LogEntry[] create(Collection<IEmbeddedCartridge> cartridges, boolean isTimeouted) {
+        if (cartridges == null || cartridges.isEmpty()) {
+            return new LogEntry[] {};
+        }
+
+        List<LogEntry> entries = new ArrayList<>();
+        for (IEmbeddedCartridge cartridge : cartridges) {
+            Collection<Message> messages = getMessages(cartridge.getMessages());
+            if (messages != null) {
+                for (Message message : messages) {
+                    if (message != null && !StringUtils.isEmpty(message.getText())) {
+                        entries.add(new LogEntry(cartridge.getName(), message.getText(), isTimeouted, cartridge));
+                    } else if (isTimeouted) {
+                        // report timeout to the user
+                        entries.add(new LogEntry(cartridge.getName(), null, isTimeouted, cartridge));
+                    }
+                }
+            } else if (isTimeouted) {
+                // report timeout to the user
+                entries.add(new LogEntry(cartridge.getName(), null, isTimeouted, cartridge));
+            }
+        }
+
+        return entries.toArray(new LogEntry[entries.size()]);
+    }
+
+    private static List<Message> getMessages(Messages messages) {
+        if (messages == null) {
+            return null;
+        }
+        List<Message> resultMessages = messages.getBy(IField.RESULT);
+        // workaround(s) for https://issues.jboss.org/browse/JBIDE-15115
+        if (resultMessages == null || resultMessages.isEmpty()) {
+            resultMessages = messages.getBy(IField.DEFAULT, ISeverity.RESULT);
+        }
+        return resultMessages;
+    }
 }

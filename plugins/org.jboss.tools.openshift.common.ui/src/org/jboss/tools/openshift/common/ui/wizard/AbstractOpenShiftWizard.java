@@ -17,20 +17,20 @@ import org.eclipse.jface.wizard.Wizard;
  */
 public class AbstractOpenShiftWizard<MODEL> extends Wizard {
 
-	private MODEL model;
+    private MODEL model;
 
-	public AbstractOpenShiftWizard(String title, MODEL model) {
-		this.model = model;
-		setNeedsProgressMonitor(true);
-		setWindowTitle(title);
-	}
+    public AbstractOpenShiftWizard(String title, MODEL model) {
+        this.model = model;
+        setNeedsProgressMonitor(true);
+        setWindowTitle(title);
+    }
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
 
-	protected MODEL getModel() {
-		return model;
-	}
+    protected MODEL getModel() {
+        return model;
+    }
 }

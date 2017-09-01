@@ -33,7 +33,7 @@ import com.openshift.restclient.model.IService;
  * @author adietish@redhat.com
  */
 public class OpenShift3NativeResourceUtils {
-	
+
 	private static final Logger LOGGER = new Logger(OpenShift3NativeResourceUtils.class);
 
 	/**
@@ -79,7 +79,7 @@ public class OpenShift3NativeResourceUtils {
 	public static boolean resourceExists(String kind, String name, String projectName, Connection connection) {
 		return safeGetResource(kind, name, projectName, connection) != null;
 	}
-	
+
 	/**
 	 * Returns the resource that matches the given kind, name and given namespace using the given connection. 
 	 * If it doesnt exist [{@code null} is returned.
@@ -96,13 +96,13 @@ public class OpenShift3NativeResourceUtils {
 
 		try {
 			return (T) connection.getResource(kind, projectName, name);
-		} catch(NotFoundException | ResourceForbiddenException e) {
+		} catch (NotFoundException | ResourceForbiddenException e) {
 			LOGGER.debug(NLS.bind("No {0} named {1} was found in project {2} on server {3}",
-					new Object[] { kind, name, projectName, connection.getHost() } ));
+					new Object[] { kind, name, projectName, connection.getHost() }));
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Returns the pods for the given service using the given connection.
 	 * 
@@ -112,8 +112,8 @@ public class OpenShift3NativeResourceUtils {
 	 */
 	public static Collection<IPod> getPods(IService service, Connection connection) {
 		assertNotNull(connection);
-		
+
 		List<IPod> allPods = connection.getResources(ResourceKind.POD, service.getNamespace());
 		return ResourceUtils.getPodsFor(service, allPods);
 	}
- }
+}

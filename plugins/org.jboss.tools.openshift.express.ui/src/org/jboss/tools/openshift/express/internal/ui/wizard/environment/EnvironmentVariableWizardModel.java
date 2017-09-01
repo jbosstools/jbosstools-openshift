@@ -20,79 +20,78 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
  */
 public class EnvironmentVariableWizardModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_NAME = "name";
-	public static final String PROPERTY_VALUE = "value";
+    public static final String PROPERTY_NAME = "name";
+    public static final String PROPERTY_VALUE = "value";
 
-	private String name;
-	private String value;
+    private String name;
+    private String value;
 
-	private EnvironmentVariableItem variable;
-	private AbstractEnvironmentVariablesWizardModel allVariablesModel;
+    private EnvironmentVariableItem variable;
+    private AbstractEnvironmentVariablesWizardModel allVariablesModel;
 
-	/**
-	 * Creates a new wizard model for creating a new environment variable
-	 * 
-	 * @param application
-	 *            the application that the environment variable shall get added
-	 *            to
-	 */
-	public EnvironmentVariableWizardModel(AbstractEnvironmentVariablesWizardModel variablesModel) {
-		this(new EnvironmentVariableItem(), variablesModel);
-	}
+    /**
+     * Creates a new wizard model for creating a new environment variable
+     * 
+     * @param application
+     *            the application that the environment variable shall get added
+     *            to
+     */
+    public EnvironmentVariableWizardModel(AbstractEnvironmentVariablesWizardModel variablesModel) {
+        this(new EnvironmentVariableItem(), variablesModel);
+    }
 
-	/**
-	 * Creates a new wizard model for editing an exiting environment variable
-	 * 
-	 * @param variable
-	 *            the environment variable that shall get edited
-	 */
-	public EnvironmentVariableWizardModel(EnvironmentVariableItem variable,
-			AbstractEnvironmentVariablesWizardModel variablesModel) {
-		this.variable = variable;
-		this.name = variable.getName();
-		this.value = variable.getValue();
-		this.allVariablesModel = variablesModel;
-	}
+    /**
+     * Creates a new wizard model for editing an exiting environment variable
+     * 
+     * @param variable
+     *            the environment variable that shall get edited
+     */
+    public EnvironmentVariableWizardModel(EnvironmentVariableItem variable, AbstractEnvironmentVariablesWizardModel variablesModel) {
+        this.variable = variable;
+        this.name = variable.getName();
+        this.value = variable.getValue();
+        this.allVariablesModel = variablesModel;
+    }
 
-	public void setName(String name) {
-		firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
-	}
+    public void setName(String name) {
+        firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
+    }
 
-	public String getName() {
-		return variable.getName();
-	}
+    public String getName() {
+        return variable.getName();
+    }
 
-	public void setValue(String value) {
-		firePropertyChange(PROPERTY_VALUE, this.value, this.value = value);
-	}
+    public void setValue(String value) {
+        firePropertyChange(PROPERTY_VALUE, this.value, this.value = value);
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public EnvironmentVariableItem getVariable() {
-		return variable;
-	}
+    public EnvironmentVariableItem getVariable() {
+        return variable;
+    }
 
-	public boolean isExistingName(String name) {
-		EnvironmentVariableItem variable = allVariablesModel.getVariable(name);
-		return variable != null
-				// ignore only if editing current one (not other one)
-				&& !variable.equals(this.variable);
-	}
+    public boolean isExistingName(String name) {
+        EnvironmentVariableItem variable = allVariablesModel.getVariable(name);
+        return variable != null
+                // ignore only if editing current one (not other one)
+                && !variable.equals(this.variable);
+    }
 
-	public boolean isEditing() {
-		return allVariablesModel.contains(variable);
-	}
-	
-	public void updateVariable() {
-		variable.setName(name);
-		variable.setValue(value);
-		if (!isEditing()) {
-			allVariablesModel.add(variable);
-		}
-		// TODO: find a way to fire a list member change so that we can get rid
-		// of refreshing the viewer when we close the env var wizard
-	}
+    public boolean isEditing() {
+        return allVariablesModel.contains(variable);
+    }
+
+    public void updateVariable() {
+        variable.setName(name);
+        variable.setValue(value);
+        if (!isEditing()) {
+            allVariablesModel.add(variable);
+        }
+        // TODO: find a way to fire a list member change so that we can get rid
+        // of refreshing the viewer when we close the env var wizard
+    }
 
 }

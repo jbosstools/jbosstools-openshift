@@ -26,51 +26,51 @@ import org.eclipse.swt.graphics.Image;
  */
 public class RequiredControlDecorationUpdater extends ControlDecorationUpdater {
 
-	private final boolean showRequiredDecorator;
+    private final boolean showRequiredDecorator;
 
-	/**
-	 * Default constructor: provides a 'REQUIRED' decorator when the status is
-	 * CANCEL
-	 */
-	public RequiredControlDecorationUpdater() {
-		this(true);
-	}
+    /**
+     * Default constructor: provides a 'REQUIRED' decorator when the status is
+     * CANCEL
+     */
+    public RequiredControlDecorationUpdater() {
+        this(true);
+    }
 
-	/**
-	 * Default constructor: provides a 'REQUIRED' decorator when the status is
-	 * CANCEL
-	 */
-	public RequiredControlDecorationUpdater(final boolean showRequiredDecorator) {
-		super();
-		this.showRequiredDecorator = showRequiredDecorator;
-	}
+    /**
+     * Default constructor: provides a 'REQUIRED' decorator when the status is
+     * CANCEL
+     */
+    public RequiredControlDecorationUpdater(final boolean showRequiredDecorator) {
+        super();
+        this.showRequiredDecorator = showRequiredDecorator;
+    }
 
-	/**
-	 * {@inheritDoc} Overrides the standard behaviour: for CANCEL status, items
-	 * are decorated with the REQUIRED decorator, not the ERROR one.
-	 */
-	@Override
-	protected Image getImage(IStatus status) {
-		if (status == null) {
-			return null;
-		}
-		String fieldDecorationID = null;
-		switch (status.getSeverity()) {
-		case IStatus.INFO:
-			fieldDecorationID = FieldDecorationRegistry.DEC_INFORMATION;
-			break;
-		case IStatus.WARNING:
-			fieldDecorationID = FieldDecorationRegistry.DEC_WARNING;
-			break;
-		case IStatus.ERROR:
-			fieldDecorationID = FieldDecorationRegistry.DEC_ERROR;
-			break;
-		case IStatus.CANCEL:
-			fieldDecorationID = showRequiredDecorator ? FieldDecorationRegistry.DEC_REQUIRED : null;
-			break;
-		}
+    /**
+     * {@inheritDoc} Overrides the standard behaviour: for CANCEL status, items
+     * are decorated with the REQUIRED decorator, not the ERROR one.
+     */
+    @Override
+    protected Image getImage(IStatus status) {
+        if (status == null) {
+            return null;
+        }
+        String fieldDecorationID = null;
+        switch (status.getSeverity()) {
+        case IStatus.INFO:
+            fieldDecorationID = FieldDecorationRegistry.DEC_INFORMATION;
+            break;
+        case IStatus.WARNING:
+            fieldDecorationID = FieldDecorationRegistry.DEC_WARNING;
+            break;
+        case IStatus.ERROR:
+            fieldDecorationID = FieldDecorationRegistry.DEC_ERROR;
+            break;
+        case IStatus.CANCEL:
+            fieldDecorationID = showRequiredDecorator ? FieldDecorationRegistry.DEC_REQUIRED : null;
+            break;
+        }
 
-		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(fieldDecorationID);
-		return fieldDecoration == null ? null : fieldDecoration.getImage();
-	}
+        FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(fieldDecorationID);
+        return fieldDecoration == null ? null : fieldDecoration.getImage();
+    }
 }

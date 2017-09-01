@@ -12,62 +12,61 @@ package org.jboss.tools.openshift.common.core.connection;
 
 import java.io.IOException;
 
-
 /**
  * @author Jeff Cantrill
  * @author Andre Dietisheim
  */
 public interface IConnection {
 
-	public static final String PROPERTY_USERNAME = "username";
-	public static final String PROPERTY_PASSWORD = "password";
-	public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
-	public static final String PROPERTY_AUTHSCHEME = "authtype";
-	public static final String PROPERTY_REMEMBER_TOKEN = "rememberToken";
+    public static final String PROPERTY_USERNAME = "username";
+    public static final String PROPERTY_PASSWORD = "password";
+    public static final String PROPERTY_REMEMBER_PASSWORD = "rememberPassword";
+    public static final String PROPERTY_AUTHSCHEME = "authtype";
+    public static final String PROPERTY_REMEMBER_TOKEN = "rememberToken";
 
-	public String getHost();
-	
-	public String getUsername();
+    public String getHost();
 
-	public void setUsername(String username);
+    public String getUsername();
 
-	public String getPassword();
+    public void setUsername(String username);
 
-	public void setPassword(String password);
+    public String getPassword();
 
-	public void setRememberPassword(boolean rememberPassword);
-	
-	public boolean isRememberPassword();
-	
-	public boolean isDefaultHost();
+    public void setPassword(String password);
 
-	public String getScheme();
-	
-	public ConnectionType getType();
+    public void setRememberPassword(boolean rememberPassword);
 
-	public void refresh();
+    public boolean isRememberPassword();
 
-	public boolean canConnect() throws IOException;
-	
-	public boolean connect();
-	
-	public IConnection clone();
+    public boolean isDefaultHost();
 
-	public void update(IConnection connection);
+    public String getScheme();
 
-	public void notifyUsage();
+    public ConnectionType getType();
 
-	public void enablePromptCredentials(boolean enable);
+    public void refresh();
 
-	public boolean isEnablePromptCredentials();
+    public boolean canConnect() throws IOException;
 
-	/**
-	 * Returns true if and only if connections are equal and
-	 * credentials like userName and password are equal. 
-	 * Default implementation compares userName and password.
-	 * Other implementations may override it to compare other data, e.g. token.
-	 * @param connection
-	 * @return
-	 */
-	public boolean credentialsEqual(IConnection connection);
+    public boolean connect();
+
+    public IConnection clone();
+
+    public void update(IConnection connection);
+
+    public void notifyUsage();
+
+    public void enablePromptCredentials(boolean enable);
+
+    public boolean isEnablePromptCredentials();
+
+    /**
+     * Returns true if and only if connections are equal and
+     * credentials like userName and password are equal. 
+     * Default implementation compares userName and password.
+     * Other implementations may override it to compare other data, e.g. token.
+     * @param connection
+     * @return
+     */
+    public boolean credentialsEqual(IConnection connection);
 }

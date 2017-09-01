@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.core.server;
 
 import java.util.HashMap;
@@ -30,67 +30,66 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 
 public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionProvider {
-	public static final String PROVIDER_ID = "org.jboss.tools.openshift.core.server.OpenshiftJMXConnection"; //$NON-NLS-1$
+    public static final String PROVIDER_ID = "org.jboss.tools.openshift.core.server.OpenshiftJMXConnection"; //$NON-NLS-1$
 
-	@Override 
-	protected boolean getConnectionPersistenceBehavior() {
-		return ON_START;
-	}
-	
-	@Override
-	protected boolean belongsHere(IServer server) {
-		if( server != null && server.getServerType().getId().equals(OpenShiftServer.SERVER_TYPE_ID) &&
-		        OpenShiftServerUtils.isJavaProject(server)) {
-			return true;
-		}
-		return false;
-	}
+    @Override
+    protected boolean getConnectionPersistenceBehavior() {
+        return ON_START;
+    }
 
-	@Override
-	public String getId() {
-		return  PROVIDER_ID;
-	}
+    @Override
+    protected boolean belongsHere(IServer server) {
+        if (server != null && server.getServerType().getId().equals(OpenShiftServer.SERVER_TYPE_ID)
+                && OpenShiftServerUtils.isJavaProject(server)) {
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	protected IConnectionWrapper createConnection(IServer server) {
-		IConnection openshiftCon = OpenShiftServerUtils.getConnection(server);
-		IResource resource = OpenShiftServerUtils.getResource(server, new NullProgressMonitor());
-		
-		if (resource == null) {
-		    return null;
-		}
-		String token = ((Connection)openshiftCon).getToken();
-		String projName =  resource.getNamespace();
-		List<IPod> pods = ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD));
-		if( pods.isEmpty() ) {
-			return null;
-		}
-		String pod =  pods.get(0).getName();
-		
-		String host = server.getHost();
-		String url = "https://" + host + ":8443/api/v1/namespaces/" 
-				+ projName + "/pods/https:" + pod + ":8778/proxy/jolokia/";
-		String headerKey = "Authorization";
-		String headerVal = "Bearer " + token;
-		
-		JolokiaConnectionWrapper cw = new JolokiaConnectionWrapper() {
-			@Override
-			public IConnectionProvider getProvider() {
-				return ExtensionManager.getProvider(PROVIDER_ID);
-			}
-		};
-		cw.setId(server.getName());
-		cw.setUrl(url);
-		cw.setType("POST");
-		cw.setIgnoreSSLErrors(true);
-		Map<String, String> headers = new HashMap<>();
-		headers.put(headerKey, headerVal);
-		cw.setHeaders(headers);
-		return cw;
-	}
+    @Override
+    public String getId() {
+        return PROVIDER_ID;
+    }
 
-	@Override
-	public String getName(IConnectionWrapper wrapper) {
-		return ((JolokiaConnectionWrapper)wrapper).getId();
-	}
+    @Override
+    protected IConnectionWrapper createConnection(IServer server) {
+        IConnection openshiftCon = OpenShiftServerUtils.getConnection(server);
+        IResource resource = OpenShiftServerUtils.getResource(server, new NullProgressMonitor());
+
+        if (resource == null) {
+            return null;
+        }
+        String token = ((Connection)openshiftCon).getToken();
+        String projName = resource.getNamespace();
+        List<IPod> pods = ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD));
+        if (pods.isEmpty()) {
+            return null;
+        }
+        String pod = pods.get(0).getName();
+
+        String host = server.getHost();
+        String url = "https://" + host + ":8443/api/v1/namespaces/" + projName + "/pods/https:" + pod + ":8778/proxy/jolokia/";
+        String headerKey = "Authorization";
+        String headerVal = "Bearer " + token;
+
+        JolokiaConnectionWrapper cw = new JolokiaConnectionWrapper() {
+            @Override
+            public IConnectionProvider getProvider() {
+                return ExtensionManager.getProvider(PROVIDER_ID);
+            }
+        };
+        cw.setId(server.getName());
+        cw.setUrl(url);
+        cw.setType("POST");
+        cw.setIgnoreSSLErrors(true);
+        Map<String, String> headers = new HashMap<>();
+        headers.put(headerKey, headerVal);
+        cw.setHeaders(headers);
+        return cw;
+    }
+
+    @Override
+    public String getName(IConnectionWrapper wrapper) {
+        return ((JolokiaConnectionWrapper)wrapper).getId();
+    }
 }

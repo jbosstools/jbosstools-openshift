@@ -31,75 +31,71 @@ import com.openshift.restclient.model.project.IProjectRequest;
  */
 public class NewProjectWizardModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_PROJECT_NAME = "projectName";
-	public static final String PROPERTY_DESCRIPTION = "description";
-	public static final String PROPERTY_DISPLAY_NAME = "displayName";
-	
-	private String description;
-	private String displayName;
-	private String projectName;
-	private Connection connection;
-	private List<IProject> projects;
-	private IProject project;
+    public static final String PROPERTY_PROJECT_NAME = "projectName";
+    public static final String PROPERTY_DESCRIPTION = "description";
+    public static final String PROPERTY_DISPLAY_NAME = "displayName";
 
-	protected NewProjectWizardModel(Connection connection, List<IProject> projects) {
-		this.connection = connection;
-		this.projects = projects;
-	}
+    private String description;
+    private String displayName;
+    private String projectName;
+    private Connection connection;
+    private List<IProject> projects;
+    private IProject project;
 
-	
-	public IProject createProject() {
-		if (connection == null) {
-			OpenShiftUIActivator.getDefault().getLogger().logError("Could not create project, missing connection.");
-			return null;
-		}
-		IProjectRequest request = connection.getResourceFactory().stub(ResourceKind.PROJECT_REQUEST, getProjectName());
-		request.setDescription(getDescription());
-		request.setDisplayName(getDisplayName());
-		IProject project = (IProject)connection.createResource(request);
-		List<IProject> newProjects = new ArrayList<>(projects);
-		newProjects.add((IProject)connection.refresh(project));
-		
-		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
-				connection, 
-				ConnectionProperties.PROPERTY_PROJECTS, 
-				projects, 
-				Collections.unmodifiableList(newProjects));
-		return this.project = project;
-	}
-	public String getProjectName() {
-		return this.projectName;
-	}
+    protected NewProjectWizardModel(Connection connection, List<IProject> projects) {
+        this.connection = connection;
+        this.projects = projects;
+    }
 
-	public void setProjectName(String projectName) {
-		firePropertyChange(PROPERTY_PROJECT_NAME,
-				this.projectName, this.projectName = projectName);
-	}
-	
-	public String getDescription() {
-		return this.description;
-	}
-	
-	public void setDescription(String description) {
-		firePropertyChange(PROPERTY_DESCRIPTION, this.description, this.description = description);
-	}
+    public IProject createProject() {
+        if (connection == null) {
+            OpenShiftUIActivator.getDefault().getLogger().logError("Could not create project, missing connection.");
+            return null;
+        }
+        IProjectRequest request = connection.getResourceFactory().stub(ResourceKind.PROJECT_REQUEST, getProjectName());
+        request.setDescription(getDescription());
+        request.setDisplayName(getDisplayName());
+        IProject project = (IProject)connection.createResource(request);
+        List<IProject> newProjects = new ArrayList<>(projects);
+        newProjects.add((IProject)connection.refresh(project));
 
-	public String getDisplayName() {
-		return displayName;
-	}
+        ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_PROJECTS, projects,
+                Collections.unmodifiableList(newProjects));
+        return this.project = project;
+    }
 
-	public void setDisplayName(String displayName) {
-		firePropertyChange(PROPERTY_DISPLAY_NAME, this.displayName, this.displayName = displayName);
-	}
-	
-	public IProject getProject() {
-		return project;
-	}
-	
-	public Collection<String> getUnavailableNames() {
-		if (projects == null || projects.isEmpty()) {
-			return Collections.emptySet();
-		}
-		return projects.stream().map(IProject::getName).collect(Collectors.toSet());
-	}
+    public String getProjectName() {
+        return this.projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        firePropertyChange(PROPERTY_PROJECT_NAME, this.projectName, this.projectName = projectName);
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(String description) {
+        firePropertyChange(PROPERTY_DESCRIPTION, this.description, this.description = description);
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        firePropertyChange(PROPERTY_DISPLAY_NAME, this.displayName, this.displayName = displayName);
+    }
+
+    public IProject getProject() {
+        return project;
+    }
+
+    public Collection<String> getUnavailableNames() {
+        if (projects == null || projects.isEmpty()) {
+            return Collections.emptySet();
+        }
+        return projects.stream().map(IProject::getName).collect(Collectors.toSet());
+    }
 }

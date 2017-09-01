@@ -30,62 +30,60 @@ import com.openshift.client.OpenShiftException;
  */
 public class SSHUserConfig {
 
-	private static final String VALUE_LIBRA_SSH_HOST = "rhcloud.com";
-	private static final String KEY_CONFIGBLOCK_HOST_START = "Host ";
-	private static final String KEY_CONFIGBLOCK_HOST_END = "\n";
-	private static final Pattern IDENTITYFILE_PATTERN = Pattern.compile(".+IdentityFile (.+)");
-	private static final String CONFIG_FILENAME = "config";
-	private File configFile;
+    private static final String VALUE_LIBRA_SSH_HOST = "rhcloud.com";
+    private static final String KEY_CONFIGBLOCK_HOST_START = "Host ";
+    private static final String KEY_CONFIGBLOCK_HOST_END = "\n";
+    private static final Pattern IDENTITYFILE_PATTERN = Pattern.compile(".+IdentityFile (.+)");
+    private static final String CONFIG_FILENAME = "config";
+    private File configFile;
 
-	public SSHUserConfig(String sshHome) {
-		this(new File(sshHome, CONFIG_FILENAME));
-	}
+    public SSHUserConfig(String sshHome) {
+        this(new File(sshHome, CONFIG_FILENAME));
+    }
 
-	public SSHUserConfig(File configFile) {
-		this.configFile = configFile;
-	}
+    public SSHUserConfig(File configFile) {
+        this.configFile = configFile;
+    }
 
-	public boolean exists() {
-		return FileUtils.canRead(configFile);
-	}
+    public boolean exists() {
+        return FileUtils.canRead(configFile);
+    }
 
-	public File getFile() {
-		return configFile;
-	}
-	
-	public boolean hasLibraIdentifyFile() throws OpenShiftException {
-		return getLibraIdentityFile() != null;
-	}
+    public File getFile() {
+        return configFile;
+    }
 
-	public String getLibraIdentityFile() throws OpenShiftException {
-		if (!exists()) {
-			return null;
-		}
+    public boolean hasLibraIdentifyFile() throws OpenShiftException {
+        return getLibraIdentityFile() != null;
+    }
 
-		try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
-			for (String data = reader.readLine(); data != null; data = reader.readLine()) {
-				if (!data.startsWith(KEY_CONFIGBLOCK_HOST_START)
-						|| !data.endsWith(VALUE_LIBRA_SSH_HOST)) {
-					continue;
-				}
+    public String getLibraIdentityFile() throws OpenShiftException {
+        if (!exists()) {
+            return null;
+        }
 
-				for (data = reader.readLine(); data != null; reader.readLine()) {
-					if (data.equals(KEY_CONFIGBLOCK_HOST_END)) {
-						continue;
-					}
+        try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+            for (String data = reader.readLine(); data != null; data = reader.readLine()) {
+                if (!data.startsWith(KEY_CONFIGBLOCK_HOST_START) || !data.endsWith(VALUE_LIBRA_SSH_HOST)) {
+                    continue;
+                }
 
-					Matcher matcher = IDENTITYFILE_PATTERN.matcher(data);
-					if (!matcher.find()
-							|| matcher.groupCount() < 1) {
-						continue;
-					}
+                for (data = reader.readLine(); data != null; reader.readLine()) {
+                    if (data.equals(KEY_CONFIGBLOCK_HOST_END)) {
+                        continue;
+                    }
 
-					return matcher.group(1);
-				}
-			}
-			return null;
-		} catch (IOException e) {
-			throw new OpenShiftException("Could not read file {0}", configFile);
-		}
-	}
+                    Matcher matcher = IDENTITYFILE_PATTERN.matcher(data);
+                    if (!matcher.find() || matcher.groupCount() < 1) {
+                        continue;
+                    }
+
+                    return matcher.group(1);
+                }
+            }
+            return null;
+        } catch (IOException e) {
+            throw new OpenShiftException("Could not read file {0}", configFile);
+        }
+    }
 }

@@ -19,50 +19,47 @@ import org.osgi.service.prefs.Preferences;
  */
 public abstract class AbstractPreferenceValue<TYPE> {
 
-	private String pluginId;
-	private String prefsKey;
+    private String pluginId;
+    private String prefsKey;
 
-	public AbstractPreferenceValue(String prefsKey, String pluginId) {
-		this.pluginId = pluginId;
-		this.prefsKey = prefsKey;
-	}
+    public AbstractPreferenceValue(String prefsKey, String pluginId) {
+        this.pluginId = pluginId;
+        this.prefsKey = prefsKey;
+    }
 
-	public abstract TYPE get();
-			
-	protected String doGet() {
-		Preferences prefs = getPreferences(pluginId);
-		return prefs.get(prefsKey, "");
-	}
+    public abstract TYPE get();
 
-	public void clear() throws BackingStoreException {
-		String prefsValue = doGet();
-		if (prefsValue == null
-				|| prefsValue == null) {
-			return;
-		}
-		getPreferences(pluginId).clear();
-	}
-		
-	public void set(TYPE value) {
-		doStore(String.valueOf(value));
-	}
-	
-	protected void doStore(String value) {
-		Preferences prefs = getPreferences(pluginId);
-		String prefsValue = prefs.get(prefsKey, "");
-		if (prefsValue == null
-				|| prefsValue.equals("") 
-				|| !prefsValue.equals(value)) {
-			prefs.put(prefsKey, value);
-			try {
-				prefs.flush();
-			} catch (BackingStoreException bse) {
-				// intentionally ignore, non-critical
-			}
-		}
-	}
+    protected String doGet() {
+        Preferences prefs = getPreferences(pluginId);
+        return prefs.get(prefsKey, "");
+    }
 
-	protected Preferences getPreferences(String pluginId) {
-		return InstanceScope.INSTANCE.getNode(pluginId);
-	}
+    public void clear() throws BackingStoreException {
+        String prefsValue = doGet();
+        if (prefsValue == null || prefsValue == null) {
+            return;
+        }
+        getPreferences(pluginId).clear();
+    }
+
+    public void set(TYPE value) {
+        doStore(String.valueOf(value));
+    }
+
+    protected void doStore(String value) {
+        Preferences prefs = getPreferences(pluginId);
+        String prefsValue = prefs.get(prefsKey, "");
+        if (prefsValue == null || prefsValue.equals("") || !prefsValue.equals(value)) {
+            prefs.put(prefsKey, value);
+            try {
+                prefs.flush();
+            } catch (BackingStoreException bse) {
+                // intentionally ignore, non-critical
+            }
+        }
+    }
+
+    protected Preferences getPreferences(String pluginId) {
+        return InstanceScope.INSTANCE.getNode(pluginId);
+    }
 }

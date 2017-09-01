@@ -17,7 +17,7 @@ package org.jboss.tools.openshift.reddeer.utils;
  *
  */
 public class OpenShiftLabel {
-	
+
 	/**
 	 * OpenShift explorer context menu labels.
 	 */
@@ -27,40 +27,40 @@ public class OpenShiftLabel {
 		public static final String EDIT = "Edit...";
 		public static final String PROPERTIES = "Properties";
 		public static final String REFRESH = "Refresh";
-		public static final String[] SHOW_IN_WEB_CONSOLE = {"Show In", "Web Console"};
-		public static final String[] SHOW_IN_WEB_BROWSER = {"Show In", "Web Browser"};
-		
+		public static final String[] SHOW_IN_WEB_CONSOLE = { "Show In", "Web Console" };
+		public static final String[] SHOW_IN_WEB_BROWSER = { "Show In", "Web Browser" };
+
 		// Connection related
 		public static final String EDIT_CONNECTION = "Edit Connection...";
 		public static final String MANAGE_SSH_KEYS = "Manage SSH Keys...";
 		public static final String MANAGE_DOMAINS = "Manage Domains...";
-		public static final String[] NEW_DOMAIN = {"New", "Domain..."};
-		public static final String[] NEW_CONNECTION = {"New", "Connection..."};
-		public static final String[] NEW_OS_PROJECT = {"New", "Project..."};
+		public static final String[] NEW_DOMAIN = { "New", "Domain..." };
+		public static final String[] NEW_CONNECTION = { "New", "Connection..." };
+		public static final String[] NEW_OS_PROJECT = { "New", "Project..." };
 		public static final String REMOVE_CONNECTION = "Remove Connection(s)...";
 		public static final String DELETE_CONNECTION = "Delete";
-		
+
 		// Domain related
 		public static final String DELETE_DOMAIN = "Delete";
 		public static final String EDIT_DOMAIN = "Edit Domain...";
-		
+
 		// Project related
 		public static final String MANAGE_OS_PROJECTS = "Manage Projects...";
 		public static final String DELETE_OS_PROJECT = "Delete";
 		public static final String DEPLOY_DOCKER_IMAGE = "Deploy Docker Image...";
 		public static final String DEPLOY_TO_OPENSHIFT = "Deploy to OpenShift...";
-		
+
 		// Resource related
 		public static final String BUILD_LOG = "Build Log...";
 		public static final String CLONE_BUILD = "Clone Build";
 		public static final String DELETE_RESOURCE = "Delete";
 		public static final String POD_LOG = "Pod Log...";
-		public static final String[] NEW_RESOURCE = {"New", "Resource..."};
+		public static final String[] NEW_RESOURCE = { "New", "Resource..." };
 		public static final String START_BUILD = "Start Build";
-		public static final String[] SCALE_UP = {"Scale", "Up"};
-		public static final String[] SCALE_DOWN = {"Scale", "Down"};
-		public static final String[] SCALE_TO = {"Scale", "To..."};
-		
+		public static final String[] SCALE_UP = { "Scale", "Up" };
+		public static final String[] SCALE_DOWN = { "Scale", "Down" };
+		public static final String[] SCALE_TO = { "Scale", "To..." };
+
 		// Application related
 		public static final String APPLICATION_DETAILS = "Details...";
 		public static final String APPLICATION_PROPERTIES = "Properties";
@@ -69,29 +69,29 @@ public class OpenShiftLabel {
 		public static final String EDIT_ENV_VARS = "Edit User Environment Variables...";
 		public static final String EMBED_CARTRIDGE = "Edit Embedded Cartridges...";
 		public static final String IMPORT_APPLICATION = "Import Application...";
-		public static final String[] NEW_OS2_APPLICATION = {"New", "Application..."};
-		public static final String[] NEW_OS3_APPLICATION = {"New", "Application..."};
-		public static final String[] NEW_SERVER = {"New", "Server"};	
-		public static final String[] NEW_SERVER_ADAPTER = {"New", "Server Adapter..."};
+		public static final String[] NEW_OS2_APPLICATION = { "New", "Application..." };
+		public static final String[] NEW_OS3_APPLICATION = { "New", "Application..." };
+		public static final String[] NEW_SERVER = { "New", "Server" };
+		public static final String[] NEW_SERVER_ADAPTER = { "New", "Server Adapter..." };
 		public static final String NEW_ADAPTER_FROM_EXPLORER = "Server Adapter...";
-		public static final String PORT_FORWARD = "Port Forwarding...";		
-		public static final String RESTART_APPLICATION = "Restart Application";	
-		public static final String[] RESTORE_SNAPSHOT = {"Snapshot", "Restore/Deploy..."};
-		public static final String[] SAVE_SNAPSHOT = {"Snapshot", "Save..."}; 
+		public static final String PORT_FORWARD = "Port Forwarding...";
+		public static final String RESTART_APPLICATION = "Restart Application";
+		public static final String[] RESTORE_SNAPSHOT = { "Snapshot", "Restore/Deploy..." };
+		public static final String[] SAVE_SNAPSHOT = { "Snapshot", "Save..." };
 		public static final String SHOW_ENV_VARS = "List All Environment Variables";
-		public static final String[] SHOW_IN_BROWSER = {"Show In", "Web Browser"};
+		public static final String[] SHOW_IN_BROWSER = { "Show In", "Web Browser" };
 		public static final String TAIL_FILES = "Tail Files...";
-		public static final String[] DEPLOY_PROJECT = {"Configure", "Deploy to OpenShift"};
-		
+		public static final String[] DEPLOY_PROJECT = { "Configure", "Deploy to OpenShift" };
+
 		// Server adapter related
 		public static final String PUBLISH = "Publish";
-		
+
 		// Workspace project related
-		public static final String[] CONFIGURE_MARKERS = {"OpenShift", "Configure Markers..."};
-		public static final String[] GIT_ADD = {"Team", "Add to Index"};
-		public static final String[] GIT_COMMIT = {"Team", "Commit..."};
+		public static final String[] CONFIGURE_MARKERS = { "OpenShift", "Configure Markers..." };
+		public static final String[] GIT_ADD = { "Team", "Add to Index" };
+		public static final String[] GIT_COMMIT = { "Team", "Commit..." };
 	}
-		
+
 	/**
 	 * Shell title labels.
 	 */
@@ -143,27 +143,27 @@ public class OpenShiftLabel {
 		public static final String STOP_ALL_DEPLOYMENTS = "Stop all deployments?";
 		public static final String TAIL_FILES = "Tail Files";
 		public static final String UNTRUSTED_SSL_CERTIFICATE = "Untrusted SSL Certificate";
-		
+
 		// Domain related
 		public static final String CREATE_DOMAIN = "Create Domain";
 		public static final String DELETE_DOMAIN = "Domain deletion";
 		public static final String EDIT_DOMAIN = "Edit domain";
 		public static final String MANAGE_DOMAINS = "Domains";
-		
+
 		// SSH Key related
 		public static final String ADD_SSH_KEY = "Add SSH Key";
 		public static final String MANAGE_SSH_KEYS = "Manage SSH Keys";
 		public static final String NEW_SSH_KEY = "New SSH Key";
 		public static final String NO_SSH_KEY = "No SSH Keys";
 		public static final String REMOVE_SSH_KEY = "Remove SSH Key";
-		
+
 		// Project related
 		public static final String MANAGE_OS_PROJECTS = "OpenShift Projects";
 		public static final String CREATE_OS_PROJECT = "Create OpenShift Project";
-		
+
 		// Server adapter related
 		public static final String PUBLISH_CHANGES = "Publish Changes";
-		
+
 		// Application related
 		public static final String APPLICATION_SUMMARY = "Create Application Summary";
 		public static final String EDIT_TEMPLATE_PARAMETER = "Edit Template Parameter";
@@ -171,11 +171,11 @@ public class OpenShiftLabel {
 		public static final String RESOURCE_LABEL = "Resource Label";
 		public static final String TEMPLATE_DETAILS = "Template Details";
 		public static final String WEBHOOK_TRIGGERS = "Webhooks triggers";
-		
+
 		// Resources related
 		public static final String CREATE_RESOURCE_SUMMARY = "Create Resource Summary";
 		public static final String DELETE_RESOURCE = "Delete OpenShift Resource";
-		
+
 		// Others
 		public static final String BINARY_LOCATION_UNKNOWN = "Unknown executable location";
 		public static final String CHEATSHEET = "Found cheatsheet";
@@ -183,7 +183,7 @@ public class OpenShiftLabel {
 		public static final String SERVICE_PORTS = "Service Ports";
 		public static final String SERVER_ADAPTER_SETTINGS = "OpenShift Server Adapter Settings";
 	}
-	
+
 	/**
 	 * Button labels.
 	 */
@@ -195,7 +195,7 @@ public class OpenShiftLabel {
 		public static final String ADVANCED_CLOSE = " << Advanced ";
 		public static final String BROWSE = "Browse...";
 		public static final String CLOSE = "Close";
-		public static final String COMMIT= "Commit";
+		public static final String COMMIT = "Commit";
 		public static final String COMMIT_PUBLISH = "Commit and Publish";
 		public static final String COMMIT_PUSH = "Commit and Push";
 		public static final String CREATE_DOMAIN = "New...";
@@ -217,8 +217,8 @@ public class OpenShiftLabel {
 		public static final String BROWSE_WORKSPACE = "Browse Workspace...";
 		public static final String WORKSPACE = "Workspace...";
 	}
-	
-	public static class TextLabels {	
+
+	public static class TextLabels {
 		// Connection related
 		public static final String NEW_CONNECTION = "<New Connection>";
 		public static final String CREATE_CONNECTION = "No connections are available. "
@@ -230,7 +230,7 @@ public class OpenShiftLabel {
 		public static final String SELECT_LOCAL_TEMPLATE = "Select a local template file or a full URL:";
 		public static final String SERVER_TYPE = "Server type:";
 		public static final String STORE_PASSWORD = "Save password (could trigger secure storage login)";
-		public static final String STORE_TOKEN= "Save token (could trigger secure storage login)";
+		public static final String STORE_TOKEN = "Save token (could trigger secure storage login)";
 		public static final String CHECK_SERVER_TYPE = "Check Server Type";
 		public static final String PROTOCOL = "Protocol:";
 		public static final String TOKEN = "Token";
@@ -239,41 +239,40 @@ public class OpenShiftLabel {
 
 		// Domain related
 		public static final String DOMAIN_NAME = "Domain Name:";
-	
+
 		// Docker integration related
 		public static final String IMAGE_NAME = "Image Name: ";
 		public static final String RESOURCE_NAME = "Resource Name: ";
-		
+
 		// Project related
 		public static final String PROJECT_NAME = "Project Name:";
 		public static final String PROJECT_DISPLAYED_NAME = "Display Name:";
 		public static final String PROJECT_DESCRIPTION = "Description:";
 		public static final String PROJECT = "OpenShift project: ";
-		
-		
+
 		// SSH Key related
 		public static final String NAME = "Name:";
 		public static final String PRIVATE_NAME = "Private Key File Name:";
 		public static final String PUBLIC_NAME = "Public Key File Name:";
 		public static final String PUB_KEY = "Public Key:";
-		
+
 		// Wizard
 		public static final String CARTRIDGE_URL = "Cartridge URL:";
 		public static final String SOURCE_CODE = "Source code:";
-		
+
 		// Embeddable Cartridge
 		public static final String EMBEDDED_CARTRIDGE_URL = "Cartridge URL:";
-		
+
 		// Application related
 		public static final String CUSTOM_TEMPLATE = "Custom template";
 		public static final String DESTINATION = "Destination:";
 		public static final String SERVER_TEMPLATE = "Server application source";
-		public static final String TAIL_OPTIONS = "Tail options:";	
-		
+		public static final String TAIL_OPTIONS = "Tail options:";
+
 		// Webhook
 		public static final String GENERIC_WEBHOOK = "Generic webhook:";
 		public static final String GITHUB_WEBHOOK = "GitHub webhook:";
-		
+
 		// Labels
 		public static final String LABEL = "Label:";
 		public static final String OC_LOCATION = "'oc' executable location";
@@ -282,17 +281,17 @@ public class OpenShiftLabel {
 		public static final String FIND_FREE_PORTS = "Find free local ports for remote ports";
 		public static final String RESOURCE_LOCATION = "Enter a file path (workspace or local) or a full URL.";
 		public static final String BUILDER_RESOURCE_NAME = "Name: ";
-		
+
 		// Git related
 		public static final String GIT_REPO_URL = "Git Repository URL:";
 		public static final String GIT_REF = "Git Reference:";
 		public static final String CONTEXT_DIR = "Context Directory:";
-		
+
 		// Ports
 		public static final String SERVICE_PORT = "Service port:";
 		public static final String POD_PORT = "Pod port:";
 	}
-	
+
 	/**
 	 * Magic pond.
 	 */
@@ -303,17 +302,15 @@ public class OpenShiftLabel {
 		public static final String NODEJS_TEMPLATE = "nodejs-example (quickstart, nodejs) - openshift";
 		public static final String RED_HAT_CENTRAL = "Red Hat Central";
 		public static final String MAVEN_MIRROR_URL = "MAVEN_MIRROR_URL";
-		public static final String[] NEW_APP_MENU = {"File", "New", "OpenShift Application"};
+		public static final String[] NEW_APP_MENU = { "File", "New", "OpenShift Application" };
 		public static final String OPENSHIFT_APP = "OpenShift Application";
 		public static final String OPENSHIFT_CENTRAL_SCRIPT = "$(\"#wizards\" ).find('a').filter(\""
 				+ ":contains('OpenShift Application')\").click()";
-		
+
 		public static final String OPENSHIFT3 = "OpenShift 3";
 		// Server adapter
-		public static final String[] OS2_SERVER_ADAPTER = new String[] {"OpenShift", 
-				"OpenShift 2 Server Adapter"};
-		public static final String[] OS3_SERVER_ADAPTER = new String[] {"OpenShift", 
-				"OpenShift 3 Server Adapter"};
+		public static final String[] OS2_SERVER_ADAPTER = new String[] { "OpenShift", "OpenShift 2 Server Adapter" };
+		public static final String[] OS3_SERVER_ADAPTER = new String[] { "OpenShift", "OpenShift 3 Server Adapter" };
 
 	}
 }

@@ -26,16 +26,15 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
  */
 public class EditConnectionHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IConnection.class);
-		return openConnectionWizard(connection, event);
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        IConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IConnection.class);
+        return openConnectionWizard(connection, event);
+    }
 
-	protected Object openConnectionWizard(IConnection connection, ExecutionEvent event) {
-		final IWizard connectToOpenShiftWizard = new ConnectionWizard(connection, 
-				ConnectionWizard.EDIT_CONNECTION_TITLE);
-		WizardUtils.openWizardDialog(connectToOpenShiftWizard, HandlerUtil.getActiveShell(event));
-		return Status.OK_STATUS;
-	}
+    protected Object openConnectionWizard(IConnection connection, ExecutionEvent event) {
+        final IWizard connectToOpenShiftWizard = new ConnectionWizard(connection, ConnectionWizard.EDIT_CONNECTION_TITLE);
+        WizardUtils.openWizardDialog(connectToOpenShiftWizard, HandlerUtil.getActiveShell(event));
+        return Status.OK_STATUS;
+    }
 }

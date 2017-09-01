@@ -30,48 +30,46 @@ import com.openshift.restclient.model.build.IWebhookTrigger;
  */
 public class WebhookUtilTest {
 
-	@Test
-	public void testGetWebHooks() {
-		IBuildConfig buildConfig = givenBuildConfigWithTriggers(genericTrigger(), imageChangeTrigger(),
-				githubTrigger());
-		List<IWebhookTrigger> webHooks = WebhookUtil.getWebHooks(buildConfig);
-		assertEquals(2, webHooks.size());
-		assertNotNull(webHooks);
-		assertEquals(BuildTriggerType.GENERIC, webHooks.get(0).getType());
-		assertEquals(BuildTriggerType.GITHUB, webHooks.get(1).getType());
-	}
+    @Test
+    public void testGetWebHooks() {
+        IBuildConfig buildConfig = givenBuildConfigWithTriggers(genericTrigger(), imageChangeTrigger(), githubTrigger());
+        List<IWebhookTrigger> webHooks = WebhookUtil.getWebHooks(buildConfig);
+        assertEquals(2, webHooks.size());
+        assertNotNull(webHooks);
+        assertEquals(BuildTriggerType.GENERIC, webHooks.get(0).getType());
+        assertEquals(BuildTriggerType.GITHUB, webHooks.get(1).getType());
+    }
 
-	@Test
-	public void testEmptyWebHooks() {
-		IBuildConfig buildConfig = givenBuildConfigWithTriggers();
-		List<IWebhookTrigger> webHooks = WebhookUtil.getWebHooks(buildConfig);
-		assertNotNull(webHooks);
-		assertEquals(0, webHooks.size());
-	}
+    @Test
+    public void testEmptyWebHooks() {
+        IBuildConfig buildConfig = givenBuildConfigWithTriggers();
+        List<IWebhookTrigger> webHooks = WebhookUtil.getWebHooks(buildConfig);
+        assertNotNull(webHooks);
+        assertEquals(0, webHooks.size());
+    }
 
-	private IBuildConfig givenBuildConfigWithTriggers(IBuildTrigger... buildTriggers) {
-		IBuildConfig buildConfig = mock(IBuildConfig.class);
-		List<IBuildTrigger> triggers = (buildTriggers == null) ? Collections.<IBuildTrigger> emptyList()
-				: Arrays.asList(buildTriggers);
-		when(buildConfig.getBuildTriggers()).thenReturn(triggers);
-		return buildConfig;
-	}
+    private IBuildConfig givenBuildConfigWithTriggers(IBuildTrigger... buildTriggers) {
+        IBuildConfig buildConfig = mock(IBuildConfig.class);
+        List<IBuildTrigger> triggers = (buildTriggers == null) ? Collections.<IBuildTrigger>emptyList() : Arrays.asList(buildTriggers);
+        when(buildConfig.getBuildTriggers()).thenReturn(triggers);
+        return buildConfig;
+    }
 
-	private IBuildTrigger genericTrigger() {
-		return mockTrigger(IWebhookTrigger.class, BuildTriggerType.GENERIC);
-	}
+    private IBuildTrigger genericTrigger() {
+        return mockTrigger(IWebhookTrigger.class, BuildTriggerType.GENERIC);
+    }
 
-	private IBuildTrigger imageChangeTrigger() {
-		return mockTrigger(IBuildTrigger.class, BuildTriggerType.IMAGE_CHANGE);
-	}
+    private IBuildTrigger imageChangeTrigger() {
+        return mockTrigger(IBuildTrigger.class, BuildTriggerType.IMAGE_CHANGE);
+    }
 
-	private IBuildTrigger githubTrigger() {
-		return mockTrigger(IWebhookTrigger.class, BuildTriggerType.GITHUB);
-	}
+    private IBuildTrigger githubTrigger() {
+        return mockTrigger(IWebhookTrigger.class, BuildTriggerType.GITHUB);
+    }
 
-	private IBuildTrigger mockTrigger(Class<? extends IBuildTrigger> clazz, String type) {
-		IBuildTrigger trigger = mock(clazz);
-		when(trigger.getType()).thenReturn(type);
-		return trigger;
-	}
+    private IBuildTrigger mockTrigger(Class<? extends IBuildTrigger> clazz, String type) {
+        IBuildTrigger trigger = mock(clazz);
+        when(trigger.getType()).thenReturn(type);
+        return trigger;
+    }
 }

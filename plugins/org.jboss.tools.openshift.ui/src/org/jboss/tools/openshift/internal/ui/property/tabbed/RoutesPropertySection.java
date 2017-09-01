@@ -21,7 +21,7 @@ import com.openshift.restclient.ResourceKind;
  */
 public class RoutesPropertySection extends OpenShiftResourcePropertySection {
 
-	public RoutesPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.RoutesTab", ResourceKind.ROUTE);
-	}
+    public RoutesPropertySection() {
+        super("popup:org.jboss.tools.openshift.ui.properties.tab.RoutesTab", ResourceKind.ROUTE);
+    }
 }

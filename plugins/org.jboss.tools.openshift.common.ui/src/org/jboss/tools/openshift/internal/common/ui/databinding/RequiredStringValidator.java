@@ -29,27 +29,27 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class RequiredStringValidator implements IValidator {
 
-	private String fieldName;
+    private String fieldName;
 
-	public RequiredStringValidator(String fieldName) {
-		this.fieldName = fieldName;
-	}
+    public RequiredStringValidator(String fieldName) {
+        this.fieldName = fieldName;
+    }
 
-	@Override
-	public IStatus validate(Object value) {
-		String string = (String) value;
-		if (StringUtils.isEmpty(string)) {
-			return ValidationStatus.cancel(NLS.bind("Please provide a {0}", fieldName));
-		}
-		return validateString((String) value);
-	}
+    @Override
+    public IStatus validate(Object value) {
+        String string = (String)value;
+        if (StringUtils.isEmpty(string)) {
+            return ValidationStatus.cancel(NLS.bind("Please provide a {0}", fieldName));
+        }
+        return validateString((String)value);
+    }
 
-	public IStatus validateString(String value) {
-		return ValidationStatus.ok();
-	}
-	
-	protected String getFieldName() {
-		return fieldName;
-	}
+    public IStatus validateString(String value) {
+        return ValidationStatus.ok();
+    }
+
+    protected String getFieldName() {
+        return fieldName;
+    }
 
 }

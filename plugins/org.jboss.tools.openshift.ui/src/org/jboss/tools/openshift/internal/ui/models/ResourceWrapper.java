@@ -14,8 +14,8 @@ import com.openshift.restclient.model.IResource;
 
 class ResourceWrapper extends AbstractResourceWrapper<IResource, AbstractOpenshiftUIElement<?, ?>> {
 
-	public ResourceWrapper(AbstractOpenshiftUIElement<?, ?> parent, IResource resource) {
-		super(parent, resource);
-	}
+    public ResourceWrapper(AbstractOpenshiftUIElement<?, ?> parent, IResource resource) {
+        super(parent, resource);
+    }
 
 }

@@ -73,8 +73,7 @@ public class SecureStorage {
 	 * @param serverType
 	 *            type of a server
 	 */
-	private static void triggerSecureStorageOfPasswordInConnectionDialog(String username, String server,
-			boolean storePassword) {
+	private static void triggerSecureStorageOfPasswordInConnectionDialog(String username, String server, boolean storePassword) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		AbstractOpenShiftConnection connection = explorer.getOpenShiftConnection(username, server);
 		connection.select();
@@ -115,8 +114,8 @@ public class SecureStorage {
 		try {
 			new DefaultShell(OpenShiftLabel.Shell.SECURE_STORAGE_PASSWORD);
 		} catch (SWTLayerException ex) {
-			LOGGER.info(String.format("Shell with label \"%s\" was not found. Trying \"%s\"",
-					OpenShiftLabel.Shell.SECURE_STORAGE_PASSWORD, OpenShiftLabel.Shell.SECURE_STORAGE));
+			LOGGER.info(String.format("Shell with label \"%s\" was not found. Trying \"%s\"", OpenShiftLabel.Shell.SECURE_STORAGE_PASSWORD,
+					OpenShiftLabel.Shell.SECURE_STORAGE));
 			new DefaultShell(OpenShiftLabel.Shell.SECURE_STORAGE);
 		}
 		new DefaultText(0).setText(password);
@@ -155,8 +154,7 @@ public class SecureStorage {
 		new WorkbenchPreferenceDialog().select(secureStoragePreferencePage);
 
 		secureStoragePreferencePage.selectContentTab();
-		boolean exists = secureStoragePreferencePage.passwordExists("[Default Secure Storage]", getPluginId(),
-				server, username);
+		boolean exists = secureStoragePreferencePage.passwordExists("[Default Secure Storage]", getPluginId(), server, username);
 
 		workbenchPreferenceDialog.ok();
 

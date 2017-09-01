@@ -26,13 +26,13 @@ import org.junit.Test;
 @Ignore
 public class DockerHubRegistryTest {
 
-	@Test
-	public void shouldFindImageTags() throws InterruptedException, ExecutionException, DockerException {
-		// given
-		final DockerHubRegistry dockerHubRegistrySearch = new DockerHubRegistry();
-		// when
-		final List<String> tags = dockerHubRegistrySearch.getTags("jboss/wildfly");
-		// then
-		assertThat(tags).contains("8.2.0.Final", "9.0.2.Final", "latest");
-	}
+    @Test
+    public void shouldFindImageTags() throws InterruptedException, ExecutionException, DockerException {
+        // given
+        final DockerHubRegistry dockerHubRegistrySearch = new DockerHubRegistry();
+        // when
+        final List<String> tags = dockerHubRegistrySearch.getTags("jboss/wildfly");
+        // then
+        assertThat(tags).contains("8.2.0.Final", "9.0.2.Final", "latest");
+    }
 }

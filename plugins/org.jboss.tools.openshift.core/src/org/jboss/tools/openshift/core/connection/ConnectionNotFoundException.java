@@ -22,10 +22,10 @@ import com.openshift.restclient.model.IResource;
  */
 public class ConnectionNotFoundException extends OpenShiftCoreException {
 
-	public ConnectionNotFoundException(IResource resource) {
-		super("Unable to find the connection for a {0} named {1}", resource.getKind(), resource.getName());
-	}
+    public ConnectionNotFoundException(IResource resource) {
+        super("Unable to find the connection for a {0} named {1}", resource.getKind(), resource.getName());
+    }
 
-	private static final long serialVersionUID = -1894208007989945899L;
+    private static final long serialVersionUID = -1894208007989945899L;
 
 }

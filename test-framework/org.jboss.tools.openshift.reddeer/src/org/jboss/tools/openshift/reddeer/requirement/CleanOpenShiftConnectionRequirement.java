@@ -33,7 +33,7 @@ import com.openshift.restclient.model.IResource;
 public class CleanOpenShiftConnectionRequirement implements Requirement<CleanConnection> {
 
 	private CleanConnection cleanConnection;
-	
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	public @interface CleanConnection {
@@ -55,7 +55,7 @@ public class CleanOpenShiftConnectionRequirement implements Requirement<CleanCon
 		Connection connection = ConnectionUtils.getConnectionOrDefault(cleanConnection.connectionURL());
 		assertNotNull("There is no connection with URL " + cleanConnection.connectionURL(), connection);
 		List<IResource> projects = connection.getResources(ResourceKind.PROJECT);
-		for (IResource project: projects) {
+		for (IResource project : projects) {
 			String projectName = project.getName();
 			connection.deleteResource(project);
 			new WaitWhile(new ProjectExists(projectName, connection), TimePeriod.LONG);
@@ -65,12 +65,12 @@ public class CleanOpenShiftConnectionRequirement implements Requirement<CleanCon
 	@Override
 	public void setDeclaration(CleanConnection cleanConnection) {
 		this.cleanConnection = cleanConnection;
-		
+
 	}
 
 	@Override
 	public void cleanUp() {
 		// NOTHING TO DO
 	}
-	
+
 }

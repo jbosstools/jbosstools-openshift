@@ -27,89 +27,89 @@ import com.openshift.client.IDomain;
  */
 public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_SELECTED_DOMAIN = "selectedDomain";
-	public static final String PROPERTY_DOMAINS = "domains";
+    public static final String PROPERTY_SELECTED_DOMAIN = "selectedDomain";
+    public static final String PROPERTY_DOMAINS = "domains";
 
-	private ExpressConnection connection;
-	private IDomain selectedDomain;
-	private List<IDomain> domains;
-	private IConnectionsRegistryListener connectionChangeListener;
+    private ExpressConnection connection;
+    private IDomain selectedDomain;
+    private List<IDomain> domains;
+    private IConnectionsRegistryListener connectionChangeListener;
 
-	public ManageDomainsWizardPageModel(IDomain domain, ExpressConnection connection) {
-		this(connection);
-		setSelectedDomain(domain);
-	}
+    public ManageDomainsWizardPageModel(IDomain domain, ExpressConnection connection) {
+        this(connection);
+        setSelectedDomain(domain);
+    }
 
-	public ManageDomainsWizardPageModel(ExpressConnection connection) {
-		this.connection = connection;
-		this.connectionChangeListener = onConnectionsChanged();
-		ConnectionsRegistrySingleton.getInstance().addListener(connectionChangeListener );
-	}
+    public ManageDomainsWizardPageModel(ExpressConnection connection) {
+        this.connection = connection;
+        this.connectionChangeListener = onConnectionsChanged();
+        ConnectionsRegistrySingleton.getInstance().addListener(connectionChangeListener);
+    }
 
-	private IConnectionsRegistryListener onConnectionsChanged() {
-		return new IConnectionsRegistryListener() {
-			
-			@Override
-			public void connectionRemoved(IConnection connection) {
-				if(ConnectionType.Express == connection.getType()){
-					ManageDomainsWizardPageModel.this.connection = null;
-					loadDomains();
-				}
-			}
-			
-			@Override
-			public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+    private IConnectionsRegistryListener onConnectionsChanged() {
+        return new IConnectionsRegistryListener() {
 
-				if(ConnectionType.Express == connection.getType()){
-					setDomains(Collections.<IDomain>emptyList()); // Workaround: force list update
-					loadDomains();
-				}
-			}
-			
-			@Override
-			public void connectionAdded(IConnection connection) {
-				if(ConnectionType.Express == connection.getType()){
-					loadDomains();
-				}
-			}
-		};
-	}
+            @Override
+            public void connectionRemoved(IConnection connection) {
+                if (ConnectionType.Express == connection.getType()) {
+                    ManageDomainsWizardPageModel.this.connection = null;
+                    loadDomains();
+                }
+            }
 
-	public void loadDomains() {
-		if (connection == null) {
-			setDomains(Collections.<IDomain>emptyList());
-		} else {
-			setDomains(connection.getDomains());
-		}
-	}
+            @Override
+            public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 
-	public void setDomains(List<IDomain> domains) {
-		firePropertyChange(PROPERTY_DOMAINS, null, this.domains = domains);
-	}
+                if (ConnectionType.Express == connection.getType()) {
+                    setDomains(Collections.<IDomain>emptyList()); // Workaround: force list update
+                    loadDomains();
+                }
+            }
 
-	public List<IDomain> getDomains() {
-		return domains;
-	}
+            @Override
+            public void connectionAdded(IConnection connection) {
+                if (ConnectionType.Express == connection.getType()) {
+                    loadDomains();
+                }
+            }
+        };
+    }
 
-	public void refresh() {
-		connection.refresh();
-		loadDomains();
-	}
+    public void loadDomains() {
+        if (connection == null) {
+            setDomains(Collections.<IDomain>emptyList());
+        } else {
+            setDomains(connection.getDomains());
+        }
+    }
 
-	public void setSelectedDomain(IDomain domain) {
-		firePropertyChange(PROPERTY_SELECTED_DOMAIN, this.selectedDomain, this.selectedDomain = domain);
-	}
+    public void setDomains(List<IDomain> domains) {
+        firePropertyChange(PROPERTY_DOMAINS, null, this.domains = domains);
+    }
 
-	public IDomain getSelectedDomain() {
-		return selectedDomain;
-	}
+    public List<IDomain> getDomains() {
+        return domains;
+    }
 
-	public ExpressConnection getConnection() {
-		return connection;
-	}
-	
-	@Override
-	public void dispose() {
-		ConnectionsRegistrySingleton.getInstance().removeListener(connectionChangeListener);
-	}
+    public void refresh() {
+        connection.refresh();
+        loadDomains();
+    }
+
+    public void setSelectedDomain(IDomain domain) {
+        firePropertyChange(PROPERTY_SELECTED_DOMAIN, this.selectedDomain, this.selectedDomain = domain);
+    }
+
+    public IDomain getSelectedDomain() {
+        return selectedDomain;
+    }
+
+    public ExpressConnection getConnection() {
+        return connection;
+    }
+
+    @Override
+    public void dispose() {
+        ConnectionsRegistrySingleton.getInstance().removeListener(connectionChangeListener);
+    }
 }

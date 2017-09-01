@@ -15,17 +15,17 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import com.openshift.restclient.model.IResource;
 
 abstract class AbstractResourceWrapper<R extends IResource, P extends AbstractOpenshiftUIElement<?, ?>>
-		extends AbstractOpenshiftUIElement<R, P> implements IResourceWrapper<R, P> {
+        extends AbstractOpenshiftUIElement<R, P> implements IResourceWrapper<R, P> {
 
-	public AbstractResourceWrapper(P parent, R resource) {
-		super(parent, resource);
-	}
+    public AbstractResourceWrapper(P parent, R resource) {
+        super(parent, resource);
+    }
 
-	@SuppressWarnings("unchecked")
-	void updateWith(IResource r) {
-		if (ResourceUtils.isOlder(getWrapped(), r)) {
-			super.updateWith((R) r);
-		}
-	}
+    @SuppressWarnings("unchecked")
+    void updateWith(IResource r) {
+        if (ResourceUtils.isOlder(getWrapped(), r)) {
+            super.updateWith((R)r);
+        }
+    }
 
 }

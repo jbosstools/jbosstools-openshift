@@ -47,89 +47,90 @@ import com.openshift.restclient.model.IProject;
 @RunWith(MockitoJUnitRunner.class)
 public class OpenShiftProjectCacheTest {
 
-	private IConnectionWrapper connectionWrapper;
-	private OpenshiftUIModel model;
+    private IConnectionWrapper connectionWrapper;
+    private OpenshiftUIModel model;
 
-	@Mock
-	private IProject project;
-	@Mock
-	private IProject project2;
+    @Mock
+    private IProject project;
+    @Mock
+    private IProject project2;
 
-	private Connection conn;
+    private Connection conn;
 
-	@Before
-	public void setUp() throws Exception {
-		this.conn = spy(createConnection("spacecat", "42", "https://localhost:8880"));
-		doReturn(Arrays.asList(project)).when(conn).getResources(ResourceKind.PROJECT);
-		ConnectionsRegistry registry = ConnectionsRegistrySingleton.getInstance();
-		registry.clear();
-		registry.add(conn);
+    @Before
+    public void setUp() throws Exception {
+        this.conn = spy(createConnection("spacecat", "42", "https://localhost:8880"));
+        doReturn(Arrays.asList(project)).when(conn).getResources(ResourceKind.PROJECT);
+        ConnectionsRegistry registry = ConnectionsRegistrySingleton.getInstance();
+        registry.clear();
+        registry.add(conn);
 
-		this.model = new OpenshiftUIModel(registry) {};
-		this.connectionWrapper = model.getConnections().iterator().next();
-	}
-	
-	@Test
-	public void testGetProjectForOnlyMakesInitialCallToServer() throws InterruptedException, TimeoutException {
-		IOpenShiftConnection connection = connectionWrapper.getWrapped();
-		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
-		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
-		UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
-		verify(connection, times(1)).getResources(ResourceKind.PROJECT);
-	}
+        this.model = new OpenshiftUIModel(registry) {
+        };
+        this.connectionWrapper = model.getConnections().iterator().next();
+    }
 
-	@Test
-	public void testConnectionChanged() {
-		// That excludes loading projects from connection when adapters list is
-		// empty.
-		// Loading would hide failure at firing project add, and cause failure
-		// at firing project remove.
-		when(conn.getResources(ResourceKind.PROJECT)).thenReturn(Collections.emptyList());
+    @Test
+    public void testGetProjectForOnlyMakesInitialCallToServer() throws InterruptedException, TimeoutException {
+        IOpenShiftConnection connection = connectionWrapper.getWrapped();
+        connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
+        connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
+        UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
+        verify(connection, times(1)).getResources(ResourceKind.PROJECT);
+    }
 
-		// project add
-		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
-				Collections.emptyList(), Arrays.asList(project));
+    @Test
+    public void testConnectionChanged() {
+        // That excludes loading projects from connection when adapters list is
+        // empty.
+        // Loading would hide failure at firing project add, and cause failure
+        // at firing project remove.
+        when(conn.getResources(ResourceKind.PROJECT)).thenReturn(Collections.emptyList());
 
-		Collection<IResourceWrapper<?, ?>> adapters = connectionWrapper.getResources();
-		assertAdapters(adapters);
+        // project add
+        ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
+                Collections.emptyList(), Arrays.asList(project));
 
-		// project remove
-		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
-				Arrays.asList(project), Collections.emptyList());
-		adapters = connectionWrapper.getResources();
-		assertTrue(adapters.isEmpty());
-	}
+        Collection<IResourceWrapper<?, ?>> adapters = connectionWrapper.getResources();
+        assertAdapters(adapters);
 
-	@Test
-	public void testConnectionWithSeveralProjectsChanged() throws InterruptedException, TimeoutException {
-		when(project.getName()).thenReturn("project1");
-		when(project2.getName()).thenReturn("project2");
-		when(conn.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(project, project2));
+        // project remove
+        ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
+                Arrays.asList(project), Collections.emptyList());
+        adapters = connectionWrapper.getResources();
+        assertTrue(adapters.isEmpty());
+    }
 
-		// provide initial loading
-		connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
-		UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
-		Collection<IResourceWrapper<?, ?>> adapters = connectionWrapper.getResources();
-		assertEquals(2, adapters.size());
+    @Test
+    public void testConnectionWithSeveralProjectsChanged() throws InterruptedException, TimeoutException {
+        when(project.getName()).thenReturn("project1");
+        when(project2.getName()).thenReturn("project2");
+        when(conn.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(project, project2));
 
-		// project remove
-		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
-				Arrays.asList(project, project2), Arrays.asList(project));
-		adapters = connectionWrapper.getResources();
-		assertAdapters(adapters);
+        // provide initial loading
+        connectionWrapper.load(IExceptionHandler.NULL_HANDLER);
+        UITestUtils.waitForState(connectionWrapper, LoadingState.LOADED);
+        Collection<IResourceWrapper<?, ?>> adapters = connectionWrapper.getResources();
+        assertEquals(2, adapters.size());
 
-		// project add
-		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
-				Arrays.asList(project), Arrays.asList(project, project2));
+        // project remove
+        ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
+                Arrays.asList(project, project2), Arrays.asList(project));
+        adapters = connectionWrapper.getResources();
+        assertAdapters(adapters);
 
-		adapters = connectionWrapper.getResources();
-		assertEquals(2, adapters.size());
-	}
+        // project add
+        ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(conn, ConnectionProperties.PROPERTY_PROJECTS,
+                Arrays.asList(project), Arrays.asList(project, project2));
 
-	private void assertAdapters(Collection<IResourceWrapper<?, ?>> adapters) {
-		assertEquals(1, adapters.size());
-		IResourceWrapper<?, ?> r= adapters.iterator().next();
-		assertEquals(project, r.getWrapped());
-		assertEquals(conn, r.getParent().getWrapped());
-	}
+        adapters = connectionWrapper.getResources();
+        assertEquals(2, adapters.size());
+    }
+
+    private void assertAdapters(Collection<IResourceWrapper<?, ?>> adapters) {
+        assertEquals(1, adapters.size());
+        IResourceWrapper<?, ?> r = adapters.iterator().next();
+        assertEquals(project, r.getWrapped());
+        assertEquals(conn, r.getParent().getWrapped());
+    }
 }

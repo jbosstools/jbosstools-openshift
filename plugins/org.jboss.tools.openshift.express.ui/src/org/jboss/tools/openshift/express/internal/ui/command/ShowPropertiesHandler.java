@@ -24,16 +24,16 @@ import org.jboss.tools.openshift.express.internal.ui.utils.Logger;
  */
 public class ShowPropertiesHandler extends AbstractHandler {
 
-	private static final String PROPERTIES_VIEW_ID = "org.eclipse.ui.views.PropertySheet";
+    private static final String PROPERTIES_VIEW_ID = "org.eclipse.ui.views.PropertySheet";
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(PROPERTIES_VIEW_ID);
-		} catch (PartInitException e) {
-			Logger.error("Failed to show properties view", e);
-		}
-		return Status.OK_STATUS;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        try {
+            PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(PROPERTIES_VIEW_ID);
+        } catch (PartInitException e) {
+            Logger.error("Failed to show properties view", e);
+        }
+        return Status.OK_STATUS;
+    }
 
 }

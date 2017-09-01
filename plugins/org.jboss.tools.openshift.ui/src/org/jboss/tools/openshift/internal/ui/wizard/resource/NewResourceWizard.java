@@ -45,42 +45,42 @@ import com.openshift.restclient.model.IProject;
  */
 public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 
-	private NewResourceWizardModel model;
+    private NewResourceWizardModel model;
 
-	public NewResourceWizard(NewResourceWizardModel model) {
-		setWindowTitle("New OpenShift resource");
-		setNeedsProgressMonitor(true);
-		this.model = model;
-	}
-	
-	public NewResourceWizard() {
+    public NewResourceWizard(NewResourceWizardModel model) {
+        setWindowTitle("New OpenShift resource");
+        setNeedsProgressMonitor(true);
+        this.model = model;
+    }
+
+    public NewResourceWizard() {
         this(new NewResourceWizardModel());
     }
 
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
+    @Override
+    public void init(IWorkbench workbench, IStructuredSelection selection) {
         Connection connection = UIUtils.getFirstElement(selection, Connection.class);
         if (connection == null) {
             IProject project = UIUtils.getFirstElement(selection, IProject.class);
             if (project != null) {
                 model.setConnection(ConnectionsRegistryUtil.getConnectionFor(project));
-                model.setProject(project);                   
+                model.setProject(project);
             }
         } else {
             model.setConnection(connection);
         }
-	}
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new ResourcePayloadPage(this, model));
-	}
+    @Override
+    public void addPages() {
+        addPage(new ResourcePayloadPage(this, model));
+    }
 
-	@Override
-	public boolean performFinish() {
+    @Override
+    public boolean performFinish() {
         boolean success = false;
-        try (InputStream is = (OpenshiftUIConstants.URL_VALIDATOR.isValid(model.getSource()))?new URL(model.getSource()).openStream()
-                                                                                                  :new FileInputStream(VariablesHelper.replaceVariables(model.getSource()))) {
+        try (InputStream is = (OpenshiftUIConstants.URL_VALIDATOR.isValid(model.getSource())) ? new URL(model.getSource()).openStream()
+                : new FileInputStream(VariablesHelper.replaceVariables(model.getSource()))) {
             final CreateResourceJob createJob = new CreateResourceJob(model.getProject(), is);
 
             createJob.addJobChangeListener(new JobChangeAdapter() {
@@ -92,8 +92,7 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
                         Display.getDefault().syncExec(new Runnable() {
                             @Override
                             public void run() {
-                                new ResourceSummaryDialog(getShell(),
-                                        createJob.getResource(), "Create Resource Summary",
+                                new ResourceSummaryDialog(getShell(), createJob.getResource(), "Create Resource Summary",
                                         "Results of creating the resource(s)").open();
                             }
                         });
@@ -111,8 +110,7 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
         return success;
     }
 
-	private boolean isSuccess(IStatus status) {
-		return JobUtils.isOk(status) 
-				|| JobUtils.isWarning(status);
-	}
+    private boolean isSuccess(IStatus status) {
+        return JobUtils.isOk(status) || JobUtils.isWarning(status);
+    }
 }

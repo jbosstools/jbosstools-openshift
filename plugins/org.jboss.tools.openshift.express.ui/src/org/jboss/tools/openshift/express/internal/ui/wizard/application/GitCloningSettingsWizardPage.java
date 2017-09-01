@@ -70,412 +70,373 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
  */
 public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
-	private GitCloningSettingsWizardPageModel pageModel;
-	private IOpenShiftApplicationWizardModel wizardModel;
-	private Button useDefaultRemoteNameButton;
-	private Button useDefaultRepoPathButton;
-	private Text remoteNameText;
-	private Label remoteNameLabel;
-	private RepoPathValidationStatusProvider repoPathValidator;
-	private RemoteNameValidationStatusProvider remoteNameValidator;
-	private Link sshLink;
+    private GitCloningSettingsWizardPageModel pageModel;
+    private IOpenShiftApplicationWizardModel wizardModel;
+    private Button useDefaultRemoteNameButton;
+    private Button useDefaultRepoPathButton;
+    private Text remoteNameText;
+    private Label remoteNameLabel;
+    private RepoPathValidationStatusProvider repoPathValidator;
+    private RemoteNameValidationStatusProvider remoteNameValidator;
+    private Link sshLink;
 
-	public GitCloningSettingsWizardPage(ExpressApplicationWizard wizard,
-			IOpenShiftApplicationWizardModel wizardModel) {
-		super(
-				"Import an existing OpenShift application",
-				"Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
-				"Cloning settings", wizard);
-		this.pageModel = new GitCloningSettingsWizardPageModel(wizardModel);
-		this.wizardModel = wizardModel;
-	}
+    public GitCloningSettingsWizardPage(ExpressApplicationWizard wizard, IOpenShiftApplicationWizardModel wizardModel) {
+        super("Import an existing OpenShift application",
+                "Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
+                "Cloning settings", wizard);
+        this.pageModel = new GitCloningSettingsWizardPageModel(wizardModel);
+        this.wizardModel = wizardModel;
+    }
 
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().applyTo(parent);
-		Composite cloneGroup = createCloneGroup(parent, dbc);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(cloneGroup);
-		Composite filler = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(filler);
-	}
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        GridLayoutFactory.fillDefaults().applyTo(parent);
+        Composite cloneGroup = createCloneGroup(parent, dbc);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(cloneGroup);
+        Composite filler = new Composite(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(filler);
+    }
 
-	private Composite createCloneGroup(Composite parent, DataBindingContext dbc) {
-		Group cloneGroup = new Group(parent, SWT.NONE);
-		cloneGroup.setText("Cloning settings");
-		cloneGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		GridLayoutFactory.fillDefaults()
-				.numColumns(3).equalWidth(false).margins(10, 10).applyTo(cloneGroup);
+    private Composite createCloneGroup(Composite parent, DataBindingContext dbc) {
+        Group cloneGroup = new Group(parent, SWT.NONE);
+        cloneGroup.setText("Cloning settings");
+        cloneGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+        GridLayoutFactory.fillDefaults().numColumns(3).equalWidth(false).margins(10, 10).applyTo(cloneGroup);
 
-		Composite composite = new Composite(cloneGroup, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(3).margins(15, 15).applyTo(composite);
-		// Repo Path Management
-		this.useDefaultRepoPathButton = new Button(composite, SWT.CHECK);
-		useDefaultRepoPathButton.setText("Use default clone destination");
-		useDefaultRepoPathButton.setToolTipText("Uncheck if you want to use a custom location to clone to");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRepoPathButton);
-		Label labelForRepoPath = new Label(composite, SWT.NONE);
-		labelForRepoPath.setText("Git Clone Destination:");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0)
-				.applyTo(labelForRepoPath);
-		final Text repoPathText = new Text(composite, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(repoPathText);
-		final IObservableValue repoPathObservable = WidgetProperties.text(SWT.Modify).observe(repoPathText);
-		final IObservableValue repoPathModelObservable =
-				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REPO_PATH).observe(pageModel);
-		ValueBindingBuilder.bind(repoPathObservable).to(repoPathModelObservable).in(dbc);
+        Composite composite = new Composite(cloneGroup, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
+        GridLayoutFactory.fillDefaults().numColumns(3).margins(15, 15).applyTo(composite);
+        // Repo Path Management
+        this.useDefaultRepoPathButton = new Button(composite, SWT.CHECK);
+        useDefaultRepoPathButton.setText("Use default clone destination");
+        useDefaultRepoPathButton.setToolTipText("Uncheck if you want to use a custom location to clone to");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRepoPathButton);
+        Label labelForRepoPath = new Label(composite, SWT.NONE);
+        labelForRepoPath.setText("Git Clone Destination:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0).applyTo(labelForRepoPath);
+        final Text repoPathText = new Text(composite, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(repoPathText);
+        final IObservableValue repoPathObservable = WidgetProperties.text(SWT.Modify).observe(repoPathText);
+        final IObservableValue repoPathModelObservable = BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REPO_PATH)
+                .observe(pageModel);
+        ValueBindingBuilder.bind(repoPathObservable).to(repoPathModelObservable).in(dbc);
 
-		Button browseRepoPathButton = new Button(composite, SWT.PUSH);
-		browseRepoPathButton.setText("Browse...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
-		browseRepoPathButton.addSelectionListener(onRepoPath());
+        Button browseRepoPathButton = new Button(composite, SWT.PUSH);
+        browseRepoPathButton.setText("Browse...");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
+        browseRepoPathButton.addSelectionListener(onRepoPath());
 
-		final IObservableValue isDefaultRepoObservable =
-				WidgetProperties.selection().observe(useDefaultRepoPathButton);
-		final IObservableValue useDefaultRepoModelObservable = BeanProperties.value(
-				GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REPO_PATH).observe(pageModel);
-		ValueBindingBuilder.bind(isDefaultRepoObservable).to(useDefaultRepoModelObservable).in(dbc);
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(repoPathText))
-				.notUpdating(useDefaultRepoModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(browseRepoPathButton))
-				.notUpdating(useDefaultRepoModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
-		// move focus to the project location text control when not choosing the
-		// 'Use default location' option.
-		UIUtils.focusOnSelection(useDefaultRepoPathButton, repoPathText);
+        final IObservableValue isDefaultRepoObservable = WidgetProperties.selection().observe(useDefaultRepoPathButton);
+        final IObservableValue useDefaultRepoModelObservable = BeanProperties
+                .value(GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REPO_PATH).observe(pageModel);
+        ValueBindingBuilder.bind(isDefaultRepoObservable).to(useDefaultRepoModelObservable).in(dbc);
+        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(repoPathText)).notUpdating(useDefaultRepoModelObservable)
+                .converting(new InvertingBooleanConverter()).in(dbc);
+        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(browseRepoPathButton)).notUpdating(useDefaultRepoModelObservable)
+                .converting(new InvertingBooleanConverter()).in(dbc);
+        // move focus to the project location text control when not choosing the
+        // 'Use default location' option.
+        UIUtils.focusOnSelection(useDefaultRepoPathButton, repoPathText);
 
-		this.repoPathValidator =
-				new RepoPathValidationStatusProvider(
-						repoPathObservable
-						, BeanProperties.value(
-								GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel)
-						, BeanProperties.value(
-								GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel));
-		dbc.addValidationStatusProvider(repoPathValidator);
-		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
+        this.repoPathValidator = new RepoPathValidationStatusProvider(repoPathObservable,
+                BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel),
+                BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel));
+        dbc.addValidationStatusProvider(repoPathValidator);
+        ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
 
-		// Remote Name Management
-		useDefaultRemoteNameButton = new Button(composite, SWT.CHECK);
-		useDefaultRemoteNameButton.setText("Use default remote name");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRemoteNameButton);
+        // Remote Name Management
+        useDefaultRemoteNameButton = new Button(composite, SWT.CHECK);
+        useDefaultRemoteNameButton.setText("Use default remote name");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(useDefaultRemoteNameButton);
 
-		this.remoteNameLabel = new Label(composite, SWT.NONE);
-		remoteNameLabel.setText("Remote name:");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0)
-				.applyTo(remoteNameLabel);
-		remoteNameText = new Text(composite, SWT.BORDER);
-		GridDataFactory.fillDefaults().span(1, 1).align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER)
-				.grab(true, false).applyTo(remoteNameText);
+        this.remoteNameLabel = new Label(composite, SWT.NONE);
+        remoteNameLabel.setText("Remote name:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).indent(10, 0).applyTo(remoteNameLabel);
+        remoteNameText = new Text(composite, SWT.BORDER);
+        GridDataFactory.fillDefaults().span(1, 1).align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
+                .applyTo(remoteNameText);
 
-		final IObservableValue remoteNameTextObservable = WidgetProperties.text(SWT.Modify).observe(remoteNameText);
-		final IObservableValue remoteNameModelObservable =
-				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REMOTE_NAME).observe(pageModel);
-		ValueBindingBuilder.bind(remoteNameTextObservable).to(remoteNameModelObservable).in(dbc);
+        final IObservableValue remoteNameTextObservable = WidgetProperties.text(SWT.Modify).observe(remoteNameText);
+        final IObservableValue remoteNameModelObservable = BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REMOTE_NAME)
+                .observe(pageModel);
+        ValueBindingBuilder.bind(remoteNameTextObservable).to(remoteNameModelObservable).in(dbc);
 
-		final IObservableValue useDefaultRemoteNameModelObservable =
-				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REMOTE_NAME).observe(
-						pageModel);
-		final IObservableValue useDefaultRemoteNameObservable =
-				WidgetProperties.selection().observe(useDefaultRemoteNameButton);
-		ValueBindingBuilder
-				.bind(useDefaultRemoteNameObservable)
-				.to(useDefaultRemoteNameModelObservable)
-				.in(dbc);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(remoteNameText))
-				.notUpdating(useDefaultRemoteNameModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(remoteNameLabel))
-				.notUpdating(useDefaultRemoteNameModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
-		// move focus to the project name text control when choosing the 'Use an
-		// existing project' option.
-		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
-		final IObservableValue projectNameModelObservable =
-				BeanProperties.value(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME).observe(wizardModel);
+        final IObservableValue useDefaultRemoteNameModelObservable = BeanProperties
+                .value(GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REMOTE_NAME).observe(pageModel);
+        final IObservableValue useDefaultRemoteNameObservable = WidgetProperties.selection().observe(useDefaultRemoteNameButton);
+        ValueBindingBuilder.bind(useDefaultRemoteNameObservable).to(useDefaultRemoteNameModelObservable).in(dbc);
+        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(remoteNameText)).notUpdating(useDefaultRemoteNameModelObservable)
+                .converting(new InvertingBooleanConverter()).in(dbc);
+        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(remoteNameLabel)).notUpdating(useDefaultRemoteNameModelObservable)
+                .converting(new InvertingBooleanConverter()).in(dbc);
+        // move focus to the project name text control when choosing the 'Use an
+        // existing project' option.
+        useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
+        final IObservableValue projectNameModelObservable = BeanProperties.value(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME)
+                .observe(wizardModel);
 
-		dbc.addValidationStatusProvider(
-				this.remoteNameValidator =
-						new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
-		ControlDecorationSupport.create(remoteNameValidator, SWT.LEFT | SWT.TOP);
+        dbc.addValidationStatusProvider(
+                this.remoteNameValidator = new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
+        ControlDecorationSupport.create(remoteNameValidator, SWT.LEFT | SWT.TOP);
 
-		this.sshLink = new Link(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0).applyTo(sshLink);
-		sshLink.addSelectionListener(onSshPrefs("SSH2 Preferences"));
-		sshLink.addSelectionListener(onManageSSHKeys("SSH Keys wizard", dbc));
-		
-		// we need a binding to have validation setting wizard validation status
-		Label dummyLabel = new Label(parent, SWT.None);
-		dummyLabel.setVisible(false);
-		GridDataFactory.fillDefaults().exclude(true).applyTo(dummyLabel);
-		ValueBindingBuilder
-				.bind(WidgetProperties.text().observe(dummyLabel))
-				.notUpdating(BeanProperties.value(
-						GitCloningSettingsWizardPageModel.PROPERTY_HAS_REMOTEKEYS).observe(pageModel))
-				.validatingAfterGet(new IValidator() {
+        this.sshLink = new Link(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0).applyTo(sshLink);
+        sshLink.addSelectionListener(onSshPrefs("SSH2 Preferences"));
+        sshLink.addSelectionListener(onManageSSHKeys("SSH Keys wizard", dbc));
 
-					@Override
-					public IStatus validate(Object value) {
-						if (!(value instanceof Boolean)) {
-							return ValidationStatus.ok();
-						}
-						Boolean hasRemoteKeys = (Boolean) value;
-						if (hasRemoteKeys) {
-							return ValidationStatus.ok();
-						} else {
-							return ValidationStatus
-									.error("No public keys found in your account. Please use the SSH keys wizard.");
-						}
-					}
-				})
-				.in(dbc);
-		refreshHasRemoteKeys(dbc);
-		return cloneGroup;
-	}
+        // we need a binding to have validation setting wizard validation status
+        Label dummyLabel = new Label(parent, SWT.None);
+        dummyLabel.setVisible(false);
+        GridDataFactory.fillDefaults().exclude(true).applyTo(dummyLabel);
+        ValueBindingBuilder.bind(WidgetProperties.text().observe(dummyLabel))
+                .notUpdating(BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_HAS_REMOTEKEYS).observe(pageModel))
+                .validatingAfterGet(new IValidator() {
 
-	private SelectionAdapter onDefaultRemoteNameUnchecked() {
-		return new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				remoteNameText.setFocus();
-			}
-		};
-	}
+                    @Override
+                    public IStatus validate(Object value) {
+                        if (!(value instanceof Boolean)) {
+                            return ValidationStatus.ok();
+                        }
+                        Boolean hasRemoteKeys = (Boolean)value;
+                        if (hasRemoteKeys) {
+                            return ValidationStatus.ok();
+                        } else {
+                            return ValidationStatus.error("No public keys found in your account. Please use the SSH keys wizard.");
+                        }
+                    }
+                }).in(dbc);
+        refreshHasRemoteKeys(dbc);
+        return cloneGroup;
+    }
 
-	private SelectionListener onRepoPath() {
-		return new SelectionAdapter() {
+    private SelectionAdapter onDefaultRemoteNameUnchecked() {
+        return new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                remoteNameText.setFocus();
+            }
+        };
+    }
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				DirectoryDialog dialog = new DirectoryDialog(getShell());
-				dialog.setText("Git clone location");
-				dialog.setMessage("Choose the location for git clone...");
-				dialog.setFilterPath(pageModel.getRepositoryPath());
-				String repositoryPath = dialog.open();
-				if (repositoryPath != null) {
-					pageModel.setRepositoryPath(repositoryPath);
-				}
-			}
-		};
-	}
+    private SelectionListener onRepoPath() {
+        return new SelectionAdapter() {
 
-	private SelectionAdapter onSshPrefs(String text) {
-		return new LinkSelectionAdapter(text) {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                DirectoryDialog dialog = new DirectoryDialog(getShell());
+                dialog.setText("Git clone location");
+                dialog.setMessage("Choose the location for git clone...");
+                dialog.setFilterPath(pageModel.getRepositoryPath());
+                String repositoryPath = dialog.open();
+                if (repositoryPath != null) {
+                    pageModel.setRepositoryPath(repositoryPath);
+                }
+            }
+        };
+    }
 
-			@Override
-			public void doWidgetSelected(SelectionEvent e) {
-				SshPrivateKeysPreferences.openPreferencesPage(getShell());
-			}
-		};
-	}
+    private SelectionAdapter onSshPrefs(String text) {
+        return new LinkSelectionAdapter(text) {
 
-	private SelectionAdapter onManageSSHKeys(String text, final DataBindingContext dbc) {
-		return new LinkSelectionAdapter(text) {
+            @Override
+            public void doWidgetSelected(SelectionEvent e) {
+                SshPrivateKeysPreferences.openPreferencesPage(getShell());
+            }
+        };
+    }
 
-			@Override
-			public void doWidgetSelected(SelectionEvent e) {
-				WizardDialog manageSSHKeysWizard =
-						new OkButtonWizardDialog(getShell(), new ManageSSHKeysWizard(pageModel.getConnection()));
-				if (manageSSHKeysWizard.open() == Dialog.OK) {
-					refreshHasRemoteKeys(dbc);
-				}
-			}
-		};
-	}
+    private SelectionAdapter onManageSSHKeys(String text, final DataBindingContext dbc) {
+        return new LinkSelectionAdapter(text) {
 
-	@Override
-	protected void onPageActivated(DataBindingContext dbc) {
-		enableWidgets(pageModel.isNewProject());
-		repoPathValidator.forceRevalidate();
-		remoteNameValidator.forceRevalidate();
-		setSSHLinkText();
-		if (pageModel.isConnected()) {
-			refreshHasRemoteKeys(dbc);
-		}
-	}
+            @Override
+            public void doWidgetSelected(SelectionEvent e) {
+                WizardDialog manageSSHKeysWizard = new OkButtonWizardDialog(getShell(), new ManageSSHKeysWizard(pageModel.getConnection()));
+                if (manageSSHKeysWizard.open() == Dialog.OK) {
+                    refreshHasRemoteKeys(dbc);
+                }
+            }
+        };
+    }
 
-	private void setSSHLinkText() {
-		if (pageModel.isConnected()) {
-			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account "
-					+ pageModel.getConnection().getUsername() 
-					+ " via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
-		} else {
-			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account"
-					+ " via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
-		}
-		sshLink.getParent().layout(true, true);
-	}
+    @Override
+    protected void onPageActivated(DataBindingContext dbc) {
+        enableWidgets(pageModel.isNewProject());
+        repoPathValidator.forceRevalidate();
+        remoteNameValidator.forceRevalidate();
+        setSSHLinkText();
+        if (pageModel.isConnected()) {
+            refreshHasRemoteKeys(dbc);
+        }
+    }
 
-	private void refreshHasRemoteKeys(DataBindingContext dbc) {
-		try {
-			if (!pageModel.isConnected()) {
-				return;
-			}
-			final LoadKeysJob loadKeysJob = new LoadKeysJob(pageModel.getConnection());
-			new JobChainBuilder(loadKeysJob).runWhenDone(new UIJob("") {
+    private void setSSHLinkText() {
+        if (pageModel.isConnected()) {
+            sshLink.setText("Make sure that you have SSH keys added to your OpenShift account " + pageModel.getConnection().getUsername()
+                    + " via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
+        } else {
+            sshLink.setText("Make sure that you have SSH keys added to your OpenShift account"
+                    + " via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
+        }
+        sshLink.getParent().layout(true, true);
+    }
 
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					IStatus status = loadKeysJob.getResult(); 
-					if(status.equals(Status.OK_STATUS)){
-						pageModel.setHasRemoteKeys(loadKeysJob.getKeys().size() > 0);
-						setErrorMessage(null);
-						return Status.OK_STATUS;
-					}else{
-						setErrorMessage(status.getMessage());
-						return status;
-					}
-				}
-			});
-			WizardUtils.runInWizard(loadKeysJob, getContainer(), dbc);
-		} catch (Exception e) {
-			StatusManager.getManager().handle(
-					ExpressUIActivator.createErrorStatus("Could not load ssh keys.", e), StatusManager.LOG);
-		}
-	}
+    private void refreshHasRemoteKeys(DataBindingContext dbc) {
+        try {
+            if (!pageModel.isConnected()) {
+                return;
+            }
+            final LoadKeysJob loadKeysJob = new LoadKeysJob(pageModel.getConnection());
+            new JobChainBuilder(loadKeysJob).runWhenDone(new UIJob("") {
 
-	@Override
-	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
-		if (direction == Direction.FORWARDS) {
-			pageModel.reset();
-			dbc.updateTargets();
-		}
-	}
+                @Override
+                public IStatus runInUIThread(IProgressMonitor monitor) {
+                    IStatus status = loadKeysJob.getResult();
+                    if (status.equals(Status.OK_STATUS)) {
+                        pageModel.setHasRemoteKeys(loadKeysJob.getKeys().size() > 0);
+                        setErrorMessage(null);
+                        return Status.OK_STATUS;
+                    } else {
+                        setErrorMessage(status.getMessage());
+                        return status;
+                    }
+                }
+            });
+            WizardUtils.runInWizard(loadKeysJob, getContainer(), dbc);
+        } catch (Exception e) {
+            StatusManager.getManager().handle(ExpressUIActivator.createErrorStatus("Could not load ssh keys.", e), StatusManager.LOG);
+        }
+    }
 
-	private void enableWidgets(boolean isNewProject) {
-		if (isNewProject) {
-			useDefaultRepoPathButton.setEnabled(true);
-			useDefaultRemoteNameButton.setEnabled(false);
-			useDefaultRemoteNameButton.setSelection(true);
-			remoteNameText.setEnabled(false);
-			remoteNameLabel.setEnabled(false);
-		} else {
-			useDefaultRepoPathButton.setEnabled(false);
-			useDefaultRemoteNameButton.setEnabled(true);
-			remoteNameText.setEnabled(!useDefaultRemoteNameButton.getSelection());
-			remoteNameLabel.setEnabled(!useDefaultRemoteNameButton.getSelection());
-		}
-	}
+    @Override
+    protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
+        if (direction == Direction.FORWARDS) {
+            pageModel.reset();
+            dbc.updateTargets();
+        }
+    }
 
-	/**
-	 * A multivalidator for the repo path. Validates the repo path on behalf of
-	 * the selection to use the default repo path and the repo path value.
-	 */
-	class RepoPathValidationStatusProvider extends MultiValidator {
+    private void enableWidgets(boolean isNewProject) {
+        if (isNewProject) {
+            useDefaultRepoPathButton.setEnabled(true);
+            useDefaultRemoteNameButton.setEnabled(false);
+            useDefaultRemoteNameButton.setSelection(true);
+            remoteNameText.setEnabled(false);
+            remoteNameLabel.setEnabled(false);
+        } else {
+            useDefaultRepoPathButton.setEnabled(false);
+            useDefaultRemoteNameButton.setEnabled(true);
+            remoteNameText.setEnabled(!useDefaultRemoteNameButton.getSelection());
+            remoteNameLabel.setEnabled(!useDefaultRemoteNameButton.getSelection());
+        }
+    }
 
-		private final IObservableValue repoPathObservable;
-		private final IObservableValue applicationNameModelObservable;
-		private final IObservableValue newProjectModelObservable;
+    /**
+     * A multivalidator for the repo path. Validates the repo path on behalf of
+     * the selection to use the default repo path and the repo path value.
+     */
+    class RepoPathValidationStatusProvider extends MultiValidator {
 
-		public RepoPathValidationStatusProvider(IObservableValue repoPathObservable,
-				IObservableValue applicationNameModelObservable, IObservableValue newProjectModelObservable) {
-			this.repoPathObservable = repoPathObservable;
-			this.applicationNameModelObservable = applicationNameModelObservable;
-			this.newProjectModelObservable = newProjectModelObservable;
-		}
+        private final IObservableValue repoPathObservable;
+        private final IObservableValue applicationNameModelObservable;
+        private final IObservableValue newProjectModelObservable;
 
-		// Validator is also be called when application name is set..
-		@Override
-		protected IStatus validate() {
-			final String repoPath = (String) repoPathObservable.getValue();
-			final String applicationName = (String) applicationNameModelObservable.getValue();
-			final boolean newProject = (Boolean) newProjectModelObservable.getValue();
+        public RepoPathValidationStatusProvider(IObservableValue repoPathObservable, IObservableValue applicationNameModelObservable,
+                IObservableValue newProjectModelObservable) {
+            this.repoPathObservable = repoPathObservable;
+            this.applicationNameModelObservable = applicationNameModelObservable;
+            this.newProjectModelObservable = newProjectModelObservable;
+        }
 
-			if (newProject) {
-				final IPath repoResourcePath = new Path(repoPath);
-				if (repoResourcePath.isEmpty()
-						|| !repoResourcePath.isAbsolute()) {
-					return ValidationStatus.cancel("You need to provide an absolute path that we'll clone to.");
-				} else if (!FileUtils.canWrite(repoResourcePath.toOSString())) {
-					return ValidationStatus.error(
-							NLS.bind("The location {0} is not writeable.", repoResourcePath.toOSString()));
-				} 
-				final IPath applicationPath = applicationName != null ?
-						repoResourcePath.append(new Path(applicationName)) : null;
-				if (applicationPath != null
-						&& applicationPath.toFile().exists()) {
-					return ValidationStatus.error(
-							NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
-									repoResourcePath.toOSString(), applicationName));
-				}
-			}
-			return ValidationStatus.ok();
-		}
+        // Validator is also be called when application name is set..
+        @Override
+        protected IStatus validate() {
+            final String repoPath = (String)repoPathObservable.getValue();
+            final String applicationName = (String)applicationNameModelObservable.getValue();
+            final boolean newProject = (Boolean)newProjectModelObservable.getValue();
 
-		public void forceRevalidate() {
-			revalidate();
-		}
+            if (newProject) {
+                final IPath repoResourcePath = new Path(repoPath);
+                if (repoResourcePath.isEmpty() || !repoResourcePath.isAbsolute()) {
+                    return ValidationStatus.cancel("You need to provide an absolute path that we'll clone to.");
+                } else if (!FileUtils.canWrite(repoResourcePath.toOSString())) {
+                    return ValidationStatus.error(NLS.bind("The location {0} is not writeable.", repoResourcePath.toOSString()));
+                }
+                final IPath applicationPath = applicationName != null ? repoResourcePath.append(new Path(applicationName)) : null;
+                if (applicationPath != null && applicationPath.toFile().exists()) {
+                    return ValidationStatus.error(NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
+                            repoResourcePath.toOSString(), applicationName));
+                }
+            }
+            return ValidationStatus.ok();
+        }
 
-	}
+        public void forceRevalidate() {
+            revalidate();
+        }
 
-	/**
-	 * A multi validator that validates the remote name on behalf of the
-	 * selection to use the default remote name and the remote name value.
-	 */
-	class RemoteNameValidationStatusProvider extends MultiValidator {
+    }
 
-		private final IObservableValue remoteNameObservable;
-		private final IObservableValue projectNameObservable;
+    /**
+     * A multi validator that validates the remote name on behalf of the
+     * selection to use the default remote name and the remote name value.
+     */
+    class RemoteNameValidationStatusProvider extends MultiValidator {
 
-		public RemoteNameValidationStatusProvider(final IObservableValue remoteNameTextObservable,
-				final IObservableValue projectNameObservable) {
-			this.remoteNameObservable = remoteNameTextObservable;
-			this.projectNameObservable = projectNameObservable;
-		}
+        private final IObservableValue remoteNameObservable;
+        private final IObservableValue projectNameObservable;
 
-		@Override
-		protected IStatus validate() {
-			IStatus status = Status.OK_STATUS;
-			String remoteName = (String) remoteNameObservable.getValue();
-			String projectName = (String) projectNameObservable.getValue();
+        public RemoteNameValidationStatusProvider(final IObservableValue remoteNameTextObservable,
+                final IObservableValue projectNameObservable) {
+            this.remoteNameObservable = remoteNameTextObservable;
+            this.projectNameObservable = projectNameObservable;
+        }
 
-			// skip the validation if the user wants to create a new project.
-			// The name and state of the existing project do
-			// not matter...
-			if (StringUtils.isEmpty(remoteName)) {
-				return ExpressUIActivator.createErrorStatus(
-						"The custom remote name must not be empty.");
-			} else if (!remoteName.matches("\\S+")) {
-				return ExpressUIActivator.createErrorStatus(
-						"The custom remote name must not contain spaces.");
-			} else if (!pageModel.isNewProject()
-					&& hasRemoteName(remoteName, getProject(projectName))) {
-				return ExpressUIActivator.createErrorStatus(NLS.bind(
-						"The project {0} already has a remote named {1}.", projectName, remoteName));
-			}
-			return status;
-		}
+        @Override
+        protected IStatus validate() {
+            IStatus status = Status.OK_STATUS;
+            String remoteName = (String)remoteNameObservable.getValue();
+            String projectName = (String)projectNameObservable.getValue();
 
-		public IProject getProject(final String projectName) {
-			if (StringUtils.isEmpty(projectName)) {
-				return null;
-			}
-			return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		}
+            // skip the validation if the user wants to create a new project.
+            // The name and state of the existing project do
+            // not matter...
+            if (StringUtils.isEmpty(remoteName)) {
+                return ExpressUIActivator.createErrorStatus("The custom remote name must not be empty.");
+            } else if (!remoteName.matches("\\S+")) {
+                return ExpressUIActivator.createErrorStatus("The custom remote name must not contain spaces.");
+            } else if (!pageModel.isNewProject() && hasRemoteName(remoteName, getProject(projectName))) {
+                return ExpressUIActivator
+                        .createErrorStatus(NLS.bind("The project {0} already has a remote named {1}.", projectName, remoteName));
+            }
+            return status;
+        }
 
-		private boolean hasRemoteName(String remoteName, IProject project) {
-			try {
-				if (project == null
-						|| !project.isAccessible()) {
-					return false;
-				}
+        public IProject getProject(final String projectName) {
+            if (StringUtils.isEmpty(projectName)) {
+                return null;
+            }
+            return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+        }
 
-				Repository repository = EGitUtils.getRepository(project);
-				if (repository == null) {
-					return false;
-				}
-				return EGitUtils.hasRemote(remoteName, repository);
-			} catch (Exception e) {
-				ExpressUIActivator.log(ExpressUIActivator.createErrorStatus(e.getMessage(), e));
-				return false;
-			}
-		}
-		
-		public void forceRevalidate() {
-			revalidate();
-		}
-	}
+        private boolean hasRemoteName(String remoteName, IProject project) {
+            try {
+                if (project == null || !project.isAccessible()) {
+                    return false;
+                }
+
+                Repository repository = EGitUtils.getRepository(project);
+                if (repository == null) {
+                    return false;
+                }
+                return EGitUtils.hasRemote(remoteName, repository);
+            } catch (Exception e) {
+                ExpressUIActivator.log(ExpressUIActivator.createErrorStatus(e.getMessage(), e));
+                return false;
+            }
+        }
+
+        public void forceRevalidate() {
+            revalidate();
+        }
+    }
 }

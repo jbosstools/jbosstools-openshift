@@ -24,67 +24,67 @@ import com.openshift.restclient.model.IStatus;
 /**
  * @author jeff.cantrill
  */
-public class ResourceSummaryLabelProvider  implements IStyledLabelProvider, ILabelProvider {
+public class ResourceSummaryLabelProvider implements IStyledLabelProvider, ILabelProvider {
 
-	@Override
-	public void addListener(ILabelProviderListener arg0) {
-	}
+    @Override
+    public void addListener(ILabelProviderListener arg0) {
+    }
 
-	@Override
-	public void dispose() {
-	}
+    @Override
+    public void dispose() {
+    }
 
-	@Override
-	public boolean isLabelProperty(Object arg0, String arg1) {
-		return false;
-	}
+    @Override
+    public boolean isLabelProperty(Object arg0, String arg1) {
+        return false;
+    }
 
-	@Override
-	public void removeListener(ILabelProviderListener arg0) {
-	}
+    @Override
+    public void removeListener(ILabelProviderListener arg0) {
+    }
 
-	@Override
-	public String getText(Object arg) {
-		if(arg instanceof IResource) {
-			IResource resource = (IResource) arg;
-			if(isFailedStatus(resource)) {
-				return org.apache.commons.lang.StringUtils.capitalize(((IStatus) resource).getMessage());
-			}
-			return NLS.bind("{0} - {1}", resource.getKind(), resource.getName());
-		}
-		return arg.toString();
-	}
+    @Override
+    public String getText(Object arg) {
+        if (arg instanceof IResource) {
+            IResource resource = (IResource)arg;
+            if (isFailedStatus(resource)) {
+                return org.apache.commons.lang.StringUtils.capitalize(((IStatus)resource).getMessage());
+            }
+            return NLS.bind("{0} - {1}", resource.getKind(), resource.getName());
+        }
+        return arg.toString();
+    }
 
-	@Override
-	public Image getImage(Object arg) {
-		if(arg instanceof IResource) {
-			IResource resource = (IResource) arg;
-			if(isFailedStatus(resource)) {
-				return OpenShiftCommonImages.ERROR;
-			}
-			return OpenShiftCommonImages.OK_IMG;
-		}
-		return null;
-	}
+    @Override
+    public Image getImage(Object arg) {
+        if (arg instanceof IResource) {
+            IResource resource = (IResource)arg;
+            if (isFailedStatus(resource)) {
+                return OpenShiftCommonImages.ERROR;
+            }
+            return OpenShiftCommonImages.OK_IMG;
+        }
+        return null;
+    }
 
-	@Override
-	public StyledString getStyledText(Object arg) {
-		if(arg instanceof IResource) {
-			IResource resource = (IResource)arg;
-			StyledString text = new StyledString();
-			if(isFailedStatus(resource)) {
-				text.append(((IStatus) resource).getMessage());
-			}else {
-				text.append(StringUtils.humanize(resource.getKind().toString()));
-				text.append(resource.getName(), StyledString.QUALIFIER_STYLER);
-			}
-			return text;
-		}
-		return null;
-	}
-	
-	private boolean isFailedStatus(IResource resource) {
-		return ResourceKind.STATUS.equals(resource.getKind()) && ((IStatus) resource).isFailure(); 
-	}
+    @Override
+    public StyledString getStyledText(Object arg) {
+        if (arg instanceof IResource) {
+            IResource resource = (IResource)arg;
+            StyledString text = new StyledString();
+            if (isFailedStatus(resource)) {
+                text.append(((IStatus)resource).getMessage());
+            } else {
+                text.append(StringUtils.humanize(resource.getKind().toString()));
+                text.append(resource.getName(), StyledString.QUALIFIER_STYLER);
+            }
+            return text;
+        }
+        return null;
+    }
+
+    private boolean isFailedStatus(IResource resource) {
+        return ResourceKind.STATUS.equals(resource.getKind()) && ((IStatus)resource).isFailure();
+    }
 
 }

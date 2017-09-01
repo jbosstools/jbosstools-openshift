@@ -20,23 +20,23 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.ssh.ISSHKeyWizardPag
  */
 public class SSHPublicKeyNameValidator extends AlphanumericStringValidator {
 
-	private ISSHKeyWizardPageModel model;
+    private ISSHKeyWizardPageModel model;
 
-	public SSHPublicKeyNameValidator(ISSHKeyWizardPageModel model) {
-		super("key name");
-		this.model = model;
-	}
+    public SSHPublicKeyNameValidator(ISSHKeyWizardPageModel model) {
+        super("key name");
+        this.model = model;
+    }
 
-	@Override
-	public IStatus validateString(String value) {
-		IStatus validationStatus = super.validateString(value);
-		if (!validationStatus.isOK()) {
-			return validationStatus;
-		}
-		if (model.hasKeyName(value)) {
-			return ValidationStatus.error("There's already a key with the name " + value);
-		}
-		return ValidationStatus.ok();
+    @Override
+    public IStatus validateString(String value) {
+        IStatus validationStatus = super.validateString(value);
+        if (!validationStatus.isOK()) {
+            return validationStatus;
+        }
+        if (model.hasKeyName(value)) {
+            return ValidationStatus.error("There's already a key with the name " + value);
+        }
+        return ValidationStatus.ok();
 
-	}
+    }
 }

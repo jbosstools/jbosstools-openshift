@@ -49,347 +49,340 @@ import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookup
 import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
 public class CDKLaunchUtility {
-	public ILaunchConfigurationWorkingCopy createExternalToolsLaunchConfig(IServer s, String args,
-			String launchConfigName) throws CoreException {
-		return setupLaunch(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
-	}
+    public ILaunchConfigurationWorkingCopy createExternalToolsLaunchConfig(IServer s, String args, String launchConfigName)
+            throws CoreException {
+        return setupLaunch(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+    }
 
-	public ILaunchConfigurationWorkingCopy createExternalToolsVagrantLaunch(IServer s, String args,
-			String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
-		String commandLoc = VagrantBinaryUtility.getVagrantLocation();
-		return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
-	}
+    public ILaunchConfigurationWorkingCopy createExternalToolsVagrantLaunch(IServer s, String args, String launchConfigName,
+            ILaunchConfiguration startupConfig) throws CoreException {
+        String commandLoc = VagrantBinaryUtility.getVagrantLocation();
+        return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
+    }
 
-	public ILaunchConfigurationWorkingCopy createExternalToolsMinishiftLaunch(IServer s, String args,
-			String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
-		String commandLoc = MinishiftBinaryUtility.getMinishiftLocation();
-		return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
-	}
+    public ILaunchConfigurationWorkingCopy createExternalToolsMinishiftLaunch(IServer s, String args, String launchConfigName,
+            ILaunchConfiguration startupConfig) throws CoreException {
+        String commandLoc = MinishiftBinaryUtility.getMinishiftLocation();
+        return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
+    }
 
-	private static final String[] getUserPass(IServer server) {
-		final CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
-		String user = cdkServer.getUsername();
-		String pass = null;
-		try {
-			pass = cdkServer.getPassword();
-		} catch (UsernameChangedException uce) {
-			pass = uce.getPassword();
-			user = uce.getUser();
-		}
-		return new String[] { user, pass };
-	}
+    private static final String[] getUserPass(IServer server) {
+        final CDKServer cdkServer = (CDKServer)server.loadAdapter(CDKServer.class, new NullProgressMonitor());
+        String user = cdkServer.getUsername();
+        String pass = null;
+        try {
+            pass = cdkServer.getPassword();
+        } catch (UsernameChangedException uce) {
+            pass = uce.getPassword();
+            user = uce.getUser();
+        }
+        return new String[] { user, pass };
+    }
 
-	private static Map<String, String> getEnvironment(IServer s, ILaunchConfiguration startupConfig)
-			throws CoreException {
-		final CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
-		// Set the environment flag
-		boolean passCredentials = cdkServer.passCredentials();
-		if (passCredentials) {
-			String[] userPass = getUserPass(s);
-			String userName = userPass[0];
-			String pass = userPass[1];
-			Map<String, String> existingEnvironment = startupConfig.getAttribute(ENVIRONMENT_VARS_KEY,
-					(Map<String, String>) null);
-			if (existingEnvironment == null) {
-				existingEnvironment = new HashMap<>();
-			}
+    private static Map<String, String> getEnvironment(IServer s, ILaunchConfiguration startupConfig) throws CoreException {
+        final CDKServer cdkServer = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
+        // Set the environment flag
+        boolean passCredentials = cdkServer.passCredentials();
+        if (passCredentials) {
+            String[] userPass = getUserPass(s);
+            String userName = userPass[0];
+            String pass = userPass[1];
+            Map<String, String> existingEnvironment = startupConfig.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String, String>)null);
+            if (existingEnvironment == null) {
+                existingEnvironment = new HashMap<>();
+            }
 
-			if (userName == null) {
-				// This is an error situation and the user should be made aware
-				throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID,
-						"The credentials for " + s.getName()
-								+ " are invalid. No username found. Please open your server editor "
-								+ "and set your access.redhat.com credentials."));
-			}
+            if (userName == null) {
+                // This is an error situation and the user should be made aware
+                throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID,
+                        "The credentials for " + s.getName() + " are invalid. No username found. Please open your server editor "
+                                + "and set your access.redhat.com credentials."));
+            }
 
-			HashMap<String, String> env = new HashMap<>(existingEnvironment);
-			String userKey = cdkServer.getUserEnvironmentKey();
-			env.put(userKey, userName);
+            HashMap<String, String> env = new HashMap<>(existingEnvironment);
+            String userKey = cdkServer.getUserEnvironmentKey();
+            env.put(userKey, userName);
 
-			String passKey = cdkServer.getPasswordEnvironmentKey();
-			if (pass == null) {
-				// This is an error situation and the user should be made aware
-				throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID,
-						"The credentials for " + s.getName() + " are invalid. No password found for username "
-								+ cdkServer.getUsername()
-								+ " for the access.redhat.com domain. Please open your server editor "
-								+ "set your access.redhat.com credentials."));
-			}
-			if (passKey != null && pass != null)
-				env.put(passKey, pass);
-			return env;
-		} else {
-			return startupConfig.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String, String>) null);
-		}
-	}
+            String passKey = cdkServer.getPasswordEnvironmentKey();
+            if (pass == null) {
+                // This is an error situation and the user should be made aware
+                throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID,
+                        "The credentials for " + s.getName() + " are invalid. No password found for username " + cdkServer.getUsername()
+                                + " for the access.redhat.com domain. Please open your server editor "
+                                + "set your access.redhat.com credentials."));
+            }
+            if (passKey != null && pass != null)
+                env.put(passKey, pass);
+            return env;
+        } else {
+            return startupConfig.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String, String>)null);
+        }
+    }
 
-	@Deprecated
-	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName,
-			ILaunchConfiguration startupConfig) throws CoreException {
-		String commandLoc = VagrantBinaryUtility.getVagrantLocation();
-		return setupLaunch(s, args, launchConfigName, startupConfig, commandLoc);
-	}
+    @Deprecated
+    public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig)
+            throws CoreException {
+        String commandLoc = VagrantBinaryUtility.getVagrantLocation();
+        return setupLaunch(s, args, launchConfigName, startupConfig, commandLoc);
+    }
 
-	@Deprecated // Bad naming here
-	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName,
-			ILaunchConfiguration startupConfig, String commandLoc) throws CoreException {
-		return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
-	}
+    @Deprecated // Bad naming here
+    public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig,
+            String commandLoc) throws CoreException {
+        return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
+    }
 
-	public ILaunchConfigurationWorkingCopy createExternalToolsLaunch(IServer s, String args, String launchConfigName,
-			ILaunchConfiguration startupConfig, String commandLoc) throws CoreException {
-		ILaunchConfigurationWorkingCopy wc = findLaunchConfig(s, launchConfigName);
-		wc.setAttributes(startupConfig.getAttributes());
-		wc.setAttribute(ATTR_ARGS, args);
-		// Set the environment flag
-		Map<String, String> env = getEnvironment(s, startupConfig);
-		wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
+    public ILaunchConfigurationWorkingCopy createExternalToolsLaunch(IServer s, String args, String launchConfigName,
+            ILaunchConfiguration startupConfig, String commandLoc) throws CoreException {
+        ILaunchConfigurationWorkingCopy wc = findLaunchConfig(s, launchConfigName);
+        wc.setAttributes(startupConfig.getAttributes());
+        wc.setAttribute(ATTR_ARGS, args);
+        // Set the environment flag
+        Map<String, String> env = getEnvironment(s, startupConfig);
+        wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
 
-		if (commandLoc != null) {
-			wc.setAttribute(IExternalToolConstants.ATTR_LOCATION, commandLoc);
-			String cmdFolder = new Path(commandLoc).removeLastSegments(1).toOSString();
-			CommandLocationLookupStrategy.get().ensureOnPath(env, cmdFolder);
-		}
+        if (commandLoc != null) {
+            wc.setAttribute(IExternalToolConstants.ATTR_LOCATION, commandLoc);
+            String cmdFolder = new Path(commandLoc).removeLastSegments(1).toOSString();
+            CommandLocationLookupStrategy.get().ensureOnPath(env, cmdFolder);
+        }
 
-		return wc;
-	}
+        return wc;
+    }
 
-	private ILaunchConfigurationWorkingCopy findLaunchConfig(IServer s, String launchName) throws CoreException {
-		return ExternalLaunchUtil.findExternalToolsLaunchConfig(s, launchName);
-	}
+    private ILaunchConfigurationWorkingCopy findLaunchConfig(IServer s, String launchName) throws CoreException {
+        return ExternalLaunchUtil.findExternalToolsLaunchConfig(s, launchName);
+    }
 
-	/*
-	 * The following methods are for dealing with raw calls to vagrant, not using
-	 * launch configurations at all.
-	 */
+    /*
+     * The following methods are for dealing with raw calls to vagrant, not using
+     * launch configurations at all.
+     */
 
-	/*
-	 * Convert a string/string hashmap into an array of string environment variables
-	 * as required by java.lang.Runtime This will super-impose the provided
-	 * environment variables ON TOP OF the existing environment in eclipse, as users
-	 * may not know *all* environment variables that need to be set, or to do so may
-	 * be tedious.
-	 */
-	public static String[] convertEnvironment(Map<String, String> env) {
-		if (env == null || env.size() == 0)
-			return null;
+    /*
+     * Convert a string/string hashmap into an array of string environment variables
+     * as required by java.lang.Runtime This will super-impose the provided
+     * environment variables ON TOP OF the existing environment in eclipse, as users
+     * may not know *all* environment variables that need to be set, or to do so may
+     * be tedious.
+     */
+    public static String[] convertEnvironment(Map<String, String> env) {
+        if (env == null || env.size() == 0)
+            return null;
 
-		// Create a new map based on pre-existing environment of Eclipse
-		Map<String, String> original = new HashMap<>(System.getenv());
+        // Create a new map based on pre-existing environment of Eclipse
+        Map<String, String> original = new HashMap<>(System.getenv());
 
-		// Add additions or changes to environment on top of existing
-		original.putAll(env);
+        // Add additions or changes to environment on top of existing
+        original.putAll(env);
 
-		// Convert the combined map into a form that can be used to launch process
-		ArrayList<String> ret = new ArrayList<>();
-		Iterator<String> it = original.keySet().iterator();
-		String working = null;
-		while (it.hasNext()) {
-			working = it.next();
-			ret.add(working + "=" + original.get(working)); //$NON-NLS-1$
-		}
-		return ret.toArray(new String[ret.size()]);
-	}
+        // Convert the combined map into a form that can be used to launch process
+        ArrayList<String> ret = new ArrayList<>();
+        Iterator<String> it = original.keySet().iterator();
+        String working = null;
+        while (it.hasNext()) {
+            working = it.next();
+            ret.add(working + "=" + original.get(working)); //$NON-NLS-1$
+        }
+        return ret.toArray(new String[ret.size()]);
+    }
 
-	public static String[] callMachineReadable(String rootCommand, String[] args, File vagrantDir,
-			Map<String, String> env) throws IOException, CommandTimeoutException {
-		return call(rootCommand, args, vagrantDir, env, 30000, false);
-	}
+    public static String[] callMachineReadable(String rootCommand, String[] args, File vagrantDir, Map<String, String> env)
+            throws IOException, CommandTimeoutException {
+        return call(rootCommand, args, vagrantDir, env, 30000, false);
+    }
 
-	private static void ensureCommandOnPath(String rootCommand, Map<String, String> env) {
-		CommandLocationLookupStrategy.get().ensureOnPath(env, new Path(rootCommand).removeLastSegments(1).toOSString());
-	}
+    private static void ensureCommandOnPath(String rootCommand, Map<String, String> env) {
+        CommandLocationLookupStrategy.get().ensureOnPath(env, new Path(rootCommand).removeLastSegments(1).toOSString());
+    }
 
-	public Process callInteractive(IServer s, String args, String launchConfigName) throws CoreException, IOException {
-		return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
-	}
+    public Process callInteractive(IServer s, String args, String launchConfigName) throws CoreException, IOException {
+        return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+    }
 
-	public Process callInteractive(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig)
-			throws CoreException, IOException {
-		Map<String, String> env = getEnvironment(s, startupConfig);
-		String vagrantcmdloc = VagrantBinaryUtility.getVagrantLocation(s);
-		File wd = CDKServerUtility.getWorkingDirectory(s);
-		Process p = callProcess(vagrantcmdloc, ArgsUtil.parse(args), wd, env, true);
-		return p;
-	}
+    public Process callInteractive(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig)
+            throws CoreException, IOException {
+        Map<String, String> env = getEnvironment(s, startupConfig);
+        String vagrantcmdloc = VagrantBinaryUtility.getVagrantLocation(s);
+        File wd = CDKServerUtility.getWorkingDirectory(s);
+        Process p = callProcess(vagrantcmdloc, ArgsUtil.parse(args), wd, env, true);
+        return p;
+    }
 
-	public Process callMinishiftInteractive(IServer s, String args, String launchConfigName)
-			throws CoreException, IOException {
-		return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
-	}
-	
-	public Process callMinishiftConsole(IServer s, String args, String launchConfigName) throws CoreException, IOException {
-		Map<String,String> env = getEnvironment(s, s.getLaunchConfiguration(true, new NullProgressMonitor()));
-		String minishift = MinishiftBinaryUtility.getMinishiftLocation(s);
-		File wd =  CDKServerUtility.getWorkingDirectory(s);
-		Process p = callProcess(minishift, ArgsUtil.parse(args), wd, env, false);
-		return p;
-	}
+    public Process callMinishiftInteractive(IServer s, String args, String launchConfigName) throws CoreException, IOException {
+        return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+    }
 
+    public Process callMinishiftConsole(IServer s, String args, String launchConfigName) throws CoreException, IOException {
+        Map<String, String> env = getEnvironment(s, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+        String minishift = MinishiftBinaryUtility.getMinishiftLocation(s);
+        File wd = CDKServerUtility.getWorkingDirectory(s);
+        Process p = callProcess(minishift, ArgsUtil.parse(args), wd, env, false);
+        return p;
+    }
 
-	public Process callMinishiftInteractive(IServer s, String args, String launchConfigName,
-			ILaunchConfiguration startupConfig) throws CoreException, IOException {
-		Map<String, String> env = getEnvironment(s, startupConfig);
-		String minishiftCmdloc = MinishiftBinaryUtility.getMinishiftLocation(s);
-		File wd = JBossServerCorePlugin.getServerStateLocation(s).toFile();
-		Process p = callProcess(minishiftCmdloc, ArgsUtil.parse(args), wd, env, true);
-		return p;
-	}
+    public Process callMinishiftInteractive(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig)
+            throws CoreException, IOException {
+        Map<String, String> env = getEnvironment(s, startupConfig);
+        String minishiftCmdloc = MinishiftBinaryUtility.getMinishiftLocation(s);
+        File wd = JBossServerCorePlugin.getServerStateLocation(s).toFile();
+        Process p = callProcess(minishiftCmdloc, ArgsUtil.parse(args), wd, env, true);
+        return p;
+    }
 
-	public static Process callProcess(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
-			boolean interactive) throws IOException {
-		ensureCommandOnPath(rootCommand, env);
-		String[] envp = (env == null ? null : convertEnvironment(env));
+    public static Process callProcess(String rootCommand, String[] args, File vagrantDir, Map<String, String> env, boolean interactive)
+            throws IOException {
+        ensureCommandOnPath(rootCommand, env);
+        String[] envp = (env == null ? null : convertEnvironment(env));
 
-		List<String> cmd = new ArrayList<>();
-		cmd.add(rootCommand);
-		cmd.addAll(Arrays.asList(args));
-		Process p = null;
-		if (interactive) {
-			p = ProcessFactory.getFactory().exec(cmd.toArray(new String[0]), envp, vagrantDir,
-					new PTY(PTY.Mode.TERMINAL));
-		} else {
-			p = Runtime.getRuntime().exec(cmd.toArray(new String[0]), envp, vagrantDir);
-		}
-		return p;
-	}
+        List<String> cmd = new ArrayList<>();
+        cmd.add(rootCommand);
+        cmd.addAll(Arrays.asList(args));
+        Process p = null;
+        if (interactive) {
+            p = ProcessFactory.getFactory().exec(cmd.toArray(new String[0]), envp, vagrantDir, new PTY(PTY.Mode.TERMINAL));
+        } else {
+            p = Runtime.getRuntime().exec(cmd.toArray(new String[0]), envp, vagrantDir);
+        }
+        return p;
+    }
 
-	public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env,
-			int timeout, boolean interactive) throws IOException, CommandTimeoutException {
-		final Process p = callProcess(rootCommand, args, vagrantDir, env, interactive);
+    public static String[] call(String rootCommand, String[] args, File vagrantDir, Map<String, String> env, int timeout,
+            boolean interactive) throws IOException, CommandTimeoutException {
+        final Process p = callProcess(rootCommand, args, vagrantDir, env, interactive);
 
-		InputStream errStream = p.getErrorStream();
-		InputStream inStream = p.getInputStream();
+        InputStream errStream = p.getErrorStream();
+        InputStream inStream = p.getInputStream();
 
-		StreamGobbler inGob = new StreamGobbler(inStream);
-		StreamGobbler errGob = new StreamGobbler(errStream);
+        StreamGobbler inGob = new StreamGobbler(inStream);
+        StreamGobbler errGob = new StreamGobbler(errStream);
 
-		inGob.start();
-		errGob.start();
+        inGob.start();
+        errGob.start();
 
-		Integer exitCode = null;
-		if (p.isAlive()) {
+        Integer exitCode = null;
+        if (p.isAlive()) {
 
-			exitCode = ThreadUtils.runWithTimeout(timeout, new Callable<Integer>() {
-				@Override
-				public Integer call() throws Exception {
-					return p.waitFor();
-				}
-			});
-		} else {
-			exitCode = p.exitValue();
-		}
+            exitCode = ThreadUtils.runWithTimeout(timeout, new Callable<Integer>() {
+                @Override
+                public Integer call() throws Exception {
+                    return p.waitFor();
+                }
+            });
+        } else {
+            exitCode = p.exitValue();
+        }
 
-		List<String> inLines = null;
-		if (exitCode == null) {
-			inGob.cancel();
-			errGob.cancel();
+        List<String> inLines = null;
+        if (exitCode == null) {
+            inGob.cancel();
+            errGob.cancel();
 
-			// Timeout reached
-			p.destroyForcibly();
-			inLines = inGob.getOutput();
-			List<String> errLines = errGob.getOutput();
-			throw new CommandTimeoutException(inLines, errLines);
-		} else {
-			inLines = inGob.getOutput();
-		}
+            // Timeout reached
+            p.destroyForcibly();
+            inLines = inGob.getOutput();
+            List<String> errLines = errGob.getOutput();
+            throw new CommandTimeoutException(inLines, errLines);
+        } else {
+            inLines = inGob.getOutput();
+        }
 
-		return (String[]) inLines.toArray(new String[inLines.size()]);
-	}
+        return (String[])inLines.toArray(new String[inLines.size()]);
+    }
 
-	private static class StreamGobbler extends Thread {
-		InputStream is;
-		ArrayList<String> ret = new ArrayList<String>();
-		private boolean canceled = false;
-		private boolean complete = false;
+    private static class StreamGobbler extends Thread {
+        InputStream is;
+        ArrayList<String> ret = new ArrayList<String>();
+        private boolean canceled = false;
+        private boolean complete = false;
 
-		public StreamGobbler(InputStream is) {
-			this.is = is;
-		}
+        public StreamGobbler(InputStream is) {
+            this.is = is;
+        }
 
-		private synchronized void add(String line) {
-			ret.add(line);
-		}
+        private synchronized void add(String line) {
+            ret.add(line);
+        }
 
-		private synchronized ArrayList<String> getList() {
-			return ret;
-		}
+        private synchronized ArrayList<String> getList() {
+            return ret;
+        }
 
-		public void run() {
-			try {
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
-				String line = null;
-				while (!isCanceled() && (line = br.readLine()) != null)
-					add(line);
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
+        public void run() {
+            try {
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                String line = null;
+                while (!isCanceled() && (line = br.readLine()) != null)
+                    add(line);
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
 
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException ioe) {
-					// ignore
-				}
-			}
-			setComplete();
-		}
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ioe) {
+                    // ignore
+                }
+            }
+            setComplete();
+        }
 
-		private synchronized void setComplete() {
-			complete = true;
-		}
+        private synchronized void setComplete() {
+            complete = true;
+        }
 
-		private synchronized boolean isComplete() {
-			return complete;
-		}
+        private synchronized boolean isComplete() {
+            return complete;
+        }
 
-		private synchronized void setCanceled() {
-			canceled = true;
-		}
+        private synchronized void setCanceled() {
+            canceled = true;
+        }
 
-		private synchronized boolean isCanceled() {
-			return canceled;
-		}
+        private synchronized boolean isCanceled() {
+            return canceled;
+        }
 
-		public void cancel() {
-			setCanceled();
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException ioe) {
-					// ignore
-				}
-			}
-		}
+        public void cancel() {
+            setCanceled();
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ioe) {
+                    // ignore
+                }
+            }
+        }
 
-		private void waitComplete(long delay, long maxwait) {
-			long start = System.currentTimeMillis();
-			long end = start + maxwait;
-			while (!isComplete() && System.currentTimeMillis() < end) {
-				try {
-					Thread.sleep(delay);
-				} catch (InterruptedException ie) {
+        private void waitComplete(long delay, long maxwait) {
+            long start = System.currentTimeMillis();
+            long end = start + maxwait;
+            while (!isComplete() && System.currentTimeMillis() < end) {
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException ie) {
 
-				}
-			}
-			if (!isComplete()) {
-				cancel();
-			}
-		}
+                }
+            }
+            if (!isComplete()) {
+                cancel();
+            }
+        }
 
-		private static final long MAX_WAIT_AFTER_TERMINATION = 5000;
-		private static final long DELAY = 100;
+        private static final long MAX_WAIT_AFTER_TERMINATION = 5000;
+        private static final long DELAY = 100;
 
-		/**
-		 * Wait a maximum 5 seconds for the streams to finish reading whatever is in the
-		 * pipeline
-		 * 
-		 * @return
-		 */
-		public List<String> getOutput() {
-			waitComplete(DELAY, MAX_WAIT_AFTER_TERMINATION);
-			return getList();
-		}
-	}
+        /**
+         * Wait a maximum 5 seconds for the streams to finish reading whatever is in the
+         * pipeline
+         * 
+         * @return
+         */
+        public List<String> getOutput() {
+            waitComplete(DELAY, MAX_WAIT_AFTER_TERMINATION);
+            return getList();
+        }
+    }
 }

@@ -54,12 +54,10 @@ import com.openshift.restclient.OpenShiftException;
  *
  */
 public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPageModel> {
-    
+
     public ResourcePayloadPage(IWizard wizard, IResourcePayloadPageModel model) {
-        super(wizard, model,
-              "Select resource payload",
-              "Select the file or workspace file from where the resource will be created",
-              "resourcePayload");
+        super(wizard, model, "Select resource payload", "Select the file or workspace file from where the resource will be created",
+                "resourcePayload");
     }
 
     @Override
@@ -71,18 +69,10 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
     private void createPayloadSourceControls(Composite parent, DataBindingContext dbc) {
         Group sourceGroup = new Group(parent, SWT.NONE);
         sourceGroup.setText("Source");
-        GridDataFactory.fillDefaults()
-                .align(SWT.FILL, SWT.FILL)
-                .grab(true, true)
-                .span(3, 1)
-                .hint(SWT.DEFAULT, SWT.DEFAULT)
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(3, 1).hint(SWT.DEFAULT, SWT.DEFAULT)
                 .applyTo(sourceGroup);
-        GridLayoutFactory.fillDefaults()
-                .numColumns(3)
-                .margins(10, 6)
-                .spacing(6, 6)
-                .applyTo(sourceGroup);
-        
+        GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 6).spacing(6, 6).applyTo(sourceGroup);
+
         createLocalSourceControls(dbc, sourceGroup);
     }
 
@@ -92,52 +82,35 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
         label.setText("Enter a file path (workspace or local) or a full URL.");
         // local template file name
         Text sourceText = new Text(sourceGroup, SWT.BORDER);
-        GridDataFactory.fillDefaults()
-                .align(SWT.FILL, SWT.CENTER)
-                .grab(true, false)
-                .span(3, 1)
-                .applyTo(sourceText);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(sourceText);
         final IObservableValue source = WidgetProperties.text(SWT.Modify).observe(sourceText);
-        ValueBindingBuilder
-                .bind(source )
-                .to(BeanProperties.value(
-                        IResourcePayloadPageModel.PROPERTY_SOURCE).observe(model))
-                .in(dbc);
+        ValueBindingBuilder.bind(source).to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE).observe(model)).in(dbc);
         MultiValidator validator = new MultiValidator() {
-            
+
             @Override
             protected IStatus validate() {
-                String sourceValue = (String) source.getValue();
+                String sourceValue = (String)source.getValue();
                 if (StringUtils.isEmpty(sourceValue)) {
                     return ValidationStatus.cancel("You need to provide a file path or an URL");
                 }
-                return !OpenshiftUIConstants.URL_VALIDATOR.isValid(sourceValue) 
-                		&& !isFile(sourceValue)?
-                				ValidationStatus.error(sourceValue + " is not a file")
-                				:ValidationStatus.ok();
+                return !OpenshiftUIConstants.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)
+                        ? ValidationStatus.error(sourceValue + " is not a file") : ValidationStatus.ok();
             }
         };
         dbc.addValidationStatusProvider(validator);
-        ControlDecorationSupport.create(
-                validator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+        ControlDecorationSupport.create(validator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
         // browse button
         Button btnBrowseFiles = new Button(sourceGroup, SWT.NONE);
         btnBrowseFiles.setText("Browse File System...");
-        GridDataFactory.fillDefaults()
-                .align(SWT.END, SWT.CENTER)
-                .span(2, 1)
-                .grab(true, false)
-                .applyTo(btnBrowseFiles);
+        GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).span(2, 1).grab(true, false).applyTo(btnBrowseFiles);
 
         btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
-        
+
         // browse button
         Button btnBrowseWorkspaceFiles = new Button(sourceGroup, SWT.NONE);
         btnBrowseWorkspaceFiles.setText("Browse Workspace...");
-        GridDataFactory.fillDefaults()
-                .align(SWT.END, SWT.CENTER)
-                .applyTo(btnBrowseWorkspaceFiles);
+        GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(btnBrowseWorkspaceFiles);
 
         btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());
     }
@@ -155,8 +128,8 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
             private FileDialog createFileDialog(String selectedFile) {
                 FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
                 dialog.setText("Select an OpenShift resource");
-                dialog.setFilterExtensions(new String[] {"*.json"});
-                if(exists(selectedFile)) {
+                dialog.setFilterExtensions(new String[] { "*.json" });
+                if (exists(selectedFile)) {
                     File file = new File(selectedFile);
                     if (file.isFile()) {
                         file = file.getParentFile();
@@ -167,17 +140,14 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
             }
         };
     }
-    
+
     private SelectionListener onBrowseWorkspaceClicked() {
         return new SelectionAdapter() {
 
             @Override
             public void widgetSelected(SelectionEvent e) {
-                ElementTreeSelectionDialog dialog = UIUtils.createFileDialog(model.getSource(),
-                                                                             "Select an OpenShift resource",
-                                                                             "Select an OpenShift resource (*.json)",
-                                                                             "json",
-                                                                             null);
+                ElementTreeSelectionDialog dialog = UIUtils.createFileDialog(model.getSource(), "Select an OpenShift resource",
+                        "Select an OpenShift resource (*.json)", "json", null);
                 dialog.setValidator(new FileValidator());
                 if (dialog.open() == IDialogConstants.OK_ID && dialog.getFirstResult() instanceof IFile) {
                     String path = ((IFile)dialog.getFirstResult()).getFullPath().toString();
@@ -186,10 +156,9 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
                 }
             }
 
-
         };
     }
-    
+
     private void setLocalSourceFileName(String file) {
         if (file == null || !isFile(file)) {
             return;
@@ -199,18 +168,14 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
         } catch (ClassCastException | OpenShiftException ex) {
             IStatus status = ValidationStatus.error(ex.getMessage(), ex);
             OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
-            ErrorDialog.openError(getShell(), "Openshift resource error",
-                    NLS.bind("The file \"{0}\" is not an OpenShift resource.", 
-                            file),
+            ErrorDialog.openError(getShell(), "Openshift resource error", NLS.bind("The file \"{0}\" is not an OpenShift resource.", file),
                     status);
         }
     }
-   
 
     @Override
     protected void setupWizardPageSupport(DataBindingContext dbc) {
         ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
     }
-
 
 }

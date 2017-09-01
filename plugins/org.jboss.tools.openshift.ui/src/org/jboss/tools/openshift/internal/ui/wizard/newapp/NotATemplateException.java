@@ -11,16 +11,16 @@
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 public class NotATemplateException extends IllegalArgumentException {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	String resourceKind;
+    String resourceKind;
 
-	public NotATemplateException(String resourceKind) {
-		super("Wrong resource kind: " + resourceKind);
-		this.resourceKind = resourceKind;
-	}
+    public NotATemplateException(String resourceKind) {
+        super("Wrong resource kind: " + resourceKind);
+        this.resourceKind = resourceKind;
+    }
 
-	public String getResourceKind() {
-		return resourceKind;
-	}
+    public String getResourceKind() {
+        return resourceKind;
+    }
 }

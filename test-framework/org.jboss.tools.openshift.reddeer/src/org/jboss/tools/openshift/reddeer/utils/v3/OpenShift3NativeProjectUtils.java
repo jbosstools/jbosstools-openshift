@@ -36,7 +36,7 @@ import com.openshift.restclient.model.project.IProjectRequest;
  */
 
 public class OpenShift3NativeProjectUtils {
-	
+
 	private OpenShift3NativeProjectUtils() {
 		throw new IllegalAccessError("Utilities class");
 	}
@@ -62,11 +62,11 @@ public class OpenShift3NativeProjectUtils {
 		IProjectRequest request = connection.getResourceFactory().stub(ResourceKind.PROJECT_REQUEST, name);
 		request.setDisplayName(StringUtils.isEmpty(displayName) ? name : displayName);
 		request.setDescription(StringUtils.isEmpty(description) ? name : description);
-		
+
 		CreateProjectWaitCondition createProjectWaitCondition = new CreateProjectWaitCondition(connection, request);
 		new WaitUntil(createProjectWaitCondition, TimePeriod.LONG);
 		IProject createdProject = createProjectWaitCondition.getProject();
-		
+
 		/**
 		 * WORKAROUND: explorer wont get notified of the the new project and
 		 * therefore wont display it unless a manual refresh is done on the
@@ -77,18 +77,16 @@ public class OpenShift3NativeProjectUtils {
 		 * @see WatchManager#KINDS
 		 */
 		new WaitUntil(new OpenShiftProjectExists(createdProject.getDisplayName(), connection));
-		
+
 		return createdProject;
 	}
-	
-	private static class CreateProjectWaitCondition extends AbstractWaitCondition{
+
+	private static class CreateProjectWaitCondition extends AbstractWaitCondition {
 
 		private IProject createdProject;
 		private Connection connection;
 		private IProjectRequest request;
-		
-		
-		
+
 		public CreateProjectWaitCondition(Connection connection, IProjectRequest request) {
 			super();
 			this.connection = connection;
@@ -97,16 +95,16 @@ public class OpenShift3NativeProjectUtils {
 
 		@Override
 		public boolean test() {
-			try{
+			try {
 				createdProject = (IProject) connection.createResource(request);
 				return true;
-			}catch(OpenShiftException ex){
+			} catch (OpenShiftException ex) {
 				LOGGER.debug(StackTraceUtils.stackTraceToString(ex));
 				return false;
 			}
 		}
-		
-		public IProject getProject(){
+
+		public IProject getProject() {
 			return createdProject;
 		}
 	}

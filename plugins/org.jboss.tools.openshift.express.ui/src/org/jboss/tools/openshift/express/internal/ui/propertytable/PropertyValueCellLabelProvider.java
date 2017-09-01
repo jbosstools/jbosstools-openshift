@@ -32,57 +32,55 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
  */
 public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelProvider {
 
-	@Override
-	protected void update(IProperty property, ViewerCell cell) {
-		if (property.isLink()) {
-			// tree editor takes some time to display, show text in the meantime
-			createStyledText(property, cell);
-			createLink(property, cell);
-		} else {
-			cell.setText(property.getValue());
-		}
-	}
+    @Override
+    protected void update(IProperty property, ViewerCell cell) {
+        if (property.isLink()) {
+            // tree editor takes some time to display, show text in the meantime
+            createStyledText(property, cell);
+            createLink(property, cell);
+        } else {
+            cell.setText(property.getValue());
+        }
+    }
 
-	protected void createLink(IProperty property, final ViewerCell cell) {
-		if (StringUtils.isEmpty(property.getValue())) {
-			return;
-		}
-		final Hyperlink link = new Hyperlink((Tree) cell.getControl(), SWT.NONE); // SWT.NO_BACKGROUND
-		link.setBackground(cell.getBackground());
-		link.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.ACTIVE_HYPERLINK_COLOR));
-		link.setFont(cell.getFont());
-		link.setUnderlined(true);
-		link.setText(property.getValue());
-		link.setBackground(cell.getBackground());
-		link.addMouseListener(onLinkClicked(property.getValue()));
-		UIUtils.copyMenuOf(cell.getControl(), link);
-		TreeUtils.createTreeEditor(link, property.getValue(), cell);
-	}
+    protected void createLink(IProperty property, final ViewerCell cell) {
+        if (StringUtils.isEmpty(property.getValue())) {
+            return;
+        }
+        final Hyperlink link = new Hyperlink((Tree)cell.getControl(), SWT.NONE); // SWT.NO_BACKGROUND
+        link.setBackground(cell.getBackground());
+        link.setForeground(JFaceResources.getColorRegistry().get(JFacePreferences.ACTIVE_HYPERLINK_COLOR));
+        link.setFont(cell.getFont());
+        link.setUnderlined(true);
+        link.setText(property.getValue());
+        link.setBackground(cell.getBackground());
+        link.addMouseListener(onLinkClicked(property.getValue()));
+        UIUtils.copyMenuOf(cell.getControl(), link);
+        TreeUtils.createTreeEditor(link, property.getValue(), cell);
+    }
 
+    private void createStyledText(IProperty property, final ViewerCell cell) {
+        StyledString.Styler style = new StyledString.Styler() {
+            @Override
+            public void applyStyles(TextStyle textStyle) {
+                textStyle.foreground = cell.getControl().getDisplay().getSystemColor(SWT.COLOR_BLUE);
+                textStyle.underline = true;
+            }
+        };
+        StyledString styledString = new StyledString(StringUtils.null2emptyString(property.getValue()), style);
+        cell.setStyleRanges(styledString.getStyleRanges());
+        cell.setText(styledString.getString());
+    }
 
-	private void createStyledText(IProperty property, final ViewerCell cell) {
-		StyledString.Styler style = new StyledString.Styler() {
-			@Override
-			public void applyStyles(TextStyle textStyle) {
-				textStyle.foreground = cell.getControl().getDisplay().getSystemColor(SWT.COLOR_BLUE);
-				textStyle.underline = true;
-			}
-		};
-		StyledString styledString = new StyledString(StringUtils.null2emptyString(property.getValue()), style);
-		cell.setStyleRanges(styledString.getStyleRanges());
-		cell.setText(styledString.getString());
-	}
+    protected MouseAdapter onLinkClicked(final String url) {
+        return new MouseAdapter() {
 
-	protected MouseAdapter onLinkClicked(final String url) {
-		return new MouseAdapter() {
-
-			@Override
-			public void mouseUp(MouseEvent e) {
-				if (e.button == 1) { // left button only
-					BrowserUtil.checkedCreateExternalBrowser(
-							url, ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
-				}
-			}
-		};
-	}
+            @Override
+            public void mouseUp(MouseEvent e) {
+                if (e.button == 1) { // left button only
+                    BrowserUtil.checkedCreateExternalBrowser(url, ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
+                }
+            }
+        };
+    }
 }

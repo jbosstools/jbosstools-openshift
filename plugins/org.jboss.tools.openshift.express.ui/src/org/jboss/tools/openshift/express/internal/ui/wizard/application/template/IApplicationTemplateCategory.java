@@ -17,12 +17,12 @@ import java.util.List;
  */
 public interface IApplicationTemplateCategory extends IApplicationTemplate {
 
-	public void clearChildren();
+    public void clearChildren();
 
-	public List<IApplicationTemplate> getChildren();
+    public List<IApplicationTemplate> getChildren();
 
-	public IApplicationTemplate addChild(IApplicationTemplate child);
+    public IApplicationTemplate addChild(IApplicationTemplate child);
 
-	public IApplicationTemplate addChildren(List<IApplicationTemplate> cartridges);
+    public IApplicationTemplate addChildren(List<IApplicationTemplate> cartridges);
 
 }

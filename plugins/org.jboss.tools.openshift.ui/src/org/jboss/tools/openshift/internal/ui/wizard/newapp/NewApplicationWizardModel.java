@@ -58,139 +58,138 @@ import com.openshift.restclient.model.template.ITemplate;
  * @author Andre Dietisheim
  *
  */
-public class NewApplicationWizardModel 
-		extends ResourceLabelsPageModel 
-		implements IApplicationSourceListPageModel{
+public class NewApplicationWizardModel extends ResourceLabelsPageModel implements IApplicationSourceListPageModel {
 
-	private Connection connection;
-	private IProject project;
-	private List<ObservableTreeItem> projectItems = new ArrayList<>();
-	private List<ObservableTreeItem> projectTemplates = new ArrayList<>();
-	private IApplicationSource selectedAppSource;
-	private IApplicationSource localAppSource;
-	private IApplicationSource serverAppSource;
-	private IStatus appSourceStatus = Status.OK_STATUS;
-	private boolean useLocalAppSource = true;
-	private String localAppSourceFilename;
-	private IResourceFactory resourceFactory;
-	private org.eclipse.core.resources.IProject eclipseProject;
-	private Comparator<ObservableTreeItem> comparator;
-	
-	private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems, 
-			IApplicationSource appSource, String localAppSourceFilename, IStatus appSourceStatus) {
-		updateProjectItems(projectItems);
-		firePropertyChange(PROPERTY_PROJECT, this.project, 
-				this.project = selectedProject = getProjectOrDefault(selectedProject, projectItems));
-		firePropertyChange(PROPERTY_APP_SOURCES, this.projectTemplates, 
-				this.projectTemplates = getProjectTemplates(selectedProject, projectItems));
-		updateAppSourceStatus(appSourceStatus);
-		firePropertyChange(PROPERTY_USE_LOCAL_APP_SOURCE, this.useLocalAppSource, this.useLocalAppSource = useLocalAppSource);
-		updateSelectedAppSource(useLocalAppSource, appSource, localAppSource, localAppSourceFilename);
-	}
+    private Connection connection;
+    private IProject project;
+    private List<ObservableTreeItem> projectItems = new ArrayList<>();
+    private List<ObservableTreeItem> projectTemplates = new ArrayList<>();
+    private IApplicationSource selectedAppSource;
+    private IApplicationSource localAppSource;
+    private IApplicationSource serverAppSource;
+    private IStatus appSourceStatus = Status.OK_STATUS;
+    private boolean useLocalAppSource = true;
+    private String localAppSourceFilename;
+    private IResourceFactory resourceFactory;
+    private org.eclipse.core.resources.IProject eclipseProject;
+    private Comparator<ObservableTreeItem> comparator;
 
-	private void updateSelectedAppSource(boolean useLocalAppSource, IApplicationSource serverAppSource, 
-			IApplicationSource localAppSource, String localAppSourceFilename) {
-		IApplicationSource source;
-		if (useLocalAppSource) {
-			source = this.localAppSource = localAppSource;
-		} else {
-			source = this.serverAppSource = serverAppSource;
-		}
-		updateLabels(source);
-		String oldLocalAppSourceFileName = this.localAppSourceFilename;
-		IApplicationSource oldSelectedAppSource = this.selectedAppSource;
-		this.localAppSourceFilename = localAppSourceFilename;
-		this.selectedAppSource = source;
+    private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems,
+            IApplicationSource appSource, String localAppSourceFilename, IStatus appSourceStatus) {
+        updateProjectItems(projectItems);
+        firePropertyChange(PROPERTY_PROJECT, this.project,
+                this.project = selectedProject = getProjectOrDefault(selectedProject, projectItems));
+        firePropertyChange(PROPERTY_APP_SOURCES, this.projectTemplates,
+                this.projectTemplates = getProjectTemplates(selectedProject, projectItems));
+        updateAppSourceStatus(appSourceStatus);
+        firePropertyChange(PROPERTY_USE_LOCAL_APP_SOURCE, this.useLocalAppSource, this.useLocalAppSource = useLocalAppSource);
+        updateSelectedAppSource(useLocalAppSource, appSource, localAppSource, localAppSourceFilename);
+    }
+
+    private void updateSelectedAppSource(boolean useLocalAppSource, IApplicationSource serverAppSource, IApplicationSource localAppSource,
+            String localAppSourceFilename) {
+        IApplicationSource source;
+        if (useLocalAppSource) {
+            source = this.localAppSource = localAppSource;
+        } else {
+            source = this.serverAppSource = serverAppSource;
+        }
+        updateLabels(source);
+        String oldLocalAppSourceFileName = this.localAppSourceFilename;
+        IApplicationSource oldSelectedAppSource = this.selectedAppSource;
+        this.localAppSourceFilename = localAppSourceFilename;
+        this.selectedAppSource = source;
         firePropertyChange(PROPERTY_LOCAL_APP_SOURCE_FILENAME, oldLocalAppSourceFileName, this.localAppSourceFilename);
-		firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, oldSelectedAppSource, this.selectedAppSource);
-	}
-	
-	private void updateLabels(IApplicationSource source) {
-		if(source != null && ResourceKind.TEMPLATE.equals(source.getKind())) {
-			ITemplate template = (ITemplate) source.getSource();
-			setLabels(template.getObjectLabels());
-			return;
-		}
-		setLabels(Collections.emptyMap());
-	}
-	
-	private void updateAppSourceStatus(IStatus appSourceStatus) {
-	    firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = appSourceStatus);
-	}
-	
-	private void setLabels(Map<String, String> labelMap) {
-		if(labelMap == null) return;
-		List<Label> labels =  new ArrayList<>(labelMap.size());
-		for (Entry<String,String> entry : labelMap.entrySet()) {
-			labels.add(new Label(entry.getKey(), entry.getValue()));
-		}
-		setLabels(labels);
-	}
-	
-	private IApplicationSource getLocalAppSource(IProgressMonitor monitor, String filename) {
-		if (StringUtils.isBlank(filename)) {
-			return null;
-		}
-		IResource resource = null;
-		filename = VariablesHelper.replaceVariables(filename);
-		try {
-			if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(filename) && !Files.isRegularFile(Paths.get(filename))) {
-				return null;
-			}
-			try (InputStream input = createInputStream(filename, monitor)) {
+        firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, oldSelectedAppSource, this.selectedAppSource);
+    }
+
+    private void updateLabels(IApplicationSource source) {
+        if (source != null && ResourceKind.TEMPLATE.equals(source.getKind())) {
+            ITemplate template = (ITemplate)source.getSource();
+            setLabels(template.getObjectLabels());
+            return;
+        }
+        setLabels(Collections.emptyMap());
+    }
+
+    private void updateAppSourceStatus(IStatus appSourceStatus) {
+        firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = appSourceStatus);
+    }
+
+    private void setLabels(Map<String, String> labelMap) {
+        if (labelMap == null)
+            return;
+        List<Label> labels = new ArrayList<>(labelMap.size());
+        for (Entry<String, String> entry : labelMap.entrySet()) {
+            labels.add(new Label(entry.getKey(), entry.getValue()));
+        }
+        setLabels(labels);
+    }
+
+    private IApplicationSource getLocalAppSource(IProgressMonitor monitor, String filename) {
+        if (StringUtils.isBlank(filename)) {
+            return null;
+        }
+        IResource resource = null;
+        filename = VariablesHelper.replaceVariables(filename);
+        try {
+            if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(filename) && !Files.isRegularFile(Paths.get(filename))) {
+                return null;
+            }
+            try (InputStream input = createInputStream(filename, monitor)) {
                 resource = resourceFactory.create(input);
-                if(resource != null && !(resource instanceof ITemplate)) {
-                	throw new NotATemplateException(resource.getKind());
+                if (resource != null && !(resource instanceof ITemplate)) {
+                    throw new NotATemplateException(resource.getKind());
                 }
             }
-		} catch (FileNotFoundException e) {
-			throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
-		} catch (IOException e) {
+        } catch (FileNotFoundException e) {
+            throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
+        } catch (IOException e) {
             throw new OpenShiftException(e, NLS.bind("Error reading the file or URL \"{0}\" to upload", filename));
-		} catch (ResourceFactoryException | ClassCastException e) {
-			throw e;
-		}
-		switch(resource.getKind()) {
-		case ResourceKind.TEMPLATE:
-			return new TemplateApplicationSource((ITemplate)resource);
-		}
-		throw new OpenShiftException("Creating applications from local files is only allowed using a template");
-	}
-	
-	private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject, List<ObservableTreeItem> allProjects) {
-		if (allProjects == null) {
-			return null;
-		}
-		for (ObservableTreeItem item : allProjects) {
-			if (item.getModel().equals(selectedProject)) {
-				return item.getChildren();
-			}
-		}
-		return allProjects;
-	}
+        } catch (ResourceFactoryException | ClassCastException e) {
+            throw e;
+        }
+        switch (resource.getKind()) {
+        case ResourceKind.TEMPLATE:
+            return new TemplateApplicationSource((ITemplate)resource);
+        }
+        throw new OpenShiftException("Creating applications from local files is only allowed using a template");
+    }
 
-	private void updateProjectItems(List<ObservableTreeItem> projectItems) {
-		List<ObservableTreeItem> oldItems = new ArrayList<>(this.projectItems);
-		// ensure we're not operating on the same list
-		List<ObservableTreeItem> newItems = new ArrayList<>();
-		if (projectItems != null) {
-			newItems.addAll(projectItems);
-		}
-		this.projectItems.clear();
-		this.projectItems.addAll(newItems);
-		firePropertyChange(PROPERTY_PROJECT_ITEMS, oldItems, this.projectItems);
-	}
-	
-	@Override
-	public void setServerAppSource(IApplicationSource appSource) {
-		update(false, this.project, this.projectItems, appSource, localAppSourceFilename, Status.OK_STATUS);
-	}
+    private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject, List<ObservableTreeItem> allProjects) {
+        if (allProjects == null) {
+            return null;
+        }
+        for (ObservableTreeItem item : allProjects) {
+            if (item.getModel().equals(selectedProject)) {
+                return item.getChildren();
+            }
+        }
+        return allProjects;
+    }
 
-	@Override
-	public IApplicationSource getServerAppSource() {
-		return serverAppSource;
-	}
-	
+    private void updateProjectItems(List<ObservableTreeItem> projectItems) {
+        List<ObservableTreeItem> oldItems = new ArrayList<>(this.projectItems);
+        // ensure we're not operating on the same list
+        List<ObservableTreeItem> newItems = new ArrayList<>();
+        if (projectItems != null) {
+            newItems.addAll(projectItems);
+        }
+        this.projectItems.clear();
+        this.projectItems.addAll(newItems);
+        firePropertyChange(PROPERTY_PROJECT_ITEMS, oldItems, this.projectItems);
+    }
+
+    @Override
+    public void setServerAppSource(IApplicationSource appSource) {
+        update(false, this.project, this.projectItems, appSource, localAppSourceFilename, Status.OK_STATUS);
+    }
+
+    @Override
+    public IApplicationSource getServerAppSource() {
+        return serverAppSource;
+    }
+
     @Override
     public void resetLocalAppSource() {
         this.localAppSource = null;
@@ -199,94 +198,93 @@ public class NewApplicationWizardModel
     }
 
     @Override
-	public IApplicationSource getSelectedAppSource() {
-		return selectedAppSource;
-	}
+    public IApplicationSource getSelectedAppSource() {
+        return selectedAppSource;
+    }
 
-	private IProject getProjectOrDefault(IProject project, List<ObservableTreeItem> projects) {
-		if (project == null) {
-			project = getDefaultProject(projects);
-		}
-		return project;
-	}
+    private IProject getProjectOrDefault(IProject project, List<ObservableTreeItem> projects) {
+        if (project == null) {
+            project = getDefaultProject(projects);
+        }
+        return project;
+    }
 
-	private IProject getDefaultProject(List<ObservableTreeItem> projects) {
-		if (projects == null 
-				|| projects.size() == 0) {
-			return null;
-		} else if(projects.size() == 1) {
-			return (IProject) projects.get(0).getModel();
-		}
-		ObservableTreeItem[] items = projects.toArray(new ObservableTreeItem[projects.size()]);
-		if (comparator != null) {
-			Arrays.sort(items, comparator);
-		}
-		return (IProject) items[0].getModel();
-	}
+    private IProject getDefaultProject(List<ObservableTreeItem> projects) {
+        if (projects == null || projects.size() == 0) {
+            return null;
+        } else if (projects.size() == 1) {
+            return (IProject)projects.get(0).getModel();
+        }
+        ObservableTreeItem[] items = projects.toArray(new ObservableTreeItem[projects.size()]);
+        if (comparator != null) {
+            Arrays.sort(items, comparator);
+        }
+        return (IProject)items[0].getModel();
+    }
 
-	@Override
-	public void setProject(IProject project) {
-		update(this.useLocalAppSource, project, this.projectItems, this.serverAppSource, this.localAppSourceFilename, this.appSourceStatus);
-	}
+    @Override
+    public void setProject(IProject project) {
+        update(this.useLocalAppSource, project, this.projectItems, this.serverAppSource, this.localAppSourceFilename, this.appSourceStatus);
+    }
 
-	@Override
-	public IProject getProject() {
-		return project;
-	}
+    @Override
+    public IProject getProject() {
+        return project;
+    }
 
-	@Override
-	public void loadResources() {
-		if (connection == null) {
-			return;
-		}
-		ObservableTreeItem connectionItem = ApplicationSourceTreeItems.INSTANCE.create(connection);
-		connectionItem.load();
-		List<ObservableTreeItem> projects = connectionItem.getChildren();
-		setProjectItems(projects);
-	}
+    @Override
+    public void loadResources() {
+        if (connection == null) {
+            return;
+        }
+        ObservableTreeItem connectionItem = ApplicationSourceTreeItems.INSTANCE.create(connection);
+        connectionItem.load();
+        List<ObservableTreeItem> projects = connectionItem.getChildren();
+        setProjectItems(projects);
+    }
 
-	@Override
-	public void setUseLocalAppSource(boolean useLocalTemplate) {
-		update(useLocalTemplate, this.project, this.projectItems, this.serverAppSource, this.localAppSourceFilename, this.appSourceStatus);
-	}
+    @Override
+    public void setUseLocalAppSource(boolean useLocalTemplate) {
+        update(useLocalTemplate, this.project, this.projectItems, this.serverAppSource, this.localAppSourceFilename, this.appSourceStatus);
+    }
 
-	@Override
-	public boolean isUseLocalAppSource() {
-		return useLocalAppSource;
-	}
+    @Override
+    public boolean isUseLocalAppSource() {
+        return useLocalAppSource;
+    }
 
-	public InputStream createInputStream(String filename, IProgressMonitor monitor) throws IOException {
-	    if (OpenshiftUIConstants.URL_VALIDATOR.isValid(filename)) {
-	        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-	            IStatus status = OpenshiftUIConstants.TRANSPORT_UTILITY.download(filename, filename, out, monitor);
-	            if (!status.isOK()) {
-	                throw new IOException(status.getMessage());
-	            }
-	            return new ByteArrayInputStream(out.toByteArray());
-	        }
-	    } else {
-	        return new FileInputStream(filename);
-	    }
-	}
+    public InputStream createInputStream(String filename, IProgressMonitor monitor) throws IOException {
+        if (OpenshiftUIConstants.URL_VALIDATOR.isValid(filename)) {
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                IStatus status = OpenshiftUIConstants.TRANSPORT_UTILITY.download(filename, filename, out, monitor);
+                if (!status.isOK()) {
+                    throw new IOException(status.getMessage());
+                }
+                return new ByteArrayInputStream(out.toByteArray());
+            }
+        } else {
+            return new FileInputStream(filename);
+        }
+    }
 
-	@Override
-	public void setLocalAppSourceFileName(String filename) {
-		update(true, this.project, this.projectItems, this.serverAppSource, filename, Status.OK_STATUS);
-	}
+    @Override
+    public void setLocalAppSourceFileName(String filename) {
+        update(true, this.project, this.projectItems, this.serverAppSource, filename, Status.OK_STATUS);
+    }
 
-	@Override
-	public String getLocalAppSourceFileName() {
-		return this.localAppSourceFilename;
-	}
-	
-	/**
+    @Override
+    public String getLocalAppSourceFileName() {
+        return this.localAppSourceFilename;
+    }
+
+    /**
      * @return the appSourceStatus
      */
-	@Override
+    @Override
     public IStatus getAppSourceStatus() {
         return appSourceStatus;
     }
-	
+
     @Override
     public void loadAppSource(IProgressMonitor monitor) {
         IStatus status = Status.OK_STATUS;
@@ -296,123 +294,117 @@ public class NewApplicationWizardModel
                 updateSelectedAppSource(useLocalAppSource, serverAppSource, source, localAppSourceFilename);
             }
         } catch (OpenShiftException e) {
-            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, 
-            		NLS.bind("Could not load template from {0}: {1}", localAppSourceFilename, e.getLocalizedMessage()), e);
+            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID,
+                    NLS.bind("Could not load template from {0}: {1}", localAppSourceFilename, e.getLocalizedMessage()), e);
         } catch (NotATemplateException e) {
-            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, 
-            		NLS.bind("{0} is not a template: {1}", localAppSourceFilename, e.getLocalizedMessage()));
+            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID,
+                    NLS.bind("{0} is not a template: {1}", localAppSourceFilename, e.getLocalizedMessage()));
         }
         updateAppSourceStatus(status);
     }
 
     @Override
-	public Connection getConnection() {
-		return connection;
-	}
+    public Connection getConnection() {
+        return connection;
+    }
 
-	@Override
-	public boolean hasConnection() {
-		return connection != null;
-	}
+    @Override
+    public boolean hasConnection() {
+        return connection != null;
+    }
 
-	@Override
-	public void setConnection(Connection connection) {
-		if (ObjectUtils.equals(connection, this.connection)) {
-			return;
-		}
+    @Override
+    public void setConnection(Connection connection) {
+        if (ObjectUtils.equals(connection, this.connection)) {
+            return;
+        }
 
-		setResourceFactory(connection);
-		reset();
-		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
-	}
+        setResourceFactory(connection);
+        reset();
+        firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
+    }
 
-	private void reset() {
-		update(this.useLocalAppSource, null, null, null, null, Status.OK_STATUS);
-	}
+    private void reset() {
+        update(this.useLocalAppSource, null, null, null, null, Status.OK_STATUS);
+    }
 
-	public void setProjectsComparator(Comparator<ObservableTreeItem> comparator) {
-		this.comparator = comparator;
-	}
+    public void setProjectsComparator(Comparator<ObservableTreeItem> comparator) {
+        this.comparator = comparator;
+    }
 
-	private void setResourceFactory(Connection connection) {
-		if (connection != null) {
-			this.resourceFactory = connection.getResourceFactory();
-		}
-	}
+    private void setResourceFactory(Connection connection) {
+        if (connection != null) {
+            this.resourceFactory = connection.getResourceFactory();
+        }
+    }
 
-	public void setResourceFactory(IResourceFactory factory) {
-		this.resourceFactory = factory;
-	}
-	
-	protected void setProjectItems(List<ObservableTreeItem> projects) {
-		update(useLocalAppSource, findProject(this.project, projects), projects, serverAppSource, 
-				localAppSourceFilename, this.appSourceStatus);
-	}
+    public void setResourceFactory(IResourceFactory factory) {
+        this.resourceFactory = factory;
+    }
 
-	private IProject findProject(final IProject project, List<ObservableTreeItem> projects) {
-		if(project == null 
-				|| CollectionUtils.isEmpty(projects)) {
-			return null;
-		}
+    protected void setProjectItems(List<ObservableTreeItem> projects) {
+        update(useLocalAppSource, findProject(this.project, projects), projects, serverAppSource, localAppSourceFilename,
+                this.appSourceStatus);
+    }
 
-		return (IProject) projects.stream()
-			.filter(item -> {
-				if(item.getModel() instanceof IProject) {
-					IProject p = (IProject) item.getModel();
-					if (p != null) {
-						boolean equals =  ObjectUtils.equals(project, p);
-						return equals;
-					}
-				}
-				return false;
-			})
-			.findFirst()
-			.map(item -> item.getModel())
-			.orElse(null);
-	}
+    private IProject findProject(final IProject project, List<ObservableTreeItem> projects) {
+        if (project == null || CollectionUtils.isEmpty(projects)) {
+            return null;
+        }
 
-	@Override
-	public List<ObservableTreeItem> getProjectItems() {
-		return this.projectItems;
-	}
+        return (IProject)projects.stream().filter(item -> {
+            if (item.getModel() instanceof IProject) {
+                IProject p = (IProject)item.getModel();
+                if (p != null) {
+                    boolean equals = ObjectUtils.equals(project, p);
+                    return equals;
+                }
+            }
+            return false;
+        }).findFirst().map(item -> item.getModel()).orElse(null);
+    }
 
-	@Override
-	public List<ObservableTreeItem> getAppSources() {
-		return this.projectTemplates;
-	}
-	
-	@Override
-	public boolean hasProjects() {
-		return projectItems != null 
-				&& !projectItems.isEmpty();
-	}
+    @Override
+    public List<ObservableTreeItem> getProjectItems() {
+        return this.projectItems;
+    }
 
-	@Override
-	public Object getContext() {
-		return null;
-	}
+    @Override
+    public List<ObservableTreeItem> getAppSources() {
+        return this.projectTemplates;
+    }
 
-	@Override
-	public void setEclipseProject(org.eclipse.core.resources.IProject eclipseProject) {
-		firePropertyChange(PROPERTY_ECLIPSE_PROJECT, this.eclipseProject, this.eclipseProject = eclipseProject);
-	}
+    @Override
+    public boolean hasProjects() {
+        return projectItems != null && !projectItems.isEmpty();
+    }
 
-	@Override
-	public org.eclipse.core.resources.IProject getEclipseProject() {
-		return eclipseProject;
-	}
+    @Override
+    public Object getContext() {
+        return null;
+    }
 
-	@Override
-	public void dispose() {
-		super.dispose();
-		connection = null;
-		project = null;
-		projectItems.clear();
-		projectTemplates.clear();
-		selectedAppSource = null;
-		localAppSource = null;
-		serverAppSource = null;
-		resourceFactory = null;
-		eclipseProject = null;
-	}
+    @Override
+    public void setEclipseProject(org.eclipse.core.resources.IProject eclipseProject) {
+        firePropertyChange(PROPERTY_ECLIPSE_PROJECT, this.eclipseProject, this.eclipseProject = eclipseProject);
+    }
+
+    @Override
+    public org.eclipse.core.resources.IProject getEclipseProject() {
+        return eclipseProject;
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        connection = null;
+        project = null;
+        projectItems.clear();
+        projectTemplates.clear();
+        selectedAppSource = null;
+        localAppSource = null;
+        serverAppSource = null;
+        resourceFactory = null;
+        eclipseProject = null;
+    }
 }

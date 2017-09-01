@@ -21,23 +21,26 @@ import com.openshift.restclient.model.IProject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WatchManagerTest {
-		
-	@Mock IProject project;
-	@Mock IOpenShiftConnection connection;
-	@Mock IClient client;
-	
-	@Test
-	@SuppressWarnings("unchecked")
-	public void testStartStopWatch() {
-		// given
-		when(project.accept(any(CapabilityVisitor.class), isNull())).thenReturn(client);
-		IWatcher watchClient = mock(IWatcher.class);
-		when(client.watch(any(), any(), any())).thenReturn(watchClient);
-		// when - then
-		WatchManager.getInstance().startWatch(project, connection);
-		verify(client, timeout(200).times(WatchManager.KINDS.length)).watch(any(), any(), any());
-		
-		WatchManager.getInstance().stopWatch(project, connection);
-		verify(watchClient, timeout(200).times(WatchManager.KINDS.length)).stop();
-	}
+
+    @Mock
+    IProject project;
+    @Mock
+    IOpenShiftConnection connection;
+    @Mock
+    IClient client;
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testStartStopWatch() {
+        // given
+        when(project.accept(any(CapabilityVisitor.class), isNull())).thenReturn(client);
+        IWatcher watchClient = mock(IWatcher.class);
+        when(client.watch(any(), any(), any())).thenReturn(watchClient);
+        // when - then
+        WatchManager.getInstance().startWatch(project, connection);
+        verify(client, timeout(200).times(WatchManager.KINDS.length)).watch(any(), any(), any());
+
+        WatchManager.getInstance().stopWatch(project, connection);
+        verify(watchClient, timeout(200).times(WatchManager.KINDS.length)).stop();
+    }
 }

@@ -42,323 +42,316 @@ import org.eclipse.core.runtime.Assert;
  */
 public class UrlUtils {
 
-	public static final String HTTP = "http";
-	public static final String HTTPS = "https";
-	public static final String SCHEME_TERMINATOR = ":";
-	public static final String SCHEME_SEPARATOR = "://";
-	public static final String SCHEME_HTTPS = HTTPS + SCHEME_SEPARATOR;
-	public static final String SCHEME_HTTP = HTTP + SCHEME_SEPARATOR;
-	public static final char CREDENTIALS_HOST_SEPARATOR = '@';
-	public static final char PORT_DELIMITER = ':';
-	
-	private static final Pattern SIMPLE_URL_PATTERN =
-			Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
+    public static final String HTTP = "http";
+    public static final String HTTPS = "https";
+    public static final String SCHEME_TERMINATOR = ":";
+    public static final String SCHEME_SEPARATOR = "://";
+    public static final String SCHEME_HTTPS = HTTPS + SCHEME_SEPARATOR;
+    public static final String SCHEME_HTTP = HTTP + SCHEME_SEPARATOR;
+    public static final char CREDENTIALS_HOST_SEPARATOR = '@';
+    public static final char PORT_DELIMITER = ':';
 
-	private static final Pattern SIMPLE_QUASI_URL_PATTERN = Pattern.compile("^((\\w+:/)?(/*)?(.*@)?)([^:|/]*)(.*)?$");
+    private static final Pattern SIMPLE_URL_PATTERN = Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
 
-	private static final String PROPERTY_BASIC = "Basic";
-	private static final String PROPERTY_AUTHORIZATION = "Authorization";
-	
-	private UrlUtils() {
-		// inhibit instantiation
-	}
+    private static final Pattern SIMPLE_QUASI_URL_PATTERN = Pattern.compile("^((\\w+:/)?(/*)?(.*@)?)([^:|/]*)(.*)?$");
 
-	public static UrlPortions toPortions(String url) throws UnsupportedEncodingException, MalformedURLException {
-		return new UrlPortions(new URL(url));
-	}
+    private static final String PROPERTY_BASIC = "Basic";
+    private static final String PROPERTY_AUTHORIZATION = "Authorization";
 
-	public static UrlPortions toPortions(URL url) throws UnsupportedEncodingException {
-		return new UrlPortions(url);
-	}
+    private UrlUtils() {
+        // inhibit instantiation
+    }
 
-	public static class UrlPortions {
+    public static UrlPortions toPortions(String url) throws UnsupportedEncodingException, MalformedURLException {
+        return new UrlPortions(new URL(url));
+    }
 
-		private String protocol;
-		private String username;
-		private String password;
-		private String host;
-		private int port;
+    public static UrlPortions toPortions(URL url) throws UnsupportedEncodingException {
+        return new UrlPortions(url);
+    }
 
-		private UrlPortions(URL url) throws UnsupportedEncodingException {
-			String userInfo = url.getUserInfo();
-			if (userInfo != null) {
-				String[] userInfos = url.getUserInfo().split(":");
-				if (userInfos.length >= 1) {
-					this.username = URLDecoder.decode(userInfos[0], "UTF-8");
-				}
-				if (userInfos.length >= 2) {
-					this.password = userInfos[1];
-				}
-			}
-			this.host = url.getHost();
-			this.protocol = url.getProtocol();
-			this.port = url.getPort();
-		}
+    public static class UrlPortions {
 
-		public String getUsername() {
-			return username;
-		}
+        private String protocol;
+        private String username;
+        private String password;
+        private String host;
+        private int port;
 
-		public String getPassword() {
-			return password;
-		}
+        private UrlPortions(URL url) throws UnsupportedEncodingException {
+            String userInfo = url.getUserInfo();
+            if (userInfo != null) {
+                String[] userInfos = url.getUserInfo().split(":");
+                if (userInfos.length >= 1) {
+                    this.username = URLDecoder.decode(userInfos[0], "UTF-8");
+                }
+                if (userInfos.length >= 2) {
+                    this.password = userInfos[1];
+                }
+            }
+            this.host = url.getHost();
+            this.protocol = url.getProtocol();
+            this.port = url.getPort();
+        }
 
-		public String getHost() {
-			return host;
-		}
+        public String getUsername() {
+            return username;
+        }
 
-		public String getScheme() {
-			return protocol + SCHEME_SEPARATOR;
-		}
-		
-		public int getPort() {
-			return port;
-		}
-	}
+        public String getPassword() {
+            return password;
+        }
 
-	/**
-	 * Ensures the given host url starts with a scheme. The given default-scheme
-	 * is appended otherwise.
-	 * 
-	 * @param hostUrl
-	 *            the host url that shall start with a scheme
-	 * @param defaultScheme
-	 *            the default scheme that shall get appended if the host url has
-	 *            no scheme
-	 * @return the host url with a scheme
-	 * @throws IllegalArgumentException
-	 */
-	public static String ensureStartsWithScheme(String hostUrl, String defaultScheme) throws IllegalArgumentException {
-		Assert.isLegal(!isEmpty(defaultScheme), "Default scheme is empty");
-		if (isEmpty(hostUrl)) {
-			return hostUrl;
-		}
-		if (hostUrl.indexOf(SCHEME_SEPARATOR) == -1) {
-			return defaultScheme + hostUrl;
-		}
-		return hostUrl;
-	}
+        public String getHost() {
+            return host;
+        }
 
-	public static String cutScheme(String host) {
-		if (isEmpty(host)) {
-			return host;
-		}
-		int hostIndex = getHostIndex(host);
-		if (hostIndex > -1) {
-			return host.substring(hostIndex);
-		}
-		return host;
-	}
+        public String getScheme() {
+            return protocol + SCHEME_SEPARATOR;
+        }
 
-	public static String getScheme(String url) {
-		if (isEmpty(url)) {
-			return null;
-		}
+        public int getPort() {
+            return port;
+        }
+    }
 
-		int hostIndex = getHostIndex(url);
-		if (hostIndex == -1) {
-			return null;
-		}
+    /**
+     * Ensures the given host url starts with a scheme. The given default-scheme
+     * is appended otherwise.
+     * 
+     * @param hostUrl
+     *            the host url that shall start with a scheme
+     * @param defaultScheme
+     *            the default scheme that shall get appended if the host url has
+     *            no scheme
+     * @return the host url with a scheme
+     * @throws IllegalArgumentException
+     */
+    public static String ensureStartsWithScheme(String hostUrl, String defaultScheme) throws IllegalArgumentException {
+        Assert.isLegal(!isEmpty(defaultScheme), "Default scheme is empty");
+        if (isEmpty(hostUrl)) {
+            return hostUrl;
+        }
+        if (hostUrl.indexOf(SCHEME_SEPARATOR) == -1) {
+            return defaultScheme + hostUrl;
+        }
+        return hostUrl;
+    }
 
-		return url.substring(0, hostIndex);
-	}
+    public static String cutScheme(String host) {
+        if (isEmpty(host)) {
+            return host;
+        }
+        int hostIndex = getHostIndex(host);
+        if (hostIndex > -1) {
+            return host.substring(hostIndex);
+        }
+        return host;
+    }
 
-	public static boolean hasScheme(String host) {
-		if (isEmpty(host)) {
-			return false;
-		}
-		return host.contains(SCHEME_SEPARATOR);
-	}
+    public static String getScheme(String url) {
+        if (isEmpty(url)) {
+            return null;
+        }
 
-	public static String getHost(String url) {
-		if (isEmpty(url)) {
-			return url;
-		}
-		String host = null;
-		if (url.contains(SCHEME_SEPARATOR)) {
-			try {
-				host = new URI(url).getHost();
-			} catch (URISyntaxException ignored) {
-			}
-		}
+        int hostIndex = getHostIndex(url);
+        if (hostIndex == -1) {
+            return null;
+        }
 
-		if (host == null) {
-			Matcher m = SIMPLE_QUASI_URL_PATTERN.matcher(url);
-			if (m.find()) {
-				host = m.group(5);
-			}
-		}
-		return host;
-	}
-	
-	private static int getHostIndex(String url) {
-		int schemeSeparatorIndex = url.indexOf(SCHEME_SEPARATOR);
-		if (schemeSeparatorIndex == -1) {
-			return schemeSeparatorIndex;
-		}
-		return schemeSeparatorIndex + SCHEME_SEPARATOR.length();
-	}
+        return url.substring(0, hostIndex);
+    }
 
-	private static boolean isEmpty(String string) {
-		return string == null
-				|| string.isEmpty();
-	}
+    public static boolean hasScheme(String host) {
+        if (isEmpty(host)) {
+            return false;
+        }
+        return host.contains(SCHEME_SEPARATOR);
+    }
 
-	public static String cutPort(String host) {
-		if (isEmpty(host)) {
-			return host;
-		}
-		int portIndex = getPortIndex(host);
-		if (portIndex > -1) {
-			return host.substring(0, portIndex);
-		}
-		return host;
-	}
+    public static String getHost(String url) {
+        if (isEmpty(url)) {
+            return url;
+        }
+        String host = null;
+        if (url.contains(SCHEME_SEPARATOR)) {
+            try {
+                host = new URI(url).getHost();
+            } catch (URISyntaxException ignored) {
+            }
+        }
 
-	private static int getPortIndex(String url) {
-		int portSeparatorIndex = url.indexOf(PORT_DELIMITER);
-		if (portSeparatorIndex == -1) {
-			return portSeparatorIndex;
-		}
-		return portSeparatorIndex;
-	}
+        if (host == null) {
+            Matcher m = SIMPLE_QUASI_URL_PATTERN.matcher(url);
+            if (m.find()) {
+                host = m.group(5);
+            }
+        }
+        return host;
+    }
 
-	/**
-	 * Returns an url for the given username, host and scheme. If the given host
-	 * already has a scheme, the scheme wont get prepended.
-	 * 
-	 * @param username
-	 *            the username for the url
-	 * @param host
-	 *            the host for the url
-	 * @param scheme
-	 *            the scheme to prepend
-	 * @return
-	 * @throws UnsupportedEncodingException
-	 */
-	public static String getUrlFor(String username, String host, String scheme) throws UnsupportedEncodingException {
-		StringBuilder builder = new StringBuilder();
-		if (!isEmpty(scheme)) {
-			builder.append(scheme);
-		}
-		if (!isEmpty(username)) {
-			builder.append(URLEncoder.encode(username, "UTF-8"))
-					.append(UrlUtils.CREDENTIALS_HOST_SEPARATOR);
-		}
-		host = cutScheme(host);
-		if (!isEmpty(host)) {
-			builder.append(host);
-		}
-		return builder.toString();
-	}
+    private static int getHostIndex(String url) {
+        int schemeSeparatorIndex = url.indexOf(SCHEME_SEPARATOR);
+        if (schemeSeparatorIndex == -1) {
+            return schemeSeparatorIndex;
+        }
+        return schemeSeparatorIndex + SCHEME_SEPARATOR.length();
+    }
 
-	/**
-	 * Returns an url for the given username and host. The host is required to
-	 * have a scheme. An illegalArgumentException is thrown otherwise.
-	 * 
-	 * @param username
-	 *            the username to use in the url
-	 * @param host
-	 *            the host with a scheme to use in the url
-	 * @return an url for the username and host
-	 * @throws UnsupportedEncodingException
-	 * @throws IllegalArgumentException
-	 *             if the host has no scheme
-	 */
-	public static String getUrlFor(String username, String host) throws UnsupportedEncodingException,
-			IllegalArgumentException {
-		String scheme = getScheme(host);
-		Assert.isLegal(!isEmpty(scheme),
-				MessageFormat.format("Could not extract scheme. Host {0} has no scheme", host));
-		return getUrlFor(username, host, scheme);
-	}
+    private static boolean isEmpty(String string) {
+        return string == null || string.isEmpty();
+    }
 
-	/**
-	 * Returns <code>true</code> if the given host is an empty string or is an
-	 * url with an empty host portion.
-	 * 
-	 * @param host
-	 *            the host to check whether it is empty
-	 * @return true if empty string or url without a host portion
-	 */
-	public static boolean isEmptyHost(String host) {
-		try {
-			return StringUtils.isEmpty(host)
-					|| new URL(ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS)).getHost().isEmpty();
-		} catch (MalformedURLException e) {
-			return false;
-		}
-	}
+    public static String cutPort(String host) {
+        if (isEmpty(host)) {
+            return host;
+        }
+        int portIndex = getPortIndex(host);
+        if (portIndex > -1) {
+            return host.substring(0, portIndex);
+        }
+        return host;
+    }
 
-	public static boolean isValid(String url) {
-		// Test via regex first. If passes then check via new URL(url) and URI(url) which are slower
-		if(SIMPLE_URL_PATTERN.matcher(url).matches()) {
-			try {
-				new URI(url);
-				new URL(url);
-			} catch (MalformedURLException | URISyntaxException e) {
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Sets blindly accepting trustmanager and hostname verifiers to the given
-	 * connection.
-	 * 
-	 * @param connection
-	 *            the connection that the permissive trustmanager and hostname
-	 *            verifiers are set to
-	 * @throws KeyManagementException
-	 * @throws NoSuchAlgorithmException
-	 */
-	public static void setupPermissiveSSLHandlers(HttpsURLConnection connection) throws KeyManagementException, NoSuchAlgorithmException {
-		SSLContext sslContext = SSLContext.getInstance("SSL");
-		sslContext.init(null, new TrustManager[] { new PermissiveTrustManager() }, null);
-		SSLSocketFactory socketFactory = sslContext.getSocketFactory();
-		connection.setSSLSocketFactory(socketFactory);
+    private static int getPortIndex(String url) {
+        int portSeparatorIndex = url.indexOf(PORT_DELIMITER);
+        if (portSeparatorIndex == -1) {
+            return portSeparatorIndex;
+        }
+        return portSeparatorIndex;
+    }
 
-		connection.setHostnameVerifier(new PermissiveHostnameVerifier());
-	}
+    /**
+     * Returns an url for the given username, host and scheme. If the given host
+     * already has a scheme, the scheme wont get prepended.
+     * 
+     * @param username
+     *            the username for the url
+     * @param host
+     *            the host for the url
+     * @param scheme
+     *            the scheme to prepend
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    public static String getUrlFor(String username, String host, String scheme) throws UnsupportedEncodingException {
+        StringBuilder builder = new StringBuilder();
+        if (!isEmpty(scheme)) {
+            builder.append(scheme);
+        }
+        if (!isEmpty(username)) {
+            builder.append(URLEncoder.encode(username, "UTF-8")).append(UrlUtils.CREDENTIALS_HOST_SEPARATOR);
+        }
+        host = cutScheme(host);
+        if (!isEmpty(host)) {
+            builder.append(host);
+        }
+        return builder.toString();
+    }
 
-	private static class PermissiveTrustManager implements X509TrustManager {
-		@Override
-		public X509Certificate[] getAcceptedIssuers() {
-			return null;
-		}
+    /**
+     * Returns an url for the given username and host. The host is required to
+     * have a scheme. An illegalArgumentException is thrown otherwise.
+     * 
+     * @param username
+     *            the username to use in the url
+     * @param host
+     *            the host with a scheme to use in the url
+     * @return an url for the username and host
+     * @throws UnsupportedEncodingException
+     * @throws IllegalArgumentException
+     *             if the host has no scheme
+     */
+    public static String getUrlFor(String username, String host) throws UnsupportedEncodingException, IllegalArgumentException {
+        String scheme = getScheme(host);
+        Assert.isLegal(!isEmpty(scheme), MessageFormat.format("Could not extract scheme. Host {0} has no scheme", host));
+        return getUrlFor(username, host, scheme);
+    }
 
-		@Override
-		public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-		}
+    /**
+     * Returns <code>true</code> if the given host is an empty string or is an
+     * url with an empty host portion.
+     * 
+     * @param host
+     *            the host to check whether it is empty
+     * @return true if empty string or url without a host portion
+     */
+    public static boolean isEmptyHost(String host) {
+        try {
+            return StringUtils.isEmpty(host) || new URL(ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS)).getHost().isEmpty();
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
 
-		@Override
-		public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-		}		
-	}
-	
-	private static class PermissiveHostnameVerifier implements HostnameVerifier {
+    public static boolean isValid(String url) {
+        // Test via regex first. If passes then check via new URL(url) and URI(url) which are slower
+        if (SIMPLE_URL_PATTERN.matcher(url).matches()) {
+            try {
+                new URI(url);
+                new URL(url);
+            } catch (MalformedURLException | URISyntaxException e) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 
-		@Override
-		public boolean verify(String hostname, SSLSession session) {
-			return true;
-		}		
-	}
-	
-	public static void addBasicAuthorization(String username, String password, HttpURLConnection connection) {
-		String credentials = toBase64Encoded(
-				new StringBuilder().append(username).append(':').append(password).toString());
-		connection.setRequestProperty(PROPERTY_AUTHORIZATION,
-				new StringBuilder().append(PROPERTY_BASIC).append(' ').append(credentials).toString());
-	}
-	
-	public static String toBase64Encoded(String unencoded) {
-			if (unencoded == null) {
-				return null;
-			} else if (unencoded.getBytes().length == 0) {
-				return new String();
-			}
-			return DatatypeConverter.printBase64Binary(unencoded.getBytes());
-	}
+    /**
+     * Sets blindly accepting trustmanager and hostname verifiers to the given
+     * connection.
+     * 
+     * @param connection
+     *            the connection that the permissive trustmanager and hostname
+     *            verifiers are set to
+     * @throws KeyManagementException
+     * @throws NoSuchAlgorithmException
+     */
+    public static void setupPermissiveSSLHandlers(HttpsURLConnection connection) throws KeyManagementException, NoSuchAlgorithmException {
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, new TrustManager[] { new PermissiveTrustManager() }, null);
+        SSLSocketFactory socketFactory = sslContext.getSocketFactory();
+        connection.setSSLSocketFactory(socketFactory);
+
+        connection.setHostnameVerifier(new PermissiveHostnameVerifier());
+    }
+
+    private static class PermissiveTrustManager implements X509TrustManager {
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+        }
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+        }
+    }
+
+    private static class PermissiveHostnameVerifier implements HostnameVerifier {
+
+        @Override
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    }
+
+    public static void addBasicAuthorization(String username, String password, HttpURLConnection connection) {
+        String credentials = toBase64Encoded(new StringBuilder().append(username).append(':').append(password).toString());
+        connection.setRequestProperty(PROPERTY_AUTHORIZATION,
+                new StringBuilder().append(PROPERTY_BASIC).append(' ').append(credentials).toString());
+    }
+
+    public static String toBase64Encoded(String unencoded) {
+        if (unencoded == null) {
+            return null;
+        } else if (unencoded.getBytes().length == 0) {
+            return new String();
+        }
+        return DatatypeConverter.printBase64Binary(unencoded.getBytes());
+    }
 }

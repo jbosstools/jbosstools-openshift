@@ -22,7 +22,7 @@ import org.jboss.reddeer.swt.impl.browser.InternalBrowser;
  */
 
 public class CentralIsLoaded extends AbstractWaitCondition {
-	
+
 	@Override
 	public boolean test() {
 		InternalBrowser internalBrowser = null;

@@ -20,52 +20,53 @@ import org.osgi.framework.BundleContext;
  */
 public class OpenShiftTestActivator extends BaseCorePlugin {
 
-	public static final String PLUGIN_ID = "org.jboss.tools.openshift.test"; //$NON-NLS-1$
-	
-	private static OpenShiftTestActivator instance;
-	private static BundleContext context;
-	public OpenShiftTestActivator() {
-		super();
-		instance = this;
-	}
+    public static final String PLUGIN_ID = "org.jboss.tools.openshift.test"; //$NON-NLS-1$
 
-	public static OpenShiftTestActivator getDefault() {
-	    return instance;
-	}
+    private static OpenShiftTestActivator instance;
+    private static BundleContext context;
 
-	public static BundleContext getBundleContext() {
-	    return context;
-	}
+    public OpenShiftTestActivator() {
+        super();
+        instance = this;
+    }
 
-	@Override
+    public static OpenShiftTestActivator getDefault() {
+        return instance;
+    }
+
+    public static BundleContext getBundleContext() {
+        return context;
+    }
+
+    @Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
         OpenShiftTestActivator.context = context;
-	}
+    }
 
     @Override
-	public void stop(BundleContext context) throws Exception {
-    	super.stop(context);
-    	OpenShiftTestActivator.context = null;
-	}
+    public void stop(BundleContext context) throws Exception {
+        super.stop(context);
+        OpenShiftTestActivator.context = null;
+    }
 
-	public static IPluginLog pluginLog() {
-		return getDefault().pluginLogInternal();
-	}
+    public static IPluginLog pluginLog() {
+        return getDefault().pluginLogInternal();
+    }
 
-	public static void logError(String message, Throwable t) {
-		pluginLog().logError(message, t);
-	}
-	
-	public static void logWarning(String message, Throwable t) {
-		pluginLog().logWarning(message, t);
-	}
-	
-	/**
-	 * Get a status factory for this plugin
-	 * @return status factory
-	 */
-	public static StatusFactory statusFactory() {
-		return getDefault().statusFactoryInternal();
-	}
+    public static void logError(String message, Throwable t) {
+        pluginLog().logError(message, t);
+    }
+
+    public static void logWarning(String message, Throwable t) {
+        pluginLog().logWarning(message, t);
+    }
+
+    /**
+     * Get a status factory for this plugin
+     * @return status factory
+     */
+    public static StatusFactory statusFactory() {
+        return getDefault().statusFactoryInternal();
+    }
 }

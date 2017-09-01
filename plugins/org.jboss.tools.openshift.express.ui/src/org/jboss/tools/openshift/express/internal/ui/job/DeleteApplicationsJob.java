@@ -29,54 +29,53 @@ import com.openshift.client.OpenShiftException;
  */
 public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 
-	private List<IApplication> applications;
-	private LoadApplicationJob job;
+    private List<IApplication> applications;
+    private LoadApplicationJob job;
 
-	public DeleteApplicationsJob(LoadApplicationJob job) {
-		super(ExpressUIMessages.DeletingOpenShiftApplications); 
-		this.job = job;
-	}
+    public DeleteApplicationsJob(LoadApplicationJob job) {
+        super(ExpressUIMessages.DeletingOpenShiftApplications);
+        this.job = job;
+    }
 
-	public DeleteApplicationsJob(final List<IApplication> applications) {
-		super(ExpressUIMessages.DeletingOpenShiftApplications); 
-		this.applications = applications;
-	}
-	
-	@Override
-	protected IStatus doRun(IProgressMonitor monitor) {
-		List<IApplication> applications = getApplications();
-		int totalWork = applications.size();
-		monitor.beginTask(ExpressUIMessages.DeletingOpenShiftApplications, totalWork);
-		try{
-			for (final IApplication application : applications) {
-				if (application == null) {
-					monitor.worked(1);
-					continue;
-				}
-				final String appName = application.getName();
-				try {
-					if (monitor.isCanceled()) {
-						return Status.CANCEL_STATUS;
-					}
-					monitor.setTaskName(NLS.bind(ExpressUIMessages.DeletingApplication, appName));
-					application.destroy();
-					monitor.worked(1);
-				} catch (OpenShiftException e) {
-					return ExpressUIActivator.createErrorStatus(
-							NLS.bind(ExpressUIMessages.FailedToDeleteApplication, appName), e);
-				}
-			}
-		}finally {
-			monitor.done();
-		}
-		return Status.OK_STATUS;
-	}
+    public DeleteApplicationsJob(final List<IApplication> applications) {
+        super(ExpressUIMessages.DeletingOpenShiftApplications);
+        this.applications = applications;
+    }
 
-	private List<IApplication> getApplications() {
-		if (applications != null) {
-			return applications;
-		} else {
-			return Collections.singletonList(job.getApplication());
-		}
-	}
+    @Override
+    protected IStatus doRun(IProgressMonitor monitor) {
+        List<IApplication> applications = getApplications();
+        int totalWork = applications.size();
+        monitor.beginTask(ExpressUIMessages.DeletingOpenShiftApplications, totalWork);
+        try {
+            for (final IApplication application : applications) {
+                if (application == null) {
+                    monitor.worked(1);
+                    continue;
+                }
+                final String appName = application.getName();
+                try {
+                    if (monitor.isCanceled()) {
+                        return Status.CANCEL_STATUS;
+                    }
+                    monitor.setTaskName(NLS.bind(ExpressUIMessages.DeletingApplication, appName));
+                    application.destroy();
+                    monitor.worked(1);
+                } catch (OpenShiftException e) {
+                    return ExpressUIActivator.createErrorStatus(NLS.bind(ExpressUIMessages.FailedToDeleteApplication, appName), e);
+                }
+            }
+        } finally {
+            monitor.done();
+        }
+        return Status.OK_STATUS;
+    }
+
+    private List<IApplication> getApplications() {
+        if (applications != null) {
+            return applications;
+        } else {
+            return Collections.singletonList(job.getApplication());
+        }
+    }
 }

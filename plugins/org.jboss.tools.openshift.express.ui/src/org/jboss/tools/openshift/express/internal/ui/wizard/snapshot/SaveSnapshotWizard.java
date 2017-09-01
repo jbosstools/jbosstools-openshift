@@ -31,50 +31,46 @@ import com.openshift.client.IApplication;
  */
 public class SaveSnapshotWizard extends AbstractOpenShiftWizard<SaveSnapshotWizardModel> {
 
-	public SaveSnapshotWizard(IApplication application) {
-		super("Save Snapshot", new SaveSnapshotWizardModel(application));
-	}
+    public SaveSnapshotWizard(IApplication application) {
+        super("Save Snapshot", new SaveSnapshotWizardModel(application));
+    }
 
-	@Override
-	public boolean performFinish() {
-		final String applicationName = getModel().getApplication().getName();
-		try {
-			IStatus status = WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob(NLS.bind("Saving snapshot for application {0}...",
-							applicationName)) {
+    @Override
+    public boolean performFinish() {
+        final String applicationName = getModel().getApplication().getName();
+        try {
+            IStatus status = WizardUtils
+                    .runInWizard(new AbstractDelegatingMonitorJob(NLS.bind("Saving snapshot for application {0}...", applicationName)) {
 
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							try {
-								getModel().saveSnapshot(monitor);
-								return Status.OK_STATUS;
-							} catch (IOException e) {
-								return ExpressUIActivator.createErrorStatus(NLS.bind("Could not save snapshot for application {0}", applicationName), e);
-							} catch (CoreException e) {
-								return e.getStatus();
-							}						
-						}
-					}, getContainer());
-			return status.isOK();
-		} catch (InvocationTargetException e) {
-			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
-			new ErrorDialog(getShell(), "Error",
-					NLS.bind("Could not save snapshot for application {0}", applicationName),
-					status, IStatus.ERROR)
-					.open();
-			return false;
-		} catch (InterruptedException e) {
-			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
-			new ErrorDialog(getShell(), "Error",
-					NLS.bind("Could not save snapshot for application {0}", applicationName),
-					status, IStatus.ERROR)
-					.open();
-			return false;
-		}
-	}
+                        @Override
+                        protected IStatus doRun(IProgressMonitor monitor) {
+                            try {
+                                getModel().saveSnapshot(monitor);
+                                return Status.OK_STATUS;
+                            } catch (IOException e) {
+                                return ExpressUIActivator
+                                        .createErrorStatus(NLS.bind("Could not save snapshot for application {0}", applicationName), e);
+                            } catch (CoreException e) {
+                                return e.getStatus();
+                            }
+                        }
+                    }, getContainer());
+            return status.isOK();
+        } catch (InvocationTargetException e) {
+            IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
+            new ErrorDialog(getShell(), "Error", NLS.bind("Could not save snapshot for application {0}", applicationName), status,
+                    IStatus.ERROR).open();
+            return false;
+        } catch (InterruptedException e) {
+            IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
+            new ErrorDialog(getShell(), "Error", NLS.bind("Could not save snapshot for application {0}", applicationName), status,
+                    IStatus.ERROR).open();
+            return false;
+        }
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new SaveSnapshotWizardPage(getModel(), this));
-	}
+    @Override
+    public void addPages() {
+        addPage(new SaveSnapshotWizardPage(getModel(), this));
+    }
 }

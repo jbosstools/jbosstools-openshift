@@ -18,18 +18,18 @@ import org.eclipse.core.databinding.conversion.Converter;
 public class Boolean2EnumConverter extends Converter {
 
     private Enum trueValue;
-    
-	public Boolean2EnumConverter(Enum trueValue) {
-		super(Boolean.class, trueValue.getClass());
-		this.trueValue = trueValue;
-	}
 
-	@Override
-	public Object convert(Object fromObject) {
-		if (!(fromObject instanceof Boolean)) {
-			return fromObject;
-		}
-		return ((Boolean)fromObject)?trueValue:null;
-	}
+    public Boolean2EnumConverter(Enum trueValue) {
+        super(Boolean.class, trueValue.getClass());
+        this.trueValue = trueValue;
+    }
+
+    @Override
+    public Object convert(Object fromObject) {
+        if (!(fromObject instanceof Boolean)) {
+            return fromObject;
+        }
+        return ((Boolean)fromObject) ? trueValue : null;
+    }
 
 }

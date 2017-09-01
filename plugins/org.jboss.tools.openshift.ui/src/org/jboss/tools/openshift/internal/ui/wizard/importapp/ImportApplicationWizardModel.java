@@ -41,383 +41,375 @@ import com.openshift.restclient.model.build.IGitBuildSource;
  * @author Jeff.Cantrill
  * @author Rob Stryker
  */
-public class ImportApplicationWizardModel 
-	extends ObservableUIPojo 
-	implements IBuildConfigPageModel, IGitCloningPageModel {
+public class ImportApplicationWizardModel extends ObservableUIPojo implements IBuildConfigPageModel, IGitCloningPageModel {
 
-	private Connection connection;
-	private ConnectionTreeItem connectionItem;
-	private Object selectedItem;
-	private String cloneDestination;
-	private boolean useDefaultCloneDestination;
-	private String repoName;
-	private IProject project;
-	private boolean reuseGitRepo = false;
-	private boolean checkoutBranchReusedRepo;
-	private String repoPath;
-	private Repository repository;
-	private String gitContextDir;
-	
-	private List<ObservableTreeItem> buildConfigs = new ArrayList<>();
-	private boolean isRepositoryBranchGitRef;
+    private Connection connection;
+    private ConnectionTreeItem connectionItem;
+    private Object selectedItem;
+    private String cloneDestination;
+    private boolean useDefaultCloneDestination;
+    private String repoName;
+    private IProject project;
+    private boolean reuseGitRepo = false;
+    private boolean checkoutBranchReusedRepo;
+    private String repoPath;
+    private Repository repository;
+    private String gitContextDir;
 
-	public ImportApplicationWizardModel() {
-		this.useDefaultCloneDestination = true;
-		this.cloneDestination = getDefaultCloneDestination();
-	}
+    private List<ObservableTreeItem> buildConfigs = new ArrayList<>();
+    private boolean isRepositoryBranchGitRef;
 
-	private void update(Connection connection, Object selectedItem, String cloneDestination, boolean useDefaultCloneDestination, 
-			IProject project, boolean reuseGitRepo, boolean checkoutBranchReusedRepo, String gitContextDir) {
-		this.connectionItem = updateConnection(connection);
-		this.project = project;
-		Object oldSelectedItem = this.selectedItem;
-		updateSelectedItem(selectedItem);
-		updateUseDefaultCloneDestination(useDefaultCloneDestination);
-		updateCloneDestination(cloneDestination);
-		IBuildConfig buildConfig = getBuildConfig(selectedItem);
-		String repoName = updateRepoName(buildConfig);
-		String oldRepoPath = this.repoPath;
-		String newRepoPath = updateRepoPath(cloneDestination, repoName);
-		reuseGitRepo = updateReuseGitRepo(reuseGitRepo, newRepoPath, oldRepoPath);
-		String gitRef = updateGitRef(getGitRef(buildConfig));
-		Repository repository = updateRepository(newRepoPath, oldRepoPath);
-		boolean isRepositoryAtGitRef = updateIsRepositoryAtGitRef(gitRef, repository);
-		updateCheckoutBranchReusedRepo(checkoutBranchReusedRepo, isRepositoryAtGitRef);
-		updateGitContextDir(gitContextDir, buildConfig, getBuildConfig(oldSelectedItem));
-	}
+    public ImportApplicationWizardModel() {
+        this.useDefaultCloneDestination = true;
+        this.cloneDestination = getDefaultCloneDestination();
+    }
 
-	private ConnectionTreeItem updateConnection(Connection connection) {
-		firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
-		return new ConnectionTreeItem(connection);
-	}
+    private void update(Connection connection, Object selectedItem, String cloneDestination, boolean useDefaultCloneDestination,
+            IProject project, boolean reuseGitRepo, boolean checkoutBranchReusedRepo, String gitContextDir) {
+        this.connectionItem = updateConnection(connection);
+        this.project = project;
+        Object oldSelectedItem = this.selectedItem;
+        updateSelectedItem(selectedItem);
+        updateUseDefaultCloneDestination(useDefaultCloneDestination);
+        updateCloneDestination(cloneDestination);
+        IBuildConfig buildConfig = getBuildConfig(selectedItem);
+        String repoName = updateRepoName(buildConfig);
+        String oldRepoPath = this.repoPath;
+        String newRepoPath = updateRepoPath(cloneDestination, repoName);
+        reuseGitRepo = updateReuseGitRepo(reuseGitRepo, newRepoPath, oldRepoPath);
+        String gitRef = updateGitRef(getGitRef(buildConfig));
+        Repository repository = updateRepository(newRepoPath, oldRepoPath);
+        boolean isRepositoryAtGitRef = updateIsRepositoryAtGitRef(gitRef, repository);
+        updateCheckoutBranchReusedRepo(checkoutBranchReusedRepo, isRepositoryAtGitRef);
+        updateGitContextDir(gitContextDir, buildConfig, getBuildConfig(oldSelectedItem));
+    }
 
-	protected void updateSelectedItem(Object selectedItem) {
-		firePropertyChange(PROPERTY_SELECTED_ITEM, this.selectedItem, this.selectedItem = selectedItem);
-	}
+    private ConnectionTreeItem updateConnection(Connection connection) {
+        firePropertyChange(PROPERTY_CONNECTION, this.connection, this.connection = connection);
+        return new ConnectionTreeItem(connection);
+    }
 
-	private String updateRepoName(IBuildConfig config) {
-		String name = getRepoName(config);
-		if (name == null 
-				&& getProject() != null) {
-			name = getProject().getName();
-		}
-		firePropertyChange(PROPERTY_REPO_NAME, this.repoName, this.repoName = name);
-		return name;
-	}
+    protected void updateSelectedItem(Object selectedItem) {
+        firePropertyChange(PROPERTY_SELECTED_ITEM, this.selectedItem, this.selectedItem = selectedItem);
+    }
 
-	private static String getRepoName(IBuildConfig config) {
-		String repoName = null;
-		if (config != null) {
-			repoName = ResourceUtils.getProjectNameForURI(config.getSourceURI());
-		}
-		return repoName;
-	}
+    private String updateRepoName(IBuildConfig config) {
+        String name = getRepoName(config);
+        if (name == null && getProject() != null) {
+            name = getProject().getName();
+        }
+        firePropertyChange(PROPERTY_REPO_NAME, this.repoName, this.repoName = name);
+        return name;
+    }
 
-	private void updateCloneDestination(String cloneDestination) {
-		firePropertyChange(PROPERTY_CLONE_DESTINATION, this.cloneDestination, this.cloneDestination = cloneDestination);
-	}
+    private static String getRepoName(IBuildConfig config) {
+        String repoName = null;
+        if (config != null) {
+            repoName = ResourceUtils.getProjectNameForURI(config.getSourceURI());
+        }
+        return repoName;
+    }
 
-	private String updateRepoPath(String repositoryPath, String repoName) {
-		String repoPath = this.repoPath;
-		if (StringUtils.isNotBlank(repositoryPath)) {
-			IPath cloneDestinationPath = new Path(repositoryPath);
-			if (StringUtils.isNotBlank(repoName)) {
-				cloneDestinationPath = cloneDestinationPath.append(new Path(repoName));
-			}
-			repoPath = cloneDestinationPath.toOSString();
-		}
+    private void updateCloneDestination(String cloneDestination) {
+        firePropertyChange(PROPERTY_CLONE_DESTINATION, this.cloneDestination, this.cloneDestination = cloneDestination);
+    }
 
-		firePropertyChange(PROPERTY_REPO_PATH, this.repoPath, this.repoPath = repoPath);
-		return repoPath;
-	}
+    private String updateRepoPath(String repositoryPath, String repoName) {
+        String repoPath = this.repoPath;
+        if (StringUtils.isNotBlank(repositoryPath)) {
+            IPath cloneDestinationPath = new Path(repositoryPath);
+            if (StringUtils.isNotBlank(repoName)) {
+                cloneDestinationPath = cloneDestinationPath.append(new Path(repoName));
+            }
+            repoPath = cloneDestinationPath.toOSString();
+        }
 
-	private Repository updateRepository(String newRepoPath, String oldRepoPath) {
-		Repository repository = this.repository;
-		if (!StringUtils.equals(newRepoPath, oldRepoPath)) {
-			if (repository != null) {
-				repository.close();
-			}
-			repository = EGitUtils.getRepository(getCloneDestination(newRepoPath));
-		}
-		return this.repository = repository;
-	}
+        firePropertyChange(PROPERTY_REPO_PATH, this.repoPath, this.repoPath = repoPath);
+        return repoPath;
+    }
 
-	private boolean updateIsRepositoryAtGitRef(String gitRef, Repository cloneDestination) {
-		boolean isCloneDestinationAtGitRef = this.isRepositoryBranchGitRef;
-		String cloneDestinationBranch = null;
-		if (cloneDestination == null) {
-			return false;
-		}
-		try {
-			cloneDestinationBranch = EGitUtils.getCurrentBranch(cloneDestination);
-		} catch (CoreException e) {
-		}
-		isCloneDestinationAtGitRef = StringUtils.equals(gitRef, cloneDestinationBranch);
-		firePropertyChange(PROPERTY_IS_REPOSITORY_BRANCH_GIT_REF, this.isRepositoryBranchGitRef, 
-				this.isRepositoryBranchGitRef = isCloneDestinationAtGitRef);
-		return isCloneDestinationAtGitRef;
-	}
+    private Repository updateRepository(String newRepoPath, String oldRepoPath) {
+        Repository repository = this.repository;
+        if (!StringUtils.equals(newRepoPath, oldRepoPath)) {
+            if (repository != null) {
+                repository.close();
+            }
+            repository = EGitUtils.getRepository(getCloneDestination(newRepoPath));
+        }
+        return this.repository = repository;
+    }
 
-	private boolean updateReuseGitRepo(boolean reuseGitRepo, String newCloneDestination, String oldCloneloneDestination) {
-		if (!Objects.equals(newCloneDestination, oldCloneloneDestination)
-				&& !FileUtils.exists(new File(newCloneDestination))
-				&& reuseGitRepo) {
-			// reset reuseGitRepo if new cloneDestination does not exist
-			reuseGitRepo = false;
-		}
-		firePropertyChange(PROPERTY_REUSE_GIT_REPOSITORY, this.reuseGitRepo, this.reuseGitRepo = reuseGitRepo);
-		return reuseGitRepo;
-	}
+    private boolean updateIsRepositoryAtGitRef(String gitRef, Repository cloneDestination) {
+        boolean isCloneDestinationAtGitRef = this.isRepositoryBranchGitRef;
+        String cloneDestinationBranch = null;
+        if (cloneDestination == null) {
+            return false;
+        }
+        try {
+            cloneDestinationBranch = EGitUtils.getCurrentBranch(cloneDestination);
+        } catch (CoreException e) {
+        }
+        isCloneDestinationAtGitRef = StringUtils.equals(gitRef, cloneDestinationBranch);
+        firePropertyChange(PROPERTY_IS_REPOSITORY_BRANCH_GIT_REF, this.isRepositoryBranchGitRef,
+                this.isRepositoryBranchGitRef = isCloneDestinationAtGitRef);
+        return isCloneDestinationAtGitRef;
+    }
 
-	private void updateCheckoutBranchReusedRepo(boolean checkoutBranchReusedRepo, boolean isCloneDestinationAtGitRef) {
-		if (isCloneDestinationAtGitRef) {
-			// reset checkout if we're already at the branch that's required
-			checkoutBranchReusedRepo = false;
-		}
-		firePropertyChange(PROPERTY_CHECKOUT_BRANCH_REUSED_REPO, this.checkoutBranchReusedRepo, this.checkoutBranchReusedRepo = checkoutBranchReusedRepo);
-	}
+    private boolean updateReuseGitRepo(boolean reuseGitRepo, String newCloneDestination, String oldCloneloneDestination) {
+        if (!Objects.equals(newCloneDestination, oldCloneloneDestination) && !FileUtils.exists(new File(newCloneDestination))
+                && reuseGitRepo) {
+            // reset reuseGitRepo if new cloneDestination does not exist
+            reuseGitRepo = false;
+        }
+        firePropertyChange(PROPERTY_REUSE_GIT_REPOSITORY, this.reuseGitRepo, this.reuseGitRepo = reuseGitRepo);
+        return reuseGitRepo;
+    }
 
-	private void updateGitContextDir(String newGitContextDir, IBuildConfig newBuildConfig, IBuildConfig oldBuildConfig) {
-		if (Objects.equals(newBuildConfig, oldBuildConfig)) {
-			if (Objects.equals(newGitContextDir, this.gitContextDir)) {
-				return;
-			}
-		} else {
-			newGitContextDir = getGitContextDir(newBuildConfig);
-		}
+    private void updateCheckoutBranchReusedRepo(boolean checkoutBranchReusedRepo, boolean isCloneDestinationAtGitRef) {
+        if (isCloneDestinationAtGitRef) {
+            // reset checkout if we're already at the branch that's required
+            checkoutBranchReusedRepo = false;
+        }
+        firePropertyChange(PROPERTY_CHECKOUT_BRANCH_REUSED_REPO, this.checkoutBranchReusedRepo,
+                this.checkoutBranchReusedRepo = checkoutBranchReusedRepo);
+    }
 
-		firePropertyChange(PROPERTY_GIT_CONTEXT_DIR, this.gitContextDir, this.gitContextDir = newGitContextDir);
-	}
+    private void updateGitContextDir(String newGitContextDir, IBuildConfig newBuildConfig, IBuildConfig oldBuildConfig) {
+        if (Objects.equals(newBuildConfig, oldBuildConfig)) {
+            if (Objects.equals(newGitContextDir, this.gitContextDir)) {
+                return;
+            }
+        } else {
+            newGitContextDir = getGitContextDir(newBuildConfig);
+        }
 
-	private String updateGitRef(String gitRef) {
-		firePropertyChange(PROPERTY_GIT_REF, null, gitRef);
-		return gitRef;
-	}
+        firePropertyChange(PROPERTY_GIT_CONTEXT_DIR, this.gitContextDir, this.gitContextDir = newGitContextDir);
+    }
 
-	@Override
-	public IBuildConfig getSelectedBuildConfig() {
-		return getBuildConfig(selectedItem);
-	}
+    private String updateGitRef(String gitRef) {
+        firePropertyChange(PROPERTY_GIT_REF, null, gitRef);
+        return gitRef;
+    }
 
-	private IBuildConfig getBuildConfig(Object item) {
-		if (!(item instanceof IBuildConfig)) {
-			return null;
-		}
-		return (IBuildConfig) item;
-	}
+    @Override
+    public IBuildConfig getSelectedBuildConfig() {
+        return getBuildConfig(selectedItem);
+    }
 
-	@Override
-	public String getGitUrl() {
-		IBuildConfig config = getSelectedBuildConfig();
-		if (config == null) {
-			return null;
-		} else {
-			return config.getSourceURI();
-		}
-	}
+    private IBuildConfig getBuildConfig(Object item) {
+        if (!(item instanceof IBuildConfig)) {
+            return null;
+        }
+        return (IBuildConfig)item;
+    }
 
-	@Override
-	public String getGitRef() {
-		return getGitRef(getSelectedBuildConfig());
-	}
+    @Override
+    public String getGitUrl() {
+        IBuildConfig config = getSelectedBuildConfig();
+        if (config == null) {
+            return null;
+        } else {
+            return config.getSourceURI();
+        }
+    }
 
-	protected String getGitRef(IBuildConfig config) {
-		String gitRef = null;
-		if (config != null 
-				&& config.getBuildSource() instanceof IGitBuildSource) {
-			gitRef = ((IGitBuildSource) config.getBuildSource()).getRef();
-		}
-		return gitRef;
-	}
-	
-	@Override
-	public void setSelectedItem(Object selectedItem) {
-		update(this.connection, selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
-				this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
-	}
+    @Override
+    public String getGitRef() {
+        return getGitRef(getSelectedBuildConfig());
+    }
 
-	@Override
-	public Object getSelectedItem() {
-		return selectedItem;
-	}
+    protected String getGitRef(IBuildConfig config) {
+        String gitRef = null;
+        if (config != null && config.getBuildSource() instanceof IGitBuildSource) {
+            gitRef = ((IGitBuildSource)config.getBuildSource()).getRef();
+        }
+        return gitRef;
+    }
 
-	@Override
-	public void setCloneDestination(String cloneDestination) {
-		update(this.connection, this.selectedItem, cloneDestination, false, this.project, 
-				this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
-	}
+    @Override
+    public void setSelectedItem(Object selectedItem) {
+        update(this.connection, selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, this.reuseGitRepo,
+                this.checkoutBranchReusedRepo, this.gitContextDir);
+    }
 
-	@Override
-	public String getCloneDestination() {
-		return cloneDestination;
-	}
+    @Override
+    public Object getSelectedItem() {
+        return selectedItem;
+    }
 
-	@Override
-	public String getRepoName() {
-		return repoName;
-	}
-	
-	@Override
-	public File getRepoPath() {
-		return getCloneDestination(repoPath);
-	}
-	
-	private File getCloneDestination(String cloneDestination) {
-		return new Path(cloneDestination).toFile();
-	}
+    @Override
+    public void setCloneDestination(String cloneDestination) {
+        update(this.connection, this.selectedItem, cloneDestination, false, this.project, this.reuseGitRepo, this.checkoutBranchReusedRepo,
+                this.gitContextDir);
+    }
 
-	@Override
-	public Repository getRepository() {
-		return this.repository;
-	}
+    @Override
+    public String getCloneDestination() {
+        return cloneDestination;
+    }
 
-	@Override
-	public boolean isRepositoryBranchGitRef() {
-		return this.isRepositoryBranchGitRef;
-	}
-	
-	@Override
-	public void setUseDefaultCloneDestination(boolean useDefaultCloneDestination) {
-		update(this.connection, this.selectedItem, useDefaultCloneDestination? getDefaultCloneDestination() : this.cloneDestination, 
-				useDefaultCloneDestination, this.project, this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
-	}
+    @Override
+    public String getRepoName() {
+        return repoName;
+    }
 
-	private String getDefaultCloneDestination() {
-		return EGitUIUtils.getEGitDefaultRepositoryPath();
-	}
+    @Override
+    public File getRepoPath() {
+        return getCloneDestination(repoPath);
+    }
 
-	private void updateUseDefaultCloneDestination(boolean useDefault) {
-		firePropertyChange(PROPERTY_USE_DEFAULT_CLONE_DESTINATION, this.useDefaultCloneDestination, this.useDefaultCloneDestination = useDefault);
-	}
+    private File getCloneDestination(String cloneDestination) {
+        return new Path(cloneDestination).toFile();
+    }
 
-	@Override
-	public boolean isUseDefaultCloneDestination() {
-		return useDefaultCloneDestination;
-	}
+    @Override
+    public Repository getRepository() {
+        return this.repository;
+    }
 
-	@Override
-	public Connection getConnection() {
-		return connection;
-	}
+    @Override
+    public boolean isRepositoryBranchGitRef() {
+        return this.isRepositoryBranchGitRef;
+    }
 
-	@Override
-	public boolean hasConnection() {
-		return connection != null;
-	}
+    @Override
+    public void setUseDefaultCloneDestination(boolean useDefaultCloneDestination) {
+        update(this.connection, this.selectedItem, useDefaultCloneDestination ? getDefaultCloneDestination() : this.cloneDestination,
+                useDefaultCloneDestination, this.project, this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
+    }
 
-	@Override
-	public void setConnection(Connection connection) {
-		update(connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
-				this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
-	}
+    private String getDefaultCloneDestination() {
+        return EGitUIUtils.getEGitDefaultRepositoryPath();
+    }
 
-	@Override
-	public List<ObservableTreeItem> getBuildConfigs() {
-		return buildConfigs;
-	}
-	
-	@Override
-	public void loadBuildConfigs() {
-		loadBuildConfigs(connectionItem);
-	}
+    private void updateUseDefaultCloneDestination(boolean useDefault) {
+        firePropertyChange(PROPERTY_USE_DEFAULT_CLONE_DESTINATION, this.useDefaultCloneDestination,
+                this.useDefaultCloneDestination = useDefault);
+    }
 
-	public void loadBuildConfigs(ConnectionTreeItem connectionItem) {
-		if (connectionItem == null) {
-				return;
-		}
-		connectionItem.load();
-		updateBuildConfigs(filterBuildConfigs(project, connectionItem.getChildren()));
-	}
+    @Override
+    public boolean isUseDefaultCloneDestination() {
+        return useDefaultCloneDestination;
+    }
 
-	private void updateBuildConfigs(List<ObservableTreeItem> newBuildConfigs) {
-		if (newBuildConfigs == null
-				|| ListUtils.isEqualList(newBuildConfigs, buildConfigs)) {
-			return;
-		}
-		List<ObservableTreeItem> oldItems = new ArrayList<>(buildConfigs);
-		List<ObservableTreeItem> newItems = new ArrayList<>(newBuildConfigs);
-		buildConfigs.clear();
-		buildConfigs.addAll(newItems);
-		firePropertyChange(PROPERTY_BUILDCONFIGS, oldItems, newItems);
-	}
+    @Override
+    public Connection getConnection() {
+        return connection;
+    }
 
-	private List<ObservableTreeItem> filterBuildConfigs(IProject project, List<ObservableTreeItem> children) {
-		List<ObservableTreeItem> result = children;
-		if (project != null) {
-			result = children.stream()
-					.filter(c -> project.equals(c.getModel()))
-					.map(p -> p.getChildren())
-					.flatMap(l -> l.stream())
-					.collect(Collectors.toList());
-		}
-		return result;
-	}
+    @Override
+    public boolean hasConnection() {
+        return connection != null;
+    }
 
-	@Override
-	public Object getContext() {
-		return null;
-	}
+    @Override
+    public void setConnection(Connection connection) {
+        update(connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, this.reuseGitRepo,
+                this.checkoutBranchReusedRepo, this.gitContextDir);
+    }
 
-	@Override
-	public String getGitContextDir() {
-		return this.gitContextDir;
-	}
+    @Override
+    public List<ObservableTreeItem> getBuildConfigs() {
+        return buildConfigs;
+    }
 
-	protected String getGitContextDir(IBuildConfig bc) {
-		String gitContextDir = null; 
-		if (bc != null 
-				&& bc.getBuildSource() instanceof IGitBuildSource) {
-			gitContextDir = ((IGitBuildSource) bc.getBuildSource()).getContextDir();
-		}
-		return gitContextDir;
-	}
+    @Override
+    public void loadBuildConfigs() {
+        loadBuildConfigs(connectionItem);
+    }
 
-	@Override
-	public void setGitContextDir(String gitContextDir) {
-		update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
-				this.reuseGitRepo, this.checkoutBranchReusedRepo, gitContextDir);
-	}
-	
-	@Override
-	public String getApplicationName() {
-		String appName = null;
-		IBuildConfig buildConfig = getSelectedBuildConfig();
-		if (buildConfig != null) {
-			appName = buildConfig.getName();
-		}
-		return appName;
-	}
+    public void loadBuildConfigs(ConnectionTreeItem connectionItem) {
+        if (connectionItem == null) {
+            return;
+        }
+        connectionItem.load();
+        updateBuildConfigs(filterBuildConfigs(project, connectionItem.getChildren()));
+    }
 
-	@Override
-	public IProject getProject() {
-		return project;
-	}
+    private void updateBuildConfigs(List<ObservableTreeItem> newBuildConfigs) {
+        if (newBuildConfigs == null || ListUtils.isEqualList(newBuildConfigs, buildConfigs)) {
+            return;
+        }
+        List<ObservableTreeItem> oldItems = new ArrayList<>(buildConfigs);
+        List<ObservableTreeItem> newItems = new ArrayList<>(newBuildConfigs);
+        buildConfigs.clear();
+        buildConfigs.addAll(newItems);
+        firePropertyChange(PROPERTY_BUILDCONFIGS, oldItems, newItems);
+    }
 
-	@Override
-	public void setProject(IProject project) {
-		update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, project, 
-				this.reuseGitRepo, this.checkoutBranchReusedRepo, this.gitContextDir);
-	}
+    private List<ObservableTreeItem> filterBuildConfigs(IProject project, List<ObservableTreeItem> children) {
+        List<ObservableTreeItem> result = children;
+        if (project != null) {
+            result = children.stream().filter(c -> project.equals(c.getModel())).map(p -> p.getChildren()).flatMap(l -> l.stream())
+                    .collect(Collectors.toList());
+        }
+        return result;
+    }
 
-	@Override
-	public boolean isReuseGitRepository() {
-		return reuseGitRepo;
-	}
+    @Override
+    public Object getContext() {
+        return null;
+    }
 
-	@Override
-	public void setReuseGitRepository(boolean reuseGitRepo) {
-		update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
-				reuseGitRepo, reuseGitRepo, this.gitContextDir);
-	}
-	
-	@Override
-	public boolean isCheckoutBranchReusedRepo() {
-		return checkoutBranchReusedRepo;
-	}
+    @Override
+    public String getGitContextDir() {
+        return this.gitContextDir;
+    }
 
-	@Override
-	public void setCheckoutBranchReusedRepo(boolean checkout) {
-		update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, 
-				this.reuseGitRepo, checkout, this.gitContextDir);
-	}
+    protected String getGitContextDir(IBuildConfig bc) {
+        String gitContextDir = null;
+        if (bc != null && bc.getBuildSource() instanceof IGitBuildSource) {
+            gitContextDir = ((IGitBuildSource)bc.getBuildSource()).getContextDir();
+        }
+        return gitContextDir;
+    }
+
+    @Override
+    public void setGitContextDir(String gitContextDir) {
+        update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, this.reuseGitRepo,
+                this.checkoutBranchReusedRepo, gitContextDir);
+    }
+
+    @Override
+    public String getApplicationName() {
+        String appName = null;
+        IBuildConfig buildConfig = getSelectedBuildConfig();
+        if (buildConfig != null) {
+            appName = buildConfig.getName();
+        }
+        return appName;
+    }
+
+    @Override
+    public IProject getProject() {
+        return project;
+    }
+
+    @Override
+    public void setProject(IProject project) {
+        update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, project, this.reuseGitRepo,
+                this.checkoutBranchReusedRepo, this.gitContextDir);
+    }
+
+    @Override
+    public boolean isReuseGitRepository() {
+        return reuseGitRepo;
+    }
+
+    @Override
+    public void setReuseGitRepository(boolean reuseGitRepo) {
+        update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, reuseGitRepo,
+                reuseGitRepo, this.gitContextDir);
+    }
+
+    @Override
+    public boolean isCheckoutBranchReusedRepo() {
+        return checkoutBranchReusedRepo;
+    }
+
+    @Override
+    public void setCheckoutBranchReusedRepo(boolean checkout) {
+        update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project, this.reuseGitRepo,
+                checkout, this.gitContextDir);
+    }
 }

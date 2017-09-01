@@ -19,111 +19,111 @@ package org.jboss.tools.openshift.common.core.connection;
  */
 public class NewConnectionMarker extends AbstractConnection {
 
-	private static final NewConnectionMarker INSTANCE = new NewConnectionMarker();
-	
-	public static final NewConnectionMarker getInstance() {
-		return INSTANCE;
-	}
-	
-	private NewConnectionMarker() {
-		super(null);
-	}
+    private static final NewConnectionMarker INSTANCE = new NewConnectionMarker();
 
-	@Override
-	public int hashCode() {
-		return getHost().hashCode();
-	}
+    public static final NewConnectionMarker getInstance() {
+        return INSTANCE;
+    }
 
-	@Override
-	public boolean equals(Object object) {
-		return object instanceof NewConnectionMarker;
-	}
+    private NewConnectionMarker() {
+        super(null);
+    }
 
-	@Override
-	public boolean isDefaultHost() {
-		return false;
-	}
+    @Override
+    public int hashCode() {
+        return getHost().hashCode();
+    }
 
-	@Override
-	public ConnectionType getType() {
-		return null;
-	}
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof NewConnectionMarker;
+    }
 
-	@Override
-	public void refresh() {
-	}
+    @Override
+    public boolean isDefaultHost() {
+        return false;
+    }
 
-	@Override
-	public boolean connect() {
-		return false;
-	}
+    @Override
+    public ConnectionType getType() {
+        return null;
+    }
 
-	@Override
-	public boolean isConnected() {
-		return false;
-	}
+    @Override
+    public void refresh() {
+    }
 
-	@Override
-	public String getHost() {
-		return "<New Connection>";
-	}
+    @Override
+    public boolean connect() {
+        return false;
+    }
 
-	@Override
-	public String getScheme() {
-		return null;
-	}
-	
-	@Override
-	public boolean canConnect() {
-		return false;
-	}
+    @Override
+    public boolean isConnected() {
+        return false;
+    }
 
-	@Override
-	public String getUsername() {
-		return null;
-	}
+    @Override
+    public String getHost() {
+        return "<New Connection>";
+    }
 
-	@Override
-	public void setUsername(String username) {
-	}
+    @Override
+    public String getScheme() {
+        return null;
+    }
 
-	@Override
-	public String getPassword() {
-		return null;
-	}
+    @Override
+    public boolean canConnect() {
+        return false;
+    }
 
-	@Override
-	public void setPassword(String password) {
-	}
+    @Override
+    public String getUsername() {
+        return null;
+    }
 
-	@Override
-	public void setRememberPassword(boolean rememberPassword) {
-	}
+    @Override
+    public void setUsername(String username) {
+    }
 
-	@Override
-	public boolean isRememberPassword() {
-		return false;
-	}
+    @Override
+    public String getPassword() {
+        return null;
+    }
 
-	@Override
-	public void enablePromptCredentials(boolean enable) {
-	}
-	
-	@Override
-	public boolean isEnablePromptCredentials() {
-		return false;
-	}
+    @Override
+    public void setPassword(String password) {
+    }
 
-	@Override
-	public IConnection clone() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void update(IConnection connection) {
-	}
+    @Override
+    public void setRememberPassword(boolean rememberPassword) {
+    }
 
-	@Override
-	public void notifyUsage() {
-	}
+    @Override
+    public boolean isRememberPassword() {
+        return false;
+    }
+
+    @Override
+    public void enablePromptCredentials(boolean enable) {
+    }
+
+    @Override
+    public boolean isEnablePromptCredentials() {
+        return false;
+    }
+
+    @Override
+    public IConnection clone() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void update(IConnection connection) {
+    }
+
+    @Override
+    public void notifyUsage() {
+    }
 }

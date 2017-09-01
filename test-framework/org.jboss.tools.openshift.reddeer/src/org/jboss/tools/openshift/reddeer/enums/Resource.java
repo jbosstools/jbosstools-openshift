@@ -12,25 +12,18 @@ package org.jboss.tools.openshift.reddeer.enums;
 
 public enum Resource {
 
-	BUILD_CONFIG("Build Configs"),
-	BUILD("Builds"),
-	DEPLOYMENT_CONFIG("Deployment Configs"),
-	IMAGE_STREAM("Image Streams"),
-	POD("Pods"),
-	ROUTE("Routes"),
-	SERVICE("Services"),
-	TEMPLATE("Templates"),
-	DEPLOYMENT("Deployments");
-	
+	BUILD_CONFIG("Build Configs"), BUILD("Builds"), DEPLOYMENT_CONFIG("Deployment Configs"), IMAGE_STREAM("Image Streams"), POD(
+			"Pods"), ROUTE("Routes"), SERVICE("Services"), TEMPLATE("Templates"), DEPLOYMENT("Deployments");
+
 	private final String text;
-	
+
 	private Resource(String text) {
 		this.text = text;
 	}
-	
+
 	@Override
 	public String toString() {
 		return text;
 	}
-	
+
 }

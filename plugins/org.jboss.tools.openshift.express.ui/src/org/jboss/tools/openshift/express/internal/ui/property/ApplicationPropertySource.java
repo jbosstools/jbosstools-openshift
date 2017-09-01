@@ -27,89 +27,83 @@ import com.openshift.client.OpenShiftSSHOperationException;
  */
 public class ApplicationPropertySource implements IPropertySource {
 
-	private final IApplication application;
+    private final IApplication application;
 
-	public ApplicationPropertySource(IApplication adaptableObject) {
-		this.application = adaptableObject;
-	}
+    public ApplicationPropertySource(IApplication adaptableObject) {
+        this.application = adaptableObject;
+    }
 
-	@Override
-	public Object getEditableValue() {
-		return null;
-	}
+    @Override
+    public Object getEditableValue() {
+        return null;
+    }
 
-	@Override
-	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new PropertyDescriptor("3.URL", "Public URL"),
-				new PropertyDescriptor("1.Name", "Name"),
-				new PropertyDescriptor("6.UUID", "UUID"),
-				new PropertyDescriptor("5.Git URL", "Git URL"),
-				new PropertyDescriptor("2.Type", "Type"),
-				new PropertyDescriptor("4.Created on", "Created on"),
-				new PropertyDescriptor("7.Port Forwarding", "Port Forwarding"),
-				new PropertyDescriptor("8.Scalable", "Scalable")
-		};
-	}
+    @Override
+    public IPropertyDescriptor[] getPropertyDescriptors() {
+        return new IPropertyDescriptor[] { new PropertyDescriptor("3.URL", "Public URL"), new PropertyDescriptor("1.Name", "Name"),
+                new PropertyDescriptor("6.UUID", "UUID"), new PropertyDescriptor("5.Git URL", "Git URL"),
+                new PropertyDescriptor("2.Type", "Type"), new PropertyDescriptor("4.Created on", "Created on"),
+                new PropertyDescriptor("7.Port Forwarding", "Port Forwarding"), new PropertyDescriptor("8.Scalable", "Scalable") };
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		if (id.equals("3.URL")) {
-			return application.getApplicationUrl().toString();
-		}
-		if (id.equals("1.Name")) {
-			return application.getName();
-		}
-		if (id.equals("6.UUID")) {
-			return application.getUUID();
-		}
-		if (id.equals("4.Created on")) {
-			SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd 'at' HH:mm:ss");
-			return format.format(application.getCreationTime());
-		}
+    @Override
+    public Object getPropertyValue(Object id) {
+        if (id.equals("3.URL")) {
+            return application.getApplicationUrl().toString();
+        }
+        if (id.equals("1.Name")) {
+            return application.getName();
+        }
+        if (id.equals("6.UUID")) {
+            return application.getUUID();
+        }
+        if (id.equals("4.Created on")) {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd 'at' HH:mm:ss");
+            return format.format(application.getCreationTime());
+        }
 
-		if (id.equals("2.Type")) {
-			return ExpressResourceLabelUtils.toString(application.getCartridge());
-		}
-		if (id.equals("5.Git URL")) {
-			return application.getGitUrl();
-		}
-		if (id.equals("7.Port Forwarding")) {
-			try {
-				StringBuffer bf = new StringBuffer();
-				boolean portFowardingStarted = application.isPortFowardingStarted();
+        if (id.equals("2.Type")) {
+            return ExpressResourceLabelUtils.toString(application.getCartridge());
+        }
+        if (id.equals("5.Git URL")) {
+            return application.getGitUrl();
+        }
+        if (id.equals("7.Port Forwarding")) {
+            try {
+                StringBuffer bf = new StringBuffer();
+                boolean portFowardingStarted = application.isPortFowardingStarted();
 
-				if (portFowardingStarted == true) {
-					return bf.append("Yes");
-				} else if (portFowardingStarted == false) {
-					return bf.append("No");
-				}
+                if (portFowardingStarted == true) {
+                    return bf.append("Yes");
+                } else if (portFowardingStarted == false) {
+                    return bf.append("No");
+                }
 
-			} catch (OpenShiftSSHOperationException e) {
-				return "Unknown";
-			}
-		}
-		if (id.equals("8.Scalable")) {
-			return application.getApplicationScale() != null ? application.getApplicationScale().getValue() : "";
-		}
-		return null;
-	}
+            } catch (OpenShiftSSHOperationException e) {
+                return "Unknown";
+            }
+        }
+        if (id.equals("8.Scalable")) {
+            return application.getApplicationScale() != null ? application.getApplicationScale().getValue() : "";
+        }
+        return null;
+    }
 
-	@Override
-	public void resetPropertyValue(Object id) {
-		// TODO Auto-generated method stub
+    @Override
+    public void resetPropertyValue(Object id) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public void setPropertyValue(Object id, Object value) {
-		// TODO Auto-generated method stub
+    @Override
+    public void setPropertyValue(Object id, Object value) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public boolean isPropertySet(Object id) {
-		return false;
-	}
+    @Override
+    public boolean isPropertySet(Object id) {
+        return false;
+    }
 
 }

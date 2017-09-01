@@ -17,17 +17,17 @@ import java.text.MessageFormat;
  */
 public class OpenShiftCoreException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public OpenShiftCoreException(String message, Object... arguments) {
-		super(MessageFormat.format(message, arguments));
-	}
+    public OpenShiftCoreException(String message, Object... arguments) {
+        super(MessageFormat.format(message, arguments));
+    }
 
-	public OpenShiftCoreException(Throwable cause, String message, Object... arguments) {
-		super(MessageFormat.format(message, arguments), cause);	
-	}
-	
-	public OpenShiftCoreException(Throwable cause) {
-		super(cause);	
-	}
+    public OpenShiftCoreException(Throwable cause, String message, Object... arguments) {
+        super(MessageFormat.format(message, arguments), cause);
+    }
+
+    public OpenShiftCoreException(Throwable cause) {
+        super(cause);
+    }
 }

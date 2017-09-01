@@ -20,12 +20,12 @@ import org.eclipse.core.databinding.conversion.Converter;
  */
 public class IsNotNull2BooleanConverter extends Converter {
 
-	public IsNotNull2BooleanConverter() {
-		super(Object.class, Boolean.class);
-	}
+    public IsNotNull2BooleanConverter() {
+        super(Object.class, Boolean.class);
+    }
 
-	@Override
-	public Object convert(Object fromObject) {
-		return fromObject != null;
-	}
+    @Override
+    public Object convert(Object fromObject) {
+        return fromObject != null;
+    }
 }

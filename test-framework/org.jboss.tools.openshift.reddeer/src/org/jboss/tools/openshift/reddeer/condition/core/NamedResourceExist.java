@@ -48,7 +48,7 @@ public class NamedResourceExist extends AbstractWaitCondition {
 		try {
 			connection.getResource(kind, project, name);
 			return true;
-		} catch(OpenShiftException e) {
+		} catch (OpenShiftException e) {
 			return false;
 		}
 	}

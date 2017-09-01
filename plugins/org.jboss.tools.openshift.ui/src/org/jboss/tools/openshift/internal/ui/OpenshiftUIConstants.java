@@ -21,8 +21,8 @@ public final class OpenshiftUIConstants {
     /*
      * An UrlValidator that recognize strings as urls with http, https, ftp and file schemes.
      */
-    public static final UrlValidator URL_VALIDATOR = new UrlValidator(new String[] {"http", "https", "ftp", "file"});
-    
+    public static final UrlValidator URL_VALIDATOR = new UrlValidator(new String[] { "http", "https", "ftp", "file" });
+
     /**
      * A bundle common transport utility for easier ECF use for downloads.
      */

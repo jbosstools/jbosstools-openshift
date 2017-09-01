@@ -45,63 +45,59 @@ import com.openshift.restclient.model.IDeploymentConfig;
  */
 public class TriggerDeploymentHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection selection = UIUtils.getCurrentSelection(event);
-		IDeploymentConfig resource = retrieveDeploymentConfig(selection);
-		if(resource == null) {
-			MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Trigger Deployment", "A deployment or deployment config must be selected in order to trigger a new deployment.");
-			return null;
-		}
-		
-		scheduleJob(resource);
-		return null;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        ISelection selection = UIUtils.getCurrentSelection(event);
+        IDeploymentConfig resource = retrieveDeploymentConfig(selection);
+        if (resource == null) {
+            MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Trigger Deployment",
+                    "A deployment or deployment config must be selected in order to trigger a new deployment.");
+            return null;
+        }
 
-	private IDeploymentConfig retrieveDeploymentConfig(ISelection selection) {
-		IServiceWrapper deployment = UIUtils.getFirstElement(selection, IServiceWrapper.class);
-		if(deployment != null) {
-			Collection<IResourceWrapper<?, ?>> configs = deployment.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG);
-			if(!configs.isEmpty()) {
-				if(configs.size() == 1) {
-					return (IDeploymentConfig) configs.iterator().next().getWrapped();
-				}else {
-					return (IDeploymentConfig) configs
-							.stream()
-							.sorted(new CreationTimestampComparator())
-							.collect(Collectors.toList()).get(0);
-				}
-			}
-			return null;
-		}
-		return UIUtils.getFirstElement(selection, IDeploymentConfig.class);
-	}
+        scheduleJob(resource);
+        return null;
+    }
 
-	private void scheduleJob(final IDeploymentConfig resource) {
-		new AbstractDelegatingMonitorJob("Starting new OpenShift deployment...") {
+    private IDeploymentConfig retrieveDeploymentConfig(ISelection selection) {
+        IServiceWrapper deployment = UIUtils.getFirstElement(selection, IServiceWrapper.class);
+        if (deployment != null) {
+            Collection<IResourceWrapper<?, ?>> configs = deployment.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG);
+            if (!configs.isEmpty()) {
+                if (configs.size() == 1) {
+                    return (IDeploymentConfig)configs.iterator().next().getWrapped();
+                } else {
+                    return (IDeploymentConfig)configs.stream().sorted(new CreationTimestampComparator()).collect(Collectors.toList())
+                            .get(0);
+                }
+            }
+            return null;
+        }
+        return UIUtils.getFirstElement(selection, IDeploymentConfig.class);
+    }
 
-			@Override
-			protected IStatus doRun(IProgressMonitor monitor) {
-				return resource.accept(new CapabilityVisitor<IDeployCapability, IStatus>() {
+    private void scheduleJob(final IDeploymentConfig resource) {
+        new AbstractDelegatingMonitorJob("Starting new OpenShift deployment...") {
 
-					@Override
-					public IStatus visit(IDeployCapability cap) {
-						try {
-							cap.deploy();
-						}catch(OpenShiftException e) {
-							return new Status(IStatus.ERROR, 
-									OpenShiftUIActivator.PLUGIN_ID, 
-									NLS.bind("Unable to perform a deployment for config {0}", resource.getName())
-									, e);
-						}
-						return new Status(IStatus.OK, 
-								OpenShiftUIActivator.PLUGIN_ID,
-								NLS.bind("Deployment triggered for config {0}", resource.getName()));
-					}
-				}, Status.OK_STATUS);
-			}
-			
-		}.schedule();
-	}
+            @Override
+            protected IStatus doRun(IProgressMonitor monitor) {
+                return resource.accept(new CapabilityVisitor<IDeployCapability, IStatus>() {
+
+                    @Override
+                    public IStatus visit(IDeployCapability cap) {
+                        try {
+                            cap.deploy();
+                        } catch (OpenShiftException e) {
+                            return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+                                    NLS.bind("Unable to perform a deployment for config {0}", resource.getName()), e);
+                        }
+                        return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID,
+                                NLS.bind("Deployment triggered for config {0}", resource.getName()));
+                    }
+                }, Status.OK_STATUS);
+            }
+
+        }.schedule();
+    }
 
 }

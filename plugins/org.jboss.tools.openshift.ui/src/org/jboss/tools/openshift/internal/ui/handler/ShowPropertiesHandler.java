@@ -29,26 +29,23 @@ import com.openshift.restclient.model.IResource;
  */
 public class ShowPropertiesHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					IWorkbenchPage page = PlatformUI.getWorkbench()
-							.getActiveWorkbenchWindow()
-							.getActivePage();
-					IWorkbenchPart active = page.getActivePart();
-					IWorkbenchPart part = page.showView("org.eclipse.ui.views.PropertySheet");
-					page.activate(active);
-					page.activate(part);
-				} catch (PartInitException e) {
-					OpenShiftUIActivator.getDefault().getLogger().logError("Failed to show the Properties view", e);
-				}
-			}
-		});
-		return null;
-	}
-
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        Display.getDefault().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+                    IWorkbenchPart active = page.getActivePart();
+                    IWorkbenchPart part = page.showView("org.eclipse.ui.views.PropertySheet");
+                    page.activate(active);
+                    page.activate(part);
+                } catch (PartInitException e) {
+                    OpenShiftUIActivator.getDefault().getLogger().logError("Failed to show the Properties view", e);
+                }
+            }
+        });
+        return null;
+    }
 
 }

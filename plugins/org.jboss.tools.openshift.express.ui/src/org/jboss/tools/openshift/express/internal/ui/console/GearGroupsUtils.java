@@ -22,20 +22,20 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public class GearGroupsUtils {
 
-	/**
-	 * Returns a concatenation of the display names of the cartridges of the given {@link IGearGroup}
-	 * @param gearGroup the Gear Group
-	 * @return the cartridges display names, separated by a comma ({@code ,}) character
-	 */
-	public static String getCartridgeDisplayNames(final IGearGroup gearGroup) {
-		final StringBuffer cartridgeNamesBuffer = new StringBuffer();
-		for(Iterator<ICartridge> iterator = gearGroup.getCartridges().iterator(); iterator.hasNext();) {
-			ICartridge cartridge = iterator.next();
-			cartridgeNamesBuffer.append(cartridge.getDisplayName());
-			if(iterator.hasNext()) {
-				cartridgeNamesBuffer.append(", ");
-			}
-		}
-		return cartridgeNamesBuffer.toString();
-	}
+    /**
+     * Returns a concatenation of the display names of the cartridges of the given {@link IGearGroup}
+     * @param gearGroup the Gear Group
+     * @return the cartridges display names, separated by a comma ({@code ,}) character
+     */
+    public static String getCartridgeDisplayNames(final IGearGroup gearGroup) {
+        final StringBuffer cartridgeNamesBuffer = new StringBuffer();
+        for (Iterator<ICartridge> iterator = gearGroup.getCartridges().iterator(); iterator.hasNext();) {
+            ICartridge cartridge = iterator.next();
+            cartridgeNamesBuffer.append(cartridge.getDisplayName());
+            if (iterator.hasNext()) {
+                cartridgeNamesBuffer.append(", ");
+            }
+        }
+        return cartridgeNamesBuffer.toString();
+    }
 }

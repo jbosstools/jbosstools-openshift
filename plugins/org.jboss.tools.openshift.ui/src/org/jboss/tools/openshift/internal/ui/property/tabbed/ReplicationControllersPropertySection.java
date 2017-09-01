@@ -21,7 +21,7 @@ import com.openshift.restclient.ResourceKind;
  */
 public class ReplicationControllersPropertySection extends OpenShiftResourcePropertySection {
 
-	public ReplicationControllersPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.ReplicationControllersTab", ResourceKind.REPLICATION_CONTROLLER);
-	}
+    public ReplicationControllersPropertySection() {
+        super("popup:org.jboss.tools.openshift.ui.properties.tab.ReplicationControllersTab", ResourceKind.REPLICATION_CONTROLLER);
+    }
 }

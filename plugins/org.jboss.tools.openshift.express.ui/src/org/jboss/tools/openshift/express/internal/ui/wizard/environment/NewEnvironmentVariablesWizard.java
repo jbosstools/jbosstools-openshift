@@ -23,33 +23,32 @@ import com.openshift.client.IDomain;
  */
 public class NewEnvironmentVariablesWizard extends AbstractEnvironmentVariablesWizard<NewEnvironmentVariablesWizardModel> {
 
-	private Map<String, String> environmentVarriableValueByKey;
+    private Map<String, String> environmentVarriableValueByKey;
 
-	public NewEnvironmentVariablesWizard(Map<String, String> environmentVariables, IDomain domain) {
-		super("Create Environment Variable(s)",
-				new NewEnvironmentVariablesWizardModel(environmentVariables, domain));
-	}
+    public NewEnvironmentVariablesWizard(Map<String, String> environmentVariables, IDomain domain) {
+        super("Create Environment Variable(s)", new NewEnvironmentVariablesWizardModel(environmentVariables, domain));
+    }
 
-	@Override
-	public boolean performFinish() {
-		if (!isSupported()) {
-			return true;
-		}
+    @Override
+    public boolean performFinish() {
+        if (!isSupported()) {
+            return true;
+        }
 
-		this.environmentVarriableValueByKey = (toMap(getModel().getVariables()));
-		return true;
-	}
+        this.environmentVarriableValueByKey = (toMap(getModel().getVariables()));
+        return true;
+    }
 
-	private Map<String, String> toMap(List<EnvironmentVariableItem> variables) {
-		HashMap<String, String> environmentVariables = new LinkedHashMap<>();
-		for (EnvironmentVariableItem variable : variables) {
-			environmentVariables.put(variable.getName(), variable.getValue());
-		}
-		return environmentVariables;
-	}
-	
-	@Override
-	public Map<String, String> getEnvironmentVariables() {
-		return environmentVarriableValueByKey;
-	}
+    private Map<String, String> toMap(List<EnvironmentVariableItem> variables) {
+        HashMap<String, String> environmentVariables = new LinkedHashMap<>();
+        for (EnvironmentVariableItem variable : variables) {
+            environmentVariables.put(variable.getName(), variable.getValue());
+        }
+        return environmentVariables;
+    }
+
+    @Override
+    public Map<String, String> getEnvironmentVariables() {
+        return environmentVarriableValueByKey;
+    }
 }

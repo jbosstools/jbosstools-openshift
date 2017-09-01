@@ -19,106 +19,106 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryList
 
 public class ConnectionsChange {
 
-	private static final long MAX_TIMEOUT_SEC = 10;
+    private static final long MAX_TIMEOUT_SEC = 10;
 
-	private IConnection notifiedConnection;
+    private IConnection notifiedConnection;
 
-	private boolean additionNotified;
-	private boolean removalNotified;
-	private boolean changeNotified;
-	private String property;
-	private CountDownLatch latch; 
-	
-	public String getProperty() {
-		return property;
-	}
+    private boolean additionNotified;
+    private boolean removalNotified;
+    private boolean changeNotified;
+    private String property;
+    private CountDownLatch latch;
 
-	public Object getOldValue() {
-		return oldValue;
-	}
+    public String getProperty() {
+        return property;
+    }
 
-	public Object getNewValue() {
-		return newValue;
-	}
+    public Object getOldValue() {
+        return oldValue;
+    }
 
-	private Object oldValue;
-	private Object newValue;
+    public Object getNewValue() {
+        return newValue;
+    }
 
-	public ConnectionsChange(ConnectionsRegistry registry) {
-		registry.addListener(new Listener());
-	}
-	
-	public void setCountDown(int totCallbacks) {
-		this.latch = new CountDownLatch(totCallbacks);
-	}
-	
-	public boolean isAdditionNotified() {
-		return additionNotified;
-	}
+    private Object oldValue;
+    private Object newValue;
 
-	public boolean isRemovalNotified() {
-		return removalNotified;
-	}
+    public ConnectionsChange(ConnectionsRegistry registry) {
+        registry.addListener(new Listener());
+    }
 
-	public boolean isChangeNotified() {
-		return changeNotified;
-	}
+    public void setCountDown(int totCallbacks) {
+        this.latch = new CountDownLatch(totCallbacks);
+    }
 
-	public IConnection getConnection() {
-		return notifiedConnection;
-	}
-	
-	public void reset() {
-		this.additionNotified = false;
-		this.removalNotified = false;
-		this.changeNotified = false;
-		this.notifiedConnection = null;
-		this.latch = null;
-	}
-	
-	private void bumpCountdown() {
-		if(latch != null) {
-			latch.countDown();
-		}
-	}
-	
-	public void waitForNotification() {
-		if(latch == null) {
-			return;
-		}
-		try {
-			if(!latch.await(MAX_TIMEOUT_SEC, TimeUnit.SECONDS)) {
-				throw new RuntimeException("ConnectionsChange timed out before receiving any notifications");
-			}
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public boolean isAdditionNotified() {
+        return additionNotified;
+    }
 
-	private class Listener implements IConnectionsRegistryListener {
+    public boolean isRemovalNotified() {
+        return removalNotified;
+    }
 
-		@Override
-		public void connectionAdded(IConnection connection) {
-			additionNotified = true;
-			notifiedConnection = connection;
-			bumpCountdown();
-		}
+    public boolean isChangeNotified() {
+        return changeNotified;
+    }
 
-		@Override
-		public void connectionRemoved(IConnection connection) {
-			removalNotified = true;
-			notifiedConnection = connection;
-			bumpCountdown();
-		}
+    public IConnection getConnection() {
+        return notifiedConnection;
+    }
 
-		@Override
-		public void connectionChanged(IConnection connection, String eventProperty, Object eventOldValue, Object eventNewValue) {
-			changeNotified = true;
-			notifiedConnection = connection;
-			property = eventProperty;
-			oldValue = eventOldValue;
-			newValue = eventNewValue;
-			bumpCountdown();
-		}
-	}
+    public void reset() {
+        this.additionNotified = false;
+        this.removalNotified = false;
+        this.changeNotified = false;
+        this.notifiedConnection = null;
+        this.latch = null;
+    }
+
+    private void bumpCountdown() {
+        if (latch != null) {
+            latch.countDown();
+        }
+    }
+
+    public void waitForNotification() {
+        if (latch == null) {
+            return;
+        }
+        try {
+            if (!latch.await(MAX_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+                throw new RuntimeException("ConnectionsChange timed out before receiving any notifications");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private class Listener implements IConnectionsRegistryListener {
+
+        @Override
+        public void connectionAdded(IConnection connection) {
+            additionNotified = true;
+            notifiedConnection = connection;
+            bumpCountdown();
+        }
+
+        @Override
+        public void connectionRemoved(IConnection connection) {
+            removalNotified = true;
+            notifiedConnection = connection;
+            bumpCountdown();
+        }
+
+        @Override
+        public void connectionChanged(IConnection connection, String eventProperty, Object eventOldValue, Object eventNewValue) {
+            changeNotified = true;
+            notifiedConnection = connection;
+            property = eventProperty;
+            oldValue = eventOldValue;
+            newValue = eventNewValue;
+            bumpCountdown();
+        }
+    }
 }

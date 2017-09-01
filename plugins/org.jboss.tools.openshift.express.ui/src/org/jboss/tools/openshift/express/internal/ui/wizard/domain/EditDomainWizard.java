@@ -29,40 +29,37 @@ import com.openshift.client.OpenShiftEndpointException;
  */
 public class EditDomainWizard extends AbstractOpenShiftWizard<DomainWizardModel> {
 
-	public EditDomainWizard(IDomain domain) {
-		super("Edit domain", new DomainWizardModel(domain));
-	}
+    public EditDomainWizard(IDomain domain) {
+        super("Edit domain", new DomainWizardModel(domain));
+    }
 
-	@Override
-	public boolean performFinish() {
-		AbstractDelegatingMonitorJob job = new AbstractDelegatingMonitorJob("Renaming domain...") {
-			@Override
-			protected IStatus doRun(IProgressMonitor monitor) {
-				try {
-					getModel().renameDomain();
-					return Status.OK_STATUS;
-				} catch (OpenShiftEndpointException e) {
-					return ExpressUIActivator.createErrorStatus(
-							NLS.bind(
-									"Could not rename domain \"{0}\": {1}", getModel().getDomainId(),
-									e.getRestResponseMessages()), e);
-				} catch (Exception e) {
-					return ExpressUIActivator.createErrorStatus(NLS.bind(
-							"Could not rename domain {0}", getModel().getDomainId()), e);
-				}
-			}
-		};
-		try {
-			IStatus status = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
-			return status.isOK();
-		} catch (Exception ex) {
-			Logger.error("Could not rename domain", ex);
-			return false;
-		}
-	}
+    @Override
+    public boolean performFinish() {
+        AbstractDelegatingMonitorJob job = new AbstractDelegatingMonitorJob("Renaming domain...") {
+            @Override
+            protected IStatus doRun(IProgressMonitor monitor) {
+                try {
+                    getModel().renameDomain();
+                    return Status.OK_STATUS;
+                } catch (OpenShiftEndpointException e) {
+                    return ExpressUIActivator.createErrorStatus(
+                            NLS.bind("Could not rename domain \"{0}\": {1}", getModel().getDomainId(), e.getRestResponseMessages()), e);
+                } catch (Exception e) {
+                    return ExpressUIActivator.createErrorStatus(NLS.bind("Could not rename domain {0}", getModel().getDomainId()), e);
+                }
+            }
+        };
+        try {
+            IStatus status = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
+            return status.isOK();
+        } catch (Exception ex) {
+            Logger.error("Could not rename domain", ex);
+            return false;
+        }
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new EditDomainWizardPage(getModel(), this));
-	}
+    @Override
+    public void addPages() {
+        addPage(new EditDomainWizardPage(getModel(), this));
+    }
 }

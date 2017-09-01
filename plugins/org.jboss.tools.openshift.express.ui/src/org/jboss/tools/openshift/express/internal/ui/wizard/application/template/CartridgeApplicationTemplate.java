@@ -23,54 +23,53 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class CartridgeApplicationTemplate extends AbstractApplicationTemplate implements ICartridgeApplicationTemplate {
 
-	private IStandaloneCartridge cartridge;
+    private IStandaloneCartridge cartridge;
 
-	public CartridgeApplicationTemplate(IStandaloneCartridge cartridge) {
-		super(cartridge.getDisplayName(), cartridge.getDescription());
-		this.cartridge = cartridge;
-	}
+    public CartridgeApplicationTemplate(IStandaloneCartridge cartridge) {
+        super(cartridge.getDisplayName(), cartridge.getDescription());
+        this.cartridge = cartridge;
+    }
 
-	@Override
-	public ICartridge getStandaloneCartridge() {
-		return cartridge;
-	}
-	
-	@Override
-	public Set<ICartridge> getAllCartridges() {
-		return Collections.<ICartridge> singleton(cartridge);
-	}
-	
-	@Override
-	public boolean canAddRemoveCartridges() {
-		return true;
-	}
+    @Override
+    public ICartridge getStandaloneCartridge() {
+        return cartridge;
+    }
 
-	@Override
-	public String getInitialGitUrl() {
-		return null;
-	}
+    @Override
+    public Set<ICartridge> getAllCartridges() {
+        return Collections.<ICartridge>singleton(cartridge);
+    }
 
-	@Override
-	public boolean isCodeAnything() {
-		return cartridge.isDownloadable();
-	}
-	
-	@Override
-	public boolean isMatching(String expression) {
-		if (super.isMatching(expression)) {
-			return true;
-		}
+    @Override
+    public boolean canAddRemoveCartridges() {
+        return true;
+    }
 
-		if (cartridge == null) {
-			return false;
-		}
+    @Override
+    public String getInitialGitUrl() {
+        return null;
+    }
 
-		return isMatching(
-				StringUtils.toLowerCase(expression), StringUtils.toLowerCase(cartridge.getName()));
-	}
+    @Override
+    public boolean isCodeAnything() {
+        return cartridge.isDownloadable();
+    }
 
-	@Override
-	public boolean isInitialGitUrlEditable() {
-		return true;
-	}
+    @Override
+    public boolean isMatching(String expression) {
+        if (super.isMatching(expression)) {
+            return true;
+        }
+
+        if (cartridge == null) {
+            return false;
+        }
+
+        return isMatching(StringUtils.toLowerCase(expression), StringUtils.toLowerCase(cartridge.getName()));
+    }
+
+    @Override
+    public boolean isInitialGitUrlEditable() {
+        return true;
+    }
 }

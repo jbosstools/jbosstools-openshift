@@ -20,35 +20,34 @@ import org.eclipse.core.databinding.conversion.Converter;
  * @author Andre Dietisheim
  */
 public class ObservableTreeItem2ModelConverter extends Converter {
-	
-	public ObservableTreeItem2ModelConverter() {
-		this(Object.class);
-	}
 
-	public ObservableTreeItem2ModelConverter(Class<?> toType) {
-		super(ObservableTreeItem.class, toType);
-	}
+    public ObservableTreeItem2ModelConverter() {
+        this(Object.class);
+    }
 
-	@Override
-	public Object convert(Object fromObject) {
-		if (!(fromObject instanceof ObservableTreeItem)) {
-			return fromObject;
-		} else {
-			return ((ObservableTreeItem) fromObject).getModel();
-		}
-	}
+    public ObservableTreeItem2ModelConverter(Class<?> toType) {
+        super(ObservableTreeItem.class, toType);
+    }
 
-	@SuppressWarnings("unchecked")
-	public <T> List<T> convert(List<ObservableTreeItem> items) {
-		if (items == null
-				|| items.size() == 0) {
-			return Collections.emptyList();
-		}
-		ArrayList<T> models = new ArrayList<>();
-		for (ObservableTreeItem item : items) {
-			models.add((T) item.getModel());
-		}
-		return models;
-	}
+    @Override
+    public Object convert(Object fromObject) {
+        if (!(fromObject instanceof ObservableTreeItem)) {
+            return fromObject;
+        } else {
+            return ((ObservableTreeItem)fromObject).getModel();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> List<T> convert(List<ObservableTreeItem> items) {
+        if (items == null || items.size() == 0) {
+            return Collections.emptyList();
+        }
+        ArrayList<T> models = new ArrayList<>();
+        for (ObservableTreeItem item : items) {
+            models.add((T)item.getModel());
+        }
+        return models;
+    }
 
 }

@@ -24,33 +24,33 @@ import com.openshift.restclient.model.IPort;
  */
 public class PortSpecAdapterTest {
 
-	@Test
-	public void testFullPortSpec() {
-		String spec = "8080/tcp";
-		IPort port = new PortSpecAdapter(spec);
-		assertEquals(8080, port.getContainerPort());
-		assertEquals("TCP", port.getProtocol());
-		assertEquals("8080-tcp", port.getName());
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testEmptyString() {
-		new PortSpecAdapter("");
-	}
+    @Test
+    public void testFullPortSpec() {
+        String spec = "8080/tcp";
+        IPort port = new PortSpecAdapter(spec);
+        assertEquals(8080, port.getContainerPort());
+        assertEquals("TCP", port.getProtocol());
+        assertEquals("8080-tcp", port.getName());
+    }
 
-	@Test(expected=IllegalArgumentException.class)
-	public void testNullString() {
-		new PortSpecAdapter(null);
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testEmptyString() {
+        new PortSpecAdapter("");
+    }
 
-	@Test(expected=IllegalArgumentException.class)
-	public void testMissingProtocol() {
-		new PortSpecAdapter("8080");
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullString() {
+        new PortSpecAdapter(null);
+    }
 
-	@Test(expected=IllegalArgumentException.class)
-	public void testNonNumericPort() {
-		new PortSpecAdapter("foo/tcp");
-	}
+    @Test(expected = IllegalArgumentException.class)
+    public void testMissingProtocol() {
+        new PortSpecAdapter("8080");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNonNumericPort() {
+        new PortSpecAdapter("foo/tcp");
+    }
 
 }

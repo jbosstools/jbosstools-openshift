@@ -22,19 +22,19 @@ import com.openshift.client.OpenShiftException;
  */
 public interface ISSHKeyWizardPageModel {
 
-	public static final String PROPERTY_NAME = "name";
+    public static final String PROPERTY_NAME = "name";
 
-	public String getName();
+    public String getName();
 
-	public void setName(String name);
+    public void setName(String name);
 
-	public boolean hasKeyName(String name);
+    public boolean hasKeyName(String name);
 
-	public boolean hasPublicKey(String publicKeyContent);
+    public boolean hasPublicKey(String publicKeyContent);
 
-	public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException;
+    public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException;
 
-	public IOpenShiftSSHKey getSSHKey();
-	
-	public File getPublicKey();
+    public IOpenShiftSSHKey getSSHKey();
+
+    public File getPublicKey();
 }

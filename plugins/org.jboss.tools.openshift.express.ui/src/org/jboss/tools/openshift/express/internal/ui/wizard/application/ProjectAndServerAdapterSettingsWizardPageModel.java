@@ -20,82 +20,78 @@ import org.jboss.tools.openshift.express.internal.ui.utils.PojoEventBridge;
  */
 public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
+    public static final String PROPERTY_APPLICATION_NAME = "applicationName";
 
-	/** whether this is a new project or not. */
-	public static final String PROPERTY_IS_NEW_PROJECT = "newProject";
+    /** whether this is a new project or not. */
+    public static final String PROPERTY_IS_NEW_PROJECT = "newProject";
 
-	/** the project name */
-	public static final String PROPERTY_PROJECT_NAME = "projectName";
+    /** the project name */
+    public static final String PROPERTY_PROJECT_NAME = "projectName";
 
-	/** whether this a server adapter should be created, or not. */
-	public static final String PROPERTY_CREATE_SERVER_ADAPTER = "createServerAdapter";
+    /** whether this a server adapter should be created, or not. */
+    public static final String PROPERTY_CREATE_SERVER_ADAPTER = "createServerAdapter";
 
-	/** whether we create a skip maven build marker */
-	public static final String PROPERTY_SKIP_MAVEN_BUILD = "skipMavenBuild";
+    /** whether we create a skip maven build marker */
+    public static final String PROPERTY_SKIP_MAVEN_BUILD = "skipMavenBuild";
 
-	private IOpenShiftApplicationWizardModel wizardModel;
+    private IOpenShiftApplicationWizardModel wizardModel;
 
-	public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftApplicationWizardModel wizardModel) {
-		this.wizardModel = wizardModel;
-		setNewProject(wizardModel.getProject() == null);
-		setCreateServerAdapter(true);
-		setupWizardModelListeners(wizardModel);
-	}
+    public ProjectAndServerAdapterSettingsWizardPageModel(IOpenShiftApplicationWizardModel wizardModel) {
+        this.wizardModel = wizardModel;
+        setNewProject(wizardModel.getProject() == null);
+        setCreateServerAdapter(true);
+        setupWizardModelListeners(wizardModel);
+    }
 
-	private void setupWizardModelListeners(IOpenShiftApplicationWizardModel wizardModel) {
-		new PojoEventBridge()
-			.listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
-			.forwardTo(PROPERTY_APPLICATION_NAME, this);
-		
-	}
+    private void setupWizardModelListeners(IOpenShiftApplicationWizardModel wizardModel) {
+        new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
+                .forwardTo(PROPERTY_APPLICATION_NAME, this);
 
-	public void setNewProject(boolean newProject) {
-		firePropertyChange(PROPERTY_IS_NEW_PROJECT, wizardModel.isNewProject(), wizardModel.setNewProject(newProject));
-		if(wizardModel.isNewProject()) {
-			setProjectName(null);
-		}
-	}
+    }
 
-	public boolean isNewProject() {
-		return wizardModel.isNewProject();
-	}
+    public void setNewProject(boolean newProject) {
+        firePropertyChange(PROPERTY_IS_NEW_PROJECT, wizardModel.isNewProject(), wizardModel.setNewProject(newProject));
+        if (wizardModel.isNewProject()) {
+            setProjectName(null);
+        }
+    }
 
-	public void setProjectName(String projectName) {
-		firePropertyChange(PROPERTY_PROJECT_NAME, wizardModel.getProjectName(), wizardModel.setProjectName(projectName));
-	}
+    public boolean isNewProject() {
+        return wizardModel.isNewProject();
+    }
 
-	public String getProjectName() {
-		return wizardModel.getProjectName();
-	}
+    public void setProjectName(String projectName) {
+        firePropertyChange(PROPERTY_PROJECT_NAME, wizardModel.getProjectName(), wizardModel.setProjectName(projectName));
+    }
 
-	public void setCreateServerAdapter(boolean createServerAdapter) {
-		firePropertyChange(
-				PROPERTY_CREATE_SERVER_ADAPTER,
-				wizardModel.isCreateServerAdapter(), wizardModel.setCreateServerAdapter(createServerAdapter));
-	}
+    public String getProjectName() {
+        return wizardModel.getProjectName();
+    }
 
-	public boolean isCreateServerAdapter() {
-		return wizardModel.isCreateServerAdapter();
-	}
+    public void setCreateServerAdapter(boolean createServerAdapter) {
+        firePropertyChange(PROPERTY_CREATE_SERVER_ADAPTER, wizardModel.isCreateServerAdapter(),
+                wizardModel.setCreateServerAdapter(createServerAdapter));
+    }
 
-	public void setSkipMavenBuild(boolean skipMavenBuild) {
-		firePropertyChange(
-				PROPERTY_SKIP_MAVEN_BUILD,
-				wizardModel.isSkipMavenBuild(), wizardModel.setSkipMavenBuild(skipMavenBuild));
-	}
+    public boolean isCreateServerAdapter() {
+        return wizardModel.isCreateServerAdapter();
+    }
 
-	public boolean isSkipMavenBuild() {
-		return wizardModel.isSkipMavenBuild();
-	}
+    public void setSkipMavenBuild(boolean skipMavenBuild) {
+        firePropertyChange(PROPERTY_SKIP_MAVEN_BUILD, wizardModel.isSkipMavenBuild(), wizardModel.setSkipMavenBuild(skipMavenBuild));
+    }
 
-	public String getApplicationName() {
-		return wizardModel.getApplicationName();
-	}
+    public boolean isSkipMavenBuild() {
+        return wizardModel.isSkipMavenBuild();
+    }
 
-	public void reset() {
-		setNewProject(wizardModel.isNewProject());
-		setProjectName(wizardModel.getProjectName());
-		setCreateServerAdapter(wizardModel.isCreateServerAdapter());
-	}
+    public String getApplicationName() {
+        return wizardModel.getApplicationName();
+    }
+
+    public void reset() {
+        setNewProject(wizardModel.isNewProject());
+        setProjectName(wizardModel.getProjectName());
+        setCreateServerAdapter(wizardModel.isCreateServerAdapter());
+    }
 }

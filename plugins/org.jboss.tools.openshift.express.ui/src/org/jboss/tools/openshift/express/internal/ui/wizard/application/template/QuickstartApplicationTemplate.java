@@ -27,137 +27,133 @@ import com.openshift.internal.client.AlternativeCartridges;
  */
 public class QuickstartApplicationTemplate extends AbstractApplicationTemplate implements IQuickstartApplicationTemplate {
 
-	private IQuickstart quickstart;
-	private Set<ICartridge> cartridges;
+    private IQuickstart quickstart;
+    private Set<ICartridge> cartridges;
 
-	public QuickstartApplicationTemplate(IQuickstart quickstart) {
-		super(quickstart.getName(), quickstart.getSummary());
-		this.quickstart = quickstart;
-		this.cartridges = getFirstAlternatives(quickstart.getSuitableCartridges());
-	}
+    public QuickstartApplicationTemplate(IQuickstart quickstart) {
+        super(quickstart.getName(), quickstart.getSummary());
+        this.quickstart = quickstart;
+        this.cartridges = getFirstAlternatives(quickstart.getSuitableCartridges());
+    }
 
-	@Override
-	public IQuickstart getQuickstart() {
-		return quickstart;
-	}
-	
-	@Override
-	public String getLanguage() {
-		return quickstart.getLanguage();
-	}
-	
-	@Override
-	public String getPageUrl() {
-		String href = quickstart.getHref();
-		if (StringUtils.isEmpty(href)) {
-			// OpenShift Enterprise has no href that points to the quickstart page.
-			// use the website instead
-			href = quickstart.getWebsite();
-		}
-		return href;
-	}
-	
-	@Override
-	public boolean hasPageUrl() {
-		return !StringUtils.isEmpty(getPageUrl()); 
-	}
-	
-	@Override
-	public String getInitialGitUrl() {
-		return quickstart.getInitialGitUrl();
-	}
+    @Override
+    public IQuickstart getQuickstart() {
+        return quickstart;
+    }
 
-	@Override
-	public List<ICartridge> getAlternativesFor(ICartridge cartridge) {
-		return quickstart.getAlternativesFor(cartridge);
-	}
+    @Override
+    public String getLanguage() {
+        return quickstart.getLanguage();
+    }
 
-	@Override
-	public Set<ICartridge> getAllCartridges() {
-		return cartridges;
-	}
+    @Override
+    public String getPageUrl() {
+        String href = quickstart.getHref();
+        if (StringUtils.isEmpty(href)) {
+            // OpenShift Enterprise has no href that points to the quickstart page.
+            // use the website instead
+            href = quickstart.getWebsite();
+        }
+        return href;
+    }
 
-	protected HashSet<ICartridge> getFirstAlternatives(List<AlternativeCartridges> allAlternatives) {
-		HashSet<ICartridge> cartridges = new HashSet<>();
-		for (AlternativeCartridges alternatives : allAlternatives) {
-			ICartridge firstAlternative = CollectionUtils.getFirstElement(alternatives.get());
-			if (firstAlternative != null) {
-				cartridges.add(firstAlternative);
-			}
-		}
-		return cartridges;
-	}
+    @Override
+    public boolean hasPageUrl() {
+        return !StringUtils.isEmpty(getPageUrl());
+    }
 
-	@Override
-	public Set<ICartridge> getEmbeddedCartridges() {
-		return getAllCartridges();
-	}
-	
-	@Override
-	public String getName() {
-		return new StringBuilder()
-			.append(super.getName())
-			.append(" (Quickstart)")
-			.toString();
-	}
+    @Override
+    public String getInitialGitUrl() {
+        return quickstart.getInitialGitUrl();
+    }
 
-	@Override
-	public List<String> getTags() {
-		if (quickstart == null) {
-			return Collections.emptyList();
-		}
-		
-		return quickstart.getTags();
-	}
-	
-	@Override
-	public String getTagsString() {
-		return StringUtils.toString(getTags());
-	}
+    @Override
+    public List<ICartridge> getAlternativesFor(ICartridge cartridge) {
+        return quickstart.getAlternativesFor(cartridge);
+    }
 
-	@Override
-	public boolean isOpenShiftMaintained() {
-		return "openshift".equals(StringUtils.toLowerCase(quickstart.getProvider()));
-	}
-	
-	@Override
-	public boolean isAutomaticSecurityUpdates() {
-		return StringUtils.isEmpty(quickstart.getInitialGitUrl());
-	}
+    @Override
+    public Set<ICartridge> getAllCartridges() {
+        return cartridges;
+    }
 
-	@Override
-	public boolean isMatching(String expression) {
-		boolean matching = super.isMatching(expression);
-		if (matching) {
-			return true;
-		}
+    protected HashSet<ICartridge> getFirstAlternatives(List<AlternativeCartridges> allAlternatives) {
+        HashSet<ICartridge> cartridges = new HashSet<>();
+        for (AlternativeCartridges alternatives : allAlternatives) {
+            ICartridge firstAlternative = CollectionUtils.getFirstElement(alternatives.get());
+            if (firstAlternative != null) {
+                cartridges.add(firstAlternative);
+            }
+        }
+        return cartridges;
+    }
 
-		return isMatchingTag(StringUtils.toLowerCase(expression));
-	}
-	
-	private boolean isMatchingTag(String expression) {
-		for (String tag : quickstart.getTags()) {
-			if (isMatching(expression, tag)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	@Override
-	public boolean canAddRemoveCartridges() {
-		return false;
-	}
+    @Override
+    public Set<ICartridge> getEmbeddedCartridges() {
+        return getAllCartridges();
+    }
 
-	@Override
-	public boolean isInitialGitUrlEditable() {
-		return false;
-	}
-	
-	@Override
-	public boolean isCodeAnything() {
-		return false;
-	}
+    @Override
+    public String getName() {
+        return new StringBuilder().append(super.getName()).append(" (Quickstart)").toString();
+    }
 
+    @Override
+    public List<String> getTags() {
+        if (quickstart == null) {
+            return Collections.emptyList();
+        }
+
+        return quickstart.getTags();
+    }
+
+    @Override
+    public String getTagsString() {
+        return StringUtils.toString(getTags());
+    }
+
+    @Override
+    public boolean isOpenShiftMaintained() {
+        return "openshift".equals(StringUtils.toLowerCase(quickstart.getProvider()));
+    }
+
+    @Override
+    public boolean isAutomaticSecurityUpdates() {
+        return StringUtils.isEmpty(quickstart.getInitialGitUrl());
+    }
+
+    @Override
+    public boolean isMatching(String expression) {
+        boolean matching = super.isMatching(expression);
+        if (matching) {
+            return true;
+        }
+
+        return isMatchingTag(StringUtils.toLowerCase(expression));
+    }
+
+    private boolean isMatchingTag(String expression) {
+        for (String tag : quickstart.getTags()) {
+            if (isMatching(expression, tag)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canAddRemoveCartridges() {
+        return false;
+    }
+
+    @Override
+    public boolean isInitialGitUrlEditable() {
+        return false;
+    }
+
+    @Override
+    public boolean isCodeAnything() {
+        return false;
+    }
 
 }

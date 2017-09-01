@@ -19,28 +19,28 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class ConnectionColumLabelProvider extends ColumnLabelProvider {
 
-	private static final String DEFAULT_MARKER = " (default)";
+    private static final String DEFAULT_MARKER = " (default)";
 
-	@Override
-	public String getText(Object element) {
-		if (!(element instanceof IConnection)) {
-			return element.toString();
-		}
-		
-		return createLabel((IConnection) element);
-	}
+    @Override
+    public String getText(Object element) {
+        if (!(element instanceof IConnection)) {
+            return element.toString();
+        }
 
-	private String createLabel(IConnection connection) {
-		StringBuilder builder = new StringBuilder();
-		String username = connection.getUsername();
-		if (!StringUtils.isEmpty(username)) {
-			builder.append(connection.getUsername()).append(" - ");
-		}
-		builder.append(connection.getHost());
-		if (connection.isDefaultHost()) {
-			builder.append(DEFAULT_MARKER);
-		}
-		return builder.toString();
-	}
+        return createLabel((IConnection)element);
+    }
+
+    private String createLabel(IConnection connection) {
+        StringBuilder builder = new StringBuilder();
+        String username = connection.getUsername();
+        if (!StringUtils.isEmpty(username)) {
+            builder.append(connection.getUsername()).append(" - ");
+        }
+        builder.append(connection.getHost());
+        if (connection.isDefaultHost()) {
+            builder.append(DEFAULT_MARKER);
+        }
+        return builder.toString();
+    }
 
 }

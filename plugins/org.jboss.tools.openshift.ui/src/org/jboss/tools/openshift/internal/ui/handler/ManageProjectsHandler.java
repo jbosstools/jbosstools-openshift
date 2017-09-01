@@ -29,22 +29,21 @@ import com.openshift.restclient.model.IResource;
  */
 public class ManageProjectsHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
-		if (connection == null) {
-			IResource resource = UIUtils.getFirstElement(selection, IResource.class);
-			if (resource != null) {
-				connection = ConnectionsRegistryUtil.getConnectionFor(resource);
-			}
-		}
-		if(connection == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No connection selected that we can manage projects for.");
-		}
-		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event),
-				new ManageProjectsWizard(connection)).open();
-		return null;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        ISelection selection = HandlerUtil.getCurrentSelection(event);
+        Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+        if (connection == null) {
+            IResource resource = UIUtils.getFirstElement(selection, IResource.class);
+            if (resource != null) {
+                connection = ConnectionsRegistryUtil.getConnectionFor(resource);
+            }
+        }
+        if (connection == null) {
+            return OpenShiftUIActivator.statusFactory().cancelStatus("No connection selected that we can manage projects for.");
+        }
+        new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), new ManageProjectsWizard(connection)).open();
+        return null;
+    }
 
 }

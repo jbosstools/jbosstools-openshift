@@ -27,15 +27,13 @@ import com.openshift.client.IApplication;
  */
 public class ImportApplicationHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
-		if (application == null) {
-			return ExpressUIActivator.createCancelStatus("Could not find the application to import");
-		}
-		WizardUtils.openWizardDialog(
-				new ImportExpressApplicationWizard(application),
-				HandlerUtil.getActiveShell(event));
-		return Status.OK_STATUS;
-	}
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
+        if (application == null) {
+            return ExpressUIActivator.createCancelStatus("Could not find the application to import");
+        }
+        WizardUtils.openWizardDialog(new ImportExpressApplicationWizard(application), HandlerUtil.getActiveShell(event));
+        return Status.OK_STATUS;
+    }
 }

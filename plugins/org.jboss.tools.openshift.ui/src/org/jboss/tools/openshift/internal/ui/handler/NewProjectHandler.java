@@ -34,31 +34,31 @@ import com.openshift.restclient.model.IProject;
  */
 public class NewProjectHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
-		if(connection == null) {
-			IProject project = UIUtils.getFirstElement(selection, IProject.class);
-			if (project != null) {
-				connection = ConnectionsRegistryUtil.getConnectionFor(project);
-			}
-		}
-		if(connection == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No connection selected"); //$NON-NLS-1$
-		}
-		openNewProjectDialog(connection, HandlerUtil.getActiveShell(event));
-		return null;
-	}
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        ISelection selection = HandlerUtil.getCurrentSelection(event);
+        Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+        if (connection == null) {
+            IProject project = UIUtils.getFirstElement(selection, IProject.class);
+            if (project != null) {
+                connection = ConnectionsRegistryUtil.getConnectionFor(project);
+            }
+        }
+        if (connection == null) {
+            return OpenShiftUIActivator.statusFactory().cancelStatus("No connection selected"); //$NON-NLS-1$
+        }
+        openNewProjectDialog(connection, HandlerUtil.getActiveShell(event));
+        return null;
+    }
 
-	public static void openNewProjectDialog(final Connection connection, final Shell shell) {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT);
-				WizardUtils.openWizardDialog(new NewProjectWizard(connection, oldProjects), shell);
-			}
-		});
-	}
+    public static void openNewProjectDialog(final Connection connection, final Shell shell) {
+        Display.getDefault().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT);
+                WizardUtils.openWizardDialog(new NewProjectWizard(connection, oldProjects), shell);
+            }
+        });
+    }
 
 }

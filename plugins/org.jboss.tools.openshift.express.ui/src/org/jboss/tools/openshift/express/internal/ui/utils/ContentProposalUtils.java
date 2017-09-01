@@ -29,56 +29,51 @@ import org.jboss.tools.common.ui.preferencevalue.StringsPreferenceValue;
  */
 public class ContentProposalUtils {
 
-	public static ContentProposalAdapter createPreferencesBacked(final Text text, String preferencesKey,
-			String pluginId) {
-		final ControlDecoration decoration = createContenProposalDecoration("History available", text);
-		final StringsPreferenceValue preferencesValues =
-				new StringsPreferenceValue(',', preferencesKey, pluginId);
-		ContentProposalAdapter proposalAdapter = createContentProposal(text, preferencesValues.get());
-		text.addFocusListener(new FocusAdapter() {
+    public static ContentProposalAdapter createPreferencesBacked(final Text text, String preferencesKey, String pluginId) {
+        final ControlDecoration decoration = createContenProposalDecoration("History available", text);
+        final StringsPreferenceValue preferencesValues = new StringsPreferenceValue(',', preferencesKey, pluginId);
+        ContentProposalAdapter proposalAdapter = createContentProposal(text, preferencesValues.get());
+        text.addFocusListener(new FocusAdapter() {
 
-			@Override
-			public void focusGained(FocusEvent e) {
-				decoration.show();
-			}
+            @Override
+            public void focusGained(FocusEvent e) {
+                decoration.show();
+            }
 
-			@Override
-			public void focusLost(FocusEvent e) {
-				decoration.hide();
-				String value = text.getText();
-				if (value != null && value.length() > 0) {
-					preferencesValues.add(text.getText());
-				}
-			}
+            @Override
+            public void focusLost(FocusEvent e) {
+                decoration.hide();
+                String value = text.getText();
+                if (value != null && value.length() > 0) {
+                    preferencesValues.add(text.getText());
+                }
+            }
 
-		});
-		return proposalAdapter;
-	}
+        });
+        return proposalAdapter;
+    }
 
-	public static ContentProposalAdapter createContentProposal(final Text text, String[] proposedValues) {
-		SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(proposedValues);
-		proposalProvider.setFiltering(true);
-		KeyStroke keyStroke = KeyStroke.getInstance(SWT.CONTROL, ' ');
-		ContentProposalAdapter proposalAdapter =
-				new ContentProposalAdapter(text, new TextContentAdapter(), proposalProvider, keyStroke, null);
-		proposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
-		return proposalAdapter;
-	}
+    public static ContentProposalAdapter createContentProposal(final Text text, String[] proposedValues) {
+        SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(proposedValues);
+        proposalProvider.setFiltering(true);
+        KeyStroke keyStroke = KeyStroke.getInstance(SWT.CONTROL, ' ');
+        ContentProposalAdapter proposalAdapter = new ContentProposalAdapter(text, new TextContentAdapter(), proposalProvider, keyStroke,
+                null);
+        proposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
+        return proposalAdapter;
+    }
 
-	public static ControlDecoration createContenProposalDecoration(String tooltip, Control control) {
-		return createDecoration(tooltip, FieldDecorationRegistry.DEC_CONTENT_PROPOSAL, SWT.RIGHT | SWT.TOP,
-				control);
-	}
+    public static ControlDecoration createContenProposalDecoration(String tooltip, Control control) {
+        return createDecoration(tooltip, FieldDecorationRegistry.DEC_CONTENT_PROPOSAL, SWT.RIGHT | SWT.TOP, control);
+    }
 
-	private static ControlDecoration createDecoration(String text, String fieldDecorationImageKey, int position,
-			Control control) {
-		ControlDecoration decoration = new ControlDecoration(control, position);
-		Image icon = FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(fieldDecorationImageKey).getImage();
-		decoration.setImage(icon);
-		decoration.setDescriptionText(text);
-		decoration.setShowHover(true);
-		decoration.hide();
-		return decoration;
-	}
+    private static ControlDecoration createDecoration(String text, String fieldDecorationImageKey, int position, Control control) {
+        ControlDecoration decoration = new ControlDecoration(control, position);
+        Image icon = FieldDecorationRegistry.getDefault().getFieldDecoration(fieldDecorationImageKey).getImage();
+        decoration.setImage(icon);
+        decoration.setDescriptionText(text);
+        decoration.setShowHover(true);
+        decoration.hide();
+        return decoration;
+    }
 }

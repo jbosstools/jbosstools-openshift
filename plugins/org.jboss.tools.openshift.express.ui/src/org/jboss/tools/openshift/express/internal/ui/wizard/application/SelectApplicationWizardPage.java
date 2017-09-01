@@ -51,135 +51,124 @@ import com.openshift.client.IApplication;
  */
 public class SelectApplicationWizardPage extends AbstractOpenShiftWizardPage {
 
-	private static final String COMMON_VIEWER_ID = "org.jboss.tools.openshift.express.internal.ui.wizard.application.SelectApplicationWizardPage";
-	private final SelectApplicationWizardPageModel pageModel;
-	private TreeViewer applicationsTreeViewer;
+    private static final String COMMON_VIEWER_ID = "org.jboss.tools.openshift.express.internal.ui.wizard.application.SelectApplicationWizardPage";
+    private final SelectApplicationWizardPageModel pageModel;
+    private TreeViewer applicationsTreeViewer;
 
-	public SelectApplicationWizardPage(OpenShiftApplicationWizardModel wizardModel, IWizard wizard) {
-		super("Select Existing Application", "Please choose the existing application that you want to import.", "Select Existing Application", wizard);
-		this.pageModel = new SelectApplicationWizardPageModel(wizardModel);
-	}
+    public SelectApplicationWizardPage(OpenShiftApplicationWizardModel wizardModel, IWizard wizard) {
+        super("Select Existing Application", "Please choose the existing application that you want to import.",
+                "Select Existing Application", wizard);
+        this.pageModel = new SelectApplicationWizardPageModel(wizardModel);
+    }
 
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(parent);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(2).applyTo(parent);
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(parent);
+        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(parent);
 
-		Label existingApplicationsLabel = new Label(parent, SWT.NONE);
-		existingApplicationsLabel.setText("Existing Applications:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).span(2, 1).applyTo(existingApplicationsLabel);
+        Label existingApplicationsLabel = new Label(parent, SWT.NONE);
+        existingApplicationsLabel.setText("Existing Applications:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(2, 1).applyTo(existingApplicationsLabel);
 
-		// applications tree
-		this.applicationsTreeViewer = createApplicationsTree(parent, dbc);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT, 200).span(1,4)
-				.applyTo(applicationsTreeViewer.getControl());
+        // applications tree
+        this.applicationsTreeViewer = createApplicationsTree(parent, dbc);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(SWT.DEFAULT, 200).span(1, 4)
+                .applyTo(applicationsTreeViewer.getControl());
 
-		Binding selectedApplicationBinding = ValueBindingBuilder
-				.bind(ViewerProperties.singlePostSelection().observe(applicationsTreeViewer))
-				.validatingAfterGet(new IValidator() {
-					
-					@Override
-					public IStatus validate(Object value) {
-						if (!(value instanceof IApplication)) {
-							return ValidationStatus.cancel("Please choose the existing application that you want to import.");
-						}
-						return ValidationStatus.ok();
-					}
-				})
-				.to(BeanProperties.value(SelectApplicationWizardPageModel.PROPERTY_SELECTED_APPLICATION).observe(pageModel))
-				.in(dbc);
-			
-		ControlDecorationSupport.create(
-				selectedApplicationBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		
-		// buttons
-		Button detailsButton = new Button(parent, SWT.PUSH);
-		detailsButton.setText("De&tails...");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).hint(80, SWT.DEFAULT)
-				.applyTo(detailsButton);
-		DataBindingUtils.bindEnablementToValidationStatus(detailsButton, IStatus.OK, dbc, selectedApplicationBinding);
-		detailsButton.addSelectionListener(onDetails(dbc));
-		
-		Control filler = new Label(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.applyTo(filler);
+        Binding selectedApplicationBinding = ValueBindingBuilder
+                .bind(ViewerProperties.singlePostSelection().observe(applicationsTreeViewer)).validatingAfterGet(new IValidator() {
 
-		Button refreshButton = new Button(parent, SWT.PUSH);
-		refreshButton.setText("R&efresh");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(refreshButton);
-		refreshButton.addSelectionListener(onRefresh(dbc));
+                    @Override
+                    public IStatus validate(Object value) {
+                        if (!(value instanceof IApplication)) {
+                            return ValidationStatus.cancel("Please choose the existing application that you want to import.");
+                        }
+                        return ValidationStatus.ok();
+                    }
+                }).to(BeanProperties.value(SelectApplicationWizardPageModel.PROPERTY_SELECTED_APPLICATION).observe(pageModel)).in(dbc);
 
-		filler = new Label(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.grab(false, true).applyTo(filler);
-		
-	}
+        ControlDecorationSupport.create(selectedApplicationBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 
-	protected TreeViewer createApplicationsTree(Composite parent, DataBindingContext dbc) {
-		CommonViewer commonViewer =
-				new CommonViewer(COMMON_VIEWER_ID, parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
-		INavigatorContentService contentService =
-				NavigatorContentServiceFactory.INSTANCE.createContentService(COMMON_VIEWER_ID, commonViewer);
-		contentService.createCommonContentProvider();
-		contentService.createCommonLabelProvider();
-		
-		return commonViewer;
-	}
-	
-	@Override
-	protected void onPageActivated(DataBindingContext dbc) {
-		pageModel.loadOpenShiftResources();
-		setViewerInput(pageModel);
-	}
+        // buttons
+        Button detailsButton = new Button(parent, SWT.PUSH);
+        detailsButton.setText("De&tails...");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).hint(80, SWT.DEFAULT).applyTo(detailsButton);
+        DataBindingUtils.bindEnablementToValidationStatus(detailsButton, IStatus.OK, dbc, selectedApplicationBinding);
+        detailsButton.addSelectionListener(onDetails(dbc));
 
-	private SelectionAdapter onRefresh(final DataBindingContext dbc) {
-		return new SelectionAdapter() {
+        Control filler = new Label(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().applyTo(filler);
 
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				try {
-					WizardUtils.runInWizard(new Job("Loading applications...") {
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-							pageModel.refresh(); 
-							setViewerInput(pageModel);
-							return Status.OK_STATUS;
-						}
+        Button refreshButton = new Button(parent, SWT.PUSH);
+        refreshButton.setText("R&efresh");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(refreshButton);
+        refreshButton.addSelectionListener(onRefresh(dbc));
 
-					}, getContainer(), dbc);
-				} catch (Exception e) {
-					Logger.error("Failed to refresh applications list", e);
-					// ignore
-				}
-			}
-		};
-	}
+        filler = new Label(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().grab(false, true).applyTo(filler);
 
-	private SelectionAdapter onDetails(DataBindingContext dbc) {
-		return new SelectionAdapter() {
+    }
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				new ApplicationDetailsDialog(pageModel.getSelectedApplication(), getShell()).open();
-			}
-		};
-	}
+    protected TreeViewer createApplicationsTree(Composite parent, DataBindingContext dbc) {
+        CommonViewer commonViewer = new CommonViewer(COMMON_VIEWER_ID, parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
+        INavigatorContentService contentService = NavigatorContentServiceFactory.INSTANCE.createContentService(COMMON_VIEWER_ID,
+                commonViewer);
+        contentService.createCommonContentProvider();
+        contentService.createCommonLabelProvider();
 
-	private void setViewerInput(final SelectApplicationWizardPageModel pageModel) {
-		getShell().getDisplay().syncExec(new Runnable() {
+        return commonViewer;
+    }
 
-			@Override
-			public void run() {
-				applicationsTreeViewer.setInput(pageModel.getConnection());
-			}
-		});
-	}
+    @Override
+    protected void onPageActivated(DataBindingContext dbc) {
+        pageModel.loadOpenShiftResources();
+        setViewerInput(pageModel);
+    }
 
-	public IApplication getSelectedApplication() {
-		return pageModel.getSelectedApplication();
-	}
+    private SelectionAdapter onRefresh(final DataBindingContext dbc) {
+        return new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent event) {
+                try {
+                    WizardUtils.runInWizard(new Job("Loading applications...") {
+                        @Override
+                        protected IStatus run(IProgressMonitor monitor) {
+                            pageModel.refresh();
+                            setViewerInput(pageModel);
+                            return Status.OK_STATUS;
+                        }
+
+                    }, getContainer(), dbc);
+                } catch (Exception e) {
+                    Logger.error("Failed to refresh applications list", e);
+                    // ignore
+                }
+            }
+        };
+    }
+
+    private SelectionAdapter onDetails(DataBindingContext dbc) {
+        return new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                new ApplicationDetailsDialog(pageModel.getSelectedApplication(), getShell()).open();
+            }
+        };
+    }
+
+    private void setViewerInput(final SelectApplicationWizardPageModel pageModel) {
+        getShell().getDisplay().syncExec(new Runnable() {
+
+            @Override
+            public void run() {
+                applicationsTreeViewer.setInput(pageModel.getConnection());
+            }
+        });
+    }
+
+    public IApplication getSelectedApplication() {
+        return pageModel.getSelectedApplication();
+    }
 }

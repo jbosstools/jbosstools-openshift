@@ -40,72 +40,56 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
  */
 public class EnvironmentVariableWizardPage extends AbstractOpenShiftWizardPage {
 
-	private EnvironmentVariableWizardModel model;
+    private EnvironmentVariableWizardModel model;
 
-	public EnvironmentVariableWizardPage(EnvironmentVariableWizardModel model, IWizard wizard) {
-		super((model.isEditing()? "Edit an existing environment variable" : "Add a new environment variable"),
-				"Please choose a name and a value for environment variable", "",
-				wizard);
-		this.model = model;
-	}
+    public EnvironmentVariableWizardPage(EnvironmentVariableWizardModel model, IWizard wizard) {
+        super((model.isEditing() ? "Edit an existing environment variable" : "Add a new environment variable"),
+                "Please choose a name and a value for environment variable", "", wizard);
+        this.model = model;
+    }
 
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults()
-				.margins(10, 10).applyTo(parent);
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
-		Group addApplicationEnvironmentVariableGroup = new Group(parent, SWT.NONE);
-		addApplicationEnvironmentVariableGroup.setText("Enviroment Variable");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(addApplicationEnvironmentVariableGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(4).margins(6, 6).applyTo(addApplicationEnvironmentVariableGroup);
+        Group addApplicationEnvironmentVariableGroup = new Group(parent, SWT.NONE);
+        addApplicationEnvironmentVariableGroup.setText("Enviroment Variable");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(addApplicationEnvironmentVariableGroup);
+        GridLayoutFactory.fillDefaults().numColumns(4).margins(6, 6).applyTo(addApplicationEnvironmentVariableGroup);
 
-		Label nameLabel = new Label(addApplicationEnvironmentVariableGroup, SWT.NONE);
-		nameLabel.setText("Name:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
+        Label nameLabel = new Label(addApplicationEnvironmentVariableGroup, SWT.NONE);
+        nameLabel.setText("Name:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 
-		Text nameText = new Text(addApplicationEnvironmentVariableGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
-		Binding nameBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(nameText))
-				.validatingAfterConvert(new RequiredStringValidator("Name") {
+        Text nameText = new Text(addApplicationEnvironmentVariableGroup, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
+        Binding nameBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(nameText))
+                .validatingAfterConvert(new RequiredStringValidator("Name") {
 
-					@Override
-					public IStatus validateString(String value) {
-						if (model.isExistingName(value)) {
-							return ValidationStatus.error(NLS.bind("There's already an environment variable with the name {0}", value));
-						}
-						if (!StringUtils.startsWithLetterOrUnderscore(value)
-								|| !StringUtils.isAlphaNumericOrUnderscore(value)) {
-							return ValidationStatus
-									.error("Name can only contain letters, digits and underscore and can't begin with a digit.");
-						}
-						return ValidationStatus.ok();
-					}
+                    @Override
+                    public IStatus validateString(String value) {
+                        if (model.isExistingName(value)) {
+                            return ValidationStatus.error(NLS.bind("There's already an environment variable with the name {0}", value));
+                        }
+                        if (!StringUtils.startsWithLetterOrUnderscore(value) || !StringUtils.isAlphaNumericOrUnderscore(value)) {
+                            return ValidationStatus
+                                    .error("Name can only contain letters, digits and underscore and can't begin with a digit.");
+                        }
+                        return ValidationStatus.ok();
+                    }
 
-				})
-				.to(BeanProperties.value(EnvironmentVariableWizardModel.PROPERTY_NAME).observe(model))
-				.in(dbc);
-		ControlDecorationSupport.create(
-				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+                }).to(BeanProperties.value(EnvironmentVariableWizardModel.PROPERTY_NAME).observe(model)).in(dbc);
+        ControlDecorationSupport.create(nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		Label valueLabel = new Label(addApplicationEnvironmentVariableGroup, SWT.NONE);
-		valueLabel.setText("Value:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
+        Label valueLabel = new Label(addApplicationEnvironmentVariableGroup, SWT.NONE);
+        valueLabel.setText("Value:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
 
-		Text valueText = new Text(addApplicationEnvironmentVariableGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
-		Binding valeuBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(valueText))
-				.validatingAfterConvert(new RequiredStringValidator("Value"))
-				.to(BeanProperties.value(EnvironmentVariableWizardModel.PROPERTY_VALUE).observe(model))
-				.in(dbc);
-		ControlDecorationSupport.create(
-				valeuBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-	}
+        Text valueText = new Text(addApplicationEnvironmentVariableGroup, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
+        Binding valeuBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(valueText))
+                .validatingAfterConvert(new RequiredStringValidator("Value"))
+                .to(BeanProperties.value(EnvironmentVariableWizardModel.PROPERTY_VALUE).observe(model)).in(dbc);
+        ControlDecorationSupport.create(valeuBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+    }
 }

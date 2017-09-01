@@ -18,24 +18,24 @@ import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 
 public class WizardFragmentUtils {
 
-	public static WizardPage getWizardPage(IWizardHandle handle) {
-		return (WizardPage) handle;
-	}
+    public static WizardPage getWizardPage(IWizardHandle handle) {
+        return (WizardPage)handle;
+    }
 
-	public static IWizard getWizard(IWizardHandle handle) {
-		IWizardPage page = getWizardPage(handle);
-		if (page == null) {
-			return null;
-		}
-		return page.getWizard();
-	}
+    public static IWizard getWizard(IWizardHandle handle) {
+        IWizardPage page = getWizardPage(handle);
+        if (page == null) {
+            return null;
+        }
+        return page.getWizard();
+    }
 
-	public static WizardDialog getWizardDialog(IWizardHandle handle) {
-		IWizard wizard = getWizard(handle);
-		if (wizard == null) {
-			return null;
-		}
-		return (WizardDialog) wizard.getContainer();
-	}
-	
+    public static WizardDialog getWizardDialog(IWizardHandle handle) {
+        IWizard wizard = getWizard(handle);
+        if (wizard == null) {
+            return null;
+        }
+        return (WizardDialog)wizard.getContainer();
+    }
+
 }

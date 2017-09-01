@@ -17,12 +17,12 @@ package org.jboss.tools.openshift.internal.ui.models;
  * @author Thomas Mäder
  */
 public interface IElementListener {
-	/**
-	 * Notification that the given element has changed in some way. It is up to
-	 * the listener to determine what exactly has changed.
-	 * 
-	 * @param element
-	 *            the changed element.
-	 */
-	void elementChanged(IOpenshiftUIElement<?, ?> element);
+    /**
+     * Notification that the given element has changed in some way. It is up to
+     * the listener to determine what exactly has changed.
+     * 
+     * @param element
+     *            the changed element.
+     */
+    void elementChanged(IOpenshiftUIElement<?, ?> element);
 }

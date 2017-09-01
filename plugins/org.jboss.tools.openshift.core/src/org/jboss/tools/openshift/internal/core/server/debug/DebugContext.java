@@ -24,112 +24,112 @@ import com.openshift.restclient.model.IPod;
  * @author Andre Dietisheim
  */
 public class DebugContext {
-	
-	public static final String DEFAULT_DEVMODE_KEY = "DEV_MODE";
-	public static final String DEFAULT_DEBUG_PORT_KEY = "DEBUG_PORT";
-	public static final String DEFAULT_DEBUG_PORT = "8787";
 
-	public static final int NO_DEBUG_PORT = -1;
+    public static final String DEFAULT_DEVMODE_KEY = "DEV_MODE";
+    public static final String DEFAULT_DEBUG_PORT_KEY = "DEBUG_PORT";
+    public static final String DEFAULT_DEBUG_PORT = "8787";
 
-	private IServer server;
-	private boolean debugEnabled;
-	private boolean devmodeEnabled;
-	private String devmodeKey;
-	private String debugPortKey;
-	private int debugPort = NO_DEBUG_PORT;
-	private IDebugListener listener;
-	private IPod pod;
+    public static final int NO_DEBUG_PORT = -1;
 
-	public DebugContext(IServer server) {
-		this(server, DEFAULT_DEVMODE_KEY, DEFAULT_DEBUG_PORT_KEY, DEFAULT_DEBUG_PORT);
-	}
+    private IServer server;
+    private boolean debugEnabled;
+    private boolean devmodeEnabled;
+    private String devmodeKey;
+    private String debugPortKey;
+    private int debugPort = NO_DEBUG_PORT;
+    private IDebugListener listener;
+    private IPod pod;
 
-	/**
-	 * Creates a debugging context instance for the given server behaviour with the
-	 * given environment keys/values that should be used in the OpenShift deployment
-	 * config.
-	 * 
-	 * @param behaviour the server behaviour that will be used for this context.
-	 * @param devmodeKey
-	 *            the env key to use to get/set devmode in the deployment config
-	 * @param debugPortKey
-	 *            the env key to use to get/set the debug port in the deployment
-	 *            config
-	 * @param debugPort
-	 *            the debug port to use in the deployment config
-	 * @return
-	 */
-	public DebugContext(IServer server, String devmodeKey, String debugPortKey, String debugPort) {
-		Assert.isNotNull(server);
-		Assert.isNotNull(devmodeKey);
-		Assert.isNotNull(debugPortKey);
-		Assert.isNotNull(debugPort);
+    public DebugContext(IServer server) {
+        this(server, DEFAULT_DEVMODE_KEY, DEFAULT_DEBUG_PORT_KEY, DEFAULT_DEBUG_PORT);
+    }
 
-		this.server = server;
-		this.devmodeKey = devmodeKey;
-		this.debugPortKey = debugPortKey;
-		this.debugPort = getDebugPort(debugPort);
-	}
+    /**
+     * Creates a debugging context instance for the given server behaviour with the
+     * given environment keys/values that should be used in the OpenShift deployment
+     * config.
+     * 
+     * @param behaviour the server behaviour that will be used for this context.
+     * @param devmodeKey
+     *            the env key to use to get/set devmode in the deployment config
+     * @param debugPortKey
+     *            the env key to use to get/set the debug port in the deployment
+     *            config
+     * @param debugPort
+     *            the debug port to use in the deployment config
+     * @return
+     */
+    public DebugContext(IServer server, String devmodeKey, String debugPortKey, String debugPort) {
+        Assert.isNotNull(server);
+        Assert.isNotNull(devmodeKey);
+        Assert.isNotNull(debugPortKey);
+        Assert.isNotNull(debugPort);
 
-	public IServer getServer() {
-		return server;
-	}
+        this.server = server;
+        this.devmodeKey = devmodeKey;
+        this.debugPortKey = debugPortKey;
+        this.debugPort = getDebugPort(debugPort);
+    }
 
-	public boolean isDebugEnabled() {
-		return debugEnabled;
-	}
+    public IServer getServer() {
+        return server;
+    }
 
-	protected void setDevmodeEnabled(boolean devmodeEnabled) {
-		this.devmodeEnabled = devmodeEnabled;
-	}
+    public boolean isDebugEnabled() {
+        return debugEnabled;
+    }
 
-	public boolean isDevmodeEnabled() {
-		return devmodeEnabled;
-	}
+    protected void setDevmodeEnabled(boolean devmodeEnabled) {
+        this.devmodeEnabled = devmodeEnabled;
+    }
 
-	protected void setDebugEnabled(boolean debugEnabled) {
-		this.debugEnabled = debugEnabled;
-		this.devmodeEnabled = debugEnabled;
-	}
+    public boolean isDevmodeEnabled() {
+        return devmodeEnabled;
+    }
 
-	public int getDebugPort() {
-		return debugPort;
-	}
+    protected void setDebugEnabled(boolean debugEnabled) {
+        this.debugEnabled = debugEnabled;
+        this.devmodeEnabled = debugEnabled;
+    }
 
-	public IPod getPod() {
-		return this.pod;
-	}
+    public int getDebugPort() {
+        return debugPort;
+    }
 
-	public void setDebugListener(IDebugListener listener) {
-		this.listener = listener;
-	}
+    public IPod getPod() {
+        return this.pod;
+    }
 
-	IDebugListener getDebugListener() {
-		return listener;
-	}
+    public void setDebugListener(IDebugListener listener) {
+        this.listener = listener;
+    }
 
-	String getDevmodeKey() {
-		return devmodeKey;
-	}
+    IDebugListener getDebugListener() {
+        return listener;
+    }
 
-	String getDebugPortKey() {
-		return debugPortKey;
-	}
+    String getDevmodeKey() {
+        return devmodeKey;
+    }
 
-	void setPod(IPod pod) {
-		this.pod = pod;
-	}
+    String getDebugPortKey() {
+        return debugPortKey;
+    }
 
-	int getDebugPort(String debugPort) {
-		if (StringUtils.isBlank(debugPort)) {
-			return NO_DEBUG_PORT;
-		}
-		
-		try {
-			return Integer.parseInt(debugPort);
-		} catch(NumberFormatException e) {
-			return NO_DEBUG_PORT;
-		}
-	}
+    void setPod(IPod pod) {
+        this.pod = pod;
+    }
+
+    int getDebugPort(String debugPort) {
+        if (StringUtils.isBlank(debugPort)) {
+            return NO_DEBUG_PORT;
+        }
+
+        try {
+            return Integer.parseInt(debugPort);
+        } catch (NumberFormatException e) {
+            return NO_DEBUG_PORT;
+        }
+    }
 
 }

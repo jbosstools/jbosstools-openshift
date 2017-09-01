@@ -21,21 +21,21 @@ import org.eclipse.wst.server.core.IServerAttributes;
  */
 public class ExpressProjectAdapterFactory implements IAdapterFactory {
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
-		if (adapterType == IProject.class) {
-			if (adaptableObject instanceof IProject) {
-				return (T) adaptableObject;
-			} else if (adaptableObject instanceof IServer) {
-				return (T) ExpressServerUtils.getDeployProject((IServerAttributes) adaptableObject);
-			}
-		}
-		return null;
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
+        if (adapterType == IProject.class) {
+            if (adaptableObject instanceof IProject) {
+                return (T)adaptableObject;
+            } else if (adaptableObject instanceof IServer) {
+                return (T)ExpressServerUtils.getDeployProject((IServerAttributes)adaptableObject);
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public Class<?>[] getAdapterList() {
-		return new Class[] { IProject.class };
-	}
+    @Override
+    public Class<?>[] getAdapterList() {
+        return new Class[] { IProject.class };
+    }
 }

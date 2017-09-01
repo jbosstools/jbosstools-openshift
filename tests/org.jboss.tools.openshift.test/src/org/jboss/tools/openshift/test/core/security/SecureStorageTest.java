@@ -31,82 +31,82 @@ import org.junit.Test;
 @Ignore
 public class SecureStorageTest {
 
-	private static IStoreKey key;
-	private static SecureStore store;
+    private static IStoreKey key;
+    private static SecureStore store;
 
-	@BeforeClass
-	public static void setUp() throws CoreException {
-		key = new OpenShiftSecureStorageKey("org.jboss.tools.openshift.test", "localhost", "foobar");
-		store = new SecureStore(key);
-	}
+    @BeforeClass
+    public static void setUp() throws CoreException {
+        key = new OpenShiftSecureStorageKey("org.jboss.tools.openshift.test", "localhost", "foobar");
+        store = new SecureStore(key);
+    }
 
-	@After
-	public void tearDown() throws SecureStoreException {
-		store.clear();
-	}
-	
-	@Test
-	public void shouldRetrieveValue() throws SecureStoreException {
-		// pre-condition
-		String password = store.get("password");
-		assertTrue(password == null);
+    @After
+    public void tearDown() throws SecureStoreException {
+        store.clear();
+    }
 
-		// operation
-		store.put("password", "gingerbred");
-		
-		// verification
-		assertEquals("gingerbred", store.get("password"));
-	}
+    @Test
+    public void shouldRetrieveValue() throws SecureStoreException {
+        // pre-condition
+        String password = store.get("password");
+        assertTrue(password == null);
 
-	@Test
-	public void shouldRemoveValue() throws SecureStoreException {
-		// pre-condition
-		store.put("password", "honey");
+        // operation
+        store.put("password", "gingerbred");
 
-		// operation
-		store.remove("password");
-		
-		// verification
-		assertTrue(store.get("password") == null);
-	}
+        // verification
+        assertEquals("gingerbred", store.get("password"));
+    }
 
-	@Test
-	public void shouldUpdateValue() throws SecureStoreException {
-		// pre-condition
-		store.put("password", "chocolate");
-		assertEquals("chocolate", store.get("password"));
+    @Test
+    public void shouldRemoveValue() throws SecureStoreException {
+        // pre-condition
+        store.put("password", "honey");
 
-		// operation
-		store.put("password", "tabasco");
+        // operation
+        store.remove("password");
 
-		// verification
-		assertEquals("tabasco", store.get("password"));
-	}
+        // verification
+        assertTrue(store.get("password") == null);
+    }
 
-	@Test
-	public void shouldStoreDistinctValues() throws SecureStoreException {
-		// pre-condition
-		store.put("password", "chocolate");
-		
-		// operation
-		store.put("nonsense", "foobar");
-		
-		// verification
-		assertEquals("foobar", store.get("nonsense"));
-	}
-	
-	@Test
-	public void shouldRemoveNode() throws SecureStoreException {
-		// pre-condition
-		IStoreKey key = new OpenShiftSecureStorageKey("org.jboss.tools.openshift.test", "localhost", "foobar");
-		SecureStore store = new SecureStore(key);
-		store.put("password", "chocolate");
-		assertTrue(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
-		
-		// operation
-		store.removeNode();
-		
-		// verification
-		assertFalse(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
-	}
+    @Test
+    public void shouldUpdateValue() throws SecureStoreException {
+        // pre-condition
+        store.put("password", "chocolate");
+        assertEquals("chocolate", store.get("password"));
+
+        // operation
+        store.put("password", "tabasco");
+
+        // verification
+        assertEquals("tabasco", store.get("password"));
+    }
+
+    @Test
+    public void shouldStoreDistinctValues() throws SecureStoreException {
+        // pre-condition
+        store.put("password", "chocolate");
+
+        // operation
+        store.put("nonsense", "foobar");
+
+        // verification
+        assertEquals("foobar", store.get("nonsense"));
+    }
+
+    @Test
+    public void shouldRemoveNode() throws SecureStoreException {
+        // pre-condition
+        IStoreKey key = new OpenShiftSecureStorageKey("org.jboss.tools.openshift.test", "localhost", "foobar");
+        SecureStore store = new SecureStore(key);
+        store.put("password", "chocolate");
+        assertTrue(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
+
+        // operation
+        store.removeNode();
+
+        // verification
+        assertFalse(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
+    }
 }

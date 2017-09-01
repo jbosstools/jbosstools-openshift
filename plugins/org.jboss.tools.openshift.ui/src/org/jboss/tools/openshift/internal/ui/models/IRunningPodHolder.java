@@ -12,5 +12,5 @@ package org.jboss.tools.openshift.internal.ui.models;
  * Running pods may be adapted to this interface with Adapters.adapt().
  */
 public interface IRunningPodHolder {
-	public IOpenshiftUIElement<?, IOpenshiftUIElement<?,?>> getPodUIElement();
+    public IOpenshiftUIElement<?, IOpenshiftUIElement<?, ?>> getPodUIElement();
 }

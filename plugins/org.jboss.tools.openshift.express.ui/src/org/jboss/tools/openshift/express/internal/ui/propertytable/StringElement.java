@@ -12,34 +12,34 @@ package org.jboss.tools.openshift.express.internal.ui.propertytable;
 
 public class StringElement extends ContainerElement {
 
-	private final String value;
-	private final boolean isLink;
+    private final String value;
+    private final boolean isLink;
 
-	public StringElement(String property, String value) {
-		this(property, value, false, null);
-	}
-	
-	public StringElement(String property, String value, ContainerElement parent) {
-		this(property, value, false, parent);
-	}
+    public StringElement(String property, String value) {
+        this(property, value, false, null);
+    }
 
-	public StringElement(String property, String value, boolean isLink) {
-		this(property, value, isLink, null);
-	}
+    public StringElement(String property, String value, ContainerElement parent) {
+        this(property, value, false, parent);
+    }
 
-	public StringElement(String property, String value, boolean isLink, ContainerElement parent) {
-		super(property, parent);
-		this.value = value;
-		this.isLink = isLink;
-	}
+    public StringElement(String property, String value, boolean isLink) {
+        this(property, value, isLink, null);
+    }
 
-	@Override
-	public final String getValue() {
-		return value;
-	}
+    public StringElement(String property, String value, boolean isLink, ContainerElement parent) {
+        super(property, parent);
+        this.value = value;
+        this.isLink = isLink;
+    }
 
-	@Override
-	public boolean isLink() {
-		return isLink;
-	}
+    @Override
+    public final String getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean isLink() {
+        return isLink;
+    }
 }

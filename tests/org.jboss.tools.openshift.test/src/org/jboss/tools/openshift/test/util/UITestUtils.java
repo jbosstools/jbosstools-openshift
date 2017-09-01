@@ -18,48 +18,47 @@ import org.jboss.tools.openshift.internal.ui.models.LoadingState;
 
 public class UITestUtils {
 
-	public static final long DEFAULT_TIMEOUT = 10_000;
-	
-	/**
-	 * Wraps a call to <code>Display.getDefault().readAndDispatch()</code>, thus waits for events 
-	 * created by {@link Display#syncExec(Runnable)} or {@link Display#asyncExec(Runnable)} 
-	 * to be processed. 
-	 * This method will wait for all events to be processed or until timeout is reached, and will simply return.
-	 * 
-	 * @param timeout maximum time to wait UI events to be processed, in milliseconds
-	 */
-	public static void waitForDeferredEvents(long timeout) {
-		boolean wait = true;
-		long start = System.currentTimeMillis();
-		while (wait) {
-			if (!Display.getDefault().readAndDispatch() || 
-					(System.currentTimeMillis() - start) > timeout) {
-				wait = false;
-			}
-		}
-	}
+    public static final long DEFAULT_TIMEOUT = 10_000;
 
-	
-	/**
-	 * Wraps a call to <code>Display.getDefault().readAndDispatch()</code>, thus waits for events 
-	 * created by {@link Display#syncExec(Runnable)} or {@link Display#asyncExec(Runnable)} 
-	 * to be processed. 
-	 * This method will wait for all events to be processed or until the default timeout is reached (i.e. 10 seconds), and will simply return.
-	 * 
-	 */
-	public static void waitForDeferredEvents() {
-		waitForDeferredEvents(DEFAULT_TIMEOUT);
-	}
+    /**
+     * Wraps a call to <code>Display.getDefault().readAndDispatch()</code>, thus waits for events 
+     * created by {@link Display#syncExec(Runnable)} or {@link Display#asyncExec(Runnable)} 
+     * to be processed. 
+     * This method will wait for all events to be processed or until timeout is reached, and will simply return.
+     * 
+     * @param timeout maximum time to wait UI events to be processed, in milliseconds
+     */
+    public static void waitForDeferredEvents(long timeout) {
+        boolean wait = true;
+        long start = System.currentTimeMillis();
+        while (wait) {
+            if (!Display.getDefault().readAndDispatch() || (System.currentTimeMillis() - start) > timeout) {
+                wait = false;
+            }
+        }
+    }
 
+    /**
+     * Wraps a call to <code>Display.getDefault().readAndDispatch()</code>, thus waits for events 
+     * created by {@link Display#syncExec(Runnable)} or {@link Display#asyncExec(Runnable)} 
+     * to be processed. 
+     * This method will wait for all events to be processed or until the default timeout is reached (i.e. 10 seconds), and will simply return.
+     * 
+     */
+    public static void waitForDeferredEvents() {
+        waitForDeferredEvents(DEFAULT_TIMEOUT);
+    }
 
-	public static void waitForState(IConnectionWrapper connectionWrapper, LoadingState state) throws InterruptedException, TimeoutException {
-		int count= 0;
-		while (connectionWrapper.getState() != state) {
-			Thread.sleep(100);
-			if (count++ > 1000) {
-				throw new TimeoutException();
-			};
-		}
-	}
+    public static void waitForState(IConnectionWrapper connectionWrapper, LoadingState state)
+            throws InterruptedException, TimeoutException {
+        int count = 0;
+        while (connectionWrapper.getState() != state) {
+            Thread.sleep(100);
+            if (count++ > 1000) {
+                throw new TimeoutException();
+            }
+            ;
+        }
+    }
 
 }

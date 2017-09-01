@@ -59,96 +59,96 @@ import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.SystemReader;
 
 public class MockSystemReader extends SystemReader {
-	private final class MockConfig extends FileBasedConfig {
-		private MockConfig(File cfgLocation, FS fs) {
-			super(cfgLocation, fs);
-		}
+    private final class MockConfig extends FileBasedConfig {
+        private MockConfig(File cfgLocation, FS fs) {
+            super(cfgLocation, fs);
+        }
 
-		@Override
-		public void load() throws IOException, ConfigInvalidException {
-			// Do nothing
-		}
+        @Override
+        public void load() throws IOException, ConfigInvalidException {
+            // Do nothing
+        }
 
-		@Override
-		public boolean isOutdated() {
-			return false;
-		}
-	}
+        @Override
+        public boolean isOutdated() {
+            return false;
+        }
+    }
 
-	final Map<String, String> values = new HashMap<>();
+    final Map<String, String> values = new HashMap<>();
 
-	FileBasedConfig userGitConfig;
+    FileBasedConfig userGitConfig;
 
-	FileBasedConfig systemGitConfig;
+    FileBasedConfig systemGitConfig;
 
-	public MockSystemReader() {
-		init(Constants.OS_USER_NAME_KEY);
-		init(Constants.GIT_AUTHOR_NAME_KEY);
-		init(Constants.GIT_AUTHOR_EMAIL_KEY);
-		init(Constants.GIT_COMMITTER_NAME_KEY);
-		init(Constants.GIT_COMMITTER_EMAIL_KEY);
-		userGitConfig = new MockConfig(null, null);
-		systemGitConfig = new MockConfig(null, null);
-		setCurrentPlatform();
-	}
+    public MockSystemReader() {
+        init(Constants.OS_USER_NAME_KEY);
+        init(Constants.GIT_AUTHOR_NAME_KEY);
+        init(Constants.GIT_AUTHOR_EMAIL_KEY);
+        init(Constants.GIT_COMMITTER_NAME_KEY);
+        init(Constants.GIT_COMMITTER_EMAIL_KEY);
+        userGitConfig = new MockConfig(null, null);
+        systemGitConfig = new MockConfig(null, null);
+        setCurrentPlatform();
+    }
 
-	private void init(final String n) {
-		setProperty(n, n);
-	}
+    private void init(final String n) {
+        setProperty(n, n);
+    }
 
-	/**
-	 * Assign some properties for the currently executing platform
-	 */
-	public void setCurrentPlatform() {
-		setProperty("os.name", System.getProperty("os.name"));
-		setProperty("file.separator", System.getProperty("file.separator"));
-		setProperty("path.separator", System.getProperty("path.separator"));
-		setProperty("line.separator", System.getProperty("line.separator"));
-	}
-	
-	public void clearProperties() {
-		values.clear();
-	}
+    /**
+     * Assign some properties for the currently executing platform
+     */
+    public void setCurrentPlatform() {
+        setProperty("os.name", System.getProperty("os.name"));
+        setProperty("file.separator", System.getProperty("file.separator"));
+        setProperty("path.separator", System.getProperty("path.separator"));
+        setProperty("line.separator", System.getProperty("line.separator"));
+    }
 
-	public void setProperty(String key, String value) {
-		values.put(key, value);
-	}
+    public void clearProperties() {
+        values.clear();
+    }
 
-	@Override
-	public String getenv(String variable) {
-		return values.get(variable);
-	}
+    public void setProperty(String key, String value) {
+        values.put(key, value);
+    }
 
-	@Override
-	public String getProperty(String key) {
-		return values.get(key);
-	}
+    @Override
+    public String getenv(String variable) {
+        return values.get(variable);
+    }
 
-	@Override
-	public FileBasedConfig openUserConfig(Config parent, FS fs) {
-		assert parent == null || parent == systemGitConfig;
-		return userGitConfig;
-	}
+    @Override
+    public String getProperty(String key) {
+        return values.get(key);
+    }
 
-	@Override
-	public FileBasedConfig openSystemConfig(Config parent, FS fs) {
-		assert parent == null;
-		return systemGitConfig;
-	}
+    @Override
+    public FileBasedConfig openUserConfig(Config parent, FS fs) {
+        assert parent == null || parent == systemGitConfig;
+        return userGitConfig;
+    }
 
-	@Override
-	public String getHostname() {
-		return "fake.host.example.com";
-	}
+    @Override
+    public FileBasedConfig openSystemConfig(Config parent, FS fs) {
+        assert parent == null;
+        return systemGitConfig;
+    }
 
-	@Override
-	public long getCurrentTime() {
-		return 1250379778668L; // Sat Aug 15 20:12:58 GMT-03:30 2009
-	}
+    @Override
+    public String getHostname() {
+        return "fake.host.example.com";
+    }
 
-	@Override
-	public int getTimezone(long when) {
-		return TimeZone.getTimeZone("GMT-03:30").getOffset(when) / (60 * 1000);
-	}
+    @Override
+    public long getCurrentTime() {
+        return 1250379778668L; // Sat Aug 15 20:12:58 GMT-03:30 2009
+    }
+
+    @Override
+    public int getTimezone(long when) {
+        return TimeZone.getTimeZone("GMT-03:30").getOffset(when) / (60 * 1000);
+    }
 
 }

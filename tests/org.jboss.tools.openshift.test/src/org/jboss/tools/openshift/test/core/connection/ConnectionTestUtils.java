@@ -30,105 +30,104 @@ import com.openshift.restclient.model.user.IUser;
  */
 public class ConnectionTestUtils {
 
-	public static Connection createConnection(String username, String token, String host) throws MalformedURLException {
-		IClient client = createClient(username, token, host);
-		return new Connection(client, null);
-	}
-	
-	public static IClient createClient(String username, String token, String host) throws MalformedURLException {
-		IClient client = mock(IClient.class);
-		when(client.getBaseURL()).thenReturn(new URL(host));
-		doReturn(mockAuthorizationContext(username, token, true)).when(client).getAuthorizationContext();
-		return client;
-	}
-	
-	public static IAuthorizationContext mockAuthorizationContext(String username, String token, boolean isAuthorized) {
-		TestableAuthorizationContext authorizationContext = spy(new TestableAuthorizationContext(username, token, isAuthorized));
+    public static Connection createConnection(String username, String token, String host) throws MalformedURLException {
+        IClient client = createClient(username, token, host);
+        return new Connection(client, null);
+    }
 
-		IUser user = mock(IUser.class);
-		doReturn(username).when(user).getName();
-		doReturn(user).when(authorizationContext).getUser();
-		
-		authorizationContext.setUser(user);
+    public static IClient createClient(String username, String token, String host) throws MalformedURLException {
+        IClient client = mock(IClient.class);
+        when(client.getBaseURL()).thenReturn(new URL(host));
+        doReturn(mockAuthorizationContext(username, token, true)).when(client).getAuthorizationContext();
+        return client;
+    }
 
-		return authorizationContext;
-	}
+    public static IAuthorizationContext mockAuthorizationContext(String username, String token, boolean isAuthorized) {
+        TestableAuthorizationContext authorizationContext = spy(new TestableAuthorizationContext(username, token, isAuthorized));
 
-	public static class TestableAuthorizationContext implements IAuthorizationContext{
+        IUser user = mock(IUser.class);
+        doReturn(username).when(user).getName();
+        doReturn(user).when(authorizationContext).getUser();
 
-		private String password;
-		private String username;
-		private String token;
-		private String authscheme;
-		private boolean authorized;
-		private IUser user;
+        authorizationContext.setUser(user);
 
-		public TestableAuthorizationContext(String username, String token, boolean isAuthorized) {
-			this.authorized = isAuthorized;
-			this.username = username;
-			this.token = token;
-		}
+        return authorizationContext;
+    }
 
-		public void setUser(IUser user) {
-			this.user = user;
-		}
+    public static class TestableAuthorizationContext implements IAuthorizationContext {
 
-		@Override
-		public IUser getUser() {
-			return user;
-		}
+        private String password;
+        private String username;
+        private String token;
+        private String authscheme;
+        private boolean authorized;
+        private IUser user;
 
-		@Override
-		public boolean isAuthorized() {
-			return authorized;
-		}
+        public TestableAuthorizationContext(String username, String token, boolean isAuthorized) {
+            this.authorized = isAuthorized;
+            this.username = username;
+            this.token = token;
+        }
 
-		@Override
-		public String getAuthScheme() {
-			return authscheme;
-		}
+        public void setUser(IUser user) {
+            this.user = user;
+        }
 
-		@Override
-		public String getToken() {
-			return token;
-		}
+        @Override
+        public IUser getUser() {
+            return user;
+        }
 
-		@Override
-		public void setToken(String token) {
-			this.token = token;
-		}
+        @Override
+        public boolean isAuthorized() {
+            return authorized;
+        }
 
-		@Override
-		public void setUserName(String userName) {
-			this.username = userName;
-		}
+        @Override
+        public String getAuthScheme() {
+            return authscheme;
+        }
 
-		@Override
-		public String getUserName() {
-			return username;
-		}
+        @Override
+        public String getToken() {
+            return token;
+        }
 
-		@Override
-		public void setPassword(String password) {
-			this.password = password;
-		}
+        @Override
+        public void setToken(String token) {
+            this.token = token;
+        }
 
-		@Override
-		public String getPassword() {
-			return password;
-		}
+        @Override
+        public void setUserName(String userName) {
+            this.username = userName;
+        }
 
-		@Override
-		public String getExpiresIn() {
-			return null;
-		}
+        @Override
+        public String getUserName() {
+            return username;
+        }
 
-		@Override
-		public IAuthorizationDetails getAuthorizationDetails() {
-			return null;
-		}
-		
-		
-	}
+        @Override
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        @Override
+        public String getPassword() {
+            return password;
+        }
+
+        @Override
+        public String getExpiresIn() {
+            return null;
+        }
+
+        @Override
+        public IAuthorizationDetails getAuthorizationDetails() {
+            return null;
+        }
+
+    }
 
 }

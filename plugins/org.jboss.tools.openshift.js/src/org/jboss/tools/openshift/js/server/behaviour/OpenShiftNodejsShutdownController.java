@@ -19,21 +19,21 @@ import org.jboss.tools.openshift.js.launcher.NodeDebugLauncher;
 
 public class OpenShiftNodejsShutdownController extends OpenShiftShutdownController implements ISubsystemController {
 
-	public OpenShiftNodejsShutdownController() {
-		super();
-	}
-	
-	@Override
-	public void stop(boolean force) {
-		OpenShiftServerBehaviour behavior = getBehavior();
-		behavior.setServerStopping();
-		try {
-			NodeDebugLauncher.terminate(behavior.getServer());
-			behavior.setServerStopped();
-		} catch(CoreException ce) {
-			log(IStatus.ERROR, "Error shutting down server", ce);
-			getBehavior().setServerStarted();
-		}
-	}
+    public OpenShiftNodejsShutdownController() {
+        super();
+    }
+
+    @Override
+    public void stop(boolean force) {
+        OpenShiftServerBehaviour behavior = getBehavior();
+        behavior.setServerStopping();
+        try {
+            NodeDebugLauncher.terminate(behavior.getServer());
+            behavior.setServerStopped();
+        } catch (CoreException ce) {
+            log(IStatus.ERROR, "Error shutting down server", ce);
+            getBehavior().setServerStarted();
+        }
+    }
 
 }

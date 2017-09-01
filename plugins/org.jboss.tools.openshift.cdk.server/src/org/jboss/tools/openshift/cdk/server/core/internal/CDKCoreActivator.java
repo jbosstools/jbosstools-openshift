@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal;
 
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
@@ -21,92 +21,92 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 public class CDKCoreActivator extends BaseUIPlugin {
-	// The plug-in ID
-	public static final String PLUGIN_ID = "org.jboss.tools.openshift.cdk.server.core"; //$NON-NLS-1$
+    // The plug-in ID
+    public static final String PLUGIN_ID = "org.jboss.tools.openshift.cdk.server.core"; //$NON-NLS-1$
 
-	// The shared instance
-	private static CDKCoreActivator plugin;
-	
-	/**
-	 * The constructor
-	 */
-	public CDKCoreActivator() {
-	}
+    // The shared instance
+    private static CDKCoreActivator plugin;
 
-	
-	private UnitedServerListener configureDependentFrameworksListener;
-	
-	private UnitedServerListener getConfigureDependentFrameworksListener() {
-		if( configureDependentFrameworksListener == null ) {
-			configureDependentFrameworksListener = new ConfigureDependentFrameworksListener();
-		}
-		return configureDependentFrameworksListener;
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
-		UnitedServerListenerManager.getDefault().addListener(getConfigureDependentFrameworksListener());
-	}
+    /**
+     * The constructor
+     */
+    public CDKCoreActivator() {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		UnitedServerListenerManager.getDefault().removeListener(getConfigureDependentFrameworksListener());
-		plugin = null;
-		super.stop(context);
-	}
+    private UnitedServerListener configureDependentFrameworksListener;
 
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
-	public static CDKCoreActivator getDefault() {
-		return plugin;
-	}
-	/**
-	 * Get the IPluginLog for this plugin. This method 
-	 * helps to make logging easier, for example:
-	 * 
-	 *     FoundationCorePlugin.pluginLog().logError(etc)
-	 *  
-	 * @return IPluginLog object
-	 */
-	public static IPluginLog pluginLog() {
-		return getDefault().pluginLogInternal();
-	}
+    private UnitedServerListener getConfigureDependentFrameworksListener() {
+        if (configureDependentFrameworksListener == null) {
+            configureDependentFrameworksListener = new ConfigureDependentFrameworksListener();
+        }
+        return configureDependentFrameworksListener;
+    }
 
-	/**
-	 * Get a status factory for this plugin
-	 * @return status factory
-	 */
-	public static StatusFactory statusFactory() {
-		return getDefault().statusFactoryInternal();
-	}
-	
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+     */
+    @Override
+    public void start(BundleContext context) throws Exception {
+        super.start(context);
+        plugin = this;
+        UnitedServerListenerManager.getDefault().addListener(getConfigureDependentFrameworksListener());
+    }
 
-	/**
-	 * Create your shared images instance. Clients are expected to override this
-	 */
-	@Override
-	protected BaseUISharedImages createSharedImages() {
-		return new CDKSharedImages(getBundle());
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+     */
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        UnitedServerListenerManager.getDefault().removeListener(getConfigureDependentFrameworksListener());
+        plugin = null;
+        super.stop(context);
+    }
 
-	public static final String CDK_WIZBAN = "icons/cdk_box_130x65.png";
-	private static class CDKSharedImages extends BaseUISharedImages {
-		public CDKSharedImages(Bundle pluginBundle) {
-			super(pluginBundle);
-			addImage(CDK_WIZBAN, CDK_WIZBAN);
-		}
-	}
+    /**
+     * Returns the shared instance
+     *
+     * @return the shared instance
+     */
+    public static CDKCoreActivator getDefault() {
+        return plugin;
+    }
+
+    /**
+     * Get the IPluginLog for this plugin. This method 
+     * helps to make logging easier, for example:
+     * 
+     *     FoundationCorePlugin.pluginLog().logError(etc)
+     *  
+     * @return IPluginLog object
+     */
+    public static IPluginLog pluginLog() {
+        return getDefault().pluginLogInternal();
+    }
+
+    /**
+     * Get a status factory for this plugin
+     * @return status factory
+     */
+    public static StatusFactory statusFactory() {
+        return getDefault().statusFactoryInternal();
+    }
+
+    /**
+     * Create your shared images instance. Clients are expected to override this
+     */
+    @Override
+    protected BaseUISharedImages createSharedImages() {
+        return new CDKSharedImages(getBundle());
+    }
+
+    public static final String CDK_WIZBAN = "icons/cdk_box_130x65.png";
+
+    private static class CDKSharedImages extends BaseUISharedImages {
+        public CDKSharedImages(Bundle pluginBundle) {
+            super(pluginBundle);
+            addImage(CDK_WIZBAN, CDK_WIZBAN);
+        }
+    }
 }

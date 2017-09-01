@@ -24,44 +24,44 @@ import org.jboss.tools.openshift.internal.js.storage.SessionStorage;
  * @author "Ilya Buziuk (ibuziuk)"
  */
 public class NodeDebugTerminateListener implements IDebugEventSetListener {
-	ILaunchConfiguration nodeDebugLaunch;
-	IServer server;
+    ILaunchConfiguration nodeDebugLaunch;
+    IServer server;
 
-	public NodeDebugTerminateListener(ILaunchConfiguration nodeDebugLaunch, IServer server) {
-		this.nodeDebugLaunch = nodeDebugLaunch;
-		this.server = server;
-	}
+    public NodeDebugTerminateListener(ILaunchConfiguration nodeDebugLaunch, IServer server) {
+        this.nodeDebugLaunch = nodeDebugLaunch;
+        this.server = server;
+    }
 
-	@Override
-	public void handleDebugEvents(DebugEvent[] events) {
-		for (DebugEvent event : events) {
-			if (event.getKind() == DebugEvent.TERMINATE) {
-				ILaunchConfiguration lc = getLaunchConfiguration(event);
-				if (lc != null && lc.equals(nodeDebugLaunch)) {
-					try {
-						// Debug session has just ended - removing server from session tracker
-						SessionStorage.get().remove(server);
-						if (server.getServerState() == IServer.STATE_STARTED) {
-							server.publish(IServer.PUBLISH_INCREMENTAL, new NullProgressMonitor());
-						}
-					} finally {
-						DebugPlugin.getDefault().removeDebugEventListener(this);
-					}
-				}
-			}
-		}
-	}
-	
-	private ILaunchConfiguration getLaunchConfiguration(DebugEvent event) {
-		ILaunchConfiguration lc = null;
-		Object source = event.getSource();
-		if (source instanceof IProcess) {
-			ILaunch launch = ((IProcess) source).getLaunch();
-			if (launch != null) {
-				lc = launch.getLaunchConfiguration();
-			}
-		}
-		return lc;
-	}
+    @Override
+    public void handleDebugEvents(DebugEvent[] events) {
+        for (DebugEvent event : events) {
+            if (event.getKind() == DebugEvent.TERMINATE) {
+                ILaunchConfiguration lc = getLaunchConfiguration(event);
+                if (lc != null && lc.equals(nodeDebugLaunch)) {
+                    try {
+                        // Debug session has just ended - removing server from session tracker
+                        SessionStorage.get().remove(server);
+                        if (server.getServerState() == IServer.STATE_STARTED) {
+                            server.publish(IServer.PUBLISH_INCREMENTAL, new NullProgressMonitor());
+                        }
+                    } finally {
+                        DebugPlugin.getDefault().removeDebugEventListener(this);
+                    }
+                }
+            }
+        }
+    }
+
+    private ILaunchConfiguration getLaunchConfiguration(DebugEvent event) {
+        ILaunchConfiguration lc = null;
+        Object source = event.getSource();
+        if (source instanceof IProcess) {
+            ILaunch launch = ((IProcess)source).getLaunch();
+            if (launch != null) {
+                lc = launch.getLaunchConfiguration();
+            }
+        }
+        return lc;
+    }
 
 }

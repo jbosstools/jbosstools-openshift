@@ -50,159 +50,157 @@ import org.jboss.tools.openshift.internal.ui.wizard.deployimage.ListDockerImages
  */
 public class ListDockerImagesWizardPage extends AbstractOpenShiftWizardPage {
 
-	/** the model. */
-	private final ListDockerImagesWizardModel model;
+    /** the model. */
+    private final ListDockerImagesWizardModel model;
 
-	private static String LIST_DOCKER_IMAGES_PAGE_NAME = "List Docker Images Page";
+    private static String LIST_DOCKER_IMAGES_PAGE_NAME = "List Docker Images Page";
 
-	private static final String PAGE_DESCRIPTION = "This page allows you to choose a local image and the name to be used for the deployed resources.";
+    private static final String PAGE_DESCRIPTION = "This page allows you to choose a local image and the name to be used for the deployed resources.";
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param wizard
-	 *            the parent wizard
-	 * @param model
-	 *            the model
-	 */
-	public ListDockerImagesWizardPage(final IWizard wizard, final ListDockerImagesWizardModel model) {
-		super("Deploy an Image", PAGE_DESCRIPTION, LIST_DOCKER_IMAGES_PAGE_NAME, wizard);
-		this.model = model;
-	}
+    /**
+     * Constructor.
+     * 
+     * @param wizard
+     *            the parent wizard
+     * @param model
+     *            the model
+     */
+    public ListDockerImagesWizardPage(final IWizard wizard, final ListDockerImagesWizardModel model) {
+        super("Deploy an Image", PAGE_DESCRIPTION, LIST_DOCKER_IMAGES_PAGE_NAME, wizard);
+        this.model = model;
+    }
 
-	@Override
-	public boolean isPageComplete() {
-		// can finish if a Docker image was selected
-		return this.model.getSelectedDockerImage() != null;
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void doCreateControls(final Composite parent, final DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().margins(10, 10).numColumns(2).applyTo(parent);
+    @Override
+    public boolean isPageComplete() {
+        // can finish if a Docker image was selected
+        return this.model.getSelectedDockerImage() != null;
+    }
 
-		// filter image by name
-		final Label filterByNameLabel = new Label(parent, SWT.SEARCH);
-		filterByNameLabel.setText("Filter:");
-		filterByNameLabel.setToolTipText("Filter images by their name");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(filterByNameLabel);
-		final Text filterByNameText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(filterByNameText);
-		
-		// table with all images
-		final Table dockerImagesTable = new Table(parent,
-				SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		final TableViewer dockerImagesTableViewer = new TableViewer(dockerImagesTable);
-		dockerImagesTable.setHeaderVisible(true);
-		dockerImagesTable.setLinesVisible(true);
-		addTableViewerColum(dockerImagesTableViewer, "Name", SWT.NONE, SWT.LEFT, 200, new ColumnLabelProvider() {
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void doCreateControls(final Composite parent, final DataBindingContext dbc) {
+        GridLayoutFactory.fillDefaults().margins(10, 10).numColumns(2).applyTo(parent);
 
-			@Override
-			public String getText(final Object element) {
-				return ((DockerImageTag) element).getRepoName();
-			}
-		});
-		addTableViewerColum(dockerImagesTableViewer, "Tag", SWT.NONE, SWT.LEFT, 100, new ColumnLabelProvider() {
+        // filter image by name
+        final Label filterByNameLabel = new Label(parent, SWT.SEARCH);
+        filterByNameLabel.setText("Filter:");
+        filterByNameLabel.setToolTipText("Filter images by their name");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(filterByNameLabel);
+        final Text filterByNameText = new Text(parent, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(filterByNameText);
 
-			@Override
-			public String getText(final Object element) {
-				return ((DockerImageTag) element).getTag();
-			}
-		});
-		addTableViewerColum(dockerImagesTableViewer, "Image ID", SWT.NONE, SWT.LEFT, 150, new ColumnLabelProvider() {
+        // table with all images
+        final Table dockerImagesTable = new Table(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+        final TableViewer dockerImagesTableViewer = new TableViewer(dockerImagesTable);
+        dockerImagesTable.setHeaderVisible(true);
+        dockerImagesTable.setLinesVisible(true);
+        addTableViewerColum(dockerImagesTableViewer, "Name", SWT.NONE, SWT.LEFT, 200, new ColumnLabelProvider() {
 
-			@Override
-			public String getText(final Object element) {
-				return ((DockerImageTag) element).getId();
-			}
-		});
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(2, 1).hint(200, 100)
-				.applyTo(dockerImagesTable);
+            @Override
+            public String getText(final Object element) {
+                return ((DockerImageTag)element).getRepoName();
+            }
+        });
+        addTableViewerColum(dockerImagesTableViewer, "Tag", SWT.NONE, SWT.LEFT, 100, new ColumnLabelProvider() {
 
-		// observe the viewer content
-		dockerImagesTableViewer.setContentProvider(new ObservableListContentProvider());
-		// observe the viewer content
-		dockerImagesTableViewer.setInput(BeanProperties
-				.list(ListDockerImagesWizardModel.class, ListDockerImagesWizardModel.DOCKER_IMAGES).observe(model));
+            @Override
+            public String getText(final Object element) {
+                return ((DockerImageTag)element).getTag();
+            }
+        });
+        addTableViewerColum(dockerImagesTableViewer, "Image ID", SWT.NONE, SWT.LEFT, 150, new ColumnLabelProvider() {
 
-		// filter by name
-		final ViewerFilter imageNameFilter = new ViewerFilter() {
-			
-			@Override
-			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				return ((DockerImageTag)element).getRepoName().contains(filterByNameText.getText());
-			}
-		}; 
-		dockerImagesTableViewer.addFilter(imageNameFilter);
-		filterByNameText.addModifyListener(onFilterImages(dockerImagesTableViewer));
+            @Override
+            public String getText(final Object element) {
+                return ((DockerImageTag)element).getId();
+            }
+        });
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(2, 1).hint(200, 100).applyTo(dockerImagesTable);
 
-		// bind selection
-		dbc.bindValue(ViewerProperties.singleSelection().observe(dockerImagesTableViewer),
-				BeanProperties.value(ListDockerImagesWizardModel.SELECTED_DOCKER_IMAGE).observe(model));
-		
-		dockerImagesTableViewer.addDoubleClickListener(new IDoubleClickListener() {
+        // observe the viewer content
+        dockerImagesTableViewer.setContentProvider(new ObservableListContentProvider());
+        // observe the viewer content
+        dockerImagesTableViewer
+                .setInput(BeanProperties.list(ListDockerImagesWizardModel.class, ListDockerImagesWizardModel.DOCKER_IMAGES).observe(model));
 
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				IWizardContainer container = getWizard().getContainer();
-				if(container instanceof OkCancelButtonWizardDialog) {
-					((OkCancelButtonWizardDialog)container).autoFinish();
-				}
-			}
-		});
+        // filter by name
+        final ViewerFilter imageNameFilter = new ViewerFilter() {
 
-		// load the Docker images
-		try {
-			getContainer().run(true, false, new IRunnableWithProgress() {
+            @Override
+            public boolean select(Viewer viewer, Object parentElement, Object element) {
+                return ((DockerImageTag)element).getRepoName().contains(filterByNameText.getText());
+            }
+        };
+        dockerImagesTableViewer.addFilter(imageNameFilter);
+        filterByNameText.addModifyListener(onFilterImages(dockerImagesTableViewer));
 
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					model.setDockerImages(model.getDockerConnection().getImages(true));
+        // bind selection
+        dbc.bindValue(ViewerProperties.singleSelection().observe(dockerImagesTableViewer),
+                BeanProperties.value(ListDockerImagesWizardModel.SELECTED_DOCKER_IMAGE).observe(model));
 
-				}
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(e);
-		}
-	}
+        dockerImagesTableViewer.addDoubleClickListener(new IDoubleClickListener() {
 
-	private static ModifyListener onFilterImages(final TableViewer dockerImagesTableViewer) {
-		return new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				dockerImagesTableViewer.refresh();			
-			}
-		};
-	}
+            @Override
+            public void doubleClick(DoubleClickEvent event) {
+                IWizardContainer container = getWizard().getContainer();
+                if (container instanceof OkCancelButtonWizardDialog) {
+                    ((OkCancelButtonWizardDialog)container).autoFinish();
+                }
+            }
+        });
 
-	private static TableViewerColumn addTableViewerColum(final TableViewer tableViewer, final String title,
-			final int style, final int alignment, final int width, final CellLabelProvider columnLabelProvider) {
-		final TableViewerColumn viewerColumn = new TableViewerColumn(tableViewer, style);
-		final TableColumn column = viewerColumn.getColumn();
-		if (title != null) {
-			column.setText(title);
-		}
-		column.setAlignment(alignment);
-		column.setWidth(width);
-		viewerColumn.setLabelProvider(columnLabelProvider);
-		return viewerColumn;
-	}
+        // load the Docker images
+        try {
+            getContainer().run(true, false, new IRunnableWithProgress() {
 
-	static class ImageIDColumnLabelProvider extends ColumnLabelProvider {
+                @Override
+                public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+                    model.setDockerImages(model.getDockerConnection().getImages(true));
 
-		@Override
-		public String getText(final Object element) {
-			return ((DockerImageTag) element).getId();
-		}
-	}
+                }
+            });
+        } catch (InvocationTargetException | InterruptedException e) {
+            OpenShiftUIActivator.getDefault().getLogger().logError(e);
+        }
+    }
 
-	static class ImageNameColumnLabelProvider extends ColumnLabelProvider {
+    private static ModifyListener onFilterImages(final TableViewer dockerImagesTableViewer) {
+        return new ModifyListener() {
 
-		@Override
-		public String getText(final Object element) {
-			return ((DockerImageTag) element).getRepoName();
-		}
-	}
+            @Override
+            public void modifyText(ModifyEvent e) {
+                dockerImagesTableViewer.refresh();
+            }
+        };
+    }
+
+    private static TableViewerColumn addTableViewerColum(final TableViewer tableViewer, final String title, final int style,
+            final int alignment, final int width, final CellLabelProvider columnLabelProvider) {
+        final TableViewerColumn viewerColumn = new TableViewerColumn(tableViewer, style);
+        final TableColumn column = viewerColumn.getColumn();
+        if (title != null) {
+            column.setText(title);
+        }
+        column.setAlignment(alignment);
+        column.setWidth(width);
+        viewerColumn.setLabelProvider(columnLabelProvider);
+        return viewerColumn;
+    }
+
+    static class ImageIDColumnLabelProvider extends ColumnLabelProvider {
+
+        @Override
+        public String getText(final Object element) {
+            return ((DockerImageTag)element).getId();
+        }
+    }
+
+    static class ImageNameColumnLabelProvider extends ColumnLabelProvider {
+
+        @Override
+        public String getText(final Object element) {
+            return ((DockerImageTag)element).getRepoName();
+        }
+    }
 
 }

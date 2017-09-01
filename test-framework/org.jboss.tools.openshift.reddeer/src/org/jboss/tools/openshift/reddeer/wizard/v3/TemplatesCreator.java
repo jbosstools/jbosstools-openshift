@@ -46,7 +46,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 public class TemplatesCreator {
 
 	private NewOpenShift3ApplicationWizard wizard;
-	
+
 	/**
 	 * Initiates a new template creator to create a new OpenShift 3 application based on template.
 	 * Wizard is opened from OpenShift explorer view.
@@ -75,7 +75,7 @@ public class TemplatesCreator {
 
 	public TemplatesCreator(String project, boolean openFromShellMenu) {
 		wizard = new NewOpenShift3ApplicationWizard();
-		
+
 		if (openFromShellMenu) {
 			wizard.openWizardFromShellMenu(project);
 		} else {
@@ -101,7 +101,7 @@ public class TemplatesCreator {
 	public void createOpenShiftApplicationBasedOnLocalTemplate(String templatePath, List<Label> labels) {
 		createOpenShiftApplicationBasedOnTemplate(false, null, templatePath, labels, (TemplateParameter[]) null);
 	}
-	
+
 	/**
 	 * Creates new OpenShift 3 application from a local template with specific parameters.
 	 * 
@@ -111,7 +111,7 @@ public class TemplatesCreator {
 	public void createOpenShiftApplicationBasedOnLocalTemplate(String templatePath, TemplateParameter... parameters) {
 		createOpenShiftApplicationBasedOnTemplate(false, null, templatePath, null, parameters);
 	}
-	
+
 	/**
 	 * Creates new OpenShift 3 application from a local template with specific labels and template parameters.
 	 * 
@@ -119,11 +119,10 @@ public class TemplatesCreator {
 	 * @param labels OpenShift labels
 	 * @param parameters template parameters
 	 */
-	public void createOpenShiftApplicationBasedOnLocalTemplate(String templatePath, List<Label> labels,
-			TemplateParameter... parameters) {
+	public void createOpenShiftApplicationBasedOnLocalTemplate(String templatePath, List<Label> labels, TemplateParameter... parameters) {
 		createOpenShiftApplicationBasedOnTemplate(false, null, templatePath, labels, parameters);
 	}
-	
+
 	/**
 	 * Creates new OpenShift 3 application from a server template with matching name.
 	 * 
@@ -132,7 +131,7 @@ public class TemplatesCreator {
 	public void createOpenShiftApplicationBasedOnServerTemplate(String templateName) {
 		createOpenShiftApplicationBasedOnTemplate(true, templateName, null, null, (TemplateParameter[]) null);
 	}
-	
+
 	/**
 	 * Creates new OpenShift 3 application from a server template with matching name.
 	 * 
@@ -151,7 +150,7 @@ public class TemplatesCreator {
 	public void createOpenShiftApplicationBasedOnServerTemplate(String templateName, TemplateParameter... parameters) {
 		createOpenShiftApplicationBasedOnTemplate(true, templateName, null, null, parameters);
 	}
-	
+
 	/**
 	 * Creates new OpenShift 3 application from a server template with matching name and specific template parameters.
 	 * 
@@ -161,7 +160,7 @@ public class TemplatesCreator {
 	public void createOpenShiftApplicationBasedOnServerTemplate(String templateName, List<Label> labels) {
 		createOpenShiftApplicationBasedOnTemplate(true, templateName, null, labels, (TemplateParameter[]) null);
 	}
-	
+
 	/**
 	 * Creates new OpenShift 3 application from a server template with matching name and specific labels
 	 * and template parameters.
@@ -171,24 +170,23 @@ public class TemplatesCreator {
 	 * @param labels list of OpenShift labels
 	 * @param parameters template parameters
 	 */
-	public void createOpenShiftApplicationBasedOnServerTemplate(String templateName, List<Label> labels,
-			TemplateParameter... parameters) {
+	public void createOpenShiftApplicationBasedOnServerTemplate(String templateName, List<Label> labels, TemplateParameter... parameters) {
 		createOpenShiftApplicationBasedOnTemplate(true, templateName, null, labels, parameters);
 	}
 
-	private void createOpenShiftApplicationBasedOnTemplate(boolean serverTemplate, String templateName, 
-			final String templateLocalPath, List<Label> labels, TemplateParameter... parameters) {
+	private void createOpenShiftApplicationBasedOnTemplate(boolean serverTemplate, String templateName, final String templateLocalPath,
+			List<Label> labels, TemplateParameter... parameters) {
 		createOpenShiftApplicationBasedOnTemplate(true, serverTemplate, templateName, templateLocalPath, labels, parameters);
 	}
 
-	private void createOpenShiftApplicationBasedOnTemplate(boolean importProject, boolean serverTemplate, String templateName, 
+	private void createOpenShiftApplicationBasedOnTemplate(boolean importProject, boolean serverTemplate, String templateName,
 			final String templateLocalPath, List<Label> labels, TemplateParameter... parameters) {
 		if (serverTemplate) {
 			selectServerTemplate(templateName);
 		} else {
 			selectLocalTemplate(templateLocalPath);
-		}		
-		
+		}
+
 		new WaitUntil(new WidgetIsEnabled(new NextButton()), TimePeriod.NORMAL);
 		new NextButton().click();
 
@@ -202,10 +200,10 @@ public class TemplatesCreator {
 		if (labels != null && labels.size() != 0) {
 			createOpenShiftLabels(labels);
 		}
-		
+
 		new FinishButton().click();
 		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.APPLICATION_SUMMARY), TimePeriod.LONG);
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.APPLICATION_SUMMARY);
 		new OkButton().click();
 		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
@@ -215,59 +213,59 @@ public class TemplatesCreator {
 
 	private void selectLocalTemplate(final String templateLocalPath) {
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
-		
+
 		new WaitWhile(new TreeIsAvailable());
-		
+
 		new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).setText(templateLocalPath);
-			
+
 	}
 
 	private void selectServerTemplate(String templateName) {
 		new DefaultTabItem(OpenShiftLabel.TextLabels.SERVER_TEMPLATE).activate();
-		
+
 		new WaitUntil(new TreeIsAvailable());
-		
+
 		new DefaultTree().selectItems(new DefaultTreeItem(templateName));
 	}
 
 	private void setTemplateParameters(TemplateParameter[] parameters) {
-		for (TemplateParameter parameter: parameters) {
-				new DefaultTable().select(parameter.getName());
-				
-				new WaitUntil(new WidgetIsEnabled(new PushButton(OpenShiftLabel.Button.EDIT)));
-				
-				new PushButton(OpenShiftLabel.Button.EDIT).click();
-				
-				new DefaultShell(OpenShiftLabel.Shell.EDIT_TEMPLATE_PARAMETER);
-				new DefaultText().setText(parameter.getValue());
-				
-				new WaitUntil(new WidgetIsEnabled(new OkButton()));
-				
-				new OkButton().click();
-				
-				new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.EDIT_TEMPLATE_PARAMETER));
+		for (TemplateParameter parameter : parameters) {
+			new DefaultTable().select(parameter.getName());
 
-				new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
+			new WaitUntil(new WidgetIsEnabled(new PushButton(OpenShiftLabel.Button.EDIT)));
+
+			new PushButton(OpenShiftLabel.Button.EDIT).click();
+
+			new DefaultShell(OpenShiftLabel.Shell.EDIT_TEMPLATE_PARAMETER);
+			new DefaultText().setText(parameter.getValue());
+
+			new WaitUntil(new WidgetIsEnabled(new OkButton()));
+
+			new OkButton().click();
+
+			new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.EDIT_TEMPLATE_PARAMETER));
+
+			new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		}
 	}
 
 	private void createOpenShiftLabels(List<Label> labels) {
-		for (Label label: labels) {
+		for (Label label : labels) {
 			new PushButton(OpenShiftLabel.Button.ADD).click();
-			
+
 			new DefaultShell(OpenShiftLabel.Shell.RESOURCE_LABEL);
 			new LabeledText(OpenShiftLabel.TextLabels.LABEL).setText(label.getName());
 			new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText(label.getValue());
-			
+
 			new WaitUntil(new WidgetIsEnabled(new OkButton()));
 			new OkButton().click();
-			
+
 			new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.RESOURCE_LABEL));
-			
+
 			new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		}
 	}
-	
+
 	private void executeImport(boolean importProject) {
 		new DefaultShell(OpenShiftLabel.Shell.IMPORT_APPLICATION);
 		if (!importProject) {
@@ -276,11 +274,11 @@ public class TemplatesCreator {
 			new FinishButton().click();
 			try {
 				new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.CHEATSHEET), TimePeriod.LONG);
-				
+
 				new DefaultShell(OpenShiftLabel.Shell.CHEATSHEET);
 				new CheckBox(0).click();
 				new NoButton().click();
-				
+
 				new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.CHEATSHEET));
 			} catch (WaitTimeoutExpiredException ex) {
 				// do nothing if cheat sheet is not provided

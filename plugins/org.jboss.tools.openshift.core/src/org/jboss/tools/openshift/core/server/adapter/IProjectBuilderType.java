@@ -17,7 +17,7 @@ import org.eclipse.core.resources.IProject;
  */
 /* package level */ interface IProjectBuilderType {
 
-	boolean applies(IProject project);
+    boolean applies(IProject project);
 
-	String getTags(IProject project);
+    String getTags(IProject project);
 }

@@ -26,17 +26,17 @@ import org.eclipse.ui.console.MessageConsole;
  */
 public class ConsoleTypePropertyTester extends PropertyTester {
 
-	/**
-	 * Verifies that the given receiver, a <code>MessageConsole</code> contains
-	 * an attribute name <code>ConsoleUtils.CONSOLE_TYPE_KEY</code> with a value
-	 * set to <code>ConsoleUtils.CONSOLE_TYPE_VALUE</code>. Using the console
-	 * attributes avoids the need to create a subtype of
-	 * <code>MessageCode</code>.
-	 */
-	@Override
-	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
-		MessageConsole console = (MessageConsole) receiver;
-		return (CONSOLE_TYPE_VALUE.equals(console.getAttribute(CONSOLE_TYPE_KEY)));
-	}
+    /**
+     * Verifies that the given receiver, a <code>MessageConsole</code> contains
+     * an attribute name <code>ConsoleUtils.CONSOLE_TYPE_KEY</code> with a value
+     * set to <code>ConsoleUtils.CONSOLE_TYPE_VALUE</code>. Using the console
+     * attributes avoids the need to create a subtype of
+     * <code>MessageCode</code>.
+     */
+    @Override
+    public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+        MessageConsole console = (MessageConsole)receiver;
+        return (CONSOLE_TYPE_VALUE.equals(console.getAttribute(CONSOLE_TYPE_KEY)));
+    }
 
 }

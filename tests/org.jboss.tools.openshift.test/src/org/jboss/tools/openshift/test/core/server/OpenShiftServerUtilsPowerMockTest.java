@@ -52,42 +52,40 @@ import com.openshift.restclient.model.IService;
 @PrepareForTest({ WatchManager.class })
 public class OpenShiftServerUtilsPowerMockTest {
 
-	private IServerWorkingCopy server;
-	private Connection connection;
+    private IServerWorkingCopy server;
+    private Connection connection;
 
-	@Before
-	public void setUp() throws UnsupportedEncodingException, MalformedURLException {
-		this.connection = createConnection();
-		this.server = createServer(ResourceMocks.PROJECT2_SERVICES[1]);
-	}
+    @Before
+    public void setUp() throws UnsupportedEncodingException, MalformedURLException {
+        this.connection = createConnection();
+        this.server = createServer(ResourceMocks.PROJECT2_SERVICES[1]);
+    }
 
-	private IServerWorkingCopy createServer(IService serverService)
-			throws UnsupportedEncodingException, MalformedURLException {
-		IServerWorkingCopy server = mock(IServerWorkingCopy.class);
-		doReturn(OpenShiftResourceUniqueId.get(serverService))
-				.when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
-		return server;
-	}
+    private IServerWorkingCopy createServer(IService serverService) throws UnsupportedEncodingException, MalformedURLException {
+        IServerWorkingCopy server = mock(IServerWorkingCopy.class);
+        doReturn(OpenShiftResourceUniqueId.get(serverService)).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE),
+                anyString());
+        return server;
+    }
 
-	private Connection createConnection() {
-		Connection connection = ResourceMocks.createConnection("http://localhost:8443", "dev@openshift.com");
-		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(ResourceMocks.PROJECTS));
-		when(ResourceMocks.PROJECT2.getResources(ResourceKind.SERVICE))
-				.thenReturn(Arrays.asList(ResourceMocks.PROJECT2_SERVICES));
-		when(connection.getResources(ResourceKind.SERVICE, ResourceMocks.PROJECT2.getName()))
-				.thenReturn(Arrays.asList(ResourceMocks.PROJECT2_SERVICES));
-		return connection;
-	}
+    private Connection createConnection() {
+        Connection connection = ResourceMocks.createConnection("http://localhost:8443", "dev@openshift.com");
+        when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Arrays.asList(ResourceMocks.PROJECTS));
+        when(ResourceMocks.PROJECT2.getResources(ResourceKind.SERVICE)).thenReturn(Arrays.asList(ResourceMocks.PROJECT2_SERVICES));
+        when(connection.getResources(ResourceKind.SERVICE, ResourceMocks.PROJECT2.getName()))
+                .thenReturn(Arrays.asList(ResourceMocks.PROJECT2_SERVICES));
+        return connection;
+    }
 
-	@Test
-	public void getServiceShouldStartWatchingProjectIfServiceNotNull() {
-		// given
-		WatchManager watchManager = mock(WatchManager.class);
-		PowerMockito.mockStatic(WatchManager.class);
-		PowerMockito.when(WatchManager.getInstance()).thenReturn(watchManager);
-		// when
-		OpenShiftServerUtils.getResource(server, connection, new NullProgressMonitor());
-		// then
-		verify(watchManager, times(1)).startWatch(any(IProject.class), eq(connection));
-	}
+    @Test
+    public void getServiceShouldStartWatchingProjectIfServiceNotNull() {
+        // given
+        WatchManager watchManager = mock(WatchManager.class);
+        PowerMockito.mockStatic(WatchManager.class);
+        PowerMockito.when(WatchManager.getInstance()).thenReturn(watchManager);
+        // when
+        OpenShiftServerUtils.getResource(server, connection, new NullProgressMonitor());
+        // then
+        verify(watchManager, times(1)).startWatch(any(IProject.class), eq(connection));
+    }
 }

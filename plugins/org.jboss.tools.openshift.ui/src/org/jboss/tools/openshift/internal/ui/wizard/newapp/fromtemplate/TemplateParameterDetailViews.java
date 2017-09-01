@@ -30,62 +30,62 @@ import com.openshift.restclient.model.template.IParameter;
  */
 public class TemplateParameterDetailViews extends AbstractStackedDetailViews {
 
-	private final IDetailView parameterView = new ParameterView();
+    private final IDetailView parameterView = new ParameterView();
 
-	TemplateParameterDetailViews(IObservableValue parameterObservable, Composite parent, DataBindingContext dbc) {
-		super(parameterObservable, null, parent, dbc);
-	}
+    TemplateParameterDetailViews(IObservableValue parameterObservable, Composite parent, DataBindingContext dbc) {
+        super(parameterObservable, null, parent, dbc);
+    }
 
-	@Override
-	protected void createViewControls(Composite parent, Object context, DataBindingContext dbc) {
-		parameterView.createControls(parent, context, dbc);
-		emptyView.createControls(parent, context, dbc);
-	}
+    @Override
+    protected void createViewControls(Composite parent, Object context, DataBindingContext dbc) {
+        parameterView.createControls(parent, context, dbc);
+        emptyView.createControls(parent, context, dbc);
+    }
 
-	@Override
-	protected IDetailView[] getDetailViews() {
-		return new IDetailView[] { emptyView, parameterView };
-	}
+    @Override
+    protected IDetailView[] getDetailViews() {
+        return new IDetailView[] { emptyView, parameterView };
+    }
 
-	private class ParameterView extends EmptyView {
+    private class ParameterView extends EmptyView {
 
-		private StyledText nameText;
-		private StyledText descriptionText;
+        private StyledText nameText;
+        private StyledText descriptionText;
 
-		@Override
-		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
-			Composite container = setControl(super.createControls(parent, context, dbc));
-			GridLayoutFactory.fillDefaults().margins(8, 2).spacing(6, 2).applyTo(container);
+        @Override
+        public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
+            Composite container = setControl(super.createControls(parent, context, dbc));
+            GridLayoutFactory.fillDefaults().margins(8, 2).spacing(6, 2).applyTo(container);
 
-			// nameLink
-			this.nameText = createNonEditableStyledText(container);
+            // nameLink
+            this.nameText = createNonEditableStyledText(container);
 
-			// descriptionText
-			this.descriptionText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
-			descriptionText.setAlwaysShowScrollBars(false);
-			StyledTextUtils.setTransparent(descriptionText);
-			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true)
-					.hint(container.getClientArea().x, SWT.DEFAULT).applyTo(descriptionText);
-			return container;
-		}
+            // descriptionText
+            this.descriptionText = new StyledText(container, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
+            descriptionText.setAlwaysShowScrollBars(false);
+            StyledTextUtils.setTransparent(descriptionText);
+            GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(container.getClientArea().x, SWT.DEFAULT)
+                    .applyTo(descriptionText);
+            return container;
+        }
 
-		@Override
-		public void onVisible(IObservableValue parameterObservable, DataBindingContext dbc) {
-			Object value = parameterObservable.getValue();
-			if (!(value instanceof IParameter) || DisposeUtils.isDisposed(nameText)) {
-				return;
-			}
-			IParameter parameter = (IParameter) value;
-			String name = parameter.getName();
-			this.nameText.setText(name);
-			this.nameText.setStyleRange(StyledTextUtils.createBoldStyle(name, null));
-			this.descriptionText.setText(parameter.getDescription());
-		}
+        @Override
+        public void onVisible(IObservableValue parameterObservable, DataBindingContext dbc) {
+            Object value = parameterObservable.getValue();
+            if (!(value instanceof IParameter) || DisposeUtils.isDisposed(nameText)) {
+                return;
+            }
+            IParameter parameter = (IParameter)value;
+            String name = parameter.getName();
+            this.nameText.setText(name);
+            this.nameText.setStyleRange(StyledTextUtils.createBoldStyle(name, null));
+            this.descriptionText.setText(parameter.getDescription());
+        }
 
-		@Override
-		public boolean isViewFor(Object object) {
-			return object instanceof IParameter;
-		}
-	}
+        @Override
+        public boolean isViewFor(Object object) {
+            return object instanceof IParameter;
+        }
+    }
 
 }

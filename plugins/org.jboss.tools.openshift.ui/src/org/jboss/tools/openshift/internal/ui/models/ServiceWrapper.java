@@ -17,17 +17,16 @@ import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 class ServiceWrapper extends ResourceContainer<IService, ProjectWrapper> implements IServiceWrapper {
-	public ServiceWrapper(ProjectWrapper parent, IService resource) {
-		super(parent, resource);
-	}
+    public ServiceWrapper(ProjectWrapper parent, IService resource) {
+        super(parent, resource);
+    }
 
-	protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated,
-			boolean changed) {
-		// do nothing
-		
-	}
+    protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated, boolean changed) {
+        // do nothing
 
-	protected ResourceWrapper createNewWrapper(Collection<IResource> resources, IResource r) {
-		return new ResourceWrapper(this, r);
-	}
+    }
+
+    protected ResourceWrapper createNewWrapper(Collection<IResource> resources, IResource r) {
+        return new ResourceWrapper(this, r);
+    }
 }

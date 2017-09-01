@@ -20,15 +20,15 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class IsNotEmptyString2BooleanConverter extends Converter {
 
-	public IsNotEmptyString2BooleanConverter() {
-		super(String.class, Boolean.class);
-	}
+    public IsNotEmptyString2BooleanConverter() {
+        super(String.class, Boolean.class);
+    }
 
-	@Override
-	public Object convert(Object fromObject) {
-		if(!(fromObject instanceof String)) {
-			return Boolean.FALSE;
-		} 
-		return !StringUtils.isEmpty((String) fromObject) ;
-	}
+    @Override
+    public Object convert(Object fromObject) {
+        if (!(fromObject instanceof String)) {
+            return Boolean.FALSE;
+        }
+        return !StringUtils.isEmpty((String)fromObject);
+    }
 }

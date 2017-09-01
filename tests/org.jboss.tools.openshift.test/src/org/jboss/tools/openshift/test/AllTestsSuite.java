@@ -56,53 +56,23 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-	ResourceUtilsIsMatchingTest.class,
-	BuildConfigPropertySourceTest.class,
-	ConnectionPropertySourceTest.class,
-	ConnectionRegistryTest.class,
-	ConnectionPersistencyTest.class,
-	ConnectionTest.class,
-	ConnectionURLTest.class,
-	CreateApplicationFromTemplateJobTest.class,
-	CreationTimestampComparatorTest.class,
-	DataBindingUtilsTest.class,
-	DeployImageJobTest.class, 
-	ExtTextPropertyDescriptorTest.class,
-	LabelKeyValidatorTest.class,
-	LabelValueValidatorTest.class,
-	ProjectNameValidatorTest.class,
-	ProjectViewerComparatorTest.class,
-	ProjectTreeSorterTest.class,
-	LazySSLCertificateCallbackTest.class, 
-	NewApplicationWizardModelTest.class,
-	OpenShiftCorePreferencesTest.class,
-	OpenShiftExplorerContentProviderTest.class,
-	OpenShiftExplorerLabelProviderTest.class,
-	OpenShiftProjectCacheTest.class,
-	OpenShiftSecureStorageKeyTest.class,
-	PortForwardingWizardModelTest.class,
-	PortSpecAdapterTest.class,
-	ResourcePropertySourceTest.class,
-	ResourceUtilsTest.class,
-	ScaleDeploymentHandlerTest.class,
-	PodLogsHandlerTest.class,
-	SmartTooltipTest.class,
-	StringUtilsTest.class,
-	TemplateParameterViewerUtilsTest.class,
-	URIUtilsTest.class,
-	URLValidatorTest.class,
-	WebhooksPropertySourceTest.class,
-	ConnectionWizardPageModelTest.class,
-	ConnectionsFactoryTest.class,
-	// triggers secure storage prompt
-	//SecureStorageTest.class
-	
-	OpenShiftSubsystemTest.class, 
-	OpenShiftModuleDeploymentPrefsUtilTest.class,
-	
-	PodPortValidatorTest.class
-})
+@SuiteClasses({ ResourceUtilsIsMatchingTest.class, BuildConfigPropertySourceTest.class, ConnectionPropertySourceTest.class,
+        ConnectionRegistryTest.class, ConnectionPersistencyTest.class, ConnectionTest.class, ConnectionURLTest.class,
+        CreateApplicationFromTemplateJobTest.class, CreationTimestampComparatorTest.class, DataBindingUtilsTest.class,
+        DeployImageJobTest.class, ExtTextPropertyDescriptorTest.class, LabelKeyValidatorTest.class, LabelValueValidatorTest.class,
+        ProjectNameValidatorTest.class, ProjectViewerComparatorTest.class, ProjectTreeSorterTest.class,
+        LazySSLCertificateCallbackTest.class, NewApplicationWizardModelTest.class, OpenShiftCorePreferencesTest.class,
+        OpenShiftExplorerContentProviderTest.class, OpenShiftExplorerLabelProviderTest.class, OpenShiftProjectCacheTest.class,
+        OpenShiftSecureStorageKeyTest.class, PortForwardingWizardModelTest.class, PortSpecAdapterTest.class,
+        ResourcePropertySourceTest.class, ResourceUtilsTest.class, ScaleDeploymentHandlerTest.class, PodLogsHandlerTest.class,
+        SmartTooltipTest.class, StringUtilsTest.class, TemplateParameterViewerUtilsTest.class, URIUtilsTest.class, URLValidatorTest.class,
+        WebhooksPropertySourceTest.class, ConnectionWizardPageModelTest.class, ConnectionsFactoryTest.class,
+        // triggers secure storage prompt
+        //SecureStorageTest.class
+
+        OpenShiftSubsystemTest.class, OpenShiftModuleDeploymentPrefsUtilTest.class,
+
+        PodPortValidatorTest.class })
 /**
  * @author Andre Dietisheim
  */

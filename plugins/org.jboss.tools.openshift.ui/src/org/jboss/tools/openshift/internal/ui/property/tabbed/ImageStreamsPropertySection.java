@@ -21,7 +21,7 @@ import com.openshift.restclient.ResourceKind;
  */
 public class ImageStreamsPropertySection extends OpenShiftResourcePropertySection {
 
-	public ImageStreamsPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.ImageStreamsTab", ResourceKind.IMAGE_STREAM);
-	}
+    public ImageStreamsPropertySection() {
+        super("popup:org.jboss.tools.openshift.ui.properties.tab.ImageStreamsTab", ResourceKind.IMAGE_STREAM);
+    }
 }

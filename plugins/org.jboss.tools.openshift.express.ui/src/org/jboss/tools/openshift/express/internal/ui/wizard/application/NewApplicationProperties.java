@@ -12,25 +12,25 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public class NewApplicationProperties implements IApplicationProperties {
 
-	private IOpenShiftApplicationWizardModel wizardModel;
+    private IOpenShiftApplicationWizardModel wizardModel;
 
-	NewApplicationProperties(IOpenShiftApplicationWizardModel wizardModel) {
-		this.wizardModel = wizardModel;
-	}
+    NewApplicationProperties(IOpenShiftApplicationWizardModel wizardModel) {
+        this.wizardModel = wizardModel;
+    }
 
-	@Override
-	public ApplicationScale getApplicationScale() {
-		return wizardModel.getApplicationScale();
-	}
+    @Override
+    public ApplicationScale getApplicationScale() {
+        return wizardModel.getApplicationScale();
+    }
 
-	@Override
-	public ICartridge getStandaloneCartridge() {
-		return wizardModel.getStandaloneCartridge();
-	}
+    @Override
+    public ICartridge getStandaloneCartridge() {
+        return wizardModel.getStandaloneCartridge();
+    }
 
-	@Override
-	public String getApplicationName() {
-		return wizardModel.getApplicationName();
-	}
-	
+    @Override
+    public String getApplicationName() {
+        return wizardModel.getApplicationName();
+    }
+
 }

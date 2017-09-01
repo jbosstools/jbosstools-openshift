@@ -57,207 +57,207 @@ import com.openshift.restclient.model.IResource;
  */
 public class OpenShiftResourcePropertySection extends AbstractPropertySection implements OpenShiftAPIAnnotations {
 
-	protected TableViewer table;
-	protected PropertySheetPage details;
-	protected TabbedPropertySheetPage page;
-	private ISelectionProvider selectionProvider;
-	private String menuContributionId;
-	private String resourceKind;
+    protected TableViewer table;
+    protected PropertySheetPage details;
+    protected TabbedPropertySheetPage page;
+    private ISelectionProvider selectionProvider;
+    private String menuContributionId;
+    private String resourceKind;
 
-	public OpenShiftResourcePropertySection(String menuContributionId, String kind) {
-		this.resourceKind= kind;
-		this.menuContributionId = menuContributionId;
-	}
+    public OpenShiftResourcePropertySection(String menuContributionId, String kind) {
+        this.resourceKind = kind;
+        this.menuContributionId = menuContributionId;
+    }
 
-	@Override
-	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
-		super.createControls(parent, aTabbedPropertySheetPage);
-		createContents(parent, aTabbedPropertySheetPage);
-	}
+    @Override
+    public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
+        super.createControls(parent, aTabbedPropertySheetPage);
+        createContents(parent, aTabbedPropertySheetPage);
+    }
 
-	@Override
-	public void aboutToBeShown() {
-		super.aboutToBeShown();
-		if (page != null) {
-			page.getSite().setSelectionProvider(selectionProvider);
-		}
-	}
+    @Override
+    public void aboutToBeShown() {
+        super.aboutToBeShown();
+        if (page != null) {
+            page.getSite().setSelectionProvider(selectionProvider);
+        }
+    }
 
-	protected void createContents(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
-		this.page = aTabbedPropertySheetPage;
-		parent.setLayout(new GridLayout());
+    protected void createContents(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
+        this.page = aTabbedPropertySheetPage;
+        parent.setLayout(new GridLayout());
 
-		SashForm container = new SashForm(parent, SWT.VERTICAL);
-		GridData d = new GridData(GridData.FILL_BOTH);
-		d.widthHint = 100; // A dirty trick that keeps table from growing
-							// unlimitedly within scrolled parent composite.
-		d.heightHint = 100;
-		container.setLayoutData(d);
-		Composite tableContainer = new Composite(container, SWT.NONE);
+        SashForm container = new SashForm(parent, SWT.VERTICAL);
+        GridData d = new GridData(GridData.FILL_BOTH);
+        d.widthHint = 100; // A dirty trick that keeps table from growing
+                           // unlimitedly within scrolled parent composite.
+        d.heightHint = 100;
+        container.setLayoutData(d);
+        Composite tableContainer = new Composite(container, SWT.NONE);
 
-		tableContainer.setLayout(new FillLayout());
-		this.table = createTable(tableContainer);
+        tableContainer.setLayout(new FillLayout());
+        this.table = createTable(tableContainer);
 
-		details = new PropertySheetPage();
-		details.createControl(container);
-		selectionProvider = new ISelectionProvider() {
+        details = new PropertySheetPage();
+        details.createControl(container);
+        selectionProvider = new ISelectionProvider() {
 
-			@Override
-			public void setSelection(ISelection selection) {
-			}
+            @Override
+            public void setSelection(ISelection selection) {
+            }
 
-			@Override
-			public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-				table.removeSelectionChangedListener(listener);
-			}
+            @Override
+            public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+                table.removeSelectionChangedListener(listener);
+            }
 
-			@Override
-			public ISelection getSelection() {
-				return table.getSelection();
-			}
+            @Override
+            public ISelection getSelection() {
+                return table.getSelection();
+            }
 
-			@Override
-			public void addSelectionChangedListener(ISelectionChangedListener listener) {
-				table.addSelectionChangedListener(listener);
-			}
-		};
-	}
+            @Override
+            public void addSelectionChangedListener(ISelectionChangedListener listener) {
+                table.addSelectionChangedListener(listener);
+            }
+        };
+    }
 
-	protected TableViewer createTable(Composite tableContainer) {
-		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		TableViewerBuilder tableViewerBuilder = new TableViewerBuilder(table, tableContainer)
-				.contentProvider(new ResourceContainerContentProvider(resourceKind));
+    protected TableViewer createTable(Composite tableContainer) {
+        Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+        table.setLinesVisible(true);
+        table.setHeaderVisible(true);
+        TableViewerBuilder tableViewerBuilder = new TableViewerBuilder(table, tableContainer)
+                .contentProvider(new ResourceContainerContentProvider(resourceKind));
 
-		setSorter(tableViewerBuilder);
-		addColumns(tableViewerBuilder);
+        setSorter(tableViewerBuilder);
+        addColumns(tableViewerBuilder);
 
-		TableViewer viewer = tableViewerBuilder.buildViewer();
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				details.selectionChanged(null, event.getSelection());
-			}
-		});
-		addContextMenu(viewer);
-		return viewer;
-	}
+        TableViewer viewer = tableViewerBuilder.buildViewer();
+        viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent event) {
+                details.selectionChanged(null, event.getSelection());
+            }
+        });
+        addContextMenu(viewer);
+        return viewer;
+    }
 
-	protected void setSorter(TableViewerBuilder tableViewerBuilder) {
-		tableViewerBuilder.sorter(createNameSorter());
-	}
+    protected void setSorter(TableViewerBuilder tableViewerBuilder) {
+        tableViewerBuilder.sorter(createNameSorter());
+    }
 
-	protected void addColumns(TableViewerBuilder tableViewerBuilder) {
-		addNameColumn(tableViewerBuilder);
-		addCreatedColumn(tableViewerBuilder);
-		addLabelsColumn(tableViewerBuilder);
-	}
+    protected void addColumns(TableViewerBuilder tableViewerBuilder) {
+        addNameColumn(tableViewerBuilder);
+        addCreatedColumn(tableViewerBuilder);
+        addLabelsColumn(tableViewerBuilder);
+    }
 
-	protected IResource getResource(Object element) {
-		if (element instanceof IResource) {
-			return (IResource) element;
-		}
-		if (element instanceof IAdaptable) {
-			return ((IAdaptable) element).getAdapter(IResource.class);
-		}
-		return null;
-	}
+    protected IResource getResource(Object element) {
+        if (element instanceof IResource) {
+            return (IResource)element;
+        }
+        if (element instanceof IAdaptable) {
+            return ((IAdaptable)element).getAdapter(IResource.class);
+        }
+        return null;
+    }
 
-	protected void addNameColumn(TableViewerBuilder tableViewerBuilder) {
-		tableViewerBuilder.column(model -> getResource(model).getName()).name("Name").align(SWT.LEFT).weight(1)
-				.minWidth(15).buildColumn();
-	}
+    protected void addNameColumn(TableViewerBuilder tableViewerBuilder) {
+        tableViewerBuilder.column(model -> getResource(model).getName()).name("Name").align(SWT.LEFT).weight(1).minWidth(15).buildColumn();
+    }
 
-	protected void addCreatedColumn(TableViewerBuilder tableViewerBuilder) {
-		tableViewerBuilder.column(model -> DateTimeUtils.formatSince(getResource(model).getCreationTimeStamp()))
-				.name("Created").align(SWT.LEFT).weight(1).minWidth(5).buildColumn();
-	}
+    protected void addCreatedColumn(TableViewerBuilder tableViewerBuilder) {
+        tableViewerBuilder.column(model -> DateTimeUtils.formatSince(getResource(model).getCreationTimeStamp())).name("Created")
+                .align(SWT.LEFT).weight(1).minWidth(5).buildColumn();
+    }
 
-	protected void addLabelsColumn(TableViewerBuilder tableViewerBuilder) {
-		tableViewerBuilder.column(model -> StringUtils.serialize(getResource(model).getLabels())).name("Labels")
-				.align(SWT.LEFT).weight(1).minWidth(25).buildColumn();
-	}
+    protected void addLabelsColumn(TableViewerBuilder tableViewerBuilder) {
+        tableViewerBuilder.column(model -> StringUtils.serialize(getResource(model).getLabels())).name("Labels").align(SWT.LEFT).weight(1)
+                .minWidth(25).buildColumn();
+    }
 
-	protected void addContextMenu(TableViewer viewer) {
-		if (menuContributionId != null) {
-			final IMenuManager contextMenu = UIUtils.createContextMenu(viewer.getTable());
-			UIUtils.registerContributionManager(menuContributionId, contextMenu, viewer.getTable());
-		}
-	}
+    protected void addContextMenu(TableViewer viewer) {
+        if (menuContributionId != null) {
+            final IMenuManager contextMenu = UIUtils.createContextMenu(viewer.getTable());
+            UIUtils.registerContributionManager(menuContributionId, contextMenu, viewer.getTable());
+        }
+    }
 
-	@Override
-	public void setInput(IWorkbenchPart part, ISelection selection) {
-		super.setInput(part, selection);
-		IResourceContainer<?, ?> model = UIUtils.getFirstElement(selection, IResourceContainer.class);
-		if (model == null)
-			return;
-		ITabDescriptor tab = page.getSelectedTab();
-		if (tab == null)
-			return;
-		table.setInput(model);
-	}
+    @Override
+    public void setInput(IWorkbenchPart part, ISelection selection) {
+        super.setInput(part, selection);
+        IResourceContainer<?, ?> model = UIUtils.getFirstElement(selection, IResourceContainer.class);
+        if (model == null)
+            return;
+        ITabDescriptor tab = page.getSelectedTab();
+        if (tab == null)
+            return;
+        table.setInput(model);
+    }
 
-	@Override
-	public void dispose() {
-		if (this.table != null && this.table.getTable() != null) {
-			this.table.getTable().dispose();
-		}
-		if (this.details != null) {
-			this.details.dispose();
-		}
-	}
+    @Override
+    public void dispose() {
+        if (this.table != null && this.table.getTable() != null) {
+            this.table.getTable().dispose();
+        }
+        if (this.details != null) {
+            this.details.dispose();
+        }
+    }
 
-	@Override
-	public boolean shouldUseExtraSpace() {
-		return true;
-	}
+    @Override
+    public boolean shouldUseExtraSpace() {
+        return true;
+    }
 
-	@Override
-	public void refresh() {
-		if (!DisposeUtils.isDisposed(table)) {
-			this.table.refresh();
-		}
-		if (!DisposeUtils.isDisposed(this.details.getControl())) {
-			this.details.refresh();
-		}
-	}
+    @Override
+    public void refresh() {
+        if (!DisposeUtils.isDisposed(table)) {
+            this.table.refresh();
+        }
+        if (!DisposeUtils.isDisposed(this.details.getControl())) {
+            this.details.refresh();
+        }
+    }
 
-	protected ViewerComparator createCreatedBySorter() {
-		final CreationTimestampComparator comparator = new CreationTimestampComparator();
-		return new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				return comparator.compare((IResourceWrapper<?, ?>) e1, (IResourceWrapper<?, ?>) e2);
-			}
-		};
-	}
+    protected ViewerComparator createCreatedBySorter() {
+        final CreationTimestampComparator comparator = new CreationTimestampComparator();
+        return new ViewerComparator() {
+            @Override
+            public int compare(Viewer viewer, Object e1, Object e2) {
+                return comparator.compare((IResourceWrapper<?, ?>)e1, (IResourceWrapper<?, ?>)e2);
+            }
+        };
+    }
 
-	protected ViewerComparator createNameSorter() {
-		return new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				IResource r1 = ((IResourceWrapper<?, ?>) e1).getWrapped();
-				IResource r2 = ((IResourceWrapper<?, ?>) e2).getWrapped();
-				return r1.getName().compareTo(r2.getName());
-			}
-		};
-	}
-	protected ViewerComparator createCreationTimestampSorter(boolean descending) {
-		return new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				IResource r1 = ((IResourceWrapper<?, ?>) e1).getWrapped();
-				IResource r2 = ((IResourceWrapper<?, ?>) e2).getWrapped();
-				try {
-					Date d1 = DateTimeUtils.parse(r1.getCreationTimeStamp());
-					Date d2 = DateTimeUtils.parse(r2.getCreationTimeStamp());
-					return descending ? d2.compareTo(d1) : d1.compareTo(d2);
-				}catch(ParseException e) {
-					OpenShiftUIActivator.log(IStatus.ERROR, "Unable to parse dates in OpenShift Resource Property Tab Section", e);
-				}
-				return 0;
-			}
-		};
-	}
+    protected ViewerComparator createNameSorter() {
+        return new ViewerComparator() {
+            @Override
+            public int compare(Viewer viewer, Object e1, Object e2) {
+                IResource r1 = ((IResourceWrapper<?, ?>)e1).getWrapped();
+                IResource r2 = ((IResourceWrapper<?, ?>)e2).getWrapped();
+                return r1.getName().compareTo(r2.getName());
+            }
+        };
+    }
+
+    protected ViewerComparator createCreationTimestampSorter(boolean descending) {
+        return new ViewerComparator() {
+            @Override
+            public int compare(Viewer viewer, Object e1, Object e2) {
+                IResource r1 = ((IResourceWrapper<?, ?>)e1).getWrapped();
+                IResource r2 = ((IResourceWrapper<?, ?>)e2).getWrapped();
+                try {
+                    Date d1 = DateTimeUtils.parse(r1.getCreationTimeStamp());
+                    Date d2 = DateTimeUtils.parse(r2.getCreationTimeStamp());
+                    return descending ? d2.compareTo(d1) : d1.compareTo(d2);
+                } catch (ParseException e) {
+                    OpenShiftUIActivator.log(IStatus.ERROR, "Unable to parse dates in OpenShift Resource Property Tab Section", e);
+                }
+                return 0;
+            }
+        };
+    }
 }

@@ -40,88 +40,86 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
  * @author mlabuda@redhat.com
  */
 public abstract class AbstractOpenShiftApplicationWizard {
-	
+
 	protected TreeViewerHandler treeViewerHandler = TreeViewerHandler.getInstance();
-	
+
 	protected String server;
 	protected String username;
-	
+
 	public AbstractOpenShiftApplicationWizard(String server, String username) {
 		this.server = server;
 		this.username = username;
 	}
-	
+
 	/**
 	 * Opens new application wizard via shell menu File - New. There has to be 
 	 * an existing connection in OpenShift explorer, otherwise method fails.
 	 */
 	public void openWizardFromShellMenu() {
 		new WorkbenchShell().setFocus();
-		
+
 		new ShellMenu("File", "New", "Other...").select();
-		
+
 		new DefaultShell("New").setFocus();
-		
+
 		new DefaultTreeItem("OpenShift", "OpenShift Application").select();
-		
+
 		new NextButton().click();
-		
+
 		signToOpenShiftAndClickNext();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD).setFocus();
 	}
 
 	private void signToOpenShiftAndClickNext() {
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
-		
+
 		selectConnection(username, server, new DefaultCombo(0));
-		
+
 		new NextButton().click();
 		processUntrustedSSLCertificate();
-		
+
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		new WaitUntil(new WidgetIsEnabled(new BackButton()), TimePeriod.LONG);
 	}
 
 	private void processUntrustedSSLCertificate() {
-		try{
+		try {
 			new WaitUntil(new ShellWithTextIsAvailable("Untrusted SSL Certificate"), TimePeriod.SHORT);
 			new YesButton().click();
-		}catch (WaitTimeoutExpiredException ex){
+		} catch (WaitTimeoutExpiredException ex) {
 			//do nothing SSL Certificate shell did not appear.
 		}
 	}
 
 	private void selectConnection(String username, String server, Combo connectionCombo) {
-		for (String comboItem: connectionCombo.getItems()) {
-			if (comboItem.contains(username) 
-					&& (server == null || comboItem.contains(server))) {
+		for (String comboItem : connectionCombo.getItems()) {
+			if (comboItem.contains(username) && (server == null || comboItem.contains(server))) {
 				connectionCombo.setSelection(comboItem);
 				break;
 			}
 		}
 	}
-	
+
 	/**
 	 * Opens a new OpenShift application wizard from JBoss Central.
 	 */
 	public void openWizardFromCentral() {
 		new DefaultToolItem(new WorkbenchShell(), OpenShiftLabel.Others.RED_HAT_CENTRAL).click();
-		
+
 		new WaitUntil(new CentralIsLoaded());
-		
+
 		new InternalBrowser().execute(OpenShiftLabel.Others.OPENSHIFT_CENTRAL_SCRIPT);
-	
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD),
-				TimePeriod.LONG);
-		
+
+		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD), TimePeriod.LONG);
+
 		signToOpenShiftAndClickNext();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD).setFocus();
 	}
 
 	protected void selectComboItem(String itemSubstring, DefaultCombo projectCombo) {
-		for (String comboItem: projectCombo.getItems()) {
+		for (String comboItem : projectCombo.getItems()) {
 			if (comboItem.contains(itemSubstring)) {
 				projectCombo.setSelection(comboItem);
 				break;
@@ -134,16 +132,16 @@ public abstract class AbstractOpenShiftApplicationWizard {
 	 */
 	public void back() {
 		new WaitUntil(new WidgetIsEnabled(new BackButton()), TimePeriod.LONG);
-		
+
 		new BackButton().click();
 	}
-	
+
 	/**
 	 * Waits and clicks Next button.
 	 */
 	public void next() {
 		new WaitUntil(new WidgetIsEnabled(new NextButton()), TimePeriod.LONG);
-		
+
 		new NextButton().click();
 	}
 
@@ -152,16 +150,16 @@ public abstract class AbstractOpenShiftApplicationWizard {
 	 */
 	public void cancel() {
 		new WaitUntil(new WidgetIsEnabled(new CancelButton()), TimePeriod.LONG);
-		
+
 		new CancelButton().click();
 	}
-	
+
 	/**
 	 * Waits and clicks Finish button.
 	 */
 	public void finish() {
 		new WaitUntil(new WidgetIsEnabled(new FinishButton()), TimePeriod.LONG);
-		
+
 		new FinishButton().click();
 	}
 }

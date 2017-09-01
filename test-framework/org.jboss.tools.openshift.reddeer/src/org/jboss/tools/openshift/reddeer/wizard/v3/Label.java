@@ -19,7 +19,7 @@ public class Label {
 
 	private String name;
 	private String value;
-	
+
 	/**
 	 * Creates new OpenShift label with specified name and value.
 	 * 
@@ -34,7 +34,7 @@ public class Label {
 	public String getName() {
 		return name;
 	}
-	
+
 	public String getValue() {
 		return value;
 	}

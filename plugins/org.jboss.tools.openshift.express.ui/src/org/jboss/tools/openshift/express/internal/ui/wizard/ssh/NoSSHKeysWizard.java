@@ -30,55 +30,53 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
  */
 public class NoSSHKeysWizard extends Wizard {
 
-	private ExpressConnection user;
+    private ExpressConnection user;
 
-	public NoSSHKeysWizard(ExpressConnection user) {
-		this.user = user;
-		setWindowTitle("No SSH Keys");
-		setNeedsProgressMonitor(true);
-	}
+    public NoSSHKeysWizard(ExpressConnection user) {
+        this.user = user;
+        setWindowTitle("No SSH Keys");
+        setNeedsProgressMonitor(true);
+    }
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new NoSSHKeysWizardPage(user, this));
-	}
+    @Override
+    public void addPages() {
+        addPage(new NoSSHKeysWizardPage(user, this));
+    }
 
-	private class NoSSHKeysWizardPage extends ManageSSHKeysWizardPage {
+    private class NoSSHKeysWizardPage extends ManageSSHKeysWizardPage {
 
-		NoSSHKeysWizardPage(ExpressConnection connection, IWizard wizard) {
-			super("Add SSH Keys",
-					"Please make sure you have an SSH public key uploaded to your OpenShift account " + connection.getUsername(),
-					"NoSSHKeysPage", connection, wizard);
-		}
+        NoSSHKeysWizardPage(ExpressConnection connection, IWizard wizard) {
+            super("Add SSH Keys",
+                    "Please make sure you have an SSH public key uploaded to your OpenShift account " + connection.getUsername(),
+                    "NoSSHKeysPage", connection, wizard);
+        }
 
-		@Override
-		protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-			Label dummyLabel = new Label(parent, SWT.None);
-			ValueBindingBuilder
-					.bind(WidgetProperties.enabled().observe(dummyLabel))
-					.notUpdatingParticipant()
-					.to(BeanProperties.value(SSHKeysWizardPageModel.PROPERTY_HAS_KEY).observe(getPageModel()))
-					.validatingAfterGet(new IValidator() {
+        @Override
+        protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+            Label dummyLabel = new Label(parent, SWT.None);
+            ValueBindingBuilder.bind(WidgetProperties.enabled().observe(dummyLabel)).notUpdatingParticipant()
+                    .to(BeanProperties.value(SSHKeysWizardPageModel.PROPERTY_HAS_KEY).observe(getPageModel()))
+                    .validatingAfterGet(new IValidator() {
 
-						@Override
-						public IStatus validate(Object value) {
-							if (Boolean.TRUE.equals(value)) {
-								return ValidationStatus.ok();
-							} else {
-								return ValidationStatus.cancel(
-										NLS.bind("You have no SSH public keys in your OpenShift account\n"
-												+ "{0} yet, please add your key(s) or\n"
-												+ "create new one(s)", getPageModel().getConnection().getUsername()));
-							}
-						}
-					})
-					.in(dbc);
-			super.doCreateControls(parent, dbc);
-		}
-	}
+                        @Override
+                        public IStatus validate(Object value) {
+                            if (Boolean.TRUE.equals(value)) {
+                                return ValidationStatus.ok();
+                            } else {
+                                return ValidationStatus
+                                        .cancel(NLS.bind(
+                                                "You have no SSH public keys in your OpenShift account\n"
+                                                        + "{0} yet, please add your key(s) or\n" + "create new one(s)",
+                                                getPageModel().getConnection().getUsername()));
+                            }
+                        }
+                    }).in(dbc);
+            super.doCreateControls(parent, dbc);
+        }
+    }
 }

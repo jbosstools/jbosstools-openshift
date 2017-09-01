@@ -28,48 +28,42 @@ import com.openshift.restclient.model.IResource;
  * @author Andre Dietisheim
  */
 public class ResourceWrapperUtils {
-	
-	private ResourceWrapperUtils() {
-	}
 
-	public static <R extends IResource> List<R> getResources(Collection<IResourceWrapper<?, ?>> wrappers) {
-		if (wrappers == null
-			|| wrappers.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return wrappers.stream()
-			.map(wrapper -> (R) wrapper.getWrapped())
-			.collect(Collectors.toList());
-	}
+    private ResourceWrapperUtils() {
+    }
 
-	public static IResource getResource(Object element) {
-		IResource resource = null;
-		if (element != null) {
-			if (element instanceof IResource) {
-				resource = (IResource) element;
-			} else if (element instanceof IResourceWrapper) {
-				resource = ((IResourceWrapper<?,?>) element) .getWrapped();
-			}
-		}
-		return resource;
-	}
+    public static <R extends IResource> List<R> getResources(Collection<IResourceWrapper<?, ?>> wrappers) {
+        if (wrappers == null || wrappers.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return wrappers.stream().map(wrapper -> (R)wrapper.getWrapped()).collect(Collectors.toList());
+    }
 
-	//Returns service UI element if given resource wrapper has a running pod and service wrapper as the parent, otherwise returns null.
-	public static IServiceWrapper getServiceWrapperFor(IResourceWrapper<?,?> wrapper, Predicate<IResourceWrapper<?,?>> predicate) {
-		if (wrapper != null) {
-			Object parent = wrapper.getParent();
-			if (parent instanceof IServiceWrapper) {
-				return (IServiceWrapper) parent;
-			} else if (parent instanceof IProjectWrapper) {
-				 Optional<IResourceWrapper<?, ?>> firstWrapper =
-						 ((IProjectWrapper) parent).getResourcesOfKind(ResourceKind.SERVICE).stream()
-						.filter(predicate)
-						.findFirst();
-				 return (IServiceWrapper) firstWrapper.orElse(null);
-			}
-		}
-		return null;
-	}
+    public static IResource getResource(Object element) {
+        IResource resource = null;
+        if (element != null) {
+            if (element instanceof IResource) {
+                resource = (IResource)element;
+            } else if (element instanceof IResourceWrapper) {
+                resource = ((IResourceWrapper<?, ?>)element).getWrapped();
+            }
+        }
+        return resource;
+    }
 
+    //Returns service UI element if given resource wrapper has a running pod and service wrapper as the parent, otherwise returns null.
+    public static IServiceWrapper getServiceWrapperFor(IResourceWrapper<?, ?> wrapper, Predicate<IResourceWrapper<?, ?>> predicate) {
+        if (wrapper != null) {
+            Object parent = wrapper.getParent();
+            if (parent instanceof IServiceWrapper) {
+                return (IServiceWrapper)parent;
+            } else if (parent instanceof IProjectWrapper) {
+                Optional<IResourceWrapper<?, ?>> firstWrapper = ((IProjectWrapper)parent).getResourcesOfKind(ResourceKind.SERVICE).stream()
+                        .filter(predicate).findFirst();
+                return (IServiceWrapper)firstWrapper.orElse(null);
+            }
+        }
+        return null;
+    }
 
 }

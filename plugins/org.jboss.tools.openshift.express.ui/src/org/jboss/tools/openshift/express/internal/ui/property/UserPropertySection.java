@@ -27,42 +27,42 @@ import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
  */
 public class UserPropertySection extends AbstractPropertySection {
 
-	private Text labelText;
-    
-	@Override
-	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
-		super.createControls(parent, aTabbedPropertySheetPage);
-		Composite composite = getWidgetFactory().createFlatFormComposite(parent);
-		FormData data;
+    private Text labelText;
 
-		labelText = getWidgetFactory().createText(composite, ""); //$NON-NLS-1$
-		data = new FormData();
-		data.left = new FormAttachment(0, STANDARD_LABEL_WIDTH);
-		data.right = new FormAttachment(100, 0);
-		data.top = new FormAttachment(0, ITabbedPropertyConstants.VSPACE);
-		labelText.setLayoutData(data);
-		//labelText.addModifyListener(listener);
+    @Override
+    public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
+        super.createControls(parent, aTabbedPropertySheetPage);
+        Composite composite = getWidgetFactory().createFlatFormComposite(parent);
+        FormData data;
 
-		CLabel labelLabel = getWidgetFactory().createCLabel(composite, "Label:"); //$NON-NLS-1$
-		data = new FormData();
-		data.left = new FormAttachment(0, 0);
-		data.right = new FormAttachment(labelText, -ITabbedPropertyConstants.HSPACE);
-		data.top = new FormAttachment(labelText, 0, SWT.CENTER);
-		labelLabel.setLayoutData(data);
-	}
+        labelText = getWidgetFactory().createText(composite, ""); //$NON-NLS-1$
+        data = new FormData();
+        data.left = new FormAttachment(0, STANDARD_LABEL_WIDTH);
+        data.right = new FormAttachment(100, 0);
+        data.top = new FormAttachment(0, ITabbedPropertyConstants.VSPACE);
+        labelText.setLayoutData(data);
+        //labelText.addModifyListener(listener);
 
-	@Override
-	public void setInput(IWorkbenchPart part, ISelection selection) {
-		super.setInput(part, selection);
-//		Assert.isTrue(selection instanceof IStructuredSelection);
-//		Object input = ((IStructuredSelection) selection).getFirstElement();
-	}
+        CLabel labelLabel = getWidgetFactory().createCLabel(composite, "Label:"); //$NON-NLS-1$
+        data = new FormData();
+        data.left = new FormAttachment(0, 0);
+        data.right = new FormAttachment(labelText, -ITabbedPropertyConstants.HSPACE);
+        data.top = new FormAttachment(labelText, 0, SWT.CENTER);
+        labelLabel.setLayoutData(data);
+    }
 
-	@Override
-	public void refresh() {
-//		labelText.removeModifyListener(listener);
-//		ButtonElementProperties properties = (ButtonElementProperties) buttonElement.getAdapter(IPropertySource.class);
-//		labelText.setText(properties.strText);
-//		labelText.addModifyListener(listener);
-	}
+    @Override
+    public void setInput(IWorkbenchPart part, ISelection selection) {
+        super.setInput(part, selection);
+        //		Assert.isTrue(selection instanceof IStructuredSelection);
+        //		Object input = ((IStructuredSelection) selection).getFirstElement();
+    }
+
+    @Override
+    public void refresh() {
+        //		labelText.removeModifyListener(listener);
+        //		ButtonElementProperties properties = (ButtonElementProperties) buttonElement.getAdapter(IPropertySource.class);
+        //		labelText.setText(properties.strText);
+        //		labelText.addModifyListener(listener);
+    }
 }

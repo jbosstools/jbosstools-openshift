@@ -27,63 +27,62 @@ import org.eclipse.ui.ide.IDE.SharedImages;
  */
 public class SelectProjectDialog extends ElementListSelectionDialog {
 
-	public SelectProjectDialog(Shell shell) {
-		super(shell, new ProjectLabelProvider());
-		setTitle("Select Existing Project");
-		setMessage("Select an existing project.");
-		setMultipleSelection(false);
-		setAllowDuplicates(false);
-		initRestrictions();
-		setElements(getProjects());
-	}
+    public SelectProjectDialog(Shell shell) {
+        super(shell, new ProjectLabelProvider());
+        setTitle("Select Existing Project");
+        setMessage("Select an existing project.");
+        setMultipleSelection(false);
+        setAllowDuplicates(false);
+        initRestrictions();
+        setElements(getProjects());
+    }
 
-	/**
-	 * Initializes the state that affects the result of getProject().
-	 * This method is called once at starting the dialog before the first call of getProject(). 
-	 */
-	protected void initRestrictions() {
-	}
+    /**
+     * Initializes the state that affects the result of getProject().
+     * This method is called once at starting the dialog before the first call of getProject(). 
+     */
+    protected void initRestrictions() {
+    }
 
-	protected Object[] getProjects() {
-		List<IProject> projects = new ArrayList<>();
-		for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-			if (isValid(project)) {
-				projects.add(project);
-			}
-		}
-		return projects.toArray();
-	}
+    protected Object[] getProjects() {
+        List<IProject> projects = new ArrayList<>();
+        for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+            if (isValid(project)) {
+                projects.add(project);
+            }
+        }
+        return projects.toArray();
+    }
 
-	protected boolean isValid(IProject project) {
-		return true;
-	}
+    protected boolean isValid(IProject project) {
+        return true;
+    }
 
-	public IProject getSelectedProject() {
-		Object[] results = getResult();
-		if (results == null 
-				|| results.length < 1) {
-			return null;
-		} else {
-			return (IProject) results[0];
-		}
-	}
-	
-	private static class ProjectLabelProvider extends LabelProvider {
+    public IProject getSelectedProject() {
+        Object[] results = getResult();
+        if (results == null || results.length < 1) {
+            return null;
+        } else {
+            return (IProject)results[0];
+        }
+    }
 
-		@Override
-		public Image getImage(Object element) {
-			return PlatformUI.getWorkbench().getSharedImages().getImage(SharedImages.IMG_OBJ_PROJECT);
-		}
+    private static class ProjectLabelProvider extends LabelProvider {
 
-		@Override
-		public String getText(Object element) {
-			if (!(element instanceof IProject)) {
-				return null;
-			}
+        @Override
+        public Image getImage(Object element) {
+            return PlatformUI.getWorkbench().getSharedImages().getImage(SharedImages.IMG_OBJ_PROJECT);
+        }
 
-			return ((IProject) element).getName();
-		}
+        @Override
+        public String getText(Object element) {
+            if (!(element instanceof IProject)) {
+                return null;
+            }
 
-	}
+            return ((IProject)element).getName();
+        }
+
+    }
 
 }

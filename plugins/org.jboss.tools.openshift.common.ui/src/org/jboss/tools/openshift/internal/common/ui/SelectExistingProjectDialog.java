@@ -33,102 +33,102 @@ import org.jboss.tools.openshift.internal.common.core.preferences.StringPreferen
  */
 public class SelectExistingProjectDialog extends SelectProjectDialog {
 
-	StringPreferenceValue showAllPreferences;
-	private boolean showAll;
-	
-	public SelectExistingProjectDialog(String message, Shell shell) {
-		super(shell);
-		setMessage(NLS.bind("{0}.\nOnly non-shared projects or Git projects allowed.", message));
-	}
+    StringPreferenceValue showAllPreferences;
+    private boolean showAll;
 
-	@Override
-	protected void initRestrictions() {
-		showAllPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftCommonUIActivator.PLUGIN_ID);
-		this.showAll = getShowAllPreferences();
-	}
+    public SelectExistingProjectDialog(String message, Shell shell) {
+        super(shell);
+        setMessage(NLS.bind("{0}.\nOnly non-shared projects or Git projects allowed.", message));
+    }
 
-	private boolean getShowAllPreferences() {
-		boolean showAll = false;
-		if(!StringUtils.isEmpty(showAllPreferences.get())) {
-			showAll = Boolean.valueOf(showAllPreferences.get());
-		}
-		return showAll;
-	}
-	
-	@Override
-	protected Control createDialogArea(Composite parent) {
-		Composite dialogArea = (Composite) super.createDialogArea(parent);
-		Button filterCheckbox = new Button(dialogArea, SWT.CHECK);
-		filterCheckbox.setText("&Show all projects");
-		filterCheckbox.setSelection(showAll);
-		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(filterCheckbox);
-		filterCheckbox.addSelectionListener(onFilterChecked());
-		return dialogArea;
-	}
+    @Override
+    protected void initRestrictions() {
+        showAllPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftCommonUIActivator.PLUGIN_ID);
+        this.showAll = getShowAllPreferences();
+    }
 
-	private SelectionListener onFilterChecked() {
-		return new SelectionAdapter() {
+    private boolean getShowAllPreferences() {
+        boolean showAll = false;
+        if (!StringUtils.isEmpty(showAllPreferences.get())) {
+            showAll = Boolean.valueOf(showAllPreferences.get());
+        }
+        return showAll;
+    }
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				super.widgetSelected(e);
-				if (e.widget instanceof Button) {
-					showAll = ((Button) e.widget).getSelection();
-					showAllPreferences.set(String.valueOf(showAll));
-					Object[] currentlySelected = getSelectedElements();
-					Object[] newProjects = getProjects();
-					setListElements(newProjects);
-					if(currentlySelected != null && currentlySelected.length == 1 && newProjects.length > 0) {
-						//this is a single selection dialog
-						for (Object project: newProjects) {
-							if(project.equals(currentlySelected[0])) {
-								restoreSelection(currentlySelected);
-								break;
-							}
-						}
-					}
-				}
-			}
-		};
-	}
+    @Override
+    protected Control createDialogArea(Composite parent) {
+        Composite dialogArea = (Composite)super.createDialogArea(parent);
+        Button filterCheckbox = new Button(dialogArea, SWT.CHECK);
+        filterCheckbox.setText("&Show all projects");
+        filterCheckbox.setSelection(showAll);
+        GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(filterCheckbox);
+        filterCheckbox.addSelectionListener(onFilterChecked());
+        return dialogArea;
+    }
 
-	void restoreSelection(final Object[] selection) {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				setSelection(selection);
-				updateOkState();
-			}
-		});
-	}
+    private SelectionListener onFilterChecked() {
+        return new SelectionAdapter() {
 
-	@Override
-	protected boolean isValid(IProject project) {
-		if (showAll) {
-			return true;
-		}
-		
-		if (!project.isAccessible()) {
-			return false;
-		}
-		
-		if(ProjectUtils.isInternalRSE(project.getName())) {
-			return false;
-		}
-			
-		if(isNonGitShared(project)) {
-			return false;
-		}
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                super.widgetSelected(e);
+                if (e.widget instanceof Button) {
+                    showAll = ((Button)e.widget).getSelection();
+                    showAllPreferences.set(String.valueOf(showAll));
+                    Object[] currentlySelected = getSelectedElements();
+                    Object[] newProjects = getProjects();
+                    setListElements(newProjects);
+                    if (currentlySelected != null && currentlySelected.length == 1 && newProjects.length > 0) {
+                        //this is a single selection dialog
+                        for (Object project : newProjects) {
+                            if (project.equals(currentlySelected[0])) {
+                                restoreSelection(currentlySelected);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    }
 
-		return true;
-	}
+    void restoreSelection(final Object[] selection) {
+        Display.getDefault().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                setSelection(selection);
+                updateOkState();
+            }
+        });
+    }
 
-	protected boolean isNonGitShared(IProject project) {
-		if (EGitUtils.isShared(project)) {
-			if (!EGitUtils.isSharedWithGit(project)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    protected boolean isValid(IProject project) {
+        if (showAll) {
+            return true;
+        }
+
+        if (!project.isAccessible()) {
+            return false;
+        }
+
+        if (ProjectUtils.isInternalRSE(project.getName())) {
+            return false;
+        }
+
+        if (isNonGitShared(project)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected boolean isNonGitShared(IProject project) {
+        if (EGitUtils.isShared(project)) {
+            if (!EGitUtils.isSharedWithGit(project)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

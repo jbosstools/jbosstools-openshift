@@ -18,9 +18,8 @@ import com.openshift.internal.client.StandaloneCartridgeResource;
  */
 public class StandaloneCartridgeResourceFake extends StandaloneCartridgeResource {
 
-	public StandaloneCartridgeResourceFake(IStandaloneCartridge cartridge) {
-		super(cartridge.getName(), cartridge.getDisplayName(),
-				cartridge.getDisplayName(), cartridge.getUrl(),
-				cartridge.getType(), cartridge.isObsolete(), null, null, null, null);
-		}
+    public StandaloneCartridgeResourceFake(IStandaloneCartridge cartridge) {
+        super(cartridge.getName(), cartridge.getDisplayName(), cartridge.getDisplayName(), cartridge.getUrl(), cartridge.getType(),
+                cartridge.isObsolete(), null, null, null, null);
+    }
 }

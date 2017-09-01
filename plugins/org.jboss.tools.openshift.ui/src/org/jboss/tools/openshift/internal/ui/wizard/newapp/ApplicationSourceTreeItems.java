@@ -42,85 +42,85 @@ import com.openshift.restclient.model.template.ITemplate;
  * @author Andre Dietisheim
  * @author Jeff Maury
  */
-public class ApplicationSourceTreeItems implements IModelFactory , ICommonAttributes{
+public class ApplicationSourceTreeItems implements IModelFactory, ICommonAttributes {
 
-	private static final String BUILDER_TAG = "builder";
-	public static final ApplicationSourceTreeItems INSTANCE = new ApplicationSourceTreeItems();
-	
-	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> List<T> createChildren(Object parent) {
-		if (parent instanceof Connection) {
-			return (List<T>) ((Connection) parent).getResources(ResourceKind.PROJECT);
-		} else if (parent instanceof IProject) {
-			IProject project = (IProject) parent;
-	        Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
-			Collection appSources = loadTemplates(project, conn);
-			appSources.addAll(loadImageStreams(project, conn));
-			return (List<T>) new ArrayList<>(appSources);
-		}
-		return Collections.emptyList();
-	}
+    private static final String BUILDER_TAG = "builder";
+    public static final ApplicationSourceTreeItems INSTANCE = new ApplicationSourceTreeItems();
 
-	private Collection<IApplicationSource> loadImageStreams(IProject project, Connection conn) {
-		final Collection<IImageStream> streams = conn.getResources(ResourceKind.IMAGE_STREAM, project.getNamespace());
-		try {
-		    if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
-				Collection<IImageStream> commonStreams = conn.getResources(ResourceKind.IMAGE_STREAM, (String) conn.getClusterNamespace());
-				commonStreams.stream().filter(s -> !streams.contains(s)).forEach(s -> streams.add(s));
-		    }
+    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public <T> List<T> createChildren(Object parent) {
+        if (parent instanceof Connection) {
+            return (List<T>)((Connection)parent).getResources(ResourceKind.PROJECT);
+        } else if (parent instanceof IProject) {
+            IProject project = (IProject)parent;
+            Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
+            Collection appSources = loadTemplates(project, conn);
+            appSources.addAll(loadImageStreams(project, conn));
+            return (List<T>)new ArrayList<>(appSources);
+        }
+        return Collections.emptyList();
+    }
+
+    private Collection<IApplicationSource> loadImageStreams(IProject project, Connection conn) {
+        final Collection<IImageStream> streams = conn.getResources(ResourceKind.IMAGE_STREAM, project.getNamespace());
+        try {
+            if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
+                Collection<IImageStream> commonStreams = conn.getResources(ResourceKind.IMAGE_STREAM, (String)conn.getClusterNamespace());
+                commonStreams.stream().filter(s -> !streams.contains(s)).forEach(s -> streams.add(s));
+            }
         } catch (OpenShiftException e) {
             OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
         }
-		
-		Collection<IApplicationSource> sources = new ArrayList<>();
-		for (IImageStream is : streams) {
-			List<ITagReference> tags = is.getTags().stream().filter(t->
-				t.isAnnotatedWith(OpenShiftAPIAnnotations.TAGS) 
-				&& ArrayUtils.contains(t.getAnnotation(OpenShiftAPIAnnotations.TAGS).split(","),BUILDER_TAG)
-			).collect(Collectors.toList());
-			if(!tags.isEmpty()) {
-				tags.forEach(t->sources.add(new ImageStreamApplicationSource(is, t)));
-			}
-		}
-		return sources;
-	}
 
-	public List<ObservableTreeItem> create(Collection<?> openShiftObjects) {
-		if (openShiftObjects == null) {
-			return Collections.emptyList();
-		}
-		List<ObservableTreeItem> items = new ArrayList<>();
-		for (Object openShiftObject : openShiftObjects) {
-			ObservableTreeItem item = create(openShiftObject);
-			if (item != null) {
-				items.add(item);
-			}
-		}
-		return items;
-	}
+        Collection<IApplicationSource> sources = new ArrayList<>();
+        for (IImageStream is : streams) {
+            List<ITagReference> tags = is.getTags().stream()
+                    .filter(t -> t.isAnnotatedWith(OpenShiftAPIAnnotations.TAGS)
+                            && ArrayUtils.contains(t.getAnnotation(OpenShiftAPIAnnotations.TAGS).split(","), BUILDER_TAG))
+                    .collect(Collectors.toList());
+            if (!tags.isEmpty()) {
+                tags.forEach(t -> sources.add(new ImageStreamApplicationSource(is, t)));
+            }
+        }
+        return sources;
+    }
 
-	@Override
-	public ObservableTreeItem create(Object object) {
-		return new ObservableTreeItem(object, this);
-	}
-	
-	private Collection<IApplicationSource> loadTemplates(IProject project, final Connection conn) {
-		return project.accept(new CapabilityVisitor<IProjectTemplateList,  Collection<IApplicationSource>>() {
+    public List<ObservableTreeItem> create(Collection<?> openShiftObjects) {
+        if (openShiftObjects == null) {
+            return Collections.emptyList();
+        }
+        List<ObservableTreeItem> items = new ArrayList<>();
+        for (Object openShiftObject : openShiftObjects) {
+            ObservableTreeItem item = create(openShiftObject);
+            if (item != null) {
+                items.add(item);
+            }
+        }
+        return items;
+    }
 
-			@Override
-			public  Collection<IApplicationSource> visit(IProjectTemplateList capability) {
-				final Collection<ITemplate> templates = capability.getTemplates();
-				if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
-				    try {
-						Collection<ITemplate> commonTemplates = capability.getCommonTemplates(conn.getClusterNamespace());
-						commonTemplates.stream().filter(t -> !templates.contains(t)).forEach(t -> templates.add(t));
-				    } catch (OpenShiftException e) {
-				        OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
-				    }
-				}
-				return templates.stream().map(t->new TemplateApplicationSource(t)).collect(Collectors.toList());
-			}
-		}, Collections.emptyList());
-	}
+    @Override
+    public ObservableTreeItem create(Object object) {
+        return new ObservableTreeItem(object, this);
+    }
+
+    private Collection<IApplicationSource> loadTemplates(IProject project, final Connection conn) {
+        return project.accept(new CapabilityVisitor<IProjectTemplateList, Collection<IApplicationSource>>() {
+
+            @Override
+            public Collection<IApplicationSource> visit(IProjectTemplateList capability) {
+                final Collection<ITemplate> templates = capability.getTemplates();
+                if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
+                    try {
+                        Collection<ITemplate> commonTemplates = capability.getCommonTemplates(conn.getClusterNamespace());
+                        commonTemplates.stream().filter(t -> !templates.contains(t)).forEach(t -> templates.add(t));
+                    } catch (OpenShiftException e) {
+                        OpenShiftUIActivator.log(IStatus.ERROR, e.getLocalizedMessage(), e);
+                    }
+                }
+                return templates.stream().map(t -> new TemplateApplicationSource(t)).collect(Collectors.toList());
+            }
+        }, Collections.emptyList());
+    }
 }

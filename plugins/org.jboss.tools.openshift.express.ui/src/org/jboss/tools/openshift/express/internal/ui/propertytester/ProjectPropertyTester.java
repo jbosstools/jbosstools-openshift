@@ -24,39 +24,37 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
  */
 public class ProjectPropertyTester extends PropertyTester {
 
-	private static final String PROPERTY_IF_SHARED_IS_EGIT = "ifSharedIsEGit";
-	private static final String PROPERTY_IS_INTERNAL_RSE = "isInternalRSE";
+    private static final String PROPERTY_IF_SHARED_IS_EGIT = "ifSharedIsEGit";
+    private static final String PROPERTY_IS_INTERNAL_RSE = "isInternalRSE";
 
-	@Override
-	public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
-		if (PROPERTY_IF_SHARED_IS_EGIT.equals(property)) {
-			return isIfSharedIsEGit(receiver, args, expectedValue);
-		} else if (PROPERTY_IS_INTERNAL_RSE.equals(property)) {
-			return isInternalRSE(receiver, args, expectedValue);
-		}
-		return false;
-	}
+    @Override
+    public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
+        if (PROPERTY_IF_SHARED_IS_EGIT.equals(property)) {
+            return isIfSharedIsEGit(receiver, args, expectedValue);
+        } else if (PROPERTY_IS_INTERNAL_RSE.equals(property)) {
+            return isInternalRSE(receiver, args, expectedValue);
+        }
+        return false;
+    }
 
-	private boolean isIfSharedIsEGit(Object receiver, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof IProject)
-				|| !(expectedValue instanceof Boolean)) {
-			return false;
-		}
+    private boolean isIfSharedIsEGit(Object receiver, Object[] args, Object expectedValue) {
+        if (!(receiver instanceof IProject) || !(expectedValue instanceof Boolean)) {
+            return false;
+        }
 
-		IProject project = (IProject) receiver;
-		Boolean expectedBoolean = (Boolean) expectedValue;
-		if (EGitUtils.isShared(project)) {
-			return expectedBoolean.equals(EGitUtils.isSharedWithGit(project));
-		} else {
-			return true;
-		}
-	}
+        IProject project = (IProject)receiver;
+        Boolean expectedBoolean = (Boolean)expectedValue;
+        if (EGitUtils.isShared(project)) {
+            return expectedBoolean.equals(EGitUtils.isSharedWithGit(project));
+        } else {
+            return true;
+        }
+    }
 
-	private boolean isInternalRSE(Object receiver, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof IProject)
-				|| !(expectedValue instanceof Boolean)) {
-			return false;
-		}
-		return ((Boolean) expectedValue).equals(ProjectUtils.isInternalRSE(((IProject) receiver).getName()));
-	}
+    private boolean isInternalRSE(Object receiver, Object[] args, Object expectedValue) {
+        if (!(receiver instanceof IProject) || !(expectedValue instanceof Boolean)) {
+            return false;
+        }
+        return ((Boolean)expectedValue).equals(ProjectUtils.isInternalRSE(((IProject)receiver).getName()));
+    }
 }

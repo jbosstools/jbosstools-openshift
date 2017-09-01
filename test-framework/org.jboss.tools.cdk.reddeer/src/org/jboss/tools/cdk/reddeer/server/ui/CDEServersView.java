@@ -16,13 +16,13 @@ import org.jboss.reddeer.swt.api.TreeItem;
 import org.jboss.tools.cdk.reddeer.server.ui.CDEServer;
 
 public class CDEServersView extends ServersView {
-	
+
 	protected boolean cdk3 = false;
-	
+
 	public CDEServersView(boolean cdk3) {
 		this.cdk3 = cdk3;
 	}
-	
+
 	@Override
 	protected Server createServer(TreeItem item) {
 		return new CDEServer(item, this, this.cdk3);

@@ -31,31 +31,30 @@ import com.openshift.restclient.model.IResource;
  */
 public class DeleteResourceJob extends AbstractDelegatingMonitorJob {
 
-	private IResource resource;
+    private IResource resource;
 
-	public DeleteResourceJob(IResource resource) {
-		super("Delete Resource Job");
-		this.resource = resource;
-	}
+    public DeleteResourceJob(IResource resource) {
+        super("Delete Resource Job");
+        this.resource = resource;
+    }
 
-	@Override
-	protected IStatus doRun(IProgressMonitor monitor) {
-		try {
-			monitor.beginTask("Delete Resource", IProgressMonitor.UNKNOWN);
-			Connection connection = ConnectionsRegistryUtil.getConnectionFor(resource);
-			if (connection != null) {
-				connection.deleteResource(resource);
-				ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
-						connection, ConnectionProperties.PROPERTY_RESOURCE, resource, null);
-			}
-			return Status.OK_STATUS;
-		} catch(OpenShiftException e) {
-			return new Status(Status.ERROR, 
-					OpenShiftUIActivator.PLUGIN_ID, 
-					NLS.bind("Error deleting {0} named  {1}.", resource.getKind(), resource.getName()), e);
-		} finally {
-			monitor.done();
-		}
-	}
+    @Override
+    protected IStatus doRun(IProgressMonitor monitor) {
+        try {
+            monitor.beginTask("Delete Resource", IProgressMonitor.UNKNOWN);
+            Connection connection = ConnectionsRegistryUtil.getConnectionFor(resource);
+            if (connection != null) {
+                connection.deleteResource(resource);
+                ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_RESOURCE,
+                        resource, null);
+            }
+            return Status.OK_STATUS;
+        } catch (OpenShiftException e) {
+            return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+                    NLS.bind("Error deleting {0} named  {1}.", resource.getKind(), resource.getName()), e);
+        } finally {
+            monitor.done();
+        }
+    }
 
 }

@@ -29,73 +29,74 @@ import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
  */
 public class DockerConfigMetaData implements IDockerImageMetadata {
 
-	private IDockerImageInfo info;
+    private IDockerImageInfo info;
 
-	public DockerConfigMetaData(IDockerImageInfo info) {
-		// TODO: throw illegal arg exception if info is null?
-		this.info = info;
-	}
-	
-	/**
-	 * Select info from either config or container config and provides a
-	 * default non null value if nothing is found.
-	 * 
-	 * @param config the image config object
-	 * @param containerConfig the image container config object
-	 * @param accessor the accessor for the target property
-	 * @param defaultFactory the factory for the default value
-	 * @return the mapped value
-	 */
-	private <C extends Collection<String>> C select(IDockerContainerConfig config, IDockerContainerConfig containerConfig, Function<IDockerContainerConfig, C> accessor, Supplier<C> defaultFactory) {
-	    C result = null;
-	    if (config != null) {
-	        result = accessor.apply(config);
-	    }
-	    if (((result == null) || result.isEmpty()) && (containerConfig != null)) {
-	        result = accessor.apply(containerConfig);
-	    }
-	    if (result == null) {
-	        result = defaultFactory.get();
-	    }
-	    return result;
-	}
-	
-	@Override
-	public Set<String> exposedPorts() {
-		if (info == null ) {
-			return Collections.emptySet();
-		}
-		return select(info.config(), info.containerConfig(), IDockerContainerConfig::exposedPorts, Collections::emptySet);
-	}
+    public DockerConfigMetaData(IDockerImageInfo info) {
+        // TODO: throw illegal arg exception if info is null?
+        this.info = info;
+    }
 
-	@Override
-	public List<String> env() {
-		if (info == null ) {
-			return Collections.emptyList();
-		}
-		return select(info.config(), info.containerConfig(), IDockerContainerConfig::env, Collections::emptyList);
-	}
+    /**
+     * Select info from either config or container config and provides a
+     * default non null value if nothing is found.
+     * 
+     * @param config the image config object
+     * @param containerConfig the image container config object
+     * @param accessor the accessor for the target property
+     * @param defaultFactory the factory for the default value
+     * @return the mapped value
+     */
+    private <C extends Collection<String>> C select(IDockerContainerConfig config, IDockerContainerConfig containerConfig,
+            Function<IDockerContainerConfig, C> accessor, Supplier<C> defaultFactory) {
+        C result = null;
+        if (config != null) {
+            result = accessor.apply(config);
+        }
+        if (((result == null) || result.isEmpty()) && (containerConfig != null)) {
+            result = accessor.apply(containerConfig);
+        }
+        if (result == null) {
+            result = defaultFactory.get();
+        }
+        return result;
+    }
 
-	@Override
-	public Set<String> volumes() {
-		if (info == null ) {
-			return Collections.emptySet();
-		}
+    @Override
+    public Set<String> exposedPorts() {
+        if (info == null) {
+            return Collections.emptySet();
+        }
+        return select(info.config(), info.containerConfig(), IDockerContainerConfig::exposedPorts, Collections::emptySet);
+    }
+
+    @Override
+    public List<String> env() {
+        if (info == null) {
+            return Collections.emptyList();
+        }
+        return select(info.config(), info.containerConfig(), IDockerContainerConfig::env, Collections::emptyList);
+    }
+
+    @Override
+    public Set<String> volumes() {
+        if (info == null) {
+            return Collections.emptySet();
+        }
         return select(info.config(), info.containerConfig(), IDockerContainerConfig::volumes, Collections::emptySet);
-	}
+    }
 
-	@Override
-	public Map<String, String> labels() {
-		Map<String, String> result = null;
-		if (info.config() != null) {
-			result = info.config().labels();
-		}
-		if (((result == null) || result.isEmpty()) && (info.containerConfig() != null)) {
-			result = info.containerConfig().labels();
-		}
-		if (result == null) {
-			result = Collections.emptyMap();
-		}
-		return result;
-	}
+    @Override
+    public Map<String, String> labels() {
+        Map<String, String> result = null;
+        if (info.config() != null) {
+            result = info.config().labels();
+        }
+        if (((result == null) || result.isEmpty()) && (info.containerConfig() != null)) {
+            result = info.containerConfig().labels();
+        }
+        if (result == null) {
+            result = Collections.emptyMap();
+        }
+        return result;
+    }
 }

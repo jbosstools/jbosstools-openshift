@@ -14,15 +14,15 @@ import org.eclipse.core.databinding.conversion.Converter;
 
 public class Model2ObservableTreeItemConverter extends Converter {
 
-	private IModelFactory factory;
+    private IModelFactory factory;
 
-	public Model2ObservableTreeItemConverter(IModelFactory factory) {
-		super(Object.class, ObservableTreeItem.class);
-		this.factory = factory;
-	}
+    public Model2ObservableTreeItemConverter(IModelFactory factory) {
+        super(Object.class, ObservableTreeItem.class);
+        this.factory = factory;
+    }
 
-	@Override
-	public Object convert(Object fromObject) {
-		return new ObservableTreeItem(fromObject, factory);
-	}
+    @Override
+    public Object convert(Object fromObject) {
+        return new ObservableTreeItem(fromObject, factory);
+    }
 }

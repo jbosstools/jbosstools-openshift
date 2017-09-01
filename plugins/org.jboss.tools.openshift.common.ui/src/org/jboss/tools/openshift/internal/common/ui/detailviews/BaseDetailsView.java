@@ -18,31 +18,31 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedD
 
 public abstract class BaseDetailsView implements IDetailView {
 
-	private Composite control;
+    private Composite control;
 
-	@Override
-	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
-	}
+    @Override
+    public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
+    }
 
-	@Override
-	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
-	}
+    @Override
+    public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
+    }
 
-	@Override
-	public Control getControl() {
-		return control;
-	}
+    @Override
+    public Control getControl() {
+        return control;
+    }
 
-	protected <T extends Composite> T setControl(T composite) {
-		this.control = composite;
-		return (T) composite;
-	}
+    protected <T extends Composite> T setControl(T composite) {
+        this.control = composite;
+        return (T)composite;
+    }
 
-	@Override
-	public abstract boolean isViewFor(Object object);
-	
-	@Override
-	public void dispose() {
-	}
+    @Override
+    public abstract boolean isViewFor(Object object);
+
+    @Override
+    public void dispose() {
+    }
 
 }

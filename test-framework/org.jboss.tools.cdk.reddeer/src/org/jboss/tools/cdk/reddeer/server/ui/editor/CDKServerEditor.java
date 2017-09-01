@@ -29,7 +29,7 @@ public class CDKServerEditor extends CDEServerEditor {
 	public LabeledText getVagrantfileLocation() {
 		return new LabeledText(new DefaultSection(CDK_DETAILS), "Vagrantfile Location: ");
 	}
-	
+
 	public Button getVagrantfileBrowse() {
 		return new PushButton(new DefaultSection(CDK_DETAILS), "Browse...");
 	}

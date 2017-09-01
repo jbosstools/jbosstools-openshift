@@ -19,5 +19,5 @@ public class NewCDKServerContainerWizardPage extends NewServerContainerWizardPag
 		new DefaultShell(WIZARD_NAME);
 		new LabeledText("Folder: ").setText(folder);
 	}
-	
+
 }

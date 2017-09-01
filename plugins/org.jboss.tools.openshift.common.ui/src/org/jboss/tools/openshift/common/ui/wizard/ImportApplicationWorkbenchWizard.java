@@ -19,15 +19,15 @@ import org.eclipse.ui.IImportWizard;
  * 
  */
 public class ImportApplicationWorkbenchWizard extends AbstractApplicationWorkbenchWizard implements IImportWizard {
-	
-	public ImportApplicationWorkbenchWizard() {
-		super("Import OpenShift Application");
-	}
 
-	private static final String IMPORT_APPLICATION_WIZARD_EXTENSION = "org.jboss.tools.openshift.ui.importApplicationWizard";
+    public ImportApplicationWorkbenchWizard() {
+        super("Import OpenShift Application");
+    }
 
-	@Override
-	protected String getWizardsExtensionId() {
-		return IMPORT_APPLICATION_WIZARD_EXTENSION;
-	}
+    private static final String IMPORT_APPLICATION_WIZARD_EXTENSION = "org.jboss.tools.openshift.ui.importApplicationWizard";
+
+    @Override
+    protected String getWizardsExtensionId() {
+        return IMPORT_APPLICATION_WIZARD_EXTENSION;
+    }
 }

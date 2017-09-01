@@ -27,69 +27,69 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class HostCertificateTest {
 
-	private HostCertificate certificate;
+    private HostCertificate certificate;
 
-	@Before
-	public void setup() throws Exception {
-		this.certificate = new HostCertificate(true, createX509Certificate(CERTIFICATE_REDHAT_COM));
-	}
+    @Before
+    public void setup() throws Exception {
+        this.certificate = new HostCertificate(true, createX509Certificate(CERTIFICATE_REDHAT_COM));
+    }
 
-	@Test
-	public void shouldEqualIdenticalCertificate() throws CertificateException {
-		// given
-		HostCertificate identicalCertificate = new HostCertificate(true, createX509Certificate(CERTIFICATE_REDHAT_COM));
-		// when
-		boolean equal = certificate.equals(identicalCertificate);
-		// then
-		assertThat(equal).isTrue();
-	}
+    @Test
+    public void shouldEqualIdenticalCertificate() throws CertificateException {
+        // given
+        HostCertificate identicalCertificate = new HostCertificate(true, createX509Certificate(CERTIFICATE_REDHAT_COM));
+        // when
+        boolean equal = certificate.equals(identicalCertificate);
+        // then
+        assertThat(equal).isTrue();
+    }
 
-	@Test
-	public void shouldEqualIdenticalCertificateThatDiffersInAcceptance() throws CertificateException {
-		// given
-		HostCertificate identicalCertificate = new HostCertificate(false, createX509Certificate(CERTIFICATE_REDHAT_COM));
-		// when
-		boolean equal = certificate.equals(identicalCertificate);
-		// then
-		assertThat(equal).isTrue();
-	}
+    @Test
+    public void shouldEqualIdenticalCertificateThatDiffersInAcceptance() throws CertificateException {
+        // given
+        HostCertificate identicalCertificate = new HostCertificate(false, createX509Certificate(CERTIFICATE_REDHAT_COM));
+        // when
+        boolean equal = certificate.equals(identicalCertificate);
+        // then
+        assertThat(equal).isTrue();
+    }
 
-	@Test
-	public void shouldNotEqualOtherCertificate() throws CertificateException {
-		// given
-		HostCertificate identicalCertificate = new HostCertificate(false, createX509Certificate(CERTIFICATE_OPENSHIFT_REDHAT_COM));
-		// when
-		boolean equal = certificate.equals(identicalCertificate);
-		// then
-		assertThat(equal).isFalse();
-	}
+    @Test
+    public void shouldNotEqualOtherCertificate() throws CertificateException {
+        // given
+        HostCertificate identicalCertificate = new HostCertificate(false, createX509Certificate(CERTIFICATE_OPENSHIFT_REDHAT_COM));
+        // when
+        boolean equal = certificate.equals(identicalCertificate);
+        // then
+        assertThat(equal).isFalse();
+    }
 
-	@Test
-	public void shouldReturnIsAccepted() throws CertificateException {
-		// given
-		// when
-		boolean accepted = certificate.isAccepted();
-		// then
-		assertThat(accepted).isTrue();
-	}
+    @Test
+    public void shouldReturnIsAccepted() throws CertificateException {
+        // given
+        // when
+        boolean accepted = certificate.isAccepted();
+        // then
+        assertThat(accepted).isTrue();
+    }
 
-	@Test
-	public void shouldSetAccepted() throws CertificateException {
-		// given
-		boolean accepted = certificate.isAccepted();
-		// when
-		certificate.setAccepted(!accepted);
-		// then
-		assertThat(certificate.isAccepted()).isEqualTo(!accepted);
-	}
+    @Test
+    public void shouldSetAccepted() throws CertificateException {
+        // given
+        boolean accepted = certificate.isAccepted();
+        // when
+        certificate.setAccepted(!accepted);
+        // then
+        assertThat(certificate.isAccepted()).isEqualTo(!accepted);
+    }
 
-	@Test
-	public void shouldReturnIsValid() throws CertificateException {
-		// given
-		// when
-		boolean valid = certificate.isValid();
-		// then
-		assertThat(valid).isTrue();
-	}
+    @Test
+    public void shouldReturnIsValid() throws CertificateException {
+        // given
+        // when
+        boolean valid = certificate.isValid();
+        // then
+        assertThat(valid).isTrue();
+    }
 
-}	
+}

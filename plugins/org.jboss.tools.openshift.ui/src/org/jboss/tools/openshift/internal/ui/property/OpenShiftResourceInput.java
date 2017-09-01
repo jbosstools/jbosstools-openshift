@@ -32,130 +32,124 @@ import com.openshift.restclient.model.IResource;
 
 public class OpenShiftResourceInput implements IStorageEditorInput {
 
-	private IStorage storage;
-	private Connection connection;
-	private IResource input;
+    private IStorage storage;
+    private Connection connection;
+    private IResource input;
 
-	public OpenShiftResourceInput(Connection connection, IResource resource) {
-		this.connection = connection;
-		this.input = resource;
-		this.storage = new IStorage() {
-			@Override
-			public InputStream getContents() throws CoreException {
-				try {
-					return IOUtils.toBufferedInputStream(IOUtils.toInputStream(input.toJson(), "UTF-8"));
-				} catch (Exception e) {
-					throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to edit input", e));
-				}
-			}
+    public OpenShiftResourceInput(Connection connection, IResource resource) {
+        this.connection = connection;
+        this.input = resource;
+        this.storage = new IStorage() {
+            @Override
+            public InputStream getContents() throws CoreException {
+                try {
+                    return IOUtils.toBufferedInputStream(IOUtils.toInputStream(input.toJson(), "UTF-8"));
+                } catch (Exception e) {
+                    throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to edit input", e));
+                }
+            }
 
-			@Override
-			public IPath getFullPath() {
-				return new Path(input.getNamespace())
-						.append(input.getKind())
-						.append(input.getName()+".json");
-			}
+            @Override
+            public IPath getFullPath() {
+                return new Path(input.getNamespace()).append(input.getKind()).append(input.getName() + ".json");
+            }
 
-			@Override
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			public Object getAdapter(Class adapter) {
-				return null;
-			}
+            @Override
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            public Object getAdapter(Class adapter) {
+                return null;
+            }
 
-			@Override
-			public String getName() {
-				StringBuilder sb = new StringBuilder()
-						.append("[").append(input.getNamespace()).append("] ")
-						.append(StringUtils.humanize(input.getKind()))
-						.append(" : ")
-						.append(input.getName())
-						.append(".json");
-				return sb.toString();
-			}
+            @Override
+            public String getName() {
+                StringBuilder sb = new StringBuilder().append("[").append(input.getNamespace()).append("] ")
+                        .append(StringUtils.humanize(input.getKind())).append(" : ").append(input.getName()).append(".json");
+                return sb.toString();
+            }
 
-			@Override
-			public boolean isReadOnly() {
-				return false;
-			}
-		};
-	}
+            @Override
+            public boolean isReadOnly() {
+                return false;
+            }
+        };
+    }
 
-	@Override
-	public boolean exists() {
-		return false;
-	}
+    @Override
+    public boolean exists() {
+        return false;
+    }
 
-	@Override
-	public ImageDescriptor getImageDescriptor() {
-		return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON;
-	}
+    @Override
+    public ImageDescriptor getImageDescriptor() {
+        return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON;
+    }
 
-	@Override
-	public String getName() {
-		return storage.getName();
-	}
+    @Override
+    public String getName() {
+        return storage.getName();
+    }
 
-	@Override
-	public IPersistableElement getPersistable() {
-		return null;
-	}
+    @Override
+    public IPersistableElement getPersistable() {
+        return null;
+    }
 
-	@Override
-	public IStorage getStorage() {
-		return storage;
-	}
+    @Override
+    public IStorage getStorage() {
+        return storage;
+    }
 
-	@Override
-	public String getToolTipText() {
-		return storage.getName();
-	}
+    @Override
+    public String getToolTipText() {
+        return storage.getName();
+    }
 
-	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Object getAdapter(Class adapter) {
-		return null;
-	}
-	
-	public Connection getConnection() {
-		return connection;
-	}
-	
-	public IResource getResource() {
-		return input;
-	}
-	
-	public void setResource(IResource newResource) {
-		input = newResource;
-	}
+    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Object getAdapter(Class adapter) {
+        return null;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((connection == null) ? 0 : connection.hashCode());
-		result = prime * result + ((input == null) ? 0 : input.hashCode());
-		return result;
-	}
+    public Connection getConnection() {
+        return connection;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		OpenShiftResourceInput other = (OpenShiftResourceInput) obj;
-		if (connection == null) {
-			if (other.connection != null)
-				return false;
-		} else if (!connection.equals(other.connection))
-			return false;
-		if (input == null) {
-			if (other.input != null)
-				return false;
-		} else if (!input.equals(other.input))
-			return false;
-		return true;
-	}
+    public IResource getResource() {
+        return input;
+    }
+
+    public void setResource(IResource newResource) {
+        input = newResource;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((connection == null) ? 0 : connection.hashCode());
+        result = prime * result + ((input == null) ? 0 : input.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        OpenShiftResourceInput other = (OpenShiftResourceInput)obj;
+        if (connection == null) {
+            if (other.connection != null)
+                return false;
+        } else if (!connection.equals(other.connection))
+            return false;
+        if (input == null) {
+            if (other.input != null)
+                return false;
+        } else if (!input.equals(other.input))
+            return false;
+        return true;
+    }
 }

@@ -39,109 +39,92 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
  */
 public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShiftWizardPage {
 
-	private IKeyValueWizardModel<T> model;
-	private String initialKey;
-	private String initialValue;
+    private IKeyValueWizardModel<T> model;
+    private String initialKey;
+    private String initialValue;
 
-	public KeyValueWizardPage(IWizard wizard, IKeyValueWizardModel<T> model) {
-		super(model.getTitle(), model.getDescription(), "", wizard);
-		this.model = model;
-		initialKey = model.getKey();
-		initialValue = model.getValue();
-	}
+    public KeyValueWizardPage(IWizard wizard, IKeyValueWizardModel<T> model) {
+        super(model.getTitle(), model.getDescription(), "", wizard);
+        this.model = model;
+        initialKey = model.getKey();
+        initialValue = model.getValue();
+    }
 
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults()
-				.margins(10, 10).applyTo(parent);
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
-		Group group = new Group(parent, SWT.NONE);
-		group.setText(model.getGroupLabel());
-		group.setLayout(new GridLayout());
-		GridDataFactory.fillDefaults().hint(550, SWT.DEFAULT)
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(group);
+        Group group = new Group(parent, SWT.NONE);
+        group.setText(model.getGroupLabel());
+        group.setLayout(new GridLayout());
+        GridDataFactory.fillDefaults().hint(550, SWT.DEFAULT).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(group);
 
-		Composite composite = new Composite(group, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(4).margins(25, 25).applyTo(composite);
+        Composite composite = new Composite(group, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
+        GridLayoutFactory.fillDefaults().numColumns(4).margins(25, 25).applyTo(composite);
 
-		Label nameLabel = new Label(composite, SWT.NONE);
-		nameLabel.setText(model.getKeyLabel()+":");
-		if(model.getKeyDescription() != null) {
-			nameLabel.setToolTipText(model.getKeyDescription());
-		}
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
+        Label nameLabel = new Label(composite, SWT.NONE);
+        nameLabel.setText(model.getKeyLabel() + ":");
+        if (model.getKeyDescription() != null) {
+            nameLabel.setToolTipText(model.getKeyDescription());
+        }
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 
-		Text nameText = new Text(composite, SWT.BORDER);
-		nameText.setEditable(model.isKeyEditable());
+        Text nameText = new Text(composite, SWT.BORDER);
+        nameText.setEditable(model.isKeyEditable());
 
-		IObservableValue keyModel = BeanProperties.value(IKeyValueWizardModel.PROPERTY_KEY).observe(model);
-		IObservableValue keyTextObservable = WidgetProperties.text(SWT.Modify).observe(nameText);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
-		Binding nameBinding = ValueBindingBuilder
-				.bind(keyTextObservable)
-				.validatingAfterConvert(model.getKeyAfterConvertValidator())
-				.to(keyModel)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+        IObservableValue keyModel = BeanProperties.value(IKeyValueWizardModel.PROPERTY_KEY).observe(model);
+        IObservableValue keyTextObservable = WidgetProperties.text(SWT.Modify).observe(nameText);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(nameText);
+        Binding nameBinding = ValueBindingBuilder.bind(keyTextObservable).validatingAfterConvert(model.getKeyAfterConvertValidator())
+                .to(keyModel).in(dbc);
+        ControlDecorationSupport.create(nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		Label valueLabel = new Label(composite, SWT.NONE);
-		valueLabel.setText(model.getValueLabel()+":");
-		if(model.getValueDescription() != null) {
-			valueLabel.setToolTipText(model.getValueDescription());
-		}
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
+        Label valueLabel = new Label(composite, SWT.NONE);
+        valueLabel.setText(model.getValueLabel() + ":");
+        if (model.getValueDescription() != null) {
+            valueLabel.setToolTipText(model.getValueDescription());
+        }
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(valueLabel);
 
-		Text valueText = new Text(composite, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
-		IObservableValue valueModel = BeanProperties.value(IKeyValueWizardModel.PROPERTY_VALUE).observe(model);
-		IObservableValue valueTextObservable = WidgetProperties.text(SWT.Modify).observe(valueText);
-		Binding valeuBinding = ValueBindingBuilder
-				.bind(valueTextObservable)
-				.validatingAfterConvert(model.getValueAfterConvertValidator())
-				.to(valueModel)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				valeuBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+        Text valueText = new Text(composite, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(valueText);
+        IObservableValue valueModel = BeanProperties.value(IKeyValueWizardModel.PROPERTY_VALUE).observe(model);
+        IObservableValue valueTextObservable = WidgetProperties.text(SWT.Modify).observe(valueText);
+        Binding valeuBinding = ValueBindingBuilder.bind(valueTextObservable).validatingAfterConvert(model.getValueAfterConvertValidator())
+                .to(valueModel).in(dbc);
+        ControlDecorationSupport.create(valeuBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-		if(initialKey != null && !initialKey.isEmpty()) {
-			DataChangedValidator validator = new DataChangedValidator(keyTextObservable, valueTextObservable);
-			dbc.addValidationStatusProvider(validator);
-		}
+        if (initialKey != null && !initialKey.isEmpty()) {
+            DataChangedValidator validator = new DataChangedValidator(keyTextObservable, valueTextObservable);
+            dbc.addValidationStatusProvider(validator);
+        }
 
-		if(!model.isKeyEditable() || nameText.getText().length() > 0) {
-			valueText.forceFocus(); //if name is set, it is more important to modify value.
-			if(!StringUtils.isEmpty(valueText.getText())) {
-				valueText.setSelection(0, valueText.getText().length());
-			}
-		}
-	}
+        if (!model.isKeyEditable() || nameText.getText().length() > 0) {
+            valueText.forceFocus(); //if name is set, it is more important to modify value.
+            if (!StringUtils.isEmpty(valueText.getText())) {
+                valueText.setSelection(0, valueText.getText().length());
+            }
+        }
+    }
 
-	class DataChangedValidator extends MultiValidator {
-		IObservableValue keyTextObservable;
-		IObservableValue valueTextObservable;
+    class DataChangedValidator extends MultiValidator {
+        IObservableValue keyTextObservable;
+        IObservableValue valueTextObservable;
 
-		public DataChangedValidator(IObservableValue keyTextObservable, IObservableValue valueTextObservable) {
-			this.keyTextObservable = keyTextObservable;
-			this.valueTextObservable = valueTextObservable;
-		}
+        public DataChangedValidator(IObservableValue keyTextObservable, IObservableValue valueTextObservable) {
+            this.keyTextObservable = keyTextObservable;
+            this.valueTextObservable = valueTextObservable;
+        }
 
-		@Override
-		protected IStatus validate() {
-			String key = (String)keyTextObservable.getValue();
-			String value = (String)valueTextObservable.getValue();
-			if(initialKey != null && initialKey.equals(key)
-					&& initialValue != null && initialValue.equals(value)) {
-				return ValidationStatus.cancel("Provide new values.");
-			}
-			return ValidationStatus.ok();
-		}
-	}
+        @Override
+        protected IStatus validate() {
+            String key = (String)keyTextObservable.getValue();
+            String value = (String)valueTextObservable.getValue();
+            if (initialKey != null && initialKey.equals(key) && initialValue != null && initialValue.equals(value)) {
+                return ValidationStatus.cancel("Provide new values.");
+            }
+            return ValidationStatus.ok();
+        }
+    }
 }

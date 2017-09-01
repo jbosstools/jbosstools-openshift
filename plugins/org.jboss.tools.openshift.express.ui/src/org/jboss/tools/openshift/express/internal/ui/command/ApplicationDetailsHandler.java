@@ -34,41 +34,41 @@ import com.openshift.client.IApplication;
  */
 public class ApplicationDetailsHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
-		Shell shell = HandlerUtil.getActiveShell(event);
-		if (application != null) {
-			openApplicationDetailsDialog(application, shell);
-		} else {
-			IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
-			openApplicationDetailsDialog(server, shell);
-		}
-		return Status.OK_STATUS;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
+        Shell shell = HandlerUtil.getActiveShell(event);
+        if (application != null) {
+            openApplicationDetailsDialog(application, shell);
+        } else {
+            IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
+            openApplicationDetailsDialog(server, shell);
+        }
+        return Status.OK_STATUS;
+    }
 
-	protected void openApplicationDetailsDialog(final IServer server, final Shell shell) {
-		if (server == null) {
-			return;
-		}
-		final LoadApplicationJob applicationJob = new LoadApplicationJob(server);
-		new JobChainBuilder(applicationJob)
-			.runWhenSuccessfullyDone(new UIJob(NLS.bind("Displaying application details", server.getName())) {
-				
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					IApplication application = applicationJob.getApplication();
-					if (application == null) {
-						return ExpressUIActivator.createCancelStatus("Could not display details for application {0}. Application not found.", server.getName());
-					}
-					openApplicationDetailsDialog(application, shell);
-					return Status.OK_STATUS;
-				}
-			})
-			.schedule();
-	}
+    protected void openApplicationDetailsDialog(final IServer server, final Shell shell) {
+        if (server == null) {
+            return;
+        }
+        final LoadApplicationJob applicationJob = new LoadApplicationJob(server);
+        new JobChainBuilder(applicationJob)
+                .runWhenSuccessfullyDone(new UIJob(NLS.bind("Displaying application details", server.getName())) {
 
-	protected void openApplicationDetailsDialog(IApplication application, Shell shell) {
-		new ApplicationDetailsDialog(application, shell).open();
-	}
+                    @Override
+                    public IStatus runInUIThread(IProgressMonitor monitor) {
+                        IApplication application = applicationJob.getApplication();
+                        if (application == null) {
+                            return ExpressUIActivator.createCancelStatus(
+                                    "Could not display details for application {0}. Application not found.", server.getName());
+                        }
+                        openApplicationDetailsDialog(application, shell);
+                        return Status.OK_STATUS;
+                    }
+                }).schedule();
+    }
+
+    protected void openApplicationDetailsDialog(IApplication application, Shell shell) {
+        new ApplicationDetailsDialog(application, shell).open();
+    }
 }

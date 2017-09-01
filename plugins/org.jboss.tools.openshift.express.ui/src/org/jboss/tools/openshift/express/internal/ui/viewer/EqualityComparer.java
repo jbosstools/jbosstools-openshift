@@ -24,22 +24,22 @@ import org.eclipse.jface.viewers.IElementComparer;
  */
 public class EqualityComparer implements IElementComparer {
 
-	@Override
-	public boolean equals(Object thisObject, Object thatObject) {
-		if (thisObject == null) {
-			return thatObject != null;
-		}
+    @Override
+    public boolean equals(Object thisObject, Object thatObject) {
+        if (thisObject == null) {
+            return thatObject != null;
+        }
 
-		if (thatObject == null) {
-			return false;
-		}
+        if (thatObject == null) {
+            return false;
+        }
 
-		return thisObject.equals(thatObject);
-	}
+        return thisObject.equals(thatObject);
+    }
 
-	@Override
-	public int hashCode(Object element) {
-		return element.hashCode();
-	}
+    @Override
+    public int hashCode(Object element) {
+        return element.hashCode();
+    }
 
 }

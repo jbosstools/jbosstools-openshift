@@ -27,7 +27,7 @@ import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 public class OpenShift3Connection extends AbstractOpenShiftConnection {
-	
+
 	public OpenShift3Connection(TreeItem connectionItem) {
 		super(connectionItem);
 	}
@@ -42,9 +42,9 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 	public OpenShiftProject getProject(String projectName) {
 		activateOpenShiftExplorerView();
 		item.expand();
-		
+
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-		
+
 		return new OpenShiftProject(treeViewerHandler.getTreeItem(item, projectName));
 	}
 
@@ -56,7 +56,7 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 	public OpenShiftProject getProject() {
 		return getProject(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 	}
-	
+
 	/**
 	 * Gets all projects existing on a connection.
 	 * 
@@ -67,12 +67,12 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 		activateOpenShiftExplorerView();
 		item.select();
 		item.expand();
-		for (TreeItem treeItem: item.getItems()) {
+		for (TreeItem treeItem : item.getItems()) {
 			projects.add(new OpenShiftProject(treeItem));
 		}
 		return projects;
 	}
-	
+
 	/**
 	 * Creates a new OpenShift project for a connection based on first project name and project
 	 * displayed name stored in {@link DatastoreOS3.PROJECT1}. The project name is generated every 
@@ -84,7 +84,7 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 		DatastoreOS3.generateProjectName();
 		return createNewProject(DatastoreOS3.PROJECT1, DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 	}
-	
+
 	/**
 	 * Creates a new OpenShift project for a connection based on second project name stored
 	 * in {@link DatastoreOS3.PROJECT2}. The project name is generated every 
@@ -96,7 +96,7 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 		DatastoreOS3.generateProject2Name();
 		return createNewProject(DatastoreOS3.PROJECT2, null);
 	}
-	
+
 	/**
 	 * Creates a new OpenShift project for a connection.
 	 * 
@@ -107,23 +107,23 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 	public OpenShiftProject createNewProject(String projectName, String displayedName) {
 		select();
 		new ContextMenu(OpenShiftLabel.ContextMenu.NEW_OS_PROJECT).select();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.CREATE_OS_PROJECT);
 		new LabeledText(OpenShiftLabel.TextLabels.PROJECT_NAME).setText(projectName);
 		if (displayedName != null) {
 			new LabeledText(OpenShiftLabel.TextLabels.PROJECT_DISPLAYED_NAME).setText(displayedName);
 		}
 		new FinishButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.CREATE_OS_PROJECT), TimePeriod.LONG);
-		
+
 		if (displayedName == null) {
 			return getProject(projectName);
 		} else {
 			return getProject(displayedName);
 		}
 	}
-	
+
 	/**
 	 * Creates a new OpenShift Project for a connection.
 	 * @param projectName project name
@@ -132,7 +132,7 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 	public OpenShiftProject createNewProject(String projectName) {
 		return createNewProject(projectName, null);
 	}
-	
+
 	/**
 	 * Finds out whether a project with specified project name exists or not.
 	 * 

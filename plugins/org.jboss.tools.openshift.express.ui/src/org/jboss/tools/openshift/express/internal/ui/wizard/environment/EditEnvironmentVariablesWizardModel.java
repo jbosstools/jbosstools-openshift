@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
 import com.openshift.client.IApplication;
 import com.openshift.client.IEnvironmentVariable;
 
-
 /**
  * Wizard that lists the environment variables and edit, add, remove them.
  * 
@@ -20,56 +19,52 @@ import com.openshift.client.IEnvironmentVariable;
  */
 public class EditEnvironmentVariablesWizardModel extends AbstractEnvironmentVariablesWizardModel {
 
-	private IApplication application;
-	
-	public EditEnvironmentVariablesWizardModel(IApplication application) {
-		this.application = application;		
-	}
+    private IApplication application;
 
-	@Override
-	public void refreshEnvironmentVariables() {
-		if (!isSupported()) {
-			return;
-		}
-		
-		application.refresh();
-		loadEnvironmentVariables();
-	}
+    public EditEnvironmentVariablesWizardModel(IApplication application) {
+        this.application = application;
+    }
 
-	@Override
-	public void loadEnvironmentVariables() {
-		if (!isSupported()) {
-			return;
-		}
-		
-		clear();
-		add(application);
-	}
+    @Override
+    public void refreshEnvironmentVariables() {
+        if (!isSupported()) {
+            return;
+        }
 
-	private void add(IApplication application) {
-		for (IEnvironmentVariable variable : application.getEnvironmentVariables().values()) {
-			add(new EnvironmentVariableItem(variable.getName(), variable.getValue()));
-		}
-	}
+        application.refresh();
+        loadEnvironmentVariables();
+    }
 
-	public IApplication getApplication() {
-		return application;
-	}
+    @Override
+    public void loadEnvironmentVariables() {
+        if (!isSupported()) {
+            return;
+        }
 
-	@Override
-	public boolean isSupported() {
-		return application != null
-				&& application.canUpdateEnvironmentVariables()
-				&& application.canGetEnvironmentVariables();
-	}
-	
-	@Override
-	public String getHost() {
-		if (application == null
-				|| application.getDomain() == null
-				|| application.getDomain().getUser() == null) {
-			return "";
-		}
-		return application.getDomain().getUser().getServer();
-	}
+        clear();
+        add(application);
+    }
+
+    private void add(IApplication application) {
+        for (IEnvironmentVariable variable : application.getEnvironmentVariables().values()) {
+            add(new EnvironmentVariableItem(variable.getName(), variable.getValue()));
+        }
+    }
+
+    public IApplication getApplication() {
+        return application;
+    }
+
+    @Override
+    public boolean isSupported() {
+        return application != null && application.canUpdateEnvironmentVariables() && application.canGetEnvironmentVariables();
+    }
+
+    @Override
+    public String getHost() {
+        if (application == null || application.getDomain() == null || application.getDomain().getUser() == null) {
+            return "";
+        }
+        return application.getDomain().getUser().getServer();
+    }
 }

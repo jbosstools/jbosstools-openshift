@@ -14,9 +14,9 @@ import java.text.MessageFormat;
 
 public class ImportFailedException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public ImportFailedException(String message, Object... arguments) {
-		super(MessageFormat.format(message, arguments));
-	}
+    public ImportFailedException(String message, Object... arguments) {
+        super(MessageFormat.format(message, arguments));
+    }
 }

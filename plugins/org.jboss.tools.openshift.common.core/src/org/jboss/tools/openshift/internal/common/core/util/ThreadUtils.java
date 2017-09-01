@@ -23,24 +23,24 @@ import java.util.concurrent.TimeoutException;
  */
 public class ThreadUtils {
 
-	/**
-	 * Runs and blocking waits for the given callable to finish for the given
-	 * time. Returns <code>null</code> if timeouts waiting for callable value.
-	 * 
-	 * @param millisTimeout
-	 * @param callable
-	 * @return
-	 */
-	public static <R> R runWithTimeout(long millisTimeout, Callable<R> callable) {
-		ExecutorService singleThreadExecutor = Executors.newFixedThreadPool(1);
-		Future<R> future = singleThreadExecutor.submit(callable);
-		try {
-			return future.get(millisTimeout, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-		} finally {
-			singleThreadExecutor.shutdown();
-		}
-		return null;
-	}
+    /**
+     * Runs and blocking waits for the given callable to finish for the given
+     * time. Returns <code>null</code> if timeouts waiting for callable value.
+     * 
+     * @param millisTimeout
+     * @param callable
+     * @return
+     */
+    public static <R> R runWithTimeout(long millisTimeout, Callable<R> callable) {
+        ExecutorService singleThreadExecutor = Executors.newFixedThreadPool(1);
+        Future<R> future = singleThreadExecutor.submit(callable);
+        try {
+            return future.get(millisTimeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } finally {
+            singleThreadExecutor.shutdown();
+        }
+        return null;
+    }
 
 }

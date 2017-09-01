@@ -21,26 +21,27 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
  */
 public class UneditablePropertyDescriptor extends PropertyDescriptor {
 
-	public UneditablePropertyDescriptor(Object id, String displayName) {
-		super(id, displayName);
-		
-	}
+    public UneditablePropertyDescriptor(Object id, String displayName) {
+        super(id, displayName);
+
+    }
 
     @Override
-	public CellEditor createPropertyEditor(Composite parent) {
+    public CellEditor createPropertyEditor(Composite parent) {
         CellEditor editor = new TextCellEditor(parent) {
             @Override
-        	protected Control createControl(Composite parent) {
-            	Control result = super.createControl(parent);
-            	text.setEditable(false);
-            	return result;
+            protected Control createControl(Composite parent) {
+                Control result = super.createControl(parent);
+                text.setEditable(false);
+                return result;
             }
+
             @Override
             protected void doSetValue(Object value) {
-            	//Since the text field is not used for editing, it does not matter which value is set,
-            	//just do the check and conversion here. When toString() is not good enough,
-            	//do conversion in property source or extend this class.
-            	super.doSetValue(value == null ? "" : value.toString());
+                //Since the text field is not used for editing, it does not matter which value is set,
+                //just do the check and conversion here. When toString() is not good enough,
+                //do conversion in property source or extend this class.
+                super.doSetValue(value == null ? "" : value.toString());
             }
         };
         return editor;

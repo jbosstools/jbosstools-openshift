@@ -21,143 +21,139 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
  */
 public class JobChainBuilder {
 
-	public static class NullCondition implements ISchedulingCondition {
+    public static class NullCondition implements ISchedulingCondition {
 
-		@Override
-		public boolean isFullfilled(Job preceedingJob) {
-			return true;
-		}
-	}
+        @Override
+        public boolean isFullfilled(Job preceedingJob) {
+            return true;
+        }
+    }
 
-	public static class SuccessfullyDoneCondition implements ISchedulingCondition {
+    public static class SuccessfullyDoneCondition implements ISchedulingCondition {
 
-		@Override
-		public boolean isFullfilled(Job preceedingJob) {
-			return preceedingJob != null
-					&& preceedingJob.getResult() != null
-					&& preceedingJob.getResult().isOK();
-		}
-		
-	}
-	
-	private Job job;
-	private IProgressMonitor progressMonitor;
+        @Override
+        public boolean isFullfilled(Job preceedingJob) {
+            return preceedingJob != null && preceedingJob.getResult() != null && preceedingJob.getResult().isOK();
+        }
 
-	public JobChainBuilder(Job job) {
-		this(job, new NullProgressMonitor());
-	}
+    }
 
-	public JobChainBuilder(Job job, IProgressMonitor progressMonitor) {
-		this.job = job;
-		setProgressMonitor(progressMonitor);
-	}
+    private Job job;
+    private IProgressMonitor progressMonitor;
 
-	/**
-	 * Sets progress monitor to provide canceling of jobs that are not yet executed.
-	 * Provides an alternative approach to cancel() method.
-	 * Always sets the inner instance to a non-null value.
-	 * @param progressMonitor
-	 */
-	public JobChainBuilder setProgressMonitor(IProgressMonitor progressMonitor) {
-		this.progressMonitor = (progressMonitor == null) ? new NullProgressMonitor() : progressMonitor;
-		return this;
-	}
+    public JobChainBuilder(Job job) {
+        this(job, new NullProgressMonitor());
+    }
 
-	/**
-	 * Runs the given job if it's predecessor was executed (successfully or not) and the given condition is fullfilled.
-	 *  
-	 * @param job to be scheduled if its predecessor was executed
-	 * @return
-	 */
-	public JobChainBuilder runWhenDoneIf(final ISchedulingCondition condition, Job constrainedJob) {
-		job.addJobChangeListener(new JobChangeAdapter() {
+    public JobChainBuilder(Job job, IProgressMonitor progressMonitor) {
+        this.job = job;
+        setProgressMonitor(progressMonitor);
+    }
 
-			@Override
-			public void done(IJobChangeEvent event) {
-				if(!progressMonitor.isCanceled()
-						&& (condition == null 
-							|| condition.isFullfilled(job))) {
-					constrainedJob.schedule();
-				}
-			}
-			
-		});
-		return new JobConstraint(constrainedJob, this);
-	}
+    /**
+     * Sets progress monitor to provide canceling of jobs that are not yet executed.
+     * Provides an alternative approach to cancel() method.
+     * Always sets the inner instance to a non-null value.
+     * @param progressMonitor
+     */
+    public JobChainBuilder setProgressMonitor(IProgressMonitor progressMonitor) {
+        this.progressMonitor = (progressMonitor == null) ? new NullProgressMonitor() : progressMonitor;
+        return this;
+    }
 
-	/**
-	 * Runs the given job if it's predecessor was executed (successfully or not).
-	 *  
-	 * @param job to be scheduled if its predecessor was executed
-	 * @return
-	 */
-	public JobChainBuilder runWhenDone(final Job constrainedJob) {
-		return runWhenDoneIf(new NullCondition(), constrainedJob);
-	}
+    /**
+     * Runs the given job if it's predecessor was executed (successfully or not) and the given condition is fullfilled.
+     *  
+     * @param job to be scheduled if its predecessor was executed
+     * @return
+     */
+    public JobChainBuilder runWhenDoneIf(final ISchedulingCondition condition, Job constrainedJob) {
+        job.addJobChangeListener(new JobChangeAdapter() {
 
-	/**
-	 * Runs the given job if it's predecessor executed successfully.
-	 *  
-	 * @param job to be scheduled if its predecessor was executed successfully
-	 * @return
-	 */
-	public JobChainBuilder runWhenSuccessfullyDone(final Job constrainedJob) {
-		return runWhenDoneIf(new SuccessfullyDoneCondition(), constrainedJob);
-	}
+            @Override
+            public void done(IJobChangeEvent event) {
+                if (!progressMonitor.isCanceled() && (condition == null || condition.isFullfilled(job))) {
+                    constrainedJob.schedule();
+                }
+            }
 
-	/**
-	 * Builds the chain of jobs. Wont schedule anything.
-	 * 
-	 * @return
-	 */
-	public Job build() {
-		return job;
-	}
+        });
+        return new JobConstraint(constrainedJob, this);
+    }
 
-	/**
-	 * Schedules the whole chain of jobs
-	 */
-	public void schedule() {
-		if(!progressMonitor.isCanceled()) {
-			job.schedule();
-		}
-	}
+    /**
+     * Runs the given job if it's predecessor was executed (successfully or not).
+     *  
+     * @param job to be scheduled if its predecessor was executed
+     * @return
+     */
+    public JobChainBuilder runWhenDone(final Job constrainedJob) {
+        return runWhenDoneIf(new NullCondition(), constrainedJob);
+    }
 
-	/**
-	 * Cancels jobs that are not executed yet.
-	 */
-	public void cancel() {
-		progressMonitor.setCanceled(true);
-	}
+    /**
+     * Runs the given job if it's predecessor executed successfully.
+     *  
+     * @param job to be scheduled if its predecessor was executed successfully
+     * @return
+     */
+    public JobChainBuilder runWhenSuccessfullyDone(final Job constrainedJob) {
+        return runWhenDoneIf(new SuccessfullyDoneCondition(), constrainedJob);
+    }
 
-	public class JobConstraint extends JobChainBuilder {
+    /**
+     * Builds the chain of jobs. Wont schedule anything.
+     * 
+     * @return
+     */
+    public Job build() {
+        return job;
+    }
 
-		private JobChainBuilder builder;
+    /**
+     * Schedules the whole chain of jobs
+     */
+    public void schedule() {
+        if (!progressMonitor.isCanceled()) {
+            job.schedule();
+        }
+    }
 
-		private JobConstraint(Job job, JobChainBuilder builder) {
-			super(job, builder.progressMonitor);
-			this.builder = builder;
-		}
-		
-		/**
-		 * Builds the chain of jobs. Wont schedule anything.
-		 * 
-		 * @return
-		 */
-		public Job build() {
-			return builder.build();
-		}
+    /**
+     * Cancels jobs that are not executed yet.
+     */
+    public void cancel() {
+        progressMonitor.setCanceled(true);
+    }
 
-		/**
-		 * Schedules the whole chain of jobs
-		 */
-		public void schedule() {
-			builder.schedule();
-		}
+    public class JobConstraint extends JobChainBuilder {
 
-	}
-	
-	public static interface ISchedulingCondition {
-		public boolean isFullfilled(Job preceedingJob);
-	}
+        private JobChainBuilder builder;
+
+        private JobConstraint(Job job, JobChainBuilder builder) {
+            super(job, builder.progressMonitor);
+            this.builder = builder;
+        }
+
+        /**
+         * Builds the chain of jobs. Wont schedule anything.
+         * 
+         * @return
+         */
+        public Job build() {
+            return builder.build();
+        }
+
+        /**
+         * Schedules the whole chain of jobs
+         */
+        public void schedule() {
+            builder.schedule();
+        }
+
+    }
+
+    public static interface ISchedulingCondition {
+        public boolean isFullfilled(Job preceedingJob);
+    }
 }

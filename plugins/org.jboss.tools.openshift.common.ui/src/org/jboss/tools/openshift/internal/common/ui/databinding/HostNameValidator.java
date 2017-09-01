@@ -22,19 +22,18 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class HostNameValidator implements IValidator {
 
-	private static final Pattern urlPattern =
-			Pattern.compile("(https?://){0,1}[^\\.:0-9]+(\\.[^\\.:0-9]+)*(:[0-9]+){0,1}");
+    private static final Pattern urlPattern = Pattern.compile("(https?://){0,1}[^\\.:0-9]+(\\.[^\\.:0-9]+)*(:[0-9]+){0,1}");
 
-	@Override
-	public IStatus validate(Object value) {
-		String server = (String) value;
-		if (StringUtils.isEmpty(server)) {
-			return ValidationStatus.cancel("You have to provide a server to connect to.");
-		}
-		if (!urlPattern.matcher(server).matches()) {
-			return ValidationStatus.error("You have to provide a valid server to connect to.");
-		}
-		return ValidationStatus.ok();
+    @Override
+    public IStatus validate(Object value) {
+        String server = (String)value;
+        if (StringUtils.isEmpty(server)) {
+            return ValidationStatus.cancel("You have to provide a server to connect to.");
+        }
+        if (!urlPattern.matcher(server).matches()) {
+            return ValidationStatus.error("You have to provide a valid server to connect to.");
+        }
+        return ValidationStatus.ok();
 
-	}
+    }
 }

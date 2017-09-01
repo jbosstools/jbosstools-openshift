@@ -23,63 +23,65 @@ import com.openshift.restclient.model.build.IWebhookTrigger;
 /**
  * Property source to display a BuildConfig's webhook triggers.
  */
-public class WebHooksPropertySource implements IPropertySource{
+public class WebHooksPropertySource implements IPropertySource {
 
-	private static final String GITHUB = "GitHub";
-	private static final String GENERIC = "Generic";
-	
-	private IWebhookTrigger genericTrigger;
-	private IWebhookTrigger gitTrigger;
+    private static final String GITHUB = "GitHub";
+    private static final String GENERIC = "Generic";
 
-	public WebHooksPropertySource(Collection<IBuildTrigger> triggers ){
-		for (IBuildTrigger trigger : triggers) {
-			switch(trigger.getType()){
-			case BuildTriggerType.generic:
-			case BuildTriggerType.GENERIC:
-				genericTrigger = (IWebhookTrigger) trigger;
-				break;
-			case BuildTriggerType.github:
-			case BuildTriggerType.GITHUB:
-				gitTrigger = (IWebhookTrigger) trigger;
-				break;
-			default:
-			}
-		}
-	}
+    private IWebhookTrigger genericTrigger;
+    private IWebhookTrigger gitTrigger;
 
-	@Override
-	public Object getEditableValue() {
-		return null;
-	}
+    public WebHooksPropertySource(Collection<IBuildTrigger> triggers) {
+        for (IBuildTrigger trigger : triggers) {
+            switch (trigger.getType()) {
+            case BuildTriggerType.generic:
+            case BuildTriggerType.GENERIC:
+                genericTrigger = (IWebhookTrigger)trigger;
+                break;
+            case BuildTriggerType.github:
+            case BuildTriggerType.GITHUB:
+                gitTrigger = (IWebhookTrigger)trigger;
+                break;
+            default:
+            }
+        }
+    }
 
-	@Override
-	public IPropertyDescriptor[] getPropertyDescriptors() {
-		List<IPropertyDescriptor> descriptors = new ArrayList<>(2);
-		if(genericTrigger != null) descriptors.add(new PropertyDescriptor(GENERIC, "Generic URL"));
-		if(gitTrigger != null) descriptors.add(new PropertyDescriptor(GITHUB, "Github URL"));
-		return descriptors.toArray(new IPropertyDescriptor[]{});
-	}
+    @Override
+    public Object getEditableValue() {
+        return null;
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		if(GENERIC.equals(id))
-			return genericTrigger.getWebhookURL();
-		if(GITHUB.equals(id))
-			return gitTrigger.getWebhookURL();
-		return null;
-	}
+    @Override
+    public IPropertyDescriptor[] getPropertyDescriptors() {
+        List<IPropertyDescriptor> descriptors = new ArrayList<>(2);
+        if (genericTrigger != null)
+            descriptors.add(new PropertyDescriptor(GENERIC, "Generic URL"));
+        if (gitTrigger != null)
+            descriptors.add(new PropertyDescriptor(GITHUB, "Github URL"));
+        return descriptors.toArray(new IPropertyDescriptor[] {});
+    }
 
-	@Override
-	public boolean isPropertySet(Object arg0) {
-		return false;
-	}
+    @Override
+    public Object getPropertyValue(Object id) {
+        if (GENERIC.equals(id))
+            return genericTrigger.getWebhookURL();
+        if (GITHUB.equals(id))
+            return gitTrigger.getWebhookURL();
+        return null;
+    }
 
-	@Override
-	public void resetPropertyValue(Object arg0) {
-	}
+    @Override
+    public boolean isPropertySet(Object arg0) {
+        return false;
+    }
 
-	@Override
-	public void setPropertyValue(Object arg0, Object arg1) {
-	}
-	
+    @Override
+    public void resetPropertyValue(Object arg0) {
+    }
+
+    @Override
+    public void setPropertyValue(Object arg0, Object arg1) {
+    }
+
 }

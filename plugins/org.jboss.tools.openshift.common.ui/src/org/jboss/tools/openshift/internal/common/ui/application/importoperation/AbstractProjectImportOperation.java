@@ -22,40 +22,35 @@ import org.eclipse.ui.PlatformUI;
  */
 public class AbstractProjectImportOperation {
 
-	private File projectFolder;
+    private File projectFolder;
 
-	public AbstractProjectImportOperation(File projectDirectory) {
-		this.projectFolder = projectDirectory;
-	}
+    public AbstractProjectImportOperation(File projectDirectory) {
+        this.projectFolder = projectDirectory;
+    }
 
-	protected File getProjectDirectory() {
-		return projectFolder;
-	}
+    protected File getProjectDirectory() {
+        return projectFolder;
+    }
 
-	protected boolean isReadable(File destination) {
-		return destination != null
-				&& destination.exists()
-				&& destination.canRead();
-	}
+    protected boolean isReadable(File destination) {
+        return destination != null && destination.exists() && destination.canRead();
+    }
 
-	/**
-	 * Display a warning message about projects to be overwritten.
-	 * 
-	 * @param title the dialog title
-	 * @param message the dialog message
-	 * @return true if projects should overwritten
-	 */
+    /**
+     * Display a warning message about projects to be overwritten.
+     * 
+     * @param title the dialog title
+     * @param message the dialog message
+     * @return true if projects should overwritten
+     */
     protected boolean displayOverwriteDialog(final String title, final String message) {
         final boolean[] overwrite = new boolean[1];
-                
+
         Display.getDefault().syncExec(new Runnable() {
 
             @Override
             public void run() {
-                overwrite[0] = MessageDialog.openQuestion(
-                        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                        title,
-                        message);
+                overwrite[0] = MessageDialog.openQuestion(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), title, message);
             }
 
         });

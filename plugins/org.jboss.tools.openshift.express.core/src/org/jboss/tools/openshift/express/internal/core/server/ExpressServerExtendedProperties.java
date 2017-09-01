@@ -21,34 +21,34 @@ import com.openshift.client.IApplication;
  */
 public class ExpressServerExtendedProperties extends ServerExtendedProperties {
 
-	public ExpressServerExtendedProperties(IAdaptable adaptable) {
-		super(adaptable);
-	}
+    public ExpressServerExtendedProperties(IAdaptable adaptable) {
+        super(adaptable);
+    }
 
-	@Override
-	public boolean allowConvenienceEnhancements() {
-		return false;
-	}
-	
-	@Override
-	public boolean hasWelcomePage() {
-		return true;
-	}
+    @Override
+    public boolean allowConvenienceEnhancements() {
+        return false;
+    }
 
-	@Override
-	public String getWelcomePageUrl() throws GetWelcomePageURLException {
-		if (!ExpressServerUtils.isExpressRuntime(server)) {
-			return null;
-		}
-		
-		try {
-			final IApplication application = ExpressServerUtils.getApplication(server);
-			if (application != null) {
-				return application.getApplicationUrl();
-			}
-		} catch (GetApplicationException e) {
-			throw new GetWelcomePageURLException(e.getMessage(), e.getCause());
-		}
-		return null;
-	}
+    @Override
+    public boolean hasWelcomePage() {
+        return true;
+    }
+
+    @Override
+    public String getWelcomePageUrl() throws GetWelcomePageURLException {
+        if (!ExpressServerUtils.isExpressRuntime(server)) {
+            return null;
+        }
+
+        try {
+            final IApplication application = ExpressServerUtils.getApplication(server);
+            if (application != null) {
+                return application.getApplicationUrl();
+            }
+        } catch (GetApplicationException e) {
+            throw new GetWelcomePageURLException(e.getMessage(), e.getCause());
+        }
+        return null;
+    }
 }

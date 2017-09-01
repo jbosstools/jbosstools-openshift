@@ -16,18 +16,18 @@ import java.util.Map;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 
-class ReplicationControllerWrapper extends ResourceContainer<IReplicationController, ProjectWrapper> implements IReplicationControllerWrapper {
-	public ReplicationControllerWrapper(ProjectWrapper parent, IReplicationController resource) {
-		super(parent, resource);
-	}
+class ReplicationControllerWrapper extends ResourceContainer<IReplicationController, ProjectWrapper>
+        implements IReplicationControllerWrapper {
+    public ReplicationControllerWrapper(ProjectWrapper parent, IReplicationController resource) {
+        super(parent, resource);
+    }
 
-	protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated,
-			boolean changed) {
-		// do nothing
-		
-	}
+    protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated, boolean changed) {
+        // do nothing
 
-	protected ResourceWrapper createNewWrapper(Collection<IResource> resources, IResource r) {
-		return new ResourceWrapper(this, r);
-	}
+    }
+
+    protected ResourceWrapper createNewWrapper(Collection<IResource> resources, IResource r) {
+        return new ResourceWrapper(this, r);
+    }
 }

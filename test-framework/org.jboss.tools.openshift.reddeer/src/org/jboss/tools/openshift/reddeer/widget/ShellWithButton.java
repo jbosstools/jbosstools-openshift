@@ -23,15 +23,14 @@ import org.jboss.reddeer.swt.impl.button.PushButton;
 import org.jboss.reddeer.swt.impl.shell.AbstractShell;
 
 public class ShellWithButton extends AbstractShell {
-	
+
 	public ShellWithButton(String title, String buttonLabel) {
 		super(lookForShellWithButton(title, buttonLabel));
 		setFocus();
 	}
-	
-	private static org.eclipse.swt.widgets.Shell lookForShellWithButton(
-			final String title, final String buttonLabel) {
-		
+
+	private static org.eclipse.swt.widgets.Shell lookForShellWithButton(final String title, final String buttonLabel) {
+
 		Matcher<String> titleMatcher = new WithTextMatcher(title);
 		Matcher<String> buttonMatcher = new BaseMatcher<String>() {
 			@Override

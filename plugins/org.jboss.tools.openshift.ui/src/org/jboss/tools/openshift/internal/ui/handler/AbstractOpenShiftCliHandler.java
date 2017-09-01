@@ -39,68 +39,62 @@ import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants
  *
  */
 public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
-	
-	protected abstract void handleEvent(ExecutionEvent event);
-	
-	protected abstract IConnection getConnection(ExecutionEvent event);
-	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		String location = OCBinary.getInstance().getLocation(getConnection(event));
-		if(StringUtils.isBlank(location)) {
-			
-			final MessageDialog dialog = new MessageDialog(HandlerUtil.getActiveShell(event),
-													"Unknown executable location",
-													null,
-													"The OpenShift Client '"+ OCBinary.getInstance().getName()+"' executable can not be found.",
-													MessageDialog.ERROR,
-													new String[] { IDialogConstants.OK_LABEL }, 0) {
-				@Override
-				protected Control createCustomArea(Composite parent) {
-					Composite container = new Composite(parent, SWT.NONE);
-					GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
-					GridLayoutFactory.fillDefaults().applyTo(container);
-					Link link = new Link(container, SWT.WRAP);
-					link.setText("You must set the executable location in the <a>OpenShift 3 preferences</a>.");
-					link.addSelectionListener(new OpenPreferencesListener(this));
-					container.setFocus();
-					return container;
-				}
-			};
-			dialog.open();
-			return null;
-		}
-		handleEvent(event);
-		return null;
-	}
 
-	private static class OpenPreferencesListener extends SelectionAdapter {
+    protected abstract void handleEvent(ExecutionEvent event);
 
-		private Dialog dialog;
+    protected abstract IConnection getConnection(ExecutionEvent event);
 
-		public OpenPreferencesListener(MessageDialog messageDialog) {
-			this.dialog = messageDialog;
-		}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        String location = OCBinary.getInstance().getLocation(getConnection(event));
+        if (StringUtils.isBlank(location)) {
 
-		@Override
-		public void widgetSelected(SelectionEvent e) {
-			dialog.close();
-			//Opening in asyncExec to workaround https://bugs.eclipse.org/471717 on OSX
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					PreferencesUtil.createPreferenceDialogOn(Display.getDefault().getActiveShell(),
-							OPEN_SHIFT_PREFERENCE_PAGE_ID,
-							new String[] {OPEN_SHIFT_PREFERENCE_PAGE_ID},
-							null
-							).open();
-				}
-			});
-		}
+            final MessageDialog dialog = new MessageDialog(HandlerUtil.getActiveShell(event), "Unknown executable location", null,
+                    "The OpenShift Client '" + OCBinary.getInstance().getName() + "' executable can not be found.", MessageDialog.ERROR,
+                    new String[] { IDialogConstants.OK_LABEL }, 0) {
+                @Override
+                protected Control createCustomArea(Composite parent) {
+                    Composite container = new Composite(parent, SWT.NONE);
+                    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
+                    GridLayoutFactory.fillDefaults().applyTo(container);
+                    Link link = new Link(container, SWT.WRAP);
+                    link.setText("You must set the executable location in the <a>OpenShift 3 preferences</a>.");
+                    link.addSelectionListener(new OpenPreferencesListener(this));
+                    container.setFocus();
+                    return container;
+                }
+            };
+            dialog.open();
+            return null;
+        }
+        handleEvent(event);
+        return null;
+    }
 
-		@Override
-		public void widgetDefaultSelected(SelectionEvent e) {
-			widgetSelected(e);
-		}
-	}
+    private static class OpenPreferencesListener extends SelectionAdapter {
+
+        private Dialog dialog;
+
+        public OpenPreferencesListener(MessageDialog messageDialog) {
+            this.dialog = messageDialog;
+        }
+
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+            dialog.close();
+            //Opening in asyncExec to workaround https://bugs.eclipse.org/471717 on OSX
+            Display.getDefault().asyncExec(new Runnable() {
+                @Override
+                public void run() {
+                    PreferencesUtil.createPreferenceDialogOn(Display.getDefault().getActiveShell(), OPEN_SHIFT_PREFERENCE_PAGE_ID,
+                            new String[] { OPEN_SHIFT_PREFERENCE_PAGE_ID }, null).open();
+                }
+            });
+        }
+
+        @Override
+        public void widgetDefaultSelected(SelectionEvent e) {
+            widgetSelected(e);
+        }
+    }
 }

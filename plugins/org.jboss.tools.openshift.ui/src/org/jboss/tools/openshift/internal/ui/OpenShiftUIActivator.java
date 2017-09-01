@@ -27,83 +27,82 @@ import com.openshift.restclient.OpenShiftException;
 
 public class OpenShiftUIActivator extends BaseUIPlugin {
 
-	public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui"; //$NON-NLS-1$
 
-	private static OpenShiftUIActivator plugin;
+    private static OpenShiftUIActivator plugin;
 
-	private IPreferenceStore corePreferenceStore;
+    private IPreferenceStore corePreferenceStore;
 
-	public OpenShiftUIActivator() {
-	}
+    public OpenShiftUIActivator() {
+    }
 
-	public IPluginLog getLogger() {
-		return pluginLogInternal();
-	}
+    public IPluginLog getLogger() {
+        return pluginLogInternal();
+    }
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
-	}
+    @Override
+    public void start(BundleContext context) throws Exception {
+        super.start(context);
+        plugin = this;
+    }
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
-		super.stop(context);
-	}
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        plugin = null;
+        super.stop(context);
+    }
 
-	public static OpenShiftUIActivator getDefault() {
-		return plugin;
-	}
+    public static OpenShiftUIActivator getDefault() {
+        return plugin;
+    }
 
-	public static StatusFactory statusFactory() {
-		return getDefault().statusFactoryInternal();
-	}
+    public static StatusFactory statusFactory() {
+        return getDefault().statusFactoryInternal();
+    }
 
-	/**
-	 * Get an inputstream for a file
-	 * 
-	 * @param file
-	 * @return
-	 * @throws OpenShiftException
-	 *             if unable to read the file;
-	 */
-	public InputStream getPluginFile(String file) {
-		URL url;
-		try {
-			url = new URL(plugin.getBundle().getEntry("/"), file);
-			return url.openStream();
-		} catch (Exception e) {
-			getLogger().logError(e);
-			throw new OpenShiftException(e, "Exception trying to load plugin file: {0}", file);
-		}
-	}
+    /**
+     * Get an inputstream for a file
+     * 
+     * @param file
+     * @return
+     * @throws OpenShiftException
+     *             if unable to read the file;
+     */
+    public InputStream getPluginFile(String file) {
+        URL url;
+        try {
+            url = new URL(plugin.getBundle().getEntry("/"), file);
+            return url.openStream();
+        } catch (Exception e) {
+            getLogger().logError(e);
+            throw new OpenShiftException(e, "Exception trying to load plugin file: {0}", file);
+        }
+    }
 
-	/**
-	 * Retrieve the preferencestore
-	 * 
-	 * @return
-	 */
-	public IPreferenceStore getCorePreferenceStore() {
-		// Create the preference store lazily.
-		if (corePreferenceStore == null) {
-			this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE,
-					OpenShiftCoreActivator.PLUGIN_ID);
+    /**
+     * Retrieve the preferencestore
+     * 
+     * @return
+     */
+    public IPreferenceStore getCorePreferenceStore() {
+        // Create the preference store lazily.
+        if (corePreferenceStore == null) {
+            this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, OpenShiftCoreActivator.PLUGIN_ID);
 
-		}
-		return corePreferenceStore;
-	}
+        }
+        return corePreferenceStore;
+    }
 
-	public static void log(int status, String message) {
-		log(status, message, null);
-	}
+    public static void log(int status, String message) {
+        log(status, message, null);
+    }
 
-	public static void log(int status, String message, Throwable e) {
-		OpenShiftUIActivator instance = getDefault();
-		instance.getLog().log(new Status(status, instance.getId(), message, e));
-	}
+    public static void log(int status, String message, Throwable e) {
+        OpenShiftUIActivator instance = getDefault();
+        instance.getLog().log(new Status(status, instance.getId(), message, e));
+    }
 
-	private String getId() {
-		return getBundle().getSymbolicName();
-	}
+    private String getId() {
+        return getBundle().getSymbolicName();
+    }
 }

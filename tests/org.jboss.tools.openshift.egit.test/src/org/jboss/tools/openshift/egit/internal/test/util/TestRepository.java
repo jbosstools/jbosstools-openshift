@@ -73,572 +73,537 @@ import org.junit.Assert;
  */
 public class TestRepository {
 
-	private static final String DEFAULT_USER = "<adietish@jbosstools>";
+    private static final String DEFAULT_USER = "<adietish@jbosstools>";
 
-	Repository repository;
+    Repository repository;
 
-	String workdirPrefix;
+    String workdirPrefix;
 
-	private File gitDir;
+    private File gitDir;
 
-	/**
-	 * Creates a new test repository
-	 * 
-	 * @param gitDir
-	 * @throws IOException
-	 */
-	public TestRepository(File gitDir) throws IOException {
-		createFileRepository(gitDir);
-		// use repository instance from RepositoryCache!
-		this.gitDir = gitDir;
-		this.repository = Activator.getDefault().getRepositoryCache().lookupRepository(gitDir);
-		this.workdirPrefix = getWorkdirPrefix(repository);
-	}
+    /**
+     * Creates a new test repository
+     * 
+     * @param gitDir
+     * @throws IOException
+     */
+    public TestRepository(File gitDir) throws IOException {
+        createFileRepository(gitDir);
+        // use repository instance from RepositoryCache!
+        this.gitDir = gitDir;
+        this.repository = Activator.getDefault().getRepositoryCache().lookupRepository(gitDir);
+        this.workdirPrefix = getWorkdirPrefix(repository);
+    }
 
-	protected void createFileRepository(File gitDir) throws IOException {
-		Repository tmpRepository = FileRepositoryBuilder.create(gitDir);
-		tmpRepository.create();
-		tmpRepository.close();
-	}
-	
-	/**
-	 * Creates the initial branches etc.
-	 * 
-	 * @throws NoHeadException
-	 * @throws NoMessageException
-	 * @throws UnmergedPathsException
-	 * @throws ConcurrentRefUpdateException
-	 * @throws WrongRepositoryStateException
-	 * @throws GitAPIException
-	 */
-	public void initialCommit() throws NoHeadException, NoMessageException,
-			UnmergedPathsException, ConcurrentRefUpdateException,
-			WrongRepositoryStateException, GitAPIException {
-		new Git(repository).commit()
-				.setAll(true)
-				.setAuthor(RawParseUtils.parsePersonIdent(DEFAULT_USER))
-				.setCommitter(RawParseUtils.parsePersonIdent(DEFAULT_USER))
-				.setMessage("initial commit").call();
-	}
+    protected void createFileRepository(File gitDir) throws IOException {
+        Repository tmpRepository = FileRepositoryBuilder.create(gitDir);
+        tmpRepository.create();
+        tmpRepository.close();
+    }
 
-	private String getWorkdirPrefix(Repository repository) {
-		String workdirPrefix = repository.getWorkTree().getAbsolutePath();
-		try {
-			workdirPrefix = repository.getWorkTree().getCanonicalPath();
-		} catch (IOException err) {
-			// ignore;
-		}
-		workdirPrefix = workdirPrefix.replace('\\', '/');
-		if (!workdirPrefix.endsWith("/")) //$NON-NLS-1$
-			workdirPrefix += "/"; //$NON-NLS-1$
-		return workdirPrefix;
-	}
+    /**
+     * Creates the initial branches etc.
+     * 
+     * @throws NoHeadException
+     * @throws NoMessageException
+     * @throws UnmergedPathsException
+     * @throws ConcurrentRefUpdateException
+     * @throws WrongRepositoryStateException
+     * @throws GitAPIException
+     */
+    public void initialCommit() throws NoHeadException, NoMessageException, UnmergedPathsException, ConcurrentRefUpdateException,
+            WrongRepositoryStateException, GitAPIException {
+        new Git(repository).commit().setAll(true).setAuthor(RawParseUtils.parsePersonIdent(DEFAULT_USER))
+                .setCommitter(RawParseUtils.parsePersonIdent(DEFAULT_USER)).setMessage("initial commit").call();
+    }
 
-	/**
-	 * Creates a test repository from an existing Repository
-	 * 
-	 * @param repository
-	 * @throws IOException
-	 */
-	public TestRepository(Repository repository) throws IOException {
-		this.repository = repository;
-		try {
-			workdirPrefix = repository.getWorkTree().getCanonicalPath();
-		} catch (IOException err) {
-			workdirPrefix = repository.getWorkTree().getAbsolutePath();
-		}
-		workdirPrefix = workdirPrefix.replace('\\', '/');
-		if (!workdirPrefix.endsWith("/")) //$NON-NLS-1$
-			workdirPrefix += "/"; //$NON-NLS-1$
-	}
+    private String getWorkdirPrefix(Repository repository) {
+        String workdirPrefix = repository.getWorkTree().getAbsolutePath();
+        try {
+            workdirPrefix = repository.getWorkTree().getCanonicalPath();
+        } catch (IOException err) {
+            // ignore;
+        }
+        workdirPrefix = workdirPrefix.replace('\\', '/');
+        if (!workdirPrefix.endsWith("/")) //$NON-NLS-1$
+            workdirPrefix += "/"; //$NON-NLS-1$
+        return workdirPrefix;
+    }
 
-	/**
-	 * @return the wrapped repository
-	 */
-	public Repository getRepository() {
-		return repository;
-	}
+    /**
+     * Creates a test repository from an existing Repository
+     * 
+     * @param repository
+     * @throws IOException
+     */
+    public TestRepository(Repository repository) throws IOException {
+        this.repository = repository;
+        try {
+            workdirPrefix = repository.getWorkTree().getCanonicalPath();
+        } catch (IOException err) {
+            workdirPrefix = repository.getWorkTree().getAbsolutePath();
+        }
+        workdirPrefix = workdirPrefix.replace('\\', '/');
+        if (!workdirPrefix.endsWith("/")) //$NON-NLS-1$
+            workdirPrefix += "/"; //$NON-NLS-1$
+    }
 
-	/**
-	 * create an initial commit containing a file "dummy" in the
-	 * 
-	 * @param message
-	 *            commit message
-	 * @return commit object
-	 * @throws IOException
-	 * @throws JGitInternalException
-	 * @throws GitAPIException 
-	 */
-	public RevCommit createInitialCommit(String message) throws IOException,
-			JGitInternalException, GitAPIException {
-		String repoPath = repository.getWorkTree().getAbsolutePath();
-		File file = new File(repoPath, "dummy");
-		if (!file.exists())
-			FileUtils.createNewFile(file);
-		add(file);
-		return commit(message);
-	}
+    /**
+     * @return the wrapped repository
+     */
+    public Repository getRepository() {
+        return repository;
+    }
 
-	/**
-	 * Create a file in the given project (so that you wont have to refresh the
-	 * project to get to know about the new java.io.File).
-	 * 
-	 * @param project
-	 * @param name
-	 * @param content
-	 * @return
-	 * @throws CoreException
-	 */
-	public IFile createFile(IProject project, String name, String content)
-			throws CoreException {
-		IFile file = project.getFile(name);
-		file.create(new ByteArrayInputStream(content.getBytes()), true,
-				new NullProgressMonitor());
-		return file;
-	}
+    /**
+     * create an initial commit containing a file "dummy" in the
+     * 
+     * @param message
+     *            commit message
+     * @return commit object
+     * @throws IOException
+     * @throws JGitInternalException
+     * @throws GitAPIException 
+     */
+    public RevCommit createInitialCommit(String message) throws IOException, JGitInternalException, GitAPIException {
+        String repoPath = repository.getWorkTree().getAbsolutePath();
+        File file = new File(repoPath, "dummy");
+        if (!file.exists())
+            FileUtils.createNewFile(file);
+        add(file);
+        return commit(message);
+    }
 
-	public File createFile(String name, String data) throws IOException {
-		File file = new File(repository.getWorkTree(), name);
-		write(file, data);
-		return file;
-	}
+    /**
+     * Create a file in the given project (so that you wont have to refresh the
+     * project to get to know about the new java.io.File).
+     * 
+     * @param project
+     * @param name
+     * @param content
+     * @return
+     * @throws CoreException
+     */
+    public IFile createFile(IProject project, String name, String content) throws CoreException {
+        IFile file = project.getFile(name);
+        file.create(new ByteArrayInputStream(content.getBytes()), true, new NullProgressMonitor());
+        return file;
+    }
 
-	private void write(final File file, final String data) throws IOException {
-		FileUtils.mkdirs(file.getParentFile(), true);
-		Writer w = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-		try {
-			w.write(data);
-		} finally {
-			w.close();
-		}
-	}
+    public File createFile(String name, String data) throws IOException {
+        File file = new File(repository.getWorkTree(), name);
+        write(file, data);
+        return file;
+    }
 
-	/**
-	 * Track, add to index and finally commit given file
-	 * 
-	 * @param project
-	 * @param file
-	 * @param commitMessage
-	 * @return commit object
-	 * @throws Exception
-	 */
-	public RevCommit addAndCommit(IProject project, File file, String commitMessage)
-			throws Exception {
-		add(file);
-		return commit(commitMessage);
-	}
+    private void write(final File file, final String data) throws IOException {
+        FileUtils.mkdirs(file.getParentFile(), true);
+        Writer w = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+        try {
+            w.write(data);
+        } finally {
+            w.close();
+        }
+    }
 
-	public RevCommit addAndCommit(File file, String commitMessage)
-			throws Exception {
-		add(file);
-		return commit(commitMessage);
-	}
+    /**
+     * Track, add to index and finally commit given file
+     * 
+     * @param project
+     * @param file
+     * @param commitMessage
+     * @return commit object
+     * @throws Exception
+     */
+    public RevCommit addAndCommit(IProject project, File file, String commitMessage) throws Exception {
+        add(file);
+        return commit(commitMessage);
+    }
 
-	/**
-	 * Appends file content to given file, then track, add to index and finally
-	 * commit it.
-	 * 
-	 * @param project
-	 * @param file
-	 * @param content
-	 * @param commitMessage
-	 * @return commit object
-	 * @throws Exception
-	 */
-	public RevCommit appendContentAndCommit(IProject project, File file,
-			byte[] content, String commitMessage) throws Exception {
-		return appendContentAndCommit(project, file, new String(content),
-				commitMessage);
-	}
+    public RevCommit addAndCommit(File file, String commitMessage) throws Exception {
+        add(file);
+        return commit(commitMessage);
+    }
 
-	/**
-	 * Appends file content to given file, then track, add to index and finally
-	 * commit it.
-	 * 
-	 * @param project
-	 * @param file
-	 * @param content
-	 * @param commitMessage
-	 * @return commit object
-	 * @throws Exception
-	 */
-	public RevCommit appendContentAndCommit(IProject project, File file,
-			String content, String commitMessage) throws Exception {
-		appendFileContent(file, content);
-		add(file);
-		add(project, file);
+    /**
+     * Appends file content to given file, then track, add to index and finally
+     * commit it.
+     * 
+     * @param project
+     * @param file
+     * @param content
+     * @param commitMessage
+     * @return commit object
+     * @throws Exception
+     */
+    public RevCommit appendContentAndCommit(IProject project, File file, byte[] content, String commitMessage) throws Exception {
+        return appendContentAndCommit(project, file, new String(content), commitMessage);
+    }
 
-		return commit(commitMessage);
-	}
+    /**
+     * Appends file content to given file, then track, add to index and finally
+     * commit it.
+     * 
+     * @param project
+     * @param file
+     * @param content
+     * @param commitMessage
+     * @return commit object
+     * @throws Exception
+     */
+    public RevCommit appendContentAndCommit(IProject project, File file, String content, String commitMessage) throws Exception {
+        appendFileContent(file, content);
+        add(file);
+        add(project, file);
 
-	/**
-	 * Commits the current index
-	 * 
-	 * @param message
-	 *            commit message
-	 * @return commit object
-	 * 
-	 * @throws UnmergedPathException
-	 * @throws JGitInternalException
-	 * @throws GitAPIException 
-	 * @throws UnmergedPathsException 
-	 */
-	public RevCommit commit(String message) throws UnmergedPathException,
-			JGitInternalException,
-			UnmergedPathsException, GitAPIException {
-		Git git = new Git(repository);
-		CommitCommand commitCommand = git.commit();
-		commitCommand.setAuthor("J. Git", "j.git@egit.org");
-		commitCommand.setCommitter(commitCommand.getAuthor());
-		commitCommand.setMessage(message);
-		return commitCommand.call();
-	}
+        return commit(commitMessage);
+    }
 
-	public void add(IFile file) throws IOException, GitAPIException {
-		add(new File(file.getLocation().toOSString()));
-	}
+    /**
+     * Commits the current index
+     * 
+     * @param message
+     *            commit message
+     * @return commit object
+     * 
+     * @throws UnmergedPathException
+     * @throws JGitInternalException
+     * @throws GitAPIException 
+     * @throws UnmergedPathsException 
+     */
+    public RevCommit commit(String message) throws UnmergedPathException, JGitInternalException, UnmergedPathsException, GitAPIException {
+        Git git = new Git(repository);
+        CommitCommand commitCommand = git.commit();
+        commitCommand.setAuthor("J. Git", "j.git@egit.org");
+        commitCommand.setCommitter(commitCommand.getAuthor());
+        commitCommand.setMessage(message);
+        return commitCommand.call();
+    }
 
-	/**
-	 * Adds file to version control
-	 * 
-	 * @param file
-	 * @throws IOException
-	 * @throws GitAPIException 
-	 */
-	public void add(File file) throws IOException, GitAPIException {
-		String repoPath =
-				getRepoRelativePath(file.getAbsolutePath());
-		try {
-			new Git(repository).add().addFilepattern(repoPath).call();
-		} catch (NoFilepatternException e) {
-			throw new IOException(e.getMessage());
-		}
-	}
+    public void add(IFile file) throws IOException, GitAPIException {
+        add(new File(file.getLocation().toOSString()));
+    }
 
-	/**
-	 * Creates a new branch and immediately checkout it.
-	 * 
-	 * @param refName
-	 *            starting point for the new branch
-	 * @param newRefName
-	 * @throws Exception
-	 */
-	public void createAndCheckoutBranch(String refName, String newRefName) throws Exception {
-		createBranch(refName, newRefName);
-		checkoutBranch(newRefName);
-	}
+    /**
+     * Adds file to version control
+     * 
+     * @param file
+     * @throws IOException
+     * @throws GitAPIException 
+     */
+    public void add(File file) throws IOException, GitAPIException {
+        String repoPath = getRepoRelativePath(file.getAbsolutePath());
+        try {
+            new Git(repository).add().addFilepattern(repoPath).call();
+        } catch (NoFilepatternException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
 
-	/**
-	 * Creates a new branch
-	 * 
-	 * @param refName
-	 *            starting point for the new branch
-	 * @param newRefName
-	 * @throws IOException
-	 * @throws GitAPIException 
-	 * @throws InvalidRefNameException 
-	 * @throws RefNotFoundException 
-	 * @throws RefAlreadyExistsException 
-	 */
-	public void createBranch(String refName, String newRefName)
-			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, GitAPIException {
-		try (Git git = new Git(repository)) {
-			git
-				.branchCreate()
-				.setName(newRefName)
-				.setStartPoint(refName)
-				.call();
-		}
-	}
+    /**
+     * Creates a new branch and immediately checkout it.
+     * 
+     * @param refName
+     *            starting point for the new branch
+     * @param newRefName
+     * @throws Exception
+     */
+    public void createAndCheckoutBranch(String refName, String newRefName) throws Exception {
+        createBranch(refName, newRefName);
+        checkoutBranch(newRefName);
+    }
 
-	/**
-	 * Returns the object id of the current branch.
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	public String getCurrentBranch() throws IOException {
-		return repository.getBranch();
-	}
+    /**
+     * Creates a new branch
+     * 
+     * @param refName
+     *            starting point for the new branch
+     * @param newRefName
+     * @throws IOException
+     * @throws GitAPIException 
+     * @throws InvalidRefNameException 
+     * @throws RefNotFoundException 
+     * @throws RefAlreadyExistsException 
+     */
+    public void createBranch(String refName, String newRefName)
+            throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, GitAPIException {
+        try (Git git = new Git(repository)) {
+            git.branchCreate().setName(newRefName).setStartPoint(refName).call();
+        }
+    }
 
-	public boolean isCurrentBranch(String name) throws IOException {
-		Assert.assertNotNull(name);
+    /**
+     * Returns the object id of the current branch.
+     * 
+     * @return
+     * @throws IOException
+     */
+    public String getCurrentBranch() throws IOException {
+        return repository.getBranch();
+    }
 
-		Ref ref = repository.findRef(name);
-		if (ref == null) {
-			return false;
-		}
-		return Repository.shortenRefName(ref.getName()).equals(
-				getCurrentBranch());
-	}
+    public boolean isCurrentBranch(String name) throws IOException {
+        Assert.assertNotNull(name);
 
-	/**
-	 * Checkouts branch
-	 * 
-	 * @param refName
-	 *            full name of branch
-	 * @throws CoreException
-	 * @throws GitAPIException 
-	 * @throws CheckoutConflictException 
-	 * @throws InvalidRefNameException 
-	 * @throws RefNotFoundException 
-	 * @throws RefAlreadyExistsException 
-	 */
-	public void checkoutBranch(String refName) throws CoreException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, GitAPIException {
-		try (Git git = new Git(repository)) {
-			git
-				.checkout()
-				.setName(refName)
-				.call();
-		}
-	}
+        Ref ref = repository.findRef(name);
+        if (ref == null) {
+            return false;
+        }
+        return Repository.shortenRefName(ref.getName()).equals(getCurrentBranch());
+    }
 
-	/**
-	 * Adds the given file to the index
-	 * 
-	 * @param project
-	 * @param file
-	 * @throws Exception
-	 */
-	public void add(IProject project, File file) throws Exception {
-		IFile iFile = getFile(project, file);
-		add(iFile);
-	}
+    /**
+     * Checkouts branch
+     * 
+     * @param refName
+     *            full name of branch
+     * @throws CoreException
+     * @throws GitAPIException 
+     * @throws CheckoutConflictException 
+     * @throws InvalidRefNameException 
+     * @throws RefNotFoundException 
+     * @throws RefAlreadyExistsException 
+     */
+    public void checkoutBranch(String refName) throws CoreException, RefAlreadyExistsException, RefNotFoundException,
+            InvalidRefNameException, CheckoutConflictException, GitAPIException {
+        try (Git git = new Git(repository)) {
+            git.checkout().setName(refName).call();
+        }
+    }
 
-	/**
-	 * Appends content to end of given file.
-	 * 
-	 * @param file
-	 * @param content
-	 * @throws IOException
-	 */
-	public void appendFileContent(File file, byte[] content) throws IOException {
-		appendFileContent(file, new String(content), true);
-	}
+    /**
+     * Adds the given file to the index
+     * 
+     * @param project
+     * @param file
+     * @throws Exception
+     */
+    public void add(IProject project, File file) throws Exception {
+        IFile iFile = getFile(project, file);
+        add(iFile);
+    }
 
-	/**
-	 * Appends content to end of given file.
-	 * 
-	 * @param file
-	 * @param content
-	 * @throws IOException
-	 */
-	public void appendFileContent(File file, String content) throws IOException {
-		appendFileContent(file, content, true);
-	}
+    /**
+     * Appends content to end of given file.
+     * 
+     * @param file
+     * @param content
+     * @throws IOException
+     */
+    public void appendFileContent(File file, byte[] content) throws IOException {
+        appendFileContent(file, new String(content), true);
+    }
 
-	/**
-	 * Appends content to given file.
-	 * 
-	 * @param file
-	 * @param content
-	 * @param append
-	 *            if true, then bytes will be written to the end of the file
-	 *            rather than the beginning
-	 * @throws IOException
-	 */
-	public void appendFileContent(File file, byte[] content, boolean append)
-			throws IOException {
-		appendFileContent(file, new String(content), append);
-	}
+    /**
+     * Appends content to end of given file.
+     * 
+     * @param file
+     * @param content
+     * @throws IOException
+     */
+    public void appendFileContent(File file, String content) throws IOException {
+        appendFileContent(file, content, true);
+    }
 
-	/**
-	 * Appends content to given file.
-	 * 
-	 * @param file
-	 * @param content
-	 * @param append
-	 *            if true, then bytes will be written to the end of the file
-	 *            rather than the beginning
-	 * @throws IOException
-	 */
-	public void appendFileContent(File file, String content, boolean append)
-			throws IOException {
-		FileWriter fw = null;
-		try {
-			fw = new FileWriter(file, append);
-			fw.append(content);
-		} finally {
-			if (fw != null)
-				fw.close();
-		}
-	}
+    /**
+     * Appends content to given file.
+     * 
+     * @param file
+     * @param content
+     * @param append
+     *            if true, then bytes will be written to the end of the file
+     *            rather than the beginning
+     * @throws IOException
+     */
+    public void appendFileContent(File file, byte[] content, boolean append) throws IOException {
+        appendFileContent(file, new String(content), append);
+    }
 
-	/**
-	 * Checks if a file with the given path exists in the HEAD tree
-	 * 
-	 * @param path
-	 * @return true if the file exists
-	 * @throws IOException
-	 */
-	public boolean inHead(String path) throws IOException {
-		ObjectId headId = repository.resolve(Constants.HEAD);
-		RevWalk rw = new RevWalk(repository);
-		TreeWalk tw = null;
-		try {
-			tw = TreeWalk.forPath(repository, path, rw.parseTree(headId));
-			return tw != null;
-		} finally {
-			rw.close();
-			rw.dispose();
-			if (tw != null)
-				tw.close();
-		}
-	}
+    /**
+     * Appends content to given file.
+     * 
+     * @param file
+     * @param content
+     * @param append
+     *            if true, then bytes will be written to the end of the file
+     *            rather than the beginning
+     * @throws IOException
+     */
+    public void appendFileContent(File file, String content, boolean append) throws IOException {
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(file, append);
+            fw.append(content);
+        } finally {
+            if (fw != null)
+                fw.close();
+        }
+    }
 
-	public boolean inIndex(String path) throws IOException {
-		return getDirCacheEntry(path) != null;
-	}
+    /**
+     * Checks if a file with the given path exists in the HEAD tree
+     * 
+     * @param path
+     * @return true if the file exists
+     * @throws IOException
+     */
+    public boolean inHead(String path) throws IOException {
+        ObjectId headId = repository.resolve(Constants.HEAD);
+        RevWalk rw = new RevWalk(repository);
+        TreeWalk tw = null;
+        try {
+            tw = TreeWalk.forPath(repository, path, rw.parseTree(headId));
+            return tw != null;
+        } finally {
+            rw.close();
+            rw.dispose();
+            if (tw != null)
+                tw.close();
+        }
+    }
 
-	public boolean removedFromIndex(String path) throws IOException {
-		DirCacheEntry dc = getDirCacheEntry(path);
-		if (dc == null)
-			return true;
+    public boolean inIndex(String path) throws IOException {
+        return getDirCacheEntry(path) != null;
+    }
 
-		Ref ref = repository.getRef(Constants.HEAD);
-		RevCommit c = new RevWalk(repository).parseCommit(ref.getObjectId());
-		TreeWalk tw = TreeWalk.forPath(repository, path, c.getTree());
+    public boolean removedFromIndex(String path) throws IOException {
+        DirCacheEntry dc = getDirCacheEntry(path);
+        if (dc == null)
+            return true;
 
-		return tw == null || dc.getObjectId().equals(tw.getObjectId(0));
-	}
+        Ref ref = repository.getRef(Constants.HEAD);
+        RevCommit c = new RevWalk(repository).parseCommit(ref.getObjectId());
+        TreeWalk tw = TreeWalk.forPath(repository, path, c.getTree());
 
-	public long lastModifiedInIndex(String path) throws IOException {
-		String repoPath = getRepoRelativePath(path);
-		DirCache dc = DirCache.read(repository.getIndexFile(), repository.getFS());
+        return tw == null || dc.getObjectId().equals(tw.getObjectId(0));
+    }
 
-		return dc.getEntry(repoPath).getLastModified();
-	}
+    public long lastModifiedInIndex(String path) throws IOException {
+        String repoPath = getRepoRelativePath(path);
+        DirCache dc = DirCache.read(repository.getIndexFile(), repository.getFS());
 
-	public int getDirCacheEntryLength(String path) throws IOException {
-		String repoPath = getRepoRelativePath(path);
-		DirCache dc = DirCache.read(repository.getIndexFile(), repository.getFS());
+        return dc.getEntry(repoPath).getLastModified();
+    }
 
-		return dc.getEntry(repoPath).getLength();
-	}
+    public int getDirCacheEntryLength(String path) throws IOException {
+        String repoPath = getRepoRelativePath(path);
+        DirCache dc = DirCache.read(repository.getIndexFile(), repository.getFS());
 
-	public String getRepoRelativePath(String path) {
-		final int pfxLen = workdirPrefix.length();
-		final int pLen = path.length();
-		if (pLen > pfxLen)
-			return path.substring(pfxLen);
-		else if (path.length() == pfxLen - 1)
-			return ""; //$NON-NLS-1$
-		return null;
-	}
+        return dc.getEntry(repoPath).getLength();
+    }
 
-	public IFile getFile(IProject project, File file) throws CoreException {
-		String relativePath = getRepoRelativePath(file.getAbsolutePath());
+    public String getRepoRelativePath(String path) {
+        final int pfxLen = workdirPrefix.length();
+        final int pLen = path.length();
+        if (pLen > pfxLen)
+            return path.substring(pfxLen);
+        else if (path.length() == pfxLen - 1)
+            return ""; //$NON-NLS-1$
+        return null;
+    }
 
-		String quotedProjectName = Pattern.quote(project.getName());
-		relativePath = relativePath.replaceFirst(quotedProjectName, "");
+    public IFile getFile(IProject project, File file) throws CoreException {
+        String relativePath = getRepoRelativePath(file.getAbsolutePath());
 
-		IFile iFile = project.getFile(relativePath);
-		iFile.refreshLocal(0, null);
+        String quotedProjectName = Pattern.quote(project.getName());
+        relativePath = relativePath.replaceFirst(quotedProjectName, "");
 
-		return iFile;
-	}
+        IFile iFile = project.getFile(relativePath);
+        iFile.refreshLocal(0, null);
 
-	public void dispose() throws IOException {
-		repository.close();
-		remove();
-		repository = null;
-	}
+        return iFile;
+    }
 
-	public void remove() throws IOException {
-		File repositoryDirectory = repository.getDirectory();
-		File repositoryParent = repositoryDirectory.getParentFile();
-		if (repositoryParent.exists()) {
-			FileUtils.delete(repositoryParent, FileUtils.RECURSIVE | FileUtils.RETRY);
-		}
-	}
+    public void dispose() throws IOException {
+        repository.close();
+        remove();
+        repository = null;
+    }
 
-	/**
-	 * Connect a project to this repository
-	 * 
-	 * @param project
-	 * @throws CoreException
-	 */
-	public void connect(IProject project) throws CoreException {
-		ConnectProviderOperation op = new ConnectProviderOperation(project,
-				this.getRepository().getDirectory());
-		op.execute(null);
-	}
+    public void remove() throws IOException {
+        File repositoryDirectory = repository.getDirectory();
+        File repositoryParent = repositoryDirectory.getParentFile();
+        if (repositoryParent.exists()) {
+            FileUtils.delete(repositoryParent, FileUtils.RECURSIVE | FileUtils.RETRY);
+        }
+    }
 
-	/**
-	 * Disconnects provider from project
-	 * 
-	 * @param project
-	 * @throws CoreException
-	 */
-	public void disconnect(IProject project) throws CoreException {
-		Collection<IProject> projects = Collections.singleton(project
-				.getProject());
-		DisconnectProviderOperation disconnect = new DisconnectProviderOperation(
-				projects);
-		disconnect.execute(null);
-	}
+    /**
+     * Connect a project to this repository
+     * 
+     * @param project
+     * @throws CoreException
+     */
+    public void connect(IProject project) throws CoreException {
+        ConnectProviderOperation op = new ConnectProviderOperation(project, this.getRepository().getDirectory());
+        op.execute(null);
+    }
 
-	private DirCacheEntry getDirCacheEntry(String path) throws IOException {
-		String repoPath = getRepoRelativePath(path);
-		DirCache dc = DirCache.read(repository.getIndexFile(), repository.getFS());
+    /**
+     * Disconnects provider from project
+     * 
+     * @param project
+     * @throws CoreException
+     */
+    public void disconnect(IProject project) throws CoreException {
+        Collection<IProject> projects = Collections.singleton(project.getProject());
+        DisconnectProviderOperation disconnect = new DisconnectProviderOperation(projects);
+        disconnect.execute(null);
+    }
 
-		return dc.getEntry(repoPath);
-	}
+    private DirCacheEntry getDirCacheEntry(String path) throws IOException {
+        String repoPath = getRepoRelativePath(path);
+        DirCache dc = DirCache.read(repository.getIndexFile(), repository.getFS());
 
-	public TestRepository cloneRepository(File path) throws URISyntaxException, InvocationTargetException,
-			InterruptedException, IOException {
-		URIish uri = new URIish("file:///" + repository.getDirectory().toString());
-		CloneOperation clop =
-				new CloneOperation(uri, true, null, path, Constants.R_HEADS + Constants.MASTER,
-						Constants.DEFAULT_REMOTE_NAME, 0);
-		clop.run(null);
-		RepositoryCache repositoryCache = Activator.getDefault().getRepositoryCache();
-		Repository clonedRepository = repositoryCache
-				.lookupRepository(new File(path, Constants.DOT_GIT));
-		return new TestRepository(clonedRepository);
-	}
+        return dc.getEntry(repoPath);
+    }
 
-	public void setUserAndEmail(String user, String email) {
-		StoredConfig config = repository.getConfig();
-		config.setString(
-				ConfigConstants.CONFIG_USER_SECTION, null, ConfigConstants.CONFIG_KEY_NAME, user);
-		config.setString(
-				ConfigConstants.CONFIG_USER_SECTION, null, ConfigConstants.CONFIG_KEY_EMAIL, email);
-	}
+    public TestRepository cloneRepository(File path)
+            throws URISyntaxException, InvocationTargetException, InterruptedException, IOException {
+        URIish uri = new URIish("file:///" + repository.getDirectory().toString());
+        CloneOperation clop = new CloneOperation(uri, true, null, path, Constants.R_HEADS + Constants.MASTER, Constants.DEFAULT_REMOTE_NAME,
+                0);
+        clop.run(null);
+        RepositoryCache repositoryCache = Activator.getDefault().getRepositoryCache();
+        Repository clonedRepository = repositoryCache.lookupRepository(new File(path, Constants.DOT_GIT));
+        return new TestRepository(clonedRepository);
+    }
 
-	public void createMockSystemReader(IPath ceilingPath) {
-		MockSystemReader mockSystemReader = new MockSystemReader();
-		SystemReader.setInstance(mockSystemReader);
-		mockSystemReader.setProperty(Constants.GIT_CEILING_DIRECTORIES_KEY, ceilingPath.toOSString());
-	}
+    public void setUserAndEmail(String user, String email) {
+        StoredConfig config = repository.getConfig();
+        config.setString(ConfigConstants.CONFIG_USER_SECTION, null, ConfigConstants.CONFIG_KEY_NAME, user);
+        config.setString(ConfigConstants.CONFIG_USER_SECTION, null, ConfigConstants.CONFIG_KEY_EMAIL, email);
+    }
 
-	public File getGitDir() {
-		return gitDir;
-	}
+    public void createMockSystemReader(IPath ceilingPath) {
+        MockSystemReader mockSystemReader = new MockSystemReader();
+        SystemReader.setInstance(mockSystemReader);
+        mockSystemReader.setProperty(Constants.GIT_CEILING_DIRECTORIES_KEY, ceilingPath.toOSString());
+    }
 
-	public void addRemoteTo(String remoteName, Repository remoteRepository)
-			throws URISyntaxException, MalformedURLException,
-			IOException {
-		URIish uri = new URIish(remoteRepository.getDirectory().toURI().toURL());
-		addRemoteTo(remoteName, uri);
-	}
-	
-	public void addRemoteTo(String remoteName, String remoteUri)
-			throws URISyntaxException, IOException {
-		addRemoteTo(remoteName, new URIish(remoteUri));
-	}
-	
-	public void addRemoteTo(String remoteName, URIish remoteUri)
-			throws URISyntaxException, IOException {
-		StoredConfig config = repository.getConfig();
-		RemoteConfig remoteConfig = new RemoteConfig(config, remoteName);
-		remoteConfig.addURI(remoteUri);
-		remoteConfig.update(config);
-		config.save();
-	}
+    public File getGitDir() {
+        return gitDir;
+    }
 
-	public URIish getUri() throws MalformedURLException {
-		return new URIish(repository.getDirectory().toURI().toURL());
-	}
+    public void addRemoteTo(String remoteName, Repository remoteRepository) throws URISyntaxException, MalformedURLException, IOException {
+        URIish uri = new URIish(remoteRepository.getDirectory().toURI().toURL());
+        addRemoteTo(remoteName, uri);
+    }
+
+    public void addRemoteTo(String remoteName, String remoteUri) throws URISyntaxException, IOException {
+        addRemoteTo(remoteName, new URIish(remoteUri));
+    }
+
+    public void addRemoteTo(String remoteName, URIish remoteUri) throws URISyntaxException, IOException {
+        StoredConfig config = repository.getConfig();
+        RemoteConfig remoteConfig = new RemoteConfig(config, remoteName);
+        remoteConfig.addURI(remoteUri);
+        remoteConfig.update(config);
+        config.save();
+    }
+
+    public URIish getUri() throws MalformedURLException {
+        return new URIish(repository.getDirectory().toURI().toURL());
+    }
 
 }

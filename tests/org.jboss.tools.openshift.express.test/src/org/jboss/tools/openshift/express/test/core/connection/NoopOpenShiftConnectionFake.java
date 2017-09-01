@@ -27,58 +27,58 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class NoopOpenShiftConnectionFake implements IOpenShiftConnection {
 
-	@Override
-	public IUser getUser() throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public IUser getUser() throws OpenShiftException {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public List<IStandaloneCartridge> getStandaloneCartridges(boolean isObsolete) throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public List<IStandaloneCartridge> getStandaloneCartridges() throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public List<IStandaloneCartridge> getStandaloneCartridges(boolean isObsolete) throws OpenShiftException {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public ExecutorService getExecutorService() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public List<IStandaloneCartridge> getStandaloneCartridges() throws OpenShiftException {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public List<IEmbeddableCartridge> getEmbeddableCartridges(boolean includeObsolete) throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public ExecutorService getExecutorService() {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public List<IDomain> getDomains() throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public List<IEmbeddableCartridge> getEmbeddableCartridges(boolean includeObsolete) throws OpenShiftException {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public String getServer() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public List<ICartridge> getCartridges(boolean includeObsolete) throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public List<ICartridge> getCartridges() throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public List<IDomain> getDomains() throws OpenShiftException {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public List<IQuickstart> getQuickstarts() throws OpenShiftException {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public String getServer() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<ICartridge> getCartridges(boolean includeObsolete) throws OpenShiftException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<ICartridge> getCartridges() throws OpenShiftException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<IQuickstart> getQuickstarts() throws OpenShiftException {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -42,113 +42,106 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class EditEmbeddedCartridgesWizard extends Wizard {
 
-	private EmbeddedCartridgesWizardModel wizardModel;
-	private EmbeddedCartridgesWizardPage embeddedCartridgesWizardPage;
-	private IApplication application;
+    private EmbeddedCartridgesWizardModel wizardModel;
+    private EmbeddedCartridgesWizardPage embeddedCartridgesWizardPage;
+    private IApplication application;
 
-	public EditEmbeddedCartridgesWizard(IApplication application, ExpressConnection connection) {
-		Assert.isLegal(application != null);
-		
-		this.wizardModel = new EmbeddedCartridgesWizardModel(
-				new HashSet<ICartridge>(application.getEmbeddedCartridges())
-				, CollectionUtils.addTo(
-						// add code anything cartridge
-						(ICartridge) new CodeAnythingCartridge(),
-						new ArrayList<>(
-								CollectionUtils.addAllTo(
-										// add downloadable cartridges embedded to application
-										new ArrayList<ICartridge>(application.getEmbeddedCartridges()),
-										new HashSet<ICartridge>(connection.getEmbeddableCartridges()))))
-				, new ExistingApplicationProperties(application)
-				, application.getDomain()
-				, connection);
-		this.application = application;
-		setNeedsProgressMonitor(true);
-		setWindowTitle("Edit Embedded Cartridges");
-	}
+    public EditEmbeddedCartridgesWizard(IApplication application, ExpressConnection connection) {
+        Assert.isLegal(application != null);
 
-	@Override
-	public boolean performFinish() {
-		return processCartridges();
-	}
+        this.wizardModel = new EmbeddedCartridgesWizardModel(new HashSet<ICartridge>(application.getEmbeddedCartridges()),
+                CollectionUtils.addTo(
+                        // add code anything cartridge
+                        (ICartridge)new CodeAnythingCartridge(),
+                        new ArrayList<>(CollectionUtils.addAllTo(
+                                // add downloadable cartridges embedded to application
+                                new ArrayList<ICartridge>(application.getEmbeddedCartridges()),
+                                new HashSet<ICartridge>(connection.getEmbeddableCartridges())))),
+                new ExistingApplicationProperties(application), application.getDomain(), connection);
+        this.application = application;
+        setNeedsProgressMonitor(true);
+        setWindowTitle("Edit Embedded Cartridges");
+    }
 
-	public boolean processCartridges() {
-		try {
-			EmbedCartridgesJob job = 
-					new EmbedCartridgesJob(
-							new ArrayList<>(wizardModel.getCheckedEmbeddableCartridges()),
-							application);
-			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
-			if (!result.isOK()) {
-				safeRefreshSelectedEmbeddedCartridges();
-			} else {
-				openLogDialog(job.getAddedCartridges(), job.isTimeouted(result));
-			}
-			new FireExpressConnectionsChangedJob(wizardModel.getConnection()).schedule();
-			return result.isOK();
-		} catch (Exception e) {
-			String errorMessage = NLS.bind("Could not embed cartridge(s) for application {0}", application.getName());
-			IStatus status = ExpressUIActivator.createErrorStatus(errorMessage, e);
-			ErrorDialog.openError(getShell(), "Error while embedding cartridges",
-					errorMessage + ": " + StringUtils.null2emptyString(e.getMessage()), status);
-			return false;
-		}
-	}
+    @Override
+    public boolean performFinish() {
+        return processCartridges();
+    }
 
-	private void openLogDialog(final List<IEmbeddedCartridge> cartridges, final boolean isTimeouted) {
-		if (cartridges.size() == 0) {
-			return;
-		}
+    public boolean processCartridges() {
+        try {
+            EmbedCartridgesJob job = new EmbedCartridgesJob(new ArrayList<>(wizardModel.getCheckedEmbeddableCartridges()), application);
+            IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
+            if (!result.isOK()) {
+                safeRefreshSelectedEmbeddedCartridges();
+            } else {
+                openLogDialog(job.getAddedCartridges(), job.isTimeouted(result));
+            }
+            new FireExpressConnectionsChangedJob(wizardModel.getConnection()).schedule();
+            return result.isOK();
+        } catch (Exception e) {
+            String errorMessage = NLS.bind("Could not embed cartridge(s) for application {0}", application.getName());
+            IStatus status = ExpressUIActivator.createErrorStatus(errorMessage, e);
+            ErrorDialog.openError(getShell(), "Error while embedding cartridges",
+                    errorMessage + ": " + StringUtils.null2emptyString(e.getMessage()), status);
+            return false;
+        }
+    }
 
-		getShell().getDisplay().syncExec(new Runnable() {
+    private void openLogDialog(final List<IEmbeddedCartridge> cartridges, final boolean isTimeouted) {
+        if (cartridges.size() == 0) {
+            return;
+        }
 
-			@Override
-			public void run() {
-				new CreationLogDialog(getShell(), LogEntryFactory.create(cartridges, isTimeouted)).open();
-			}
-		});
-	}
+        getShell().getDisplay().syncExec(new Runnable() {
 
-	private void safeRefreshSelectedEmbeddedCartridges() {
-		getShell().getDisplay().syncExec(new Runnable() {
+            @Override
+            public void run() {
+                new CreationLogDialog(getShell(), LogEntryFactory.create(cartridges, isTimeouted)).open();
+            }
+        });
+    }
 
-			@Override
-			public void run() {
-				try {
-					embeddedCartridgesWizardPage.setCheckedEmbeddableCartridges(wizardModel.getEmbeddedCartridges());
-				} catch (Exception e) {
-					ExpressUIActivator.log(e);
-				}
-			}
-		});
-	}
+    private void safeRefreshSelectedEmbeddedCartridges() {
+        getShell().getDisplay().syncExec(new Runnable() {
 
-	@Override
-	public void addPages() {
-		addPage(this.embeddedCartridgesWizardPage = new EmbeddedCartridgesWizardPage(wizardModel, this));
-	}
-	
-	private static class ExistingApplicationProperties implements IApplicationProperties {
-		
-		private IApplication application;
+            @Override
+            public void run() {
+                try {
+                    embeddedCartridgesWizardPage.setCheckedEmbeddableCartridges(wizardModel.getEmbeddedCartridges());
+                } catch (Exception e) {
+                    ExpressUIActivator.log(e);
+                }
+            }
+        });
+    }
 
-		ExistingApplicationProperties(IApplication application) {
-			this.application = application;
-		}
+    @Override
+    public void addPages() {
+        addPage(this.embeddedCartridgesWizardPage = new EmbeddedCartridgesWizardPage(wizardModel, this));
+    }
 
-		@Override
-		public IStandaloneCartridge getStandaloneCartridge() {
-			return application.getCartridge();
-		}
-		
-		@Override
-		public ApplicationScale getApplicationScale() {
-			return application.getApplicationScale();
-		}
-		
-		@Override
-		public String getApplicationName() {
-			return application.getName();
-		}
-	}
+    private static class ExistingApplicationProperties implements IApplicationProperties {
+
+        private IApplication application;
+
+        ExistingApplicationProperties(IApplication application) {
+            this.application = application;
+        }
+
+        @Override
+        public IStandaloneCartridge getStandaloneCartridge() {
+            return application.getCartridge();
+        }
+
+        @Override
+        public ApplicationScale getApplicationScale() {
+            return application.getApplicationScale();
+        }
+
+        @Override
+        public String getApplicationName() {
+            return application.getName();
+        }
+    }
 }

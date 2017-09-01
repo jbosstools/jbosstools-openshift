@@ -40,7 +40,6 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPage;
 
 import com.openshift.restclient.model.IProject;
 
-
 /**
  * The deploy image wizard that allows you to deploy a docker image to openshift
  * with a reasonable set of openshift resources
@@ -50,172 +49,166 @@ import com.openshift.restclient.model.IProject;
  */
 public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParameters> {
 
-	private static final String TITLE = "Deploy Image to OpenShift";
+    private static final String TITLE = "Deploy Image to OpenShift";
 
-	public DeployImageWizard(IDockerConnection dockerConnection, IDockerImage image, Connection connection, IProject project, boolean isAuthorized) {
-		super(TITLE, new DeployImageWizardModel());
+    public DeployImageWizard(IDockerConnection dockerConnection, IDockerImage image, Connection connection, IProject project,
+            boolean isAuthorized) {
+        super(TITLE, new DeployImageWizardModel());
 
-		DeployImageWizardModel model = (DeployImageWizardModel)getModel();
-		if(dockerConnection != null || image != null) {
-			model.setDockerConnection(image != null ? image.getConnection() : dockerConnection);
-			if(image != null) {
-				model.setOriginatedFromDockerExplorer(true);
-				model.setImageName(getImageNameWithTag(image));
-			}
-		}
-		model.setStartedWithActiveConnection(isAuthorized);
-		model.setConnection(connection);
-		model.setProject(project);
-		
-		setNeedsProgressMonitor(true);
-	}
+        DeployImageWizardModel model = (DeployImageWizardModel)getModel();
+        if (dockerConnection != null || image != null) {
+            model.setDockerConnection(image != null ? image.getConnection() : dockerConnection);
+            if (image != null) {
+                model.setOriginatedFromDockerExplorer(true);
+                model.setImageName(getImageNameWithTag(image));
+            }
+        }
+        model.setStartedWithActiveConnection(isAuthorized);
+        model.setConnection(connection);
+        model.setProject(project);
 
-	private String getImageNameWithTag(IDockerImage image) {
-		String imageName = image.repo();
-		if(!image.tags().isEmpty()) {
-			TreeSet<String> tags = new TreeSet<>(image.tags());
-			imageName += ":" + tags.first();
-		}
-		return imageName;
-	}
+        setNeedsProgressMonitor(true);
+    }
 
-	@Override
-	public void addPages() {
-	    if (getModel().originatedFromDockerExplorer()
-				|| !((DeployImageWizardModel)getModel()).isStartedWithActiveConnection()) {
-	        addPage(new ConnectionWizardPage(this, getModel(), Connection.class));
-	    }
-		addPage(new DeployImagePage(this, getModel()));
-		addPage(new DeploymentConfigPage(this, getModel()));
-		addPage(new ServicesAndRoutingPage(this,  getModel()));
-		addPage(new ResourceLabelsPage(this,  getModel()));
-	}
+    private String getImageNameWithTag(IDockerImage image) {
+        String imageName = image.repo();
+        if (!image.tags().isEmpty()) {
+            TreeSet<String> tags = new TreeSet<>(image.tags());
+            imageName += ":" + tags.first();
+        }
+        return imageName;
+    }
 
-	@Override
-	public IWizardPage getStartingPage() {
-		if(((DeployImageWizardModel)getModel()).isStartedWithActiveConnection()) {
-			return getPage(DeployImagePage.DEPLOY_IMAGE_PAGE_NAME);
-		}
-		return super.getStartingPage();
-	}
+    @Override
+    public void addPages() {
+        if (getModel().originatedFromDockerExplorer() || !((DeployImageWizardModel)getModel()).isStartedWithActiveConnection()) {
+            addPage(new ConnectionWizardPage(this, getModel(), Connection.class));
+        }
+        addPage(new DeployImagePage(this, getModel()));
+        addPage(new DeploymentConfigPage(this, getModel()));
+        addPage(new ServicesAndRoutingPage(this, getModel()));
+        addPage(new ResourceLabelsPage(this, getModel()));
+    }
 
-	@Override
-	public boolean performFinish() {
-		// checks if we need to push the image, first
-		final Job job = getJobChain(getModel(), PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
-		job.addJobChangeListener(new JobChangeAdapter() {
-			@Override
-			public void done(IJobChangeEvent event) {
-				final IStatus status = event.getResult();
-				UsageStats.getInstance().newV3Application( getModel().getConnection().getHost(), isFailed(status));
-				super.done(event);
-			}
-		});
-		job.schedule();
-			
-		return true;
-	}
+    @Override
+    public IWizardPage getStartingPage() {
+        if (((DeployImageWizardModel)getModel()).isStartedWithActiveConnection()) {
+            return getPage(DeployImagePage.DEPLOY_IMAGE_PAGE_NAME);
+        }
+        return super.getStartingPage();
+    }
 
-	/**
-	 * Gets the Job to run as a chain of smaller jobs, depending on the use-case
-	 * @param model the wizard model
-	 * @param shell the current shell
-	 * @return
-	 */
-	private Job getJobChain(final IDeployImageParameters model, final Shell shell) {
-		final DeployImageJob deployJob = getDeployImageJob(getModel(), getShell());
-		final boolean pushImageToRegistry = model.isPushImageToRegistry();
-		if(pushImageToRegistry) {
-			final PushImageToRegistryJob pushImageToRegistryJob = getPushImageToRegistryJob(model);
-			return new JobChainBuilder(pushImageToRegistryJob).runWhenSuccessfullyDone(deployJob)
-					.runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true)).build();
-		}
-		return new JobChainBuilder(deployJob)
-				.runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true))
-				.build();
-	}
+    @Override
+    public boolean performFinish() {
+        // checks if we need to push the image, first
+        final Job job = getJobChain(getModel(), PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+        job.addJobChangeListener(new JobChangeAdapter() {
+            @Override
+            public void done(IJobChangeEvent event) {
+                final IStatus status = event.getResult();
+                UsageStats.getInstance().newV3Application(getModel().getConnection().getHost(), isFailed(status));
+                super.done(event);
+            }
+        });
+        job.schedule();
 
-	private static DeployImageJob getDeployImageJob(final IDeployImageParameters model, final Shell shell) {
-		final DeployImageJob deployJob = new DeployImageJob(model);
-		deployJob.addJobChangeListener(new JobChangeAdapter(){
+        return true;
+    }
 
-			@Override
-			public void done(IJobChangeEvent event) {
-				IStatus status = event.getResult();
-				if((JobUtils.isOk(status) || JobUtils.isWarning(status)) && !deployJob.getResources().isEmpty()) {
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							new ResourceSummaryDialog(
-									shell, 
-									deployJob.getResources(),
-									TITLE,
-									deployJob.getSummaryMessage()).open();
-						}
-					});
-					OpenShiftUIUtils.showOpenShiftExplorer();
-				}
-			}
-		});
-		return deployJob;
-	}
-	
-	private static PushImageToRegistryJob getPushImageToRegistryJob(final IDeployImageParameters model) {
-		final IDockerConnection dockerConnection = model.getDockerConnection();
-		final String imageName = model.getImageName();
-		final String deployProjectName = model.getProject().getName();
-		final IRegistryAccount registryAccount = new IRegistryAccount() {
-			
-			@Override
-			public String getServerAddress() {
-				return model.getTargetRegistryLocation();
-			}
-			
-			@Override
-			public String getUsername() {
-				return model.getTargetRegistryUsername();
-			}
-			
-			@Override
-			public char[] getPassword() {
-				return model.getTargetRegistryPassword().toCharArray();
-			}
-			
-			@Override
-			public String getEmail() {
-				return null;
-			}
-			
-			@Override
-			public List<IRepositoryTag> getTags(String arg0) throws DockerException {
-				return null;
-			}
-			
-			@Override
-			public boolean isVersion2() {
-				return false;
-			}
+    /**
+     * Gets the Job to run as a chain of smaller jobs, depending on the use-case
+     * @param model the wizard model
+     * @param shell the current shell
+     * @return
+     */
+    private Job getJobChain(final IDeployImageParameters model, final Shell shell) {
+        final DeployImageJob deployJob = getDeployImageJob(getModel(), getShell());
+        final boolean pushImageToRegistry = model.isPushImageToRegistry();
+        if (pushImageToRegistry) {
+            final PushImageToRegistryJob pushImageToRegistryJob = getPushImageToRegistryJob(model);
+            return new JobChainBuilder(pushImageToRegistryJob).runWhenSuccessfullyDone(deployJob)
+                    .runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true)).build();
+        }
+        return new JobChainBuilder(deployJob).runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true)).build();
+    }
 
-			@Override
-			public List<IDockerImageSearchResult> getImages(String arg0) throws DockerException {
-				return null;
-			}
-		}; 
-		return new PushImageToRegistryJob(dockerConnection, registryAccount, deployProjectName, imageName);
-	}
-	
-	/**
-	 * Checks if the given {@code status}
-	 * 
-	 * @param status
-	 *            the {@link IStatus} to check
-	 * @return <code>true</code> if the given status severity is
-	 *         {@link IStatus.OK} or {@link IStatus.WARNING}, <code>false</code>
-	 *         otherwise.
-	 */
-	public static boolean isFailed(IStatus status) {
-		return JobUtils.isOk(status) || JobUtils.isWarning(status);
-	}
+    private static DeployImageJob getDeployImageJob(final IDeployImageParameters model, final Shell shell) {
+        final DeployImageJob deployJob = new DeployImageJob(model);
+        deployJob.addJobChangeListener(new JobChangeAdapter() {
+
+            @Override
+            public void done(IJobChangeEvent event) {
+                IStatus status = event.getResult();
+                if ((JobUtils.isOk(status) || JobUtils.isWarning(status)) && !deployJob.getResources().isEmpty()) {
+                    Display.getDefault().syncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            new ResourceSummaryDialog(shell, deployJob.getResources(), TITLE, deployJob.getSummaryMessage()).open();
+                        }
+                    });
+                    OpenShiftUIUtils.showOpenShiftExplorer();
+                }
+            }
+        });
+        return deployJob;
+    }
+
+    private static PushImageToRegistryJob getPushImageToRegistryJob(final IDeployImageParameters model) {
+        final IDockerConnection dockerConnection = model.getDockerConnection();
+        final String imageName = model.getImageName();
+        final String deployProjectName = model.getProject().getName();
+        final IRegistryAccount registryAccount = new IRegistryAccount() {
+
+            @Override
+            public String getServerAddress() {
+                return model.getTargetRegistryLocation();
+            }
+
+            @Override
+            public String getUsername() {
+                return model.getTargetRegistryUsername();
+            }
+
+            @Override
+            public char[] getPassword() {
+                return model.getTargetRegistryPassword().toCharArray();
+            }
+
+            @Override
+            public String getEmail() {
+                return null;
+            }
+
+            @Override
+            public List<IRepositoryTag> getTags(String arg0) throws DockerException {
+                return null;
+            }
+
+            @Override
+            public boolean isVersion2() {
+                return false;
+            }
+
+            @Override
+            public List<IDockerImageSearchResult> getImages(String arg0) throws DockerException {
+                return null;
+            }
+        };
+        return new PushImageToRegistryJob(dockerConnection, registryAccount, deployProjectName, imageName);
+    }
+
+    /**
+     * Checks if the given {@code status}
+     * 
+     * @param status
+     *            the {@link IStatus} to check
+     * @return <code>true</code> if the given status severity is
+     *         {@link IStatus.OK} or {@link IStatus.WARNING}, <code>false</code>
+     *         otherwise.
+     */
+    public static boolean isFailed(IStatus status) {
+        return JobUtils.isOk(status) || JobUtils.isWarning(status);
+    }
 
     @Override
     public void dispose() {

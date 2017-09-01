@@ -23,47 +23,46 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  * @author Jeff Cantrill
  * @author Andre Dietisheim
  */
-public class ConnectionPersistency extends AbstractConnectionPersistency<Connection>{
-	
-	private final IOpenShiftCorePreferences preferences;
-	
-	public ConnectionPersistency() {
-		this(OpenShiftCorePreferences.INSTANCE);
-	}
-	
-	protected ConnectionPersistency(IOpenShiftCorePreferences preferences) {
-		this.preferences = preferences;
-	}
-	
-	@Override
-	protected String[] loadPersisted() {
-		return preferences.loadConnections();
-	}
+public class ConnectionPersistency extends AbstractConnectionPersistency<Connection> {
 
-	@Override
-	protected void persist(Map<String, Connection> connections) {
-		preferences.saveConnections(connections.keySet().toArray(new String[] {}));
-		for (Entry<String, Connection> entry : connections.entrySet()) {
-			preferences.saveExtProperties(entry.getKey(), entry.getValue().getExtendedProperties());
-		}
-	}
+    private final IOpenShiftCorePreferences preferences;
 
-	@Override
-	protected void logError(String message, Exception e) {
-		OpenShiftCoreActivator.pluginLog().logError(message, e);
-	}
+    public ConnectionPersistency() {
+        this(OpenShiftCorePreferences.INSTANCE);
+    }
 
-	@Override
-	protected Connection createConnection(ConnectionURL connectionURL) {
-		Connection connection = new ConnectionFactory().create(
-				connectionURL.getHostWithScheme());
-		if (connection == null) {
-			return null;
-		} else {
-			connection.setUsername(connectionURL.getUsername());
-			connection.setAuthScheme(preferences.loadScheme(connectionURL.toString()));
-			connection.setExtendedProperties(preferences.loadExtProperties(connectionURL.toString()));
-			return connection;
-		}
-	}
+    protected ConnectionPersistency(IOpenShiftCorePreferences preferences) {
+        this.preferences = preferences;
+    }
+
+    @Override
+    protected String[] loadPersisted() {
+        return preferences.loadConnections();
+    }
+
+    @Override
+    protected void persist(Map<String, Connection> connections) {
+        preferences.saveConnections(connections.keySet().toArray(new String[] {}));
+        for (Entry<String, Connection> entry : connections.entrySet()) {
+            preferences.saveExtProperties(entry.getKey(), entry.getValue().getExtendedProperties());
+        }
+    }
+
+    @Override
+    protected void logError(String message, Exception e) {
+        OpenShiftCoreActivator.pluginLog().logError(message, e);
+    }
+
+    @Override
+    protected Connection createConnection(ConnectionURL connectionURL) {
+        Connection connection = new ConnectionFactory().create(connectionURL.getHostWithScheme());
+        if (connection == null) {
+            return null;
+        } else {
+            connection.setUsername(connectionURL.getUsername());
+            connection.setAuthScheme(preferences.loadScheme(connectionURL.toString()));
+            connection.setExtendedProperties(preferences.loadExtProperties(connectionURL.toString()));
+            return connection;
+        }
+    }
 }

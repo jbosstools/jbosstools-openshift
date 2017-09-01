@@ -89,12 +89,16 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	public @interface RequiredService {
 		/** a connection url as specified in {@link ConnectionURL}. ex. https://adietish@10.1.2.2.:8443*/
 		String connectionURL() default StringUtils.EMPTY;
+
 		/** the name of the project that the service (specified below) should exist in */
 		String project() default StringUtils.EMPTY;
+
 		/** the name of the service that should exist, triggering the use of the template (specified below) otherwise */
 		String service();
+
 		/** the name of a template, URL of a remote template, or path to a local template file that should be used to create the service if it doesn't exist */
 		String template();
+
 		/** whether the resources created by the requirement should be automatically deleted after test class, default false */
 		boolean cleanup() default false;
 	}
@@ -114,11 +118,11 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		this.connection = ConnectionUtils.getConnectionOrDefault(serviceSpec.connectionURL());
 		assertNotNull(NLS.bind("No connection for {0} exists", serviceSpec.connectionURL()), connection);
 		final String projectName = TestUtils.getValueOrDefault(serviceSpec.project(), DatastoreOS3.TEST_PROJECT);
-		assertTrue(NLS.bind("No project {0} exists on server {1}", projectName, connection.getHost()), 
+		assertTrue(NLS.bind("No project {0} exists on server {1}", projectName, connection.getHost()),
 				OpenShift3NativeResourceUtils.hasProject(projectName, connection));
 		final String serviceName = serviceSpec.service();
 		final String templateName = serviceSpec.template();
-		
+
 		IResourceFactory factory = new ClientBuilder(connection.getHost()).build().getResourceFactory();
 		try {
 			// try if template comes from a URL
@@ -127,21 +131,19 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		} catch (MalformedURLException ex) {
 			// template is not a URL, try a path to local file instead
 			if (new File(templateName).exists()) {
-				try {	
+				try {
 					template = factory.create(new FileInputStream(templateName));
 				} catch (FileNotFoundException e) {
 					throw new RedDeerException("Unable to read local template", e);
 				}
 			} else {
 				// it is not an external template
-				template = connection.getResource(
-						ResourceKind.TEMPLATE, OpenShiftResources.OPENSHIFT_PROJECT, templateName);
+				template = connection.getResource(ResourceKind.TEMPLATE, OpenShiftResources.OPENSHIFT_PROJECT, templateName);
 			}
 		} catch (IOException ex) {
 			throw new RedDeerException("Unable to read template from URL", ex);
 		}
-		
-		
+
 		assertNotNull(template);
 		this.service = getOrCreateService(projectName, serviceName, template);
 
@@ -150,32 +152,27 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	}
 
 	private void waitForResources(final String serviceName, final String projectName, final IService service) {
-		new WaitUntil(
-				new ServicePodsExist(serviceName, projectName, connection)
-				, TimePeriod.VERY_LONG);
+		new WaitUntil(new ServicePodsExist(serviceName, projectName, connection), TimePeriod.VERY_LONG);
 
-		new WaitUntil(
-				new ResourceExists(ResourceKind.REPLICATION_CONTROLLER, new BaseMatcher<List<IResource>>() {
+		new WaitUntil(new ResourceExists(ResourceKind.REPLICATION_CONTROLLER, new BaseMatcher<List<IResource>>() {
 
-					@Override
-					public boolean matches(Object item) {
-						if (!(item instanceof List)) {
-							return false;
-						}
-						@SuppressWarnings("unchecked")
-						List<IReplicationController> resources = (List<IReplicationController>) item;
-						if (resources.isEmpty()) {
-							return false;
-						}
-						return ResourceUtils.getReplicationControllerFor(service, resources) != null;
-					}
-
-					@Override
-					public void describeTo(Description description) {
-					}
+			@Override
+			public boolean matches(Object item) {
+				if (!(item instanceof List)) {
+					return false;
 				}
-				, projectName, connection),
-				TIMEPERIOD_WAIT_FOR_BUILD);
+				@SuppressWarnings("unchecked")
+				List<IReplicationController> resources = (List<IReplicationController>) item;
+				if (resources.isEmpty()) {
+					return false;
+				}
+				return ResourceUtils.getReplicationControllerFor(service, resources) != null;
+			}
+
+			@Override
+			public void describeTo(Description description) {
+			}
+		}, projectName, connection), TIMEPERIOD_WAIT_FOR_BUILD);
 	}
 
 	/**
@@ -191,47 +188,44 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	 */
 	private void waitForUI(final String serviceName, final String projectName) {
 		// wait for service to appear in UI
-		new WaitUntil(
-				new AbstractWaitCondition() {
+		new WaitUntil(new AbstractWaitCondition() {
 
-					@Override
-					public boolean test() {
-						OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-						explorer.open();
-						OpenShift3Connection os3Connection = explorer.getOpenShift3Connection(connection);
-						assertThat(os3Connection, not(nullValue()));
-						OpenShiftProject os3Project = os3Connection.getProject(projectName);
-						assertThat(os3Project, not(nullValue()));
-						boolean serviceExists = false;
-						try {
-							serviceExists =  os3Project.getService(serviceName) != null;
-						} catch (RedDeerException e) {
-							// catched intentionnally
-							System.err.println(e);
-						}
-						/*
-						 * WORKAROUND: UI takes extensive amount of time to notice resource changes
-						 * -> refresh tree to force it to see changes
-						 */
-						if (!serviceExists) {
-							os3Project.refresh();
-						}
-						return serviceExists;
-					}}
-				, TimePeriod.VERY_LONG);
+			@Override
+			public boolean test() {
+				OpenShiftExplorerView explorer = new OpenShiftExplorerView();
+				explorer.open();
+				OpenShift3Connection os3Connection = explorer.getOpenShift3Connection(connection);
+				assertThat(os3Connection, not(nullValue()));
+				OpenShiftProject os3Project = os3Connection.getProject(projectName);
+				assertThat(os3Project, not(nullValue()));
+				boolean serviceExists = false;
+				try {
+					serviceExists = os3Project.getService(serviceName) != null;
+				} catch (RedDeerException e) {
+					// catched intentionnally
+					System.err.println(e);
+				}
+				/*
+				 * WORKAROUND: UI takes extensive amount of time to notice resource changes
+				 * -> refresh tree to force it to see changes
+				 */
+				if (!serviceExists) {
+					os3Project.refresh();
+				}
+				return serviceExists;
+			}
+		}, TimePeriod.VERY_LONG);
 
 		// wait for replication controller to appear in UI
 		List<IReplicationController> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespace());
 		IReplicationController serviceRc = ResourceUtils.getReplicationControllerFor(service, rcs);
 		assertThat(serviceRc, not(nullValue()));
-		new WaitUntil(
-				new OpenShiftResourceExists(Resource.DEPLOYMENT, containsString(serviceRc.getName()), ResourceState.UNSPECIFIED, projectName)
-				, TimePeriod.VERY_LONG);
+		new WaitUntil(new OpenShiftResourceExists(Resource.DEPLOYMENT, containsString(serviceRc.getName()), ResourceState.UNSPECIFIED,
+				projectName), TimePeriod.VERY_LONG);
 	}
 
 	private IService getOrCreateService(String projectName, String serviceName, ITemplate template) {
-		IService service = OpenShift3NativeResourceUtils.safeGetResource(
-				ResourceKind.SERVICE, serviceName, projectName, connection);
+		IService service = OpenShift3NativeResourceUtils.safeGetResource(ResourceKind.SERVICE, serviceName, projectName, connection);
 		if (service == null) {
 			service = createService(serviceName, template, projectName, connection);
 		}
@@ -239,7 +233,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	}
 
 	private IService createService(String serviceName, ITemplate template, String projectName, Connection connection) {
-		
+
 		LOGGER.debug(NLS.bind("Creating service in project {0} on server {1} using template {2}",
 				new Object[] { projectName, connection.getHost(), template.getName() }));
 		IProject project = OpenShift3NativeResourceUtils.getProject(projectName, connection);
@@ -248,12 +242,8 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		CreateApplicationFromTemplateJob job = new CreateApplicationFromTemplateJob(project, template);
 		job.schedule();
 
-		new WaitWhile(
-				new JobIsRunning(new Matcher[] { CoreMatchers.sameInstance(job) }), 
-				TimePeriod.LONG);
-		new WaitUntil(
-				new NamedResourceExist(ResourceKind.SERVICE, serviceName, projectName, connection),
-				TimePeriod.VERY_LONG);
+		new WaitWhile(new JobIsRunning(new Matcher[] { CoreMatchers.sameInstance(job) }), TimePeriod.LONG);
+		new WaitUntil(new NamedResourceExist(ResourceKind.SERVICE, serviceName, projectName, connection), TimePeriod.VERY_LONG);
 
 		return connection.getResource(ResourceKind.SERVICE, projectName, serviceName);
 	}
@@ -268,11 +258,11 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		if (serviceSpec.cleanup()) {
 			String projectName = TestUtils.getValueOrDefault(serviceSpec.project(), DatastoreOS3.TEST_PROJECT);
 			final IProject project = OpenShift3NativeResourceUtils.getProject(projectName, connection);
-			
+
 			IProjectTemplateProcessing capability = project.getCapability(IProjectTemplateProcessing.class);
-			ITemplate processed = capability.process(template);			
-			
-			for(IResource resource : processed.getObjects()) {
+			ITemplate processed = capability.process(template);
+
+			for (IResource resource : processed.getObjects()) {
 				IResource res = connection.getResource(resource.getKind(), projectName, resource.getName());
 				try {
 					connection.deleteResource(res);
@@ -285,9 +275,9 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 			cleanResources(connection, ResourceKind.BUILD, project, template);
 			cleanResources(connection, ResourceKind.REPLICATION_CONTROLLER, project, template);
 			cleanResources(connection, ResourceKind.POD, project, template);
-			
-			new WaitWhile(new AbstractWaitCondition() {				
-				
+
+			new WaitWhile(new AbstractWaitCondition() {
+
 				@Override
 				public boolean test() {
 					for (IResource resource : project.getResources(ResourceKind.POD)) {
@@ -297,12 +287,12 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 					}
 					return false;
 				}
-				
+
 				@Override
 				public String description() {
 					return "at least one application pod is running";
 				}
-				
+
 			}, TimePeriod.LONG);
 			new OpenShiftExplorerView().getOpenShift3Connection(connection).refresh();
 		}
@@ -311,17 +301,16 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 	public IService getService() {
 		return service;
 	}
-	
+
 	public IReplicationController getReplicationController() {
-		if (service == null
-				|| connection == null) {
+		if (service == null || connection == null) {
 			return null;
 		}
 		List<IReplicationController> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespace());
 		IReplicationController rc = ResourceUtils.getReplicationControllerFor(service, rcs);
 		return rc;
 	}
-	
+
 	private void cleanResources(Connection connection, String kind, IProject project, ITemplate template) {
 		for (IResource resource : project.getResources(kind)) {
 			if (resource.getName().startsWith(template.getName())) {

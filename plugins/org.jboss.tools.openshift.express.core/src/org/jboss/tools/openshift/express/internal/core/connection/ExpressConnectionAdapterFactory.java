@@ -25,45 +25,45 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  */
 public class ExpressConnectionAdapterFactory implements IAdapterFactory {
 
-	@Override
-	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
-		if (adapterType != ExpressConnection.class) {
-			return null;
-		}
+    @Override
+    public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
+        if (adapterType != ExpressConnection.class) {
+            return null;
+        }
 
-		ExpressConnection connection = null;
-		if (adaptableObject instanceof ExpressConnection) {
-			connection = (ExpressConnection) adaptableObject;
-		} else if (adaptableObject instanceof IDomain) {
-			IDomain domain = (IDomain) adaptableObject;
-			connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
-		} else if (adaptableObject instanceof IUser) {
-			IUser user = (IUser) adaptableObject;
-			connection = ExpressConnectionUtils.getByResource(user, ConnectionsRegistrySingleton.getInstance());
-		} else if (adaptableObject instanceof IApplication) {
-			IApplication application = (IApplication) adaptableObject;
-			connection = getConnection(application);
-		} else if (adaptableObject instanceof IEmbeddedCartridge) {
-			IEmbeddedCartridge embeddedCartridge = (IEmbeddedCartridge) adaptableObject;
-			IApplication application = embeddedCartridge.getApplication();
-			if (application != null) {				
-				connection = getConnection(application);
-			}
-		}
-		return connection;
-	}
+        ExpressConnection connection = null;
+        if (adaptableObject instanceof ExpressConnection) {
+            connection = (ExpressConnection)adaptableObject;
+        } else if (adaptableObject instanceof IDomain) {
+            IDomain domain = (IDomain)adaptableObject;
+            connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
+        } else if (adaptableObject instanceof IUser) {
+            IUser user = (IUser)adaptableObject;
+            connection = ExpressConnectionUtils.getByResource(user, ConnectionsRegistrySingleton.getInstance());
+        } else if (adaptableObject instanceof IApplication) {
+            IApplication application = (IApplication)adaptableObject;
+            connection = getConnection(application);
+        } else if (adaptableObject instanceof IEmbeddedCartridge) {
+            IEmbeddedCartridge embeddedCartridge = (IEmbeddedCartridge)adaptableObject;
+            IApplication application = embeddedCartridge.getApplication();
+            if (application != null) {
+                connection = getConnection(application);
+            }
+        }
+        return connection;
+    }
 
-	private ExpressConnection getConnection(IApplication application) {
-		IDomain domain = application.getDomain();
-		if (domain == null) {
-			return null;
-		}
-		return ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
-	}
+    private ExpressConnection getConnection(IApplication application) {
+        IDomain domain = application.getDomain();
+        if (domain == null) {
+            return null;
+        }
+        return ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
+    }
 
-	@Override
-	public Class<?>[] getAdapterList() {
-		return new Class[] { ExpressConnection.class };
-	}
+    @Override
+    public Class<?>[] getAdapterList() {
+        return new Class[] { ExpressConnection.class };
+    }
 
 }

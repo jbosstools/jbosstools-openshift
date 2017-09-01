@@ -17,18 +17,18 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
  */
 public interface IConnectionAware<C extends IConnection> {
 
-	public static final String PROPERTY_CONNECTION = "connection";
+    public static final String PROPERTY_CONNECTION = "connection";
 
-	public C getConnection();
+    public C getConnection();
 
-	public boolean hasConnection();
-	
-	public void setConnection(C connection);
-	
-	/**
-	 * A context that is useful to connection editors
-	 * @return
-	 */
-	Object getContext();
+    public boolean hasConnection();
+
+    public void setConnection(C connection);
+
+    /**
+     * A context that is useful to connection editors
+     * @return
+     */
+    Object getContext();
 
 }

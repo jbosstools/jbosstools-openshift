@@ -53,285 +53,280 @@ import com.openshift.restclient.model.template.ITemplate;
  * @author jeff.cantrill
  *
  */
-public class ApplicationSourceFromTemplateModel 
-	extends ResourceLabelsPageModel 
-	implements IResourceDetailsModel, ITemplateParametersPageModel, IApplicationSourceModel {
+public class ApplicationSourceFromTemplateModel extends ResourceLabelsPageModel
+        implements IResourceDetailsModel, ITemplateParametersPageModel, IApplicationSourceModel {
 
-	//intentionally package local, facilitates refresh of widgets in TemplateParametersPage
-	static final String PROPERTY_MODIFIED_PARAMETER = "modifiedParameter";
-	
-	private IProject project;
-	private ITemplate template;
-	private List<IParameter> parameters = new ArrayList<>();
-	private IParameter selectedParameter;
-	private Map<String, String> originalValueMap;
-	private Collection<IResource> items = new ArrayList<>(); 
-	private org.eclipse.core.resources.IProject eclipseProject;
+    //intentionally package local, facilitates refresh of widgets in TemplateParametersPage
+    static final String PROPERTY_MODIFIED_PARAMETER = "modifiedParameter";
 
-	@Override
-	public IResourcesModelJob createFinishJob() {
-		return new AppFromTemplateJob();
-	}
-	
-	class AppFromTemplateJob implements IResourcesModelJob{
-		
-		private final CreateApplicationFromTemplateJob job;
-		
-		AppFromTemplateJob(){
-			job = new CreateApplicationFromTemplateJob(
-					project,
-					template,
-					getParameters(),
-					getLabels());
-		}
-		
-		@Override
-		public Collection<IResource> getResources() {
-			return job.getResources();
-		}
-		
-		@Override
-		public Runnable getSummaryRunnable(final Shell shell) {
-			return new Runnable() {
-				@Override
-				public void run() {
-					final String message = NLS.bind(
-							"Results of creating the resources from the {0} template.", 
-							template.getName());
-					new NewApplicationSummaryFromTemplateDialog(shell, job, message).open();
-				}
-			};
-		}
-		
-		@Override
-		public Job getJob() {
-			return job;
-		}
-		
-		@Override
-		public DelegatingProgressMonitor getDelegatingProgressMonitor() {
-			return job.getDelegatingProgressMonitor();
-		}
-		
-		@Override
-		public void addJobChangeListener(IJobChangeListener listener) {
-			job.addJobChangeListener(listener);
-		}
-	}
+    private IProject project;
+    private ITemplate template;
+    private List<IParameter> parameters = new ArrayList<>();
+    private IParameter selectedParameter;
+    private Map<String, String> originalValueMap;
+    private Collection<IResource> items = new ArrayList<>();
+    private org.eclipse.core.resources.IProject eclipseProject;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		switch(evt.getPropertyName()) {
-		case IResourceLabelsPageModel.PROPERTY_LABELS:
-			setLabels((List<Label>) evt.getNewValue());
-			break;
-		case IApplicationSourceListPageModel.PROPERTY_PROJECT:
-			this.project = (IProject) evt.getNewValue();
-			break;
-		case IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE:
-			handleSelectedAppSource(evt);
-			break;
-		case IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT:
-			handleEclipseProject(evt);
-			break;
-		}
-	}
-	
-	private void handleSelectedAppSource(PropertyChangeEvent evt) {
-		if(evt.getNewValue() instanceof IApplicationSource
-				&& ResourceKind.TEMPLATE.equals(((IApplicationSource) evt.getNewValue()).getKind())){
-			IApplicationSource source = (IApplicationSource) evt.getNewValue();
-			ITemplate newTemplate = (ITemplate) source.getSource();
-			if (!Objects.equals(newTemplate, this.template)) {
-				this.template = newTemplate;
-				updateTemplateParameters(newTemplate);
-			}
-		} 
-	}
-	private void handleEclipseProject(PropertyChangeEvent evt) {
-		if(evt.getNewValue() instanceof org.eclipse.core.resources.IProject) {
-			this.eclipseProject = (org.eclipse.core.resources.IProject) evt.getNewValue();
-			updateTemplateParameters(template);
-		} 
-	}
+    @Override
+    public IResourcesModelJob createFinishJob() {
+        return new AppFromTemplateJob();
+    }
 
-	@Override
-	public Collection<IResource> getItems() {
-		return items;
-	}
+    class AppFromTemplateJob implements IResourcesModelJob {
 
-	private void setItems(Collection<IResource> items) {
-		firePropertyChange(PROPERTY_ITEMS, this.items, this.items = items);
-	}
+        private final CreateApplicationFromTemplateJob job;
 
-	private void updateTemplateParameters(ITemplate template) {
-		if (template == null) {
-			return;
-		}
-		setParameters(template.getParameters().values());
-		setItems(template.getObjects());
-		setLabels(template.getObjectLabels());
-	}
+        AppFromTemplateJob() {
+            job = new CreateApplicationFromTemplateJob(project, template, getParameters(), getLabels());
+        }
 
-	@Override
-	public List<IParameter> getParameters() {
-		return parameters;
-	}
+        @Override
+        public Collection<IResource> getResources() {
+            return job.getResources();
+        }
 
-	public boolean isParameterModified(IParameter param) {
-		return param != null && originalValueMap != null
-			&& !Objects.equals(param.getValue(), originalValueMap.get(param.getName()));
-	}
+        @Override
+        public Runnable getSummaryRunnable(final Shell shell) {
+            return new Runnable() {
+                @Override
+                public void run() {
+                    final String message = NLS.bind("Results of creating the resources from the {0} template.", template.getName());
+                    new NewApplicationSummaryFromTemplateDialog(shell, job, message).open();
+                }
+            };
+        }
 
-	@Override
-	public void setParameters(Collection<IParameter> parameters) {
-		List<IParameter> oldParameters = new ArrayList<>(this.parameters);
-		if (parameters == null) {
-			this.parameters.clear();
-		} else {
-			this.originalValueMap = toMap(parameters);
-			List<IParameter> newParameters = new ArrayList<>();
-			newParameters.addAll(injectProjectParameters(eclipseProject, parameters));
-			this.parameters.clear();
-			this.parameters.addAll(newParameters);
-			Collections.sort(this.parameters, new TemplateParameterViewerUtils.ParameterNameComparator());
-		}
-		firePropertyChange(PROPERTY_PARAMETERS, oldParameters, this.parameters);
+        @Override
+        public Job getJob() {
+            return job;
+        }
 
-		// update selected parameter
-		setSelectedParameter(getSelectedParameterOrDefault());
-	}
+        @Override
+        public DelegatingProgressMonitor getDelegatingProgressMonitor() {
+            return job.getDelegatingProgressMonitor();
+        }
 
-	private Map<String, String> toMap(Collection<IParameter> parameters) {
-		Map<String, String> paramsMap = new HashMap<>();
-		if (parameters != null) {
-		  parameters.forEach(p -> paramsMap.put(p.getName(), p.getValue()));
-		}
-		return paramsMap;
-	}
+        @Override
+        public void addJobChangeListener(IJobChangeListener listener) {
+            job.addJobChangeListener(listener);
+        }
+    }
 
-	private Collection<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project, Collection<IParameter> originalParameters) {
-		if (originalParameters == null || originalParameters.isEmpty()) {
-			return originalParameters;
-		}
-		Map<String, String> projectParams = getProjectParameters(project);
+    @SuppressWarnings("unchecked")
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        switch (evt.getPropertyName()) {
+        case IResourceLabelsPageModel.PROPERTY_LABELS:
+            setLabels((List<Label>)evt.getNewValue());
+            break;
+        case IApplicationSourceListPageModel.PROPERTY_PROJECT:
+            this.project = (IProject)evt.getNewValue();
+            break;
+        case IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE:
+            handleSelectedAppSource(evt);
+            break;
+        case IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT:
+            handleEclipseProject(evt);
+            break;
+        }
+    }
 
-		originalParameters = originalParameters.stream().map(p -> { 
-			String value = projectParams.get(p.getName());
-			if (value != null) {
-			    p = p.clone();
-				p.setValue(value);
-			}
-			return p;
-		}).collect(Collectors.toList());
+    private void handleSelectedAppSource(PropertyChangeEvent evt) {
+        if (evt.getNewValue() instanceof IApplicationSource
+                && ResourceKind.TEMPLATE.equals(((IApplicationSource)evt.getNewValue()).getKind())) {
+            IApplicationSource source = (IApplicationSource)evt.getNewValue();
+            ITemplate newTemplate = (ITemplate)source.getSource();
+            if (!Objects.equals(newTemplate, this.template)) {
+                this.template = newTemplate;
+                updateTemplateParameters(newTemplate);
+            }
+        }
+    }
 
-		return originalParameters;
-	}
+    private void handleEclipseProject(PropertyChangeEvent evt) {
+        if (evt.getNewValue() instanceof org.eclipse.core.resources.IProject) {
+            this.eclipseProject = (org.eclipse.core.resources.IProject)evt.getNewValue();
+            updateTemplateParameters(template);
+        }
+    }
 
-	private Map<String, String> getProjectParameters(org.eclipse.core.resources.IProject project) {
-		if(project == null) {
-			return Collections.emptyMap();
-		}
+    @Override
+    public Collection<IResource> getItems() {
+        return items;
+    }
 
-		Map<String,String> projectParams = new HashMap<>();
-		String gitRepo = getGitRepo(project);
-		if (gitRepo != null) {
-			projectParams.put(PARAMETER_SOURCE_REPOSITORY_URL, gitRepo);
-			projectParams.put(PARAMETER_GIT_URI, gitRepo);//legacy key
-			
-			String branch = getGitBranch(project);
-			projectParams.put("SOURCE_REPOSITORY_REF", branch);
-			projectParams.put("GIT_REF", branch);//legacy key
-			
-			//Setting the context dir is a really bad idea if we're dealing with a multi module project
-			//Better let the user do it manually if needed.
-			//String contextDir = getDefaultContextDir(project);
-			String contextDir = StringUtils.EMPTY;
-			projectParams.put("CONTEXT_DIR", contextDir);
-			projectParams.put("GIT_CONTEXT_DIR", contextDir);//legacy key
-		}
-		return projectParams;
-	}
+    private void setItems(Collection<IResource> items) {
+        firePropertyChange(PROPERTY_ITEMS, this.items, this.items = items);
+    }
 
-	private String getGitBranch(org.eclipse.core.resources.IProject project) {
-		try {
-			return StringUtils.defaultString(EGitUtils.getCurrentBranch(project));
-		} catch (CoreException e) {
-			throw new OpenShiftException(e, NLS.bind("Could not determine the default Git branch for \"{0}\"", project.getName()));
-		}
-	}
+    private void updateTemplateParameters(ITemplate template) {
+        if (template == null) {
+            return;
+        }
+        setParameters(template.getParameters().values());
+        setItems(template.getObjects());
+        setLabels(template.getObjectLabels());
+    }
 
-	private String getGitRepo(org.eclipse.core.resources.IProject project) {
-		try {
-			return StringUtils.defaultString(EGitUtils.getDefaultRemoteRepo(project));
-		} catch (CoreException e) {
-			throw new OpenShiftException(e, NLS.bind("Could not determine the default remote Git repository for \"{0}\"", project.getName()));
-		}
-	}
+    @Override
+    public List<IParameter> getParameters() {
+        return parameters;
+    }
 
-	@Override
-	public IParameter getSelectedParameter() {
-		return this.selectedParameter;
-	}
+    public boolean isParameterModified(IParameter param) {
+        return param != null && originalValueMap != null && !Objects.equals(param.getValue(), originalValueMap.get(param.getName()));
+    }
 
-	private IParameter getSelectedParameterOrDefault() {
-		if (selectedParameter == null
-				|| !parameters.contains(selectedParameter)) {
-			if (CollectionUtils.isEmpty(parameters)) {
-				return null;
-			} else {
-				return parameters.get(0);
-			}
-		} else {
-			return selectedParameter;
-		}
-	}
+    @Override
+    public void setParameters(Collection<IParameter> parameters) {
+        List<IParameter> oldParameters = new ArrayList<>(this.parameters);
+        if (parameters == null) {
+            this.parameters.clear();
+        } else {
+            this.originalValueMap = toMap(parameters);
+            List<IParameter> newParameters = new ArrayList<>();
+            newParameters.addAll(injectProjectParameters(eclipseProject, parameters));
+            this.parameters.clear();
+            this.parameters.addAll(newParameters);
+            Collections.sort(this.parameters, new TemplateParameterViewerUtils.ParameterNameComparator());
+        }
+        firePropertyChange(PROPERTY_PARAMETERS, oldParameters, this.parameters);
 
-	@Override
-	public void setSelectedParameter(IParameter parameter) {
-		firePropertyChange(PROPERTY_SELECTED_PARAMETER, this.selectedParameter, this.selectedParameter = parameter);
-	}
+        // update selected parameter
+        setSelectedParameter(getSelectedParameterOrDefault());
+    }
 
-	@Override
-	public void updateParameterValue(IParameter param, String value) {
-		param.setValue(value);
-		firePropertyChange(PROPERTY_MODIFIED_PARAMETER, null, param);
-		//Let's flip the selection to cause refresh of the state of buttons.
-		//Otherwise, we would have to introduce more properties and keep there state.
-		IParameter s = selectedParameter;
-		setSelectedParameter(null);
-		setSelectedParameter(s);
-	}
+    private Map<String, String> toMap(Collection<IParameter> parameters) {
+        Map<String, String> paramsMap = new HashMap<>();
+        if (parameters != null) {
+            parameters.forEach(p -> paramsMap.put(p.getName(), p.getValue()));
+        }
+        return paramsMap;
+    }
 
-	@Override
-	public void resetParameter(IParameter param) {
-		if (param != null && !Objects.equals(param.getValue(), originalValueMap.get(param.getName()))) {
-			updateParameterValue(param, originalValueMap.get(param.getName()));
-		}
-	}
+    private Collection<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project,
+            Collection<IParameter> originalParameters) {
+        if (originalParameters == null || originalParameters.isEmpty()) {
+            return originalParameters;
+        }
+        Map<String, String> projectParams = getProjectParameters(project);
 
-	private void setLabels(Map<String, String> labelMap) {
-		if(labelMap == null) return;
-		List<Label> labels =  new ArrayList<>(labelMap.size());
-		for (Entry<String,String> entry : labelMap.entrySet()) {
-			labels.add(new Label(entry.getKey(), entry.getValue()));
-		}
-		setLabels(labels);
-	}
+        originalParameters = originalParameters.stream().map(p -> {
+            String value = projectParams.get(p.getName());
+            if (value != null) {
+                p = p.clone();
+                p.setValue(value);
+            }
+            return p;
+        }).collect(Collectors.toList());
 
-	@Override
-	public void dispose() {
-		super.dispose();
-		project = null;
-		template = null;
-		parameters.clear();
-		selectedParameter = null;
-		if(originalValueMap != null) {
-			originalValueMap.clear();
-		}
-		items.clear();
-		eclipseProject = null;
-	}
+        return originalParameters;
+    }
+
+    private Map<String, String> getProjectParameters(org.eclipse.core.resources.IProject project) {
+        if (project == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> projectParams = new HashMap<>();
+        String gitRepo = getGitRepo(project);
+        if (gitRepo != null) {
+            projectParams.put(PARAMETER_SOURCE_REPOSITORY_URL, gitRepo);
+            projectParams.put(PARAMETER_GIT_URI, gitRepo);//legacy key
+
+            String branch = getGitBranch(project);
+            projectParams.put("SOURCE_REPOSITORY_REF", branch);
+            projectParams.put("GIT_REF", branch);//legacy key
+
+            //Setting the context dir is a really bad idea if we're dealing with a multi module project
+            //Better let the user do it manually if needed.
+            //String contextDir = getDefaultContextDir(project);
+            String contextDir = StringUtils.EMPTY;
+            projectParams.put("CONTEXT_DIR", contextDir);
+            projectParams.put("GIT_CONTEXT_DIR", contextDir);//legacy key
+        }
+        return projectParams;
+    }
+
+    private String getGitBranch(org.eclipse.core.resources.IProject project) {
+        try {
+            return StringUtils.defaultString(EGitUtils.getCurrentBranch(project));
+        } catch (CoreException e) {
+            throw new OpenShiftException(e, NLS.bind("Could not determine the default Git branch for \"{0}\"", project.getName()));
+        }
+    }
+
+    private String getGitRepo(org.eclipse.core.resources.IProject project) {
+        try {
+            return StringUtils.defaultString(EGitUtils.getDefaultRemoteRepo(project));
+        } catch (CoreException e) {
+            throw new OpenShiftException(e,
+                    NLS.bind("Could not determine the default remote Git repository for \"{0}\"", project.getName()));
+        }
+    }
+
+    @Override
+    public IParameter getSelectedParameter() {
+        return this.selectedParameter;
+    }
+
+    private IParameter getSelectedParameterOrDefault() {
+        if (selectedParameter == null || !parameters.contains(selectedParameter)) {
+            if (CollectionUtils.isEmpty(parameters)) {
+                return null;
+            } else {
+                return parameters.get(0);
+            }
+        } else {
+            return selectedParameter;
+        }
+    }
+
+    @Override
+    public void setSelectedParameter(IParameter parameter) {
+        firePropertyChange(PROPERTY_SELECTED_PARAMETER, this.selectedParameter, this.selectedParameter = parameter);
+    }
+
+    @Override
+    public void updateParameterValue(IParameter param, String value) {
+        param.setValue(value);
+        firePropertyChange(PROPERTY_MODIFIED_PARAMETER, null, param);
+        //Let's flip the selection to cause refresh of the state of buttons.
+        //Otherwise, we would have to introduce more properties and keep there state.
+        IParameter s = selectedParameter;
+        setSelectedParameter(null);
+        setSelectedParameter(s);
+    }
+
+    @Override
+    public void resetParameter(IParameter param) {
+        if (param != null && !Objects.equals(param.getValue(), originalValueMap.get(param.getName()))) {
+            updateParameterValue(param, originalValueMap.get(param.getName()));
+        }
+    }
+
+    private void setLabels(Map<String, String> labelMap) {
+        if (labelMap == null)
+            return;
+        List<Label> labels = new ArrayList<>(labelMap.size());
+        for (Entry<String, String> entry : labelMap.entrySet()) {
+            labels.add(new Label(entry.getKey(), entry.getValue()));
+        }
+        setLabels(labels);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        project = null;
+        template = null;
+        parameters.clear();
+        selectedParameter = null;
+        if (originalValueMap != null) {
+            originalValueMap.clear();
+        }
+        items.clear();
+        eclipseProject = null;
+    }
 
 }

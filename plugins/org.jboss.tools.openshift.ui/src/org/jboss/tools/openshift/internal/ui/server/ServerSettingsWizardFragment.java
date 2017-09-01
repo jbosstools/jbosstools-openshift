@@ -43,227 +43,218 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
  * @author Andre Dietisheim
  */
 public class ServerSettingsWizardFragment extends WizardHandleAwareFragment implements ICompletable {
-	static final String IS_LOADING_SERVICES = "isLoadingServices";
+    static final String IS_LOADING_SERVICES = "isLoadingServices";
 
-	private PropertyChangeListener connectionChangeListener = new PropertyChangeListener() {
+    private PropertyChangeListener connectionChangeListener = new PropertyChangeListener() {
 
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			final IWizardContainer wizardContainer = getWizardContainer();
-			if(serverSettingsWizardPage == null 
-					|| serverSettingsWizardPage.getModel() == null 
-					|| wizardContainer == null) {
-				//nothing to update;
-				return;
-			}
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            final IWizardContainer wizardContainer = getWizardContainer();
+            if (serverSettingsWizardPage == null || serverSettingsWizardPage.getModel() == null || wizardContainer == null) {
+                //nothing to update;
+                return;
+            }
 
-			if(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION.equals(evt.getPropertyName())) {
-				if(evt.getNewValue() == null || evt.getNewValue() instanceof Connection)  {
-					Connection newConnection = (Connection)evt.getNewValue();
-					if(newConnection != serverSettingsWizardPage.getModel().getConnection() && wizardContainer != null) {
-						serverSettingsWizardPage.needsLoadingResources = true;
-						serverSettingsWizardPage.getModel().setConnection(newConnection);
-						serverSettingsWizardPage.getModel().setResourceItems(new ArrayList<>());
-						serverSettingsWizardPage.setComplete(false);
-						wizardContainer.updateButtons();
-					}
-				} else {
-					//do nothing
-				}
-			} else if(ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS.equals(evt.getPropertyName())) {
-				serverSettingsWizardPage.needsLoadingResources = true;
-				serverSettingsWizardPage.getModel().setResourceItems(new ArrayList<>());
-				serverSettingsWizardPage.setComplete(false);
-				wizardContainer.updateButtons();
-			}
-		}
-	};
+            if (ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION.equals(evt.getPropertyName())) {
+                if (evt.getNewValue() == null || evt.getNewValue() instanceof Connection) {
+                    Connection newConnection = (Connection)evt.getNewValue();
+                    if (newConnection != serverSettingsWizardPage.getModel().getConnection() && wizardContainer != null) {
+                        serverSettingsWizardPage.needsLoadingResources = true;
+                        serverSettingsWizardPage.getModel().setConnection(newConnection);
+                        serverSettingsWizardPage.getModel().setResourceItems(new ArrayList<>());
+                        serverSettingsWizardPage.setComplete(false);
+                        wizardContainer.updateButtons();
+                    }
+                } else {
+                    //do nothing
+                }
+            } else if (ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS.equals(evt.getPropertyName())) {
+                serverSettingsWizardPage.needsLoadingResources = true;
+                serverSettingsWizardPage.getModel().setResourceItems(new ArrayList<>());
+                serverSettingsWizardPage.setComplete(false);
+                wizardContainer.updateButtons();
+            }
+        }
+    };
 
-	private ServerSettingsWizardPageWrapper serverSettingsWizardPage;
+    private ServerSettingsWizardPageWrapper serverSettingsWizardPage;
 
-	/**
-	 * Constructor.
-	 */
-	public ServerSettingsWizardFragment() {
-		// no finishing wizard before input provided in this page
-		setComplete(false);
-	}
+    /**
+     * Constructor.
+     */
+    public ServerSettingsWizardFragment() {
+        // no finishing wizard before input provided in this page
+        setComplete(false);
+    }
 
-	/**
-	 * @return the connection change listener to update the widgets if the
-	 *         connection selection changed in the
-	 *         {@link ConnectionWizardFragment}.
-	 */
-	public PropertyChangeListener getConnectionChangeListener() {
-		return connectionChangeListener;
-	}
+    /**
+     * @return the connection change listener to update the widgets if the
+     *         connection selection changed in the
+     *         {@link ConnectionWizardFragment}.
+     */
+    public PropertyChangeListener getConnectionChangeListener() {
+        return connectionChangeListener;
+    }
 
-	@Override
-	public boolean hasComposite() {
-		return true;
-	}
+    @Override
+    public boolean hasComposite() {
+        return true;
+    }
 
-	@Override
-	public void performFinish(IProgressMonitor monitor) throws CoreException {
-		if(serverSettingsWizardPage != null) {
-			serverSettingsWizardPage.updateServer();
-			serverSettingsWizardPage.unhook();
-		}
-		super.performFinish(monitor); //only removes handle, it should be done after successful update only.
-	}
+    @Override
+    public void performFinish(IProgressMonitor monitor) throws CoreException {
+        if (serverSettingsWizardPage != null) {
+            serverSettingsWizardPage.updateServer();
+            serverSettingsWizardPage.unhook();
+        }
+        super.performFinish(monitor); //only removes handle, it should be done after successful update only.
+    }
 
-	@Override
-	public void performCancel(IProgressMonitor monitor) throws CoreException {
-		if(serverSettingsWizardPage != null) {
-			serverSettingsWizardPage.unhook();
-		}
-		super.performCancel(monitor);
-	}
+    @Override
+    public void performCancel(IProgressMonitor monitor) throws CoreException {
+        if (serverSettingsWizardPage != null) {
+            serverSettingsWizardPage.unhook();
+        }
+        super.performCancel(monitor);
+    }
 
-	/** 
-	 * Exposing the protected method {@link WizardFragment#setComplete} in the API by the {@link ICompletable} interface
-	 */
-	@Override
-	public void setComplete(boolean complete) {
-		super.setComplete(complete);
-	}
+    /** 
+     * Exposing the protected method {@link WizardFragment#setComplete} in the API by the {@link ICompletable} interface
+     */
+    @Override
+    public void setComplete(boolean complete) {
+        super.setComplete(complete);
+    }
 
-	@Override
-	public boolean isComplete() {
-		return this.serverSettingsWizardPage != null 
-				&& !this.serverSettingsWizardPage.isLoadingResources() 
-				&& !this.serverSettingsWizardPage.isNeedsLoadingResources() 
-				&& this.serverSettingsWizardPage.getModel().getResource() != null
-				&& serverSettingsWizardPage.isPageComplete();
-	}
-	
-	@Override
-	public Composite createComposite(final Composite parent, final IWizardHandle handle) {
-		setHandle(handle);
-		this.serverSettingsWizardPage = createServerSettingsWizardPage(parent, handle);
-		updateWizardHandle(handle, this.serverSettingsWizardPage);
-		WizardFragmentUtils.getWizardDialog(handle).addPageChangingListener(onPageChanging());
-		return (Composite) this.serverSettingsWizardPage.getControl();
-	}
-	
-	private ServerSettingsWizardPageWrapper createServerSettingsWizardPage(final Composite parent, final IWizardHandle handle) {
-		final ServerSettingsWizardPageWrapper serverSettingsWizardPage = new ServerSettingsWizardPageWrapper(handle, getTaskModel());
-		serverSettingsWizardPage.getModel().addPropertyChangeListener(connectionChangeListener);
-		serverSettingsWizardPage.createControl(parent);
-		return serverSettingsWizardPage;
-	}
+    @Override
+    public boolean isComplete() {
+        return this.serverSettingsWizardPage != null && !this.serverSettingsWizardPage.isLoadingResources()
+                && !this.serverSettingsWizardPage.isNeedsLoadingResources()
+                && this.serverSettingsWizardPage.getModel().getResource() != null && serverSettingsWizardPage.isPageComplete();
+    }
 
-	private void updateWizardHandle(final IWizardHandle handle, final ServerSettingsWizardPageWrapper serverSettingsWizardPage) {
-		handle.setTitle(serverSettingsWizardPage.getTitle());
-		handle.setDescription(serverSettingsWizardPage.getDescription());
-		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
-	}
+    @Override
+    public Composite createComposite(final Composite parent, final IWizardHandle handle) {
+        setHandle(handle);
+        this.serverSettingsWizardPage = createServerSettingsWizardPage(parent, handle);
+        updateWizardHandle(handle, this.serverSettingsWizardPage);
+        WizardFragmentUtils.getWizardDialog(handle).addPageChangingListener(onPageChanging());
+        return (Composite)this.serverSettingsWizardPage.getControl();
+    }
 
-	private IPageChangingListener onPageChanging() {
-		return new IPageChangingListener() {
-			@Override
-			public void handlePageChanging(PageChangingEvent event) {
-				if(serverSettingsWizardPage != null) {
-					serverSettingsWizardPage.reloadServices();
-				}
-			}
-		};
-	}
+    private ServerSettingsWizardPageWrapper createServerSettingsWizardPage(final Composite parent, final IWizardHandle handle) {
+        final ServerSettingsWizardPageWrapper serverSettingsWizardPage = new ServerSettingsWizardPageWrapper(handle, getTaskModel());
+        serverSettingsWizardPage.getModel().addPropertyChangeListener(connectionChangeListener);
+        serverSettingsWizardPage.createControl(parent);
+        return serverSettingsWizardPage;
+    }
 
-	protected ModifyListener onFilterTextModified(final TreeViewer applicationTemplatesViewer) {
-		return new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				applicationTemplatesViewer.refresh();
-				applicationTemplatesViewer.expandAll();
-			}
-		};
-	}
+    private void updateWizardHandle(final IWizardHandle handle, final ServerSettingsWizardPageWrapper serverSettingsWizardPage) {
+        handle.setTitle(serverSettingsWizardPage.getTitle());
+        handle.setDescription(serverSettingsWizardPage.getDescription());
+        handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
+    }
 
-	
-	class ServerSettingsWizardPageWrapper extends ServerSettingsWizardPage {
-		private IWizardHandle wizardHandle;
+    private IPageChangingListener onPageChanging() {
+        return new IPageChangingListener() {
+            @Override
+            public void handlePageChanging(PageChangingEvent event) {
+                if (serverSettingsWizardPage != null) {
+                    serverSettingsWizardPage.reloadServices();
+                }
+            }
+        };
+    }
 
-		private ServerSettingsWizardPageWrapper(final IWizardHandle wizardHandle, final TaskModel taskModel) {
-			super(((IWizardPage) wizardHandle).getWizard(), 
-					OpenShiftServerTaskModelAccessor.getServer(taskModel), 
-					OpenShiftServerTaskModelAccessor.getConnection(taskModel),
-					UIUtils.getFirstSelectedWorkbenchProject());
-			this.wizardHandle = wizardHandle;
-		}
+    protected ModifyListener onFilterTextModified(final TreeViewer applicationTemplatesViewer) {
+        return new ModifyListener() {
 
-		boolean isWizardDisposed() {
-			return getContainer() == null
-					|| getContainer().getShell() == null
-					|| getContainer().getShell().isDisposed();
-		}
-		
-		@Override
-		public void setPageComplete(boolean complete) {
-			super.setPageComplete(complete);
-			if(!isWizardDisposed()) {
-				wizardHandle.update();
-			}
-		}
+            @Override
+            public void modifyText(ModifyEvent e) {
+                applicationTemplatesViewer.refresh();
+                applicationTemplatesViewer.expandAll();
+            }
+        };
+    }
 
-		@Override
-		public void setErrorMessage(String newMessage) {
-			if(!isWizardDisposed()) {
-				((WizardPage) wizardHandle).setErrorMessage(newMessage);
-			}
-		}
+    class ServerSettingsWizardPageWrapper extends ServerSettingsWizardPage {
+        private IWizardHandle wizardHandle;
 
-		@Override
-		public void setMessage(String newMessage, int newType) {
-			if(!isWizardDisposed()) {
-				wizardHandle.setMessage(newMessage, newType);
-			}
-		}
+        private ServerSettingsWizardPageWrapper(final IWizardHandle wizardHandle, final TaskModel taskModel) {
+            super(((IWizardPage)wizardHandle).getWizard(), OpenShiftServerTaskModelAccessor.getServer(taskModel),
+                    OpenShiftServerTaskModelAccessor.getConnection(taskModel), UIUtils.getFirstSelectedWorkbenchProject());
+            this.wizardHandle = wizardHandle;
+        }
 
-		public void onPageWillGetDeactivated(Direction direction, PageChangingEvent event) {
-			onPageWillGetDeactivated(direction, event, null);
-		}
+        boolean isWizardDisposed() {
+            return getContainer() == null || getContainer().getShell() == null || getContainer().getShell().isDisposed();
+        }
 
-		void reloadServices() {
-			final IWizardContainer container = getContainer();
-			if(!needsLoadingResources || container == null) {
-				return;
-			}
+        @Override
+        public void setPageComplete(boolean complete) {
+            super.setPageComplete(complete);
+            if (!isWizardDisposed()) {
+                wizardHandle.update();
+            }
+        }
 
-			try {
-				this.isLoadingResources = true;
-				getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
-				container.updateButtons();
-				WizardUtils.runInWizard(new Job("Loading services...") {
+        @Override
+        public void setErrorMessage(String newMessage) {
+            if (!isWizardDisposed()) {
+                ((WizardPage)wizardHandle).setErrorMessage(newMessage);
+            }
+        }
 
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-						//only reload services.
-						if(!isWizardDisposed()) {
-							ServerSettingsWizardPageWrapper.this.model.loadResources();
-							ServerSettingsWizardPageWrapper.this.needsLoadingResources = false;
-						}
-						return Status.OK_STATUS;
-					}
-				}, container);
-			} catch (InvocationTargetException | InterruptedException e) {
-				// swallow intentionally
-			} finally {
-				this.needsLoadingResources = false;
-				this.isLoadingResources = false;
-				getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
-				if(!isWizardDisposed()) {
-					container.updateButtons();
-				}
-			}
-		}
-	
-		void unhook() {
-			uiHook = null;
-			model = null;
-		}
+        @Override
+        public void setMessage(String newMessage, int newType) {
+            if (!isWizardDisposed()) {
+                wizardHandle.setMessage(newMessage, newType);
+            }
+        }
 
-	}
+        public void onPageWillGetDeactivated(Direction direction, PageChangingEvent event) {
+            onPageWillGetDeactivated(direction, event, null);
+        }
+
+        void reloadServices() {
+            final IWizardContainer container = getContainer();
+            if (!needsLoadingResources || container == null) {
+                return;
+            }
+
+            try {
+                this.isLoadingResources = true;
+                getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
+                container.updateButtons();
+                WizardUtils.runInWizard(new Job("Loading services...") {
+
+                    @Override
+                    protected IStatus run(IProgressMonitor monitor) {
+                        //only reload services.
+                        if (!isWizardDisposed()) {
+                            ServerSettingsWizardPageWrapper.this.model.loadResources();
+                            ServerSettingsWizardPageWrapper.this.needsLoadingResources = false;
+                        }
+                        return Status.OK_STATUS;
+                    }
+                }, container);
+            } catch (InvocationTargetException | InterruptedException e) {
+                // swallow intentionally
+            } finally {
+                this.needsLoadingResources = false;
+                this.isLoadingResources = false;
+                getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
+                if (!isWizardDisposed()) {
+                    container.updateButtons();
+                }
+            }
+        }
+
+        void unhook() {
+            uiHook = null;
+            model = null;
+        }
+
+    }
 
 }

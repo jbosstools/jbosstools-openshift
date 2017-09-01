@@ -30,80 +30,80 @@ import org.eclipse.swt.widgets.TableItem;
  */
 public class TableViewerCellDecorationManager {
 
-	private Image image;
-	private Table table;
-	private Map<ViewerCell, TableEditor> decorationByCell = new HashMap<>();
+    private Image image;
+    private Table table;
+    private Map<ViewerCell, TableEditor> decorationByCell = new HashMap<>();
 
-	/**
-	 * @param table
-	 *            the table to handle cell decorations for
-	 * @param image
-	 *            the image to show as decoration
-	 */
-	public TableViewerCellDecorationManager(Image image, Table table) {
-		this.image = image;
-		this.table = table;
-	}
+    /**
+     * @param table
+     *            the table to handle cell decorations for
+     * @param image
+     *            the image to show as decoration
+     */
+    public TableViewerCellDecorationManager(Image image, Table table) {
+        this.image = image;
+        this.table = table;
+    }
 
-	public void toggle(boolean show, ViewerCell cell) {
-		if (show) {
-			show(cell);
-		} else {
-			hide(cell);
-		}
-	}
-	
-	public void show(ViewerCell cell) {
-		TableEditor editor = decorationByCell.get(cell);
-		if (editor == null) {
-			Control decoration = createDecoration(image, table);
-			editor = createTableEditor(image, table);
-			decorationByCell.put(cell, editor);
-			editor.setEditor(decoration, (TableItem) cell.getItem(), cell.getColumnIndex());
-		}
-	}
+    public void toggle(boolean show, ViewerCell cell) {
+        if (show) {
+            show(cell);
+        } else {
+            hide(cell);
+        }
+    }
 
-	public void hide(ViewerCell cell) {
-		TableEditor editor = decorationByCell.get(cell);
-		if (editor != null) {
-			hide(editor);
-			decorationByCell.remove(cell);
-		}
-	}
+    public void show(ViewerCell cell) {
+        TableEditor editor = decorationByCell.get(cell);
+        if (editor == null) {
+            Control decoration = createDecoration(image, table);
+            editor = createTableEditor(image, table);
+            decorationByCell.put(cell, editor);
+            editor.setEditor(decoration, (TableItem)cell.getItem(), cell.getColumnIndex());
+        }
+    }
 
-	private void hide(TableEditor editor) {
-		Control decoration = editor.getEditor();
-		if (decoration != null) {
-			decoration.setVisible(false);
-			decoration.dispose();
-		}
-		editor.setEditor(null);
-		editor.dispose();
-	}
+    public void hide(ViewerCell cell) {
+        TableEditor editor = decorationByCell.get(cell);
+        if (editor != null) {
+            hide(editor);
+            decorationByCell.remove(cell);
+        }
+    }
 
-	public void hideAll() {
-		for (TableEditor decoration : decorationByCell.values()) {
-			hide(decoration);
-		}
-		decorationByCell.clear();
-	}
-	
-	private Control createDecoration(Image image, Table table) {
-		Label validationDecoration = new Label(table, SWT.None);
-		validationDecoration.setImage(image);
-		return validationDecoration;
-	}
+    private void hide(TableEditor editor) {
+        Control decoration = editor.getEditor();
+        if (decoration != null) {
+            decoration.setVisible(false);
+            decoration.dispose();
+        }
+        editor.setEditor(null);
+        editor.dispose();
+    }
 
-	private TableEditor createTableEditor(Image image, Table table) {
-		TableEditor tableEditor = new TableEditor(table);
-		tableEditor.grabHorizontal = false;
-		tableEditor.grabVertical = false;
-		Rectangle bounds = image.getBounds();
-		tableEditor.minimumHeight = bounds.height;
-		tableEditor.minimumWidth = bounds.width;
-		tableEditor.verticalAlignment = SWT.BEGINNING;
-		tableEditor.horizontalAlignment = SWT.LEFT;
+    public void hideAll() {
+        for (TableEditor decoration : decorationByCell.values()) {
+            hide(decoration);
+        }
+        decorationByCell.clear();
+    }
 
-		return tableEditor;
-	}
+    private Control createDecoration(Image image, Table table) {
+        Label validationDecoration = new Label(table, SWT.None);
+        validationDecoration.setImage(image);
+        return validationDecoration;
+    }
+
+    private TableEditor createTableEditor(Image image, Table table) {
+        TableEditor tableEditor = new TableEditor(table);
+        tableEditor.grabHorizontal = false;
+        tableEditor.grabVertical = false;
+        Rectangle bounds = image.getBounds();
+        tableEditor.minimumHeight = bounds.height;
+        tableEditor.minimumWidth = bounds.width;
+        tableEditor.verticalAlignment = SWT.BEGINNING;
+        tableEditor.horizontalAlignment = SWT.LEFT;
+
+        return tableEditor;
+    }
 }

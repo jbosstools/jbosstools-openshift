@@ -26,23 +26,22 @@ public abstract class AbstractOpenShiftConnection extends AbstractOpenShiftExplo
 	public AbstractOpenShiftConnection(TreeItem connectionItem) {
 		super(connectionItem);
 	}
-	
+
 	/**
 	 * Removes connection from OpenShift explorer view.
 	 */
 	public void remove() {
 		item.select();
-		
+
 		new ContextMenu(OpenShiftLabel.ContextMenu.DELETE_CONNECTION).select();
-		
+
 		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.REMOVE_CONNECTION));
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.REMOVE_CONNECTION);
 		new OkButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.REMOVE_CONNECTION));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
-	
-	
+
 }

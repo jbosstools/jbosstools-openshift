@@ -24,37 +24,37 @@ import org.eclipse.osgi.util.NLS;
  */
 public class ServiceNameValidator implements IValidator {
 
-	private static final String CHAR_FMT = "[a-z0-9]";
-	private static final String EXT_CHAR_FMT = "[-a-z0-9]";
-	public static final int MAXLENGTH = 24;
-	private static final Pattern REGEX = Pattern.compile("^[a-z](" + EXT_CHAR_FMT + "*" + CHAR_FMT +")?$");
+    private static final String CHAR_FMT = "[a-z0-9]";
+    private static final String EXT_CHAR_FMT = "[-a-z0-9]";
+    public static final int MAXLENGTH = 24;
+    private static final Pattern REGEX = Pattern.compile("^[a-z](" + EXT_CHAR_FMT + "*" + CHAR_FMT + ")?$");
 
-	private final static String failureMessage = "A valid name is alphanumeric (a-z, and 0-9), "
-			+ "with the character '-' allowed anywhere except first or last position.";
+    private final static String failureMessage = "A valid name is alphanumeric (a-z, and 0-9), "
+            + "with the character '-' allowed anywhere except first or last position.";
 
-	private final IStatus FAILED;
-	private final IStatus EMPTY_CANCEL;
-	
-	public ServiceNameValidator() {
-		FAILED = ValidationStatus.error(failureMessage);
-		EMPTY_CANCEL = ValidationStatus.cancel("Please provide a valid resource name.");
-	}
-	
-	@Override
-	public IStatus validate(Object paramObject) {
-		if(paramObject != null && !(paramObject instanceof String))
-			return ValidationStatus.cancel("Name is not an instance of a string");
-		String value= (String) paramObject;
-		if(StringUtils.isBlank(value))
-			return EMPTY_CANCEL;
-		if(value.length() > MAXLENGTH) {
-			return ValidationStatus.error(NLS.bind("Maximum name length is {0} characters", MAXLENGTH));
-		}
+    private final IStatus FAILED;
+    private final IStatus EMPTY_CANCEL;
 
-		if(!REGEX.matcher(value).matches()) {
-			return FAILED;
-		}
-		return ValidationStatus.OK_STATUS;
-	}
+    public ServiceNameValidator() {
+        FAILED = ValidationStatus.error(failureMessage);
+        EMPTY_CANCEL = ValidationStatus.cancel("Please provide a valid resource name.");
+    }
+
+    @Override
+    public IStatus validate(Object paramObject) {
+        if (paramObject != null && !(paramObject instanceof String))
+            return ValidationStatus.cancel("Name is not an instance of a string");
+        String value = (String)paramObject;
+        if (StringUtils.isBlank(value))
+            return EMPTY_CANCEL;
+        if (value.length() > MAXLENGTH) {
+            return ValidationStatus.error(NLS.bind("Maximum name length is {0} characters", MAXLENGTH));
+        }
+
+        if (!REGEX.matcher(value).matches()) {
+            return FAILED;
+        }
+        return ValidationStatus.OK_STATUS;
+    }
 
 }

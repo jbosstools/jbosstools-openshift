@@ -20,10 +20,10 @@ public class NewCDK3ServerContainerWizardPage extends NewServerContainerWizardPa
 		new DefaultShell(WIZARD_NAME);
 		new LabeledText("Minishift Binary: ").setText(binary);
 	}
-	
+
 	public void setHypervisor(final String text) {
 		new DefaultShell(WIZARD_NAME);
 		new LabeledCombo("Hypervisor:").setSelection(text);
 	}
-	
+
 }

@@ -12,48 +12,48 @@ import org.jboss.tools.openshift.internal.ui.validator.LabelKeyValidator;
 import org.jboss.tools.openshift.internal.ui.validator.LabelValueValidator;
 import org.junit.Test;
 
-public class LabelValueValidatorTest extends AbstractValidatorTest{
-	
-	public LabelValueValidatorTest() {
-		super(new LabelValueValidator());
-	}
+public class LabelValueValidatorTest extends AbstractValidatorTest {
 
-	@Test
-	public void nullValueShouldBeInvalid() {
-		assertCancel(null);
-	}
+    public LabelValueValidatorTest() {
+        super(new LabelValueValidator());
+    }
 
-	@Test
-	public void emptyValueShouldBeInvalid() {
-		assertCancel("");
-	}
+    @Test
+    public void nullValueShouldBeInvalid() {
+        assertCancel(null);
+    }
 
-	@Test
-	public void blankValueShouldBeInvalid() {
-		assertCancel("  ");
-	}
+    @Test
+    public void emptyValueShouldBeInvalid() {
+        assertCancel("");
+    }
 
-	@Test
-	public void valueWithoutSubDomainThatExceedsTheMaxValueShouldBeInvalid() {
-		StringBuilder b = new StringBuilder();
-		for(int i=0; i < LabelKeyValidator.LABEL_MAXLENGTH + 1; i++)
-			b.append("a");
-		assertFailure(b.toString());
-	}
+    @Test
+    public void blankValueShouldBeInvalid() {
+        assertCancel("  ");
+    }
 
-	@Test
-	public void valueWithSpacesShouldBeInvalid() {
-		assertFailure("abc def");
-	}
+    @Test
+    public void valueWithoutSubDomainThatExceedsTheMaxValueShouldBeInvalid() {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < LabelKeyValidator.LABEL_MAXLENGTH + 1; i++)
+            b.append("a");
+        assertFailure(b.toString());
+    }
 
-	@Test
-	public void valueWithSlashesShouldBeInValid() {
-		assertFailure("abcd.efg/a23");
-	}
-	
-	@Test
-	public void valueWithDotsDashesAndUnderScoresShouldBeValid() {
-		assertPass("abcd.efg_k-123");
-	}
+    @Test
+    public void valueWithSpacesShouldBeInvalid() {
+        assertFailure("abc def");
+    }
+
+    @Test
+    public void valueWithSlashesShouldBeInValid() {
+        assertFailure("abcd.efg/a23");
+    }
+
+    @Test
+    public void valueWithDotsDashesAndUnderScoresShouldBeValid() {
+        assertPass("abcd.efg_k-123");
+    }
 
 }

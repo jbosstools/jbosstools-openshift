@@ -38,100 +38,101 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class HumanReadableX509CertificateTest {
 
-	private static final String DATE_FORMAT = "E, d MMM yyyy HH:mm:ss z";
+    private static final String DATE_FORMAT = "E, d MMM yyyy HH:mm:ss z";
 
-	private HumanReadableX509Certificate certificate;
+    private HumanReadableX509Certificate certificate;
 
-	@Before
-	public void setup() throws Exception {
-		this.certificate = new HumanReadableX509Certificate(SSLCertificateUtils.createX509Certificate(CERTIFICATE_REDHAT_COM));
-	}
+    @Before
+    public void setup() throws Exception {
+        this.certificate = new HumanReadableX509Certificate(SSLCertificateUtils.createX509Certificate(CERTIFICATE_REDHAT_COM));
+    }
 
-	@Test
-	public void shouldReportIssuedTo() throws CertificateException {
-		// given
-		// when
-		String issuedTo = certificate.getIssuedTo();
-		// then
-		assertThat(getValue(LABEL_PRINCIPAL_COUNTRY, issuedTo)).isEqualTo("US");
-		assertThat(getValue(LABEL_PRINCIPAL_STATE, issuedTo)).isEqualTo("NORTH CAROLINA");
-		assertThat(getValue(LABEL_PRINCIPAL_LOCALITY, issuedTo)).isEqualTo("Raleigh");
-		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedTo)).isEqualTo("Red Hat, Inc.");
-		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedTo)).isEqualTo("IT");
-		assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedTo)).isEqualTo("www.redhat.com");
-	}
+    @Test
+    public void shouldReportIssuedTo() throws CertificateException {
+        // given
+        // when
+        String issuedTo = certificate.getIssuedTo();
+        // then
+        assertThat(getValue(LABEL_PRINCIPAL_COUNTRY, issuedTo)).isEqualTo("US");
+        assertThat(getValue(LABEL_PRINCIPAL_STATE, issuedTo)).isEqualTo("NORTH CAROLINA");
+        assertThat(getValue(LABEL_PRINCIPAL_LOCALITY, issuedTo)).isEqualTo("Raleigh");
+        assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedTo)).isEqualTo("Red Hat, Inc.");
+        assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedTo)).isEqualTo("IT");
+        assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedTo)).isEqualTo("www.redhat.com");
+    }
 
-	@Test
-	public void shouldReportIssuedToCommonName() {
-		// given
-		// when
-		String issuedToCommonName = certificate.getIssuedTo(HumanReadableX509Certificate.PRINCIPAL_COMMON_NAME);
-		// then
-		assertThat(issuedToCommonName).isEqualTo("www.redhat.com");
-	}
+    @Test
+    public void shouldReportIssuedToCommonName() {
+        // given
+        // when
+        String issuedToCommonName = certificate.getIssuedTo(HumanReadableX509Certificate.PRINCIPAL_COMMON_NAME);
+        // then
+        assertThat(issuedToCommonName).isEqualTo("www.redhat.com");
+    }
 
-	@Test
-	public void shouldReportIssuedBy() throws CertificateException {
-		// given
-		// when
-		String issuedBy = certificate.getIssuedBy();
-		// then
-		assertThat(getValue(LABEL_PRINCIPAL_COUNTRY, issuedBy)).isEqualTo("GB");
-		assertThat(getValue(LABEL_PRINCIPAL_STATE, issuedBy)).isEqualTo("Greater Manchester");
-		assertThat(getValue(LABEL_PRINCIPAL_LOCALITY, issuedBy)).isEqualTo("Salford");
-		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedBy)).isEqualTo("COMODO CA Limited");
-		assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedBy)).isEqualTo("COMODO RSA Extended Validation Secure Server CA 2");
-	}
+    @Test
+    public void shouldReportIssuedBy() throws CertificateException {
+        // given
+        // when
+        String issuedBy = certificate.getIssuedBy();
+        // then
+        assertThat(getValue(LABEL_PRINCIPAL_COUNTRY, issuedBy)).isEqualTo("GB");
+        assertThat(getValue(LABEL_PRINCIPAL_STATE, issuedBy)).isEqualTo("Greater Manchester");
+        assertThat(getValue(LABEL_PRINCIPAL_LOCALITY, issuedBy)).isEqualTo("Salford");
+        assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedBy)).isEqualTo("COMODO CA Limited");
+        assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedBy)).isEqualTo("COMODO RSA Extended Validation Secure Server CA 2");
+    }
 
-	@Test
-	public void shouldReportIssuedByState() {
-		// given
-		// when
-		String issuedToCommonName = certificate.getIssuedBy(HumanReadableX509Certificate.PRINCIPAL_STATE);
-		// then
-		assertThat(issuedToCommonName).isEqualTo("Greater Manchester");
-	}
+    @Test
+    public void shouldReportIssuedByState() {
+        // given
+        // when
+        String issuedToCommonName = certificate.getIssuedBy(HumanReadableX509Certificate.PRINCIPAL_STATE);
+        // then
+        assertThat(issuedToCommonName).isEqualTo("Greater Manchester");
+    }
 
-	@Test
-	public void shouldReportFingerPrint() throws CertificateException {
-		// given
-		// when
-		String fingerprint = certificate.getFingerprint();
-		// then
-		assertThat(fingerprint).isEqualTo("A1C3587B794993BCFD0AFD023BAA07680F20B3F2");
-	}
+    @Test
+    public void shouldReportFingerPrint() throws CertificateException {
+        // given
+        // when
+        String fingerprint = certificate.getFingerprint();
+        // then
+        assertThat(fingerprint).isEqualTo("A1C3587B794993BCFD0AFD023BAA07680F20B3F2");
+    }
 
-	@Test
-	public void shouldReportValidity() throws CertificateException, ParseException {
-		// given
-		SimpleDateFormat dateParser = new SimpleDateFormat(DATE_FORMAT);
-		Calendar expectedIssuedOn = getCalendar(dateParser.parse("Sat, 5 Sep 2015 01:00:00 CET"));
-		Calendar expectedExpiresOn = getCalendar(dateParser.parse("Sun, 3 Sep 2017 00:59:59 CET"));
-		// when
-		String validity = certificate.getValidity();
-		// then
-		Calendar issuedOn = getCalendar(dateParser.parse(getValue(LABEL_VALIDITY_ISSUED_ON, validity)));
-		assertThat(issuedOn).isEqualTo(expectedIssuedOn);
-		Calendar expiresOn = getCalendar(dateParser.parse(getValue(LABEL_VALIDITY_EXPIRES_ON, validity)));
-		assertThat(expiresOn).isEqualTo(expectedExpiresOn);
-	}
+    @Test
+    public void shouldReportValidity() throws CertificateException, ParseException {
+        // given
+        SimpleDateFormat dateParser = new SimpleDateFormat(DATE_FORMAT);
+        Calendar expectedIssuedOn = getCalendar(dateParser.parse("Sat, 5 Sep 2015 01:00:00 CET"));
+        Calendar expectedExpiresOn = getCalendar(dateParser.parse("Sun, 3 Sep 2017 00:59:59 CET"));
+        // when
+        String validity = certificate.getValidity();
+        // then
+        Calendar issuedOn = getCalendar(dateParser.parse(getValue(LABEL_VALIDITY_ISSUED_ON, validity)));
+        assertThat(issuedOn).isEqualTo(expectedIssuedOn);
+        Calendar expiresOn = getCalendar(dateParser.parse(getValue(LABEL_VALIDITY_EXPIRES_ON, validity)));
+        assertThat(expiresOn).isEqualTo(expectedExpiresOn);
+    }
 
-	private Calendar getCalendar(Date date) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		return calendar;
-	}
-	
-	private String getValue(String identifier, String string) {
-		assertThat(string).isNotEmpty();
+    private Calendar getCalendar(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar;
+    }
 
-		int valueIndexOf = string.indexOf(identifier);
-		assertThat(valueIndexOf).as("identifier %s could not be found in %s", identifier, string).isNotNegative();
+    private String getValue(String identifier, String string) {
+        assertThat(string).isNotEmpty();
 
-		int eolIndexOf = string.indexOf('\n', valueIndexOf);
-		if (eolIndexOf == -1 ) {
-			eolIndexOf = string.length();
-		}
-		return string.substring(valueIndexOf + identifier.length() + HumanReadableX509Certificate.SEPARATOR_LABEL_VALUE.length(), eolIndexOf);
-	}
-}	
+        int valueIndexOf = string.indexOf(identifier);
+        assertThat(valueIndexOf).as("identifier %s could not be found in %s", identifier, string).isNotNegative();
+
+        int eolIndexOf = string.indexOf('\n', valueIndexOf);
+        if (eolIndexOf == -1) {
+            eolIndexOf = string.length();
+        }
+        return string.substring(valueIndexOf + identifier.length() + HumanReadableX509Certificate.SEPARATOR_LABEL_VALUE.length(),
+                eolIndexOf);
+    }
+}

@@ -25,58 +25,57 @@ import org.junit.Test;
 
 public class VariablesHelperTest {
 
-	@Test
-	public void testContainsVariables() {
-		assertFalse(VariablesHelper.containsVariables(null));
-		assertFalse(VariablesHelper.containsVariables("  "));
-		assertFalse(VariablesHelper.containsVariables("}foo${"));
-		assertFalse(VariablesHelper.containsVariables("}foo${"));
-		assertTrue(VariablesHelper.containsVariables("${foo}"));
-	}
-	
-	@Test
-	public void testAddWorkspacePrefix() {
-		String value = "foo";
-		assertEquals(VariablesHelper.WORKSPACE_PREFIX+value+VariablesHelper.VARIABLE_SUFFIX, VariablesHelper.addWorkspacePrefix(value));
-		value = null;
-		assertNull(VariablesHelper.addWorkspacePrefix(value));
-		value = " ";
-		assertEquals(value, VariablesHelper.addWorkspacePrefix(value));
-		value = VariablesHelper.WORKSPACE_PREFIX+"bar"+VariablesHelper.VARIABLE_SUFFIX;
-		assertEquals(value, VariablesHelper.addWorkspacePrefix(value));
-	}
-	
-	@Test
-	public void testGetWorkspacePath() {
-		String value = "foo";
-		assertEquals(value, VariablesHelper.getWorkspacePath(value));
-		String varValue = VariablesHelper.addWorkspacePrefix(value);
-		assertEquals(value, VariablesHelper.getWorkspacePath(varValue));
-	}
-	
-	
-	@Test
-	public void testReplaceVariables() throws Exception {
-		String name = "foo";
-		String value = VariablesHelper.addWorkspacePrefix(name);
-		try {
-			VariablesHelper.replaceVariables(value);
-			fail("missing resource should fail to resolve");
-		} catch (OpenShiftCoreException e) {
-		}
-		assertEquals(value, VariablesHelper.replaceVariables(value, true));
-		IProject bar = getOrcreateProject(name);
-		assertEquals(bar.getLocation().toOSString(), VariablesHelper.replaceVariables(value));
-	}
-	
-	private IProject getOrcreateProject(String projectName) throws Exception {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		if (project.exists()) {
-			return project;
-		}
-		IProjectDescription desc = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-		project.create(desc, null);
-		project.open(null);
-		return project;
-	}
+    @Test
+    public void testContainsVariables() {
+        assertFalse(VariablesHelper.containsVariables(null));
+        assertFalse(VariablesHelper.containsVariables("  "));
+        assertFalse(VariablesHelper.containsVariables("}foo${"));
+        assertFalse(VariablesHelper.containsVariables("}foo${"));
+        assertTrue(VariablesHelper.containsVariables("${foo}"));
+    }
+
+    @Test
+    public void testAddWorkspacePrefix() {
+        String value = "foo";
+        assertEquals(VariablesHelper.WORKSPACE_PREFIX + value + VariablesHelper.VARIABLE_SUFFIX, VariablesHelper.addWorkspacePrefix(value));
+        value = null;
+        assertNull(VariablesHelper.addWorkspacePrefix(value));
+        value = " ";
+        assertEquals(value, VariablesHelper.addWorkspacePrefix(value));
+        value = VariablesHelper.WORKSPACE_PREFIX + "bar" + VariablesHelper.VARIABLE_SUFFIX;
+        assertEquals(value, VariablesHelper.addWorkspacePrefix(value));
+    }
+
+    @Test
+    public void testGetWorkspacePath() {
+        String value = "foo";
+        assertEquals(value, VariablesHelper.getWorkspacePath(value));
+        String varValue = VariablesHelper.addWorkspacePrefix(value);
+        assertEquals(value, VariablesHelper.getWorkspacePath(varValue));
+    }
+
+    @Test
+    public void testReplaceVariables() throws Exception {
+        String name = "foo";
+        String value = VariablesHelper.addWorkspacePrefix(name);
+        try {
+            VariablesHelper.replaceVariables(value);
+            fail("missing resource should fail to resolve");
+        } catch (OpenShiftCoreException e) {
+        }
+        assertEquals(value, VariablesHelper.replaceVariables(value, true));
+        IProject bar = getOrcreateProject(name);
+        assertEquals(bar.getLocation().toOSString(), VariablesHelper.replaceVariables(value));
+    }
+
+    private IProject getOrcreateProject(String projectName) throws Exception {
+        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+        if (project.exists()) {
+            return project;
+        }
+        IProjectDescription desc = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
+        project.create(desc, null);
+        project.open(null);
+        return project;
+    }
 }

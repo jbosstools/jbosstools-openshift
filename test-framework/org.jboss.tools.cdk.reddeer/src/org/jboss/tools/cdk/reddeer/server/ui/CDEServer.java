@@ -35,28 +35,28 @@ import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
  *
  */
 public class CDEServer extends Server {
-	
+
 	private static final String SSL_DIALOG_NAME = "Untrusted SSL Certificate";
-	
+
 	private static Logger log = Logger.getLogger(CDEServer.class);
-	
+
 	private boolean certificateAccepted = false;
-	
+
 	protected boolean cdk3 = false;
-	
+
 	public CDEServer(TreeItem item, ServersView view) {
 		super(item, view);
 	}
-	
+
 	public CDEServer(TreeItem item, ServersView view, boolean cdk3) {
 		super(item, view);
 		this.cdk3 = cdk3;
 	}
-	
+
 	public void setCertificateAccepted(boolean accepted) {
 		this.certificateAccepted = accepted;
 	}
-	
+
 	@Override
 	protected void operateServerState(String menuItem, final ServerState resultState) {
 		ServerState actualState = this.getLabel().getState();
@@ -76,16 +76,15 @@ public class CDEServer extends Server {
 			new WaitUntil(new ShellWithTextIsAvailable("Problem Occured"), TimePeriod.NORMAL);
 			new DefaultShell("Problem Occured");
 			new OkButton().click();
-			String message = "Problem occured when trying to " + menuItem
-					+ " CDK server adapter";
-			throw new CDKServerException(message);	
+			String message = "Problem occured when trying to " + menuItem + " CDK server adapter";
+			throw new CDKServerException(message);
 		} catch (WaitTimeoutExpiredException exc) {
 			log.info("Problem Occured dialog did not appear on CDK server " + menuItem);
 		}
 		try {
 			new WaitUntil(new ServerHasState(this, actualState), TimePeriod.NORMAL);
 			String message = "Server's state went back to " + actualState;
-			throw new CDKServerException(message);	
+			throw new CDKServerException(message);
 		} catch (WaitTimeoutExpiredException exc) {
 			log.info("Server's state changed and did not go back to " + actualState);
 		}
@@ -96,7 +95,7 @@ public class CDEServer extends Server {
 		new WaitWhile(new SystemJobIsRunning(new JobMatcher("Inspecting CDK environment")), TimePeriod.LONG);
 		log.debug("Operate server's state finished, the result server's state is: '" + getLabel().getState() + "'");
 	}
-	
+
 	/**
 	 * Methods waits for SSL Certificate dialog shell to appear and then confirms dialog, 
 	 * it might happen that certificate is already in place and no dialog is shown,
@@ -111,8 +110,7 @@ public class CDEServer extends Server {
 			new WaitWhile(new ShellWithTextIsAvailable(SSL_DIALOG_NAME));
 			setCertificateAccepted(true);
 		} catch (WaitTimeoutExpiredException ex) {
-			String message ="WaitTimeoutExpiredException occured when handling Certificate dialog. "
-					+ "Dialog has not been shown";
+			String message = "WaitTimeoutExpiredException occured when handling Certificate dialog. " + "Dialog has not been shown";
 			log.error(message);
 			throw new CDKServerException(message, ex);
 		}

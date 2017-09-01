@@ -33,84 +33,80 @@ import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
 public class OpenshiftEapProfileDetector implements IOpenshiftServerAdapterProfileDetector {
 
-	public static final String PROFILE = "openshift3.eap";
-	
-	private static final Collection<String> EAP_LIKE_KEYWORDS = 
-			Collections.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
-	
+    public static final String PROFILE = "openshift3.eap";
 
-	public OpenshiftEapProfileDetector() {
-		super();
-	}
+    private static final Collection<String> EAP_LIKE_KEYWORDS = Collections.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
 
-	@Override
-	public String getProfile() {
-		return PROFILE;
-	}
+    public OpenshiftEapProfileDetector() {
+        super();
+    }
 
-	@Override
-	public boolean detect(IConnection connection, IResource resource,
-			org.eclipse.core.resources.IProject eclipseProject) {
-		IBuildConfig buildConfig = getBuildConfig(connection, resource);
-		if (buildConfig == null) {
-			return false;
-		}
-		return isEapStyle(buildConfig);
-	}
+    @Override
+    public String getProfile() {
+        return PROFILE;
+    }
 
-	private IBuildConfig getBuildConfig(IConnection connection, IResource resource) {
-		if (resource == null || resource.getProject() == null || !(connection instanceof Connection)) {
-			return null;
-		}
-		Connection connectionInstance = (Connection) connection;
-		List<IBuildConfig> buildConfigs = 
-				connectionInstance.getResources(ResourceKind.BUILD_CONFIG, resource.getProject().getName());
-		if (buildConfigs == null) {
-			return null;
-		}
-		return ResourceUtils.getBuildConfigFor(resource, buildConfigs);
-	}
+    @Override
+    public boolean detect(IConnection connection, IResource resource, org.eclipse.core.resources.IProject eclipseProject) {
+        IBuildConfig buildConfig = getBuildConfig(connection, resource);
+        if (buildConfig == null) {
+            return false;
+        }
+        return isEapStyle(buildConfig);
+    }
 
-	@SuppressWarnings({ "deprecation" })
-	public boolean isEapStyle(IBuildConfig buildConfig) {
-		if (buildConfig == null) {
-			return false;
-		}
-		// First check buildconfig docker image name
-		IBuildStrategy strategy = buildConfig.getBuildStrategy();
-		DockerImageURI image = null;
-		boolean isEapStyle = false;
-		if (strategy instanceof ISourceBuildStrategy) {
-			image = ((ISourceBuildStrategy) strategy).getImage();
-		} else if (strategy instanceof ICustomBuildStrategy) {
-			image = ((ICustomBuildStrategy) strategy).getImage();
-		} else if (strategy instanceof IDockerBuildStrategy) {
-			image = ((IDockerBuildStrategy) strategy).getBaseImage();
-		} else if (strategy instanceof ISTIBuildStrategy) {
-			image = ((ISTIBuildStrategy) strategy).getImage();
-		}
-		if (image != null) {
-			isEapStyle = containsEapLikeKeywords(image.getName());
-		}
-		if (!isEapStyle) {
-			// Check template labels as a last resort
-			// not sure it's even possible to reach this point
-			Map<String, String> labels = buildConfig.getLabels();
-			if (labels != null) {
-				String template = labels.get("template");
-				isEapStyle = containsEapLikeKeywords(template);
-			}
-		}
-		return isEapStyle;
-	}
+    private IBuildConfig getBuildConfig(IConnection connection, IResource resource) {
+        if (resource == null || resource.getProject() == null || !(connection instanceof Connection)) {
+            return null;
+        }
+        Connection connectionInstance = (Connection)connection;
+        List<IBuildConfig> buildConfigs = connectionInstance.getResources(ResourceKind.BUILD_CONFIG, resource.getProject().getName());
+        if (buildConfigs == null) {
+            return null;
+        }
+        return ResourceUtils.getBuildConfigFor(resource, buildConfigs);
+    }
 
-	public boolean containsEapLikeKeywords(String label) {
-		if (org.apache.commons.lang.StringUtils.isBlank(label)) {
-			return false;
-		}
-		String lcLabel = label.toLowerCase();
-		boolean isEapLike = EAP_LIKE_KEYWORDS.stream().filter(kw -> lcLabel.contains(kw)).findFirst().isPresent();
-		return isEapLike;
-	}
+    @SuppressWarnings({ "deprecation" })
+    public boolean isEapStyle(IBuildConfig buildConfig) {
+        if (buildConfig == null) {
+            return false;
+        }
+        // First check buildconfig docker image name
+        IBuildStrategy strategy = buildConfig.getBuildStrategy();
+        DockerImageURI image = null;
+        boolean isEapStyle = false;
+        if (strategy instanceof ISourceBuildStrategy) {
+            image = ((ISourceBuildStrategy)strategy).getImage();
+        } else if (strategy instanceof ICustomBuildStrategy) {
+            image = ((ICustomBuildStrategy)strategy).getImage();
+        } else if (strategy instanceof IDockerBuildStrategy) {
+            image = ((IDockerBuildStrategy)strategy).getBaseImage();
+        } else if (strategy instanceof ISTIBuildStrategy) {
+            image = ((ISTIBuildStrategy)strategy).getImage();
+        }
+        if (image != null) {
+            isEapStyle = containsEapLikeKeywords(image.getName());
+        }
+        if (!isEapStyle) {
+            // Check template labels as a last resort
+            // not sure it's even possible to reach this point
+            Map<String, String> labels = buildConfig.getLabels();
+            if (labels != null) {
+                String template = labels.get("template");
+                isEapStyle = containsEapLikeKeywords(template);
+            }
+        }
+        return isEapStyle;
+    }
+
+    public boolean containsEapLikeKeywords(String label) {
+        if (org.apache.commons.lang.StringUtils.isBlank(label)) {
+            return false;
+        }
+        String lcLabel = label.toLowerCase();
+        boolean isEapLike = EAP_LIKE_KEYWORDS.stream().filter(kw -> lcLabel.contains(kw)).findFirst().isPresent();
+        return isEapLike;
+    }
 
 }

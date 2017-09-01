@@ -18,17 +18,17 @@ import org.jboss.tools.openshift.internal.js.storage.SessionStorage;
 
 public class OpenShiftNodejsPublishController extends OpenShiftPublishController implements ISubsystemController {
 
-	public OpenShiftNodejsPublishController() {
-		super();
-	}
+    public OpenShiftNodejsPublishController() {
+        super();
+    }
 
-	@Override
-	public void publishStart(final IProgressMonitor monitor) throws CoreException {
-		syncDownFailed = false;
-		if (SessionStorage.get().containsKey(getServer())) {
-			return;
-		}
-		super.publishStart(monitor);
-	}
+    @Override
+    public void publishStart(final IProgressMonitor monitor) throws CoreException {
+        syncDownFailed = false;
+        if (SessionStorage.get().containsKey(getServer())) {
+            return;
+        }
+        super.publishStart(monitor);
+    }
 
 }

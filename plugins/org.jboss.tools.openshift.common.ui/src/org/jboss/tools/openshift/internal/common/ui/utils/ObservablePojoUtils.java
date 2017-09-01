@@ -19,22 +19,20 @@ import org.jboss.tools.common.databinding.IObservablePojo;
  */
 public class ObservablePojoUtils {
 
-	private ObservablePojoUtils() {
-	}
+    private ObservablePojoUtils() {
+    }
 
-	public static void addPropertyChangeListener(PropertyChangeListener listener, Object object) {
-		if (!(object instanceof IObservablePojo)) {
-			return;
-		}
-		((IObservablePojo) object).addPropertyChangeListener(listener);
-	}
+    public static void addPropertyChangeListener(PropertyChangeListener listener, Object object) {
+        if (!(object instanceof IObservablePojo)) {
+            return;
+        }
+        ((IObservablePojo)object).addPropertyChangeListener(listener);
+    }
 
-	public static void removePropertyChangeListener(PropertyChangeListener listener, Object object) {
-		if (listener != null
-				&& object instanceof IObservablePojo) {
-			((IObservablePojo) object).removePropertyChangeListener(listener);
-		}
-	}
+    public static void removePropertyChangeListener(PropertyChangeListener listener, Object object) {
+        if (listener != null && object instanceof IObservablePojo) {
+            ((IObservablePojo)object).removePropertyChangeListener(listener);
+        }
+    }
 
-	
 }

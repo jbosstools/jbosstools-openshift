@@ -29,54 +29,55 @@ import com.openshift.client.OpenShiftSSHOperationException;
  */
 public class CreateSSHSessionJob extends Job {
 
-	private IApplication application;
+    private IApplication application;
 
-	private boolean validSession = false;
+    private boolean validSession = false;
 
-	private LoadApplicationJob applicationJob;
+    private LoadApplicationJob applicationJob;
 
-	public CreateSSHSessionJob(final IApplication application) {
-		super("Verifying SSH session...");
-		this.application = application;
-	}
+    public CreateSSHSessionJob(final IApplication application) {
+        super("Verifying SSH session...");
+        this.application = application;
+    }
 
-	public CreateSSHSessionJob(final LoadApplicationJob job) {
-		super("Verifying SSH session...");
-		this.applicationJob = job;
-	}
+    public CreateSSHSessionJob(final LoadApplicationJob job) {
+        super("Verifying SSH session...");
+        this.applicationJob = job;
+    }
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		IApplication application = getApplication();
-		if (application == null) {
-			return ExpressUIActivator.createErrorStatus("Could not verify SSH seesion. Application was not found.");
-		}
-		try {		
-			final boolean hasAlreadySSHSession = application.hasSSHSession();
-			if (!hasAlreadySSHSession) {
-				Logger.debug(NLS.bind("Opening a new SSH Session for application {0}.", application.getName()));
-				Session session = SSHSessionRepository.getInstance().getSession(application);
-				application.setSSHSession(session);
-			}
-			// now, check if the session is valid (ie, not null and still
-			// connected)
-			this.validSession = application.hasSSHSession();
-			return Status.OK_STATUS;
-		} catch (OpenShiftSSHOperationException e) {
-			return ExpressUIActivator.createErrorStatus(NLS.bind("Could not verify SSH session for application {0}", application.getName()));
-		}
-	}
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+        IApplication application = getApplication();
+        if (application == null) {
+            return ExpressUIActivator.createErrorStatus("Could not verify SSH seesion. Application was not found.");
+        }
+        try {
+            final boolean hasAlreadySSHSession = application.hasSSHSession();
+            if (!hasAlreadySSHSession) {
+                Logger.debug(NLS.bind("Opening a new SSH Session for application {0}.", application.getName()));
+                Session session = SSHSessionRepository.getInstance().getSession(application);
+                application.setSSHSession(session);
+            }
+            // now, check if the session is valid (ie, not null and still
+            // connected)
+            this.validSession = application.hasSSHSession();
+            return Status.OK_STATUS;
+        } catch (OpenShiftSSHOperationException e) {
+            return ExpressUIActivator
+                    .createErrorStatus(NLS.bind("Could not verify SSH session for application {0}", application.getName()));
+        }
+    }
 
-	private IApplication getApplication() {
-		if (application != null) {
-			return application;
-		} else {
-			return applicationJob.getApplication();
-		}
-	}
+    private IApplication getApplication() {
+        if (application != null) {
+            return application;
+        } else {
+            return applicationJob.getApplication();
+        }
+    }
 
-	public final boolean isValidSession() {
-		return validSession;
-	}
+    public final boolean isValidSession() {
+        return validSession;
+    }
 
 }

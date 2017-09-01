@@ -19,35 +19,34 @@ import org.jboss.tools.common.databinding.ObservablePojo;
 
 public class PojoEventBridge implements PropertyChangeListener {
 
-	private IObservablePojo destination;
-	private String destinationProperty;
+    private IObservablePojo destination;
+    private String destinationProperty;
 
-	public PojoEventBridge() {
-	}
+    public PojoEventBridge() {
+    }
 
-	public PojoEventBridge(String sourceProperty, ObservablePojo source, String destinationProperty, ObservablePojo destination) {
-		listenTo(sourceProperty, source);
-		forwardTo(destinationProperty, destination);
-	}
+    public PojoEventBridge(String sourceProperty, ObservablePojo source, String destinationProperty, ObservablePojo destination) {
+        listenTo(sourceProperty, source);
+        forwardTo(destinationProperty, destination);
+    }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent event) {
-		if (destination == null 
-				|| destinationProperty == null) {
-			return;
-		}
-		
-		destination.firePropertyChange(destinationProperty, event.getOldValue(), event.getNewValue());
-	}
-	
-	public PojoEventBridge listenTo(String sourceProperty, IObservablePojo source) {
-		source.addPropertyChangeListener(sourceProperty, this);
-		return this;
-	}
-		
-	public PojoEventBridge forwardTo(String destinationProperty, ObservablePojo destination) {
-		this.destinationProperty = destinationProperty;
-		this.destination = destination;
-		return this;
-	}
+    @Override
+    public void propertyChange(PropertyChangeEvent event) {
+        if (destination == null || destinationProperty == null) {
+            return;
+        }
+
+        destination.firePropertyChange(destinationProperty, event.getOldValue(), event.getNewValue());
+    }
+
+    public PojoEventBridge listenTo(String sourceProperty, IObservablePojo source) {
+        source.addPropertyChangeListener(sourceProperty, this);
+        return this;
+    }
+
+    public PojoEventBridge forwardTo(String destinationProperty, ObservablePojo destination) {
+        this.destinationProperty = destinationProperty;
+        this.destination = destination;
+        return this;
+    }
 }

@@ -18,61 +18,62 @@ import java.util.Collection;
  */
 public interface IConnectionsFactory {
 
-	/** connection factory for OpenShift 2 */
-	public static final String CONNECTIONFACTORY_EXPRESS_ID = "org.jboss.tools.openshift.express.core.ConnectionFactory";
+    /** connection factory for OpenShift 2 */
+    public static final String CONNECTIONFACTORY_EXPRESS_ID = "org.jboss.tools.openshift.express.core.ConnectionFactory";
 
-	/** connection factory for OpenShift 3 */
-	public static final String CONNECTIONFACTORY_OPENSHIFT_ID = "org.jboss.tools.openshift.core.ConnectionFactory";
-	
-	/**
-	 * Creates a connections for the given host. Queries the connection
-	 * factories that are registered and returns the first one that can create a
-	 * connection. Returns <code>null</code> otherwise
-	 * 
-	 * @param host
-	 * @return
-	 * @throws IOException
-	 */
-	public IConnection create(String host) throws IOException;
+    /** connection factory for OpenShift 3 */
+    public static final String CONNECTIONFACTORY_OPENSHIFT_ID = "org.jboss.tools.openshift.core.ConnectionFactory";
 
-	/**
-	 * Returns a connection factory that can create connections for the given host.
-	 * 
-	 * @param host the host to get a factory for
-	 * @return the connection factory
-	 * @throws IOException
-	 */
-	public IConnectionFactory getFactory(String host) throws IOException;
-	
-	/**
-	 * Returns all connection factories that are registered to this composite
-	 * factory.
-	 * 
-	 * @return
-	 */
-	public Collection<IConnectionFactory> getAll();
-	
-	/**
-	 * Returns all connection factories that can create connections of the given
-	 * type. Returns all connection factories if the given type is {@code null}
-	 * 
-	 * @return
-	 */
-	public <T extends IConnection> Collection<IConnectionFactory> getAll(Class<T> clazz);
-	/**
-	 * Returns the connection factory that is registered to this composite
-	 * factory for the given id. Returns <code>null</code> otherwise.
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public IConnectionFactory getById(String id);
+    /**
+     * Creates a connections for the given host. Queries the connection
+     * factories that are registered and returns the first one that can create a
+     * connection. Returns <code>null</code> otherwise
+     * 
+     * @param host
+     * @return
+     * @throws IOException
+     */
+    public IConnection create(String host) throws IOException;
 
-	/**
-	 * Returns a factory that is capable of creating a connection that can connect
-	 * @param host
-	 * @return
-	 * @throws IOException
-	 */
-	public <T extends IConnection> IConnectionFactory getByConnection(Class<T> clazz);
+    /**
+     * Returns a connection factory that can create connections for the given host.
+     * 
+     * @param host the host to get a factory for
+     * @return the connection factory
+     * @throws IOException
+     */
+    public IConnectionFactory getFactory(String host) throws IOException;
+
+    /**
+     * Returns all connection factories that are registered to this composite
+     * factory.
+     * 
+     * @return
+     */
+    public Collection<IConnectionFactory> getAll();
+
+    /**
+     * Returns all connection factories that can create connections of the given
+     * type. Returns all connection factories if the given type is {@code null}
+     * 
+     * @return
+     */
+    public <T extends IConnection> Collection<IConnectionFactory> getAll(Class<T> clazz);
+
+    /**
+     * Returns the connection factory that is registered to this composite
+     * factory for the given id. Returns <code>null</code> otherwise.
+     * 
+     * @param id
+     * @return
+     */
+    public IConnectionFactory getById(String id);
+
+    /**
+     * Returns a factory that is capable of creating a connection that can connect
+     * @param host
+     * @return
+     * @throws IOException
+     */
+    public <T extends IConnection> IConnectionFactory getByConnection(Class<T> clazz);
 }

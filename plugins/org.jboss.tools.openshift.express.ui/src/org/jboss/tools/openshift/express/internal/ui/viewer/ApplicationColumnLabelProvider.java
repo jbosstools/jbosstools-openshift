@@ -19,11 +19,11 @@ import com.openshift.client.IApplication;
  */
 public class ApplicationColumnLabelProvider extends ColumnLabelProvider {
 
-	@Override
-	public String getText(Object element) {
-		if (!(element instanceof IApplication)) {
-			return super.getText(element);
-		}
-		return ((IApplication) element).getName();
-	}
+    @Override
+    public String getText(Object element) {
+        if (!(element instanceof IApplication)) {
+            return super.getText(element);
+        }
+        return ((IApplication)element).getName();
+    }
 }

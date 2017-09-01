@@ -32,300 +32,294 @@ import org.eclipse.core.runtime.Assert;
  */
 public class FileUtils {
 
-	private static final String EXT_TAR_GZ = ".tar.gz";
-	private static final String NUMERIC_SUFFIX_FILENAME_PATTERN = "{0}/{1}({2}){3}";
-	private static final Pattern NUMERIC_SUFFIX_FILENAME_REGEX = Pattern.compile("(.*)\\([0-9]+\\)");
+    private static final String EXT_TAR_GZ = ".tar.gz";
+    private static final String NUMERIC_SUFFIX_FILENAME_PATTERN = "{0}/{1}({2}){3}";
+    private static final Pattern NUMERIC_SUFFIX_FILENAME_REGEX = Pattern.compile("(.*)\\([0-9]+\\)");
 
-	private static final byte[] buffer = new byte[1024];
-	
-	private FileUtils() {
-		// private default constructor for utils class
-	}
+    private static final byte[] buffer = new byte[1024];
 
-	public static boolean canRead(String path) {
-		if (path == null) {
-			return false;
-		}
-		return canRead(new File(path));
-	}
+    private FileUtils() {
+        // private default constructor for utils class
+    }
 
-	public static boolean canRead(File file) {
-		if (file == null) {
-			return false;
-		}
-		return file.canRead();
-	}
+    public static boolean canRead(String path) {
+        if (path == null) {
+            return false;
+        }
+        return canRead(new File(path));
+    }
 
-	public static boolean canWrite(String path) {
-		if (path == null) {
-			return false;
-		}
-		return canWrite(new File(path));
-	}
-	
-	public static boolean canWrite(File file) {
-		if (file == null) {
-			return false;
-		}
-		if (!file.exists()) {
-			return canWrite(file.getParent());
-		}
-		return file.canWrite();
-	}
-	
-	public static boolean exists(File file) {
-		return file != null
-				&& file.exists();
-	}
+    public static boolean canRead(File file) {
+        if (file == null) {
+            return false;
+        }
+        return file.canRead();
+    }
 
-	public static boolean isDirectory(File file) {
-		return file != null
-				&& file.isDirectory();
-	}
+    public static boolean canWrite(String path) {
+        if (path == null) {
+            return false;
+        }
+        return canWrite(new File(path));
+    }
 
-	public static File getSystemTmpFolder() {
-		String tmpFolder = System.getProperty("java.io.tmpdir");
-		return new File(tmpFolder);
-	}
+    public static boolean canWrite(File file) {
+        if (file == null) {
+            return false;
+        }
+        if (!file.exists()) {
+            return canWrite(file.getParent());
+        }
+        return file.canWrite();
+    }
 
-	public static File getRandomTmpFolder() {
-		String randomName = String.valueOf(System.currentTimeMillis());
-		return new File(getSystemTmpFolder(), randomName);
-	}
+    public static boolean exists(File file) {
+        return file != null && file.exists();
+    }
 
-	/**
-	 * Copies the ginve source to the given destination recursively. Overwrites
-	 * existing files/directory on the destination path if told so.
-	 * 
-	 * @param source
-	 *            the source file/directory to copy
-	 * @param destination
-	 *            the destination to copy to
-	 * @param overwrite
-	 *            overwrites existing files/directories if <code>true</code>.
-	 *            Does not overwrite otherwise.
-	 * @throws IOException
-	 */
-	public static void copy(File source, File destination, boolean overwrite) throws IOException {
-		if (!exists(source)
-				|| destination == null) {
-			return;
-		}
+    public static boolean isDirectory(File file) {
+        return file != null && file.isDirectory();
+    }
 
-		if (source.isDirectory()) {
-			copyDirectory(source, destination, overwrite);
-		} else {
-			copyFile(source, destination, overwrite);
-		}
-	}
+    public static File getSystemTmpFolder() {
+        String tmpFolder = System.getProperty("java.io.tmpdir");
+        return new File(tmpFolder);
+    }
 
-	private static void copyDirectory(File source, File destination, boolean overwrite) throws IOException {
-		Assert.isLegal(source != null);
-		Assert.isLegal(source.isDirectory());
-		Assert.isLegal(destination != null);
+    public static File getRandomTmpFolder() {
+        String randomName = String.valueOf(System.currentTimeMillis());
+        return new File(getSystemTmpFolder(), randomName);
+    }
 
-		destination = getDestinationDirectory(source, destination);
+    /**
+     * Copies the ginve source to the given destination recursively. Overwrites
+     * existing files/directory on the destination path if told so.
+     * 
+     * @param source
+     *            the source file/directory to copy
+     * @param destination
+     *            the destination to copy to
+     * @param overwrite
+     *            overwrites existing files/directories if <code>true</code>.
+     *            Does not overwrite otherwise.
+     * @throws IOException
+     */
+    public static void copy(File source, File destination, boolean overwrite) throws IOException {
+        if (!exists(source) || destination == null) {
+            return;
+        }
 
-		if (!destination.exists()) {
-			destination.mkdir();
-			copyPermissions(source, destination);
-		}
+        if (source.isDirectory()) {
+            copyDirectory(source, destination, overwrite);
+        } else {
+            copyFile(source, destination, overwrite);
+        }
+    }
 
-		for (File content : source.listFiles()) {
-			if (content.isDirectory()) {
-				copyDirectory(content, new File(destination, content.getName()), overwrite);
-			} else {
-				copyFile(content, new File(destination, content.getName()), overwrite);
-			}
-		}
-	}
+    private static void copyDirectory(File source, File destination, boolean overwrite) throws IOException {
+        Assert.isLegal(source != null);
+        Assert.isLegal(source.isDirectory());
+        Assert.isLegal(destination != null);
 
-	private static File getDestinationDirectory(File source, File destination) {
-		if (!source.getName().equals(destination.getName())) {
-			destination = new File(destination, source.getName());
-		}
-		return destination;
-	}
+        destination = getDestinationDirectory(source, destination);
 
-	private static void copyFile(File source, File destination, boolean overwrite) throws IOException {
-		Assert.isLegal(source != null);
-		Assert.isLegal(source.isFile());
-		Assert.isLegal(destination != null);
+        if (!destination.exists()) {
+            destination.mkdir();
+            copyPermissions(source, destination);
+        }
 
-		destination = getDestinationFile(source, destination);
+        for (File content : source.listFiles()) {
+            if (content.isDirectory()) {
+                copyDirectory(content, new File(destination, content.getName()), overwrite);
+            } else {
+                copyFile(content, new File(destination, content.getName()), overwrite);
+            }
+        }
+    }
 
-		if (exists(destination)
-				&& !overwrite) {
-			return;
-		}
+    private static File getDestinationDirectory(File source, File destination) {
+        if (!source.getName().equals(destination.getName())) {
+            destination = new File(destination, source.getName());
+        }
+        return destination;
+    }
 
-		if (isDirectory(destination)) {
-			if (!overwrite) {
-				return;
-			}
-			destination.delete();
-		}
+    private static void copyFile(File source, File destination, boolean overwrite) throws IOException {
+        Assert.isLegal(source != null);
+        Assert.isLegal(source.isFile());
+        Assert.isLegal(destination != null);
 
-		writeTo(source, destination);
-	}
+        destination = getDestinationFile(source, destination);
 
-	private static File getDestinationFile(File source, File destination) {
-		if (!source.getName().equals(destination.getName())) {
-			destination = new File(destination, source.getName());
-		}
-		return destination;
-	}
+        if (exists(destination) && !overwrite) {
+            return;
+        }
 
-	private static final void writeTo(File source, File destination) throws IOException {
-		Assert.isLegal(source != null);
-		Assert.isLegal(destination != null);
+        if (isDirectory(destination)) {
+            if (!overwrite) {
+                return;
+            }
+            destination.delete();
+        }
 
-		writeTo(new BufferedInputStream(new FileInputStream(source)), destination);
-		copyPermissions(source, destination);
-	}
+        writeTo(source, destination);
+    }
 
-	public static final void writeTo(String content, File destination) throws FileNotFoundException {
-		PrintWriter writer = new PrintWriter(destination);
-		writer.write(content);
-		writer.flush();
-		writer.close();
-	}
+    private static File getDestinationFile(File source, File destination) {
+        if (!source.getName().equals(destination.getName())) {
+            destination = new File(destination, source.getName());
+        }
+        return destination;
+    }
 
-	private static final void writeTo(InputStream in, File destination) throws IOException {
-		Assert.isLegal(in != null);
-		Assert.isLegal(destination != null);
+    private static final void writeTo(File source, File destination) throws IOException {
+        Assert.isLegal(source != null);
+        Assert.isLegal(destination != null);
 
-		try (OutputStream out = new BufferedOutputStream(new FileOutputStream(destination))) {
-			for (int read = -1; (read = in.read(buffer)) != -1;) {
-				out.write(buffer, 0, read);
-			}
-			out.flush();
-		} finally {
-			silentlyClose(in);
-		}
-	}
+        writeTo(new BufferedInputStream(new FileInputStream(source)), destination);
+        copyPermissions(source, destination);
+    }
 
-	/**
-	 * Replicates the owner permissions from the source to the destination. Due
-	 * to limitation in java6 this is the best we can do (there's no way in
-	 * java6 to know if rights are due to owner or group)
-	 * 
-	 * @param source
-	 * @param destination
-	 * 
-	 * @see File#canRead()
-	 * @see File#setReadable(boolean)
-	 * @see File#canWrite()
-	 * @see File#setWritable(boolean)
-	 * @see File#canExecute()
-	 * @see File#setExecutable(boolean)
-	 */
-	private static void copyPermissions(File source, File destination) {
-		Assert.isLegal(source != null);
-		Assert.isLegal(destination != null);
+    public static final void writeTo(String content, File destination) throws FileNotFoundException {
+        PrintWriter writer = new PrintWriter(destination);
+        writer.write(content);
+        writer.flush();
+        writer.close();
+    }
 
-		destination.setReadable(source.canRead());
-		destination.setWritable(source.canWrite());
-		destination.setExecutable(source.canExecute());
-	}
+    private static final void writeTo(InputStream in, File destination) throws IOException {
+        Assert.isLegal(in != null);
+        Assert.isLegal(destination != null);
 
-	private static void silentlyClose(InputStream in) {
-		try {
-			if (in != null) {
-				in.close();
-			}
-		} catch (IOException e) {
-			// ignore
-		}
-	}
+        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(destination))) {
+            for (int read = -1; (read = in.read(buffer)) != -1;) {
+                out.write(buffer, 0, read);
+            }
+            out.flush();
+        } finally {
+            silentlyClose(in);
+        }
+    }
 
-	private static void silentlyClose(OutputStream out) {
-		try {
-			if (out != null) {
-				out.close();
-			}
-		} catch (IOException e) {
-			// ignore
-		}
-	}
+    /**
+     * Replicates the owner permissions from the source to the destination. Due
+     * to limitation in java6 this is the best we can do (there's no way in
+     * java6 to know if rights are due to owner or group)
+     * 
+     * @param source
+     * @param destination
+     * 
+     * @see File#canRead()
+     * @see File#setReadable(boolean)
+     * @see File#canWrite()
+     * @see File#setWritable(boolean)
+     * @see File#canExecute()
+     * @see File#setExecutable(boolean)
+     */
+    private static void copyPermissions(File source, File destination) {
+        Assert.isLegal(source != null);
+        Assert.isLegal(destination != null);
 
-	public static String getParent(String filepath) {
-		String parent = null;
-		if (!StringUtils.isEmpty(filepath)) {
-			parent = new File(filepath).getParent();
-		}
-		return parent;
-	}
+        destination.setReadable(source.canRead());
+        destination.setWritable(source.canWrite());
+        destination.setExecutable(source.canExecute());
+    }
 
-	/**
-	 * Returns the given filepath with a suffix if the given filepath already
-	 * exists.
-	 * 
-	 * @param filepath
-	 * @return the filepath or filepath + numeric suffix if not available.
-	 * 
-	 * @see #NUMERIC_SUFFIX_FILENAME_PATTERN
-	 */
-	public static String getAvailableFilepath(String filepath) {
-		if (StringUtils.isEmpty(filepath)) {
-			return filepath;
-		}
-		String extension = getExtension(filepath);
-		String dir = FilenameUtils.getFullPathNoEndSeparator(filepath);
-		String filenameWithoutExtension = stripNumericSuffix(getBaseName(filepath));
+    private static void silentlyClose(InputStream in) {
+        try {
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException e) {
+            // ignore
+        }
+    }
 
-		String newFilename = filepath;
-		int i = 1;
-		while (new File(newFilename).exists()) {
-			newFilename = MessageFormat.format(NUMERIC_SUFFIX_FILENAME_PATTERN, dir, filenameWithoutExtension, i++, extension);
-		}
-		return newFilename;
-	}
+    private static void silentlyClose(OutputStream out) {
+        try {
+            if (out != null) {
+                out.close();
+            }
+        } catch (IOException e) {
+            // ignore
+        }
+    }
 
-	/**
-	 * Strips the numeric suffix off the given filepath if present. Returns the
-	 * given filepath otherwise.
-	 * 
-	 * @param filepath
-	 * @return
-	 */
-	private static String stripNumericSuffix(String filepath) {
-		if (StringUtils.isEmpty(filepath)) {
-			return filepath;
-		}
-		Matcher matcher = NUMERIC_SUFFIX_FILENAME_REGEX.matcher(filepath);
-		if (!matcher.matches()
-				|| matcher.groupCount() < 1) {
-			return filepath;
-		}
-		return matcher.group(1);
-	}
+    public static String getParent(String filepath) {
+        String parent = null;
+        if (!StringUtils.isEmpty(filepath)) {
+            parent = new File(filepath).getParent();
+        }
+        return parent;
+    }
 
-	private static String getExtension(String filename) {
-		if (StringUtils.isEmpty(filename)) {
-			return filename;
-		}
-		if(filename.endsWith(EXT_TAR_GZ)){
-			return EXT_TAR_GZ;
-		}
-		return FilenameUtils.getExtension(filename);
-	}
+    /**
+     * Returns the given filepath with a suffix if the given filepath already
+     * exists.
+     * 
+     * @param filepath
+     * @return the filepath or filepath + numeric suffix if not available.
+     * 
+     * @see #NUMERIC_SUFFIX_FILENAME_PATTERN
+     */
+    public static String getAvailableFilepath(String filepath) {
+        if (StringUtils.isEmpty(filepath)) {
+            return filepath;
+        }
+        String extension = getExtension(filepath);
+        String dir = FilenameUtils.getFullPathNoEndSeparator(filepath);
+        String filenameWithoutExtension = stripNumericSuffix(getBaseName(filepath));
 
-	/**
-	 * Returns the filename without the suffix
-	 * 
-	 * @param filename
-	 * @return
-	 */
-	public static String getBaseName(String filename) {
-		if (StringUtils.isEmpty(filename)) {
-			return filename;
-		}
-		if (filename.endsWith(EXT_TAR_GZ)) {
-			filename = filename.substring(0,
-					filename.length() - EXT_TAR_GZ.length());
-		}
+        String newFilename = filepath;
+        int i = 1;
+        while (new File(newFilename).exists()) {
+            newFilename = MessageFormat.format(NUMERIC_SUFFIX_FILENAME_PATTERN, dir, filenameWithoutExtension, i++, extension);
+        }
+        return newFilename;
+    }
 
-		return FilenameUtils.getBaseName(filename);
-	}
+    /**
+     * Strips the numeric suffix off the given filepath if present. Returns the
+     * given filepath otherwise.
+     * 
+     * @param filepath
+     * @return
+     */
+    private static String stripNumericSuffix(String filepath) {
+        if (StringUtils.isEmpty(filepath)) {
+            return filepath;
+        }
+        Matcher matcher = NUMERIC_SUFFIX_FILENAME_REGEX.matcher(filepath);
+        if (!matcher.matches() || matcher.groupCount() < 1) {
+            return filepath;
+        }
+        return matcher.group(1);
+    }
+
+    private static String getExtension(String filename) {
+        if (StringUtils.isEmpty(filename)) {
+            return filename;
+        }
+        if (filename.endsWith(EXT_TAR_GZ)) {
+            return EXT_TAR_GZ;
+        }
+        return FilenameUtils.getExtension(filename);
+    }
+
+    /**
+     * Returns the filename without the suffix
+     * 
+     * @param filename
+     * @return
+     */
+    public static String getBaseName(String filename) {
+        if (StringUtils.isEmpty(filename)) {
+            return filename;
+        }
+        if (filename.endsWith(EXT_TAR_GZ)) {
+            filename = filename.substring(0, filename.length() - EXT_TAR_GZ.length());
+        }
+
+        return FilenameUtils.getBaseName(filename);
+    }
 }

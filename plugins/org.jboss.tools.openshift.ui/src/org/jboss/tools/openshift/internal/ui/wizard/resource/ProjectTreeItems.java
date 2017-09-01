@@ -26,33 +26,33 @@ import com.openshift.restclient.ResourceKind;
  */
 public class ProjectTreeItems implements IModelFactory {
 
-	public static final ProjectTreeItems INSTANCE = new ProjectTreeItems();
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> List<T> createChildren(Object parent) {
-		if (parent instanceof Connection) {
-			return (List<T>) ((Connection) parent).getResources(ResourceKind.PROJECT);
-		}
-		return Collections.emptyList();
-	}
+    public static final ProjectTreeItems INSTANCE = new ProjectTreeItems();
 
-	public List<ObservableTreeItem> create(Collection<?> openShiftObjects) {
-		if (openShiftObjects == null) {
-			return Collections.emptyList();
-		}
-		List<ObservableTreeItem> items = new ArrayList<>();
-		for (Object openShiftObject : openShiftObjects) {
-			ObservableTreeItem item = create(openShiftObject);
-			if (item != null) {
-				items.add(item);
-			}
-		}
-		return items;
-	}
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> List<T> createChildren(Object parent) {
+        if (parent instanceof Connection) {
+            return (List<T>)((Connection)parent).getResources(ResourceKind.PROJECT);
+        }
+        return Collections.emptyList();
+    }
 
-	@Override
-	public ObservableTreeItem create(Object object) {
-		return new ObservableTreeItem(object, this);
-	}
+    public List<ObservableTreeItem> create(Collection<?> openShiftObjects) {
+        if (openShiftObjects == null) {
+            return Collections.emptyList();
+        }
+        List<ObservableTreeItem> items = new ArrayList<>();
+        for (Object openShiftObject : openShiftObjects) {
+            ObservableTreeItem item = create(openShiftObject);
+            if (item != null) {
+                items.add(item);
+            }
+        }
+        return items;
+    }
+
+    @Override
+    public ObservableTreeItem create(Object object) {
+        return new ObservableTreeItem(object, this);
+    }
 }

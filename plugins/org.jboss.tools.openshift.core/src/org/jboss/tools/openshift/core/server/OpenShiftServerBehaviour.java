@@ -27,44 +27,43 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  * This server requires caching the Publish controller, since the publish controller maintains some state between calls
  */
 public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
-	public static final String PROFILE_OPENSHIFT3 = "openshift3";
-	
-	private static final String CURRENTLY_RESTARTING = "openshift.server.restarting";
-	
-	@Override
-	public void setServerStarted() {
-		super.setServerStarted();
-		launchPostStartupJobs();
-	}
+    public static final String PROFILE_OPENSHIFT3 = "openshift3";
 
-	@Override
-	public void restart(String launchMode) throws CoreException {
-		setRestarting(true);
-		super.restart(launchMode);
-	}
+    private static final String CURRENTLY_RESTARTING = "openshift.server.restarting";
 
-	public boolean isRestarting() {
-		return Boolean.TRUE.equals(getSharedData(CURRENTLY_RESTARTING));
-	}
-	
-	public void setRestarting(boolean restarting) {
-		putSharedData(CURRENTLY_RESTARTING, restarting);
-	}
+    @Override
+    public void setServerStarted() {
+        super.setServerStarted();
+        launchPostStartupJobs();
+    }
 
-	protected void launchPostStartupJobs() {
-		try {
-			// Once the server is marked started, we want to update the deployment scanners and module publish state
-			IServer s = getServer();
-			IModuleStateController modules = getModuleStateController();
-			Job moduleStateJob = null;
-			if( modules != null ) {
-				moduleStateJob = new UpdateModuleStateJob(modules, s, true, 10000);
-				moduleStateJob.schedule();
-			}
-		} catch(CoreException ce) {
-			OpenShiftCoreActivator.pluginLog().logError(ce);
-		}
-	}
+    @Override
+    public void restart(String launchMode) throws CoreException {
+        setRestarting(true);
+        super.restart(launchMode);
+    }
 
+    public boolean isRestarting() {
+        return Boolean.TRUE.equals(getSharedData(CURRENTLY_RESTARTING));
+    }
+
+    public void setRestarting(boolean restarting) {
+        putSharedData(CURRENTLY_RESTARTING, restarting);
+    }
+
+    protected void launchPostStartupJobs() {
+        try {
+            // Once the server is marked started, we want to update the deployment scanners and module publish state
+            IServer s = getServer();
+            IModuleStateController modules = getModuleStateController();
+            Job moduleStateJob = null;
+            if (modules != null) {
+                moduleStateJob = new UpdateModuleStateJob(modules, s, true, 10000);
+                moduleStateJob.schedule();
+            }
+        } catch (CoreException ce) {
+            OpenShiftCoreActivator.pluginLog().logError(ce);
+        }
+    }
 
 }

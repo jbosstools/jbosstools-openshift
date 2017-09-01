@@ -19,7 +19,6 @@ import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
 
-
 /**
  * Wait condition to wait until a specific property value of a resource 
  * is updated.
@@ -28,12 +27,12 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
  *
  */
 public class ResourceIsUpdated extends AbstractWaitCondition {
-	
+
 	private OpenShiftResource resource;
-	
+
 	private String[] propertyName;
 	private Matcher<String> propertyValueMatcher;
-	
+
 	/**
 	 * Constructor for waiting for a update of specific resource property value.
 	 * 
@@ -43,25 +42,25 @@ public class ResourceIsUpdated extends AbstractWaitCondition {
 	 * @param propertyName resource property name
 	 * @param propertyValueMatcher resource property value matcher
 	 */
-	public ResourceIsUpdated(String project, Resource resourceType, String resourceName,
-			String[] propertyName, Matcher<String> propertyValueMatcher) {
+	public ResourceIsUpdated(String project, Resource resourceType, String resourceName, String[] propertyName,
+			Matcher<String> propertyValueMatcher) {
 
 		this.propertyName = propertyName;
 		this.propertyValueMatcher = propertyValueMatcher;
-		
+
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		new PropertiesView().open();
 		explorer.open();
-		List<OpenShiftResource> resources = explorer.getOpenShift3Connection().
-				getProject(project).getOpenShiftResources(resourceType, true);
-		for (OpenShiftResource resource: resources) {
+		List<OpenShiftResource> resources = explorer.getOpenShift3Connection().getProject(project).getOpenShiftResources(resourceType,
+				true);
+		for (OpenShiftResource resource : resources) {
 			if (resource.getName().equals(resourceName)) {
 				this.resource = resource;
 				break;
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean test() {
 		resource.select();

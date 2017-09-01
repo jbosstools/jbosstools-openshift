@@ -28,37 +28,36 @@ import com.openshift.client.OpenShiftEndpointException;
  */
 public class NewDomainWizard extends AbstractOpenShiftWizard<NewDomainWizardModel> {
 
-	public NewDomainWizard(ExpressConnection connection) {
-		super("Create Domain", new NewDomainWizardModel(connection));
-	}
+    public NewDomainWizard(ExpressConnection connection) {
+        super("Create Domain", new NewDomainWizardModel(connection));
+    }
 
-	@Override
-	public boolean performFinish() {
-		AbstractDelegatingMonitorJob newDomainJob = 
-				new AbstractDelegatingMonitorJob(NLS.bind("Creating domain {0}...", getModel().getDomainId())) {
-			@Override
-			protected IStatus doRun(IProgressMonitor monitor) {
-				try {
-					getModel().createDomain();
-					return Status.OK_STATUS;
-				} catch (OpenShiftEndpointException e) {
-					return ExpressUIActivator.createErrorStatus(
-							NLS.bind("Could not create domain \"{0}\": {1}",
-									getModel().getDomainId(), e.getRestResponseMessages()), e);
-				}
-			}
-		};
-		
-		try {
-			WizardUtils.runInWizard(newDomainJob, getContainer());
-		} catch (Exception e) {
-			Logger.error("Could not create domain", e);
-		}
-		return newDomainJob.getResult().isOK();
-	}
+    @Override
+    public boolean performFinish() {
+        AbstractDelegatingMonitorJob newDomainJob = new AbstractDelegatingMonitorJob(
+                NLS.bind("Creating domain {0}...", getModel().getDomainId())) {
+            @Override
+            protected IStatus doRun(IProgressMonitor monitor) {
+                try {
+                    getModel().createDomain();
+                    return Status.OK_STATUS;
+                } catch (OpenShiftEndpointException e) {
+                    return ExpressUIActivator.createErrorStatus(
+                            NLS.bind("Could not create domain \"{0}\": {1}", getModel().getDomainId(), e.getRestResponseMessages()), e);
+                }
+            }
+        };
 
-	@Override
-	public void addPages() {
-		addPage(new NewDomainWizardPage(getModel(), this));
-	}
+        try {
+            WizardUtils.runInWizard(newDomainJob, getContainer());
+        } catch (Exception e) {
+            Logger.error("Could not create domain", e);
+        }
+        return newDomainJob.getResult().isOK();
+    }
+
+    @Override
+    public void addPages() {
+        addPage(new NewDomainWizardPage(getModel(), this));
+    }
 }

@@ -23,7 +23,7 @@ public class CDKServerException extends RedDeerException {
 	 * Generated UID
 	 */
 	private static final long serialVersionUID = -1484606432928003515L;
-	
+
 	/**
 	 * Instantiates a new cdk server wizard exception.
 	 *
@@ -33,14 +33,14 @@ public class CDKServerException extends RedDeerException {
 	public CDKServerException(String message, Throwable cause) {
 		super(message, cause);
 	}
-	
+
 	/**
 	 * Instantiates a new cdk server wizard exception.
 	 *
 	 * @param message the message
-	 */	
+	 */
 	public CDKServerException(String message) {
 		super(message);
-	}	
-	
+	}
+
 }

@@ -20,27 +20,34 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
  *
  */
 public interface IEnvironmentVariablesPageModel {
-	//A constant set as value to an environment variable to mark it deleted
-	static final String DELETED = "&Deleted";
-	
-	static final String PROPERTY_ENVIRONMENT_VARIABLES = "environmentVariables";
-	static final String PROPERTY_SELECTED_ENVIRONMENT_VARIABLE = "selectedEnvironmentVariable";
-	
-	List<EnvironmentVariable> getEnvironmentVariables();
-	void setEnvironmentVariables(List<EnvironmentVariable> envVars);
-	
-	void setSelectedEnvironmentVariable(EnvironmentVariable envVar);
-	EnvironmentVariable getSelectedEnvironmentVariable();
-	EnvironmentVariable getEnvironmentVariable(String key);
-	boolean isEnvironmentVariableModified(EnvironmentVariable envVar);
+    //A constant set as value to an environment variable to mark it deleted
+    static final String DELETED = "&Deleted";
 
-	default boolean isEnvironmentVariableDeleted(IKeyValueItem envVar) {
-		return DELETED.equals(envVar.getValue());
-	}
-	
-	void removeEnvironmentVariable(EnvironmentVariable envVar);
-	void resetEnvironmentVariable(EnvironmentVariable envVar);
-	void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value);
-	void addEnvironmentVariable(String key, String value);
-	
+    static final String PROPERTY_ENVIRONMENT_VARIABLES = "environmentVariables";
+    static final String PROPERTY_SELECTED_ENVIRONMENT_VARIABLE = "selectedEnvironmentVariable";
+
+    List<EnvironmentVariable> getEnvironmentVariables();
+
+    void setEnvironmentVariables(List<EnvironmentVariable> envVars);
+
+    void setSelectedEnvironmentVariable(EnvironmentVariable envVar);
+
+    EnvironmentVariable getSelectedEnvironmentVariable();
+
+    EnvironmentVariable getEnvironmentVariable(String key);
+
+    boolean isEnvironmentVariableModified(EnvironmentVariable envVar);
+
+    default boolean isEnvironmentVariableDeleted(IKeyValueItem envVar) {
+        return DELETED.equals(envVar.getValue());
+    }
+
+    void removeEnvironmentVariable(EnvironmentVariable envVar);
+
+    void resetEnvironmentVariable(EnvironmentVariable envVar);
+
+    void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value);
+
+    void addEnvironmentVariable(String key, String value);
+
 }

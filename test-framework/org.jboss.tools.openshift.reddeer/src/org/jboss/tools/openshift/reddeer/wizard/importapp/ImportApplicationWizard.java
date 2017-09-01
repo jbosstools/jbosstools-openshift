@@ -30,25 +30,25 @@ import org.jboss.tools.openshift.reddeer.view.resources.Service;
  */
 public class ImportApplicationWizard extends WizardDialog {
 
-	public ImportApplicationWizard openFromOpenshiftView(Service openshiftService){
+	public ImportApplicationWizard openFromOpenshiftView(Service openshiftService) {
 		openshiftService.select();
 		new ContextMenu(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
 		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
 		return this;
 	}
-	
-	public ImportApplicationWizard openFromServerAdapterSettings(){
+
+	public ImportApplicationWizard openFromServerAdapterSettings() {
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
 		new PushButton("Import...").click();
 		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
 		return this;
 	}
-	
-	public void finishAndOverrideExisting(){
+
+	public void finishAndOverrideExisting() {
 		String shellText = new DefaultShell().getText();
 		Button button = new FinishButton();
 		button.click();
-		
+
 		new DefaultShell("Overwrite project(s) ?");
 		new YesButton().click();
 

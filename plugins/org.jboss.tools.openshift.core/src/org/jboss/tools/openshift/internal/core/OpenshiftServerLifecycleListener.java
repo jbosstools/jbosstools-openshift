@@ -22,38 +22,40 @@ import org.jboss.tools.openshift.core.server.OpenShiftServer;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 
 public class OpenshiftServerLifecycleListener implements IServerLifecycleListener {
-	@Override
-	public void serverRemoved(IServer server) {
-		// Take no action when a server is removed
-	}
-	@Override
-	public void serverChanged(IServer server) {
-		// Take no action when a server is changed
-	}
-	@Override
-	public void serverAdded(IServer server) {
-		if( server != null ) {
-			String typeId = server.getServerType().getId();
-			boolean start = server.getAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false); 
-			if( OpenShiftServer.SERVER_TYPE_ID.equals(typeId) && start) {
-				startServerInJob(server);
-			}
-		}
-	}
-	
-	private void startServerInJob(IServer server) {
-		new Job("Waiting for OpenShift pods to be ready") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					server.start("run", new NullProgressMonitor());
-				} catch(CoreException ce) {
-					OpenShiftCoreActivator.pluginLog().logError("Error starting server", ce);
-				}
-				return Status.OK_STATUS;
-			}
-			
-		}.schedule(3000);
-	}
-	
+    @Override
+    public void serverRemoved(IServer server) {
+        // Take no action when a server is removed
+    }
+
+    @Override
+    public void serverChanged(IServer server) {
+        // Take no action when a server is changed
+    }
+
+    @Override
+    public void serverAdded(IServer server) {
+        if (server != null) {
+            String typeId = server.getServerType().getId();
+            boolean start = server.getAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false);
+            if (OpenShiftServer.SERVER_TYPE_ID.equals(typeId) && start) {
+                startServerInJob(server);
+            }
+        }
+    }
+
+    private void startServerInJob(IServer server) {
+        new Job("Waiting for OpenShift pods to be ready") {
+            @Override
+            protected IStatus run(IProgressMonitor monitor) {
+                try {
+                    server.start("run", new NullProgressMonitor());
+                } catch (CoreException ce) {
+                    OpenShiftCoreActivator.pluginLog().logError("Error starting server", ce);
+                }
+                return Status.OK_STATUS;
+            }
+
+        }.schedule(3000);
+    }
+
 }

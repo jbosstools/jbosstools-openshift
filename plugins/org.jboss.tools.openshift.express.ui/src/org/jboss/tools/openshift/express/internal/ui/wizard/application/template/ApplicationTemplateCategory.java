@@ -20,74 +20,74 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class ApplicationTemplateCategory extends AbstractApplicationTemplate implements IApplicationTemplateCategory {
 
-	private List<IApplicationTemplate> children;
+    private List<IApplicationTemplate> children;
 
-	public ApplicationTemplateCategory(String name, String description, IApplicationTemplate... children) {
-		super(name, description, children);
-		this.children = new ArrayList<>();
-	}
+    public ApplicationTemplateCategory(String name, String description, IApplicationTemplate... children) {
+        super(name, description, children);
+        this.children = new ArrayList<>();
+    }
 
-	@Override
-	public List<IApplicationTemplate> getChildren() {
-		return children;
-	}
+    @Override
+    public List<IApplicationTemplate> getChildren() {
+        return children;
+    }
 
-	@Override
-	public void clearChildren() {
-		children.clear();
-		firePropertyChange(PROPERTY_CHILDREN, null, children);
-	}
+    @Override
+    public void clearChildren() {
+        children.clear();
+        firePropertyChange(PROPERTY_CHILDREN, null, children);
+    }
 
-	@Override
-	public IApplicationTemplate addChild(IApplicationTemplate child) {
-		children.add((IApplicationTemplate) child);
-		fireIndexedPropertyChange(PROPERTY_CHILDREN, children.size() - 1, null, child);
-		return this;
-	}
+    @Override
+    public IApplicationTemplate addChild(IApplicationTemplate child) {
+        children.add((IApplicationTemplate)child);
+        fireIndexedPropertyChange(PROPERTY_CHILDREN, children.size() - 1, null, child);
+        return this;
+    }
 
-	@Override
-	public IApplicationTemplate addChildren(List<IApplicationTemplate> templates) {
-		children.addAll(templates);
-		firePropertyChange(PROPERTY_CHILDREN, null, children);
-		return this;
-	}
-	
-	@Override
-	public boolean isMatching(String expression) {
-		boolean matching = super.isMatching(expression);
-		if (matching) {
-			return true;
-		}
+    @Override
+    public IApplicationTemplate addChildren(List<IApplicationTemplate> templates) {
+        children.addAll(templates);
+        firePropertyChange(PROPERTY_CHILDREN, null, children);
+        return this;
+    }
 
-		return isMatchingChildren(StringUtils.toLowerCase(expression));
-	}
+    @Override
+    public boolean isMatching(String expression) {
+        boolean matching = super.isMatching(expression);
+        if (matching) {
+            return true;
+        }
 
-	private boolean isMatchingChildren(String expression) {
-		for (IApplicationTemplate template : children) {
-			if (template.isMatching(expression)) {
-				return true;
-			}
-		}
-		return false;
-	}
+        return isMatchingChildren(StringUtils.toLowerCase(expression));
+    }
 
-	@Override
-	public boolean canAddRemoveCartridges() {
-		return false;
-	}
+    private boolean isMatchingChildren(String expression) {
+        for (IApplicationTemplate template : children) {
+            if (template.isMatching(expression)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public boolean canCreateApplication() {
-		return false;
-	}
+    @Override
+    public boolean canAddRemoveCartridges() {
+        return false;
+    }
 
-	@Override
-	public boolean isInitialGitUrlEditable() {
-		return false;
-	}
+    @Override
+    public boolean canCreateApplication() {
+        return false;
+    }
 
-	@Override
-	public boolean isCodeAnything() {
-		return false;
-	}
+    @Override
+    public boolean isInitialGitUrlEditable() {
+        return false;
+    }
+
+    @Override
+    public boolean isCodeAnything() {
+        return false;
+    }
 }

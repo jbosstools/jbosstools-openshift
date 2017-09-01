@@ -13,36 +13,35 @@ import org.eclipse.jface.viewers.Viewer;
  */
 public abstract class AbstractPropertyTableContentProvider implements ITreeContentProvider {
 
-	@Override
-	public abstract Object[] getElements(Object inputElement);
+    @Override
+    public abstract Object[] getElements(Object inputElement);
 
-	@Override
-	public Object[] getChildren(Object parentElement) {
-		if (!hasChildren(parentElement)) {
-			return new Object[0];
-		}
-		return ((IProperty) parentElement).getChildren();
-	}
+    @Override
+    public Object[] getChildren(Object parentElement) {
+        if (!hasChildren(parentElement)) {
+            return new Object[0];
+        }
+        return ((IProperty)parentElement).getChildren();
+    }
 
-	@Override
-	public Object getParent(Object element) {
-		if (element instanceof IProperty) {
-			return ((IProperty) element).getParent();
-		}
-		return null;
-	}
+    @Override
+    public Object getParent(Object element) {
+        if (element instanceof IProperty) {
+            return ((IProperty)element).getParent();
+        }
+        return null;
+    }
 
-	@Override
-	public boolean hasChildren(Object element) {
-		return element instanceof IProperty
-				&& ((IProperty) element).hasChildren();
-	}
+    @Override
+    public boolean hasChildren(Object element) {
+        return element instanceof IProperty && ((IProperty)element).hasChildren();
+    }
 
-	@Override
-	public void dispose() {
-	}
+    @Override
+    public void dispose() {
+    }
 
-	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-	}
+    @Override
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    }
 }

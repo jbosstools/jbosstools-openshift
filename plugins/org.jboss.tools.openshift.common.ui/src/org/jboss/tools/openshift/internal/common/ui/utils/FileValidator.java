@@ -30,10 +30,10 @@ public class FileValidator implements ISelectionStatusValidator {
         if (selection.length == 0) {
             return new Status(IStatus.ERROR, OpenShiftCommonUIActivator.PLUGIN_ID, "");
         }
-        for (int i= 0; i < selection.length; i++) {
+        for (int i = 0; i < selection.length; i++) {
             if (!(selection[i] instanceof IFile)) {
                 return new Status(IStatus.ERROR, OpenShiftCommonUIActivator.PLUGIN_ID, "");
-            }                   
+            }
         }
         return new Status(IStatus.OK, OpenShiftCommonUIActivator.PLUGIN_ID, "");
     }

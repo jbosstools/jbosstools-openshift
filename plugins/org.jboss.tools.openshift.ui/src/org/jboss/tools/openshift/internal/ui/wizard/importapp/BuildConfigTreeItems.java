@@ -13,77 +13,77 @@ import com.openshift.restclient.model.IProject;
 
 public class BuildConfigTreeItems {
 
-	public static class ConnectionTreeItem extends ObservableTreeItem {
+    public static class ConnectionTreeItem extends ObservableTreeItem {
 
-		ConnectionTreeItem(Connection model) {
-			super(model);
-		}
+        ConnectionTreeItem(Connection model) {
+            super(model);
+        }
 
-		@Override
-		protected List<? extends Object> loadChildren() {
-			if (!(getModel() instanceof Connection)) {
-				return Collections.emptyList();
-			}
-			return ((Connection) getModel()).getResources(ResourceKind.PROJECT);
-		}
+        @Override
+        protected List<? extends Object> loadChildren() {
+            if (!(getModel() instanceof Connection)) {
+                return Collections.emptyList();
+            }
+            return ((Connection)getModel()).getResources(ResourceKind.PROJECT);
+        }
 
-		@Override
-		protected ObservableTreeItem createChildItem(Object model) {
-			return new ProjectTreeItem(model);
-		}
+        @Override
+        protected ObservableTreeItem createChildItem(Object model) {
+            return new ProjectTreeItem(model);
+        }
 
-	}
-	
-	public static class ProjectTreeItem extends ObservableTreeItem {
+    }
 
-		ProjectTreeItem(Object model) {
-			super(model);
-		}
+    public static class ProjectTreeItem extends ObservableTreeItem {
 
-		@Override
-		protected List<? extends Object> loadChildren() {
-			if (!(getModel() instanceof IProject)) {
-				return Collections.emptyList();
-			}
-			return ((IProject) getModel()).getResources(ResourceKind.BUILD_CONFIG);
-		}
+        ProjectTreeItem(Object model) {
+            super(model);
+        }
 
-		@Override
-		protected ObservableTreeItem createChildItem(Object model) {
-			return new BuildConfigTreeItem(model);
-		}
+        @Override
+        protected List<? extends Object> loadChildren() {
+            if (!(getModel() instanceof IProject)) {
+                return Collections.emptyList();
+            }
+            return ((IProject)getModel()).getResources(ResourceKind.BUILD_CONFIG);
+        }
 
-	}
-	
-	public static class BuildConfigTreeItem extends ObservableTreeItem {
+        @Override
+        protected ObservableTreeItem createChildItem(Object model) {
+            return new BuildConfigTreeItem(model);
+        }
 
-		BuildConfigTreeItem(Object model) {
-			super(model);
-		}
+    }
 
-		@Override
-		protected ObservableTreeItem createChildItem(Object model) {
-			return null;
-		}
+    public static class BuildConfigTreeItem extends ObservableTreeItem {
 
-	}
-	
-	public static class Model2ObservableTreeItemConverter extends Converter {
-		
-		Model2ObservableTreeItemConverter() {
-			super(Object.class, ObservableTreeItem.class);
-		}
+        BuildConfigTreeItem(Object model) {
+            super(model);
+        }
 
-		@Override
-		public Object convert(Object fromObject) {
-				if (fromObject instanceof IProject) {
-					return new ProjectTreeItem(fromObject);
-				} else if (fromObject instanceof IBuildConfig) {
-					return new BuildConfigTreeItem(fromObject);
-				} else {
-					return fromObject;
-				}
-		}
-	}
-	
+        @Override
+        protected ObservableTreeItem createChildItem(Object model) {
+            return null;
+        }
+
+    }
+
+    public static class Model2ObservableTreeItemConverter extends Converter {
+
+        Model2ObservableTreeItemConverter() {
+            super(Object.class, ObservableTreeItem.class);
+        }
+
+        @Override
+        public Object convert(Object fromObject) {
+            if (fromObject instanceof IProject) {
+                return new ProjectTreeItem(fromObject);
+            } else if (fromObject instanceof IBuildConfig) {
+                return new BuildConfigTreeItem(fromObject);
+            } else {
+                return fromObject;
+            }
+        }
+    }
+
 }

@@ -23,70 +23,70 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class SmartTooltipTest {
-	static final String SHORT_TEXT = "short text";
-	static final String LONG_TEXT = "long text long text long text long text long text";
-	static final String CUSTOM_TOOLTIP = "my custom tooltip";
+    static final String SHORT_TEXT = "short text";
+    static final String LONG_TEXT = "long text long text long text long text long text";
+    static final String CUSTOM_TOOLTIP = "my custom tooltip";
 
-	@Test
-	public void testSmartTooltip() {
-		TestWindow window = new TestWindow(null);
-		window.create();
-		window.getShell().setSize(200, 100);
-		Text text = window.text;
-		SmartTooltip tooltip = SmartTooltip.get(text);
-		Assert.assertNotNull(tooltip);
-		
-		try {
-			window.open();
-			Assert.assertNull(text.getToolTipText());
+    @Test
+    public void testSmartTooltip() {
+        TestWindow window = new TestWindow(null);
+        window.create();
+        window.getShell().setSize(200, 100);
+        Text text = window.text;
+        SmartTooltip tooltip = SmartTooltip.get(text);
+        Assert.assertNotNull(tooltip);
 
-			//1. Test that on short text there is no tooltip.
-			text.setText(SHORT_TEXT);
-			Assert.assertNull(text.getToolTipText());
+        try {
+            window.open();
+            Assert.assertNull(text.getToolTipText());
 
-			//2. Test that on long text there is tooltip.
-			text.setText(LONG_TEXT);
-			Assert.assertEquals(LONG_TEXT, text.getToolTipText());
-			
-			//3. Test that if custom tooltip is assigned, it is respected.
-			tooltip.setToolTip(CUSTOM_TOOLTIP);
-			Assert.assertEquals(LONG_TEXT + "\n" + CUSTOM_TOOLTIP, text.getToolTipText());
+            //1. Test that on short text there is no tooltip.
+            text.setText(SHORT_TEXT);
+            Assert.assertNull(text.getToolTipText());
 
-			//4. Test that if window is made wide enough, only custom tooltip remains.
-			window.getShell().setSize(800, 100);
-			Assert.assertEquals(CUSTOM_TOOLTIP, text.getToolTipText());
+            //2. Test that on long text there is tooltip.
+            text.setText(LONG_TEXT);
+            Assert.assertEquals(LONG_TEXT, text.getToolTipText());
 
-			//5. Test that if window is made narrow again, smart tooltip returns.
-			window.getShell().setSize(200, 100);
-			Assert.assertEquals(LONG_TEXT + "\n" + CUSTOM_TOOLTIP, text.getToolTipText());
+            //3. Test that if custom tooltip is assigned, it is respected.
+            tooltip.setToolTip(CUSTOM_TOOLTIP);
+            Assert.assertEquals(LONG_TEXT + "\n" + CUSTOM_TOOLTIP, text.getToolTipText());
 
-			//6. Test that if smart tooltip is disabled, only custom tooltip remains.
-			tooltip.setEnabled(false);
-			Assert.assertEquals(CUSTOM_TOOLTIP, text.getToolTipText());
+            //4. Test that if window is made wide enough, only custom tooltip remains.
+            window.getShell().setSize(800, 100);
+            Assert.assertEquals(CUSTOM_TOOLTIP, text.getToolTipText());
 
-			//7. Test that if smart tooltip is disabled, it appears.
-			tooltip.setEnabled(true);
-			Assert.assertEquals(LONG_TEXT + "\n" + CUSTOM_TOOLTIP, text.getToolTipText());
-		} finally {
-			window.close();
-		}
-	}
+            //5. Test that if window is made narrow again, smart tooltip returns.
+            window.getShell().setSize(200, 100);
+            Assert.assertEquals(LONG_TEXT + "\n" + CUSTOM_TOOLTIP, text.getToolTipText());
 
-	class TestWindow extends Window {
-		Text text;
+            //6. Test that if smart tooltip is disabled, only custom tooltip remains.
+            tooltip.setEnabled(false);
+            Assert.assertEquals(CUSTOM_TOOLTIP, text.getToolTipText());
 
-		protected TestWindow(Shell shell) {
-			super(shell);
-		}
-		
-		protected Control createContents(Composite parent) {
-			Composite container = new Composite(parent, SWT.NONE);
-			GridLayoutFactory.fillDefaults().applyTo(container);
-			GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(container);
-			text = new Text(container, SWT.NONE);
-			GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.CENTER);
-			new SmartTooltip(text);
-			return container;
-		}
-	}
+            //7. Test that if smart tooltip is disabled, it appears.
+            tooltip.setEnabled(true);
+            Assert.assertEquals(LONG_TEXT + "\n" + CUSTOM_TOOLTIP, text.getToolTipText());
+        } finally {
+            window.close();
+        }
+    }
+
+    class TestWindow extends Window {
+        Text text;
+
+        protected TestWindow(Shell shell) {
+            super(shell);
+        }
+
+        protected Control createContents(Composite parent) {
+            Composite container = new Composite(parent, SWT.NONE);
+            GridLayoutFactory.fillDefaults().applyTo(container);
+            GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(container);
+            text = new Text(container, SWT.NONE);
+            GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.CENTER);
+            new SmartTooltip(text);
+            return container;
+        }
+    }
 }

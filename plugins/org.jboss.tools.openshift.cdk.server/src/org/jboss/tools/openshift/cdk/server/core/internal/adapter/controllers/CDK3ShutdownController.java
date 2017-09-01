@@ -20,28 +20,27 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPolle
 
 public class CDK3ShutdownController extends AbstractCDKShutdownController {
 
-	protected AbstractCDKPoller getCDKPoller() {
-		MinishiftPoller vp = new MinishiftPoller();
-		return vp;
-	}
-	
-	protected String getShutdownArgs() {
-		String cmd = "stop";
-		return cmd;
-	}
-	
+    protected AbstractCDKPoller getCDKPoller() {
+        MinishiftPoller vp = new MinishiftPoller();
+        return vp;
+    }
 
-	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
-		return new CDKLaunchUtility().callMinishiftInteractive(getServer(), cmd, getServer().getName());
-	}
+    protected String getShutdownArgs() {
+        String cmd = "stop";
+        return cmd;
+    }
 
-	@Override
-	protected boolean useTerminal() {
-		return false;
-	}
+    protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
+        return new CDKLaunchUtility().callMinishiftInteractive(getServer(), cmd, getServer().getName());
+    }
 
-	@Override
-	protected String getCommandLocation() {
-		return MinishiftBinaryUtility.getMinishiftLocation(getServer());
-	}
+    @Override
+    protected boolean useTerminal() {
+        return false;
+    }
+
+    @Override
+    protected String getCommandLocation() {
+        return MinishiftBinaryUtility.getMinishiftLocation(getServer());
+    }
 }

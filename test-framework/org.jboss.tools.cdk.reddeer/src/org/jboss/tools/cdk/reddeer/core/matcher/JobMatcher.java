@@ -25,10 +25,10 @@ import org.jboss.reddeer.common.exception.RedDeerException;
 public class JobMatcher extends BaseMatcher<Job> {
 
 	private Job jobToMatch;
-	
+
 	public JobMatcher(String jobName) {
 		this.jobToMatch = new Job(jobName) {
-			
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// TODO Auto-generated method stub
@@ -36,11 +36,11 @@ public class JobMatcher extends BaseMatcher<Job> {
 			}
 		};
 	}
-	
+
 	public JobMatcher(Job job) {
 		this.jobToMatch = job;
 	}
-	
+
 	@Override
 	public void describeTo(Description description) {
 		description.appendText("Job with name ");

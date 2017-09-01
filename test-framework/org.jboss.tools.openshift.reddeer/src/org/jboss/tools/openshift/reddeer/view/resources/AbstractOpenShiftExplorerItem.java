@@ -24,38 +24,38 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 public abstract class AbstractOpenShiftExplorerItem {
 
 	protected TreeViewerHandler treeViewerHandler = TreeViewerHandler.getInstance();
-	
-	protected TreeItem item;	
-	
+
+	protected TreeItem item;
+
 	public AbstractOpenShiftExplorerItem(TreeItem item) {
 		this.item = item;
 	}
-	
+
 	protected void activateOpenShiftExplorerView() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.activate();
 	}
-	
+
 	public void refresh() {
 		select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.REFRESH).select();	
-		
+		new ContextMenu(OpenShiftLabel.ContextMenu.REFRESH).select();
+
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
-	
+
 	public void select() {
-		activateOpenShiftExplorerView();		
+		activateOpenShiftExplorerView();
 		item.select();
 	}
-	
+
 	public void expand() {
 		activateOpenShiftExplorerView();
 		item.expand();
-		
+
 		// There can be some processing, wait for it
-		new WaitWhile(new JobIsRunning(new Matcher[] {new IsEqual<String>("Loading OpenShift resources...")}), TimePeriod.NORMAL);
+		new WaitWhile(new JobIsRunning(new Matcher[] { new IsEqual<String>("Loading OpenShift resources...") }), TimePeriod.NORMAL);
 	}
-	
+
 	public TreeItem getTreeItem() {
 		return item;
 	}

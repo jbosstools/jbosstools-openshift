@@ -14,62 +14,59 @@ import java.util.Set;
 
 import com.openshift.client.cartridge.ICartridge;
 
-
-
 /**
  * @author Andre Dietisheim
  */
 public interface IApplicationTemplate {
 
-	public String PROPERTY_NAME = "name";
-	public String PROPERTY_CHILDREN = "children";
+    public String PROPERTY_NAME = "name";
+    public String PROPERTY_CHILDREN = "children";
 
-	public String getName();
+    public String getName();
 
-	public void setName(String name);
+    public void setName(String name);
 
-	public String getDescription();
-	
-	/**
-	 * Returns <code>true</code> if this template matches the given expression.
-	 * 
-	 * @param expression
-	 * @return
-	 */
-	public boolean isMatching(String expression);
+    public String getDescription();
 
-	/**
-	 * Returns <code>true</code> if this template is a valid template to start
-	 * an application from.
-	 * 
-	 * @return
-	 */
-	public boolean canCreateApplication();
-	
-	/**
-	 * Returns <code>true</code> if one can add/remove cartridges from this
-	 * template.
-	 * 
-	 * @return
-	 */
-	public boolean canAddRemoveCartridges();
-	
-	/**
-	 * Returns all (embedded and standalone) cartridges for this template.
-	 * 
-	 * @return
-	 */
-	public Set<ICartridge> getAllCartridges();
-	
-	public Set<ICartridge> getEmbeddedCartridges();
+    /**
+     * Returns <code>true</code> if this template matches the given expression.
+     * 
+     * @param expression
+     * @return
+     */
+    public boolean isMatching(String expression);
 
-	public ICartridge getStandaloneCartridge();
+    /**
+     * Returns <code>true</code> if this template is a valid template to start
+     * an application from.
+     * 
+     * @return
+     */
+    public boolean canCreateApplication();
 
-	public String getInitialGitUrl();
-	
-	public boolean isInitialGitUrlEditable();
-	
-	public boolean isCodeAnything();
+    /**
+     * Returns <code>true</code> if one can add/remove cartridges from this
+     * template.
+     * 
+     * @return
+     */
+    public boolean canAddRemoveCartridges();
 
+    /**
+     * Returns all (embedded and standalone) cartridges for this template.
+     * 
+     * @return
+     */
+    public Set<ICartridge> getAllCartridges();
+
+    public Set<ICartridge> getEmbeddedCartridges();
+
+    public ICartridge getStandaloneCartridge();
+
+    public String getInitialGitUrl();
+
+    public boolean isInitialGitUrlEditable();
+
+    public boolean isCodeAnything();
 
 }

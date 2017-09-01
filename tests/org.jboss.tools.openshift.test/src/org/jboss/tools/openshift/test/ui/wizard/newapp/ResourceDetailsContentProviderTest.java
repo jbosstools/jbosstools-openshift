@@ -30,61 +30,56 @@ import com.openshift.restclient.model.IBuildConfig;
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceDetailsContentProviderTest {
 
-	private ResourceDetailsContentProvider contentProvider;
+    private ResourceDetailsContentProvider contentProvider;
 
-	@Before
-	public void before() {
-		this.contentProvider = new ResourceDetailsContentProvider();
-	}
+    @Before
+    public void before() {
+        this.contentProvider = new ResourceDetailsContentProvider();
+    }
 
-	@Test
-	public void shouldReturnUnknownResourcePropertyGivenBuildConfigBuildStrategyIsNull() {
-		// given
-		IBuildConfig bc = ResourceMocks.createBuildConfig("42", null, null, null, null, null, null, null);
+    @Test
+    public void shouldReturnUnknownResourcePropertyGivenBuildConfigBuildStrategyIsNull() {
+        // given
+        IBuildConfig bc = ResourceMocks.createBuildConfig("42", null, null, null, null, null, null, null);
 
-		// when
-		Object[] children = contentProvider.getChildren(bc);
+        // when
+        Object[] children = contentProvider.getChildren(bc);
 
-		// then
-		ResourceProperty property = getResourceProperty(ResourceDetailsContentProvider.LABEL_STRATEGY, children);
-		assertThat(property).isNotNull();
-		assertThat(property.isUnknownValue()).isTrue();
-	}
+        // then
+        ResourceProperty property = getResourceProperty(ResourceDetailsContentProvider.LABEL_STRATEGY, children);
+        assertThat(property).isNotNull();
+        assertThat(property.isUnknownValue()).isTrue();
+    }
 
-	@Test
-	public void shouldReturnResourcePropertyGivenBuildConfigBuildStrategyExists() {
-		// given
-		IBuildConfig bc = createBuildConfig("42", null, null, null, null, null, null, createSourceBuildStrategy("42"));
+    @Test
+    public void shouldReturnResourcePropertyGivenBuildConfigBuildStrategyExists() {
+        // given
+        IBuildConfig bc = createBuildConfig("42", null, null, null, null, null, null, createSourceBuildStrategy("42"));
 
-		// when
-		Object[] children = contentProvider.getChildren(bc);
+        // when
+        Object[] children = contentProvider.getChildren(bc);
 
-		// then
-		ResourceProperty property = getResourceProperty(ResourceDetailsContentProvider.LABEL_STRATEGY, children);
-		assertThat(property).isNotNull();
-		assertThat(property.isUnknownValue()).isFalse();
-	}
+        // then
+        ResourceProperty property = getResourceProperty(ResourceDetailsContentProvider.LABEL_STRATEGY, children);
+        assertThat(property).isNotNull();
+        assertThat(property.isUnknownValue()).isFalse();
+    }
 
-	private ResourceProperty getResourceProperty(String label, Object[] children) {
-		assertThat(label).isNotNull();
-		
-		if (children == null) {
-			return null;
-		}
-		return 
-				Arrays.stream(children)
-					.map(object -> { 
-						if (object instanceof ResourceProperty) { 
-							return (ResourceProperty) object;
-						} else { 
-							return null; 
-						}
-					})
-					.filter(property -> property != null)
-					.filter(property -> { return label.equals(property.getProperty()); } )
-					.findFirst()
-					.orElse(null);
-	}
-	
+    private ResourceProperty getResourceProperty(String label, Object[] children) {
+        assertThat(label).isNotNull();
+
+        if (children == null) {
+            return null;
+        }
+        return Arrays.stream(children).map(object -> {
+            if (object instanceof ResourceProperty) {
+                return (ResourceProperty)object;
+            } else {
+                return null;
+            }
+        }).filter(property -> property != null).filter(property -> {
+            return label.equals(property.getProperty());
+        }).findFirst().orElse(null);
+    }
+
 }
-

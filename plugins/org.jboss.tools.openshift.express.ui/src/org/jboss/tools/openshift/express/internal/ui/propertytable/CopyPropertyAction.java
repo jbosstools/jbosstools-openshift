@@ -26,34 +26,32 @@ import org.eclipse.ui.actions.SelectionProviderAction;
  */
 public class CopyPropertyAction extends SelectionProviderAction {
 
-	private ISelectionProvider selectionProvider;
+    private ISelectionProvider selectionProvider;
 
-	public CopyPropertyAction(ISelectionProvider provider) {
-		super(provider, "Copy");
-		initAction();
-		this.selectionProvider = provider;
-	}
+    public CopyPropertyAction(ISelectionProvider provider) {
+        super(provider, "Copy");
+        initAction();
+        this.selectionProvider = provider;
+    }
 
-	protected void initAction() {
-		ISharedImages sharedImages = PlatformUI.getWorkbench().getSharedImages();
-		setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
-		setDisabledImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
-//		setActionDefinitionId(ActionFactory.COPY.getCommandId());
-//		setAccelerator(SWT.CTRL | 'C');
-	}
+    protected void initAction() {
+        ISharedImages sharedImages = PlatformUI.getWorkbench().getSharedImages();
+        setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
+        setDisabledImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
+        //		setActionDefinitionId(ActionFactory.COPY.getCommandId());
+        //		setAccelerator(SWT.CTRL | 'C');
+    }
 
-	@Override
-	public void run() {
-		ISelection selection = selectionProvider.getSelection();
-		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-			if (structuredSelection.getFirstElement() instanceof IProperty) {
-				IProperty property = (IProperty) structuredSelection.getFirstElement();
-				Clipboard clipboard = new Clipboard(Display.getDefault());
-				clipboard.setContents(
-						new Object[] { property.getValue() },
-						new Transfer[] { TextTransfer.getInstance() });
-			}
-		}
-	}
+    @Override
+    public void run() {
+        ISelection selection = selectionProvider.getSelection();
+        if (selection instanceof IStructuredSelection) {
+            IStructuredSelection structuredSelection = (IStructuredSelection)selection;
+            if (structuredSelection.getFirstElement() instanceof IProperty) {
+                IProperty property = (IProperty)structuredSelection.getFirstElement();
+                Clipboard clipboard = new Clipboard(Display.getDefault());
+                clipboard.setContents(new Object[] { property.getValue() }, new Transfer[] { TextTransfer.getInstance() });
+            }
+        }
+    }
 }

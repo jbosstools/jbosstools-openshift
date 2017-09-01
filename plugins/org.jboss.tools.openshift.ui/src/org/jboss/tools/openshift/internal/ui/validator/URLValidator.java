@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.validator;
 
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -23,44 +22,42 @@ import org.eclipse.osgi.util.NLS;
  * @author jeff.cantrill
  *
  */
-public class URLValidator implements IValidator{
-	
-	private static final String [] SCHEMES = new String [] {"http", "https"};
-	private final String invalidURLMessage;
-	private boolean allowEmpty = false;
-	@SuppressWarnings("serial")
-	private UrlValidator validator = new UrlValidator(SCHEMES, UrlValidator.ALLOW_LOCAL_URLS) {
-		
-		@Override
-		protected boolean isValidAuthority(String domain) {
-			//default implementation doesn't recognize *.cdk domains as valid authorities
-			//so we bypass that check altogether. An alternative would be to provide a RegexValidator, 
-			//but to use what regexp?
-			return true;
-		}
-	};
-	
-	/**
-	 * @param urlType  The value to plug into error message of 'Please provide a valid TYPE URL'
-	 * @param allowEmpty  Empty/Blank values will return OK
-	 */
-	public URLValidator(String urlType, boolean allowEmpty) {
-		invalidURLMessage = NLS.bind("Please provide a valid {0} (HTTP/S) URL.", urlType);
-		this.allowEmpty  = allowEmpty;
-	}
-	
-	
+public class URLValidator implements IValidator {
 
-	@Override
-	public IStatus validate(Object in) {
-		String value = (String) in;
-		if(allowEmpty && StringUtils.isBlank(value)) {
-			return ValidationStatus.ok();
-		}
-		if (!validator.isValid(value)) {
-			return ValidationStatus.error(invalidURLMessage);
-		}
-		return ValidationStatus.ok();
-	}
-	
+    private static final String[] SCHEMES = new String[] { "http", "https" };
+    private final String invalidURLMessage;
+    private boolean allowEmpty = false;
+    @SuppressWarnings("serial")
+    private UrlValidator validator = new UrlValidator(SCHEMES, UrlValidator.ALLOW_LOCAL_URLS) {
+
+        @Override
+        protected boolean isValidAuthority(String domain) {
+            //default implementation doesn't recognize *.cdk domains as valid authorities
+            //so we bypass that check altogether. An alternative would be to provide a RegexValidator, 
+            //but to use what regexp?
+            return true;
+        }
+    };
+
+    /**
+     * @param urlType  The value to plug into error message of 'Please provide a valid TYPE URL'
+     * @param allowEmpty  Empty/Blank values will return OK
+     */
+    public URLValidator(String urlType, boolean allowEmpty) {
+        invalidURLMessage = NLS.bind("Please provide a valid {0} (HTTP/S) URL.", urlType);
+        this.allowEmpty = allowEmpty;
+    }
+
+    @Override
+    public IStatus validate(Object in) {
+        String value = (String)in;
+        if (allowEmpty && StringUtils.isBlank(value)) {
+            return ValidationStatus.ok();
+        }
+        if (!validator.isValid(value)) {
+            return ValidationStatus.error(invalidURLMessage);
+        }
+        return ValidationStatus.ok();
+    }
+
 }

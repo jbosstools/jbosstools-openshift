@@ -82,385 +82,367 @@ import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUICons
  */
 public abstract class ExpressApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<ExpressConnection> {
 
-	private final OpenShiftApplicationWizardModel model;
+    private final OpenShiftApplicationWizardModel model;
 
-	ExpressApplicationWizard(ExpressConnection connection, IDomain domain, IApplication application, IProject project, 
-			boolean useExistingApplication, String wizardTitle) {
-		setWindowTitle(wizardTitle);
-		setNeedsProgressMonitor(true);
-		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
-		this.model = new OpenShiftApplicationWizardModel(connection, domain, application, project, useExistingApplication);
-		String repoPath = getDialogSettings().get(REPO_PATH_KEY);
-		if (isNotBlank(repoPath)) {
-			model.setUseDefaultRepoPath(false);
-			model.setRepositoryPath(repoPath);
-		} else {
-			model.setUseDefaultRepoPath(true);
-		}
-	}
-	
-	@Override
-	public Object getContext() {
-		return null;
-	}
-	
-	protected void openError(final String title, final String message) {
-		getShell().getDisplay().syncExec(new Runnable() {
+    ExpressApplicationWizard(ExpressConnection connection, IDomain domain, IApplication application, IProject project,
+            boolean useExistingApplication, String wizardTitle) {
+        setWindowTitle(wizardTitle);
+        setNeedsProgressMonitor(true);
+        setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(),
+                IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
+        this.model = new OpenShiftApplicationWizardModel(connection, domain, application, project, useExistingApplication);
+        String repoPath = getDialogSettings().get(REPO_PATH_KEY);
+        if (isNotBlank(repoPath)) {
+            model.setUseDefaultRepoPath(false);
+            model.setRepositoryPath(repoPath);
+        } else {
+            model.setUseDefaultRepoPath(true);
+        }
+    }
 
-			@Override
-			public void run() {
-				MessageDialog.openError(getShell(), title, message);
-			}
-		});
-	}
+    @Override
+    public Object getContext() {
+        return null;
+    }
 
-	protected boolean askForConfirmation(final String message, final String applicationName) {
-		final boolean[] confirmed = new boolean[1];
-		getShell().getDisplay().syncExec(new Runnable() {
+    protected void openError(final String title, final String message) {
+        getShell().getDisplay().syncExec(new Runnable() {
 
-			@Override
-			public void run() {
-				confirmed[0] = MessageDialog.openConfirm(getShell(),
-						NLS.bind("Import OpenShift Application ", applicationName), message);
-			}
-		});
-		return confirmed[0];
-	}
+            @Override
+            public void run() {
+                MessageDialog.openError(getShell(), title, message);
+            }
+        });
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new ApplicationTemplateWizardPage(this, model));
-		addPage(new ApplicationConfigurationWizardPage(this, model));
-		addPage(new ProjectAndServerAdapterSettingsWizardPage(this, model));
-		addPage(new GitCloningSettingsWizardPage(this, model));
-	}
+    protected boolean askForConfirmation(final String message, final String applicationName) {
+        final boolean[] confirmed = new boolean[1];
+        getShell().getDisplay().syncExec(new Runnable() {
 
-	@Override
-	public boolean performFinish() {
-			boolean success = createImportApplication();
-			if (!model.isUseExistingApplication()) {
-				UsageStats.getInstance().newV2Application(model.getConnection().getHost(), success);
-			} else {
-				UsageStats.getInstance().importV2Application(model.getConnection().getHost(), success);
-			}
-			if (success) {
-				if(!model.isUseDefaultRepoPath()) {
-					getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
-				} else {
-					getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
-				}
-			}
-			return success;
-	}
+            @Override
+            public void run() {
+                confirmed[0] = MessageDialog.openConfirm(getShell(), NLS.bind("Import OpenShift Application ", applicationName), message);
+            }
+        });
+        return confirmed[0];
+    }
 
-	private boolean createImportApplication() {
-		if (!model.isUseExistingApplication()) {
-			IStatus status = createApplication();
-			if (!handleOpenShiftError(
-					NLS.bind("create application {0}", StringUtils.null2emptyString(model.getApplicationName())), status)) {
-				return false;
-			}
+    @Override
+    public void addPages() {
+        addPage(new ApplicationTemplateWizardPage(this, model));
+        addPage(new ApplicationConfigurationWizardPage(this, model));
+        addPage(new ProjectAndServerAdapterSettingsWizardPage(this, model));
+        addPage(new GitCloningSettingsWizardPage(this, model));
+    }
 
-			status = waitForApplication(model.getApplication());
-			if (!handleOpenShiftError(
-					NLS.bind("wait for application {0} to become reachable", StringUtils.null2emptyString(model.getApplicationName())),
-					status)) {
-				return false;
-			}
+    @Override
+    public boolean performFinish() {
+        boolean success = createImportApplication();
+        if (!model.isUseExistingApplication()) {
+            UsageStats.getInstance().newV2Application(model.getConnection().getHost(), success);
+        } else {
+            UsageStats.getInstance().importV2Application(model.getConnection().getHost(), success);
+        }
+        if (success) {
+            if (!model.isUseDefaultRepoPath()) {
+                getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
+            } else {
+                getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
+            }
+        }
+        return success;
+    }
 
-			new FireExpressConnectionsChangedJob(model.getConnection()).schedule();
-			saveCodeAnythingUrl();
-		}
+    private boolean createImportApplication() {
+        if (!model.isUseExistingApplication()) {
+            IStatus status = createApplication();
+            if (!handleOpenShiftError(NLS.bind("create application {0}", StringUtils.null2emptyString(model.getApplicationName())),
+                    status)) {
+                return false;
+            }
 
-		if (!importProject()) {
-			return false;
-		}
+            status = waitForApplication(model.getApplication());
+            if (!handleOpenShiftError(
+                    NLS.bind("wait for application {0} to become reachable", StringUtils.null2emptyString(model.getApplicationName())),
+                    status)) {
+                return false;
+            }
 
-		if (!createServerAdapter()) {
-			return false;
-		}
+            new FireExpressConnectionsChangedJob(model.getConnection()).schedule();
+            saveCodeAnythingUrl();
+        }
 
-		return true;
-	}
+        if (!importProject()) {
+            return false;
+        }
 
-	private boolean handleOpenShiftError(String operation, IStatus status) {
-		boolean abort = false;
-		if (JobUtils.isCancel(status)) {
-			if (AbstractDelegatingMonitorJob.TIMEOUTED == status.getCode()) {
-				closeWizard();
-			}
-		} else if (!JobUtils.isOk(status)) {
-			// dont open error-dialog, the jobs will do if they fail
-			// ErrorDialog.openError(getShell(), "Error", "Could not " + operation, status);
-			if (model.getConnection() != null) {
-				new JobChainBuilder(new RefreshConnectionJob(model.getConnection()))
-					.runWhenDone(new FireExpressConnectionsChangedJob(model.getConnection()))
-					.schedule();
-			}
-			abort = true;
-		}
-		
-		return !abort;
-	}
+        if (!createServerAdapter()) {
+            return false;
+        }
 
-	private void closeWizard() {
-		IWizardContainer container = getContainer();
-		if (container instanceof WizardDialog) {
-			((WizardDialog) container).close();
-		}
-	}
+        return true;
+    }
 
-	private IStatus waitForApplication(IApplication application) {
-		try {
-			AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
-			IStatus status = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer());
-			return status;
-		} catch (Exception e) {
-			return ExpressUIActivator.createErrorStatus(
-					NLS.bind("Could not wait for application {0} to become reachable", application.getName()), e);
-		}
-	}
+    private boolean handleOpenShiftError(String operation, IStatus status) {
+        boolean abort = false;
+        if (JobUtils.isCancel(status)) {
+            if (AbstractDelegatingMonitorJob.TIMEOUTED == status.getCode()) {
+                closeWizard();
+            }
+        } else if (!JobUtils.isOk(status)) {
+            // dont open error-dialog, the jobs will do if they fail
+            // ErrorDialog.openError(getShell(), "Error", "Could not " + operation, status);
+            if (model.getConnection() != null) {
+                new JobChainBuilder(new RefreshConnectionJob(model.getConnection()))
+                        .runWhenDone(new FireExpressConnectionsChangedJob(model.getConnection())).schedule();
+            }
+            abort = true;
+        }
 
-	private boolean importProject() {
-		try {
-			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			IStatus jobResult = WizardUtils.runInWizard(
-					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer());
-			return JobUtils.isOk(jobResult);
-		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", ExpressUIActivator
-					.createErrorStatus("An exception occurred while creating local git repository.", e));
-			return false;
-		}
-	}
+        return !abort;
+    }
 
-	private void saveCodeAnythingUrl() {
-		IApplicationTemplate template = model.getSelectedApplicationTemplate();
-		if (!(template instanceof ICodeAnythingApplicationTemplate)) {
-			return;
-		}
-		
-		String url = ((ICodeAnythingApplicationTemplate) template).getUrl();
-		ExpressCorePreferences.INSTANCE.addDownloadableStandaloneCartUrl(url);
-	}
-	
-	private boolean createServerAdapter() {
-		try {
-			if (!model.isCreateServerAdapter()) {
-				return true;
-			}
-			IServer server = model.createServerAdapter(new DelegatingProgressMonitor());
-			return server != null;
-		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", NLS.bind("Could not create server adapter for new project {0}.",
-					model.getProjectName()),
-					ExpressUIActivator.createErrorStatus(e.getMessage(), e));
-			return false;
-		}
-	}
+    private void closeWizard() {
+        IWizardContainer container = getContainer();
+        if (container instanceof WizardDialog) {
+            ((WizardDialog)container).close();
+        }
+    }
 
-	private IStatus createApplication() {
-		try {
-			CreateApplicationJob job = new CreateApplicationJob(
-					model.getApplicationName()
-					, model.getApplicationScale()
-					, model.getApplicationGearProfile()
-					, model.getInitialGitUrl()
-					, model.getEnvironmentVariables()
-					, model.getCartridges()
-					, model.getDomain());
-			IStatus status = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer());
-			IApplication application = job.getApplication();
-			model.setApplication(application);
-			if (status.isOK()) {
-				openLogDialog(application, job.isTimeouted(status));
-				openLogDialog(job.getAddedCartridges(), job.isTimeouted(status));
-			}
-			return status;
-		} catch (Exception e) {
-			return ExpressUIActivator.createErrorStatus(
-					NLS.bind("Could not create application {0}", model.getApplicationName()), e);
-		}
-	}
+    private IStatus waitForApplication(IApplication application) {
+        try {
+            AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
+            IStatus status = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
+            return status;
+        } catch (Exception e) {
+            return ExpressUIActivator
+                    .createErrorStatus(NLS.bind("Could not wait for application {0} to become reachable", application.getName()), e);
+        }
+    }
 
-	private void openLogDialog(final IApplication application, final boolean isTimeouted) {
-		final LogEntry[] logEntries = LogEntryFactory.create(application, isTimeouted);
-		if (logEntries.length == 0) {
-			return;
-		}
-		getShell().getDisplay().syncExec(new Runnable() {
+    private boolean importProject() {
+        try {
+            final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
+            IStatus jobResult = WizardUtils.runInWizard(new ImportJob(delegatingMonitor), delegatingMonitor, getContainer());
+            return JobUtils.isOk(jobResult);
+        } catch (Exception e) {
+            ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.",
+                    ExpressUIActivator.createErrorStatus("An exception occurred while creating local git repository.", e));
+            return false;
+        }
+    }
 
-			@Override
-			public void run() {
-				new CreationLogDialog(getShell(), logEntries).open();
-			}
-		});
-	}
-	
-	private void openLogDialog(final List<IEmbeddedCartridge> embeddableCartridges, final boolean isTimeouted) {
-		final LogEntry[] logEntries = LogEntryFactory.create(embeddableCartridges, isTimeouted);
-		if (logEntries == null
-				|| logEntries.length == 0) {
-			return;
-		}
+    private void saveCodeAnythingUrl() {
+        IApplicationTemplate template = model.getSelectedApplicationTemplate();
+        if (!(template instanceof ICodeAnythingApplicationTemplate)) {
+            return;
+        }
 
-		getShell().getDisplay().syncExec(new Runnable() {
+        String url = ((ICodeAnythingApplicationTemplate)template).getUrl();
+        ExpressCorePreferences.INSTANCE.addDownloadableStandaloneCartUrl(url);
+    }
 
-			@Override
-			public void run() {
-				new CreationLogDialog(getShell(), logEntries).open();
-			}
-		});
-	}
+    private boolean createServerAdapter() {
+        try {
+            if (!model.isCreateServerAdapter()) {
+                return true;
+            }
+            IServer server = model.createServerAdapter(new DelegatingProgressMonitor());
+            return server != null;
+        } catch (Exception e) {
+            ErrorDialog.openError(getShell(), "Error",
+                    NLS.bind("Could not create server adapter for new project {0}.", model.getProjectName()),
+                    ExpressUIActivator.createErrorStatus(e.getMessage(), e));
+            return false;
+        }
+    }
 
-	OpenShiftApplicationWizardModel getModel() {
-		return model;
-	}
-	
-	@Override
-	public void dispose() {
-		model.dispose();
-	}
+    private IStatus createApplication() {
+        try {
+            CreateApplicationJob job = new CreateApplicationJob(model.getApplicationName(), model.getApplicationScale(),
+                    model.getApplicationGearProfile(), model.getInitialGitUrl(), model.getEnvironmentVariables(), model.getCartridges(),
+                    model.getDomain());
+            IStatus status = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
+            IApplication application = job.getApplication();
+            model.setApplication(application);
+            if (status.isOK()) {
+                openLogDialog(application, job.isTimeouted(status));
+                openLogDialog(job.getAddedCartridges(), job.isTimeouted(status));
+            }
+            return status;
+        } catch (Exception e) {
+            return ExpressUIActivator.createErrorStatus(NLS.bind("Could not create application {0}", model.getApplicationName()), e);
+        }
+    }
 
-	public boolean isCreateServerAdapter() {
-		return model.isCreateServerAdapter();
-	}
-	
-	/**
-	 * A workspace job that will create a new project or enable the selected
-	 * project to be used with OpenShift.
-	 */
-	private class ImportJob extends WorkspaceJob {
+    private void openLogDialog(final IApplication application, final boolean isTimeouted) {
+        final LogEntry[] logEntries = LogEntryFactory.create(application, isTimeouted);
+        if (logEntries.length == 0) {
+            return;
+        }
+        getShell().getDisplay().syncExec(new Runnable() {
 
-		private DelegatingProgressMonitor delegatingMonitor;
+            @Override
+            public void run() {
+                new CreationLogDialog(getShell(), logEntries).open();
+            }
+        });
+    }
 
-		public ImportJob(DelegatingProgressMonitor delegatingMonitor) {
-			super("Importing project to workspace...");
-			setRule(ResourcesPlugin.getWorkspace().getRoot());
-			this.delegatingMonitor = delegatingMonitor;
-		}
+    private void openLogDialog(final List<IEmbeddedCartridge> embeddableCartridges, final boolean isTimeouted) {
+        final LogEntry[] logEntries = LogEntryFactory.create(embeddableCartridges, isTimeouted);
+        if (logEntries == null || logEntries.length == 0) {
+            return;
+        }
 
-		@Override
-		public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-			try {
-				delegatingMonitor.add(monitor);
-				if (model.isNewProject()) {
-					model.importProject(delegatingMonitor);
-				} else if (!model.isGitSharedProject()) {
-					if (!askForConfirmation(
-							NLS.bind(
-									"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration " +
-									"from server to local project and connecting local project to OpenShift Git repository.\n" +
-									"The local project will be committed to local Git repository upon confirmation and further publishing will " +
-									"eventually override existing remote content.\n\n" +
-									"This cannot be undone. Do you wish to continue?",
-									model.getApplicationName(), model.getProjectName()),
-							model.getApplicationName())) {
-						return Status.CANCEL_STATUS;
-					}
-					model.mergeIntoUnsharedProject(delegatingMonitor);
-				} else {
-					if (!askForConfirmation(
-							NLS.bind(
-									"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration " +
-									"from server to local project and connecting local project to OpenShift Git repository.\n" +
-									"The local project will be committed to local Git repository upon confirmation and further publishing will " +
-									"eventually override existing remote content.\n\n" +
-									"This cannot be undone. Do you wish to continue?",
-									model.getApplicationName(), model.getProjectName()),
-							model.getApplicationName())) {
-						return Status.CANCEL_STATUS;
-					}
-					model.mergeIntoGitSharedProject(delegatingMonitor);
-				}
-				return Status.OK_STATUS;
-			} catch (final WontOverwriteException e) {
-				openError("Project already present", e.getMessage());
-				return Status.CANCEL_STATUS;
-			} catch (final ImportFailedException e) {
-				return ExpressUIActivator.createErrorStatus(
-						"Could not import project from application {0}.", e, model.getApplicationName());
-			} catch (IOException e) {
-				return ExpressUIActivator.createErrorStatus(
-						"Could not copy openshift configuration files to project {0}", e, model
-								.getProjectName());
-			} catch (OpenShiftException e) {
-				return ExpressUIActivator.createErrorStatus("Could not import project to the workspace.", e);
-			} catch (URISyntaxException e) {
-				return ExpressUIActivator.createErrorStatus("The url of the remote git repository is not valid", e);
-			} catch (InvocationTargetException e) {
-				TransportException te = getTransportException(e);
-				if (te != null) {
-					return ExpressUIActivator.createErrorStatus(
-							"Could not clone the repository. Authentication failed.\n"
-									+ " Please make sure that you added your private key to the ssh preferences.", te);
-				} else {
-					return ExpressUIActivator.createErrorStatus(
-							"An exception occurred while creating local git repository.", e);
-				}
-			} catch (Exception e) {
-				return ExpressUIActivator.createErrorStatus("Could not import project to the workspace.", e);
-			} finally {
-				delegatingMonitor.done();
-			}
-		}
+        getShell().getDisplay().syncExec(new Runnable() {
 
-		protected TransportException getTransportException(Throwable t) {
-			if (t instanceof TransportException) {
-				return (TransportException) t;
-			} else if (t instanceof InvocationTargetException) {
-				return getTransportException(((InvocationTargetException) t).getTargetException());
-			} else if (t instanceof Exception) {
-				return getTransportException(((Exception) t).getCause());
-			}
-			return null;
-		}
+            @Override
+            public void run() {
+                new CreationLogDialog(getShell(), logEntries).open();
+            }
+        });
+    }
 
-	}
+    OpenShiftApplicationWizardModel getModel() {
+        return model;
+    }
 
-	@Override
-	public void setConnection(ExpressConnection connection) {
-		model.setConnection(connection);
-	}
+    @Override
+    public void dispose() {
+        model.dispose();
+    }
 
-	@Override
-	public ExpressConnection getConnection() {
-		return model.getConnection();
-	}
+    public boolean isCreateServerAdapter() {
+        return model.isCreateServerAdapter();
+    }
 
-	@Override
-	public boolean hasConnection() {
-		return model.hasConnection();
-	}
+    /**
+     * A workspace job that will create a new project or enable the selected
+     * project to be used with OpenShift.
+     */
+    private class ImportJob extends WorkspaceJob {
 
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		updateModel(selection, getModel());
-		if(getModel().getConnection() != null) {
-			ConnectionsRegistrySingleton.getInstance().setRecent(getModel().getConnection());
-		}
-	}
+        private DelegatingProgressMonitor delegatingMonitor;
 
-	private void updateModel(IStructuredSelection selection, IOpenShiftApplicationWizardModel model) {
-		IDomain domain = UIUtils.getFirstElement(selection, IDomain.class);
-		if (domain != null) {
-			model.setDomain(domain);
-		} else {
-			ExpressConnection connection = UIUtils.getFirstElement(selection, ExpressConnection.class);
-			if (connection != null) {
-				model.setConnection(connection);
-			} else {
-				/**
-				 * PackageExplorer Configure->New OpenShift Application
-				 */
-				IProject project = UIUtils.getFirstElement(selection, IProject.class);
-				if (project != null) {
-					model.setProject(project);
-				}
-			}
-		}
-	}
+        public ImportJob(DelegatingProgressMonitor delegatingMonitor) {
+            super("Importing project to workspace...");
+            setRule(ResourcesPlugin.getWorkspace().getRoot());
+            this.delegatingMonitor = delegatingMonitor;
+        }
+
+        @Override
+        public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+            try {
+                delegatingMonitor.add(monitor);
+                if (model.isNewProject()) {
+                    model.importProject(delegatingMonitor);
+                } else if (!model.isGitSharedProject()) {
+                    if (!askForConfirmation(NLS.bind(
+                            "OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration "
+                                    + "from server to local project and connecting local project to OpenShift Git repository.\n"
+                                    + "The local project will be committed to local Git repository upon confirmation and further publishing will "
+                                    + "eventually override existing remote content.\n\n"
+                                    + "This cannot be undone. Do you wish to continue?",
+                            model.getApplicationName(), model.getProjectName()), model.getApplicationName())) {
+                        return Status.CANCEL_STATUS;
+                    }
+                    model.mergeIntoUnsharedProject(delegatingMonitor);
+                } else {
+                    if (!askForConfirmation(NLS.bind(
+                            "OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration "
+                                    + "from server to local project and connecting local project to OpenShift Git repository.\n"
+                                    + "The local project will be committed to local Git repository upon confirmation and further publishing will "
+                                    + "eventually override existing remote content.\n\n"
+                                    + "This cannot be undone. Do you wish to continue?",
+                            model.getApplicationName(), model.getProjectName()), model.getApplicationName())) {
+                        return Status.CANCEL_STATUS;
+                    }
+                    model.mergeIntoGitSharedProject(delegatingMonitor);
+                }
+                return Status.OK_STATUS;
+            } catch (final WontOverwriteException e) {
+                openError("Project already present", e.getMessage());
+                return Status.CANCEL_STATUS;
+            } catch (final ImportFailedException e) {
+                return ExpressUIActivator.createErrorStatus("Could not import project from application {0}.", e,
+                        model.getApplicationName());
+            } catch (IOException e) {
+                return ExpressUIActivator.createErrorStatus("Could not copy openshift configuration files to project {0}", e,
+                        model.getProjectName());
+            } catch (OpenShiftException e) {
+                return ExpressUIActivator.createErrorStatus("Could not import project to the workspace.", e);
+            } catch (URISyntaxException e) {
+                return ExpressUIActivator.createErrorStatus("The url of the remote git repository is not valid", e);
+            } catch (InvocationTargetException e) {
+                TransportException te = getTransportException(e);
+                if (te != null) {
+                    return ExpressUIActivator.createErrorStatus("Could not clone the repository. Authentication failed.\n"
+                            + " Please make sure that you added your private key to the ssh preferences.", te);
+                } else {
+                    return ExpressUIActivator.createErrorStatus("An exception occurred while creating local git repository.", e);
+                }
+            } catch (Exception e) {
+                return ExpressUIActivator.createErrorStatus("Could not import project to the workspace.", e);
+            } finally {
+                delegatingMonitor.done();
+            }
+        }
+
+        protected TransportException getTransportException(Throwable t) {
+            if (t instanceof TransportException) {
+                return (TransportException)t;
+            } else if (t instanceof InvocationTargetException) {
+                return getTransportException(((InvocationTargetException)t).getTargetException());
+            } else if (t instanceof Exception) {
+                return getTransportException(((Exception)t).getCause());
+            }
+            return null;
+        }
+
+    }
+
+    @Override
+    public void setConnection(ExpressConnection connection) {
+        model.setConnection(connection);
+    }
+
+    @Override
+    public ExpressConnection getConnection() {
+        return model.getConnection();
+    }
+
+    @Override
+    public boolean hasConnection() {
+        return model.hasConnection();
+    }
+
+    @Override
+    public void init(IWorkbench workbench, IStructuredSelection selection) {
+        updateModel(selection, getModel());
+        if (getModel().getConnection() != null) {
+            ConnectionsRegistrySingleton.getInstance().setRecent(getModel().getConnection());
+        }
+    }
+
+    private void updateModel(IStructuredSelection selection, IOpenShiftApplicationWizardModel model) {
+        IDomain domain = UIUtils.getFirstElement(selection, IDomain.class);
+        if (domain != null) {
+            model.setDomain(domain);
+        } else {
+            ExpressConnection connection = UIUtils.getFirstElement(selection, ExpressConnection.class);
+            if (connection != null) {
+                model.setConnection(connection);
+            } else {
+                /**
+                 * PackageExplorer Configure->New OpenShift Application
+                 */
+                IProject project = UIUtils.getFirstElement(selection, IProject.class);
+                if (project != null) {
+                    model.setProject(project);
+                }
+            }
+        }
+    }
 
 }

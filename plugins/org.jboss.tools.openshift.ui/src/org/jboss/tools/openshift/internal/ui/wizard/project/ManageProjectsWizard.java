@@ -18,47 +18,46 @@ import org.jboss.tools.openshift.core.connection.Connection;
 
 import com.openshift.restclient.model.IProject;
 
-
 /**
  * @author jeff.cantrill
  */
 public class ManageProjectsWizard extends AbstractOpenShiftWizard<ManageProjectsWizardPageModel> {
 
-	private String description;
-	private ManageProjectsWizardPage manageProjectsWizardPage;
+    private String description;
+    private ManageProjectsWizardPage manageProjectsWizardPage;
 
-	public ManageProjectsWizard(Connection connection) {
-		this(null, connection);
-	}
+    public ManageProjectsWizard(Connection connection) {
+        this(null, connection);
+    }
 
-	public ManageProjectsWizard(IProject project, Connection connection) {
-		super("OpenShift Projects", new ManageProjectsWizardPageModel(project, connection));
-		this.description = NLS.bind("Manage projects for connection {0}", connection.toString(), connection);
-		setNeedsProgressMonitor(true);
-	}
+    public ManageProjectsWizard(IProject project, Connection connection) {
+        super("OpenShift Projects", new ManageProjectsWizardPageModel(project, connection));
+        this.description = NLS.bind("Manage projects for connection {0}", connection.toString(), connection);
+        setNeedsProgressMonitor(true);
+    }
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
-	
-	@Override
-	public void addPages() {
-		addPage(this.manageProjectsWizardPage = new ManageProjectsWizardPage(getWindowTitle(), description, getModel(), this));
-	}
-	
-	public IProject getSelectedProject() {
-		if (manageProjectsWizardPage == null) {
-			return null;
-		}
-		return manageProjectsWizardPage.getSelectedProject();
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
 
-	public List<IProject> getProjects() {
-		return manageProjectsWizardPage.getProjects();
-	}
+    @Override
+    public void addPages() {
+        addPage(this.manageProjectsWizardPage = new ManageProjectsWizardPage(getWindowTitle(), description, getModel(), this));
+    }
 
-	public boolean hasChanged() {
-		return manageProjectsWizardPage.hasChanged();
-	}
+    public IProject getSelectedProject() {
+        if (manageProjectsWizardPage == null) {
+            return null;
+        }
+        return manageProjectsWizardPage.getSelectedProject();
+    }
+
+    public List<IProject> getProjects() {
+        return manageProjectsWizardPage.getProjects();
+    }
+
+    public boolean hasChanged() {
+        return manageProjectsWizardPage.hasChanged();
+    }
 }

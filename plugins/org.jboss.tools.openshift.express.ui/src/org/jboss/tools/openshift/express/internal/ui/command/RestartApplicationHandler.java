@@ -27,40 +27,32 @@ import com.openshift.client.IApplication;
  */
 public class RestartApplicationHandler extends AbstractApplicationHandler {
 
-	@Override
-	protected IStatus execute(IApplication application, Shell shell) {
-		if (!promptUserToConfirm(application.getName(), shell)) {
-			return ExpressUIActivator.createCancelStatus(
-					"Restarting application {0} was cancelled.", application.getName());
-		}
-		new RestartApplicationJob(application).schedule();
-		return Status.OK_STATUS;
-	}
+    @Override
+    protected IStatus execute(IApplication application, Shell shell) {
+        if (!promptUserToConfirm(application.getName(), shell)) {
+            return ExpressUIActivator.createCancelStatus("Restarting application {0} was cancelled.", application.getName());
+        }
+        new RestartApplicationJob(application).schedule();
+        return Status.OK_STATUS;
+    }
 
-	@Override
-	protected IStatus execute(LoadApplicationJob job, Shell shell) {
-		if (!promptUserToConfirm(job.getApplicationName(), shell)) {
-			return ExpressUIActivator.createCancelStatus(
-					"Restarting application {0} was cancelled.", job.getApplicationName());
-		}
-		new JobChainBuilder(job)
-				.runWhenSuccessfullyDone(new RestartApplicationJob(job)).schedule();
-		return Status.OK_STATUS;
-	}
+    @Override
+    protected IStatus execute(LoadApplicationJob job, Shell shell) {
+        if (!promptUserToConfirm(job.getApplicationName(), shell)) {
+            return ExpressUIActivator.createCancelStatus("Restarting application {0} was cancelled.", job.getApplicationName());
+        }
+        new JobChainBuilder(job).runWhenSuccessfullyDone(new RestartApplicationJob(job)).schedule();
+        return Status.OK_STATUS;
+    }
 
-	private boolean promptUserToConfirm(String applicationName, Shell shell) {
-		return MessageDialog
-				.openQuestion(
-						shell,
-						"Restart Application",
-						NLS.bind("You are about to restart application {0}.\n\n"
-								+ "Restarting an application in production may be harmful. "
-								+ "Are you sure that you want to restart your application?",
-								applicationName));
-	}
+    private boolean promptUserToConfirm(String applicationName, Shell shell) {
+        return MessageDialog.openQuestion(shell, "Restart Application",
+                NLS.bind("You are about to restart application {0}.\n\n" + "Restarting an application in production may be harmful. "
+                        + "Are you sure that you want to restart your application?", applicationName));
+    }
 
-	@Override
-	protected String getOperationName() {
-		return "restart application";
-	}
+    @Override
+    protected String getOperationName() {
+        return "restart application";
+    }
 }

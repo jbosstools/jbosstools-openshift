@@ -19,23 +19,23 @@ import org.jboss.tools.openshift.core.server.adapter.ProjectBuilderTypeDetector;
 import com.openshift.restclient.model.IResource;
 
 public class OpenShiftNodejsApplicationProfileDetector implements IOpenshiftServerAdapterProfileDetector {
-	
-	public static final String PROFILE = "openshift3.nodejs";
-	private static final String TEMPLATES_TAG_NODEJS = "node";
 
-	public OpenShiftNodejsApplicationProfileDetector() {
-		super();
-	}
+    public static final String PROFILE = "openshift3.nodejs";
+    private static final String TEMPLATES_TAG_NODEJS = "node";
 
-	@Override
-	public String getProfile() {
-		return PROFILE;
-	}
+    public OpenShiftNodejsApplicationProfileDetector() {
+        super();
+    }
 
-	@Override
-	public boolean detect(IConnection connection, IResource resource, IProject eclipseProject) {
-		return ProjectUtils.isAccessible(eclipseProject)
-				&& TEMPLATES_TAG_NODEJS.equals(new ProjectBuilderTypeDetector().findTemplateFilter(eclipseProject));
-	}
+    @Override
+    public String getProfile() {
+        return PROFILE;
+    }
+
+    @Override
+    public boolean detect(IConnection connection, IResource resource, IProject eclipseProject) {
+        return ProjectUtils.isAccessible(eclipseProject)
+                && TEMPLATES_TAG_NODEJS.equals(new ProjectBuilderTypeDetector().findTemplateFilter(eclipseProject));
+    }
 
 }

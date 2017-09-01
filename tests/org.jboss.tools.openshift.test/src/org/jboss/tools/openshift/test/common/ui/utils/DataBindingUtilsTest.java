@@ -23,29 +23,30 @@ import org.junit.Test;
 
 public class DataBindingUtilsTest {
 
-	@Test
-	public void testAddDisposableListChangeListener() {
-		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		Table table = new Table(shell, SWT.NONE);
-		WritableList<Object> observable = new WritableList<>();
-		ListChangeListener listener = new ListChangeListener();
+    @Test
+    public void testAddDisposableListChangeListener() {
+        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+        Table table = new Table(shell, SWT.NONE);
+        WritableList<Object> observable = new WritableList<>();
+        ListChangeListener listener = new ListChangeListener();
 
-		DataBindingUtils.addDisposableListChangeListener(listener, observable, table);
-		observable.add(new Object());
-		Assert.assertEquals("After the listener is added, it should listen to changes in the observable list", 1, listener.changes);
+        DataBindingUtils.addDisposableListChangeListener(listener, observable, table);
+        observable.add(new Object());
+        Assert.assertEquals("After the listener is added, it should listen to changes in the observable list", 1, listener.changes);
 
-		table.dispose();
-		observable.add(new Object());
-		Assert.assertEquals("After the table is disposed, the listener should not listen to changes in the observable list", 1, listener.changes);
-	}
+        table.dispose();
+        observable.add(new Object());
+        Assert.assertEquals("After the table is disposed, the listener should not listen to changes in the observable list", 1,
+                listener.changes);
+    }
 
-	class ListChangeListener implements IListChangeListener<Object> {
-		int changes = 0;
+    class ListChangeListener implements IListChangeListener<Object> {
+        int changes = 0;
 
-		@Override
-		public void handleListChange(ListChangeEvent<? extends Object> event) {
-			changes++;
-		}
-		
-	}
+        @Override
+        public void handleListChange(ListChangeEvent<? extends Object> event) {
+            changes++;
+        }
+
+    }
 }

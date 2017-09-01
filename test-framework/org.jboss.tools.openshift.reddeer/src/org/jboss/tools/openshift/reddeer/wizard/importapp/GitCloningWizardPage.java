@@ -17,18 +17,15 @@ import org.jboss.reddeer.swt.impl.group.DefaultGroup;
  * @author jnovak@redhat.com
  */
 public class GitCloningWizardPage {
-	
-	public void useExistingRepository(boolean useExistingRepository){
-		CheckBox useExistingRepositoryCheckBox = new CheckBox(
-				new DefaultGroup("Clone destination"), 
-				"Do not clone - use existing repository"
-		);
+
+	public void useExistingRepository(boolean useExistingRepository) {
+		CheckBox useExistingRepositoryCheckBox = new CheckBox(new DefaultGroup("Clone destination"),
+				"Do not clone - use existing repository");
 		useExistingRepositoryCheckBox.toggle(useExistingRepository);
 	}
-	
-	public boolean projectExists(){
-		return new ImportApplicationWizard().getPageDescription()
-				.trim().startsWith("There already is a folder named");
+
+	public boolean projectExists() {
+		return new ImportApplicationWizard().getPageDescription().trim().startsWith("There already is a folder named");
 	}
-	
+
 }

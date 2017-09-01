@@ -66,190 +66,177 @@ import com.openshift.restclient.model.template.IParameter;
  */
 public class NewApplicationSummaryFromTemplateDialog extends ResourceSummaryDialog {
 
-	private static final int COPIED_NOTIFICATION_SHOW_DURATION = 2*1000;
-	
-	private CreateApplicationFromTemplateJob job;
+    private static final int COPIED_NOTIFICATION_SHOW_DURATION = 2 * 1000;
 
-	public NewApplicationSummaryFromTemplateDialog(Shell parentShell, CreateApplicationFromTemplateJob job, String message) {
-		super(parentShell, job.getResources(),  "Create Application Summary", message,  new ResourceSummaryLabelProvider(), new ResourceSummaryContentProvider());
-		this.job = job;
-	}
+    private CreateApplicationFromTemplateJob job;
 
-	@Override
-	protected void createAreaAfterResourceSummary(Composite parent) {
-		
-		Composite area = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(area);
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(area);
-		
-		final Collection<IBuildConfig> buildConfigs = findBuildConfigsWithWebHooks();
-		if (!buildConfigs.isEmpty()) {
-			Link webHooksLink = new Link(area, SWT.NONE);
-			webHooksLink.setText("Click <a>here</a> to display the webhooks available to automatically trigger builds.");
-			GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(webHooksLink);
-			webHooksLink.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					WebHooksDialog dialog = new WebHooksDialog(getParentShell(), buildConfigs);
-					dialog.open();
-				}
-			});
-		}
+    public NewApplicationSummaryFromTemplateDialog(Shell parentShell, CreateApplicationFromTemplateJob job, String message) {
+        super(parentShell, job.getResources(), "Create Application Summary", message, new ResourceSummaryLabelProvider(),
+                new ResourceSummaryContentProvider());
+        this.job = job;
+    }
 
-		if(job.getParameters().isEmpty()) {
-			return;
-		}
+    @Override
+    protected void createAreaAfterResourceSummary(Composite parent) {
 
-		Label lblParams = new Label(area, SWT.WRAP);
-		lblParams.setText("Please make note of the following parameters which may include values required to administer your resources:");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.TOP).hint(100, SWT.DEFAULT).grab(true, false).applyTo(lblParams);
+        Composite area = new Composite(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(area);
+        GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(area);
 
-		Composite container = new Composite(parent, SWT.NONE);
-		GridDataFactory.swtDefaults().align(SWT.FILL, SWT.TOP).grab(true, true).applyTo(container);
-		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).equalWidth(false).applyTo(container);
-		
-		Composite parameters = new Composite(container, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.hint(100, 200)
-			.grab(true, true)
-			.applyTo(parameters);
+        final Collection<IBuildConfig> buildConfigs = findBuildConfigsWithWebHooks();
+        if (!buildConfigs.isEmpty()) {
+            Link webHooksLink = new Link(area, SWT.NONE);
+            webHooksLink.setText("Click <a>here</a> to display the webhooks available to automatically trigger builds.");
+            GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(webHooksLink);
+            webHooksLink.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    WebHooksDialog dialog = new WebHooksDialog(getParentShell(), buildConfigs);
+                    dialog.open();
+                }
+            });
+        }
 
-		TableViewer viewer = createTable(parameters);
-		viewer.setInput(job.getParameters());
+        if (job.getParameters().isEmpty()) {
+            return;
+        }
 
-		Button copyToClipboard = new Button(container, SWT.PUSH);
-		copyToClipboard.setImage(OpenShiftImages.COPY_TO_CLIPBOARD_IMG);
-		copyToClipboard.setToolTipText("Copy parameters to clipboard");
-		copyToClipboard.addSelectionListener(onClickCopyButton(lblParams));
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(false, false).applyTo(copyToClipboard);
-	}
-	
-	private SelectionAdapter onClickCopyButton(final Control control) {
-	  return new SelectionAdapter() {
-	    @Override
-	    public void widgetSelected(SelectionEvent e) {
-	    	List<IParameter> params = new ArrayList<>(job.getParameters());
-	    	Collections.sort(params, new Comparator<IParameter>() {
+        Label lblParams = new Label(area, SWT.WRAP);
+        lblParams.setText("Please make note of the following parameters which may include values required to administer your resources:");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).hint(100, SWT.DEFAULT).grab(true, false).applyTo(lblParams);
 
-				@Override
-				public int compare(IParameter p1, IParameter p2) {
-					return p1.getName().compareTo(p2.getName());
-				}
-			});
-	    	String text = getAsString(params);
-	        copyToClipBoard(control, text, "Parameters copied to clipboard");
-	    }
-	  };
-	}
+        Composite container = new Composite(parent, SWT.NONE);
+        GridDataFactory.swtDefaults().align(SWT.FILL, SWT.TOP).grab(true, true).applyTo(container);
+        GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).equalWidth(false).applyTo(container);
 
-	private static String getAsString(Collection<IParameter> parameters) {
-	  StringBuilder content = new StringBuilder();
-	  for (IParameter param : parameters) {
-	    content.append(getAsString(param)).append("\r\n");
-	  }
-	  return content.toString();
-	}
+        Composite parameters = new Composite(container, SWT.NONE);
+        GridDataFactory.fillDefaults().hint(100, 200).grab(true, true).applyTo(parameters);
 
-	private static String getAsString(IParameter param) {
-	  StringBuilder content = new StringBuilder(param.getName());
-	  content.append(": ").append(param.getValue());
-	  return content.toString();
-	}
-	 
-	private void copyToClipBoard(Control control, String text, String notification) {
-	  copyToClipBoard(text);
-	  notifyCopied(control, notification);
-	}
+        TableViewer viewer = createTable(parameters);
+        viewer.setInput(job.getParameters());
 
-	private void notifyCopied(Control control, String notification) {
-	  DefaultToolTip copiedNotification = new DefaultToolTip(control, ToolTip.NO_RECREATE, true);
-	  copiedNotification.setText(notification);
-	  copiedNotification.setHideDelay(COPIED_NOTIFICATION_SHOW_DURATION);
-	  copiedNotification.show(control.getLocation());
-	  copiedNotification.deactivate();
-	}
+        Button copyToClipboard = new Button(container, SWT.PUSH);
+        copyToClipboard.setImage(OpenShiftImages.COPY_TO_CLIPBOARD_IMG);
+        copyToClipboard.setToolTipText("Copy parameters to clipboard");
+        copyToClipboard.addSelectionListener(onClickCopyButton(lblParams));
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(false, false).applyTo(copyToClipboard);
+    }
 
-	private void copyToClipBoard(String text) {
-	  Clipboard clipboard = new Clipboard(Display.getCurrent());
-	  Object[] data = new Object[] { text };
-	  Transfer[] dataTypes = new Transfer[] { TextTransfer.getInstance() };
-	  clipboard.setContents(data, dataTypes);
-	  clipboard.dispose();
-	}
- 
-	private Collection<IBuildConfig> findBuildConfigsWithWebHooks() {
-		Set<IBuildConfig> buildConfigs = new LinkedHashSet<>();
-		for (IResource r : job.getResources()) {
-			if (r instanceof IBuildConfig && !WebhookUtil.getWebHooks((IBuildConfig)r).isEmpty()) {
-				buildConfigs.add((IBuildConfig)r);
-			}
-		}
-		return buildConfigs;
-	}
+    private SelectionAdapter onClickCopyButton(final Control control) {
+        return new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                List<IParameter> params = new ArrayList<>(job.getParameters());
+                Collections.sort(params, new Comparator<IParameter>() {
 
-	public TableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		ICellToolTipProvider<IParameter> cellToolTipProvider = new ICellToolTipProvider<IParameter>() {
+                    @Override
+                    public int compare(IParameter p1, IParameter p2) {
+                        return p1.getName().compareTo(p2.getName());
+                    }
+                });
+                String text = getAsString(params);
+                copyToClipBoard(control, text, "Parameters copied to clipboard");
+            }
+        };
+    }
 
-			@Override
-			public String getToolTipText(IParameter object) {
-				return object.getDescription();
-			}
+    private static String getAsString(Collection<IParameter> parameters) {
+        StringBuilder content = new StringBuilder();
+        for (IParameter param : parameters) {
+            content.append(getAsString(param)).append("\r\n");
+        }
+        return content.toString();
+    }
 
-			@Override
-			public int getToolTipDisplayDelayTime(IParameter object) {
-				return 0;
-			}
-		};
-		TableViewer viewer = new TableViewerBuilder(table, tableContainer)
-				.contentProvider(new ArrayContentProvider())
-				.column(new IColumnLabelProvider<IParameter>() {
+    private static String getAsString(IParameter param) {
+        StringBuilder content = new StringBuilder(param.getName());
+        content.append(": ").append(param.getValue());
+        return content.toString();
+    }
 
-					@Override
-					public String getValue(IParameter variable) {
-						return variable.getName();
-					}})
-					.cellToolTipProvider(cellToolTipProvider)
-					.name("Name")
-					.align(SWT.LEFT).weight(2).minWidth(100)
-					.buildColumn()
-				.column(new IColumnLabelProvider<IParameter>() {
+    private void copyToClipBoard(Control control, String text, String notification) {
+        copyToClipBoard(text);
+        notifyCopied(control, notification);
+    }
 
-					@Override
-					public String getValue(IParameter parameter) {
-						return TemplateParameterViewerUtils.getValueLabel(parameter);
-					}})
-					.cellToolTipProvider(cellToolTipProvider)
-					.name("Value")
-					.align(SWT.LEFT).weight(2).minWidth(100)
-					.buildColumn()
-				.buildViewer();
-		viewer.setComparator(new ParameterNameViewerComparator());
+    private void notifyCopied(Control control, String notification) {
+        DefaultToolTip copiedNotification = new DefaultToolTip(control, ToolTip.NO_RECREATE, true);
+        copiedNotification.setText(notification);
+        copiedNotification.setHideDelay(COPIED_NOTIFICATION_SHOW_DURATION);
+        copiedNotification.show(control.getLocation());
+        copiedNotification.deactivate();
+    }
 
-		viewer.addDoubleClickListener(onDoubleClick(table));
-		return viewer;
-	}
+    private void copyToClipBoard(String text) {
+        Clipboard clipboard = new Clipboard(Display.getCurrent());
+        Object[] data = new Object[] { text };
+        Transfer[] dataTypes = new Transfer[] { TextTransfer.getInstance() };
+        clipboard.setContents(data, dataTypes);
+        clipboard.dispose();
+    }
 
-	 private IDoubleClickListener onDoubleClick(final Control control) {
-	    return new IDoubleClickListener() {
-	      @Override
-	      public void doubleClick(DoubleClickEvent event) {
-	        IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-	        IParameter param = (IParameter) selection.getFirstElement();
-	        if (param != null) {
-	        	String text = param.getValue();
-	        	if (StringUtils.isNotBlank(text)) {
-	        		String notification = param.getName() + " value copied to clipboard";
-	        		copyToClipBoard(control, text, notification);
-	        	}
-	        }
-	      }
-	    };
-	}
+    private Collection<IBuildConfig> findBuildConfigsWithWebHooks() {
+        Set<IBuildConfig> buildConfigs = new LinkedHashSet<>();
+        for (IResource r : job.getResources()) {
+            if (r instanceof IBuildConfig && !WebhookUtil.getWebHooks((IBuildConfig)r).isEmpty()) {
+                buildConfigs.add((IBuildConfig)r);
+            }
+        }
+        return buildConfigs;
+    }
+
+    public TableViewer createTable(Composite tableContainer) {
+        Table table = new Table(tableContainer, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+        table.setLinesVisible(true);
+        table.setHeaderVisible(true);
+        ICellToolTipProvider<IParameter> cellToolTipProvider = new ICellToolTipProvider<IParameter>() {
+
+            @Override
+            public String getToolTipText(IParameter object) {
+                return object.getDescription();
+            }
+
+            @Override
+            public int getToolTipDisplayDelayTime(IParameter object) {
+                return 0;
+            }
+        };
+        TableViewer viewer = new TableViewerBuilder(table, tableContainer).contentProvider(new ArrayContentProvider())
+                .column(new IColumnLabelProvider<IParameter>() {
+
+                    @Override
+                    public String getValue(IParameter variable) {
+                        return variable.getName();
+                    }
+                }).cellToolTipProvider(cellToolTipProvider).name("Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
+                .column(new IColumnLabelProvider<IParameter>() {
+
+                    @Override
+                    public String getValue(IParameter parameter) {
+                        return TemplateParameterViewerUtils.getValueLabel(parameter);
+                    }
+                }).cellToolTipProvider(cellToolTipProvider).name("Value").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
+                .buildViewer();
+        viewer.setComparator(new ParameterNameViewerComparator());
+
+        viewer.addDoubleClickListener(onDoubleClick(table));
+        return viewer;
+    }
+
+    private IDoubleClickListener onDoubleClick(final Control control) {
+        return new IDoubleClickListener() {
+            @Override
+            public void doubleClick(DoubleClickEvent event) {
+                IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+                IParameter param = (IParameter)selection.getFirstElement();
+                if (param != null) {
+                    String text = param.getValue();
+                    if (StringUtils.isNotBlank(text)) {
+                        String notification = param.getName() + " value copied to clipboard";
+                        copyToClipBoard(control, text, notification);
+                    }
+                }
+            }
+        };
+    }
 }

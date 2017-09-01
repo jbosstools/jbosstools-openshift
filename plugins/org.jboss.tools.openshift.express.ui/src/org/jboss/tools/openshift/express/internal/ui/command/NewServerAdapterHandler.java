@@ -49,59 +49,56 @@ import com.openshift.client.OpenShiftException;
  */
 public class NewServerAdapterHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IApplication application = 
-				UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
-		if (application == null) {
-			return ExpressUIActivator
-					.createCancelStatus("Cannot create server adapter: no application selected.");
-		}
-		
-		try {
-			NewServerWizard wizard = new NewServerWizard(ExpressServerUtils.EXPRESS_SERVER_TYPE);
-			ExpressServerWizardTaskModelUtil.put(application, wizard.getTaskModel());
-			final IDomain domain = application.getDomain();
-			ExpressServerWizardTaskModelUtil.put(domain, wizard.getTaskModel());
-			ExpressConnection connection = ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance());
-			if (connection == null) {
-				return ExpressUIActivator.createCancelStatus(NLS.bind(
-						"Cannot create server adapter: connection for application {0} not found.",
-						application.getName()));
-			}
-			ExpressServerWizardTaskModelUtil.put(connection, wizard.getTaskModel());
-			WizardUtils.openWizardDialog(400, 700, wizard, HandlerUtil.getActiveShell(event));
-			return Status.OK_STATUS;
-		} catch (OpenShiftException e) {
-			return ExpressUIActivator.createErrorStatus(NLS.bind("Could not create OpenShift server adapter for application {0}", application.getName()), e);
-		}
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
+        if (application == null) {
+            return ExpressUIActivator.createCancelStatus("Cannot create server adapter: no application selected.");
+        }
 
-	public class NewServerWizard extends TaskWizard implements INewWizard {
-		public NewServerWizard(final String serverType) {
-			super(Messages.wizNewServerWizardTitle,
-					new WizardFragment() {
-						@Override
-						protected void createChildFragments(List<WizardFragment> list) {
-							list.add(new NewServerWizardFragment(null, serverType));
+        try {
+            NewServerWizard wizard = new NewServerWizard(ExpressServerUtils.EXPRESS_SERVER_TYPE);
+            ExpressServerWizardTaskModelUtil.put(application, wizard.getTaskModel());
+            final IDomain domain = application.getDomain();
+            ExpressServerWizardTaskModelUtil.put(domain, wizard.getTaskModel());
+            ExpressConnection connection = ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance());
+            if (connection == null) {
+                return ExpressUIActivator.createCancelStatus(
+                        NLS.bind("Cannot create server adapter: connection for application {0} not found.", application.getName()));
+            }
+            ExpressServerWizardTaskModelUtil.put(connection, wizard.getTaskModel());
+            WizardUtils.openWizardDialog(400, 700, wizard, HandlerUtil.getActiveShell(event));
+            return Status.OK_STATUS;
+        } catch (OpenShiftException e) {
+            return ExpressUIActivator
+                    .createErrorStatus(NLS.bind("Could not create OpenShift server adapter for application {0}", application.getName()), e);
+        }
+    }
 
-							list.add(WizardTaskUtil.TempSaveRuntimeFragment);
-							list.add(WizardTaskUtil.TempSaveServerFragment);
+    public class NewServerWizard extends TaskWizard implements INewWizard {
+        public NewServerWizard(final String serverType) {
+            super(Messages.wizNewServerWizardTitle, new WizardFragment() {
+                @Override
+                protected void createChildFragments(List<WizardFragment> list) {
+                    list.add(new NewServerWizardFragment(null, serverType));
 
-							list.add(new ModifyModulesWizardFragment());
-							list.add(new TasksWizardFragment());
+                    list.add(WizardTaskUtil.TempSaveRuntimeFragment);
+                    list.add(WizardTaskUtil.TempSaveServerFragment);
 
-							list.add(WizardTaskUtil.SaveRuntimeFragment);
-							list.add(WizardTaskUtil.SaveServerFragment);
-							list.add(WizardTaskUtil.SaveHostnameFragment);
-						}
-					});
-		}
+                    list.add(new ModifyModulesWizardFragment());
+                    list.add(new TasksWizardFragment());
 
-		@Override
-		public void init(IWorkbench newWorkbench, IStructuredSelection newSelection) {
-			// do nothing
-		}
-	}
+                    list.add(WizardTaskUtil.SaveRuntimeFragment);
+                    list.add(WizardTaskUtil.SaveServerFragment);
+                    list.add(WizardTaskUtil.SaveHostnameFragment);
+                }
+            });
+        }
+
+        @Override
+        public void init(IWorkbench newWorkbench, IStructuredSelection newSelection) {
+            // do nothing
+        }
+    }
 
 }

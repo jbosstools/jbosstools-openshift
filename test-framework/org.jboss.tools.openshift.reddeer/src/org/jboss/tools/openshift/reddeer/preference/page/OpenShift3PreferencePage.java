@@ -23,11 +23,11 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
  *
  */
 public class OpenShift3PreferencePage extends PreferencePage {
-	
+
 	public OpenShift3PreferencePage() {
 		super("JBoss Tools", "OpenShift 3");
 	}
-	
+
 	/**
 	 * Sets path to oc binary location on local file system. There are supposed to be validators
 	 * for text field containing path.
@@ -37,7 +37,7 @@ public class OpenShift3PreferencePage extends PreferencePage {
 	public void setOCLocation(String path) {
 		new LabeledText(OpenShiftLabel.TextLabels.OC_LOCATION).setText(path);
 	}
-	
+
 	/**
 	 * Clear oc binary location.
 	 */
@@ -45,4 +45,3 @@ public class OpenShift3PreferencePage extends PreferencePage {
 		setOCLocation("");
 	}
 }
-

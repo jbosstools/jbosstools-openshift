@@ -25,32 +25,32 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class OkCancelButtonWizardDialog extends WizardDialog {
 
-	public OkCancelButtonWizardDialog(Shell parentShell, IWizard newWizard) {
-		super(parentShell, newWizard);
-	}
-	
-	@Override
-	protected Control createButtonBar(Composite parent) {
-		Control control = super.createButtonBar(parent);
-		getButton(IDialogConstants.FINISH_ID).setText(IDialogConstants.OK_LABEL);
-		return control;
-	}
+    public OkCancelButtonWizardDialog(Shell parentShell, IWizard newWizard) {
+        super(parentShell, newWizard);
+    }
 
-	protected void hideButton(Button button) {
-		if (button != null) {
-			button.setVisible(false);
-			GridDataFactory.fillDefaults().exclude(true).applyTo(button);
-		}
-	}
-	
-	public boolean autoFinish() {
-		if(getWizard().canFinish()) {
-			if(!getWizard().performFinish()) {
-				return false;
-			}			
-			okPressed();
-			return true;
-		}
-		return false;
-	}
+    @Override
+    protected Control createButtonBar(Composite parent) {
+        Control control = super.createButtonBar(parent);
+        getButton(IDialogConstants.FINISH_ID).setText(IDialogConstants.OK_LABEL);
+        return control;
+    }
+
+    protected void hideButton(Button button) {
+        if (button != null) {
+            button.setVisible(false);
+            GridDataFactory.fillDefaults().exclude(true).applyTo(button);
+        }
+    }
+
+    public boolean autoFinish() {
+        if (getWizard().canFinish()) {
+            if (!getWizard().performFinish()) {
+                return false;
+            }
+            okPressed();
+            return true;
+        }
+        return false;
+    }
 }

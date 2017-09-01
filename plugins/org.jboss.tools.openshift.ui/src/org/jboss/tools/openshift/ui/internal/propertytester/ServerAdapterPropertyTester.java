@@ -32,13 +32,12 @@ public class ServerAdapterPropertyTester extends PropertyTester {
     }
 
     private boolean isServerAdapterAllowed(Object receiver, Object[] args, Object expectedValue) {
-        if (!(receiver instanceof IResource)
-                || !(expectedValue instanceof Boolean)) {
+        if (!(receiver instanceof IResource) || !(expectedValue instanceof Boolean)) {
             return false;
         }
-        IResource resource = (IResource) receiver;
+        IResource resource = (IResource)receiver;
         Boolean allowed = OpenShiftServerUtils.isAllowedForServerAdapter(resource);
-        return ((Boolean) expectedValue).equals(allowed);
+        return ((Boolean)expectedValue).equals(allowed);
     }
 
 }

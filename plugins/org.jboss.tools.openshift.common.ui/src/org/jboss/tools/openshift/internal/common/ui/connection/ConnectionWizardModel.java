@@ -18,37 +18,37 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
  * @author Andre Dietisheim
  */
 public class ConnectionWizardModel implements IConnectionAware<IConnection> {
-	
-	protected IConnection connection;
-	private Object context;
 
-	public ConnectionWizardModel(Class<? extends IConnection> connectionType) {
-		this(ConnectionsRegistrySingleton.getInstance().getRecentConnection(connectionType), null);
-	}
+    protected IConnection connection;
+    private Object context;
 
-	public ConnectionWizardModel(final IConnection connection, Object context) {
-		this.connection = connection;
-		this.context = context;
-	}
+    public ConnectionWizardModel(Class<? extends IConnection> connectionType) {
+        this(ConnectionsRegistrySingleton.getInstance().getRecentConnection(connectionType), null);
+    }
 
-	@Override
-	public Object getContext() {
-		return this.context;
-	}
-	
-	@Override
-	public IConnection getConnection() {
-		return connection;
-	}
+    public ConnectionWizardModel(final IConnection connection, Object context) {
+        this.connection = connection;
+        this.context = context;
+    }
 
-	@Override
-	public void setConnection(IConnection connection) {
-		this.connection = connection;
-	}
+    @Override
+    public Object getContext() {
+        return this.context;
+    }
 
-	@Override
-	public boolean hasConnection() {
-		return getConnection() != null;
-	}
+    @Override
+    public IConnection getConnection() {
+        return connection;
+    }
+
+    @Override
+    public void setConnection(IConnection connection) {
+        this.connection = connection;
+    }
+
+    @Override
+    public boolean hasConnection() {
+        return getConnection() != null;
+    }
 
 }

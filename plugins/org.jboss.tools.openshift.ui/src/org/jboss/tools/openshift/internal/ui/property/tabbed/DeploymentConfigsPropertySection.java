@@ -21,7 +21,7 @@ import com.openshift.restclient.ResourceKind;
  */
 public class DeploymentConfigsPropertySection extends OpenShiftResourcePropertySection {
 
-	public DeploymentConfigsPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.DeploymentConfigsTab", ResourceKind.DEPLOYMENT_CONFIG);
-	}
+    public DeploymentConfigsPropertySection() {
+        super("popup:org.jboss.tools.openshift.ui.properties.tab.DeploymentConfigsTab", ResourceKind.DEPLOYMENT_CONFIG);
+    }
 }

@@ -23,53 +23,52 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
 public abstract class BaseExplorerLabelProvider implements IStyledLabelProvider, ILabelProvider {
 
-	@Override
-	public void addListener(ILabelProviderListener listener) {
-	}
+    @Override
+    public void addListener(ILabelProviderListener listener) {
+    }
 
-	@Override
-	public void dispose() {
-	}
+    @Override
+    public void dispose() {
+    }
 
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		return false;
-	}
+    @Override
+    public boolean isLabelProperty(Object element, String property) {
+        return false;
+    }
 
-	@Override
-	public void removeListener(ILabelProviderListener listener) {
-	}
+    @Override
+    public void removeListener(ILabelProviderListener listener) {
+    }
 
-	@Override
-	public Image getImage(Object element) {
-		if (element instanceof IConnection) {
-			return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
-		}
-		if (element instanceof BaseExplorerContentProvider.LoadingStub) {
-			return OpenShiftCommonImages.SYSTEM_PROCESS_IMG;
-		} 
-		if (element instanceof Exception) {
-			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
-		}
-		return null;
-	}
+    @Override
+    public Image getImage(Object element) {
+        if (element instanceof IConnection) {
+            return OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_ICON_IMG;
+        }
+        if (element instanceof BaseExplorerContentProvider.LoadingStub) {
+            return OpenShiftCommonImages.SYSTEM_PROCESS_IMG;
+        }
+        if (element instanceof Exception) {
+            return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+        }
+        return null;
+    }
 
-	@Override
-	public String getText(Object element) {
-		return getStyledText(element).getString();
-	}
+    @Override
+    public String getText(Object element) {
+        return getStyledText(element).getString();
+    }
 
-	@Override
-	public StyledString getStyledText(Object element) {
-		if (element instanceof BaseExplorerContentProvider.LoadingStub) {
-			return new StyledString("Loading...");
-		}
-		if(element instanceof Exception) {
-			Exception exception = (Exception)element;
-			return new StyledString(StringUtils.defaultIfBlank(exception.getMessage(), exception.getClass().getName()));
-		}
-		return new StyledString(element.toString());
-	}
-	
-	
+    @Override
+    public StyledString getStyledText(Object element) {
+        if (element instanceof BaseExplorerContentProvider.LoadingStub) {
+            return new StyledString("Loading...");
+        }
+        if (element instanceof Exception) {
+            Exception exception = (Exception)element;
+            return new StyledString(StringUtils.defaultIfBlank(exception.getMessage(), exception.getClass().getName()));
+        }
+        return new StyledString(element.toString());
+    }
+
 }

@@ -26,73 +26,72 @@ import com.openshift.restclient.model.IResource;
  */
 public interface IOpenShiftConnection extends IConnection {
 
-	static final String PROPERTY_EXTENDED_PROPERTIES = "extendedProperties";
-	
-	/**
-	 * Retrieve a list of resources of the given kind;
-	 * @param kind
-	 * @return
-	 * @throws OpenShiftException
-	 */
-	<T extends IResource> List<T> getResources(String kind);
-	
-	<T extends IResource> List<T> getResources(String kind, String namespace);
+    static final String PROPERTY_EXTENDED_PROPERTIES = "extendedProperties";
 
-	/**
-	 * Get or refresh a resource
-	 * 
-	 * @return a <IResource>
-	 * @throws OpenShiftException
-	 */
-	<T extends IResource> T refresh(IResource resource);
-	
-	/**
-	 * Retrieve a resource by name
-	 * @param kind
-	 * @param namespace
-	 * @param name
-	 * @return
-	 */
-	<T extends IResource> T getResource(String kind, String namespace, String name);
-	
-	@Override
-	String getUsername();
-	
-	/**
-	 * Map of extended properties for
-	 * a connection (e.g. public url to the registry
-	 * @return
-	 */
-	Map<String, Object> getExtendedProperties();
-	
-	/**
-	 * Set the extended properties for a connection.
-	 * @param ext
-	 */
-	void setExtendedProperties(Map<String, Object> ext);
-	
-	/**
-	 * Return the cluster namespace used for common resources.
-	 * 
-	 * @return the cluster namespace
-	 */
-	String getClusterNamespace();
-	
-	
-	/**
-	 * Set a value of an extended property
-	 * @param name
-	 * @param value
-	 */
-	void setExtendedProperty(String name, Object value);
-	
-	/**
-	 * Get the server Openshift version
-	 */
-	String getOpenShiftMasterVersion();
-	
-	/**
-	 * Get the server Kubernetes version
-	 */
-	String getKubernetesMasterVersion();
+    /**
+     * Retrieve a list of resources of the given kind;
+     * @param kind
+     * @return
+     * @throws OpenShiftException
+     */
+    <T extends IResource> List<T> getResources(String kind);
+
+    <T extends IResource> List<T> getResources(String kind, String namespace);
+
+    /**
+     * Get or refresh a resource
+     * 
+     * @return a <IResource>
+     * @throws OpenShiftException
+     */
+    <T extends IResource> T refresh(IResource resource);
+
+    /**
+     * Retrieve a resource by name
+     * @param kind
+     * @param namespace
+     * @param name
+     * @return
+     */
+    <T extends IResource> T getResource(String kind, String namespace, String name);
+
+    @Override
+    String getUsername();
+
+    /**
+     * Map of extended properties for
+     * a connection (e.g. public url to the registry
+     * @return
+     */
+    Map<String, Object> getExtendedProperties();
+
+    /**
+     * Set the extended properties for a connection.
+     * @param ext
+     */
+    void setExtendedProperties(Map<String, Object> ext);
+
+    /**
+     * Return the cluster namespace used for common resources.
+     * 
+     * @return the cluster namespace
+     */
+    String getClusterNamespace();
+
+    /**
+     * Set a value of an extended property
+     * @param name
+     * @param value
+     */
+    void setExtendedProperty(String name, Object value);
+
+    /**
+     * Get the server Openshift version
+     */
+    String getOpenShiftMasterVersion();
+
+    /**
+     * Get the server Kubernetes version
+     */
+    String getKubernetesMasterVersion();
 }

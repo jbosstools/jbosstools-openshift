@@ -26,37 +26,36 @@ import com.openshift.restclient.model.IService;
  */
 public class ServiceViewerFilter extends ViewerFilter {
 
-	private Text filterText;
+    private Text filterText;
 
-	public ServiceViewerFilter(Text filterText) {
-		Assert.isLegal(!DisposeUtils.isDisposed(filterText));
-		this.filterText = filterText;
-	}
+    public ServiceViewerFilter(Text filterText) {
+        Assert.isLegal(!DisposeUtils.isDisposed(filterText));
+        this.filterText = filterText;
+    }
 
-	@Override
-	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (!(element instanceof ObservableTreeItem)) {
-			return false;
-		}
-		if (!(((ObservableTreeItem) element).getModel() instanceof IResource)) {
-			return false;
-		}
-		
-		IResource resource = (IResource) ((ObservableTreeItem) element).getModel();
-		if (resource instanceof IService) {
-			return isMatching(filterText.getText(), (IService) resource);
-		} else {
-			return true;
-		}
-	}
+    @Override
+    public boolean select(Viewer viewer, Object parentElement, Object element) {
+        if (!(element instanceof ObservableTreeItem)) {
+            return false;
+        }
+        if (!(((ObservableTreeItem)element).getModel() instanceof IResource)) {
+            return false;
+        }
 
-	private boolean isMatching(String filter, IService service) {
-		for (String label : service.getSelector().values()) {
-			if (!StringUtils.isEmpty(label) 
-					&& label.contains(filter)) {
-				return true;
-			}
-		}
-		return false;
-	}
+        IResource resource = (IResource)((ObservableTreeItem)element).getModel();
+        if (resource instanceof IService) {
+            return isMatching(filterText.getText(), (IService)resource);
+        } else {
+            return true;
+        }
+    }
+
+    private boolean isMatching(String filter, IService service) {
+        for (String label : service.getSelector().values()) {
+            if (!StringUtils.isEmpty(label) && label.contains(filter)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

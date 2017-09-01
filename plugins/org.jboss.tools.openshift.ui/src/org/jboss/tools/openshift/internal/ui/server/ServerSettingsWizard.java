@@ -27,47 +27,46 @@ import com.openshift.restclient.model.route.IRoute;
  * Explorer view.
  */
 public class ServerSettingsWizard extends Wizard {
-	
-	private static final String WIZARD_TITLE = "OpenShift Server Adapter Settings";
 
-	private final ServerSettingsWizardPage serverSettingsWizardPage;
-	
-	private IServer createdServer = null;
-	
-	/**
-	 * Invoked when launched from explorer
-	 * 
-	 * @param server the working copy of the {@link IServer} to create
-	 * @param connection the current OpenShift {@link Connection}
-	 * @param resource the selected resource
-	 */
-	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, 
-			final IResource resource, final IRoute route) {
-		setWindowTitle(WIZARD_TITLE);
-		this.serverSettingsWizardPage = 
-				new ServerSettingsWizardPage(this, server, connection, resource, route);
-	}
-	
-	@Override
-	public void addPages() {
-		addPage(this.serverSettingsWizardPage);
-	}
+    private static final String WIZARD_TITLE = "OpenShift Server Adapter Settings";
 
-	@Override
-	public boolean performFinish() {
-		try {
-			this.createdServer = serverSettingsWizardPage.saveServer(new NullProgressMonitor());
-		} catch (CoreException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError("Failed to create the Server Adapter", e);
-		}
-		return true;
-	}
+    private final ServerSettingsWizardPage serverSettingsWizardPage;
 
-	/**
-	 * @return the {@link IServer} that was created or <code>null</code> if the
-	 *         operation failed or was cancelled.
-	 */
-	public IServer getCreatedServer() {
-		return createdServer;
-	}
+    private IServer createdServer = null;
+
+    /**
+     * Invoked when launched from explorer
+     * 
+     * @param server the working copy of the {@link IServer} to create
+     * @param connection the current OpenShift {@link Connection}
+     * @param resource the selected resource
+     */
+    public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, final IResource resource,
+            final IRoute route) {
+        setWindowTitle(WIZARD_TITLE);
+        this.serverSettingsWizardPage = new ServerSettingsWizardPage(this, server, connection, resource, route);
+    }
+
+    @Override
+    public void addPages() {
+        addPage(this.serverSettingsWizardPage);
+    }
+
+    @Override
+    public boolean performFinish() {
+        try {
+            this.createdServer = serverSettingsWizardPage.saveServer(new NullProgressMonitor());
+        } catch (CoreException e) {
+            OpenShiftUIActivator.getDefault().getLogger().logError("Failed to create the Server Adapter", e);
+        }
+        return true;
+    }
+
+    /**
+     * @return the {@link IServer} that was created or <code>null</code> if the
+     *         operation failed or was cancelled.
+     */
+    public IServer getCreatedServer() {
+        return createdServer;
+    }
 }

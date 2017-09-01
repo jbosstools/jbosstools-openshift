@@ -25,11 +25,11 @@ import org.jboss.reddeer.uiforms.impl.section.DefaultSection;
  *
  */
 public class CDEServerEditor extends ServerEditor {
-	
+
 	public static final String CREDENTIALS = "Credentials";
-	
+
 	public static final String CDK_DETAILS = "CDK Details";
-	
+
 	public CDEServerEditor(String title) {
 		super(title);
 	}
@@ -37,33 +37,33 @@ public class CDEServerEditor extends ServerEditor {
 	public LabeledText getPasswordLabel() {
 		return new LabeledText(new DefaultSection(CREDENTIALS), "Password: ");
 	}
-	
+
 	public LabeledText getUsernameLabel() {
 		return new LabeledText(new DefaultSection(CREDENTIALS), "Username: ");
 	}
-	
+
 	public Button getAddButton() {
 		return new PushButton(new DefaultSection(CREDENTIALS), "Add...");
 	}
-	
+
 	public Button getEditButton() {
 		return new PushButton(new DefaultSection(CREDENTIALS), "Edit...");
 	}
-	
+
 	public Combo getDomainCombo() {
 		return new LabeledCombo(new DefaultSection(CREDENTIALS), "Domain: ");
 	}
-	
+
 	public Button getPassCredentialsCheckBox() {
 		return new CheckBox(new DefaultSection(CREDENTIALS), "Pass credentials to environment");
 	}
-	
+
 	public LabeledText getHostnameLabel() {
-		return new LabeledText(new DefaultSection("General Information"),"Host name:");
+		return new LabeledText(new DefaultSection("General Information"), "Host name:");
 	}
-	
+
 	public LabeledText getServernameLabel() {
-		return new LabeledText(new DefaultSection("General Information"),"Server name:");
+		return new LabeledText(new DefaultSection("General Information"), "Server name:");
 	}
-	
+
 }

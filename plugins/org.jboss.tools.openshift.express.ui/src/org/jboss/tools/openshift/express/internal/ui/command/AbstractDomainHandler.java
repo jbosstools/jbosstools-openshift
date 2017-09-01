@@ -22,17 +22,17 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
  */
 public abstract class AbstractDomainHandler extends AbstractHandler {
 
-	protected ExpressConnection getConnection(ExecutionEvent event) {
-		ExpressConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), ExpressConnection.class);
-		if (connection == null) {
-			Logger.warn("Could not launch domain wizard, no connection selected");
-			return null;
-		}
+    protected ExpressConnection getConnection(ExecutionEvent event) {
+        ExpressConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), ExpressConnection.class);
+        if (connection == null) {
+            Logger.warn("Could not launch domain wizard, no connection selected");
+            return null;
+        }
 
-		if (!connection.connect()) {
-			Logger.warn("Could not launch domain wizard, connection is not connected");
-			return null;
-		}
-		return connection;
-	}
+        if (!connection.connect()) {
+            Logger.warn("Could not launch domain wizard, connection is not connected");
+            return null;
+        }
+        return connection;
+    }
 }

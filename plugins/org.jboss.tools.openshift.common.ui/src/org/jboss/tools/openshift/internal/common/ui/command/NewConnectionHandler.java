@@ -24,10 +24,10 @@ import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
  */
 public class NewConnectionHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final ConnectionWizard connectionWizard = new ConnectionWizard((IConnection) null);
-		WizardUtils.openWizardDialog(connectionWizard, HandlerUtil.getActiveShell(event));
-		return Status.OK_STATUS;
-	}
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        final ConnectionWizard connectionWizard = new ConnectionWizard((IConnection)null);
+        WizardUtils.openWizardDialog(connectionWizard, HandlerUtil.getActiveShell(event));
+        return Status.OK_STATUS;
+    }
 }

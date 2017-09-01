@@ -69,7 +69,7 @@ public class OpenShiftProjectRequirement implements Requirement<RequiredProject>
 		 * {@link #name()} is used
 		 */
 		String description() default StringUtils.EMPTY;
-		
+
 		/**
 		 * whether the project created by the requirement should be automatically deleted after test class, default false
 		 */
@@ -87,8 +87,8 @@ public class OpenShiftProjectRequirement implements Requirement<RequiredProject>
 		Connection connection = ConnectionUtils.getConnectionOrDefault(projectSpec.connectionURL());
 		assertNotNull(NLS.bind("No connection {0} exists", projectSpec.connectionURL()), connection);
 
-		this.project = OpenShift3NativeProjectUtils.getOrCreateProject(projectName, projectSpec.displayName(),
-				projectSpec.description(), connection);
+		this.project = OpenShift3NativeProjectUtils.getOrCreateProject(projectName, projectSpec.displayName(), projectSpec.description(),
+				connection);
 	}
 
 	@Override

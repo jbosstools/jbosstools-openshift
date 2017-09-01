@@ -21,7 +21,7 @@ public class AmountOfResourcesExists extends AbstractWaitCondition {
 	private OpenShiftProject project;
 	private Resource resource;
 	private int amount;
-	
+
 	public AmountOfResourcesExists(Resource resource, int amount) {
 		this(resource, amount, null);
 	}
@@ -30,25 +30,25 @@ public class AmountOfResourcesExists extends AbstractWaitCondition {
 		explorer = new OpenShiftExplorerView();
 		if (projectName == null) {
 			this.project = explorer.getOpenShift3Connection().getProject();
-		}else {
+		} else {
 			this.project = explorer.getOpenShift3Connection().getProject(projectName);
 		}
 		this.resource = resource;
 		this.amount = amount;
 	}
-	
+
 	@Override
 	public boolean test() {
 		// workaround for disposed project
 		if (project.getTreeItem().isDisposed()) {
 			project = explorer.getOpenShift3Connection().getProject();
 		}
-		
+
 		return project.getOpenShiftResources(resource).size() == amount;
 	}
 
 	@Override
 	public String description() {
-		return "Waiting for existence of " + amount + " " + resource.toString() + " resource(s).";  
+		return "Waiting for existence of " + amount + " " + resource.toString() + " resource(s).";
 	}
 }

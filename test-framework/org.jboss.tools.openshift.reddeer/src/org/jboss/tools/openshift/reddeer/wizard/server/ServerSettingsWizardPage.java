@@ -17,7 +17,7 @@ import org.jboss.tools.openshift.reddeer.wizard.importapp.ImportApplicationWizar
  */
 public class ServerSettingsWizardPage {
 
-	public ImportApplicationWizard importProject(){
+	public ImportApplicationWizard importProject() {
 		return new ImportApplicationWizard().openFromServerAdapterSettings();
 	}
 }

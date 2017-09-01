@@ -21,27 +21,27 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 
 public class CDKShutdownController extends AbstractCDKShutdownController {
 
-	protected AbstractCDKPoller getCDKPoller() {
-		return new VagrantPoller();
-	}
+    protected AbstractCDKPoller getCDKPoller() {
+        return new VagrantPoller();
+    }
 
-	protected String getShutdownArgs() {
-		String cmd = CDKConstants.VAGRANT_CMD_HALT + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR;
-		return cmd;
-	}
-	
-	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
-		return new CDKLaunchUtility().callInteractive(getServer(), cmd, getServer().getName());
-	}
+    protected String getShutdownArgs() {
+        String cmd = CDKConstants.VAGRANT_CMD_HALT + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR;
+        return cmd;
+    }
 
-	@Override
-	protected boolean useTerminal() {
-		return true;
-	}
-	
-	@Override
-	protected String getCommandLocation() {
-		return VagrantBinaryUtility.getVagrantLocation();
-	}
+    protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
+        return new CDKLaunchUtility().callInteractive(getServer(), cmd, getServer().getName());
+    }
+
+    @Override
+    protected boolean useTerminal() {
+        return true;
+    }
+
+    @Override
+    protected String getCommandLocation() {
+        return VagrantBinaryUtility.getVagrantLocation();
+    }
 
 }

@@ -31,86 +31,85 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  */
 public class ExpressExplorerLabelProvider extends BaseExplorerLabelProvider {
 
-	private static final String DEFAULT_MARKER = "(default)";
+    private static final String DEFAULT_MARKER = "(default)";
 
-	@Override
-	public Image getImage(Object element) {
-		if (element instanceof IDomain) {
-			return ExpressImages.GLOBE_IMG;
-		}
-		if (element instanceof IApplication) {
-			return ExpressImages.QUERY_IMG;
-		} 
-		if (element instanceof IEmbeddedCartridge) {
-			return ExpressImages.TASK_REPO_IMG;
-		} 
-		return super.getImage(element);
-	}
+    @Override
+    public Image getImage(Object element) {
+        if (element instanceof IDomain) {
+            return ExpressImages.GLOBE_IMG;
+        }
+        if (element instanceof IApplication) {
+            return ExpressImages.QUERY_IMG;
+        }
+        if (element instanceof IEmbeddedCartridge) {
+            return ExpressImages.TASK_REPO_IMG;
+        }
+        return super.getImage(element);
+    }
 
-	@Override
-	public String getText(Object element) {
-		return getStyledText(element).getString();
-	}
+    @Override
+    public String getText(Object element) {
+        return getStyledText(element).getString();
+    }
 
-	@Override
-	public StyledString getStyledText(Object element) {
-		if (element instanceof ExpressConnection) {
-			return createStyledString((ExpressConnection) element);
-		} else if (element instanceof IDomain) {
-			return createStyledString((IDomain) element);
-		} else if (element instanceof IApplication) {
-			return createStyledString((IApplication) element);
-		} else if (element instanceof IEmbeddedCartridge) {
-			return createStyledString((IEmbeddedCartridge) element);
-		} else if (element instanceof BaseExplorerContentProvider.LoadingStub) {
-			return new StyledString(ExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
-		} else if (element instanceof BaseExplorerContentProvider.NotConnectedUserStub) {
-			return new StyledString(ExpressUIMessages.USER_NOT_CONNECTED_LABEL);
-		} else if (element instanceof OpenShiftException) {
-			return new StyledString(((OpenShiftException) element).getMessage());
-		}
-		return super.getStyledText(element);
-	}
+    @Override
+    public StyledString getStyledText(Object element) {
+        if (element instanceof ExpressConnection) {
+            return createStyledString((ExpressConnection)element);
+        } else if (element instanceof IDomain) {
+            return createStyledString((IDomain)element);
+        } else if (element instanceof IApplication) {
+            return createStyledString((IApplication)element);
+        } else if (element instanceof IEmbeddedCartridge) {
+            return createStyledString((IEmbeddedCartridge)element);
+        } else if (element instanceof BaseExplorerContentProvider.LoadingStub) {
+            return new StyledString(ExpressUIMessages.LOADING_USER_APPLICATIONS_LABEL);
+        } else if (element instanceof BaseExplorerContentProvider.NotConnectedUserStub) {
+            return new StyledString(ExpressUIMessages.USER_NOT_CONNECTED_LABEL);
+        } else if (element instanceof OpenShiftException) {
+            return new StyledString(((OpenShiftException)element).getMessage());
+        }
+        return super.getStyledText(element);
+    }
 
-	private StyledString createStyledString(ExpressConnection connection) {
-		String name = StringUtils.null2emptyString(connection.getUsername());
-		String host = StringUtils.null2emptyString(connection.getHost());
-		StringBuilder builder = new StringBuilder(name).append(' ').append(host);
-		if (connection.isDefaultHost()) {
-			builder.append(' ').append(DEFAULT_MARKER);
-		}
-		String label = builder.toString();
-		StyledString styledString = new StyledString(label);
-		styledString.setStyle(name.length() + 1, builder.length() - name.length() - 1, StyledString.QUALIFIER_STYLER);
-		return styledString;
-	}
+    private StyledString createStyledString(ExpressConnection connection) {
+        String name = StringUtils.null2emptyString(connection.getUsername());
+        String host = StringUtils.null2emptyString(connection.getHost());
+        StringBuilder builder = new StringBuilder(name).append(' ').append(host);
+        if (connection.isDefaultHost()) {
+            builder.append(' ').append(DEFAULT_MARKER);
+        }
+        String label = builder.toString();
+        StyledString styledString = new StyledString(label);
+        styledString.setStyle(name.length() + 1, builder.length() - name.length() - 1, StyledString.QUALIFIER_STYLER);
+        return styledString;
+    }
 
-	private StyledString createStyledString(IDomain domain) {
-		String id = domain.getId();
-		String fullName = ExpressResourceLabelUtils.toString(domain); 
-		String label = 
-				new StringBuilder(id).append(' ').append(fullName).toString();
+    private StyledString createStyledString(IDomain domain) {
+        String id = domain.getId();
+        String fullName = ExpressResourceLabelUtils.toString(domain);
+        String label = new StringBuilder(id).append(' ').append(fullName).toString();
 
-		StyledString styledString = new StyledString(label);
-		styledString.setStyle(id.length() + 1, fullName.length(), StyledString.QUALIFIER_STYLER);
-		return styledString;
-	}
+        StyledString styledString = new StyledString(label);
+        styledString.setStyle(id.length() + 1, fullName.length(), StyledString.QUALIFIER_STYLER);
+        return styledString;
+    }
 
-	private StyledString createStyledString(IApplication application) {
-		String appName = application.getName();
-		String appType = StringUtils.null2emptyString(ExpressResourceLabelUtils.toString(application.getCartridge()));
-		StringBuilder sb = new StringBuilder(appName).append(' ').append(appType);
-		StyledString styledString = new StyledString(sb.toString());
-		styledString.setStyle(appName.length() + 1, appType.length(), StyledString.QUALIFIER_STYLER);
-		return styledString;
-	}
+    private StyledString createStyledString(IApplication application) {
+        String appName = application.getName();
+        String appType = StringUtils.null2emptyString(ExpressResourceLabelUtils.toString(application.getCartridge()));
+        StringBuilder sb = new StringBuilder(appName).append(' ').append(appType);
+        StyledString styledString = new StyledString(sb.toString());
+        styledString.setStyle(appName.length() + 1, appType.length(), StyledString.QUALIFIER_STYLER);
+        return styledString;
+    }
 
-	private StyledString createStyledString(IEmbeddedCartridge cartridge) {
-		String displayName = cartridge.getDisplayName();
-		String name = cartridge.getName();
-		StringBuilder sb = new StringBuilder(displayName).append(' ').append(name);
-		StyledString styledString = new StyledString(sb.toString());
-		styledString.setStyle(displayName.length() + 1, name.length(), StyledString.QUALIFIER_STYLER);
-		return styledString;
-	}
+    private StyledString createStyledString(IEmbeddedCartridge cartridge) {
+        String displayName = cartridge.getDisplayName();
+        String name = cartridge.getName();
+        StringBuilder sb = new StringBuilder(displayName).append(' ').append(name);
+        StyledString styledString = new StyledString(sb.toString());
+        styledString.setStyle(displayName.length() + 1, name.length(), StyledString.QUALIFIER_STYLER);
+        return styledString;
+    }
 }

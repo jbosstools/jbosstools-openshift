@@ -22,16 +22,16 @@ import org.jboss.tools.openshift.common.core.utils.FileUtils;
  * @author Andre Dietisheim
  */
 public class FileExistsConverter extends Converter {
-	
-	public FileExistsConverter() {
-		super(File.class, Boolean.class);
-	}
 
-	@Override
-	public Object convert(Object fromObject) {
-		if (!(fromObject instanceof File)) {
-			return false;
-		}
-		return FileUtils.exists((File) fromObject);
-	}
+    public FileExistsConverter() {
+        super(File.class, Boolean.class);
+    }
+
+    @Override
+    public Object convert(Object fromObject) {
+        if (!(fromObject instanceof File)) {
+            return false;
+        }
+        return FileUtils.exists((File)fromObject);
+    }
 }

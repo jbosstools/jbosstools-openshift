@@ -23,24 +23,24 @@ import org.jboss.tools.openshift.express.internal.ui.ExpressUIActivator;
  */
 public class OpenShiftUserPreferencesProvider {
 
-	private static final String LAST_SELECTED_CARTRIDGE_KEY = ExpressUIActivator.PLUGIN_ID + ".lastSelectedCartridge";
+    private static final String LAST_SELECTED_CARTRIDGE_KEY = ExpressUIActivator.PLUGIN_ID + ".lastSelectedCartridge";
 
-	/**
-	 * @return the last selected value, or null if that preference does not exist yet.
-	 */
-	public String getLastSelectedCartridgeName() {
-		// Find the last-selected one
-		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(ExpressUIActivator.PLUGIN_ID);
-		return prefs.get(LAST_SELECTED_CARTRIDGE_KEY, null);
-	}
+    /**
+     * @return the last selected value, or null if that preference does not exist yet.
+     */
+    public String getLastSelectedCartridgeName() {
+        // Find the last-selected one
+        IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(ExpressUIActivator.PLUGIN_ID);
+        return prefs.get(LAST_SELECTED_CARTRIDGE_KEY, null);
+    }
 
-	/**
-	 * Stores the given cartridge name in the preferences.
-	 * @param name
-	 */
-	public void setLastSelectedCartridgeName(String name) {
-		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(ExpressUIActivator.PLUGIN_ID);
-		prefs.put(LAST_SELECTED_CARTRIDGE_KEY, name);
-	}
+    /**
+     * Stores the given cartridge name in the preferences.
+     * @param name
+     */
+    public void setLastSelectedCartridgeName(String name) {
+        IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(ExpressUIActivator.PLUGIN_ID);
+        prefs.put(LAST_SELECTED_CARTRIDGE_KEY, name);
+    }
 
 }

@@ -23,41 +23,40 @@ import com.openshift.client.IGearGroup;
  */
 public class TailFilesWizard extends Wizard {
 
-	private final TailFilesWizardPageModel model;
+    private final TailFilesWizardPageModel model;
 
-	public TailFilesWizard(final IApplication app) {
-		setNeedsProgressMonitor(true);
-		setWindowTitle("Tail Files");
-		this.model = new TailFilesWizardPageModel(app);
-	}
+    public TailFilesWizard(final IApplication app) {
+        setNeedsProgressMonitor(true);
+        setWindowTitle("Tail Files");
+        this.model = new TailFilesWizardPageModel(app);
+    }
 
-	@Override
-	public boolean canFinish() {
-		final Collection<IGearGroup> selectedGearGroups = getSelectedGearGroups();
-		return selectedGearGroups != null && !selectedGearGroups.isEmpty();
-	}
-	
-	
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
+    @Override
+    public boolean canFinish() {
+        final Collection<IGearGroup> selectedGearGroups = getSelectedGearGroups();
+        return selectedGearGroups != null && !selectedGearGroups.isEmpty();
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new TailFilesWizardPage(model, this));
-	}
-	
-	public String getFilePattern() {
-		return model.getFilePattern();
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
 
-	/**
-	 * @return true if the 'tail' command be executed on all gears (if the
-	 *         application is scalable), false otherwise.
-	 */
-	public Collection<IGearGroup> getSelectedGearGroups() {
-		return model.getSelectedGearGroups();
-	}
+    @Override
+    public void addPages() {
+        addPage(new TailFilesWizardPage(model, this));
+    }
+
+    public String getFilePattern() {
+        return model.getFilePattern();
+    }
+
+    /**
+     * @return true if the 'tail' command be executed on all gears (if the
+     *         application is scalable), false otherwise.
+     */
+    public Collection<IGearGroup> getSelectedGearGroups() {
+        return model.getSelectedGearGroups();
+    }
 
 }

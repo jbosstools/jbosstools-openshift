@@ -32,72 +32,71 @@ import com.openshift.client.IUser;
  */
 public class FireExpressConnectionsChangedJob extends FireConnectionsChangedJob {
 
-	private LoadApplicationJob job;
-	
-	public FireExpressConnectionsChangedJob(LoadApplicationJob job) {
-		super(NLS.bind("Refreshing connection for application {0}", job.getApplicationName()));
-		this.job = job;
-	}
+    private LoadApplicationJob job;
 
-	public FireExpressConnectionsChangedJob(IUser user) {
-		super(NLS.bind("Refreshing connection {0}", user.getRhlogin()));
-		add(createConnection(user));
-	}
+    public FireExpressConnectionsChangedJob(LoadApplicationJob job) {
+        super(NLS.bind("Refreshing connection for application {0}", job.getApplicationName()));
+        this.job = job;
+    }
 
-	public FireExpressConnectionsChangedJob(List<IUser> users) {
-		super(NLS.bind("Refreshing {0} connections", users.size()));
-		add(createConnections(users));
-	}
-	
-	public FireExpressConnectionsChangedJob(ExpressConnection connection) {
-		super(NLS.bind("Refreshing connection {0}", ExpressResourceLabelUtils.toString(connection)));
-		add(connection);
-	}
+    public FireExpressConnectionsChangedJob(IUser user) {
+        super(NLS.bind("Refreshing connection {0}", user.getRhlogin()));
+        add(createConnection(user));
+    }
 
-	@Override
-	protected List<IConnection> getConnections() {
-		if (!connections.isEmpty()) {
-			return connections;
-		} else if (job != null) {
-			return Collections.singletonList(createConnection(job.getApplication()));
-		}
-		return Collections.emptyList();
-	}
+    public FireExpressConnectionsChangedJob(List<IUser> users) {
+        super(NLS.bind("Refreshing {0} connections", users.size()));
+        add(createConnections(users));
+    }
 
-	private void add(Collection<IConnection> connections) {
-		for (IConnection connection : connections) {
-			add(connection);
-		}
-	}
+    public FireExpressConnectionsChangedJob(ExpressConnection connection) {
+        super(NLS.bind("Refreshing connection {0}", ExpressResourceLabelUtils.toString(connection)));
+        add(connection);
+    }
 
-	private void add(IConnection connection) {
-		if (connection != null) {
-			connections.add(connection);
-		}
-	}
+    @Override
+    protected List<IConnection> getConnections() {
+        if (!connections.isEmpty()) {
+            return connections;
+        } else if (job != null) {
+            return Collections.singletonList(createConnection(job.getApplication()));
+        }
+        return Collections.emptyList();
+    }
 
-	private Collection<IConnection> createConnections(List<IUser> users) {
-		Set<IConnection> connections = new HashSet<>();
-		if (users == null) {
-			return connections;
-		}
-		
-		for (IUser user : users) {
-			connections.add(createConnection(user));
-		}
-		return connections;
-	}
+    private void add(Collection<IConnection> connections) {
+        for (IConnection connection : connections) {
+            add(connection);
+        }
+    }
 
-	private IConnection createConnection(IUser user) {
-		return ExpressConnectionUtils.getByResource(user, ConnectionsRegistrySingleton.getInstance());
-	}
+    private void add(IConnection connection) {
+        if (connection != null) {
+            connections.add(connection);
+        }
+    }
 
-	private IConnection createConnection(IApplication application) {
-		if (application == null
-				|| application.getDomain() == null) {
-			return null;
-		}
-		return createConnection(application.getDomain().getUser());
-	}
+    private Collection<IConnection> createConnections(List<IUser> users) {
+        Set<IConnection> connections = new HashSet<>();
+        if (users == null) {
+            return connections;
+        }
+
+        for (IUser user : users) {
+            connections.add(createConnection(user));
+        }
+        return connections;
+    }
+
+    private IConnection createConnection(IUser user) {
+        return ExpressConnectionUtils.getByResource(user, ConnectionsRegistrySingleton.getInstance());
+    }
+
+    private IConnection createConnection(IApplication application) {
+        if (application == null || application.getDomain() == null) {
+            return null;
+        }
+        return createConnection(application.getDomain().getUser());
+    }
 
 }

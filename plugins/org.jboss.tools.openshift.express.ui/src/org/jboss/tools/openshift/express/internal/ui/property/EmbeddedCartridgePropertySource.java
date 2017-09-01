@@ -23,53 +23,52 @@ import com.openshift.client.cartridge.IEmbeddedCartridge;
  */
 public class EmbeddedCartridgePropertySource implements IPropertySource {
 
-	private final IEmbeddedCartridge cartridge;
+    private final IEmbeddedCartridge cartridge;
 
-	public EmbeddedCartridgePropertySource(IEmbeddedCartridge cartridge) {
-		this.cartridge = cartridge;
-	}
+    public EmbeddedCartridgePropertySource(IEmbeddedCartridge cartridge) {
+        this.cartridge = cartridge;
+    }
 
-	@Override
-	public Object getEditableValue() {
-		return this;
-	}
+    @Override
+    public Object getEditableValue() {
+        return this;
+    }
 
-	@Override
-	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] { new PropertyDescriptor("Name", "Name"),
-				new PropertyDescriptor("URL", "URL") };
-	}
+    @Override
+    public IPropertyDescriptor[] getPropertyDescriptors() {
+        return new IPropertyDescriptor[] { new PropertyDescriptor("Name", "Name"), new PropertyDescriptor("URL", "URL") };
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		try {
-			if (id.equals("Name")) {
-				return cartridge.getName();
-			}
-			if (id.equals("URL")) {
-				return cartridge.getUrl();
-			}
-		} catch (OpenShiftException e) {
-			Logger.error("Could not get selected object's property '" + id + "'.", e);
-		}
-		return null;
-	}
+    @Override
+    public Object getPropertyValue(Object id) {
+        try {
+            if (id.equals("Name")) {
+                return cartridge.getName();
+            }
+            if (id.equals("URL")) {
+                return cartridge.getUrl();
+            }
+        } catch (OpenShiftException e) {
+            Logger.error("Could not get selected object's property '" + id + "'.", e);
+        }
+        return null;
+    }
 
-	@Override
-	public void resetPropertyValue(Object id) {
-		// TODO Auto-generated method stub
+    @Override
+    public void resetPropertyValue(Object id) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public void setPropertyValue(Object id, Object value) {
-		// TODO Auto-generated method stub
+    @Override
+    public void setPropertyValue(Object id, Object value) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public boolean isPropertySet(Object id) {
-		return false;
-	}
+    @Override
+    public boolean isPropertySet(Object id) {
+        return false;
+    }
 
 }
