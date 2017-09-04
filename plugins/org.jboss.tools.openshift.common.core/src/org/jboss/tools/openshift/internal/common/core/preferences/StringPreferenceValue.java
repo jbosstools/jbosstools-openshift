@@ -10,31 +10,31 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.core.preferences;
 
-
 /**
  * @author Andre Dietisheim
  */
 public class StringPreferenceValue extends AbstractPreferenceValue<String> {
 
-	private String pluginId;
-	private String prefsKey;
-	public StringPreferenceValue(String prefsKey, String pluginId) {
-		super(prefsKey, pluginId);
-		this.pluginId = pluginId;
-		this.prefsKey = prefsKey;
-	}
+    private String pluginId;
+    private String prefsKey;
 
-	@Override
-	public String get() {
-		return doGet();
-	}
+    public StringPreferenceValue(String prefsKey, String pluginId) {
+        super(prefsKey, pluginId);
+        this.pluginId = pluginId;
+        this.prefsKey = prefsKey;
+    }
 
-	@Override
-	public void set(String value) {
-		doStore(value);
-	}
-	
-	public void remove() {
-		getPreferences(pluginId).remove(prefsKey);
-	}
+    @Override
+    public String get() {
+        return doGet();
+    }
+
+    @Override
+    public void set(String value) {
+        doStore(value);
+    }
+
+    public void remove() {
+        getPreferences(pluginId).remove(prefsKey);
+    }
 }

@@ -18,27 +18,27 @@ import org.junit.Test;
 
 public class UrlUtilsTest {
 
-	@Test
-	public void testGetHost() {
-		assertNull(getHost(null));
-		assertEquals("", getHost(""));
-		assertEquals("foo", getHost("http://foo/bar"));
-		assertEquals("foo", getHost("http://foo/"));
-		assertEquals("foo", getHost("http://foo"));
-		assertEquals("foo", getHost("http://foo:8080/"));
-		assertEquals("foo", getHost("foo"));
-		assertEquals("foo", getHost("foo:8080"));
-		assertEquals("foo", getHost("foo:8080/foo"));
-		assertEquals("foo", getHost("foo"));
-		assertEquals("foo", getHost("foo:8080"));
-		assertEquals("foo", getHost("foo:8080/foo"));
-		assertEquals("foo", getHost("//foo:8080/foo"));
-		assertEquals("foo", getHost("user@foo:8080/foo"));
-		assertEquals("foo", getHost("//user@foo:8080/foo"));
-		assertEquals("foo", getHost("file:///foo/bar"));//it's probably incorrect
-		assertEquals("", getHost("a@"));
-		assertEquals("a", getHost("@a"));
-		assertEquals("", getHost(":a"));
-		assertEquals("a", getHost("/a"));
-	}
+    @Test
+    public void testGetHost() {
+        assertNull(getHost(null));
+        assertEquals("", getHost(""));
+        assertEquals("foo", getHost("http://foo/bar"));
+        assertEquals("foo", getHost("http://foo/"));
+        assertEquals("foo", getHost("http://foo"));
+        assertEquals("foo", getHost("http://foo:8080/"));
+        assertEquals("foo", getHost("foo"));
+        assertEquals("foo", getHost("foo:8080"));
+        assertEquals("foo", getHost("foo:8080/foo"));
+        assertEquals("foo", getHost("foo"));
+        assertEquals("foo", getHost("foo:8080"));
+        assertEquals("foo", getHost("foo:8080/foo"));
+        assertEquals("foo", getHost("//foo:8080/foo"));
+        assertEquals("foo", getHost("user@foo:8080/foo"));
+        assertEquals("foo", getHost("//user@foo:8080/foo"));
+        assertEquals("foo", getHost("file:///foo/bar"));//it's probably incorrect
+        assertEquals("", getHost("a@"));
+        assertEquals("a", getHost("@a"));
+        assertEquals("", getHost(":a"));
+        assertEquals("a", getHost("/a"));
+    }
 }

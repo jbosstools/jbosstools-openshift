@@ -46,13 +46,13 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 	private static final String CLIENT_TOOLS_DESTINATION = "binaries";
 	private static final String SUFFIX_TAR_GZ = ".tar.gz";
 	private static final String SUFFIX_ZIP = ".zip";
-	
+
 	private static final Logger LOGGER = new Logger(OpenShiftCommandLineToolsRequirement.class);
-	
+
 	@Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    public @interface OCBinary {
-    }
+	@Target(ElementType.TYPE)
+	public @interface OCBinary {
+	}
 
 	@Override
 	public boolean canFulfill() {
@@ -75,21 +75,23 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 			Files.deleteIfExists(Paths.get(OCBinaryFile.get().getFile().toURI()));
 			Files.createSymbolicLink(OCBinaryFile.get().getFile().toPath(), Paths.get(downloadedOCBinary.getAbsolutePath()));
 		} catch (IOException e) {
-			throw new OpenShiftToolsException(NLS.bind("Could not symlink {0} to {1}:\n{2}", 
+			throw new OpenShiftToolsException(NLS.bind("Could not symlink {0} to {1}:\n{2}",
 					new Object[] { OCBinaryFile.get().getFile().getAbsolutePath(), downloadedOCBinary.getAbsolutePath(), e }));
 		}
 	}
 
 	@Override
-	public void setDeclaration(OCBinary declaration) {}
+	public void setDeclaration(OCBinary declaration) {
+	}
 
 	@Override
-	public void cleanUp() {}
-	
+	public void cleanUp() {
+	}
+
 	public static String getOCLocation() {
 		return OCBinaryFile.get().getFile().getAbsolutePath();
 	}
-	
+
 	private File downloadAndExtractOpenShiftClient() {
 		LOGGER.info("Creating directory binaries");
 		File outputDirectory = new File(CLIENT_TOOLS_DESTINATION);
@@ -98,10 +100,9 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 		String fileName = downloadArchive(getDownloadLink());
 		String extractedDirectory = extractArchive(fileName, outputDirectory);
 
-		if (StringUtils.isEmpty(extractedDirectory)
-			|| !(new File(extractedDirectory).exists())) {
-				throw new OpenShiftToolsException("Cannot extract archive " + fileName + ". "
-						+ "Archive does not extract into a single root folder.");
+		if (StringUtils.isEmpty(extractedDirectory) || !(new File(extractedDirectory).exists())) {
+			throw new OpenShiftToolsException(
+					"Cannot extract archive " + fileName + ". " + "Archive does not extract into a single root folder.");
 		}
 
 		return new File(extractedDirectory, OCBinaryFile.get().getName());
@@ -149,84 +150,82 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 
 		return extractedDirectory;
 	}
-	
+
 	private String getFileName(String urlPath) {
 		String[] pathParts = urlPath.split("/");
 		return Paths.get(CLIENT_TOOLS_DESTINATION, pathParts[pathParts.length - 1]).toString();
 	}
-	
+
 	private String getDownloadLink() {
 		if (Platform.OS_LINUX.equals(Platform.getOS())) {
 			if (Platform.getOSArch().equals(Platform.ARCH_X86)) {
 				return ClientVersion.LINUX_1_3_32.getDownloadLink();
-			} else { 
+			} else {
 				return ClientVersion.LINUX_1_3_64.getDownloadLink();
 			}
-		} else if (Platform.OS_WIN32.equals(Platform.getOSArch())){
+		} else if (Platform.OS_WIN32.equals(Platform.getOSArch())) {
 			return ClientVersion.WINDOWS_1_3_64.getDownloadLink();
-		} else if (Platform.OS_MACOSX.equals(Platform.getOS())){
+		} else if (Platform.OS_MACOSX.equals(Platform.getOS())) {
 			return ClientVersion.MAC_1_3.getDownloadLink();
 		} else {
 			return null;
 		}
 	}
-	
+
 	public enum ClientVersion {
 		LINUX_1_1_32("https://github.com/openshift/origin/releases/download/"
-				+ "v1.1/openshift-origin-v1.1-ac7a99a-linux-386.tar.gz"),
-		LINUX_1_1_64("https://github.com/openshift/origin/releases/download/"
-				+ "v1.1/openshift-origin-v1.1-ac7a99a-linux-amd64.tar.gz"),
-		WINDOWS_1_1_64("https://github.com/openshift/origin/releases/download/"
-				+ "v1.1/openshift-origin-v1.1-ac7a99a-windows-amd64.zip"),
-		
+				+ "v1.1/openshift-origin-v1.1-ac7a99a-linux-386.tar.gz"), LINUX_1_1_64(
+						"https://github.com/openshift/origin/releases/download/"
+								+ "v1.1/openshift-origin-v1.1-ac7a99a-linux-amd64.tar.gz"), WINDOWS_1_1_64(
+										"https://github.com/openshift/origin/releases/download/"
+												+ "v1.1/openshift-origin-v1.1-ac7a99a-windows-amd64.zip"),
+
 		LINUX_1_2_32("https://github.com/openshift/origin/releases/download/"
-				+ "v1.2.0/openshift-origin-client-tools-v1.2.0-2e62fab-linux-32bit.tar.gz"),
-		LINUX_1_2_64("https://github.com/openshift/origin/releases/download/"
-				+ "v1.2.0/openshift-origin-client-tools-v1.2.0-2e62fab-linux-64bit.tar.gz"),
-		WINDOWS_1_2_64("https://github.com/openshift/origin/releases/download/"
-				+ "v1.2.0/openshift-origin-client-tools-v1.2.0-2e62fab-windows.zip"),
-		MAC_1_2("https://github.com/openshift/origin/releases/download/" 
-				+ "v1.2.0/openshift-origin-client-tools-v1.2.0-2e62fab-mac.zip"),
-		
+				+ "v1.2.0/openshift-origin-client-tools-v1.2.0-2e62fab-linux-32bit.tar.gz"), LINUX_1_2_64(
+						"https://github.com/openshift/origin/releases/download/"
+								+ "v1.2.0/openshift-origin-client-tools-v1.2.0-2e62fab-linux-64bit.tar.gz"), WINDOWS_1_2_64(
+										"https://github.com/openshift/origin/releases/download/"
+												+ "v1.2.0/openshift-origin-client-tools-v1.2.0-2e62fab-windows.zip"), MAC_1_2(
+														"https://github.com/openshift/origin/releases/download/"
+																+ "v1.2.0/openshift-origin-client-tools-v1.2.0-2e62fab-mac.zip"),
+
 		LINUX_1_3_32("https://github.com/openshift/origin/releases/download/"
-				+ "v1.3.2/openshift-origin-client-tools-v1.3.2-ac1d579-linux-32bit.tar.gz"),
-		LINUX_1_3_64("https://github.com/openshift/origin/releases/download/"
-				+ "v1.3.2/openshift-origin-client-tools-v1.3.2-ac1d579-linux-64bit.tar.gz"),
-		WINDOWS_1_3_64("https://github.com/openshift/origin/releases/download/"
-				+ "v1.3.2/openshift-origin-client-tools-v1.3.2-ac1d579-windows.zip"),
-		MAC_1_3("https://github.com/openshift/origin/releases/download/"
-				+ "v1.3.2/openshift-origin-client-tools-v1.3.2-ac1d579-mac.zip");
-		
+				+ "v1.3.2/openshift-origin-client-tools-v1.3.2-ac1d579-linux-32bit.tar.gz"), LINUX_1_3_64(
+						"https://github.com/openshift/origin/releases/download/"
+								+ "v1.3.2/openshift-origin-client-tools-v1.3.2-ac1d579-linux-64bit.tar.gz"), WINDOWS_1_3_64(
+										"https://github.com/openshift/origin/releases/download/"
+												+ "v1.3.2/openshift-origin-client-tools-v1.3.2-ac1d579-windows.zip"), MAC_1_3(
+														"https://github.com/openshift/origin/releases/download/"
+																+ "v1.3.2/openshift-origin-client-tools-v1.3.2-ac1d579-mac.zip");
+
 		String url;
-		
+
 		private ClientVersion(String url) {
 			this.url = url;
 		}
-		
+
 		public String getDownloadLink() {
 			return url;
-		}		
+		}
 	}
 
 	public enum OCBinaryFile {
-		LINUX("oc"), 
-		MAC("oc"),
-		WINDOWS("oc.exe");
+		LINUX("oc"), MAC("oc"), WINDOWS("oc.exe");
 
 		private String name;
 
 		private OCBinaryFile(String name) {
 			this.name = name;
 		}
-		
+
 		public String getName() {
 			return name;
 		}
-		
+
 		public File getFile() {
 			return new File(CLIENT_TOOLS_DESTINATION, getName());
 		}
-		
+
 		public static OCBinaryFile get() {
 			if (Platform.OS_LINUX.equals(Platform.getOS())) {
 				return LINUX;

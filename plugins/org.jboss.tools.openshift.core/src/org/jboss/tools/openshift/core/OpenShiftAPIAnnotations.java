@@ -17,22 +17,22 @@ package org.jboss.tools.openshift.core;
  *
  */
 public interface OpenShiftAPIAnnotations {
-	
-	static final String BUILD_NAME = "openshift.io/build.name";
-	static final String BUILD_NUMBER = "openshift.io/build.number";
-	
-	static final String BUILD_CONFIG_NAME = "openshift.io/build-config.name";
-	
-	static final String DEPLOYMENT_CONFIG_LATEST_VERSION = "openshift.io/deployment-config.latest-version";
-	static final String DEPLOYMENT_CONFIG_NAME = "openshift.io/deployment-config.name";
-	static final String DEPLOYMENT_NAME = "openshift.io/deployment.name";
 
-	static final String DEPLOYER_POD_FOR = "openshift.io/deployer-pod-for.name";
-	
-	static final String GENERATED_BY = "openshift.io/generated-by";
+    static final String BUILD_NAME = "openshift.io/build.name";
+    static final String BUILD_NUMBER = "openshift.io/build.number";
 
-	static final String DESCRIPTION = "description";
-	static final String ICON_CLASS = "iconClass";
-	static final String PROVIDER = "provider";
-	static final String TAGS = "tags";
+    static final String BUILD_CONFIG_NAME = "openshift.io/build-config.name";
+
+    static final String DEPLOYMENT_CONFIG_LATEST_VERSION = "openshift.io/deployment-config.latest-version";
+    static final String DEPLOYMENT_CONFIG_NAME = "openshift.io/deployment-config.name";
+    static final String DEPLOYMENT_NAME = "openshift.io/deployment.name";
+
+    static final String DEPLOYER_POD_FOR = "openshift.io/deployer-pod-for.name";
+
+    static final String GENERATED_BY = "openshift.io/generated-by";
+
+    static final String DESCRIPTION = "description";
+    static final String ICON_CLASS = "iconClass";
+    static final String PROVIDER = "provider";
+    static final String TAGS = "tags";
 }

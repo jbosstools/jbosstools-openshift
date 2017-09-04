@@ -39,127 +39,120 @@ import com.openshift.client.OpenShiftException;
  */
 public class MergeIntoUnsharedProject extends AbstractImportApplicationOperation {
 
-	public MergeIntoUnsharedProject(String projectName, IApplication application, String remoteName,
-			List<IOpenShiftMarker> markers, ExpressConnection connection) {
-		super(projectName, application, remoteName, markers, connection);
-	}
+    public MergeIntoUnsharedProject(String projectName, IApplication application, String remoteName, List<IOpenShiftMarker> markers,
+            ExpressConnection connection) {
+        super(projectName, application, remoteName, markers, connection);
+    }
 
-	/**
-	 * Enables the user chosen project to be used on the chosen OpenShift
-	 * application. *
-	 * <ul>
-	 * <li>clones the application git repository</li>
-	 * <li>copies the configuration files to the user project (in the workspace)
-	 * </li>
-	 * <li>shares the given project with git</li>
-	 * </ul>
-	 * 
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @return
-	 * @throws URISyntaxException
-	 *             The OpenShift application repository could not be cloned,
-	 *             because the uri it is located at is not a valid git uri
-	 * @throws OpenShiftException
-	 * 
-	 * @throws InvocationTargetException
-	 *             The OpenShift application repository could not be cloned, the
-	 *             clone operation failed.
-	 * @throws InterruptedException
-	 *             The OpenShift application repository could not be cloned, the
-	 *             clone operation was interrupted.
-	 * @throws IOException
-	 *             The configuration files could not be copied from the git
-	 *             clone to the user project
-	 * @throws CoreException
-	 *             The user project could not be shared with the git
-	 * 
-	 * @see #cloneRepository
-	 * @see #copyOpenshiftConfiguration
-	 * @see #shareProject
-	 * @see #createServerAdapterIfRequired
-	 */
-	@Override
-	public IProject execute(IProgressMonitor monitor)
-			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
-			URISyntaxException {
-		// File repositoryFile =
-		// model.cloneRepository(monitor);
-		// model.importProject(repositoryFile, monitor);
-		// Repository repository =
-		// model.shareProject(monitor);
-		// model.mergeWithApplicationRepository(repository,
-		// monitor);
-		IProject project = getProject();
+    /**
+     * Enables the user chosen project to be used on the chosen OpenShift
+     * application. *
+     * <ul>
+     * <li>clones the application git repository</li>
+     * <li>copies the configuration files to the user project (in the workspace)
+     * </li>
+     * <li>shares the given project with git</li>
+     * </ul>
+     * 
+     * @param monitor
+     *            the monitor to report progress to
+     * @return
+     * @throws URISyntaxException
+     *             The OpenShift application repository could not be cloned,
+     *             because the uri it is located at is not a valid git uri
+     * @throws OpenShiftException
+     * 
+     * @throws InvocationTargetException
+     *             The OpenShift application repository could not be cloned, the
+     *             clone operation failed.
+     * @throws InterruptedException
+     *             The OpenShift application repository could not be cloned, the
+     *             clone operation was interrupted.
+     * @throws IOException
+     *             The configuration files could not be copied from the git
+     *             clone to the user project
+     * @throws CoreException
+     *             The user project could not be shared with the git
+     * 
+     * @see #cloneRepository
+     * @see #copyOpenshiftConfiguration
+     * @see #shareProject
+     * @see #createServerAdapterIfRequired
+     */
+    @Override
+    public IProject execute(IProgressMonitor monitor)
+            throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException, URISyntaxException {
+        // File repositoryFile =
+        // model.cloneRepository(monitor);
+        // model.importProject(repositoryFile, monitor);
+        // Repository repository =
+        // model.shareProject(monitor);
+        // model.mergeWithApplicationRepository(repository,
+        // monitor);
+        IProject project = getProject();
 
-		copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
-		setupGitIgnore(project, monitor);
-		setupOpenShiftMavenProfile(getApplication(), project, monitor);
-		addSettingsFile(project, monitor);
-		setupMarkers(project, monitor);
-		shareProject(project, monitor);
-		addRemote(getRemoteName(), getApplication().getGitUrl(), project);
-		
-		return project;
-	}
+        copyOpenshiftConfigurations(getApplication(), getRemoteName(), project, monitor);
+        setupGitIgnore(project, monitor);
+        setupOpenShiftMavenProfile(getApplication(), project, monitor);
+        addSettingsFile(project, monitor);
+        setupMarkers(project, monitor);
+        shareProject(project, monitor);
+        addRemote(getRemoteName(), getApplication().getGitUrl(), project);
 
-	private void shareProject(IProject project, IProgressMonitor monitor) throws CoreException {
-		monitor.subTask(NLS.bind("Sharing project {0}...", project.getName()));
-		EGitUtils.share(project, monitor);
-	}
+        return project;
+    }
 
-	/**
-	 * Copies the openshift configuration from the given source folder to the
-	 * given project. Copies
-	 * <ul>
-	 * <li>.git</li>
-	 * <li>.openshift</li>
-	 * <li>deployments</li>
-	 * <li>pom.xml</li>
-	 * </ul>
-	 * to the project in the workspace
-	 * 
-	 * @param sourceFolder
-	 *            the source to copy the openshift config from
-	 * @param project
-	 *            the project to copy the configuration to.
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws InterruptedException
-	 * @throws InvocationTargetException
-	 * @throws OpenShiftException
-	 * @throws CoreException
-	 */
-	private void copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project,
-			IProgressMonitor monitor)
-			throws IOException, OpenShiftException, InvocationTargetException, InterruptedException,
-			URISyntaxException, CoreException {
-		Assert.isLegal(project != null);
+    private void shareProject(IProject project, IProgressMonitor monitor) throws CoreException {
+        monitor.subTask(NLS.bind("Sharing project {0}...", project.getName()));
+        EGitUtils.share(project, monitor);
+    }
 
-		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
-		File tmpFolder = FileUtils.getRandomTmpFolder();
-		cloneRepository(getApplication(), getRemoteName(), tmpFolder, false, monitor);
-		ResourceUtils.copy(tmpFolder, new String[] {
-				".git",
-				".openshift",
-				"deployments",
-				"pom.xml" }, project, monitor);
+    /**
+     * Copies the openshift configuration from the given source folder to the
+     * given project. Copies
+     * <ul>
+     * <li>.git</li>
+     * <li>.openshift</li>
+     * <li>deployments</li>
+     * <li>pom.xml</li>
+     * </ul>
+     * to the project in the workspace
+     * 
+     * @param sourceFolder
+     *            the source to copy the openshift config from
+     * @param project
+     *            the project to copy the configuration to.
+     * @param monitor
+     *            the monitor to report progress to
+     * @throws IOException
+     * @throws URISyntaxException
+     * @throws InterruptedException
+     * @throws InvocationTargetException
+     * @throws OpenShiftException
+     * @throws CoreException
+     */
+    private void copyOpenshiftConfigurations(IApplication application, String remoteName, IProject project, IProgressMonitor monitor)
+            throws IOException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException, CoreException {
+        Assert.isLegal(project != null);
 
-		FileUtil.safeDelete(tmpFolder);
+        monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
+        File tmpFolder = FileUtils.getRandomTmpFolder();
+        cloneRepository(getApplication(), getRemoteName(), tmpFolder, false, monitor);
+        ResourceUtils.copy(tmpFolder, new String[] { ".git", ".openshift", "deployments", "pom.xml" }, project, monitor);
 
-	}
+        FileUtil.safeDelete(tmpFolder);
 
-	// private void mergeWithApplicationRepository(Repository repository,
-	// IApplication application,
-	// IProgressMonitor monitor)
-	// throws MalformedURLException, URISyntaxException, IOException,
-	// OpenShiftException, CoreException,
-	// InvocationTargetException {
-	// URIish uri = new URIish(application.getGitUri());
-	// EGitUtils.addRemoteTo("openshift", uri, repository);
-	// EGitUtils.mergeWithRemote(uri, "refs/remotes/openshift/HEAD", repository,
-	// monitor);
-	// }
+    }
+
+    // private void mergeWithApplicationRepository(Repository repository,
+    // IApplication application,
+    // IProgressMonitor monitor)
+    // throws MalformedURLException, URISyntaxException, IOException,
+    // OpenShiftException, CoreException,
+    // InvocationTargetException {
+    // URIish uri = new URIish(application.getGitUri());
+    // EGitUtils.addRemoteTo("openshift", uri, repository);
+    // EGitUtils.mergeWithRemote(uri, "refs/remotes/openshift/HEAD", repository,
+    // monitor);
+    // }
 }

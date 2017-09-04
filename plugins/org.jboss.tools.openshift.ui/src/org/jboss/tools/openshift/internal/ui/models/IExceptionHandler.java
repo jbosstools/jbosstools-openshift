@@ -18,17 +18,17 @@ package org.jboss.tools.openshift.internal.ui.models;
  * @author Thomas Mäder
  */
 public interface IExceptionHandler {
-	public static IExceptionHandler NULL_HANDLER = new IExceptionHandler() {
+    public static IExceptionHandler NULL_HANDLER = new IExceptionHandler() {
 
-		@Override
-		public void handleException(Throwable e) {
-			// do nothing
-		}
-	};
+        @Override
+        public void handleException(Throwable e) {
+            // do nothing
+        }
+    };
 
-	/**
-	 * Handle the exception. May be called from an arbitrary thread.
-	 * @param e the exception that occcured.
-	 */
-	void handleException(Throwable e);
+    /**
+     * Handle the exception. May be called from an arbitrary thread.
+     * @param e the exception that occcured.
+     */
+    void handleException(Throwable e);
 }

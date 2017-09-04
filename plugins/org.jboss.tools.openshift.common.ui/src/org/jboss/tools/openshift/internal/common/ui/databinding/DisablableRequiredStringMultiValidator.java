@@ -21,23 +21,24 @@ import org.eclipse.core.runtime.IStatus;
  */
 public class DisablableRequiredStringMultiValidator extends RequiredStringMultiValidator {
 
-	private IObservableValue<Boolean> disabledObservable;
+    private IObservableValue<Boolean> disabledObservable;
 
-	public DisablableRequiredStringMultiValidator(IObservableValue<String> value, IObservableValue<Boolean> disabledObservable, String errorMessage) {
-		super(errorMessage, value);
-		this.disabledObservable = disabledObservable;
-	}
+    public DisablableRequiredStringMultiValidator(IObservableValue<String> value, IObservableValue<Boolean> disabledObservable,
+            String errorMessage) {
+        super(errorMessage, value);
+        this.disabledObservable = disabledObservable;
+    }
 
-	@Override
-	protected IStatus validate() {
-		if (!isDisabled()) {
-			return super.validate();
-		}
-		return ValidationStatus.ok();
-	}
+    @Override
+    protected IStatus validate() {
+        if (!isDisabled()) {
+            return super.validate();
+        }
+        return ValidationStatus.ok();
+    }
 
-	protected boolean isDisabled() {
-		Boolean disabled = this.disabledObservable.getValue();
-		return Boolean.TRUE.equals(disabled);
-	}	
-}		
+    protected boolean isDisabled() {
+        Boolean disabled = this.disabledObservable.getValue();
+        return Boolean.TRUE.equals(disabled);
+    }
+}

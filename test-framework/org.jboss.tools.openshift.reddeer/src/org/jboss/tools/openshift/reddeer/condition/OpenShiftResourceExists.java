@@ -37,7 +37,7 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 	private final Matcher<String> resourceNameMatcher;
 	private final ResourceState resourceState;
 	private final Resource resource;
-	
+
 	/**
 	 * Creates new ResourceExists to wait for existence of any resource of specified type for
 	 * default connection and project.
@@ -47,7 +47,7 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 	public OpenShiftResourceExists(Resource resource) {
 		this(resource, (Matcher<String>) null, ResourceState.UNSPECIFIED);
 	}
-	
+
 	/**
 	 * Creates new ResourceExists to wait for existence of a resource of specified type
 	 * matching specified resource name for default connection and project
@@ -58,7 +58,7 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 	public OpenShiftResourceExists(Resource resource, String resourceName) {
 		this(resource, new WithTextMatcher(resourceName), ResourceState.UNSPECIFIED);
 	}
-	
+
 	/**
 	 * Creates new ResourceExists to wait for existence of a resource of specified type
 	 * matching specified resource name and in specified state for default connection
@@ -71,7 +71,7 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 	public OpenShiftResourceExists(Resource resource, String resourceName, ResourceState resourceState) {
 		this(resource, new WithTextMatcher(resourceName), resourceState, null);
 	}
-	
+
 	public OpenShiftResourceExists(Resource resource, String resourceName, ResourceState resourceState, String projectName) {
 		this(resource, new WithTextMatcher(resourceName), resourceState, projectName);
 	}
@@ -86,7 +86,7 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 	public OpenShiftResourceExists(Resource resource, Matcher<String> nameMatcher) {
 		this(resource, nameMatcher, ResourceState.UNSPECIFIED);
 	}
-		
+
 	/**
 	 * Creates new ResourceExists to wait for existence of a resource of specified type
 	 * matching specified resource name matcher and in specified state for 
@@ -116,7 +116,7 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 		}
 	}
 
-		@Override
+	@Override
 	public boolean test() {
 		// workaround for disposed widget
 		if (project.getTreeItem().isDisposed()) {
@@ -124,7 +124,7 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 		}
 
 		List<OpenShiftResource> resources = getResources();
-		for (OpenShiftResource rsrc: resources) {
+		for (OpenShiftResource rsrc : resources) {
 			if (resourceNameMatcher == null) {
 				return true;
 			}
@@ -138,23 +138,22 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 		return false;
 	}
 
-		private List<OpenShiftResource> getResources() {
-			List<OpenShiftResource> resources;
-			try {
-				resources = project.getOpenShiftResources(resource);
-			} catch (CoreLayerException ex) {
-				// In case widget is still disposed... what the heck?!
-				OpenShift3Connection connection = explorer.getOpenShift3Connection();
-				connection.refresh();
-				resources = connection.getProject(project.getName()).getOpenShiftResources(resource);
-			}
-			return resources;
+	private List<OpenShiftResource> getResources() {
+		List<OpenShiftResource> resources;
+		try {
+			resources = project.getOpenShiftResources(resource);
+		} catch (CoreLayerException ex) {
+			// In case widget is still disposed... what the heck?!
+			OpenShift3Connection connection = explorer.getOpenShift3Connection();
+			connection.refresh();
+			resources = connection.getProject(project.getName()).getOpenShiftResources(resource);
 		}
+		return resources;
+	}
 
 	@Override
 	public String description() {
-		String matcherDescription = resourceNameMatcher == null ? "" : " matching resource name matcher " + 
-			resourceNameMatcher.toString(); 
-		return "Waiting for resource " + resource.toString() + matcherDescription;  
+		String matcherDescription = resourceNameMatcher == null ? "" : " matching resource name matcher " + resourceNameMatcher.toString();
+		return "Waiting for resource " + resource.toString() + matcherDescription;
 	}
 }

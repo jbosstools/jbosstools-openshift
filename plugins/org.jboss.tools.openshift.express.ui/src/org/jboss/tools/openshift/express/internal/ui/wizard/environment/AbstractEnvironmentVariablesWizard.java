@@ -18,24 +18,25 @@ import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
  * @author Martes G Wigglesworth
  * @author Andre Dietisheim
  */
-public abstract class AbstractEnvironmentVariablesWizard<MODEL extends AbstractEnvironmentVariablesWizardModel> extends AbstractOpenShiftWizard<MODEL> {
+public abstract class AbstractEnvironmentVariablesWizard<MODEL extends AbstractEnvironmentVariablesWizardModel>
+        extends AbstractOpenShiftWizard<MODEL> {
 
-	private Map<String, String> environmentVarriableValueByKey;
+    private Map<String, String> environmentVarriableValueByKey;
 
-	protected AbstractEnvironmentVariablesWizard(String title, MODEL wizardModel) {
-		super(title, wizardModel);
-	}
+    protected AbstractEnvironmentVariablesWizard(String title, MODEL wizardModel) {
+        super(title, wizardModel);
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new EnvironmentVariablesWizardPage(getModel(), this));
-	}
+    @Override
+    public void addPages() {
+        addPage(new EnvironmentVariablesWizardPage(getModel(), this));
+    }
 
-	protected boolean isSupported() {
-		return getModel().isSupported();
-	}
-	
-	public Map<String, String> getEnvironmentVariables() {
-		return environmentVarriableValueByKey;
-	}
+    protected boolean isSupported() {
+        return getModel().isSupported();
+    }
+
+    public Map<String, String> getEnvironmentVariables() {
+        return environmentVarriableValueByKey;
+    }
 }

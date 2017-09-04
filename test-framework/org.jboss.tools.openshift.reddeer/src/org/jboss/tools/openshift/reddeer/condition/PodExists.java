@@ -34,28 +34,27 @@ import org.jboss.tools.openshift.reddeer.view.resources.Service;
  * @author mlabuda@redhat.com
  *
  */
-public class PodExists extends AbstractWaitCondition{
+public class PodExists extends AbstractWaitCondition {
 
 	private Service service;
 	private Matcher<String>[] matchers;
 	private TreeItem serviceItem;
-	
+
 	@SuppressWarnings("unchecked")
 	public PodExists(String serviceName, String podName) {
 		this(serviceName, new WithTextMatcher(podName));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public PodExists(String serviceName, Matcher<String>... podNameMatchers) {
 		this(DatastoreOS3.PROJECT1_DISPLAYED_NAME, serviceName, podNameMatchers);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public PodExists(String project, String serviceName, Matcher<String>... podNameMatchers) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		matchers = podNameMatchers;
-		service = explorer.getOpenShift3Connection().getProject(project).
-				getService(serviceName);
+		service = explorer.getOpenShift3Connection().getProject(project).getService(serviceName);
 		service.refresh();
 		service.expand();
 		service.select();
@@ -66,23 +65,23 @@ public class PodExists extends AbstractWaitCondition{
 	public boolean test() {
 		List<String> treeItemsTexts = Display.syncExec(new ResultRunnable<List<String>>() {
 			@Override
-			public List<String >run() {
+			public List<String> run() {
 				List<String> texts = new ArrayList<String>();
-				for (TreeItem treeItem: serviceItem.getItems()) {
+				for (TreeItem treeItem : serviceItem.getItems()) {
 					texts.add(treeItem.getText());
 				}
 				return texts;
 			}
 		});
-		
+
 		if (treeItemsTexts.size() == 0) {
 			return false;
 		}
-		
-		for (String text: treeItemsTexts) {
+
+		for (String text : treeItemsTexts) {
 			boolean matches = true;
 			if (matchers != null) {
-				for (Matcher<String> matcher: matchers) {
+				for (Matcher<String> matcher : matchers) {
 					if (!matcher.matches(text)) {
 						matches = false;
 						break;

@@ -27,96 +27,96 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
  *
  */
 public interface IApplicationSourceListPageModel extends IProjectPageModel<Connection> {
-	
-	static final String PROPERTY_SELECTED_APP_SOURCE = "selectedAppSource";
-	static final String PROPERTY_APP_SOURCES = "appSources";
-	static final String PROPERTY_SERVER_APP_SOURCE = "serverAppSource";
-	static final String PROPERTY_LOCAL_APP_SOURCE_FILENAME = "localAppSourceFileName";
-	static final String PROPERTY_USE_LOCAL_APP_SOURCE = "useLocalAppSource";
-	static final String PROPERTY_APP_SOURCE_STATUS = "appSourceStatus";
-	static final String PROPERTY_ECLIPSE_PROJECT = "eclipseProject";
-	
-	/**
-	 * Sets the selected server app source
-	 *
-	 * @param appSource
-	 */
-	void setServerAppSource(IApplicationSource appSource);
-	
-	/**
-	 * Returns the selected server application source
-	 *
-	 * @return
-	 */
-	IApplicationSource getServerAppSource();
-	
-	/**
-	 * Returns the selected application source (e.g. template, imagestream)
-	 *
-	 * @return
-	 */
-	IApplicationSource getSelectedAppSource();
-	
-	/**
-	 * Reset the local application source
-	 */
-	void resetLocalAppSource();
 
-	/**
-	 * Sets this model to use a local app source if <code>true</code> is given. 
-	 * Will use server provided app source otherwise.
-	 *
-	 * @param uploadTemplate
-	 */
-	void setUseLocalAppSource(boolean uploadAppSource);
-	
-	/**
-	 * Returns <code>true</code> if this model is set use a local app source and upload it.
-	 *
-	 * @return
-	 */
-	boolean isUseLocalAppSource();
-	
-	/**
-	 * Sets the name of the local app source that will be uploaded to the server.
-	 *
-	 * @param name
-	 */
-	void setLocalAppSourceFileName(String name);
-	
-	/**
-	 * Returns the name of the local app source that will be uploaded to the server.
-	 *
-	 * @return
-	 */
-	String getLocalAppSourceFileName();
-	
-	/**
-	 * Load the app source (if not provided). Will cause change in the app source status 
-	 * property.
-	 * 
-	 * @param monitor the monitor to control the operation
-	 * @see #getAppSourceStatus()
-	 * @see #PROPERTY_APP_SOURCE_STATUS
-	 */
-	void loadAppSource(IProgressMonitor monitor);
-	
-	/**
-	 * Returns the app status (result of loading).
-	 * 
-	 * @return the app status
-	 */
-	IStatus getAppSourceStatus();
-	
-	/**
-	 * The collection of observable application sources from
-	 * which a new app can be created (e.g. template, imagestream)
-	 * @return
-	 */
-	List<ObservableTreeItem> getAppSources();
+    static final String PROPERTY_SELECTED_APP_SOURCE = "selectedAppSource";
+    static final String PROPERTY_APP_SOURCES = "appSources";
+    static final String PROPERTY_SERVER_APP_SOURCE = "serverAppSource";
+    static final String PROPERTY_LOCAL_APP_SOURCE_FILENAME = "localAppSourceFileName";
+    static final String PROPERTY_USE_LOCAL_APP_SOURCE = "useLocalAppSource";
+    static final String PROPERTY_APP_SOURCE_STATUS = "appSourceStatus";
+    static final String PROPERTY_ECLIPSE_PROJECT = "eclipseProject";
 
-	org.eclipse.core.resources.IProject getEclipseProject();
+    /**
+     * Sets the selected server app source
+     *
+     * @param appSource
+     */
+    void setServerAppSource(IApplicationSource appSource);
 
-	void setEclipseProject(org.eclipse.core.resources.IProject eclipseProject);
-	
+    /**
+     * Returns the selected server application source
+     *
+     * @return
+     */
+    IApplicationSource getServerAppSource();
+
+    /**
+     * Returns the selected application source (e.g. template, imagestream)
+     *
+     * @return
+     */
+    IApplicationSource getSelectedAppSource();
+
+    /**
+     * Reset the local application source
+     */
+    void resetLocalAppSource();
+
+    /**
+     * Sets this model to use a local app source if <code>true</code> is given. 
+     * Will use server provided app source otherwise.
+     *
+     * @param uploadTemplate
+     */
+    void setUseLocalAppSource(boolean uploadAppSource);
+
+    /**
+     * Returns <code>true</code> if this model is set use a local app source and upload it.
+     *
+     * @return
+     */
+    boolean isUseLocalAppSource();
+
+    /**
+     * Sets the name of the local app source that will be uploaded to the server.
+     *
+     * @param name
+     */
+    void setLocalAppSourceFileName(String name);
+
+    /**
+     * Returns the name of the local app source that will be uploaded to the server.
+     *
+     * @return
+     */
+    String getLocalAppSourceFileName();
+
+    /**
+     * Load the app source (if not provided). Will cause change in the app source status 
+     * property.
+     * 
+     * @param monitor the monitor to control the operation
+     * @see #getAppSourceStatus()
+     * @see #PROPERTY_APP_SOURCE_STATUS
+     */
+    void loadAppSource(IProgressMonitor monitor);
+
+    /**
+     * Returns the app status (result of loading).
+     * 
+     * @return the app status
+     */
+    IStatus getAppSourceStatus();
+
+    /**
+     * The collection of observable application sources from
+     * which a new app can be created (e.g. template, imagestream)
+     * @return
+     */
+    List<ObservableTreeItem> getAppSources();
+
+    org.eclipse.core.resources.IProject getEclipseProject();
+
+    void setEclipseProject(org.eclipse.core.resources.IProject eclipseProject);
+
 }

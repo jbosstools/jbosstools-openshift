@@ -24,22 +24,22 @@ import org.jboss.reddeer.swt.impl.combo.LabeledCombo;
 import org.jboss.reddeer.swt.impl.shell.DefaultShell;
 
 public class NewServerContainerWizardPage {
-	
+
 	private static final String SECURE_STORAGE = "Secure Storage Password";
 
 	protected static final String WIZARD_NAME = "New Server";
-	
+
 	private static Logger log = Logger.getLogger(NewServerContainerWizardPage.class);
-	
+
 	public String getDomain() {
 		new DefaultShell(WIZARD_NAME);
 		return new LabeledCombo("Domain: ").getSelection();
 	}
-	
+
 	public Button getAddButton() {
 		return new PushButton("Add...");
 	}
-	
+
 	private static void disposeSecureStoragePassword() {
 		try {
 			new WaitUntil(new ShellWithTextIsAvailable(SECURE_STORAGE), TimePeriod.NORMAL, true);
@@ -49,7 +49,7 @@ public class NewServerContainerWizardPage {
 			log.info("WaitTimeoutExpiredException occurred while waiting for Secure Storage Password dialog");
 		}
 	}
-	
+
 	public void setCredentials(String username, String password) {
 		log.info("Setting Red Hat Access credentials");
 		getAddButton().click();
@@ -69,9 +69,7 @@ public class NewServerContainerWizardPage {
 				credentialsPage.cancelAddingUser();
 				return;
 			}
-			throw new CoreLayerException("Setting the credentials was not successful, "
-					+ "OK button is not enabled, error: \n\r" +
-					text);	
+			throw new CoreLayerException("Setting the credentials was not successful, " + "OK button is not enabled, error: \n\r" + text);
 		}
 		disposeSecureStoragePassword();
 	}

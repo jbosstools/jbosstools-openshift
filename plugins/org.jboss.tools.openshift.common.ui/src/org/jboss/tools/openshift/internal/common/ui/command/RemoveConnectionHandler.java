@@ -29,43 +29,37 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
  */
 public class RemoveConnectionHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IConnection[] connections = UIUtils.getElements(HandlerUtil.getCurrentSelection(event), IConnection.class);
-		if( connections.length == 0 )
-			return null;
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        IConnection[] connections = UIUtils.getElements(HandlerUtil.getCurrentSelection(event), IConnection.class);
+        if (connections.length == 0)
+            return null;
 
-		List<IConnection> safeConnections = new ArrayList<>(connections.length);
-		for (IConnection connection : connections) {
-			if (connection != null) {
-				safeConnections.add(connection);
-			}
-		}
-		
-		if (safeConnections.isEmpty()) {
-			return null;
-		}
-		
-		if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event)
-				, "Remove connection"
-				, NLS.bind("You are about to remove the connection(s):\n{0}\n\n"
-						+ "Do you want to continue?\n\n",
-						StringUtils.toString(
-								safeConnections,
-								new StringUtils.ToStringConverter<IConnection>() {
+        List<IConnection> safeConnections = new ArrayList<>(connections.length);
+        for (IConnection connection : connections) {
+            if (connection != null) {
+                safeConnections.add(connection);
+            }
+        }
 
-									@Override
-									public String toString(IConnection connection) {
-										return "\n" + connection.toString();
-									}
-								})
-						)
-				)) {
-			for(IConnection connection : safeConnections){
-				ConnectionsRegistrySingleton.getInstance().remove(connection);
-			}
+        if (safeConnections.isEmpty()) {
+            return null;
+        }
 
-		}
-		return null;
-	}
+        if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), "Remove connection",
+                NLS.bind("You are about to remove the connection(s):\n{0}\n\n" + "Do you want to continue?\n\n",
+                        StringUtils.toString(safeConnections, new StringUtils.ToStringConverter<IConnection>() {
+
+                            @Override
+                            public String toString(IConnection connection) {
+                                return "\n" + connection.toString();
+                            }
+                        })))) {
+            for (IConnection connection : safeConnections) {
+                ConnectionsRegistrySingleton.getInstance().remove(connection);
+            }
+
+        }
+        return null;
+    }
 }

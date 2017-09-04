@@ -29,172 +29,166 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public class GitCloningSettingsWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_APPLICATION_NAME = "applicationName";
-	public static final String PROPERTY_NEW_PROJECT = "newProject";
-	public static final String PROPERTY_REPO_PATH = "repositoryPath";
-	public static final String PROPERTY_REMOTE_NAME = "remoteName";
-	public static final String PROPERTY_USE_DEFAULT_REPO_PATH = IOpenShiftApplicationWizardModel.PROP_USE_DEFAULT_REPO_PATH;
-	public static final String PROPERTY_USE_DEFAULT_REMOTE_NAME = "useDefaultRemoteName";
-	public static final String PROPERTY_HAS_REMOTEKEYS = "hasRemoteKeys";
+    public static final String PROPERTY_APPLICATION_NAME = "applicationName";
+    public static final String PROPERTY_NEW_PROJECT = "newProject";
+    public static final String PROPERTY_REPO_PATH = "repositoryPath";
+    public static final String PROPERTY_REMOTE_NAME = "remoteName";
+    public static final String PROPERTY_USE_DEFAULT_REPO_PATH = IOpenShiftApplicationWizardModel.PROP_USE_DEFAULT_REPO_PATH;
+    public static final String PROPERTY_USE_DEFAULT_REMOTE_NAME = "useDefaultRemoteName";
+    public static final String PROPERTY_HAS_REMOTEKEYS = "hasRemoteKeys";
 
-	private IOpenShiftApplicationWizardModel wizardModel;
-	private boolean useDefaultRemoteName = true;
-	private boolean hasRemoteKeys;
+    private IOpenShiftApplicationWizardModel wizardModel;
+    private boolean useDefaultRemoteName = true;
+    private boolean hasRemoteKeys;
 
-	public GitCloningSettingsWizardPageModel(IOpenShiftApplicationWizardModel wizardModel) {
-		this.wizardModel = wizardModel;
-		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
-		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME, onWizardProjectNameChanged());
-		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_NEW_PROJECT, onWizardProjectNameChanged());
-		wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_USE_DEFAULT_REPO_PATH, onUseDefaultRepoPathChanged());
-		setDefaultRemoteName();
-	}
+    public GitCloningSettingsWizardPageModel(IOpenShiftApplicationWizardModel wizardModel) {
+        this.wizardModel = wizardModel;
+        wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, onWizardApplicationNameChanged());
+        wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME, onWizardProjectNameChanged());
+        wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_NEW_PROJECT, onWizardProjectNameChanged());
+        wizardModel.addPropertyChangeListener(IOpenShiftApplicationWizardModel.PROP_USE_DEFAULT_REPO_PATH, onUseDefaultRepoPathChanged());
+        setDefaultRemoteName();
+    }
 
+    /**
+     * Listener to propagate the application name changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
+     * @return
+     */
+    private PropertyChangeListener onWizardApplicationNameChanged() {
+        return new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                firePropertyChange(PROPERTY_APPLICATION_NAME, evt.getOldValue(), evt.getNewValue());
+                if (wizardModel.isNewProject() && isUseDefaultRepoPath()) {
+                    setRepositoryPath(IOpenShiftApplicationWizardModel.DEFAULT_REPOSITORY_PATH);
+                }
+            }
+        };
+    }
 
-	/**
-	 * Listener to propagate the application name changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
-	 * @return
-	 */
-	private PropertyChangeListener onWizardApplicationNameChanged() {
-		return new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChange(PROPERTY_APPLICATION_NAME, evt.getOldValue(), evt.getNewValue());
-				if(wizardModel.isNewProject() && isUseDefaultRepoPath()) {
-					setRepositoryPath(IOpenShiftApplicationWizardModel.DEFAULT_REPOSITORY_PATH);
-				} 
-			}
-		};
-	}
+    /**
+     * Listener to propagate the project name changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
+     * @return
+     */
+    private PropertyChangeListener onWizardProjectNameChanged() {
+        return new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if (isUseDefaultRepoPath()) {
+                    final IProject project = wizardModel.getProject();
+                    if (project != null && project.exists()) {
+                        setRepositoryPath(project.getLocation().toOSString());
+                    } else {
+                        setRepositoryPath(IOpenShiftApplicationWizardModel.DEFAULT_REPOSITORY_PATH);
+                    }
+                }
+                setDefaultRemoteName();
+            }
+        };
+    }
 
-	/**
-	 * Listener to propagate the project name changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
-	 * @return
-	 */
-	private PropertyChangeListener onWizardProjectNameChanged() {
-		return new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if(isUseDefaultRepoPath()) {
-					final IProject project = wizardModel.getProject();
-					if(project != null && project.exists()) {
-						setRepositoryPath(project.getLocation().toOSString());
-					} else {
-						setRepositoryPath(IOpenShiftApplicationWizardModel.DEFAULT_REPOSITORY_PATH);
-					}
-				}
-				setDefaultRemoteName();
-			}
-		};
-	}
-	
-	/**
-	 * Listener to propagate the default repository path flag changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
-	 * @return the property listener
-	 */
-	private PropertyChangeListener onUseDefaultRepoPathChanged() {
-		return new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChange(PROPERTY_USE_DEFAULT_REPO_PATH, evt.getOldValue(), evt.getNewValue());
-			}
-		};
-	}
+    /**
+     * Listener to propagate the default repository path flag changes from the underlying WizardModel into this WizardPageModel, so that properties can be affected here, too.
+     * @return the property listener
+     */
+    private PropertyChangeListener onUseDefaultRepoPathChanged() {
+        return new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                firePropertyChange(PROPERTY_USE_DEFAULT_REPO_PATH, evt.getOldValue(), evt.getNewValue());
+            }
+        };
+    }
 
-	public boolean isNewProject() {
-		return wizardModel.isNewProject();
-	}
+    public boolean isNewProject() {
+        return wizardModel.isNewProject();
+    }
 
-	public String getApplicationName() {
-		return wizardModel.getApplicationName();
-	}
-	
-	public String getRepositoryPath() {
-		return wizardModel.getRepositoryPath();
-	}
+    public String getApplicationName() {
+        return wizardModel.getApplicationName();
+    }
 
-	public void setRepositoryPath(String repositoryPath) {
-		firePropertyChange(PROPERTY_REPO_PATH, wizardModel.getRepositoryPath(),
-				wizardModel.setRepositoryPath(repositoryPath));
-	}
+    public String getRepositoryPath() {
+        return wizardModel.getRepositoryPath();
+    }
 
-	private void resetRemoteName() {
-		setRemoteName(null);
-	}
+    public void setRepositoryPath(String repositoryPath) {
+        firePropertyChange(PROPERTY_REPO_PATH, wizardModel.getRepositoryPath(), wizardModel.setRepositoryPath(repositoryPath));
+    }
 
-	private void setDefaultRemoteName() {
-		if(wizardModel.isNewProject()) {
-			setRemoteName(IOpenShiftApplicationWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
-		} else {
-			setRemoteName(IOpenShiftApplicationWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
-		}
-	}
-	
-	private String getDefaultRepositoryPath() {
-		return EGitUIUtils.getEGitDefaultRepositoryPath();
-	}
+    private void resetRemoteName() {
+        setRemoteName(null);
+    }
 
-	public String getRemoteName() {
-		return wizardModel.getRemoteName();
-	}
+    private void setDefaultRemoteName() {
+        if (wizardModel.isNewProject()) {
+            setRemoteName(IOpenShiftApplicationWizardModel.NEW_PROJECT_REMOTE_NAME_DEFAULT);
+        } else {
+            setRemoteName(IOpenShiftApplicationWizardModel.EXISTING_PROJECT_REMOTE_NAME_DEFAULT);
+        }
+    }
 
-	public void setRemoteName(String remoteName) {
-		firePropertyChange(PROPERTY_REMOTE_NAME, wizardModel.getRemoteName(), wizardModel.setRemoteName(remoteName));
-	}
+    private String getDefaultRepositoryPath() {
+        return EGitUIUtils.getEGitDefaultRepositoryPath();
+    }
 
-	public boolean isCompatibleToApplicationCartridge(ICartridge cartridge) {
-		IApplication application = wizardModel.getApplication();
-		return application != null && application.getCartridge() != null
-				&& application.getCartridge().equals(cartridge);
-	}
+    public String getRemoteName() {
+        return wizardModel.getRemoteName();
+    }
 
-	public void setUseDefaultRepoPath(boolean useDefaultRepoPath) {
-		firePropertyChange(PROPERTY_USE_DEFAULT_REPO_PATH
-				, wizardModel.isUseDefaultRepoPath()
-				, wizardModel.setUseDefaultRepoPath(useDefaultRepoPath));
-		if (useDefaultRepoPath) {
-			setRepositoryPath(getDefaultRepositoryPath());
-		}
-	}
+    public void setRemoteName(String remoteName) {
+        firePropertyChange(PROPERTY_REMOTE_NAME, wizardModel.getRemoteName(), wizardModel.setRemoteName(remoteName));
+    }
 
-	public boolean isUseDefaultRepoPath() {
-		return wizardModel.isUseDefaultRepoPath();
-	}
+    public boolean isCompatibleToApplicationCartridge(ICartridge cartridge) {
+        IApplication application = wizardModel.getApplication();
+        return application != null && application.getCartridge() != null && application.getCartridge().equals(cartridge);
+    }
 
-	public void setUseDefaultRemoteName(boolean useDefaultRemoteName) {
-		firePropertyChange(PROPERTY_USE_DEFAULT_REMOTE_NAME, useDefaultRemoteName,
-				this.useDefaultRemoteName = useDefaultRemoteName);
-		if (useDefaultRemoteName) {
-			setDefaultRemoteName();
-		} else {
-			resetRemoteName();
-		}
-	}
+    public void setUseDefaultRepoPath(boolean useDefaultRepoPath) {
+        firePropertyChange(PROPERTY_USE_DEFAULT_REPO_PATH, wizardModel.isUseDefaultRepoPath(),
+                wizardModel.setUseDefaultRepoPath(useDefaultRepoPath));
+        if (useDefaultRepoPath) {
+            setRepositoryPath(getDefaultRepositoryPath());
+        }
+    }
 
-	public boolean isUseDefaultRemoteName() {
-		return useDefaultRemoteName;
-	}
+    public boolean isUseDefaultRepoPath() {
+        return wizardModel.isUseDefaultRepoPath();
+    }
 
-	public boolean getHasRemoteKeys() {
-		return hasRemoteKeys;
-	}
-	
-	public void setHasRemoteKeys(boolean hasRemoteKeys) {
-		firePropertyChange(PROPERTY_HAS_REMOTEKEYS, this.hasRemoteKeys, this.hasRemoteKeys = hasRemoteKeys);
-	}
+    public void setUseDefaultRemoteName(boolean useDefaultRemoteName) {
+        firePropertyChange(PROPERTY_USE_DEFAULT_REMOTE_NAME, useDefaultRemoteName, this.useDefaultRemoteName = useDefaultRemoteName);
+        if (useDefaultRemoteName) {
+            setDefaultRemoteName();
+        } else {
+            resetRemoteName();
+        }
+    }
 
-	public ExpressConnection getConnection() {
-		return wizardModel.getConnection();
-	}
-	
-	public boolean isConnected() {
-		return getConnection() != null
-				&& getConnection().isConnected();
-	}
-	
-	public void reset() {
-		setRemoteName(wizardModel.getRemoteName());
-		setRepositoryPath(wizardModel.getRepositoryPath());
-		setHasRemoteKeys(getHasRemoteKeys());
-	}
+    public boolean isUseDefaultRemoteName() {
+        return useDefaultRemoteName;
+    }
+
+    public boolean getHasRemoteKeys() {
+        return hasRemoteKeys;
+    }
+
+    public void setHasRemoteKeys(boolean hasRemoteKeys) {
+        firePropertyChange(PROPERTY_HAS_REMOTEKEYS, this.hasRemoteKeys, this.hasRemoteKeys = hasRemoteKeys);
+    }
+
+    public ExpressConnection getConnection() {
+        return wizardModel.getConnection();
+    }
+
+    public boolean isConnected() {
+        return getConnection() != null && getConnection().isConnected();
+    }
+
+    public void reset() {
+        setRemoteName(wizardModel.getRemoteName());
+        setRepositoryPath(wizardModel.getRepositoryPath());
+        setHasRemoteKeys(getHasRemoteKeys());
+    }
 }

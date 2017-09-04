@@ -19,17 +19,17 @@ import org.eclipse.core.runtime.IStatus;
  */
 public class IsNotNullValidator implements IValidator {
 
-	private IStatus invalidStatus;
+    private IStatus invalidStatus;
 
-	public IsNotNullValidator(IStatus invalidStatus) {
-		this.invalidStatus = invalidStatus;
-	}
+    public IsNotNullValidator(IStatus invalidStatus) {
+        this.invalidStatus = invalidStatus;
+    }
 
-	@Override
-	public IStatus validate(Object value) {
-		if (value == null) {
-			return invalidStatus;
-		}
-		return ValidationStatus.ok();
-	}
+    @Override
+    public IStatus validate(Object value) {
+        if (value == null) {
+            return invalidStatus;
+        }
+        return ValidationStatus.ok();
+    }
 }

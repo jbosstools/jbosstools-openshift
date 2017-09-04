@@ -20,85 +20,85 @@ import com.openshift.restclient.model.IPort;
  * @author jeff.cantrill
  *
  */
-public class PortSpecAdapter implements IPort{
-	
-	private String name;
-	private String protocol;
-	private int port;
-	
-	/**
-	 * 
-	 * @param spec A string in the form of "port/protocol"
-	 * @throws IllegalArgumentException if the port info can not be determined from the spec
-	 */
-	public PortSpecAdapter(String spec){
-		String[] parts = StringUtils.defaultIfBlank(spec, "").split("/");
-		if(parts.length != 2){
-			throw new IllegalArgumentException(NLS.bind("Unable to determine port info from spec {0}", spec));
-		}
-		port = Integer.valueOf(parts[0]);
-		protocol = parts[1].toUpperCase(); 
-		name = getName(port, protocol);
-	}
-	
-	public PortSpecAdapter(String name, String protocol, int port){
-		if(StringUtils.isBlank(protocol)){
-			throw new IllegalArgumentException("protocol must be set");
-		}
-		this.port = port;
-		this.protocol = protocol; 
-		this.name = (name == null)?getName(port, protocol):name;
-	}
-	
-	@Override
-	public String getName() {
-		return name;
-	}
+public class PortSpecAdapter implements IPort {
 
-	@Override
-	public int getContainerPort() {
-		return port;
-	}
+    private String name;
+    private String protocol;
+    private int port;
 
-	@Override
-	public String getProtocol() {
-		return protocol;
-	}
+    /**
+     * 
+     * @param spec A string in the form of "port/protocol"
+     * @throws IllegalArgumentException if the port info can not be determined from the spec
+     */
+    public PortSpecAdapter(String spec) {
+        String[] parts = StringUtils.defaultIfBlank(spec, "").split("/");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException(NLS.bind("Unable to determine port info from spec {0}", spec));
+        }
+        port = Integer.valueOf(parts[0]);
+        protocol = parts[1].toUpperCase();
+        name = getName(port, protocol);
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + port;
-		result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
-		return result;
-	}
+    public PortSpecAdapter(String name, String protocol, int port) {
+        if (StringUtils.isBlank(protocol)) {
+            throw new IllegalArgumentException("protocol must be set");
+        }
+        this.port = port;
+        this.protocol = protocol;
+        this.name = (name == null) ? getName(port, protocol) : name;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		PortSpecAdapter other = (PortSpecAdapter) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (port != other.port)
-			return false;
-		if (protocol == null) {
-			if (other.protocol != null)
-				return false;
-		} else if (!protocol.equals(other.protocol))
-			return false;
-		return true;
-	}
-	
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int getContainerPort() {
+        return port;
+    }
+
+    @Override
+    public String getProtocol() {
+        return protocol;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + port;
+        result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PortSpecAdapter other = (PortSpecAdapter)obj;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (port != other.port)
+            return false;
+        if (protocol == null) {
+            if (other.protocol != null)
+                return false;
+        } else if (!protocol.equals(other.protocol))
+            return false;
+        return true;
+    }
+
     /**
      * For better test reporting
      */
@@ -108,7 +108,7 @@ public class PortSpecAdapter implements IPort{
     }
 
     private String getName(int port, String protocol) {
-		return NLS.bind("{0}-{1}", port, protocol.toLowerCase());
-	}
-	
+        return NLS.bind("{0}-{1}", port, protocol.toLowerCase());
+    }
+
 }

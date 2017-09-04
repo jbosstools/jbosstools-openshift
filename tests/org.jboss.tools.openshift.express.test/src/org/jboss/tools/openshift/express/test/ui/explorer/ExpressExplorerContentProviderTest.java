@@ -34,60 +34,63 @@ import com.openshift.client.IDomain;
 @RunWith(MockitoJUnitRunner.class)
 public class ExpressExplorerContentProviderTest {
 
-	private ExpressExplorerContentProvider provider;
-	private ConnectionsRegistry registry;
-	@Mock
-	private IApplication application;
-	@Mock 
-	private IDomain domain;
-	@Mock 
-	private IConnection connection;
+    private ExpressExplorerContentProvider provider;
+    private ConnectionsRegistry registry;
+    @Mock
+    private IApplication application;
+    @Mock
+    private IDomain domain;
+    @Mock
+    private IConnection connection;
 
-	@Before
-	public void setup(){
-		provider = new ExpressExplorerContentProvider();
-		registry = new ConnectionsRegistry();
-		registry.add(connection);
-	}
-	
-	@Test
-	public void getExplorerElementsReturnsDomainsForExpressConnections(){
-		ExpressConnection xpressConnection = spy(new ExpressConnection("", "http://localhost"));
-		registry.add(xpressConnection);
-		List<IDomain> domains = Arrays.asList(domain);
-		doReturn(domains).when(xpressConnection).getDomains();
-		
-		assertArrayEquals(domains.toArray(), provider.getExplorerElements(xpressConnection));
-	}
-	
-	@Test
-	public void getElementsReturnsExpressConnectionsForTheRegistry(){
-		registry.add(new ExpressConnection("", "http://localhost"));
-		registry.add(new ExpressConnection("", "http://localhost:8080"));
-		
-		Object[] elements = provider.getExplorerElements(registry);
-		assertEquals("Exp. only ExpressConnections to be returned by this provider", 2, elements.length);
-		for (Object e : elements) {
-			if(!(e instanceof ExpressConnection)){
-				fail("Exp. only ExpressConnections to be returned by this provider");
-			}
-		}
-	}
-	
-	@Test
-	public void testRegistryHasChildren() {
-		assertTrue("Exp. the ConnectionsRegistry to have children", provider.hasChildren(registry));
-	}
-	@Test
-	public void testConnectionHasChildren() {
-		assertTrue("Exp. an IConnection to have children", provider.hasChildren(connection));
-	}
-	@Test
-	public void testDomainHasChildren() {
-		assertTrue("Exp. an IDomain to have children", provider.hasChildren(domain));
-	}
-	@Test
-	public void testApplicationHasChildren() {
-		assertTrue("Exp. an IApplication to have children", provider.hasChildren(application));
-	}
+    @Before
+    public void setup() {
+        provider = new ExpressExplorerContentProvider();
+        registry = new ConnectionsRegistry();
+        registry.add(connection);
+    }
+
+    @Test
+    public void getExplorerElementsReturnsDomainsForExpressConnections() {
+        ExpressConnection xpressConnection = spy(new ExpressConnection("", "http://localhost"));
+        registry.add(xpressConnection);
+        List<IDomain> domains = Arrays.asList(domain);
+        doReturn(domains).when(xpressConnection).getDomains();
+
+        assertArrayEquals(domains.toArray(), provider.getExplorerElements(xpressConnection));
+    }
+
+    @Test
+    public void getElementsReturnsExpressConnectionsForTheRegistry() {
+        registry.add(new ExpressConnection("", "http://localhost"));
+        registry.add(new ExpressConnection("", "http://localhost:8080"));
+
+        Object[] elements = provider.getExplorerElements(registry);
+        assertEquals("Exp. only ExpressConnections to be returned by this provider", 2, elements.length);
+        for (Object e : elements) {
+            if (!(e instanceof ExpressConnection)) {
+                fail("Exp. only ExpressConnections to be returned by this provider");
+            }
+        }
+    }
+
+    @Test
+    public void testRegistryHasChildren() {
+        assertTrue("Exp. the ConnectionsRegistry to have children", provider.hasChildren(registry));
+    }
+
+    @Test
+    public void testConnectionHasChildren() {
+        assertTrue("Exp. an IConnection to have children", provider.hasChildren(connection));
+    }
+
+    @Test
+    public void testDomainHasChildren() {
+        assertTrue("Exp. an IDomain to have children", provider.hasChildren(domain));
+    }
+
+    @Test
+    public void testApplicationHasChildren() {
+        assertTrue("Exp. an IApplication to have children", provider.hasChildren(application));
+    }
 }

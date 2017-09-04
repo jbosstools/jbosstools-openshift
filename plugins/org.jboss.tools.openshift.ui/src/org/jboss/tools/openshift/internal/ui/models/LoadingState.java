@@ -20,12 +20,12 @@ package org.jboss.tools.openshift.internal.ui.models;
  *
  */
 public enum LoadingState {
-	/** The no loading attempt has been made yet **/
-	INIT,
-	/** the element is currently being loaded **/
-	LOADING,
-	/** loading has been stopped, either cancelled or with exception **/
-	LOAD_STOPPED,
-	/** Loading has finished, the element can be used **/
-	LOADED
+    /** The no loading attempt has been made yet **/
+    INIT,
+    /** the element is currently being loaded **/
+    LOADING,
+    /** loading has been stopped, either cancelled or with exception **/
+    LOAD_STOPPED,
+    /** Loading has finished, the element can be used **/
+    LOADED
 }

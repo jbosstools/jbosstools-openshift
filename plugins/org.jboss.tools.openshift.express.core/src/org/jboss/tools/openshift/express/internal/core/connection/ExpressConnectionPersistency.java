@@ -26,31 +26,26 @@ import org.jboss.tools.openshift.express.internal.core.preferences.ExpressCorePr
  */
 public class ExpressConnectionPersistency extends AbstractConnectionPersistency<ExpressConnection> {
 
-	@Override
-	protected String[] loadPersisted() {
-		return (String[]) ArrayUtils.addAll(
-				ExpressCorePreferences.INSTANCE.loadConnections(), 
-				ExpressCorePreferences.INSTANCE.loadLegacyConnections());
-	}
+    @Override
+    protected String[] loadPersisted() {
+        return (String[])ArrayUtils.addAll(ExpressCorePreferences.INSTANCE.loadConnections(),
+                ExpressCorePreferences.INSTANCE.loadLegacyConnections());
+    }
 
-	@Override
-	protected void persist(Map<String, ExpressConnection> connections) {
-		ExpressCorePreferences.INSTANCE.saveConnections(connections.keySet().toArray(new String [] {}));
-	}
+    @Override
+    protected void persist(Map<String, ExpressConnection> connections) {
+        ExpressCorePreferences.INSTANCE.saveConnections(connections.keySet().toArray(new String[] {}));
+    }
 
-	@Override
-	protected void logError(String message, Exception e) {
-		ExpressCoreActivator.pluginLog().logError(message, e);
-	}
+    @Override
+    protected void logError(String message, Exception e) {
+        ExpressCoreActivator.pluginLog().logError(message, e);
+    }
 
-	@Override
-	protected ExpressConnection createConnection(ConnectionURL connectionURL) {
-		return new ExpressConnection(
-				connectionURL.getUsername(),
-				connectionURL.getHostWithScheme(),
-				new LazyCredentialsPrompter(
-						ExpressCoreUIIntegration.getDefault().getCredentialPrompter()),
-				new LazySSLCertificateCallback(
-						ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback()));
-	}
+    @Override
+    protected ExpressConnection createConnection(ConnectionURL connectionURL) {
+        return new ExpressConnection(connectionURL.getUsername(), connectionURL.getHostWithScheme(),
+                new LazyCredentialsPrompter(ExpressCoreUIIntegration.getDefault().getCredentialPrompter()),
+                new LazySSLCertificateCallback(ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback()));
+    }
 }

@@ -24,10 +24,10 @@ import org.jboss.tools.openshift.common.ui.wizard.NewApplicationWorkbenchWizard;
  */
 public class NewApplicationHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Shell shell = HandlerUtil.getActiveShell(event);
-		WizardUtils.openWizardDialog(new NewApplicationWorkbenchWizard(), shell);
-		return Status.OK_STATUS;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        Shell shell = HandlerUtil.getActiveShell(event);
+        WizardUtils.openWizardDialog(new NewApplicationWorkbenchWizard(), shell);
+        return Status.OK_STATUS;
+    }
 }

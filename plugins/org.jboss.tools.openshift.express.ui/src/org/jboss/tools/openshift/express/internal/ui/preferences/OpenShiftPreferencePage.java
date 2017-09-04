@@ -25,34 +25,32 @@ import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
  */
 public class OpenShiftPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	private IntegerFieldEditor clientReadTimeout;
+    private IntegerFieldEditor clientReadTimeout;
 
-	public OpenShiftPreferencePage() {
-		super(GRID);
-	}
+    public OpenShiftPreferencePage() {
+        super(GRID);
+    }
 
-	@Override
-	public void createFieldEditors() {
-		this.clientReadTimeout =
-				new IntegerFieldEditor(
-						IExpressCoreConstants.CLIENT_READ_TIMEOUT,
-						ExpressUIMessages.ClientReadTimeout, getFieldEditorParent());
-		clientReadTimeout.setValidRange(0, Integer.MAX_VALUE / 1000); // seconds
-		addField(clientReadTimeout);
-	}
+    @Override
+    public void createFieldEditors() {
+        this.clientReadTimeout = new IntegerFieldEditor(IExpressCoreConstants.CLIENT_READ_TIMEOUT, ExpressUIMessages.ClientReadTimeout,
+                getFieldEditorParent());
+        clientReadTimeout.setValidRange(0, Integer.MAX_VALUE / 1000); // seconds
+        addField(clientReadTimeout);
+    }
 
-	@Override
-	public void init(IWorkbench workbench) {
-		IPreferenceStore preferenceStore = ExpressUIActivator.getDefault().getCorePreferenceStore();
-		preferenceStore.setDefault(IExpressCoreConstants.CLIENT_READ_TIMEOUT, ClientSystemProperties.getReadTimeoutSeconds());
-		setPreferenceStore(preferenceStore);
-	}
+    @Override
+    public void init(IWorkbench workbench) {
+        IPreferenceStore preferenceStore = ExpressUIActivator.getDefault().getCorePreferenceStore();
+        preferenceStore.setDefault(IExpressCoreConstants.CLIENT_READ_TIMEOUT, ClientSystemProperties.getReadTimeoutSeconds());
+        setPreferenceStore(preferenceStore);
+    }
 
-	@Override
-	public boolean performOk() {
-		boolean returnValue = super.performOk();
-		ClientSystemProperties.setReadTimeoutSeconds(clientReadTimeout.getIntValue());
-		return returnValue;
-	}
-	
+    @Override
+    public boolean performOk() {
+        boolean returnValue = super.performOk();
+        ClientSystemProperties.setReadTimeoutSeconds(clientReadTimeout.getIntValue());
+        return returnValue;
+    }
+
 }

@@ -24,38 +24,38 @@ import com.openshift.restclient.model.build.IWebhookTrigger;
  */
 public class WebhookUtil {
 
-	public static List<IWebhookTrigger> getWebHooks(IBuildConfig buildConfig) {
-		if (buildConfig == null) {
-			return null;
-		}
-		List<IBuildTrigger> triggers = buildConfig.getBuildTriggers();
-		List<IWebhookTrigger> webHooks = null;
-		if (triggers == null || triggers.isEmpty()) {
-			webHooks = Collections.emptyList();
-		} else {
-			webHooks = new ArrayList<>(triggers.size());
-			for (IBuildTrigger trigger : triggers) {
-				IWebhookTrigger webHook = getAsWebHook(trigger);
-				if (webHook != null) {
-					webHooks.add(webHook);
-				}
-			}
-		}
-		return webHooks;
-	}
+    public static List<IWebhookTrigger> getWebHooks(IBuildConfig buildConfig) {
+        if (buildConfig == null) {
+            return null;
+        }
+        List<IBuildTrigger> triggers = buildConfig.getBuildTriggers();
+        List<IWebhookTrigger> webHooks = null;
+        if (triggers == null || triggers.isEmpty()) {
+            webHooks = Collections.emptyList();
+        } else {
+            webHooks = new ArrayList<>(triggers.size());
+            for (IBuildTrigger trigger : triggers) {
+                IWebhookTrigger webHook = getAsWebHook(trigger);
+                if (webHook != null) {
+                    webHooks.add(webHook);
+                }
+            }
+        }
+        return webHooks;
+    }
 
-	private static IWebhookTrigger getAsWebHook(IBuildTrigger trigger) {
-		if (trigger == null) {
-			return null;
-		}
-		switch (trigger.getType()) {
-		case BuildTriggerType.generic:
-		case BuildTriggerType.GENERIC:
-		case BuildTriggerType.github:
-		case BuildTriggerType.GITHUB:
-			return (IWebhookTrigger) trigger;
-		default:
-			return null;
-		}
-	}
+    private static IWebhookTrigger getAsWebHook(IBuildTrigger trigger) {
+        if (trigger == null) {
+            return null;
+        }
+        switch (trigger.getType()) {
+        case BuildTriggerType.generic:
+        case BuildTriggerType.GENERIC:
+        case BuildTriggerType.github:
+        case BuildTriggerType.GITHUB:
+            return (IWebhookTrigger)trigger;
+        default:
+            return null;
+        }
+    }
 }

@@ -13,7 +13,6 @@ import java.util.Map;
 
 import com.openshift.client.IDomain;
 
-
 /**
  * Wizard that lists the environment variables and edit, add, remove them.
  * 
@@ -22,48 +21,45 @@ import com.openshift.client.IDomain;
  */
 public class NewEnvironmentVariablesWizardModel extends AbstractEnvironmentVariablesWizardModel {
 
-	private Map<String, String> environmentVariables;
-	private IDomain domain;
-	
-	public NewEnvironmentVariablesWizardModel(Map<String, String> environmentVariables, IDomain domain) {
-		this.environmentVariables = environmentVariables;
-		this.domain = domain;
-	}
+    private Map<String, String> environmentVariables;
+    private IDomain domain;
 
-	@Override
-	public void refreshEnvironmentVariables() {
-		loadEnvironmentVariables();
-	}
+    public NewEnvironmentVariablesWizardModel(Map<String, String> environmentVariables, IDomain domain) {
+        this.environmentVariables = environmentVariables;
+        this.domain = domain;
+    }
 
-	@Override
-	public void loadEnvironmentVariables() {
-		clear();
-		if (environmentVariables == null
-				|| environmentVariables.isEmpty()) {
-			return;
-		}
+    @Override
+    public void refreshEnvironmentVariables() {
+        loadEnvironmentVariables();
+    }
 
-		add(environmentVariables);
-	}
+    @Override
+    public void loadEnvironmentVariables() {
+        clear();
+        if (environmentVariables == null || environmentVariables.isEmpty()) {
+            return;
+        }
 
-	private void add(Map<String, String> environmentVariables) {
-		for (Map.Entry<String, String> entry : environmentVariables.entrySet()) {
-			add(new EnvironmentVariableItem(entry.getKey(), entry.getValue()));
-		}
-	}
+        add(environmentVariables);
+    }
 
-	@Override
-	public boolean isSupported() {
-		return domain != null
-				&& domain.canCreateApplicationWithEnvironmentVariables();
-	}
-	
-	@Override
-	public String getHost() {
-		if (domain == null
-				|| domain.getUser() == null) {
-			return null;
-		}
-		return domain.getUser().getServer();
-	}
+    private void add(Map<String, String> environmentVariables) {
+        for (Map.Entry<String, String> entry : environmentVariables.entrySet()) {
+            add(new EnvironmentVariableItem(entry.getKey(), entry.getValue()));
+        }
+    }
+
+    @Override
+    public boolean isSupported() {
+        return domain != null && domain.canCreateApplicationWithEnvironmentVariables();
+    }
+
+    @Override
+    public String getHost() {
+        if (domain == null || domain.getUser() == null) {
+            return null;
+        }
+        return domain.getUser().getServer();
+    }
 }

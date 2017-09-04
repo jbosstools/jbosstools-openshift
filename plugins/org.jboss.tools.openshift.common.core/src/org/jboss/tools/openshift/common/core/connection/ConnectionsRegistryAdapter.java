@@ -18,22 +18,22 @@ package org.jboss.tools.openshift.common.core.connection;
  */
 public class ConnectionsRegistryAdapter implements IConnectionsRegistryListener {
 
-	@Override
-	public void connectionAdded(IConnection connection) {
-		// TODO Auto-generated method stub
+    @Override
+    public void connectionAdded(IConnection connection) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public void connectionRemoved(IConnection connection) {
-		// TODO Auto-generated method stub
+    @Override
+    public void connectionRemoved(IConnection connection) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-		// TODO Auto-generated method stub
+    @Override
+    public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
 }

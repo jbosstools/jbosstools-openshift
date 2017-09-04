@@ -20,23 +20,23 @@ import com.openshift.client.IQuickstart;
  */
 public class QuickstartNameComparator implements Comparator<IQuickstart> {
 
-	private Collator collator;
+    private Collator collator;
 
-	public QuickstartNameComparator() {
-		this.collator = Collator.getInstance();
-	}
+    public QuickstartNameComparator() {
+        this.collator = Collator.getInstance();
+    }
 
-	@Override
-	public int compare(IQuickstart thisQuickstart, IQuickstart thatQuickstart) {
-		if (thisQuickstart == null) {
-			if (thatQuickstart == null) {
-				return 0;
-			} else {
-				return -1;
-			}
-		} else if (thatQuickstart == null) {
-			return 1;
-		}
-		return collator.compare(thisQuickstart.getName(), thatQuickstart.getName());
-	}
+    @Override
+    public int compare(IQuickstart thisQuickstart, IQuickstart thatQuickstart) {
+        if (thisQuickstart == null) {
+            if (thatQuickstart == null) {
+                return 0;
+            } else {
+                return -1;
+            }
+        } else if (thatQuickstart == null) {
+            return 1;
+        }
+        return collator.compare(thisQuickstart.getName(), thatQuickstart.getName());
+    }
 }

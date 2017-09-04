@@ -24,21 +24,20 @@ import com.openshift.client.IApplication;
  */
 public class StartApplicationHandler extends AbstractApplicationHandler {
 
-	@Override
-	protected IStatus execute(IApplication application, Shell shell) {
-		new StartApplicationJob(application).schedule();
-		return Status.OK_STATUS;
-	}
+    @Override
+    protected IStatus execute(IApplication application, Shell shell) {
+        new StartApplicationJob(application).schedule();
+        return Status.OK_STATUS;
+    }
 
-	@Override
-	protected IStatus execute(LoadApplicationJob job, Shell shell) {
-		new JobChainBuilder(job)
-				.runWhenSuccessfullyDone(new StartApplicationJob(job)).schedule();
-		return Status.OK_STATUS;
-	}
+    @Override
+    protected IStatus execute(LoadApplicationJob job, Shell shell) {
+        new JobChainBuilder(job).runWhenSuccessfullyDone(new StartApplicationJob(job)).schedule();
+        return Status.OK_STATUS;
+    }
 
-	@Override
-	protected String getOperationName() {
-		return "start application";
-	}
+    @Override
+    protected String getOperationName() {
+        return "start application";
+    }
 }

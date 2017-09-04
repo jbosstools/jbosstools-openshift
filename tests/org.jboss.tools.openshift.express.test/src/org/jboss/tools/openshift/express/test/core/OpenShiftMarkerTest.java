@@ -30,101 +30,100 @@ import org.junit.Test;
 
 public class OpenShiftMarkerTest {
 
-	private IProject project;
-	private OpenShiftMarkers markers;
+    private IProject project;
+    private OpenShiftMarkers markers;
 
-	@Before
-	public void setUp() throws CoreException {
-		String projectName = String.valueOf(System.currentTimeMillis());
-		this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		project.create(new NullProgressMonitor());
-		project.open(new NullProgressMonitor());
-		this.markers = new OpenShiftMarkers(project);
-	}
+    @Before
+    public void setUp() throws CoreException {
+        String projectName = String.valueOf(System.currentTimeMillis());
+        this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+        project.create(new NullProgressMonitor());
+        project.open(new NullProgressMonitor());
+        this.markers = new OpenShiftMarkers(project);
+    }
 
-	@After
-	public void tearDown() throws CoreException {
-		this.project.delete(true, new NullProgressMonitor());
-	}
+    @After
+    public void tearDown() throws CoreException {
+        this.project.delete(true, new NullProgressMonitor());
+    }
 
-	@Test
-	public void shouldReturnAllKnownMarkersAndNonePresent() throws CoreException {
-		// operations
-		List<IOpenShiftMarker> all = markers.getAll();
-		List<IOpenShiftMarker> present = markers.getPresent();
+    @Test
+    public void shouldReturnAllKnownMarkersAndNonePresent() throws CoreException {
+        // operations
+        List<IOpenShiftMarker> all = markers.getAll();
+        List<IOpenShiftMarker> present = markers.getPresent();
 
-		// verification
-		assertEquals(6, all.size());
-		assertTrue(present.isEmpty());
-	}
+        // verification
+        assertEquals(6, all.size());
+        assertTrue(present.isEmpty());
+    }
 
-	@Test
-	public void shouldReturnAllKnownMarkersAnd1Present() throws CoreException {
-		// prerequisites
-		createMarker(IOpenShiftMarker.SKIP_MAVEN_BUILD.getFileName());
-		
-		// operations
-		List<IOpenShiftMarker> all = markers.getAll();
-		List<IOpenShiftMarker> present = markers.getPresent();
+    @Test
+    public void shouldReturnAllKnownMarkersAnd1Present() throws CoreException {
+        // prerequisites
+        createMarker(IOpenShiftMarker.SKIP_MAVEN_BUILD.getFileName());
 
-		// verification
-		assertEquals(6, all.size());
-		assertEquals(1, present.size());
-	}
+        // operations
+        List<IOpenShiftMarker> all = markers.getAll();
+        List<IOpenShiftMarker> present = markers.getPresent();
 
-	@Test
-	public void shouldReturnAllKnownMarkersAnd1Custom() throws CoreException {
-		// prerequisites
-		createMarker("adietish");
-		
-		// operations
-		List<IOpenShiftMarker> all = markers.getAll();
-		List<IOpenShiftMarker> present = markers.getPresent();
+        // verification
+        assertEquals(6, all.size());
+        assertEquals(1, present.size());
+    }
 
-		assertEquals(6 + 1, all.size());
-		assertEquals(1, present.size());
-	}
-	
-	@Test
-	public void shouldIgnoreDotFileInMarkers() throws CoreException {
-		// prerequisites
-		createMarker(".gitignore");
-		
-		// operations
-		List<IOpenShiftMarker> all = markers.getAll();
-		List<IOpenShiftMarker> present = markers.getPresent();
+    @Test
+    public void shouldReturnAllKnownMarkersAnd1Custom() throws CoreException {
+        // prerequisites
+        createMarker("adietish");
 
-		// verification
-		assertEquals(6, all.size());
-		assertEquals(0, present.size());
-	}
+        // operations
+        List<IOpenShiftMarker> all = markers.getAll();
+        List<IOpenShiftMarker> present = markers.getPresent();
 
-	@Test
-	public void shouldCreateMarkerWhenMissingMarkersFolder() throws CoreException {
-		// prerequisites
-		
-		// operations
-		IOpenShiftMarker.SKIP_MAVEN_BUILD.addTo(project, new NullProgressMonitor());
-		
-		// verification
-		assertEquals(1, markers.getPresent().size());
-	}
+        assertEquals(6 + 1, all.size());
+        assertEquals(1, present.size());
+    }
 
-	@Test
-	public void shouldRemoveMarker() throws CoreException {
-		// prerequisites
-		IOpenShiftMarker.SKIP_MAVEN_BUILD.addTo(project, new NullProgressMonitor());
-		
-		// operations
-		IOpenShiftMarker.SKIP_MAVEN_BUILD.removeFrom(project, new NullProgressMonitor());
-		
-		// verification
-		assertEquals(0, markers.getPresent().size());
-	}
+    @Test
+    public void shouldIgnoreDotFileInMarkers() throws CoreException {
+        // prerequisites
+        createMarker(".gitignore");
 
-	private void createMarker(String filename) throws CoreException {
-		IFolder markersFolder = OpenShiftProjectUtils.ensureMarkersFolderExists(project, new NullProgressMonitor());
-		markersFolder.getFile(filename)
-				.create(new ByteArrayInputStream(new byte[] {}), false, new NullProgressMonitor());
-	}
+        // operations
+        List<IOpenShiftMarker> all = markers.getAll();
+        List<IOpenShiftMarker> present = markers.getPresent();
+
+        // verification
+        assertEquals(6, all.size());
+        assertEquals(0, present.size());
+    }
+
+    @Test
+    public void shouldCreateMarkerWhenMissingMarkersFolder() throws CoreException {
+        // prerequisites
+
+        // operations
+        IOpenShiftMarker.SKIP_MAVEN_BUILD.addTo(project, new NullProgressMonitor());
+
+        // verification
+        assertEquals(1, markers.getPresent().size());
+    }
+
+    @Test
+    public void shouldRemoveMarker() throws CoreException {
+        // prerequisites
+        IOpenShiftMarker.SKIP_MAVEN_BUILD.addTo(project, new NullProgressMonitor());
+
+        // operations
+        IOpenShiftMarker.SKIP_MAVEN_BUILD.removeFrom(project, new NullProgressMonitor());
+
+        // verification
+        assertEquals(0, markers.getPresent().size());
+    }
+
+    private void createMarker(String filename) throws CoreException {
+        IFolder markersFolder = OpenShiftProjectUtils.ensureMarkersFolderExists(project, new NullProgressMonitor());
+        markersFolder.getFile(filename).create(new ByteArrayInputStream(new byte[] {}), false, new NullProgressMonitor());
+    }
 }

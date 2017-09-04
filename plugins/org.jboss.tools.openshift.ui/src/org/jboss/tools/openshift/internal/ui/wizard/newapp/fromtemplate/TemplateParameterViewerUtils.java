@@ -23,43 +23,43 @@ import com.openshift.restclient.model.template.IParameter;
  */
 public class TemplateParameterViewerUtils {
 
-	private TemplateParameterViewerUtils() {
-	}
+    private TemplateParameterViewerUtils() {
+    }
 
-	public static String getValueLabel(IParameter parameter) {
-		if (parameter == null) {
-			return null;
-		}
-		
-		boolean hasGenerator = isNotBlank(parameter.getGeneratorName());
-		boolean hasValue = isNotBlank(parameter.getValue());
-		if(hasGenerator) {
-			return hasValue ? parameter.getValue() : "(generated)";
-		}
-		return defaultIfBlank(parameter.getValue(), "");
-	}
+    public static String getValueLabel(IParameter parameter) {
+        if (parameter == null) {
+            return null;
+        }
 
-	/** 
-	 * A viewer comparator that compares parameters in their names.
-	 */
-	public static class ParameterNameViewerComparator extends ViewerComparator {
+        boolean hasGenerator = isNotBlank(parameter.getGeneratorName());
+        boolean hasValue = isNotBlank(parameter.getValue());
+        if (hasGenerator) {
+            return hasValue ? parameter.getValue() : "(generated)";
+        }
+        return defaultIfBlank(parameter.getValue(), "");
+    }
 
-		Comparator<IParameter> comparator = new ParameterNameComparator();
+    /** 
+     * A viewer comparator that compares parameters in their names.
+     */
+    public static class ParameterNameViewerComparator extends ViewerComparator {
 
-		@Override
-		public int compare(Viewer viewer, Object e1, Object e2) {
-			IParameter first = (IParameter) e1;
-			IParameter second = (IParameter) e2;
-			return comparator.compare(first, second);
-		}
-	}
+        Comparator<IParameter> comparator = new ParameterNameComparator();
 
-	public static class ParameterNameComparator implements Comparator<IParameter> {
+        @Override
+        public int compare(Viewer viewer, Object e1, Object e2) {
+            IParameter first = (IParameter)e1;
+            IParameter second = (IParameter)e2;
+            return comparator.compare(first, second);
+        }
+    }
 
-		@Override
-		public int compare(IParameter parameter1, IParameter parameter2) {
-			return parameter1.getName().compareTo(parameter2.getName());
-		}
-	}
+    public static class ParameterNameComparator implements Comparator<IParameter> {
+
+        @Override
+        public int compare(IParameter parameter1, IParameter parameter2) {
+            return parameter1.getName().compareTo(parameter2.getName());
+        }
+    }
 
 }

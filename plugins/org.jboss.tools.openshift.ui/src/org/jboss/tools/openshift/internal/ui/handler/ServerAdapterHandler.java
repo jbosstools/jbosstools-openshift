@@ -50,111 +50,108 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class ServerAdapterHandler extends AbstractHandler {
 
-	private static final String SERVERS_VIEW_ID = "org.eclipse.wst.server.ui.ServersView";
+    private static final String SERVERS_VIEW_ID = "org.eclipse.wst.server.ui.ServersView";
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final IWorkbenchWindow workbenchWindow = HandlerUtil.getActiveWorkbenchWindow(event);
-		ISelection selection = UIUtils.getCurrentSelection(event);
-		IResource selectedResource = UIUtils.getFirstElement(selection, IResource.class);
-		final IServer openShiftServer = getOpenShiftServer(selectedResource);
-		if (openShiftServer != null) {
-			openServersView(openShiftServer, workbenchWindow);
-		}
-		return null;
-	}
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        final IWorkbenchWindow workbenchWindow = HandlerUtil.getActiveWorkbenchWindow(event);
+        ISelection selection = UIUtils.getCurrentSelection(event);
+        IResource selectedResource = UIUtils.getFirstElement(selection, IResource.class);
+        final IServer openShiftServer = getOpenShiftServer(selectedResource);
+        if (openShiftServer != null) {
+            openServersView(openShiftServer, workbenchWindow);
+        }
+        return null;
+    }
 
-	/**
-	 * Finds the OpenShift server corresponding to the selection or prompts the
-	 * user to create one.
-	 * 
-	 * @param resource
-	 *            the selected OpenShift {@link IResource}
-	 * 
-	 * @return the matching OpenShift {@link IServer} or <code>null</code> if
-	 *         none was found or user cancelled the creation operation.
-	 */
-	private IServer getOpenShiftServer(final IResource resource) {
-		if (resource == null) {
-			return null;
-		}
-		
-		IResource source = null;
-		IRoute route = null;
-		
-		if (resource instanceof IService) {
-			source = (IService) resource;
-		} else if (resource instanceof IRoute) {
-			route = (IRoute) resource;
-			final IRoute localRoute = route;
-			source = (IService) route.getProject().getResources(ResourceKind.SERVICE).stream()
-					.filter(s -> ResourceUtils.areRelated(localRoute, (IService) s))
-					.findFirst()
-					.orElseGet(() -> null);
-       } else if (resource instanceof IReplicationController) {
-		    source = resource;
-		} else if (resource instanceof IPod) {
-		    final Collection<IService> services = ResourceUtils.getServicesFor((IPod) resource, resource.getProject().getResources(ResourceKind.SERVICE));
-		    if (!services.isEmpty()) {
+    /**
+     * Finds the OpenShift server corresponding to the selection or prompts the
+     * user to create one.
+     * 
+     * @param resource
+     *            the selected OpenShift {@link IResource}
+     * 
+     * @return the matching OpenShift {@link IServer} or <code>null</code> if
+     *         none was found or user cancelled the creation operation.
+     */
+    private IServer getOpenShiftServer(final IResource resource) {
+        if (resource == null) {
+            return null;
+        }
+
+        IResource source = null;
+        IRoute route = null;
+
+        if (resource instanceof IService) {
+            source = (IService)resource;
+        } else if (resource instanceof IRoute) {
+            route = (IRoute)resource;
+            final IRoute localRoute = route;
+            source = (IService)route.getProject().getResources(ResourceKind.SERVICE).stream()
+                    .filter(s -> ResourceUtils.areRelated(localRoute, (IService)s)).findFirst().orElseGet(() -> null);
+        } else if (resource instanceof IReplicationController) {
+            source = resource;
+        } else if (resource instanceof IPod) {
+            final Collection<IService> services = ResourceUtils.getServicesFor((IPod)resource,
+                    resource.getProject().getResources(ResourceKind.SERVICE));
+            if (!services.isEmpty()) {
                 source = services.iterator().next();
-		    } else {
-                source = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod) resource);
+            } else {
+                source = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod)resource);
             }
-		}
-		if (source != null)  {
-	        final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(source);
-	        return openOrCreateServerAdapter(source, route, connection);
-		}
-		return null;
-	}
+        }
+        if (source != null) {
+            final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(source);
+            return openOrCreateServerAdapter(source, route, connection);
+        }
+        return null;
+    }
 
-	/**
-	 * Looks for an existing {@link IServer} matching the given {@code resource},
-	 * otherwise, opens the Server Adapter wizard to create a new one.
-	 * 
-	 * @param resource
-	 * @param route 
-	 * @param connection
-	 *            the OpenShift connection
-	 */
-	private IServer openOrCreateServerAdapter(final IResource resource, IRoute route, final Connection connection) {
-		if (resource == null || connection == null) {
-			return null;
-		}
-		final String resourceName = OpenShiftResourceUniqueId.get(resource);
-		IServer server = OpenShiftServerUtils.findServerForResource(resourceName);
-		if (server == null) {
-			server = createServer(resourceName, resource, route, connection);
-		}
-		return server;
-	}
+    /**
+     * Looks for an existing {@link IServer} matching the given {@code resource},
+     * otherwise, opens the Server Adapter wizard to create a new one.
+     * 
+     * @param resource
+     * @param route 
+     * @param connection
+     *            the OpenShift connection
+     */
+    private IServer openOrCreateServerAdapter(final IResource resource, IRoute route, final Connection connection) {
+        if (resource == null || connection == null) {
+            return null;
+        }
+        final String resourceName = OpenShiftResourceUniqueId.get(resource);
+        IServer server = OpenShiftServerUtils.findServerForResource(resourceName);
+        if (server == null) {
+            server = createServer(resourceName, resource, route, connection);
+        }
+        return server;
+    }
 
-	private IServer createServer(final String resourceName, final IResource resource, IRoute route, final Connection connection) {
-		IServer server = null;
-		try {
-			IServerWorkingCopy serverWorkingCopy = OpenShiftServerUtils.create(resourceName);
-			final ServerSettingsWizard serverSettingsWizard = 
-					new ServerSettingsWizard(serverWorkingCopy, connection, resource, route);
-			if (WizardUtils.openWizardDialog(600, 650, serverSettingsWizard, Display.getDefault().getActiveShell())) {
-				server = serverSettingsWizard.getCreatedServer();
-			}
-		} catch (CoreException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(
-					NLS.bind("Failed to create OpenShift Server Adapter for resource {0}", resourceName), e);
-		}
-		return server;
-	}
-	
-	private void openServersView(final IServer openShiftServer, final IWorkbenchWindow workbenchWindow) {
-		try {
-			final CommonNavigator serversViewPart = (CommonNavigator) workbenchWindow.getActivePage().showView(SERVERS_VIEW_ID);
-			serversViewPart.setFocus();
-			serversViewPart.getCommonViewer().refresh();
-			serversViewPart.getCommonViewer().setSelection(new StructuredSelection(openShiftServer));
-		} catch (PartInitException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError("Failed to open Servers View", e);
-		}
-	}
+    private IServer createServer(final String resourceName, final IResource resource, IRoute route, final Connection connection) {
+        IServer server = null;
+        try {
+            IServerWorkingCopy serverWorkingCopy = OpenShiftServerUtils.create(resourceName);
+            final ServerSettingsWizard serverSettingsWizard = new ServerSettingsWizard(serverWorkingCopy, connection, resource, route);
+            if (WizardUtils.openWizardDialog(600, 650, serverSettingsWizard, Display.getDefault().getActiveShell())) {
+                server = serverSettingsWizard.getCreatedServer();
+            }
+        } catch (CoreException e) {
+            OpenShiftUIActivator.getDefault().getLogger()
+                    .logError(NLS.bind("Failed to create OpenShift Server Adapter for resource {0}", resourceName), e);
+        }
+        return server;
+    }
 
+    private void openServersView(final IServer openShiftServer, final IWorkbenchWindow workbenchWindow) {
+        try {
+            final CommonNavigator serversViewPart = (CommonNavigator)workbenchWindow.getActivePage().showView(SERVERS_VIEW_ID);
+            serversViewPart.setFocus();
+            serversViewPart.getCommonViewer().refresh();
+            serversViewPart.getCommonViewer().setSelection(new StructuredSelection(openShiftServer));
+        } catch (PartInitException e) {
+            OpenShiftUIActivator.getDefault().getLogger().logError("Failed to open Servers View", e);
+        }
+    }
 
 }

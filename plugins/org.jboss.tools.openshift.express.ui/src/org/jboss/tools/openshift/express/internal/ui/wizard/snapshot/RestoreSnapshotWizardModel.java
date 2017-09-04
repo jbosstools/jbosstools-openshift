@@ -31,76 +31,76 @@ import com.openshift.internal.client.utils.StreamUtils;
  */
 public class RestoreSnapshotWizardModel extends ObservablePojo {
 
-	private String filepath;
-	private boolean deploymentSnapshot;
-	private boolean hotDeploy;
-	private IApplication application;
+    private String filepath;
+    private boolean deploymentSnapshot;
+    private boolean hotDeploy;
+    private IApplication application;
 
-	public RestoreSnapshotWizardModel(IApplication application) {
-		this.application = application;
-		this.filepath = getSnapshotFromPreferences(application, isDeploymentSnapshot());
-	}
+    public RestoreSnapshotWizardModel(IApplication application) {
+        this.application = application;
+        this.filepath = getSnapshotFromPreferences(application, isDeploymentSnapshot());
+    }
 
-	public IApplication getApplication() {
-		return application;
-	}
+    public IApplication getApplication() {
+        return application;
+    }
 
-	public String setFilepath(String filepath) {
-		return this.filepath = filepath;
-	}
+    public String setFilepath(String filepath) {
+        return this.filepath = filepath;
+    }
 
-	public String getFilepath() {
-		return filepath;
-	}
+    public String getFilepath() {
+        return filepath;
+    }
 
-	public boolean setDeploymentSnapshot(boolean deploymentSnapshot) {
-		return this.deploymentSnapshot = deploymentSnapshot;
-	}
+    public boolean setDeploymentSnapshot(boolean deploymentSnapshot) {
+        return this.deploymentSnapshot = deploymentSnapshot;
+    }
 
-	public boolean isDeploymentSnapshot() {
-		return deploymentSnapshot;
-	}
+    public boolean isDeploymentSnapshot() {
+        return deploymentSnapshot;
+    }
 
-	public String restoreSnapshot(IProgressMonitor monitor) throws IOException {
-		if (monitor.isCanceled()) {
-			return null;
-		}
-		storeSnapshotToPreferences(filepath, deploymentSnapshot);
-		Session session = SSHSessionRepository.getInstance().getSession(application);
-		FileInputStream snapshotFileInputStream = new FileInputStream(new File(getFilepath()));
-		InputStream saveResponse = null;
-		if (isDeploymentSnapshot()) {
-			saveResponse = new ApplicationSSHSession(application, session).restoreDeploymentSnapshot(snapshotFileInputStream, hotDeploy);
-		} else {
-			saveResponse = new ApplicationSSHSession(application, session).restoreFullSnapshot(snapshotFileInputStream);
-		}
-		ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
-		StreamUtils.writeTo(saveResponse, byteArrayOut);
-		return new String(byteArrayOut.toByteArray());
-	}
+    public String restoreSnapshot(IProgressMonitor monitor) throws IOException {
+        if (monitor.isCanceled()) {
+            return null;
+        }
+        storeSnapshotToPreferences(filepath, deploymentSnapshot);
+        Session session = SSHSessionRepository.getInstance().getSession(application);
+        FileInputStream snapshotFileInputStream = new FileInputStream(new File(getFilepath()));
+        InputStream saveResponse = null;
+        if (isDeploymentSnapshot()) {
+            saveResponse = new ApplicationSSHSession(application, session).restoreDeploymentSnapshot(snapshotFileInputStream, hotDeploy);
+        } else {
+            saveResponse = new ApplicationSSHSession(application, session).restoreFullSnapshot(snapshotFileInputStream);
+        }
+        ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+        StreamUtils.writeTo(saveResponse, byteArrayOut);
+        return new String(byteArrayOut.toByteArray());
+    }
 
-	public boolean isHotDeploy() {
-		return hotDeploy;
-	}
+    public boolean isHotDeploy() {
+        return hotDeploy;
+    }
 
-	public boolean setHotDeploy(boolean hotDeploy) {
-		return this.hotDeploy = hotDeploy;
-	}
-	
-	private void storeSnapshotToPreferences(String filepath, boolean deploymentSnapshot) {
-		if (deploymentSnapshot) {
-			ExpressCorePreferences.INSTANCE.saveDeploymentSnapshot(getApplication(), filepath);
-		} else {
-			ExpressCorePreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);	
-		}
-	}
-	
-	private String getSnapshotFromPreferences(IApplication application, boolean deploymentSnapshot) {
-		if (deploymentSnapshot) {
-			return ExpressCorePreferences.INSTANCE.getDeploymentSnapshot(application);
-		} else {
-			return ExpressCorePreferences.INSTANCE.getFullSnapshot(application);
-		}
-	}
+    public boolean setHotDeploy(boolean hotDeploy) {
+        return this.hotDeploy = hotDeploy;
+    }
+
+    private void storeSnapshotToPreferences(String filepath, boolean deploymentSnapshot) {
+        if (deploymentSnapshot) {
+            ExpressCorePreferences.INSTANCE.saveDeploymentSnapshot(getApplication(), filepath);
+        } else {
+            ExpressCorePreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);
+        }
+    }
+
+    private String getSnapshotFromPreferences(IApplication application, boolean deploymentSnapshot) {
+        if (deploymentSnapshot) {
+            return ExpressCorePreferences.INSTANCE.getDeploymentSnapshot(application);
+        } else {
+            return ExpressCorePreferences.INSTANCE.getFullSnapshot(application);
+        }
+    }
 
 }

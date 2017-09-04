@@ -20,36 +20,36 @@ import org.eclipse.jface.wizard.Wizard;
  */
 public class KeyValueWizard<T extends IKeyValueItem> extends Wizard {
 
-	private IKeyValueWizardModel<T> model;
-	
-	/**
-	 * Used to create a new key/value pairs
-	 * 
-	 * @param model  the wizard model
-	 */
-	public KeyValueWizard(IKeyValueWizardModel<T> model) {
-		this(null, model);
-	}
-	
-	/**
-	 * Used to edit an existing key value pair
-	 * 
-	 * @param variable the variable that shall get edited
-	 * @param model 
-	 */
-	public KeyValueWizard(T variable, IKeyValueWizardModel<T> model) {
-		this.model = model;
-		setWindowTitle(model.getWindowTitle());
-		setNeedsProgressMonitor(true);
-	}
+    private IKeyValueWizardModel<T> model;
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
+    /**
+     * Used to create a new key/value pairs
+     * 
+     * @param model  the wizard model
+     */
+    public KeyValueWizard(IKeyValueWizardModel<T> model) {
+        this(null, model);
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new KeyValueWizardPage<>(this, model));
-	}
+    /**
+     * Used to edit an existing key value pair
+     * 
+     * @param variable the variable that shall get edited
+     * @param model 
+     */
+    public KeyValueWizard(T variable, IKeyValueWizardModel<T> model) {
+        this.model = model;
+        setWindowTitle(model.getWindowTitle());
+        setNeedsProgressMonitor(true);
+    }
+
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
+
+    @Override
+    public void addPages() {
+        addPage(new KeyValueWizardPage<>(this, model));
+    }
 }

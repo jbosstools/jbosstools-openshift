@@ -30,259 +30,258 @@ import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
  * @author Jeff Cantrill
  */
 public class ConnectionsRegistry {
-	
-	private enum EventType { ADDED, REMOVED, CHANGED }
 
-	/** The most recent user connected on OpenShift. */
-	private IConnection recentConnection = null;
-	private Map<ConnectionURL, IConnection> connectionsByUrl = new HashMap<>();
-	private List<IConnectionsRegistryListener> listeners = new ArrayList<>();
-	private PropertyChangeListener connectionListener = new ConnectionListener();
+    private enum EventType {
+        ADDED, REMOVED, CHANGED
+    }
 
-	public synchronized void addListener(IConnectionsRegistryListener listener) {
-		listeners.add(listener);
-	}
+    /** The most recent user connected on OpenShift. */
+    private IConnection recentConnection = null;
+    private Map<ConnectionURL, IConnection> connectionsByUrl = new HashMap<>();
+    private List<IConnectionsRegistryListener> listeners = new ArrayList<>();
+    private PropertyChangeListener connectionListener = new ConnectionListener();
 
-	public synchronized void removeListener(IConnectionsRegistryListener listener) {
-		listeners.remove(listener);
-	}
+    public synchronized void addListener(IConnectionsRegistryListener listener) {
+        listeners.add(listener);
+    }
 
-	/**
-	 * @return independent copy of listeners to fire changes.
-	 */
-	private synchronized List<IConnectionsRegistryListener> getListeners() {
-		return new ArrayList<>(listeners);
-	}
+    public synchronized void removeListener(IConnectionsRegistryListener listener) {
+        listeners.remove(listener);
+    }
 
-	public void clear() {
-		IConnection[] connections = connectionsByUrl.values().toArray(new IConnection[connectionsByUrl.size()]);
-		for (IConnection connection : connections) {
-			remove(connection);
-		}
-	}
+    /**
+     * @return independent copy of listeners to fire changes.
+     */
+    private synchronized List<IConnectionsRegistryListener> getListeners() {
+        return new ArrayList<>(listeners);
+    }
 
-	public boolean add(IConnection connection) {
-		try {
-			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
-			return add(connectionUrl, connection);
-		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftCoreException(e, "Could not add connection {0}", connection.getHost());
-		} catch (MalformedURLException e) {
-			throw new OpenShiftCoreException(e, "Could not add connection {0}", connection.getHost());
-		}
-	}
+    public void clear() {
+        IConnection[] connections = connectionsByUrl.values().toArray(new IConnection[connectionsByUrl.size()]);
+        for (IConnection connection : connections) {
+            remove(connection);
+        }
+    }
 
-	public void addAll(Collection<? extends IConnection> connections) {
-		for (IConnection connection : connections) {
-			add(connection);
-		}
-	}
+    public boolean add(IConnection connection) {
+        try {
+            ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
+            return add(connectionUrl, connection);
+        } catch (UnsupportedEncodingException e) {
+            throw new OpenShiftCoreException(e, "Could not add connection {0}", connection.getHost());
+        } catch (MalformedURLException e) {
+            throw new OpenShiftCoreException(e, "Could not add connection {0}", connection.getHost());
+        }
+    }
 
-	protected boolean add(ConnectionURL connectionUrl, IConnection connection) {
-		if (connectionsByUrl.containsKey(connectionUrl)) {
-			return false;
-		}
-		addPropertyChangeListener(connection);
-		connectionsByUrl.put(connectionUrl, connection);
-		this.recentConnection = connection;
-		fireChange(connection, EventType.ADDED);
-		return true;
-	}
+    public void addAll(Collection<? extends IConnection> connections) {
+        for (IConnection connection : connections) {
+            add(connection);
+        }
+    }
 
-	public boolean has(IConnection connection) {
-		try {
-			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
-			return getByUrl(connectionUrl) != null;
-		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftCoreException(e, NLS.bind("Could not get url for connection {0}", connection.getHost()));
-		} catch (MalformedURLException e) {
-			throw new OpenShiftCoreException(e, NLS.bind("Could not get url for connection {0}", connection.getHost()));
-		}
-	}
+    protected boolean add(ConnectionURL connectionUrl, IConnection connection) {
+        if (connectionsByUrl.containsKey(connectionUrl)) {
+            return false;
+        }
+        addPropertyChangeListener(connection);
+        connectionsByUrl.put(connectionUrl, connection);
+        this.recentConnection = connection;
+        fireChange(connection, EventType.ADDED);
+        return true;
+    }
 
-	// TODO: dont allow/require external trigger to changer notification
-	public void fireConnectionChanged(IConnection connection) {
-		fireConnectionChanged(connection, null, null, null);
-	}
+    public boolean has(IConnection connection) {
+        try {
+            ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
+            return getByUrl(connectionUrl) != null;
+        } catch (UnsupportedEncodingException e) {
+            throw new OpenShiftCoreException(e, NLS.bind("Could not get url for connection {0}", connection.getHost()));
+        } catch (MalformedURLException e) {
+            throw new OpenShiftCoreException(e, NLS.bind("Could not get url for connection {0}", connection.getHost()));
+        }
+    }
 
-	// TODO: dont allow/require external trigger to changer notification
-	public void fireConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-		if (connection == null) {
-			return;
-		}
-		fireChange(connection, EventType.CHANGED, property, oldValue, newValue);
-	}
+    // TODO: dont allow/require external trigger to changer notification
+    public void fireConnectionChanged(IConnection connection) {
+        fireConnectionChanged(connection, null, null, null);
+    }
 
-	public boolean remove(IConnection connection) {
-		try {
-			ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
-			if (!connectionsByUrl.containsKey(connectionUrl)) {
-				return false;
-			}
-			connectionsByUrl.remove(connectionUrl);
-			removePropertyChangeListener(connection);
+    // TODO: dont allow/require external trigger to changer notification
+    public void fireConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+        if (connection == null) {
+            return;
+        }
+        fireChange(connection, EventType.CHANGED, property, oldValue, newValue);
+    }
 
-			if (this.recentConnection == connection) {
-				this.recentConnection = null;
-			}
-			fireChange(connection, EventType.REMOVED);
-			return true;
-		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftCoreException(e, NLS.bind("Could not remove connection {0}", connection.getHost()));
-		} catch (MalformedURLException e) {
-			throw new OpenShiftCoreException(e, NLS.bind("Could not remove connection {0}", connection.getHost()));
-		}
-	}
+    public boolean remove(IConnection connection) {
+        try {
+            ConnectionURL connectionUrl = ConnectionURL.forConnection(connection);
+            if (!connectionsByUrl.containsKey(connectionUrl)) {
+                return false;
+            }
+            connectionsByUrl.remove(connectionUrl);
+            removePropertyChangeListener(connection);
 
-	private void fireChange(IConnection connection, EventType eventType) {
-		fireChange(connection, eventType, null, null, null);
-	}
+            if (this.recentConnection == connection) {
+                this.recentConnection = null;
+            }
+            fireChange(connection, EventType.REMOVED);
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            throw new OpenShiftCoreException(e, NLS.bind("Could not remove connection {0}", connection.getHost()));
+        } catch (MalformedURLException e) {
+            throw new OpenShiftCoreException(e, NLS.bind("Could not remove connection {0}", connection.getHost()));
+        }
+    }
 
-	private void fireChange(IConnection connection, EventType eventType, String property, Object oldValue, Object newValue) {
-		if (connection == null) {
-			return;
-		}
+    private void fireChange(IConnection connection, EventType eventType) {
+        fireChange(connection, eventType, null, null, null);
+    }
 
-		for (IConnectionsRegistryListener l : getListeners()) {
-			switch (eventType) {
-			case ADDED:
-				l.connectionAdded(connection);
-				break;
-			case REMOVED:
-				l.connectionRemoved(connection);
-				break;
-			case CHANGED:
-				l.connectionChanged(connection, property, oldValue, newValue);
-				break;
-			}
-		}
-	}
+    private void fireChange(IConnection connection, EventType eventType, String property, Object oldValue, Object newValue) {
+        if (connection == null) {
+            return;
+        }
 
-	public IConnection getRecentConnection() {
-		return recentConnection;
-	}
+        for (IConnectionsRegistryListener l : getListeners()) {
+            switch (eventType) {
+            case ADDED:
+                l.connectionAdded(connection);
+                break;
+            case REMOVED:
+                l.connectionRemoved(connection);
+                break;
+            case CHANGED:
+                l.connectionChanged(connection, property, oldValue, newValue);
+                break;
+            }
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	public <T extends IConnection> T getRecentConnection(Class<T> clazz) {
-		if (recentConnection == null || clazz == null || !clazz.isAssignableFrom(recentConnection.getClass())) {
-			return null;
-		}
-		return (T) recentConnection;
-	}
+    public IConnection getRecentConnection() {
+        return recentConnection;
+    }
 
-	public IConnection getByUrl(ConnectionURL connectionUrl) {
-		if (connectionUrl == null) {
-			return null;
-		}
-		return connectionsByUrl.get(connectionUrl);
-	}
+    @SuppressWarnings("unchecked")
+    public <T extends IConnection> T getRecentConnection(Class<T> clazz) {
+        if (recentConnection == null || clazz == null || !clazz.isAssignableFrom(recentConnection.getClass())) {
+            return null;
+        }
+        return (T)recentConnection;
+    }
 
-	@SuppressWarnings("unchecked")
-	public <T extends IConnection> T getByUrl(ConnectionURL connectionUrl, Class<T> clazz) {
-		IConnection connection = getByUrl(connectionUrl);
-		if (connection != null && !clazz.isAssignableFrom(connection.getClass())) {
-			return null;
-		}
-		return (T) connection;
-	}
+    public IConnection getByUrl(ConnectionURL connectionUrl) {
+        if (connectionUrl == null) {
+            return null;
+        }
+        return connectionsByUrl.get(connectionUrl);
+    }
 
-	/**
-	 * Return a list of connections that are of the given type
-	 * 
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public <T extends IConnection> Collection<T> getAll(Class<T> clazz) {
-		List<T> connections = new ArrayList<>();
-		for (IConnection connection : connectionsByUrl.values()) {
-			if (connection != null && clazz.isAssignableFrom(connection.getClass())) {
-				connections.add((T) connection);
-			}
-		}
-		return connections;
-	}
+    @SuppressWarnings("unchecked")
+    public <T extends IConnection> T getByUrl(ConnectionURL connectionUrl, Class<T> clazz) {
+        IConnection connection = getByUrl(connectionUrl);
+        if (connection != null && !clazz.isAssignableFrom(connection.getClass())) {
+            return null;
+        }
+        return (T)connection;
+    }
 
-	public Collection<IConnection> getAll() {
-		return connectionsByUrl.values();
-	}
+    /**
+     * Return a list of connections that are of the given type
+     * 
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends IConnection> Collection<T> getAll(Class<T> clazz) {
+        List<T> connections = new ArrayList<>();
+        for (IConnection connection : connectionsByUrl.values()) {
+            if (connection != null && clazz.isAssignableFrom(connection.getClass())) {
+                connections.add((T)connection);
+            }
+        }
+        return connections;
+    }
 
-	public int size() {
-		return connectionsByUrl.size();
-	}
+    public Collection<IConnection> getAll() {
+        return connectionsByUrl.values();
+    }
 
-	public IConnection setRecent(IConnection connection) {
-		return this.recentConnection = connection;
-	}
+    public int size() {
+        return connectionsByUrl.size();
+    }
 
-	private void addPropertyChangeListener(IConnection connection) {
-		if (!(connection instanceof ObservablePojo)) {
-			return;
-		}
+    public IConnection setRecent(IConnection connection) {
+        return this.recentConnection = connection;
+    }
 
-		((ObservablePojo) connection).addPropertyChangeListener(connectionListener);
-	}
+    private void addPropertyChangeListener(IConnection connection) {
+        if (!(connection instanceof ObservablePojo)) {
+            return;
+        }
 
-	private void removePropertyChangeListener(IConnection connection) {
-		if (!(connection instanceof ObservablePojo)) {
-			return;
-		}
+        ((ObservablePojo)connection).addPropertyChangeListener(connectionListener);
+    }
 
-		((ObservablePojo) connection).removePropertyChangeListener(connectionListener);
-	}
+    private void removePropertyChangeListener(IConnection connection) {
+        if (!(connection instanceof ObservablePojo)) {
+            return;
+        }
 
-	private class ConnectionListener implements PropertyChangeListener {
+        ((ObservablePojo)connection).removePropertyChangeListener(connectionListener);
+    }
 
-		@Override
-		public void propertyChange(PropertyChangeEvent event) {
-			if (!(event.getSource() instanceof IConnection)) {
-				return;
-			}
-			fireConnectionChanged((IConnection) event.getSource(), event.getPropertyName(), event.getOldValue(),
-					event.getNewValue());
-		}
+    private class ConnectionListener implements PropertyChangeListener {
 
-	}
+        @Override
+        public void propertyChange(PropertyChangeEvent event) {
+            if (!(event.getSource() instanceof IConnection)) {
+                return;
+            }
+            fireConnectionChanged((IConnection)event.getSource(), event.getPropertyName(), event.getOldValue(), event.getNewValue());
+        }
 
-	public void update(IConnection currentConnection, IConnection updatedConnection) {
-		ConnectionURL updatedConnectionUrl = null;
-		try {
-			updatedConnectionUrl = ConnectionURL.forConnection(updatedConnection);
-		} catch (UnsupportedEncodingException | MalformedURLException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not update connection {0}", updatedConnection.getHost()));
-		}
-		ConnectionURL oldConnectionUrl = null;
-		try {
-			oldConnectionUrl = ConnectionURL.forConnection(currentConnection);
-		} catch (UnsupportedEncodingException | MalformedURLException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not update connection {0}", currentConnection.getHost()));
-		}
-		if (!oldConnectionUrl.equals(updatedConnectionUrl)) {
-			connectionsByUrl.remove(oldConnectionUrl);
-		}
+    }
 
-		// serious change = username changed
-		boolean seriousChange = !updatedConnection.equals(currentConnection);
-		// change requiring refresh = password or token changed
-		boolean credentialsChange = !updatedConnection.credentialsEqual(currentConnection);
+    public void update(IConnection currentConnection, IConnection updatedConnection) {
+        ConnectionURL updatedConnectionUrl = null;
+        try {
+            updatedConnectionUrl = ConnectionURL.forConnection(updatedConnection);
+        } catch (UnsupportedEncodingException | MalformedURLException e) {
+            throw new OpenShiftCoreException(e, NLS.bind("Could not update connection {0}", updatedConnection.getHost()));
+        }
+        ConnectionURL oldConnectionUrl = null;
+        try {
+            oldConnectionUrl = ConnectionURL.forConnection(currentConnection);
+        } catch (UnsupportedEncodingException | MalformedURLException e) {
+            throw new OpenShiftCoreException(e, NLS.bind("Could not update connection {0}", currentConnection.getHost()));
+        }
+        if (!oldConnectionUrl.equals(updatedConnectionUrl)) {
+            connectionsByUrl.remove(oldConnectionUrl);
+        }
 
-		// in case of a serious change, we perform remove+add instead of just
-		// updating+emitting change event
-		// because the connection hashcode will change, refreshing it in the
-		// treeview will cause `widget is disposed` errors
-		if (seriousChange) {
-			remove(currentConnection);
-		}
-		currentConnection.update(updatedConnection);
-		if (seriousChange) {
-			add(currentConnection);
-		} else if (credentialsChange) {
-			// Property is defined in
-			// org.jboss.tools.openshift.core.connection.ConnectionProperties
-			fireChange(currentConnection, EventType.CHANGED, "openshift.resource.refresh", currentConnection, currentConnection);
-		}
-		this.recentConnection = currentConnection;
-	}
+        // serious change = username changed
+        boolean seriousChange = !updatedConnection.equals(currentConnection);
+        // change requiring refresh = password or token changed
+        boolean credentialsChange = !updatedConnection.credentialsEqual(currentConnection);
+
+        // in case of a serious change, we perform remove+add instead of just
+        // updating+emitting change event
+        // because the connection hashcode will change, refreshing it in the
+        // treeview will cause `widget is disposed` errors
+        if (seriousChange) {
+            remove(currentConnection);
+        }
+        currentConnection.update(updatedConnection);
+        if (seriousChange) {
+            add(currentConnection);
+        } else if (credentialsChange) {
+            // Property is defined in
+            // org.jboss.tools.openshift.core.connection.ConnectionProperties
+            fireChange(currentConnection, EventType.CHANGED, "openshift.resource.refresh", currentConnection, currentConnection);
+        }
+        this.recentConnection = currentConnection;
+    }
 
 }

@@ -37,69 +37,74 @@ import com.openshift.restclient.model.volume.IPersistentVolumeClaim;
 
 @RunWith(Theories.class)
 public class OpenInWebConsoleHandlerTest {
-	
-	private static OpenInWebConsoleHandlerTestable handlerMock;
-	private static Connection connectionMock;
-	
-	@BeforeClass
-	public static void initTestable() {
-		handlerMock = new OpenInWebConsoleHandlerTestable();
-		connectionMock = mock(Connection.class);
-		when(connectionMock.getHost()).thenReturn("http://localhost");
-	}	
-	@DataPoints
-	public static DataPair[] dataPoints = new DataPair[] {
-			new DataPair(mock(IBuildConfig.class), "http://localhost/console/project/namespace/browse/builds/qwerty"),
-			new DataPair(mock(IBuild.class), "http://localhost/console/project/namespace/browse/builds/label/qwerty"),
-			new DataPair(mock(IDeploymentConfig.class), "http://localhost/console/project/namespace/browse/deployments/qwerty"),
-			new DataPair(mock(IPod.class), "http://localhost/console/project/namespace/browse/pods/qwerty"),
-			new DataPair(mock(IService.class), "http://localhost/console/project/namespace/browse/services/qwerty"),
-			new DataPair(mock(IImageStream.class), "http://localhost/console/project/namespace/browse/images/qwerty"),
-			new DataPair(mock(IPersistentVolumeClaim.class), "http://localhost/console/project/namespace/browse/persistentvolumeclaims/qwerty"),
-			new DataPair(mock(IEvent.class), "http://localhost/console/project/namespace/browse/events/"),
-			new DataPair(mock(IProject.class), "http://localhost/console/project/namespace"),
-			new DataPair(null, "http://localhost/console")	
-	};
 
-	@Theory
-	public void test(DataPair dataPair) {
-		IResource resourceMock = dataPair.getResource();
-		if (resourceMock != null) {
-			when(resourceMock.getNamespace()).thenReturn("namespace");
-			when(resourceMock.getName()).thenReturn("qwerty");
-			when(resourceMock.getLabels()).thenReturn(new HashMap<String, String>() {{put("buildconfig", "label");}});
-		}
-		
-		assertEquals(dataPair.getExpected(), handlerMock.getWebConsoleUrl(connectionMock, resourceMock));
-	}
-	
-	static class OpenInWebConsoleHandlerTestable extends OpenInWebConsoleHandler{
-		
-		public OpenInWebConsoleHandlerTestable() {
-			super();
-		}
-		
-		public String getWebConsoleUrl(Connection connection, IResource resource) {
-			return super.getWebConsoleUrl(connection, resource);
-		}
-	}
-	
-	static class DataPair {
-		private IResource input;
-		private String expected;
-		
-		public DataPair(IResource input, String expected) {
-			this.input = input;
-			this.expected = expected;
-		}
+    private static OpenInWebConsoleHandlerTestable handlerMock;
+    private static Connection connectionMock;
 
-		public IResource getResource() {
-			return input;
-		}
+    @BeforeClass
+    public static void initTestable() {
+        handlerMock = new OpenInWebConsoleHandlerTestable();
+        connectionMock = mock(Connection.class);
+        when(connectionMock.getHost()).thenReturn("http://localhost");
+    }
 
-		public String getExpected() {
-			return expected;
-		}
-	}
+    @DataPoints
+    public static DataPair[] dataPoints = new DataPair[] {
+            new DataPair(mock(IBuildConfig.class), "http://localhost/console/project/namespace/browse/builds/qwerty"),
+            new DataPair(mock(IBuild.class), "http://localhost/console/project/namespace/browse/builds/label/qwerty"),
+            new DataPair(mock(IDeploymentConfig.class), "http://localhost/console/project/namespace/browse/deployments/qwerty"),
+            new DataPair(mock(IPod.class), "http://localhost/console/project/namespace/browse/pods/qwerty"),
+            new DataPair(mock(IService.class), "http://localhost/console/project/namespace/browse/services/qwerty"),
+            new DataPair(mock(IImageStream.class), "http://localhost/console/project/namespace/browse/images/qwerty"),
+            new DataPair(mock(IPersistentVolumeClaim.class),
+                    "http://localhost/console/project/namespace/browse/persistentvolumeclaims/qwerty"),
+            new DataPair(mock(IEvent.class), "http://localhost/console/project/namespace/browse/events/"),
+            new DataPair(mock(IProject.class), "http://localhost/console/project/namespace"),
+            new DataPair(null, "http://localhost/console") };
+
+    @Theory
+    public void test(DataPair dataPair) {
+        IResource resourceMock = dataPair.getResource();
+        if (resourceMock != null) {
+            when(resourceMock.getNamespace()).thenReturn("namespace");
+            when(resourceMock.getName()).thenReturn("qwerty");
+            when(resourceMock.getLabels()).thenReturn(new HashMap<String, String>() {
+                {
+                    put("buildconfig", "label");
+                }
+            });
+        }
+
+        assertEquals(dataPair.getExpected(), handlerMock.getWebConsoleUrl(connectionMock, resourceMock));
+    }
+
+    static class OpenInWebConsoleHandlerTestable extends OpenInWebConsoleHandler {
+
+        public OpenInWebConsoleHandlerTestable() {
+            super();
+        }
+
+        public String getWebConsoleUrl(Connection connection, IResource resource) {
+            return super.getWebConsoleUrl(connection, resource);
+        }
+    }
+
+    static class DataPair {
+        private IResource input;
+        private String expected;
+
+        public DataPair(IResource input, String expected) {
+            this.input = input;
+            this.expected = expected;
+        }
+
+        public IResource getResource() {
+            return input;
+        }
+
+        public String getExpected() {
+            return expected;
+        }
+    }
 
 }

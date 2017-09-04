@@ -27,158 +27,150 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class SSHUtils {
 
-	private static final String SSH_PREFERENCE_PAGE_ID = "org.eclipse.jsch.ui.SSHPreferences";
-	private static final String KEYS_SEPARATOR = ",";
+    private static final String SSH_PREFERENCE_PAGE_ID = "org.eclipse.jsch.ui.SSHPreferences";
+    private static final String KEYS_SEPARATOR = ",";
 
-	public static String getSSH2Home() {
-		return JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_SSH2HOME);
-	}
+    public static String getSSH2Home() {
+        return JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_SSH2HOME);
+    }
 
-	public static void setPrivateKeyPermissions(File privateKey) {
-		// set f permission to correspond to 'chmod 0600' read/write only for
-		// user
-		// First clear all permissions for both user and others
-		privateKey.setReadable(false, false);
-		privateKey.setWritable(false, false);
-		// Enable only readable for user
-		privateKey.setReadable(true, true);
-		privateKey.setWritable(true, true);
-	}
+    public static void setPrivateKeyPermissions(File privateKey) {
+        // set f permission to correspond to 'chmod 0600' read/write only for
+        // user
+        // First clear all permissions for both user and others
+        privateKey.setReadable(false, false);
+        privateKey.setWritable(false, false);
+        // Enable only readable for user
+        privateKey.setReadable(true, true);
+        privateKey.setWritable(true, true);
+    }
 
-	public static String[] getPrivateKeysFromPreferences() {
-		String privateKeys =
-				JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_PRIVATEKEY);
-		if (privateKeys != null
-				&& privateKeys.trim().length() > 0) {
-			return privateKeys.split(KEYS_SEPARATOR);
-		} else {
-			return new String[0];
-		}
-	}
+    public static String[] getPrivateKeysFromPreferences() {
+        String privateKeys = JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_PRIVATEKEY);
+        if (privateKeys != null && privateKeys.trim().length() > 0) {
+            return privateKeys.split(KEYS_SEPARATOR);
+        } else {
+            return new String[0];
+        }
+    }
 
-	public static boolean isPrivateKeyForPublicKeyKnownToSsh(String publicKeyPath) {
-		if (StringUtils.isEmpty(publicKeyPath)) {
-			return false;
-		}
-		for (String preferencesKey : getPrivateKeysFromPreferences()) {
-			try {
-				File privateKey = getKeyFile(preferencesKey);
-				if (privateKey == null
-						|| !FileUtils.canRead(privateKey)) {
-					continue;
-				}
-				if (publicKeyPath.startsWith(privateKey.getAbsolutePath() + ".")
-						|| publicKeyPath.startsWith(privateKey.getPath() + ".")) {
-					return true;
-				}
-			} catch (FileNotFoundException e) {
-				continue;
-			}
-		}
-		return false;
-	}
+    public static boolean isPrivateKeyForPublicKeyKnownToSsh(String publicKeyPath) {
+        if (StringUtils.isEmpty(publicKeyPath)) {
+            return false;
+        }
+        for (String preferencesKey : getPrivateKeysFromPreferences()) {
+            try {
+                File privateKey = getKeyFile(preferencesKey);
+                if (privateKey == null || !FileUtils.canRead(privateKey)) {
+                    continue;
+                }
+                if (publicKeyPath.startsWith(privateKey.getAbsolutePath() + ".") || publicKeyPath.startsWith(privateKey.getPath() + ".")) {
+                    return true;
+                }
+            } catch (FileNotFoundException e) {
+                continue;
+            }
+        }
+        return false;
+    }
 
-	public static void addToPrivateKeysPreferences(File privateKey) {
-		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
-		String privateKeys = preferences.getString(IConstants.KEY_PRIVATEKEY);
-		String privateKeyPath = getKeyPath(privateKey);
-		
-		if (privateKeys != null
-				&& privateKeys.trim().length() > 0) {
-			privateKeys = privateKeys + "," + privateKeyPath;
-		} else {
-			privateKeys = privateKeyPath;
-		}
-		preferences.setValue(IConstants.KEY_PRIVATEKEY, privateKeys);
-		JSchCorePlugin.getPlugin().setNeedToLoadKeys(true);
-		JSchCorePlugin.getPlugin().savePluginPreferences();
-	}
+    public static void addToPrivateKeysPreferences(File privateKey) {
+        Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
+        String privateKeys = preferences.getString(IConstants.KEY_PRIVATEKEY);
+        String privateKeyPath = getKeyPath(privateKey);
 
-	private static String getKeyPath(File privateKey) {
-		String ssh2Home = getSSH2Home();
-		if (ssh2Home == null
-				|| ssh2Home.isEmpty()) {
-			return privateKey.getAbsolutePath();
-		}
-		
-		if (!privateKey.getAbsolutePath().startsWith(ssh2Home)) {
-			return privateKey.getAbsolutePath(); 
-		}
-		
-		return privateKey.getName();
-	}
+        if (privateKeys != null && privateKeys.trim().length() > 0) {
+            privateKeys = privateKeys + "," + privateKeyPath;
+        } else {
+            privateKeys = privateKeyPath;
+        }
+        preferences.setValue(IConstants.KEY_PRIVATEKEY, privateKeys);
+        JSchCorePlugin.getPlugin().setNeedToLoadKeys(true);
+        JSchCorePlugin.getPlugin().savePluginPreferences();
+    }
 
-	public static int openPreferencesPage(Shell shell) {
-		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(
-				shell, SSH_PREFERENCE_PAGE_ID, null, null);
-		return dialog.open();
-	}
+    private static String getKeyPath(File privateKey) {
+        String ssh2Home = getSSH2Home();
+        if (ssh2Home == null || ssh2Home.isEmpty()) {
+            return privateKey.getAbsolutePath();
+        }
 
-	/**
-	 * Returns <code>true</code> if the given 
-	 * @param publicKeyPath
-	 * @return
-	 */
-	public static boolean publicKeyMatchesPrivateKeyInPreferences(File publicKey) {
-		for (String preferencesKey : SSHUtils.getPrivateKeysFromPreferences()) {
-			try {
-				File privateKey = getKeyFile(preferencesKey.trim());
-				if (privateKey == null) {
-					continue;
-				}
-				if (publicKey.getAbsolutePath().startsWith(privateKey.getAbsolutePath() + ".")) {
-					return true;
-				}
-			} catch (FileNotFoundException e) {
-				continue;
-			}
-		}
-		return false;
-	}
+        if (!privateKey.getAbsolutePath().startsWith(ssh2Home)) {
+            return privateKey.getAbsolutePath();
+        }
 
-	/**
-	 * Returns the key file for a given relative or absolute keyPath. The
-	 * keyPath may be absolute or relative to the ssh home directory.
-	 * 
-	 * @param keyPath
-	 * @return
-	 * @throws FileNotFoundException
-	 */
-	public static File getKeyForRelativeOrAbsolutePath(String keyPath) throws FileNotFoundException {
-		if (isEmpty(keyPath)) {
-			return null;
-		}
+        return privateKey.getName();
+    }
 
-		if (keyPath.startsWith(File.separator)) {
-			return new File(keyPath);
-		} else {
-			return new File(getSSH2Home(), keyPath);
-		}
-	}
+    public static int openPreferencesPage(Shell shell) {
+        PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(shell, SSH_PREFERENCE_PAGE_ID, null, null);
+        return dialog.open();
+    }
 
-	private static boolean isEmpty(String string) {
-		return string == null
-				|| string.isEmpty();
-	}
-	
-	/**
-	 * Returns the key file for the given (absolute or relative) key path.
-	 * This methods prepends the ssh directory to the path if the given it's a
-	 * relative one. There's no guarantee that the file returned really exists.
-	 * 
-	 * @param keyName
-	 * @return
-	 * @throws FileNotFoundException
-	 */
-	public static File getKeyFile(String keyName) throws FileNotFoundException {
-		if (isEmpty(keyName)) {
-			return null;
-		}
+    /**
+     * Returns <code>true</code> if the given 
+     * @param publicKeyPath
+     * @return
+     */
+    public static boolean publicKeyMatchesPrivateKeyInPreferences(File publicKey) {
+        for (String preferencesKey : SSHUtils.getPrivateKeysFromPreferences()) {
+            try {
+                File privateKey = getKeyFile(preferencesKey.trim());
+                if (privateKey == null) {
+                    continue;
+                }
+                if (publicKey.getAbsolutePath().startsWith(privateKey.getAbsolutePath() + ".")) {
+                    return true;
+                }
+            } catch (FileNotFoundException e) {
+                continue;
+            }
+        }
+        return false;
+    }
 
-		if (keyName.startsWith(File.separator)) {
-			return new File(keyName);
-		} else {
-			return new File(getSSH2Home(), keyName);
-		}
-	}
+    /**
+     * Returns the key file for a given relative or absolute keyPath. The
+     * keyPath may be absolute or relative to the ssh home directory.
+     * 
+     * @param keyPath
+     * @return
+     * @throws FileNotFoundException
+     */
+    public static File getKeyForRelativeOrAbsolutePath(String keyPath) throws FileNotFoundException {
+        if (isEmpty(keyPath)) {
+            return null;
+        }
+
+        if (keyPath.startsWith(File.separator)) {
+            return new File(keyPath);
+        } else {
+            return new File(getSSH2Home(), keyPath);
+        }
+    }
+
+    private static boolean isEmpty(String string) {
+        return string == null || string.isEmpty();
+    }
+
+    /**
+     * Returns the key file for the given (absolute or relative) key path.
+     * This methods prepends the ssh directory to the path if the given it's a
+     * relative one. There's no guarantee that the file returned really exists.
+     * 
+     * @param keyName
+     * @return
+     * @throws FileNotFoundException
+     */
+    public static File getKeyFile(String keyName) throws FileNotFoundException {
+        if (isEmpty(keyName)) {
+            return null;
+        }
+
+        if (keyName.startsWith(File.separator)) {
+            return new File(keyName);
+        } else {
+            return new File(getSSH2Home(), keyName);
+        }
+    }
 }

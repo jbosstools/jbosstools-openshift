@@ -53,167 +53,168 @@ import com.openshift.restclient.model.template.ITemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class NewApplicationWizardModelTest {
 
-	private TestableNewApplicationWizardModel model;
-	@Mock
-	private ITemplate template;
-	@Mock
-	private IProject project;
-	@Mock
-	private IResourceFactory factory;
-	private List<ObservableTreeItem> projectItems;
-	
-	@Before
-	public void setup() throws Exception {
-		when(template.getKind()).thenReturn(ResourceKind.TEMPLATE);
-		when(project.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
-		createProjectTemplateItems();
-		TestableNewApplicationWizardModel model = new TestableNewApplicationWizardModel();
-		this.projectItems = createProjectTemplateItems();
-		model.setProjectItems(projectItems);
-		model.setProject(project);
-		model.setResourceFactory(factory);
+    private TestableNewApplicationWizardModel model;
+    @Mock
+    private ITemplate template;
+    @Mock
+    private IProject project;
+    @Mock
+    private IResourceFactory factory;
+    private List<ObservableTreeItem> projectItems;
 
-		this.model = spy(model);
-		doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString(), anyObject());
-	}
+    @Before
+    public void setup() throws Exception {
+        when(template.getKind()).thenReturn(ResourceKind.TEMPLATE);
+        when(project.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
+        createProjectTemplateItems();
+        TestableNewApplicationWizardModel model = new TestableNewApplicationWizardModel();
+        this.projectItems = createProjectTemplateItems();
+        model.setProjectItems(projectItems);
+        model.setProject(project);
+        model.setResourceFactory(factory);
 
-	/**
-	 * Creates a tree of items:
-	 * 
-	 *  - project1
-	 *     - template1
-	 *  - project2
-	 *     - template2
-	 *     - template3
-	 *  - project3
-	 *     - template4
-	 *     - template5
-	 *     - template6
-	 * @return 
-	 */
-	private List<ObservableTreeItem> createProjectTemplateItems() {
-		List<ObservableTreeItem> projectItems = createObservableTreeItems(createResources(3, IProject.class, ResourceKind.PROJECT,
-				resource -> {
-					when(resource.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
-					}));
-		for (int i = 0; i < 3; i++) {
-			projectItems.get(i).setChildren(createObservableTreeItems(createResources(i + 1, ITemplate.class, ResourceKind.TEMPLATE)));;
-		}
-		return projectItems;
-	}
+        this.model = spy(model);
+        doReturn(mock(InputStream.class)).when(this.model).createInputStream(anyString(), anyObject());
+    }
 
-	@Test
-	public void getProjectItemsShouldReturnAllItemsSet() {
-		// pre-conditions
-		model.setProjectItems(Collections.emptyList());
+    /**
+     * Creates a tree of items:
+     * 
+     *  - project1
+     *     - template1
+     *  - project2
+     *     - template2
+     *     - template3
+     *  - project3
+     *     - template4
+     *     - template5
+     *     - template6
+     * @return 
+     */
+    private List<ObservableTreeItem> createProjectTemplateItems() {
+        List<ObservableTreeItem> projectItems = createObservableTreeItems(
+                createResources(3, IProject.class, ResourceKind.PROJECT, resource -> {
+                    when(resource.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
+                }));
+        for (int i = 0; i < 3; i++) {
+            projectItems.get(i).setChildren(createObservableTreeItems(createResources(i + 1, ITemplate.class, ResourceKind.TEMPLATE)));
+            ;
+        }
+        return projectItems;
+    }
 
-		// operations
-		model.setProjectItems(projectItems);
+    @Test
+    public void getProjectItemsShouldReturnAllItemsSet() {
+        // pre-conditions
+        model.setProjectItems(Collections.emptyList());
 
-		// verification
-		assertThat(model.getProjectItems()).containsExactlyElementsOf(projectItems);
-	}
+        // operations
+        model.setProjectItems(projectItems);
 
-	@Test
-	public void setProjectShouldReturnSameProject() {
-		// pre-conditions
-		assertThat(model.getProjectItems().size()).isGreaterThan(2); 
-		IProject project2 = (IProject) model.getProjectItems().get(1).getModel();
+        // verification
+        assertThat(model.getProjectItems()).containsExactlyElementsOf(projectItems);
+    }
 
-		// operations
-		model.setProject(project2);
+    @Test
+    public void setProjectShouldReturnSameProject() {
+        // pre-conditions
+        assertThat(model.getProjectItems().size()).isGreaterThan(2);
+        IProject project2 = (IProject)model.getProjectItems().get(1).getModel();
 
-		// verification
-		assertThat(model.getProject()).isEqualTo(project2);
-	}
+        // operations
+        model.setProject(project2);
 
-	@Test
-	public void setProjectItemsShouldPreserveSelectedProjectIfContained() {
-		// pre-conditions
-		this.projectItems.add(new ObservableTreeItem(project));
-		model.setProject(project);
-		IProject selectedProject = model.getProject(); 
-		assertThat(selectedProject).isNotNull();
-		
-		// operations
-		model.setProjectItems(projectItems);
+        // verification
+        assertThat(model.getProject()).isEqualTo(project2);
+    }
 
-		// verification
-		assertThat(model.getProject()).isEqualTo(selectedProject);
-	}
-	
-	@Test
-	public void setProjectItemsShouldSelect1stProjectIfCurrentNotContained() {
-		// pre-conditions
-		model.setProject(project);
+    @Test
+    public void setProjectItemsShouldPreserveSelectedProjectIfContained() {
+        // pre-conditions
+        this.projectItems.add(new ObservableTreeItem(project));
+        model.setProject(project);
+        IProject selectedProject = model.getProject();
+        assertThat(selectedProject).isNotNull();
 
-		// operations
-		model.setProjectItems(projectItems);
+        // operations
+        model.setProjectItems(projectItems);
 
-		// verification
-		ObservableTreeItem projectItem = projectItems.get(0);
-		assertThat(projectItem).isNotNull();
-		assertThat(model.getProject()).isEqualTo(projectItem.getModel());
-	}
+        // verification
+        assertThat(model.getProject()).isEqualTo(selectedProject);
+    }
 
-	@Test
-	public void setNullProjectShouldSet1stProject() {
-		// pre-conditions
+    @Test
+    public void setProjectItemsShouldSelect1stProjectIfCurrentNotContained() {
+        // pre-conditions
+        model.setProject(project);
 
-		// operations
-		model.setProject(null);
+        // operations
+        model.setProjectItems(projectItems);
 
-		// verification
-		assertThat(model.getProject()).isEqualTo(getProject(0));
-	}
-	
-	@Test
-	public void setNullProjectShouldSetNullIfNoProjectsAvailable() {
-		// pre-conditions
-		model.setProjectItems(Collections.emptyList());
-		
-		// operations
-		model.setProject(null);
+        // verification
+        ObservableTreeItem projectItem = projectItems.get(0);
+        assertThat(projectItem).isNotNull();
+        assertThat(model.getProject()).isEqualTo(projectItem.getModel());
+    }
 
-		// verification
-		assertThat(model.getProject()).isNull();
-	}
+    @Test
+    public void setNullProjectShouldSet1stProject() {
+        // pre-conditions
 
-	@Test
-	public void setProjectToProject2ShouldHaveGetTemplatesReturnTemplatesForProject2() {
-		// pre-conditions
-		IProject project2 = getProject(1); 
+        // operations
+        model.setProject(null);
 
-		// operations
-		model.setProject(project2);
-		List<ObservableTreeItem> templates = model.getAppSources();
-		
-		// verification
-		assertThat(templates).containsAll(getTemplateItemsForProject(1));
-	}
+        // verification
+        assertThat(model.getProject()).isEqualTo(getProject(0));
+    }
 
-	@Test
-	public void setServerTemplateShouldSetUseLocalTemplateToFalse() {
-		// pre-conditions
-		IApplicationSource template = mock(IApplicationSource.class);
+    @Test
+    public void setNullProjectShouldSetNullIfNoProjectsAvailable() {
+        // pre-conditions
+        model.setProjectItems(Collections.emptyList());
 
-		// operations
-		model.setServerAppSource(template );
+        // operations
+        model.setProject(null);
 
-		// verification
-		assertThat(model.isUseLocalAppSource()).isFalse();
-	}
-	
-	@Test
-	public void setLocalTemplateFilenameShouldSetUseLocalTemplateToTrue() {
-		// pre-conditions
+        // verification
+        assertThat(model.getProject()).isNull();
+    }
 
-		// operations
-		model.setLocalAppSourceFileName("test.json");
+    @Test
+    public void setProjectToProject2ShouldHaveGetTemplatesReturnTemplatesForProject2() {
+        // pre-conditions
+        IProject project2 = getProject(1);
 
-		// verification
-		assertThat(model.isUseLocalAppSource()).isTrue();
-	}
+        // operations
+        model.setProject(project2);
+        List<ObservableTreeItem> templates = model.getAppSources();
+
+        // verification
+        assertThat(templates).containsAll(getTemplateItemsForProject(1));
+    }
+
+    @Test
+    public void setServerTemplateShouldSetUseLocalTemplateToFalse() {
+        // pre-conditions
+        IApplicationSource template = mock(IApplicationSource.class);
+
+        // operations
+        model.setServerAppSource(template);
+
+        // verification
+        assertThat(model.isUseLocalAppSource()).isFalse();
+    }
+
+    @Test
+    public void setLocalTemplateFilenameShouldSetUseLocalTemplateToTrue() {
+        // pre-conditions
+
+        // operations
+        model.setLocalAppSourceFileName("test.json");
+
+        // verification
+        assertThat(model.isUseLocalAppSource()).isTrue();
+    }
 
     @Test
     public void setLocalTemplateURLShouldSetUseLocalTemplateToTrue() {
@@ -227,15 +228,15 @@ public class NewApplicationWizardModelTest {
     }
 
     @Test
-	public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
-		when(factory.create(any(InputStream.class))).thenReturn(template);
-		model.setUseLocalAppSource(true);
-		model.setLocalAppSourceFileName("resources/eap6-basic-sti.json");
-		model.loadAppSource(null);
-		verify(factory).create(any(InputStream.class));
-		assertEquals(TemplateApplicationSource.class, model.getSelectedAppSource().getClass());
-	}
-	
+    public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
+        when(factory.create(any(InputStream.class))).thenReturn(template);
+        model.setUseLocalAppSource(true);
+        model.setLocalAppSourceFileName("resources/eap6-basic-sti.json");
+        model.loadAppSource(null);
+        verify(factory).create(any(InputStream.class));
+        assertEquals(TemplateApplicationSource.class, model.getSelectedAppSource().getClass());
+    }
+
     @Test
     public void setTemplateURLShouldLoadAndParseTheTemplate() {
         when(factory.create(any(InputStream.class))).thenReturn(template);
@@ -247,33 +248,32 @@ public class NewApplicationWizardModelTest {
     }
 
     @Test
-	public void setWrongJsonAsTemplateFile() throws Exception {
-		IRoute route = Mockito.mock(IRoute.class);
-		when(route.getKind()).thenReturn(ResourceKind.ROUTE);
-		when(factory.create(any(InputStream.class))).thenReturn(route);
-		model.setLocalAppSourceFileName("resources/jboss_infinispan-server_ImageStreamImport.json");
-		model.loadAppSource(null);
-		assertFalse(model.getAppSourceStatus().isOK());
-		assertNull(model.getAppSourceStatus().getException());
-	}
-	
-	private IProject getProject(int i) {
-		assertThat(projectItems.size()).isGreaterThan(i + 1);
+    public void setWrongJsonAsTemplateFile() throws Exception {
+        IRoute route = Mockito.mock(IRoute.class);
+        when(route.getKind()).thenReturn(ResourceKind.ROUTE);
+        when(factory.create(any(InputStream.class))).thenReturn(route);
+        model.setLocalAppSourceFileName("resources/jboss_infinispan-server_ImageStreamImport.json");
+        model.loadAppSource(null);
+        assertFalse(model.getAppSourceStatus().isOK());
+        assertNull(model.getAppSourceStatus().getException());
+    }
 
-		return (IProject) projectItems.get(i).getModel();
-	}
+    private IProject getProject(int i) {
+        assertThat(projectItems.size()).isGreaterThan(i + 1);
 
-	private List<ObservableTreeItem> getTemplateItemsForProject(int i) {
-		assertThat(projectItems.size()).isGreaterThan(i + 1);
+        return (IProject)projectItems.get(i).getModel();
+    }
 
-		return projectItems.get(i).getChildren().stream()
-				.collect(Collectors.<ObservableTreeItem>toList());
-	}
+    private List<ObservableTreeItem> getTemplateItemsForProject(int i) {
+        assertThat(projectItems.size()).isGreaterThan(i + 1);
 
-	public static class TestableNewApplicationWizardModel extends NewApplicationWizardModel {
-		@Override
-		public void setProjectItems(List<ObservableTreeItem> projects) {
-			super.setProjectItems(projects);
-		}
-	}
+        return projectItems.get(i).getChildren().stream().collect(Collectors.<ObservableTreeItem>toList());
+    }
+
+    public static class TestableNewApplicationWizardModel extends NewApplicationWizardModel {
+        @Override
+        public void setProjectItems(List<ObservableTreeItem> projects) {
+            super.setProjectItems(projects);
+        }
+    }
 }

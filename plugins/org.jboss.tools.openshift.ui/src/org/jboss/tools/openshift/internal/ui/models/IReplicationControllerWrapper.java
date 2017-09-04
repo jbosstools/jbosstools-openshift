@@ -18,6 +18,7 @@ import com.openshift.restclient.model.IReplicationController;
  * @author Jeff Maury
  *
  */
-public interface IReplicationControllerWrapper extends IResourceWrapper<IReplicationController, ProjectWrapper>, IResourceContainer<IReplicationController, ProjectWrapper> {
+public interface IReplicationControllerWrapper
+        extends IResourceWrapper<IReplicationController, ProjectWrapper>, IResourceContainer<IReplicationController, ProjectWrapper> {
 
 }

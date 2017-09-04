@@ -29,7 +29,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
  *
  */
 public class ResourceLabelsWizardPage {
-	
+
 	/**
 	 * Creates a new resource label with specified name and value.
 	 * 
@@ -39,21 +39,20 @@ public class ResourceLabelsWizardPage {
 	 */
 	public boolean createLabel(String name, String value) {
 		new PushButton(OpenShiftLabel.Button.ADD).click();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.RESOURCE_LABEL);
 		new LabeledText(OpenShiftLabel.TextLabels.LABEL).setText(name);
 		new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText(value);
-		
+
 		new WaitUntil(new WidgetIsEnabled(new OkButton()));
-		
+
 		new OkButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.RESOURCE_LABEL));
-		
-		return new DefaultTable().containsItem(name, 0) &&
-				new DefaultTable().containsItem(value, 1);
+
+		return new DefaultTable().containsItem(name, 0) && new DefaultTable().containsItem(value, 1);
 	}
-	
+
 	/**
 	 * Changes resource label to have a new name and value.
 	 * @param name current name of resource label
@@ -64,21 +63,20 @@ public class ResourceLabelsWizardPage {
 	public boolean editLabel(String name, String newName, String newValue) {
 		new DefaultTable().select(name);
 		new PushButton(OpenShiftLabel.Button.EDIT).click();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.RESOURCE_LABEL);
 		new LabeledText(OpenShiftLabel.TextLabels.LABEL).setText(newName);
 		new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText(newValue);
-		
+
 		new WaitUntil(new WidgetIsEnabled(new OkButton()));
-		
+
 		new OkButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.RESOURCE_LABEL));
-		
-		return new DefaultTable().containsItem(newName, 0) &&
-				new DefaultTable().containsItem(newValue, 1);
+
+		return new DefaultTable().containsItem(newName, 0) && new DefaultTable().containsItem(newValue, 1);
 	}
-	
+
 	/**
 	 * Removes resource label
 	 * @param name name of label to remove
@@ -87,13 +85,13 @@ public class ResourceLabelsWizardPage {
 	public boolean deleteLabel(String name) {
 		new DefaultTable().select(name);
 		new PushButton(OpenShiftLabel.Button.REMOVE).click();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.REMOVE_LABEL);
 		new YesButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.REMOVE_LABEL));
-		
+
 		return new DefaultTable().containsItem(name);
 	}
-	
+
 }

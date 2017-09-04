@@ -19,28 +19,28 @@ import org.eclipse.osgi.util.NLS;
  *
  */
 public class OpenShiftUIMessages extends NLS {
-	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages"; //$NON-NLS-1$
-	static {
-		NLS.initializeMessages(BUNDLE_NAME, OpenShiftUIMessages.class);
-	}
-	
-	private OpenShiftUIMessages() {
-	}
-	
-	public static String Name;
-	public static String DisplayName;
-	public static String Description;
-	public static String ProjectDeletionConfirmation;
-	public static String ProjectDeletionConfirmationN;
-	public static String ResourceDeletionConfirmation;
-	public static String ResourceDeletionConfirmationN;
-	public static String ResourceDeletionDialogTitle;
-	public static String ProjectDeletionDialogTitle;
-	
-	public static String OCBinaryErrorMessage;
-	public static String OCBinaryWarningMessage;
-	
-	public static String InvalidHostNameErrorMessage;
-	public static String EmptyHostNameErrorMessage;
-	public static String RoundRobinRoutingMessage;
+    private static final String BUNDLE_NAME = "org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages"; //$NON-NLS-1$
+    static {
+        NLS.initializeMessages(BUNDLE_NAME, OpenShiftUIMessages.class);
+    }
+
+    private OpenShiftUIMessages() {
+    }
+
+    public static String Name;
+    public static String DisplayName;
+    public static String Description;
+    public static String ProjectDeletionConfirmation;
+    public static String ProjectDeletionConfirmationN;
+    public static String ResourceDeletionConfirmation;
+    public static String ResourceDeletionConfirmationN;
+    public static String ResourceDeletionDialogTitle;
+    public static String ProjectDeletionDialogTitle;
+
+    public static String OCBinaryErrorMessage;
+    public static String OCBinaryWarningMessage;
+
+    public static String InvalidHostNameErrorMessage;
+    public static String EmptyHostNameErrorMessage;
+    public static String RoundRobinRoutingMessage;
 }

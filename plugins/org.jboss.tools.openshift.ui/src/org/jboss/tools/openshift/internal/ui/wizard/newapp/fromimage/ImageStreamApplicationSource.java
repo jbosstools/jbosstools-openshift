@@ -29,62 +29,60 @@ import com.openshift.restclient.model.image.ITagReference;
  */
 public class ImageStreamApplicationSource implements IApplicationSource {
 
-	private final IImageStream is;
-	private final ITagReference tag;
+    private final IImageStream is;
+    private final ITagReference tag;
 
-	public ImageStreamApplicationSource(IImageStream is, ITagReference tag) {
-		this.is = is;
-		this.tag = tag;
-	}
+    public ImageStreamApplicationSource(IImageStream is, ITagReference tag) {
+        this.is = is;
+        this.tag = tag;
+    }
 
-	@Override
-	public String getName() {
-		return NLS.bind("{0}:{1}", is.getName(), tag.getName());
-	}
+    @Override
+    public String getName() {
+        return NLS.bind("{0}:{1}", is.getName(), tag.getName());
+    }
 
-	@Override
-	public String getNamespace() {
-		return is.getNamespace();
-	}
+    @Override
+    public String getNamespace() {
+        return is.getNamespace();
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public IImageStream getSource() {
-		return is;
-	}
-	
-	@Override
-	public String getKind() {
-		return is.getKind();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public IImageStream getSource() {
+        return is;
+    }
 
-	public ITagReference getSourceTag() {
-		return tag;
-	}
+    @Override
+    public String getKind() {
+        return is.getKind();
+    }
 
-	@Override
-	public Collection<String> getTags() {
-		if(tag.isAnnotatedWith(OpenShiftAPIAnnotations.TAGS)) {
-			return Arrays.asList(tag.getAnnotation(OpenShiftAPIAnnotations.TAGS).split(","));
-		}
-		return Collections.emptyList();
-	}
+    public ITagReference getSourceTag() {
+        return tag;
+    }
 
-	@Override
-	public boolean isAnnotatedWith(String key) {
-		return tag.isAnnotatedWith(key);
-	}
+    @Override
+    public Collection<String> getTags() {
+        if (tag.isAnnotatedWith(OpenShiftAPIAnnotations.TAGS)) {
+            return Arrays.asList(tag.getAnnotation(OpenShiftAPIAnnotations.TAGS).split(","));
+        }
+        return Collections.emptyList();
+    }
 
-	@Override
-	public String getAnnotation(String key) {
-		return tag.getAnnotation(key);
-	}
+    @Override
+    public boolean isAnnotatedWith(String key) {
+        return tag.isAnnotatedWith(key);
+    }
 
-	@Override
-	public Map<String, String> getAnnotations() {
-		return tag.getAnnotations();
-	}
-	
-	
+    @Override
+    public String getAnnotation(String key) {
+        return tag.getAnnotation(key);
+    }
+
+    @Override
+    public Map<String, String> getAnnotations() {
+        return tag.getAnnotations();
+    }
 
 }

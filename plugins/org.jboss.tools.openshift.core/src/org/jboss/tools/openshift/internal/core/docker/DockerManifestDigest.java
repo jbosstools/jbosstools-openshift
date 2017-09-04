@@ -15,38 +15,37 @@ import java.util.regex.Pattern;
 
 public class DockerManifestDigest {
 
-	private static final Pattern REGEX_MANIFEST_DIGEST = Pattern.compile("([^:]*:\\/\\/)([^@]*)@(.*)");
-	
-	private String prefix;
-	private ContentDigest digest;
+    private static final Pattern REGEX_MANIFEST_DIGEST = Pattern.compile("([^:]*:\\/\\/)([^@]*)@(.*)");
 
-	private String repository;
+    private String prefix;
+    private ContentDigest digest;
 
-	public DockerManifestDigest(String imageId) {
-		if (imageId == null ||
-				imageId.length() == 0) {
-			throw new IllegalArgumentException("The imageId is empty.");
-		}
+    private String repository;
 
-		Matcher matcher = REGEX_MANIFEST_DIGEST.matcher(imageId);
-		if (!matcher.matches()) {
-			throw new IllegalArgumentException(imageId + "is not a docker manifest digest.");
-		}
+    public DockerManifestDigest(String imageId) {
+        if (imageId == null || imageId.length() == 0) {
+            throw new IllegalArgumentException("The imageId is empty.");
+        }
 
-		this.prefix = matcher.group(1);
-		this.repository = matcher.group(2);
-		
-	}
+        Matcher matcher = REGEX_MANIFEST_DIGEST.matcher(imageId);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException(imageId + "is not a docker manifest digest.");
+        }
 
-	public String getPrefix() {
-		return prefix;
-	}
+        this.prefix = matcher.group(1);
+        this.repository = matcher.group(2);
 
-	public String getRepository() {
-		return repository;
-	}
-	
-	public ContentDigest getDigest() {
-		return digest;
-	}
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public String getRepository() {
+        return repository;
+    }
+
+    public ContentDigest getDigest() {
+        return digest;
+    }
 }

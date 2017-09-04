@@ -24,90 +24,87 @@ import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IService;
 
 public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrapper> implements IProjectWrapper {
-	private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
+    private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
 
-	public ProjectWrapper(ConnectionWrapper parent, IProject resource) {
-		super(parent, resource);
-	}
+    public ProjectWrapper(ConnectionWrapper parent, IProject resource) {
+        super(parent, resource);
+    }
 
-	public LoadingState getState() {
-		return state.get();
-	}
+    public LoadingState getState() {
+        return state.get();
+    }
 
-	void setLoadingState(LoadingState newState) {
-		state.set(newState);
-	}
+    void setLoadingState(LoadingState newState) {
+        state.set(newState);
+    }
 
-	public boolean load(IExceptionHandler handler) {
-		if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {
-			getParent().startLoadJob(this, handler);
-			return true;
-		}
-		return false;
-	}
+    public boolean load(IExceptionHandler handler) {
+        if (state.compareAndSet(LoadingState.INIT, LoadingState.LOADING)) {
+            getParent().startLoadJob(this, handler);
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated,
-			boolean changed) {
-		if (changed || !updated.isEmpty()) {
-			// we need to update all services. Any resource change may have
-			// changed to related
-			getResources().forEach(wrapper -> {
-				if (wrapper instanceof ServiceWrapper) {
-					ServiceWrapper service = (ServiceWrapper) wrapper;
-					Collection<IResource> relatedResources = ServiceResourceMapper
-							.computeRelatedResources(service.getWrapped(), resources);
-					service.updateWithResources(relatedResources);
-				} else if (wrapper instanceof ReplicationControllerWrapper) {
-				    ReplicationControllerWrapper dcWrapper = (ReplicationControllerWrapper) wrapper;
-				    Collection<IResource> relatedresources = getRelatedResources(resources, wrapper);
-				    dcWrapper.updateWithResources(relatedresources);
-				}
-			});
-		}
-	}
+    @Override
+    protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated, boolean changed) {
+        if (changed || !updated.isEmpty()) {
+            // we need to update all services. Any resource change may have
+            // changed to related
+            getResources().forEach(wrapper -> {
+                if (wrapper instanceof ServiceWrapper) {
+                    ServiceWrapper service = (ServiceWrapper)wrapper;
+                    Collection<IResource> relatedResources = ServiceResourceMapper.computeRelatedResources(service.getWrapped(), resources);
+                    service.updateWithResources(relatedResources);
+                } else if (wrapper instanceof ReplicationControllerWrapper) {
+                    ReplicationControllerWrapper dcWrapper = (ReplicationControllerWrapper)wrapper;
+                    Collection<IResource> relatedresources = getRelatedResources(resources, wrapper);
+                    dcWrapper.updateWithResources(relatedresources);
+                }
+            });
+        }
+    }
 
     private Collection<IResource> getRelatedResources(Collection<IResource> resources, IResourceWrapper<?, ?> wrapper) {
-        Collection<IResource> relatedresources =
-                (ResourceKind.DEPLOYMENT_CONFIG.equals(wrapper.getWrapped().getKind()))?ServiceResourceMapper.computeRelatedResources((IDeploymentConfig) wrapper.getWrapped(), resources)
-                                                                                       :ServiceResourceMapper.computeRelatedResources((IReplicationController) wrapper.getWrapped(), resources);
+        Collection<IResource> relatedresources = (ResourceKind.DEPLOYMENT_CONFIG.equals(wrapper.getWrapped().getKind()))
+                ? ServiceResourceMapper.computeRelatedResources((IDeploymentConfig)wrapper.getWrapped(), resources)
+                : ServiceResourceMapper.computeRelatedResources((IReplicationController)wrapper.getWrapped(), resources);
         return relatedresources;
     }
 
     @Override
-	protected AbstractResourceWrapper<?, ?> createNewWrapper(Collection<IResource> resources, IResource r) {
-		AbstractResourceWrapper<?, ?> newWrapper;
-		if (r instanceof IService) {
-			ServiceWrapper newService = new ServiceWrapper(ProjectWrapper.this, (IService) r);
-			Collection<IResource> relatedResources = ServiceResourceMapper.computeRelatedResources((IService) r,
-					resources);
-			newService.initWithResources(relatedResources);
-			newWrapper = newService;
-		} else if ((ResourceKind.DEPLOYMENT_CONFIG.equals(r.getKind()) ||
-		           (ResourceKind.REPLICATION_CONTROLLER.equals(r.getKind()) && !r.isAnnotatedWith(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME))) &&
-		           ServiceResourceMapper.getServices((IReplicationController) r, resources).isEmpty()) {
-		        ReplicationControllerWrapper dcWrapper = new ReplicationControllerWrapper(this, (IReplicationController) r);
-		        Collection<IResource> relatedResource = getRelatedResources(resources, dcWrapper);
-		        dcWrapper.initWithResources(relatedResource);
-		        newWrapper = dcWrapper;
-		} else {
-			newWrapper = new ResourceWrapper(ProjectWrapper.this, r);
-		}
-		return newWrapper;
-	}
+    protected AbstractResourceWrapper<?, ?> createNewWrapper(Collection<IResource> resources, IResource r) {
+        AbstractResourceWrapper<?, ?> newWrapper;
+        if (r instanceof IService) {
+            ServiceWrapper newService = new ServiceWrapper(ProjectWrapper.this, (IService)r);
+            Collection<IResource> relatedResources = ServiceResourceMapper.computeRelatedResources((IService)r, resources);
+            newService.initWithResources(relatedResources);
+            newWrapper = newService;
+        } else if ((ResourceKind.DEPLOYMENT_CONFIG.equals(r.getKind()) || (ResourceKind.REPLICATION_CONTROLLER.equals(r.getKind())
+                && !r.isAnnotatedWith(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))
+                && ServiceResourceMapper.getServices((IReplicationController)r, resources).isEmpty()) {
+            ReplicationControllerWrapper dcWrapper = new ReplicationControllerWrapper(this, (IReplicationController)r);
+            Collection<IResource> relatedResource = getRelatedResources(resources, dcWrapper);
+            dcWrapper.initWithResources(relatedResource);
+            newWrapper = dcWrapper;
+        } else {
+            newWrapper = new ResourceWrapper(ProjectWrapper.this, r);
+        }
+        return newWrapper;
+    }
 
     @Override
-	void initWithResources(Collection<IResource> resources) {
-		super.initWithResources(resources);
-		state.set(LoadingState.LOADED);
-	}
+    void initWithResources(Collection<IResource> resources) {
+        super.initWithResources(resources);
+        state.set(LoadingState.LOADED);
+    }
 
-	@Override
-	public void refresh() {
-		getParent().refresh(this);
-		state.set(LoadingState.LOADED);
-		fireChanged();
-	}
+    @Override
+    public void refresh() {
+        getParent().refresh(this);
+        state.set(LoadingState.LOADED);
+        fireChanged();
+    }
 
     @Override
     public Collection<IResourceWrapper<?, ?>> getResources() {

@@ -24,27 +24,27 @@ import com.openshift.client.OpenShiftTimeoutException;
  */
 public class RestartApplicationJob extends AbstratApplicationJob {
 
-	public RestartApplicationJob(IApplication application) {
-		super(new ApplicationProvider(application), NLS.bind(ExpressUIMessages.RESTARTING_APPLICATION, application.getName()));
-	}
+    public RestartApplicationJob(IApplication application) {
+        super(new ApplicationProvider(application), NLS.bind(ExpressUIMessages.RESTARTING_APPLICATION, application.getName()));
+    }
 
-	public RestartApplicationJob(LoadApplicationJob applicationJob) {
-		super(new ApplicationProvider(applicationJob), NLS.bind(ExpressUIMessages.RESTARTING_APPLICATION, ""));
-	}
+    public RestartApplicationJob(LoadApplicationJob applicationJob) {
+        super(new ApplicationProvider(applicationJob), NLS.bind(ExpressUIMessages.RESTARTING_APPLICATION, ""));
+    }
 
-	@Override
-	protected IStatus doRun(IProgressMonitor monitor) {
-		try {
-			super.doRun(monitor);
-		} catch(OpenShiftTimeoutException e) {
-			// intentionally swallow, 
-			// restart operation is very very likely to timeout
-		}
-		return Status.OK_STATUS;
-	}
+    @Override
+    protected IStatus doRun(IProgressMonitor monitor) {
+        try {
+            super.doRun(monitor);
+        } catch (OpenShiftTimeoutException e) {
+            // intentionally swallow, 
+            // restart operation is very very likely to timeout
+        }
+        return Status.OK_STATUS;
+    }
 
-	@Override
-	protected void doRun(IApplication application) {
-		application.restart();
-	}
+    @Override
+    protected void doRun(IApplication application) {
+        application.restart();
+    }
 }

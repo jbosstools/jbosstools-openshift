@@ -27,78 +27,73 @@ import org.eclipse.swt.widgets.TreeItem;
  */
 public class TreeUtils {
 
-	/**
-	 * Creates a tree editor for the given cell with the given control.
-	 * <p>
-	 * A tree editor puts a control over a given cell in a tree. Furthermore it puts text into the cell so that the
-	 * column's large enough so that the control has enough room to overlay itself over it
-	 * 
-	 * @param cell the cell to put the control to
-	 * @param control the control to put to the given cell
-	 * @param cellText the text that's put into the table cell (overlayed by the editor), that only enlarges the
-	 *            column to have enough room for the editor
-	 * 
-	 * @return the tree editor
-	 * 
-	 * @see ViewerCell
-	 * @see TreeEditor
-	 */
-	public static TreeEditor createTreeEditor( Control control, String cellText, ViewerCell cell )
-	{
-		Assert.isTrue(cell.getControl() instanceof Tree);
-		
-		Tree tree = ( Tree ) cell.getControl();
-		final TreeEditor treeEditor = new TreeEditor( tree );
-		initializeTreeEditor( treeEditor, control, cellText, cell );
-		tree.addDisposeListener(new DisposeListener() {
-			
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				treeEditor.dispose();
-			}
-		});
-		return treeEditor;
-	}
+    /**
+     * Creates a tree editor for the given cell with the given control.
+     * <p>
+     * A tree editor puts a control over a given cell in a tree. Furthermore it puts text into the cell so that the
+     * column's large enough so that the control has enough room to overlay itself over it
+     * 
+     * @param cell the cell to put the control to
+     * @param control the control to put to the given cell
+     * @param cellText the text that's put into the table cell (overlayed by the editor), that only enlarges the
+     *            column to have enough room for the editor
+     * 
+     * @return the tree editor
+     * 
+     * @see ViewerCell
+     * @see TreeEditor
+     */
+    public static TreeEditor createTreeEditor(Control control, String cellText, ViewerCell cell) {
+        Assert.isTrue(cell.getControl() instanceof Tree);
 
-	/**
-	 * Initializes a given tree editor for a given viewer cell with a given (editor-)control.
-	 * 
-	 * @param treeEditor the tree editor that shall get initialized
-	 * @param control the control that shall be positioned by the tree editor
-	 * @param cellText the text that will get displayed in the cell (only used to make sure, the cell has the required size)
-	 * @param cell the cell the table editor shall be positioned to.
-	 * 
-	 * @see TreeEditor
-	 * @see ViewerCell
-	 */
-	public static void initializeTreeEditor( TreeEditor treeEditor, Control control, String cellText, ViewerCell cell )
-	{
-		treeEditor.grabHorizontal = true;
-		treeEditor.grabVertical = true;
-		treeEditor.horizontalAlignment = SWT.FILL;
-		treeEditor.verticalAlignment = SWT.FILL;
-		TreeItem treeItem = ( TreeItem ) cell.getItem();
-		treeEditor.setEditor( control, treeItem, cell.getColumnIndex() );
-		// ensure cell is as large as space needed for link
-		//cell.setText( " " + cellText + " ");
-	}
+        Tree tree = (Tree)cell.getControl();
+        final TreeEditor treeEditor = new TreeEditor(tree);
+        initializeTreeEditor(treeEditor, control, cellText, cell);
+        tree.addDisposeListener(new DisposeListener() {
 
-	/**
-	 * Sets the height of the rows in a given table. The height might only be increased (compared to the standard
-	 * height). Decreasing it below the default height has no effect.
-	 * 
-	 * @param height the height in pixels
-	 * @param table the table
-	 */
-	public static void setRowHeight( final int height, Tree tree )
-	{
-		tree.addListener( SWT.MeasureItem, new Listener()
-		{
-			@Override
-			public void handleEvent( Event event )
-			{
-				event.height = height;
-			}
-		} );
-	}
+            @Override
+            public void widgetDisposed(DisposeEvent e) {
+                treeEditor.dispose();
+            }
+        });
+        return treeEditor;
+    }
+
+    /**
+     * Initializes a given tree editor for a given viewer cell with a given (editor-)control.
+     * 
+     * @param treeEditor the tree editor that shall get initialized
+     * @param control the control that shall be positioned by the tree editor
+     * @param cellText the text that will get displayed in the cell (only used to make sure, the cell has the required size)
+     * @param cell the cell the table editor shall be positioned to.
+     * 
+     * @see TreeEditor
+     * @see ViewerCell
+     */
+    public static void initializeTreeEditor(TreeEditor treeEditor, Control control, String cellText, ViewerCell cell) {
+        treeEditor.grabHorizontal = true;
+        treeEditor.grabVertical = true;
+        treeEditor.horizontalAlignment = SWT.FILL;
+        treeEditor.verticalAlignment = SWT.FILL;
+        TreeItem treeItem = (TreeItem)cell.getItem();
+        treeEditor.setEditor(control, treeItem, cell.getColumnIndex());
+        // ensure cell is as large as space needed for link
+        //cell.setText( " " + cellText + " ");
+    }
+
+    /**
+     * Sets the height of the rows in a given table. The height might only be increased (compared to the standard
+     * height). Decreasing it below the default height has no effect.
+     * 
+     * @param height the height in pixels
+     * @param table the table
+     */
+    public static void setRowHeight(final int height, Tree tree) {
+        tree.addListener(SWT.MeasureItem, new Listener() {
+            @Override
+            public void handleEvent(Event event) {
+                event.height = height;
+            }
+        });
+    }
 }

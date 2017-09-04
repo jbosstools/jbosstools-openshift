@@ -29,136 +29,130 @@ import com.openshift.client.SSHKeyType;
  */
 public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 
-	public static final String PROPERTY_TYPE = "type";
-	public static final String PROPERTY_SSH2_HOME = "SSH2Home";
-	public static final String PROPERTY_PRIVATEKEY_FILENAME = "privateKeyName";
-	public static final String PROPERTY_PRIVATEKEY_PASSPHRASE = "privateKeyPathphrase";
-	public static final String PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE = "privateKeyPassphraseConfirm";
-	public static final String PROPERTY_PUBLICKEY_FILENAME = "publicKeyName";
-	private static final String PUBLICKEY_SUFFIX = ".pub";
+    public static final String PROPERTY_TYPE = "type";
+    public static final String PROPERTY_SSH2_HOME = "SSH2Home";
+    public static final String PROPERTY_PRIVATEKEY_FILENAME = "privateKeyName";
+    public static final String PROPERTY_PRIVATEKEY_PASSPHRASE = "privateKeyPathphrase";
+    public static final String PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE = "privateKeyPassphraseConfirm";
+    public static final String PROPERTY_PUBLICKEY_FILENAME = "publicKeyName";
+    private static final String PUBLICKEY_SUFFIX = ".pub";
 
-	private SSHKeyType type = SSHKeyType.SSH_RSA;
-	private String ssh2Home = SSHUtils.getSSH2Home();
-	private String privateKeyName;
-	private String privateKeyPathphrase;
-	private String privateKeyPathphraseConfirm;
-	private String publicKeyName;
-	private IOpenShiftSSHKey key;
+    private SSHKeyType type = SSHKeyType.SSH_RSA;
+    private String ssh2Home = SSHUtils.getSSH2Home();
+    private String privateKeyName;
+    private String privateKeyPathphrase;
+    private String privateKeyPathphraseConfirm;
+    private String publicKeyName;
+    private IOpenShiftSSHKey key;
 
-	public NewSSHKeyWizardPageModel(ExpressConnection user) {
-		super(user);
-	}
+    public NewSSHKeyWizardPageModel(ExpressConnection user) {
+        super(user);
+    }
 
-	public SSHKeyType getType() {
-		return type;
-	}
+    public SSHKeyType getType() {
+        return type;
+    }
 
-	public void setType(SSHKeyType type) {
-		firePropertyChange(PROPERTY_TYPE, this.type, this.type = type);
-	}
+    public void setType(SSHKeyType type) {
+        firePropertyChange(PROPERTY_TYPE, this.type, this.type = type);
+    }
 
-	public String getPrivateKeyPathphrase() {
-		return privateKeyPathphrase;
-	}
+    public String getPrivateKeyPathphrase() {
+        return privateKeyPathphrase;
+    }
 
-	public String getPrivateKeyPassphraseConfirm() {
-		return privateKeyPathphraseConfirm;
-	}
+    public String getPrivateKeyPassphraseConfirm() {
+        return privateKeyPathphraseConfirm;
+    }
 
-	
-	public void setPrivateKeyPassphraseConfirm(String confirm) {
-		firePropertyChange(PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE, this.privateKeyPathphraseConfirm, 
-				this.privateKeyPathphraseConfirm = confirm);
-	}
-	
-	public void setPrivateKeyPathphrase(String privateKeyPathphrase) {
-		firePropertyChange(PROPERTY_PRIVATEKEY_PASSPHRASE,
-				this.privateKeyPathphrase, this.privateKeyPathphrase = privateKeyPathphrase);
-	}
+    public void setPrivateKeyPassphraseConfirm(String confirm) {
+        firePropertyChange(PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE, this.privateKeyPathphraseConfirm,
+                this.privateKeyPathphraseConfirm = confirm);
+    }
 
-	public String getPrivateKeyName() {
-		return privateKeyName;
-	}
+    public void setPrivateKeyPathphrase(String privateKeyPathphrase) {
+        firePropertyChange(PROPERTY_PRIVATEKEY_PASSPHRASE, this.privateKeyPathphrase, this.privateKeyPathphrase = privateKeyPathphrase);
+    }
 
-	public void setPrivateKeyName(String privateKeyName) {
-		String oldPrivateKeyName = getPrivateKeyName();
-		firePropertyChange(PROPERTY_PRIVATEKEY_FILENAME, this.privateKeyName, this.privateKeyName = privateKeyName);
-		updatePublicKeyNameFromPrivateKey(oldPrivateKeyName, privateKeyName);
-	}
+    public String getPrivateKeyName() {
+        return privateKeyName;
+    }
 
-	private void updatePublicKeyNameFromPrivateKey(String oldPrivateKeyName, String privateKeyName) {
-		if (StringUtils.isEmpty(publicKeyName)) {
-			setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
-		} else {
-			String publicKeyNameNoSuffix = StringUtils.getWithoutSuffix(publicKeyName, PUBLICKEY_SUFFIX);
-			if (oldPrivateKeyName.startsWith(publicKeyNameNoSuffix)) {
-				setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
-			}
-		}
-	}
+    public void setPrivateKeyName(String privateKeyName) {
+        String oldPrivateKeyName = getPrivateKeyName();
+        firePropertyChange(PROPERTY_PRIVATEKEY_FILENAME, this.privateKeyName, this.privateKeyName = privateKeyName);
+        updatePublicKeyNameFromPrivateKey(oldPrivateKeyName, privateKeyName);
+    }
 
-	public String getPublicKeyName() {
-		return publicKeyName;
-	}
+    private void updatePublicKeyNameFromPrivateKey(String oldPrivateKeyName, String privateKeyName) {
+        if (StringUtils.isEmpty(publicKeyName)) {
+            setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
+        } else {
+            String publicKeyNameNoSuffix = StringUtils.getWithoutSuffix(publicKeyName, PUBLICKEY_SUFFIX);
+            if (oldPrivateKeyName.startsWith(publicKeyNameNoSuffix)) {
+                setPublicKeyName(privateKeyName + PUBLICKEY_SUFFIX);
+            }
+        }
+    }
 
-	public void setPublicKeyName(String publicKeyName) {
-		firePropertyChange(PROPERTY_PUBLICKEY_FILENAME, this.publicKeyName, this.publicKeyName = publicKeyName);
-	}
+    public String getPublicKeyName() {
+        return publicKeyName;
+    }
 
-	public String getSSH2Home() {
-		return ssh2Home;
-	}
+    public void setPublicKeyName(String publicKeyName) {
+        firePropertyChange(PROPERTY_PUBLICKEY_FILENAME, this.publicKeyName, this.publicKeyName = publicKeyName);
+    }
 
-	public void setSSH2Home(String ssh2Home) {
-		firePropertyChange(PROPERTY_SSH2_HOME, this.ssh2Home, this.ssh2Home = ssh2Home);
-	}
+    public String getSSH2Home() {
+        return ssh2Home;
+    }
 
-	@Override
-	public File getPublicKey() {
-		return new File(ssh2Home, publicKeyName);
-	}
+    public void setSSH2Home(String ssh2Home) {
+        firePropertyChange(PROPERTY_SSH2_HOME, this.ssh2Home, this.ssh2Home = ssh2Home);
+    }
 
-	@Override
-	public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
-		SSHKeyPair keyPair = createSSHKey();
-		SSHUtils.addToPrivateKeysPreferences(new File(keyPair.getPrivateKeyPath()));
-		return this.key = getConnection().putSSHKey(getName(), keyPair);
-	}
+    @Override
+    public File getPublicKey() {
+        return new File(ssh2Home, publicKeyName);
+    }
 
-	private SSHKeyPair createSSHKey() {
-		ensureSSHHomeExists(ssh2Home);
-		File privateKey = new File(ssh2Home, privateKeyName);
-		File publicKey = new File(ssh2Home, publicKeyName);
-		SSHKeyPair keyPair =
-				SSHKeyPair.create(privateKeyPathphrase, privateKey.getAbsolutePath(), publicKey.getAbsolutePath());
-		SSHUtils.setPrivateKeyPermissions(privateKey);
-		return keyPair;
-	}
+    @Override
+    public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
+        SSHKeyPair keyPair = createSSHKey();
+        SSHUtils.addToPrivateKeysPreferences(new File(keyPair.getPrivateKeyPath()));
+        return this.key = getConnection().putSSHKey(getName(), keyPair);
+    }
 
-	private void ensureSSHHomeExists(String ssh2Home)
-			throws OpenShiftException {
-		File ssh2HomeFile = new File(ssh2Home);
-		if (FileUtils.canRead(ssh2HomeFile)) {
-			if (!FileUtils.isDirectory(ssh2HomeFile)) {
-				throw new OpenShiftException(
-						ssh2Home + " is a file instead of a directory. This prevents creation and usage of ssh keys");
-			}
-			return;
-		}
+    private SSHKeyPair createSSHKey() {
+        ensureSSHHomeExists(ssh2Home);
+        File privateKey = new File(ssh2Home, privateKeyName);
+        File publicKey = new File(ssh2Home, publicKeyName);
+        SSHKeyPair keyPair = SSHKeyPair.create(privateKeyPathphrase, privateKey.getAbsolutePath(), publicKey.getAbsolutePath());
+        SSHUtils.setPrivateKeyPermissions(privateKey);
+        return keyPair;
+    }
 
-		try {
-			if(!ssh2HomeFile.mkdirs()) {
-				throw new OpenShiftException("Could not create ssh2 home directory at {0}", ssh2Home);
-			}
-		} catch(SecurityException e) {
-			throw new OpenShiftException(e, "Could not create ssh2 home directory at {0}", ssh2Home);
-		}
-	}
+    private void ensureSSHHomeExists(String ssh2Home) throws OpenShiftException {
+        File ssh2HomeFile = new File(ssh2Home);
+        if (FileUtils.canRead(ssh2HomeFile)) {
+            if (!FileUtils.isDirectory(ssh2HomeFile)) {
+                throw new OpenShiftException(ssh2Home + " is a file instead of a directory. This prevents creation and usage of ssh keys");
+            }
+            return;
+        }
 
-	@Override
-	public IOpenShiftSSHKey getSSHKey() {
-		return key;
-	}
+        try {
+            if (!ssh2HomeFile.mkdirs()) {
+                throw new OpenShiftException("Could not create ssh2 home directory at {0}", ssh2Home);
+            }
+        } catch (SecurityException e) {
+            throw new OpenShiftException(e, "Could not create ssh2 home directory at {0}", ssh2Home);
+        }
+    }
 
-	
+    @Override
+    public IOpenShiftSSHKey getSSHKey() {
+        return key;
+    }
+
 }

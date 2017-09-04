@@ -46,182 +46,169 @@ import com.openshift.restclient.model.build.IWebhookTrigger;
  */
 public class WebHooksComponent extends Composite {
 
-	private static final int COPIED_NOTIFICATION_SHOW_DURATION = 2 * 1000;
+    private static final int COPIED_NOTIFICATION_SHOW_DURATION = 2 * 1000;
 
-	protected static final String WEBHOOKS_DOCS = "https://docs.openshift.org/latest/dev_guide/builds.html#webhook-triggers";
-	
-	private Collection<IBuildConfig> buildConfigs;
+    protected static final String WEBHOOKS_DOCS = "https://docs.openshift.org/latest/dev_guide/builds.html#webhook-triggers";
 
-	public WebHooksComponent(IBuildConfig buildConfig, Composite parent, int style) {
-		super(parent, style);
-		this.buildConfigs = Collections.singleton(buildConfig);
-		createControls(buildConfigs, parent);
-	}
+    private Collection<IBuildConfig> buildConfigs;
 
-	public WebHooksComponent(Collection<IBuildConfig> buildConfigs, Composite parent, int style) {
-	    super(parent, style);
-	    this.buildConfigs = buildConfigs;
-	    createControls(buildConfigs, parent);
-	}
+    public WebHooksComponent(IBuildConfig buildConfig, Composite parent, int style) {
+        super(parent, style);
+        this.buildConfigs = Collections.singleton(buildConfig);
+        createControls(buildConfigs, parent);
+    }
 
-	private void createControls(Collection<IBuildConfig> buildConfigs, Composite parent) {
-		GridLayoutFactory.fillDefaults()
-			.applyTo(this);
+    public WebHooksComponent(Collection<IBuildConfig> buildConfigs, Composite parent, int style) {
+        super(parent, style);
+        this.buildConfigs = buildConfigs;
+        createControls(buildConfigs, parent);
+    }
 
-		Link webhookExplanation = new Link(this, SWT.WRAP);
-		webhookExplanation.setText("<a>Webhook triggers</a> allow you to trigger a new build by sending a request to the OpenShift API endpoint.");
-		GridDataFactory.fillDefaults()
-					   .align(SWT.FILL, SWT.FILL).grab(true, false)
-					   .applyTo(webhookExplanation);
-		webhookExplanation.addSelectionListener(onWebhookExplanationClicked());
-		
-		for (IBuildConfig buildConfig : buildConfigs) {
-			Group hooksGroup = new Group(this, SWT.None);
-			hooksGroup.setText("Webhooks for "+buildConfig.getSourceURI());
-			GridDataFactory.fillDefaults()
-						   .align(SWT.FILL, SWT.FILL)
-						   .grab(true, true)
-						   .applyTo(hooksGroup);
-			GridLayoutFactory.fillDefaults()
-							 .numColumns(3)
-							 .margins(10, 10)
-							 .applyTo(hooksGroup);
+    private void createControls(Collection<IBuildConfig> buildConfigs, Composite parent) {
+        GridLayoutFactory.fillDefaults().applyTo(this);
 
-			createHookWidgets(buildConfig, hooksGroup);
-		}
-	}
+        Link webhookExplanation = new Link(this, SWT.WRAP);
+        webhookExplanation
+                .setText("<a>Webhook triggers</a> allow you to trigger a new build by sending a request to the OpenShift API endpoint.");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(webhookExplanation);
+        webhookExplanation.addSelectionListener(onWebhookExplanationClicked());
 
-	private SelectionListener onWebhookExplanationClicked() {
-		return new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				new BrowserUtility().checkedCreateExternalBrowser(WEBHOOKS_DOCS,
-						OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
-			}
-		};
-	}
+        for (IBuildConfig buildConfig : buildConfigs) {
+            Group hooksGroup = new Group(this, SWT.None);
+            hooksGroup.setText("Webhooks for " + buildConfig.getSourceURI());
+            GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(hooksGroup);
+            GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).applyTo(hooksGroup);
 
-	private void createHookWidgets(IBuildConfig buildConfig, Composite parent) {
-	  List<IWebhookTrigger> webHooks = WebhookUtil.getWebHooks(buildConfig);
-	  if (webHooks == null
-				|| webHooks.isEmpty()) {
-			createNoHooksMessage(buildConfig, parent);
-		} else {
-			for (IWebhookTrigger webHook : webHooks) {
-				createWebhookWidget(buildConfig, webHook, parent);
-			}
-		}
-	}
+            createHookWidgets(buildConfig, hooksGroup);
+        }
+    }
 
-	private void createNoHooksMessage(IBuildConfig buildConfig, Composite parent) {
-		Label noHooksLabel = new Label(parent, SWT.NONE);
-		noHooksLabel.setText("You have no webhooks configured for build config. "+buildConfig.getSourceURI());
-	}
+    private SelectionListener onWebhookExplanationClicked() {
+        return new SelectionAdapter() {
 
-	private void createWebhookWidget(IBuildConfig buildConfig, IWebhookTrigger webHook, Composite parent) {
-		Link link = new Link(parent, SWT.NONE);
-		link.addSelectionListener(onClickWebhook(buildConfig));
-		String gitUrl = buildConfig.getSourceURI();
-		String linkLabel = isGitHub(gitUrl, webHook) ? "<a>" + webHook.getType() + "</a>" : webHook.getType();
-		link.setText(linkLabel + " webhook:");
-		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.CENTER)
-			.applyTo(link);
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                new BrowserUtility().checkedCreateExternalBrowser(WEBHOOKS_DOCS, OpenShiftUIActivator.PLUGIN_ID,
+                        OpenShiftUIActivator.getDefault().getLog());
+            }
+        };
+    }
 
-		final Text uriText = new Text(parent, SWT.BORDER);
-		uriText.setEditable(false);
-		uriText.setText(webHook.getWebhookURL());
-		uriText.addMouseListener(onClickUriText(uriText));
-		uriText.setToolTipText("Click to copy to the clipboard");
-		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.FILL).grab(true, false)
-			.applyTo(uriText);
-		
-		Button copyToClipboard = new Button(parent, SWT.PUSH);
-		copyToClipboard.setImage(OpenShiftImages.COPY_TO_CLIPBOARD_IMG);
-		copyToClipboard.setToolTipText("Copy to clipboard");
-		copyToClipboard.addSelectionListener(onClickCopyButton(uriText));
-	}
+    private void createHookWidgets(IBuildConfig buildConfig, Composite parent) {
+        List<IWebhookTrigger> webHooks = WebhookUtil.getWebHooks(buildConfig);
+        if (webHooks == null || webHooks.isEmpty()) {
+            createNoHooksMessage(buildConfig, parent);
+        } else {
+            for (IWebhookTrigger webHook : webHooks) {
+                createWebhookWidget(buildConfig, webHook, parent);
+            }
+        }
+    }
 
-	private SelectionAdapter onClickCopyButton(final Text uriText) {
-		return new SelectionAdapter() {
+    private void createNoHooksMessage(IBuildConfig buildConfig, Composite parent) {
+        Label noHooksLabel = new Label(parent, SWT.NONE);
+        noHooksLabel.setText("You have no webhooks configured for build config. " + buildConfig.getSourceURI());
+    }
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				copyToClipBoard(uriText);
-			}
-		};
-	}
+    private void createWebhookWidget(IBuildConfig buildConfig, IWebhookTrigger webHook, Composite parent) {
+        Link link = new Link(parent, SWT.NONE);
+        link.addSelectionListener(onClickWebhook(buildConfig));
+        String gitUrl = buildConfig.getSourceURI();
+        String linkLabel = isGitHub(gitUrl, webHook) ? "<a>" + webHook.getType() + "</a>" : webHook.getType();
+        link.setText(linkLabel + " webhook:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(link);
 
-	private MouseAdapter onClickUriText(final Text uriText) {
-		return new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent event) {
-				copyToClipBoard(uriText);
-			}
-		};
-	}
+        final Text uriText = new Text(parent, SWT.BORDER);
+        uriText.setEditable(false);
+        uriText.setText(webHook.getWebhookURL());
+        uriText.addMouseListener(onClickUriText(uriText));
+        uriText.setToolTipText("Click to copy to the clipboard");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).grab(true, false).applyTo(uriText);
 
-	private SelectionAdapter onClickWebhook(final IBuildConfig buildConfig) {
-		return new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				String url = buildConfig.getBuildSource().getURI();
-				url = StringUtils.removeEnd(url, ".git");
-				if (isGitHub(url)) {
-					//open https://github.com/<user>/<repo>/settings/hooks
-					if(!url.endsWith("/")) {
-						url = url+"/";
-					}
-					url += "settings/hooks";
-				}
-				new BrowserUtility().checkedCreateExternalBrowser(url,
-					OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
-			}
-		};
-	}
+        Button copyToClipboard = new Button(parent, SWT.PUSH);
+        copyToClipboard.setImage(OpenShiftImages.COPY_TO_CLIPBOARD_IMG);
+        copyToClipboard.setToolTipText("Copy to clipboard");
+        copyToClipboard.addSelectionListener(onClickCopyButton(uriText));
+    }
 
-	private void copyToClipBoard(final Text uriText) {
-		uriText.selectAll();
-		String uriToCopy = uriText.getText();
-		copyToClipBoard(uriToCopy);
-		
-		notifyCopied(uriText);
-	}
+    private SelectionAdapter onClickCopyButton(final Text uriText) {
+        return new SelectionAdapter() {
 
-	private void notifyCopied(final Text uriText) {
-		DefaultToolTip copiedNotification = new DefaultToolTip(uriText, ToolTip.NO_RECREATE, true);
-		copiedNotification.setText("Webhook copied to clipboard");
-		copiedNotification.setHideDelay(COPIED_NOTIFICATION_SHOW_DURATION);
-		copiedNotification.show(uriText.getLocation());
-		copiedNotification.deactivate();
-	}
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                copyToClipBoard(uriText);
+            }
+        };
+    }
 
-	private static boolean isGitHub(String gitUrl, IWebhookTrigger webHook) {
-		if (!isGitHub(gitUrl)) {
-			return false;
-		}
+    private MouseAdapter onClickUriText(final Text uriText) {
+        return new MouseAdapter() {
+            @Override
+            public void mouseUp(MouseEvent event) {
+                copyToClipBoard(uriText);
+            }
+        };
+    }
 
-		switch (webHook.getType()) {
-			case BuildTriggerType.github:
-			case BuildTriggerType.GITHUB:
-				return true;
-			default:
-				return false;
-		}
-	}
+    private SelectionAdapter onClickWebhook(final IBuildConfig buildConfig) {
+        return new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                String url = buildConfig.getBuildSource().getURI();
+                url = StringUtils.removeEnd(url, ".git");
+                if (isGitHub(url)) {
+                    //open https://github.com/<user>/<repo>/settings/hooks
+                    if (!url.endsWith("/")) {
+                        url = url + "/";
+                    }
+                    url += "settings/hooks";
+                }
+                new BrowserUtility().checkedCreateExternalBrowser(url, OpenShiftUIActivator.PLUGIN_ID,
+                        OpenShiftUIActivator.getDefault().getLog());
+            }
+        };
+    }
 
-	private static boolean isGitHub(String gitUrl) {
-		return StringUtils.startsWith(gitUrl, "https://github.com/");
-	}
-	
-	private void copyToClipBoard(String url) {
-		Clipboard clipboard = new Clipboard(getDisplay());
-		Object[] data = new Object[] { url };
-		Transfer[] dataTypes = new Transfer[] { TextTransfer.getInstance() };
-		clipboard.setContents(data, dataTypes);
-		clipboard.dispose();
-	}
+    private void copyToClipBoard(final Text uriText) {
+        uriText.selectAll();
+        String uriToCopy = uriText.getText();
+        copyToClipBoard(uriToCopy);
+
+        notifyCopied(uriText);
+    }
+
+    private void notifyCopied(final Text uriText) {
+        DefaultToolTip copiedNotification = new DefaultToolTip(uriText, ToolTip.NO_RECREATE, true);
+        copiedNotification.setText("Webhook copied to clipboard");
+        copiedNotification.setHideDelay(COPIED_NOTIFICATION_SHOW_DURATION);
+        copiedNotification.show(uriText.getLocation());
+        copiedNotification.deactivate();
+    }
+
+    private static boolean isGitHub(String gitUrl, IWebhookTrigger webHook) {
+        if (!isGitHub(gitUrl)) {
+            return false;
+        }
+
+        switch (webHook.getType()) {
+        case BuildTriggerType.github:
+        case BuildTriggerType.GITHUB:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    private static boolean isGitHub(String gitUrl) {
+        return StringUtils.startsWith(gitUrl, "https://github.com/");
+    }
+
+    private void copyToClipBoard(String url) {
+        Clipboard clipboard = new Clipboard(getDisplay());
+        Object[] data = new Object[] { url };
+        Transfer[] dataTypes = new Transfer[] { TextTransfer.getInstance() };
+        clipboard.setContents(data, dataTypes);
+        clipboard.dispose();
+    }
 
 }

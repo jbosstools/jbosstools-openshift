@@ -22,38 +22,38 @@ import com.openshift.client.IDomain;
  * @author Rob Stryker
  */
 public class ExpressServerWizardTaskModelUtil {
-	/* For use inside express wizard fragment */
-	public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";
-	public static final String TASK_WIZARD_ATTR_DOMAIN = "domain";
-	public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";
-	public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";
+    /* For use inside express wizard fragment */
+    public static final String TASK_WIZARD_ATTR_CONNECTION = "connection";
+    public static final String TASK_WIZARD_ATTR_DOMAIN = "domain";
+    public static final String TASK_WIZARD_ATTR_APP_LIST = "appList";
+    public static final String TASK_WIZARD_ATTR_SELECTED_APP = "application";
 
-	public static void put(ExpressConnection connection, TaskModel taskModel) {
-		taskModel.putObject(TASK_WIZARD_ATTR_CONNECTION, connection);
-	}
+    public static void put(ExpressConnection connection, TaskModel taskModel) {
+        taskModel.putObject(TASK_WIZARD_ATTR_CONNECTION, connection);
+    }
 
-	public static ExpressConnection getConnection(IServerModeUICallback callback) {
-		ExpressConnection connection = (ExpressConnection) callback.getAttribute(TASK_WIZARD_ATTR_CONNECTION);
-		if (connection == null) {
-			connection = ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class);
-		}
-		return connection;
-	}
+    public static ExpressConnection getConnection(IServerModeUICallback callback) {
+        ExpressConnection connection = (ExpressConnection)callback.getAttribute(TASK_WIZARD_ATTR_CONNECTION);
+        if (connection == null) {
+            connection = ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class);
+        }
+        return connection;
+    }
 
-	public static void put(IDomain domain, TaskModel taskModel) {
-		taskModel.putObject(TASK_WIZARD_ATTR_DOMAIN, domain);
-	}
- 
-	public static IDomain getDomain(IServerModeUICallback callback) {
-		return (IDomain) callback.getAttribute(TASK_WIZARD_ATTR_DOMAIN);
-	}
+    public static void put(IDomain domain, TaskModel taskModel) {
+        taskModel.putObject(TASK_WIZARD_ATTR_DOMAIN, domain);
+    }
 
-	public static void put(IApplication application, TaskModel taskModel) {
-		taskModel.putObject(TASK_WIZARD_ATTR_SELECTED_APP, application);
-	}
-	
-	public static IApplication getApplication(IServerModeUICallback callback) {
-		return (IApplication) callback.getAttribute(TASK_WIZARD_ATTR_SELECTED_APP);
-	}
+    public static IDomain getDomain(IServerModeUICallback callback) {
+        return (IDomain)callback.getAttribute(TASK_WIZARD_ATTR_DOMAIN);
+    }
+
+    public static void put(IApplication application, TaskModel taskModel) {
+        taskModel.putObject(TASK_WIZARD_ATTR_SELECTED_APP, application);
+    }
+
+    public static IApplication getApplication(IServerModeUICallback callback) {
+        return (IApplication)callback.getAttribute(TASK_WIZARD_ATTR_SELECTED_APP);
+    }
 
 }

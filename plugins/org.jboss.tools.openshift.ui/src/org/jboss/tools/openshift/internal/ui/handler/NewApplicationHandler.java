@@ -28,15 +28,15 @@ import org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizard;
  */
 public class NewApplicationHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		try {
-			WizardUtils.openWizardDialog(new NewApplicationWizard(), HandlerUtil.getActiveShell(event));
-		} catch (ConnectionNotFoundException e) {
-			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to find the connection", e);
-		}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        try {
+            WizardUtils.openWizardDialog(new NewApplicationWizard(), HandlerUtil.getActiveShell(event));
+        } catch (ConnectionNotFoundException e) {
+            return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to find the connection", e);
+        }
 
-		return Status.OK_STATUS;
-	}
+        return Status.OK_STATUS;
+    }
 
 }

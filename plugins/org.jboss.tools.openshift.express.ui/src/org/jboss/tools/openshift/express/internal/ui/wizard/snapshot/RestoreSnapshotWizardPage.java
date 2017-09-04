@@ -48,193 +48,167 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
  */
 public class RestoreSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 
-	private RestoreSnapshotWizardPageModel pageModel;
+    private RestoreSnapshotWizardPageModel pageModel;
 
-	public RestoreSnapshotWizardPage(RestoreSnapshotWizardModel wizardModel, IWizard wizard) {
-		this("Restore/Deploy Snapshot Cartridges",
-				NLS.bind("Please choose the snapshot type and file that we will restore/deploy to application {0}",
-						StringUtils.null2emptyString(wizardModel.getApplication().getName())),
-				wizardModel, wizard);
-	}
+    public RestoreSnapshotWizardPage(RestoreSnapshotWizardModel wizardModel, IWizard wizard) {
+        this("Restore/Deploy Snapshot Cartridges",
+                NLS.bind("Please choose the snapshot type and file that we will restore/deploy to application {0}",
+                        StringUtils.null2emptyString(wizardModel.getApplication().getName())),
+                wizardModel, wizard);
+    }
 
-	protected RestoreSnapshotWizardPage(String title, String description, RestoreSnapshotWizardModel wizardModel,
-			IWizard wizard) {
-		super(title, description, title, wizard);
-		this.pageModel = new RestoreSnapshotWizardPageModel(wizardModel);
-	}
+    protected RestoreSnapshotWizardPage(String title, String description, RestoreSnapshotWizardModel wizardModel, IWizard wizard) {
+        super(title, description, title, wizard);
+        this.pageModel = new RestoreSnapshotWizardPageModel(wizardModel);
+    }
 
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		// snapshot type
-		GridLayoutFactory.fillDefaults()
-				.numColumns(5).margins(10, 10).applyTo(parent);
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        // snapshot type
+        GridLayoutFactory.fillDefaults().numColumns(5).margins(10, 10).applyTo(parent);
 
-		Label snapshotTypeLabel = new Label(parent, SWT.None);
-		snapshotTypeLabel.setText("Snapshot Type:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(snapshotTypeLabel);
+        Label snapshotTypeLabel = new Label(parent, SWT.None);
+        snapshotTypeLabel.setText("Snapshot Type:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(snapshotTypeLabel);
 
-		Button fullSnapshotButton = new Button(parent, SWT.RADIO);
-		fullSnapshotButton.setText("Full");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(fullSnapshotButton);
-		ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(fullSnapshotButton))
-				.converting(new InvertingBooleanConverter())
-				.to(BeanProperties.value(RestoreSnapshotWizardPageModel.PROPERTY_DEPLOYMENT_SNAPSHOT)
-						.observe(pageModel))
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
+        Button fullSnapshotButton = new Button(parent, SWT.RADIO);
+        fullSnapshotButton.setText("Full");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(fullSnapshotButton);
+        ValueBindingBuilder.bind(WidgetProperties.selection().observe(fullSnapshotButton)).converting(new InvertingBooleanConverter())
+                .to(BeanProperties.value(RestoreSnapshotWizardPageModel.PROPERTY_DEPLOYMENT_SNAPSHOT).observe(pageModel))
+                .converting(new InvertingBooleanConverter()).in(dbc);
 
-		Button deploymentSnapshotButton = new Button(parent, SWT.RADIO);
-		deploymentSnapshotButton.setText("Deployment");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(deploymentSnapshotButton);
-		ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(deploymentSnapshotButton))
-				.to(BeanProperties.value(RestoreSnapshotWizardPageModel.PROPERTY_DEPLOYMENT_SNAPSHOT)
-						.observe(pageModel))
-				.in(dbc);
+        Button deploymentSnapshotButton = new Button(parent, SWT.RADIO);
+        deploymentSnapshotButton.setText("Deployment");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(deploymentSnapshotButton);
+        ValueBindingBuilder.bind(WidgetProperties.selection().observe(deploymentSnapshotButton))
+                .to(BeanProperties.value(RestoreSnapshotWizardPageModel.PROPERTY_DEPLOYMENT_SNAPSHOT).observe(pageModel)).in(dbc);
 
-		// horizontal filler
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
+        // horizontal filler
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
 
-		// file
-		Label filepathLabel = new Label(parent, SWT.None);
-		filepathLabel.setText("File:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(filepathLabel);
+        // file
+        Label filepathLabel = new Label(parent, SWT.None);
+        filepathLabel.setText("File:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(filepathLabel);
 
-		Text filepathText = new Text(parent, SWT.BORDER);
-		filepathText.setEditable(false);
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).grab(true, false).applyTo(filepathText);
-		ISWTObservableValue filenameObservable = WidgetProperties.text(SWT.Modify).observe(filepathText);
-		ValueBindingBuilder
-				.bind(filenameObservable)
-				.to(BeanProperties.value(RestoreSnapshotWizardPageModel.PROPERTY_FILEPATH).observe(pageModel))
-				.in(dbc);
-		
-		Button workspaceButton = new Button(parent, SWT.PUSH);
-		workspaceButton.setText("Workspace...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.CENTER, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(workspaceButton);
-		workspaceButton.addSelectionListener(onWorkspace());
-		
-		Button browseButton = new Button(parent, SWT.PUSH);
-		browseButton.setText("Browse...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseButton);
-		browseButton.addSelectionListener(onBrowse());
+        Text filepathText = new Text(parent, SWT.BORDER);
+        filepathText.setEditable(false);
+        GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).grab(true, false)
+                .applyTo(filepathText);
+        ISWTObservableValue filenameObservable = WidgetProperties.text(SWT.Modify).observe(filepathText);
+        ValueBindingBuilder.bind(filenameObservable)
+                .to(BeanProperties.value(RestoreSnapshotWizardPageModel.PROPERTY_FILEPATH).observe(pageModel)).in(dbc);
 
-		// hot-deploy
-		Button hotDeployButton = new Button(parent, SWT.CHECK);
-		hotDeployButton.setText("Use Hot Deployment");
-		GridDataFactory.fillDefaults()
-				.span(5, 1).align(SWT.FILL, SWT.CENTER).applyTo(hotDeployButton);
-		ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(hotDeployButton))
-				.to(BeanProperties.value(RestoreSnapshotWizardPageModel.PROPERTY_HOT_DEPLOY)
-						.observe(pageModel))
-				.in(dbc);
+        Button workspaceButton = new Button(parent, SWT.PUSH);
+        workspaceButton.setText("Workspace...");
+        GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(workspaceButton);
+        workspaceButton.addSelectionListener(onWorkspace());
 
-		MultiValidator filenameValidator = new FilepathValidator(filenameObservable);
-		dbc.addValidationStatusProvider(filenameValidator);
-		ControlDecorationSupport.create(
-				filenameValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+        Button browseButton = new Button(parent, SWT.PUSH);
+        browseButton.setText("Browse...");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseButton);
+        browseButton.addSelectionListener(onBrowse());
 
-		// vertical filler
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).span(3, 1).grab(true, true).applyTo(new Composite(parent, SWT.None));
-	}
+        // hot-deploy
+        Button hotDeployButton = new Button(parent, SWT.CHECK);
+        hotDeployButton.setText("Use Hot Deployment");
+        GridDataFactory.fillDefaults().span(5, 1).align(SWT.FILL, SWT.CENTER).applyTo(hotDeployButton);
+        ValueBindingBuilder.bind(WidgetProperties.selection().observe(hotDeployButton))
+                .to(BeanProperties.value(RestoreSnapshotWizardPageModel.PROPERTY_HOT_DEPLOY).observe(pageModel)).in(dbc);
 
-	private SelectionAdapter onBrowse() {
-		return new SelectionAdapter() {
+        MultiValidator filenameValidator = new FilepathValidator(filenameObservable);
+        dbc.addValidationStatusProvider(filenameValidator);
+        ControlDecorationSupport.create(filenameValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
-				dialog.setText("Choose your snapshot file");
-				dialog.setFilterPath(FileUtils.getParent(pageModel.getFilepath()));
-				String filepath = dialog.open();
-				if (!StringUtils.isEmpty(filepath)) {
-					pageModel.setFilepath(filepath);
-				}
-			}
-		};
-	}
+        // vertical filler
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(3, 1).grab(true, true).applyTo(new Composite(parent, SWT.None));
+    }
 
-	private SelectionAdapter onWorkspace() {
-		return new SelectionAdapter() {
+    private SelectionAdapter onBrowse() {
+        return new SelectionAdapter() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
-				dialog.setText("Choose your snapshot file");
-				dialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString());
-				String filepath = dialog.open();
-				if (!StringUtils.isEmpty(filepath)) {
-					pageModel.setFilepath(filepath);
-				}
-			}
-		};
-	}
-	static class FilepathValidator extends MultiValidator {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
+                dialog.setText("Choose your snapshot file");
+                dialog.setFilterPath(FileUtils.getParent(pageModel.getFilepath()));
+                String filepath = dialog.open();
+                if (!StringUtils.isEmpty(filepath)) {
+                    pageModel.setFilepath(filepath);
+                }
+            }
+        };
+    }
 
-		private IObservableValue filepathObservable;
+    private SelectionAdapter onWorkspace() {
+        return new SelectionAdapter() {
 
-		public FilepathValidator(IObservableValue filenameObservable) {
-			this.filepathObservable = filenameObservable;
-		}
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
+                dialog.setText("Choose your snapshot file");
+                dialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString());
+                String filepath = dialog.open();
+                if (!StringUtils.isEmpty(filepath)) {
+                    pageModel.setFilepath(filepath);
+                }
+            }
+        };
+    }
 
-		@Override
-		protected IStatus validate() {
+    static class FilepathValidator extends MultiValidator {
 
-			String filepath = (String) filepathObservable.getValue();
+        private IObservableValue filepathObservable;
 
-			if (StringUtils.isEmpty(filepath)) {
-				return ValidationStatus.cancel("Please provide a file that we can restore/deploy.");
-			} else {
-//				try {
-					File snapshotFile = new File(filepath);
-					if (!snapshotFile.exists()) {
-						return ValidationStatus.error(NLS.bind("File {0} is not existing.", filepath));
-					} else if (!snapshotFile.canRead()) {
-						return ValidationStatus.error(NLS.bind(
-								"File {0} is not readable. Please check your permissions.",
-								filepath));
-//					} else if (!isTarGz(filepath)) {
-//						return ValidationStatus.error(NLS.bind(
-//								"File {0} is not a tar gz archive.",
-//								filepath));
-					}
-//				} catch (IOException e) {
-//					ExpressUIActivator.log(e);
-//					return ValidationStatus.error(NLS.bind(
-//							"Unknown error accessing file {0}. Please check log for details.", filepath));
-//				}
-			}
-			return ValidationStatus.ok();
-		}
+        public FilepathValidator(IObservableValue filenameObservable) {
+            this.filepathObservable = filenameObservable;
+        }
 
-//		private boolean isTarGz(String filepath) throws IOException {
-//			FileInputStream snapshotFileIn = new FileInputStream(filepath);
-//			try {
-//				return TarFileUtils.isTarGz(snapshotFileIn);
-//			} finally {
-//				StreamUtils.close(snapshotFileIn);
-//			}
-//		}
+        @Override
+        protected IStatus validate() {
 
-		@Override
-		public IObservableList getTargets() {
-			WritableList targets = new WritableList();
-			targets.add(filepathObservable);
-			return targets;
-		}
-	}
+            String filepath = (String)filepathObservable.getValue();
+
+            if (StringUtils.isEmpty(filepath)) {
+                return ValidationStatus.cancel("Please provide a file that we can restore/deploy.");
+            } else {
+                //				try {
+                File snapshotFile = new File(filepath);
+                if (!snapshotFile.exists()) {
+                    return ValidationStatus.error(NLS.bind("File {0} is not existing.", filepath));
+                } else if (!snapshotFile.canRead()) {
+                    return ValidationStatus.error(NLS.bind("File {0} is not readable. Please check your permissions.", filepath));
+                    //					} else if (!isTarGz(filepath)) {
+                    //						return ValidationStatus.error(NLS.bind(
+                    //								"File {0} is not a tar gz archive.",
+                    //								filepath));
+                }
+                //				} catch (IOException e) {
+                //					ExpressUIActivator.log(e);
+                //					return ValidationStatus.error(NLS.bind(
+                //							"Unknown error accessing file {0}. Please check log for details.", filepath));
+                //				}
+            }
+            return ValidationStatus.ok();
+        }
+
+        //		private boolean isTarGz(String filepath) throws IOException {
+        //			FileInputStream snapshotFileIn = new FileInputStream(filepath);
+        //			try {
+        //				return TarFileUtils.isTarGz(snapshotFileIn);
+        //			} finally {
+        //				StreamUtils.close(snapshotFileIn);
+        //			}
+        //		}
+
+        @Override
+        public IObservableList getTargets() {
+            WritableList targets = new WritableList();
+            targets.add(filepathObservable);
+            return targets;
+        }
+    }
 
 }

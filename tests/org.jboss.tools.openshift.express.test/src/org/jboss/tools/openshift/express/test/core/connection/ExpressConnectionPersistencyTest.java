@@ -28,107 +28,102 @@ import org.junit.Test;
  */
 public class ExpressConnectionPersistencyTest {
 
-	private ExpressConnection connection1;
-	private ExpressConnection connection2;
+    private ExpressConnection connection1;
+    private ExpressConnection connection2;
 
-	@Before
-	public void setup() throws Exception {
-		this.connection1 = new ExpressConnection("foo", "https://localhost:8442");
-		this.connection2 = new ExpressConnection("bar", "https://localhost:8443");
-	}
+    @Before
+    public void setup() throws Exception {
+        this.connection1 = new ExpressConnection("foo", "https://localhost:8442");
+        this.connection2 = new ExpressConnection("bar", "https://localhost:8443");
+    }
 
-	@Test
-	public void shouldSaveConnections() {
-		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
+    @Test
+    public void shouldSaveConnections() {
+        ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
 
-			@Override
-			protected void persist(Map<String, ExpressConnection> connections) {
-				// verification
-				assertArrayEquals(new String[] {	"https://foo@localhost:8442", "https://bar@localhost:8443" }, connections.keySet().toArray(new String[] {}));
-			}
-			
-		};
-		// pre-condition
-		List<ExpressConnection> connections = new ArrayList<>();
-		connections.add(connection1);
-		connections.add(connection2);
-		
-		// operations
-		persistency.save(connections);
-	}
+            @Override
+            protected void persist(Map<String, ExpressConnection> connections) {
+                // verification
+                assertArrayEquals(new String[] { "https://foo@localhost:8442", "https://bar@localhost:8443" },
+                        connections.keySet().toArray(new String[] {}));
+            }
 
-	@Test
-	public void shouldLoadConnections() {
-		// pre-condition
-		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
+        };
+        // pre-condition
+        List<ExpressConnection> connections = new ArrayList<>();
+        connections.add(connection1);
+        connections.add(connection2);
 
-			@Override
-			protected String[] loadPersisted() {
-				return new String[] {
-						"https://foo@localhost:8442",
-						"https://bar@localhost:8443" };
-				}
-		};
-		// operations
-		Collection<ExpressConnection> connections = persistency.load();
+        // operations
+        persistency.save(connections);
+    }
 
-		// verification
-		assertEquals(2, connections.size());
-		assertContainsConnection(connection1, connections);
-		assertContainsConnection(connection2, connections);
-	}
+    @Test
+    public void shouldLoadConnections() {
+        // pre-condition
+        ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
 
-	@Test
-	public void shouldNotLoadMalformedUrl() {	
-		// pre-condition
-		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
+            @Override
+            protected String[] loadPersisted() {
+                return new String[] { "https://foo@localhost:8442", "https://bar@localhost:8443" };
+            }
+        };
+        // operations
+        Collection<ExpressConnection> connections = persistency.load();
 
-			@Override
-			protected String[] loadPersisted() {
-				return new String[] {
-						"https://foo@localhost:8442",
-						"htp://bingobongo",
-						"https://bar@localhost:8443" };
-				}
-		};
-		
-		// operations
-		Collection<ExpressConnection> connections = persistency.load();
+        // verification
+        assertEquals(2, connections.size());
+        assertContainsConnection(connection1, connections);
+        assertContainsConnection(connection2, connections);
+    }
 
-		// verification
-		assertEquals(2, connections.size());
-		assertContainsConnection(connection1, connections);
-		assertContainsConnection(connection2, connections);
-	}
-	
-	@Test
-	public void shouldLoadUsernamesAsDefaultHostConnection() {	
-		// pre-condition
-		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
+    @Test
+    public void shouldNotLoadMalformedUrl() {
+        // pre-condition
+        ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
 
-			@Override
-			protected String[] loadPersisted() {
-				return new String[] {
-						"bingobongo@redhat.com" };
-				}
-		};
-		
-		// operations
-		Collection<ExpressConnection> connections = persistency.load();
+            @Override
+            protected String[] loadPersisted() {
+                return new String[] { "https://foo@localhost:8442", "htp://bingobongo", "https://bar@localhost:8443" };
+            }
+        };
 
-		// verification
-		assertEquals(1, connections.size());
-		ExpressConnection connection = connections.iterator().next();
-		assertTrue(connection.isDefaultHost());
-		assertEquals("bingobongo@redhat.com", connection.getUsername());
-	}
+        // operations
+        Collection<ExpressConnection> connections = persistency.load();
 
-	private void assertContainsConnection(ExpressConnection connection, Collection<ExpressConnection> connections) {
-		for (ExpressConnection effectiveConnection : connections) {
-			if (effectiveConnection.equals(connection)) {
-				return;
-			}
-		}
-		fail(String.format("Could not find connection %s in connections %s.", connection, connections));
-	}
+        // verification
+        assertEquals(2, connections.size());
+        assertContainsConnection(connection1, connections);
+        assertContainsConnection(connection2, connections);
+    }
+
+    @Test
+    public void shouldLoadUsernamesAsDefaultHostConnection() {
+        // pre-condition
+        ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
+
+            @Override
+            protected String[] loadPersisted() {
+                return new String[] { "bingobongo@redhat.com" };
+            }
+        };
+
+        // operations
+        Collection<ExpressConnection> connections = persistency.load();
+
+        // verification
+        assertEquals(1, connections.size());
+        ExpressConnection connection = connections.iterator().next();
+        assertTrue(connection.isDefaultHost());
+        assertEquals("bingobongo@redhat.com", connection.getUsername());
+    }
+
+    private void assertContainsConnection(ExpressConnection connection, Collection<ExpressConnection> connections) {
+        for (ExpressConnection effectiveConnection : connections) {
+            if (effectiveConnection.equals(connection)) {
+                return;
+            }
+        }
+        fail(String.format("Could not find connection %s in connections %s.", connection, connections));
+    }
 }

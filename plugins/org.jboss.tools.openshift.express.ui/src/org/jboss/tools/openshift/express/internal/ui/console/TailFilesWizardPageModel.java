@@ -28,102 +28,99 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class TailFilesWizardPageModel extends ObservableUIPojo {
 
-	private static final String DEFAULT_FILE_PATTERN = "-f -n 100 */logs/*";
+    private static final String DEFAULT_FILE_PATTERN = "-f -n 100 */logs/*";
 
-	public static final String PROPERTY_FILE_PATTERN = "filePattern";
+    public static final String PROPERTY_FILE_PATTERN = "filePattern";
 
-	public static final String PROPERTY_GEAR_GROUPS = "gearGroups";
+    public static final String PROPERTY_GEAR_GROUPS = "gearGroups";
 
-	public static final String PROPERTY_SELECTED_GEAR_GROUPS = "selectedGearGroups";
-	
-	private final IApplication application;
+    public static final String PROPERTY_SELECTED_GEAR_GROUPS = "selectedGearGroups";
 
-	private String filePattern = DEFAULT_FILE_PATTERN;
+    private final IApplication application;
 
-	private Collection<IGearGroup> gearGroups;
+    private String filePattern = DEFAULT_FILE_PATTERN;
 
-	private Collection<IGearGroup> selectedGearGroups;
+    private Collection<IGearGroup> gearGroups;
 
-	public TailFilesWizardPageModel(final IApplication app) {
-		this.application = app;
-		setFilePattern(ensureValidDefault(ExpressCorePreferences.INSTANCE.getTailFileOptions(application)));
-	}
+    private Collection<IGearGroup> selectedGearGroups;
 
-	public void setFilePattern(final String filePattern) {
-		firePropertyChange(
-				PROPERTY_FILE_PATTERN, this.filePattern, this.filePattern = filePattern);
-		ExpressCorePreferences.INSTANCE.saveTailFileOptions(application, filePattern);
-	}
+    public TailFilesWizardPageModel(final IApplication app) {
+        this.application = app;
+        setFilePattern(ensureValidDefault(ExpressCorePreferences.INSTANCE.getTailFileOptions(application)));
+    }
 
-	public String getFilePattern() {
-		return filePattern;
-	}
+    public void setFilePattern(final String filePattern) {
+        firePropertyChange(PROPERTY_FILE_PATTERN, this.filePattern, this.filePattern = filePattern);
+        ExpressCorePreferences.INSTANCE.saveTailFileOptions(application, filePattern);
+    }
 
-	public void resetFilePattern() {
-		setFilePattern(ensureValidDefault(null));
-	}
+    public String getFilePattern() {
+        return filePattern;
+    }
 
-	private String ensureValidDefault(String filePattern) {
-		if (StringUtils.isEmpty(filePattern)) {
-			return DEFAULT_FILE_PATTERN;
-		}
-		return filePattern;
-	}
+    public void resetFilePattern() {
+        setFilePattern(ensureValidDefault(null));
+    }
 
-	public IApplication getApplication() {
-		return application;
-	}
+    private String ensureValidDefault(String filePattern) {
+        if (StringUtils.isEmpty(filePattern)) {
+            return DEFAULT_FILE_PATTERN;
+        }
+        return filePattern;
+    }
 
-	/**
-	 * Loads and refresh the {@link IGearGroup} for the current application
-	 */
-	public void loadGearGroups() {
-		setGearGroups(application.getGearGroups());
-	}
+    public IApplication getApplication() {
+        return application;
+    }
 
-	/**
-	 * @return the gearGroups
-	 */
-	public Collection<IGearGroup> getGearGroups() {
-		return gearGroups;
-	}
-	
-	/**
-	 * @param gearGroups the gearGroups to set
-	 */
-	public void setGearGroups(final Collection<IGearGroup> gearGroups) {
-		firePropertyChange(
-				PROPERTY_GEAR_GROUPS, this.gearGroups, this.gearGroups = gearGroups);
-		// pre-select gear groups that contain the main (Standalone cartridge)
-		Set<IGearGroup> selectedGearGroups = new HashSet<>();
-		for(IGearGroup gearGroup : gearGroups) {
-			for(ICartridge cartridge : gearGroup.getCartridges()) {
-				if(cartridge instanceof IStandaloneCartridge) {
-					selectedGearGroups.add(gearGroup);
-					continue;
-				}
-			}
-		}
-		setSelectedGearGroups(selectedGearGroups);
-	}
+    /**
+     * Loads and refresh the {@link IGearGroup} for the current application
+     */
+    public void loadGearGroups() {
+        setGearGroups(application.getGearGroups());
+    }
 
-	/**
-	 * @return the selected {@link IGearGroup} in the UI.
-	 */
-	public Collection<IGearGroup> getSelectedGearGroups() {
-		return this.selectedGearGroups;
-	}
-	
-	public void setSelectedGearGroups(final Collection<IGearGroup> selectedGearGroups) {
-		firePropertyChange(
-				PROPERTY_SELECTED_GEAR_GROUPS, this.selectedGearGroups, this.selectedGearGroups = selectedGearGroups);
-	}
+    /**
+     * @return the gearGroups
+     */
+    public Collection<IGearGroup> getGearGroups() {
+        return gearGroups;
+    }
 
-	public void selectAllGears() {
-		setSelectedGearGroups(new HashSet<>(getGearGroups()));
-	}
+    /**
+     * @param gearGroups the gearGroups to set
+     */
+    public void setGearGroups(final Collection<IGearGroup> gearGroups) {
+        firePropertyChange(PROPERTY_GEAR_GROUPS, this.gearGroups, this.gearGroups = gearGroups);
+        // pre-select gear groups that contain the main (Standalone cartridge)
+        Set<IGearGroup> selectedGearGroups = new HashSet<>();
+        for (IGearGroup gearGroup : gearGroups) {
+            for (ICartridge cartridge : gearGroup.getCartridges()) {
+                if (cartridge instanceof IStandaloneCartridge) {
+                    selectedGearGroups.add(gearGroup);
+                    continue;
+                }
+            }
+        }
+        setSelectedGearGroups(selectedGearGroups);
+    }
 
-	public void deselectAllGears() {
-		setSelectedGearGroups(new HashSet<IGearGroup>());
-	}
+    /**
+     * @return the selected {@link IGearGroup} in the UI.
+     */
+    public Collection<IGearGroup> getSelectedGearGroups() {
+        return this.selectedGearGroups;
+    }
+
+    public void setSelectedGearGroups(final Collection<IGearGroup> selectedGearGroups) {
+        firePropertyChange(PROPERTY_SELECTED_GEAR_GROUPS, this.selectedGearGroups, this.selectedGearGroups = selectedGearGroups);
+    }
+
+    public void selectAllGears() {
+        setSelectedGearGroups(new HashSet<>(getGearGroups()));
+    }
+
+    public void deselectAllGears() {
+        setSelectedGearGroups(new HashSet<IGearGroup>());
+    }
 }

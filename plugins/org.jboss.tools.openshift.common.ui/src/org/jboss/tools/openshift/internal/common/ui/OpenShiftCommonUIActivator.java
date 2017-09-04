@@ -22,65 +22,66 @@ import org.osgi.framework.BundleContext;
 
 public class OpenShiftCommonUIActivator extends BaseUIPlugin {
 
-	public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui"; //$NON-NLS-1$
 
-	private static OpenShiftCommonUIActivator plugin;
+    private static OpenShiftCommonUIActivator plugin;
 
-	ConnectionsRegistryAdapter connectionsRegistryListener;
-	
-	public OpenShiftCommonUIActivator() {
-	}
-	
-	public IPluginLog getLogger(){
-		return pluginLogInternal();
-	}
-	
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
+    ConnectionsRegistryAdapter connectionsRegistryListener;
 
-		connectionsRegistryListener = new ConnectionsRegistryAdapter() {
-			@Override
-			public void connectionAdded(IConnection connection) {
-				try {
-					OpenShiftUIUtils.showOpenShiftExplorer();
-				} catch (Exception e) {
-					// Can happen during workbench startup, while the core
-					// plugins are starting.
-					// Since mutiple connections would cause multiple errors,
-					// it's probably better to swallow the exception, else a
-					// user would see multiple
-					// errors in the log, every time the workbench starts.
-				}
-			}
-		};
-		ConnectionsRegistrySingleton.getInstance().addListener(connectionsRegistryListener);
-	}
+    public OpenShiftCommonUIActivator() {
+    }
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
-		if (connectionsRegistryListener != null) {
-			ConnectionsRegistrySingleton.getInstance().removeListener(connectionsRegistryListener);
-			connectionsRegistryListener = null;
-		}
-		super.stop(context);
-	}
-	public static OpenShiftCommonUIActivator getDefault() {
-		return plugin;
-	}
+    public IPluginLog getLogger() {
+        return pluginLogInternal();
+    }
 
-	public static void log(Throwable t) {
-		log(null, t);
-	}
+    @Override
+    public void start(BundleContext context) throws Exception {
+        super.start(context);
+        plugin = this;
 
-	public static void log(String message, Throwable t) {
-		log(StatusFactory.errorStatus(PLUGIN_ID, message, t));
-	}
-	
-	public static void log(IStatus status) {
-		plugin.getLog().log(status);
-	}
+        connectionsRegistryListener = new ConnectionsRegistryAdapter() {
+            @Override
+            public void connectionAdded(IConnection connection) {
+                try {
+                    OpenShiftUIUtils.showOpenShiftExplorer();
+                } catch (Exception e) {
+                    // Can happen during workbench startup, while the core
+                    // plugins are starting.
+                    // Since mutiple connections would cause multiple errors,
+                    // it's probably better to swallow the exception, else a
+                    // user would see multiple
+                    // errors in the log, every time the workbench starts.
+                }
+            }
+        };
+        ConnectionsRegistrySingleton.getInstance().addListener(connectionsRegistryListener);
+    }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        plugin = null;
+        if (connectionsRegistryListener != null) {
+            ConnectionsRegistrySingleton.getInstance().removeListener(connectionsRegistryListener);
+            connectionsRegistryListener = null;
+        }
+        super.stop(context);
+    }
+
+    public static OpenShiftCommonUIActivator getDefault() {
+        return plugin;
+    }
+
+    public static void log(Throwable t) {
+        log(null, t);
+    }
+
+    public static void log(String message, Throwable t) {
+        log(StatusFactory.errorStatus(PLUGIN_ID, message, t));
+    }
+
+    public static void log(IStatus status) {
+        plugin.getLog().log(status);
+    }
 
 }

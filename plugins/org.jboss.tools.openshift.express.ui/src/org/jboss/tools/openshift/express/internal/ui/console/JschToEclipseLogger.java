@@ -21,35 +21,35 @@ import com.jcraft.jsch.Logger;
  */
 public class JschToEclipseLogger implements Logger {
 
-	static java.util.Hashtable<Integer, String> name = new java.util.Hashtable<>();
-	static {
-		name.put(new Integer(DEBUG), "DEBUG: ");
-		name.put(new Integer(INFO), "INFO: ");
-		name.put(new Integer(WARN), "WARN: ");
-		name.put(new Integer(ERROR), "ERROR: ");
-		name.put(new Integer(FATAL), "FATAL: ");
-	}
+    static java.util.Hashtable<Integer, String> name = new java.util.Hashtable<>();
+    static {
+        name.put(new Integer(DEBUG), "DEBUG: ");
+        name.put(new Integer(INFO), "INFO: ");
+        name.put(new Integer(WARN), "WARN: ");
+        name.put(new Integer(ERROR), "ERROR: ");
+        name.put(new Integer(FATAL), "FATAL: ");
+    }
 
-	@Override
-	public boolean isEnabled(int level) {
-		return true;
-	}
+    @Override
+    public boolean isEnabled(int level) {
+        return true;
+    }
 
-	@Override
-	public void log(int level, String message) {
-		switch (level) {
-		case DEBUG:
-		case INFO:
-			org.jboss.tools.openshift.express.internal.ui.utils.Logger.debug(message);
-			break;
-		case WARN:
-			org.jboss.tools.openshift.express.internal.ui.utils.Logger.warn(message);
-			break;
-		case ERROR:
-		case FATAL:
-			org.jboss.tools.openshift.express.internal.ui.utils.Logger.error(message);
-			break;
-		}
-	}
+    @Override
+    public void log(int level, String message) {
+        switch (level) {
+        case DEBUG:
+        case INFO:
+            org.jboss.tools.openshift.express.internal.ui.utils.Logger.debug(message);
+            break;
+        case WARN:
+            org.jboss.tools.openshift.express.internal.ui.utils.Logger.warn(message);
+            break;
+        case ERROR:
+        case FATAL:
+            org.jboss.tools.openshift.express.internal.ui.utils.Logger.error(message);
+            break;
+        }
+    }
 
 }

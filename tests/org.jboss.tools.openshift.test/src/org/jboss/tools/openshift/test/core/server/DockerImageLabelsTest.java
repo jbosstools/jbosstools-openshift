@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.test.core.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,135 +44,135 @@ import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 @RunWith(MockitoJUnitRunner.class)
 public class DockerImageLabelsTest {
 
-	private static final String NODEJS_IMAGESTREAM_TAG_URL = "/imageStreamTag_nodejs_latest.json";
-	
-	private Connection connection;
-	private IDeploymentConfig dc;
-	private TestableDockerImageLabels labels;
-	private TestableDockerImageLabels labelsThatFailsToLoad;
+    private static final String NODEJS_IMAGESTREAM_TAG_URL = "/imageStreamTag_nodejs_latest.json";
 
-	@Before
-	public void setup() throws IOException {		
-		this.connection = createConnection("https://localhost:8181", "aUser");
+    private Connection connection;
+    private IDeploymentConfig dc;
+    private TestableDockerImageLabels labels;
+    private TestableDockerImageLabels labelsThatFailsToLoad;
 
-		this.labelsThatFailsToLoad = spy(new TestableDockerImageLabels(null, connection));
+    @Before
+    public void setup() throws IOException {
+        this.connection = createConnection("https://localhost:8181", "aUser");
 
-		this.dc = ResourceMocks.createDeploymentConfig("aDeploymentConfig", ResourceMocks.createProject("aProject"), null, null);		
-		IDeploymentImageChangeTrigger trigger = ResourceMocks.createDeploymentImageChangeTrigger(DeploymentTriggerType.IMAGE_CHANGE, "nodejs:latest");
-		ResourceMocks.mockGetTriggers(Collections.singletonList(trigger), dc);
+        this.labelsThatFailsToLoad = spy(new TestableDockerImageLabels(null, connection));
 
-		IResource imageStreamTag = mockImageStreamTag(NODEJS_IMAGESTREAM_TAG_URL);
-		doReturn(imageStreamTag).when(connection).getResource(eq(ResourceKind.IMAGE_STREAM_TAG), anyString(), anyString());
+        this.dc = ResourceMocks.createDeploymentConfig("aDeploymentConfig", ResourceMocks.createProject("aProject"), null, null);
+        IDeploymentImageChangeTrigger trigger = ResourceMocks.createDeploymentImageChangeTrigger(DeploymentTriggerType.IMAGE_CHANGE,
+                "nodejs:latest");
+        ResourceMocks.mockGetTriggers(Collections.singletonList(trigger), dc);
 
-		this.labels = spy(new TestableDockerImageLabels(dc, connection));
-	}
+        IResource imageStreamTag = mockImageStreamTag(NODEJS_IMAGESTREAM_TAG_URL);
+        doReturn(imageStreamTag).when(connection).getResource(eq(ResourceKind.IMAGE_STREAM_TAG), anyString(), anyString());
 
-	private IResource mockImageStreamTag(String url) throws IOException {
-		IResource imageStreamTag = mock(IResource.class);
-		doReturn(IOUtils.toString(DockerImageLabelsTest.class.getResourceAsStream(url))).when(imageStreamTag).toJson();
-		return imageStreamTag;
-	}
+        this.labels = spy(new TestableDockerImageLabels(dc, connection));
+    }
 
+    private IResource mockImageStreamTag(String url) throws IOException {
+        IResource imageStreamTag = mock(IResource.class);
+        doReturn(IOUtils.toString(DockerImageLabelsTest.class.getResourceAsStream(url))).when(imageStreamTag).toJson();
+        return imageStreamTag;
+    }
 
-	@Test
-	public void shouldNotBeAvailableGivenItIsNotLoaded() throws CoreException {
-		// given
-		// when
-		boolean available = labels.isAvailable();
-		// then
-		assertThat(available).isFalse();
-		verify(labels, never()).load();
-	}
+    @Test
+    public void shouldNotBeAvailableGivenItIsNotLoaded() throws CoreException {
+        // given
+        // when
+        boolean available = labels.isAvailable();
+        // then
+        assertThat(available).isFalse();
+        verify(labels, never()).load();
+    }
 
-	@Test
-	public void loadShouldReturnFalseGivenLoadFails() throws CoreException {
-		// given
-		// when
-		boolean success = labelsThatFailsToLoad.load();
-		// then
-		assertThat(success).isFalse();
-	}
+    @Test
+    public void loadShouldReturnFalseGivenLoadFails() throws CoreException {
+        // given
+        // when
+        boolean success = labelsThatFailsToLoad.load();
+        // then
+        assertThat(success).isFalse();
+    }
 
-	@Test
-	public void shouldNotBeAvailableGivenLoadFailsToLoadMetadata() throws CoreException {
-		// given
-		// when
-		labelsThatFailsToLoad.load();
-		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
-		assertThat(labels.isAvailable()).isFalse();
-	}
+    @Test
+    public void shouldNotBeAvailableGivenLoadFailsToLoadMetadata() throws CoreException {
+        // given
+        // when
+        labelsThatFailsToLoad.load();
+        // then
+        verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+        assertThat(labels.isAvailable()).isFalse();
+    }
 
-	@Test
-	public void shouldTryToLoadGivenDevmodeKeyIsRequested() throws CoreException {
-		// given
-		// when
-		String devmodeKey = labelsThatFailsToLoad.getDevmodeKey();
-		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
-		assertThat(devmodeKey).isNull();
-	}
+    @Test
+    public void shouldTryToLoadGivenDevmodeKeyIsRequested() throws CoreException {
+        // given
+        // when
+        String devmodeKey = labelsThatFailsToLoad.getDevmodeKey();
+        // then
+        verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+        assertThat(devmodeKey).isNull();
+    }
 
-	@Test
-	public void shouldTryToLoadAgainGivenPriorLoadFailed() throws CoreException {
-		// given
-		// when
-		labelsThatFailsToLoad.getDevmodeKey();
-		labelsThatFailsToLoad.getDevmodeKey();
-		// then
-		verify(labelsThatFailsToLoad, times(2)).load(any(IResource.class));
-	}
+    @Test
+    public void shouldTryToLoadAgainGivenPriorLoadFailed() throws CoreException {
+        // given
+        // when
+        labelsThatFailsToLoad.getDevmodeKey();
+        labelsThatFailsToLoad.getDevmodeKey();
+        // then
+        verify(labelsThatFailsToLoad, times(2)).load(any(IResource.class));
+    }
 
-	@Test
-	public void shouldNotLoadAgainGivenPriorLoadSucceeded() throws CoreException {
-		// given
-		// when
-		labels.getDevmodeKey();
-		labels.getDevmodeKey();
-		// then
-		verify(labels, times(1)).load(any(IResource.class));
-	}
+    @Test
+    public void shouldNotLoadAgainGivenPriorLoadSucceeded() throws CoreException {
+        // given
+        // when
+        labels.getDevmodeKey();
+        labels.getDevmodeKey();
+        // then
+        verify(labels, times(1)).load(any(IResource.class));
+    }
 
-	@Test
-	public void shouldTryToLoadGivenDevmodePortKeyIsRequested() throws CoreException {
-		// given
-		// when
-		String devmodePortKey = labelsThatFailsToLoad.getDevmodePortKey();
-		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
-		assertThat(devmodePortKey).isNull();
-	}
+    @Test
+    public void shouldTryToLoadGivenDevmodePortKeyIsRequested() throws CoreException {
+        // given
+        // when
+        String devmodePortKey = labelsThatFailsToLoad.getDevmodePortKey();
+        // then
+        verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+        assertThat(devmodePortKey).isNull();
+    }
 
-	@Test
-	public void shouldTryToLoadGivenDevmodePortValueIsRequested() throws CoreException {
-		// given
-		// when
-		String devmodePortValue = labelsThatFailsToLoad.getDevmodePortValue();
-		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
-		assertThat(devmodePortValue).isNull();
-	}
+    @Test
+    public void shouldTryToLoadGivenDevmodePortValueIsRequested() throws CoreException {
+        // given
+        // when
+        String devmodePortValue = labelsThatFailsToLoad.getDevmodePortValue();
+        // then
+        verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+        assertThat(devmodePortValue).isNull();
+    }
 
-	@Test
-	public void shouldTryToLoadGivenPodPathIsRequested() throws CoreException {
-		// given
-		// when
-		String podPath = labelsThatFailsToLoad.getPodPath();
-		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
-		assertThat(podPath).isNull();
-	}
+    @Test
+    public void shouldTryToLoadGivenPodPathIsRequested() throws CoreException {
+        // given
+        // when
+        String podPath = labelsThatFailsToLoad.getPodPath();
+        // then
+        verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+        assertThat(podPath).isNull();
+    }
 
-	public class TestableDockerImageLabels extends DockerImageLabels {
+    public class TestableDockerImageLabels extends DockerImageLabels {
 
-		protected TestableDockerImageLabels(IResource resource, Connection connection) {
-			super(resource, connection);
-		}
+        protected TestableDockerImageLabels(IResource resource, Connection connection) {
+            super(resource, connection);
+        }
 
-		@Override
-		protected String load(IResource resource) {
-			return super.load(resource);
-		}
-		
-	}
+        @Override
+        protected String load(IResource resource) {
+            return super.load(resource);
+        }
+
+    }
 }

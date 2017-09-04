@@ -28,71 +28,69 @@ import com.openshift.restclient.model.IServicePort;
  */
 public class DeploymentPropertySource implements IPropertySource {
 
-	private IServiceWrapper deployment;
+    private IServiceWrapper deployment;
 
-	public DeploymentPropertySource(IServiceWrapper deployment) {
-		this.deployment = deployment;
-	}
+    public DeploymentPropertySource(IServiceWrapper deployment) {
+        this.deployment = deployment;
+    }
 
-	@Override
-	public Object getEditableValue() {
-		return null;
-	}
+    @Override
+    public Object getEditableValue() {
+        return null;
+    }
 
-	@Override
-	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new ExtTextPropertyDescriptor("service.name", "Name", "Service"),
-				new ExtTextPropertyDescriptor("service.port", "Port Mapping", "Service"),
-				new ExtTextPropertyDescriptor("service.route", "Route", "Service"),
-				new ExtTextPropertyDescriptor("deployment.name", "Name", "Deployment"),
-				new ExtTextPropertyDescriptor("deployment.date", "Date", "Deployment"),
-				new UneditablePropertyDescriptor("pods", "Pods") //running, pending, succeeded/ failed/ unknown
-		};
-	}
-	
-//	private Collection<IPropertyDescriptor> getPodStatusDescriptors(){
-//		Set<IPropertyDescriptor> status = new HashSet<>();
-//		for (IPod pod : deployment.getPods()) {
-//			status.add(new ExtTextPropertyDescriptor("pod", pod.getStatus(), "Pods"));
-//		}
-//		return status;
-//	}
+    @Override
+    public IPropertyDescriptor[] getPropertyDescriptors() {
+        return new IPropertyDescriptor[] { new ExtTextPropertyDescriptor("service.name", "Name", "Service"),
+                new ExtTextPropertyDescriptor("service.port", "Port Mapping", "Service"),
+                new ExtTextPropertyDescriptor("service.route", "Route", "Service"),
+                new ExtTextPropertyDescriptor("deployment.name", "Name", "Deployment"),
+                new ExtTextPropertyDescriptor("deployment.date", "Date", "Deployment"), new UneditablePropertyDescriptor("pods", "Pods") //running, pending, succeeded/ failed/ unknown
+        };
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		switch((String)id) {
-		case "service.name":
-			return deployment.getWrapped().getName();
-		case "service.port":
-			List<IServicePort> ports = deployment.getWrapped().getPorts();
-			if(ports.size() > 0) {
-				IServicePort port = ports.get(0);
-				return NLS.bind("{0}/{1}->{2}", new Object[] { port.getPort(), port.getProtocol(), port.getTargetPort()});
-			}
-			break;
-		case "service.route":
-		case "deployment.name":
-//			return NLS.bind("", deployment.get)
-		case "deployment.date":
-			
-		case "pods":
-			return deployment.getResourcesOfKind(ResourceKind.POD).size();
-		}
-		return null;
-	}
+    //	private Collection<IPropertyDescriptor> getPodStatusDescriptors(){
+    //		Set<IPropertyDescriptor> status = new HashSet<>();
+    //		for (IPod pod : deployment.getPods()) {
+    //			status.add(new ExtTextPropertyDescriptor("pod", pod.getStatus(), "Pods"));
+    //		}
+    //		return status;
+    //	}
 
-	@Override
-	public boolean isPropertySet(Object id) {
-		return false;
-	}
+    @Override
+    public Object getPropertyValue(Object id) {
+        switch ((String)id) {
+        case "service.name":
+            return deployment.getWrapped().getName();
+        case "service.port":
+            List<IServicePort> ports = deployment.getWrapped().getPorts();
+            if (ports.size() > 0) {
+                IServicePort port = ports.get(0);
+                return NLS.bind("{0}/{1}->{2}", new Object[] { port.getPort(), port.getProtocol(), port.getTargetPort() });
+            }
+            break;
+        case "service.route":
+        case "deployment.name":
+            //			return NLS.bind("", deployment.get)
+        case "deployment.date":
 
-	@Override
-	public void resetPropertyValue(Object id) {
-	}
+        case "pods":
+            return deployment.getResourcesOfKind(ResourceKind.POD).size();
+        }
+        return null;
+    }
 
-	@Override
-	public void setPropertyValue(Object id, Object value) {
-	}
+    @Override
+    public boolean isPropertySet(Object id) {
+        return false;
+    }
+
+    @Override
+    public void resetPropertyValue(Object id) {
+    }
+
+    @Override
+    public void setPropertyValue(Object id, Object value) {
+    }
 
 }

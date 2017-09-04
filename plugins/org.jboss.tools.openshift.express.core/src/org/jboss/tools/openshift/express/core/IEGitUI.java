@@ -23,17 +23,17 @@ import org.eclipse.core.runtime.jobs.Job;
  */
 public interface IEGitUI {
 
-	/**
-	 * Opens the EGit Commit dialog and performs the commit for the given
-	 * project unless the users cancels it. The commit is performed in a
-	 * background job and thus operations that rely on commit completion can be
-	 * executed in the given job change listener.
-	 * 
-	 * @param project
-	 * @param remote 
-	 * @param commitJobListener
-	 * @throws CoreException
-	 */
-	public void publish(IProject project, String remote, String applicationName, Job job) throws CoreException;
+    /**
+     * Opens the EGit Commit dialog and performs the commit for the given
+     * project unless the users cancels it. The commit is performed in a
+     * background job and thus operations that rely on commit completion can be
+     * executed in the given job change listener.
+     * 
+     * @param project
+     * @param remote 
+     * @param commitJobListener
+     * @throws CoreException
+     */
+    public void publish(IProject project, String remote, String applicationName, Job job) throws CoreException;
 
 }

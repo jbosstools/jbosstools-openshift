@@ -18,19 +18,19 @@ import org.jboss.tools.foundation.core.plugin.log.IPluginLog;
  */
 public class OpenShiftNodejsActivator extends BaseCorePlugin {
 
-	public static final String PLUGIN_ID = "org.jboss.tools.openshift.js"; //$NON-NLS-1$
-	private static OpenShiftNodejsActivator instance;
+    public static final String PLUGIN_ID = "org.jboss.tools.openshift.js"; //$NON-NLS-1$
+    private static OpenShiftNodejsActivator instance;
 
-	public OpenShiftNodejsActivator() {
-		super();
-		instance = this;
-	}
+    public OpenShiftNodejsActivator() {
+        super();
+        instance = this;
+    }
 
-	public IPluginLog getLogger() {
-		return pluginLogInternal();
-	}
+    public IPluginLog getLogger() {
+        return pluginLogInternal();
+    }
 
-	public static OpenShiftNodejsActivator getDefault() {
-	    return instance;
-	}
+    public static OpenShiftNodejsActivator getDefault() {
+        return instance;
+    }
 }

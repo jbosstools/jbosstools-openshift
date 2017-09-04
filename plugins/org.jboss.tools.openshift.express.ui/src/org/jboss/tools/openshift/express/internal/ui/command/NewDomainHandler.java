@@ -24,15 +24,15 @@ import org.jboss.tools.openshift.express.internal.ui.wizard.domain.NewDomainWiza
  */
 public class NewDomainHandler extends AbstractDomainHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ExpressConnection connection = getConnection(event);
-		if (connection == null) {
-			return null;
-		}
-		if (WizardUtils.openWizardDialog(new NewDomainWizard(connection), HandlerUtil.getActiveShell(event)) == Window.OK) {
-			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
-		}
-		return null;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        ExpressConnection connection = getConnection(event);
+        if (connection == null) {
+            return null;
+        }
+        if (WizardUtils.openWizardDialog(new NewDomainWizard(connection), HandlerUtil.getActiveShell(event)) == Window.OK) {
+            ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
+        }
+        return null;
+    }
 }

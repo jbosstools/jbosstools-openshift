@@ -30,41 +30,24 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class DockerImageValidatorTest {
 
-  private DockerImageValidator validator = new DockerImageValidator();
+    private DockerImageValidator validator = new DockerImageValidator();
 
-  @Parameters(name = "{index}: validate({0})={1}")
+    @Parameters(name = "{index}: validate({0})={1}")
     public static Collection<Object[]> data() {
-      Map<String, Boolean> dataSet = new LinkedHashMap<>();
-      dataSet.putAll(getData(Arrays.asList(
-          "foo",
-          "foo/name",
-          "foo.bar/name",
-          "foo.bar/namespace/name",
-          "foo.bar.io/namespace/name",
-          "127.0.0.1:1234/namespace/name",
-          "127.0.0.1:1/namespace/name:tag",
-          "127.0.0.1:5000/foo",
-          "foo:bar",
-          "jboss/wildfly:h23gfsd23"
+        Map<String, Boolean> dataSet = new LinkedHashMap<>();
+        dataSet.putAll(getData(Arrays.asList("foo", "foo/name", "foo.bar/name", "foo.bar/namespace/name", "foo.bar.io/namespace/name",
+                "127.0.0.1:1234/namespace/name", "127.0.0.1:1/namespace/name:tag", "127.0.0.1:5000/foo", "foo:bar",
+                "jboss/wildfly:h23gfsd23"
 
-      ), Boolean.TRUE));
-      dataSet.putAll(getData(Arrays.asList(
-          "https://foo.bar/namespace/name",
-          "foo/Name",
-          "-foo",
-          "bar/foo-",
-          "-foo.io/bar/name",
-          "foo///name",
-          "foo.io/bar/Name",
-          "foo.io/bar///name",
-          "jbo:ss/wildfly:h23gfsd23",
-          "jboss/wildfly:h23gf&sd23"
-      ), Boolean.FALSE));
-      return dataSet.entrySet().stream().map(e -> new Object[] {e.getKey(), e.getValue()}).collect(Collectors.toList());
+        ), Boolean.TRUE));
+        dataSet.putAll(
+                getData(Arrays.asList("https://foo.bar/namespace/name", "foo/Name", "-foo", "bar/foo-", "-foo.io/bar/name", "foo///name",
+                        "foo.io/bar/Name", "foo.io/bar///name", "jbo:ss/wildfly:h23gfsd23", "jboss/wildfly:h23gf&sd23"), Boolean.FALSE));
+        return dataSet.entrySet().stream().map(e -> new Object[] { e.getKey(), e.getValue() }).collect(Collectors.toList());
     }
 
     private static Map<String, Boolean> getData(Collection<String> elements, Boolean result) {
-      return elements.stream().collect(Collectors.toMap(Function.identity(), s -> result));
+        return elements.stream().collect(Collectors.toMap(Function.identity(), s -> result));
     }
 
     @Parameter

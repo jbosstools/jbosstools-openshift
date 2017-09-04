@@ -13,20 +13,19 @@ package org.jboss.tools.openshift.reddeer.preference.page;
 import org.jboss.reddeer.jface.preference.PreferencePage;
 import org.jboss.reddeer.swt.impl.button.CheckBox;
 
-
 /**
  * Just a stub representing JavaDebugPreferencePage
  * @author rhopp
  *
  */
-public class JavaDebugPreferencePage extends PreferencePage{
-	
+public class JavaDebugPreferencePage extends PreferencePage {
+
 	public JavaDebugPreferencePage() {
 		super("Java", "Debug");
 	}
 
-	public void setSuspendOnUncaughtExceptions(boolean checked){
+	public void setSuspendOnUncaughtExceptions(boolean checked) {
 		new CheckBox("Suspend execution on uncaught exceptions").toggle(checked);
 	}
-	
+
 }

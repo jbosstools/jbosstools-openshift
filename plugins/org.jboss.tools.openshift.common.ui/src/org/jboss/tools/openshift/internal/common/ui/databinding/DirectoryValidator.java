@@ -21,20 +21,20 @@ import org.eclipse.osgi.util.NLS;
  */
 public class DirectoryValidator extends RequiredStringValidator {
 
-	public DirectoryValidator(String fieldName) {
-		super(fieldName);
-	}
+    public DirectoryValidator(String fieldName) {
+        super(fieldName);
+    }
 
-	@Override
-	public IStatus validateString(String value) {
-		File directory = new File(value);
-		if (!directory.isDirectory()) {
-			return ValidationStatus.error(NLS.bind("{0} is not a directory.", value));
-		}
-		if (!directory.exists()) {
-			return ValidationStatus.error(NLS.bind("The directory {0} does not exist.", directory));
-		}
-		return ValidationStatus.ok();
-	}
+    @Override
+    public IStatus validateString(String value) {
+        File directory = new File(value);
+        if (!directory.isDirectory()) {
+            return ValidationStatus.error(NLS.bind("{0} is not a directory.", value));
+        }
+        if (!directory.exists()) {
+            return ValidationStatus.error(NLS.bind("The directory {0} does not exist.", directory));
+        }
+        return ValidationStatus.ok();
+    }
 
 }

@@ -17,48 +17,47 @@ import java.util.Collection;
  */
 public class CollectionUtils {
 
-	/**
-	 * Adds the given element to the given collection.
-	 * 
-	 * @param element the element to add
-	 * @param collection the collection to add to
-	 * @return
-	 */
-	public static <C extends Collection<E>, E> C addTo(E element, C collection) {
-		collection.add(element);
-		return collection;
-	}
-	
-	/**
-	 * Adds all elements withing the given collection to the given other collection
-	 * 
-	 * @param toAdd all elements that should get add
-	 * @param collection
-	 * @return
-	 */
-	public static <C extends Collection<E>, E> C addAllTo(C toAdd, C collection) {
-		collection.addAll(toAdd);
-		return collection;
-	}
+    /**
+     * Adds the given element to the given collection.
+     * 
+     * @param element the element to add
+     * @param collection the collection to add to
+     * @return
+     */
+    public static <C extends Collection<E>, E> C addTo(E element, C collection) {
+        collection.add(element);
+        return collection;
+    }
 
-	/**
-	 * Removes all given elements from the given other collection.
-	 * 
-	 * @param toRemove
-	 * @param cartridges
-	 * @return
-	 */
-	public static <C extends Collection<E>, E> C removeAll(C toRemove, C cartridges) {
-		cartridges.removeAll(toRemove);
-		return cartridges;
-	}
+    /**
+     * Adds all elements withing the given collection to the given other collection
+     * 
+     * @param toAdd all elements that should get add
+     * @param collection
+     * @return
+     */
+    public static <C extends Collection<E>, E> C addAllTo(C toAdd, C collection) {
+        collection.addAll(toAdd);
+        return collection;
+    }
 
-	public static <T> T getFirstElement(Collection<T> collection) {
-		if (collection == null
-				|| collection.isEmpty()) {
-			return null;
-		}
-		
-		return collection.iterator().next();
-	}
+    /**
+     * Removes all given elements from the given other collection.
+     * 
+     * @param toRemove
+     * @param cartridges
+     * @return
+     */
+    public static <C extends Collection<E>, E> C removeAll(C toRemove, C cartridges) {
+        cartridges.removeAll(toRemove);
+        return cartridges;
+    }
+
+    public static <T> T getFirstElement(Collection<T> collection) {
+        if (collection == null || collection.isEmpty()) {
+            return null;
+        }
+
+        return collection.iterator().next();
+    }
 }

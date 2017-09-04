@@ -17,18 +17,18 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
 
 public class OpenshiftJMXLabelProvider extends LabelProvider {
 
-	public OpenshiftJMXLabelProvider() {
-		// TODO Auto-generated constructor stub
-	}
+    public OpenshiftJMXLabelProvider() {
+        // TODO Auto-generated constructor stub
+    }
 
-	@Override
-	public Image getImage(Object element) {
-		return OpenShiftImages.OPENSHIFT_LOGO_IMG;
-	}
+    @Override
+    public Image getImage(Object element) {
+        return OpenShiftImages.OPENSHIFT_LOGO_IMG;
+    }
 
-	@Override
-	public String getText(Object element) {
-		return ((JolokiaConnectionWrapper)element).getName();
-	}
+    @Override
+    public String getText(Object element) {
+        return ((JolokiaConnectionWrapper)element).getName();
+    }
 
 }

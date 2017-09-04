@@ -27,7 +27,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
  *
  */
 public class EnvironmentVariableWizardPage {
-	
+
 	/**
 	 * Removes environment.
 	 * 
@@ -38,15 +38,15 @@ public class EnvironmentVariableWizardPage {
 		DefaultTable table = new DefaultTable();
 		table.select(envVar.getName());
 		new PushButton(OpenShiftLabel.Button.REMOVE_BASIC).click();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.REMOVE_ENV_VAR);
 		new YesButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.REMOVE_ENV_VAR));
-		
+
 		return !(table.containsItem(envVar.getName(), 0) && table.containsItem(envVar.getValue(), 1));
 	}
-	
+
 	/**
 	 * Creates a new environment variable.
 	 * 
@@ -56,18 +56,18 @@ public class EnvironmentVariableWizardPage {
 	public boolean addEnvironmentVariable(EnvVar envVar) {
 		DefaultTable table = new DefaultTable();
 		new PushButton(OpenShiftLabel.Button.ADD).click();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.ENVIRONMENT_VARIABLE);
-		
+
 		new LabeledText("Name:").setText(envVar.getName());
 		new LabeledText("Value:").setText(envVar.getValue());
 		new OkButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.ENVIRONMENT_VARIABLE));
-		
+
 		return table.containsItem(envVar.getName(), 0) && table.containsItem(envVar.getValue(), 1);
 	}
-	
+
 	/**
 	 * Changes an existing environment variable to have new values.
 	 * New and old environment variables passed as arguments should be different
@@ -81,7 +81,7 @@ public class EnvironmentVariableWizardPage {
 		DefaultTable table = new DefaultTable();
 		table.getItem(oldVar.getName()).select();
 		new PushButton(OpenShiftLabel.Button.EDIT).click();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.ENVIRONMENT_VARIABLE);
 		LabeledText name = new LabeledText(OpenShiftLabel.TextLabels.NAME);
 		if (!name.isReadOnly()) {
@@ -89,13 +89,13 @@ public class EnvironmentVariableWizardPage {
 		}
 		new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText(newVar.getValue());
 		new OkButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.ENVIRONMENT_VARIABLE));
-		
-		return (table.containsItem(newVar.getName(), 0) && table.containsItem(newVar.getValue(), 1)) &&
-				!(table.containsItem(oldVar.getName(), 0) && table.containsItem(oldVar.getValue(), 1)); 
+
+		return (table.containsItem(newVar.getName(), 0) && table.containsItem(newVar.getValue(), 1))
+				&& !(table.containsItem(oldVar.getName(), 0) && table.containsItem(oldVar.getValue(), 1));
 	}
-	
+
 	/**
 	 * Resets environment variable to its default state.
 	 * 
@@ -106,17 +106,17 @@ public class EnvironmentVariableWizardPage {
 	public boolean resetEnvironmentVariable(EnvVar changedVar, EnvVar defaultVar) {
 		DefaultTable table = new DefaultTable();
 		table.getItem(changedVar.getName()).select();
-		
+
 		new PushButton(OpenShiftLabel.Button.RESET).click();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.RESET_ENV_VAR);
 		new YesButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.RESET_ENV_VAR));
-		
+
 		return table.containsItem(defaultVar.getName(), 0) && table.containsItem(defaultVar.getValue(), 1);
 	}
-	
+
 	/**
 	 * Resets all edited environment variables and check whether default variables passed as argument are 
 	 * displayed in the table.
@@ -127,15 +127,15 @@ public class EnvironmentVariableWizardPage {
 	public boolean resetAllVariables(EnvVar... envVars) {
 		DefaultTable table = new DefaultTable();
 		new PushButton(OpenShiftLabel.Button.RESET_ALL).click();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.RESET_ENV_VAR);
 		new YesButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.RESET_ENV_VAR));
-		
+
 		// If any of environment variables passed as argument were not reset, return false
 		if (envVars != null && envVars.length > 0) {
-			for (EnvVar envVar: envVars) {
+			for (EnvVar envVar : envVars) {
 				if (!(table.containsItem(envVar.getName(), 0) && (table.containsItem(envVar.getValue(), 1)))) {
 					return false;
 				}
@@ -143,7 +143,7 @@ public class EnvironmentVariableWizardPage {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Object representing environment variable pair name:value.
 	 * 
@@ -151,19 +151,19 @@ public class EnvironmentVariableWizardPage {
 	 *
 	 */
 	public static class EnvVar {
-		
+
 		private String name;
 		private String value;
-		
+
 		public EnvVar(String name, String value) {
 			this.name = name;
 			this.value = value;
 		}
-		
+
 		public String getName() {
 			return name;
 		}
-		
+
 		public String getValue() {
 			return value;
 		}

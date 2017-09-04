@@ -24,24 +24,24 @@ import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProv
  */
 public class ObservableTreeItemStyledCellLabelProvider extends StyledCellLabelProvider {
 
-	private OpenShiftExplorerLabelProvider explorerLabelProvider;
+    private OpenShiftExplorerLabelProvider explorerLabelProvider;
 
-	public ObservableTreeItemStyledCellLabelProvider() {
-		this.explorerLabelProvider = new OpenShiftExplorerLabelProvider();
-		this.explorerLabelProvider.setLabelLimit(100);
-	}
+    public ObservableTreeItemStyledCellLabelProvider() {
+        this.explorerLabelProvider = new OpenShiftExplorerLabelProvider();
+        this.explorerLabelProvider.setLabelLimit(100);
+    }
 
-	@Override
-	public void update(ViewerCell cell) {
-		Object element = cell.getElement();
-		if (!(element instanceof ObservableTreeItem)) {
-			return;
-		}
-		ObservableTreeItem item = (ObservableTreeItem) element;
-		StyledString styledText = explorerLabelProvider.getStyledText(item.getModel());
-		cell.setText(styledText.getString());
-		cell.setStyleRanges(styledText.getStyleRanges());
-		Image image = explorerLabelProvider.getImage(item.getModel());
-		cell.setImage(image);
-	}
+    @Override
+    public void update(ViewerCell cell) {
+        Object element = cell.getElement();
+        if (!(element instanceof ObservableTreeItem)) {
+            return;
+        }
+        ObservableTreeItem item = (ObservableTreeItem)element;
+        StyledString styledText = explorerLabelProvider.getStyledText(item.getModel());
+        cell.setText(styledText.getString());
+        cell.setStyleRanges(styledText.getStyleRanges());
+        Image image = explorerLabelProvider.getImage(item.getModel());
+        cell.setImage(image);
+    }
 }

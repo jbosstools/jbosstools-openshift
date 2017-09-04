@@ -23,72 +23,72 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public abstract class AbstractApplicationTemplate extends ObservablePojo implements IApplicationTemplate {
 
-	private String name;
-	private String description; 
+    private String name;
+    private String description;
 
-	protected AbstractApplicationTemplate(String name, String description, IApplicationTemplate... children) {
-		this.name = name;
-		this.description = description;
-	}
+    protected AbstractApplicationTemplate(String name, String description, IApplicationTemplate... children) {
+        this.name = name;
+        this.description = description;
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public void setName(String name) {
-		firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
-	}
-	
-	@Override
-	public String getDescription() {
-		return description;
-	}
-	
-	@Override
-	public Set<ICartridge> getAllCartridges() {
-		return Collections.emptySet();
-	}
+    @Override
+    public void setName(String name) {
+        firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
+    }
 
-	@Override
-	public Set<ICartridge> getEmbeddedCartridges() {
-		return Collections.emptySet();
-	}
+    @Override
+    public String getDescription() {
+        return description;
+    }
 
-	@Override
-	public ICartridge getStandaloneCartridge() {
-		return null;
-	}
+    @Override
+    public Set<ICartridge> getAllCartridges() {
+        return Collections.emptySet();
+    }
 
-	@Override
-	public String getInitialGitUrl() {
-		return null;
-	}
+    @Override
+    public Set<ICartridge> getEmbeddedCartridges() {
+        return Collections.emptySet();
+    }
 
-	@Override
-	public boolean isMatching(String expression) {
-		if (StringUtils.isEmpty(expression)) {
-			return true;
-		}
+    @Override
+    public ICartridge getStandaloneCartridge() {
+        return null;
+    }
 
-		String lowerCaseExpression = StringUtils.toLowerCase(expression);
-		
-		return isMatching(lowerCaseExpression, StringUtils.toLowerCase(getName()))
-				|| isMatching(lowerCaseExpression, StringUtils.toLowerCase(getDescription()));
-	}
-	
-	protected boolean isMatching(String expression, String toMatch) {
-		if (StringUtils.isEmpty(toMatch)) {
-			return false;
-		}
-		
-		return toMatch.indexOf(expression) >= 0;
-	}
+    @Override
+    public String getInitialGitUrl() {
+        return null;
+    }
 
-	@Override
-	public boolean canCreateApplication() {
-		return true;
-	}
+    @Override
+    public boolean isMatching(String expression) {
+        if (StringUtils.isEmpty(expression)) {
+            return true;
+        }
+
+        String lowerCaseExpression = StringUtils.toLowerCase(expression);
+
+        return isMatching(lowerCaseExpression, StringUtils.toLowerCase(getName()))
+                || isMatching(lowerCaseExpression, StringUtils.toLowerCase(getDescription()));
+    }
+
+    protected boolean isMatching(String expression, String toMatch) {
+        if (StringUtils.isEmpty(toMatch)) {
+            return false;
+        }
+
+        return toMatch.indexOf(expression) >= 0;
+    }
+
+    @Override
+    public boolean canCreateApplication() {
+        return true;
+    }
 
 }

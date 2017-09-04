@@ -23,23 +23,24 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedD
  */
 public class ConnectionEditorsStackedView extends AbstractStackedDetailViews {
 
-	private static final String CONNECTION_EDITORS_EXTENSION = "org.jboss.tools.openshift.ui.connectionEditor";
-	private static final String ATTRIBUTE_CLASS = "class";
+    private static final String CONNECTION_EDITORS_EXTENSION = "org.jboss.tools.openshift.ui.connectionEditor";
+    private static final String ATTRIBUTE_CLASS = "class";
 
-	private Collection<IConnectionEditor> connectionEditors;
+    private Collection<IConnectionEditor> connectionEditors;
 
-	ConnectionEditorsStackedView(IObservableValue<?> detailViewModel, ConnectionWizardPage wizardPage, Composite parent, DataBindingContext dbc) {
-		super(detailViewModel, wizardPage, parent, dbc);
-		this.connectionEditors = getConnectionEditors();
-	}
+    ConnectionEditorsStackedView(IObservableValue<?> detailViewModel, ConnectionWizardPage wizardPage, Composite parent,
+            DataBindingContext dbc) {
+        super(detailViewModel, wizardPage, parent, dbc);
+        this.connectionEditors = getConnectionEditors();
+    }
 
-	@Override
-	protected IDetailView[] getDetailViews() {
-		return connectionEditors.toArray(new IConnectionEditor[connectionEditors.size()]);
-	}
-	
-	private Collection<IConnectionEditor> getConnectionEditors() {
-		return ExtensionUtils.getExtensions(CONNECTION_EDITORS_EXTENSION, ATTRIBUTE_CLASS);
-	}
+    @Override
+    protected IDetailView[] getDetailViews() {
+        return connectionEditors.toArray(new IConnectionEditor[connectionEditors.size()]);
+    }
+
+    private Collection<IConnectionEditor> getConnectionEditors() {
+        return ExtensionUtils.getExtensions(CONNECTION_EDITORS_EXTENSION, ATTRIBUTE_CLASS);
+    }
 
 }

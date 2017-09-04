@@ -25,54 +25,54 @@ import com.openshift.restclient.model.IProject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectViewerComparatorTest {
-	
-	private static final int LAST = 1;
-	private static final int FIRST = -1;
-	private static final int EQUAL = 0;
-	private ProjectViewerComparator comparator;
-	@Mock
-	private IProject projectOne;
-	@Mock
-	private IProject projectTwo;
 
-	@Before
-	public void setUp() throws Exception {
-		comparator = new ProjectViewerComparator();
-		when(projectOne.getName()).thenReturn("mmmm");
-		when(projectTwo.getName()).thenReturn("gggg");
-	}
-	
-	@Test
-	public void testDefaultProjectShouldAppearFirst() {
-		when(projectOne.getName()).thenReturn("openshift-infra");
-		when(projectTwo.getName()).thenReturn("default");
-		assertTrue(0  < comparator.compare(null, projectOne, projectTwo));
-	}
+    private static final int LAST = 1;
+    private static final int FIRST = -1;
+    private static final int EQUAL = 0;
+    private ProjectViewerComparator comparator;
+    @Mock
+    private IProject projectOne;
+    @Mock
+    private IProject projectTwo;
 
-	@Test
-	public void testOpenShiftProjectsShouldAppearBeforeOthers() {
-		when(projectTwo.getName()).thenReturn("openshift-infra");
-		assertTrue(0 < comparator.compare(null, projectOne, projectTwo));
-	}
+    @Before
+    public void setUp() throws Exception {
+        comparator = new ProjectViewerComparator();
+        when(projectOne.getName()).thenReturn("mmmm");
+        when(projectTwo.getName()).thenReturn("gggg");
+    }
 
-	@Test
-	public void testOtherProjectsShouldAppearInAlphabetical() {
-		assertTrue(0 < comparator.compare(null, projectOne, projectTwo));
-		assertTrue(0 > comparator.compare(null, projectTwo, projectOne));
-	}
-	
-	@Test
-	public void testWhenInstanceAreNotProjects() {
-		assertEquals(EQUAL, comparator.compare(null, "first", null));
-		assertEquals(EQUAL, comparator.compare(null, null, "second"));
-		assertEquals(LAST, comparator.compare(null, "first", projectOne));
-	}
+    @Test
+    public void testDefaultProjectShouldAppearFirst() {
+        when(projectOne.getName()).thenReturn("openshift-infra");
+        when(projectTwo.getName()).thenReturn("default");
+        assertTrue(0 < comparator.compare(null, projectOne, projectTwo));
+    }
 
-	@Test
-	public void testWhenInstanceAreNull() {
-		assertEquals(EQUAL, comparator.compare(null, null, null));
-		assertEquals(FIRST, comparator.compare(null, projectOne, null));
-		assertEquals(LAST, comparator.compare(null, null, projectOne));
-	}
+    @Test
+    public void testOpenShiftProjectsShouldAppearBeforeOthers() {
+        when(projectTwo.getName()).thenReturn("openshift-infra");
+        assertTrue(0 < comparator.compare(null, projectOne, projectTwo));
+    }
+
+    @Test
+    public void testOtherProjectsShouldAppearInAlphabetical() {
+        assertTrue(0 < comparator.compare(null, projectOne, projectTwo));
+        assertTrue(0 > comparator.compare(null, projectTwo, projectOne));
+    }
+
+    @Test
+    public void testWhenInstanceAreNotProjects() {
+        assertEquals(EQUAL, comparator.compare(null, "first", null));
+        assertEquals(EQUAL, comparator.compare(null, null, "second"));
+        assertEquals(LAST, comparator.compare(null, "first", projectOne));
+    }
+
+    @Test
+    public void testWhenInstanceAreNull() {
+        assertEquals(EQUAL, comparator.compare(null, null, null));
+        assertEquals(FIRST, comparator.compare(null, projectOne, null));
+        assertEquals(LAST, comparator.compare(null, null, projectOne));
+    }
 
 }

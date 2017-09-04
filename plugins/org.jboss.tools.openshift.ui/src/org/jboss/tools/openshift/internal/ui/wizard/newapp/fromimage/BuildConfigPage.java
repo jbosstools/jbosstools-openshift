@@ -43,205 +43,153 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceNameControl;
  */
 public class BuildConfigPage extends EnvironmentVariablePage {
 
-	public static final String PAGE_NAME = "Build Config Settings Page";
-	private static final String PAGE_TITLE = "Build Configuration";
-	private static final String PAGE_DESCRIPTION = "";
+    public static final String PAGE_NAME = "Build Config Settings Page";
+    private static final String PAGE_TITLE = "Build Configuration";
+    private static final String PAGE_DESCRIPTION = "";
 
-	private IBuildConfigPageModel model;
+    private IBuildConfigPageModel model;
 
-	public BuildConfigPage(IWizard wizard, IBuildConfigPageModel model) {
-		super(PAGE_TITLE, PAGE_DESCRIPTION, PAGE_NAME, wizard,  model.getEnvVariablesModel());
-		this.model = model;
-	}
+    public BuildConfigPage(IWizard wizard, IBuildConfigPageModel model) {
+        super(PAGE_TITLE, PAGE_DESCRIPTION, PAGE_NAME, wizard, model.getEnvVariablesModel());
+        this.model = model;
+    }
 
-	@Override
-	protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
-		model.init();
-	}
+    @Override
+    protected void onPageWillGetActivated(Direction direction, PageChangingEvent event, DataBindingContext dbc) {
+        model.init();
+    }
 
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().margins(10, 2).applyTo(parent);
-		
-		Composite nameParent = new Composite(parent, SWT.NONE);
-		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(nameParent);
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(nameParent);
-		//basename for resources
-		new ResourceNameControl("Name: ") {
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        GridLayoutFactory.fillDefaults().margins(10, 2).applyTo(parent);
 
-			@Override
-			protected void layoutLabel(Label resourceNameLabel) {
-				GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.CENTER)
-					.grab(false, false)
-					.applyTo(resourceNameLabel);
-			}
+        Composite nameParent = new Composite(parent, SWT.NONE);
+        GridLayoutFactory.fillDefaults().numColumns(3).applyTo(nameParent);
+        GridDataFactory.fillDefaults().grab(true, false).applyTo(nameParent);
+        //basename for resources
+        new ResourceNameControl("Name: ") {
 
-			@Override
-			protected void layoutText(Text resourceNameText) {
-				GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.grab(true, false)
-				.span(2, 1)
-				.applyTo(resourceNameText);
-			}
-			
-			
-		}.doCreateControl(nameParent, dbc, model);
-		createSeparator(parent);
-		
-		//git info
-		createSourceControls(parent, dbc);
-		createSeparator(parent);
-		
-		// build triggers
-		createTriggers(parent, dbc);
-		createSeparator(parent);
+            @Override
+            protected void layoutLabel(Label resourceNameLabel) {
+                GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(resourceNameLabel);
+            }
 
-		//Env Variables Block
-		createEnvVariableControl(parent, dbc, "Build environment variables (Build and Runtime):", "Environment variables are used to configure and pass information to running containers.  These environment variables will be available during your build and at runtime.");
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void createTriggers(Composite parent, DataBindingContext dbc) {
-		
-		Label triggerLabel = new Label(parent, SWT.NONE);
-		triggerLabel.setText("Build Triggers:");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.applyTo(triggerLabel);
-		
-		//webhook
-		Button webHookBtn = new Button(parent, SWT.CHECK);
-		webHookBtn.setText("Configure a webhook build trigger");
-		webHookBtn.setToolTipText("The source repository must be configured to use the webhook to trigger a build when source is committed.");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(webHookBtn);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(webHookBtn))
-			.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONFIG_WEB_HOOK)
-			.observe(model))
-			.in(dbc);
-		
-		//image change
-		Button imageChangeBtn = new Button(parent, SWT.CHECK);
-		imageChangeBtn.setText("Automatically build a new image when the builder image changes");
-		imageChangeBtn.setToolTipText("Automatically building a new image when the builder image changes allows your code to always run on the latest updates.");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(imageChangeBtn);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(imageChangeBtn))
-			.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_IMAGE_CHANGE_TRIGGER)
-			.observe(model))
-			.in(dbc);
-		
-		//build config change
-		Button configChangeBtn = new Button(parent, SWT.CHECK);
-		configChangeBtn.setText("Automatically build a new image when the build configuration changes");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(configChangeBtn);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(configChangeBtn))
-			.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONFIG_CHANGE_TRIGGER)
-			.observe(model))
-			.in(dbc);
-		
-	}
+            @Override
+            protected void layoutText(Text resourceNameText) {
+                GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(resourceNameText);
+            }
 
-	private void createSeparator(Composite parent) {
-		GridDataFactory
-			.fillDefaults()
-			.align(SWT.FILL, SWT.BEGINNING)
-			.grab(true, false)
-			.applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
-	}
+        }.doCreateControl(nameParent, dbc, model);
+        createSeparator(parent);
 
-	@SuppressWarnings({ "unchecked"})
-	private void createSourceControls(Composite root, DataBindingContext dbc) {
-		Composite parent = new Composite(root, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(parent);
-		GridLayoutFactory.fillDefaults().
-			numColumns(3).applyTo(parent);
-		
-		//url
-		Label gitUrlLabel = new Label(parent, SWT.NONE);
-		gitUrlLabel.setText("Git Repository URL:");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(false, false)
-			.applyTo(gitUrlLabel);
-		
-		final Text gitUrlText = new Text(parent, SWT.BORDER);
-		gitUrlText.setToolTipText("The URL to the Git repository.");
-		//TODO add 'try it' link here
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.span(2, 1)
-			.applyTo(gitUrlText);
+        //git info
+        createSourceControls(parent, dbc);
+        createSeparator(parent);
 
-		Binding gitUrlBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observeDelayed(500, gitUrlText))
-				.validatingAfterConvert(new IValidator() {
-					
-					@Override
-					public IStatus validate(Object value) {
-						if(UrlUtils.isValid((String) value)){
-							return Status.OK_STATUS;
-						}
-						return ValidationStatus.error("A valid URL to a Git repository is required");
-					}
-				})
-				.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_GIT_REPOSITORY_URL).observe(model))
-				.in(dbc);
-		ControlDecorationSupport.create(
-				gitUrlBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));		
+        // build triggers
+        createTriggers(parent, dbc);
+        createSeparator(parent);
 
-		//reference
-		Label gitReferenceLabel = new Label(parent, SWT.NONE);
-		gitReferenceLabel.setText("Git Reference:");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(false, false)
-			.applyTo(gitReferenceLabel);
-		gitReferenceLabel.setToolTipText("Optional branch, tag, or commit.");
+        //Env Variables Block
+        createEnvVariableControl(parent, dbc, "Build environment variables (Build and Runtime):",
+                "Environment variables are used to configure and pass information to running containers.  These environment variables will be available during your build and at runtime.");
+    }
 
-		final Text gitReferenceText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.span(2, 1)
-			.applyTo(gitReferenceText);
+    @SuppressWarnings("unchecked")
+    private void createTriggers(Composite parent, DataBindingContext dbc) {
 
-		IObservableValue gitReferenceTextObservable = WidgetProperties.text(SWT.Modify).observe(gitReferenceText);
-		GitReferenceValidator validator = new GitReferenceValidator(gitReferenceTextObservable);
-		Binding gitReferenceBinding = ValueBindingBuilder
-			.bind(gitReferenceTextObservable)
-			.validatingAfterConvert(validator)
-			.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_GIT_REFERENCE).observe(model))
-			.in(dbc);
-		dbc.addValidationStatusProvider(validator);
-		ControlDecorationSupport.create(
-				gitReferenceBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		
-		//context dir
-		Label contextDirLabel = new Label(parent, SWT.NONE);
-		contextDirLabel.setText("Context Directory:");
-		contextDirLabel.setToolTipText("Optional subdirectory for the application source code, used as the context directory for the build.");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(false, false)
-			.applyTo(contextDirLabel);
-		
-		final Text contextDirText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.span(2, 1)
-			.applyTo(contextDirText);
-		ValueBindingBuilder
-			.bind(WidgetProperties.text(SWT.Modify).observe(contextDirText))
-			.to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONTEXT_DIR).observe(model))
-			.in(dbc);
-	}
-	
+        Label triggerLabel = new Label(parent, SWT.NONE);
+        triggerLabel.setText("Build Triggers:");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(triggerLabel);
+
+        //webhook
+        Button webHookBtn = new Button(parent, SWT.CHECK);
+        webHookBtn.setText("Configure a webhook build trigger");
+        webHookBtn
+                .setToolTipText("The source repository must be configured to use the webhook to trigger a build when source is committed.");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(webHookBtn);
+        ValueBindingBuilder.bind(WidgetProperties.selection().observe(webHookBtn))
+                .to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONFIG_WEB_HOOK).observe(model)).in(dbc);
+
+        //image change
+        Button imageChangeBtn = new Button(parent, SWT.CHECK);
+        imageChangeBtn.setText("Automatically build a new image when the builder image changes");
+        imageChangeBtn.setToolTipText(
+                "Automatically building a new image when the builder image changes allows your code to always run on the latest updates.");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(imageChangeBtn);
+        ValueBindingBuilder.bind(WidgetProperties.selection().observe(imageChangeBtn))
+                .to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_IMAGE_CHANGE_TRIGGER).observe(model)).in(dbc);
+
+        //build config change
+        Button configChangeBtn = new Button(parent, SWT.CHECK);
+        configChangeBtn.setText("Automatically build a new image when the build configuration changes");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, false).applyTo(configChangeBtn);
+        ValueBindingBuilder.bind(WidgetProperties.selection().observe(configChangeBtn))
+                .to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONFIG_CHANGE_TRIGGER).observe(model)).in(dbc);
+
+    }
+
+    private void createSeparator(Composite parent) {
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false)
+                .applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    private void createSourceControls(Composite root, DataBindingContext dbc) {
+        Composite parent = new Composite(root, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(parent);
+        GridLayoutFactory.fillDefaults().numColumns(3).applyTo(parent);
+
+        //url
+        Label gitUrlLabel = new Label(parent, SWT.NONE);
+        gitUrlLabel.setText("Git Repository URL:");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(gitUrlLabel);
+
+        final Text gitUrlText = new Text(parent, SWT.BORDER);
+        gitUrlText.setToolTipText("The URL to the Git repository.");
+        //TODO add 'try it' link here
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(gitUrlText);
+
+        Binding gitUrlBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observeDelayed(500, gitUrlText))
+                .validatingAfterConvert(new IValidator() {
+
+                    @Override
+                    public IStatus validate(Object value) {
+                        if (UrlUtils.isValid((String)value)) {
+                            return Status.OK_STATUS;
+                        }
+                        return ValidationStatus.error("A valid URL to a Git repository is required");
+                    }
+                }).to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_GIT_REPOSITORY_URL).observe(model)).in(dbc);
+        ControlDecorationSupport.create(gitUrlBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+
+        //reference
+        Label gitReferenceLabel = new Label(parent, SWT.NONE);
+        gitReferenceLabel.setText("Git Reference:");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(gitReferenceLabel);
+        gitReferenceLabel.setToolTipText("Optional branch, tag, or commit.");
+
+        final Text gitReferenceText = new Text(parent, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(gitReferenceText);
+
+        IObservableValue gitReferenceTextObservable = WidgetProperties.text(SWT.Modify).observe(gitReferenceText);
+        GitReferenceValidator validator = new GitReferenceValidator(gitReferenceTextObservable);
+        Binding gitReferenceBinding = ValueBindingBuilder.bind(gitReferenceTextObservable).validatingAfterConvert(validator)
+                .to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_GIT_REFERENCE).observe(model)).in(dbc);
+        dbc.addValidationStatusProvider(validator);
+        ControlDecorationSupport.create(gitReferenceBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+
+        //context dir
+        Label contextDirLabel = new Label(parent, SWT.NONE);
+        contextDirLabel.setText("Context Directory:");
+        contextDirLabel
+                .setToolTipText("Optional subdirectory for the application source code, used as the context directory for the build.");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(contextDirLabel);
+
+        final Text contextDirText = new Text(parent, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(contextDirText);
+        ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(contextDirText))
+                .to(BeanProperties.value(IBuildConfigPageModel.PROPERTY_CONTEXT_DIR).observe(model)).in(dbc);
+    }
+
 }

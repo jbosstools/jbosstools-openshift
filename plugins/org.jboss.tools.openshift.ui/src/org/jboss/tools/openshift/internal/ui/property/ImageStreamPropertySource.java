@@ -17,25 +17,23 @@ import com.openshift.restclient.model.IImageStream;
  */
 public class ImageStreamPropertySource extends ResourcePropertySource<IImageStream> {
 
-	private static final String REGISTRY = "registry";
+    private static final String REGISTRY = "registry";
 
-	public ImageStreamPropertySource(IImageStream resource) {
-		super(resource);
-	}
+    public ImageStreamPropertySource(IImageStream resource) {
+        super(resource);
+    }
 
-	@Override
-	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new UneditablePropertyDescriptor(REGISTRY, "Registry")
-		};
-	}
+    @Override
+    public IPropertyDescriptor[] getResourcePropertyDescriptors() {
+        return new IPropertyDescriptor[] { new UneditablePropertyDescriptor(REGISTRY, "Registry") };
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		if(REGISTRY.equals(id)){
-			return getResource().getDockerImageRepository();
-		}
-		return super.getPropertyValue(id);
-	}
-	
+    @Override
+    public Object getPropertyValue(Object id) {
+        if (REGISTRY.equals(id)) {
+            return getResource().getDockerImageRepository();
+        }
+        return super.getPropertyValue(id);
+    }
+
 }

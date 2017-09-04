@@ -34,7 +34,7 @@ public class ConnectionUtils {
 			return getConnection(DatastoreOS3.USERNAME, DatastoreOS3.SERVER);
 		}
 	}
-	
+
 	/**
 	 * Returns a connection for the given connection url (@see {@link ConnectionURL}. ex. https://adietish@10.1.2.2:8443).
 	 * @param connectionUrlString

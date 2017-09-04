@@ -40,137 +40,135 @@ import com.openshift.client.OpenShiftException;
  */
 public class DomainWizardModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_DOMAIN_ID = "domainId";
-	
-	private static final String OPENSHIFT_ENTERPRISE_WEBUI_DOMAINPAGE = "{0}/console/domain/{1}";
-	private static final String OPENSHIFT_ORIGIN_WEBUI_DOMAINPAGE = "{0}/app/console/domain/{1}";
+    public static final String PROPERTY_DOMAIN_ID = "domainId";
 
-	private String domainId;
-	private final IDomain domain;
-	private ExpressConnection connection;
+    private static final String OPENSHIFT_ENTERPRISE_WEBUI_DOMAINPAGE = "{0}/console/domain/{1}";
+    private static final String OPENSHIFT_ORIGIN_WEBUI_DOMAINPAGE = "{0}/app/console/domain/{1}";
 
-	public DomainWizardModel(ExpressConnection connection) {
-		this(null, connection);
-	}
+    private String domainId;
+    private final IDomain domain;
+    private ExpressConnection connection;
 
-	public DomainWizardModel(IDomain domain) {
-		this(domain, null);
-	}
+    public DomainWizardModel(ExpressConnection connection) {
+        this(null, connection);
+    }
 
-	protected DomainWizardModel(IDomain domain, ExpressConnection connection) {
-		this.domain = domain;
-		this.connection = connection;
-		if (domain == null) {
-			return;
-		}
-		setDomainId(domain.getId());
-	}
+    public DomainWizardModel(IDomain domain) {
+        this(domain, null);
+    }
 
-	public String getDomainId() {
-		return this.domainId;
-	}
+    protected DomainWizardModel(IDomain domain, ExpressConnection connection) {
+        this.domain = domain;
+        this.connection = connection;
+        if (domain == null) {
+            return;
+        }
+        setDomainId(domain.getId());
+    }
 
-	public void setDomainId(String domainId) {
-		firePropertyChange(PROPERTY_DOMAIN_ID,
-				this.domainId, this.domainId = domainId);
-	}
+    public String getDomainId() {
+        return this.domainId;
+    }
 
-	public void renameDomain() throws OpenShiftException, SocketTimeoutException {
-		if (domain == null) {
-			Logger.warn("Attempting to rename missing user domain...");
-			return;
-		}
-		domain.rename(domainId);
-		fireConnectionChanged(domain, connection);
-	}
+    public void setDomainId(String domainId) {
+        firePropertyChange(PROPERTY_DOMAIN_ID, this.domainId, this.domainId = domainId);
+    }
 
-	private void fireConnectionChanged(IDomain domain, ExpressConnection connection) {
-		if (connection == null) {
-			connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
-		}
-		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
-	}
+    public void renameDomain() throws OpenShiftException, SocketTimeoutException {
+        if (domain == null) {
+            Logger.warn("Attempting to rename missing user domain...");
+            return;
+        }
+        domain.rename(domainId);
+        fireConnectionChanged(domain, connection);
+    }
 
-	public boolean isCurrentDomainId(String domainId) {
-		try {
-			if (domain == null) {
-				return false;
-			}
-			return domain.getId().equals(domainId);
-		} catch (Exception e) {
-			ExpressUIActivator.log(e);
-			return true;
-		}
-	}
+    private void fireConnectionChanged(IDomain domain, ExpressConnection connection) {
+        if (connection == null) {
+            connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
+        }
+        ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
+    }
 
-	public IDomain getDomain() {
-		return domain;
-	}
-	
-	public ExpressConnection getConnection() {
-		return connection;
-	}
+    public boolean isCurrentDomainId(String domainId) {
+        try {
+            if (domain == null) {
+                return false;
+            }
+            return domain.getId().equals(domainId);
+        } catch (Exception e) {
+            ExpressUIActivator.log(e);
+            return true;
+        }
+    }
 
-	public String getWebUIDomainPageUrl() {
-		if (getDomain() == null
-				|| getDomain().getUser() == null) {
-			return null;
-		}
+    public IDomain getDomain() {
+        return domain;
+    }
 
-		String domainWebUIUrl = getOriginWebUIDomainPageUrl();
-		if (isUrlAvailable(domainWebUIUrl)) {
-			return domainWebUIUrl;
-		}
-		domainWebUIUrl = getEnterpsiseWebUIDomainPageUrl();
-		if (isUrlAvailable(domainWebUIUrl)) {
-			return domainWebUIUrl;
-		}
-		return null;	
-	}
-	
-	public String getOriginWebUIDomainPageUrl() {
-		if (getDomain() == null) {
-			return null;
-		}
-		String host = getDomain().getUser().getServer();
-		return MessageFormat.format(OPENSHIFT_ORIGIN_WEBUI_DOMAINPAGE, host, domainId);
-	}
-	
-	public String getEnterpsiseWebUIDomainPageUrl() {
-		if (getDomain() == null) {
-			return null;
-		}
-		String host = getDomain().getUser().getServer();
-		return MessageFormat.format(OPENSHIFT_ENTERPRISE_WEBUI_DOMAINPAGE, host, domainId);
-	}
-	
-	private boolean isUrlAvailable(String domainWebUIUrl) {
-		try {
-			URL url = new URL(domainWebUIUrl);
-			try {
-				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-				if (connection instanceof HttpsURLConnection) {
-					UrlUtils.setupPermissiveSSLHandlers((HttpsURLConnection) connection);
-				}
-				IUser user = getDomain().getUser();
-				UrlUtils.addBasicAuthorization(user.getRhlogin(), user.getPassword(), connection);
+    public ExpressConnection getConnection() {
+        return connection;
+    }
 
-				connection.connect();
-				return connection.getResponseCode() == 200;
-			} catch (KeyManagementException e) {
-				ExpressUIActivator.log(NLS.bind(
-						"Could not install permissive trust manager and hostname verifier for connection {0}", url), e);
-				return false;
-			} catch (NoSuchAlgorithmException e) {
-				ExpressUIActivator.log(NLS.bind(
-						"Could not install permissive trust manager and hostname verifier for connection {0}", url), e);
-				return false;
-			} catch (IOException e) {
-				return false;
-			}
-		} catch (MalformedURLException e) {
-			return false;
-		}
-	}
-	
+    public String getWebUIDomainPageUrl() {
+        if (getDomain() == null || getDomain().getUser() == null) {
+            return null;
+        }
+
+        String domainWebUIUrl = getOriginWebUIDomainPageUrl();
+        if (isUrlAvailable(domainWebUIUrl)) {
+            return domainWebUIUrl;
+        }
+        domainWebUIUrl = getEnterpsiseWebUIDomainPageUrl();
+        if (isUrlAvailable(domainWebUIUrl)) {
+            return domainWebUIUrl;
+        }
+        return null;
+    }
+
+    public String getOriginWebUIDomainPageUrl() {
+        if (getDomain() == null) {
+            return null;
+        }
+        String host = getDomain().getUser().getServer();
+        return MessageFormat.format(OPENSHIFT_ORIGIN_WEBUI_DOMAINPAGE, host, domainId);
+    }
+
+    public String getEnterpsiseWebUIDomainPageUrl() {
+        if (getDomain() == null) {
+            return null;
+        }
+        String host = getDomain().getUser().getServer();
+        return MessageFormat.format(OPENSHIFT_ENTERPRISE_WEBUI_DOMAINPAGE, host, domainId);
+    }
+
+    private boolean isUrlAvailable(String domainWebUIUrl) {
+        try {
+            URL url = new URL(domainWebUIUrl);
+            try {
+                HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                if (connection instanceof HttpsURLConnection) {
+                    UrlUtils.setupPermissiveSSLHandlers((HttpsURLConnection)connection);
+                }
+                IUser user = getDomain().getUser();
+                UrlUtils.addBasicAuthorization(user.getRhlogin(), user.getPassword(), connection);
+
+                connection.connect();
+                return connection.getResponseCode() == 200;
+            } catch (KeyManagementException e) {
+                ExpressUIActivator.log(NLS.bind("Could not install permissive trust manager and hostname verifier for connection {0}", url),
+                        e);
+                return false;
+            } catch (NoSuchAlgorithmException e) {
+                ExpressUIActivator.log(NLS.bind("Could not install permissive trust manager and hostname verifier for connection {0}", url),
+                        e);
+                return false;
+            } catch (IOException e) {
+                return false;
+            }
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+
 }

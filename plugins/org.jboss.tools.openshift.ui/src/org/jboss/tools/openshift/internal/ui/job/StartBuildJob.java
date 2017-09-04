@@ -30,33 +30,34 @@ import com.openshift.restclient.model.IResource;
  */
 public class StartBuildJob extends AbstractDelegatingMonitorJob {
 
-	private IResource buildsource;
+    private IResource buildsource;
 
-	public StartBuildJob(IResource buildsource) {
-		super("Start Build Job");
-		this.buildsource = buildsource;
-	}
+    public StartBuildJob(IResource buildsource) {
+        super("Start Build Job");
+        this.buildsource = buildsource;
+    }
 
-	@Override
-	protected IStatus doRun(IProgressMonitor monitor) {
-		try {
-			monitor.beginTask("Starting build job", IProgressMonitor.UNKNOWN);
-			IBuild build = buildsource.accept(new CapabilityVisitor<IBuildTriggerable, IBuild>() {
+    @Override
+    protected IStatus doRun(IProgressMonitor monitor) {
+        try {
+            monitor.beginTask("Starting build job", IProgressMonitor.UNKNOWN);
+            IBuild build = buildsource.accept(new CapabilityVisitor<IBuildTriggerable, IBuild>() {
 
-				@Override
-				public IBuild visit(IBuildTriggerable triggerable) {
-					return triggerable.trigger();
-				}
-			}, null);
-			if(build == null) {
-				return new Status(Status.INFO, OpenShiftUIActivator.PLUGIN_ID, "Manually triggering builds is unsupported");
-			}
-			return Status.OK_STATUS;
-		}catch(OpenShiftException e) {
-			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind("Error starting build {0}.", buildsource.getName()), e);
-		}finally {
-			monitor.done();
-		}
-	}
+                @Override
+                public IBuild visit(IBuildTriggerable triggerable) {
+                    return triggerable.trigger();
+                }
+            }, null);
+            if (build == null) {
+                return new Status(Status.INFO, OpenShiftUIActivator.PLUGIN_ID, "Manually triggering builds is unsupported");
+            }
+            return Status.OK_STATUS;
+        } catch (OpenShiftException e) {
+            return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind("Error starting build {0}.", buildsource.getName()),
+                    e);
+        } finally {
+            monitor.done();
+        }
+    }
 
 }

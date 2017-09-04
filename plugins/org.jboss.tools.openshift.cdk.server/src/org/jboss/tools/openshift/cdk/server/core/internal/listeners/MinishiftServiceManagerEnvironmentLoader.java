@@ -27,148 +27,146 @@ import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 
 public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvironmentLoader {
-	
-	public MinishiftServiceManagerEnvironmentLoader() {
-		super(TYPE_MINISHIFT);
-	}
 
-	@Override
-	public ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, boolean suppressErrors) {
-		// Load the docker env
-		Map<String, String> adbEnv = loadDockerEnv(server);
-		
-		// Load the minishift console --machine-readable
-		Properties props = loadOpenshiftConsoleDetails(server, suppressErrors);
-		String registry = getOpenshiftRegistry(server, suppressErrors);
-		if( registry != null )
-			props.put(ServiceManagerEnvironment.IMAGE_REGISTRY_KEY, registry);
+    public MinishiftServiceManagerEnvironmentLoader() {
+        super(TYPE_MINISHIFT);
+    }
 
-		// merge the two 
-		Map<String, String> merged = merge(adbEnv, props);
-		
-		String minishiftHomeDefault = System.getProperty("user.home") + File.separator + ".minishift";
-		String minishiftHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, minishiftHomeDefault);
-		
-		Properties dotCDK = CDKServerUtility.getDotCDK(minishiftHome, "cdk");
-		merged = merge(merged, dotCDK);
-		
-		File ocLocation = findOCLocation();
-		if( ocLocation != null ) {
-			merged.put(OC_LOCATION_KEY, ocLocation.getAbsolutePath());
-		}
+    @Override
+    public ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, boolean suppressErrors) {
+        // Load the docker env
+        Map<String, String> adbEnv = loadDockerEnv(server);
 
-		try {
-			return new ServiceManagerEnvironment(merged);
-		} catch (URISyntaxException urise) {
-			if( !suppressErrors ) {
-				String msg = "Environment variable DOCKER_HOST is not a valid uri:  " + merged.get("DOCKER_HOST");
-				CDKCoreActivator.pluginLog().logError(msg, urise);
-			}
-			return null;
-		}
-		
-		
-	}
-	
-	private File findOCLocation() {
-		String dotMinishift = System.getProperty("user.home") + File.separator + ".minishift";
-		File root = new File(dotMinishift);
-		if( root.exists()) {
-			File cache = new File(root, "cache");
-			File oc = new File(cache, "oc");
-			if( oc.exists()) {
-				String[] names = oc.list();
-				if( names != null && names.length > 0) {
-					Arrays.sort(names);
-					String latest = names[names.length-1];
-					File latestF = new File(oc, latest);
-					String platformDep = (Platform.getOS().equals(Platform.OS_WIN32) ? "oc.exe" : "oc");
-					File ocBin = new File(latestF, platformDep);
-					if( ocBin.exists())
-						return ocBin;
-				}
-			}
-		}
-		return null;
-	}
-	
+        // Load the minishift console --machine-readable
+        Properties props = loadOpenshiftConsoleDetails(server, suppressErrors);
+        String registry = getOpenshiftRegistry(server, suppressErrors);
+        if (registry != null)
+            props.put(ServiceManagerEnvironment.IMAGE_REGISTRY_KEY, registry);
 
-	protected String getOpenshiftRegistry(IServer server, boolean suppressErrors) {
-		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
-		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
-		String[] args = new String[] { "openshift", "registry" };
-		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
-		
-		try {
-			String[] lines = callAndGetLines(env, args, cmdLoc, wd);
-			String invalidMsg = null;
-			if( lines != null && lines.length > 0 && lines[0] != null) {
-				String l = lines[0];
-				if( validateHostPort(l)) {
-					return l;
-				}
-				invalidMsg = "Call to '" + cmdLoc + " openshift registry' returned an invalid url: " + l;
-			} else {
-				invalidMsg = "Call to '" + cmdLoc + " openshift registry' was unable to locate an image registry for server " + server.getName();
-			}
-			if( invalidMsg != null && !suppressErrors)
-				CDKCoreActivator.pluginLog().logWarning(invalidMsg);
-		} catch(IOException ioe) {
-			if( !suppressErrors) {
-				String errMsg = "Unable to successfully complete a call to minishift openshift registry.";
-				CDKCoreActivator.pluginLog().logError(errMsg,ioe);
-			}
-		}
-		return null;
-	}
-	
-	private boolean validateHostPort(String string) {
-		// https://stackoverflow.com/questions/2345063/java-common-way-to-validate-and-convert-hostport-to-inetsocketaddress
-		try {
-			// WORKAROUND: add any scheme to make the resulting URI valid.
-			URI uri = new URI("my://" + string); // may throw URISyntaxException
-			if (uri.getHost() == null || uri.getPort() == -1) {
-				return false;
-			}
-		} catch (URISyntaxException ex) {
-			// validation failed
-			return false;
-		}
+        // merge the two 
+        Map<String, String> merged = merge(adbEnv, props);
 
-		// validation succeeded
-		return true;
-	}
+        String minishiftHomeDefault = System.getProperty("user.home") + File.separator + ".minishift";
+        String minishiftHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, minishiftHomeDefault);
 
-	protected Map<String, String> loadDockerEnv(IServer server) {
-		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
-		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
-		String[] args = new String[] { "docker-env" };
-		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
-		try {
-			HashMap<String, String> adbEnv = callAndParseEnvVar(env, args, cmdLoc, wd);
-			return adbEnv;
-		} catch (IOException ioe) {
-			CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to minishift docker-env ",
-					ioe);
-		}
-		return new HashMap<String, String>();
-	}
+        Properties dotCDK = CDKServerUtility.getDotCDK(minishiftHome, "cdk");
+        merged = merge(merged, dotCDK);
 
-	protected Properties loadOpenshiftConsoleDetails(IServer server, boolean suppressError) {
-		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
-		String[] args = new String[] { "console", "--machine-readable" };
-		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
-		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
-		try {
-			Properties ret = callAndParseProperties(env, args, cmdLoc, wd);
-			return ret;
-		} catch (IOException ce) {
-			if( !suppressError) {
-				CDKCoreActivator.pluginLog()
-						.logError("Unable to successfully complete a call to minishift console --machine-readable. ", ce);
-			}
-		}
-		return new Properties();
-	}
+        File ocLocation = findOCLocation();
+        if (ocLocation != null) {
+            merged.put(OC_LOCATION_KEY, ocLocation.getAbsolutePath());
+        }
+
+        try {
+            return new ServiceManagerEnvironment(merged);
+        } catch (URISyntaxException urise) {
+            if (!suppressErrors) {
+                String msg = "Environment variable DOCKER_HOST is not a valid uri:  " + merged.get("DOCKER_HOST");
+                CDKCoreActivator.pluginLog().logError(msg, urise);
+            }
+            return null;
+        }
+
+    }
+
+    private File findOCLocation() {
+        String dotMinishift = System.getProperty("user.home") + File.separator + ".minishift";
+        File root = new File(dotMinishift);
+        if (root.exists()) {
+            File cache = new File(root, "cache");
+            File oc = new File(cache, "oc");
+            if (oc.exists()) {
+                String[] names = oc.list();
+                if (names != null && names.length > 0) {
+                    Arrays.sort(names);
+                    String latest = names[names.length - 1];
+                    File latestF = new File(oc, latest);
+                    String platformDep = (Platform.getOS().equals(Platform.OS_WIN32) ? "oc.exe" : "oc");
+                    File ocBin = new File(latestF, platformDep);
+                    if (ocBin.exists())
+                        return ocBin;
+                }
+            }
+        }
+        return null;
+    }
+
+    protected String getOpenshiftRegistry(IServer server, boolean suppressErrors) {
+        Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
+        String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
+        String[] args = new String[] { "openshift", "registry" };
+        File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
+
+        try {
+            String[] lines = callAndGetLines(env, args, cmdLoc, wd);
+            String invalidMsg = null;
+            if (lines != null && lines.length > 0 && lines[0] != null) {
+                String l = lines[0];
+                if (validateHostPort(l)) {
+                    return l;
+                }
+                invalidMsg = "Call to '" + cmdLoc + " openshift registry' returned an invalid url: " + l;
+            } else {
+                invalidMsg = "Call to '" + cmdLoc + " openshift registry' was unable to locate an image registry for server "
+                        + server.getName();
+            }
+            if (invalidMsg != null && !suppressErrors)
+                CDKCoreActivator.pluginLog().logWarning(invalidMsg);
+        } catch (IOException ioe) {
+            if (!suppressErrors) {
+                String errMsg = "Unable to successfully complete a call to minishift openshift registry.";
+                CDKCoreActivator.pluginLog().logError(errMsg, ioe);
+            }
+        }
+        return null;
+    }
+
+    private boolean validateHostPort(String string) {
+        // https://stackoverflow.com/questions/2345063/java-common-way-to-validate-and-convert-hostport-to-inetsocketaddress
+        try {
+            // WORKAROUND: add any scheme to make the resulting URI valid.
+            URI uri = new URI("my://" + string); // may throw URISyntaxException
+            if (uri.getHost() == null || uri.getPort() == -1) {
+                return false;
+            }
+        } catch (URISyntaxException ex) {
+            // validation failed
+            return false;
+        }
+
+        // validation succeeded
+        return true;
+    }
+
+    protected Map<String, String> loadDockerEnv(IServer server) {
+        Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
+        String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
+        String[] args = new String[] { "docker-env" };
+        File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
+        try {
+            HashMap<String, String> adbEnv = callAndParseEnvVar(env, args, cmdLoc, wd);
+            return adbEnv;
+        } catch (IOException ioe) {
+            CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to minishift docker-env ", ioe);
+        }
+        return new HashMap<String, String>();
+    }
+
+    protected Properties loadOpenshiftConsoleDetails(IServer server, boolean suppressError) {
+        Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
+        String[] args = new String[] { "console", "--machine-readable" };
+        File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
+        String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
+        try {
+            Properties ret = callAndParseProperties(env, args, cmdLoc, wd);
+            return ret;
+        } catch (IOException ce) {
+            if (!suppressError) {
+                CDKCoreActivator.pluginLog().logError("Unable to successfully complete a call to minishift console --machine-readable. ",
+                        ce);
+            }
+        }
+        return new Properties();
+    }
 
 }

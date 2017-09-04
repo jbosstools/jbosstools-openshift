@@ -15,45 +15,45 @@ package org.jboss.tools.openshift.common.core.connection;
  */
 public interface IConnectionFactory {
 
-	/**
-	 * Returns the human readable name of this factory.
-	 *  
-	 * @return
-	 */
-	public String getName();
-	
-	/**
-	 * Returns the unique id of this factory.
-	 * 
-	 * @return
-	 */
-	public String getId();
+    /**
+     * Returns the human readable name of this factory.
+     *  
+     * @return
+     */
+    public String getName();
 
-	/**
-	 * Creates a connection for the given host. Returns <code>null</code> otherwise. The connection is not authorized yet.
-	 * 
-	 * @param url
-	 * @return
-	 */
-	public IConnection create(String host);
-	
-	/**
-	 * Returns the default host for this factory. 
-	 * 
-	 * @return
-	 */
-	public String getDefaultHost();
+    /**
+     * Returns the unique id of this factory.
+     * 
+     * @return
+     */
+    public String getId();
 
-	boolean hasDefaultHost();
-	
-	/**
-	 * Returns <code>true</code> if this factory can create a connection of the given type.
-	 * @param connection
-	 * @return
-	 */
-	public <T extends IConnection> boolean canCreate(Class<T> clazz);
+    /**
+     * Creates a connection for the given host. Returns <code>null</code> otherwise. The connection is not authorized yet.
+     * 
+     * @param url
+     * @return
+     */
+    public IConnection create(String host);
 
-	public String getUserDocUrl();
+    /**
+     * Returns the default host for this factory. 
+     * 
+     * @return
+     */
+    public String getDefaultHost();
 
-	public String getUserDocText();
+    boolean hasDefaultHost();
+
+    /**
+     * Returns <code>true</code> if this factory can create a connection of the given type.
+     * @param connection
+     * @return
+     */
+    public <T extends IConnection> boolean canCreate(Class<T> clazz);
+
+    public String getUserDocUrl();
+
+    public String getUserDocText();
 }

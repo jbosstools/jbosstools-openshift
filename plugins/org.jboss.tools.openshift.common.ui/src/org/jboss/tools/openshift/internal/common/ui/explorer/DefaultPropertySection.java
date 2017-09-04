@@ -20,40 +20,38 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 
 public class DefaultPropertySection extends AbstractPropertySection {
 
-	private PropertySheetPage page;
+    private PropertySheetPage page;
 
-	public DefaultPropertySection() {
-		page = new PropertySheetPage();
-	}
+    public DefaultPropertySection() {
+        page = new PropertySheetPage();
+    }
 
-	@Override
-	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
-		page.createControl(parent);
-	}
+    @Override
+    public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
+        page.createControl(parent);
+    }
 
-	
-	@Override
-	public boolean shouldUseExtraSpace() {
-		return true;
-	}
-	
+    @Override
+    public boolean shouldUseExtraSpace() {
+        return true;
+    }
 
-	@Override
-	public void dispose() {
-		page.dispose();
-	}
+    @Override
+    public void dispose() {
+        page.dispose();
+    }
 
-	@Override
-	public void setInput(IWorkbenchPart part, ISelection selection) {
-		super.setInput(part, selection);
-		page.selectionChanged(part, selection);
-	}
+    @Override
+    public void setInput(IWorkbenchPart part, ISelection selection) {
+        super.setInput(part, selection);
+        page.selectionChanged(part, selection);
+    }
 
-	@Override
-	public void refresh() {
-		if(!DisposeUtils.isDisposed(page.getControl())){
-			page.refresh();
-		}
-	}
-	
+    @Override
+    public void refresh() {
+        if (!DisposeUtils.isDisposed(page.getControl())) {
+            page.refresh();
+        }
+    }
+
 }

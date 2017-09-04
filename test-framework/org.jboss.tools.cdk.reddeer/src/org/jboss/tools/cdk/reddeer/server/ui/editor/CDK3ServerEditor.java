@@ -23,15 +23,15 @@ import org.jboss.reddeer.uiforms.impl.section.DefaultSection;
  *
  */
 public class CDK3ServerEditor extends CDEServerEditor {
-	
+
 	public CDK3ServerEditor(String title) {
 		super(title);
 	}
 
 	public LabeledText getMinishiftBinaryLabel() {
-		return new LabeledText(new DefaultSection(CDK_DETAILS),"Minishift Binary: ");
+		return new LabeledText(new DefaultSection(CDK_DETAILS), "Minishift Binary: ");
 	}
-	
+
 	public LabeledCombo getHypervisorCombo() {
 		return new LabeledCombo(new DefaultSection(CDK_DETAILS), "Hypervisor:");
 	}
@@ -43,9 +43,9 @@ public class CDK3ServerEditor extends CDEServerEditor {
 	public Button getMinishiftBinaryBrowseButton() {
 		return new PushButton(new DefaultSection(CDK_DETAILS), 0, new WithTextMatcher("Browse..."));
 	}
-	
+
 	public Button getMinishiftHomeBrowseButton() {
 		return new PushButton(new DefaultSection(CDK_DETAILS), 1, new WithTextMatcher("Browse..."));
 	}
-	
+
 }

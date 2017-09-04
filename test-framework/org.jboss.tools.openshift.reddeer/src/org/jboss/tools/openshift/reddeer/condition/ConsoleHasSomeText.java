@@ -23,15 +23,15 @@ import org.jboss.reddeer.eclipse.ui.console.ConsoleView;
  * @author mlabuda@redhat.com
  *
  */
-public class ConsoleHasSomeText extends AbstractWaitCondition{
+public class ConsoleHasSomeText extends AbstractWaitCondition {
 
 	private ConsoleView consoleView;
-	
+
 	public ConsoleHasSomeText() {
 		consoleView = new ConsoleView();
 		consoleView.open();
 	}
-	
+
 	@Override
 	public boolean test() {
 		try {
@@ -46,5 +46,4 @@ public class ConsoleHasSomeText extends AbstractWaitCondition{
 		return "console contains text";
 	}
 
-	
 }

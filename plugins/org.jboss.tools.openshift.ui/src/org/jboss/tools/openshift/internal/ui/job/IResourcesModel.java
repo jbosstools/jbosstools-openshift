@@ -21,9 +21,9 @@ import com.openshift.restclient.model.IResource;
  */
 public interface IResourcesModel {
 
-	/**
-	 * Get the resources
-	 * @return the {@link java.util.Collection} of resources
-	 */
-	Collection<IResource> getResources();
+    /**
+     * Get the resources
+     * @return the {@link java.util.Collection} of resources
+     */
+    Collection<IResource> getResources();
 }

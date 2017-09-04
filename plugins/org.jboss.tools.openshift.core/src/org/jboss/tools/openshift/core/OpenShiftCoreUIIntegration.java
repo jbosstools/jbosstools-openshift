@@ -23,45 +23,45 @@ import com.openshift.restclient.ISSLCertificateCallback;
  */
 public class OpenShiftCoreUIIntegration {
 
-	private static final String SSLCERTIFICATE_CALLBACK_UI_EXTENSION = "org.jboss.tools.openshift.core.sslCertificateCallbackUI";
-	private static final String CREDENTIALS_PROMPTER_UI_EXTENSION = "org.jboss.tools.openshift.core.credentialsPrompterUI";
-	private static final String ROUTE_CHOOSER_EXTENSION = "org.jboss.tools.openshift.core.routeChooser";
-	
-	private static final String ATTRIBUTE_CLASS = "class";
+    private static final String SSLCERTIFICATE_CALLBACK_UI_EXTENSION = "org.jboss.tools.openshift.core.sslCertificateCallbackUI";
+    private static final String CREDENTIALS_PROMPTER_UI_EXTENSION = "org.jboss.tools.openshift.core.credentialsPrompterUI";
+    private static final String ROUTE_CHOOSER_EXTENSION = "org.jboss.tools.openshift.core.routeChooser";
 
-	private static OpenShiftCoreUIIntegration INSTANCE = new OpenShiftCoreUIIntegration();
+    private static final String ATTRIBUTE_CLASS = "class";
 
-	public static OpenShiftCoreUIIntegration getInstance(){
-		return INSTANCE;
-	}
+    private static OpenShiftCoreUIIntegration INSTANCE = new OpenShiftCoreUIIntegration();
 
-	protected ISSLCertificateCallback sslCertificateCallback;
-	protected ICredentialsPrompter credentialPrompter;
-	private IRouteChooser browser;
+    public static OpenShiftCoreUIIntegration getInstance() {
+        return INSTANCE;
+    }
 
-	// for testing purposes
-	protected OpenShiftCoreUIIntegration() {
-	}
+    protected ISSLCertificateCallback sslCertificateCallback;
+    protected ICredentialsPrompter credentialPrompter;
+    private IRouteChooser browser;
 
-	public ISSLCertificateCallback getSSLCertificateCallback() {
-		if (sslCertificateCallback == null) {
-			sslCertificateCallback = ExtensionUtils.getFirstExtension(SSLCERTIFICATE_CALLBACK_UI_EXTENSION, ATTRIBUTE_CLASS);
-		}
-		return sslCertificateCallback;
-	}
-	
-	public ICredentialsPrompter getCredentialPrompter() {
-		if (credentialPrompter == null) {
-			this.credentialPrompter = ExtensionUtils.getFirstExtension(CREDENTIALS_PROMPTER_UI_EXTENSION, ATTRIBUTE_CLASS);
-		}
-		return credentialPrompter;
-	}
+    // for testing purposes
+    protected OpenShiftCoreUIIntegration() {
+    }
 
-	public IRouteChooser getRouteChooser() {
-		if (browser == null) {
-			this.browser = ExtensionUtils.getFirstExtension(ROUTE_CHOOSER_EXTENSION, ATTRIBUTE_CLASS);
-		}
-		return browser;
-	}
+    public ISSLCertificateCallback getSSLCertificateCallback() {
+        if (sslCertificateCallback == null) {
+            sslCertificateCallback = ExtensionUtils.getFirstExtension(SSLCERTIFICATE_CALLBACK_UI_EXTENSION, ATTRIBUTE_CLASS);
+        }
+        return sslCertificateCallback;
+    }
+
+    public ICredentialsPrompter getCredentialPrompter() {
+        if (credentialPrompter == null) {
+            this.credentialPrompter = ExtensionUtils.getFirstExtension(CREDENTIALS_PROMPTER_UI_EXTENSION, ATTRIBUTE_CLASS);
+        }
+        return credentialPrompter;
+    }
+
+    public IRouteChooser getRouteChooser() {
+        if (browser == null) {
+            this.browser = ExtensionUtils.getFirstExtension(ROUTE_CHOOSER_EXTENSION, ATTRIBUTE_CLASS);
+        }
+        return browser;
+    }
 
 }

@@ -21,22 +21,22 @@ import com.openshift.client.OpenShiftException;
  */
 public class NewDomainWizardModel extends DomainWizardModel {
 
-	public NewDomainWizardModel(ExpressConnection connection) {
-		super(connection);
-	}
+    public NewDomainWizardModel(ExpressConnection connection) {
+        super(connection);
+    }
 
-	public void createDomain() throws OpenShiftException {
-		ExpressConnection connection = getConnection();
-		if (connection == null) {
-			Logger.error("Could not create domain, missing connection.");
-		}
-		connection.createDomain(getDomainId());
-		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
-	}
+    public void createDomain() throws OpenShiftException {
+        ExpressConnection connection = getConnection();
+        if (connection == null) {
+            Logger.error("Could not create domain, missing connection.");
+        }
+        connection.createDomain(getDomainId());
+        ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
+    }
 
-	@Override
-	public boolean isCurrentDomainId(String domainId) {
-		return false;
-	}
+    @Override
+    public boolean isCurrentDomainId(String domainId) {
+        return false;
+    }
 
 }

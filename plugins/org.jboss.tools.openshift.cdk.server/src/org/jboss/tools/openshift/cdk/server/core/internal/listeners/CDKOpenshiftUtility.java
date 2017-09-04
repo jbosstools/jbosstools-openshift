@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
 import java.util.Collection;
@@ -25,75 +25,72 @@ import org.jboss.tools.openshift.core.connection.Connection;
 
 public class CDKOpenshiftUtility {
 
+    public IConnection findExistingOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
+        String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
+        Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
+        for (IConnection c : connections) {
+            if (c.getType() == ConnectionType.Kubernetes) {
+                String host = c.getHost();
+                if (host.equals(soughtHost)) {
+                    return c;
+                }
+            }
+        }
+        return null;
+    }
 
-	public IConnection findExistingOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
-		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
-		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
-		for(IConnection c : connections) {
-			if( c.getType() == ConnectionType.Kubernetes) {
-				String host = c.getHost();
-				if( host.equals(soughtHost)) {
-					return c;
-				}
-			}
-		}
-		return null;
-	}
-	
-	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment env) {
-		return createOpenshiftConnection(server, env, ConnectionsRegistrySingleton.getInstance());
-	}
-	
-	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment env, ConnectionsRegistry registry) {
-		
-		// Create the connection
-		String soughtHost = env.openshiftHost + ":" + env.openshiftPort;
-		ConnectionsFactoryTracker connectionsFactory = new ConnectionsFactoryTracker();
-		connectionsFactory.open();
-		IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
-		IConnection con = factory.create(soughtHost);
-		
-		
-		// Set some defaults
-		String authScheme = env.getAuthorizationScheme(); 
-		String username = env.getUsername();
-		String password = env.getPassword();
-		if( authScheme != null && !authScheme.isEmpty()) {
-			authScheme = new String(""+authScheme.charAt(0)).toUpperCase() + authScheme.substring(1);
-			
-		}
-		
-		((Connection)con).setAuthScheme(authScheme);
-		((Connection)con).setUsername(username);
-		if( password != null ) {
-			((Connection)con).setPassword(password);
-		}
-		((Connection)con).setRememberPassword(true);
+    public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment env) {
+        return createOpenshiftConnection(server, env, ConnectionsRegistrySingleton.getInstance());
+    }
 
-		String ocLoc = env.get(ServiceManagerEnvironmentLoader.OC_LOCATION_KEY); 
-		if( ocLoc != null ) {
-			((Connection)con).setExtendedProperty(ICommonAttributes.OC_LOCATION_KEY, ocLoc);
-			((Connection)con).setExtendedProperty(ICommonAttributes.OC_OVERRIDE_KEY, true);
-		}
-		
-		updateOpenshiftConnection(server, env, con, false);
-		
-		
-		if( registry != null )
-			registry.add(con);
-		return con;
-	}
-	
-	public void updateOpenshiftConnection(IServer server, ServiceManagerEnvironment env, IConnection con) {
-		updateOpenshiftConnection(server, env, con, true);
-	}
-	
-	public void updateOpenshiftConnection(IServer server, ServiceManagerEnvironment env, IConnection con, boolean fireUpdate) {
-		String dockerReg = env.getDockerRegistry();
-		((Connection)con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, dockerReg);
-		if( fireUpdate) {
-			ConnectionsRegistrySingleton.getInstance().update(con, con);
-		}
-	}
-	
+    public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment env, ConnectionsRegistry registry) {
+
+        // Create the connection
+        String soughtHost = env.openshiftHost + ":" + env.openshiftPort;
+        ConnectionsFactoryTracker connectionsFactory = new ConnectionsFactoryTracker();
+        connectionsFactory.open();
+        IConnectionFactory factory = connectionsFactory.getById(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
+        IConnection con = factory.create(soughtHost);
+
+        // Set some defaults
+        String authScheme = env.getAuthorizationScheme();
+        String username = env.getUsername();
+        String password = env.getPassword();
+        if (authScheme != null && !authScheme.isEmpty()) {
+            authScheme = new String("" + authScheme.charAt(0)).toUpperCase() + authScheme.substring(1);
+
+        }
+
+        ((Connection)con).setAuthScheme(authScheme);
+        ((Connection)con).setUsername(username);
+        if (password != null) {
+            ((Connection)con).setPassword(password);
+        }
+        ((Connection)con).setRememberPassword(true);
+
+        String ocLoc = env.get(ServiceManagerEnvironmentLoader.OC_LOCATION_KEY);
+        if (ocLoc != null) {
+            ((Connection)con).setExtendedProperty(ICommonAttributes.OC_LOCATION_KEY, ocLoc);
+            ((Connection)con).setExtendedProperty(ICommonAttributes.OC_OVERRIDE_KEY, true);
+        }
+
+        updateOpenshiftConnection(server, env, con, false);
+
+        if (registry != null)
+            registry.add(con);
+        return con;
+    }
+
+    public void updateOpenshiftConnection(IServer server, ServiceManagerEnvironment env, IConnection con) {
+        updateOpenshiftConnection(server, env, con, true);
+    }
+
+    public void updateOpenshiftConnection(IServer server, ServiceManagerEnvironment env, IConnection con, boolean fireUpdate) {
+        String dockerReg = env.getDockerRegistry();
+        ((Connection)con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, dockerReg);
+        if (fireUpdate) {
+            ConnectionsRegistrySingleton.getInstance().update(con, con);
+        }
+    }
+
 }

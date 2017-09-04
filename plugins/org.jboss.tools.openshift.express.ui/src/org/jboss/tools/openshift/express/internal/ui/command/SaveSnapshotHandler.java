@@ -34,44 +34,38 @@ import com.openshift.client.IApplication;
  */
 public class SaveSnapshotHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
-		if (application != null) {
-			// explorer
-			openSaveSnapshotWizard(application, HandlerUtil.getActiveShell(event));
-		} else {
-			// servers view
-			IServer server = (IServer)
-					UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
-			if (server == null) {
-				return ExpressUIActivator.createErrorStatus("Could not find application to snapshot");
-			}
-			final LoadApplicationJob loadApplicationJob = new LoadApplicationJob(server);
-			new JobChainBuilder(loadApplicationJob)
-					.runWhenSuccessfullyDone(new UIJob("Opening Save Snapshot wizard...") {
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
+        if (application != null) {
+            // explorer
+            openSaveSnapshotWizard(application, HandlerUtil.getActiveShell(event));
+        } else {
+            // servers view
+            IServer server = (IServer)UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
+            if (server == null) {
+                return ExpressUIActivator.createErrorStatus("Could not find application to snapshot");
+            }
+            final LoadApplicationJob loadApplicationJob = new LoadApplicationJob(server);
+            new JobChainBuilder(loadApplicationJob).runWhenSuccessfullyDone(new UIJob("Opening Save Snapshot wizard...") {
 
-						@Override
-						public IStatus runInUIThread(IProgressMonitor monitor) {
-							IApplication application = loadApplicationJob.getApplication();
-							if (application == null) {
-								return ExpressUIActivator
-										.createCancelStatus("Could not find application to save the snapshot for.");
-							}
-							openSaveSnapshotWizard(loadApplicationJob.getApplication(),
-									HandlerUtil.getActiveShell(event));
-							return Status.OK_STATUS;
-						}
-					})
-					.schedule();
-			return Status.OK_STATUS;
-		}
-		return Status.OK_STATUS;
-	}
+                @Override
+                public IStatus runInUIThread(IProgressMonitor monitor) {
+                    IApplication application = loadApplicationJob.getApplication();
+                    if (application == null) {
+                        return ExpressUIActivator.createCancelStatus("Could not find application to save the snapshot for.");
+                    }
+                    openSaveSnapshotWizard(loadApplicationJob.getApplication(), HandlerUtil.getActiveShell(event));
+                    return Status.OK_STATUS;
+                }
+            }).schedule();
+            return Status.OK_STATUS;
+        }
+        return Status.OK_STATUS;
+    }
 
-	private void openSaveSnapshotWizard(IApplication application, Shell shell) {
-		WizardUtils.openWizardDialog(
-				new SaveSnapshotWizard(application), shell);
-	}
+    private void openSaveSnapshotWizard(IApplication application, Shell shell) {
+        WizardUtils.openWizardDialog(new SaveSnapshotWizard(application), shell);
+    }
 
 }

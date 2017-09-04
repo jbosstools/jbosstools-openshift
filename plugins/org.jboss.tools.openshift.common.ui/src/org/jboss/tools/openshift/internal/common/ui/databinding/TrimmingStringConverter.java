@@ -17,16 +17,16 @@ import org.eclipse.core.databinding.conversion.Converter;
  */
 public class TrimmingStringConverter extends Converter {
 
-	public TrimmingStringConverter() {
-		super(String.class, String.class);
-	}
+    public TrimmingStringConverter() {
+        super(String.class, String.class);
+    }
 
-	@Override
-	public Object convert(Object fromObject) {
-		if (!(fromObject instanceof String)) {
-			return fromObject;
-		}
-		return ((String) fromObject).trim();
-	}
+    @Override
+    public Object convert(Object fromObject) {
+        if (!(fromObject instanceof String)) {
+            return fromObject;
+        }
+        return ((String)fromObject).trim();
+    }
 
 }

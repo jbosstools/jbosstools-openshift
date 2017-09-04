@@ -29,25 +29,25 @@ import com.openshift.client.OpenShiftException;
  */
 public class LoadKeysJob extends Job {
 
-	private ExpressConnection user;
-	private List<IOpenShiftSSHKey> keys = new ArrayList<>();
+    private ExpressConnection user;
+    private List<IOpenShiftSSHKey> keys = new ArrayList<>();
 
-	public LoadKeysJob(ExpressConnection user) {
-		super("Loading SSH keys... ");
-		this.user = user;
-	}
+    public LoadKeysJob(ExpressConnection user) {
+        super("Loading SSH keys... ");
+        this.user = user;
+    }
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		try{
-			this.keys = user.getSSHKeys();
-			return Status.OK_STATUS; 
-		}catch(OpenShiftException ex){
-			return ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, ex);
-		}
-	}
-	
-	public List<IOpenShiftSSHKey> getKeys() {
-		return keys;
-	}
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+        try {
+            this.keys = user.getSSHKeys();
+            return Status.OK_STATUS;
+        } catch (OpenShiftException ex) {
+            return ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, ex);
+        }
+    }
+
+    public List<IOpenShiftSSHKey> getKeys() {
+        return keys;
+    }
 }

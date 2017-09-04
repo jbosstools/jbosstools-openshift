@@ -32,126 +32,124 @@ import org.eclipse.swt.widgets.Control;
  */
 public class DataBindingUtils {
 
-	public static void dispose(IObservable observable) {
-		if (observable != null) {
-			observable.dispose();
-		}
-	}
-	
-	/**
-	 * Adds the given status providers to the given data binding context.
-	 * 
-	 * @param providers the providers to add
-	 * @param dbc the context to add to
-	 * 
-	 * @see ValidationStatusProvider
-	 * @see DataBindingContext
-	 */
-	public static void addValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
-		for (ValidationStatusProvider provider: new ArrayList<>(providers)) {
-			dbc.addValidationStatusProvider(provider);
-		}
-	}
+    public static void dispose(IObservable observable) {
+        if (observable != null) {
+            observable.dispose();
+        }
+    }
 
-	/**
-	 * Removes the given status providers from the given data binding context.
-	 * 
-	 * @param providers the providers to remove
-	 * @param dbc the context to remove from
-	 * 
-	 * @see ValidationStatusProvider
-	 * @see DataBindingContext
-	 */
-	public static void removeValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
-		for (ValidationStatusProvider provider: new ArrayList<>(providers)) {
-			dbc.removeValidationStatusProvider(provider);
-		}
-	}
-	
-	/**
-	 * Triggers (model to target) validation of all bindings within the given databinding context. 
-	 * 
-	 * @param dbc the databinding context
-	 * 
-	 * @see DataBindingContext 
-	 * @see Binding#validateTargetToModel()
-	 */
-	public static void validateTargetsToModels(DataBindingContext dbc) {
-		for (Iterator<?> iterator = dbc.getBindings().iterator(); iterator.hasNext(); ) {
-			Binding binding = (Binding) iterator.next();
-			binding.validateTargetToModel();
-		}
-	}
-	
-	public static void dispose(List<ValidationStatusProvider> providers) {
-		for (ValidationStatusProvider provider : providers) {
-			dispose(provider);
-		}
-	}
+    /**
+     * Adds the given status providers to the given data binding context.
+     * 
+     * @param providers the providers to add
+     * @param dbc the context to add to
+     * 
+     * @see ValidationStatusProvider
+     * @see DataBindingContext
+     */
+    public static void addValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
+        for (ValidationStatusProvider provider : new ArrayList<>(providers)) {
+            dbc.addValidationStatusProvider(provider);
+        }
+    }
 
-	public static boolean isDisposed(ValidationStatusProvider provider) {
-		return provider == null
-				|| provider.isDisposed();
-	}
+    /**
+     * Removes the given status providers from the given data binding context.
+     * 
+     * @param providers the providers to remove
+     * @param dbc the context to remove from
+     * 
+     * @see ValidationStatusProvider
+     * @see DataBindingContext
+     */
+    public static void removeValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
+        for (ValidationStatusProvider provider : new ArrayList<>(providers)) {
+            dbc.removeValidationStatusProvider(provider);
+        }
+    }
 
-	public static void dispose(ValidationStatusProvider provider) {
-		if (isDisposed(provider)) {
-			return;
-		}
-		
-		provider.dispose();
-	}
-	
-	public static void dispose(DataBindingContext dbc) {
-		if (dbc != null) {
-			dbc.dispose();
-		}
-	}
+    /**
+     * Triggers (model to target) validation of all bindings within the given databinding context. 
+     * 
+     * @param dbc the databinding context
+     * 
+     * @see DataBindingContext 
+     * @see Binding#validateTargetToModel()
+     */
+    public static void validateTargetsToModels(DataBindingContext dbc) {
+        for (Iterator<?> iterator = dbc.getBindings().iterator(); iterator.hasNext();) {
+            Binding binding = (Binding)iterator.next();
+            binding.validateTargetToModel();
+        }
+    }
 
-	public static boolean isValid(DataBindingContext dbc) {
-		if (dbc == null) {
-			return false;
-		}
+    public static void dispose(List<ValidationStatusProvider> providers) {
+        for (ValidationStatusProvider provider : providers) {
+            dispose(provider);
+        }
+    }
 
-		for (Object element : dbc.getValidationStatusProviders()) {
-			ValidationStatusProvider validationProvider = (ValidationStatusProvider) element;
-			IStatus validationStatus = (IStatus) validationProvider.getValidationStatus().getValue();
-			if (!isDisposed(validationProvider)
-					&& !validationStatus.isOK()) {
-				return false;
-			}
-		}
-		return true;
-	}
+    public static boolean isDisposed(ValidationStatusProvider provider) {
+        return provider == null || provider.isDisposed();
+    }
 
-	/**
-	 * Adds the given list change listener to the given observable and removes
-	 * it once the given control is disposed.
-	 * 
-	 * @param listener
-	 *            the listener that shall be added
-	 * @param observable
-	 *            the observable that the listener shall be attached to
-	 * @param control
-	 *            the control that triggers removal once it's disposed
-	 */
-	public static void addDisposableListChangeListener(
-			final IListChangeListener listener, final IObservableList observable, Control control) {
-		Assert.isNotNull(listener);
-		Assert.isNotNull(observable);
-		Assert.isNotNull(control);
-		
-		if (control.isDisposed()) {
-			return;
-		}
+    public static void dispose(ValidationStatusProvider provider) {
+        if (isDisposed(provider)) {
+            return;
+        }
 
-		observable.addListChangeListener(listener);
-		control.addDisposeListener(new DisposeListener() {
+        provider.dispose();
+    }
 
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				observable.removeListChangeListener(listener);
-			}
-		});
-	}
+    public static void dispose(DataBindingContext dbc) {
+        if (dbc != null) {
+            dbc.dispose();
+        }
+    }
+
+    public static boolean isValid(DataBindingContext dbc) {
+        if (dbc == null) {
+            return false;
+        }
+
+        for (Object element : dbc.getValidationStatusProviders()) {
+            ValidationStatusProvider validationProvider = (ValidationStatusProvider)element;
+            IStatus validationStatus = (IStatus)validationProvider.getValidationStatus().getValue();
+            if (!isDisposed(validationProvider) && !validationStatus.isOK()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Adds the given list change listener to the given observable and removes
+     * it once the given control is disposed.
+     * 
+     * @param listener
+     *            the listener that shall be added
+     * @param observable
+     *            the observable that the listener shall be attached to
+     * @param control
+     *            the control that triggers removal once it's disposed
+     */
+    public static void addDisposableListChangeListener(final IListChangeListener listener, final IObservableList observable,
+            Control control) {
+        Assert.isNotNull(listener);
+        Assert.isNotNull(observable);
+        Assert.isNotNull(control);
+
+        if (control.isDisposed()) {
+            return;
+        }
+
+        observable.addListChangeListener(listener);
+        control.addDisposeListener(new DisposeListener() {
+
+            @Override
+            public void widgetDisposed(DisposeEvent e) {
+                observable.removeListChangeListener(listener);
+            }
+        });
+    }
 }

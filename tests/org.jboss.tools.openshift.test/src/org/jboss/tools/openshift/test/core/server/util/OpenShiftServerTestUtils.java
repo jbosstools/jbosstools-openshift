@@ -36,51 +36,51 @@ import com.openshift.restclient.model.IService;
 
 public class OpenShiftServerTestUtils {
 
-	public static void cleanup() {
-		IServer[] all = ServerCore.getServers();
-		for( int i = 0; i < all.length; i++ ) {
-			try {
-				all[i].delete();
-			} catch(CoreException ce) {
-				ce.printStackTrace();
-			}
-		}
-	}
+    public static void cleanup() {
+        IServer[] all = ServerCore.getServers();
+        for (int i = 0; i < all.length; i++) {
+            try {
+                all[i].delete();
+            } catch (CoreException ce) {
+                ce.printStackTrace();
+            }
+        }
+    }
 
-	public static IServer createOpenshift3Server(String name, String profile) throws CoreException, UnsupportedEncodingException, MalformedURLException {
-		return createOpenshift3Server(name, profile, null, null);
-	}
+    public static IServer createOpenshift3Server(String name, String profile)
+            throws CoreException, UnsupportedEncodingException, MalformedURLException {
+        return createOpenshift3Server(name, profile, null, null);
+    }
 
-	public static IServer createOpenshift3Server(String name, String profile, IService service, IOpenShiftConnection connection)
-			throws CoreException, UnsupportedEncodingException, MalformedURLException {
-		IServerType type = OpenShiftServerUtils.getServerType();
-		IServerWorkingCopy wc = type.createServer(name, null, null);
-		String serviceId = service == null? null : OpenShiftResourceUniqueId.get(service);
-		String connectionUrl = connection == null? null : ConnectionURL.forConnection(connection).getUrl();
-		OpenShiftServerUtils.updateServer(
-				name, "http://www.example.com", "dummy", connectionUrl, "dummy", serviceId, "dummy", "dummy", "dummy", "dummy", "dummy", wc);
-		if (profile != null) {
-			ServerProfileModel.setProfile(wc, profile);
-		}
-		return wc.save(false, null);
-	}
+    public static IServer createOpenshift3Server(String name, String profile, IService service, IOpenShiftConnection connection)
+            throws CoreException, UnsupportedEncodingException, MalformedURLException {
+        IServerType type = OpenShiftServerUtils.getServerType();
+        IServerWorkingCopy wc = type.createServer(name, null, null);
+        String serviceId = service == null ? null : OpenShiftResourceUniqueId.get(service);
+        String connectionUrl = connection == null ? null : ConnectionURL.forConnection(connection).getUrl();
+        OpenShiftServerUtils.updateServer(name, "http://www.example.com", "dummy", connectionUrl, "dummy", serviceId, "dummy", "dummy",
+                "dummy", "dummy", "dummy", wc);
+        if (profile != null) {
+            ServerProfileModel.setProfile(wc, profile);
+        }
+        return wc.save(false, null);
+    }
 
-	public static IServer mockServer(IResource resource, Connection connection)
-			throws UnsupportedEncodingException, MalformedURLException {
-		IServer server = mock(IServer.class);
+    public static IServer mockServer(IResource resource, Connection connection) throws UnsupportedEncodingException, MalformedURLException {
+        IServer server = mock(IServer.class);
 
-		String connectionUrl = ConnectionURL.forConnection(connection).toString();
-		doReturn(connectionUrl).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), anyString());
+        String connectionUrl = ConnectionURL.forConnection(connection).toString();
+        doReturn(connectionUrl).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), anyString());
 
-		String resourceUniqueId = OpenShiftResourceUniqueId.get(resource);
-		doReturn(resourceUniqueId).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
+        String resourceUniqueId = OpenShiftResourceUniqueId.get(resource);
+        doReturn(resourceUniqueId).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
 
-		return server;
-	}
-	
-	public static IControllableServerBehavior mockServerBehaviour(IServer server) {
-		IControllableServerBehavior behaviour = mock(IControllableServerBehavior.class);
-		doReturn(server).when(behaviour).getServer();
-		return behaviour;
-	}
+        return server;
+    }
+
+    public static IControllableServerBehavior mockServerBehaviour(IServer server) {
+        IControllableServerBehavior behaviour = mock(IControllableServerBehavior.class);
+        doReturn(server).when(behaviour).getServer();
+        return behaviour;
+    }
 }

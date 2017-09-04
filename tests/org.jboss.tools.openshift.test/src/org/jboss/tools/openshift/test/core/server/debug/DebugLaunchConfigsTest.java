@@ -44,130 +44,130 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DebugLaunchConfigsTest {
-	
-	private ILaunchManager launchManager;
-	private DebugLaunchConfigs debugLaunchConfigs;
 
-	@Before
-	public void setUp() {
-		this.launchManager = mock(ILaunchManager.class);
-		this.debugLaunchConfigs = DebugLaunchConfigs.get(launchManager);
-		System.setProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, "2000");
-	}
+    private ILaunchManager launchManager;
+    private DebugLaunchConfigs debugLaunchConfigs;
 
-	@After
-	public void tearDown() {
-		System.clearProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY);
-	}
+    @Before
+    public void setUp() {
+        this.launchManager = mock(ILaunchManager.class);
+        this.debugLaunchConfigs = DebugLaunchConfigs.get(launchManager);
+        System.setProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, "2000");
+    }
 
-	@Test
-	public void testSetupRemoteDebuggerLaunchConfiguration() throws CoreException {
-		ILaunchConfigurationWorkingCopy workingCopy = mock(ILaunchConfigurationWorkingCopy.class);
+    @After
+    public void tearDown() {
+        System.clearProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY);
+    }
 
-		IProject project = mock(IProject.class);
-		String name = "baymax";
-		when(project.getName()).thenReturn(name);
+    @Test
+    public void testSetupRemoteDebuggerLaunchConfiguration() throws CoreException {
+        ILaunchConfigurationWorkingCopy workingCopy = mock(ILaunchConfigurationWorkingCopy.class);
 
-		debugLaunchConfigs.setupRemoteDebuggerLaunchConfiguration(workingCopy, project, 1234);
+        IProject project = mock(IProject.class);
+        String name = "baymax";
+        when(project.getName()).thenReturn(name);
 
-		//pretty stoopid test
-		verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,name);
-		Map<String, String> connectMap = new HashMap<>();
-		connectMap.put("port", "1234"); //$NON-NLS-1$
-		connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
-		verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);
-	}
+        debugLaunchConfigs.setupRemoteDebuggerLaunchConfiguration(workingCopy, project, 1234);
 
-	@Test
-	public void getRemoteDebuggerLaunchConfiguration() throws CoreException {
-		String name = "Remote debugger to foo";
-		ILaunchConfiguration good = mock(ILaunchConfiguration.class);
-		when(good.getName()).thenReturn(name);
-		ILaunchConfiguration bad = mock(ILaunchConfiguration.class);
-		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{bad, good});
+        //pretty stoopid test
+        verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, name);
+        Map<String, String> connectMap = new HashMap<>();
+        connectMap.put("port", "1234"); //$NON-NLS-1$
+        connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
+        verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);
+    }
 
-		IServer server = mockServer("foo");
-		assertSame(good, debugLaunchConfigs.getRemoteDebuggerLaunchConfiguration(server));
+    @Test
+    public void getRemoteDebuggerLaunchConfiguration() throws CoreException {
+        String name = "Remote debugger to foo";
+        ILaunchConfiguration good = mock(ILaunchConfiguration.class);
+        when(good.getName()).thenReturn(name);
+        ILaunchConfiguration bad = mock(ILaunchConfiguration.class);
+        when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[] { bad, good });
 
-		server = mockServer("bar");
-		assertNull(debugLaunchConfigs.getRemoteDebuggerLaunchConfiguration(server));
-	}
+        IServer server = mockServer("foo");
+        assertSame(good, debugLaunchConfigs.getRemoteDebuggerLaunchConfiguration(server));
 
-	@Test
-	public void testCreateRemoteDebuggerLaunchConfiguration() throws CoreException {
-		IServer server = mockServer("foo");
-		ILaunchConfigurationType launchConfigurationType = mock(ILaunchConfigurationType.class);
-		when(launchManager.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION)).thenReturn(launchConfigurationType);
+        server = mockServer("bar");
+        assertNull(debugLaunchConfigs.getRemoteDebuggerLaunchConfiguration(server));
+    }
 
-		debugLaunchConfigs.createRemoteDebuggerLaunchConfiguration(server);
+    @Test
+    public void testCreateRemoteDebuggerLaunchConfiguration() throws CoreException {
+        IServer server = mockServer("foo");
+        ILaunchConfigurationType launchConfigurationType = mock(ILaunchConfigurationType.class);
+        when(launchManager.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION)).thenReturn(launchConfigurationType);
 
-		verify(launchConfigurationType).newInstance(null, "Remote debugger to foo");
-	}
+        debugLaunchConfigs.createRemoteDebuggerLaunchConfiguration(server);
 
-	@Test
-	public void testTerminateRemoteDebugger() throws CoreException {
-		ILaunchConfiguration launchConfig = mock(ILaunchConfiguration.class);
+        verify(launchConfigurationType).newInstance(null, "Remote debugger to foo");
+    }
 
-		String name = "foo";
-		IServer server = mockServer(name);
-		when(launchConfig.getName()).thenReturn("Remote debugger to "+ name);
+    @Test
+    public void testTerminateRemoteDebugger() throws CoreException {
+        ILaunchConfiguration launchConfig = mock(ILaunchConfiguration.class);
 
-		ILaunch matchingLaunch1 = mock(ILaunch.class);
-		when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
+        String name = "foo";
+        IServer server = mockServer(name);
+        when(launchConfig.getName()).thenReturn("Remote debugger to " + name);
 
-		ILaunch matchingLaunch2 = mock(ILaunch.class);
-		when(matchingLaunch2.getLaunchConfiguration()).thenReturn(launchConfig);
-		when(matchingLaunch2.canTerminate()).thenReturn(true);
+        ILaunch matchingLaunch1 = mock(ILaunch.class);
+        when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
 
-		ILaunch otherLaunch1 = mock(ILaunch.class);
-		ILaunch otherLaunch2 = mock(ILaunch.class);
+        ILaunch matchingLaunch2 = mock(ILaunch.class);
+        when(matchingLaunch2.getLaunchConfiguration()).thenReturn(launchConfig);
+        when(matchingLaunch2.canTerminate()).thenReturn(true);
 
-		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{launchConfig});
+        ILaunch otherLaunch1 = mock(ILaunch.class);
+        ILaunch otherLaunch2 = mock(ILaunch.class);
 
-		when(launchManager.getLaunches()).thenReturn(new ILaunch[]{otherLaunch1, matchingLaunch1, matchingLaunch2, otherLaunch2});
+        when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[] { launchConfig });
 
-		debugLaunchConfigs.terminateRemoteDebugger(server);
+        when(launchManager.getLaunches()).thenReturn(new ILaunch[] { otherLaunch1, matchingLaunch1, matchingLaunch2, otherLaunch2 });
 
-		verify(matchingLaunch1, never()).terminate();
-		verify(matchingLaunch2).terminate();
-		verify(otherLaunch1, never()).terminate();
-		verify(otherLaunch2, never()).terminate();
-	}
+        debugLaunchConfigs.terminateRemoteDebugger(server);
 
-	@Test
-	public void testTerminateRemoteDebuggerWithException() throws CoreException {
-		String name = "foo";
-		IServer server = mockServer(name);
+        verify(matchingLaunch1, never()).terminate();
+        verify(matchingLaunch2).terminate();
+        verify(otherLaunch1, never()).terminate();
+        verify(otherLaunch2, never()).terminate();
+    }
 
-		ILaunchConfiguration launchConfig = mock(ILaunchConfiguration.class);
-		when(launchConfig.getName()).thenReturn("Remote debugger to "+ name);
+    @Test
+    public void testTerminateRemoteDebuggerWithException() throws CoreException {
+        String name = "foo";
+        IServer server = mockServer(name);
 
-		ILaunch matchingLaunch1 = mock(ILaunch.class);
-		when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
-		when(matchingLaunch1.canTerminate()).thenReturn(true);
-		IStatus error = new Status(IStatus.ERROR, "foo", "buuuurned!", null);
-		doThrow(new DebugException(error)).when(matchingLaunch1).terminate();
+        ILaunchConfiguration launchConfig = mock(ILaunchConfiguration.class);
+        when(launchConfig.getName()).thenReturn("Remote debugger to " + name);
 
-		ILaunch matchingLaunch2 = mock(ILaunch.class);
-		when(matchingLaunch2.canTerminate()).thenReturn(true);
-		when(matchingLaunch2.getLaunchConfiguration()).thenReturn(launchConfig);
+        ILaunch matchingLaunch1 = mock(ILaunch.class);
+        when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
+        when(matchingLaunch1.canTerminate()).thenReturn(true);
+        IStatus error = new Status(IStatus.ERROR, "foo", "buuuurned!", null);
+        doThrow(new DebugException(error)).when(matchingLaunch1).terminate();
 
-		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{launchConfig});
+        ILaunch matchingLaunch2 = mock(ILaunch.class);
+        when(matchingLaunch2.canTerminate()).thenReturn(true);
+        when(matchingLaunch2.getLaunchConfiguration()).thenReturn(launchConfig);
 
-		when(launchManager.getLaunches()).thenReturn(new ILaunch[]{matchingLaunch1, matchingLaunch2});
+        when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[] { launchConfig });
 
-		try {
-			debugLaunchConfigs.terminateRemoteDebugger(server);
-			fail();
-		} catch (CoreException e) {
-			verify(matchingLaunch2).terminate();
-			assertEquals(error, e.getStatus().getChildren()[0]);
-		}
-	}
+        when(launchManager.getLaunches()).thenReturn(new ILaunch[] { matchingLaunch1, matchingLaunch2 });
 
-	private IServer mockServer(String name) {
-		IServer server = mock(IServer.class);
-		when(server.getName()).thenReturn(name);
-		return server;
-	}
+        try {
+            debugLaunchConfigs.terminateRemoteDebugger(server);
+            fail();
+        } catch (CoreException e) {
+            verify(matchingLaunch2).terminate();
+            assertEquals(error, e.getStatus().getChildren()[0]);
+        }
+    }
+
+    private IServer mockServer(String name) {
+        IServer server = mock(IServer.class);
+        when(server.getName()).thenReturn(name);
+        return server;
+    }
 }

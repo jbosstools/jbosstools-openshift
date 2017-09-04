@@ -9,15 +9,13 @@ import org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController
 
 public class OpenShiftEapPublishController extends OpenShiftPublishController implements ISubsystemController {
 
-	public OpenShiftEapPublishController() {
-		super();
-	}
-	
-	@Override
-	public int publishModule(int kind,
-			int deltaKind, IModule[] module, IProgressMonitor monitor)
-			throws CoreException {
-		return super.publishModule(IServer.PUBLISH_CLEAN, deltaKind, module, monitor);
-	}
+    public OpenShiftEapPublishController() {
+        super();
+    }
+
+    @Override
+    public int publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor) throws CoreException {
+        return super.publishModule(IServer.PUBLISH_CLEAN, deltaKind, module, monitor);
+    }
 
 }

@@ -21,36 +21,35 @@ import org.eclipse.jface.viewers.Viewer;
  */
 public class ResourceSummaryContentProvider implements ITreeContentProvider {
 
-	@Override
-	public void dispose() {
-	}
+    @Override
+    public void dispose() {
+    }
 
-	@Override
-	public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
-	}
+    @Override
+    public void inputChanged(Viewer arg0, Object arg1, Object arg2) {
+    }
 
-	@Override
-	public Object[] getChildren(Object node) {
-		return null;
-	}
+    @Override
+    public Object[] getChildren(Object node) {
+        return null;
+    }
 
-	@Override
-	public Object[] getElements(Object input) {
-		if(input instanceof Collection<?>) {
-			return ((Collection<?>) input).toArray();
-		}
-		return new Object[] {input};
-	}
+    @Override
+    public Object[] getElements(Object input) {
+        if (input instanceof Collection<?>) {
+            return ((Collection<?>)input).toArray();
+        }
+        return new Object[] { input };
+    }
 
-	@Override
-	public Object getParent(Object arg0) {
-		return null;
-	}
+    @Override
+    public Object getParent(Object arg0) {
+        return null;
+    }
 
-	@Override
-	public boolean hasChildren(Object node) {
-		return false;
-	}
-
+    @Override
+    public boolean hasChildren(Object node) {
+        return false;
+    }
 
 }

@@ -31,61 +31,61 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
  */
 public class ExpressServerWizardFragment extends WizardFragment implements ICompletable {
 
-	private ExpressServerWizardComposite composite;
+    private ExpressServerWizardComposite composite;
 
-	@Override
-	public boolean hasComposite() {
-		return true;
-	}
+    @Override
+    public boolean hasComposite() {
+        return true;
+    }
 
-	@Override
-	public void setComplete(boolean complete) {
-		super.setComplete(complete);
-	}
+    @Override
+    public void setComplete(boolean complete) {
+        super.setComplete(complete);
+    }
 
-	@Override
-	public boolean isComplete() {
-		return composite != null && composite.createErrorMessage() == null;
-	}
+    @Override
+    public boolean isComplete() {
+        return composite != null && composite.createErrorMessage() == null;
+    }
 
-	@Override
-	public Composite createComposite(Composite parent, IWizardHandle handle) {
-		handle.setTitle("Create an OpenShift 2 Server Adapter");
-		handle.setDescription("Create an OpenShift 2 Server Adapter by choosing your connection, application and deploy project.");
-		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
-		IServerModeUICallback callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
-			@Override
-			public void executeLongRunning(Job j) {
-				// depends on COMMON, DAMN
-				IWizardContainer container = ((WizardPage)handle).getWizard().getContainer();
-				try {
-					WizardUtils.runInWizard(j, container);
-				} catch(Exception e) {
-					// TODO clean
-				}
-			}
-		};
-		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout(2, false));
-		this.composite = new ExpressServerWizardComposite(composite, callback);
-		return this.composite.getComposite();
-	}
+    @Override
+    public Composite createComposite(Composite parent, IWizardHandle handle) {
+        handle.setTitle("Create an OpenShift 2 Server Adapter");
+        handle.setDescription("Create an OpenShift 2 Server Adapter by choosing your connection, application and deploy project.");
+        handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
+        IServerModeUICallback callback = new NewServerWizardBehaviourCallback(getTaskModel(), handle, this) {
+            @Override
+            public void executeLongRunning(Job j) {
+                // depends on COMMON, DAMN
+                IWizardContainer container = ((WizardPage)handle).getWizard().getContainer();
+                try {
+                    WizardUtils.runInWizard(j, container);
+                } catch (Exception e) {
+                    // TODO clean
+                }
+            }
+        };
+        Composite composite = new Composite(parent, SWT.NONE);
+        composite.setLayout(new GridLayout(2, false));
+        this.composite = new ExpressServerWizardComposite(composite, callback);
+        return this.composite.getComposite();
+    }
 
-	@Override
-	public void enter() {
-		// do nothing
-	}
+    @Override
+    public void enter() {
+        // do nothing
+    }
 
-	@Override
-	public void performFinish(IProgressMonitor monitor) throws CoreException {
-		super.performFinish(monitor);
-		composite.performFinish(monitor);
-		composite = null;
-	}
+    @Override
+    public void performFinish(IProgressMonitor monitor) throws CoreException {
+        super.performFinish(monitor);
+        composite.performFinish(monitor);
+        composite = null;
+    }
 
-	@Override
-	public void performCancel(IProgressMonitor monitor) throws CoreException {
-		composite = null;
-	}
+    @Override
+    public void performCancel(IProgressMonitor monitor) throws CoreException {
+        composite = null;
+    }
 
 }

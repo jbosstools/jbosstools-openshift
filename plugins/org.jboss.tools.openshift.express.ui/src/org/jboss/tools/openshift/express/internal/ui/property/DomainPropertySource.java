@@ -22,52 +22,50 @@ import com.openshift.client.IDomain;
  */
 public class DomainPropertySource implements IPropertySource {
 
-	private static final String PROPERTY_ID = "ID";
-	private static final String PROPERTY_SUFFIX = "SUFFIX";
-	private static final String PROPERTY_FULLNAME = "FULLNAME";
-	
-	private final IDomain domain;
+    private static final String PROPERTY_ID = "ID";
+    private static final String PROPERTY_SUFFIX = "SUFFIX";
+    private static final String PROPERTY_FULLNAME = "FULLNAME";
 
-	public DomainPropertySource(IDomain domain) {
-		this.domain = domain;
-	}
+    private final IDomain domain;
 
-	@Override
-	public Object getEditableValue() {
-		return this;
-	}
+    public DomainPropertySource(IDomain domain) {
+        this.domain = domain;
+    }
 
-	@Override
-	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] { 
-				new PropertyDescriptor(PROPERTY_ID, "Id"),
-				new PropertyDescriptor(PROPERTY_SUFFIX, "Suffix"),
-				new PropertyDescriptor(PROPERTY_FULLNAME, "Full Name") };
-	}
+    @Override
+    public Object getEditableValue() {
+        return this;
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		if (PROPERTY_ID.equals(id)) {
-			return domain.getId();
-		} else if (PROPERTY_SUFFIX.equals(id)) {
-			return domain.getSuffix();
-		} else if (PROPERTY_FULLNAME.equals(id)) {
-			return ExpressResourceLabelUtils.toString(domain);
-		}
-		return null;
-	}
+    @Override
+    public IPropertyDescriptor[] getPropertyDescriptors() {
+        return new IPropertyDescriptor[] { new PropertyDescriptor(PROPERTY_ID, "Id"), new PropertyDescriptor(PROPERTY_SUFFIX, "Suffix"),
+                new PropertyDescriptor(PROPERTY_FULLNAME, "Full Name") };
+    }
 
-	@Override
-	public void resetPropertyValue(Object id) {
-	}
+    @Override
+    public Object getPropertyValue(Object id) {
+        if (PROPERTY_ID.equals(id)) {
+            return domain.getId();
+        } else if (PROPERTY_SUFFIX.equals(id)) {
+            return domain.getSuffix();
+        } else if (PROPERTY_FULLNAME.equals(id)) {
+            return ExpressResourceLabelUtils.toString(domain);
+        }
+        return null;
+    }
 
-	@Override
-	public void setPropertyValue(Object id, Object value) {
-	}
+    @Override
+    public void resetPropertyValue(Object id) {
+    }
 
-	@Override
-	public boolean isPropertySet(Object id) {
-		return false;
-	}
+    @Override
+    public void setPropertyValue(Object id, Object value) {
+    }
+
+    @Override
+    public boolean isPropertySet(Object id) {
+        return false;
+    }
 
 }

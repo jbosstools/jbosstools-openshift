@@ -38,187 +38,186 @@ import com.openshift.restclient.model.route.IRoute;
  * 
  * @author jeff.cantrill
  */
-public class ResourceDetailsContentProvider implements ITreeContentProvider{
+public class ResourceDetailsContentProvider implements ITreeContentProvider {
 
-	public static final String LABEL_STRATEGY = "strategy";
+    public static final String LABEL_STRATEGY = "strategy";
 
-	@Override
-	public Object[] getChildren(Object node) {
-		if(node instanceof IResource) {
-			IResource resource = (IResource) node;
-			Collection<ResourceProperty> properties = new ArrayList<>();
-			properties.add(new ResourceProperty("labels", resource.getLabels()));
-			switch(resource.getKind()) {
-			case ResourceKind.BUILD_CONFIG:
-				addBuildConfigProperties(properties, (IBuildConfig) resource); 
-				break;
-			case ResourceKind.DEPLOYMENT_CONFIG:
-				addDeploymentConfigProperties(properties, (IDeploymentConfig) resource); 
-				break;
-			case ResourceKind.SERVICE:
-				addServiceProperties(properties, (IService) resource); 
-				break;
-			case ResourceKind.ROUTE:
-				addRouteProperties(properties, (IRoute) resource); 
-				break;
-			case ResourceKind.IMAGE_STREAM:
-				addImageStreamProperties(properties, (IImageStream) resource); 
-				break;
-			default:
-			}
-			return properties.toArray();
-		}
-		return new Object[] {};
-	}
-	
-	private void addRouteProperties(Collection<ResourceProperty> properties, IRoute resource) {
-		properties.add(new ResourceProperty("host", resource.getHost()));
-		properties.add(new ResourceProperty("path", resource.getPath()));
-		properties.add(new ResourceProperty("service", resource.getServiceName()));
-	}
+    @Override
+    public Object[] getChildren(Object node) {
+        if (node instanceof IResource) {
+            IResource resource = (IResource)node;
+            Collection<ResourceProperty> properties = new ArrayList<>();
+            properties.add(new ResourceProperty("labels", resource.getLabels()));
+            switch (resource.getKind()) {
+            case ResourceKind.BUILD_CONFIG:
+                addBuildConfigProperties(properties, (IBuildConfig)resource);
+                break;
+            case ResourceKind.DEPLOYMENT_CONFIG:
+                addDeploymentConfigProperties(properties, (IDeploymentConfig)resource);
+                break;
+            case ResourceKind.SERVICE:
+                addServiceProperties(properties, (IService)resource);
+                break;
+            case ResourceKind.ROUTE:
+                addRouteProperties(properties, (IRoute)resource);
+                break;
+            case ResourceKind.IMAGE_STREAM:
+                addImageStreamProperties(properties, (IImageStream)resource);
+                break;
+            default:
+            }
+            return properties.toArray();
+        }
+        return new Object[] {};
+    }
 
-	private void addImageStreamProperties(Collection<ResourceProperty> properties, IImageStream resource) {
-		properties.add(new ResourceProperty("registry", resource.getDockerImageRepository()));
-	}
+    private void addRouteProperties(Collection<ResourceProperty> properties, IRoute resource) {
+        properties.add(new ResourceProperty("host", resource.getHost()));
+        properties.add(new ResourceProperty("path", resource.getPath()));
+        properties.add(new ResourceProperty("service", resource.getServiceName()));
+    }
 
-	private void addServiceProperties(Collection<ResourceProperty> properties, IService resource) {
-		properties.add(new ResourceProperty("selector", resource.getSelector()));
-		properties.add(new ResourceProperty("port", resource.getPort()));
-	}
+    private void addImageStreamProperties(Collection<ResourceProperty> properties, IImageStream resource) {
+        properties.add(new ResourceProperty("registry", resource.getDockerImageRepository()));
+    }
 
-	private void addDeploymentConfigProperties(Collection<ResourceProperty> properties, IDeploymentConfig resource) {
-		properties.add(new ResourceProperty("triggers", resource.getTriggerTypes()));
-		properties.add(new ResourceProperty(LABEL_STRATEGY, resource.getDeploymentStrategyType()));
-		properties.add(new ResourceProperty("template selector", resource.getReplicaSelector()));
-	}
+    private void addServiceProperties(Collection<ResourceProperty> properties, IService resource) {
+        properties.add(new ResourceProperty("selector", resource.getSelector()));
+        properties.add(new ResourceProperty("port", resource.getPort()));
+    }
 
-	private void addBuildConfigProperties(Collection<ResourceProperty> properties, IBuildConfig config) {
-		IBuildStrategy buildStrategy = config.getBuildStrategy();
-		addStrategyTypeProperties(properties, buildStrategy);
-		properties.add(new ResourceProperty("source URL", config.getSourceURI()));
-		properties.add(new ResourceProperty("output to", config.getOutputRepositoryName()));
-		List<String> triggers = config.getBuildTriggers().stream()
-				.map(trigger -> trigger.getType().toString())
-				.collect(Collectors.toList());
-		properties.add(new ResourceProperty("build triggers", triggers));
-	}
+    private void addDeploymentConfigProperties(Collection<ResourceProperty> properties, IDeploymentConfig resource) {
+        properties.add(new ResourceProperty("triggers", resource.getTriggerTypes()));
+        properties.add(new ResourceProperty(LABEL_STRATEGY, resource.getDeploymentStrategyType()));
+        properties.add(new ResourceProperty("template selector", resource.getReplicaSelector()));
+    }
 
-	private void addStrategyTypeProperties(Collection<ResourceProperty> properties, IBuildStrategy buildStrategy) {
-		if (buildStrategy == null
-				|| buildStrategy.getType() == null) {
-			properties.add(new UnknownResourceProperty(LABEL_STRATEGY));
-			return;
-		}
+    private void addBuildConfigProperties(Collection<ResourceProperty> properties, IBuildConfig config) {
+        IBuildStrategy buildStrategy = config.getBuildStrategy();
+        addStrategyTypeProperties(properties, buildStrategy);
+        properties.add(new ResourceProperty("source URL", config.getSourceURI()));
+        properties.add(new ResourceProperty("output to", config.getOutputRepositoryName()));
+        List<String> triggers = config.getBuildTriggers().stream().map(trigger -> trigger.getType().toString())
+                .collect(Collectors.toList());
+        properties.add(new ResourceProperty("build triggers", triggers));
+    }
 
-		properties.add(new ResourceProperty(LABEL_STRATEGY, buildStrategy.getType().toString()));
-		switch(buildStrategy.getType()) {
-		case BuildStrategyType.SOURCE:
-			ISourceBuildStrategy sti = (ISourceBuildStrategy) buildStrategy;
-			properties.add(new ResourceProperty("builder image", StringUtils.toStringOrNull(sti.getImage())));
-			break;
-		case BuildStrategyType.DOCKER:
-			IDockerBuildStrategy docker = (IDockerBuildStrategy) buildStrategy;
-			properties.add(new ResourceProperty("base image", StringUtils.toStringOrNull(docker.getBaseImage())));
-			break;
-		case BuildStrategyType.CUSTOM:
-			ICustomBuildStrategy custom = (ICustomBuildStrategy) buildStrategy;
-			properties.add(new ResourceProperty("builder image", StringUtils.toStringOrNull(custom.getImage())));
-			break;
-		case BuildStrategyType.JENKINS_PIPELINE:
-			IJenkinsPipelineStrategy jenkins = (IJenkinsPipelineStrategy) buildStrategy;
-			properties.add(new ResourceProperty("jenkins file", StringUtils.removeAll(StringUtils.getLineSeparator(), jenkins.getJenkinsfile())));
-			properties.add(new ResourceProperty("jenkins file path", StringUtils.toStringOrNull(jenkins.getJenkinsfilePath())));
-			break;
-		default:
-		}
-	}
+    private void addStrategyTypeProperties(Collection<ResourceProperty> properties, IBuildStrategy buildStrategy) {
+        if (buildStrategy == null || buildStrategy.getType() == null) {
+            properties.add(new UnknownResourceProperty(LABEL_STRATEGY));
+            return;
+        }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Object[] getElements(Object rootElements) {
-		if(!(rootElements instanceof Collection)) {
-			return new Object[] {};
-		}
-	
-		List<IResource> resources = new ArrayList<>((Collection<IResource>) rootElements);
-		Collections.sort(resources, new ResourceKindAndNameComparator());
-		return resources.toArray();
-	}
+        properties.add(new ResourceProperty(LABEL_STRATEGY, buildStrategy.getType().toString()));
+        switch (buildStrategy.getType()) {
+        case BuildStrategyType.SOURCE:
+            ISourceBuildStrategy sti = (ISourceBuildStrategy)buildStrategy;
+            properties.add(new ResourceProperty("builder image", StringUtils.toStringOrNull(sti.getImage())));
+            break;
+        case BuildStrategyType.DOCKER:
+            IDockerBuildStrategy docker = (IDockerBuildStrategy)buildStrategy;
+            properties.add(new ResourceProperty("base image", StringUtils.toStringOrNull(docker.getBaseImage())));
+            break;
+        case BuildStrategyType.CUSTOM:
+            ICustomBuildStrategy custom = (ICustomBuildStrategy)buildStrategy;
+            properties.add(new ResourceProperty("builder image", StringUtils.toStringOrNull(custom.getImage())));
+            break;
+        case BuildStrategyType.JENKINS_PIPELINE:
+            IJenkinsPipelineStrategy jenkins = (IJenkinsPipelineStrategy)buildStrategy;
+            properties.add(
+                    new ResourceProperty("jenkins file", StringUtils.removeAll(StringUtils.getLineSeparator(), jenkins.getJenkinsfile())));
+            properties.add(new ResourceProperty("jenkins file path", StringUtils.toStringOrNull(jenkins.getJenkinsfilePath())));
+            break;
+        default:
+        }
+    }
 
-	@Override
-	public boolean hasChildren(Object node) {
-		return node instanceof IResource;
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object[] getElements(Object rootElements) {
+        if (!(rootElements instanceof Collection)) {
+            return new Object[] {};
+        }
 
-	@Override
-	public void dispose() {
-	}
+        List<IResource> resources = new ArrayList<>((Collection<IResource>)rootElements);
+        Collections.sort(resources, new ResourceKindAndNameComparator());
+        return resources.toArray();
+    }
 
-	@Override
-	public void inputChanged(Viewer viewer, Object oldValue, Object newValue) {
-	}
+    @Override
+    public boolean hasChildren(Object node) {
+        return node instanceof IResource;
+    }
 
-	@Override
-	public Object getParent(Object paramObject) {
-		return null;
-	}
+    @Override
+    public void dispose() {
+    }
 
-	/**
-	 * A wrapper for a resource properties
-	 */
-	public static class ResourceProperty {
-		
-		private Object value;
-		private String property;
+    @Override
+    public void inputChanged(Viewer viewer, Object oldValue, Object newValue) {
+    }
 
-		ResourceProperty(String property, Object value){
-			this.property = property;
-			this.value = value;
-		}
-		
-		public String getProperty() {
-			return property;
-		}
-		
-		public Object getValue() {
-			return value;
-		}
+    @Override
+    public Object getParent(Object paramObject) {
+        return null;
+    }
 
-		public boolean isUnknownValue() {
-			return false;
-		}
-		
-	}
+    /**
+     * A wrapper for a resource properties
+     */
+    public static class ResourceProperty {
 
-	public static class UnknownResourceProperty extends ResourceProperty {
+        private Object value;
+        private String property;
 
-		UnknownResourceProperty(String property) {
-			super(property, null);
-		}
+        ResourceProperty(String property, Object value) {
+            this.property = property;
+            this.value = value;
+        }
 
-		@Override
-		public boolean isUnknownValue() {
-			return true;
-		}
-	}
-	
-	private static class ResourceKindAndNameComparator implements Comparator<IResource> {
-		@Override
-		public int compare(IResource first, IResource second) {
-			int result = compareKind(first, second);
-			if (result != 0) {
-				return result;
-			}
-			return compareName(first, second);
-		}
+        public String getProperty() {
+            return property;
+        }
 
-		private int compareName(IResource first, IResource second) {
-			return first.getName().compareTo(second.getName());
-		}
+        public Object getValue() {
+            return value;
+        }
 
-		private int compareKind(IResource first, IResource second) {
-			int result = first.getKind().toString().compareTo(second.getKind().toString());
-			return result;
-		}
-	}
+        public boolean isUnknownValue() {
+            return false;
+        }
+
+    }
+
+    public static class UnknownResourceProperty extends ResourceProperty {
+
+        UnknownResourceProperty(String property) {
+            super(property, null);
+        }
+
+        @Override
+        public boolean isUnknownValue() {
+            return true;
+        }
+    }
+
+    private static class ResourceKindAndNameComparator implements Comparator<IResource> {
+        @Override
+        public int compare(IResource first, IResource second) {
+            int result = compareKind(first, second);
+            if (result != 0) {
+                return result;
+            }
+            return compareName(first, second);
+        }
+
+        private int compareName(IResource first, IResource second) {
+            return first.getName().compareTo(second.getName());
+        }
+
+        private int compareKind(IResource first, IResource second) {
+            int result = first.getKind().toString().compareTo(second.getKind().toString());
+            return result;
+        }
+    }
 }

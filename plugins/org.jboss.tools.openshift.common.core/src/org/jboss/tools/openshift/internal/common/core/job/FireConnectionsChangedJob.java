@@ -25,32 +25,32 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
  */
 public class FireConnectionsChangedJob extends AbstractDelegatingMonitorJob {
 
-	protected List<IConnection> connections = new ArrayList<>();
-	
-	public FireConnectionsChangedJob(IConnection connection) {
-		super(NLS.bind("Refreshing connection {0}", connection.getHost()));
-		add(connection);
-	}
+    protected List<IConnection> connections = new ArrayList<>();
 
-	protected FireConnectionsChangedJob(String jobName) {
-		super(jobName);
-	}
-	
-	@Override
-	protected IStatus doRun(IProgressMonitor monitor) {
-		for (IConnection connection : getConnections()) {
-			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
-		}
-		return Status.OK_STATUS;
-	}
-	
-	protected List<IConnection> getConnections() {
-		return connections;
-	}
+    public FireConnectionsChangedJob(IConnection connection) {
+        super(NLS.bind("Refreshing connection {0}", connection.getHost()));
+        add(connection);
+    }
 
-	private void add(IConnection connection) {
-		if (connection != null) {
-			connections.add(connection);
-		}
-	}
+    protected FireConnectionsChangedJob(String jobName) {
+        super(jobName);
+    }
+
+    @Override
+    protected IStatus doRun(IProgressMonitor monitor) {
+        for (IConnection connection : getConnections()) {
+            ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
+        }
+        return Status.OK_STATUS;
+    }
+
+    protected List<IConnection> getConnections() {
+        return connections;
+    }
+
+    private void add(IConnection connection) {
+        if (connection != null) {
+            connections.add(connection);
+        }
+    }
 }

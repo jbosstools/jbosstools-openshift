@@ -16,31 +16,31 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
  * be initialized after the class that depends upon this on
  */
 public class LazyCredentialsPrompter implements ICredentialsPrompter {
-	
-	private ICredentialsPrompter prompter;
-	
-	/**
-	 * Prompt for authentication.
-	 */
-	@Override
-	public final boolean promptAndAuthenticate(IConnection connection, Object context) {
-		if (!loadPrompter()) {
-			return false;
-		}
-		return prompter.promptAndAuthenticate(connection, context);
-	}
 
-	private boolean loadPrompter() {
-		if (prompter == null) {
-			prompter = getExtension();
-			return prompter != null;
-		}
-		return true;
-	}
+    private ICredentialsPrompter prompter;
 
-	// for testing purposes
-	public ICredentialsPrompter getExtension() {
-		return OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter();
-	}
-	
+    /**
+     * Prompt for authentication.
+     */
+    @Override
+    public final boolean promptAndAuthenticate(IConnection connection, Object context) {
+        if (!loadPrompter()) {
+            return false;
+        }
+        return prompter.promptAndAuthenticate(connection, context);
+    }
+
+    private boolean loadPrompter() {
+        if (prompter == null) {
+            prompter = getExtension();
+            return prompter != null;
+        }
+        return true;
+    }
+
+    // for testing purposes
+    public ICredentialsPrompter getExtension() {
+        return OpenShiftCoreUIIntegration.getInstance().getCredentialPrompter();
+    }
+
 }

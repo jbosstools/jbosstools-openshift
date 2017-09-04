@@ -27,64 +27,64 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 
-	private Set<ICartridge> checkedEmbeddedCartridges;
-	private List<ICartridge> availableCartridges;
-	private ExpressConnection connection;
-	private IDomain domain;
-	private IApplicationProperties applicationProperties;
-	private Set<ICartridge> embeddedCartridges;
+    private Set<ICartridge> checkedEmbeddedCartridges;
+    private List<ICartridge> availableCartridges;
+    private ExpressConnection connection;
+    private IDomain domain;
+    private IApplicationProperties applicationProperties;
+    private Set<ICartridge> embeddedCartridges;
 
-	public EmbeddedCartridgesWizardModel(Set<ICartridge> embeddedCartidges, List<ICartridge> availableCartridges, 
-			IApplicationProperties applicationProperties, IDomain domain, ExpressConnection connection) {
-		this.embeddedCartridges = embeddedCartidges;
-		this.checkedEmbeddedCartridges = new HashSet<>();
-		this.checkedEmbeddedCartridges.addAll(embeddedCartidges);
-		this.availableCartridges = availableCartridges;
-		this.applicationProperties = applicationProperties;
-		this.domain = domain;
-		this.connection = connection;
-	}
+    public EmbeddedCartridgesWizardModel(Set<ICartridge> embeddedCartidges, List<ICartridge> availableCartridges,
+            IApplicationProperties applicationProperties, IDomain domain, ExpressConnection connection) {
+        this.embeddedCartridges = embeddedCartidges;
+        this.checkedEmbeddedCartridges = new HashSet<>();
+        this.checkedEmbeddedCartridges.addAll(embeddedCartidges);
+        this.availableCartridges = availableCartridges;
+        this.applicationProperties = applicationProperties;
+        this.domain = domain;
+        this.connection = connection;
+    }
 
-	public List<ICartridge> getEmbeddableCartridges() {
-		return availableCartridges;
-	}
-	
-	public Set<ICartridge> getEmbeddedCartridges() {
-		return embeddedCartridges;
-	}
+    public List<ICartridge> getEmbeddableCartridges() {
+        return availableCartridges;
+    }
 
-	public boolean isEmbedded(ICartridge cartridge) {
-		return embeddedCartridges.contains(cartridge);
-	}
-	
-	public Set<ICartridge> setCheckedEmbeddableCartridges(Set<ICartridge> cartridges) {
-		return	this.checkedEmbeddedCartridges = cartridges;
-	}
+    public Set<ICartridge> getEmbeddedCartridges() {
+        return embeddedCartridges;
+    }
 
-	public Set<ICartridge> getCheckedEmbeddableCartridges() {
-		return checkedEmbeddedCartridges;
-	}
+    public boolean isEmbedded(ICartridge cartridge) {
+        return embeddedCartridges.contains(cartridge);
+    }
 
-	public void refresh() {
-	}
+    public Set<ICartridge> setCheckedEmbeddableCartridges(Set<ICartridge> cartridges) {
+        return this.checkedEmbeddedCartridges = cartridges;
+    }
 
-	public ApplicationScale getApplicationScale() {
-		return applicationProperties.getApplicationScale();
-	}
+    public Set<ICartridge> getCheckedEmbeddableCartridges() {
+        return checkedEmbeddedCartridges;
+    }
 
-	public ICartridge getStandaloneCartridge() {
-		return applicationProperties.getStandaloneCartridge();
-	}
+    public void refresh() {
+    }
 
-	public String getApplicationName() {
-		return applicationProperties.getApplicationName();
-	}
-	
-	public ExpressConnection getConnection() {
-		return connection;
-	}
+    public ApplicationScale getApplicationScale() {
+        return applicationProperties.getApplicationScale();
+    }
 
-	public IDomain getDomain() {
-		return domain;
-	}
+    public ICartridge getStandaloneCartridge() {
+        return applicationProperties.getStandaloneCartridge();
+    }
+
+    public String getApplicationName() {
+        return applicationProperties.getApplicationName();
+    }
+
+    public ExpressConnection getConnection() {
+        return connection;
+    }
+
+    public IDomain getDomain() {
+        return domain;
+    }
 }

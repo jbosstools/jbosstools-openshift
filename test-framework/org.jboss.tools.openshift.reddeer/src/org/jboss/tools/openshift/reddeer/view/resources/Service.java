@@ -45,7 +45,7 @@ public class Service extends AbstractOpenShiftExplorerItem {
 	public String getName() {
 		return treeViewerHandler.getNonStyledText(item);
 	}
-	
+
 	/**
 	 * Gets a route of an OpenShift service.
 	 * 
@@ -59,7 +59,7 @@ public class Service extends AbstractOpenShiftExplorerItem {
 			return nonstyledText;
 		}
 	}
-	
+
 	/**
 	 * Gets a pod with a specified name.
 	 * 
@@ -69,8 +69,7 @@ public class Service extends AbstractOpenShiftExplorerItem {
 	public Pod getPod(String name) {
 		return new Pod(treeViewerHandler.getTreeItem(item, name));
 	}
-	
-	
+
 	/**
 	 * Gets first pod matching a specified matcher.
 	 * 
@@ -80,11 +79,11 @@ public class Service extends AbstractOpenShiftExplorerItem {
 	 */
 	@SuppressWarnings("unchecked")
 	public Pod getPod(Matcher<String>... matchers) {
-		for (TreeItem treeItem: item.getItems()) {
+		for (TreeItem treeItem : item.getItems()) {
 			if (!treeItem.isDisposed()) {
 				String treeItemText = treeItem.getText();
 				boolean matches = true;
-				for (Matcher<String> matcher: matchers) {
+				for (Matcher<String> matcher : matchers) {
 					if (!matcher.matches(treeItemText)) {
 						matches = false;
 						break;
@@ -97,21 +96,21 @@ public class Service extends AbstractOpenShiftExplorerItem {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Creates server adapter for this service with default values.
 	 */
-	
+
 	public void createServerAdapter() {
 		select();
 		new ContextMenu(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
 		new FinishButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS));
 		new WaitUntil(new JobIsKilled("Refreshing server adapter list"), TimePeriod.LONG, false);
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 	}
-	
+
 }

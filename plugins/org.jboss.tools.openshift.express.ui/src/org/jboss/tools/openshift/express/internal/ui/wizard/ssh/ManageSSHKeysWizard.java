@@ -18,17 +18,17 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
  */
 public class ManageSSHKeysWizard extends AbstractOpenShiftWizard<ExpressConnection> {
 
-	public ManageSSHKeysWizard(ExpressConnection connection) {
-		super("Manage SSH Keys", connection);
-	}
+    public ManageSSHKeysWizard(ExpressConnection connection) {
+        super("Manage SSH Keys", connection);
+    }
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new ManageSSHKeysWizardPage(getModel(), this));
-	}
+    @Override
+    public void addPages() {
+        addPage(new ManageSSHKeysWizardPage(getModel(), this));
+    }
 }

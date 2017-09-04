@@ -17,14 +17,14 @@ import com.openshift.client.OpenShiftException;
  */
 public class ExpressException extends OpenShiftException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public ExpressException(String message, Object... arguments) {
-		super(message, arguments);
-	}
+    public ExpressException(String message, Object... arguments) {
+        super(message, arguments);
+    }
 
-	public ExpressException(Throwable cause, String message, Object... arguments) {
-		super(cause, message, arguments);
-	}
+    public ExpressException(Throwable cause, String message, Object... arguments) {
+        super(cause, message, arguments);
+    }
 
 }

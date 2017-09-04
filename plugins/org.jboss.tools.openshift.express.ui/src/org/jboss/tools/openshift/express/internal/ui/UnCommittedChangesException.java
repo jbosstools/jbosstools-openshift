@@ -15,9 +15,9 @@ package org.jboss.tools.openshift.express.internal.ui;
  */
 public class UnCommittedChangesException extends ExpressException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public UnCommittedChangesException(String message, Object... arguments) {
-		super(message, arguments);
-	}
+    public UnCommittedChangesException(String message, Object... arguments) {
+        super(message, arguments);
+    }
 }

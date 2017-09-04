@@ -43,250 +43,193 @@ import com.openshift.restclient.ISSLCertificateCallback;
  */
 public class ConnectionWizardPageModelTest {
 
-	@Mock
-	private IConnectionAware<IConnection> wizardModel;
-	private String[] allHosts = new String[] {
-			"https://www.redhat.com", "http://openshift.com", "https://10.1.2.2:8443" };
-	private Connection editedConnection = mockOS3Connection("andre.dietisheim@chapeuvermelho.pt", allHosts[0]);
-	private List<Connection> os3Connections = Arrays.asList(
-				mockOS3Connection("adietish@roterhut.ch", allHosts[0]),
-				mockOS3Connection("adietish@chapeaurouge.ch", allHosts[1]),
-				mockOS3Connection("adietish@redhat.ch", allHosts[2])
-			);
-	private List<IConnection> otherConnections = Arrays.asList(
-				mockOtherConnection("adietish@cappellorosso.ch", allHosts[0]),
-				mockOtherConnection("adietish@sombrerorojo.es", allHosts[1])
-			);
-	
-	@SuppressWarnings("unchecked")
-	private List<IConnection> allConnections = 	union(os3Connections, otherConnections);
+    @Mock
+    private IConnectionAware<IConnection> wizardModel;
+    private String[] allHosts = new String[] { "https://www.redhat.com", "http://openshift.com", "https://10.1.2.2:8443" };
+    private Connection editedConnection = mockOS3Connection("andre.dietisheim@chapeuvermelho.pt", allHosts[0]);
+    private List<Connection> os3Connections = Arrays.asList(mockOS3Connection("adietish@roterhut.ch", allHosts[0]),
+            mockOS3Connection("adietish@chapeaurouge.ch", allHosts[1]), mockOS3Connection("adietish@redhat.ch", allHosts[2]));
+    private List<IConnection> otherConnections = Arrays.asList(mockOtherConnection("adietish@cappellorosso.ch", allHosts[0]),
+            mockOtherConnection("adietish@sombrerorojo.es", allHosts[1]));
 
-	private TestableConnectionWizardPageModel model;
+    @SuppressWarnings("unchecked")
+    private List<IConnection> allConnections = union(os3Connections, otherConnections);
 
-	@Before
-	public void setUp() {
-		this.model = new TestableConnectionWizardPageModel(
-				editedConnection, 
-				allConnections,
-				editedConnection.getClass(),
-				true,
-				wizardModel);
+    private TestableConnectionWizardPageModel model;
 
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void getAllConnections_should_return_all_connections_and_NewConnectionMarker_if_connection_type_is_null_and_connection_change_is_allowed() {
-		// pre-condition
-		ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				editedConnection, 
-				allConnections,
-				null,
-				true,
-				wizardModel); 
-		// operation
-		// verification
-		assertThat(model.getAllConnections()).containsExactlyElementsOf(
-				union(Collections.singletonList(NewConnectionMarker.getInstance()), allConnections));
-	}
-	
-	@Test
-	public void getAllConnections_should_return_only_edited_connection_and_NewConnectionMarker_if_connection_change_is_disallowed() {
-		// pre-condition
-		ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				editedConnection, 
-				allConnections,
-				null,
-				false,
-				wizardModel); 
-		// operation
-		// verification
-		assertThat(model.getAllConnections()).containsExactlyElementsOf(
-				Arrays.asList(NewConnectionMarker.getInstance(), editedConnection));
-	}
+    @Before
+    public void setUp() {
+        this.model = new TestableConnectionWizardPageModel(editedConnection, allConnections, editedConnection.getClass(), true,
+                wizardModel);
 
-	@Test
-	public void getAllHosts_should_return_all_hosts_within_all_connections() {
-		// pre-condition
-		ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				editedConnection, 
-				allConnections,
-				null,
-				false,
-				wizardModel); 
-		// operation
-		Collection<String> allHosts = model.getAllHosts();
+    }
 
-		// verification
-		assertThat(allHosts).containsOnly(this.allHosts);
-	}
+    @SuppressWarnings("unchecked")
+    @Test
+    public void getAllConnections_should_return_all_connections_and_NewConnectionMarker_if_connection_type_is_null_and_connection_change_is_allowed() {
+        // pre-condition
+        ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(editedConnection, allConnections, null, true, wizardModel);
+        // operation
+        // verification
+        assertThat(model.getAllConnections())
+                .containsExactlyElementsOf(union(Collections.singletonList(NewConnectionMarker.getInstance()), allConnections));
+    }
 
-	@Test
-	public void getAllHosts_should_only_contain_unique_hosts() {
-		// pre-condition
-		assertThat(allConnections).isNotEmpty();
-		allConnections.add(allConnections.get(0)); // add duplicate host
-		
-		ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				editedConnection, 
-				allConnections,
-				null,
-				false,
-				wizardModel); 
-		// operation
-		Collection<String> allHosts = model.getAllHosts();
+    @Test
+    public void getAllConnections_should_return_only_edited_connection_and_NewConnectionMarker_if_connection_change_is_disallowed() {
+        // pre-condition
+        ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(editedConnection, allConnections, null, false, wizardModel);
+        // operation
+        // verification
+        assertThat(model.getAllConnections()).containsExactlyElementsOf(Arrays.asList(NewConnectionMarker.getInstance(), editedConnection));
+    }
 
-		// verification
-		assertThat(allHosts).containsOnly(this.allHosts);
-	}
+    @Test
+    public void getAllHosts_should_return_all_hosts_within_all_connections() {
+        // pre-condition
+        ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(editedConnection, allConnections, null, false, wizardModel);
+        // operation
+        Collection<String> allHosts = model.getAllHosts();
 
-	@Test
-	public void should_edit_new_connection_given_edited_connection_is_null() {
-		// pre-condition
-		TestableConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				null, 
-				allConnections,
-				null,
-				true,
-				wizardModel); 
-		// operation
-		boolean isNewConnection = model.isNewConnection();
-		// verification
-		assertThat(isNewConnection).isTrue();
-	}
+        // verification
+        assertThat(allHosts).containsOnly(this.allHosts);
+    }
 
-	@Test
-	public void should_edit_existing_connection_given_edited_connection_is_not_null_but_wont_match_connection_type() {
-		// pre-condition
-		TestableConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				editedConnection, 
-				allConnections,
-				null,
-				true,
-				wizardModel); 
-		// operation
-		boolean isNewConnection = model.isNewConnection();
-		// verification
-		assertThat(isNewConnection).isFalse();
-	}
+    @Test
+    public void getAllHosts_should_only_contain_unique_hosts() {
+        // pre-condition
+        assertThat(allConnections).isNotEmpty();
+        allConnections.add(allConnections.get(0)); // add duplicate host
 
-	@Test
-	public void should_edit_existing_connection_given_edited_connection_is_not_null() {
-		// pre-condition
-		TestableConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				editedConnection, 
-				allConnections,
-				editedConnection.getClass(),
-				true,
-				wizardModel);
-		// operation
-		boolean isNewConnection = model.isNewConnection();
-		// verification
-		assertThat(isNewConnection).isFalse();
-	}
+        ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(editedConnection, allConnections, null, false, wizardModel);
+        // operation
+        Collection<String> allHosts = model.getAllHosts();
 
-	@Test
-	public void should_edit_new_connection_given_edited_connection_is_not_null_but_wont_match_connection_type() {
-		// pre-condition
-		TestableConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				editedConnection, 
-				allConnections,
-				OtherConnection.class,
-				true,
-				wizardModel);
-		// operation
-		boolean isNewConnection = model.isNewConnection();
-		// verification
-		assertThat(isNewConnection).isTrue();
-	}
+        // verification
+        assertThat(allHosts).containsOnly(this.allHosts);
+    }
 
-	@Test
-	public void should_disable_prompt_on_edited_connection() {
-		// given
-		// when
-		// then
-		verify(editedConnection).enablePromptCredentials(false);
-	}
-	
-	@Test
-	public void should_enable_promptCredentials_on_edited_connection_when_disposing_model_and_was_enabled_before_editing_it() {
-		// given prompt is disabled once connection is being edited
-		Connection connection = mockOS3Connection("foo", "https://localhost");
-		doReturn(true).when(connection).isEnablePromptCredentials();
-		allConnections.add(connection);
-		ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				connection, 
-				allConnections,
-				editedConnection.getClass(),
-				true,
-				wizardModel);
-		verify(connection).enablePromptCredentials(false);
-		// when
-		model.dispose();
-		// then
-		verify(connection).enablePromptCredentials(true);
-	}
+    @Test
+    public void should_edit_new_connection_given_edited_connection_is_null() {
+        // pre-condition
+        TestableConnectionWizardPageModel model = new TestableConnectionWizardPageModel(null, allConnections, null, true, wizardModel);
+        // operation
+        boolean isNewConnection = model.isNewConnection();
+        // verification
+        assertThat(isNewConnection).isTrue();
+    }
 
-	@Test
-	public void should_disable_promptCredentials_on_edited_connection_when_disposing_model_and_was_disabled_before_editing_it() {
-		// given prompt is disabled once connection is being edited
-		Connection connection = mockOS3Connection("foo", "https://localhost");
-		doReturn(false).when(connection).isEnablePromptCredentials();
-		allConnections.add(connection);
-		ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(
-				connection, 
-				allConnections,
-				connection.getClass(),
-				true,
-				wizardModel);
-		verify(connection).enablePromptCredentials(false);
-		// when
-		model.dispose();
-		// then disable 2x, once when editing, 2nd time when disposing
-		verify(connection, times(2)).enablePromptCredentials(false);
-	}
-	
-	@Test
-	public void should_default_connection_be_OS3() {
-	    ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(null, allConnections, null, true, wizardModel);
-	    assertThat(model.getConnectionFactory().getId()).isEqualTo(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
-	}
+    @Test
+    public void should_edit_existing_connection_given_edited_connection_is_not_null_but_wont_match_connection_type() {
+        // pre-condition
+        TestableConnectionWizardPageModel model = new TestableConnectionWizardPageModel(editedConnection, allConnections, null, true,
+                wizardModel);
+        // operation
+        boolean isNewConnection = model.isNewConnection();
+        // verification
+        assertThat(isNewConnection).isFalse();
+    }
 
-	private Connection mockOS3Connection(String username, String url) {
-		Connection mock = mock(Connection.class);
-		when(mock.getHost()).thenReturn(url);
-		when(mock.getUsername()).thenReturn(username);
-		when(mock.isEnablePromptCredentials()).thenReturn(true);
-		return mock;
-	}
+    @Test
+    public void should_edit_existing_connection_given_edited_connection_is_not_null() {
+        // pre-condition
+        TestableConnectionWizardPageModel model = new TestableConnectionWizardPageModel(editedConnection, allConnections,
+                editedConnection.getClass(), true, wizardModel);
+        // operation
+        boolean isNewConnection = model.isNewConnection();
+        // verification
+        assertThat(isNewConnection).isFalse();
+    }
 
-	private IConnection mockOtherConnection(String username, String url) {
-		IConnection mock = mock(IConnection.class);
-		when(mock.getHost()).thenReturn(url);
-		when(mock.getUsername()).thenReturn(username);
-		return mock;
-	}
+    @Test
+    public void should_edit_new_connection_given_edited_connection_is_not_null_but_wont_match_connection_type() {
+        // pre-condition
+        TestableConnectionWizardPageModel model = new TestableConnectionWizardPageModel(editedConnection, allConnections,
+                OtherConnection.class, true, wizardModel);
+        // operation
+        boolean isNewConnection = model.isNewConnection();
+        // verification
+        assertThat(isNewConnection).isTrue();
+    }
 
-	private class OtherConnection extends Connection {
+    @Test
+    public void should_disable_prompt_on_edited_connection() {
+        // given
+        // when
+        // then
+        verify(editedConnection).enablePromptCredentials(false);
+    }
 
-		public OtherConnection(String url, ICredentialsPrompter credentialsPrompter,
-				ISSLCertificateCallback sslCertCallback) throws MalformedURLException {
-			super(url, credentialsPrompter, sslCertCallback);
-		}
-	}
+    @Test
+    public void should_enable_promptCredentials_on_edited_connection_when_disposing_model_and_was_enabled_before_editing_it() {
+        // given prompt is disabled once connection is being edited
+        Connection connection = mockOS3Connection("foo", "https://localhost");
+        doReturn(true).when(connection).isEnablePromptCredentials();
+        allConnections.add(connection);
+        ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(connection, allConnections, editedConnection.getClass(),
+                true, wizardModel);
+        verify(connection).enablePromptCredentials(false);
+        // when
+        model.dispose();
+        // then
+        verify(connection).enablePromptCredentials(true);
+    }
 
-	private static class TestableConnectionWizardPageModel extends ConnectionWizardPageModel {
+    @Test
+    public void should_disable_promptCredentials_on_edited_connection_when_disposing_model_and_was_disabled_before_editing_it() {
+        // given prompt is disabled once connection is being edited
+        Connection connection = mockOS3Connection("foo", "https://localhost");
+        doReturn(false).when(connection).isEnablePromptCredentials();
+        allConnections.add(connection);
+        ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(connection, allConnections, connection.getClass(), true,
+                wizardModel);
+        verify(connection).enablePromptCredentials(false);
+        // when
+        model.dispose();
+        // then disable 2x, once when editing, 2nd time when disposing
+        verify(connection, times(2)).enablePromptCredentials(false);
+    }
 
-		public TestableConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections,
-				Class<? extends IConnection> connectionType, boolean allowConnectionChange,
-				IConnectionAware<IConnection> wizardModel) {
-			super(editedConnection, allConnections, connectionType, allowConnectionChange, wizardModel);
-		}
+    @Test
+    public void should_default_connection_be_OS3() {
+        ConnectionWizardPageModel model = new TestableConnectionWizardPageModel(null, allConnections, null, true, wizardModel);
+        assertThat(model.getConnectionFactory().getId()).isEqualTo(IConnectionsFactory.CONNECTIONFACTORY_OPENSHIFT_ID);
+    }
 
-		@Override
-		public boolean isNewConnection() {
-			return super.isNewConnection();
-		}
-	}
+    private Connection mockOS3Connection(String username, String url) {
+        Connection mock = mock(Connection.class);
+        when(mock.getHost()).thenReturn(url);
+        when(mock.getUsername()).thenReturn(username);
+        when(mock.isEnablePromptCredentials()).thenReturn(true);
+        return mock;
+    }
+
+    private IConnection mockOtherConnection(String username, String url) {
+        IConnection mock = mock(IConnection.class);
+        when(mock.getHost()).thenReturn(url);
+        when(mock.getUsername()).thenReturn(username);
+        return mock;
+    }
+
+    private class OtherConnection extends Connection {
+
+        public OtherConnection(String url, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback)
+                throws MalformedURLException {
+            super(url, credentialsPrompter, sslCertCallback);
+        }
+    }
+
+    private static class TestableConnectionWizardPageModel extends ConnectionWizardPageModel {
+
+        public TestableConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections,
+                Class<? extends IConnection> connectionType, boolean allowConnectionChange, IConnectionAware<IConnection> wizardModel) {
+            super(editedConnection, allConnections, connectionType, allowConnectionChange, wizardModel);
+        }
+
+        @Override
+        public boolean isNewConnection() {
+            return super.isNewConnection();
+        }
+    }
 
 }

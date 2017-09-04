@@ -16,50 +16,50 @@ import java.util.List;
 
 public class DiffUtils {
 
-	private DiffUtils() {
-		// inhibit instantiation
-	}
-	
-	public static <T> Diff<T> getDiff(Collection<T> source, Collection<T> target) {
-		return new Diff<>(source, target);
-	}
-	
-	public static <T> Collection<T> getAdditions(Collection<T> source, Collection<T> target) {
-		List<T> addedElements = new ArrayList<>();
-		for(T element : target) {
-			if (!source.contains(element)) {
-				addedElements.add(element);
-			}
-		}
-		return addedElements;
-	}
+    private DiffUtils() {
+        // inhibit instantiation
+    }
 
-	public static <T> Collection<T> getRemovals(Collection<T> source, Collection<T> target) {
-		List<T> removedElement = new ArrayList<>();
-		for(T element : source) {
-			if (!target.contains(element)) {
-				removedElement.add(element);
-			}
-		}
-		return removedElement;
-	}
+    public static <T> Diff<T> getDiff(Collection<T> source, Collection<T> target) {
+        return new Diff<>(source, target);
+    }
 
-	public static class Diff<T> {
+    public static <T> Collection<T> getAdditions(Collection<T> source, Collection<T> target) {
+        List<T> addedElements = new ArrayList<>();
+        for (T element : target) {
+            if (!source.contains(element)) {
+                addedElements.add(element);
+            }
+        }
+        return addedElements;
+    }
 
-		private Collection<T> additions;
-		private Collection<T> removals;
+    public static <T> Collection<T> getRemovals(Collection<T> source, Collection<T> target) {
+        List<T> removedElement = new ArrayList<>();
+        for (T element : source) {
+            if (!target.contains(element)) {
+                removedElement.add(element);
+            }
+        }
+        return removedElement;
+    }
 
-		public Diff(Collection<T> source, Collection<T> target) {
-			this.additions = DiffUtils.getAdditions(source, target);
-			this.removals = DiffUtils.getRemovals(source, target);
-		}
+    public static class Diff<T> {
 
-		public Collection<T> getAdditions() {
-			return additions;
-		}
+        private Collection<T> additions;
+        private Collection<T> removals;
 
-		public Collection<T> getRemovals() {
-			return removals;
-		}
-	}
+        public Diff(Collection<T> source, Collection<T> target) {
+            this.additions = DiffUtils.getAdditions(source, target);
+            this.removals = DiffUtils.getRemovals(source, target);
+        }
+
+        public Collection<T> getAdditions() {
+            return additions;
+        }
+
+        public Collection<T> getRemovals() {
+            return removals;
+        }
+    }
 }

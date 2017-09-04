@@ -39,66 +39,67 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class EditDefaultRouteHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final Shell shell = HandlerUtil.getActiveShell(event);
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        final Shell shell = HandlerUtil.getActiveShell(event);
 
-		ISelection currentSelection = UIUtils.getCurrentSelection(event);
+        ISelection currentSelection = UIUtils.getCurrentSelection(event);
 
-		IServiceWrapper service = UIUtils.getFirstElement(currentSelection, IServiceWrapper.class);
-		if (service != null) {
-			new RouteOpenerJob(service.getWrapped().getNamespace(), shell) {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					this.routes = service.getResourcesOfKind(ResourceKind.ROUTE).stream().map(r -> (IRoute)r.getWrapped()).collect(Collectors.toList());
-					return Status.OK_STATUS;
-				}
-			}.schedule();
-			return Status.OK_STATUS;
-		}
-		
-		final IProject project = UIUtils.getFirstElement(currentSelection, IProject.class);
-		if (project != null) {
-			new RouteOpenerJob(project.getName(), shell) {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					this.routes = project.getResources(ResourceKind.ROUTE);
-					return Status.OK_STATUS;
-				}
-			}.schedule();
-			return Status.OK_STATUS;
-		}		
-		return Status.OK_STATUS;
-	}
-	
-	private abstract class RouteOpenerJob extends UIUpdatingJob {
-		protected List<IRoute> routes;
-		private Shell shell;
+        IServiceWrapper service = UIUtils.getFirstElement(currentSelection, IServiceWrapper.class);
+        if (service != null) {
+            new RouteOpenerJob(service.getWrapped().getNamespace(), shell) {
+                @Override
+                protected IStatus run(IProgressMonitor monitor) {
+                    this.routes = service.getResourcesOfKind(ResourceKind.ROUTE).stream().map(r -> (IRoute)r.getWrapped())
+                            .collect(Collectors.toList());
+                    return Status.OK_STATUS;
+                }
+            }.schedule();
+            return Status.OK_STATUS;
+        }
 
-		public RouteOpenerJob(String projectName, Shell shell) {
-			super(NLS.bind("Loading routes for project {0}", projectName));
-			this.shell = shell;
-		}
+        final IProject project = UIUtils.getFirstElement(currentSelection, IProject.class);
+        if (project != null) {
+            new RouteOpenerJob(project.getName(), shell) {
+                @Override
+                protected IStatus run(IProgressMonitor monitor) {
+                    this.routes = project.getResources(ResourceKind.ROUTE);
+                    return Status.OK_STATUS;
+                }
+            }.schedule();
+            return Status.OK_STATUS;
+        }
+        return Status.OK_STATUS;
+    }
 
-		@Override
-		protected IStatus updateUI(IProgressMonitor monitor) {
-			if (routes == null || routes.isEmpty()) {
-				return OpenInWebBrowserHandler.nothingToOpenDialog(shell);
-			}
+    private abstract class RouteOpenerJob extends UIUpdatingJob {
+        protected List<IRoute> routes;
+        private Shell shell;
 
-			IRoute selectedRoute = SelectedRoutePreference.instance.getSelectedRoute(routes);
+        public RouteOpenerJob(String projectName, Shell shell) {
+            super(NLS.bind("Loading routes for project {0}", projectName));
+            this.shell = shell;
+        }
 
-			SelectRouteDialog routeDialog = new SelectRouteDialog(routes, shell, selectedRoute != null, selectedRoute);
-			if (routeDialog.open() == Dialog.OK) {
-				selectedRoute = routeDialog.getSelectedRoute();
-				if(routeDialog.isRememberChoice()) {
-					SelectedRoutePreference.instance.setSelectedRoute(routes, selectedRoute);
-				} else {
-					SelectedRoutePreference.instance.removeSelectedRoute(routes);
-				}
-			}
-			return Status.OK_STATUS;
-		}
-	}
+        @Override
+        protected IStatus updateUI(IProgressMonitor monitor) {
+            if (routes == null || routes.isEmpty()) {
+                return OpenInWebBrowserHandler.nothingToOpenDialog(shell);
+            }
+
+            IRoute selectedRoute = SelectedRoutePreference.instance.getSelectedRoute(routes);
+
+            SelectRouteDialog routeDialog = new SelectRouteDialog(routes, shell, selectedRoute != null, selectedRoute);
+            if (routeDialog.open() == Dialog.OK) {
+                selectedRoute = routeDialog.getSelectedRoute();
+                if (routeDialog.isRememberChoice()) {
+                    SelectedRoutePreference.instance.setSelectedRoute(routes, selectedRoute);
+                } else {
+                    SelectedRoutePreference.instance.removeSelectedRoute(routes);
+                }
+            }
+            return Status.OK_STATUS;
+        }
+    }
 
 }

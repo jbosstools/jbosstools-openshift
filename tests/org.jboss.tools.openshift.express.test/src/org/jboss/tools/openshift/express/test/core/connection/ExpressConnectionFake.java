@@ -18,44 +18,44 @@ import org.jboss.tools.openshift.express.test.core.NoopUserFake;
  */
 public class ExpressConnectionFake extends ExpressConnection {
 
-	private static final String USERNAME = "testUser";
-	private boolean authenticationTriggered;
-	
-	public ExpressConnectionFake() {
-		this(USERNAME);
-	}
-	
-	public ExpressConnectionFake(String username) {
-		this(username, null);
-	}
+    private static final String USERNAME = "testUser";
+    private boolean authenticationTriggered;
 
-	public ExpressConnectionFake(String username, String host) {
-		super(username, null, host, false, null);
-	}
+    public ExpressConnectionFake() {
+        this(USERNAME);
+    }
 
-	public ExpressConnectionFake(String username, String scheme, String host) {
-		super(username, null, scheme, host, false, null, null);
-	}
-	
-	public void setConnected(boolean connected) {
-		if (connected) {
-			setUser(new NoopUserFake());
-		} else {
-			clearUser();
-		}
-	}
-	
-	@Override
-	protected boolean createUser() {
-		return this.authenticationTriggered = true;
-	}
+    public ExpressConnectionFake(String username) {
+        this(username, null);
+    }
 
-	public boolean isAuthenticationTriggered() {
-		return authenticationTriggered;
-	}
-	
-	@Override
-	public void save() {
-		// dont do anything
-	}
+    public ExpressConnectionFake(String username, String host) {
+        super(username, null, host, false, null);
+    }
+
+    public ExpressConnectionFake(String username, String scheme, String host) {
+        super(username, null, scheme, host, false, null, null);
+    }
+
+    public void setConnected(boolean connected) {
+        if (connected) {
+            setUser(new NoopUserFake());
+        } else {
+            clearUser();
+        }
+    }
+
+    @Override
+    protected boolean createUser() {
+        return this.authenticationTriggered = true;
+    }
+
+    public boolean isAuthenticationTriggered() {
+        return authenticationTriggered;
+    }
+
+    @Override
+    public void save() {
+        // dont do anything
+    }
 }

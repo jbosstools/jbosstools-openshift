@@ -15,20 +15,20 @@ import org.junit.Test;
 
 public class ExtTextPropertyDescriptorTest {
 
-	@Test
-	public void testCategoryIsSet() {
-		assertEquals("Common", new ExtTextPropertyDescriptor("foo", "bar", "Common").getCategory());
-	}
-	
-	@Test
-	public void testDisplayNameFromEnum(){
-		ExtTextPropertyDescriptor descriptor = new ExtTextPropertyDescriptor(Foo.Bar, "foo");
-		assertEquals("Bar", descriptor.getDisplayName());
-		assertEquals("foo", descriptor.getCategory());
-	}
-	
-	private enum Foo{
-		Bar;
-	}
-	
+    @Test
+    public void testCategoryIsSet() {
+        assertEquals("Common", new ExtTextPropertyDescriptor("foo", "bar", "Common").getCategory());
+    }
+
+    @Test
+    public void testDisplayNameFromEnum() {
+        ExtTextPropertyDescriptor descriptor = new ExtTextPropertyDescriptor(Foo.Bar, "foo");
+        assertEquals("Bar", descriptor.getDisplayName());
+        assertEquals("foo", descriptor.getCategory());
+    }
+
+    private enum Foo {
+        Bar;
+    }
+
 }

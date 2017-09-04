@@ -24,18 +24,18 @@ import org.junit.Test;
 
 public class OpenShiftServerAdapterFactoryTest {
 
-	@Test
-	public void testLoadWebModule() {
-		OpenShiftServerAdapterFactory factory = new OpenShiftServerAdapterFactory();
-		IServer server = mock(IServer.class);
-		OpenShiftServer realServer = mock(OpenShiftServer.class);
-		when(server.loadAdapter(eq(OpenShiftServer.class), isA(IProgressMonitor.class))).thenReturn(realServer);
-		IServerModule serverModule = factory.getAdapter(server, IServerModule.class);
-		assertNotNull(serverModule);
-		
-		IModule[] module = serverModule.getModule();
-		assertNotNull(module);
-		
-		assertNotNull(module[0].loadAdapter(IWebModule.class, null));
-	}
+    @Test
+    public void testLoadWebModule() {
+        OpenShiftServerAdapterFactory factory = new OpenShiftServerAdapterFactory();
+        IServer server = mock(IServer.class);
+        OpenShiftServer realServer = mock(OpenShiftServer.class);
+        when(server.loadAdapter(eq(OpenShiftServer.class), isA(IProgressMonitor.class))).thenReturn(realServer);
+        IServerModule serverModule = factory.getAdapter(server, IServerModule.class);
+        assertNotNull(serverModule);
+
+        IModule[] module = serverModule.getModule();
+        assertNotNull(module);
+
+        assertNotNull(module[0].loadAdapter(IWebModule.class, null));
+    }
 }

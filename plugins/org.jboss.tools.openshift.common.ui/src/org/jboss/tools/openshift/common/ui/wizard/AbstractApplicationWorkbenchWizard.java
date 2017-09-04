@@ -42,162 +42,155 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizar
  * 
  */
 public abstract class AbstractApplicationWorkbenchWizard extends Wizard implements IWorkbenchWizard {
-	
-	protected class DelegatingConnectionWizardPage extends ConnectionWizardPage {
-		
-		private IConnectionAwareWizard<IConnection> wizard;
 
-		private DelegatingConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel) {
-			super(wizard, wizardModel);
-		}
+    protected class DelegatingConnectionWizardPage extends ConnectionWizardPage {
 
-		@Override
-		public boolean isPageComplete() {
-			return false;
-		}
+        private IConnectionAwareWizard<IConnection> wizard;
 
-		@Override
-		public boolean canFlipToNextPage() {
-			return DataBindingUtils.isValid(getDatabindingContext())
-					&& hasWizard(getModel().getConnectionFactory());
-		}
+        private DelegatingConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel) {
+            super(wizard, wizardModel);
+        }
 
-		@Override
-		public IWizardPage getNextPage() {
-			IWizardPage page = null;
-			if (isConnected() && wizard != null) {
-				page = wizard.getStartingPage();
-			} else if (DataBindingUtils.isValid(getDatabindingContext())) {
-				if (connect()) {
-					IConnection connection = getConnection();
-					this.wizard = getWizard(connection);
-					if (wizard != null) {
-						wizard.setConnection(connection);
-						page = wizard.getStartingPage();
-					}
-				}
-			}
-			return page;
-		}
+        @Override
+        public boolean isPageComplete() {
+            return false;
+        }
 
-		private IConnectionAwareWizard<IConnection> getWizard(IConnection connection) {
-			if (connection == null) {
-				return null;
-			}
+        @Override
+        public boolean canFlipToNextPage() {
+            return DataBindingUtils.isValid(getDatabindingContext()) && hasWizard(getModel().getConnectionFactory());
+        }
 
-			IConnectionAwareWizard<IConnection> wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
-			if (wizard == null) {
-				return null;
-			}
+        @Override
+        public IWizardPage getNextPage() {
+            IWizardPage page = null;
+            if (isConnected() && wizard != null) {
+                page = wizard.getStartingPage();
+            } else if (DataBindingUtils.isValid(getDatabindingContext())) {
+                if (connect()) {
+                    IConnection connection = getConnection();
+                    this.wizard = getWizard(connection);
+                    if (wizard != null) {
+                        wizard.setConnection(connection);
+                        page = wizard.getStartingPage();
+                    }
+                }
+            }
+            return page;
+        }
 
-			init(wizard);
-			return wizard;
-		}
+        private IConnectionAwareWizard<IConnection> getWizard(IConnection connection) {
+            if (connection == null) {
+                return null;
+            }
 
-		private void init(IWizard wizard) {
-			wizard.setContainer(getContainer());
-			if (wizard.getPageCount() == 0) {
-				// initialize wizard
-				if (wizard instanceof IWorkbenchWizard) {
-					// init for package explorer/Configure->New/Import OpenShift application
-					((IWorkbenchWizard) wizard).init(workbench, selection);
-				}
-				wizard.addPages();
-			}
-		}
+            IConnectionAwareWizard<IConnection> wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
+            if (wizard == null) {
+                return null;
+            }
 
-		private boolean hasWizard(IConnectionFactory factory) {
-			if (factory == null) {
-				return false;
-			}
-			String host = getModel().getHost();
-			if (StringUtils.isEmpty(host)){
-			    return false;
-			}
-			IConnection connection = factory.create(host);
-			if (connection == null) {
-				return false;
-			}
-			IWizard wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
-			if (wizard == null) {
-				setErrorMessage(NLS.bind("No wizard for {0} connections present.", getModel().getConnectionFactory().getName()));
-			}
-			return wizard != null;
-		}
-	}
+            init(wizard);
+            return wizard;
+        }
 
-	private static final String ATTRIBUTE_CLASS = "class";
-	private static final String ATTRIBUTE_CONNECTION = "connection";
+        private void init(IWizard wizard) {
+            wizard.setContainer(getContainer());
+            if (wizard.getPageCount() == 0) {
+                // initialize wizard
+                if (wizard instanceof IWorkbenchWizard) {
+                    // init for package explorer/Configure->New/Import OpenShift application
+                    ((IWorkbenchWizard)wizard).init(workbench, selection);
+                }
+                wizard.addPages();
+            }
+        }
 
-	private Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection;
-	private IWorkbench workbench;
-	private IStructuredSelection selection;
+        private boolean hasWizard(IConnectionFactory factory) {
+            if (factory == null) {
+                return false;
+            }
+            String host = getModel().getHost();
+            if (StringUtils.isEmpty(host)) {
+                return false;
+            }
+            IConnection connection = factory.create(host);
+            if (connection == null) {
+                return false;
+            }
+            IWizard wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
+            if (wizard == null) {
+                setErrorMessage(NLS.bind("No wizard for {0} connections present.", getModel().getConnectionFactory().getName()));
+            }
+            return wizard != null;
+        }
+    }
 
-	protected AbstractApplicationWorkbenchWizard(String title) {
-		setWindowTitle(title);
-		setNeedsProgressMonitor(true);
-		setForcePreviousAndNextButtons(true);
-	}
+    private static final String ATTRIBUTE_CLASS = "class";
+    private static final String ATTRIBUTE_CONNECTION = "connection";
 
-	protected IConnectionAwareWizard<IConnection> getWizard(Class<? extends IConnection> connectionClass) {
-		return getWizards().get(connectionClass);
-	}
+    private Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection;
+    private IWorkbench workbench;
+    private IStructuredSelection selection;
 
-	private Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> getWizards() {
-		if (wizardsByConnection == null) {
-			this.wizardsByConnection = createWizards(getWizardsExtensionId());
-		}
-		
-		return wizardsByConnection;
-	}
-	
-	protected Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> createWizards(String extensionId) {
-		HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection = new HashMap<>();
- 		for (IConfigurationElement configuration : ExtensionUtils.getExtensionConfigurations(extensionId)) {
-			createWizard(wizardsByConnection, configuration);
-		}
-		return wizardsByConnection;
-	}
+    protected AbstractApplicationWorkbenchWizard(String title) {
+        setWindowTitle(title);
+        setNeedsProgressMonitor(true);
+        setForcePreviousAndNextButtons(true);
+    }
 
-	private void createWizard(Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection, 
-			IConfigurationElement configuration) {
-		try {
-			IConnectionAwareWizard<IConnection> wizard = 
-					ExtensionUtils.createExtension(ATTRIBUTE_CLASS, configuration);
-			if (wizard != null) {
-				Class<IConnection> connectionClass = 
-						ExtensionUtils.getClass(configuration.getAttribute(ATTRIBUTE_CONNECTION), configuration);
-				if (connectionClass != null) {
-					wizardsByConnection.put(connectionClass, wizard);
-				}
-			}
-		} catch (InvalidRegistryObjectException 
-				| IllegalStateException 
-				| IllegalArgumentException 
-				| ClassNotFoundException e) {
-			OpenShiftCommonUIActivator.log(
-					NLS.bind("Could not create application wizard in bundle {0} for extension {1}", // $NON-NLS-1$
-							ExtensionUtils.getBundleNameFor(configuration),
-							configuration.getName()),
-					e); 
-		}
-	}
+    protected IConnectionAwareWizard<IConnection> getWizard(Class<? extends IConnection> connectionClass) {
+        return getWizards().get(connectionClass);
+    }
 
-	@Override
-	public boolean performFinish() {
-		return false;
-	}
+    private Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> getWizards() {
+        if (wizardsByConnection == null) {
+            this.wizardsByConnection = createWizards(getWizardsExtensionId());
+        }
 
-	@Override
-	public void addPages() {
-		addPage(new DelegatingConnectionWizardPage(this, new ConnectionWizardModel(ConnectionsRegistrySingleton.getInstance().getRecentConnection(), null)));
-	}
+        return wizardsByConnection;
+    }
 
-	protected abstract String getWizardsExtensionId();
+    protected Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> createWizards(String extensionId) {
+        HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection = new HashMap<>();
+        for (IConfigurationElement configuration : ExtensionUtils.getExtensionConfigurations(extensionId)) {
+            createWizard(wizardsByConnection, configuration);
+        }
+        return wizardsByConnection;
+    }
 
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		this.workbench = workbench;
-		this.selection = selection;
-	}
+    private void createWizard(Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection,
+            IConfigurationElement configuration) {
+        try {
+            IConnectionAwareWizard<IConnection> wizard = ExtensionUtils.createExtension(ATTRIBUTE_CLASS, configuration);
+            if (wizard != null) {
+                Class<IConnection> connectionClass = ExtensionUtils.getClass(configuration.getAttribute(ATTRIBUTE_CONNECTION),
+                        configuration);
+                if (connectionClass != null) {
+                    wizardsByConnection.put(connectionClass, wizard);
+                }
+            }
+        } catch (InvalidRegistryObjectException | IllegalStateException | IllegalArgumentException | ClassNotFoundException e) {
+            OpenShiftCommonUIActivator.log(NLS.bind("Could not create application wizard in bundle {0} for extension {1}", // $NON-NLS-1$
+                    ExtensionUtils.getBundleNameFor(configuration), configuration.getName()), e);
+        }
+    }
+
+    @Override
+    public boolean performFinish() {
+        return false;
+    }
+
+    @Override
+    public void addPages() {
+        addPage(new DelegatingConnectionWizardPage(this,
+                new ConnectionWizardModel(ConnectionsRegistrySingleton.getInstance().getRecentConnection(), null)));
+    }
+
+    protected abstract String getWizardsExtensionId();
+
+    @Override
+    public void init(IWorkbench workbench, IStructuredSelection selection) {
+        this.workbench = workbench;
+        this.selection = selection;
+    }
 }

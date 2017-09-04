@@ -31,39 +31,39 @@ import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 @SuppressWarnings("restriction")
 public class TailConsolePageParticipant implements IConsolePageParticipant {
 
-	/** The standard Eclipse UI CloseConsoleAction.*/
-	private CloseConsoleAction closeConsoleAction;
+    /** The standard Eclipse UI CloseConsoleAction.*/
+    private CloseConsoleAction closeConsoleAction;
 
-	@Override
-	public void init(IPageBookViewPage page, IConsole console) {
-		this.closeConsoleAction = new CloseConsoleAction(console);
-		this.closeConsoleAction.setImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_ELCL_REMOVE));
-		this.closeConsoleAction.setToolTipText(ExpressUIMessages.CloseConsole);
-		IActionBars bars = page.getSite().getActionBars();
-		bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, closeConsoleAction);
-	}
+    @Override
+    public void init(IPageBookViewPage page, IConsole console) {
+        this.closeConsoleAction = new CloseConsoleAction(console);
+        this.closeConsoleAction.setImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_ELCL_REMOVE));
+        this.closeConsoleAction.setToolTipText(ExpressUIMessages.CloseConsole);
+        IActionBars bars = page.getSite().getActionBars();
+        bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, closeConsoleAction);
+    }
 
-	@Override
-	public void dispose() {
-		this.closeConsoleAction = null;
-	}
+    @Override
+    public void dispose() {
+        this.closeConsoleAction = null;
+    }
 
-	@Override
-	public void activated() {
-	}
+    @Override
+    public void activated() {
+    }
 
-	@Override
-	public void deactivated() {
-	}
+    @Override
+    public void deactivated() {
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-	 */
-	@Override
-	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+     */
+    @Override
+    public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+        return null;
+    }
 
 }

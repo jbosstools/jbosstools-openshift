@@ -39,123 +39,122 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
  */
 public class ConnectionWizardFragment extends WizardFragment {
 
-	private WrappedConnectionWizardPage connectionPage;
-	private PropertyChangeListener connectionChangeListener = null;
+    private WrappedConnectionWizardPage connectionPage;
+    private PropertyChangeListener connectionChangeListener = null;
 
-	public void addConnectionChangeListener(PropertyChangeListener connectionChangeListener) {
-		this.connectionChangeListener = connectionChangeListener;
-	}
+    public void addConnectionChangeListener(PropertyChangeListener connectionChangeListener) {
+        this.connectionChangeListener = connectionChangeListener;
+    }
 
-	@Override
-	public boolean hasComposite() {
-		return true;
-	}
+    @Override
+    public boolean hasComposite() {
+        return true;
+    }
 
-	@Override
-	public boolean isComplete() {
-		if(connectionPage == null || !connectionPage.isPageComplete()) {
-			return false;
-		}
-		if(getTaskModel() != null) {
-			Object isLoadingServices = getTaskModel().getObject(ServerSettingsWizardFragment.IS_LOADING_SERVICES);
-			return !(Boolean.TRUE.equals(isLoadingServices));
-		}
-		return true;
-	}
+    @Override
+    public boolean isComplete() {
+        if (connectionPage == null || !connectionPage.isPageComplete()) {
+            return false;
+        }
+        if (getTaskModel() != null) {
+            Object isLoadingServices = getTaskModel().getObject(ServerSettingsWizardFragment.IS_LOADING_SERVICES);
+            return !(Boolean.TRUE.equals(isLoadingServices));
+        }
+        return true;
+    }
 
-	@Override
-	public Composite createComposite(Composite parent, IWizardHandle handle) {
-		this.connectionPage = createConnectionWizardPage(parent, handle);
-		updateWizardHandle(handle, connectionPage);
-		getContainer(getPage(handle)).addPageChangingListener(onPageChanging(handle));
-		getContainer(getPage(handle)).addPageChangedListener(connectionPage.onPageChanged());
-		return (Composite) connectionPage.getControl();
-	}
+    @Override
+    public Composite createComposite(Composite parent, IWizardHandle handle) {
+        this.connectionPage = createConnectionWizardPage(parent, handle);
+        updateWizardHandle(handle, connectionPage);
+        getContainer(getPage(handle)).addPageChangingListener(onPageChanging(handle));
+        getContainer(getPage(handle)).addPageChangedListener(connectionPage.onPageChanged());
+        return (Composite)connectionPage.getControl();
+    }
 
-	private IPageChangingListener onPageChanging(IWizardHandle wizardHandle) {
-		return new IPageChangingListener() {
+    private IPageChangingListener onPageChanging(IWizardHandle wizardHandle) {
+        return new IPageChangingListener() {
 
-			@Override
-			public void handlePageChanging(PageChangingEvent event) {
-				if (event.getCurrentPage() == getPage(wizardHandle)){
-					if (event.getTargetPage() == null
-							|| event.getTargetPage().equals(getPage(wizardHandle).getNextPage())) {
-						connectionPage.onPageWillGetDeactivated(Direction.FORWARDS, event);							
-					} else {
-						connectionPage.onPageWillGetDeactivated(Direction.BACKWARDS, event);
-					}
-					
-					IConnection connection = connectionPage.getConnection();
-					if (connection instanceof Connection) {
-						OpenShiftServerTaskModelAccessor.set((Connection) connection, getTaskModel());
-					}
-				}
-			}
-		};
-	}
+            @Override
+            public void handlePageChanging(PageChangingEvent event) {
+                if (event.getCurrentPage() == getPage(wizardHandle)) {
+                    if (event.getTargetPage() == null || event.getTargetPage().equals(getPage(wizardHandle).getNextPage())) {
+                        connectionPage.onPageWillGetDeactivated(Direction.FORWARDS, event);
+                    } else {
+                        connectionPage.onPageWillGetDeactivated(Direction.BACKWARDS, event);
+                    }
 
-	private WrappedConnectionWizardPage createConnectionWizardPage(Composite parent, IWizardHandle handle) {
-		WrappedConnectionWizardPage connectionPage = new WrappedConnectionWizardPage(handle);
-		connectionPage.createControl(parent);
-		return connectionPage;
-	}
+                    IConnection connection = connectionPage.getConnection();
+                    if (connection instanceof Connection) {
+                        OpenShiftServerTaskModelAccessor.set((Connection)connection, getTaskModel());
+                    }
+                }
+            }
+        };
+    }
 
-	private void updateWizardHandle(IWizardHandle handle, ConnectionWizardPage connectionPage) {
-		handle.setTitle(connectionPage.getTitle());
-		handle.setDescription(connectionPage.getDescription());
-		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
-	}
+    private WrappedConnectionWizardPage createConnectionWizardPage(Composite parent, IWizardHandle handle) {
+        WrappedConnectionWizardPage connectionPage = new WrappedConnectionWizardPage(handle);
+        connectionPage.createControl(parent);
+        return connectionPage;
+    }
 
-	private IWizardPage getPage(IWizardHandle wizardHandle) {
-		return (IWizardPage) wizardHandle;
-	}
-	
-	private WizardDialog getContainer(IWizardPage wizardPage) {
-		return (WizardDialog) wizardPage.getWizard().getContainer();
-	}
+    private void updateWizardHandle(IWizardHandle handle, ConnectionWizardPage connectionPage) {
+        handle.setTitle(connectionPage.getTitle());
+        handle.setDescription(connectionPage.getDescription());
+        handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
+    }
 
-	private class WrappedConnectionWizardPage extends ConnectionWizardPage {
+    private IWizardPage getPage(IWizardHandle wizardHandle) {
+        return (IWizardPage)wizardHandle;
+    }
 
-		private IWizardHandle wizardHandle;
+    private WizardDialog getContainer(IWizardPage wizardPage) {
+        return (WizardDialog)wizardPage.getWizard().getContainer();
+    }
 
-		private WrappedConnectionWizardPage(IWizardHandle wizardHandle) {
-			super(((IWizardPage) wizardHandle).getWizard(), new ConnectionWizardModel(Connection.class), Connection.class);
-			this.wizardHandle = wizardHandle;
-			if(connectionChangeListener != null) {
-				getModel().addPropertyChangeListener(connectionChangeListener);
-			}
-		}
+    private class WrappedConnectionWizardPage extends ConnectionWizardPage {
 
-		@Override
-		public void setPageComplete(boolean complete) {
-			super.setPageComplete(complete);
-			wizardHandle.update();
-		}
+        private IWizardHandle wizardHandle;
 
-		@Override
-		public void setErrorMessage(String newMessage) {
-			((WizardPage) wizardHandle).setErrorMessage(newMessage);
-		}
+        private WrappedConnectionWizardPage(IWizardHandle wizardHandle) {
+            super(((IWizardPage)wizardHandle).getWizard(), new ConnectionWizardModel(Connection.class), Connection.class);
+            this.wizardHandle = wizardHandle;
+            if (connectionChangeListener != null) {
+                getModel().addPropertyChangeListener(connectionChangeListener);
+            }
+        }
 
-		@Override
-		public void setMessage(String newMessage, int newType) {
-			wizardHandle.setMessage(newMessage, newType);
-		}
+        @Override
+        public void setPageComplete(boolean complete) {
+            super.setPageComplete(complete);
+            wizardHandle.update();
+        }
 
-		public void onPageWillGetDeactivated(Direction direction, PageChangingEvent event) {
-			onPageWillGetDeactivated(direction, event, null);
-		}
+        @Override
+        public void setErrorMessage(String newMessage) {
+            ((WizardPage)wizardHandle).setErrorMessage(newMessage);
+        }
 
-		private IPageChangedListener onPageChanged() {
-			return new IPageChangedListener() {
+        @Override
+        public void setMessage(String newMessage, int newType) {
+            wizardHandle.setMessage(newMessage, newType);
+        }
 
-				@Override
-				public void pageChanged(PageChangedEvent event) {
-					if (event.getSelectedPage() == getPage(wizardHandle)) {
-						updateSize();
-					}
-				}
-			};
-		}
-	}
+        public void onPageWillGetDeactivated(Direction direction, PageChangingEvent event) {
+            onPageWillGetDeactivated(direction, event, null);
+        }
+
+        private IPageChangedListener onPageChanged() {
+            return new IPageChangedListener() {
+
+                @Override
+                public void pageChanged(PageChangedEvent event) {
+                    if (event.getSelectedPage() == getPage(wizardHandle)) {
+                        updateSize();
+                    }
+                }
+            };
+        }
+    }
 }

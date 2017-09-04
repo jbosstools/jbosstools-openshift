@@ -19,12 +19,12 @@ import org.eclipse.jface.viewers.ViewerCell;
  */
 public abstract class AbstractPropertyCellLabelProvider extends StyledCellLabelProvider {
 
-	@Override
-	public void update(ViewerCell cell) {
-		if (cell.getElement() instanceof IProperty) {
-			update((IProperty) cell.getElement(), cell);
-		}
-	}
+    @Override
+    public void update(ViewerCell cell) {
+        if (cell.getElement() instanceof IProperty) {
+            update((IProperty)cell.getElement(), cell);
+        }
+    }
 
-	abstract protected void update(IProperty property, ViewerCell cell);
+    abstract protected void update(IProperty property, ViewerCell cell);
 }

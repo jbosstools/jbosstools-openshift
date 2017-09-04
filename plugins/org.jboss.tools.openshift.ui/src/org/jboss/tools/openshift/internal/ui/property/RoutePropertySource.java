@@ -19,35 +19,32 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class RoutePropertySource extends ResourcePropertySource<IRoute> {
 
-	private static final String SERVICE = "service";
-	private static final String HOST_PATH = "host/path";
-	private static final String PORT = "port";
+    private static final String SERVICE = "service";
+    private static final String HOST_PATH = "host/path";
+    private static final String PORT = "port";
 
-	public RoutePropertySource(IRoute resource) {
-		super(resource);
-	}
+    public RoutePropertySource(IRoute resource) {
+        super(resource);
+    }
 
-	@Override
-	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new UneditablePropertyDescriptor(HOST_PATH, "URI"),
-				new UneditablePropertyDescriptor(SERVICE, "Service"),
-				new UneditablePropertyDescriptor(PORT, "Port"),
-		};
-	}
+    @Override
+    public IPropertyDescriptor[] getResourcePropertyDescriptors() {
+        return new IPropertyDescriptor[] { new UneditablePropertyDescriptor(HOST_PATH, "URI"),
+                new UneditablePropertyDescriptor(SERVICE, "Service"), new UneditablePropertyDescriptor(PORT, "Port"), };
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		if(HOST_PATH.equals(id)){
-			return NLS.bind("{0}{1}", getResource().getHost(), getResource().getPath());
-		}
-		if(SERVICE.equals(id)){
-			return getResource().getServiceName();
-		}
-		if (PORT.equals(id)) {
-		    return getResource().createPort().getTargetPortName();
-		}
-		return super.getPropertyValue(id);
-	}
-	
+    @Override
+    public Object getPropertyValue(Object id) {
+        if (HOST_PATH.equals(id)) {
+            return NLS.bind("{0}{1}", getResource().getHost(), getResource().getPath());
+        }
+        if (SERVICE.equals(id)) {
+            return getResource().getServiceName();
+        }
+        if (PORT.equals(id)) {
+            return getResource().createPort().getTargetPortName();
+        }
+        return super.getPropertyValue(id);
+    }
+
 }

@@ -23,33 +23,32 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedD
  */
 public class AdvancedConnectionEditorsStackedView extends AbstractStackedDetailViews {
 
-	private static final String EXTENSION = "org.jboss.tools.openshift.ui.connectionEditor.advanced";
-	private static final String ATTRIBUTE_CLASS = "class";
+    private static final String EXTENSION = "org.jboss.tools.openshift.ui.connectionEditor.advanced";
+    private static final String ATTRIBUTE_CLASS = "class";
 
-	private Collection<IAdvancedConnectionPropertiesEditor> editors;
+    private Collection<IAdvancedConnectionPropertiesEditor> editors;
 
-	@SuppressWarnings("rawtypes")
-	protected AdvancedConnectionEditorsStackedView(IObservableValue detailViewModel, ConnectionWizardPageModel model, Composite parent, DataBindingContext dbc) {
-		super(detailViewModel, model, parent, dbc);
-		this.editors = getEditors();
-	}
+    @SuppressWarnings("rawtypes")
+    protected AdvancedConnectionEditorsStackedView(IObservableValue detailViewModel, ConnectionWizardPageModel model, Composite parent,
+            DataBindingContext dbc) {
+        super(detailViewModel, model, parent, dbc);
+        this.editors = getEditors();
+    }
 
-	@Override
-	protected IDetailView[] getDetailViews() {
-		return editors.toArray(new IAdvancedConnectionPropertiesEditor[editors.size()]);
-	}
-	
-	private Collection<IAdvancedConnectionPropertiesEditor> getEditors() {
-		return ExtensionUtils.getExtensions(EXTENSION, ATTRIBUTE_CLASS);
-	}
+    @Override
+    protected IDetailView[] getDetailViews() {
+        return editors.toArray(new IAdvancedConnectionPropertiesEditor[editors.size()]);
+    }
 
-	public void saveChanges(ConnectionWizardPageModel pageModel) {
-		IAdvancedConnectionPropertiesEditor[] ed = editors.toArray(new IAdvancedConnectionPropertiesEditor[editors.size()]);
-		for( int i = 0; i < ed.length; i++ ) {
-			ed[i].saveChanges(pageModel);
-		}
-	}
-	
-	
+    private Collection<IAdvancedConnectionPropertiesEditor> getEditors() {
+        return ExtensionUtils.getExtensions(EXTENSION, ATTRIBUTE_CLASS);
+    }
+
+    public void saveChanges(ConnectionWizardPageModel pageModel) {
+        IAdvancedConnectionPropertiesEditor[] ed = editors.toArray(new IAdvancedConnectionPropertiesEditor[editors.size()]);
+        for (int i = 0; i < ed.length; i++) {
+            ed[i].saveChanges(pageModel);
+        }
+    }
 
 }

@@ -44,159 +44,141 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
  */
 public class ExpressConnectionEditor extends BaseConnectionEditor {
 
-	private Text usernameText;
-	private IObservableValue usernameObservable;
-	private Binding usernameBinding;
-	private Text passwordText;
-	private IObservableValue passwordObservable;
-	private Binding passwordBinding;
-	private IObservableValue rememberPasswordObservable;
-	private Button rememberPasswordCheckBox;
-	private Binding rememberPasswordBinding;
-	
-	public ExpressConnectionEditor() {
-	}
+    private Text usernameText;
+    private IObservableValue usernameObservable;
+    private Binding usernameBinding;
+    private Text passwordText;
+    private IObservableValue passwordObservable;
+    private Binding passwordBinding;
+    private IObservableValue rememberPasswordObservable;
+    private Button rememberPasswordCheckBox;
+    private Binding rememberPasswordBinding;
 
-	@Override
-	public Composite createControls(Composite parent, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
-		Composite composite = setControl(new Composite(parent, SWT.None));
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
+    public ExpressConnectionEditor() {
+    }
 
-		// username
-		Label rhLoginLabel = new Label(composite, SWT.NONE);
-		rhLoginLabel.setText("&Username:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(rhLoginLabel);
-		this.usernameText = new Text(composite, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
-		this.usernameObservable = new WritableValue(null, String.class);
-		usernameObservable.addValueChangeListener(changeListener);
-		
-		// password
-		Label passwordLabel = new Label(composite, SWT.NONE);
-		passwordLabel.setText("&Password:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
-		this.passwordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
-		this.passwordObservable = new WritableValue(null, String.class);
-		passwordObservable.addValueChangeListener(changeListener);
-		
-		this.rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
-		rememberPasswordCheckBox.setText("&Save password (could trigger secure storage login)");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
-		this.rememberPasswordObservable = new WritableValue(null, Boolean.class);
-		rememberPasswordObservable.addValueChangeListener(changeListener);
-		
-		return composite;
-	}
+    @Override
+    public Composite createControls(Composite parent, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+        Composite composite = setControl(new Composite(parent, SWT.None));
+        GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
 
-	@Override
-	public void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
-		updateFrom(selectedConnection);
-		bindWidgetsToInternalModel(dbc);
-	}
+        // username
+        Label rhLoginLabel = new Label(composite, SWT.NONE);
+        rhLoginLabel.setText("&Username:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(rhLoginLabel);
+        this.usernameText = new Text(composite, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
+        this.usernameObservable = new WritableValue(null, String.class);
+        usernameObservable.addValueChangeListener(changeListener);
 
-	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
-		// username
-		this.usernameBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
-				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("username"))
-				.to(usernameObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+        // password
+        Label passwordLabel = new Label(composite, SWT.NONE);
+        passwordLabel.setText("&Password:");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
+        this.passwordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
+        this.passwordObservable = new WritableValue(null, String.class);
+        passwordObservable.addValueChangeListener(changeListener);
 
-		// password
-		this.passwordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
-				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("password"))
-				.to(passwordObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		
-		// remember password
-		this.rememberPasswordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
-				.to(rememberPasswordObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				rememberPasswordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-	}
-	
-	@Override
-	public void onInVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
-		disposeBindings();
-	}
+        this.rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
+        rememberPasswordCheckBox.setText("&Save password (could trigger secure storage login)");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
+        this.rememberPasswordObservable = new WritableValue(null, Boolean.class);
+        rememberPasswordObservable.addValueChangeListener(changeListener);
 
-	@Override
-	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
-		updateFrom(selectedConnection);
-	}
-	
-	private void updateFrom(IObservableValue selectedConnectionObservable) {
-		Object value = selectedConnectionObservable.getValue();
-		if (value instanceof ExpressConnection) {
-			ExpressConnection selectedConnection = (ExpressConnection) selectedConnectionObservable.getValue();
-			usernameObservable.setValue(selectedConnection.getUsername());
-			passwordObservable.setValue(selectedConnection.getPassword());
-			rememberPasswordObservable.setValue(selectedConnection.isRememberPassword());
-		} else if (value instanceof NewConnectionMarker) {
-			usernameObservable.setValue(null);
-			passwordObservable.setValue(null);
-			rememberPasswordObservable.setValue(false);
-		}
-	}
+        return composite;
+    }
 
-	@Override
-	public boolean isViewFor(Object object) {
-		return object instanceof ExpressConnectionFactory;
-	}
+    @Override
+    public void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+        updateFrom(selectedConnection);
+        bindWidgetsToInternalModel(dbc);
+    }
 
-	@Override
-	public void dispose() {
-		disposeBindings();
-	}
+    private void bindWidgetsToInternalModel(DataBindingContext dbc) {
+        // username
+        this.usernameBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
+                .converting(new TrimmingStringConverter()).validatingAfterConvert(new RequiredStringValidator("username"))
+                .to(usernameObservable).in(dbc);
+        ControlDecorationSupport.create(usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-	private void disposeBindings() {
-		DataBindingUtils.dispose(usernameBinding);
-		DataBindingUtils.dispose(passwordBinding);
-		DataBindingUtils.dispose(rememberPasswordBinding);
-	}
+        // password
+        this.passwordBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
+                .converting(new TrimmingStringConverter()).validatingAfterConvert(new RequiredStringValidator("password"))
+                .to(passwordObservable).in(dbc);
+        ControlDecorationSupport.create(passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
-	@Override
-	protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(ConnectionWizardPageModel pageModel) {
-		return new ExpressConnectionAuthenticationProvider();
-	}
-	
-	private class ExpressConnectionAuthenticationProvider implements IConnectionAuthenticationProvider {
+        // remember password
+        this.rememberPasswordBinding = ValueBindingBuilder.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
+                .to(rememberPasswordObservable).in(dbc);
+        ControlDecorationSupport.create(rememberPasswordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+    }
 
-		@Override
-		public IConnection update(IConnection connection) {
-			Assert.isLegal(connection instanceof ExpressConnection);
-			
-			final ExpressConnection expressConnection = (ExpressConnection) connection;
-			// might be called from job, switch to display thread to access observables
-			Display.getDefault().syncExec(new Runnable() {
+    @Override
+    public void onInVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+        disposeBindings();
+    }
 
-				@Override
-				public void run() {
-					expressConnection.setUsername((String) usernameObservable.getValue());
-					expressConnection.setPassword((String) passwordObservable.getValue());
-					expressConnection.setRememberPassword(
-							BooleanUtils.toBoolean((Boolean) rememberPasswordObservable.getValue()));
-				}
-			});
+    @Override
+    protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
+        updateFrom(selectedConnection);
+    }
 
-			return expressConnection;
-		}
-		
-	}
+    private void updateFrom(IObservableValue selectedConnectionObservable) {
+        Object value = selectedConnectionObservable.getValue();
+        if (value instanceof ExpressConnection) {
+            ExpressConnection selectedConnection = (ExpressConnection)selectedConnectionObservable.getValue();
+            usernameObservable.setValue(selectedConnection.getUsername());
+            passwordObservable.setValue(selectedConnection.getPassword());
+            rememberPasswordObservable.setValue(selectedConnection.isRememberPassword());
+        } else if (value instanceof NewConnectionMarker) {
+            usernameObservable.setValue(null);
+            passwordObservable.setValue(null);
+            rememberPasswordObservable.setValue(false);
+        }
+    }
+
+    @Override
+    public boolean isViewFor(Object object) {
+        return object instanceof ExpressConnectionFactory;
+    }
+
+    @Override
+    public void dispose() {
+        disposeBindings();
+    }
+
+    private void disposeBindings() {
+        DataBindingUtils.dispose(usernameBinding);
+        DataBindingUtils.dispose(passwordBinding);
+        DataBindingUtils.dispose(rememberPasswordBinding);
+    }
+
+    @Override
+    protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(ConnectionWizardPageModel pageModel) {
+        return new ExpressConnectionAuthenticationProvider();
+    }
+
+    private class ExpressConnectionAuthenticationProvider implements IConnectionAuthenticationProvider {
+
+        @Override
+        public IConnection update(IConnection connection) {
+            Assert.isLegal(connection instanceof ExpressConnection);
+
+            final ExpressConnection expressConnection = (ExpressConnection)connection;
+            // might be called from job, switch to display thread to access observables
+            Display.getDefault().syncExec(new Runnable() {
+
+                @Override
+                public void run() {
+                    expressConnection.setUsername((String)usernameObservable.getValue());
+                    expressConnection.setPassword((String)passwordObservable.getValue());
+                    expressConnection.setRememberPassword(BooleanUtils.toBoolean((Boolean)rememberPasswordObservable.getValue()));
+                }
+            });
+
+            return expressConnection;
+        }
+
+    }
 }

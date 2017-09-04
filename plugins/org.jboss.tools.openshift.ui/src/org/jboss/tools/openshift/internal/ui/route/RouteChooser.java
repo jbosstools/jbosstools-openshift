@@ -24,38 +24,35 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class RouteChooser implements IRouteChooser {
 
-	private static final String NO_ROUTE_MSG = "Could not find a route that points to an url to show in a browser.";
+    private static final String NO_ROUTE_MSG = "Could not find a route that points to an url to show in a browser.";
 
-	private boolean rememberChoice = false;
+    private boolean rememberChoice = false;
 
-	public RouteChooser() {
-	}
+    public RouteChooser() {
+    }
 
-	@Override
-	public IRoute chooseRoute(List<IRoute> routes) {
-		final IRoute[] selectedRoute = new IRoute[1];
-		Display.getDefault().syncExec(() -> {
-			SelectRouteDialog routeDialog = 
-					new SelectRouteDialog(routes, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
-			if (Dialog.OK == routeDialog.open()) {
-				selectedRoute[0] = routeDialog.getSelectedRoute();
-				rememberChoice = routeDialog.isRememberChoice();
-			}
-		});
-		return selectedRoute[0];
-	}
+    @Override
+    public IRoute chooseRoute(List<IRoute> routes) {
+        final IRoute[] selectedRoute = new IRoute[1];
+        Display.getDefault().syncExec(() -> {
+            SelectRouteDialog routeDialog = new SelectRouteDialog(routes, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+            if (Dialog.OK == routeDialog.open()) {
+                selectedRoute[0] = routeDialog.getSelectedRoute();
+                rememberChoice = routeDialog.isRememberChoice();
+            }
+        });
+        return selectedRoute[0];
+    }
 
-	@Override
-	public boolean isRememberChoice() {
-		return rememberChoice;
-	}
+    @Override
+    public boolean isRememberChoice() {
+        return rememberChoice;
+    }
 
-	@Override
-	public void noRouteErrorDialog() {
-		Display.getDefault().syncExec(() -> {
-			MessageDialog.openWarning(
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
-					"No route to open", NO_ROUTE_MSG);
-		});
-	}
+    @Override
+    public void noRouteErrorDialog() {
+        Display.getDefault().syncExec(() -> {
+            MessageDialog.openWarning(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "No route to open", NO_ROUTE_MSG);
+        });
+    }
 }

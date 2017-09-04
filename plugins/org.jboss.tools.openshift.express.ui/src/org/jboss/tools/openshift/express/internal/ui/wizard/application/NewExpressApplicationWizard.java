@@ -25,26 +25,26 @@ import com.openshift.client.IDomain;
  */
 public class NewExpressApplicationWizard extends ExpressApplicationWizard {
 
-	/**
-	 * Constructor invoked via File->Import
-	 */
-	public NewExpressApplicationWizard() {
-		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class),
-				null, null, null, false, "New OpenShift Application");
-	}
+    /**
+     * Constructor invoked via File->Import
+     */
+    public NewExpressApplicationWizard() {
+        super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class), null, null, null, false,
+                "New OpenShift Application");
+    }
 
-	/**
-	 * Constructor invoked via OpenShift Explorer context menu
-	 */
-	public NewExpressApplicationWizard(IDomain domain) {
-		super(ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance()),
-				domain, null, null, false, "New OpenShift Application");
-	}
+    /**
+     * Constructor invoked via OpenShift Explorer context menu
+     */
+    public NewExpressApplicationWizard(IDomain domain) {
+        super(ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance()), domain, null, null, false,
+                "New OpenShift Application");
+    }
 
-	/**
-	 * Constructor invoked via OpenShift Explorer context menu
-	 */
-	public NewExpressApplicationWizard(ExpressConnection connection) {
-		super(connection, connection.getDefaultDomain(), null, null, false, "New OpenShift Application");
-	}
+    /**
+     * Constructor invoked via OpenShift Explorer context menu
+     */
+    public NewExpressApplicationWizard(ExpressConnection connection) {
+        super(connection, connection.getDefaultDomain(), null, null, false, "New OpenShift Application");
+    }
 }

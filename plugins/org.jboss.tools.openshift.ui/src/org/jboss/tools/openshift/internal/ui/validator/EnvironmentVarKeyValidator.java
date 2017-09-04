@@ -26,39 +26,39 @@ import org.eclipse.osgi.util.NLS;
  */
 public class EnvironmentVarKeyValidator implements IValidator {
 
-	private static final Pattern CIDENTIFIER_REGEXP = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*$");
+    private static final Pattern CIDENTIFIER_REGEXP = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*$");
 
-	private final String failureMessage = "A valid {0} is alphanumeric (a-z, and 0-9), "
-			+ "including the character '_', allowed anywhere except first position.";
+    private final String failureMessage = "A valid {0} is alphanumeric (a-z, and 0-9), "
+            + "including the character '_', allowed anywhere except first position.";
 
-	private final IStatus FAILED;
-	private static final IStatus NAME_IS_USED_ERROR = ValidationStatus.error("An environment variable with this name already exists");
-	private Collection<String> usedKeys;
-	
-	public EnvironmentVarKeyValidator(Collection<String> usedKeys) {
-		this("environment variable name", usedKeys);
-	}
-	
-	public EnvironmentVarKeyValidator(String element, Collection<String> usedKeys) {
-		FAILED = ValidationStatus.error(NLS.bind(failureMessage, element));
-		this.usedKeys = usedKeys != null ? usedKeys : new ArrayList<>(0);
-	}
+    private final IStatus FAILED;
+    private static final IStatus NAME_IS_USED_ERROR = ValidationStatus.error("An environment variable with this name already exists");
+    private Collection<String> usedKeys;
 
-	@Override
-	public IStatus validate(Object paramObject) {
-		if(!(paramObject instanceof String))
-			return ValidationStatus.cancel("Value is not an instance of a string");
-		String value= (String) paramObject;
-		if (StringUtils.isBlank(value)) {
-			return ValidationStatus.cancel("Please provide a key name.");
-		}
-		if(!CIDENTIFIER_REGEXP.matcher(value).matches()) {
-			return FAILED;
-		}
-		if(usedKeys.contains(value)) {
-			return NAME_IS_USED_ERROR;
-		}
-		
-		return ValidationStatus.OK_STATUS;
-	}
+    public EnvironmentVarKeyValidator(Collection<String> usedKeys) {
+        this("environment variable name", usedKeys);
+    }
+
+    public EnvironmentVarKeyValidator(String element, Collection<String> usedKeys) {
+        FAILED = ValidationStatus.error(NLS.bind(failureMessage, element));
+        this.usedKeys = usedKeys != null ? usedKeys : new ArrayList<>(0);
+    }
+
+    @Override
+    public IStatus validate(Object paramObject) {
+        if (!(paramObject instanceof String))
+            return ValidationStatus.cancel("Value is not an instance of a string");
+        String value = (String)paramObject;
+        if (StringUtils.isBlank(value)) {
+            return ValidationStatus.cancel("Please provide a key name.");
+        }
+        if (!CIDENTIFIER_REGEXP.matcher(value).matches()) {
+            return FAILED;
+        }
+        if (usedKeys.contains(value)) {
+            return NAME_IS_USED_ERROR;
+        }
+
+        return ValidationStatus.OK_STATUS;
+    }
 }

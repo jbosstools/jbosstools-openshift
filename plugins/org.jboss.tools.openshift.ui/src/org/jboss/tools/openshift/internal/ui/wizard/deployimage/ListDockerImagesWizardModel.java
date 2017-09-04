@@ -30,113 +30,111 @@ import org.jboss.tools.openshift.internal.core.docker.DockerImageUtils;
  */
 public class ListDockerImagesWizardModel extends ObservablePojo {
 
-	private final IDockerConnection dockerConnection;
+    private final IDockerConnection dockerConnection;
 
-	public static final String FILTER_NAME = "filterName";
+    public static final String FILTER_NAME = "filterName";
 
-	public static final String DOCKER_IMAGES = "dockerImages";
+    public static final String DOCKER_IMAGES = "dockerImages";
 
-	public static final String SELECTED_DOCKER_IMAGE = "selectedDockerImage";
+    public static final String SELECTED_DOCKER_IMAGE = "selectedDockerImage";
 
-	private String filterName;
+    private String filterName;
 
-	private List<DockerImageTag> dockerImages;
+    private List<DockerImageTag> dockerImages;
 
-	private DockerImageTag selectedDockerImage;
+    private DockerImageTag selectedDockerImage;
 
-	public ListDockerImagesWizardModel(final IDockerConnection dockerConnection, final String imageName) {
-		this.dockerConnection = dockerConnection;
-		this.filterName = imageName;
-	}
+    public ListDockerImagesWizardModel(final IDockerConnection dockerConnection, final String imageName) {
+        this.dockerConnection = dockerConnection;
+        this.filterName = imageName;
+    }
 
-	public IDockerConnection getDockerConnection() {
-		return this.dockerConnection;
-	}
+    public IDockerConnection getDockerConnection() {
+        return this.dockerConnection;
+    }
 
-	public String getFilterName() {
-		return this.filterName;
-	}
+    public String getFilterName() {
+        return this.filterName;
+    }
 
-	public void setImageName(final String filterName) {
-		firePropertyChange(FILTER_NAME, this.filterName, this.filterName = filterName);
-	}
+    public void setImageName(final String filterName) {
+        firePropertyChange(FILTER_NAME, this.filterName, this.filterName = filterName);
+    }
 
-	public List<DockerImageTag> getDockerImages() {
-		return this.dockerImages;
-	}
-	
-	public void setDockerImages(final List<IDockerImage> dockerImages) {
-		final List<IDockerImage> topLevelImages = dockerImages.stream()
-				.filter(image -> !image.isDangling() && !image.isIntermediateImage()).collect(Collectors.toList());
-		final List<DockerImageTag> imageTags = new ArrayList<>();
-		for(IDockerImage topLevelImage : topLevelImages) {
-			final Map<String, List<String>> repoTags = DockerImageUtils.extractTagsByRepo(topLevelImage.repoTags());
-			for(Entry<String, List<String>> entry : repoTags.entrySet()) {
-				final String repo = entry.getKey();
-				final List<String> tags = entry.getValue();
-				for(String tag : tags) {
-					imageTags.add(new DockerImageTag(topLevelImage.id(), repo, tag));
-				}
-			}
-		}
-				
-		Collections.sort(imageTags, new Comparator<DockerImageTag>() {
-			@Override
-			public int compare(DockerImageTag image1, DockerImageTag image2) {
-				return image1.getRepoName().compareTo(image2.getRepoName());
-			}
-		});
-		firePropertyChange(DOCKER_IMAGES, this.dockerImages,
-				this.dockerImages = imageTags);
-	}
+    public List<DockerImageTag> getDockerImages() {
+        return this.dockerImages;
+    }
 
-	public DockerImageTag getSelectedDockerImage() {
-		return this.selectedDockerImage;
-	}
-	
-	public void setSelectedDockerImage(final DockerImageTag selectedDockerImage) {
-		firePropertyChange(SELECTED_DOCKER_IMAGE, this.selectedDockerImage,
-				this.selectedDockerImage = selectedDockerImage);
-	}
-	
-	static class DockerImageTag {
+    public void setDockerImages(final List<IDockerImage> dockerImages) {
+        final List<IDockerImage> topLevelImages = dockerImages.stream().filter(image -> !image.isDangling() && !image.isIntermediateImage())
+                .collect(Collectors.toList());
+        final List<DockerImageTag> imageTags = new ArrayList<>();
+        for (IDockerImage topLevelImage : topLevelImages) {
+            final Map<String, List<String>> repoTags = DockerImageUtils.extractTagsByRepo(topLevelImage.repoTags());
+            for (Entry<String, List<String>> entry : repoTags.entrySet()) {
+                final String repo = entry.getKey();
+                final List<String> tags = entry.getValue();
+                for (String tag : tags) {
+                    imageTags.add(new DockerImageTag(topLevelImage.id(), repo, tag));
+                }
+            }
+        }
 
-		/** the corresponding image id. */
-		private final String id;
-		
-		/** repository name of the image. */
-		private final String repoName;
+        Collections.sort(imageTags, new Comparator<DockerImageTag>() {
+            @Override
+            public int compare(DockerImageTag image1, DockerImageTag image2) {
+                return image1.getRepoName().compareTo(image2.getRepoName());
+            }
+        });
+        firePropertyChange(DOCKER_IMAGES, this.dockerImages, this.dockerImages = imageTags);
+    }
 
-		/** the tag for this specific image. */
-		private final String tag;
+    public DockerImageTag getSelectedDockerImage() {
+        return this.selectedDockerImage;
+    }
 
-		public DockerImageTag(final String id, final String repoName, final String tag) {
-			this.id = id.startsWith("sha256:") ? id.substring("sha256:".length(), "sha256:".length() + 12) : id.substring(0,  12);
-			this.repoName = repoName;
-			this.tag = tag;
-		}
+    public void setSelectedDockerImage(final DockerImageTag selectedDockerImage) {
+        firePropertyChange(SELECTED_DOCKER_IMAGE, this.selectedDockerImage, this.selectedDockerImage = selectedDockerImage);
+    }
 
-		/**
-		 * @return the id
-		 */
-		public String getId() {
-			return id;
-		}
+    static class DockerImageTag {
 
-		/**
-		 * @return the repoName
-		 */
-		public String getRepoName() {
-			return repoName;
-		}
+        /** the corresponding image id. */
+        private final String id;
 
-		/**
-		 * @return the tag
-		 */
-		public String getTag() {
-			return tag;
-		}
-		
-	}
-	
+        /** repository name of the image. */
+        private final String repoName;
+
+        /** the tag for this specific image. */
+        private final String tag;
+
+        public DockerImageTag(final String id, final String repoName, final String tag) {
+            this.id = id.startsWith("sha256:") ? id.substring("sha256:".length(), "sha256:".length() + 12) : id.substring(0, 12);
+            this.repoName = repoName;
+            this.tag = tag;
+        }
+
+        /**
+         * @return the id
+         */
+        public String getId() {
+            return id;
+        }
+
+        /**
+         * @return the repoName
+         */
+        public String getRepoName() {
+            return repoName;
+        }
+
+        /**
+         * @return the tag
+         */
+        public String getTag() {
+            return tag;
+        }
+
+    }
+
 }

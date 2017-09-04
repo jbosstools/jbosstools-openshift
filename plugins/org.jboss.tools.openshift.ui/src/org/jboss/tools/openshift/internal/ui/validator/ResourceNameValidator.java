@@ -23,20 +23,22 @@ import org.eclipse.core.runtime.IStatus;
  *
  */
 public class ResourceNameValidator extends MultiValidator implements IValidator {
-	
-	private final ServiceNameValidator validator = new ServiceNameValidator();
-	private final IObservableValue<String> observable;
-	
-	public ResourceNameValidator(IObservableValue<String> observable){
-		this.observable = observable;
-	}
-	@Override
-	protected IStatus validate() {
-		return validator.validate(observable.getValue());
-	}
-	@Override
-	public IStatus validate(Object value) {
-		return validator.validate(value);
-	}
-	
+
+    private final ServiceNameValidator validator = new ServiceNameValidator();
+    private final IObservableValue<String> observable;
+
+    public ResourceNameValidator(IObservableValue<String> observable) {
+        this.observable = observable;
+    }
+
+    @Override
+    protected IStatus validate() {
+        return validator.validate(observable.getValue());
+    }
+
+    @Override
+    public IStatus validate(Object value) {
+        return validator.validate(value);
+    }
+
 }

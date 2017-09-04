@@ -42,81 +42,76 @@ import com.openshift.client.OpenShiftException;
  */
 public class ExpressServerFactory {
 
-	public ExpressServerFactory() {
-	}
+    public ExpressServerFactory() {
+    }
 
-	public IServer create(IProject project, IApplication application, IDomain domain, IProgressMonitor monitor)
-			throws OpenShiftException {
-		return createAdapterAndModules(project, application, domain, null, monitor);
-	}
+    public IServer create(IProject project, IApplication application, IDomain domain, IProgressMonitor monitor) throws OpenShiftException {
+        return createAdapterAndModules(project, application, domain, null, monitor);
+    }
 
-	/**
-	 * creates an OpenShift server adapter for the user chosen project.
-	 * 
-	 * @param monitor
-	 *            the monitor to report progress to.
-	 * @return 
-	 * @throws OpenShiftException
-	 */
-	protected IServer createAdapterAndModules(IProject project, IApplication application,
-			IDomain domain, String remoteName, IProgressMonitor monitor) throws OpenShiftException {
-		monitor.subTask(NLS.bind("Creating server adapter for project {0}", project.getName()));
-		
-		IServer server = null;
-		try {
-			IServerType serverType = ServerCore.findServerType(ExpressServerUtils.EXPRESS_SERVER_TYPE);
-			server = createAdapter(serverType, application, domain, project.getName(), remoteName);
-			server = addModules(getModules(Collections.singletonList(project)), server, monitor);
-		} catch (CoreException ce) {
-			ExpressCoreActivator.getDefault().getLog().log(ce.getStatus());
-		} catch (OpenShiftException ose) {
-			IStatus s = new Status(IStatus.ERROR, ExpressCoreActivator.PLUGIN_ID,
-					"Cannot create openshift server adapter", ose);
-			ExpressCoreActivator.getDefault().getLog().log(s);
-		}
-		return server;
-	}
-	
-	private IServer createAdapter(IServerType serverType, IApplication application, IDomain domain,
-			String deployProject, String remoteName) throws CoreException,
-			OpenShiftException {
-		Assert.isLegal(serverType != null, "Missing server adapter type");
-		Assert.isLegal(application != null, "Missing application");
+    /**
+     * creates an OpenShift server adapter for the user chosen project.
+     * 
+     * @param monitor
+     *            the monitor to report progress to.
+     * @return 
+     * @throws OpenShiftException
+     */
+    protected IServer createAdapterAndModules(IProject project, IApplication application, IDomain domain, String remoteName,
+            IProgressMonitor monitor) throws OpenShiftException {
+        monitor.subTask(NLS.bind("Creating server adapter for project {0}", project.getName()));
 
-		String serverName = ExpressServerUtils.getDefaultServerName(application);
-		IServer server = ExpressServerUtils.createServer(serverType, serverName);
-		ExpressServerUtils.fillServerWithOpenShiftDetails(
-				server, deployProject, remoteName, serverName, application, domain);
-		return server;
-	}
-	
-	public void addModules(IServer server, List<IProject> importedProjects, IProgressMonitor monitor) throws CoreException {
-		addModules(getModules(importedProjects), server, monitor);
-	}
+        IServer server = null;
+        try {
+            IServerType serverType = ServerCore.findServerType(ExpressServerUtils.EXPRESS_SERVER_TYPE);
+            server = createAdapter(serverType, application, domain, project.getName(), remoteName);
+            server = addModules(getModules(Collections.singletonList(project)), server, monitor);
+        } catch (CoreException ce) {
+            ExpressCoreActivator.getDefault().getLog().log(ce.getStatus());
+        } catch (OpenShiftException ose) {
+            IStatus s = new Status(IStatus.ERROR, ExpressCoreActivator.PLUGIN_ID, "Cannot create openshift server adapter", ose);
+            ExpressCoreActivator.getDefault().getLog().log(s);
+        }
+        return server;
+    }
 
-	private IServer addModules(List<IModule> modules, IServer server, IProgressMonitor monitor) throws CoreException {
-		if (modules == null
-				|| modules.size() == 0) {
-			return server;
-		}
-		IServerWorkingCopy wc = server.createWorkingCopy();
-		IModule[] addedModules = modules.toArray(new IModule[modules.size()]);
-		wc.modifyModules(addedModules, new IModule[0], monitor);
-		server = wc.save(true, monitor);
-		((Server) server).setModulePublishState(addedModules, IServer.PUBLISH_STATE_NONE);
-		return server;
-	}
+    private IServer createAdapter(IServerType serverType, IApplication application, IDomain domain, String deployProject, String remoteName)
+            throws CoreException, OpenShiftException {
+        Assert.isLegal(serverType != null, "Missing server adapter type");
+        Assert.isLegal(application != null, "Missing application");
 
-	private List<IModule> getModules(List<IProject> importedProjects) {
-		Iterator<IProject> i = importedProjects.iterator();
-		ArrayList<IModule> toAdd = new ArrayList<>();
-		while (i.hasNext()) {
-			IProject p = i.next();
-			IModule[] m = ServerUtil.getModules(p);
-			if (m != null && m.length > 0) {
-				toAdd.addAll(Arrays.asList(m));
-			}
-		}
-		return toAdd;
-	}
+        String serverName = ExpressServerUtils.getDefaultServerName(application);
+        IServer server = ExpressServerUtils.createServer(serverType, serverName);
+        ExpressServerUtils.fillServerWithOpenShiftDetails(server, deployProject, remoteName, serverName, application, domain);
+        return server;
+    }
+
+    public void addModules(IServer server, List<IProject> importedProjects, IProgressMonitor monitor) throws CoreException {
+        addModules(getModules(importedProjects), server, monitor);
+    }
+
+    private IServer addModules(List<IModule> modules, IServer server, IProgressMonitor monitor) throws CoreException {
+        if (modules == null || modules.size() == 0) {
+            return server;
+        }
+        IServerWorkingCopy wc = server.createWorkingCopy();
+        IModule[] addedModules = modules.toArray(new IModule[modules.size()]);
+        wc.modifyModules(addedModules, new IModule[0], monitor);
+        server = wc.save(true, monitor);
+        ((Server)server).setModulePublishState(addedModules, IServer.PUBLISH_STATE_NONE);
+        return server;
+    }
+
+    private List<IModule> getModules(List<IProject> importedProjects) {
+        Iterator<IProject> i = importedProjects.iterator();
+        ArrayList<IModule> toAdd = new ArrayList<>();
+        while (i.hasNext()) {
+            IProject p = i.next();
+            IModule[] m = ServerUtil.getModules(p);
+            if (m != null && m.length > 0) {
+                toAdd.addAll(Arrays.asList(m));
+            }
+        }
+        return toAdd;
+    }
 }

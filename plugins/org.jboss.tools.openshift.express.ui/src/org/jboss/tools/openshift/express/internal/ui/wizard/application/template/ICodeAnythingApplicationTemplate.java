@@ -10,15 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.wizard.application.template;
 
-
 /**
  * @author Andre Dietisheim
  */
 public interface ICodeAnythingApplicationTemplate extends ICartridgeApplicationTemplate {
 
-	public static final String PROPERTY_CARTRIDGE_URL = "url";
+    public static final String PROPERTY_CARTRIDGE_URL = "url";
 
-	public String getUrl();
+    public String getUrl();
 
-	public void setUrl(String url);
+    public void setUrl(String url);
 }

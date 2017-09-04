@@ -29,27 +29,27 @@ import com.openshift.client.OpenShiftException;
  */
 public class DestroyDomainJob extends AbstractDelegatingMonitorJob {
 
-	private IDomain domain;
-	private boolean force;
+    private IDomain domain;
+    private boolean force;
 
-	public DestroyDomainJob(final IDomain domain, final boolean force) {
-		super(NLS.bind(ExpressUIMessages.DESTROYING_DOMAIN, domain.getId()));
-		this.domain = domain;
-		this.force = force;
-	}
+    public DestroyDomainJob(final IDomain domain, final boolean force) {
+        super(NLS.bind(ExpressUIMessages.DESTROYING_DOMAIN, domain.getId()));
+        this.domain = domain;
+        this.force = force;
+    }
 
-	@Override
-	protected IStatus doRun(IProgressMonitor monitor) {
-		try {
-			domain.destroy(force);
-			ExpressConnection connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
-			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
-			return Status.OK_STATUS;
-		} catch (OpenShiftException e) {
-			return new Status(Status.ERROR, ExpressUIActivator.PLUGIN_ID, NLS.bind(
-					"Failed to destroy domain \"{0}\"", domain.getId()), e);
-		} finally {
-			monitor.done();
-		}
-	}
+    @Override
+    protected IStatus doRun(IProgressMonitor monitor) {
+        try {
+            domain.destroy(force);
+            ExpressConnection connection = ExpressConnectionUtils.getByResource(domain.getUser(),
+                    ConnectionsRegistrySingleton.getInstance());
+            ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
+            return Status.OK_STATUS;
+        } catch (OpenShiftException e) {
+            return new Status(Status.ERROR, ExpressUIActivator.PLUGIN_ID, NLS.bind("Failed to destroy domain \"{0}\"", domain.getId()), e);
+        } finally {
+            monitor.done();
+        }
+    }
 }

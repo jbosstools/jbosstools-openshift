@@ -50,185 +50,181 @@ import com.openshift.restclient.model.IResource;
  */
 public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
 
-	private ImportApplicationWizardModel model;
-	private ImportJob importJob;
-	private List<IJobChangeListener> importJobChangeListenersList = new ArrayList<IJobChangeListener>();
+    private ImportApplicationWizardModel model;
+    private ImportJob importJob;
+    private List<IJobChangeListener> importJobChangeListenersList = new ArrayList<IJobChangeListener>();
 
-	public ImportApplicationWizard() {
-		setWindowTitle("Import OpenShift Application");
-		setNeedsProgressMonitor(true);
-		setDialogSettings(
-				DialogSettings.getOrCreateSection(
-						OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
-		this.model = new ImportApplicationWizardModel();
-		String repoPath = loadRepoPath();
-		if (StringUtils.isNotBlank(repoPath)) {
-		    model.setCloneDestination(repoPath);
-		    model.setUseDefaultCloneDestination(false);
-		}
-	}
+    public ImportApplicationWizard() {
+        setWindowTitle("Import OpenShift Application");
+        setNeedsProgressMonitor(true);
+        setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(),
+                IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
+        this.model = new ImportApplicationWizardModel();
+        String repoPath = loadRepoPath();
+        if (StringUtils.isNotBlank(repoPath)) {
+            model.setCloneDestination(repoPath);
+            model.setUseDefaultCloneDestination(false);
+        }
+    }
 
-	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
-		this();
-		if (projectsAndBuildConfigs != null
-				&& projectsAndBuildConfigs.size() == 1) {
-			Map.Entry<IProject, Collection<IBuildConfig>> entry = projectsAndBuildConfigs.entrySet().iterator().next();
-			IProject project = entry.getKey();
-			setConnection(project);
-			model.setProject(project);
-			setSelectedItem(entry, project);
-		}
-	}
+    public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
+        this();
+        if (projectsAndBuildConfigs != null && projectsAndBuildConfigs.size() == 1) {
+            Map.Entry<IProject, Collection<IBuildConfig>> entry = projectsAndBuildConfigs.entrySet().iterator().next();
+            IProject project = entry.getKey();
+            setConnection(project);
+            model.setProject(project);
+            setSelectedItem(entry, project);
+        }
+    }
 
-	/**
-	 * Get the default Git import path. Check for a section in the openshift.common.ui
-	 * plugin (to share with Openshift v2) and if not found, check for a section in
-	 * openshift.ui (initial implementation that was not shared with Openshift v2).
-	 * 
-	 * @return the found default git path
-	 */
-	private String loadRepoPath() {
-	    String path = getDialogSettings().get(REPO_PATH_KEY);
-	    if (path == null) {
-	        IDialogSettings settings = DialogSettings.getOrCreateSection(
-	        		OpenShiftUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
-	        path = settings.get(REPO_PATH_KEY);
-	    }
-	    return path;
-	}
-	
-	private void setConnection(IProject project) {
-		Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
-		setModelConnection(connection);
-	}
+    /**
+     * Get the default Git import path. Check for a section in the openshift.common.ui
+     * plugin (to share with Openshift v2) and if not found, check for a section in
+     * openshift.ui (initial implementation that was not shared with Openshift v2).
+     * 
+     * @return the found default git path
+     */
+    private String loadRepoPath() {
+        String path = getDialogSettings().get(REPO_PATH_KEY);
+        if (path == null) {
+            IDialogSettings settings = DialogSettings.getOrCreateSection(OpenShiftUIActivator.getDefault().getDialogSettings(),
+                    IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
+            path = settings.get(REPO_PATH_KEY);
+        }
+        return path;
+    }
 
-	private void setSelectedItem(Map.Entry<IProject, Collection<IBuildConfig>> entry, IProject project) {
-		Collection<IBuildConfig> buildConfigs = entry.getValue();
-		if (buildConfigs != null 
-				&& buildConfigs.size() == 1) {
-			model.setSelectedItem(buildConfigs.iterator().next());
-		} else {
-			model.setSelectedItem(project);
-		}
-	}
-	
-	public ImportApplicationWizardModel getModel() {
-	    return model;
-	}
-	
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		if (model.getConnection() != null 
-				&& model.getSelectedItem() != null) {
-			return;
-		}
-		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
-		if (connection != null) {
-			model.setConnection(connection);
-		} else {
-			IResource resource = UIUtils.getFirstElement(selection, IResource.class);
-			if (resource != null) {
-				setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(resource));
-				model.setSelectedItem(resource);
-			} else {
-				IProject project = UIUtils.getFirstElement(selection, IProject.class);
-				if (project != null) {
-					setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(project));
-					model.setSelectedItem(project);
-				}
-			}
-		}
-	}
+    private void setConnection(IProject project) {
+        Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
+        setModelConnection(connection);
+    }
 
-	@Override
-	public void addPages() {
-		//Skip build config selection page if it's already set
-		if (model.getSelectedBuildConfig() == null) {
-			addPage(new BuildConfigWizardPage(this, model));
-		}
-		addPage(new GitCloningWizardPage(this, model));
-	}
+    private void setSelectedItem(Map.Entry<IProject, Collection<IBuildConfig>> entry, IProject project) {
+        Collection<IBuildConfig> buildConfigs = entry.getValue();
+        if (buildConfigs != null && buildConfigs.size() == 1) {
+            model.setSelectedItem(buildConfigs.iterator().next());
+        } else {
+            model.setSelectedItem(project);
+        }
+    }
 
-	@Override
-	public boolean performFinish() {
-		createImportJob(model.isReuseGitRepository());
-		importJob.schedule();
-		return true;
-	}
+    public ImportApplicationWizardModel getModel() {
+        return model;
+    }
 
-	private void createImportJob(boolean reuseGitRepository) {
-		if (reuseGitRepository) {
-			this.importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath(),
-					model.isCheckoutBranchReusedRepo());
-		} else {
-			this.importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath());
-		}
-		String gitContextDir = model.getGitContextDir();
-		if (StringUtils.isNotEmpty(gitContextDir)) {
-			importJob.setFilters(Collections.singleton(gitContextDir));
-		}
-		importJob.setUser(true);
-		importJob.addJobChangeListener(new JobChangeAdapter() {
+    @Override
+    public void init(IWorkbench workbench, IStructuredSelection selection) {
+        if (model.getConnection() != null && model.getSelectedItem() != null) {
+            return;
+        }
+        Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+        if (connection != null) {
+            model.setConnection(connection);
+        } else {
+            IResource resource = UIUtils.getFirstElement(selection, IResource.class);
+            if (resource != null) {
+                setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(resource));
+                model.setSelectedItem(resource);
+            } else {
+                IProject project = UIUtils.getFirstElement(selection, IProject.class);
+                if (project != null) {
+                    setModelConnection(ConnectionsRegistryUtil.safeGetConnectionFor(project));
+                    model.setSelectedItem(project);
+                }
+            }
+        }
+    }
 
-			@Override
-			public void done(IJobChangeEvent event) {
-				boolean success = JobUtils.isOk(importJob.getResult());
-				if (success) {
-					saveRepoPath();
-				}
-				UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
-			}});
-		for (IJobChangeListener importJobChangeListener: importJobChangeListenersList) {
-			importJob.addJobChangeListener(importJobChangeListener);
-		}
-	}
+    @Override
+    public void addPages() {
+        //Skip build config selection page if it's already set
+        if (model.getSelectedBuildConfig() == null) {
+            addPage(new BuildConfigWizardPage(this, model));
+        }
+        addPage(new GitCloningWizardPage(this, model));
+    }
 
-	private void saveRepoPath() {
-		if(!model.isUseDefaultCloneDestination()) {
-			getDialogSettings().put(REPO_PATH_KEY, model.getCloneDestination());
-		} else {
-			getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
-		}
-	}
-	
-	public void addImportJobChangeListener(IJobChangeListener importJobChangeListener) {
-		importJobChangeListenersList.add(importJobChangeListener);
-	}
+    @Override
+    public boolean performFinish() {
+        createImportJob(model.isReuseGitRepository());
+        importJob.schedule();
+        return true;
+    }
 
-	@Override
-	public Connection getConnection() {
-		return model.getConnection();
-	}
+    private void createImportJob(boolean reuseGitRepository) {
+        if (reuseGitRepository) {
+            this.importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath(), model.isCheckoutBranchReusedRepo());
+        } else {
+            this.importJob = new ImportJob(model.getGitUrl(), model.getGitRef(), model.getRepoPath());
+        }
+        String gitContextDir = model.getGitContextDir();
+        if (StringUtils.isNotEmpty(gitContextDir)) {
+            importJob.setFilters(Collections.singleton(gitContextDir));
+        }
+        importJob.setUser(true);
+        importJob.addJobChangeListener(new JobChangeAdapter() {
 
-	@Override
-	public boolean hasConnection() {
-		return model.hasConnection();
-	}
+            @Override
+            public void done(IJobChangeEvent event) {
+                boolean success = JobUtils.isOk(importJob.getResult());
+                if (success) {
+                    saveRepoPath();
+                }
+                UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
+            }
+        });
+        for (IJobChangeListener importJobChangeListener : importJobChangeListenersList) {
+            importJob.addJobChangeListener(importJobChangeListener);
+        }
+    }
 
-	@Override
-	public void setConnection(Connection connection) {
-		model.setConnection(connection);
-	}
+    private void saveRepoPath() {
+        if (!model.isUseDefaultCloneDestination()) {
+            getDialogSettings().put(REPO_PATH_KEY, model.getCloneDestination());
+        } else {
+            getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
+        }
+    }
 
-	@Override
-	public Object getContext() {
-		return null;
-	}
+    public void addImportJobChangeListener(IJobChangeListener importJobChangeListener) {
+        importJobChangeListenersList.add(importJobChangeListener);
+    }
 
-	private void setModelConnection(Connection connection) {
-		if (connection != null) {
-			model.setConnection(connection);
-		}
-	}
+    @Override
+    public Connection getConnection() {
+        return model.getConnection();
+    }
 
-	public ImportJob getImportJob() {
-		return importJob;
-	}
-	
-	@Override
-	public void dispose() {
-		importJobChangeListenersList.clear();
-		super.dispose();
-	}
-	
+    @Override
+    public boolean hasConnection() {
+        return model.hasConnection();
+    }
+
+    @Override
+    public void setConnection(Connection connection) {
+        model.setConnection(connection);
+    }
+
+    @Override
+    public Object getContext() {
+        return null;
+    }
+
+    private void setModelConnection(Connection connection) {
+        if (connection != null) {
+            model.setConnection(connection);
+        }
+    }
+
+    public ImportJob getImportJob() {
+        return importJob;
+    }
+
+    @Override
+    public void dispose() {
+        importJobChangeListenersList.clear();
+        super.dispose();
+    }
+
 }

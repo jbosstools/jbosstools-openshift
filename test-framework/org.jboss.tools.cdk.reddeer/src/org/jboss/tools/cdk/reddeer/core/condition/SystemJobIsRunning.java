@@ -22,20 +22,20 @@ import org.jboss.reddeer.core.condition.JobIsRunning;
  *
  */
 public class SystemJobIsRunning extends JobIsRunning {
-	
+
 	public static final Logger log = Logger.getLogger(SystemJobIsRunning.class);
-	
+
 	@SuppressWarnings("rawtypes")
 	private Matcher[] consideredJobs;
-	
+
 	public SystemJobIsRunning(Matcher<?> matcher) {
 		this(new Matcher[] { matcher });
 	}
-	
+
 	public SystemJobIsRunning(Matcher<?>[] consideredJobs) {
 		this.consideredJobs = consideredJobs;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.jboss.reddeer.common.condition.WaitCondition#test()
 	 */
@@ -43,8 +43,8 @@ public class SystemJobIsRunning extends JobIsRunning {
 	@Override
 	public boolean test() {
 		Job[] currentJobs = Job.getJobManager().find(null);
-		for (Job job: currentJobs) {
-			
+		for (Job job : currentJobs) {
+
 			if (CoreMatchers.anyOf(consideredJobs).matches(job.getName())) {
 				log.debug("  job '%s' has no excuses, wait for it", job.getName());
 				return true;

@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.core;
 
 import org.eclipse.core.runtime.MultiStatus;
@@ -23,29 +23,30 @@ import com.openshift.restclient.capability.IBinaryCapability;
  */
 public abstract class OCBinaryOperation {
 
-	/**
-	 * Runs the operation
-	 * 
-	 * @deprecated please use run(IConnection, MultiStatus).
-	 * @param status the status to update during the operation
-	 */
-	@Deprecated
-	public void run(final MultiStatus status) {
-		run(null, status);
-	}
-	public void run(IConnection connection, final MultiStatus status) {
-		String oldLocation = OpenShiftContext.get().get(IBinaryCapability.OPENSHIFT_BINARY_LOCATION);
-		String location = OCBinary.getInstance().getLocation(connection);
-		OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, location);
-		try {
-			runOCBinary(status);
-		} finally {
-			if (!StringUtils.isEmpty(oldLocation)) {
-				OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, oldLocation);
-			}
-		}
-	}
-	
-	protected abstract void runOCBinary(MultiStatus multiStatus);
+    /**
+     * Runs the operation
+     * 
+     * @deprecated please use run(IConnection, MultiStatus).
+     * @param status the status to update during the operation
+     */
+    @Deprecated
+    public void run(final MultiStatus status) {
+        run(null, status);
+    }
+
+    public void run(IConnection connection, final MultiStatus status) {
+        String oldLocation = OpenShiftContext.get().get(IBinaryCapability.OPENSHIFT_BINARY_LOCATION);
+        String location = OCBinary.getInstance().getLocation(connection);
+        OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, location);
+        try {
+            runOCBinary(status);
+        } finally {
+            if (!StringUtils.isEmpty(oldLocation)) {
+                OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, oldLocation);
+            }
+        }
+    }
+
+    protected abstract void runOCBinary(MultiStatus multiStatus);
 
 }

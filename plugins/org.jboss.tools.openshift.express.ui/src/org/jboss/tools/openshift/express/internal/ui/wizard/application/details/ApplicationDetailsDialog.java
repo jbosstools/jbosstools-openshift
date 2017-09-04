@@ -42,91 +42,86 @@ import com.openshift.client.IApplication;
  */
 public class ApplicationDetailsDialog extends TitleAreaDialog {
 
-	private IApplication application;
+    private IApplication application;
 
-	public ApplicationDetailsDialog(IApplication application, Shell parentShell) {
-		super(parentShell);
-		this.application = application;
-		setHelpAvailable(false);
-	}
+    public ApplicationDetailsDialog(IApplication application, Shell parentShell) {
+        super(parentShell);
+        this.application = application;
+        setHelpAvailable(false);
+    }
 
-	@Override
-	protected Control createContents(Composite parent) {
-		Control control = super.createContents(parent);
-		setupDialog(parent);
-		return control;
-	}
+    @Override
+    protected Control createContents(Composite parent) {
+        Control control = super.createContents(parent);
+        setupDialog(parent);
+        return control;
+    }
 
-	@Override
-	protected Control createDialogArea(Composite parent) {
-		Label titleSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleSeparator);
+    @Override
+    protected Control createDialogArea(Composite parent) {
+        Label titleSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleSeparator);
 
-		Composite dialogArea = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(dialogArea);
-		TreeViewer viewer = createApplicationDetailsTable(dialogArea);
-		fillApplicationDetailsTable(viewer);
+        Composite dialogArea = new Composite(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
+        GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(dialogArea);
+        TreeViewer viewer = createApplicationDetailsTable(dialogArea);
+        fillApplicationDetailsTable(viewer);
 
-		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
+        Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
 
-		return dialogArea;
-	}
+        return dialogArea;
+    }
 
-	private void createContextMenu(TreeViewer viewer) {
-		IMenuManager contextMenu = UIUtils.createContextMenu(viewer.getControl());
-		contextMenu.add(new CopyPropertyAction(viewer));
-	}
+    private void createContextMenu(TreeViewer viewer) {
+        IMenuManager contextMenu = UIUtils.createContextMenu(viewer.getControl());
+        contextMenu.add(new CopyPropertyAction(viewer));
+    }
 
-	private void fillApplicationDetailsTable(final TreeViewer viewer) {
-		viewer.setInput(application);
-		viewer.expandToLevel(2);
-	}
+    private void fillApplicationDetailsTable(final TreeViewer viewer) {
+        viewer.setInput(application);
+        viewer.expandToLevel(2);
+    }
 
-	private TreeViewer createApplicationDetailsTable(Composite parent) {
-		Composite tableContainer = new Composite(parent, SWT.NONE);
-		TreeColumnLayout treeLayout = new TreeColumnLayout();
-		tableContainer.setLayout(treeLayout);
+    private TreeViewer createApplicationDetailsTable(Composite parent) {
+        Composite tableContainer = new Composite(parent, SWT.NONE);
+        TreeColumnLayout treeLayout = new TreeColumnLayout();
+        tableContainer.setLayout(treeLayout);
 
-		Tree tree = new Tree(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		tree.setLinesVisible(true);
-		tree.setHeaderVisible(true);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
+        Tree tree = new Tree(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+        tree.setLinesVisible(true);
+        tree.setHeaderVisible(true);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
 
-		final TreeViewer viewer = new TreeViewer(tree);
-		createContextMenu(viewer);
-		viewer.setContentProvider(new ApplicationDetailsContentProvider());
-		createTreeColumn("Property", 1, new PropertyNameCellLabelProvider(), viewer, treeLayout);
-		createTreeColumn("Value", 3, new PropertyValueCellLabelProvider(), viewer, treeLayout);
+        final TreeViewer viewer = new TreeViewer(tree);
+        createContextMenu(viewer);
+        viewer.setContentProvider(new ApplicationDetailsContentProvider());
+        createTreeColumn("Property", 1, new PropertyNameCellLabelProvider(), viewer, treeLayout);
+        createTreeColumn("Value", 3, new PropertyValueCellLabelProvider(), viewer, treeLayout);
 
-		return viewer;
-	}
+        return viewer;
+    }
 
-	private void createTreeColumn(String name, int weight, CellLabelProvider cellLabelProvider, TreeViewer treeViewer,
-			TreeColumnLayout layout) {
-		final TreeViewerColumn viewerColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
-		final TreeColumn column = viewerColumn.getColumn();
-		column.setText(name);
-		column.setResizable(true);
-		viewerColumn.setLabelProvider(cellLabelProvider);
-		layout.setColumnData(column, new ColumnWeightData(weight, weight * 200, true));
-	}
+    private void createTreeColumn(String name, int weight, CellLabelProvider cellLabelProvider, TreeViewer treeViewer,
+            TreeColumnLayout layout) {
+        final TreeViewerColumn viewerColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
+        final TreeColumn column = viewerColumn.getColumn();
+        column.setText(name);
+        column.setResizable(true);
+        viewerColumn.setLabelProvider(cellLabelProvider);
+        layout.setColumnData(column, new ColumnWeightData(weight, weight * 200, true));
+    }
 
-	private void setupDialog(Composite parent) {
-		parent.getShell().setText("Application Details");
-		setTitle(NLS.bind("Details of Application {0}", application.getName()));
-		setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
-	}
+    private void setupDialog(Composite parent) {
+        parent.getShell().setText("Application Details");
+        setTitle(NLS.bind("Details of Application {0}", application.getName()));
+        setTitleImage(ExpressImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
+    }
 
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-	}
-
+    @Override
+    protected void createButtonsForButtonBar(Composite parent) {
+        createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+    }
 
 }

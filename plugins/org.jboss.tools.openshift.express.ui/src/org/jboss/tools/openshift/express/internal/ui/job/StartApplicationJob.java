@@ -19,16 +19,16 @@ import com.openshift.client.IApplication;
  */
 public class StartApplicationJob extends AbstratApplicationJob {
 
-	public StartApplicationJob(IApplication application) {
-		super(new ApplicationProvider(application), NLS.bind("Starting application {0}", application.getName()));
-	}
+    public StartApplicationJob(IApplication application) {
+        super(new ApplicationProvider(application), NLS.bind("Starting application {0}", application.getName()));
+    }
 
-	public StartApplicationJob(LoadApplicationJob applicationJob) {
-		super(new ApplicationProvider(applicationJob), NLS.bind("Starting application {0}", applicationJob.getApplicationName()));
-	}
+    public StartApplicationJob(LoadApplicationJob applicationJob) {
+        super(new ApplicationProvider(applicationJob), NLS.bind("Starting application {0}", applicationJob.getApplicationName()));
+    }
 
-	@Override
-	protected void doRun(IApplication application) {
-		application.start();
-	}
+    @Override
+    protected void doRun(IApplication application) {
+        application.start();
+    }
 }

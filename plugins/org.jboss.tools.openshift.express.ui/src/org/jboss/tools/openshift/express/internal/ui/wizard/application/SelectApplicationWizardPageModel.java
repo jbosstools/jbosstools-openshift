@@ -28,64 +28,62 @@ import com.openshift.client.OpenShiftException;
  */
 public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_DOMAINS = "domains";
-	public static final String PROPERTY_SELECTED_APPLICATION = "selectedApplication";
+    public static final String PROPERTY_DOMAINS = "domains";
+    public static final String PROPERTY_SELECTED_APPLICATION = "selectedApplication";
 
-	private IApplication selectedApplication;
-	private OpenShiftApplicationWizardModel wizardModel;
+    private IApplication selectedApplication;
+    private OpenShiftApplicationWizardModel wizardModel;
 
-	public SelectApplicationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
-		this.selectedApplication = wizardModel.getApplication();
-		this.wizardModel = wizardModel;
-		new PojoEventBridge()
-			.listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAINS, wizardModel).forwardTo(PROPERTY_DOMAINS, this);
-	}
+    public SelectApplicationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
+        this.selectedApplication = wizardModel.getApplication();
+        this.wizardModel = wizardModel;
+        new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAINS, wizardModel).forwardTo(PROPERTY_DOMAINS, this);
+    }
 
-	public void refresh() {
-		refreshDomains();
-		this.selectedApplication = null;
-	}
-	
-	private void refreshDomains() {
-		ExpressConnection connection = wizardModel.getConnection();
-		if (connection == null) {
-			return;
-		}
-		connection.refresh();
-		wizardModel.setDomains(loadDomains(connection));
-	}
+    public void refresh() {
+        refreshDomains();
+        this.selectedApplication = null;
+    }
 
-	public List<IDomain> getDomains() throws OpenShiftException {
-		return wizardModel.getDomains();
-	}
+    private void refreshDomains() {
+        ExpressConnection connection = wizardModel.getConnection();
+        if (connection == null) {
+            return;
+        }
+        connection.refresh();
+        wizardModel.setDomains(loadDomains(connection));
+    }
 
-	public IApplication getSelectedApplication() {
-		return selectedApplication;
-	}
+    public List<IDomain> getDomains() throws OpenShiftException {
+        return wizardModel.getDomains();
+    }
 
-	public void setSelectedApplication(IApplication application) {
-		firePropertyChange(PROPERTY_SELECTED_APPLICATION, 
-				this.selectedApplication, this.selectedApplication = application);
-	}
+    public IApplication getSelectedApplication() {
+        return selectedApplication;
+    }
 
-	public void loadOpenShiftResources() {
-		loadDomains(wizardModel.getConnection());
-	}
+    public void setSelectedApplication(IApplication application) {
+        firePropertyChange(PROPERTY_SELECTED_APPLICATION, this.selectedApplication, this.selectedApplication = application);
+    }
 
-	protected List<IDomain> loadDomains(ExpressConnection connection) {
-		if (connection == null) {
-			return Collections.emptyList();
-		}
-		List<IDomain> domains = connection.getDomains();
-		wizardModel.setDomains(domains);
-		return domains;
-	}
-	
-	public ExpressConnection getConnection() {
-		return wizardModel.getConnection();
-	}
+    public void loadOpenShiftResources() {
+        loadDomains(wizardModel.getConnection());
+    }
 
-	public void clearSelectedApplication() {
-		setSelectedApplication(null);
-	}
+    protected List<IDomain> loadDomains(ExpressConnection connection) {
+        if (connection == null) {
+            return Collections.emptyList();
+        }
+        List<IDomain> domains = connection.getDomains();
+        wizardModel.setDomains(domains);
+        return domains;
+    }
+
+    public ExpressConnection getConnection() {
+        return wizardModel.getConnection();
+    }
+
+    public void clearSelectedApplication() {
+        setSelectedApplication(null);
+    }
 }

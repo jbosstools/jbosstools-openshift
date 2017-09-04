@@ -32,45 +32,41 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages;
  */
 public class GeneralProjectImportOperation extends AbstractProjectImportOperation {
 
-	public GeneralProjectImportOperation(File projectDirectory) {
-		super(projectDirectory);
-	}
+    public GeneralProjectImportOperation(File projectDirectory) {
+        super(projectDirectory);
+    }
 
-	public List<IProject> importToWorkspace(IProgressMonitor monitor)
-			throws CoreException, InterruptedException {
+    public List<IProject> importToWorkspace(IProgressMonitor monitor) throws CoreException, InterruptedException {
 
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		IProject project = workspace.getRoot().getProject(getProjectDirectory().getName());
-		if (overwriteExistingProject(project, workspace, monitor)) {
-	        importToWorkspace(getProjectDirectory(), workspace, monitor);
-		}
-		return Collections.singletonList(project);
-	}
+        IWorkspace workspace = ResourcesPlugin.getWorkspace();
+        IProject project = workspace.getRoot().getProject(getProjectDirectory().getName());
+        if (overwriteExistingProject(project, workspace, monitor)) {
+            importToWorkspace(getProjectDirectory(), workspace, monitor);
+        }
+        return Collections.singletonList(project);
+    }
 
-	private void importToWorkspace(File projectDirectory, IWorkspace workspace, IProgressMonitor monitor)
-			throws CoreException {
-		String projectName = projectDirectory.getName();
-		IProjectDescription description = workspace.newProjectDescription(projectName);
-		description.setLocation(Path.fromOSString(projectDirectory.getAbsolutePath()));
-		IProject project = workspace.getRoot().getProject(projectName);
-		project.create(description, monitor);
-		project.open(IResource.BACKGROUND_REFRESH, monitor);
-	}
+    private void importToWorkspace(File projectDirectory, IWorkspace workspace, IProgressMonitor monitor) throws CoreException {
+        String projectName = projectDirectory.getName();
+        IProjectDescription description = workspace.newProjectDescription(projectName);
+        description.setLocation(Path.fromOSString(projectDirectory.getAbsolutePath()));
+        IProject project = workspace.getRoot().getProject(projectName);
+        project.create(description, monitor);
+        project.open(IResource.BACKGROUND_REFRESH, monitor);
+    }
 
-	private boolean overwriteExistingProject(final IProject project, IWorkspace workspace, IProgressMonitor monitor)
-			throws CoreException {
-		if (project == null
-				|| !project.exists()) {
-			return true;
-		}
+    private boolean overwriteExistingProject(final IProject project, IWorkspace workspace, IProgressMonitor monitor) throws CoreException {
+        if (project == null || !project.exists()) {
+            return true;
+        }
 
-		final boolean overwrite = displayOverwriteDialog(OpenShiftCommonUIMessages.OverwriteProjectsDialogTitle,
-		                                                 NLS.bind(OpenShiftCommonUIMessages.GeneralProjectWarningMessage, project.getName()));
-		if (overwrite) {
-			project.delete(false, true, monitor);
-		} else {
-		    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-		}
-		return overwrite;
-	}
+        final boolean overwrite = displayOverwriteDialog(OpenShiftCommonUIMessages.OverwriteProjectsDialogTitle,
+                NLS.bind(OpenShiftCommonUIMessages.GeneralProjectWarningMessage, project.getName()));
+        if (overwrite) {
+            project.delete(false, true, monitor);
+        } else {
+            project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+        }
+        return overwrite;
+    }
 }

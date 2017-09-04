@@ -30,13 +30,13 @@ import org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController
  */
 public final class SessionStorage {
 
-	private SessionStorage() {
-	}
+    private SessionStorage() {
+    }
 
-	private static final Map<IServer, ILaunchConfiguration> INSTANCE = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<IServer, ILaunchConfiguration> INSTANCE = Collections.synchronizedMap(new HashMap<>());
 
-	public static Map<IServer, ILaunchConfiguration> get() {
-		return INSTANCE;
-	}
+    public static Map<IServer, ILaunchConfiguration> get() {
+        return INSTANCE;
+    }
 
 }

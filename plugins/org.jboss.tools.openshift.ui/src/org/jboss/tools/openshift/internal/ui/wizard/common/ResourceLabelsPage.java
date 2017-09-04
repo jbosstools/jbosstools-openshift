@@ -60,243 +60,211 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageMo
  */
 public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 
-	public static final String PAGE_NAME = "Resource Labels Page";
-	private static final String LABEL = "Label";
-	private static final String RESOURCE_LABEL = "Resource Label";
-	private static final String PAGE_DESCRIPTION = "Add or edit the labels to be added to each resource. " + 
-			"Labels are used to organize, group, or select objects and resources, such as pods and services.  Some labels cannot be modified and therefore" +
-			" cannot be edited or removed.";
+    public static final String PAGE_NAME = "Resource Labels Page";
+    private static final String LABEL = "Label";
+    private static final String RESOURCE_LABEL = "Resource Label";
+    private static final String PAGE_DESCRIPTION = "Add or edit the labels to be added to each resource. "
+            + "Labels are used to organize, group, or select objects and resources, such as pods and services.  Some labels cannot be modified and therefore"
+            + " cannot be edited or removed.";
 
-	private IResourceLabelsPageModel model;
-	private TableViewer viewer;
+    private IResourceLabelsPageModel model;
+    private TableViewer viewer;
 
-	public ResourceLabelsPage(IWizard wizard, IResourceLabelsPageModel model) {
-		super("Resource Labels", PAGE_DESCRIPTION, PAGE_NAME, wizard);
-		this.model = model;
-	}
+    public ResourceLabelsPage(IWizard wizard, IResourceLabelsPageModel model) {
+        super("Resource Labels", PAGE_DESCRIPTION, PAGE_NAME, wizard);
+        this.model = model;
+    }
 
-	@Override
-	protected void doCreateControls(Composite container, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
-		org.eclipse.swt.widgets.Label lblLabel = new org.eclipse.swt.widgets.Label(container, SWT.NONE);
-		lblLabel.setText("Labels");
+    @Override
+    protected void doCreateControls(Composite container, DataBindingContext dbc) {
+        GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(container);
+        org.eclipse.swt.widgets.Label lblLabel = new org.eclipse.swt.widgets.Label(container, SWT.NONE);
+        lblLabel.setText("Labels");
 
-		Composite labelsGroup = new Composite(container, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(labelsGroup);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(2)
-			.applyTo(labelsGroup);
-		
-		Composite tableContainer = new Composite(labelsGroup, SWT.NONE);
+        Composite labelsGroup = new Composite(container, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(labelsGroup);
+        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(labelsGroup);
 
-		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults()
-				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
-		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
-				.in(dbc);
-		viewer.setContentProvider(new ObservableListContentProvider());
-		viewer.setInput(BeanProperties.list(
-				IResourceLabelsPageModel.PROPERTY_LABELS).observe(model));
+        Composite tableContainer = new Composite(labelsGroup, SWT.NONE);
 
-		Button addButton = new Button(labelsGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
-		addButton.setText("Add...");
-		addButton.addSelectionListener(onAdd());
-		UIUtils.setDefaultButtonWidth(addButton);
-		
-		Button editExistingButton = new Button(labelsGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
-		editExistingButton.setText("Edit...");
-		editExistingButton.addSelectionListener(onEdit());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(editExistingButton))
-				.notUpdatingParticipant()
-				.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
-				.converting(new IsNotNullOrReadOnlyBooleanConverter())
-				.in(dbc);
-		UIUtils.setDefaultButtonWidth(editExistingButton);
-		
-		Button removeButton = new Button(labelsGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
-		removeButton.setText("Remove...");
-		removeButton.addSelectionListener(onRemove());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
-				.notUpdatingParticipant()
-				.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
-				.converting(new IsNotNullOrReadOnlyBooleanConverter())
-				.in(dbc);
-		UIUtils.setDefaultButtonWidth(removeButton);
-	}
+        this.viewer = createTable(tableContainer);
+        GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+        ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
+                .to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model)).in(dbc);
+        viewer.setContentProvider(new ObservableListContentProvider());
+        viewer.setInput(BeanProperties.list(IResourceLabelsPageModel.PROPERTY_LABELS).observe(model));
 
-	private SelectionListener onRemove() {
-		return new SelectionAdapter() {
+        Button addButton = new Button(labelsGroup, SWT.PUSH);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(addButton);
+        addButton.setText("Add...");
+        addButton.addSelectionListener(onAdd());
+        UIUtils.setDefaultButtonWidth(addButton);
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Label label = UIUtils.getFirstElement(viewer.getSelection(),Label.class);
-				if(MessageDialog.openQuestion(getShell(), "Remove Label", NLS.bind("Are you sure you want to delete the label {0} ", label.getName()))) {
-					model.removeLabel(label);
-					viewer.refresh();
-				}
-			}
-			
-		};
-	}
+        Button editExistingButton = new Button(labelsGroup, SWT.PUSH);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
+        editExistingButton.setText("Edit...");
+        editExistingButton.addSelectionListener(onEdit());
+        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(editExistingButton)).notUpdatingParticipant()
+                .to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
+                .converting(new IsNotNullOrReadOnlyBooleanConverter()).in(dbc);
+        UIUtils.setDefaultButtonWidth(editExistingButton);
 
-	private SelectionListener onEdit() {
-		return new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				final Label label = UIUtils.getFirstElement(viewer.getSelection(),Label.class);
-				editLabel(label);
-			}
-		};
-	}
+        Button removeButton = new Button(labelsGroup, SWT.PUSH);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(removeButton);
+        removeButton.setText("Remove...");
+        removeButton.addSelectionListener(onRemove());
+        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(removeButton)).notUpdatingParticipant()
+                .to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
+                .converting(new IsNotNullOrReadOnlyBooleanConverter()).in(dbc);
+        UIUtils.setDefaultButtonWidth(removeButton);
+    }
 
-	private void editLabel(Label label) {
-		if (label == null || isReadOnly(label)) {
-			return;
-		}
-		Set<String> usedKeys = getUsedKeys();
-		usedKeys.remove(label.getKey());
-		IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<>(label)
-			.windowTitle(RESOURCE_LABEL)
-			.title("Edit Label")
-			.description("Edit the resource label.")
-			.keyLabel(LABEL)
-			.keyDescription(LabelKeyValidator.keyDescription)
-			.valueDescription(NLS.bind(LabelValueValidator.valueDescription, LabelValueValidator.defaultType))
-			.groupLabel(LABEL)
-			.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels(), usedKeys))
-			.valueAfterConvertValidator(new LabelValueValidator())
-			.build();
-		OkCancelButtonWizardDialog dialog =
-				new OkCancelButtonWizardDialog(getShell(),
-						new KeyValueWizard<>(label, dialogModel));
-		if(OkCancelButtonWizardDialog.OK == dialog.open()) {
-			model.updateLabel(label, dialogModel.getKey(), dialogModel.getValue());
-		}
-	}
+    private SelectionListener onRemove() {
+        return new SelectionAdapter() {
 
-	Set<String> getUsedKeys() {
-		return model.getLabels().stream().map(l -> l.getKey()).collect(Collectors.toSet());
-	}
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Label label = UIUtils.getFirstElement(viewer.getSelection(), Label.class);
+                if (MessageDialog.openQuestion(getShell(), "Remove Label",
+                        NLS.bind("Are you sure you want to delete the label {0} ", label.getName()))) {
+                    model.removeLabel(label);
+                    viewer.refresh();
+                }
+            }
 
-	private SelectionListener onAdd() {
-		return new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<Label>()
-						.windowTitle(RESOURCE_LABEL)
-						.title("Add Label")
-						.description("Add a resource label.")
-						.keyLabel(LABEL)
-						.keyDescription(LabelKeyValidator.keyDescription)
-						.valueDescription(NLS.bind(LabelValueValidator.valueDescription, LabelValueValidator.defaultType))
-						.groupLabel(LABEL)
-						.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels(), getUsedKeys()))
-						.valueAfterConvertValidator(new LabelValueValidator())
-						.build();
-				OkCancelButtonWizardDialog dialog =
-						new OkCancelButtonWizardDialog(getShell(),
-								new KeyValueWizard<>(UIUtils.getFirstElement(viewer.getSelection(),Label.class), dialogModel));
-				if(OkCancelButtonWizardDialog.OK == dialog.open()) {
-					model.addLabel(dialogModel.getKey(), dialogModel.getValue());
-				}
-			}
-		};
-	}
+        };
+    }
 
-	protected TableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
+    private SelectionListener onEdit() {
+        return new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                final Label label = UIUtils.getFirstElement(viewer.getSelection(), Label.class);
+                editLabel(label);
+            }
+        };
+    }
 
-		this.viewer = new TableViewerBuilder(table, tableContainer)
-				.contentProvider(new ArrayContentProvider())
-				.<Label>column(new DelegatingStyledCellLabelProvider(new LabelTextProvider() {
-					@Override
-					public String getValue(Label label) {
-						return label.getName();
-					}
-				}))
-				.name("Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.<Label>column(new DelegatingStyledCellLabelProvider(new LabelTextProvider() {
-					@Override
-					public String getValue(Label label) {
-						return label.getValue();
-					}
-				}))
-				.name("Value").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.buildViewer();
-		viewer.addDoubleClickListener(e -> editLabel((Label)((IStructuredSelection)e.getSelection()).getFirstElement()));
-		viewer.setComparator(new ViewerComparator() {
+    private void editLabel(Label label) {
+        if (label == null || isReadOnly(label)) {
+            return;
+        }
+        Set<String> usedKeys = getUsedKeys();
+        usedKeys.remove(label.getKey());
+        IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<>(label).windowTitle(RESOURCE_LABEL).title("Edit Label")
+                .description("Edit the resource label.").keyLabel(LABEL).keyDescription(LabelKeyValidator.keyDescription)
+                .valueDescription(NLS.bind(LabelValueValidator.valueDescription, LabelValueValidator.defaultType)).groupLabel(LABEL)
+                .keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels(), usedKeys))
+                .valueAfterConvertValidator(new LabelValueValidator()).build();
+        OkCancelButtonWizardDialog dialog = new OkCancelButtonWizardDialog(getShell(), new KeyValueWizard<>(label, dialogModel));
+        if (OkCancelButtonWizardDialog.OK == dialog.open()) {
+            model.updateLabel(label, dialogModel.getKey(), dialogModel.getValue());
+        }
+    }
 
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				Label first = (Label) e1;
-				Label other = (Label) e2;
-				return first.getName().compareTo(other.getName());
-			}
-			
-		});
-		return viewer;
-	}
+    Set<String> getUsedKeys() {
+        return model.getLabels().stream().map(l -> l.getKey()).collect(Collectors.toSet());
+    }
 
-	private abstract class LabelTextProvider extends ColumnLabelProvider implements IStyledLabelProvider {
+    private SelectionListener onAdd() {
+        return new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<Label>().windowTitle(RESOURCE_LABEL)
+                        .title("Add Label").description("Add a resource label.").keyLabel(LABEL)
+                        .keyDescription(LabelKeyValidator.keyDescription)
+                        .valueDescription(NLS.bind(LabelValueValidator.valueDescription, LabelValueValidator.defaultType)).groupLabel(LABEL)
+                        .keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels(), getUsedKeys()))
+                        .valueAfterConvertValidator(new LabelValueValidator()).build();
+                OkCancelButtonWizardDialog dialog = new OkCancelButtonWizardDialog(getShell(),
+                        new KeyValueWizard<>(UIUtils.getFirstElement(viewer.getSelection(), Label.class), dialogModel));
+                if (OkCancelButtonWizardDialog.OK == dialog.open()) {
+                    model.addLabel(dialogModel.getKey(), dialogModel.getValue());
+                }
+            }
+        };
+    }
 
-		@Override
-		public String getToolTipText(Object label) {
-			return isReadOnly((Label)label)?"This label can not be modified":null;
-		}
+    protected TableViewer createTable(Composite tableContainer) {
+        Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+        table.setLinesVisible(true);
+        table.setHeaderVisible(true);
 
-		@Override
-		public String getText(Object element) {
-			return getStyledText(element).getString();
-		}
+        this.viewer = new TableViewerBuilder(table, tableContainer).contentProvider(new ArrayContentProvider())
+                .<Label>column(new DelegatingStyledCellLabelProvider(new LabelTextProvider() {
+                    @Override
+                    public String getValue(Label label) {
+                        return label.getName();
+                    }
+                })).name("Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
+                .<Label>column(new DelegatingStyledCellLabelProvider(new LabelTextProvider() {
+                    @Override
+                    public String getValue(Label label) {
+                        return label.getValue();
+                    }
+                })).name("Value").align(SWT.LEFT).weight(2).minWidth(100).buildColumn().buildViewer();
+        viewer.addDoubleClickListener(e -> editLabel((Label)((IStructuredSelection)e.getSelection()).getFirstElement()));
+        viewer.setComparator(new ViewerComparator() {
 
-		@Override
-		public StyledString getStyledText(Object element) {
-			StyledString styledString= new StyledString();
-			Label label = (Label)element;
-			String text = getValue(label);
-			if (isReadOnly(label)) {
-				styledString.append(text, StyledString.QUALIFIER_STYLER);
-			} else {
-				styledString.append(text);
-			}
-			return styledString;
-		}
+            @Override
+            public int compare(Viewer viewer, Object e1, Object e2) {
+                Label first = (Label)e1;
+                Label other = (Label)e2;
+                return first.getName().compareTo(other.getName());
+            }
 
-		abstract public String getValue(Label label);
-	}
+        });
+        return viewer;
+    }
 
-	/*
-	 * Only allow editing or removal of labels that are not
-	 * deemed readonly.  Following the lead of the webconsole here
-	 */
-	private class IsNotNullOrReadOnlyBooleanConverter extends Converter{
+    private abstract class LabelTextProvider extends ColumnLabelProvider implements IStyledLabelProvider {
 
-		public IsNotNullOrReadOnlyBooleanConverter() {
-			super(Label.class, Boolean.class);
-		}
+        @Override
+        public String getToolTipText(Object label) {
+            return isReadOnly((Label)label) ? "This label can not be modified" : null;
+        }
 
-		@Override
-		public Object convert(Object arg) {
-			if(arg == null) return Boolean.FALSE;
-			return !isReadOnly((Label)arg);
-		}
-		
-	}
+        @Override
+        public String getText(Object element) {
+            return getStyledText(element).getString();
+        }
 
-	private boolean isReadOnly(Label label) {
-		return model.getReadOnlyLabels().contains(label.getName());
-	}
+        @Override
+        public StyledString getStyledText(Object element) {
+            StyledString styledString = new StyledString();
+            Label label = (Label)element;
+            String text = getValue(label);
+            if (isReadOnly(label)) {
+                styledString.append(text, StyledString.QUALIFIER_STYLER);
+            } else {
+                styledString.append(text);
+            }
+            return styledString;
+        }
+
+        abstract public String getValue(Label label);
+    }
+
+    /*
+     * Only allow editing or removal of labels that are not
+     * deemed readonly.  Following the lead of the webconsole here
+     */
+    private class IsNotNullOrReadOnlyBooleanConverter extends Converter {
+
+        public IsNotNullOrReadOnlyBooleanConverter() {
+            super(Label.class, Boolean.class);
+        }
+
+        @Override
+        public Object convert(Object arg) {
+            if (arg == null)
+                return Boolean.FALSE;
+            return !isReadOnly((Label)arg);
+        }
+
+    }
+
+    private boolean isReadOnly(Label label) {
+        return model.getReadOnlyLabels().contains(label.getName());
+    }
 }

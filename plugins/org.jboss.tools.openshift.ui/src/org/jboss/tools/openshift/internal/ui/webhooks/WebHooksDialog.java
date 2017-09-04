@@ -27,39 +27,37 @@ import com.openshift.restclient.model.IBuildConfig;
  */
 public class WebHooksDialog extends Dialog {
 
-	private Collection<IBuildConfig> buildConfigs;
+    private Collection<IBuildConfig> buildConfigs;
 
-	public WebHooksDialog(Shell parent, IBuildConfig buildConfig) {
-		super(parent);
-		this.buildConfigs = Collections.singleton(buildConfig);
-	}
+    public WebHooksDialog(Shell parent, IBuildConfig buildConfig) {
+        super(parent);
+        this.buildConfigs = Collections.singleton(buildConfig);
+    }
 
-	public WebHooksDialog(Shell parent, Collection<IBuildConfig> buildConfigs) {
-		super(parent);
-		this.buildConfigs = buildConfigs;
-	}
+    public WebHooksDialog(Shell parent, Collection<IBuildConfig> buildConfigs) {
+        super(parent);
+        this.buildConfigs = buildConfigs;
+    }
 
-	@Override
-	protected void configureShell(Shell shell) {
-		super.configureShell(shell);
-		shell.setText("Webhooks triggers");
-		setShellStyle(getShellStyle() | SWT.RESIZE);
-	}
-	
-	@Override
-	protected Control createDialogArea(Composite parent) {
-		Composite container = (Composite) super.createDialogArea(parent);
-		WebHooksComponent webHookComponent = new WebHooksComponent(buildConfigs, container, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, SWT.DEFAULT)
-			.applyTo(webHookComponent);
-		
-		return container;
-	}
+    @Override
+    protected void configureShell(Shell shell) {
+        super.configureShell(shell);
+        shell.setText("Webhooks triggers");
+        setShellStyle(getShellStyle() | SWT.RESIZE);
+    }
 
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-	}
+    @Override
+    protected Control createDialogArea(Composite parent) {
+        Composite container = (Composite)super.createDialogArea(parent);
+        WebHooksComponent webHookComponent = new WebHooksComponent(buildConfigs, container, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, SWT.DEFAULT).applyTo(webHookComponent);
+
+        return container;
+    }
+
+    @Override
+    protected void createButtonsForButtonBar(Composite parent) {
+        createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+    }
 
 }

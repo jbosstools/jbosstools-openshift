@@ -52,222 +52,220 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public class ApplicationSourceFromImageModel 
-	extends DeployImageWizardModel	
-	implements IApplicationSourceModel, IBuildConfigPageModel {
-	
-	private static final String ANNOTATION_SAMPLE_CONTEXT_DIR = "sampleContextDir";
-	private static final String ANNOTATION_SAMPLE_REPO = "sampleRepo";
-	private static final String ANNOTATION_SAMPLE_REF = "sampleRef";
-	private static final String DEFAULT_REFERENCE = "master";
+public class ApplicationSourceFromImageModel extends DeployImageWizardModel implements IApplicationSourceModel, IBuildConfigPageModel {
 
-	private ImageStreamApplicationSource source;
-	private IWizardContainer container;
-	private IEnvironmentVariablesPageModel envModel = new EnvironmentVariablesPageModel();
-	private String gitRepositoryUrl = "";
-	private String gitReference = DEFAULT_REFERENCE;
-	private String contextDir = "";
-	private boolean imageChangeTrigger = true;
-	private boolean configChangeTrigger = true;
-	private boolean configWebHook = true;
-	private AtomicBoolean staleRepoInfo = new AtomicBoolean(true);
-	
-	@Override
-	public IResourcesModelJob createFinishJob() {
-		return new CreateApplicationFromImageJob(this, this);
-	}
-	
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if(evt == null) return;
-		super.propertyChange(evt);
-		switch(evt.getPropertyName()) {
-		case IResourceLabelsPageModel.PROPERTY_LABELS:
-			setLabels((List<Label>) evt.getNewValue());
-			break;
-		case IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE:
-			handleSelectedAppSource(evt);
-			break;
-		case IApplicationSourceListPageModel.PROPERTY_PROJECT:
-			setProject((IProject) evt.getNewValue());
-			break;
-		case IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT:
-			handleEclipseProject(evt);
-			break;
-		}
-	}
-	
-	private void handleEclipseProject(PropertyChangeEvent evt) {
-		org.eclipse.core.resources.IProject project = (org.eclipse.core.resources.IProject) evt.getNewValue();
-		if(project != null) {
-			try {
-				setGitRepositoryUrl(EGitUtils.getDefaultRemoteRepo(project));
-				setGitReference(EGitUtils.getCurrentBranch(project));
-				setContextDir(StringUtils.EMPTY);
-				return;
-			} catch (CoreException e) {
-				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to retrieve the remote git repo from " + project.getName(), e);
-			}
-		}
-		setGitRepositoryUrl(null);
-		setGitReference(null);
-		setContextDir(null);
-	}
+    private static final String ANNOTATION_SAMPLE_CONTEXT_DIR = "sampleContextDir";
+    private static final String ANNOTATION_SAMPLE_REPO = "sampleRepo";
+    private static final String ANNOTATION_SAMPLE_REF = "sampleRef";
+    private static final String DEFAULT_REFERENCE = "master";
 
-	private void handleSelectedAppSource(PropertyChangeEvent evt) {
-		if(evt.getNewValue() instanceof ImageStreamApplicationSource
-				&& ResourceKind.IMAGE_STREAM.equals(((IApplicationSource) evt.getNewValue()).getKind())) {
-			this.source = (ImageStreamApplicationSource) evt.getNewValue();
-			staleRepoInfo.set(true);
-			setGitRepositoryUrl(null);
-			setResourceName(null);
-		}
-	}
-	
-	@Override
-	public void init() { 
-		if(staleRepoInfo.compareAndSet(true, false)) {
-			loadBuilderImageMetadata();
-			if ((this.source != null) && (this.getGitRepositoryUrl() == null)) {
-				setGitRepositoryUrl(this.source.getAnnotation(ANNOTATION_SAMPLE_REPO));
-				setContextDir(this.source.getAnnotation(ANNOTATION_SAMPLE_CONTEXT_DIR));
-				setGitReference(this.source.getAnnotation(ANNOTATION_SAMPLE_REF));
-			}
-		}
-	}
-	
-	private void loadBuilderImageMetadata() {
-		if(source != null && container != null) {
-			setImageName(NLS.bind("{0}/{1}", source.getNamespace(), source.getName()));
-			Job loadImageJob = new Job("Load builder image metadata...") {
-				
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					if(initializeContainerInfo()) {
-						return Status.OK_STATUS;
-					}
-					return Status.CANCEL_STATUS;
-				}
-				
-			};
-			try {
-				final IStatus status = WizardUtils.runInWizard(loadImageJob, container);
-				if (!status.isOK()) {
-					MessageDialog.openWarning(container.getShell(), "Warning",
-							NLS.bind("No builder image metadata for {0} could be found.", getImageName()));
-				}
-			} catch (InvocationTargetException | InterruptedException e) {
-				final String message = NLS.bind("Failed to look-up metadata for a builder image {0}", getImageName());
-				MessageDialog.openError(container.getShell(), "Error", message);
-				OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
-			}
-		}
-	}
-	
-	@Override
-	protected IDockerImageMetadata lookupImageMetadata() {
-		if (source == null) {
-			return null;
-		}
-		try {
-			Connection conn = ConnectionsRegistryUtil.getConnectionFor(getProject());
-			IResource istag = conn.getResource(ResourceKind.IMAGE_STREAM_TAG, source.getNamespace(), source.getName());
-			return new ImageStreamTagMetaData(istag.toJson(true));
-		}catch(Exception e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(NLS.bind("Unable to retrieve imagestream tag for {0}", getImageName()), e);
-		}
-		return null;
-	}
-	
-	@Override
-	public String getBuilderImageName() {
-		return source.getName();
-	}
+    private ImageStreamApplicationSource source;
+    private IWizardContainer container;
+    private IEnvironmentVariablesPageModel envModel = new EnvironmentVariablesPageModel();
+    private String gitRepositoryUrl = "";
+    private String gitReference = DEFAULT_REFERENCE;
+    private String contextDir = "";
+    private boolean imageChangeTrigger = true;
+    private boolean configChangeTrigger = true;
+    private boolean configWebHook = true;
+    private AtomicBoolean staleRepoInfo = new AtomicBoolean(true);
 
+    @Override
+    public IResourcesModelJob createFinishJob() {
+        return new CreateApplicationFromImageJob(this, this);
+    }
 
-	@Override
-	public String getBuilderImageNamespace() {
-		return source.getNamespace();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt == null)
+            return;
+        super.propertyChange(evt);
+        switch (evt.getPropertyName()) {
+        case IResourceLabelsPageModel.PROPERTY_LABELS:
+            setLabels((List<Label>)evt.getNewValue());
+            break;
+        case IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE:
+            handleSelectedAppSource(evt);
+            break;
+        case IApplicationSourceListPageModel.PROPERTY_PROJECT:
+            setProject((IProject)evt.getNewValue());
+            break;
+        case IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT:
+            handleEclipseProject(evt);
+            break;
+        }
+    }
 
+    private void handleEclipseProject(PropertyChangeEvent evt) {
+        org.eclipse.core.resources.IProject project = (org.eclipse.core.resources.IProject)evt.getNewValue();
+        if (project != null) {
+            try {
+                setGitRepositoryUrl(EGitUtils.getDefaultRemoteRepo(project));
+                setGitReference(EGitUtils.getCurrentBranch(project));
+                setContextDir(StringUtils.EMPTY);
+                return;
+            } catch (CoreException e) {
+                OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to retrieve the remote git repo from " + project.getName(),
+                        e);
+            }
+        }
+        setGitRepositoryUrl(null);
+        setGitReference(null);
+        setContextDir(null);
+    }
 
-	public void setContainer(IWizardContainer container) {
-		this.container = container;
-	}
-	
-	@Override
-	public IEnvironmentVariablesPageModel getEnvVariablesModel() {
-		return envModel;
-	}
+    private void handleSelectedAppSource(PropertyChangeEvent evt) {
+        if (evt.getNewValue() instanceof ImageStreamApplicationSource
+                && ResourceKind.IMAGE_STREAM.equals(((IApplicationSource)evt.getNewValue()).getKind())) {
+            this.source = (ImageStreamApplicationSource)evt.getNewValue();
+            staleRepoInfo.set(true);
+            setGitRepositoryUrl(null);
+            setResourceName(null);
+        }
+    }
 
-	@Override
-	public void setConfigWebHook(boolean value) {
-		firePropertyChange(PROPERTY_CONFIG_WEB_HOOK, configWebHook, this.configWebHook = value);
-	}
+    @Override
+    public void init() {
+        if (staleRepoInfo.compareAndSet(true, false)) {
+            loadBuilderImageMetadata();
+            if ((this.source != null) && (this.getGitRepositoryUrl() == null)) {
+                setGitRepositoryUrl(this.source.getAnnotation(ANNOTATION_SAMPLE_REPO));
+                setContextDir(this.source.getAnnotation(ANNOTATION_SAMPLE_CONTEXT_DIR));
+                setGitReference(this.source.getAnnotation(ANNOTATION_SAMPLE_REF));
+            }
+        }
+    }
 
-	@Override
-	public boolean isConfigWebHook() {
-		return this.configWebHook;
-	}
+    private void loadBuilderImageMetadata() {
+        if (source != null && container != null) {
+            setImageName(NLS.bind("{0}/{1}", source.getNamespace(), source.getName()));
+            Job loadImageJob = new Job("Load builder image metadata...") {
 
-	@Override
-	public void setConfigChangeTrigger(boolean value) {
-		firePropertyChange(PROPERTY_CONFIG_CHANGE_TRIGGER, configChangeTrigger, this.configChangeTrigger = value);
-	}
+                @Override
+                protected IStatus run(IProgressMonitor monitor) {
+                    if (initializeContainerInfo()) {
+                        return Status.OK_STATUS;
+                    }
+                    return Status.CANCEL_STATUS;
+                }
 
-	@Override
-	public boolean isConfigChangeTrigger() {
-		return configChangeTrigger;
-	}
+            };
+            try {
+                final IStatus status = WizardUtils.runInWizard(loadImageJob, container);
+                if (!status.isOK()) {
+                    MessageDialog.openWarning(container.getShell(), "Warning",
+                            NLS.bind("No builder image metadata for {0} could be found.", getImageName()));
+                }
+            } catch (InvocationTargetException | InterruptedException e) {
+                final String message = NLS.bind("Failed to look-up metadata for a builder image {0}", getImageName());
+                MessageDialog.openError(container.getShell(), "Error", message);
+                OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
+            }
+        }
+    }
 
-	@Override
-	public void setImageChangeTrigger(boolean value) {
-		firePropertyChange(PROPERTY_IMAGE_CHANGE_TRIGGER, imageChangeTrigger, this.imageChangeTrigger = value);
-	}
+    @Override
+    protected IDockerImageMetadata lookupImageMetadata() {
+        if (source == null) {
+            return null;
+        }
+        try {
+            Connection conn = ConnectionsRegistryUtil.getConnectionFor(getProject());
+            IResource istag = conn.getResource(ResourceKind.IMAGE_STREAM_TAG, source.getNamespace(), source.getName());
+            return new ImageStreamTagMetaData(istag.toJson(true));
+        } catch (Exception e) {
+            OpenShiftUIActivator.getDefault().getLogger().logError(NLS.bind("Unable to retrieve imagestream tag for {0}", getImageName()),
+                    e);
+        }
+        return null;
+    }
 
-	@Override
-	public boolean isImageChangeTrigger() {
-		return imageChangeTrigger;
-	}
+    @Override
+    public String getBuilderImageName() {
+        return source.getName();
+    }
 
-	@Override
-	public String getGitRepositoryUrl() {
-		return this.gitRepositoryUrl;
-	}
+    @Override
+    public String getBuilderImageNamespace() {
+        return source.getNamespace();
+    }
 
-	@Override
-	public void setGitRepositoryUrl(String url) {
-		firePropertyChange(PROPERTY_GIT_REPOSITORY_URL, this.gitRepositoryUrl, this.gitRepositoryUrl = url);
-	}
+    public void setContainer(IWizardContainer container) {
+        this.container = container;
+    }
 
-	@Override
-	public String getGitReference() {
-		return this.gitReference;
-	}
+    @Override
+    public IEnvironmentVariablesPageModel getEnvVariablesModel() {
+        return envModel;
+    }
 
-	@Override
-	public void setGitReference(String ref) {
-		firePropertyChange(PROPERTY_GIT_REFERENCE, this.gitReference, this.gitReference = ref);
-	}
+    @Override
+    public void setConfigWebHook(boolean value) {
+        firePropertyChange(PROPERTY_CONFIG_WEB_HOOK, configWebHook, this.configWebHook = value);
+    }
 
-	@Override
-	public String getContextDir() {
-		return this.contextDir;
-	}
+    @Override
+    public boolean isConfigWebHook() {
+        return this.configWebHook;
+    }
 
-	@Override
-	public void setContextDir(String contextDir) {
-		firePropertyChange(PROPERTY_CONTEXT_DIR, this.contextDir, this.contextDir = contextDir);
-	}
-	
-	@Override
-	public void dispose() {
-		super.dispose();
-		source = null;
-		container = null;
-		((EnvironmentVariablesPageModel)envModel).dispose();
-	}
+    @Override
+    public void setConfigChangeTrigger(boolean value) {
+        firePropertyChange(PROPERTY_CONFIG_CHANGE_TRIGGER, configChangeTrigger, this.configChangeTrigger = value);
+    }
+
+    @Override
+    public boolean isConfigChangeTrigger() {
+        return configChangeTrigger;
+    }
+
+    @Override
+    public void setImageChangeTrigger(boolean value) {
+        firePropertyChange(PROPERTY_IMAGE_CHANGE_TRIGGER, imageChangeTrigger, this.imageChangeTrigger = value);
+    }
+
+    @Override
+    public boolean isImageChangeTrigger() {
+        return imageChangeTrigger;
+    }
+
+    @Override
+    public String getGitRepositoryUrl() {
+        return this.gitRepositoryUrl;
+    }
+
+    @Override
+    public void setGitRepositoryUrl(String url) {
+        firePropertyChange(PROPERTY_GIT_REPOSITORY_URL, this.gitRepositoryUrl, this.gitRepositoryUrl = url);
+    }
+
+    @Override
+    public String getGitReference() {
+        return this.gitReference;
+    }
+
+    @Override
+    public void setGitReference(String ref) {
+        firePropertyChange(PROPERTY_GIT_REFERENCE, this.gitReference, this.gitReference = ref);
+    }
+
+    @Override
+    public String getContextDir() {
+        return this.contextDir;
+    }
+
+    @Override
+    public void setContextDir(String contextDir) {
+        firePropertyChange(PROPERTY_CONTEXT_DIR, this.contextDir, this.contextDir = contextDir);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        source = null;
+        container = null;
+        ((EnvironmentVariablesPageModel)envModel).dispose();
+    }
 
 }

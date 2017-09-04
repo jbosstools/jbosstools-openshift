@@ -17,9 +17,9 @@ import java.text.MessageFormat;
  */
 public class WontOverwriteException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public WontOverwriteException(String message, Object... arguments) {
-		super(MessageFormat.format(message, arguments));
-	}
+    public WontOverwriteException(String message, Object... arguments) {
+        super(MessageFormat.format(message, arguments));
+    }
 }

@@ -19,13 +19,13 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class TrimTrailingSlashConverter extends Converter {
 
-	public TrimTrailingSlashConverter() {
-		super(String.class, String.class);
-	}
+    public TrimTrailingSlashConverter() {
+        super(String.class, String.class);
+    }
 
-	@Override
-	public Object convert(Object fromObject) {
-		Assert.isLegal(fromObject instanceof String);
-		return StringUtils.removeTrailingSlashes((String) fromObject);
-	}
+    @Override
+    public Object convert(Object fromObject) {
+        Assert.isLegal(fromObject instanceof String);
+        return StringUtils.removeTrailingSlashes((String)fromObject);
+    }
 }

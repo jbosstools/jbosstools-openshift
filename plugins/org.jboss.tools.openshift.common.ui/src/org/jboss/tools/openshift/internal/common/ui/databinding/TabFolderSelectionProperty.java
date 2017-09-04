@@ -21,23 +21,23 @@ import org.eclipse.swt.widgets.TabFolder;
  */
 public class TabFolderSelectionProperty extends WidgetValueProperty {
 
-	public TabFolderSelectionProperty() {
-		super(SWT.Selection);
-	}
-	
-	@Override
-	public Object getValueType() {
-		return Integer.TYPE;
-	}
+    public TabFolderSelectionProperty() {
+        super(SWT.Selection);
+    }
 
-	@Override
-	protected Object doGetValue(Object source) {
-		return Integer.valueOf(((TabFolder)source).getSelectionIndex());
-	}
+    @Override
+    public Object getValueType() {
+        return Integer.TYPE;
+    }
 
-	@Override
-	protected void doSetValue(Object source, Object value) {
-		((TabFolder)source).setSelection((Integer) value);
-	}
+    @Override
+    protected Object doGetValue(Object source) {
+        return Integer.valueOf(((TabFolder)source).getSelectionIndex());
+    }
+
+    @Override
+    protected void doSetValue(Object source, Object value) {
+        ((TabFolder)source).setSelection((Integer)value);
+    }
 
 }

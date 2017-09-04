@@ -12,7 +12,7 @@ package org.jboss.tools.openshift.express.internal.ui.propertytable;
 
 class LinkElement extends StringElement {
 
-	public LinkElement(String property, String value, ContainerElement parent) {
-		super(property, value, true, parent);
-	}
+    public LinkElement(String property, String value, ContainerElement parent) {
+        super(property, value, true, parent);
+    }
 }

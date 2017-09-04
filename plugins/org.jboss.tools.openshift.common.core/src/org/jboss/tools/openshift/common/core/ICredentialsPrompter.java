@@ -25,13 +25,13 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
  */
 public interface ICredentialsPrompter {
 
-	/**
-	 * Prompt that the given connection requires 
-	 * authentication. 
-	 * 
-	 * @param connection  The connection
-	 * @return true if prompted for password; false otherwise
-	 */
-	public boolean promptAndAuthenticate(IConnection connection, Object context);
-	
+    /**
+     * Prompt that the given connection requires 
+     * authentication. 
+     * 
+     * @param connection  The connection
+     * @return true if prompted for password; false otherwise
+     */
+    public boolean promptAndAuthenticate(IConnection connection, Object context);
+
 }

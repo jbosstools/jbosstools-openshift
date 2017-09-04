@@ -31,35 +31,33 @@ import com.openshift.internal.client.utils.StringUtils;
  */
 public abstract class AbstractApplicationHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
-		Shell shell = HandlerUtil.getActiveShell(event);
-		if (application != null) {
-			return execute(application, shell);
-		} else {
-			IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
-			if (server == null) {
-				return ExpressUIActivator.createCancelStatus(NLS.bind("Could not {0}: server adapter not found.", getOperationName()));
-			}
-			return execute(server, shell);
-		}
-	}
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
+        Shell shell = HandlerUtil.getActiveShell(event);
+        if (application != null) {
+            return execute(application, shell);
+        } else {
+            IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
+            if (server == null) {
+                return ExpressUIActivator.createCancelStatus(NLS.bind("Could not {0}: server adapter not found.", getOperationName()));
+            }
+            return execute(server, shell);
+        }
+    }
 
-	protected IStatus execute(IServer server, Shell shell) {
-		String applicationName = ExpressServerUtils.getApplicationName(server);
-		if (StringUtils.isEmpty(applicationName)) {
-			return ExpressUIActivator.createCancelStatus(NLS.bind(
-					"Could not {0} application: application for server adapter {1} not found.",
-					getOperationName(),
-					server.getName()));
-		}
-		return execute(new LoadApplicationJob(server), shell);
-	}
-	
-	protected abstract IStatus execute(IApplication application, Shell shell);
+    protected IStatus execute(IServer server, Shell shell) {
+        String applicationName = ExpressServerUtils.getApplicationName(server);
+        if (StringUtils.isEmpty(applicationName)) {
+            return ExpressUIActivator.createCancelStatus(NLS.bind(
+                    "Could not {0} application: application for server adapter {1} not found.", getOperationName(), server.getName()));
+        }
+        return execute(new LoadApplicationJob(server), shell);
+    }
 
-	protected abstract IStatus execute(LoadApplicationJob loadApplicationJob, Shell shell);
+    protected abstract IStatus execute(IApplication application, Shell shell);
 
-	protected abstract String getOperationName();
+    protected abstract IStatus execute(LoadApplicationJob loadApplicationJob, Shell shell);
+
+    protected abstract String getOperationName();
 }

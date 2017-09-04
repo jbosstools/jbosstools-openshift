@@ -18,27 +18,27 @@ import org.junit.Test;
 
 public class OpenShiftSecureStorageKeyTest {
 
-	private static final String BASE = "the.base.key";
-	private static final String USERNAME = "aperson@anaddress.com";
-	private static final String EXP_KEY = "the.base.key/ahost/aperson@anaddress.com";
+    private static final String BASE = "the.base.key";
+    private static final String USERNAME = "aperson@anaddress.com";
+    private static final String EXP_KEY = "the.base.key/ahost/aperson@anaddress.com";
 
-	@Before
-	public void setUp() throws Exception {
-	}
+    @Before
+    public void setUp() throws Exception {
+    }
 
-	@Test
-	public void testGetKeyForHostWithoutSceme() {
-		assertEquals(EXP_KEY, new OpenShiftSecureStorageKey(BASE, "ahost", USERNAME).getKey());
-	}
+    @Test
+    public void testGetKeyForHostWithoutSceme() {
+        assertEquals(EXP_KEY, new OpenShiftSecureStorageKey(BASE, "ahost", USERNAME).getKey());
+    }
 
-	@Test
-	public void testGetKeyForHostWithSceme() {
-		assertEquals(EXP_KEY, new OpenShiftSecureStorageKey(BASE, "https://ahost", USERNAME).getKey());
-	}
-	
-	@Test
-	public void testGetKeyForHostWithTrailingSlash() {
-		assertEquals(EXP_KEY, new OpenShiftSecureStorageKey(BASE, "https://ahost/", USERNAME).getKey());
-	}
+    @Test
+    public void testGetKeyForHostWithSceme() {
+        assertEquals(EXP_KEY, new OpenShiftSecureStorageKey(BASE, "https://ahost", USERNAME).getKey());
+    }
+
+    @Test
+    public void testGetKeyForHostWithTrailingSlash() {
+        assertEquals(EXP_KEY, new OpenShiftSecureStorageKey(BASE, "https://ahost/", USERNAME).getKey());
+    }
 
 }

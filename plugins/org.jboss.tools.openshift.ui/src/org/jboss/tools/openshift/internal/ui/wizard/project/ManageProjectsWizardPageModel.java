@@ -28,91 +28,92 @@ import com.openshift.restclient.model.IProject;
  */
 public class ManageProjectsWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_SELECTED_PROJECT = "selectedProject";
-	public static final String PROPERTY_PROJECTS = "projects";
+    public static final String PROPERTY_SELECTED_PROJECT = "selectedProject";
+    public static final String PROPERTY_PROJECTS = "projects";
 
-	private Connection connection;
-	private IProject selectedProject;
-	private List<IProject> projects;
-	private IConnectionsRegistryListener connectionChangeListener;
+    private Connection connection;
+    private IProject selectedProject;
+    private List<IProject> projects;
+    private IConnectionsRegistryListener connectionChangeListener;
 
-	public ManageProjectsWizardPageModel(IProject project, Connection connection) {
-		this(connection);
-		setSelectedProject(project);
-	}
+    public ManageProjectsWizardPageModel(IProject project, Connection connection) {
+        this(connection);
+        setSelectedProject(project);
+    }
 
-	public ManageProjectsWizardPageModel(Connection connection) {
-		this.connection = connection;
-		this.connectionChangeListener = onConnectionsChanged();
-		ConnectionsRegistrySingleton.getInstance().addListener(connectionChangeListener );
-	}
+    public ManageProjectsWizardPageModel(Connection connection) {
+        this.connection = connection;
+        this.connectionChangeListener = onConnectionsChanged();
+        ConnectionsRegistrySingleton.getInstance().addListener(connectionChangeListener);
+    }
 
-	private IConnectionsRegistryListener onConnectionsChanged() {
-		return new IConnectionsRegistryListener() {
-		
-			@Override
-			public void connectionRemoved(IConnection connection) {
-				if(connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)){
-					ManageProjectsWizardPageModel.this.connection = null;
-					setProjects(Collections.<IProject>emptyList());
-				}
-			}
-			
-			@SuppressWarnings("unchecked")
-			@Override
-			public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+    private IConnectionsRegistryListener onConnectionsChanged() {
+        return new IConnectionsRegistryListener() {
 
-				if(connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection) && ConnectionProperties.PROPERTY_PROJECTS.equals(property)){
-					setProjects((List<IProject>) newValue); 
-				}
-			}
-			
-			@Override
-			public void connectionAdded(IConnection connection) {
-				if(connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)){
-					ManageProjectsWizardPageModel.this.connection = (Connection) connection;
-					loadProjects();
-				}
-			}
-		};
-	}
+            @Override
+            public void connectionRemoved(IConnection connection) {
+                if (connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)) {
+                    ManageProjectsWizardPageModel.this.connection = null;
+                    setProjects(Collections.<IProject>emptyList());
+                }
+            }
 
-	public void loadProjects() {
-		if (connection == null) {
-			setProjects(Collections.<IProject>emptyList());
-		} else {
-			List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
-			setProjects(projects);
-		}
-	}
+            @SuppressWarnings("unchecked")
+            @Override
+            public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 
-	public void setProjects(List<IProject> projects) {
-		firePropertyChange(PROPERTY_PROJECTS, null, this.projects = projects);
-	}
+                if (connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)
+                        && ConnectionProperties.PROPERTY_PROJECTS.equals(property)) {
+                    setProjects((List<IProject>)newValue);
+                }
+            }
 
-	public List<IProject> getProjects() {
-		return projects;
-	}
+            @Override
+            public void connectionAdded(IConnection connection) {
+                if (connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)) {
+                    ManageProjectsWizardPageModel.this.connection = (Connection)connection;
+                    loadProjects();
+                }
+            }
+        };
+    }
 
-	public void refresh() {
-		connection.refresh();
-		loadProjects();
-	}
+    public void loadProjects() {
+        if (connection == null) {
+            setProjects(Collections.<IProject>emptyList());
+        } else {
+            List<IProject> projects = connection.getResources(ResourceKind.PROJECT);
+            setProjects(projects);
+        }
+    }
 
-	public void setSelectedProject(IProject project) {
-		firePropertyChange(PROPERTY_SELECTED_PROJECT, this.selectedProject, this.selectedProject = project);
-	}
+    public void setProjects(List<IProject> projects) {
+        firePropertyChange(PROPERTY_PROJECTS, null, this.projects = projects);
+    }
 
-	public IProject getSelectedProject() {
-		return selectedProject;
-	}
+    public List<IProject> getProjects() {
+        return projects;
+    }
 
-	public Connection getConnection() {
-		return connection;
-	}
-	
-	@Override
-	public void dispose() {
-		ConnectionsRegistrySingleton.getInstance().removeListener(connectionChangeListener);
-	}
+    public void refresh() {
+        connection.refresh();
+        loadProjects();
+    }
+
+    public void setSelectedProject(IProject project) {
+        firePropertyChange(PROPERTY_SELECTED_PROJECT, this.selectedProject, this.selectedProject = project);
+    }
+
+    public IProject getSelectedProject() {
+        return selectedProject;
+    }
+
+    public Connection getConnection() {
+        return connection;
+    }
+
+    @Override
+    public void dispose() {
+        ConnectionsRegistrySingleton.getInstance().removeListener(connectionChangeListener);
+    }
 }

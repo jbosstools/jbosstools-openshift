@@ -30,9 +30,9 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
 public class ApplicationPodIsRunning extends AbstractWaitCondition {
 
 	private OpenShiftProject project;
-	
+
 	private String applicationPodName;
-	
+
 	/**
 	 * Constructs a new ApplicationPodsRunning wait condition.
 	 * Pods containing 'build' and 'deploy' key words in their name
@@ -41,7 +41,7 @@ public class ApplicationPodIsRunning extends AbstractWaitCondition {
 	 * not met. 
 	 */
 	public ApplicationPodIsRunning() {
-		OpenShiftExplorerView explorer  = new OpenShiftExplorerView();
+		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
 		this.project = explorer.getOpenShift3Connection().getProject();
 	}
@@ -54,27 +54,26 @@ public class ApplicationPodIsRunning extends AbstractWaitCondition {
 	public boolean test() {
 		project.refresh();
 		List<OpenShiftResource> pods = project.getOpenShiftResources(Resource.POD);
-	
+
 		if (pods.isEmpty()) {
 			return false;
 		}
-		
+
 		// TODO: this FLAWED: it assumes that all pods that it finds within a
 		// project are the pods for the application that a test wants to wait
 		// for
-		for (OpenShiftResource resource: pods) {
-			if (!resource.getName().contains("build") && 
-					!resource.getName().contains("deploy")) {
+		for (OpenShiftResource resource : pods) {
+			if (!resource.getName().contains("build") && !resource.getName().contains("deploy")) {
 				if (resource.getStatus().equals(ResourceState.RUNNING.toString())) {
 					applicationPodName = resource.getName();
 					return true;
 				}
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public String getApplicationPodName() {
 		return applicationPodName;
 	}

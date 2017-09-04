@@ -21,51 +21,46 @@ import com.openshift.restclient.model.IEvent;
  */
 public class EventPropertySource extends ResourcePropertySource<IEvent> {
 
-	public EventPropertySource(IEvent resource) {
-		super(resource);
-	}
-	
-	@Override
-	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-			new UneditablePropertyDescriptor("firstSeen", "First Seen"),
-			new UneditablePropertyDescriptor("lastSeen", "Last Seen"),
-			new UneditablePropertyDescriptor("count", "Count"),
-			new UneditablePropertyDescriptor("name", "Name"),
-			new UneditablePropertyDescriptor("kind", "Kind"),
-			new UneditablePropertyDescriptor("subobject", "Subobject"),
-			new UneditablePropertyDescriptor("type", "Type"),
-			new UneditablePropertyDescriptor("reason", "Reason"),
-			new UneditablePropertyDescriptor("source", "Source"),
-			new UneditablePropertyDescriptor("message", "Message"),
-		};
-	}
+    public EventPropertySource(IEvent resource) {
+        super(resource);
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		IEvent e = getResource();
-		switch((String)id) {
-		case "firstSeen": return DateTimeUtils.formatSince(e.getFirstSeenTimestamp());
-		case "lastSeen": 
-			return DateTimeUtils.formatSince(e.getLastSeenTimestamp());
-		case "count": 
-			return e.getCount();
-		case "name" :
-			return StringUtils.substringBefore(e.getName(), ".");
-		case "kind" :
-			return e.getKind();
-		case "type": 
-			return e.getType();
-		case "reason" :
-			return e.getReason();
-		case "source" :
-			return e.getEventSource();
-		case "subobject" :
-			return e.getInvolvedObject() != null ? e.getInvolvedObject().getFieldPath() : null;
-		case "message" :
-			return e.getMessage();
-		}
-		return super.getPropertyValue(id);
-	}
+    @Override
+    public IPropertyDescriptor[] getPropertyDescriptors() {
+        return new IPropertyDescriptor[] { new UneditablePropertyDescriptor("firstSeen", "First Seen"),
+                new UneditablePropertyDescriptor("lastSeen", "Last Seen"), new UneditablePropertyDescriptor("count", "Count"),
+                new UneditablePropertyDescriptor("name", "Name"), new UneditablePropertyDescriptor("kind", "Kind"),
+                new UneditablePropertyDescriptor("subobject", "Subobject"), new UneditablePropertyDescriptor("type", "Type"),
+                new UneditablePropertyDescriptor("reason", "Reason"), new UneditablePropertyDescriptor("source", "Source"),
+                new UneditablePropertyDescriptor("message", "Message"), };
+    }
+
+    @Override
+    public Object getPropertyValue(Object id) {
+        IEvent e = getResource();
+        switch ((String)id) {
+        case "firstSeen":
+            return DateTimeUtils.formatSince(e.getFirstSeenTimestamp());
+        case "lastSeen":
+            return DateTimeUtils.formatSince(e.getLastSeenTimestamp());
+        case "count":
+            return e.getCount();
+        case "name":
+            return StringUtils.substringBefore(e.getName(), ".");
+        case "kind":
+            return e.getKind();
+        case "type":
+            return e.getType();
+        case "reason":
+            return e.getReason();
+        case "source":
+            return e.getEventSource();
+        case "subobject":
+            return e.getInvolvedObject() != null ? e.getInvolvedObject().getFieldPath() : null;
+        case "message":
+            return e.getMessage();
+        }
+        return super.getPropertyValue(id);
+    }
 
 }

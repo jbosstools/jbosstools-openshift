@@ -19,20 +19,20 @@ import org.jboss.reddeer.swt.impl.button.PushButton;
 import org.jboss.reddeer.swt.impl.table.DefaultTable;
 
 public class OpenShift3SSLCertificatePreferencePage extends PreferencePage {
-	
+
 	private static Logger log = Logger.getLogger(OpenShift3SSLCertificatePreferencePage.class);
-	
+
 	public OpenShift3SSLCertificatePreferencePage() {
 		super("JBoss Tools", "OpenShift 3", "SSL certificates");
 	}
-	
+
 	public void printCertificates() {
 		DefaultTable table = new DefaultTable();
 		for (int i = 0; i < table.rowCount(); i++) {
 			log.info("On index " + i + " is : " + table.getItem(i).getText(1));
 		}
 	}
-	
+
 	public void deleteAll() {
 		DefaultTable table = new DefaultTable();
 		List<TableItem> tableItems = table.getItems();

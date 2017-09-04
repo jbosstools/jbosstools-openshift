@@ -22,86 +22,86 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
  * @author Andre Dietisheim
  */
 public abstract class AbstractConnection extends ObservablePojo implements IConnection {
-	
-	private String host;
 
-	protected AbstractConnection(String host) {
-		this(null, host);
-	}
-	
-	protected AbstractConnection(String scheme, String host) {
-		this.host = getHost(scheme, host);
-	}
+    private String host;
 
-	private String getHost(String scheme, String host) {
-		if (StringUtils.isEmpty(host)) {
-			// empty host == default host
-			return host;
-		}
-		
-		if (StringUtils.isEmpty(scheme)) {
-			scheme = UrlUtils.SCHEME_HTTPS;
-		}
-		return UrlUtils.ensureStartsWithScheme(host, scheme);
-	}
+    protected AbstractConnection(String host) {
+        this(null, host);
+    }
 
-	@Override
-	public String getHost() {
-		return host;
-	}
+    protected AbstractConnection(String scheme, String host) {
+        this.host = getHost(scheme, host);
+    }
 
-	@Override
-	public String getScheme() {
-		return UrlUtils.getScheme(host);
-	}
+    private String getHost(String scheme, String host) {
+        if (StringUtils.isEmpty(host)) {
+            // empty host == default host
+            return host;
+        }
 
-	@Override
-	public abstract boolean connect();
-	
-	public abstract boolean isConnected();
-	
-	@Override
-	public abstract IConnection clone();
+        if (StringUtils.isEmpty(scheme)) {
+            scheme = UrlUtils.SCHEME_HTTPS;
+        }
+        return UrlUtils.ensureStartsWithScheme(host, scheme);
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((host == null) ? 0 : host.hashCode());
-		return result;
-	}
+    @Override
+    public String getHost() {
+        return host;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof AbstractConnection)) {
-			return false;
-		}
-		AbstractConnection other = (AbstractConnection) obj;
-		if(!Objects.equals(host, other.host)) {
-			return false;
-		}
-		if(!Objects.equals(getUsername(), other.getUsername())) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public String getScheme() {
+        return UrlUtils.getScheme(host);
+    }
 
-	@Override
-	public boolean credentialsEqual(IConnection connection) {
-		if(!equals(connection)) {
-			return false;
-		}
-		//It is safe to cast now.
-		AbstractConnection other = (AbstractConnection)connection;
-		if(!Objects.equals(getPassword(), other.getPassword())) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public abstract boolean connect();
+
+    public abstract boolean isConnected();
+
+    @Override
+    public abstract IConnection clone();
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((host == null) ? 0 : host.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof AbstractConnection)) {
+            return false;
+        }
+        AbstractConnection other = (AbstractConnection)obj;
+        if (!Objects.equals(host, other.host)) {
+            return false;
+        }
+        if (!Objects.equals(getUsername(), other.getUsername())) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean credentialsEqual(IConnection connection) {
+        if (!equals(connection)) {
+            return false;
+        }
+        //It is safe to cast now.
+        AbstractConnection other = (AbstractConnection)connection;
+        if (!Objects.equals(getPassword(), other.getPassword())) {
+            return false;
+        }
+        return true;
+    }
 }

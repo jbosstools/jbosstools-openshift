@@ -76,299 +76,286 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  * @author Jeff Maury
  */
-public class NewApplicationWizard 
-	extends Wizard 
-	implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
+public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
 
-	private NewApplicationWizardModel model = new NewApplicationWizardModel();
-	private ApplicationSourceFromTemplateModel fromTemplateModel = new ApplicationSourceFromTemplateModel();
-	private ApplicationSourceFromImageModel fromImageModel = new ApplicationSourceFromImageModel();
+    private NewApplicationWizardModel model = new NewApplicationWizardModel();
+    private ApplicationSourceFromTemplateModel fromTemplateModel = new ApplicationSourceFromTemplateModel();
+    private ApplicationSourceFromImageModel fromImageModel = new ApplicationSourceFromImageModel();
 
-	public NewApplicationWizard() {
-		setWindowTitle("New OpenShift Application");
-		setNeedsProgressMonitor(true);
-		
-		Stream.of(fromTemplateModel, fromImageModel).forEach(m->{
-			model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE, m);
-			model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT, m);
-			model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_PROJECT, m);
-			model.addPropertyChangeListener(IResourceLabelsPageModel.PROPERTY_LABELS, m);
-		});
-	}
+    public NewApplicationWizard() {
+        setWindowTitle("New OpenShift Application");
+        setNeedsProgressMonitor(true);
 
-	@Override
-	public void init(IWorkbench workbench, IStructuredSelection selection) {
+        Stream.of(fromTemplateModel, fromImageModel).forEach(m -> {
+            model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE, m);
+            model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT, m);
+            model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_PROJECT, m);
+            model.addPropertyChangeListener(IResourceLabelsPageModel.PROPERTY_LABELS, m);
+        });
+    }
+
+    @Override
+    public void init(IWorkbench workbench, IStructuredSelection selection) {
         fromImageModel.setContainer(getContainer());
-		if (selection == null
-				|| selection.isEmpty()) {
-			return;
-		}
-		org.eclipse.core.resources.IProject selectedProject = UIUtils.getFirstElement(selection, org.eclipse.core.resources.IProject.class);
-		model.setEclipseProject(selectedProject);
-		
-		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
-		if (connection != null) {
-			setConnection(connection);
-		} else {
-			IResource resource = UIUtils.getFirstElement(selection, IResource.class);
-			if (resource != null) {
-				connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
-				setConnection(connection);
-				model.setProject(resource.getProject());
-			} 
-		}
-		if(connection != null) {
-			ConnectionsRegistrySingleton.getInstance().setRecent(connection);
-		}
-	}
+        if (selection == null || selection.isEmpty()) {
+            return;
+        }
+        org.eclipse.core.resources.IProject selectedProject = UIUtils.getFirstElement(selection, org.eclipse.core.resources.IProject.class);
+        model.setEclipseProject(selectedProject);
 
-	@Override
-	public void addPages() {
-		/*
-		 * list --> template params -------------------------------> labels -> done
-		 *   |                                                    |
-		 *    ----> buildconfig -> deployconfig -> serviceconfig -|
-		 */
-		
-		//app from image
-		BuildConfigPage bcPage = new BuildConfigPage(this, fromImageModel) {
-			@Override
-			public boolean isPageComplete() {
-				return isTemplateFlow() ? true : super.isPageComplete();
-			}
-		};
+        Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+        if (connection != null) {
+            setConnection(connection);
+        } else {
+            IResource resource = UIUtils.getFirstElement(selection, IResource.class);
+            if (resource != null) {
+                connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
+                setConnection(connection);
+                model.setProject(resource.getProject());
+            }
+        }
+        if (connection != null) {
+            ConnectionsRegistrySingleton.getInstance().setRecent(connection);
+        }
+    }
 
-		DeploymentConfigPage dcPage = new DeploymentConfigPage(this, fromImageModel) {
-			@Override
-			public boolean isPageComplete() {
-				return isTemplateFlow() ? true : super.isPageComplete();
-			}
-		};
-		ServicesAndRoutingPage servicesPage = new ServicesAndRoutingPage(this, fromImageModel) {
-			@Override
-			public boolean isPageComplete() {
-				return isTemplateFlow() ? true : super.isPageComplete();
-			}
-			
-		};
+    @Override
+    public void addPages() {
+        /*
+         * list --> template params -------------------------------> labels -> done
+         *   |                                                    |
+         *    ----> buildconfig -> deployconfig -> serviceconfig -|
+         */
 
-		//app from template
-		TemplateParametersPage paramPage = new TemplateParametersPage(this, fromTemplateModel) {
-			
-			@Override
-			public boolean isPageComplete() {
-				return isTemplateFlow() ? 
-						//force visiting parameters page
-						getContainer() != null 
-						&& !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage) 
-						&& super.isPageComplete()  
-						: true;
-			}
+        //app from image
+        BuildConfigPage bcPage = new BuildConfigPage(this, fromImageModel) {
+            @Override
+            public boolean isPageComplete() {
+                return isTemplateFlow() ? true : super.isPageComplete();
+            }
+        };
 
-			@Override
-			public IWizardPage getNextPage() {
-				return getPage(ResourceLabelsPage.PAGE_NAME);
-			}
-		};
-		
-		ResourceLabelsPage labelsPage = new ResourceLabelsPage(this, model);
+        DeploymentConfigPage dcPage = new DeploymentConfigPage(this, fromImageModel) {
+            @Override
+            public boolean isPageComplete() {
+                return isTemplateFlow() ? true : super.isPageComplete();
+            }
+        };
+        ServicesAndRoutingPage servicesPage = new ServicesAndRoutingPage(this, fromImageModel) {
+            @Override
+            public boolean isPageComplete() {
+                return isTemplateFlow() ? true : super.isPageComplete();
+            }
 
-		ApplicationSourceListPage listPage = new ApplicationSourceListPage(this, model) {
+        };
 
-			@Override
-			public IWizardPage getNextPage() {
-				if(isTemplateFlow()){
-					return getPage(TemplateParametersPage.PAGE_NAME);
-				}
-				return getPage(BuildConfigPage.PAGE_NAME);
-			}
-			
-		};
+        //app from template
+        TemplateParametersPage paramPage = new TemplateParametersPage(this, fromTemplateModel) {
 
-		
-		addPage(listPage);
-		addPage(paramPage);
-		addPage(bcPage);
-		addPage(dcPage);
-		addPage(servicesPage);
-		addPage(labelsPage);
-	}
+            @Override
+            public boolean isPageComplete() {
+                return isTemplateFlow() ?
+                //force visiting parameters page
+                getContainer() != null && !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage) && super.isPageComplete()
+                        : true;
+            }
 
-	@Override
-	public void dispose() {
-		super.dispose();
-		model.dispose();
-		fromImageModel.dispose();
-		fromTemplateModel.dispose();
-		model = null;
-		fromImageModel = null;
-		fromTemplateModel = null;
-	}
+            @Override
+            public IWizardPage getNextPage() {
+                return getPage(ResourceLabelsPage.PAGE_NAME);
+            }
+        };
 
-	private boolean isTemplateFlow() {
-		if(model.getSelectedAppSource() != null && model.getSelectedAppSource().getSource() != null) {
-			return ResourceKind.TEMPLATE.equals(model.getSelectedAppSource().getSource().getKind());
-		}
-		return true;
-	}
+        ResourceLabelsPage labelsPage = new ResourceLabelsPage(this, model);
 
-	@Override
-	public boolean performFinish() {
+        ApplicationSourceListPage listPage = new ApplicationSourceListPage(this, model) {
 
-		final IResourcesModelJob createJob = isTemplateFlow()
-				? fromTemplateModel.createFinishJob() 
-				: fromImageModel.createFinishJob();
-		
-		createJob.addJobChangeListener(new JobChangeAdapter() {
+            @Override
+            public IWizardPage getNextPage() {
+                if (isTemplateFlow()) {
+                    return getPage(TemplateParametersPage.PAGE_NAME);
+                }
+                return getPage(BuildConfigPage.PAGE_NAME);
+            }
 
-			@Override
-			public void done(IJobChangeEvent event) {
-				IStatus status = event.getResult();
-				if(JobUtils.isOk(status) 
-						|| JobUtils.isWarning(status)) {
-					Display.getDefault().syncExec(createJob.getSummaryRunnable(getShell()));
-					OpenShiftUIUtils.showOpenShiftExplorer();
-					if (model.getEclipseProject() != null) {
-						//No need to import the project from git, it's already here
-						return;
-					}
-					Collection<IResource> resources = createJob.getResources();
-					final Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = getBuildConfigs(resources);
-					if (projectsAndBuildConfigs.isEmpty()) {
-						return;
-					}
-					Connection connection = model.getConnection();
-					Display.getDefault().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
-							wizard.addImportJobChangeListener(new JobChangeAdapter() {
-								
-								@Override
-								public void done(IJobChangeEvent event) {
-									IService service = getService(resources);
-									List<org.eclipse.core.resources.IProject> importedProjects = wizard.getImportJob().getImportedProjects();
-									if (service != null && importedProjects.size() == 1) {
-										Display.getDefault().asyncExec(new Runnable() {
+        };
 
-								            @Override
-								            public void run() {
-								            	if (MessageDialog.openQuestion(getShell(), "Create server adapter", NLS.bind(
-														"Would you like to create a server adapter for the imported {0} project?",
-														importedProjects.get(0).getName()))) {
-								            		createServerAdapter(importedProjects.get(0), connection, service, getRoute(resources));
-								            	}
-								            }
-										});
-									}
-								}
-							});
-							new WizardDialog(getShell(), wizard).open();
-						}
-					});
-				}
-			}
-			
-			protected Map<IProject, Collection<IBuildConfig>> getBuildConfigs(Collection<IResource> resources) {
-				Map<IProject, Collection<IBuildConfig>> projects = new LinkedHashMap<>();
-				for (IResource resource : resources) {
-					if (resource instanceof IBuildConfig) {
-						IBuildConfig buildConfig = (IBuildConfig)resource;
-						if (StringUtils.isNotBlank(buildConfig.getSourceURI())) {
-							IProject p = buildConfig.getProject();
-							Collection<IBuildConfig> buildConfigs = projects.get(p);
-							if (buildConfigs == null) {
-								buildConfigs = new LinkedHashSet<>();
-								projects.put(p, buildConfigs);
-							}
-							buildConfigs.add(buildConfig);
-						}
-					}
-				}
-				return projects;
-			}
-			
-			protected IService getService(Collection<IResource> resources) {
-				IResource service = getResourceOfType(resources, IService.class);
-				return service == null ? null : (IService)service;
-			}
-			
-			protected IRoute getRoute(Collection<IResource> resources) {
-				IResource route = getResourceOfType(resources, IRoute.class);
-				return route == null ? null : (IRoute)route;
-			}
-			
-			private IResource getResourceOfType(Collection<IResource> resources, Class<? extends IResource> type) {
-				for (IResource resource : resources) {
-					if (type.isInstance(resource)) {
-						return resource;
-					}
-				}
-				return null;
-			}
-			
-			protected void createServerAdapter(org.eclipse.core.resources.IProject project, Connection connection, IService service, IRoute route) {
-				try {
-					IServerWorkingCopy server = OpenShiftServerUtils.create(OpenShiftResourceUniqueId.get(service));
-					ServerSettingsWizardPageModel serverModel = new ServerSettingsWizardPageModel(service, route,
-							project, connection, server,
-							OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()));
-					serverModel.loadResources();
-					serverModel.updateServer();
-					server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false);
-					serverModel.saveServer(null);
-				} catch(CoreException ce) {
-					OpenShiftUIActivator.getDefault().getLogger().logError("Error occured while creating a server adapter", ce);
-					return;
-				}
-			}
-		});
-		
-		boolean success = false;
-		try {
-			Job job = new JobChainBuilder(createJob.getJob())
-					.runWhenSuccessfullyDone(new RefreshResourcesJob(createJob, true)).build();
-			IStatus status = runInWizard(
-					job, 
-					createJob.getDelegatingProgressMonitor(), 
-					getContainer());
-			success = isFailed(status);
-		} catch (InvocationTargetException | InterruptedException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(e);
-			success = false;
-		} finally {
-			UsageStats.getInstance().newV3Application(model.getConnection().getHost(), success);
-		}
-		return success;
-	}
+        addPage(listPage);
+        addPage(paramPage);
+        addPage(bcPage);
+        addPage(dcPage);
+        addPage(servicesPage);
+        addPage(labelsPage);
+    }
 
-	private boolean isFailed(IStatus status) {
-		return JobUtils.isOk(status) 
-				|| JobUtils.isWarning(status);
-	}
+    @Override
+    public void dispose() {
+        super.dispose();
+        model.dispose();
+        fromImageModel.dispose();
+        fromTemplateModel.dispose();
+        model = null;
+        fromImageModel = null;
+        fromTemplateModel = null;
+    }
 
-	@Override
-	public Connection getConnection() {
-		return model.getConnection();
-	}
+    private boolean isTemplateFlow() {
+        if (model.getSelectedAppSource() != null && model.getSelectedAppSource().getSource() != null) {
+            return ResourceKind.TEMPLATE.equals(model.getSelectedAppSource().getSource().getKind());
+        }
+        return true;
+    }
 
-	@Override
-	public boolean hasConnection() {
-		return model.hasConnection();
-	}
+    @Override
+    public boolean performFinish() {
 
-	@Override
-	public void setConnection(Connection connection) {
-		model.setConnection(connection);
-		if(model == null || fromImageModel == null) {
-			//wizard is disposed by canceling the creation of a required project;
-			return;
-		}
-		fromImageModel.setConnection(connection);
-	}
+        final IResourcesModelJob createJob = isTemplateFlow() ? fromTemplateModel.createFinishJob() : fromImageModel.createFinishJob();
 
-	@Override
-	public Object getContext() {
-		return null;
-	}
+        createJob.addJobChangeListener(new JobChangeAdapter() {
+
+            @Override
+            public void done(IJobChangeEvent event) {
+                IStatus status = event.getResult();
+                if (JobUtils.isOk(status) || JobUtils.isWarning(status)) {
+                    Display.getDefault().syncExec(createJob.getSummaryRunnable(getShell()));
+                    OpenShiftUIUtils.showOpenShiftExplorer();
+                    if (model.getEclipseProject() != null) {
+                        //No need to import the project from git, it's already here
+                        return;
+                    }
+                    Collection<IResource> resources = createJob.getResources();
+                    final Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = getBuildConfigs(resources);
+                    if (projectsAndBuildConfigs.isEmpty()) {
+                        return;
+                    }
+                    Connection connection = model.getConnection();
+                    Display.getDefault().asyncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
+                            wizard.addImportJobChangeListener(new JobChangeAdapter() {
+
+                                @Override
+                                public void done(IJobChangeEvent event) {
+                                    IService service = getService(resources);
+                                    List<org.eclipse.core.resources.IProject> importedProjects = wizard.getImportJob()
+                                            .getImportedProjects();
+                                    if (service != null && importedProjects.size() == 1) {
+                                        Display.getDefault().asyncExec(new Runnable() {
+
+                                            @Override
+                                            public void run() {
+                                                if (MessageDialog.openQuestion(getShell(), "Create server adapter",
+                                                        NLS.bind("Would you like to create a server adapter for the imported {0} project?",
+                                                                importedProjects.get(0).getName()))) {
+                                                    createServerAdapter(importedProjects.get(0), connection, service, getRoute(resources));
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                            new WizardDialog(getShell(), wizard).open();
+                        }
+                    });
+                }
+            }
+
+            protected Map<IProject, Collection<IBuildConfig>> getBuildConfigs(Collection<IResource> resources) {
+                Map<IProject, Collection<IBuildConfig>> projects = new LinkedHashMap<>();
+                for (IResource resource : resources) {
+                    if (resource instanceof IBuildConfig) {
+                        IBuildConfig buildConfig = (IBuildConfig)resource;
+                        if (StringUtils.isNotBlank(buildConfig.getSourceURI())) {
+                            IProject p = buildConfig.getProject();
+                            Collection<IBuildConfig> buildConfigs = projects.get(p);
+                            if (buildConfigs == null) {
+                                buildConfigs = new LinkedHashSet<>();
+                                projects.put(p, buildConfigs);
+                            }
+                            buildConfigs.add(buildConfig);
+                        }
+                    }
+                }
+                return projects;
+            }
+
+            protected IService getService(Collection<IResource> resources) {
+                IResource service = getResourceOfType(resources, IService.class);
+                return service == null ? null : (IService)service;
+            }
+
+            protected IRoute getRoute(Collection<IResource> resources) {
+                IResource route = getResourceOfType(resources, IRoute.class);
+                return route == null ? null : (IRoute)route;
+            }
+
+            private IResource getResourceOfType(Collection<IResource> resources, Class<? extends IResource> type) {
+                for (IResource resource : resources) {
+                    if (type.isInstance(resource)) {
+                        return resource;
+                    }
+                }
+                return null;
+            }
+
+            protected void createServerAdapter(org.eclipse.core.resources.IProject project, Connection connection, IService service,
+                    IRoute route) {
+                try {
+                    IServerWorkingCopy server = OpenShiftServerUtils.create(OpenShiftResourceUniqueId.get(service));
+                    ServerSettingsWizardPageModel serverModel = new ServerSettingsWizardPageModel(service, route, project, connection,
+                            server, OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()));
+                    serverModel.loadResources();
+                    serverModel.updateServer();
+                    server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false);
+                    serverModel.saveServer(null);
+                } catch (CoreException ce) {
+                    OpenShiftUIActivator.getDefault().getLogger().logError("Error occured while creating a server adapter", ce);
+                    return;
+                }
+            }
+        });
+
+        boolean success = false;
+        try {
+            Job job = new JobChainBuilder(createJob.getJob()).runWhenSuccessfullyDone(new RefreshResourcesJob(createJob, true)).build();
+            IStatus status = runInWizard(job, createJob.getDelegatingProgressMonitor(), getContainer());
+            success = isFailed(status);
+        } catch (InvocationTargetException | InterruptedException e) {
+            OpenShiftUIActivator.getDefault().getLogger().logError(e);
+            success = false;
+        } finally {
+            UsageStats.getInstance().newV3Application(model.getConnection().getHost(), success);
+        }
+        return success;
+    }
+
+    private boolean isFailed(IStatus status) {
+        return JobUtils.isOk(status) || JobUtils.isWarning(status);
+    }
+
+    @Override
+    public Connection getConnection() {
+        return model.getConnection();
+    }
+
+    @Override
+    public boolean hasConnection() {
+        return model.hasConnection();
+    }
+
+    @Override
+    public void setConnection(Connection connection) {
+        model.setConnection(connection);
+        if (model == null || fromImageModel == null) {
+            //wizard is disposed by canceling the creation of a required project;
+            return;
+        }
+        fromImageModel.setConnection(connection);
+    }
+
+    @Override
+    public Object getContext() {
+        return null;
+    }
 }

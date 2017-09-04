@@ -21,7 +21,7 @@ import com.openshift.restclient.ResourceKind;
  */
 public class ServicesPropertySection extends OpenShiftResourcePropertySection {
 
-	public ServicesPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.ServicesTab", ResourceKind.SERVICE);
-	}
+    public ServicesPropertySection() {
+        super("popup:org.jboss.tools.openshift.ui.properties.tab.ServicesTab", ResourceKind.SERVICE);
+    }
 }

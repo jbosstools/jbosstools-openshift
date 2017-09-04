@@ -15,15 +15,15 @@ import org.eclipse.osgi.util.NLS;
 
 public class ExpressCoreMessages extends NLS {
 
-	private static final String BUNDLE_NAME = ExpressCoreMessages.class.getName();
+    private static final String BUNDLE_NAME = ExpressCoreMessages.class.getName();
 
-	static {
-		NLS.initializeMessages(BUNDLE_NAME, ExpressCoreMessages.class);
-	}
+    static {
+        NLS.initializeMessages(BUNDLE_NAME, ExpressCoreMessages.class);
+    }
 
-	private ExpressCoreMessages() {
-		// Do not instantiate
-	}
+    private ExpressCoreMessages() {
+        // Do not instantiate
+    }
 
-	public static String OPERATION_CANCELLED;
+    public static String OPERATION_CANCELLED;
 }

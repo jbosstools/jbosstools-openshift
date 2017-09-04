@@ -53,241 +53,240 @@ import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
  */
 public class OpenShiftExplorerView extends CommonNavigator implements IConnectionsRegistryListener {
 
-	private Control connectionsPane;
-	private Control explanationsPane;
-	private PageBook pageBook;
+    private Control connectionsPane;
+    private Control explanationsPane;
+    private PageBook pageBook;
 
-	@Override
-	protected Object getInitialInput() {
-		return ConnectionsRegistrySingleton.getInstance();
-	}
+    @Override
+    protected Object getInitialInput() {
+        return ConnectionsRegistrySingleton.getInstance();
+    }
 
-	@Override
-	protected CommonViewer createCommonViewer(Composite parent) {
-		CommonViewer viewer = super.createCommonViewer(parent);
-		new OpenShiftExplorerContextsHandler(viewer);
-		return viewer;
-	}
+    @Override
+    protected CommonViewer createCommonViewer(Composite parent) {
+        CommonViewer viewer = super.createCommonViewer(parent);
+        new OpenShiftExplorerContextsHandler(viewer);
+        return viewer;
+    }
 
-	@Override
-	public void dispose() {
-		ConnectionsRegistrySingleton.getInstance().removeListener(this);
-		super.dispose();
-	}
+    @Override
+    public void dispose() {
+        ConnectionsRegistrySingleton.getInstance().removeListener(this);
+        super.dispose();
+    }
 
-	@Override
-	public void connectionAdded(IConnection connection) {
-		showConnectionsOrExplanations();
-	}
+    @Override
+    public void connectionAdded(IConnection connection) {
+        showConnectionsOrExplanations();
+    }
 
-	private void showConnectionsOrExplanations() {
-		asyncShowConnectionsOrExplanations();
-	}
+    private void showConnectionsOrExplanations() {
+        asyncShowConnectionsOrExplanations();
+    }
 
-	private void asyncShowConnectionsOrExplanations() {
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				if (!pageBook.isDisposed()) {
-					showConnectionsOrExplanations(connectionsPane, explanationsPane);
-				}
-			}
-		});
-	}
+    private void asyncShowConnectionsOrExplanations() {
+        Display.getDefault().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                if (!pageBook.isDisposed()) {
+                    showConnectionsOrExplanations(connectionsPane, explanationsPane);
+                }
+            }
+        });
+    }
 
-	@Override
-	public void connectionRemoved(IConnection connection) {
-		asyncShowConnectionsOrExplanations();
-	}
+    @Override
+    public void connectionRemoved(IConnection connection) {
+        asyncShowConnectionsOrExplanations();
+    }
 
-	@Override
-	public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-	}
+    @Override
+    public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+    }
 
-	@Override
-	public void createPartControl(Composite parent) {
-		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		this.pageBook = new PageBook(parent, SWT.NONE);
+    @Override
+    public void createPartControl(Composite parent) {
+        FormToolkit toolkit = new FormToolkit(parent.getDisplay());
+        this.pageBook = new PageBook(parent, SWT.NONE);
 
-		super.createPartControl(pageBook);
+        super.createPartControl(pageBook);
 
-		this.connectionsPane = getCommonViewer().getControl();
-		this.explanationsPane = createExplanationPane(connectionsPane, pageBook, toolkit);
-		showConnectionsOrExplanations(connectionsPane, explanationsPane);
-		ConnectionsRegistrySingleton.getInstance().addListener(this);
-		getCommonViewer().refresh();
-	}
+        this.connectionsPane = getCommonViewer().getControl();
+        this.explanationsPane = createExplanationPane(connectionsPane, pageBook, toolkit);
+        showConnectionsOrExplanations(connectionsPane, explanationsPane);
+        ConnectionsRegistrySingleton.getInstance().addListener(this);
+        getCommonViewer().refresh();
+    }
 
-	private Control createExplanationPane(Control connectionsPane, PageBook pageBook, FormToolkit kit) {
-		Form form = kit.createForm(pageBook);
-		Composite composite = form.getBody();
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
+    private Control createExplanationPane(Control connectionsPane, PageBook pageBook, FormToolkit kit) {
+        Form form = kit.createForm(pageBook);
+        Composite composite = form.getBody();
+        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
 
-		Link link = new Link(composite, SWT.NONE);
-		link.setText("No connections are available. Create a new connection with the <a>New Connection Wizard...</a>");
-		link.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).grab(true, false).applyTo(link);
-		link.addSelectionListener(onExplanationClicked(connectionsPane, link));
-		return form;
-	}
+        Link link = new Link(composite, SWT.NONE);
+        link.setText("No connections are available. Create a new connection with the <a>New Connection Wizard...</a>");
+        link.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).grab(true, false).applyTo(link);
+        link.addSelectionListener(onExplanationClicked(connectionsPane, link));
+        return form;
+    }
 
-	private SelectionAdapter onExplanationClicked(final Control connectionsPane, final Control explanationPane) {
-		return new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				ConnectionWizard wizard = new ConnectionWizard();
-				WizardDialog dialog = new WizardDialog(
-						PlatformUI.getWorkbench().getModalDialogShellProvider().getShell(), wizard);
-				if (dialog.open() == Window.OK) {
-					showConnectionsOrExplanations(connectionsPane, explanationPane);
-				}
-			}
-		};
-	}
+    private SelectionAdapter onExplanationClicked(final Control connectionsPane, final Control explanationPane) {
+        return new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                ConnectionWizard wizard = new ConnectionWizard();
+                WizardDialog dialog = new WizardDialog(PlatformUI.getWorkbench().getModalDialogShellProvider().getShell(), wizard);
+                if (dialog.open() == Window.OK) {
+                    showConnectionsOrExplanations(connectionsPane, explanationPane);
+                }
+            }
+        };
+    }
 
-	private void showConnectionsOrExplanations(Control connectionsPane, Control explanationsPane) {
-		if (ConnectionsRegistrySingleton.getInstance().getAll().size() < 1) {
-			showPage(explanationsPane);
-		} else {
-			showPage(connectionsPane);
-		}
-	}
+    private void showConnectionsOrExplanations(Control connectionsPane, Control explanationsPane) {
+        if (ConnectionsRegistrySingleton.getInstance().getAll().size() < 1) {
+            showPage(explanationsPane);
+        } else {
+            showPage(connectionsPane);
+        }
+    }
 
-	private void showPage(final Control page) {
-		pageBook.showPage(page);
-	}
+    private void showPage(final Control page) {
+        pageBook.showPage(page);
+    }
 
-	private static class OpenShiftExplorerContextsHandler extends Contexts {
+    private static class OpenShiftExplorerContextsHandler extends Contexts {
 
-		private static final String CONNECTION_CONTEXT = "org.jboss.tools.openshift.explorer.context.connection";
-		// private static final String APPLICATION_CONTEXT =
-		// "org.jboss.tools.openshift.explorer.context.application";
-		// private static final String DOMAIN_CONTEXT =
-		// "org.jboss.tools.openshift.explorer.context.domain";
+        private static final String CONNECTION_CONTEXT = "org.jboss.tools.openshift.explorer.context.connection";
+        // private static final String APPLICATION_CONTEXT =
+        // "org.jboss.tools.openshift.explorer.context.application";
+        // private static final String DOMAIN_CONTEXT =
+        // "org.jboss.tools.openshift.explorer.context.domain";
 
-		OpenShiftExplorerContextsHandler(CommonViewer viewer) {
-			viewer.getControl().addFocusListener(onFocusLost());
-			viewer.addSelectionChangedListener(onSelectionChanged());
-		}
+        OpenShiftExplorerContextsHandler(CommonViewer viewer) {
+            viewer.getControl().addFocusListener(onFocusLost());
+            viewer.addSelectionChangedListener(onSelectionChanged());
+        }
 
-		private FocusAdapter onFocusLost() {
-			return new FocusAdapter() {
+        private FocusAdapter onFocusLost() {
+            return new FocusAdapter() {
 
-				@Override
-				public void focusLost(FocusEvent event) {
-					deactivateCurrent();
-				}
-			};
-		}
+                @Override
+                public void focusLost(FocusEvent event) {
+                    deactivateCurrent();
+                }
+            };
+        }
 
-		private ISelectionChangedListener onSelectionChanged() {
-			return new ISelectionChangedListener() {
+        private ISelectionChangedListener onSelectionChanged() {
+            return new ISelectionChangedListener() {
 
-				@Override
-				public void selectionChanged(SelectionChangedEvent event) {
-					ISelection selection = event.getSelection();
-					// if (UIUtils.isFirstElementOfType(IDomain.class,
-					// selection)) {
-					// activate(DOMAIN_CONTEXT);
-					// } else if
-					// (UIUtils.isFirstElementOfType(IApplication.class,
-					// selection)) {
-					// activate(APPLICATION_CONTEXT);
-					// } else if
-					// (UIUtils.isFirstElementOfType(ExpressConnection.class,
-					// selection)) {
-					// // must be checked after domain, application, adapter may
-					// convert
-					// // any resource to a connection
-					activate(CONNECTION_CONTEXT);
-					// }
-				}
-			};
-		}
-	}
+                @Override
+                public void selectionChanged(SelectionChangedEvent event) {
+                    ISelection selection = event.getSelection();
+                    // if (UIUtils.isFirstElementOfType(IDomain.class,
+                    // selection)) {
+                    // activate(DOMAIN_CONTEXT);
+                    // } else if
+                    // (UIUtils.isFirstElementOfType(IApplication.class,
+                    // selection)) {
+                    // activate(APPLICATION_CONTEXT);
+                    // } else if
+                    // (UIUtils.isFirstElementOfType(ExpressConnection.class,
+                    // selection)) {
+                    // // must be checked after domain, application, adapter may
+                    // convert
+                    // // any resource to a connection
+                    activate(CONNECTION_CONTEXT);
+                    // }
+                }
+            };
+        }
+    }
 
-	@Override
-	public void initListeners(TreeViewer viewer) {
-		super.initListeners(viewer);
-		Tree tree = viewer.getTree();
-		if (tree != null && !tree.isDisposed()) {
-			new LinkMouseListener(tree);
-		}
-	}
+    @Override
+    public void initListeners(TreeViewer viewer) {
+        super.initListeners(viewer);
+        Tree tree = viewer.getTree();
+        if (tree != null && !tree.isDisposed()) {
+            new LinkMouseListener(tree);
+        }
+    }
 
-	static class LinkMouseListener extends MouseAdapter implements MouseMoveListener {
-		Tree tree;
+    static class LinkMouseListener extends MouseAdapter implements MouseMoveListener {
+        Tree tree;
 
-		LinkMouseListener(Tree tree) {
-			this.tree = tree;
-			tree.addMouseListener(this);
-			tree.addMouseMoveListener(this);
-		}
+        LinkMouseListener(Tree tree) {
+            this.tree = tree;
+            tree.addMouseListener(this);
+            tree.addMouseMoveListener(this);
+        }
 
-		boolean isLink = false;
+        boolean isLink = false;
 
-		@Override
-		public void mouseMove(MouseEvent e) {
-			if (tree.isDisposed()) {
-				return;
-			}
-			ILink link = getLink(e);
-			if (isLink != (link != null)) {
-				isLink = (link != null);
-				Cursor cursor = isLink ? Display.getDefault().getSystemCursor(SWT.CURSOR_HAND) : null;
-				tree.setCursor(cursor);
-			}
-		}
+        @Override
+        public void mouseMove(MouseEvent e) {
+            if (tree.isDisposed()) {
+                return;
+            }
+            ILink link = getLink(e);
+            if (isLink != (link != null)) {
+                isLink = (link != null);
+                Cursor cursor = isLink ? Display.getDefault().getSystemCursor(SWT.CURSOR_HAND) : null;
+                tree.setCursor(cursor);
+            }
+        }
 
-		@Override
-		public void mouseUp(MouseEvent e) {
-			final ILink link = getLink(e);
-			if (link != null) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						if (tree.isDisposed()) {
-							return;
-						}
-						tree.setCursor(null);
-						isLink = false;
-						link.execute();
-					}
-				});
-			}
-		}
+        @Override
+        public void mouseUp(MouseEvent e) {
+            final ILink link = getLink(e);
+            if (link != null) {
+                Display.getDefault().asyncExec(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (tree.isDisposed()) {
+                            return;
+                        }
+                        tree.setCursor(null);
+                        isLink = false;
+                        link.execute();
+                    }
+                });
+            }
+        }
 
-		ILink getLink(MouseEvent e) {
-			if (e.getSource() instanceof Tree) {
-				Tree tree = (Tree) e.getSource();
-				TreeItem t = tree.getItem(new Point(e.x, e.y));
-				Object o = t == null ? null : t.getData();
-				return o instanceof ILink ? (ILink) o : null;
-			}
-			return null;
-		}
-	}
+        ILink getLink(MouseEvent e) {
+            if (e.getSource() instanceof Tree) {
+                Tree tree = (Tree)e.getSource();
+                TreeItem t = tree.getItem(new Point(e.x, e.y));
+                Object o = t == null ? null : t.getData();
+                return o instanceof ILink ? (ILink)o : null;
+            }
+            return null;
+        }
+    }
 
-	private static class Contexts {
+    private static class Contexts {
 
-		private IContextActivation contextActivation;
+        private IContextActivation contextActivation;
 
-		public void activate(String contextId) {
-			deactivateCurrent();
-			IContextService service = getService();
-			this.contextActivation = service.activateContext(contextId);
-		}
+        public void activate(String contextId) {
+            deactivateCurrent();
+            IContextService service = getService();
+            this.contextActivation = service.activateContext(contextId);
+        }
 
-		public void deactivateCurrent() {
-			if (contextActivation != null) {
-				IContextService service = getService();
-				service.deactivateContext(contextActivation);
-			}
-		}
+        public void deactivateCurrent() {
+            if (contextActivation != null) {
+                IContextService service = getService();
+                service.deactivateContext(contextActivation);
+            }
+        }
 
-		private IContextService getService() {
-			return (IContextService) PlatformUI.getWorkbench().getService(IContextService.class);
-		}
-	}
+        private IContextService getService() {
+            return (IContextService)PlatformUI.getWorkbench().getService(IContextService.class);
+        }
+    }
 
 }

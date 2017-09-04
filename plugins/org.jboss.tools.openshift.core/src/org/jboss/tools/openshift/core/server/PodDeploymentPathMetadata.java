@@ -20,36 +20,34 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class PodDeploymentPathMetadata {
 
-	// default fallback
-	private static final String DEFAULT_DEPLOYMENT_DIR = "/opt/app-root/src";
-	// "image->"dockerImageMetadata"->"Config"->"Labels"->"com.redhat.deployments-dir"
-	private static final Pattern PATTERN_REDHAT_DEPLOYMENTS_DIR = Pattern
-			.compile("\"com\\.redhat\\.deployments-dir\"[^\"]*\"([^\"]*)\",");
-	// "image->"dockerImageMetadata"->"Config"->"Labels"->"com.redhat.deployments-dir"
-	private static final Pattern PATTERN_JBOSS_DEPLOYMENTS_DIR = Pattern
-			.compile("\"org\\.jboss\\.deployments-dir\"[^\"]*\"([^\"]*)\",");
-	// "image->"dockerImageMetadata"->"Config"->"WorkginDir"
-	private static final Pattern PATTERN_WOKRING_DIR = Pattern.compile("\"WorkingDir\"[^\"]*\"([^\"]*)\",");
-	
-	private String metadata;
+    // default fallback
+    private static final String DEFAULT_DEPLOYMENT_DIR = "/opt/app-root/src";
+    // "image->"dockerImageMetadata"->"Config"->"Labels"->"com.redhat.deployments-dir"
+    private static final Pattern PATTERN_REDHAT_DEPLOYMENTS_DIR = Pattern.compile("\"com\\.redhat\\.deployments-dir\"[^\"]*\"([^\"]*)\",");
+    // "image->"dockerImageMetadata"->"Config"->"Labels"->"com.redhat.deployments-dir"
+    private static final Pattern PATTERN_JBOSS_DEPLOYMENTS_DIR = Pattern.compile("\"org\\.jboss\\.deployments-dir\"[^\"]*\"([^\"]*)\",");
+    // "image->"dockerImageMetadata"->"Config"->"WorkginDir"
+    private static final Pattern PATTERN_WOKRING_DIR = Pattern.compile("\"WorkingDir\"[^\"]*\"([^\"]*)\",");
 
-	public PodDeploymentPathMetadata(String metadata) {
-		this.metadata = metadata;
-	}
+    private String metadata;
 
-	public String get() {
-		if (StringUtils.isEmpty(metadata)) {
-			return null;
-		}
-		return getPodPath(metadata);
-	}
+    public PodDeploymentPathMetadata(String metadata) {
+        this.metadata = metadata;
+    }
 
-	protected String useDefaultPathIfEmpty(String podPath) {
-		if (StringUtils.isEmpty(podPath)) {
-			return DEFAULT_DEPLOYMENT_DIR;
-		}
-		return podPath;
-	}
+    public String get() {
+        if (StringUtils.isEmpty(metadata)) {
+            return null;
+        }
+        return getPodPath(metadata);
+    }
+
+    protected String useDefaultPathIfEmpty(String podPath) {
+        if (StringUtils.isEmpty(podPath)) {
+            return DEFAULT_DEPLOYMENT_DIR;
+        }
+        return podPath;
+    }
 
     private String getPodPath(String imageMetaData) {
         String podPath = null;
@@ -63,12 +61,12 @@ public class PodDeploymentPathMetadata {
     }
 
     private String matchFirstGroup(String imageStreamTag, Pattern pattern) {
-		Matcher matcher = pattern.matcher(imageStreamTag);
-		if (matcher.find() && matcher.groupCount() == 1) {
-			return matcher.group(1);
-		} else {
-			return null;
-		}
-	}
+        Matcher matcher = pattern.matcher(imageStreamTag);
+        if (matcher.find() && matcher.groupCount() == 1) {
+            return matcher.group(1);
+        } else {
+            return null;
+        }
+    }
 
 }

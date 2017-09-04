@@ -65,229 +65,206 @@ import com.openshift.restclient.model.IProject;
  */
 public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 
-	private static final IPluginLog LOG = OpenShiftUIActivator.getDefault().getLogger();
-	private ManageProjectsWizardPageModel pageModel;
-	private TableViewer viewer;
+    private static final IPluginLog LOG = OpenShiftUIActivator.getDefault().getLogger();
+    private ManageProjectsWizardPageModel pageModel;
+    private TableViewer viewer;
 
-	private List<IProject> initialProjects;
+    private List<IProject> initialProjects;
 
-	public ManageProjectsWizardPage(String title, String description, ManageProjectsWizardPageModel pageModel, IWizard wizard) {
-		super(title, description, title, wizard);
-		this.pageModel = pageModel;
-	}
+    public ManageProjectsWizardPage(String title, String description, ManageProjectsWizardPageModel pageModel, IWizard wizard) {
+        super(title, description, title, wizard);
+        this.pageModel = pageModel;
+    }
 
-	@Override
-	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
+    @Override
+    protected void doCreateControls(Composite parent, DataBindingContext dbc) {
+        GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
-		Group group = new Group(parent, SWT.NONE);
-		group.setText("OpenShift Projects");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(group);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(group);
+        Group group = new Group(parent, SWT.NONE);
+        group.setText("OpenShift Projects");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(group);
+        GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(group);
 
-		// table
-		Composite tableContainer = new Composite(group, SWT.NONE);
-		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults()
-				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
-		viewer.setContentProvider(new ObservableListContentProvider());
-		viewer.setInput(BeanProperties.list(
-				ManageProjectsWizardPageModel.PROPERTY_PROJECTS).observe(pageModel));
-		loadProjects(dbc);
-		initialProjects = getProjects();
-		viewer.setComparator(new ProjectViewerComparator());
+        // table
+        Composite tableContainer = new Composite(group, SWT.NONE);
+        this.viewer = createTable(tableContainer);
+        GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+        viewer.setContentProvider(new ObservableListContentProvider());
+        viewer.setInput(BeanProperties.list(ManageProjectsWizardPageModel.PROPERTY_PROJECTS).observe(pageModel));
+        loadProjects(dbc);
+        initialProjects = getProjects();
+        viewer.setComparator(new ProjectViewerComparator());
 
-		IObservableValue viewerSingleSelection = ViewerProperties.singleSelection().observe(viewer);
-		ValueBindingBuilder.bind(viewerSingleSelection)
-				.to(BeanProperties.value(ManageProjectsWizardPageModel.PROPERTY_SELECTED_PROJECT).observe(pageModel))
-				.in(dbc);
+        IObservableValue viewerSingleSelection = ViewerProperties.singleSelection().observe(viewer);
+        ValueBindingBuilder.bind(viewerSingleSelection)
+                .to(BeanProperties.value(ManageProjectsWizardPageModel.PROPERTY_SELECTED_PROJECT).observe(pageModel)).in(dbc);
 
-		// new 
-		Button newButton = new Button(group, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(newButton);
-		newButton.setText("New...");
-		newButton.addSelectionListener(onNew());
-		UIUtils.setDefaultButtonWidth(newButton);
+        // new 
+        Button newButton = new Button(group, SWT.PUSH);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(newButton);
+        newButton.setText("New...");
+        newButton.addSelectionListener(onNew());
+        UIUtils.setDefaultButtonWidth(newButton);
 
-		// remove
-		Button removeButton = new Button(group, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
-		removeButton.setText("Remove...");
-		removeButton.addSelectionListener(onRemove(dbc));
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
-				.notUpdatingParticipant()
-				.to(viewerSingleSelection)
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
-		UIUtils.setDefaultButtonWidth(removeButton);
+        // remove
+        Button removeButton = new Button(group, SWT.PUSH);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(removeButton);
+        removeButton.setText("Remove...");
+        removeButton.addSelectionListener(onRemove(dbc));
+        ValueBindingBuilder.bind(WidgetProperties.enabled().observe(removeButton)).notUpdatingParticipant().to(viewerSingleSelection)
+                .converting(new IsNotNull2BooleanConverter()).in(dbc);
+        UIUtils.setDefaultButtonWidth(removeButton);
 
-		Composite filler = new Composite(group, SWT.None);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(filler);
+        Composite filler = new Composite(group, SWT.None);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(filler);
 
-		// refresh
-		Button refreshButton = new Button(group, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.END).applyTo(refreshButton);
-		refreshButton.setText("Refresh...");
-		refreshButton.addSelectionListener(onRefresh(dbc));
-		UIUtils.setDefaultButtonWidth(refreshButton);
-	}
+        // refresh
+        Button refreshButton = new Button(group, SWT.PUSH);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.END).applyTo(refreshButton);
+        refreshButton.setText("Refresh...");
+        refreshButton.addSelectionListener(onRefresh(dbc));
+        UIUtils.setDefaultButtonWidth(refreshButton);
+    }
 
-	private void loadProjects(DataBindingContext dbc) {
-		try {
-			WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob("Loading OpenShift projects...") {
+    private void loadProjects(DataBindingContext dbc) {
+        try {
+            WizardUtils.runInWizard(new AbstractDelegatingMonitorJob("Loading OpenShift projects...") {
 
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							pageModel.loadProjects();
-							return Status.OK_STATUS;
-						}
-					}, new DelegatingProgressMonitor(), getContainer(), dbc);
-		} catch (InvocationTargetException | InterruptedException e) {
-			LOG.logError(NLS.bind("Could not load projects for connection {0}", pageModel.getConnection().toString()), e);
-		}
-	}
+                @Override
+                protected IStatus doRun(IProgressMonitor monitor) {
+                    pageModel.loadProjects();
+                    return Status.OK_STATUS;
+                }
+            }, new DelegatingProgressMonitor(), getContainer(), dbc);
+        } catch (InvocationTargetException | InterruptedException e) {
+            LOG.logError(NLS.bind("Could not load projects for connection {0}", pageModel.getConnection().toString()), e);
+        }
+    }
 
-	private SelectionListener onNew() {
-		return new SelectionAdapter() {
+    private SelectionListener onNew() {
+        return new SelectionAdapter() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				NewProjectWizard newProjectWizard = new NewProjectWizard(pageModel.getConnection(), pageModel.getProjects());
-				int res = WizardUtils.openWizardDialog(newProjectWizard, getShell());
-				if (res == IDialogConstants.OK_ID) {
-					IProject newOrSelectedProject = newProjectWizard.getProject();
-					if (newOrSelectedProject != null) {
-						pageModel.setSelectedProject(newOrSelectedProject);
-					}
-				}
-			}
-		};
-	}
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                NewProjectWizard newProjectWizard = new NewProjectWizard(pageModel.getConnection(), pageModel.getProjects());
+                int res = WizardUtils.openWizardDialog(newProjectWizard, getShell());
+                if (res == IDialogConstants.OK_ID) {
+                    IProject newOrSelectedProject = newProjectWizard.getProject();
+                    if (newOrSelectedProject != null) {
+                        pageModel.setSelectedProject(newOrSelectedProject);
+                    }
+                }
+            }
+        };
+    }
 
-	private SelectionListener onRemove(final DataBindingContext dbc) {
-		return new SelectionAdapter() {
+    private SelectionListener onRemove(final DataBindingContext dbc) {
+        return new SelectionAdapter() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IProject project = pageModel.getSelectedProject();
-				if (project == null) {
-					return;
-				}
-				boolean confirm = MessageDialog.openConfirm(getShell(), 
-						OpenShiftUIMessages.ResourceDeletionDialogTitle, 
-						NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, project.getName()));
-				if (!confirm) {
-					return;
-				}
-				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(project);
-				try {
-					org.jboss.tools.common.ui.WizardUtils.runInWizard(
-							job, job.getDelegatingProgressMonitor(), getContainer(), dbc);
-				} catch (InvocationTargetException | InterruptedException ex) {
-					OpenShiftUIActivator.getDefault().getLogger().logError(NLS.bind("Could not delete OpenShift project {0}", project.getName()), ex);
-				}
-			}
-		};
-	}
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                IProject project = pageModel.getSelectedProject();
+                if (project == null) {
+                    return;
+                }
+                boolean confirm = MessageDialog.openConfirm(getShell(), OpenShiftUIMessages.ResourceDeletionDialogTitle,
+                        NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, project.getName()));
+                if (!confirm) {
+                    return;
+                }
+                DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(project);
+                try {
+                    org.jboss.tools.common.ui.WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer(), dbc);
+                } catch (InvocationTargetException | InterruptedException ex) {
+                    OpenShiftUIActivator.getDefault().getLogger()
+                            .logError(NLS.bind("Could not delete OpenShift project {0}", project.getName()), ex);
+                }
+            }
+        };
+    }
 
-	private SelectionListener onRefresh(final DataBindingContext dbc) {
-		return new SelectionAdapter() {
+    private SelectionListener onRefresh(final DataBindingContext dbc) {
+        return new SelectionAdapter() {
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				refreshModel(dbc);
-			}
-		};
-	}
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                refreshModel(dbc);
+            }
+        };
+    }
 
-	@Override
-	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
-	}
+    @Override
+    protected void setupWizardPageSupport(DataBindingContext dbc) {
+        ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
+    }
 
-	protected TableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		ICellToolTipProvider<IProject> cellToolTipProvider = new ICellToolTipProvider<IProject>() {
+    protected TableViewer createTable(Composite tableContainer) {
+        Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+        table.setLinesVisible(true);
+        table.setHeaderVisible(true);
+        ICellToolTipProvider<IProject> cellToolTipProvider = new ICellToolTipProvider<IProject>() {
 
-			@Override
-			public String getToolTipText(IProject object) {
-				return object.getDescription();
-			}
+            @Override
+            public String getToolTipText(IProject object) {
+                return object.getDescription();
+            }
 
-			@Override
-			public int getToolTipDisplayDelayTime(IProject object) {
-				return 0;
-			}
-		};
-		
-		this.viewer = new TableViewerBuilder(table, tableContainer)
-				.contentProvider(new ArrayContentProvider())
-				.column(new IColumnLabelProvider<IProject>() {
+            @Override
+            public int getToolTipDisplayDelayTime(IProject object) {
+                return 0;
+            }
+        };
 
-					@Override
-					public String getValue(IProject project) {
-						return project.getName();
-					}
-				})
-				.cellToolTipProvider(cellToolTipProvider)
-				.name("Name").align(SWT.LEFT).weight(1).minWidth(75).buildColumn()
-				.column(new IColumnLabelProvider<IProject>() {
+        this.viewer = new TableViewerBuilder(table, tableContainer).contentProvider(new ArrayContentProvider())
+                .column(new IColumnLabelProvider<IProject>() {
 
-					@Override
-					public String getValue(IProject project) {
-						return project.getDisplayName();
-					}
-				})
-				.cellToolTipProvider(cellToolTipProvider)
-				.name("Display Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.buildViewer();
+                    @Override
+                    public String getValue(IProject project) {
+                        return project.getName();
+                    }
+                }).cellToolTipProvider(cellToolTipProvider).name("Name").align(SWT.LEFT).weight(1).minWidth(75).buildColumn()
+                .column(new IColumnLabelProvider<IProject>() {
 
-		return viewer;
-	}
+                    @Override
+                    public String getValue(IProject project) {
+                        return project.getDisplayName();
+                    }
+                }).cellToolTipProvider(cellToolTipProvider).name("Display Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
+                .buildViewer();
 
-	private void refreshModel(final DataBindingContext dbc) {
-		try {
-			WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob("Refreshing Projects...") {
+        return viewer;
+    }
 
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							pageModel.refresh();
-							return Status.OK_STATUS;
-						}
-					}
-					, new DelegatingProgressMonitor(), getContainer(), dbc);
-		} catch (InvocationTargetException | InterruptedException e) {
-			LOG.logError(NLS.bind("Could not refresh projects for connection {0}", pageModel.getConnection().toString()), e);
-		}
-	}
+    private void refreshModel(final DataBindingContext dbc) {
+        try {
+            WizardUtils.runInWizard(new AbstractDelegatingMonitorJob("Refreshing Projects...") {
 
-	public IProject getSelectedProject() {
-		return pageModel.getSelectedProject();
-	}
+                @Override
+                protected IStatus doRun(IProgressMonitor monitor) {
+                    pageModel.refresh();
+                    return Status.OK_STATUS;
+                }
+            }, new DelegatingProgressMonitor(), getContainer(), dbc);
+        } catch (InvocationTargetException | InterruptedException e) {
+            LOG.logError(NLS.bind("Could not refresh projects for connection {0}", pageModel.getConnection().toString()), e);
+        }
+    }
 
-	public List<IProject> getProjects() {
-		return pageModel.getProjects();
-	}
+    public IProject getSelectedProject() {
+        return pageModel.getSelectedProject();
+    }
 
-	@Override
-	public void dispose() {
-		pageModel.dispose();
-		super.dispose();
-	}
+    public List<IProject> getProjects() {
+        return pageModel.getProjects();
+    }
 
-	public boolean hasChanged() {
-		return !Objects.deepEquals(initialProjects,getProjects());
-	}
+    @Override
+    public void dispose() {
+        pageModel.dispose();
+        super.dispose();
+    }
+
+    public boolean hasChanged() {
+        return !Objects.deepEquals(initialProjects, getProjects());
+    }
 }

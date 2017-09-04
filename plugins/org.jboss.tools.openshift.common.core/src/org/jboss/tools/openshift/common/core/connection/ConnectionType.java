@@ -15,6 +15,5 @@ package org.jboss.tools.openshift.common.core.connection;
  * @author Andre Dietisheim
  */
 public enum ConnectionType {
-	Express,
-	Kubernetes;
+    Express, Kubernetes;
 }

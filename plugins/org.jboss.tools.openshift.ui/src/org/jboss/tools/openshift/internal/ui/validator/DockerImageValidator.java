@@ -34,67 +34,68 @@ import org.eclipse.core.runtime.IStatus;
  */
 public class DockerImageValidator implements IValidator {
 
-	private String hostnameComponentRegexp = "(?:[a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])";
+    private String hostnameComponentRegexp = "(?:[a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])";
 
-	// hostnameComponentRegexp restricts the registry hostname component of a
-	// repository name to
-	// start with a component as defined by hostnameRegexp and followed by an
-	// optional port.
-	private String hostnameRegexp = "(?:" + hostnameComponentRegexp + "\\.)*" + hostnameComponentRegexp + "(?::[0-9]+)?";
+    // hostnameComponentRegexp restricts the registry hostname component of a
+    // repository name to
+    // start with a component as defined by hostnameRegexp and followed by an
+    // optional port.
+    private String hostnameRegexp = "(?:" + hostnameComponentRegexp + "\\.)*" + hostnameComponentRegexp + "(?::[0-9]+)?";
 
-	// TagRegexp matches valid tag names. From docker/docker:graph/tags.go.
-	private String tagRegexp = "[\\w][\\w.-]{0,127}";
+    // TagRegexp matches valid tag names. From docker/docker:graph/tags.go.
+    private String tagRegexp = "[\\w][\\w.-]{0,127}";
 
-	// nameSubComponentRegexp defines the part of the name which must be
-	// begin and end with an alphanumeric character. These characters can
-	// be separated by any number of dashes.
-	private String nameSubComponentRegexp = "[a-z0-9]+(?:[-]+[a-z0-9]+)*";
+    // nameSubComponentRegexp defines the part of the name which must be
+    // begin and end with an alphanumeric character. These characters can
+    // be separated by any number of dashes.
+    private String nameSubComponentRegexp = "[a-z0-9]+(?:[-]+[a-z0-9]+)*";
 
-	// nameComponentRegexp restricts registry path component names to
-	// start with at least one letter or number, with following parts able to
-	// be separated by one period, underscore or double underscore.
-	private String nameComponentRegexp = nameSubComponentRegexp + "(?:(?:[._]|__)" + nameSubComponentRegexp + ")*";
+    // nameComponentRegexp restricts registry path component names to
+    // start with at least one letter or number, with following parts able to
+    // be separated by one period, underscore or double underscore.
+    private String nameComponentRegexp = nameSubComponentRegexp + "(?:(?:[._]|__)" + nameSubComponentRegexp + ")*";
 
-	private String nameRegexp = "(?:" + nameComponentRegexp + "/)*" + nameComponentRegexp;
+    private String nameRegexp = "(?:" + nameComponentRegexp + "/)*" + nameComponentRegexp;
 
-	// digestRegexp matches valid digests.
-	private String digestRegexp = "[A-Za-z][A-Za-z0-9]*(?:[-_+.][A-Za-z][A-Za-z0-9]*)*[:][[:xdigit:]]{32,}";
+    // digestRegexp matches valid digests.
+    private String digestRegexp = "[A-Za-z][A-Za-z0-9]*(?:[-_+.][A-Za-z][A-Za-z0-9]*)*[:][[:xdigit:]]{32,}";
 
-	// referenceRegexp is the full supported format of a reference. The
-	// regexp has capturing groups for name, tag, and digest components.
-	private String referenceRegexp = "^((?:" + hostnameRegexp + "/)?" + nameRegexp + ")(?:[:](" + tagRegexp +"))?(?:[@](" + digestRegexp + "))?$";
+    // referenceRegexp is the full supported format of a reference. The
+    // regexp has capturing groups for name, tag, and digest components.
+    private String referenceRegexp = "^((?:" + hostnameRegexp + "/)?" + nameRegexp + ")(?:[:](" + tagRegexp + "))?(?:[@](" + digestRegexp
+            + "))?$";
 
-	private Pattern IMAGE_PATTERN = Pattern.compile(referenceRegexp);
+    private Pattern IMAGE_PATTERN = Pattern.compile(referenceRegexp);
 
-	private static String ERROR_MSG = "Please provide an existing docker image in the format of [[<repo>/]<namespace>/]<name>[:<tag>].\n"
-			+ " The defaults are: repo=docker.io, namespace=library, tag=latest";
-	
-	@Override
-	public IStatus validate(Object value) {
-		if (!(value instanceof String)) {
-			return ValidationStatus.cancel(ERROR_MSG);
-		}
-		String name = (String) value; 
-		IStatus status = validateImageName(name);
-		if (status.isOK()) {
-			status = additionalValidation(name);
-		}
-		return status;
-	}
+    private static String ERROR_MSG = "Please provide an existing docker image in the format of [[<repo>/]<namespace>/]<name>[:<tag>].\n"
+            + " The defaults are: repo=docker.io, namespace=library, tag=latest";
 
-	public IStatus validateImageName(String repoName) {
-		String uri = repoName;
-		if (StringUtils.isEmpty(uri) || uri.contains("://")) {
-			return ValidationStatus.cancel(ERROR_MSG);
-		}
-		Matcher matcher = IMAGE_PATTERN.matcher(repoName);
-		if (!matcher.matches()) {
-			return ValidationStatus.cancel(ERROR_MSG);
-		}
-		return ValidationStatus.ok();
-	}
+    @Override
+    public IStatus validate(Object value) {
+        if (!(value instanceof String)) {
+            return ValidationStatus.cancel(ERROR_MSG);
+        }
+        String name = (String)value;
+        IStatus status = validateImageName(name);
+        if (status.isOK()) {
+            status = additionalValidation(name);
+        }
+        return status;
+    }
 
-	public IStatus additionalValidation(String repoName) {
-		return ValidationStatus.ok();
-	}
+    public IStatus validateImageName(String repoName) {
+        String uri = repoName;
+        if (StringUtils.isEmpty(uri) || uri.contains("://")) {
+            return ValidationStatus.cancel(ERROR_MSG);
+        }
+        Matcher matcher = IMAGE_PATTERN.matcher(repoName);
+        if (!matcher.matches()) {
+            return ValidationStatus.cancel(ERROR_MSG);
+        }
+        return ValidationStatus.ok();
+    }
+
+    public IStatus additionalValidation(String repoName) {
+        return ValidationStatus.ok();
+    }
 }

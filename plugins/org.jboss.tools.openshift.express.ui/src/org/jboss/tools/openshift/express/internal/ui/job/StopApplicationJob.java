@@ -19,16 +19,16 @@ import com.openshift.client.IApplication;
  */
 public class StopApplicationJob extends AbstratApplicationJob {
 
-	public StopApplicationJob(IApplication application) {
-		super(new ApplicationProvider(application), NLS.bind("Stopping application {0}", application.getName()));
-	}
+    public StopApplicationJob(IApplication application) {
+        super(new ApplicationProvider(application), NLS.bind("Stopping application {0}", application.getName()));
+    }
 
-	public StopApplicationJob(LoadApplicationJob applicationJob) {
-		super(new ApplicationProvider(applicationJob), NLS.bind("Stopping application {0}", applicationJob.getApplicationName()));
-	}
+    public StopApplicationJob(LoadApplicationJob applicationJob) {
+        super(new ApplicationProvider(applicationJob), NLS.bind("Stopping application {0}", applicationJob.getApplicationName()));
+    }
 
-	@Override
-	protected void doRun(IApplication application) {
-		application.stop();
-	}
+    @Override
+    protected void doRun(IApplication application) {
+        application.stop();
+    }
 }

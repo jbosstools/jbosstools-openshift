@@ -61,9 +61,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 	}
 
 	private String getDialogTitle(boolean hasProject) {
-		return hasProject ? 
-				OpenShiftUIMessages.ProjectDeletionDialogTitle
-				: OpenShiftUIMessages.ResourceDeletionDialogTitle;
+		return hasProject ? OpenShiftUIMessages.ProjectDeletionDialogTitle : OpenShiftUIMessages.ResourceDeletionDialogTitle;
 	}
 
 	private String getDialogMessage(IResourceWrapper<?, ?>[] resources, boolean hasProject) {
@@ -99,8 +97,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 			 * default
 			 */
 			@Override
-			protected boolean shouldCancel(IStatus lastCompletedJobResult, int numberOfFailedJobs,
-					int numberOfCanceledJobs) {
+			protected boolean shouldCancel(IStatus lastCompletedJobResult, int numberOfFailedJobs, int numberOfCanceledJobs) {
 				return false;
 			}
 

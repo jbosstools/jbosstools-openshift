@@ -25,45 +25,44 @@ import com.openshift.restclient.model.IResource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreationTimestampComparatorTest {
-	
-	private static final int AFTER = 1;
-	private static final int EQUAL = 0;
-	private CreationTimestampComparator comparator;
-	@Mock
-	private IResourceWrapper<IResource, ?> one;
-	@Mock
-	private IResourceWrapper<IResource, ?> two;
-	@Mock
-	private IResource projectOne;
-	@Mock
-	private IResource projectTwo;
 
-	@Before
-	public void setUp() throws Exception {
-		comparator = new CreationTimestampComparator();
-		when(one.getWrapped()).thenReturn(projectOne);
-		when(projectOne.getCreationTimeStamp()).thenReturn("2016-01-15T20:24:18Z");
-		when(two.getWrapped()).thenReturn(projectTwo);
-		when(projectTwo.getCreationTimeStamp()).thenReturn("2016-02-15T20:24:18Z");
-	}
-	
-	@Test
-	public void testResourcesAreSortedFromNewestToOldest() {
-		assertEquals(AFTER, comparator.compare(one, two));
-	}
+    private static final int AFTER = 1;
+    private static final int EQUAL = 0;
+    private CreationTimestampComparator comparator;
+    @Mock
+    private IResourceWrapper<IResource, ?> one;
+    @Mock
+    private IResourceWrapper<IResource, ?> two;
+    @Mock
+    private IResource projectOne;
+    @Mock
+    private IResource projectTwo;
 
-	@Test
-	public void testResourcesAreEqualWhenBothInvalid() {
-		when(projectTwo.getCreationTimeStamp()).thenReturn("aaa");
-		when(projectOne.getCreationTimeStamp()).thenReturn("");
-		assertEquals(EQUAL, comparator.compare(one, two));
-	}
-	
-	@Test
-	public void testResourcesAreSortedFromCorrectToInvalid() {
-		when(projectOne.getCreationTimeStamp()).thenReturn("abc");
-		assertEquals(AFTER, comparator.compare(one, two));
-	}
+    @Before
+    public void setUp() throws Exception {
+        comparator = new CreationTimestampComparator();
+        when(one.getWrapped()).thenReturn(projectOne);
+        when(projectOne.getCreationTimeStamp()).thenReturn("2016-01-15T20:24:18Z");
+        when(two.getWrapped()).thenReturn(projectTwo);
+        when(projectTwo.getCreationTimeStamp()).thenReturn("2016-02-15T20:24:18Z");
+    }
 
+    @Test
+    public void testResourcesAreSortedFromNewestToOldest() {
+        assertEquals(AFTER, comparator.compare(one, two));
+    }
+
+    @Test
+    public void testResourcesAreEqualWhenBothInvalid() {
+        when(projectTwo.getCreationTimeStamp()).thenReturn("aaa");
+        when(projectOne.getCreationTimeStamp()).thenReturn("");
+        assertEquals(EQUAL, comparator.compare(one, two));
+    }
+
+    @Test
+    public void testResourcesAreSortedFromCorrectToInvalid() {
+        when(projectOne.getCreationTimeStamp()).thenReturn("abc");
+        assertEquals(AFTER, comparator.compare(one, two));
+    }
 
 }

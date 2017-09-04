@@ -18,63 +18,61 @@ import com.openshift.client.cartridge.ICartridge;
 /**
  * @author Andre Dietisheim
  */
-public class CodeAnythingApplicationTemplate
-		extends CartridgeApplicationTemplate implements ICodeAnythingApplicationTemplate {
+public class CodeAnythingApplicationTemplate extends CartridgeApplicationTemplate implements ICodeAnythingApplicationTemplate {
 
-	public CodeAnythingApplicationTemplate() {
-		super(new CodeAnythingCartridge());
-	}
+    public CodeAnythingApplicationTemplate() {
+        super(new CodeAnythingCartridge());
+    }
 
-	@Override
-	public boolean isCodeAnything() {
-		return true;
-	}
+    @Override
+    public boolean isCodeAnything() {
+        return true;
+    }
 
-	@Override
-	public String getUrl() {
-		return getCartridgeUrl((CodeAnythingCartridge) getStandaloneCartridge());
-	}
-	
-	@Override
-	public void setUrl(String url) {
-		String oldUrl = getUrl();
-		((CodeAnythingCartridge) getStandaloneCartridge()).setUrlString(url);
-		firePropertyChange(PROPERTY_CARTRIDGE_URL, oldUrl, url);
-		firePropertyChange(PROPERTY_NAME, null, getName());
-	}
-	
-	@Override
-	public String getName() {
-		StringBuilder builder = new StringBuilder(super.getName());
-		String cartridgeUrl = getCartridgeUrl((CodeAnythingCartridge) getStandaloneCartridge());
-		if (!StringUtils.isEmpty(cartridgeUrl)) {
-			builder.append(" (").append(cartridgeUrl).append(')');
-		}
-		return builder.toString();
-	}
+    @Override
+    public String getUrl() {
+        return getCartridgeUrl((CodeAnythingCartridge)getStandaloneCartridge());
+    }
 
-	protected String getCartridgeUrl(CodeAnythingCartridge cartridge) {
-		if (cartridge == null
-				|| cartridge.getUrlString() == null) {
-			return null;
-		}
-		return cartridge.getUrlString();
-	}
+    @Override
+    public void setUrl(String url) {
+        String oldUrl = getUrl();
+        ((CodeAnythingCartridge)getStandaloneCartridge()).setUrlString(url);
+        firePropertyChange(PROPERTY_CARTRIDGE_URL, oldUrl, url);
+        firePropertyChange(PROPERTY_NAME, null, getName());
+    }
 
-	@Override
-	public boolean isMatching(String expression) {
-		if (super.isMatching(expression)) {
-			return true;
-		}
-		ICartridge cartridge = getStandaloneCartridge();
-		if (cartridge == null) {
-			return false;
-		}
+    @Override
+    public String getName() {
+        StringBuilder builder = new StringBuilder(super.getName());
+        String cartridgeUrl = getCartridgeUrl((CodeAnythingCartridge)getStandaloneCartridge());
+        if (!StringUtils.isEmpty(cartridgeUrl)) {
+            builder.append(" (").append(cartridgeUrl).append(')');
+        }
+        return builder.toString();
+    }
 
-		String lowerCaseExpression = StringUtils.toLowerCase(expression);
+    protected String getCartridgeUrl(CodeAnythingCartridge cartridge) {
+        if (cartridge == null || cartridge.getUrlString() == null) {
+            return null;
+        }
+        return cartridge.getUrlString();
+    }
 
-		return isMatching(lowerCaseExpression, StringUtils.toLowerCase(cartridge.getName()))
-				|| isMatching(lowerCaseExpression, StringUtils.toLowerCase(cartridge.getDisplayName()))
-				|| isMatching(lowerCaseExpression, StringUtils.toLowerCase(cartridge.getDescription()));
-	}
+    @Override
+    public boolean isMatching(String expression) {
+        if (super.isMatching(expression)) {
+            return true;
+        }
+        ICartridge cartridge = getStandaloneCartridge();
+        if (cartridge == null) {
+            return false;
+        }
+
+        String lowerCaseExpression = StringUtils.toLowerCase(expression);
+
+        return isMatching(lowerCaseExpression, StringUtils.toLowerCase(cartridge.getName()))
+                || isMatching(lowerCaseExpression, StringUtils.toLowerCase(cartridge.getDisplayName()))
+                || isMatching(lowerCaseExpression, StringUtils.toLowerCase(cartridge.getDescription()));
+    }
 }

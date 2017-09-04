@@ -29,43 +29,43 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ UIUtils.class, MessageDialog.class, WatchManager.class, ConnectionsRegistryUtil.class, NLS.class})
-@SuppressStaticInitializationFor({ "org.eclipse.swt.SWT", "org.eclipse.swt.widgets.Canvas",
-		"org.eclipse.swt.widgets.Shell", "org.eclipse.swt.widgets.Control" })
+@PrepareForTest({ UIUtils.class, MessageDialog.class, WatchManager.class, ConnectionsRegistryUtil.class, NLS.class })
+@SuppressStaticInitializationFor({ "org.eclipse.swt.SWT", "org.eclipse.swt.widgets.Canvas", "org.eclipse.swt.widgets.Shell",
+        "org.eclipse.swt.widgets.Control" })
 public class DeleteResourceHandlerTest {
 
-	@Test
-	public void testStopWatchProject() throws Exception {		
-		IProject project = mock(IProject.class);
-		when(project.getName()).thenReturn("ProjectName");
-		when(project.getKind()).thenReturn(ResourceKind.PROJECT);
-		
-		IProjectWrapper projectWrapper = mock(IProjectWrapper.class);
-		when(projectWrapper.getWrapped()).thenReturn(project);
-		
-		IResourceWrapper<?, ?>[] resourceWrappers = new IResourceWrapper<?, ?>[] { projectWrapper };
-		PowerMockito.mockStatic(UIUtils.class);
-		PowerMockito.when(UIUtils.getElements(any(), any())).thenReturn(resourceWrappers);
-		
-		PowerMockito.mockStatic(MessageDialog.class);
-		PowerMockito.when(MessageDialog.openConfirm(any(), any(), any())).thenReturn(true);
-		
-		WatchManager watchManager = mock(WatchManager.class);
-		PowerMockito.mockStatic(WatchManager.class);
-		PowerMockito.when(WatchManager.getInstance()).thenReturn(watchManager);
-		
-		Connection connection = mock(Connection.class);
-		PowerMockito.mockStatic(ConnectionsRegistryUtil.class);
-		PowerMockito.when(ConnectionsRegistryUtil.getConnectionFor(eq(project))).thenReturn(connection);
-		
-		PowerMockito.mockStatic(NLS.class);
-		PowerMockito.doNothing().when(NLS.class, "initializeMessages", new Object[] {
-				"org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages", OpenShiftUIMessages.class });
+    @Test
+    public void testStopWatchProject() throws Exception {
+        IProject project = mock(IProject.class);
+        when(project.getName()).thenReturn("ProjectName");
+        when(project.getKind()).thenReturn(ResourceKind.PROJECT);
 
-		DeleteResourceHandler handler = new DeleteResourceHandler();
-		handler.execute(new ExecutionEvent());
-		//TODO get rid of timeout here. Need to wait for callback from DeleteResourceJob for project
-		//difficult, because it's a job (runs async) and has overriden `doRun` method in OpenShiftJobs
-		verify(watchManager, timeout(200).times(1)).stopWatch(eq(project), eq(connection));
-	}
+        IProjectWrapper projectWrapper = mock(IProjectWrapper.class);
+        when(projectWrapper.getWrapped()).thenReturn(project);
+
+        IResourceWrapper<?, ?>[] resourceWrappers = new IResourceWrapper<?, ?>[] { projectWrapper };
+        PowerMockito.mockStatic(UIUtils.class);
+        PowerMockito.when(UIUtils.getElements(any(), any())).thenReturn(resourceWrappers);
+
+        PowerMockito.mockStatic(MessageDialog.class);
+        PowerMockito.when(MessageDialog.openConfirm(any(), any(), any())).thenReturn(true);
+
+        WatchManager watchManager = mock(WatchManager.class);
+        PowerMockito.mockStatic(WatchManager.class);
+        PowerMockito.when(WatchManager.getInstance()).thenReturn(watchManager);
+
+        Connection connection = mock(Connection.class);
+        PowerMockito.mockStatic(ConnectionsRegistryUtil.class);
+        PowerMockito.when(ConnectionsRegistryUtil.getConnectionFor(eq(project))).thenReturn(connection);
+
+        PowerMockito.mockStatic(NLS.class);
+        PowerMockito.doNothing().when(NLS.class, "initializeMessages",
+                new Object[] { "org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages", OpenShiftUIMessages.class });
+
+        DeleteResourceHandler handler = new DeleteResourceHandler();
+        handler.execute(new ExecutionEvent());
+        //TODO get rid of timeout here. Need to wait for callback from DeleteResourceJob for project
+        //difficult, because it's a job (runs async) and has overriden `doRun` method in OpenShiftJobs
+        verify(watchManager, timeout(200).times(1)).stopWatch(eq(project), eq(connection));
+    }
 }

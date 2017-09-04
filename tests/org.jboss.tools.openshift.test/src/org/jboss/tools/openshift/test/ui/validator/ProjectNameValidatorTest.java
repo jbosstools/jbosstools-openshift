@@ -20,76 +20,76 @@ import org.junit.Test;
  */
 public class ProjectNameValidatorTest extends AbstractValidatorTest {
 
-	public ProjectNameValidatorTest() {
-		super(new ProjectNameValidator("default message", Arrays.asList("nope","back off")));
-	}
+    public ProjectNameValidatorTest() {
+        super(new ProjectNameValidator("default message", Arrays.asList("nope", "back off")));
+    }
 
-	@Test
-	public void singleDotNameShouldNotBeAllowed() {
-		assertFailure(".");
-	}
+    @Test
+    public void singleDotNameShouldNotBeAllowed() {
+        assertFailure(".");
+    }
 
-	@Test
-	public void doubleDotNameShouldNotBeAllowed() {
-		assertFailure(".,");
-	}
+    @Test
+    public void doubleDotNameShouldNotBeAllowed() {
+        assertFailure(".,");
+    }
 
-	@Test
-	public void slashShouldNotBeAllowed() {
-		assertFailure("abc\\def");
-	}
+    @Test
+    public void slashShouldNotBeAllowed() {
+        assertFailure("abc\\def");
+    }
 
-	@Test
-	public void percentShouldNotBeAllowed() {
-		assertFailure("abcdef%");
-	}
+    @Test
+    public void percentShouldNotBeAllowed() {
+        assertFailure("abcdef%");
+    }
 
-	@Test
-	public void lengthLessThan2ShouldNotBeAllowed() {
-		assertFailure("a");
-	}
+    @Test
+    public void lengthLessThan2ShouldNotBeAllowed() {
+        assertFailure("a");
+    }
 
-	@Test
-	public void validProjectNameShouldBeValid() {
-		assertPass("projectname");
-	}
+    @Test
+    public void validProjectNameShouldBeValid() {
+        assertPass("projectname");
+    }
 
-	public void emptyValueShouldBeInvalid() {
-		assertCancel("");
-	}
+    public void emptyValueShouldBeInvalid() {
+        assertCancel("");
+    }
 
-	public void valueWithSlashesShouldBeInValid() {
-		// Should be invalid, as opposed to regular LabelValueValidator behavior
-		assertFailure("abcd.efg/a23");
-	}
+    public void valueWithSlashesShouldBeInValid() {
+        // Should be invalid, as opposed to regular LabelValueValidator behavior
+        assertFailure("abcd.efg/a23");
+    }
 
-	public void valueWithDotsDashesAndUnderScoresShouldBeValid() {
-		// Should be invalid, as opposed to regular LabelValueValidator behavior
-		assertFailure("abcd.efg_k-123");
-	}
+    public void valueWithDotsDashesAndUnderScoresShouldBeValid() {
+        // Should be invalid, as opposed to regular LabelValueValidator behavior
+        assertFailure("abcd.efg_k-123");
+    }
 
-	public void nullValueShouldBeInvalid() {
-		assertFailure(null);
-	}
+    public void nullValueShouldBeInvalid() {
+        assertFailure(null);
+    }
 
-	@Test
-	public void startsWithDashShouldNotBeAllowed() {
-		assertFailure("-abc");
-	}
+    @Test
+    public void startsWithDashShouldNotBeAllowed() {
+        assertFailure("-abc");
+    }
 
-	@Test
-	public void endsWithDashShouldNotBeAllowed() {
-		assertFailure("abc-");
-	}
+    @Test
+    public void endsWithDashShouldNotBeAllowed() {
+        assertFailure("abc-");
+    }
 
-	@Test
-	public void upperCaseCharactersShouldNotBeAllowed() {
-		assertFailure("aBc");
-	}
+    @Test
+    public void upperCaseCharactersShouldNotBeAllowed() {
+        assertFailure("aBc");
+    }
 
-	@Test
-	public void reservedNamesShouldNotBeAllowed() {
-		assertFailure("nope");
-		assertFailure("back off");
-	}
+    @Test
+    public void reservedNamesShouldNotBeAllowed() {
+        assertFailure("nope");
+        assertFailure("back off");
+    }
 }

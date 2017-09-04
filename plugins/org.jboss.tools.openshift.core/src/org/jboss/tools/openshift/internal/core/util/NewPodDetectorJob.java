@@ -40,97 +40,89 @@ import com.openshift.restclient.model.IReplicationController;
  */
 public class NewPodDetectorJob extends Job {
 
-	/**
-	 * For testing purposes
-	 */
-	public static final String DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY = "deployment.config.listener.job.timeout";
-	//TODO get timeout value from some settings
-	public static final int TIMEOUT = Integer.getInteger(DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, 600_000);
-	private static final int SLEEP_DELAY = 100;
-	private static final String POD_STATE_RUNNING = "Running";
-	
-	private IDeploymentConfig dc;
-	private IPod pod;
-	private Collection<String> oldPods = Collections.emptySet();
+    /**
+     * For testing purposes
+     */
+    public static final String DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY = "deployment.config.listener.job.timeout";
+    //TODO get timeout value from some settings
+    public static final int TIMEOUT = Integer.getInteger(DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, 600_000);
+    private static final int SLEEP_DELAY = 100;
+    private static final String POD_STATE_RUNNING = "Running";
 
-	private IConnectionsRegistryListener connectionsRegistryListener = new ConnectionsRegistryAdapter() {
-		@Override
-		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-			if (pod != null) {
-				// we're done already
-				return;
-			}
+    private IDeploymentConfig dc;
+    private IPod pod;
+    private Collection<String> oldPods = Collections.emptySet();
 
-			if (newValue instanceof IDeploymentConfig 
-					&& !dc.equals(oldValue)) {
-				dc = (IDeploymentConfig) newValue;
-				return;
-			}
+    private IConnectionsRegistryListener connectionsRegistryListener = new ConnectionsRegistryAdapter() {
+        @Override
+        public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+            if (pod != null) {
+                // we're done already
+                return;
+            }
 
-			if (newValue instanceof IPod) {
-				IPod notifiedPod = (IPod) newValue;
-				if (isNewRunningRuntimePod(notifiedPod)) {
-					// store new & running runtime pod for job to stop waiting
-					pod = notifiedPod;
-			    }
-			}
-		}
+            if (newValue instanceof IDeploymentConfig && !dc.equals(oldValue)) {
+                dc = (IDeploymentConfig)newValue;
+                return;
+            }
 
-		private boolean isNewRunningRuntimePod(IPod pod) {
-			return ResourceUtils.isRuntimePod(pod)
-					&& !oldPods.contains(pod.getName())
-					&& POD_STATE_RUNNING.equals(pod.getStatus()) 
-					&& ResourceUtils.areRelated(pod, dc);
-		}
-	};
+            if (newValue instanceof IPod) {
+                IPod notifiedPod = (IPod)newValue;
+                if (isNewRunningRuntimePod(notifiedPod)) {
+                    // store new & running runtime pod for job to stop waiting
+                    pod = notifiedPod;
+                }
+            }
+        }
 
-	public NewPodDetectorJob(IDeploymentConfig dc) {
-		super("Waiting for OpenShift Pod redeployment");
-		this.dc = dc;
-	}
+        private boolean isNewRunningRuntimePod(IPod pod) {
+            return ResourceUtils.isRuntimePod(pod) && !oldPods.contains(pod.getName()) && POD_STATE_RUNNING.equals(pod.getStatus())
+                    && ResourceUtils.areRelated(pod, dc);
+        }
+    };
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		this.oldPods = getOldPods(dc);
-		try {
-			ConnectionsRegistrySingleton.getInstance().addListener(connectionsRegistryListener);
-			waitForNewPod(monitor);
-			return pod == null ? getTimeOutStatus() : Status.OK_STATUS;
-		} finally {
-			ConnectionsRegistrySingleton.getInstance().removeListener(connectionsRegistryListener);
-		}
-	}
+    public NewPodDetectorJob(IDeploymentConfig dc) {
+        super("Waiting for OpenShift Pod redeployment");
+        this.dc = dc;
+    }
 
-	private Collection<String> getOldPods(IReplicationController rc) {
-		Connection connection = ConnectionsRegistryUtil.getConnectionFor(rc);
-		List<IPod> allPods = connection.getResources(ResourceKind.POD, rc.getNamespace());
-		return ResourceUtils.getPodsFor(rc, allPods).stream()
-			.filter(pod -> ResourceUtils.isRuntimePod(pod))
-			.map(p -> p.getName())
-			.collect(Collectors.toList());
-	}
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+        this.oldPods = getOldPods(dc);
+        try {
+            ConnectionsRegistrySingleton.getInstance().addListener(connectionsRegistryListener);
+            waitForNewPod(monitor);
+            return pod == null ? getTimeOutStatus() : Status.OK_STATUS;
+        } finally {
+            ConnectionsRegistrySingleton.getInstance().removeListener(connectionsRegistryListener);
+        }
+    }
 
-	private void waitForNewPod(IProgressMonitor monitor) {
-		long elapsed = 0;
-		while (pod == null
-				&& !monitor.isCanceled() 
-				&& elapsed < TIMEOUT) {
-			try {
-				Thread.sleep(SLEEP_DELAY);
-				monitor.worked(1);
-				elapsed += SLEEP_DELAY;
-			} catch (InterruptedException e) {
-				// swallow intentionally
-			}
-		}
-	}
+    private Collection<String> getOldPods(IReplicationController rc) {
+        Connection connection = ConnectionsRegistryUtil.getConnectionFor(rc);
+        List<IPod> allPods = connection.getResources(ResourceKind.POD, rc.getNamespace());
+        return ResourceUtils.getPodsFor(rc, allPods).stream().filter(pod -> ResourceUtils.isRuntimePod(pod)).map(p -> p.getName())
+                .collect(Collectors.toList());
+    }
 
-	public IStatus getTimeOutStatus() {
-		return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, 
-				"Failed to detect new deployed Pod for " + dc.getName());
-	}
-	
-	public IPod getPod() {
-		return pod;
-	}
+    private void waitForNewPod(IProgressMonitor monitor) {
+        long elapsed = 0;
+        while (pod == null && !monitor.isCanceled() && elapsed < TIMEOUT) {
+            try {
+                Thread.sleep(SLEEP_DELAY);
+                monitor.worked(1);
+                elapsed += SLEEP_DELAY;
+            } catch (InterruptedException e) {
+                // swallow intentionally
+            }
+        }
+    }
+
+    public IStatus getTimeOutStatus() {
+        return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, "Failed to detect new deployed Pod for " + dc.getName());
+    }
+
+    public IPod getPod() {
+        return pod;
+    }
 }

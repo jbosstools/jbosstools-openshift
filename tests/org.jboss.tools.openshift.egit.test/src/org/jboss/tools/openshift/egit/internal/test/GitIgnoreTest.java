@@ -32,152 +32,151 @@ import org.junit.Test;
  */
 public class GitIgnoreTest {
 
-	public static final String NL = System.getProperty("line.separator");
+    public static final String NL = System.getProperty("line.separator");
 
-	private IFile gitIgnoreFile;
+    private IFile gitIgnoreFile;
 
-	private IProject project;
+    private IProject project;
 
-	public void setUp() throws CoreException {
-		this.project = createRandomProject();
-		this.gitIgnoreFile = createGitFile(project, "");
-	}
+    public void setUp() throws CoreException {
+        this.project = createRandomProject();
+        this.gitIgnoreFile = createGitFile(project, "");
+    }
 
-	public void tearDown() {
-		silentlyDelete(project);
-	}
+    public void tearDown() {
+        silentlyDelete(project);
+    }
 
-	@Test
-	public void canAddEntries() throws CoreException, IOException {
-		GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
-		assertTrue(gitIgnore.size() == 0);
-		String entry = "dummy";
-		gitIgnore.add(entry);
-		assertTrue(gitIgnore.size() == 1);
-		assertTrue(gitIgnore.contains(entry));
-	}
+    @Test
+    public void canAddEntries() throws CoreException, IOException {
+        GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
+        assertTrue(gitIgnore.size() == 0);
+        String entry = "dummy";
+        gitIgnore.add(entry);
+        assertTrue(gitIgnore.size() == 1);
+        assertTrue(gitIgnore.contains(entry));
+    }
 
-	@Test
-	public void canParseExistingEntries() throws CoreException, IOException {
-		IFile gitIgnoreFile = null;
-		IProject project = null;
-		try {
-			project = createRandomProject();
-			gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
-			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
-			assertTrue(gitIgnore.size() == 3);
-			assertTrue(gitIgnore.contains("redhat"));
-			assertTrue(gitIgnore.contains("jboss"));
-			assertTrue(gitIgnore.contains("tools"));
-		} finally {
-			silentlyDelete(project);
-		}
-	}
+    @Test
+    public void canParseExistingEntries() throws CoreException, IOException {
+        IFile gitIgnoreFile = null;
+        IProject project = null;
+        try {
+            project = createRandomProject();
+            gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
+            GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
+            assertTrue(gitIgnore.size() == 3);
+            assertTrue(gitIgnore.contains("redhat"));
+            assertTrue(gitIgnore.contains("jboss"));
+            assertTrue(gitIgnore.contains("tools"));
+        } finally {
+            silentlyDelete(project);
+        }
+    }
 
-	@Test
-	public void entryIsNotAddedTwice() throws CoreException, IOException {
-		IFile gitIgnoreFile = null;
-		IProject project = null;
-		try {
-			project = createRandomProject();
-			gitIgnoreFile = createGitFile(project, "redhat");
-			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
-			assertTrue(gitIgnore.size() == 1);
-			assertTrue(gitIgnore.contains("redhat"));
-			gitIgnore.add("redhat");
-			assertTrue(gitIgnore.size() == 1);
-		} finally {
-			silentlyDelete(project);
-		}
-	}
-	
-	@Test
-	public void writingDoesNotAlterOrdering() throws CoreException, IOException {
-		IFile gitIgnoreFile = null;
-		IProject project = null;
-		try {
-			project = createRandomProject();
-			gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
-			String entries = FileUtil.readStream(gitIgnoreFile);
-			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
-			gitIgnore.write(null);
+    @Test
+    public void entryIsNotAddedTwice() throws CoreException, IOException {
+        IFile gitIgnoreFile = null;
+        IProject project = null;
+        try {
+            project = createRandomProject();
+            gitIgnoreFile = createGitFile(project, "redhat");
+            GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
+            assertTrue(gitIgnore.size() == 1);
+            assertTrue(gitIgnore.contains("redhat"));
+            gitIgnore.add("redhat");
+            assertTrue(gitIgnore.size() == 1);
+        } finally {
+            silentlyDelete(project);
+        }
+    }
 
-			String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
-			assertEquals(entries, entriesAfterWrite);
-			
-		} finally {
-			silentlyDelete(project);
-		}
-	}
+    @Test
+    public void writingDoesNotAlterOrdering() throws CoreException, IOException {
+        IFile gitIgnoreFile = null;
+        IProject project = null;
+        try {
+            project = createRandomProject();
+            gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
+            String entries = FileUtil.readStream(gitIgnoreFile);
+            GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
+            gitIgnore.write(null);
 
-	@Test
-	public void newEntriesAreAddedToTheEnd() throws CoreException, IOException {
-		IFile gitIgnoreFile = null;
-		IProject project = null;
-		try {
-			project = createRandomProject();
-			gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
-			String entries = FileUtil.readStream(gitIgnoreFile);
-			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
-			gitIgnore.add("adietish");
-			gitIgnore.write(null);
+            String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
+            assertEquals(entries, entriesAfterWrite);
 
-			String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
-			assertFalse(entries.equals(entriesAfterWrite));
-			assertTrue(entriesAfterWrite.indexOf(entries) == 0);
-		} finally {
-			silentlyDelete(project);
-		}
-	}
+        } finally {
+            silentlyDelete(project);
+        }
+    }
 
-	@Test
-	public void addingExistingEntryDoesNotMoveItToTheEnd() throws CoreException, IOException {
-		IFile gitIgnoreFile = null;
-		IProject project = null;
-		try {
-			project = createRandomProject();
-			gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
-			String entries = FileUtil.readStream(gitIgnoreFile);
-			GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
-			gitIgnore.add("jboss");
-			gitIgnore.write(null);
+    @Test
+    public void newEntriesAreAddedToTheEnd() throws CoreException, IOException {
+        IFile gitIgnoreFile = null;
+        IProject project = null;
+        try {
+            project = createRandomProject();
+            gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
+            String entries = FileUtil.readStream(gitIgnoreFile);
+            GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
+            gitIgnore.add("adietish");
+            gitIgnore.write(null);
 
-			String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
-			assertEquals(entries, entriesAfterWrite);
-		} finally {
-			silentlyDelete(project);
-		}
-	}
+            String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
+            assertFalse(entries.equals(entriesAfterWrite));
+            assertTrue(entriesAfterWrite.indexOf(entries) == 0);
+        } finally {
+            silentlyDelete(project);
+        }
+    }
 
-	private IFile createGitFile(IProject project, String... gitIgnoreEntries) throws CoreException {
-		IFile gitFile = project.getFile(Constants.GITIGNORE_FILENAME);
-		StringBuilder builder = new StringBuilder();
-		for (String entry : gitIgnoreEntries) {
-			builder.append(entry);
-			builder.append(NL);
-		}
-		gitFile.create(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, null);
-		return gitFile;
-	}
+    @Test
+    public void addingExistingEntryDoesNotMoveItToTheEnd() throws CoreException, IOException {
+        IFile gitIgnoreFile = null;
+        IProject project = null;
+        try {
+            project = createRandomProject();
+            gitIgnoreFile = createGitFile(project, "redhat", "jboss", "tools");
+            String entries = FileUtil.readStream(gitIgnoreFile);
+            GitIgnore gitIgnore = new GitIgnore(gitIgnoreFile);
+            gitIgnore.add("jboss");
+            gitIgnore.write(null);
 
-	private IProject createRandomProject() throws CoreException {
-		String projectName = String.valueOf(System.currentTimeMillis());
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		project.create(null);
-		project.open(null);
-		return project;
-	}
+            String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
+            assertEquals(entries, entriesAfterWrite);
+        } finally {
+            silentlyDelete(project);
+        }
+    }
 
-	private void silentlyDelete(IProject project) {
-		if (project == null
-				|| !project.isAccessible()) {
-			return;
-		}
-		try {
-			project.close(null);
-			project.delete(true, null);
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
-	}
+    private IFile createGitFile(IProject project, String... gitIgnoreEntries) throws CoreException {
+        IFile gitFile = project.getFile(Constants.GITIGNORE_FILENAME);
+        StringBuilder builder = new StringBuilder();
+        for (String entry : gitIgnoreEntries) {
+            builder.append(entry);
+            builder.append(NL);
+        }
+        gitFile.create(new ByteArrayInputStream(builder.toString().getBytes()), IResource.FORCE, null);
+        return gitFile;
+    }
+
+    private IProject createRandomProject() throws CoreException {
+        String projectName = String.valueOf(System.currentTimeMillis());
+        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+        project.create(null);
+        project.open(null);
+        return project;
+    }
+
+    private void silentlyDelete(IProject project) {
+        if (project == null || !project.isAccessible()) {
+            return;
+        }
+        try {
+            project.close(null);
+            project.delete(true, null);
+        } catch (CoreException e) {
+            e.printStackTrace();
+        }
+    }
 }

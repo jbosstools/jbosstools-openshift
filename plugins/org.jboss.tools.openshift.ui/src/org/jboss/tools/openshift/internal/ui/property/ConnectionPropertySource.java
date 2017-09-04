@@ -25,119 +25,120 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 
 public class ConnectionPropertySource implements IPropertySource {
-	
-	private static final String HOST = "host";
-	private static final String USERNAME = "username";
-	private static final String OPENSHIFT_MASTER_VERSION = "openshift-version";
-	private static final String KUBERNETES_MASTER_VERSION = "kubernetes-version";
-	private IConnection connection;
 
-	private ConnectionListener listener = new ConnectionListener();
+    private static final String HOST = "host";
+    private static final String USERNAME = "username";
+    private static final String OPENSHIFT_MASTER_VERSION = "openshift-version";
+    private static final String KUBERNETES_MASTER_VERSION = "kubernetes-version";
+    private IConnection connection;
 
-	class ConnectionListener implements IConnectionsRegistryListener {
+    private ConnectionListener listener = new ConnectionListener();
 
-		@Override
-		public void connectionAdded(IConnection connection) {
-		}
+    class ConnectionListener implements IConnectionsRegistryListener {
 
-		@Override
-		public void connectionRemoved(IConnection connection) {
-		}
+        @Override
+        public void connectionAdded(IConnection connection) {
+        }
 
-		@Override
-		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-			if(connection.equals(ConnectionPropertySource.this.connection) && IOpenShiftConnection.PROPERTY_EXTENDED_PROPERTIES.equals(property)) {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						PropertySheet sh = OpenShiftUIUtils.getPropertySheet();
-						if(sh != null) {
-							OpenShiftUIUtils.refreshPropertySheetPage(sh);
-						}
-					}
-				});
-			}
-		}
-	}
+        @Override
+        public void connectionRemoved(IConnection connection) {
+        }
 
-	public ConnectionPropertySource(IConnection connection) {
-		this.connection = connection;
-		ConnectionsRegistrySingleton.getInstance().addListener(listener);
-	}
+        @Override
+        public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
+            if (connection.equals(ConnectionPropertySource.this.connection)
+                    && IOpenShiftConnection.PROPERTY_EXTENDED_PROPERTIES.equals(property)) {
+                Display.getDefault().asyncExec(new Runnable() {
+                    @Override
+                    public void run() {
+                        PropertySheet sh = OpenShiftUIUtils.getPropertySheet();
+                        if (sh != null) {
+                            OpenShiftUIUtils.refreshPropertySheetPage(sh);
+                        }
+                    }
+                });
+            }
+        }
+    }
 
-	@Override
-	public Object getEditableValue() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public ConnectionPropertySource(IConnection connection) {
+        this.connection = connection;
+        ConnectionsRegistrySingleton.getInstance().addListener(listener);
+    }
 
-	@Override
-	public IPropertyDescriptor[] getPropertyDescriptors() {
-		List<IPropertyDescriptor>  descriptors = new ArrayList<>();
-		descriptors.add(new UneditablePropertyDescriptor(HOST, "Host"));
-		descriptors.add(new UneditablePropertyDescriptor(USERNAME, "User Name"));
-		descriptors.add(new UneditablePropertyDescriptor(OPENSHIFT_MASTER_VERSION, "OpenShift Master Version"));
-		descriptors.add(new UneditablePropertyDescriptor(KUBERNETES_MASTER_VERSION, "Kubernetes Master Version"));
-		if(connection instanceof IOpenShiftConnection) {
-			Set<String> set = new TreeSet<>(((IOpenShiftConnection)connection).getExtendedProperties().keySet());
-			for (String name: set) {
-				descriptors.add(new UneditablePropertyDescriptor(name, toVisualPropertyName(name)));
-			}
-		}
-		return descriptors.toArray(new IPropertyDescriptor[descriptors.size()]);
-	}
+    @Override
+    public Object getEditableValue() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	private String toVisualPropertyName(String name) {
-		String label = ICommonAttributes.EXTENDED_PROPERTY_LABELS.get(name);
-		if(label != null) {
-			return label;
-		}
-		if(name.length() > 1) {
-			return name.substring(0, 1).toUpperCase() + name.substring(1);
-		}
-		return name;
-	}
+    @Override
+    public IPropertyDescriptor[] getPropertyDescriptors() {
+        List<IPropertyDescriptor> descriptors = new ArrayList<>();
+        descriptors.add(new UneditablePropertyDescriptor(HOST, "Host"));
+        descriptors.add(new UneditablePropertyDescriptor(USERNAME, "User Name"));
+        descriptors.add(new UneditablePropertyDescriptor(OPENSHIFT_MASTER_VERSION, "OpenShift Master Version"));
+        descriptors.add(new UneditablePropertyDescriptor(KUBERNETES_MASTER_VERSION, "Kubernetes Master Version"));
+        if (connection instanceof IOpenShiftConnection) {
+            Set<String> set = new TreeSet<>(((IOpenShiftConnection)connection).getExtendedProperties().keySet());
+            for (String name : set) {
+                descriptors.add(new UneditablePropertyDescriptor(name, toVisualPropertyName(name)));
+            }
+        }
+        return descriptors.toArray(new IPropertyDescriptor[descriptors.size()]);
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		if (id == null) {
-			return null;
-		}
-		if (HOST.equals(id)){
-			return this.connection.toString();
-		}
-		if (USERNAME.equals(id)) {
-			return this.connection.getUsername();
-		}
-		if(connection instanceof IOpenShiftConnection) {
-			IOpenShiftConnection openshiftConnection = (IOpenShiftConnection)this.connection;
-			if(OPENSHIFT_MASTER_VERSION.equals(id)) {
-				return openshiftConnection.getOpenShiftMasterVersion();
-			}
-			if(KUBERNETES_MASTER_VERSION.equals(id)) {
-				return openshiftConnection.getKubernetesMasterVersion();
-			}
-			Object result = openshiftConnection.getExtendedProperties().get(id);
-			return result == null ? "" : result.toString();
-		}
-		return null;
-	}
+    private String toVisualPropertyName(String name) {
+        String label = ICommonAttributes.EXTENDED_PROPERTY_LABELS.get(name);
+        if (label != null) {
+            return label;
+        }
+        if (name.length() > 1) {
+            return name.substring(0, 1).toUpperCase() + name.substring(1);
+        }
+        return name;
+    }
 
-	@Override
-	public boolean isPropertySet(Object id) {
-		return false;
-	}
+    @Override
+    public Object getPropertyValue(Object id) {
+        if (id == null) {
+            return null;
+        }
+        if (HOST.equals(id)) {
+            return this.connection.toString();
+        }
+        if (USERNAME.equals(id)) {
+            return this.connection.getUsername();
+        }
+        if (connection instanceof IOpenShiftConnection) {
+            IOpenShiftConnection openshiftConnection = (IOpenShiftConnection)this.connection;
+            if (OPENSHIFT_MASTER_VERSION.equals(id)) {
+                return openshiftConnection.getOpenShiftMasterVersion();
+            }
+            if (KUBERNETES_MASTER_VERSION.equals(id)) {
+                return openshiftConnection.getKubernetesMasterVersion();
+            }
+            Object result = openshiftConnection.getExtendedProperties().get(id);
+            return result == null ? "" : result.toString();
+        }
+        return null;
+    }
 
-	@Override
-	public void resetPropertyValue(Object id) {
-	}
+    @Override
+    public boolean isPropertySet(Object id) {
+        return false;
+    }
 
-	@Override
-	public void setPropertyValue(Object id	, Object value) {
-		
-	}
+    @Override
+    public void resetPropertyValue(Object id) {
+    }
 
-	public void dispose() {
-		ConnectionsRegistrySingleton.getInstance().removeListener(listener);
-	}
+    @Override
+    public void setPropertyValue(Object id, Object value) {
+
+    }
+
+    public void dispose() {
+        ConnectionsRegistrySingleton.getInstance().removeListener(listener);
+    }
 }

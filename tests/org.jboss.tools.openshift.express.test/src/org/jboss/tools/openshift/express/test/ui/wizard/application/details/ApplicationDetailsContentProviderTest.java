@@ -29,23 +29,22 @@ import com.openshift.client.IApplication;
  */
 public class ApplicationDetailsContentProviderTest {
 
-	@Test
-	public void testGetElements() {
-		IApplication app = new ApplicationDetailsFake();
-		ApplicationDetailsContentProvider provider = new ApplicationDetailsContentProvider();
+    @Test
+    public void testGetElements() {
+        IApplication app = new ApplicationDetailsFake();
+        ApplicationDetailsContentProvider provider = new ApplicationDetailsContentProvider();
 
-		String[] exp = { "Name", "Public URL", "Type", "Created on", "UUID", "Git URL", "SSH ExpressConnection", "Scalable",
-				"Cartridges" };
-		assertApplicationDetails(exp, provider.getElements(app));
-	}
+        String[] exp = { "Name", "Public URL", "Type", "Created on", "UUID", "Git URL", "SSH ExpressConnection", "Scalable", "Cartridges" };
+        assertApplicationDetails(exp, provider.getElements(app));
+    }
 
-	private void assertApplicationDetails(String[] exp, Object[] elements) {
-		IProperty[] props = Arrays.copyOf(elements, elements.length, IProperty[].class);
-		List<String> actual = new ArrayList<>(props.length);
-		for (int i = 0; i < props.length; i++) {
-			actual.add(props[i].getName());
-		}
-		assertArrayEquals("Exp. the details to show the visible properties", exp, actual.toArray());
-	}
+    private void assertApplicationDetails(String[] exp, Object[] elements) {
+        IProperty[] props = Arrays.copyOf(elements, elements.length, IProperty[].class);
+        List<String> actual = new ArrayList<>(props.length);
+        for (int i = 0; i < props.length; i++) {
+            actual.add(props[i].getName());
+        }
+        assertArrayEquals("Exp. the details to show the visible properties", exp, actual.toArray());
+    }
 
 }

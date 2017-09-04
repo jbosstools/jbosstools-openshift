@@ -67,555 +67,493 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class ServerSettingsWizardPageModel extends ServerResourceViewModel implements IResourceChangeListener {
 
-	public static final String PROPERTY_DEPLOYPROJECT = "deployProject";
-	public static final String PROPERTY_PROJECTS = "projects";
-	public static final String PROPERTY_SOURCE_PATH = "sourcePath";
-	public static final String PROPERTY_POD_PATH = "podPath";
-	public static final String PROPERTY_USE_INFERRED_POD_PATH = "useInferredPodPath";
+    public static final String PROPERTY_DEPLOYPROJECT = "deployProject";
+    public static final String PROPERTY_PROJECTS = "projects";
+    public static final String PROPERTY_SOURCE_PATH = "sourcePath";
+    public static final String PROPERTY_POD_PATH = "podPath";
+    public static final String PROPERTY_USE_INFERRED_POD_PATH = "useInferredPodPath";
 
-	public static final String PROPERTY_SELECT_DEFAULT_ROUTE = "selectDefaultRoute";
-	public static final String PROPERTY_ROUTE = "route";
-	public static final String PROPERTY_ROUTES = "routes";
-	public static final String PROPERTY_USE_IMAGE_DEVMODE_KEY = "useImageDevmodeKey";
-	public static final String PROPERTY_DEVMODE_KEY = "devmodeKey";
-	public static final String PROPERTY_USE_IMAGE_DEBUG_PORT_KEY = "useImageDebugPortKey";
-	public static final String PROPERTY_DEBUG_PORT_KEY = "debugPortKey";
-	public static final String PROPERTY_DEBUG_PORT_VALUE = "debugPortValue";
-	public static final String PROPERTY_OC_BINARY_STATUS = "OCBinaryStatus";
+    public static final String PROPERTY_SELECT_DEFAULT_ROUTE = "selectDefaultRoute";
+    public static final String PROPERTY_ROUTE = "route";
+    public static final String PROPERTY_ROUTES = "routes";
+    public static final String PROPERTY_USE_IMAGE_DEVMODE_KEY = "useImageDevmodeKey";
+    public static final String PROPERTY_DEVMODE_KEY = "devmodeKey";
+    public static final String PROPERTY_USE_IMAGE_DEBUG_PORT_KEY = "useImageDebugPortKey";
+    public static final String PROPERTY_DEBUG_PORT_KEY = "debugPortKey";
+    public static final String PROPERTY_DEBUG_PORT_VALUE = "debugPortValue";
+    public static final String PROPERTY_OC_BINARY_STATUS = "OCBinaryStatus";
 
-	private static final String PROFILE_DETECTOR_EP_ID = "org.jboss.tools.openshift.core.serverAdapterProfileDetector";
+    private static final String PROFILE_DETECTOR_EP_ID = "org.jboss.tools.openshift.core.serverAdapterProfileDetector";
 
-	protected org.eclipse.core.resources.IProject deployProject;
-	protected List<org.eclipse.core.resources.IProject> projects = new ArrayList<>();
-	private String sourcePath;
-	protected String podPath;
-	protected String inferredPodPath = null;
-	private IServerWorkingCopy server;
-	private boolean selectDefaultRoute = false;
-	private IRoute route;
-	private Map<IProject, List<IRoute>> routesByProject = new HashMap<>();
-	private List<IRoute> serviceRoutes = new ArrayList<>();
-	private boolean isLoaded = false;
-	private Map<IProject, List<IBuildConfig>> buildConfigsByProject;
-	private boolean useInferredPodPath = true;
-	private IStatus ocBinaryStatus = Status.OK_STATUS;
-	private boolean useImageDevmodeKey = true;
-	private String devmodeKey;
-	private boolean useImageDebugPortKey = true;
-	private String debugPortKey;
-	private String debugPortValue;
+    protected org.eclipse.core.resources.IProject deployProject;
+    protected List<org.eclipse.core.resources.IProject> projects = new ArrayList<>();
+    private String sourcePath;
+    protected String podPath;
+    protected String inferredPodPath = null;
+    private IServerWorkingCopy server;
+    private boolean selectDefaultRoute = false;
+    private IRoute route;
+    private Map<IProject, List<IRoute>> routesByProject = new HashMap<>();
+    private List<IRoute> serviceRoutes = new ArrayList<>();
+    private boolean isLoaded = false;
+    private Map<IProject, List<IBuildConfig>> buildConfigsByProject;
+    private boolean useInferredPodPath = true;
+    private IStatus ocBinaryStatus = Status.OK_STATUS;
+    private boolean useImageDevmodeKey = true;
+    private String devmodeKey;
+    private boolean useImageDebugPortKey = true;
+    private String debugPortKey;
+    private String debugPortValue;
 
-	protected ServerSettingsWizardPageModel(IResource resource, IRoute route, org.eclipse.core.resources.IProject deployProject, 
-			Connection connection, IServerWorkingCopy server) {
-		this(resource, route, deployProject, connection, server, Status.OK_STATUS);
-	}
+    protected ServerSettingsWizardPageModel(IResource resource, IRoute route, org.eclipse.core.resources.IProject deployProject,
+            Connection connection, IServerWorkingCopy server) {
+        this(resource, route, deployProject, connection, server, Status.OK_STATUS);
+    }
 
-	public ServerSettingsWizardPageModel(IResource resource, IRoute route, org.eclipse.core.resources.IProject deployProject, 
-			Connection connection, IServerWorkingCopy server, IStatus ocBinaryStatus) {
-		super(resource, connection);
-		this.route = route;
-		this.deployProject = deployProject;
-		this.server = server;
-		this.ocBinaryStatus = ocBinaryStatus;
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
-	}
+    public ServerSettingsWizardPageModel(IResource resource, IRoute route, org.eclipse.core.resources.IProject deployProject,
+            Connection connection, IServerWorkingCopy server, IStatus ocBinaryStatus) {
+        super(resource, connection);
+        this.route = route;
+        this.deployProject = deployProject;
+        this.server = server;
+        this.ocBinaryStatus = ocBinaryStatus;
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
+    }
 
-	protected void update(Connection connection, List<Connection> connections, 
-			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
-			String sourcePath, String podPath, boolean useInferredPodPath,
-			IResource resource, List<ObservableTreeItem> resourceItems, 
-			IRoute route, boolean isSelectDefaultRoute, Map<IProject, List<IRoute>> routesByProject,
-			IStatus ocBinaryStatus,
-			boolean useImageDevmodeKey, String devmodeKey, 
-			boolean useImageDebugPortKey, String debugPortKey, String debugPortValue) {
-		update(connection, connections, resource, resourceItems);
-		updateProjects(projects);
-		org.eclipse.core.resources.IProject oldDeployProject = this.deployProject;
-		org.eclipse.core.resources.IProject newDeployProject = updateDeployProject(deployProject, projects, resource);
-		sourcePath = updateSourcePath(sourcePath, newDeployProject, oldDeployProject);
-		List<IRoute> newRoutes = updateRoutes(resource, routesByProject);
-		updateRoute(route, newRoutes, resource);
-		updateSelectDefaultRoute(isSelectDefaultRoute);
-		updateOCBinaryStatus(ocBinaryStatus);
-		firePropertyChange(PROPERTY_USE_INFERRED_POD_PATH, this.useInferredPodPath, this.useInferredPodPath = useInferredPodPath);
-		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = podPath);
-		updateDevmode(useImageDevmodeKey, devmodeKey);
-		updateDebugPort(useImageDebugPortKey, debugPortKey, debugPortValue);
-	}
-	
-	private void updateProjects(List<org.eclipse.core.resources.IProject> projects) {
-		if (projects == this.projects) {
-			return; // happens when other properties are changed, avoid unnecessary work
-		}
-		List<org.eclipse.core.resources.IProject> oldProjects = new ArrayList<>(this.projects);
-		// ensure we're not operating on the same list
-		List<org.eclipse.core.resources.IProject> newProjects = new ArrayList<>();
-		if (projects != null) {
-			newProjects.addAll(projects);
-		}
-		this.projects.clear();
-		this.projects.addAll(newProjects);
-		firePropertyChange(PROPERTY_PROJECTS, oldProjects, this.projects);
-	}
+    protected void update(Connection connection, List<Connection> connections, org.eclipse.core.resources.IProject deployProject,
+            List<org.eclipse.core.resources.IProject> projects, String sourcePath, String podPath, boolean useInferredPodPath,
+            IResource resource, List<ObservableTreeItem> resourceItems, IRoute route, boolean isSelectDefaultRoute,
+            Map<IProject, List<IRoute>> routesByProject, IStatus ocBinaryStatus, boolean useImageDevmodeKey, String devmodeKey,
+            boolean useImageDebugPortKey, String debugPortKey, String debugPortValue) {
+        update(connection, connections, resource, resourceItems);
+        updateProjects(projects);
+        org.eclipse.core.resources.IProject oldDeployProject = this.deployProject;
+        org.eclipse.core.resources.IProject newDeployProject = updateDeployProject(deployProject, projects, resource);
+        sourcePath = updateSourcePath(sourcePath, newDeployProject, oldDeployProject);
+        List<IRoute> newRoutes = updateRoutes(resource, routesByProject);
+        updateRoute(route, newRoutes, resource);
+        updateSelectDefaultRoute(isSelectDefaultRoute);
+        updateOCBinaryStatus(ocBinaryStatus);
+        firePropertyChange(PROPERTY_USE_INFERRED_POD_PATH, this.useInferredPodPath, this.useInferredPodPath = useInferredPodPath);
+        firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = podPath);
+        updateDevmode(useImageDevmodeKey, devmodeKey);
+        updateDebugPort(useImageDebugPortKey, debugPortKey, debugPortValue);
+    }
 
-	protected org.eclipse.core.resources.IProject updateDeployProject(org.eclipse.core.resources.IProject newDeployProject, 
-			List<org.eclipse.core.resources.IProject> projects, IResource resource) {
-		if (newDeployProject == null
-				|| !projects.contains(newDeployProject)) {
-			newDeployProject = getDeployProject(resource);
-			if (newDeployProject == null) {
-				newDeployProject =  getProjectOrDefault(newDeployProject, projects);
-			}
-		}
-		firePropertyChange(PROPERTY_DEPLOYPROJECT, this.deployProject, this.deployProject = newDeployProject);
-		return this.deployProject;
-	}
+    private void updateProjects(List<org.eclipse.core.resources.IProject> projects) {
+        if (projects == this.projects) {
+            return; // happens when other properties are changed, avoid unnecessary work
+        }
+        List<org.eclipse.core.resources.IProject> oldProjects = new ArrayList<>(this.projects);
+        // ensure we're not operating on the same list
+        List<org.eclipse.core.resources.IProject> newProjects = new ArrayList<>();
+        if (projects != null) {
+            newProjects.addAll(projects);
+        }
+        this.projects.clear();
+        this.projects.addAll(newProjects);
+        firePropertyChange(PROPERTY_PROJECTS, oldProjects, this.projects);
+    }
 
-	protected String updateSourcePath(String sourcePath, org.eclipse.core.resources.IProject newDeployProject, 
-			org.eclipse.core.resources.IProject oldDeployProject) {
-		if ((StringUtils.isEmpty(sourcePath)
-				|| newDeployProject != oldDeployProject)
-				&& ProjectUtils.isAccessible(newDeployProject)) {
-			sourcePath = VariablesHelper.addWorkspacePrefix(newDeployProject.getFullPath().toString());
-		}
-		firePropertyChange(PROPERTY_SOURCE_PATH, this.sourcePath, this.sourcePath = sourcePath);
-		return sourcePath;
-	}
+    protected org.eclipse.core.resources.IProject updateDeployProject(org.eclipse.core.resources.IProject newDeployProject,
+            List<org.eclipse.core.resources.IProject> projects, IResource resource) {
+        if (newDeployProject == null || !projects.contains(newDeployProject)) {
+            newDeployProject = getDeployProject(resource);
+            if (newDeployProject == null) {
+                newDeployProject = getProjectOrDefault(newDeployProject, projects);
+            }
+        }
+        firePropertyChange(PROPERTY_DEPLOYPROJECT, this.deployProject, this.deployProject = newDeployProject);
+        return this.deployProject;
+    }
 
-	/**
-	 * Replaces choices in the route selector as needed.
-	 * If choices are replaced calls updateRoute() to reset its selected value.
-	 * @param routesByProject2 
-	 * @param resource 
-	 * @return 
-	 */
-	protected List<IRoute> updateRoutes(IResource resource, Map<IProject, List<IRoute>> routesByProject) {
-		this.routesByProject = routesByProject;
+    protected String updateSourcePath(String sourcePath, org.eclipse.core.resources.IProject newDeployProject,
+            org.eclipse.core.resources.IProject oldDeployProject) {
+        if ((StringUtils.isEmpty(sourcePath) || newDeployProject != oldDeployProject) && ProjectUtils.isAccessible(newDeployProject)) {
+            sourcePath = VariablesHelper.addWorkspacePrefix(newDeployProject.getFullPath().toString());
+        }
+        firePropertyChange(PROPERTY_SOURCE_PATH, this.sourcePath, this.sourcePath = sourcePath);
+        return sourcePath;
+    }
 
-		List<IRoute> oldRoutes = new ArrayList<>(this.serviceRoutes);
-		List<IRoute> routes = getRoutes(resource);
-		this.serviceRoutes.clear();
-		this.serviceRoutes.addAll(routes);
-		resetSelectedRoute();
-		firePropertyChange(PROPERTY_ROUTES, oldRoutes, this.serviceRoutes);
+    /**
+     * Replaces choices in the route selector as needed.
+     * If choices are replaced calls updateRoute() to reset its selected value.
+     * @param routesByProject2 
+     * @param resource 
+     * @return 
+     */
+    protected List<IRoute> updateRoutes(IResource resource, Map<IProject, List<IRoute>> routesByProject) {
+        this.routesByProject = routesByProject;
 
-		return routes;
-	}
+        List<IRoute> oldRoutes = new ArrayList<>(this.serviceRoutes);
+        List<IRoute> routes = getRoutes(resource);
+        this.serviceRoutes.clear();
+        this.serviceRoutes.addAll(routes);
+        resetSelectedRoute();
+        firePropertyChange(PROPERTY_ROUTES, oldRoutes, this.serviceRoutes);
 
-	// workaround needed for a possible (?) bug in databinding
-	private void resetSelectedRoute() {
-		if (this.route != null) {
-			firePropertyChange(PROPERTY_ROUTE, this.route, this.route = null);
-		}
-	}
+        return routes;
+    }
 
-	/**
-	 * Updates the route that's selected. Chooses the route for the given resource
-	 * @param route
-	 * @return 
-	 * @return 
-	 */
-	protected IRoute updateRoute(IRoute route, List<IRoute> routes, IResource resource) {
-		if (!isLoaded) {
-			return null;
-		}
+    // workaround needed for a possible (?) bug in databinding
+    private void resetSelectedRoute() {
+        if (this.route != null) {
+            firePropertyChange(PROPERTY_ROUTE, this.route, this.route = null);
+        }
+    }
 
-		if (routes == null
-				|| routes.isEmpty()) {
-			route = null;
-		} else if(route == null || !routes.contains(route)) {
-		    if (resource instanceof IService) {
-	            route = ResourceUtils.getRouteFor((IService) resource, routes);
-		    }
-			if(route == null 
-					|| !routes.contains(route)) {
-				route = routes.get(0);
-			}
-		}
-		firePropertyChange(PROPERTY_ROUTE, this.route, this.route = route);
-		return this.route;
-	}
+    /**
+     * Updates the route that's selected. Chooses the route for the given resource
+     * @param route
+     * @return 
+     * @return 
+     */
+    protected IRoute updateRoute(IRoute route, List<IRoute> routes, IResource resource) {
+        if (!isLoaded) {
+            return null;
+        }
 
-	private void updateSelectDefaultRoute(boolean selectDefaultRoute) {
-		firePropertyChange(PROPERTY_SELECT_DEFAULT_ROUTE, this.selectDefaultRoute, this.selectDefaultRoute = selectDefaultRoute);
-	}
+        if (routes == null || routes.isEmpty()) {
+            route = null;
+        } else if (route == null || !routes.contains(route)) {
+            if (resource instanceof IService) {
+                route = ResourceUtils.getRouteFor((IService)resource, routes);
+            }
+            if (route == null || !routes.contains(route)) {
+                route = routes.get(0);
+            }
+        }
+        firePropertyChange(PROPERTY_ROUTE, this.route, this.route = route);
+        return this.route;
+    }
 
-	protected org.eclipse.core.resources.IProject getDeployProject(IResource resource) {
-	    //TODO: JBIDE-23490 check if association can be done for non service resources
-		if (resource == null) {
-			return null;
-		}
-		IProject openShiftProject = getOpenShiftProject(resource);
-		List<IBuildConfig> buildConfigs = getBuildConfigs(openShiftProject);
-		IBuildConfig buildConfig = ResourceUtils.getBuildConfigFor(resource, buildConfigs);
-		return ResourceUtils.getWorkspaceProjectFor(buildConfig, getProjects());
-	}
+    private void updateSelectDefaultRoute(boolean selectDefaultRoute) {
+        firePropertyChange(PROPERTY_SELECT_DEFAULT_ROUTE, this.selectDefaultRoute, this.selectDefaultRoute = selectDefaultRoute);
+    }
 
-	public void setDeployProject(org.eclipse.core.resources.IProject project) {
-		update(getConnection(), getConnections(), 
-				project, this.projects, 
-				this.sourcePath, this.podPath, this.useInferredPodPath,
-				getResource(), getResourceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject,
-				this.ocBinaryStatus,
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
-	}
+    protected org.eclipse.core.resources.IProject getDeployProject(IResource resource) {
+        //TODO: JBIDE-23490 check if association can be done for non service resources
+        if (resource == null) {
+            return null;
+        }
+        IProject openShiftProject = getOpenShiftProject(resource);
+        List<IBuildConfig> buildConfigs = getBuildConfigs(openShiftProject);
+        IBuildConfig buildConfig = ResourceUtils.getBuildConfigFor(resource, buildConfigs);
+        return ResourceUtils.getWorkspaceProjectFor(buildConfig, getProjects());
+    }
 
-	public org.eclipse.core.resources.IProject getDeployProject() {
-		return deployProject;
-	}
+    public void setDeployProject(org.eclipse.core.resources.IProject project) {
+        update(getConnection(), getConnections(), project, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+    }
 
-	protected void setProjects(List<org.eclipse.core.resources.IProject> projects) {
-		updateProjects(projects);
-	}
+    public org.eclipse.core.resources.IProject getDeployProject() {
+        return deployProject;
+    }
 
-	public List<org.eclipse.core.resources.IProject> getProjects() {
-		return projects;
-	}
-	
-	public void setSourcePath(String sourcePath) {
-		update(getConnection(), getConnections(), 
-				this.deployProject, this.projects, 
-				sourcePath, this.podPath, this.useInferredPodPath,
-				getResource(), getResourceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject,
-				this.ocBinaryStatus,
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
-	}
+    protected void setProjects(List<org.eclipse.core.resources.IProject> projects) {
+        updateProjects(projects);
+    }
 
-	public String getSourcePath() {
-		return sourcePath;
-	}
+    public List<org.eclipse.core.resources.IProject> getProjects() {
+        return projects;
+    }
 
-	public void setPodPath(String podPath) {
-		update(getConnection(), getConnections(), 
-				this.deployProject, this.projects, 
-				this.sourcePath, podPath, this.useInferredPodPath,
-				getResource(), getResourceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject,
-				this.ocBinaryStatus,
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
-	}
+    public void setSourcePath(String sourcePath) {
+        update(getConnection(), getConnections(), this.deployProject, this.projects, sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+    }
 
-	public String getPodPath() {
-		return podPath;
-	}
+    public String getSourcePath() {
+        return sourcePath;
+    }
 
-	public boolean isUseInferredPodPath() {
-		return this.useInferredPodPath;
-	}
+    public void setPodPath(String podPath) {
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+    }
 
-	public void setUseInferredPodPath(boolean useInferredPodPath) {
-		update(getConnection(), getConnections(), 
-				this.deployProject, this.projects, 
-				this.sourcePath, this.podPath, useInferredPodPath,
-				getResource(), getResourceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject,
-				this.ocBinaryStatus,
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
-	}
+    public String getPodPath() {
+        return podPath;
+    }
 
-	@Override
-	public void setResource(IResource resource) {
-		update(getConnection(), getConnections(), 
-				this.deployProject, this.projects, 
-				this.sourcePath, this.podPath, this.useInferredPodPath,
-				resource, getResourceItems(), 
-				this.route, this.selectDefaultRoute, this.routesByProject,
-				this.ocBinaryStatus,
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
-	}
-	
-	protected org.eclipse.core.resources.IProject getProjectOrDefault(org.eclipse.core.resources.IProject project, List<org.eclipse.core.resources.IProject> projects) {
-		if (project == null) {
-			project = projects.stream().findFirst().orElse(null);
-		}
-		return project;
-	}
+    public boolean isUseInferredPodPath() {
+        return this.useInferredPodPath;
+    }
 
-	@Override
-	public void loadResources() {
-		loadResources(getConnection());
-	}
+    public void setUseInferredPodPath(boolean useInferredPodPath) {
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+    }
 
-	@Override
-	public void loadResources(Connection newConnection) {
-		boolean serviceInitialized = this.resource != null;
-		this.isLoaded = false;
-		setProjects(loadProjects());
-		super.loadResources(newConnection);
-		List<IProject> openshiftProjects = ObservableTreeItemUtils.getAllModels(IProject.class, getResourceItems());
-		setBuildConfigs(loadBuildConfigs(openshiftProjects, newConnection));
-		setProjects(loadProjects());
-		setRoutes(loadRoutes(getResourceItems()));
-		
-		this.isLoaded = true;
+    @Override
+    public void setResource(IResource resource) {
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                resource, getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+    }
 
-		if (serviceInitialized) {
-			// initialized via a resource/route (launched via openshift explorer)
-			updateDeployProject(getDeployProject(resource), projects, resource);
-		} else {
-			// initialized via a project (launched via new server wizard)
-			updateResource(getService(deployProject, getResourceItems()), getResourceItems());
-		}
+    protected org.eclipse.core.resources.IProject getProjectOrDefault(org.eclipse.core.resources.IProject project,
+            List<org.eclipse.core.resources.IProject> projects) {
+        if (project == null) {
+            project = projects.stream().findFirst().orElse(null);
+        }
+        return project;
+    }
 
-		update(getConnection(), getConnections(), 
-				this.deployProject, this.projects, 
-				this.sourcePath, this.podPath, this.useInferredPodPath,
-				this.resource, getResourceItems(),
-				this.route, selectDefaultRoute, this.routesByProject,
-				this.ocBinaryStatus,
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
-	}
+    @Override
+    public void loadResources() {
+        loadResources(getConnection());
+    }
 
-	private List<IBuildConfig> getBuildConfigs(IProject project) {
-		if (buildConfigsByProject == null) {
-			return null;
-		}
-		return buildConfigsByProject.get(project);
-	}
+    @Override
+    public void loadResources(Connection newConnection) {
+        boolean serviceInitialized = this.resource != null;
+        this.isLoaded = false;
+        setProjects(loadProjects());
+        super.loadResources(newConnection);
+        List<IProject> openshiftProjects = ObservableTreeItemUtils.getAllModels(IProject.class, getResourceItems());
+        setBuildConfigs(loadBuildConfigs(openshiftProjects, newConnection));
+        setProjects(loadProjects());
+        setRoutes(loadRoutes(getResourceItems()));
 
-	protected IService getService(org.eclipse.core.resources.IProject project, List<ObservableTreeItem> services) {
-		if (!ProjectUtils.isAccessible(project) 
-				|| CollectionUtils.isEmpty(services)) {
-			return null;
-		}
-		//JBIDE-23490: check default resource
-		List<IService> allServices = ObservableTreeItemUtils.getAllModels(IService.class, 
-				services.stream()
-				.flatMap(ObservableTreeItemUtils::flatten)
-				.collect(Collectors.toList()));
-		return allServices.stream()
-			.filter(service -> ObjectUtils.equals(project, getDeployProject(service)))
-			.findFirst()
-			.orElse(null);
-	}
-	
+        this.isLoaded = true;
+
+        if (serviceInitialized) {
+            // initialized via a resource/route (launched via openshift explorer)
+            updateDeployProject(getDeployProject(resource), projects, resource);
+        } else {
+            // initialized via a project (launched via new server wizard)
+            updateResource(getService(deployProject, getResourceItems()), getResourceItems());
+        }
+
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                this.resource, getResourceItems(), this.route, selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+    }
+
+    private List<IBuildConfig> getBuildConfigs(IProject project) {
+        if (buildConfigsByProject == null) {
+            return null;
+        }
+        return buildConfigsByProject.get(project);
+    }
+
+    protected IService getService(org.eclipse.core.resources.IProject project, List<ObservableTreeItem> services) {
+        if (!ProjectUtils.isAccessible(project) || CollectionUtils.isEmpty(services)) {
+            return null;
+        }
+        //JBIDE-23490: check default resource
+        List<IService> allServices = ObservableTreeItemUtils.getAllModels(IService.class,
+                services.stream().flatMap(ObservableTreeItemUtils::flatten).collect(Collectors.toList()));
+        return allServices.stream().filter(service -> ObjectUtils.equals(project, getDeployProject(service))).findFirst().orElse(null);
+    }
+
     private Map<IProject, List<IBuildConfig>> loadBuildConfigs(List<IProject> projects, Connection connection) {
-		if (projects == null
-				|| projects.isEmpty()) {
-			return Collections.emptyMap();
-		}
-		
-		return projects.stream()
-				.collect(Collectors.toMap(
-						project -> project, 
-						project -> {
-							List<IBuildConfig> buildConfigs = connection.getResources(ResourceKind.BUILD_CONFIG, project.getName());
-							return buildConfigs;
-						}));
-	}
+        if (projects == null || projects.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
-	private void setBuildConfigs(Map<IProject, List<IBuildConfig>> buildConfigsByProject) {
-		this.buildConfigsByProject = buildConfigsByProject;
-	}
+        return projects.stream().collect(Collectors.toMap(project -> project, project -> {
+            List<IBuildConfig> buildConfigs = connection.getResources(ResourceKind.BUILD_CONFIG, project.getName());
+            return buildConfigs;
+        }));
+    }
 
-	protected List<org.eclipse.core.resources.IProject> loadProjects() {
-		List<org.eclipse.core.resources.IProject> p = ProjectUtils.getAllAccessibleProjects();
-		return p;
-	}
+    private void setBuildConfigs(Map<IProject, List<IBuildConfig>> buildConfigsByProject) {
+        this.buildConfigsByProject = buildConfigsByProject;
+    }
 
-	protected Map<IProject, List<IRoute>> loadRoutes(List<ObservableTreeItem> serviceItems) {
-		List<IProject> projects = ObservableTreeItemUtils.getAllModels(IProject.class, serviceItems);
-		return projects.stream()
-				.collect(Collectors.toMap(project -> project, project -> project.getResources(ResourceKind.ROUTE)));
-	}
+    protected List<org.eclipse.core.resources.IProject> loadProjects() {
+        List<org.eclipse.core.resources.IProject> p = ProjectUtils.getAllAccessibleProjects();
+        return p;
+    }
 
-	public void updateServer() throws OpenShiftException {
-		updateServer(server);
-	}
+    protected Map<IProject, List<IRoute>> loadRoutes(List<ObservableTreeItem> serviceItems) {
+        List<IProject> projects = ObservableTreeItemUtils.getAllModels(IProject.class, serviceItems);
+        return projects.stream().collect(Collectors.toMap(project -> project, project -> project.getResources(ResourceKind.ROUTE)));
+    }
 
-	private void updateServer(IServerWorkingCopy server) throws OpenShiftException {
-		String connectionUrl = getConnectionUrl(getConnection());
-		String serverName = OpenShiftServerUtils.getServerName(getResource(), getConnection());
-		String host = getHost(getRoute(), getConnection());
-		String routeURL = getRouteURL(isSelectDefaultRoute(), getRoute());
-		String podPath = useInferredPodPath ? "" : this.podPath;
-		String devmodeKey = useImageDevmodeKey ? null : this.devmodeKey;
-		String debugPortKey = useImageDebugPortKey ? null : this.debugPortKey;
-		String debugPortValue = useImageDebugPortKey ? null : this.debugPortValue;
+    public void updateServer() throws OpenShiftException {
+        updateServer(server);
+    }
 
-		OpenShiftServerUtils.updateServer(
-				serverName, host, connectionUrl, getResource(), sourcePath, podPath, deployProject, routeURL, 
-				devmodeKey, debugPortKey, debugPortValue,
-				server);
-		server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
-		ServerProfileModel.setProfile(server, getProfileId());
+    private void updateServer(IServerWorkingCopy server) throws OpenShiftException {
+        String connectionUrl = getConnectionUrl(getConnection());
+        String serverName = OpenShiftServerUtils.getServerName(getResource(), getConnection());
+        String host = getHost(getRoute(), getConnection());
+        String routeURL = getRouteURL(isSelectDefaultRoute(), getRoute());
+        String podPath = useInferredPodPath ? "" : this.podPath;
+        String devmodeKey = useImageDevmodeKey ? null : this.devmodeKey;
+        String debugPortKey = useImageDebugPortKey ? null : this.debugPortKey;
+        String debugPortValue = useImageDebugPortKey ? null : this.debugPortValue;
 
-		updateServer(connectionUrl, getResource(), sourcePath, routeURL, podPath, devmodeKey, debugPortKey, debugPortValue, deployProject);
+        OpenShiftServerUtils.updateServer(serverName, host, connectionUrl, getResource(), sourcePath, podPath, deployProject, routeURL,
+                devmodeKey, debugPortKey, debugPortValue, server);
+        server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
+        ServerProfileModel.setProfile(server, getProfileId());
 
-		updateModules(server);
-	}
+        updateServer(connectionUrl, getResource(), sourcePath, routeURL, podPath, devmodeKey, debugPortKey, debugPortValue, deployProject);
 
-	// for testing purposes
-	protected void updateServer(String connectionUrl, IResource resource, String sourcePath, String routeURL, String podPath, String devmodeKey,
-			String debugPortKey, String debugPortValue, org.eclipse.core.resources.IProject deployProject) {
-		OpenShiftServerUtils.updateServerProject(
-				connectionUrl, getResource(), sourcePath, podPath, routeURL, devmodeKey, debugPortKey, debugPortValue, deployProject);
-	}
+        updateModules(server);
+    }
 
-	private void updateModules(IServerWorkingCopy server) {
-		IModule[] matchingModules = ServerUtil.getModules(deployProject);
-		if( matchingModules != null && matchingModules.length > 0) {
-			try {
-				server.modifyModules(matchingModules, new IModule[]{}, new NullProgressMonitor());
-			} catch(CoreException ce) {
-				throw new OpenShiftException(ce, "Could not get add modules to server ", server.getName());
-			}
-		}
-	}
-	
-	protected String getProfileId() {
-		Collection<IConfigurationElement> configurationElements = ExtensionUtils
-				.getExtensionConfigurations(PROFILE_DETECTOR_EP_ID);
-		for (IConfigurationElement configurationElement : configurationElements) {
-			try {
-				Object extension = configurationElement.createExecutableExtension("class");
-				if (extension instanceof IOpenshiftServerAdapterProfileDetector) {
-					IOpenshiftServerAdapterProfileDetector detector = (IOpenshiftServerAdapterProfileDetector)extension;
-					if (detector.detect(getConnection(), getResource(), getDeployProject())) {
-						return detector.getProfile();
-					}
-				}
-			} catch (CoreException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3;
-	}
-	
-	protected String getHost(IRoute route) {
-		return getHost(route, null);
-	}
+    // for testing purposes
+    protected void updateServer(String connectionUrl, IResource resource, String sourcePath, String routeURL, String podPath,
+            String devmodeKey, String debugPortKey, String debugPortValue, org.eclipse.core.resources.IProject deployProject) {
+        OpenShiftServerUtils.updateServerProject(connectionUrl, getResource(), sourcePath, podPath, routeURL, devmodeKey, debugPortKey,
+                debugPortValue, deployProject);
+    }
 
-	protected String getHost(IRoute route, IConnection connection) {
-		if (route != null) {
-			return UrlUtils.getHost(route.getURL());
-		} else if(connection != null) {
-			return UrlUtils.getHost(connection.getHost());
-		}
-		return "";
-	}
+    private void updateModules(IServerWorkingCopy server) {
+        IModule[] matchingModules = ServerUtil.getModules(deployProject);
+        if (matchingModules != null && matchingModules.length > 0) {
+            try {
+                server.modifyModules(matchingModules, new IModule[] {}, new NullProgressMonitor());
+            } catch (CoreException ce) {
+                throw new OpenShiftException(ce, "Could not get add modules to server ", server.getName());
+            }
+        }
+    }
 
-	protected String getRouteURL(boolean isSelectDefaultRoute, IRoute route) {
-		if (!isSelectDefaultRoute || route == null) {
-			return null;
-		}
-		return route.getURL();
-	}
-	
-	public boolean isSelectDefaultRoute() {
-		return selectDefaultRoute;
-	}
+    protected String getProfileId() {
+        Collection<IConfigurationElement> configurationElements = ExtensionUtils.getExtensionConfigurations(PROFILE_DETECTOR_EP_ID);
+        for (IConfigurationElement configurationElement : configurationElements) {
+            try {
+                Object extension = configurationElement.createExecutableExtension("class");
+                if (extension instanceof IOpenshiftServerAdapterProfileDetector) {
+                    IOpenshiftServerAdapterProfileDetector detector = (IOpenshiftServerAdapterProfileDetector)extension;
+                    if (detector.detect(getConnection(), getResource(), getDeployProject())) {
+                        return detector.getProfile();
+                    }
+                }
+            } catch (CoreException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return OpenShiftServerBehaviour.PROFILE_OPENSHIFT3;
+    }
 
-	public void setSelectDefaultRoute(boolean selectDefaultRoute) {
-		update(getConnection(), getConnections(), 
-				this.deployProject, this.projects, 
-				this.sourcePath, this.podPath, this.useInferredPodPath,
-				getResource(), getResourceItems(),
-				this.route, selectDefaultRoute, this.routesByProject,
-				this.ocBinaryStatus,
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
-	}
+    protected String getHost(IRoute route) {
+        return getHost(route, null);
+    }
 
-	protected void setRoutes(Map<IProject, List<IRoute>> routesByProject) {
-		updateRoutes(resource, routesByProject);
-	}
+    protected String getHost(IRoute route, IConnection connection) {
+        if (route != null) {
+            return UrlUtils.getHost(route.getURL());
+        } else if (connection != null) {
+            return UrlUtils.getHost(connection.getHost());
+        }
+        return "";
+    }
 
-	/**
-	 * Returns the routes that match the resource that's currently selected.
-	 * 
-	 * @return the routes that match the selected resource
-	 * 
-	 * @see #getResource()
-	 * @see #getAllRoutes(IService)
-	 */
-	public List<IRoute> getRoutes() {
-		if (getResource() == null) {
-			return Collections.emptyList();
-		}
-		return getRoutes(getResource());
-	}
+    protected String getRouteURL(boolean isSelectDefaultRoute, IRoute route) {
+        if (!isSelectDefaultRoute || route == null) {
+            return null;
+        }
+        return route.getURL();
+    }
 
-	protected List<IRoute> getRoutes(IResource resource) {
-	    if (resource instanceof IService) {
-	        return ResourceUtils.getRoutesFor((IService) resource, getAllRoutes(resource));
-	    } else {
-	        return Collections.emptyList();
-	    }
-	}
+    public boolean isSelectDefaultRoute() {
+        return selectDefaultRoute;
+    }
 
-	public IRoute getRoute() {
-		if (!isLoaded) {
-			return null;
-		}
-		// reveal selected route only once model is loaded
-		return route;
-	}
+    public void setSelectDefaultRoute(boolean selectDefaultRoute) {
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+    }
 
-	public void setRoute(IRoute newRoute) {
-		update(getConnection(), getConnections(), 
-				this.deployProject, this.projects, 
-				this.sourcePath, this.podPath, this.useInferredPodPath,
-				getResource(), getResourceItems(),
-				newRoute, this.selectDefaultRoute, this.routesByProject,
-				this.ocBinaryStatus,
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
-	}
+    protected void setRoutes(Map<IProject, List<IRoute>> routesByProject) {
+        updateRoutes(resource, routesByProject);
+    }
 
-	protected List<IRoute> getAllRoutes(IRoute route) {
-		IProject project = getOpenShiftProject(route);
-		if (project == null) {
-			return Collections.emptyList();
-		}
-		return getAllRoutes(project);
-	}
+    /**
+     * Returns the routes that match the resource that's currently selected.
+     * 
+     * @return the routes that match the selected resource
+     * 
+     * @see #getResource()
+     * @see #getAllRoutes(IService)
+     */
+    public List<IRoute> getRoutes() {
+        if (getResource() == null) {
+            return Collections.emptyList();
+        }
+        return getRoutes(getResource());
+    }
 
-	protected Map<IProject, List<IRoute>> getAllRoutes() {
-		return routesByProject;
-	}
+    protected List<IRoute> getRoutes(IResource resource) {
+        if (resource instanceof IService) {
+            return ResourceUtils.getRoutesFor((IService)resource, getAllRoutes(resource));
+        } else {
+            return Collections.emptyList();
+        }
+    }
 
-	protected List<IRoute> getAllRoutes(IResource resource) {
-		IProject project = resource.getProject();
-		if (project == null) {
-			return Collections.emptyList();
-		}
-		return getAllRoutes(project);
-	}
+    public IRoute getRoute() {
+        if (!isLoaded) {
+            return null;
+        }
+        // reveal selected route only once model is loaded
+        return route;
+    }
 
-	protected List<IRoute> getAllRoutes(IProject project) {
-		return routesByProject.get(project);
-	}
+    public void setRoute(IRoute newRoute) {
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), newRoute, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+    }
 
-	protected IProject getOpenShiftProject(IRoute route) {
-		return route.getProject();
-	}
+    protected List<IRoute> getAllRoutes(IRoute route) {
+        IProject project = getOpenShiftProject(route);
+        if (project == null) {
+            return Collections.emptyList();
+        }
+        return getAllRoutes(project);
+    }
 
-	public IServer saveServer(IProgressMonitor monitor) throws CoreException {
-		return server.save(true, monitor);
-	}
-	
-	protected String getConnectionUrl(IConnection connection) {
-		ConnectionURL connectionUrl;
-		try {
-			connectionUrl = ConnectionURL.forConnection(connection);
-			return connectionUrl.toString();
-		} catch (UnsupportedEncodingException | MalformedURLException e) {
-			throw new OpenShiftException(e, "Could not get url for connection {0}", connection.getHost());
-		}
-	}
+    protected Map<IProject, List<IRoute>> getAllRoutes() {
+        return routesByProject;
+    }
+
+    protected List<IRoute> getAllRoutes(IResource resource) {
+        IProject project = resource.getProject();
+        if (project == null) {
+            return Collections.emptyList();
+        }
+        return getAllRoutes(project);
+    }
+
+    protected List<IRoute> getAllRoutes(IProject project) {
+        return routesByProject.get(project);
+    }
+
+    protected IProject getOpenShiftProject(IRoute route) {
+        return route.getProject();
+    }
+
+    public IServer saveServer(IProgressMonitor monitor) throws CoreException {
+        return server.save(true, monitor);
+    }
+
+    protected String getConnectionUrl(IConnection connection) {
+        ConnectionURL connectionUrl;
+        try {
+            connectionUrl = ConnectionURL.forConnection(connection);
+            return connectionUrl.toString();
+        } catch (UnsupportedEncodingException | MalformedURLException e) {
+            throw new OpenShiftException(e, "Could not get url for connection {0}", connection.getHost());
+        }
+    }
 
     private void updateOCBinaryStatus(IStatus ocBinaryStatus) {
-        firePropertyChange(PROPERTY_OC_BINARY_STATUS, this.ocBinaryStatus,
-                this.ocBinaryStatus = ocBinaryStatus);
+        firePropertyChange(PROPERTY_OC_BINARY_STATUS, this.ocBinaryStatus, this.ocBinaryStatus = ocBinaryStatus);
     }
 
     public IStatus getOCBinaryStatus() {
@@ -623,131 +561,108 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
     }
 
     public void setOCBinaryStatus(IStatus ocBinaryStatus) {
-        update(getConnection(), getConnections(), 
-                this.deployProject, this.projects, 
-                this.sourcePath, this.podPath, this.useInferredPodPath,
-                getResource(), getResourceItems(),
-                this.route, this.selectDefaultRoute, this.routesByProject,
-                ocBinaryStatus,
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
     }
-    
-    private void updateDevmode(boolean useImageDevmodeKey, String devmodeKey) {
-    		String oldDevmodeKey = this.devmodeKey;
-    		if (useImageDevmodeKey) {
-    			this.devmodeKey = null;
-    		}
-    		firePropertyChange(PROPERTY_DEVMODE_KEY, oldDevmodeKey, this.devmodeKey);
 
-    		firePropertyChange(PROPERTY_USE_IMAGE_DEVMODE_KEY, this.useImageDevmodeKey, this.useImageDevmodeKey = useImageDevmodeKey);
+    private void updateDevmode(boolean useImageDevmodeKey, String devmodeKey) {
+        String oldDevmodeKey = this.devmodeKey;
+        if (useImageDevmodeKey) {
+            this.devmodeKey = null;
+        }
+        firePropertyChange(PROPERTY_DEVMODE_KEY, oldDevmodeKey, this.devmodeKey);
+
+        firePropertyChange(PROPERTY_USE_IMAGE_DEVMODE_KEY, this.useImageDevmodeKey, this.useImageDevmodeKey = useImageDevmodeKey);
     }
 
     public boolean isUseImageDevmodeKey() {
-    		return useImageDevmodeKey;
+        return useImageDevmodeKey;
     }
 
     public void setUseImageDevmodeKey(boolean useImageDevmodeKey) {
-        update(getConnection(), getConnections(), 
-                this.deployProject, this.projects, 
-                this.sourcePath, this.podPath, this.useInferredPodPath,
-                getResource(), getResourceItems(),
-                this.route, this.selectDefaultRoute, this.routesByProject,
-                this.ocBinaryStatus,
-                useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue
-        		);
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
     }
 
     public void setUseDevmodeKey(String devmodeKey) {
-        update(getConnection(), getConnections(),
-                this.deployProject, this.projects, 
-                this.sourcePath, this.podPath, this.useInferredPodPath,
-                getResource(), getResourceItems(),
-                this.route, this.selectDefaultRoute, this.routesByProject,
-                this.ocBinaryStatus,
-                this.useImageDevmodeKey, devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue
-        		);
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, devmodeKey, this.useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
     }
 
     public String getDevmodeKey() {
-    		return devmodeKey;
-    	}
-    
-	public boolean isUseImageDebugPortKey() {
-		return useImageDebugPortKey;
-	}
-
-	public void setUseImageDebugPortKey(boolean useImageDebugPortKey) {
-		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath,
-				this.useInferredPodPath, getResource(), getResourceItems(), this.route, this.selectDefaultRoute,
-				this.routesByProject, this.ocBinaryStatus, 
-				this.useImageDevmodeKey, this.devmodeKey, 
-				useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
-	}
-
-	public void setDebugPortKey(String debugPortKey) {
-		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath,
-				this.useInferredPodPath, getResource(), getResourceItems(), this.route, this.selectDefaultRoute,
-				this.routesByProject, this.ocBinaryStatus, 
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, debugPortKey, this.debugPortValue);
-	}
-
-	public String getDebugPortKey() {
-		return debugPortKey;
-	}
-
-	public void setDebugPortValue(String debugPortValue) {
-		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath,
-				this.useInferredPodPath, getResource(), getResourceItems(), this.route, this.selectDefaultRoute,
-				this.routesByProject, this.ocBinaryStatus, 
-				this.useImageDevmodeKey, this.devmodeKey, 
-				this.useImageDebugPortKey, this.debugPortKey, debugPortValue);
-	}
-
-	public String getDebugPortValue() {
-		return debugPortValue;
-	}
-
-	private void updateDebugPort(boolean useImageDebugPortKey, String debugPortKey, String debugPortValue) {
-		String oldDebugPortKey = this.debugPortKey;
-		String oldDebugPort = this.debugPortValue;
-		if (useImageDebugPortKey) {
-			this.debugPortKey = null;
-			this.debugPortValue = null;
-		}
-		firePropertyChange(PROPERTY_DEBUG_PORT_KEY, oldDebugPortKey, this.debugPortKey);
-		firePropertyChange(PROPERTY_DEBUG_PORT_VALUE, oldDebugPort, this.debugPortValue);
-
-		firePropertyChange(PROPERTY_USE_IMAGE_DEBUG_PORT_KEY, this.useImageDebugPortKey, this.useImageDebugPortKey = useImageDebugPortKey);		
-	}
-
-    protected IServerWorkingCopy getServer() {
-		return server;
+        return devmodeKey;
     }
 
-	@Override
-	public void resourceChanged(IResourceChangeEvent event) {
-		boolean[] needReload = new boolean[1];
-		try {
-			event.getDelta().accept((delta) -> {
-				if ((delta.getResource().getType() == org.eclipse.core.resources.IResource.PROJECT)
-						&& ((delta.getKind() == IResourceDelta.ADDED) || (delta.getKind() == IResourceDelta.REMOVED))) {
-					needReload[0] = true;
-				}
-				return true;
-			}, true);
-			if (needReload[0]) {
-				setProjects(loadProjects());
-			}
-		} catch (CoreException e) {
-			OpenShiftUIActivator.log(Status.ERROR, e.getLocalizedMessage(), e);
-		}
-	}
+    public boolean isUseImageDebugPortKey() {
+        return useImageDebugPortKey;
+    }
 
-	@Override
+    public void setUseImageDebugPortKey(boolean useImageDebugPortKey) {
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+    }
+
+    public void setDebugPortKey(String debugPortKey) {
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, debugPortKey, this.debugPortValue);
+    }
+
+    public String getDebugPortKey() {
+        return debugPortKey;
+    }
+
+    public void setDebugPortValue(String debugPortValue) {
+        update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath, this.useInferredPodPath,
+                getResource(), getResourceItems(), this.route, this.selectDefaultRoute, this.routesByProject, this.ocBinaryStatus,
+                this.useImageDevmodeKey, this.devmodeKey, this.useImageDebugPortKey, this.debugPortKey, debugPortValue);
+    }
+
+    public String getDebugPortValue() {
+        return debugPortValue;
+    }
+
+    private void updateDebugPort(boolean useImageDebugPortKey, String debugPortKey, String debugPortValue) {
+        String oldDebugPortKey = this.debugPortKey;
+        String oldDebugPort = this.debugPortValue;
+        if (useImageDebugPortKey) {
+            this.debugPortKey = null;
+            this.debugPortValue = null;
+        }
+        firePropertyChange(PROPERTY_DEBUG_PORT_KEY, oldDebugPortKey, this.debugPortKey);
+        firePropertyChange(PROPERTY_DEBUG_PORT_VALUE, oldDebugPort, this.debugPortValue);
+
+        firePropertyChange(PROPERTY_USE_IMAGE_DEBUG_PORT_KEY, this.useImageDebugPortKey, this.useImageDebugPortKey = useImageDebugPortKey);
+    }
+
+    protected IServerWorkingCopy getServer() {
+        return server;
+    }
+
+    @Override
+    public void resourceChanged(IResourceChangeEvent event) {
+        boolean[] needReload = new boolean[1];
+        try {
+            event.getDelta().accept((delta) -> {
+                if ((delta.getResource().getType() == org.eclipse.core.resources.IResource.PROJECT)
+                        && ((delta.getKind() == IResourceDelta.ADDED) || (delta.getKind() == IResourceDelta.REMOVED))) {
+                    needReload[0] = true;
+                }
+                return true;
+            }, true);
+            if (needReload[0]) {
+                setProjects(loadProjects());
+            }
+        } catch (CoreException e) {
+            OpenShiftUIActivator.log(Status.ERROR, e.getLocalizedMessage(), e);
+        }
+    }
+
+    @Override
     public void dispose() {
         super.dispose();
         ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);

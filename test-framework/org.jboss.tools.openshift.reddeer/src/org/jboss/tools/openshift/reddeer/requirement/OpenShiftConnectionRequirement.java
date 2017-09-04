@@ -45,7 +45,7 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
  * @author adietish@redhat.com
  */
 public class OpenShiftConnectionRequirement implements Requirement<RequiredBasicConnection> {
-	
+
 	private static final int CONNECT_TIMEOUT = 4;
 	private static Logger LOGGER = new Logger(OpenShiftConnectionRequirement.class);
 
@@ -53,8 +53,8 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 	private Connection connection;
 
 	@Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    public @interface RequiredBasicConnection {
+	@Target(ElementType.TYPE)
+	public @interface RequiredBasicConnection {
 		/**
 		 * the host to connect to. If nothing is provided {@link DatastoreOS3#SERVER} is used
 		 */
@@ -69,7 +69,7 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 		 * the password to use when authenticating. If nothing is provided {@link DatastoreOS3#PASSWORD} is used
 		 */
 		String password() default StringUtils.EMPTY;
-		
+
 		/**
 		 * whether the connection created by the requirement should be automatically deleted after test class, default false
 		 */
@@ -118,10 +118,8 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 	}
 
 	private IClient createClient(String server) {
-		IClient client = new ClientBuilder(server)
-			.sslCertificateCallback(new NoopSSLCertificateCallback())
-			.withConnectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
-			.build();
+		IClient client = new ClientBuilder(server).sslCertificateCallback(new NoopSSLCertificateCallback())
+				.withConnectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS).build();
 		return client;
 	}
 
@@ -137,7 +135,7 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 			new WaitWhile(new ConnectionExists(connection.getHost(), connection.getUsername()));
 		}
 	}
-	
+
 	public Connection getConnection() {
 		return connection;
 	}
@@ -148,16 +146,16 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 		}
 		return connection.getUsername();
 	}
-	
+
 	public String getHost() {
 		if (connection == null) {
 			return null;
 		}
 		return connection.getHost();
 	}
-	
+
 	private class ConnectionExists extends AbstractWaitCondition {
-		
+
 		private OpenShiftExplorerView view;
 		private String server;
 		private String user;
@@ -167,11 +165,11 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 			this.server = server;
 			this.user = user;
 		}
-		
+
 		@Override
 		public boolean test() {
 			return view.connectionExists(server, user);
 		}
-		
+
 	}
 }

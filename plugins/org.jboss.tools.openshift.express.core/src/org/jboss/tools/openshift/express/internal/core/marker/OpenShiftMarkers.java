@@ -27,149 +27,148 @@ import org.jboss.tools.openshift.express.internal.core.util.ResourceUtils;
  */
 public class OpenShiftMarkers {
 
-	private IProject project;
-	private Collection<IOpenShiftMarker> allKnownMarkers;
+    private IProject project;
+    private Collection<IOpenShiftMarker> allKnownMarkers;
 
-	public OpenShiftMarkers(IProject project) {
-		this.project = project;
-		this.allKnownMarkers = new ArrayList<>();
-		allKnownMarkers.add(IOpenShiftMarker.DISABLE_AUTO_SCALING);
-		allKnownMarkers.add(IOpenShiftMarker.ENABLE_JPA);
-		allKnownMarkers.add(IOpenShiftMarker.FORCE_CLEAN_BUILD);
-		allKnownMarkers.add(IOpenShiftMarker.HOT_DEPLOY);
-		allKnownMarkers.add(IOpenShiftMarker.JAVA_7);
-		allKnownMarkers.add(IOpenShiftMarker.SKIP_MAVEN_BUILD);
+    public OpenShiftMarkers(IProject project) {
+        this.project = project;
+        this.allKnownMarkers = new ArrayList<>();
+        allKnownMarkers.add(IOpenShiftMarker.DISABLE_AUTO_SCALING);
+        allKnownMarkers.add(IOpenShiftMarker.ENABLE_JPA);
+        allKnownMarkers.add(IOpenShiftMarker.FORCE_CLEAN_BUILD);
+        allKnownMarkers.add(IOpenShiftMarker.HOT_DEPLOY);
+        allKnownMarkers.add(IOpenShiftMarker.JAVA_7);
+        allKnownMarkers.add(IOpenShiftMarker.SKIP_MAVEN_BUILD);
 
-	}
+    }
 
-	/**
-	 * Returns all possible markers for the given project. The method returns
-	 * the markers it knows about and the unknown ones found in the given
-	 * project.
-	 * 
-	 * @return all possible markers for the given project.
-	 * @throws CoreException
-	 * 
-	 * @see IProject
-	 * @see IOpenShiftMarker
-	 * 
-	 */
-	public List<IOpenShiftMarker> getAll() throws CoreException {
-		final List<IOpenShiftMarker> allMarkers = new ArrayList<>();
-		allMarkers.addAll(getAllKnownMarkers());
-		final IFolder folder = OpenShiftProjectUtils.getMarkersFolder(project);
-		if (folder != null
-				&& folder.isAccessible()) {
-			folder.accept(new IResourceVisitor() {
+    /**
+     * Returns all possible markers for the given project. The method returns
+     * the markers it knows about and the unknown ones found in the given
+     * project.
+     * 
+     * @return all possible markers for the given project.
+     * @throws CoreException
+     * 
+     * @see IProject
+     * @see IOpenShiftMarker
+     * 
+     */
+    public List<IOpenShiftMarker> getAll() throws CoreException {
+        final List<IOpenShiftMarker> allMarkers = new ArrayList<>();
+        allMarkers.addAll(getAllKnownMarkers());
+        final IFolder folder = OpenShiftProjectUtils.getMarkersFolder(project);
+        if (folder != null && folder.isAccessible()) {
+            folder.accept(new IResourceVisitor() {
 
-				@Override
-				public boolean visit(IResource resource) throws CoreException {
-					// visit markers folder
-					if (resource == folder) {
-						return true;
-					}
-					// dont visit markers within markers folder
-					if (resource.getType() != IResource.FILE) {
-						return false;
-					}
-					if (startsWithDot(resource)) {
-						return false;
-					}
-					if (isReadme(resource)) {
-						return false;
-					}
-					if (!isKnownMarker(resource.getName())) {
-						allMarkers.add(createUnknownMarker(resource));
-					}
-					return false;
-				}
+                @Override
+                public boolean visit(IResource resource) throws CoreException {
+                    // visit markers folder
+                    if (resource == folder) {
+                        return true;
+                    }
+                    // dont visit markers within markers folder
+                    if (resource.getType() != IResource.FILE) {
+                        return false;
+                    }
+                    if (startsWithDot(resource)) {
+                        return false;
+                    }
+                    if (isReadme(resource)) {
+                        return false;
+                    }
+                    if (!isKnownMarker(resource.getName())) {
+                        allMarkers.add(createUnknownMarker(resource));
+                    }
+                    return false;
+                }
 
-			}, IResource.DEPTH_ONE, false);
-		}
+            }, IResource.DEPTH_ONE, false);
+        }
 
-		return allMarkers;
-	}
+        return allMarkers;
+    }
 
-	/**
-	 * Returns all markers found in the given project.
-	 * 
-	 * @return
-	 * @throws CoreException
-	 */
-	public List<IOpenShiftMarker> getPresent() throws CoreException {
-		final List<IOpenShiftMarker> allMarkers = new ArrayList<>();
-		final IFolder folder = OpenShiftProjectUtils.getMarkersFolder(project);
-		if (ResourceUtils.exists(folder)) {
-			folder.accept(new IResourceVisitor() {
+    /**
+     * Returns all markers found in the given project.
+     * 
+     * @return
+     * @throws CoreException
+     */
+    public List<IOpenShiftMarker> getPresent() throws CoreException {
+        final List<IOpenShiftMarker> allMarkers = new ArrayList<>();
+        final IFolder folder = OpenShiftProjectUtils.getMarkersFolder(project);
+        if (ResourceUtils.exists(folder)) {
+            folder.accept(new IResourceVisitor() {
 
-				@Override
-				public boolean visit(IResource resource) throws CoreException {
-					// visit markers folder
-					if (resource == folder) {
-						return true;
-					}
-					// dont visit markers within markers folder
-					if (resource.getType() != IResource.FILE) {
-						return false;
-					}
-					// exclude dot-files (.gitignore etc.)
-					if (startsWithDot(resource)) {
-						return false;
-					} 
-					// exclude README
-					if (isReadme(resource)) {
-						return false;
-					}
-					allMarkers.add(getMarker(resource));
-					return false;
-				}
-			}, IResource.DEPTH_ONE, false);
-		}
+                @Override
+                public boolean visit(IResource resource) throws CoreException {
+                    // visit markers folder
+                    if (resource == folder) {
+                        return true;
+                    }
+                    // dont visit markers within markers folder
+                    if (resource.getType() != IResource.FILE) {
+                        return false;
+                    }
+                    // exclude dot-files (.gitignore etc.)
+                    if (startsWithDot(resource)) {
+                        return false;
+                    }
+                    // exclude README
+                    if (isReadme(resource)) {
+                        return false;
+                    }
+                    allMarkers.add(getMarker(resource));
+                    return false;
+                }
+            }, IResource.DEPTH_ONE, false);
+        }
 
-		return allMarkers;
-	}
+        return allMarkers;
+    }
 
-	private boolean startsWithDot(IResource resource) {
-		if (!ResourceUtils.exists(resource)) {
-			return false;
-		}
-		return resource.getName().startsWith(".");
-	}
-	
-	private boolean isReadme(IResource resource) {
-		if (!ResourceUtils.exists(resource)) {
-			return false;
-		}
-		return "README.MD".equalsIgnoreCase(resource.getName());
-	}
-	
-	private IOpenShiftMarker getMarker(IResource resource) {
-		IOpenShiftMarker marker = getKnownMarker(resource.getName());
-		if (marker == null) {
-			marker = createUnknownMarker(resource);
-		}
-		return marker;
-	}
+    private boolean startsWithDot(IResource resource) {
+        if (!ResourceUtils.exists(resource)) {
+            return false;
+        }
+        return resource.getName().startsWith(".");
+    }
 
-	private IOpenShiftMarker createUnknownMarker(IResource resource) {
-		return new BaseOpenShiftMarker(resource.getName(), resource.getName(), null);
-	}
+    private boolean isReadme(IResource resource) {
+        if (!ResourceUtils.exists(resource)) {
+            return false;
+        }
+        return "README.MD".equalsIgnoreCase(resource.getName());
+    }
 
-	private boolean isKnownMarker(String fileName) {
-		return getKnownMarker(fileName) != null;
-	}
+    private IOpenShiftMarker getMarker(IResource resource) {
+        IOpenShiftMarker marker = getKnownMarker(resource.getName());
+        if (marker == null) {
+            marker = createUnknownMarker(resource);
+        }
+        return marker;
+    }
 
-	private IOpenShiftMarker getKnownMarker(String fileName) {
-		for (IOpenShiftMarker marker : getAllKnownMarkers()) {
-			if (marker.getFileName().equals(fileName)) {
-				return marker;
-			}
-		}
-		return null;
-	}
+    private IOpenShiftMarker createUnknownMarker(IResource resource) {
+        return new BaseOpenShiftMarker(resource.getName(), resource.getName(), null);
+    }
 
-	private Collection<IOpenShiftMarker> getAllKnownMarkers() {
-		return allKnownMarkers;
-	}
+    private boolean isKnownMarker(String fileName) {
+        return getKnownMarker(fileName) != null;
+    }
+
+    private IOpenShiftMarker getKnownMarker(String fileName) {
+        for (IOpenShiftMarker marker : getAllKnownMarkers()) {
+            if (marker.getFileName().equals(fileName)) {
+                return marker;
+            }
+        }
+        return null;
+    }
+
+    private Collection<IOpenShiftMarker> getAllKnownMarkers() {
+        return allKnownMarkers;
+    }
 
 }

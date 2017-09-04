@@ -21,43 +21,42 @@ import com.openshift.client.OpenShiftException;
  */
 public abstract class AbstractSSHKeyWizardPageModel extends ObservableUIPojo implements ISSHKeyWizardPageModel {
 
-	private String name;
-	private ExpressConnection connection;
-	
-	AbstractSSHKeyWizardPageModel(ExpressConnection user) {
-		this.connection = user;
-	}
+    private String name;
+    private ExpressConnection connection;
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    AbstractSSHKeyWizardPageModel(ExpressConnection user) {
+        this.connection = user;
+    }
 
-	@Override
-	public void setName(String name) {
-		firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public boolean hasKeyName(String name) {
-		return connection.hasSSHKeyName(name);
-	}
+    @Override
+    public void setName(String name) {
+        firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
+    }
 
-	@Override
-	public boolean hasPublicKey(String publicKeyContent) {
-		return connection.hasSSHPublicKey(publicKeyContent);
-	}
-	
-	protected ExpressConnection getConnection() {
-		return connection;
-	}
+    @Override
+    public boolean hasKeyName(String name) {
+        return connection.hasSSHKeyName(name);
+    }
 
-	protected String checkedGetSSH2Home() throws OpenShiftException {
-		String ssh2Home = SSHUtils.getSSH2Home();
-		if (ssh2Home == null 
-				|| ssh2Home.trim().length() == 0) {
-			throw new OpenShiftException("Could not determine your ssh2 home directory");
-		}
-		return ssh2Home;
-	}
+    @Override
+    public boolean hasPublicKey(String publicKeyContent) {
+        return connection.hasSSHPublicKey(publicKeyContent);
+    }
+
+    protected ExpressConnection getConnection() {
+        return connection;
+    }
+
+    protected String checkedGetSSH2Home() throws OpenShiftException {
+        String ssh2Home = SSHUtils.getSSH2Home();
+        if (ssh2Home == null || ssh2Home.trim().length() == 0) {
+            throw new OpenShiftException("Could not determine your ssh2 home directory");
+        }
+        return ssh2Home;
+    }
 }

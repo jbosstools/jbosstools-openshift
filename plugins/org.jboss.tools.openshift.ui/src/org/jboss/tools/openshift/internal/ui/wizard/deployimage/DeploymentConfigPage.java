@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
-
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -43,161 +42,142 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.EnvironmentVariablePa
  */
 public class DeploymentConfigPage extends EnvironmentVariablePage {
 
-	public static final String PAGE_NAME = "Deployment Config Settings Page";
-	private static final String PAGE_TITLE = "Deployment Configuration && Scalability";
-	private static final String PAGE_DESCRIPTION = "";
+    public static final String PAGE_NAME = "Deployment Config Settings Page";
+    private static final String PAGE_TITLE = "Deployment Configuration && Scalability";
+    private static final String PAGE_DESCRIPTION = "";
 
-	private IDeploymentConfigPageModel model;
-	private TableViewer dataViewer;
+    private IDeploymentConfigPageModel model;
+    private TableViewer dataViewer;
 
-	//Layout
-	private Composite volTableContainer;
+    //Layout
+    private Composite volTableContainer;
 
-	public DeploymentConfigPage(IWizard wizard, IDeploymentConfigPageModel model) {
-		super(PAGE_TITLE, PAGE_DESCRIPTION, PAGE_NAME, wizard, model);
-		this.model = model;
-	}
+    public DeploymentConfigPage(IWizard wizard, IDeploymentConfigPageModel model) {
+        super(PAGE_TITLE, PAGE_DESCRIPTION, PAGE_NAME, wizard, model);
+        this.model = model;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void doCreateControls(final Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void doCreateControls(final Composite parent, DataBindingContext dbc) {
+        GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
-		//Env Variables Block
-		createEnvVariableControl(parent, dbc, "Deployment environment variables (Runtime only):", EnvironmentVariablePage.TABLE_LABEL_TOOLTIP);
+        //Env Variables Block
+        createEnvVariableControl(parent, dbc, "Deployment environment variables (Runtime only):",
+                EnvironmentVariablePage.TABLE_LABEL_TOOLTIP);
 
-		Label separator1 = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator1);
+        Label separator1 = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator1);
 
-		createDataVolumeControl(parent, dbc);
-		
-		Label separator2 = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator2);
+        createDataVolumeControl(parent, dbc);
 
-		//Scaling
-		Composite scalingContainer = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(scalingContainer);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(2).margins(6, 6).applyTo(scalingContainer);
-		
-		Label lblReplicas = new Label(scalingContainer, SWT.NONE);
-		lblReplicas.setText("Replicas:");
-		lblReplicas.setToolTipText("Replicas are the number of copies of an image that will be scheduled to run on OpenShift");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER)
-			.applyTo(lblReplicas);
-		
-		Spinner replicas = new Spinner(scalingContainer, SWT.BORDER);
-		replicas.setMinimum(1);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(replicas);
-		ValueBindingBuilder.bind(WidgetProperties.selection().observe(replicas))
-			.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_REPLICAS)
-			.observe(model))
-			.in(dbc);
-		parent.addControlListener(new ControlListener() {
+        Label separator2 = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).applyTo(separator2);
 
-			@Override
-			public void controlResized(ControlEvent e) {
-				if(parent.isDisposed() || envTableContainer == null || envTableContainer.isDisposed()
-						|| volTableContainer == null || volTableContainer.isDisposed()) {
-					return;
-				}
+        //Scaling
+        Composite scalingContainer = new Composite(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(scalingContainer);
+        GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(scalingContainer);
 
-				int h = parent.getSize().y;
-				if(h > 0) {
-					int envtable = heightScale * 5 + 30; //Minimum height that can be assigned to envVars table.
-					int voltable = heightScale * 4 + 24; //Minimum height that can be assigned to volumes table.
-					int replicas = heightScale * 7; //Preferred height for bottom.
-					int all = envtable + voltable + replicas;
-					int minVolume = heightScale * 2;
-	
-					int hEnvVar = envtable;
-					int hVolumes = voltable;
-					if(h > all) {
-						//In this case the bottom gets its preferred size and the remainder is proportionally shared by tables.
-						hEnvVar = (h - replicas) * envtable / (envtable + voltable);
-						hVolumes = (h - replicas) * voltable / (envtable + voltable);
-					} else if(h > envtable + replicas + minVolume) {
-						//Shrink volumes table, no use to shrink env-var table because of buttons.
-						hVolumes = h - envtable - replicas;
-					} else {
-						//At a smaller available height, all components will be in lack of height evenly.
-						hVolumes = minVolume;
-					}
-					((GridData)envTableContainer.getLayoutData()).heightHint = hEnvVar;
-					((GridData)volTableContainer.getLayoutData()).heightHint = hVolumes;
-					parent.layout(true);
-				}
-			}
+        Label lblReplicas = new Label(scalingContainer, SWT.NONE);
+        lblReplicas.setText("Replicas:");
+        lblReplicas.setToolTipText("Replicas are the number of copies of an image that will be scheduled to run on OpenShift");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(lblReplicas);
 
-			@Override
-			public void controlMoved(ControlEvent e) {
-			}
-		});
-	}
+        Spinner replicas = new Spinner(scalingContainer, SWT.BORDER);
+        replicas.setMinimum(1);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(replicas);
+        ValueBindingBuilder.bind(WidgetProperties.selection().observe(replicas))
+                .to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_REPLICAS).observe(model)).in(dbc);
+        parent.addControlListener(new ControlListener() {
 
-	@SuppressWarnings("unchecked")
-	private void createDataVolumeControl(Composite parent, DataBindingContext dbc) {
-		Composite sectionContainer = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(sectionContainer);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(2).margins(6, 6).applyTo(sectionContainer);
-		
-		Label lblSection = new Label(sectionContainer, SWT.NONE);
-		lblSection.setText("Data volumes:");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL)
-			.span(2,1)
-			.applyTo(lblSection);
-		Composite tableContainer = volTableContainer = new Composite(sectionContainer, SWT.NONE);
-		
-		dataViewer = createDataVolumeTable(tableContainer);
-		dataViewer.setContentProvider(new ObservableListContentProvider());
-		GridDataFactory.fillDefaults()
-			.span(2, 4).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150).applyTo(tableContainer);
-		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(dataViewer))
-			.to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_VOLUME)
-			.observe(model));
-		dataViewer.setInput(BeanProperties.list(
-				IDeploymentConfigPageModel.PROPERTY_VOLUMES).observe(model));
-		
-		Label lblNotice = new Label(sectionContainer, SWT.WRAP);
-		lblNotice.setText(NLS.bind("NOTICE: This image might use an EmptyDir volume. Data in EmptyDir volumes is not persisted across deployments.", model.getResourceName()));
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL)
-			.grab(true, false)
-			.span(2,2)
-			.applyTo(lblNotice);
-	}
-	
-	protected TableViewer createDataVolumeTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		this.dataViewer = new TableViewerBuilder(table, tableContainer)
-				.column(new IColumnLabelProvider<String>() {
-					@Override
-					public String getValue(String label) {
-						return label;
-					}
-				})
-				.name("Container Path").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.buildViewer();
-		dataViewer.setComparator(new ViewerComparator() {
+            @Override
+            public void controlResized(ControlEvent e) {
+                if (parent.isDisposed() || envTableContainer == null || envTableContainer.isDisposed() || volTableContainer == null
+                        || volTableContainer.isDisposed()) {
+                    return;
+                }
 
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				String first = (String) e1;
-				String other = (String) e2;
-				return first.compareTo(other);
-			}
-			
-		});
-		return dataViewer;
-	}
-	
+                int h = parent.getSize().y;
+                if (h > 0) {
+                    int envtable = heightScale * 5 + 30; //Minimum height that can be assigned to envVars table.
+                    int voltable = heightScale * 4 + 24; //Minimum height that can be assigned to volumes table.
+                    int replicas = heightScale * 7; //Preferred height for bottom.
+                    int all = envtable + voltable + replicas;
+                    int minVolume = heightScale * 2;
+
+                    int hEnvVar = envtable;
+                    int hVolumes = voltable;
+                    if (h > all) {
+                        //In this case the bottom gets its preferred size and the remainder is proportionally shared by tables.
+                        hEnvVar = (h - replicas) * envtable / (envtable + voltable);
+                        hVolumes = (h - replicas) * voltable / (envtable + voltable);
+                    } else if (h > envtable + replicas + minVolume) {
+                        //Shrink volumes table, no use to shrink env-var table because of buttons.
+                        hVolumes = h - envtable - replicas;
+                    } else {
+                        //At a smaller available height, all components will be in lack of height evenly.
+                        hVolumes = minVolume;
+                    }
+                    ((GridData)envTableContainer.getLayoutData()).heightHint = hEnvVar;
+                    ((GridData)volTableContainer.getLayoutData()).heightHint = hVolumes;
+                    parent.layout(true);
+                }
+            }
+
+            @Override
+            public void controlMoved(ControlEvent e) {
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void createDataVolumeControl(Composite parent, DataBindingContext dbc) {
+        Composite sectionContainer = new Composite(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(sectionContainer);
+        GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(sectionContainer);
+
+        Label lblSection = new Label(sectionContainer, SWT.NONE);
+        lblSection.setText("Data volumes:");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(2, 1).applyTo(lblSection);
+        Composite tableContainer = volTableContainer = new Composite(sectionContainer, SWT.NONE);
+
+        dataViewer = createDataVolumeTable(tableContainer);
+        dataViewer.setContentProvider(new ObservableListContentProvider());
+        GridDataFactory.fillDefaults().span(2, 4).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
+                .applyTo(tableContainer);
+        ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(dataViewer))
+                .to(BeanProperties.value(IDeploymentConfigPageModel.PROPERTY_SELECTED_VOLUME).observe(model));
+        dataViewer.setInput(BeanProperties.list(IDeploymentConfigPageModel.PROPERTY_VOLUMES).observe(model));
+
+        Label lblNotice = new Label(sectionContainer, SWT.WRAP);
+        lblNotice.setText(
+                NLS.bind("NOTICE: This image might use an EmptyDir volume. Data in EmptyDir volumes is not persisted across deployments.",
+                        model.getResourceName()));
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 2).applyTo(lblNotice);
+    }
+
+    protected TableViewer createDataVolumeTable(Composite tableContainer) {
+        Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+        table.setLinesVisible(true);
+        table.setHeaderVisible(true);
+        this.dataViewer = new TableViewerBuilder(table, tableContainer).column(new IColumnLabelProvider<String>() {
+            @Override
+            public String getValue(String label) {
+                return label;
+            }
+        }).name("Container Path").align(SWT.LEFT).weight(2).minWidth(100).buildColumn().buildViewer();
+        dataViewer.setComparator(new ViewerComparator() {
+
+            @Override
+            public int compare(Viewer viewer, Object e1, Object e2) {
+                String first = (String)e1;
+                String other = (String)e2;
+                return first.compareTo(other);
+            }
+
+        });
+        return dataViewer;
+    }
+
 }

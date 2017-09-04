@@ -20,13 +20,13 @@ import com.openshift.restclient.model.IServicePort;
  * @author jeff.cantrill
  *
  */
-public class ServicePortAdapter extends ObservablePojo implements IServicePort{
-	
+public class ServicePortAdapter extends ObservablePojo implements IServicePort {
+
     /**
      * Name property
      */
     public static final String NAME = "name";
-    
+
     /**
      * Port property
      */
@@ -41,24 +41,24 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
      * Route port property
      */
     public static final String ROUTE_PORT = "routePort";
-	
-	private String name;
-	private int port;
-	private String containerPort;
-	private String protocol;
-	private boolean routePort;
 
-	public ServicePortAdapter(IPort port){
-		name = port.getName();
-		this.port = port.getContainerPort();
-		containerPort = String.valueOf(port.getContainerPort());
-		protocol = port.getProtocol();
-	}
-	
-	public ServicePortAdapter(ServicePortAdapter port) {
-	    this((IServicePort) port);
-		this.routePort = port.isRoutePort();
-	}
+    private String name;
+    private int port;
+    private String containerPort;
+    private String protocol;
+    private boolean routePort;
+
+    public ServicePortAdapter(IPort port) {
+        name = port.getName();
+        this.port = port.getContainerPort();
+        containerPort = String.valueOf(port.getContainerPort());
+        protocol = port.getProtocol();
+    }
+
+    public ServicePortAdapter(ServicePortAdapter port) {
+        this((IServicePort)port);
+        this.routePort = port.isRoutePort();
+    }
 
     public ServicePortAdapter(IServicePort port) {
         this.name = port.getName();
@@ -68,54 +68,54 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
     }
 
     public ServicePortAdapter() {
-	}
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public void setName(String name) {
-		firePropertyChange("name", this.name, this.name = name);
-	}
+    @Override
+    public void setName(String name) {
+        firePropertyChange("name", this.name, this.name = name);
+    }
 
-	@Override
-	public int getPort() {
-		return port;
-	}
+    @Override
+    public int getPort() {
+        return port;
+    }
 
-	@Override
-	public void setPort(int port) {
-		firePropertyChange("port", this.port, this.port = port);
-	}
+    @Override
+    public void setPort(int port) {
+        firePropertyChange("port", this.port, this.port = port);
+    }
 
-	@Override
-	public String getTargetPort() {
-		return containerPort;
-	}
+    @Override
+    public String getTargetPort() {
+        return containerPort;
+    }
 
-	@Override
-	public void setTargetPort(int port) {
-		firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(port));
-	}
-	
-	@Override
-	public void setTargetPort(String intOrString) {
-		firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(intOrString));
-	}
+    @Override
+    public void setTargetPort(int port) {
+        firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(port));
+    }
 
-	@Override
-	public String getProtocol() {
-		return protocol;
-	}
+    @Override
+    public void setTargetPort(String intOrString) {
+        firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(intOrString));
+    }
 
-	@Override
-	public void setProtocol(String proto) {
-		firePropertyChange("protocol", this.protocol, this.protocol = proto);
-	}
+    @Override
+    public String getProtocol() {
+        return protocol;
+    }
 
-	/**
+    @Override
+    public void setProtocol(String proto) {
+        firePropertyChange("protocol", this.protocol, this.protocol = proto);
+    }
+
+    /**
      * @return the routePort
      */
     public boolean isRoutePort() {
@@ -130,56 +130,55 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
     }
 
     @Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + port;
-		result = prime * result + ((containerPort == null) ? 0 : containerPort.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
-		result = prime * result + ((routePort) ? 1231 : 1237);
-		return result;
-	}
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + port;
+        result = prime * result + ((containerPort == null) ? 0 : containerPort.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
+        result = prime * result + ((routePort) ? 1231 : 1237);
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ServicePortAdapter other = (ServicePortAdapter) obj;
-		if (port != other.port)
-			return false;
-		if (containerPort == null) {
-			if (other.containerPort != null)
-				return false;
-		} else if (!containerPort.equals(other.containerPort))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (protocol == null) {
-			if (other.protocol != null)
-				return false;
-		} else if (!protocol.equals(other.protocol))
-			return false;
-		else if (routePort != other.routePort)
-		        return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ServicePortAdapter other = (ServicePortAdapter)obj;
+        if (port != other.port)
+            return false;
+        if (containerPort == null) {
+            if (other.containerPort != null)
+                return false;
+        } else if (!containerPort.equals(other.containerPort))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (protocol == null) {
+            if (other.protocol != null)
+                return false;
+        } else if (!protocol.equals(other.protocol))
+            return false;
+        else if (routePort != other.routePort)
+            return false;
+        return true;
+    }
 
     /**
      * For better test reporting
      */
     @Override
     public String toString() {
-        return "ServicePortAdapter [name=" + name + ", port=" + port + ", containerPort=" + containerPort
-                + ", protocol=" + protocol + ", routePort=" + routePort + "]";
+        return "ServicePortAdapter [name=" + name + ", port=" + port + ", containerPort=" + containerPort + ", protocol=" + protocol
+                + ", routePort=" + routePort + "]";
     }
-	
-	
+
 }

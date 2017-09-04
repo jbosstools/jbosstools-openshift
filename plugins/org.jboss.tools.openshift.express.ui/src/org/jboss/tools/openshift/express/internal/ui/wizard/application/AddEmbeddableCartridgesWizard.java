@@ -27,36 +27,31 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public class AddEmbeddableCartridgesWizard extends AbstractOpenShiftWizard<EmbeddedCartridgesWizardModel> {
 
-	private EmbeddedCartridgesWizardPage embeddedCartridgesWizardPage;
+    private EmbeddedCartridgesWizardPage embeddedCartridgesWizardPage;
 
-	public AddEmbeddableCartridgesWizard(IOpenShiftApplicationWizardModel wizardModel) {
-		super("Add Embedded Cartridges", 
-				new EmbeddedCartridgesWizardModel(
-						wizardModel.getEmbeddedCartridges()
-						, CollectionUtils.addTo(
-								// add code anything
-								(ICartridge) new CodeAnythingCartridge(),
-								// remove embedded cartridges
-								(List<ICartridge>) CollectionUtils.removeAll(
-										wizardModel.getEmbeddedCartridges(),
-										new ArrayList<>(wizardModel.getAvailableEmbeddableCartridges())))
-						, new NewApplicationProperties(wizardModel)
-						, wizardModel.getDomain()
-						, wizardModel.getConnection()
-				));
-	}
+    public AddEmbeddableCartridgesWizard(IOpenShiftApplicationWizardModel wizardModel) {
+        super("Add Embedded Cartridges",
+                new EmbeddedCartridgesWizardModel(wizardModel.getEmbeddedCartridges(),
+                        CollectionUtils.addTo(
+                                // add code anything
+                                (ICartridge)new CodeAnythingCartridge(),
+                                // remove embedded cartridges
+                                (List<ICartridge>)CollectionUtils.removeAll(wizardModel.getEmbeddedCartridges(),
+                                        new ArrayList<>(wizardModel.getAvailableEmbeddableCartridges()))),
+                        new NewApplicationProperties(wizardModel), wizardModel.getDomain(), wizardModel.getConnection()));
+    }
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
 
-	@Override
-	public void addPages() {
-		addPage(this.embeddedCartridgesWizardPage = new EmbeddedCartridgesWizardPage(getModel(), this));
-	}
+    @Override
+    public void addPages() {
+        addPage(this.embeddedCartridgesWizardPage = new EmbeddedCartridgesWizardPage(getModel(), this));
+    }
 
-	public Set<ICartridge> getCheckedCartridges() {
-		return embeddedCartridgesWizardPage.getCheckedCartridges();
-	}
+    public Set<ICartridge> getCheckedCartridges() {
+        return embeddedCartridgesWizardPage.getCheckedCartridges();
+    }
 }

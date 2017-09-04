@@ -18,14 +18,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
  */
 public interface IImportApplicationStrategy {
 
-	/**
-	 * Executes this import operation and returns the projects that were
-	 * imported.
-	 * 
-	 * @param monitor the monitor to report progress to
-	 * @return the list of projects that were imported to the workspace.
-	 * @throws Exception
-	 */
-	public IProject execute(IProgressMonitor monitor) throws Exception;
+    /**
+     * Executes this import operation and returns the projects that were
+     * imported.
+     * 
+     * @param monitor the monitor to report progress to
+     * @return the list of projects that were imported to the workspace.
+     * @throws Exception
+     */
+    public IProject execute(IProgressMonitor monitor) throws Exception;
 
 }

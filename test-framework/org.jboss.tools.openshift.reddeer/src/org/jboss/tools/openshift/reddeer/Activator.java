@@ -15,10 +15,10 @@ import org.osgi.framework.BundleContext;
 
 public class Activator extends AbstractUIPlugin {
 
-	public static final String PLUGIN_ID = "org.jboss.tools.openshift.reddeer"; 
+	public static final String PLUGIN_ID = "org.jboss.tools.openshift.reddeer";
 
 	private static Activator plugin;
-	
+
 	public Activator() {
 	}
 

@@ -41,159 +41,146 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 public class SelectProjectComponentBuilder {
-	String textLabel = "Use existing workspace project:";
-	String browseLabel = "Browse...";
-	String errorText = "Select an existing project";
-	int hSpan = 1;
-	boolean required = true;
+    String textLabel = "Use existing workspace project:";
+    String browseLabel = "Browse...";
+    String errorText = "Select an existing project";
+    int hSpan = 1;
+    boolean required = true;
 
-	IObservableValue<?> eclipseProjectObservable;
-	SelectionListener selectionListener;
+    IObservableValue<?> eclipseProjectObservable;
+    SelectionListener selectionListener;
 
-	ISWTObservableValue projectNameTextObservable;
+    ISWTObservableValue projectNameTextObservable;
 
-	public SelectProjectComponentBuilder() {}
+    public SelectProjectComponentBuilder() {
+    }
 
-	public void build(Composite container, DataBindingContext dbc) {
-		Label existingProjectLabel = new Label(container, SWT.NONE);
-		existingProjectLabel.setText("Eclipse Project: ");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.applyTo(existingProjectLabel);
-		
-		final Text existingProjectNameText = new Text(container, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.span(hSpan, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(existingProjectNameText);
-		
-		projectNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingProjectNameText);
+    public void build(Composite container, DataBindingContext dbc) {
+        Label existingProjectLabel = new Label(container, SWT.NONE);
+        existingProjectLabel.setText("Eclipse Project: ");
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(existingProjectLabel);
 
-		Binding eclipseProjectBinding = ValueBindingBuilder
-			.bind(projectNameTextObservable)
-			.validatingAfterConvert(new IValidator() {
-				@Override
-				public IStatus validate(Object value) {
-					if(value instanceof String) {
-						return ValidationStatus.ok();
-					} else if(value == null) {
-						if(required) {
-							return ValidationStatus.error("Select an existing project");
-						} else if(!StringUtils.isEmpty(existingProjectNameText.getText())) {
-							return ValidationStatus.error(NLS.bind("Project {0} does not exist", existingProjectNameText.getText()));
-						}
-					}
-					return ValidationStatus.ok();
-				}
-			})
-			.converting(new Converter(String.class, IProject.class) {
-				@Override
-				public Object convert(Object fromObject) {
-					String name = (String)fromObject;
-					return ProjectUtils.getProject(name);
-				}
-			})
-			.to(eclipseProjectObservable)
-			.converting(new Converter(IProject.class, String.class) {
+        final Text existingProjectNameText = new Text(container, SWT.BORDER);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(hSpan, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+                .applyTo(existingProjectNameText);
 
-				@Override
-				public Object convert(Object fromObject) {
-					return fromObject == null ? "" : ((IProject)fromObject).getName();
-				}
-			})
-			.in(dbc);
-		ControlDecorationSupport.create(
-				eclipseProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+        projectNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingProjectNameText);
 
-		// project name content assist
-		ControlDecoration dec = new ControlDecoration(existingProjectNameText, SWT.TOP | SWT.RIGHT);
+        Binding eclipseProjectBinding = ValueBindingBuilder.bind(projectNameTextObservable).validatingAfterConvert(new IValidator() {
+            @Override
+            public IStatus validate(Object value) {
+                if (value instanceof String) {
+                    return ValidationStatus.ok();
+                } else if (value == null) {
+                    if (required) {
+                        return ValidationStatus.error("Select an existing project");
+                    } else if (!StringUtils.isEmpty(existingProjectNameText.getText())) {
+                        return ValidationStatus.error(NLS.bind("Project {0} does not exist", existingProjectNameText.getText()));
+                    }
+                }
+                return ValidationStatus.ok();
+            }
+        }).converting(new Converter(String.class, IProject.class) {
+            @Override
+            public Object convert(Object fromObject) {
+                String name = (String)fromObject;
+                return ProjectUtils.getProject(name);
+            }
+        }).to(eclipseProjectObservable).converting(new Converter(IProject.class, String.class) {
 
-		FieldDecoration contentProposalFieldIndicator =
-				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
-		dec.setImage(contentProposalFieldIndicator.getImage());
-		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
-		dec.setShowOnlyOnFocus(true);
+            @Override
+            public Object convert(Object fromObject) {
+                return fromObject == null ? "" : ((IProject)fromObject).getName();
+            }
+        }).in(dbc);
+        ControlDecorationSupport.create(eclipseProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 
-		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllAccessibleProjectNames());
+        // project name content assist
+        ControlDecoration dec = new ControlDecoration(existingProjectNameText, SWT.TOP | SWT.RIGHT);
 
-		// browse projects
-		Button browseProjectsButton = new Button(container, SWT.NONE);
-		browseProjectsButton.setText("Browse...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER)
-				.grab(false, false)
-				.applyTo(browseProjectsButton);
-		UIUtils.setDefaultButtonWidth(browseProjectsButton);
-		browseProjectsButton.addSelectionListener(selectionListener);
-	}
+        FieldDecoration contentProposalFieldIndicator = FieldDecorationRegistry.getDefault()
+                .getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+        dec.setImage(contentProposalFieldIndicator.getImage());
+        dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
+        dec.setShowOnlyOnFocus(true);
 
-	/**
-	 * Set value of label at text input. Has only effect if called before build().
-	 *  
-	 * @param label
-	 * @return self for chaining
-	 */
-	public SelectProjectComponentBuilder setTextLabel(String label) {
-		textLabel = label;
-		return this;
-	}
+        new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllAccessibleProjectNames());
 
-	/**
-	 * Set value of model observable. Has only effect if called before build().
-	 *  
-	 * @param label
-	 * @return self for chaining
-	 */
-	public SelectProjectComponentBuilder setEclipseProjectObservable(IObservableValue<?> eclipseProjectObservable) {
-		this.eclipseProjectObservable = eclipseProjectObservable;
-		return this;
-	}
+        // browse projects
+        Button browseProjectsButton = new Button(container, SWT.NONE);
+        browseProjectsButton.setText("Browse...");
+        GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).applyTo(browseProjectsButton);
+        UIUtils.setDefaultButtonWidth(browseProjectsButton);
+        browseProjectsButton.addSelectionListener(selectionListener);
+    }
 
-	/**
-	 * Set number of columns in the grid to take by text input. 
-	 * Grid needs one column for label, hSpan columns for text input, and one column for browse button.
-	 * Has only effect if called before build().
-	 *  
-	 * @param label
-	 * @return
-	 */
-	public SelectProjectComponentBuilder setHorisontalSpan(int hSpan) {
-		this.hSpan = hSpan;
-		return this;
-	}
+    /**
+     * Set value of label at text input. Has only effect if called before build().
+     *  
+     * @param label
+     * @return self for chaining
+     */
+    public SelectProjectComponentBuilder setTextLabel(String label) {
+        textLabel = label;
+        return this;
+    }
 
-	/**
-	 * By default input is required.
-	 * Set to false if selecting a project is not required.
-	 * Has only effect if called before build().
-	 * @param required
-	 * @return self for chaining
-	 */
-	public SelectProjectComponentBuilder setRequired(boolean required) {
-		this.required = required;
-		return this;
-	}
+    /**
+     * Set value of model observable. Has only effect if called before build().
+     *  
+     * @param label
+     * @return self for chaining
+     */
+    public SelectProjectComponentBuilder setEclipseProjectObservable(IObservableValue<?> eclipseProjectObservable) {
+        this.eclipseProjectObservable = eclipseProjectObservable;
+        return this;
+    }
 
-	/**
-	 * Set selection listener that will run a customized dialog and consume selected project.
-	 * Has only effect if called before build().
-	 *  
-	 * @param label
-	 * @return self for chaining
-	 */
-	public SelectProjectComponentBuilder setSelectionListener(SelectionListener listener) {
-		selectionListener = listener;
-		return this;
-	}
+    /**
+     * Set number of columns in the grid to take by text input. 
+     * Grid needs one column for label, hSpan columns for text input, and one column for browse button.
+     * Has only effect if called before build().
+     *  
+     * @param label
+     * @return
+     */
+    public SelectProjectComponentBuilder setHorisontalSpan(int hSpan) {
+        this.hSpan = hSpan;
+        return this;
+    }
 
-	/**
-	 * Returns swt observable for text input. Has only effect if called after build().
-	 *  
-	 * @param label
-	 * @return
-	 */
-	public ISWTObservableValue getProjectNameTextObservable() {
-		return projectNameTextObservable;
-	}
-	
+    /**
+     * By default input is required.
+     * Set to false if selecting a project is not required.
+     * Has only effect if called before build().
+     * @param required
+     * @return self for chaining
+     */
+    public SelectProjectComponentBuilder setRequired(boolean required) {
+        this.required = required;
+        return this;
+    }
+
+    /**
+     * Set selection listener that will run a customized dialog and consume selected project.
+     * Has only effect if called before build().
+     *  
+     * @param label
+     * @return self for chaining
+     */
+    public SelectProjectComponentBuilder setSelectionListener(SelectionListener listener) {
+        selectionListener = listener;
+        return this;
+    }
+
+    /**
+     * Returns swt observable for text input. Has only effect if called after build().
+     *  
+     * @param label
+     * @return
+     */
+    public ISWTObservableValue getProjectNameTextObservable() {
+        return projectNameTextObservable;
+    }
+
 }

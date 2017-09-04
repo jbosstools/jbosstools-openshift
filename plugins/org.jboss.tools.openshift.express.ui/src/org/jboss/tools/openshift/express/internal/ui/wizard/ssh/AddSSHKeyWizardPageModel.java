@@ -25,42 +25,41 @@ import com.openshift.client.SSHPublicKey;
  */
 public class AddSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 
-	public static final String PROPERTY_PUBLICKEY_PATH = "publicKeyPath";
-	
-	private String keyPath;
+    public static final String PROPERTY_PUBLICKEY_PATH = "publicKeyPath";
 
-	private IOpenShiftSSHKey key;
-	
-	public AddSSHKeyWizardPageModel(ExpressConnection user) {
-		super(user);
-	}
+    private String keyPath;
 
-	public String getPublicKeyPath() {
-		return keyPath;
-	}
+    private IOpenShiftSSHKey key;
 
-	@Override
-	public File getPublicKey() {
-		return new File(keyPath);
-	}
+    public AddSSHKeyWizardPageModel(ExpressConnection user) {
+        super(user);
+    }
 
-	public void setPublicKeyPath(String keyPath) {
-		firePropertyChange(PROPERTY_PUBLICKEY_PATH, this.keyPath, this.keyPath = keyPath);
-	}
+    public String getPublicKeyPath() {
+        return keyPath;
+    }
 
-	@Override
-	public boolean hasPublicKey(String publicKeyContent) {
-		return getConnection().hasSSHPublicKey(publicKeyContent);
-	}	
-	
-	@Override
-	public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
-		return this.key = getConnection().putSSHKey(getName(), new SSHPublicKey(getPublicKey()));
-	}
+    @Override
+    public File getPublicKey() {
+        return new File(keyPath);
+    }
 
-	@Override
-	public IOpenShiftSSHKey getSSHKey() {
-		return key;
-	}
+    public void setPublicKeyPath(String keyPath) {
+        firePropertyChange(PROPERTY_PUBLICKEY_PATH, this.keyPath, this.keyPath = keyPath);
+    }
+
+    @Override
+    public boolean hasPublicKey(String publicKeyContent) {
+        return getConnection().hasSSHPublicKey(publicKeyContent);
+    }
+
+    @Override
+    public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
+        return this.key = getConnection().putSSHKey(getName(), new SSHPublicKey(getPublicKey()));
+    }
+
+    @Override
+    public IOpenShiftSSHKey getSSHKey() {
+        return key;
+    }
 }
-

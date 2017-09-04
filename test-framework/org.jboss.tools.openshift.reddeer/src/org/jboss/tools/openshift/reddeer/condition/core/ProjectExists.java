@@ -22,7 +22,7 @@ import com.openshift.restclient.ResourceKind;
  *
  */
 public class ProjectExists extends NamedResourceExist {
-	
+
 	public ProjectExists(String name, Connection connection) {
 		super(ResourceKind.PROJECT, name, null, connection);
 	}

@@ -46,196 +46,196 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Jeff Maury
  */
 public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
-	private static final List<String> TERMINATED_STATUS = Arrays.asList("Complete", "Failed", "Error", "Cancelled");
+    private static final List<String> TERMINATED_STATUS = Arrays.asList("Complete", "Failed", "Error", "Cancelled");
 
-	private OpenshiftUIModel model;
-	private IElementListener listener;
-	private StructuredViewer viewer;
-	private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs = new HashMap<Object, BaseExplorerContentProvider.LoadingStub>();
+    private OpenshiftUIModel model;
+    private IElementListener listener;
+    private StructuredViewer viewer;
+    private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs = new HashMap<Object, BaseExplorerContentProvider.LoadingStub>();
 
-	public OpenShiftExplorerContentProvider() {
-		this(OpenshiftUIModel.getInstance());
-	}
-	
-	/**
-	 * Constructor for testing purposes to inject mocked OpenshiftUIModel
-	 */
-	protected OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
-		this.model = model;
-		listener = new IElementListener() {
+    public OpenShiftExplorerContentProvider() {
+        this(OpenshiftUIModel.getInstance());
+    }
 
-			@Override
-			public void elementChanged(IOpenshiftUIElement<?, ?> element) {
-				if (element instanceof OpenshiftUIModel) {
-					refreshViewer(ConnectionsRegistrySingleton.getInstance());
-				} else {
-					refreshViewer(element);
-				}
-				if (element.getWrapped() instanceof IRoute) {
-					viewer.update(element.getParent(), null);
-				}
-			}
-		};
-		model.addListener(listener);
-	}
+    /**
+     * Constructor for testing purposes to inject mocked OpenshiftUIModel
+     */
+    protected OpenShiftExplorerContentProvider(OpenshiftUIModel model) {
+        this.model = model;
+        listener = new IElementListener() {
 
-	protected void refreshViewer(Object element) {
-		if (viewer != null) {
-			viewer.refresh(element);
-		}
-	}
+            @Override
+            public void elementChanged(IOpenshiftUIElement<?, ?> element) {
+                if (element instanceof OpenshiftUIModel) {
+                    refreshViewer(ConnectionsRegistrySingleton.getInstance());
+                } else {
+                    refreshViewer(element);
+                }
+                if (element.getWrapped() instanceof IRoute) {
+                    viewer.update(element.getParent(), null);
+                }
+            }
+        };
+        model.addListener(listener);
+    }
 
-	protected void asyncExec(Runnable r) {
-		if (viewer != null) {
-			Control control = viewer.getControl();
-			if (control != null && !control.isDisposed()) {
-				control.getDisplay().asyncExec(r);
-			}
-		}
-	}
+    protected void refreshViewer(Object element) {
+        if (viewer != null) {
+            viewer.refresh(element);
+        }
+    }
 
-	@Override
-	public void dispose() {
-		model.removeListener(listener);
-	}
-
-	/**
-	 * Called to obtain the root elements of the tree viewer, which should be
-	 * Connections
-	 */
-	@Override
-	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof ConnectionsRegistry) {
-			return model.getConnections().toArray();
-		} else {
-			return new Object[0];
-		}
-	}
-
-	private void handleLoadingException(Object parentElement, Throwable e) {
-		LoadingStub stub = makeStub(parentElement);
-		stub.add(e);
-		asyncExec(() -> refreshViewer(parentElement));
-	}
-
-	private LoadingStub makeStub(Object parentElement) {
-		synchronized (stubs) {
-			LoadingStub stub = stubs.get(parentElement);
-			if (stub == null) {
-				stub = new LoadingStub();
-				stubs.put(parentElement, stub);
-			}
-			return stub;
-		}
-	}
-	
-	private LoadingStub removeStub(Object parentElement) {
-		synchronized (stubs) {
-			return stubs.remove(parentElement);
-		}
-	}
-
-	/**
-	 * Called to obtain the children of any element in the tree viewer
-	 */
-	@Override
-	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IConnectionWrapper) {
-			return getConnectionChildren((IConnectionWrapper) parentElement);
-		} else if (parentElement instanceof IProjectWrapper) {
-			return getProjectChildren((IProjectWrapper) parentElement);
-		} else if (parentElement instanceof IServiceWrapper) {
-			return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>) parentElement);
-		} else if (parentElement instanceof IReplicationControllerWrapper) {
-		    return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>) parentElement);
-		} else if (parentElement instanceof LoadingStub) {
-			return ((LoadingStub) parentElement).getChildren();
-		}
-		return new Object[0];
-	}
-	
-	protected Object[] getConnectionChildren(IConnectionWrapper connection) {
-		switch(connection.getState()) {
-		case LOADED:
-			removeStub(connection);
-			Object[] result = connection.getResources().toArray();
-			if (result == null || result.length == 0) {
-				result = new Object[] { new NewProjectLinkNode((Connection) connection.getWrapped()) };
-			}
-			return result;
-		case LOAD_STOPPED:
-			LoadingStub stub = removeStub(connection);
-			if (stub != null) {
-				return stub.getChildren();
-			}
-		default:
-			connection.load(e -> {
-				handleLoadingException(connection, e);
-			});
-			return new Object[] { makeStub(connection) };
-		}
-	}
-	
-	protected Object[] getProjectChildren(IProjectWrapper project) {
-		switch(project.getState()) {
-		case LOADED:
-			removeStub(project);
-			Collection<IResourceWrapper<?, ?>> services = project.getResourcesOfKind(ResourceKind.SERVICE);
-			Collection<IReplicationControllerWrapper> dcs = project.getResourcesOfType(IReplicationControllerWrapper.class);
-			services.addAll(dcs);
-			return services.toArray();
-		case LOAD_STOPPED:
-			LoadingStub stub = removeStub(project);
-			if (stub != null) {
-				return stub.getChildren();
-			}
-		default:
-			project.load(e -> {
-				handleLoadingException(project, e);
-			});
-			return new Object[] { makeStub(project) };
-		}
-	}
-	
-	protected Object[] getContainerChildren(IResourceContainer<?, IOpenshiftUIElement<?,?>> service) {
-		ArrayList<Object> result = new ArrayList<>();
-		service.getResourcesOfKind(ResourceKind.BUILD).stream()
-				.filter(b -> !isTerminatedBuild((IBuild) b.getWrapped())).forEach(r -> result.add(r));
-		service.getResourcesOfKind(ResourceKind.POD).stream()
-				.filter(p -> !ResourceUtils.isBuildPod((IPod) p.getWrapped())).forEach(r -> result.add(r));
-		return result.toArray();
-	}
+    protected void asyncExec(Runnable r) {
+        if (viewer != null) {
+            Control control = viewer.getControl();
+            if (control != null && !control.isDisposed()) {
+                control.getDisplay().asyncExec(r);
+            }
+        }
+    }
 
     @Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		// non-structured viewer would be a configuration problem. Crash!
-		this.viewer = (StructuredViewer) viewer;
-	}
+    public void dispose() {
+        model.removeListener(listener);
+    }
 
-	private boolean isTerminatedBuild(IBuild build) {
-		String phase = build.getStatus();
-		return TERMINATED_STATUS.contains(phase);
-	}
+    /**
+     * Called to obtain the root elements of the tree viewer, which should be
+     * Connections
+     */
+    @Override
+    public Object[] getElements(Object inputElement) {
+        if (inputElement instanceof ConnectionsRegistry) {
+            return model.getConnections().toArray();
+        } else {
+            return new Object[0];
+        }
+    }
 
-	@Override
-	public Object getParent(Object element) {
-		if (element instanceof IConnectionWrapper) {
-			return ConnectionsRegistrySingleton.getInstance();
-		}
-		if (element instanceof IOpenshiftUIElement<?, ?>) {
-			return ((IOpenshiftUIElement<?, ?>) element).getParent();
-		}
-		return null;
-	}
+    private void handleLoadingException(Object parentElement, Throwable e) {
+        LoadingStub stub = makeStub(parentElement);
+        stub.add(e);
+        asyncExec(() -> refreshViewer(parentElement));
+    }
 
-	@Override
-	public boolean hasChildren(Object element) {
-		if (element instanceof LoadingStub) {
-			return ((LoadingStub) element).hasChildren();
-		}
-		return element instanceof ConnectionsRegistry || element instanceof OpenshiftUIModel
-				|| element instanceof IConnectionWrapper || element instanceof IProjectWrapper
-				|| element instanceof IServiceWrapper || element instanceof IReplicationControllerWrapper;
-	}
+    private LoadingStub makeStub(Object parentElement) {
+        synchronized (stubs) {
+            LoadingStub stub = stubs.get(parentElement);
+            if (stub == null) {
+                stub = new LoadingStub();
+                stubs.put(parentElement, stub);
+            }
+            return stub;
+        }
+    }
+
+    private LoadingStub removeStub(Object parentElement) {
+        synchronized (stubs) {
+            return stubs.remove(parentElement);
+        }
+    }
+
+    /**
+     * Called to obtain the children of any element in the tree viewer
+     */
+    @Override
+    public Object[] getChildren(Object parentElement) {
+        if (parentElement instanceof IConnectionWrapper) {
+            return getConnectionChildren((IConnectionWrapper)parentElement);
+        } else if (parentElement instanceof IProjectWrapper) {
+            return getProjectChildren((IProjectWrapper)parentElement);
+        } else if (parentElement instanceof IServiceWrapper) {
+            return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>)parentElement);
+        } else if (parentElement instanceof IReplicationControllerWrapper) {
+            return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>)parentElement);
+        } else if (parentElement instanceof LoadingStub) {
+            return ((LoadingStub)parentElement).getChildren();
+        }
+        return new Object[0];
+    }
+
+    protected Object[] getConnectionChildren(IConnectionWrapper connection) {
+        switch (connection.getState()) {
+        case LOADED:
+            removeStub(connection);
+            Object[] result = connection.getResources().toArray();
+            if (result == null || result.length == 0) {
+                result = new Object[] { new NewProjectLinkNode((Connection)connection.getWrapped()) };
+            }
+            return result;
+        case LOAD_STOPPED:
+            LoadingStub stub = removeStub(connection);
+            if (stub != null) {
+                return stub.getChildren();
+            }
+        default:
+            connection.load(e -> {
+                handleLoadingException(connection, e);
+            });
+            return new Object[] { makeStub(connection) };
+        }
+    }
+
+    protected Object[] getProjectChildren(IProjectWrapper project) {
+        switch (project.getState()) {
+        case LOADED:
+            removeStub(project);
+            Collection<IResourceWrapper<?, ?>> services = project.getResourcesOfKind(ResourceKind.SERVICE);
+            Collection<IReplicationControllerWrapper> dcs = project.getResourcesOfType(IReplicationControllerWrapper.class);
+            services.addAll(dcs);
+            return services.toArray();
+        case LOAD_STOPPED:
+            LoadingStub stub = removeStub(project);
+            if (stub != null) {
+                return stub.getChildren();
+            }
+        default:
+            project.load(e -> {
+                handleLoadingException(project, e);
+            });
+            return new Object[] { makeStub(project) };
+        }
+    }
+
+    protected Object[] getContainerChildren(IResourceContainer<?, IOpenshiftUIElement<?, ?>> service) {
+        ArrayList<Object> result = new ArrayList<>();
+        service.getResourcesOfKind(ResourceKind.BUILD).stream().filter(b -> !isTerminatedBuild((IBuild)b.getWrapped()))
+                .forEach(r -> result.add(r));
+        service.getResourcesOfKind(ResourceKind.POD).stream().filter(p -> !ResourceUtils.isBuildPod((IPod)p.getWrapped()))
+                .forEach(r -> result.add(r));
+        return result.toArray();
+    }
+
+    @Override
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+        // non-structured viewer would be a configuration problem. Crash!
+        this.viewer = (StructuredViewer)viewer;
+    }
+
+    private boolean isTerminatedBuild(IBuild build) {
+        String phase = build.getStatus();
+        return TERMINATED_STATUS.contains(phase);
+    }
+
+    @Override
+    public Object getParent(Object element) {
+        if (element instanceof IConnectionWrapper) {
+            return ConnectionsRegistrySingleton.getInstance();
+        }
+        if (element instanceof IOpenshiftUIElement<?, ?>) {
+            return ((IOpenshiftUIElement<?, ?>)element).getParent();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean hasChildren(Object element) {
+        if (element instanceof LoadingStub) {
+            return ((LoadingStub)element).hasChildren();
+        }
+        return element instanceof ConnectionsRegistry || element instanceof OpenshiftUIModel || element instanceof IConnectionWrapper
+                || element instanceof IProjectWrapper || element instanceof IServiceWrapper
+                || element instanceof IReplicationControllerWrapper;
+    }
 
 }

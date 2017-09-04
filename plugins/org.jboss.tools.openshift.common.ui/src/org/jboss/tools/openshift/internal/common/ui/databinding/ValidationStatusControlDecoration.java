@@ -27,62 +27,61 @@ import org.eclipse.swt.widgets.Control;
  */
 public class ValidationStatusControlDecoration {
 
-	private IObservableValue validationStatus;
+    private IObservableValue validationStatus;
 
-	public ValidationStatusControlDecoration(ValidationStatusProvider provider) {
-		this.validationStatus = provider.getValidationStatus();
-	}
+    public ValidationStatusControlDecoration(ValidationStatusProvider provider) {
+        this.validationStatus = provider.getValidationStatus();
+    }
 
-	public void showFor(Control control, int position) {
-		ControlDecoration decoration = createDecoration(control, position);
-		IValueChangeListener validationStatusListener = onValidationStatusChanged(decoration);
-		
-		validationStatus.addValueChangeListener(validationStatusListener);
-		control.addDisposeListener(onControlDisposed(validationStatusListener));
+    public void showFor(Control control, int position) {
+        ControlDecoration decoration = createDecoration(control, position);
+        IValueChangeListener validationStatusListener = onValidationStatusChanged(decoration);
 
-	}
-	
-	private ControlDecoration createDecoration(Control control, int position) {
-		ControlDecoration controlDecoration = new ControlDecoration(control, position);
-		FieldDecoration fieldDecoration =
-				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
-		controlDecoration.setImage(fieldDecoration.getImage());
-		if (validationStatus.getValue() instanceof IStatus) {
-			showDecoration(controlDecoration, (IStatus) validationStatus.getValue());
-		}
-		return controlDecoration;
-	}
+        validationStatus.addValueChangeListener(validationStatusListener);
+        control.addDisposeListener(onControlDisposed(validationStatusListener));
 
-	private DisposeListener onControlDisposed(final IValueChangeListener validationStatusListener) {
-		return new DisposeListener() {
-			
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				validationStatus.removeValueChangeListener(validationStatusListener);
-			}
-		};
-	}
+    }
 
-	private IValueChangeListener onValidationStatusChanged(final ControlDecoration controlDecoration) {
-		return new IValueChangeListener() {
+    private ControlDecoration createDecoration(Control control, int position) {
+        ControlDecoration controlDecoration = new ControlDecoration(control, position);
+        FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
+        controlDecoration.setImage(fieldDecoration.getImage());
+        if (validationStatus.getValue() instanceof IStatus) {
+            showDecoration(controlDecoration, (IStatus)validationStatus.getValue());
+        }
+        return controlDecoration;
+    }
 
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				if (!(event.diff.getNewValue() instanceof IStatus)) {
-					return;
-				}
-				IStatus validationStatus = (IStatus) event.diff.getNewValue();
-				showDecoration(controlDecoration, validationStatus);
-			}
-		};
-	}
+    private DisposeListener onControlDisposed(final IValueChangeListener validationStatusListener) {
+        return new DisposeListener() {
 
-	private void showDecoration(final ControlDecoration controlDecoration, IStatus validationStatus) {
-		if (validationStatus.isOK()) {
-			controlDecoration.hide();
-		} else {
-			controlDecoration.show();
-		}
-	}
+            @Override
+            public void widgetDisposed(DisposeEvent e) {
+                validationStatus.removeValueChangeListener(validationStatusListener);
+            }
+        };
+    }
+
+    private IValueChangeListener onValidationStatusChanged(final ControlDecoration controlDecoration) {
+        return new IValueChangeListener() {
+
+            @Override
+            public void handleValueChange(ValueChangeEvent event) {
+                if (!(event.diff.getNewValue() instanceof IStatus)) {
+                    return;
+                }
+                IStatus validationStatus = (IStatus)event.diff.getNewValue();
+                showDecoration(controlDecoration, validationStatus);
+            }
+        };
+    }
+
+    private void showDecoration(final ControlDecoration controlDecoration, IStatus validationStatus) {
+        if (validationStatus.isOK()) {
+            controlDecoration.hide();
+        } else {
+            controlDecoration.show();
+        }
+    }
 
 }

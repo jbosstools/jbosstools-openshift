@@ -12,15 +12,15 @@ package org.jboss.tools.openshift.express.internal.ui.propertytable;
 
 public interface IProperty {
 
-	public String getName();
+    public String getName();
 
-	public String getValue();
+    public String getValue();
 
-	public ContainerElement getParent();
+    public ContainerElement getParent();
 
-	public boolean isLink();
+    public boolean isLink();
 
-	public boolean hasChildren();
+    public boolean hasChildren();
 
-	public Object[] getChildren();
+    public Object[] getChildren();
 }

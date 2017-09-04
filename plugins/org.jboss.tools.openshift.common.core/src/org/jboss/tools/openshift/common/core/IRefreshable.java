@@ -10,5 +10,5 @@ package org.jboss.tools.openshift.common.core;
 
 public interface IRefreshable {
 
-	void refresh();
+    void refresh();
 }

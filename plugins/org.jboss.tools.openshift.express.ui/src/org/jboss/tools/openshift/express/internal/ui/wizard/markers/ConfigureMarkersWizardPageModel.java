@@ -28,91 +28,89 @@ import org.jboss.tools.openshift.express.internal.core.util.DiffUtils;
  */
 public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_AVAILABLE_MARKERS = "availableMarkers";
-	public static final String PROPERTY_CHECKED_MARKERS = "checkedMarkers";
-	public static final String PROPERTY_SELECTED_MARKER = "selectedMarker";
-	
-	private List<IOpenShiftMarker> availableMarkers;
-	private Set<IOpenShiftMarker> presentMarkers = new HashSet<>();
-	private Set<IOpenShiftMarker> checkedMarkers = new HashSet<>();
-	private IOpenShiftMarker selectedMarker;
-	private IProject project;
+    public static final String PROPERTY_AVAILABLE_MARKERS = "availableMarkers";
+    public static final String PROPERTY_CHECKED_MARKERS = "checkedMarkers";
+    public static final String PROPERTY_SELECTED_MARKER = "selectedMarker";
 
-	public ConfigureMarkersWizardPageModel(IProject project) {
-		this.project = project;
-	}
-	
-	public void loadMarkers() throws CoreException {
-		OpenShiftMarkers markers = new OpenShiftMarkers(project);
-		setAvailableMarkers(markers.getAll());
-		this.presentMarkers = toSet(markers.getPresent());
-		setCheckedMarkers(presentMarkers);
-	}
-	
-	private Set<IOpenShiftMarker> toSet(List<IOpenShiftMarker> markers) {
-		Set<IOpenShiftMarker> markersSet = new HashSet<>();
-		markersSet.addAll(markers);
-		return markersSet; 
-	}
-	
-	public void setAvailableMarkers(List<IOpenShiftMarker> markers) {
-		firePropertyChange(
-				PROPERTY_AVAILABLE_MARKERS, this.availableMarkers, this.availableMarkers = markers);
-	}
+    private List<IOpenShiftMarker> availableMarkers;
+    private Set<IOpenShiftMarker> presentMarkers = new HashSet<>();
+    private Set<IOpenShiftMarker> checkedMarkers = new HashSet<>();
+    private IOpenShiftMarker selectedMarker;
+    private IProject project;
 
-	public List<IOpenShiftMarker> getAvailableMarkers() {
-		return availableMarkers;
-	}
+    public ConfigureMarkersWizardPageModel(IProject project) {
+        this.project = project;
+    }
 
-	public Set<IOpenShiftMarker> getCheckedMarkers() {
-		return checkedMarkers;
-	}
+    public void loadMarkers() throws CoreException {
+        OpenShiftMarkers markers = new OpenShiftMarkers(project);
+        setAvailableMarkers(markers.getAll());
+        this.presentMarkers = toSet(markers.getPresent());
+        setCheckedMarkers(presentMarkers);
+    }
 
-	public void setCheckedMarkers(Set<IOpenShiftMarker> markers) {
-		Set<IOpenShiftMarker> oldValue = getCheckedMarkers();
-		if (markers != checkedMarkers) {
-			checkedMarkers.clear();
-			checkedMarkers.addAll(markers);
-		}
-		firePropertyChange(PROPERTY_CHECKED_MARKERS, oldValue, checkedMarkers);
-	}
-	
-	public void setSelectedMarker(IOpenShiftMarker marker) {
-		firePropertyChange(
-				PROPERTY_SELECTED_MARKER, this.selectedMarker, this.selectedMarker = marker);
-	}
-	
-	public IOpenShiftMarker getSelectedMarker() {
-		return selectedMarker;
-	}
+    private Set<IOpenShiftMarker> toSet(List<IOpenShiftMarker> markers) {
+        Set<IOpenShiftMarker> markersSet = new HashSet<>();
+        markersSet.addAll(markers);
+        return markersSet;
+    }
 
-	/**
-	 * Returns the markers that the user removed.
-	 * 
-	 * @return the markers that the user removed
-	 */
-	public Collection<IOpenShiftMarker> getRemovedMarkers() {
-		return DiffUtils.getRemovals(presentMarkers, checkedMarkers);
-	}
+    public void setAvailableMarkers(List<IOpenShiftMarker> markers) {
+        firePropertyChange(PROPERTY_AVAILABLE_MARKERS, this.availableMarkers, this.availableMarkers = markers);
+    }
 
-	/**
-	 * Returns the markers that the user has added.
-	 * 
-	 * @return the markers that the user added
-	 */
-	public Collection<IOpenShiftMarker> getAddedMarkers() {
-		return DiffUtils.getAdditions(presentMarkers, checkedMarkers);
-	}
-	
-	public void removeFromProject(IOpenShiftMarker marker, IProgressMonitor monitor) throws CoreException {
-		if (marker == null) {
-			return;
-		}
-		
-		marker.removeFrom(project, monitor);
-	}
+    public List<IOpenShiftMarker> getAvailableMarkers() {
+        return availableMarkers;
+    }
 
-	public IProject getProject() {
-		return project;
-	}
+    public Set<IOpenShiftMarker> getCheckedMarkers() {
+        return checkedMarkers;
+    }
+
+    public void setCheckedMarkers(Set<IOpenShiftMarker> markers) {
+        Set<IOpenShiftMarker> oldValue = getCheckedMarkers();
+        if (markers != checkedMarkers) {
+            checkedMarkers.clear();
+            checkedMarkers.addAll(markers);
+        }
+        firePropertyChange(PROPERTY_CHECKED_MARKERS, oldValue, checkedMarkers);
+    }
+
+    public void setSelectedMarker(IOpenShiftMarker marker) {
+        firePropertyChange(PROPERTY_SELECTED_MARKER, this.selectedMarker, this.selectedMarker = marker);
+    }
+
+    public IOpenShiftMarker getSelectedMarker() {
+        return selectedMarker;
+    }
+
+    /**
+     * Returns the markers that the user removed.
+     * 
+     * @return the markers that the user removed
+     */
+    public Collection<IOpenShiftMarker> getRemovedMarkers() {
+        return DiffUtils.getRemovals(presentMarkers, checkedMarkers);
+    }
+
+    /**
+     * Returns the markers that the user has added.
+     * 
+     * @return the markers that the user added
+     */
+    public Collection<IOpenShiftMarker> getAddedMarkers() {
+        return DiffUtils.getAdditions(presentMarkers, checkedMarkers);
+    }
+
+    public void removeFromProject(IOpenShiftMarker marker, IProgressMonitor monitor) throws CoreException {
+        if (marker == null) {
+            return;
+        }
+
+        marker.removeFrom(project, monitor);
+    }
+
+    public IProject getProject() {
+        return project;
+    }
 }

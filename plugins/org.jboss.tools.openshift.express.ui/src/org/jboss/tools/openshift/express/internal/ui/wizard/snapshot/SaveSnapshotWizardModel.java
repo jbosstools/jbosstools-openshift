@@ -33,71 +33,71 @@ import com.openshift.internal.client.utils.StreamUtils;
  */
 public class SaveSnapshotWizardModel extends ObservablePojo {
 
-	private String filepath;
-	private boolean deploymentSnapshot;
-	private IApplication application;
-	private IProject project;
+    private String filepath;
+    private boolean deploymentSnapshot;
+    private IApplication application;
+    private IProject project;
 
-	public SaveSnapshotWizardModel(IApplication application) {
-		this.application = application;
-		this.filepath = FileUtils.getAvailableFilepath(getSnapshotFromPreferences(application, deploymentSnapshot));
-	}
+    public SaveSnapshotWizardModel(IApplication application) {
+        this.application = application;
+        this.filepath = FileUtils.getAvailableFilepath(getSnapshotFromPreferences(application, deploymentSnapshot));
+    }
 
-	public IApplication getApplication() {
-		return application;
-	}
+    public IApplication getApplication() {
+        return application;
+    }
 
-	public void setProject(IProject project){
-		this.project = project;
-	}
-	
-	public String setFilepath(String filename) {
-		return this.filepath = filename;
-	}
+    public void setProject(IProject project) {
+        this.project = project;
+    }
 
-	public String getFilepath() {
-		return filepath;
-	}
+    public String setFilepath(String filename) {
+        return this.filepath = filename;
+    }
 
-	public boolean setDeploymentSnapshot(boolean deploymentSnapshot) {
-		return this.deploymentSnapshot = deploymentSnapshot;
-	}
+    public String getFilepath() {
+        return filepath;
+    }
 
-	public boolean isDeploymentSnapshot() {
-		return deploymentSnapshot;
-	}
+    public boolean setDeploymentSnapshot(boolean deploymentSnapshot) {
+        return this.deploymentSnapshot = deploymentSnapshot;
+    }
 
-	public void saveSnapshot(IProgressMonitor monitor) throws IOException, CoreException {
-		if (monitor.isCanceled()) {
-			return;
-		}
-		Session session = SSHSessionRepository.getInstance().getSession(application);
-		if (isDeploymentSnapshot()) {
-			InputStream saveResponse = new ApplicationSSHSession(application, session).saveDeploymentSnapshot();
-			StreamUtils.writeTo(saveResponse, new FileOutputStream(getFilepath()));
-		} else {
-			InputStream saveResponse = new ApplicationSSHSession(application, session).saveFullSnapshot();
-			StreamUtils.writeTo(saveResponse, new FileOutputStream(getFilepath()));
-		}
-		storeSnapshotToPreferences(filepath, deploymentSnapshot);
-		if (project != null) {
-			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-		}
-	}
+    public boolean isDeploymentSnapshot() {
+        return deploymentSnapshot;
+    }
 
-	private void storeSnapshotToPreferences(String filepath, boolean deploymentSnapshot) {
-		if (deploymentSnapshot) {
-			ExpressCorePreferences.INSTANCE.saveDeploymentSnapshot(getApplication(), filepath);
-		} else {
-			ExpressCorePreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);
-		}
-	}
-	
-	private String getSnapshotFromPreferences(IApplication application, boolean deploymentSnapshot) {
-		if (deploymentSnapshot) {
-			return ExpressCorePreferences.INSTANCE.getDeploymentSnapshot(application);
-		} else {
-			return ExpressCorePreferences.INSTANCE.getFullSnapshot(application);
-		}
-	}
+    public void saveSnapshot(IProgressMonitor monitor) throws IOException, CoreException {
+        if (monitor.isCanceled()) {
+            return;
+        }
+        Session session = SSHSessionRepository.getInstance().getSession(application);
+        if (isDeploymentSnapshot()) {
+            InputStream saveResponse = new ApplicationSSHSession(application, session).saveDeploymentSnapshot();
+            StreamUtils.writeTo(saveResponse, new FileOutputStream(getFilepath()));
+        } else {
+            InputStream saveResponse = new ApplicationSSHSession(application, session).saveFullSnapshot();
+            StreamUtils.writeTo(saveResponse, new FileOutputStream(getFilepath()));
+        }
+        storeSnapshotToPreferences(filepath, deploymentSnapshot);
+        if (project != null) {
+            project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+        }
+    }
+
+    private void storeSnapshotToPreferences(String filepath, boolean deploymentSnapshot) {
+        if (deploymentSnapshot) {
+            ExpressCorePreferences.INSTANCE.saveDeploymentSnapshot(getApplication(), filepath);
+        } else {
+            ExpressCorePreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);
+        }
+    }
+
+    private String getSnapshotFromPreferences(IApplication application, boolean deploymentSnapshot) {
+        if (deploymentSnapshot) {
+            return ExpressCorePreferences.INSTANCE.getDeploymentSnapshot(application);
+        } else {
+            return ExpressCorePreferences.INSTANCE.getFullSnapshot(application);
+        }
+    }
 }

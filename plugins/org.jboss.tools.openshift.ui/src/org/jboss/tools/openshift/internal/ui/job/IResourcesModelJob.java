@@ -16,13 +16,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
 
 public interface IResourcesModelJob extends IResourcesModel {
-	
-	void addJobChangeListener(IJobChangeListener listener);
-	
-	DelegatingProgressMonitor getDelegatingProgressMonitor();
-	
-	Job getJob();
-	
-	Runnable getSummaryRunnable(Shell shell);
+
+    void addJobChangeListener(IJobChangeListener listener);
+
+    DelegatingProgressMonitor getDelegatingProgressMonitor();
+
+    Job getJob();
+
+    Runnable getSummaryRunnable(Shell shell);
 
 }

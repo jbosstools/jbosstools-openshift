@@ -37,45 +37,44 @@ import com.openshift.restclient.IClient;
 @RunWith(MockitoJUnitRunner.class)
 public class LazyCredentialsPrompterTest {
 
-	private Connection connection;
-	@Mock
-	private IClient client;
-	private LazyCredentialsPrompter lazyPrompter;
-	@Mock
-	private ICredentialsPrompter permissiveExtensionPrompter;
-	@Mock
-	private ICredentialsPrompter denyingExtensionPrompter;
+    private Connection connection;
+    @Mock
+    private IClient client;
+    private LazyCredentialsPrompter lazyPrompter;
+    @Mock
+    private ICredentialsPrompter permissiveExtensionPrompter;
+    @Mock
+    private ICredentialsPrompter denyingExtensionPrompter;
 
+    @Before
+    public void setup() throws MalformedURLException {
+        when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));
+        this.lazyPrompter = spy(new LazyCredentialsPrompter());
+        this.connection = new Connection(client.getBaseURL().toString(), lazyPrompter, null);
+        when(permissiveExtensionPrompter.promptAndAuthenticate(connection, null)).thenReturn(true);
+        when(denyingExtensionPrompter.promptAndAuthenticate(connection, null)).thenReturn(true);
+    }
 
-	@Before
-	public void setup() throws MalformedURLException {
-		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));
-		this.lazyPrompter = spy(new LazyCredentialsPrompter());
-		this.connection = new Connection(client.getBaseURL().toString(), lazyPrompter, null);
-		when(permissiveExtensionPrompter.promptAndAuthenticate(connection, null)).thenReturn(true);
-		when(denyingExtensionPrompter.promptAndAuthenticate(connection, null)).thenReturn(true);
-	}
+    @Test
+    public void testAuthenticatesOKWithPrompter() {
+        when(lazyPrompter.getExtension()).thenReturn(permissiveExtensionPrompter);
 
-	@Test
-	public void testAuthenticatesOKWithPrompter() {
-		when(lazyPrompter.getExtension()).thenReturn(permissiveExtensionPrompter);
+        assertTrue("Exp. to prompt for creds", lazyPrompter.promptAndAuthenticate(connection, null));
+        verify(permissiveExtensionPrompter, times(1)).promptAndAuthenticate(any(Connection.class), any());
+    }
 
-		assertTrue("Exp. to prompt for creds", lazyPrompter.promptAndAuthenticate(connection, null));
-		verify(permissiveExtensionPrompter, times(1)).promptAndAuthenticate(any(Connection.class), any());
-	}
+    @Test
+    public void testAuthenticatesNOTOKWithPrompter() {
+        when(lazyPrompter.getExtension()).thenReturn(null);
 
-	@Test
-	public void testAuthenticatesNOTOKWithPrompter() {
-		when(lazyPrompter.getExtension()).thenReturn(null);
+        assertFalse("Exp. to prompt for creds", lazyPrompter.promptAndAuthenticate(connection, null));
+        verify(denyingExtensionPrompter, never()).promptAndAuthenticate(any(Connection.class), any());
+    }
 
-		assertFalse("Exp. to prompt for creds", lazyPrompter.promptAndAuthenticate(connection, null));
-		verify(denyingExtensionPrompter, never()).promptAndAuthenticate(any(Connection.class), any());
-	}
+    @Test
+    public void testAuthenticatesNOTOKWithoutPrompter() {
+        when(lazyPrompter.getExtension()).thenReturn(null);
 
-	@Test
-	public void testAuthenticatesNOTOKWithoutPrompter() {
-		when(lazyPrompter.getExtension()).thenReturn(null);
-
-		assertFalse("Exp. to prompt for creds", lazyPrompter.promptAndAuthenticate(connection, null));
-	}
+        assertFalse("Exp. to prompt for creds", lazyPrompter.promptAndAuthenticate(connection, null));
+    }
 }

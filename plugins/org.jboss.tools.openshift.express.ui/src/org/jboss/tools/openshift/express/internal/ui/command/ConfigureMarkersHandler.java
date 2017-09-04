@@ -25,14 +25,13 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardD
  */
 public class ConfigureMarkersHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IProject project = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IProject.class);
-		if (project != null) {
-			new OkCancelButtonWizardDialog(HandlerUtil.getActiveShell(event), new ConfigureMarkersWizard(project))
-					.open();
-		}
-		return Status.OK_STATUS;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        IProject project = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IProject.class);
+        if (project != null) {
+            new OkCancelButtonWizardDialog(HandlerUtil.getActiveShell(event), new ConfigureMarkersWizard(project)).open();
+        }
+        return Status.OK_STATUS;
+    }
 
 }

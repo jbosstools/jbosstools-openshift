@@ -25,81 +25,81 @@ import org.eclipse.swt.widgets.TabFolder;
  * 
  * @author Viacheslav Kabanovich
  */
-public class TabFolderTraverseListener  implements Listener {
-	TabFolder tabFolder;
-	List<Control> firstControls = new ArrayList<>();
+public class TabFolderTraverseListener implements Listener {
+    TabFolder tabFolder;
+    List<Control> firstControls = new ArrayList<>();
 
-	public TabFolderTraverseListener(TabFolder tabFolder) {
-		this.tabFolder = tabFolder;
-		tabFolder.addListener(SWT.Traverse, this);
-	}
-	@Override
-	public void handleEvent(Event event) {
-		if(event.detail == SWT.TRAVERSE_ARROW_NEXT || event.detail == SWT.TRAVERSE_TAB_NEXT) {
-			int i = tabFolder.getSelectionIndex();
-			if(i >= 0 && i < firstControls.size() && firstControls.get(i) != null) {
-				setFocus(firstControls.get(i));
-				event.doit = false;
-			}
-		}
-	}
+    public TabFolderTraverseListener(TabFolder tabFolder) {
+        this.tabFolder = tabFolder;
+        tabFolder.addListener(SWT.Traverse, this);
+    }
 
-	/**
-	 * Call this method for i-th tab with all controls that may be focused.
-	 * 
-	 * @param i
-	 * @param controls
-	 */
-	public void bindTabControls(int i, final Control... controls) {
-		while(firstControls.size() < i) {
-			firstControls.add(null);
-		}
-		if(firstControls.size() == i) {
-			firstControls.add(controls[0]);
-		} else {
-			firstControls.set(i, controls[0]);
-		}
-		for (Control c: controls) {
-			c.addListener(SWT.Traverse, new Listener() {
-				@Override
-				public void handleEvent(Event event) {
-					if(event.detail == SWT.TRAVERSE_TAB_NEXT) {
-						if(c != controls[controls.length - 1]) {
-							setFocusToNextSibling(c);
-						} else {
-							setFocusToNextSibling(tabFolder);
-						}
-						event.doit = false;
-					}
-				}
-			});
-		}
-	}
+    @Override
+    public void handleEvent(Event event) {
+        if (event.detail == SWT.TRAVERSE_ARROW_NEXT || event.detail == SWT.TRAVERSE_TAB_NEXT) {
+            int i = tabFolder.getSelectionIndex();
+            if (i >= 0 && i < firstControls.size() && firstControls.get(i) != null) {
+                setFocus(firstControls.get(i));
+                event.doit = false;
+            }
+        }
+    }
 
-	private void setFocusToNextSibling(Control c) {
-		Composite parent = c.getParent();
-		Control[] children = parent.getTabList();
-		for (int i = 0; i < children.length; i++) {
-			Control child = children[i];
-			if (child == c) {
-				for (int j = i + 1; j < children.length; j++) {
-					Control nc = children[j];
-					if (nc.isEnabled() && nc.isVisible() && ((nc.getStyle() & SWT.NO_FOCUS) == 0) 
-							&& setFocus(nc)) {
-						return;
-					}
-				}
-			}
-		}
-	}
+    /**
+     * Call this method for i-th tab with all controls that may be focused.
+     * 
+     * @param i
+     * @param controls
+     */
+    public void bindTabControls(int i, final Control... controls) {
+        while (firstControls.size() < i) {
+            firstControls.add(null);
+        }
+        if (firstControls.size() == i) {
+            firstControls.add(controls[0]);
+        } else {
+            firstControls.set(i, controls[0]);
+        }
+        for (Control c : controls) {
+            c.addListener(SWT.Traverse, new Listener() {
+                @Override
+                public void handleEvent(Event event) {
+                    if (event.detail == SWT.TRAVERSE_TAB_NEXT) {
+                        if (c != controls[controls.length - 1]) {
+                            setFocusToNextSibling(c);
+                        } else {
+                            setFocusToNextSibling(tabFolder);
+                        }
+                        event.doit = false;
+                    }
+                }
+            });
+        }
+    }
 
-	/**
-	 * Override for tests. This method is called after all checks that
-	 * guarantee that control.forceFocus() must be successful if the window is active.
-	 * @param control
-	 * @return
-	 */
-	protected boolean setFocus(Control control) {
-		return control.forceFocus();
-	}
+    private void setFocusToNextSibling(Control c) {
+        Composite parent = c.getParent();
+        Control[] children = parent.getTabList();
+        for (int i = 0; i < children.length; i++) {
+            Control child = children[i];
+            if (child == c) {
+                for (int j = i + 1; j < children.length; j++) {
+                    Control nc = children[j];
+                    if (nc.isEnabled() && nc.isVisible() && ((nc.getStyle() & SWT.NO_FOCUS) == 0) && setFocus(nc)) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Override for tests. This method is called after all checks that
+     * guarantee that control.forceFocus() must be successful if the window is active.
+     * @param control
+     * @return
+     */
+    protected boolean setFocus(Control control) {
+        return control.forceFocus();
+    }
 }

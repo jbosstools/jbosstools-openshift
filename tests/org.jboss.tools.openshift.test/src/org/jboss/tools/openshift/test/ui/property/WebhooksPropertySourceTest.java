@@ -25,26 +25,23 @@ import com.openshift.restclient.model.build.IWebhookTrigger;
 
 public class WebhooksPropertySourceTest {
 
-	@Test
-	public void test() {
-		List<IBuildTrigger> triggers = givenBuildTriggers();
-		WebHooksPropertySource source = new WebHooksPropertySource(triggers);
-		IPropertyDescriptor[] propertyDescriptors = source.getPropertyDescriptors();
-		assertEquals("Exp. descripter for each webhook only", 2, propertyDescriptors.length);
-		assertEquals("Generic", propertyDescriptors[0].getId());
-		assertEquals("GitHub", propertyDescriptors[1].getId());
-	}
-	
-	private List<IBuildTrigger> givenBuildTriggers(){
-		List<IBuildTrigger> triggers = Arrays.asList(new IBuildTrigger[]{
-				mock(IWebhookTrigger.class),
-				mock(IBuildTrigger.class),
-				mock(IWebhookTrigger.class)
-		});
-		when(triggers.get(0).getType()).thenReturn(BuildTriggerType.GENERIC);
-		when(triggers.get(1).getType()).thenReturn(BuildTriggerType.IMAGE_CHANGE);
-		when(triggers.get(2).getType()).thenReturn(BuildTriggerType.GITHUB);
-		return triggers;
-	}
+    @Test
+    public void test() {
+        List<IBuildTrigger> triggers = givenBuildTriggers();
+        WebHooksPropertySource source = new WebHooksPropertySource(triggers);
+        IPropertyDescriptor[] propertyDescriptors = source.getPropertyDescriptors();
+        assertEquals("Exp. descripter for each webhook only", 2, propertyDescriptors.length);
+        assertEquals("Generic", propertyDescriptors[0].getId());
+        assertEquals("GitHub", propertyDescriptors[1].getId());
+    }
+
+    private List<IBuildTrigger> givenBuildTriggers() {
+        List<IBuildTrigger> triggers = Arrays
+                .asList(new IBuildTrigger[] { mock(IWebhookTrigger.class), mock(IBuildTrigger.class), mock(IWebhookTrigger.class) });
+        when(triggers.get(0).getType()).thenReturn(BuildTriggerType.GENERIC);
+        when(triggers.get(1).getType()).thenReturn(BuildTriggerType.IMAGE_CHANGE);
+        when(triggers.get(2).getType()).thenReturn(BuildTriggerType.GITHUB);
+        return triggers;
+    }
 
 }

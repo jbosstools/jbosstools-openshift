@@ -21,7 +21,7 @@ import com.openshift.restclient.ResourceKind;
  */
 public class BuildConfigsPropertySection extends OpenShiftResourcePropertySection {
 
-	public BuildConfigsPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.BuildConfigsTab", ResourceKind.BUILD_CONFIG);
-	}
+    public BuildConfigsPropertySection() {
+        super("popup:org.jboss.tools.openshift.ui.properties.tab.BuildConfigsTab", ResourceKind.BUILD_CONFIG);
+    }
 }

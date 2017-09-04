@@ -24,31 +24,31 @@ import com.openshift.restclient.model.template.IParameter;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class TemplateParameterViewerUtilsTest {
-	
-	@Mock
-	private IParameter param;
-	
-	@Test
-	public void parametersWithBlankValueAndNoGeneratorShouldReturnBlank() {
-		assertEquals("", TemplateParameterViewerUtils.getValueLabel(param));
-	}
 
-	@Test
-	public void parametersWithBlankValueAndAGeneratorShouldReturnGenerated() {
-		when(param.getGeneratorName()).thenReturn("expression");
-		assertEquals("(generated)", TemplateParameterViewerUtils.getValueLabel(param));
-	}
+    @Mock
+    private IParameter param;
 
-	@Test
-	public void parametersWithAValueAndNoGeneratorShouldReturnTheValue() {
-		when(param.getValue()).thenReturn("abc123");
-		assertEquals("abc123", TemplateParameterViewerUtils.getValueLabel(param));
-	}
-	
-	@Test
-	public void parametersWithAValueAndAGeneratorShouldReturnTheValue() {
-		when(param.getGeneratorName()).thenReturn("expression");
-		when(param.getValue()).thenReturn("abc123");
-		assertEquals("abc123", TemplateParameterViewerUtils.getValueLabel(param));
-	}
+    @Test
+    public void parametersWithBlankValueAndNoGeneratorShouldReturnBlank() {
+        assertEquals("", TemplateParameterViewerUtils.getValueLabel(param));
+    }
+
+    @Test
+    public void parametersWithBlankValueAndAGeneratorShouldReturnGenerated() {
+        when(param.getGeneratorName()).thenReturn("expression");
+        assertEquals("(generated)", TemplateParameterViewerUtils.getValueLabel(param));
+    }
+
+    @Test
+    public void parametersWithAValueAndNoGeneratorShouldReturnTheValue() {
+        when(param.getValue()).thenReturn("abc123");
+        assertEquals("abc123", TemplateParameterViewerUtils.getValueLabel(param));
+    }
+
+    @Test
+    public void parametersWithAValueAndAGeneratorShouldReturnTheValue() {
+        when(param.getGeneratorName()).thenReturn("expression");
+        when(param.getValue()).thenReturn("abc123");
+        assertEquals("abc123", TemplateParameterViewerUtils.getValueLabel(param));
+    }
 }

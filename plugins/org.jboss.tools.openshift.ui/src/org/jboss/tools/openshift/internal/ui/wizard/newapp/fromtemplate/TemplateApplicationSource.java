@@ -28,59 +28,58 @@ import com.openshift.restclient.model.template.ITemplate;
  */
 public class TemplateApplicationSource implements IApplicationSource {
 
-	private final ITemplate template;
+    private final ITemplate template;
 
-	public TemplateApplicationSource(ITemplate template) {
-		if(template == null) throw new OpenShiftException("ITemplate instance was null while trying to Instantiate a %s", TemplateApplicationSource.class);
-		this.template = template;
-	}
+    public TemplateApplicationSource(ITemplate template) {
+        if (template == null)
+            throw new OpenShiftException("ITemplate instance was null while trying to Instantiate a %s", TemplateApplicationSource.class);
+        this.template = template;
+    }
 
-	@Override
-	public String getName() {
-		return this.template.getName();
-	}
+    @Override
+    public String getName() {
+        return this.template.getName();
+    }
 
-	@Override
-	public String getNamespace() {
-		return this.template.getNamespace();
-	}
+    @Override
+    public String getNamespace() {
+        return this.template.getNamespace();
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public ITemplate getSource() {
-		return this.template;
-	}
-	
-	@Override
-	public String getKind() {
-		return template.getKind();
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public ITemplate getSource() {
+        return this.template;
+    }
 
-	@Override
-	public Collection<String> getTags() {
-		return this.template.accept(new CapabilityVisitor<ITags, Collection<String>>() {
-			@Override
-			public Collection<String> visit(ITags capability) {
-				return capability.getTags();
-			}
-		}, Collections.emptyList());
-	}
+    @Override
+    public String getKind() {
+        return template.getKind();
+    }
 
-	@Override
-	public boolean isAnnotatedWith(String key) {
-		return this.template.isAnnotatedWith(key);
-	}
+    @Override
+    public Collection<String> getTags() {
+        return this.template.accept(new CapabilityVisitor<ITags, Collection<String>>() {
+            @Override
+            public Collection<String> visit(ITags capability) {
+                return capability.getTags();
+            }
+        }, Collections.emptyList());
+    }
 
-	@Override
-	public String getAnnotation(String key) {
-		return this.template.getAnnotation(key);
-	}
+    @Override
+    public boolean isAnnotatedWith(String key) {
+        return this.template.isAnnotatedWith(key);
+    }
 
-	@Override
-	public Map<String, String> getAnnotations() {
-		return this.template.getAnnotations();
-	}
-	
-	
+    @Override
+    public String getAnnotation(String key) {
+        return this.template.getAnnotation(key);
+    }
+
+    @Override
+    public Map<String, String> getAnnotations() {
+        return this.template.getAnnotations();
+    }
 
 }

@@ -33,108 +33,108 @@ import org.osgi.framework.BundleContext;
  */
 public class ExpressUIActivator extends AbstractUIPlugin {
 
-	public static final String PLUGIN_ID = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
+    public static final String PLUGIN_ID = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
 
-	private static ExpressUIActivator plugin;
+    private static ExpressUIActivator plugin;
 
-	private IPreferenceStore corePreferenceStore;
+    private IPreferenceStore corePreferenceStore;
 
-	public ExpressUIActivator() {
-		this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, ExpressCoreActivator.PLUGIN_ID);
-	}
+    public ExpressUIActivator() {
+        this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, ExpressCoreActivator.PLUGIN_ID);
+    }
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
-		initCoreUIIntegration();
-	}
+    @Override
+    public void start(BundleContext context) throws Exception {
+        super.start(context);
+        plugin = this;
+        initCoreUIIntegration();
+    }
 
-	protected void initCoreUIIntegration() {
-		/* 
-		 * TODO: replace by extension point
-		 */
-		ExpressCoreUIIntegration.getDefault().setQuestionHandler(new QuestionHandler());
-		ExpressCoreUIIntegration.getDefault().setConsoleUtility(new ConsoleUtils());
-		ExpressCoreUIIntegration.getDefault().setCredentialPrompter(new CredentialsPrompter());
-		ExpressCoreUIIntegration.getDefault().setSSLCertificateAuthorization(new SSLCertificateCallback());
-	}
+    protected void initCoreUIIntegration() {
+        /* 
+         * TODO: replace by extension point
+         */
+        ExpressCoreUIIntegration.getDefault().setQuestionHandler(new QuestionHandler());
+        ExpressCoreUIIntegration.getDefault().setConsoleUtility(new ConsoleUtils());
+        ExpressCoreUIIntegration.getDefault().setCredentialPrompter(new CredentialsPrompter());
+        ExpressCoreUIIntegration.getDefault().setSSLCertificateAuthorization(new SSLCertificateCallback());
+    }
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		// TODO: implement connection saving
-		// ConnectionsRegistrySingleton.getInstance().save();
-		plugin = null;
-		super.stop(context);
-	}
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        // TODO: implement connection saving
+        // ConnectionsRegistrySingleton.getInstance().save();
+        plugin = null;
+        super.stop(context);
+    }
 
-	public static ExpressUIActivator getDefault() {
-		return plugin;
-	}
+    public static ExpressUIActivator getDefault() {
+        return plugin;
+    }
 
-	public static void log(IStatus status) {
-		plugin.getLog().log(status);
-	}
+    public static void log(IStatus status) {
+        plugin.getLog().log(status);
+    }
 
-	public static void log(String message) {
-		log(message, null);
-	}
+    public static void log(String message) {
+        log(message, null);
+    }
 
-	public static void log(Throwable e) {
-		log(e.getMessage(), e);
-	}
+    public static void log(Throwable e) {
+        log(e.getMessage(), e);
+    }
 
-	public static void log(String message, Throwable e) {
-		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, message, e));
-	}
+    public static void log(String message, Throwable e) {
+        log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, message, e));
+    }
 
-	public static IStatus createCancelStatus(String message) {
-		return new Status(IStatus.CANCEL, PLUGIN_ID, message);
-	}
+    public static IStatus createCancelStatus(String message) {
+        return new Status(IStatus.CANCEL, PLUGIN_ID, message);
+    }
 
-	public static IStatus createCancelStatus(String message, Object... arguments) {
-		return new Status(IStatus.CANCEL, PLUGIN_ID, NLS.bind(message, arguments));
-	}
+    public static IStatus createCancelStatus(String message, Object... arguments) {
+        return new Status(IStatus.CANCEL, PLUGIN_ID, NLS.bind(message, arguments));
+    }
 
-	public static IStatus createErrorStatus(String message) {
-		return new Status(IStatus.ERROR, PLUGIN_ID, message);
-	}
+    public static IStatus createErrorStatus(String message) {
+        return new Status(IStatus.ERROR, PLUGIN_ID, message);
+    }
 
-	public static IStatus createErrorStatus(String message, Throwable throwable) {
-		return new Status(IStatus.ERROR, PLUGIN_ID, message, throwable);
-	}
+    public static IStatus createErrorStatus(String message, Throwable throwable) {
+        return new Status(IStatus.ERROR, PLUGIN_ID, message, throwable);
+    }
 
-	public static IStatus createErrorStatus(String message, Throwable throwable, Object... arguments) {
-		return createErrorStatus(NLS.bind(message, arguments), throwable);
-	}
-	
-	public static MultiStatus createMultiStatus(String message, Throwable t, Object... arguments) {
-		MultiStatus multiStatus = new MultiStatus(PLUGIN_ID, IStatus.ERROR, NLS.bind(message, arguments), t);
-		addStatuses(t, multiStatus);
-		return multiStatus;
-	}
+    public static IStatus createErrorStatus(String message, Throwable throwable, Object... arguments) {
+        return createErrorStatus(NLS.bind(message, arguments), throwable);
+    }
 
-	private static void addStatuses(Throwable t, MultiStatus multiStatus) {
-		Throwable wrapped = getWrappedThrowable(t);
-		if (wrapped != null) {
-			multiStatus.add(createErrorStatus(wrapped.getMessage(), wrapped));
-			addStatuses(wrapped, multiStatus);
-		}
-	}
-	
-	private static Throwable getWrappedThrowable(Throwable t) {
-		if (t instanceof InvocationTargetException) {
-			return ((InvocationTargetException) t).getTargetException();
-		} else if (t instanceof Exception) {
-			return ((Exception) t).getCause();
-		}
-		return null;
-	}
+    public static MultiStatus createMultiStatus(String message, Throwable t, Object... arguments) {
+        MultiStatus multiStatus = new MultiStatus(PLUGIN_ID, IStatus.ERROR, NLS.bind(message, arguments), t);
+        addStatuses(t, multiStatus);
+        return multiStatus;
+    }
+
+    private static void addStatuses(Throwable t, MultiStatus multiStatus) {
+        Throwable wrapped = getWrappedThrowable(t);
+        if (wrapped != null) {
+            multiStatus.add(createErrorStatus(wrapped.getMessage(), wrapped));
+            addStatuses(wrapped, multiStatus);
+        }
+    }
+
+    private static Throwable getWrappedThrowable(Throwable t) {
+        if (t instanceof InvocationTargetException) {
+            return ((InvocationTargetException)t).getTargetException();
+        } else if (t instanceof Exception) {
+            return ((Exception)t).getCause();
+        }
+        return null;
+    }
 
     public IPreferenceStore getCorePreferenceStore() {
         // Create the preference store lazily.
         if (corePreferenceStore == null) {
-        	this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, ExpressCoreActivator.PLUGIN_ID);
+            this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, ExpressCoreActivator.PLUGIN_ID);
 
         }
         return corePreferenceStore;

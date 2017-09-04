@@ -19,22 +19,20 @@ import org.eclipse.swt.events.SelectionEvent;
  */
 public abstract class LinkSelectionAdapter extends SelectionAdapter {
 
-	private String text;
+    private String text;
 
-	public LinkSelectionAdapter(String text) {
-		Assert.isLegal(text != null
-				&& !text.isEmpty());
-		this.text = text;
-	}
+    public LinkSelectionAdapter(String text) {
+        Assert.isLegal(text != null && !text.isEmpty());
+        this.text = text;
+    }
 
-	@Override
-	public final void widgetSelected(SelectionEvent e) {
-		if (text.equals(e.text)) {
-			doWidgetSelected(e);
-		}
-	}
+    @Override
+    public final void widgetSelected(SelectionEvent e) {
+        if (text.equals(e.text)) {
+            doWidgetSelected(e);
+        }
+    }
 
-	protected abstract void doWidgetSelected(SelectionEvent e);
+    protected abstract void doWidgetSelected(SelectionEvent e);
 
-	
 }

@@ -15,24 +15,24 @@ package org.jboss.tools.openshift.egit.core.internal.utils;
  */
 public class RegexUtils {
 
-	public static String toPatternString(String string) {
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < string.length(); ++i) {
-			char ch = string.charAt(i);
-			if ("\\.^$|?*+[]{}()".indexOf(ch) != -1) {
-				// reserved char char
-				builder.append('\\').append(ch);
-//			} else if (Character.isLetter(ch)) {
-//				// letter
-//				builder.append("[A-Za-z]");
-//			} else if (Character.isDigit(ch)) {
-//				// digit
-//				builder.append("\\d");
-			} else {
-				builder.append(ch);
-			}
-		}
-		return builder.toString();
-	}
+    public static String toPatternString(String string) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < string.length(); ++i) {
+            char ch = string.charAt(i);
+            if ("\\.^$|?*+[]{}()".indexOf(ch) != -1) {
+                // reserved char char
+                builder.append('\\').append(ch);
+                //			} else if (Character.isLetter(ch)) {
+                //				// letter
+                //				builder.append("[A-Za-z]");
+                //			} else if (Character.isDigit(ch)) {
+                //				// digit
+                //				builder.append("\\d");
+            } else {
+                builder.append(ch);
+            }
+        }
+        return builder.toString();
+    }
 
 }

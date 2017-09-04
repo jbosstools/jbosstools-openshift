@@ -30,42 +30,41 @@ import com.openshift.restclient.OpenShiftException;
  */
 public class RefreshResourceHandler extends AbstractHandler {
 
-	private static final String FAILED_TO_REFRESH_ELEMENT = "Failed to refresh element";
-	private static final String LOADING_OPEN_SHIFT_INFORMATIONS = "Loading OpenShift information...";
+    private static final String FAILED_TO_REFRESH_ELEMENT = "Failed to refresh element";
+    private static final String LOADING_OPEN_SHIFT_INFORMATIONS = "Loading OpenShift information...";
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = UIUtils.getCurrentSelection(event);
-		IOpenshiftUIElement<?, ?> element = UIUtils.getFirstElement(selection, IOpenshiftUIElement.class);
-		if (element != null) {
-			refresh(element);
-		}
-		return null;
-	}
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        ISelection selection = UIUtils.getCurrentSelection(event);
+        IOpenshiftUIElement<?, ?> element = UIUtils.getFirstElement(selection, IOpenshiftUIElement.class);
+        if (element != null) {
+            refresh(element);
+        }
+        return null;
+    }
 
+    private void refresh(IOpenshiftUIElement<?, ?> element) {
+        Job job = null;
+        job = createRefreshJob(element);
+        job.schedule();
+    }
 
-	private void refresh(IOpenshiftUIElement<?, ?> element) {
-		Job job = null;
-		job = createRefreshJob(element);
-		job.schedule();
-	}
+    private Job createRefreshJob(IOpenshiftUIElement<?, ?> element) {
+        return new AbstractDelegatingMonitorJob(LOADING_OPEN_SHIFT_INFORMATIONS) {
 
-	private Job createRefreshJob(IOpenshiftUIElement<?, ?> element) {
-		return new AbstractDelegatingMonitorJob(LOADING_OPEN_SHIFT_INFORMATIONS) {
-
-			@Override
-			protected IStatus doRun(IProgressMonitor monitor) {
-				try {
-					monitor.beginTask(LOADING_OPEN_SHIFT_INFORMATIONS, IProgressMonitor.UNKNOWN);
-					element.refresh();
-				} catch (OpenShiftException e) {
-					OpenShiftCommonUIActivator.getDefault().getLogger().logError(FAILED_TO_REFRESH_ELEMENT, e);
-					return new Status(Status.ERROR, OpenShiftCommonUIActivator.PLUGIN_ID, FAILED_TO_REFRESH_ELEMENT, e);
-				} finally {
-					monitor.done();
-				}
-				return Status.OK_STATUS;
-			}
-		};
-	}
+            @Override
+            protected IStatus doRun(IProgressMonitor monitor) {
+                try {
+                    monitor.beginTask(LOADING_OPEN_SHIFT_INFORMATIONS, IProgressMonitor.UNKNOWN);
+                    element.refresh();
+                } catch (OpenShiftException e) {
+                    OpenShiftCommonUIActivator.getDefault().getLogger().logError(FAILED_TO_REFRESH_ELEMENT, e);
+                    return new Status(Status.ERROR, OpenShiftCommonUIActivator.PLUGIN_ID, FAILED_TO_REFRESH_ELEMENT, e);
+                } finally {
+                    monitor.done();
+                }
+                return Status.OK_STATUS;
+            }
+        };
+    }
 }

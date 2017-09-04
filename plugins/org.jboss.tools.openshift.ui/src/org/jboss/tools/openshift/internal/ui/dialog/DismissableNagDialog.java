@@ -20,29 +20,29 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class DismissableNagDialog extends MessageDialog implements IDialogConstants {
 
-	public static final int ALWAYS = 0;
-	public static final int NO = 1;
-	public static final int YES = 2;
-	private static final String [] LABELS = new String []{"Always Replace", NO_LABEL, YES_LABEL}; 
-	
-	public AtomicBoolean isOpen = new AtomicBoolean(false);
-	
-	public DismissableNagDialog(Shell parentShell, String dialogTitle, String dialogMessage) {
-		super(parentShell, dialogTitle, null, dialogMessage, QUESTION, LABELS, YES);
-	}
+    public static final int ALWAYS = 0;
+    public static final int NO = 1;
+    public static final int YES = 2;
+    private static final String[] LABELS = new String[] { "Always Replace", NO_LABEL, YES_LABEL };
 
-	@Override
-	public int open() {
-		try {
-			isOpen.set(true);
-			return super.open();
-		}finally {
-			isOpen.set(false);
-		}
-	}
-	
-	public boolean isOpen() {
-		return isOpen.get();
-	}
-	
+    public AtomicBoolean isOpen = new AtomicBoolean(false);
+
+    public DismissableNagDialog(Shell parentShell, String dialogTitle, String dialogMessage) {
+        super(parentShell, dialogTitle, null, dialogMessage, QUESTION, LABELS, YES);
+    }
+
+    @Override
+    public int open() {
+        try {
+            isOpen.set(true);
+            return super.open();
+        } finally {
+            isOpen.set(false);
+        }
+    }
+
+    public boolean isOpen() {
+        return isOpen.get();
+    }
+
 }

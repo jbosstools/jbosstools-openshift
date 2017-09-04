@@ -22,16 +22,16 @@ import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMoni
  */
 public class RefreshConnectionJob extends AbstractDelegatingMonitorJob {
 
-	private ExpressConnection connection;
+    private ExpressConnection connection;
 
-	public RefreshConnectionJob(ExpressConnection connection) {
-		super(NLS.bind("Refreshing iConnection {0}", connection.getId()));
-		this.connection = connection;
-	}
+    public RefreshConnectionJob(ExpressConnection connection) {
+        super(NLS.bind("Refreshing iConnection {0}", connection.getId()));
+        this.connection = connection;
+    }
 
-	@Override
-	protected IStatus doRun(IProgressMonitor monitor) {
-		connection.refresh();
-		return Status.OK_STATUS;
-	}
+    @Override
+    protected IStatus doRun(IProgressMonitor monitor) {
+        connection.refresh();
+        return Status.OK_STATUS;
+    }
 }

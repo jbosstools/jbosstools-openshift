@@ -23,71 +23,69 @@ import com.openshift.client.OpenShiftException;
  */
 public class SSHKeysWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_SELECTED_KEY = "selectedSSHKey";
-	public static final String PROPERTY_HAS_KEY = "hasSSHKey";
+    public static final String PROPERTY_SELECTED_KEY = "selectedSSHKey";
+    public static final String PROPERTY_HAS_KEY = "hasSSHKey";
 
-	private ExpressConnection connection;
-	private IOpenShiftSSHKey selectedKey;
+    private ExpressConnection connection;
+    private IOpenShiftSSHKey selectedKey;
 
-	public SSHKeysWizardPageModel(ExpressConnection connection) {
-		this.connection = connection;
-	}
+    public SSHKeysWizardPageModel(ExpressConnection connection) {
+        this.connection = connection;
+    }
 
-	public List<IOpenShiftSSHKey> getSSHKeys() throws OpenShiftException {
-		List<IOpenShiftSSHKey> keys = connection.getSSHKeys();
-		fireHasSSHKey();
-		return keys;
-	}
-	
-	public IOpenShiftSSHKey getSelectedSSHKey() {
-		return selectedKey;
-	}
-	
-	public void setSelectedSSHKey(IOpenShiftSSHKey key) {
-		firePropertyChange(PROPERTY_SELECTED_KEY, this.selectedKey, this.selectedKey = key);
-	}
+    public List<IOpenShiftSSHKey> getSSHKeys() throws OpenShiftException {
+        List<IOpenShiftSSHKey> keys = connection.getSSHKeys();
+        fireHasSSHKey();
+        return keys;
+    }
 
-	public boolean getHasSSHKey() {
-		return connection.hasSSHKeys();
-	}
-	
-	protected void fireHasSSHKey() {
-		firePropertyChange(PROPERTY_HAS_KEY, null, getHasSSHKey());
-	}
-	
-	public void removeKey() throws OpenShiftException{
-		if (selectedKey == null) {
-			return;
-		}
-		selectedKey.destroy();
-		selectedKey = null;
-		restoreSelectedSSHKey();
-	}
+    public IOpenShiftSSHKey getSelectedSSHKey() {
+        return selectedKey;
+    }
 
-	public void refresh()  throws OpenShiftException {
-		connection.refresh();
-		restoreSelectedSSHKey();
-	}
+    public void setSelectedSSHKey(IOpenShiftSSHKey key) {
+        firePropertyChange(PROPERTY_SELECTED_KEY, this.selectedKey, this.selectedKey = key);
+    }
 
-	private void restoreSelectedSSHKey() {
-		IOpenShiftSSHKey keyToSelect = selectedKey;
-		if (keyToSelect == null
-				|| !connection.hasSSHKeyName(keyToSelect.getName())) {
-			keyToSelect = getFirstKey();
-		}
-		setSelectedSSHKey(keyToSelect);
-	}
+    public boolean getHasSSHKey() {
+        return connection.hasSSHKeys();
+    }
 
-	private IOpenShiftSSHKey getFirstKey() {
-		if(getSSHKeys().size() == 0) {
-			return null;
-		} 
-		return getSSHKeys().get(0);
-	}
+    protected void fireHasSSHKey() {
+        firePropertyChange(PROPERTY_HAS_KEY, null, getHasSSHKey());
+    }
 
-	
-	public ExpressConnection getConnection() {
-		return connection;
-	}
+    public void removeKey() throws OpenShiftException {
+        if (selectedKey == null) {
+            return;
+        }
+        selectedKey.destroy();
+        selectedKey = null;
+        restoreSelectedSSHKey();
+    }
+
+    public void refresh() throws OpenShiftException {
+        connection.refresh();
+        restoreSelectedSSHKey();
+    }
+
+    private void restoreSelectedSSHKey() {
+        IOpenShiftSSHKey keyToSelect = selectedKey;
+        if (keyToSelect == null || !connection.hasSSHKeyName(keyToSelect.getName())) {
+            keyToSelect = getFirstKey();
+        }
+        setSelectedSSHKey(keyToSelect);
+    }
+
+    private IOpenShiftSSHKey getFirstKey() {
+        if (getSSHKeys().size() == 0) {
+            return null;
+        }
+        return getSSHKeys().get(0);
+    }
+
+    public ExpressConnection getConnection() {
+        return connection;
+    }
 
 }

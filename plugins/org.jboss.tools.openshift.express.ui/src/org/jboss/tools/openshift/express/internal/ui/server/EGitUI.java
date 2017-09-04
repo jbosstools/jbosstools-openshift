@@ -24,19 +24,19 @@ import org.jboss.tools.openshift.express.core.IEGitUI;
  */
 public class EGitUI implements IEGitUI {
 
-	@Override
-	public void publish(IProject project, final String remote, final String applicationName, final Job pushJob) throws CoreException {
-		final Repository repository = EGitUtils.checkedGetRepository(project);
+    @Override
+    public void publish(IProject project, final String remote, final String applicationName, final Job pushJob) throws CoreException {
+        final Repository repository = EGitUtils.checkedGetRepository(project);
 
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+        PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
-				new CommitUI(shell, repository, remote, applicationName, pushJob).commit();
-			}
-		});
+            @Override
+            public void run() {
+                Shell shell = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
+                new CommitUI(shell, repository, remote, applicationName, pushJob).commit();
+            }
+        });
 
-	}
+    }
 
 }

@@ -27,41 +27,41 @@ import com.openshift.client.IApplication;
  */
 public class LoadApplicationJob extends Job {
 
-	private IApplication application = null;
+    private IApplication application = null;
 
-	private final IServer server;
+    private final IServer server;
 
-	public LoadApplicationJob(final IServer server) {
-		super(NLS.bind("Identifying OpenShift Application for server adapter {0}...", server.getName()));
-		this.server = server;
-	}
+    public LoadApplicationJob(final IServer server) {
+        super(NLS.bind("Identifying OpenShift Application for server adapter {0}...", server.getName()));
+        this.server = server;
+    }
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		Throwable failureCause = null;
-		try {
-			this.application = ExpressServerUtils.getApplication(server);
-		} catch (ExpressServerUtils.GetApplicationException e) {
-			//TODO Error status below may use message, but texts should be elaborated. For now, error status is clear enough.
-			failureCause = e.getCause();
-		}
-		if (application == null) {
-			return ExpressUIActivator.createErrorStatus(
-					NLS.bind("Failed to retrieve Application from server adapter {0}.\n" +
-							"Please verify that the associated OpenShift application and workspace project still exist.", 
-							server.getName()), failureCause);
-		}
-		return Status.OK_STATUS;
-	}
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+        Throwable failureCause = null;
+        try {
+            this.application = ExpressServerUtils.getApplication(server);
+        } catch (ExpressServerUtils.GetApplicationException e) {
+            //TODO Error status below may use message, but texts should be elaborated. For now, error status is clear enough.
+            failureCause = e.getCause();
+        }
+        if (application == null) {
+            return ExpressUIActivator.createErrorStatus(NLS.bind(
+                    "Failed to retrieve Application from server adapter {0}.\n"
+                            + "Please verify that the associated OpenShift application and workspace project still exist.",
+                    server.getName()), failureCause);
+        }
+        return Status.OK_STATUS;
+    }
 
-	/**
-	 * @return the application
-	 */
-	public final IApplication getApplication() {
-		return application;
-	}
-	
-	public String getApplicationName() {
-		return server.getName();
-	}
+    /**
+     * @return the application
+     */
+    public final IApplication getApplication() {
+        return application;
+    }
+
+    public String getApplicationName() {
+        return server.getName();
+    }
 }

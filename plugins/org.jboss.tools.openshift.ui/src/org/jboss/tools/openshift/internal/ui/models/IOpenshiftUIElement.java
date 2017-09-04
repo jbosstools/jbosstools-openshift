@@ -21,26 +21,27 @@ import org.eclipse.core.runtime.IAdaptable;
  * @param <R> the type of the wrapped element
  */
 public interface IOpenshiftUIElement<R, P extends IOpenshiftUIElement<?, ?>> extends IAdaptable {
-	/**
-	 * Get the container of this element. 
-	 * @return
-	 */
-	public P getParent();
-	public R getWrapped();
+    /**
+     * Get the container of this element. 
+     * @return
+     */
+    public P getParent();
 
-	@SuppressWarnings("unchecked")
-	default <T> T getAdapter(Class<T> adapter) {
-		if (adapter.isInstance(this)) {
-			return (T) this;
-		}
-		return null;
-	}
+    public R getWrapped();
 
-	/**
-	 * Update the state of the given element with the latest version from
-	 * openshift.
-	 */
-	void refresh();
+    @SuppressWarnings("unchecked")
+    default <T> T getAdapter(Class<T> adapter) {
+        if (adapter.isInstance(this)) {
+            return (T)this;
+        }
+        return null;
+    }
 
-	public OpenshiftUIModel getRoot();
+    /**
+     * Update the state of the given element with the latest version from
+     * openshift.
+     */
+    void refresh();
+
+    public OpenshiftUIModel getRoot();
 }

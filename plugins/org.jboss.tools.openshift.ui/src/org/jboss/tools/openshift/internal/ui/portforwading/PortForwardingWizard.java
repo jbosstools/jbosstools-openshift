@@ -15,22 +15,23 @@ import org.eclipse.jface.wizard.Wizard;
 /**
  * @author jeff.cantrill
  */
-public class PortForwardingWizard extends Wizard  {
+public class PortForwardingWizard extends Wizard {
 
-	private PortForwardingWizardModel model;
-	public PortForwardingWizard(PortForwardingWizardModel model) {
-		setWindowTitle("Application Port Forwarding");
-		this.model = model;
-	}
+    private PortForwardingWizardModel model;
 
-	@Override
-	public boolean performFinish() {
-		return true;
-	}
+    public PortForwardingWizard(PortForwardingWizardModel model) {
+        setWindowTitle("Application Port Forwarding");
+        this.model = model;
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new PortForwardingWizardPage(model, this));
-	}
+    @Override
+    public boolean performFinish() {
+        return true;
+    }
+
+    @Override
+    public void addPages() {
+        addPage(new PortForwardingWizardPage(model, this));
+    }
 
 }

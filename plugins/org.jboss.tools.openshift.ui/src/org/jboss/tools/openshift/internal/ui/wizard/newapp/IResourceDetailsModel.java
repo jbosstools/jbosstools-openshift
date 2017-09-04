@@ -16,7 +16,7 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  */
 public interface IResourceDetailsModel {
-	static final String PROPERTY_ITEMS = "items";
-	
-	Collection<IResource> getItems();
+    static final String PROPERTY_ITEMS = "items";
+
+    Collection<IResource> getItems();
 }

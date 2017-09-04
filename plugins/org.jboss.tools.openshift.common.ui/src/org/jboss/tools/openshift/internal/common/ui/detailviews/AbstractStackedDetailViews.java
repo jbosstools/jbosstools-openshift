@@ -39,210 +39,206 @@ import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
  */
 public abstract class AbstractStackedDetailViews {
 
-	protected final IDetailView emptyView = new EmptyView();
-	
-	private Composite parent;
-	private IDetailView currentView = emptyView;
-	private final StackLayout stackLayout = new StackLayout();
-	private Object context;
-	private DataBindingContext dbc;
-	private IObservableValue detailViewModel;
+    protected final IDetailView emptyView = new EmptyView();
 
-	public AbstractStackedDetailViews(IObservableValue detailViewModel, Object context, Composite parent, DataBindingContext dbc) {
-		Assert.isLegal(parent != null && !parent.isDisposed());
-		this.parent = parent;
-		parent.addDisposeListener(onDispose());
-		this.context = context;
-		Assert.isLegal(dbc != null);
-		this.dbc = dbc;
-		Assert.isLegal(detailViewModel != null && !detailViewModel.isDisposed());
-		this.detailViewModel = detailViewModel;
-	}
-	public void createControls() {
-		createControls(true);
-	}
+    private Composite parent;
+    private IDetailView currentView = emptyView;
+    private final StackLayout stackLayout = new StackLayout();
+    private Object context;
+    private DataBindingContext dbc;
+    private IObservableValue detailViewModel;
 
-	public void createControls(boolean showView) {
-		DataBindingUtils.addDisposableValueChangeListener(onDetailViewModelChanged(), detailViewModel, parent);
+    public AbstractStackedDetailViews(IObservableValue detailViewModel, Object context, Composite parent, DataBindingContext dbc) {
+        Assert.isLegal(parent != null && !parent.isDisposed());
+        this.parent = parent;
+        parent.addDisposeListener(onDispose());
+        this.context = context;
+        Assert.isLegal(dbc != null);
+        this.dbc = dbc;
+        Assert.isLegal(detailViewModel != null && !detailViewModel.isDisposed());
+        this.detailViewModel = detailViewModel;
+    }
 
-		parent.setLayout(stackLayout);
-		createViewControls(parent, context, dbc);
-		if(showView)
-			showView(detailViewModel, getView(detailViewModel), dbc);
-	}
+    public void createControls() {
+        createControls(true);
+    }
 
-	protected abstract IDetailView[] getDetailViews();
-	
-	private IValueChangeListener onDetailViewModelChanged() {
-		return new IValueChangeListener() {
+    public void createControls(boolean showView) {
+        DataBindingUtils.addDisposableValueChangeListener(onDetailViewModelChanged(), detailViewModel, parent);
 
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				showView(event.getObservableValue(), dbc);
-			}
-		};
-	}
+        parent.setLayout(stackLayout);
+        createViewControls(parent, context, dbc);
+        if (showView)
+            showView(detailViewModel, getView(detailViewModel), dbc);
+    }
 
-	protected void showView(IObservableValue detailViewsModel, DataBindingContext dbc) {
-		showView(detailViewsModel, getView(detailViewsModel), dbc);
-	}
+    protected abstract IDetailView[] getDetailViews();
 
-	protected void showView(IObservableValue detailViewsModel, IDetailView view, DataBindingContext dbc) {
-		if (view == null
-				|| view.getControl() == null
-				|| detailViewsModel == null) {
-			return;
-		}
-		currentView.onInVisible(detailViewsModel, dbc);
-		this.currentView = view;
-		view.onVisible(detailViewsModel, dbc);
-		stackLayout.topControl = view.getControl();
-		parent.layout(true, true);
-	}
+    private IValueChangeListener onDetailViewModelChanged() {
+        return new IValueChangeListener() {
 
-	protected void createViewControls(Composite parent, Object context, DataBindingContext dbc) {
-		emptyView.createControls(parent, context, dbc);
-		for (IDetailView detailView : getDetailViews()) {
-			detailView.createControls(parent, context, dbc);
-		}
-	}
+            @Override
+            public void handleValueChange(ValueChangeEvent event) {
+                showView(event.getObservableValue(), dbc);
+            }
+        };
+    }
 
-	protected IDetailView getView(IObservableValue detailViewsModel) {
-		return getViewFor(detailViewsModel, getDetailViews());
-	}
+    protected void showView(IObservableValue detailViewsModel, DataBindingContext dbc) {
+        showView(detailViewsModel, getView(detailViewsModel), dbc);
+    }
 
-	protected IDetailView getViewFor(IObservableValue detailViewsModel, IDetailView... detailViews) {
-		Object value = detailViewsModel.getValue();
-		IDetailView view = createControls(emptyView);
+    protected void showView(IObservableValue detailViewsModel, IDetailView view, DataBindingContext dbc) {
+        if (view == null || view.getControl() == null || detailViewsModel == null) {
+            return;
+        }
+        currentView.onInVisible(detailViewsModel, dbc);
+        this.currentView = view;
+        view.onVisible(detailViewsModel, dbc);
+        stackLayout.topControl = view.getControl();
+        parent.layout(true, true);
+    }
 
-		for(IDetailView detailView : detailViews) {
-			if (detailView.isViewFor(value)) {
-				view = detailView;
-				break;
-			}
-		}
+    protected void createViewControls(Composite parent, Object context, DataBindingContext dbc) {
+        emptyView.createControls(parent, context, dbc);
+        for (IDetailView detailView : getDetailViews()) {
+            detailView.createControls(parent, context, dbc);
+        }
+    }
 
-		if (view == null) {
-			OpenShiftCommonCoreActivator.pluginLog().logWarning(NLS.bind("No view found to display value {0}", value));
-		}
-		
-		return view;
-	}
-	
-	private IDetailView createControls(IDetailView view) {
-		if (view == null) {
-			return null;
-		}
-		if (view.getControl() == null) {
-			view.createControls(parent, view, dbc);
-		}
-		return view;
-	}
-	
-	private DisposeListener onDispose() {
-		return new DisposeListener() {
-			
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				dispose();
-			}
-		};
-	}
+    protected IDetailView getView(IObservableValue detailViewsModel) {
+        return getViewFor(detailViewsModel, getDetailViews());
+    }
 
-	private void dispose() {
-		for (IDetailView view : getDetailViews()) {
-			if (view != null) {
-				view.dispose();
-			}
-		}
-	}
-	
-	protected IDetailView getCurrentView() {
-		return currentView;
-	}
+    protected IDetailView getViewFor(IObservableValue detailViewsModel, IDetailView... detailViews) {
+        Object value = detailViewsModel.getValue();
+        IDetailView view = createControls(emptyView);
 
-	public class EmptyView extends BaseDetailsView {
+        for (IDetailView detailView : detailViews) {
+            if (detailView.isViewFor(value)) {
+                view = detailView;
+                break;
+            }
+        }
 
-		@Override
-		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
-			Composite container = setControl(new Composite(parent, SWT.NONE));
-			GridLayoutFactory.fillDefaults()
-					.margins(6, 6).spacing(6, 6).applyTo(container);
-			return container;
-		}
-		
-		@Override
-		public boolean isViewFor(Object object) {
-			return false;
-		}
+        if (view == null) {
+            OpenShiftCommonCoreActivator.pluginLog().logWarning(NLS.bind("No view found to display value {0}", value));
+        }
 
-		/**
-		 * Helper method that creates Label + read-only StyledText
-		 * @param labelText
-		 * @param container
-		 * @return
-		 */
-		protected StyledText createLabeledValue(String labelText, Composite container) {
-			Label label = new Label(container, SWT.NONE);
-			label.setText(labelText);
-			GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(label);
-			return createNonEditableStyledText(container);
-		}
+        return view;
+    }
 
-		/**
-		 * Helper method that creates read-only StyledText for a value to display
-		 * @param container
-		 * @return
-		 */
-		protected StyledText createNonEditableStyledText(Composite container) {
-			StyledText styledText = new StyledText(container, SWT.READ_ONLY);
-			styledText.setAlwaysShowScrollBars(false);
-			StyledTextUtils.setTransparent(styledText);
-			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(styledText);
-			styledText.addFocusListener(fl);
-			new SmartTooltip(styledText);
-			return styledText;
-		}
+    private IDetailView createControls(IDetailView view) {
+        if (view == null) {
+            return null;
+        }
+        if (view.getControl() == null) {
+            view.createControls(parent, view, dbc);
+        }
+        return view;
+    }
 
-		/**
-		 * Listener used to remove selection from read-only text widget when focus is lost.
-		 * This prevents independent selecting on several widgets. As selection is used
-		 * for copying text to the clipboard, it is not needed without focus. 
-		 */
-		protected FocusListener fl = new FocusListener() {
+    private DisposeListener onDispose() {
+        return new DisposeListener() {
 
-			@Override
-			public void focusGained(FocusEvent e) {
-				//nothing to do
-			}
+            @Override
+            public void widgetDisposed(DisposeEvent e) {
+                dispose();
+            }
+        };
+    }
 
-			@Override
-			public void focusLost(FocusEvent e) {
-				if(e.getSource() instanceof StyledText) {
-					((StyledText)e.getSource()).setSelection(0, 0);
-				} else if(e.getSource() instanceof Text) {
-					((Text)e.getSource()).setSelection(0, 0);
-				}
-			}
+    private void dispose() {
+        for (IDetailView view : getDetailViews()) {
+            if (view != null) {
+                view.dispose();
+            }
+        }
+    }
 
-		};
+    protected IDetailView getCurrentView() {
+        return currentView;
+    }
 
-	}
-	
-	public interface IDetailView {
+    public class EmptyView extends BaseDetailsView {
 
-		public Composite createControls(Composite parent, Object context, DataBindingContext dbc);
+        @Override
+        public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
+            Composite container = setControl(new Composite(parent, SWT.NONE));
+            GridLayoutFactory.fillDefaults().margins(6, 6).spacing(6, 6).applyTo(container);
+            return container;
+        }
 
-		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
+        @Override
+        public boolean isViewFor(Object object) {
+            return false;
+        }
 
-		public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
+        /**
+         * Helper method that creates Label + read-only StyledText
+         * @param labelText
+         * @param container
+         * @return
+         */
+        protected StyledText createLabeledValue(String labelText, Composite container) {
+            Label label = new Label(container, SWT.NONE);
+            label.setText(labelText);
+            GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(label);
+            return createNonEditableStyledText(container);
+        }
 
-		public Control getControl();
-		
-		public boolean isViewFor(Object object);
+        /**
+         * Helper method that creates read-only StyledText for a value to display
+         * @param container
+         * @return
+         */
+        protected StyledText createNonEditableStyledText(Composite container) {
+            StyledText styledText = new StyledText(container, SWT.READ_ONLY);
+            styledText.setAlwaysShowScrollBars(false);
+            StyledTextUtils.setTransparent(styledText);
+            GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(styledText);
+            styledText.addFocusListener(fl);
+            new SmartTooltip(styledText);
+            return styledText;
+        }
 
-		public void dispose();
-	}
+        /**
+         * Listener used to remove selection from read-only text widget when focus is lost.
+         * This prevents independent selecting on several widgets. As selection is used
+         * for copying text to the clipboard, it is not needed without focus. 
+         */
+        protected FocusListener fl = new FocusListener() {
+
+            @Override
+            public void focusGained(FocusEvent e) {
+                //nothing to do
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (e.getSource() instanceof StyledText) {
+                    ((StyledText)e.getSource()).setSelection(0, 0);
+                } else if (e.getSource() instanceof Text) {
+                    ((Text)e.getSource()).setSelection(0, 0);
+                }
+            }
+
+        };
+
+    }
+
+    public interface IDetailView {
+
+        public Composite createControls(Composite parent, Object context, DataBindingContext dbc);
+
+        public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
+
+        public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
+
+        public Control getControl();
+
+        public boolean isViewFor(Object object);
+
+        public void dispose();
+    }
 }

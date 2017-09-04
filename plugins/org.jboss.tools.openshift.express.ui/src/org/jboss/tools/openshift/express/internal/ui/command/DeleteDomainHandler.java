@@ -27,21 +27,21 @@ import com.openshift.client.IDomain;
  */
 public class DeleteDomainHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		final IDomain domain = UIUtils.getFirstElement(selection, IDomain.class);
-		if (domain == null) {
-			return Status.OK_STATUS;
-		}
-		DestroyDomainDialog dialog = new DestroyDomainDialog(domain, HandlerUtil.getActiveShell(event));
-		dialog.open();
-		if (dialog.isCancel()) {
-			return Status.OK_STATUS;
-		}
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        ISelection selection = HandlerUtil.getCurrentSelection(event);
+        final IDomain domain = UIUtils.getFirstElement(selection, IDomain.class);
+        if (domain == null) {
+            return Status.OK_STATUS;
+        }
+        DestroyDomainDialog dialog = new DestroyDomainDialog(domain, HandlerUtil.getActiveShell(event));
+        dialog.open();
+        if (dialog.isCancel()) {
+            return Status.OK_STATUS;
+        }
 
-		new DestroyDomainJob(domain, dialog.isForceDelete()).schedule();
-		
-		return Status.OK_STATUS;
-	}
+        new DestroyDomainJob(domain, dialog.isForceDelete()).schedule();
+
+        return Status.OK_STATUS;
+    }
 }

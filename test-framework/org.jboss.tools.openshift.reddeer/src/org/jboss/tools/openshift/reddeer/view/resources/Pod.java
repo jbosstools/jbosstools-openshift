@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.reddeer.view.resources;
 import org.jboss.reddeer.swt.api.TreeItem;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 
-
 /**
  * Pod, one or more containers deployed together on a single host, are represented
  * as a TreeItem in OpenShift Explorer view. Pods are placed right under an OpenShift
@@ -27,7 +26,7 @@ public class Pod extends AbstractOpenShiftExplorerItem {
 	public Pod(TreeItem item) {
 		super(item);
 	}
-	
+
 	/**
 	 * Gets state of a pod.
 	 * 
@@ -37,7 +36,7 @@ public class Pod extends AbstractOpenShiftExplorerItem {
 		String state = treeViewerHandler.getStyledTexts(item)[0].trim();
 		return ResourceState.valueOf(state);
 	}
-	
+
 	/**
 	 * Gets name of a pod.
 	 * @return name of a pod

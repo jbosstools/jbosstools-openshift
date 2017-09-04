@@ -20,31 +20,31 @@ import org.jboss.tools.foundation.core.jobs.DelegatingProgressMonitor;
  */
 public abstract class AbstractDelegatingMonitorJob extends Job {
 
-	public static final int OK = 0;
-	public static final int TIMEOUTED = 1;
+    public static final int OK = 0;
+    public static final int TIMEOUTED = 1;
 
-	protected DelegatingProgressMonitor delegatingMonitor;
+    protected DelegatingProgressMonitor delegatingMonitor;
 
-	public AbstractDelegatingMonitorJob(String name) {
-		super(name);
-		
-		this.delegatingMonitor = new DelegatingProgressMonitor();
-	}
+    public AbstractDelegatingMonitorJob(String name) {
+        super(name);
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		delegatingMonitor.add(monitor);
-		return doRun(delegatingMonitor);
-	}
+        this.delegatingMonitor = new DelegatingProgressMonitor();
+    }
 
-	public DelegatingProgressMonitor getDelegatingProgressMonitor() {
-		return delegatingMonitor;
-	}
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+        delegatingMonitor.add(monitor);
+        return doRun(delegatingMonitor);
+    }
 
-	protected abstract IStatus doRun(IProgressMonitor monitor);
-		
-	public boolean isTimeouted(IStatus status){
-		return status.getCode() == TIMEOUTED;
-	}
-	
+    public DelegatingProgressMonitor getDelegatingProgressMonitor() {
+        return delegatingMonitor;
+    }
+
+    protected abstract IStatus doRun(IProgressMonitor monitor);
+
+    public boolean isTimeouted(IStatus status) {
+        return status.getCode() == TIMEOUTED;
+    }
+
 }

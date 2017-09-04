@@ -34,7 +34,7 @@ public class ServicePodsExist extends AbstractWaitCondition {
 	private final String serviceName;
 	private String projectName;
 	private Connection connection;
-	
+
 	public ServicePodsExist(String serviceName, String projectName, Connection connection) {
 		assertNotNull(serviceName);
 		assertNotNull(projectName);
@@ -61,11 +61,10 @@ public class ServicePodsExist extends AbstractWaitCondition {
 	}
 
 	private boolean hasDesiredReplicas(IService service) {
-		List<IReplicationController> allReplicationControllers = 
-				connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespace());
+		List<IReplicationController> allReplicationControllers = connection.getResources(ResourceKind.REPLICATION_CONTROLLER,
+				service.getNamespace());
 		IReplicationController rc = ResourceUtils.getReplicationControllerFor(service, allReplicationControllers);
-		return rc != null 
-				&& rc.getDesiredReplicaCount() > 0;
+		return rc != null && rc.getDesiredReplicaCount() > 0;
 	}
 
 	@Override

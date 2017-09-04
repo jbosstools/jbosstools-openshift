@@ -29,16 +29,16 @@ import static org.mockito.Mockito.doReturn;
  *
  */
 public class DockerConfigMetaDataTest {
-    
+
     private IDockerImageInfo imageInfo;
-    
+
     @Before
     public void before() {
         imageInfo = mock(IDockerImageInfo.class);
         doReturn(null).when(imageInfo).config();
         doReturn(null).when(imageInfo).containerConfig();
     }
-    
+
     /**
      * Mock an IDockerContainerConfig object.
      * 
@@ -54,7 +54,7 @@ public class DockerConfigMetaDataTest {
         doReturn(volumes).when(containerConfig).volumes();
         return containerConfig;
     }
-    
+
     @Test
     public void checkThatContainerConfigPortsAreReturnedWhenNoConfig() {
         doReturn(createContainerConfig(Collections.singleton("8080"), null, null)).when(imageInfo).containerConfig();

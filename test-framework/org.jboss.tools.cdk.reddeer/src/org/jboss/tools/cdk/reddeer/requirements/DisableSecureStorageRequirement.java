@@ -36,13 +36,13 @@ import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.
  * @author odockal
  */
 public class DisableSecureStorageRequirement implements Requirement<DisableSecureStorage> {
-	
+
 	private static final Logger log = Logger.getLogger(DisableSecureStorageRequirement.class);
-	
+
 	@Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    public @interface DisableSecureStorage {
-    }
+	@Target(ElementType.TYPE)
+	public @interface DisableSecureStorage {
+	}
 
 	@Override
 	public boolean canFulfill() {
@@ -51,7 +51,7 @@ public class DisableSecureStorageRequirement implements Requirement<DisableSecur
 
 	@Override
 	public void fulfill() {
-		setSecureStorageMasterPasswords(false);		
+		setSecureStorageMasterPasswords(false);
 	}
 
 	@Override
@@ -63,32 +63,30 @@ public class DisableSecureStorageRequirement implements Requirement<DisableSecur
 	public void cleanUp() {
 		setSecureStorageMasterPasswords(true);
 	}
-	
-    private void setSecureStorageMasterPasswords(boolean checked) {
-        WorkbenchPreferenceDialog preferenceDialog = new WorkbenchPreferenceDialog();
-        StoragePreferencePage storagePage = new StoragePreferencePage();
 
-        preferenceDialog.open();
-        preferenceDialog.select(storagePage);
-        try {
-	        new WaitUntil(new WidgetIsFound<org.eclipse.swt.custom.CLabel>(
-	        		new ClassMatcher(org.eclipse.swt.custom.CLabel.class), 
-	        		new WithMnemonicTextMatcher("Secure Storage")), TimePeriod.NORMAL);
-	        log.info("Getting master password providers");
-	        List<TableItem> items = storagePage.getMasterPasswordProviders();
-	        for (TableItem item : items) {
-	        	log.info("Uncheking table item: " + item.getText());
-	            item.setChecked(checked);
-	        }
-	        new WaitUntil(new JobIsRunning(), TimePeriod.NORMAL, false);
-	        storagePage.apply();
-        } catch (WaitTimeoutExpiredException exc) {
-        	log.error("Secure Storage preferences page has timed out");
-        	exc.printStackTrace();
-        } finally {
-	        preferenceDialog.ok();
+	private void setSecureStorageMasterPasswords(boolean checked) {
+		WorkbenchPreferenceDialog preferenceDialog = new WorkbenchPreferenceDialog();
+		StoragePreferencePage storagePage = new StoragePreferencePage();
+
+		preferenceDialog.open();
+		preferenceDialog.select(storagePage);
+		try {
+			new WaitUntil(new WidgetIsFound<org.eclipse.swt.custom.CLabel>(new ClassMatcher(org.eclipse.swt.custom.CLabel.class),
+					new WithMnemonicTextMatcher("Secure Storage")), TimePeriod.NORMAL);
+			log.info("Getting master password providers");
+			List<TableItem> items = storagePage.getMasterPasswordProviders();
+			for (TableItem item : items) {
+				log.info("Uncheking table item: " + item.getText());
+				item.setChecked(checked);
+			}
+			new WaitUntil(new JobIsRunning(), TimePeriod.NORMAL, false);
+			storagePage.apply();
+		} catch (WaitTimeoutExpiredException exc) {
+			log.error("Secure Storage preferences page has timed out");
+			exc.printStackTrace();
+		} finally {
+			preferenceDialog.ok();
 		}
-    }
+	}
 
 }
-

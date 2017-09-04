@@ -21,91 +21,91 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
  */
 public class ConnectionFake extends AbstractConnection {
 
-	private String username;
-	private String password;
-	
-	protected ConnectionFake(String host) {
-		super(host);
-	}
+    private String username;
+    private String password;
 
-	@Override
-	public boolean connect() {
-		return false;
-	}
+    protected ConnectionFake(String host) {
+        super(host);
+    }
 
-	@Override
-	public boolean canConnect() throws IOException {
-		return false;
-	}
+    @Override
+    public boolean connect() {
+        return false;
+    }
 
-	@Override
-	public String getUsername() {
-		return username;
-	}
+    @Override
+    public boolean canConnect() throws IOException {
+        return false;
+    }
 
-	@Override
-	public void setUsername(String username) {
-		firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
-	}
+    @Override
+    public String getUsername() {
+        return username;
+    }
 
-	@Override
-	public String getPassword() {
-		return password;
-	}
+    @Override
+    public void setUsername(String username) {
+        firePropertyChange(PROPERTY_USERNAME, this.username, this.username = username);
+    }
 
-	@Override
-	public void setPassword(String password) {
-		firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
-	}
+    @Override
+    public String getPassword() {
+        return password;
+    }
 
-	@Override
-	public void enablePromptCredentials(boolean enable) {
-	}
+    @Override
+    public void setPassword(String password) {
+        firePropertyChange(PROPERTY_PASSWORD, this.password, this.password = password);
+    }
 
-	@Override
-	public boolean isEnablePromptCredentials() {
-		return false;
-	}
+    @Override
+    public void enablePromptCredentials(boolean enable) {
+    }
 
-	@Override
-	public boolean isRememberPassword() {
-		return false;
-	}
-	
-	@Override
-	public boolean isDefaultHost() {
-		return false;
-	}
+    @Override
+    public boolean isEnablePromptCredentials() {
+        return false;
+    }
 
-	@Override
-	public ConnectionType getType() {
-		return null;
-	}
+    @Override
+    public boolean isRememberPassword() {
+        return false;
+    }
 
-	@Override
-	public void refresh() {
-	}
+    @Override
+    public boolean isDefaultHost() {
+        return false;
+    }
 
-	@Override
-	public boolean isConnected() {
-		return false;
-	}
-	
-	@Override
-	public IConnection clone() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void update(IConnection connection) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public ConnectionType getType() {
+        return null;
+    }
 
-	@Override
-	public void setRememberPassword(boolean rememberPassword) {
-	}
+    @Override
+    public void refresh() {
+    }
 
-	@Override
-	public void notifyUsage() {
-	}
+    @Override
+    public boolean isConnected() {
+        return false;
+    }
+
+    @Override
+    public IConnection clone() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void update(IConnection connection) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setRememberPassword(boolean rememberPassword) {
+    }
+
+    @Override
+    public void notifyUsage() {
+    }
 }

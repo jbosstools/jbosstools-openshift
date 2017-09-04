@@ -20,22 +20,22 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public interface IQuickstartApplicationTemplate extends IApplicationTemplate {
 
-	public IQuickstart getQuickstart();
+    public IQuickstart getQuickstart();
 
-	public String getLanguage();
-	
-	public String getPageUrl();
+    public String getLanguage();
 
-	public boolean hasPageUrl();
-	
-	public List<ICartridge> getAlternativesFor(ICartridge cartridge);
-	
-	public boolean isOpenShiftMaintained();
-	
-	public boolean isAutomaticSecurityUpdates();
+    public String getPageUrl();
 
-	public List<String> getTags();
+    public boolean hasPageUrl();
 
-	public String getTagsString();
+    public List<ICartridge> getAlternativesFor(ICartridge cartridge);
+
+    public boolean isOpenShiftMaintained();
+
+    public boolean isAutomaticSecurityUpdates();
+
+    public List<String> getTags();
+
+    public String getTagsString();
 
 }

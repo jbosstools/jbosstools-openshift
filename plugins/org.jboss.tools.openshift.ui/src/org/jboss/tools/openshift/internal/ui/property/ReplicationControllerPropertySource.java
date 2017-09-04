@@ -15,31 +15,28 @@ import com.openshift.restclient.model.IReplicationController;
 
 public class ReplicationControllerPropertySource extends ResourcePropertySource<IReplicationController> {
 
-	public ReplicationControllerPropertySource(IReplicationController resource) {
-		super(resource);
-	}
+    public ReplicationControllerPropertySource(IReplicationController resource) {
+        super(resource);
+    }
 
-	@Override
-	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new UneditablePropertyDescriptor("replicas", "Replicas"),
-				new UneditablePropertyDescriptor("selector", "Selector"),
-				new UneditablePropertyDescriptor("images", "Image(s)"),
-		};
-	}
+    @Override
+    public IPropertyDescriptor[] getResourcePropertyDescriptors() {
+        return new IPropertyDescriptor[] { new UneditablePropertyDescriptor("replicas", "Replicas"),
+                new UneditablePropertyDescriptor("selector", "Selector"), new UneditablePropertyDescriptor("images", "Image(s)"), };
+    }
 
-	@Override
-	public Object getPropertyValue(Object id) {
-		if("replicas".equals(id)){
-			return String.format("%s current / %s desired", getResource().getCurrentReplicaCount(), getResource().getDesiredReplicaCount());
-		}
-		if("selector".equals(id)){
-			return StringUtils.serialize(getResource().getReplicaSelector());
-		}
-		if("images".equals(id)){
-			return  org.apache.commons.lang.StringUtils.join(getResource().getImages(), ", ");
-		}
-		return super.getPropertyValue(id);
-	}
-	
+    @Override
+    public Object getPropertyValue(Object id) {
+        if ("replicas".equals(id)) {
+            return String.format("%s current / %s desired", getResource().getCurrentReplicaCount(), getResource().getDesiredReplicaCount());
+        }
+        if ("selector".equals(id)) {
+            return StringUtils.serialize(getResource().getReplicaSelector());
+        }
+        if ("images".equals(id)) {
+            return org.apache.commons.lang.StringUtils.join(getResource().getImages(), ", ");
+        }
+        return super.getPropertyValue(id);
+    }
+
 }

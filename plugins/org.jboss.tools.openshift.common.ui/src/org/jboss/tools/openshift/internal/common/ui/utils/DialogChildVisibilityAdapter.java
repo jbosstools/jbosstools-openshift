@@ -30,88 +30,88 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class DialogChildVisibilityAdapter {
 
-	private boolean visible;
-	private final Composite composite;
-	private final GridData gridData;
-	private final Shell shell;
-	private int invisibleChildShellHeight;
-	private boolean resizing;
-	
-	public DialogChildVisibilityAdapter(Composite child, boolean visible) {
-		Assert.isTrue(child != null && !child.isDisposed());
-		this.composite = child;
-		Object layoutData = child.getLayoutData();
-		Assert.isTrue(layoutData instanceof GridData, "only supports GridLayout");
-		this.gridData = (GridData) layoutData;
-		gridData.exclude = !visible;
-		Assert.isTrue(child.getShell() != null	&& !child.getShell().isDisposed());
-		this.shell = child.getShell();
-		shell.addControlListener(onShellResized(shell));
-		this.invisibleChildShellHeight = computeChildHeight(visible, child, shell);
-		this.visible = visible;
-		child.setVisible(visible);
-	}
-	
-	private ControlListener onShellResized(final Shell shell) {
-		final ControlListener listener = new ControlAdapter() {
+    private boolean visible;
+    private final Composite composite;
+    private final GridData gridData;
+    private final Shell shell;
+    private int invisibleChildShellHeight;
+    private boolean resizing;
 
-			@Override
-			public void controlResized(ControlEvent e) {
-				if (!resizing) {
-					DialogChildVisibilityAdapter.this.invisibleChildShellHeight = shell.getSize().y;
-				}
-			}
+    public DialogChildVisibilityAdapter(Composite child, boolean visible) {
+        Assert.isTrue(child != null && !child.isDisposed());
+        this.composite = child;
+        Object layoutData = child.getLayoutData();
+        Assert.isTrue(layoutData instanceof GridData, "only supports GridLayout");
+        this.gridData = (GridData)layoutData;
+        gridData.exclude = !visible;
+        Assert.isTrue(child.getShell() != null && !child.getShell().isDisposed());
+        this.shell = child.getShell();
+        shell.addControlListener(onShellResized(shell));
+        this.invisibleChildShellHeight = computeChildHeight(visible, child, shell);
+        this.visible = visible;
+        child.setVisible(visible);
+    }
 
-		};
-		
-		shell.addDisposeListener(new DisposeListener() {
-			
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				shell.removeControlListener(listener);
-			}
-		});
-		return listener;
-	}
+    private ControlListener onShellResized(final Shell shell) {
+        final ControlListener listener = new ControlAdapter() {
 
-	private int computeChildHeight(boolean visible, Composite child, Shell shell) {
-		Point size = shell.getSize();
-		if (visible) {
-			Point childSize = child.computeSize(child.getSize().x, SWT.DEFAULT);
-			size.y = size.y - childSize.y ;
-		} 
-		return size.y;
-	}
+            @Override
+            public void controlResized(ControlEvent e) {
+                if (!resizing) {
+                    DialogChildVisibilityAdapter.this.invisibleChildShellHeight = shell.getSize().y;
+                }
+            }
 
-	public void setVisible(boolean visible) {
-		if (this.visible == visible) {
-			return;
-		}
-		toggle();
-	}
-	
-	public boolean toggle() {
-		this.resizing = true;
-		this.visible = !visible;
-		composite.setVisible(visible);
-		gridData.exclude = !visible;
-		int newShellHeight= computeShellHeight(shell.getSize());
-		shell.setSize(shell.getSize().x, newShellHeight);
-		shell.layout(true, true);
-		this.resizing = false;
-		return visible;
-	}
+        };
 
-	protected int computeShellHeight(Point shellSize) {
-		if (visible) {
-			return shell.computeSize(shellSize.x, SWT.DEFAULT, true).y;
-		} else {
-			return new Point(shellSize.x, invisibleChildShellHeight).y;
-		}
-	}
+        shell.addDisposeListener(new DisposeListener() {
 
-	public boolean isVisible() {
-		return visible;
-	}
-	
+            @Override
+            public void widgetDisposed(DisposeEvent e) {
+                shell.removeControlListener(listener);
+            }
+        });
+        return listener;
+    }
+
+    private int computeChildHeight(boolean visible, Composite child, Shell shell) {
+        Point size = shell.getSize();
+        if (visible) {
+            Point childSize = child.computeSize(child.getSize().x, SWT.DEFAULT);
+            size.y = size.y - childSize.y;
+        }
+        return size.y;
+    }
+
+    public void setVisible(boolean visible) {
+        if (this.visible == visible) {
+            return;
+        }
+        toggle();
+    }
+
+    public boolean toggle() {
+        this.resizing = true;
+        this.visible = !visible;
+        composite.setVisible(visible);
+        gridData.exclude = !visible;
+        int newShellHeight = computeShellHeight(shell.getSize());
+        shell.setSize(shell.getSize().x, newShellHeight);
+        shell.layout(true, true);
+        this.resizing = false;
+        return visible;
+    }
+
+    protected int computeShellHeight(Point shellSize) {
+        if (visible) {
+            return shell.computeSize(shellSize.x, SWT.DEFAULT, true).y;
+        } else {
+            return new Point(shellSize.x, invisibleChildShellHeight).y;
+        }
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
 }

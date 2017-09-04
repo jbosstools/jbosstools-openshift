@@ -14,19 +14,19 @@ package org.jboss.tools.openshift.internal.ui.property;
  */
 public class ExtTextPropertyDescriptor extends UneditablePropertyDescriptor {
 
-	/**
-	 * Create a TextPropertyDescriptor defaulting the displayName
-	 * to the id.ToString()
-	 * @param id
-	 * @param category
-	 */
-	public ExtTextPropertyDescriptor(Enum<?> id, String category) {
-		this(id, id.toString(), category);
-	}
+    /**
+     * Create a TextPropertyDescriptor defaulting the displayName
+     * to the id.ToString()
+     * @param id
+     * @param category
+     */
+    public ExtTextPropertyDescriptor(Enum<?> id, String category) {
+        this(id, id.toString(), category);
+    }
 
-	public ExtTextPropertyDescriptor(Object id, String displayName, String category) {
-		super(id, displayName);
-		setCategory(category);
-	}
+    public ExtTextPropertyDescriptor(Object id, String displayName, String category) {
+        super(id, displayName);
+        setCategory(category);
+    }
 
 }

@@ -41,92 +41,93 @@ import com.openshift.restclient.model.IPod;
  * @author Jeff Maury
  */
 public class PodLogsHandler extends AbstractOpenShiftCliHandler {
-	private static final String [] STATES = new String [] {"Running", "Succeeded", "Failed", "Completed", "Error"};
-	
-	public static final String INVALID_POD_STATUS_MESSAGE = "The log is unavailable while the pod is in {0} state.";
-	
+    private static final String[] STATES = new String[] { "Running", "Succeeded", "Failed", "Completed", "Error" };
+
+    public static final String INVALID_POD_STATUS_MESSAGE = "The log is unavailable while the pod is in {0} state.";
+
     protected <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
         ISelection selection = UIUtils.getCurrentSelection(event);
         return UIUtils.getFirstElement(selection, klass);
     }
 
-	@Override
-	protected void handleEvent(ExecutionEvent event){
-		IPod pod = getSelectedElement(event, IPod.class);
-		if(pod == null) {
-			pod = getPodFromBuild(event);
-			if(pod == null) {
-				MessageDialog.openError(HandlerUtil.getActiveShell(event), "No pod selected", "Unable to determine the build pod in order to retrieve its log.");
-				return;
-			}
-		}
-		showLogs(pod, event);
-	}
-	
-	protected void showDialog(ExecutionEvent event, String title, String message) {
-	    MessageDialog.openError(HandlerUtil.getActiveShell(event), title, message);
-	}
-	
-	protected void showLogs(IPod pod, ExecutionEvent event) {
-		if(pod == null){
-			showDialog(event, "No pod selected", "No pod was selected to retrieve a log.");
-			return;
-		}
-		if(!ArrayUtils.contains(STATES, pod.getStatus())) {
-			showDialog(event, "Logs Unavailable", NLS.bind(INVALID_POD_STATUS_MESSAGE, pod.getStatus()));
-			return;
-		}
-		Collection<IContainer> containers = pod.getContainers();
-		if(containers.isEmpty()) {
-			showDialog(event, "Logs Unavailable", "There are no containers from which to retrieve logs");
-			return;
-		}
-		String containerName = null;
-		if(containers.size() > 1) {
-			List<String> names = containers.stream().map(c->c.getName()).collect(Collectors.toList());
-			Collections.sort(names);
-			ElementListSelectionDialog dialog = new ElementListSelectionDialog(HandlerUtil.getActiveShell(event), new LabelProvider());
-			dialog.setElements(names.toArray());
-			dialog.setTitle("Pod Containers");
-			dialog.setMessage("Select a pod container");
-			dialog.setMultipleSelection(false);
-			int result = dialog.open();
-			if(Window.CANCEL == result) {
-				return;
-			}
-			containerName = (String) dialog.getFirstResult();
-		}else if (containers.size() == 1){
-			containerName = containers.iterator().next().getName();
-		}
-		new PodLogsJob(pod, containerName).schedule();
-	}
+    @Override
+    protected void handleEvent(ExecutionEvent event) {
+        IPod pod = getSelectedElement(event, IPod.class);
+        if (pod == null) {
+            pod = getPodFromBuild(event);
+            if (pod == null) {
+                MessageDialog.openError(HandlerUtil.getActiveShell(event), "No pod selected",
+                        "Unable to determine the build pod in order to retrieve its log.");
+                return;
+            }
+        }
+        showLogs(pod, event);
+    }
 
-	private IConnection getConnectionFromBuild(ExecutionEvent event) {
-		IBuild build = getSelectedElement(event, IBuild.class);
-		if(build != null) {
-			return ConnectionsRegistryUtil.safeGetConnectionFor(build);
-		}
-		return null;
-	}
-	
-	private IPod getPodFromBuild(ExecutionEvent event) {
-		IBuild build = getSelectedElement(event, IBuild.class);
-		if(build != null) {
-			final String buildName = build.getName();
-			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(build);
-			List<IPod> pods = connection.getResources(ResourceKind.POD, build.getNamespace());
-			for (IPod pod : pods) {
-				if(buildName.equals(pod.getAnnotation(OpenShiftAPIAnnotations.BUILD_NAME))) {
-					return pod;
-				}
-			}
-		}
-		return null;
-	}
+    protected void showDialog(ExecutionEvent event, String title, String message) {
+        MessageDialog.openError(HandlerUtil.getActiveShell(event), title, message);
+    }
 
-	@Override
-	protected IConnection getConnection(ExecutionEvent event) {
-		return getConnectionFromBuild(event);
-	}
+    protected void showLogs(IPod pod, ExecutionEvent event) {
+        if (pod == null) {
+            showDialog(event, "No pod selected", "No pod was selected to retrieve a log.");
+            return;
+        }
+        if (!ArrayUtils.contains(STATES, pod.getStatus())) {
+            showDialog(event, "Logs Unavailable", NLS.bind(INVALID_POD_STATUS_MESSAGE, pod.getStatus()));
+            return;
+        }
+        Collection<IContainer> containers = pod.getContainers();
+        if (containers.isEmpty()) {
+            showDialog(event, "Logs Unavailable", "There are no containers from which to retrieve logs");
+            return;
+        }
+        String containerName = null;
+        if (containers.size() > 1) {
+            List<String> names = containers.stream().map(c -> c.getName()).collect(Collectors.toList());
+            Collections.sort(names);
+            ElementListSelectionDialog dialog = new ElementListSelectionDialog(HandlerUtil.getActiveShell(event), new LabelProvider());
+            dialog.setElements(names.toArray());
+            dialog.setTitle("Pod Containers");
+            dialog.setMessage("Select a pod container");
+            dialog.setMultipleSelection(false);
+            int result = dialog.open();
+            if (Window.CANCEL == result) {
+                return;
+            }
+            containerName = (String)dialog.getFirstResult();
+        } else if (containers.size() == 1) {
+            containerName = containers.iterator().next().getName();
+        }
+        new PodLogsJob(pod, containerName).schedule();
+    }
+
+    private IConnection getConnectionFromBuild(ExecutionEvent event) {
+        IBuild build = getSelectedElement(event, IBuild.class);
+        if (build != null) {
+            return ConnectionsRegistryUtil.safeGetConnectionFor(build);
+        }
+        return null;
+    }
+
+    private IPod getPodFromBuild(ExecutionEvent event) {
+        IBuild build = getSelectedElement(event, IBuild.class);
+        if (build != null) {
+            final String buildName = build.getName();
+            Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(build);
+            List<IPod> pods = connection.getResources(ResourceKind.POD, build.getNamespace());
+            for (IPod pod : pods) {
+                if (buildName.equals(pod.getAnnotation(OpenShiftAPIAnnotations.BUILD_NAME))) {
+                    return pod;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected IConnection getConnection(ExecutionEvent event) {
+        return getConnectionFromBuild(event);
+    }
 
 }

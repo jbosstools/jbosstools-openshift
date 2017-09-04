@@ -28,17 +28,16 @@ import com.openshift.restclient.model.IBuildConfig;
  */
 public class ShowWebHooksHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection selection = UIUtils.getCurrentSelection(event);
-		IBuildConfig buildConfig = UIUtils.getFirstElement(selection, IBuildConfig.class);
-		if(buildConfig == null) {
-			return Status.OK_STATUS;
-		}
-		WebHooksDialog dialog = new WebHooksDialog(HandlerUtil.getActiveShell(event), buildConfig);
-		dialog.open();
-		return Status.OK_STATUS;
-	}
-
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        ISelection selection = UIUtils.getCurrentSelection(event);
+        IBuildConfig buildConfig = UIUtils.getFirstElement(selection, IBuildConfig.class);
+        if (buildConfig == null) {
+            return Status.OK_STATUS;
+        }
+        WebHooksDialog dialog = new WebHooksDialog(HandlerUtil.getActiveShell(event), buildConfig);
+        dialog.open();
+        return Status.OK_STATUS;
+    }
 
 }

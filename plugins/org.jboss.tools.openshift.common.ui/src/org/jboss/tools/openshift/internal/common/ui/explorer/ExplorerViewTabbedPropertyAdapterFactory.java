@@ -28,39 +28,39 @@ import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
  *
  */
 public class ExplorerViewTabbedPropertyAdapterFactory implements IAdapterFactory {
-	
-	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
-		if (adapterType == IPropertySheetPage.class) {
-			IWorkbenchPart found = findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
-			if (found != null) {
-				ITabbedPropertySheetPageContributor contrib = new ITabbedPropertySheetPageContributor() {
-					@Override
-					public String getContributorId() {
-						return OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID;
-					}
-				};
-				return new TabbedPropertySheetPage(contrib);
-			}
-		}
-		return null;
-	}
 
-	@Override
-	public Class<?>[] getAdapterList() {
-		return new Class[] { IPropertySheetPage.class };
-	}
+    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Object getAdapter(Object adaptableObject, Class adapterType) {
+        if (adapterType == IPropertySheetPage.class) {
+            IWorkbenchPart found = findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
+            if (found != null) {
+                ITabbedPropertySheetPageContributor contrib = new ITabbedPropertySheetPageContributor() {
+                    @Override
+                    public String getContributorId() {
+                        return OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID;
+                    }
+                };
+                return new TabbedPropertySheetPage(contrib);
+            }
+        }
+        return null;
+    }
 
-	private IWorkbenchPart findView(String id) {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (window != null) {
-			IWorkbenchPage page = window.getActivePage();
-			if (page != null) {
-				IWorkbenchPart part = page.findView(id);
-				return part;
-			}
-		}
-		return null;
-	}
+    @Override
+    public Class<?>[] getAdapterList() {
+        return new Class[] { IPropertySheetPage.class };
+    }
+
+    private IWorkbenchPart findView(String id) {
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        if (window != null) {
+            IWorkbenchPage page = window.getActivePage();
+            if (page != null) {
+                IWorkbenchPart part = page.findView(id);
+                return part;
+            }
+        }
+        return null;
+    }
 }

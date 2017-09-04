@@ -20,63 +20,61 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 public abstract class DialogAdvancedPart {
-	protected Button advancedButton;
-	protected DialogChildVisibilityAdapter advancedSectionVisibilityAdapter;
+    protected Button advancedButton;
+    protected DialogChildVisibilityAdapter advancedSectionVisibilityAdapter;
 
-	public DialogAdvancedPart() {
-	}
+    public DialogAdvancedPart() {
+    }
 
-	/**
-	 * 
-	 * @param parent
-	 * @param numColumns the number of columns the advanced button and the advanced
-	 *                   group container should span of the parent layout
-	 */
-	public final void createAdvancedGroup(Composite parent, int numColumns) {
-		// advanced button
-		this.advancedButton = new Button(parent, SWT.NONE);
-		advancedButton.setText(getAdvancedButtonLabel(false));
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).span(numColumns, 1).applyTo(advancedButton);
+    /**
+     * 
+     * @param parent
+     * @param numColumns the number of columns the advanced button and the advanced
+     *                   group container should span of the parent layout
+     */
+    public final void createAdvancedGroup(Composite parent, int numColumns) {
+        // advanced button
+        this.advancedButton = new Button(parent, SWT.NONE);
+        advancedButton.setText(getAdvancedButtonLabel(false));
+        GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).span(numColumns, 1).applyTo(advancedButton);
 
-		// advanced composite
-		Composite advancedComposite = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).span(numColumns, 1).applyTo(advancedComposite);
-		adjustAdvancedCompositeLayout(GridLayoutFactory.fillDefaults()).applyTo(advancedComposite);
-		
-		this.advancedSectionVisibilityAdapter = new DialogChildVisibilityAdapter(advancedComposite, false);
-		advancedButton.addSelectionListener(onAdvancedClicked());
-		
-		createAdvancedContent(advancedComposite);
-	}
+        // advanced composite
+        Composite advancedComposite = new Composite(parent, SWT.NONE);
+        GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(numColumns, 1).applyTo(advancedComposite);
+        adjustAdvancedCompositeLayout(GridLayoutFactory.fillDefaults()).applyTo(advancedComposite);
 
-	protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
-		return gridLayoutFactory;
-	}
+        this.advancedSectionVisibilityAdapter = new DialogChildVisibilityAdapter(advancedComposite, false);
+        advancedButton.addSelectionListener(onAdvancedClicked());
 
-	private SelectionListener onAdvancedClicked() {
-		return new SelectionAdapter() {
+        createAdvancedContent(advancedComposite);
+    }
 
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				showAdvancedSection(!advancedSectionVisibilityAdapter.isVisible());
-			}
-		};
-	}
+    protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
+        return gridLayoutFactory;
+    }
 
-	public void showAdvancedSection(boolean visible) {
-		advancedSectionVisibilityAdapter.setVisible(visible);
-		advancedButton.setText(getAdvancedButtonLabel(visible));
-	}
+    private SelectionListener onAdvancedClicked() {
+        return new SelectionAdapter() {
 
-	protected String getAdvancedButtonLabel(boolean visible) {
-		if (visible) {
-			return " << Advanced ";
-		} else {
-			return " Advanced >> ";
-		}
-	}
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                showAdvancedSection(!advancedSectionVisibilityAdapter.isVisible());
+            }
+        };
+    }
 
-	protected abstract void createAdvancedContent(Composite advancedComposite);
+    public void showAdvancedSection(boolean visible) {
+        advancedSectionVisibilityAdapter.setVisible(visible);
+        advancedButton.setText(getAdvancedButtonLabel(visible));
+    }
+
+    protected String getAdvancedButtonLabel(boolean visible) {
+        if (visible) {
+            return " << Advanced ";
+        } else {
+            return " Advanced >> ";
+        }
+    }
+
+    protected abstract void createAdvancedContent(Composite advancedComposite);
 }

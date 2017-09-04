@@ -36,7 +36,7 @@ public class NewOpenShift3ApplicationWizard extends AbstractOpenShiftApplication
 	public NewOpenShift3ApplicationWizard() {
 		super(DatastoreOS3.SERVER, DatastoreOS3.USERNAME);
 	}
-	
+
 	public void openWizardFromExplorer() {
 		openWizardFromExplorer(null);
 	}
@@ -50,11 +50,11 @@ public class NewOpenShift3ApplicationWizard extends AbstractOpenShiftApplication
 		explorer.reopen();
 
 		selectExplorerProject(project, explorer);
-	
+
 		new ContextMenu(OpenShiftLabel.ContextMenu.NEW_OS3_APPLICATION).select();
-		
+
 		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD), TimePeriod.LONG);
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 	}
 

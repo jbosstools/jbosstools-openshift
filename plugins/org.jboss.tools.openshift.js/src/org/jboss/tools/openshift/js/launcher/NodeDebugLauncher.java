@@ -38,67 +38,63 @@ import com.openshift.restclient.model.IResource;
  */
 public final class NodeDebugLauncher {
 
-	public static void launch(IServer server, int port) throws CoreException {
-		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType type = launchManager
-				.getLaunchConfigurationType(NodeDebuggerUtil.CHROMIUM_LAUNCH_CONFIGURATION_TYPE_ID);
+    public static void launch(IServer server, int port) throws CoreException {
+        ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
+        ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(NodeDebuggerUtil.CHROMIUM_LAUNCH_CONFIGURATION_TYPE_ID);
 
-		IProject project = OpenShiftServerUtils.getDeployProject(server);
-		String projectName = project.getName();
+        IProject project = OpenShiftServerUtils.getDeployProject(server);
+        String projectName = project.getName();
 
-		final ILaunchConfigurationWorkingCopy v8debugLaunch = type.newInstance(project, projectName);
+        final ILaunchConfigurationWorkingCopy v8debugLaunch = type.newInstance(project, projectName);
 
-		v8debugLaunch.setAttribute(LaunchParams.CHROMIUM_DEBUG_HOST, NodeDebuggerUtil.LOCALHOST);
+        v8debugLaunch.setAttribute(LaunchParams.CHROMIUM_DEBUG_HOST, NodeDebuggerUtil.LOCALHOST);
 
-		v8debugLaunch.setAttribute(LaunchParams.CHROMIUM_DEBUG_PORT, port);
+        v8debugLaunch.setAttribute(LaunchParams.CHROMIUM_DEBUG_PORT, port);
 
-		v8debugLaunch.setAttribute(LaunchParams.ADD_NETWORK_CONSOLE, true);
+        v8debugLaunch.setAttribute(LaunchParams.ADD_NETWORK_CONSOLE, true);
 
-		v8debugLaunch.setAttribute(LaunchParams.BREAKPOINT_SYNC_DIRECTION,
-				BreakpointSynchronizer.Direction.MERGE.name());
+        v8debugLaunch.setAttribute(LaunchParams.BREAKPOINT_SYNC_DIRECTION, BreakpointSynchronizer.Direction.MERGE.name());
 
-		v8debugLaunch.setAttribute(LaunchParams.SOURCE_LOOKUP_MODE, LaunchParams.LookupMode.EXACT_MATCH.name());
+        v8debugLaunch.setAttribute(LaunchParams.SOURCE_LOOKUP_MODE, LaunchParams.LookupMode.EXACT_MATCH.name());
 
-		v8debugLaunch.setAttribute(LaunchParams.ATTR_APP_PROJECT,
-				OpenShiftServerUtils.getDeployProject(server).getName());
+        v8debugLaunch.setAttribute(LaunchParams.ATTR_APP_PROJECT, OpenShiftServerUtils.getDeployProject(server).getName());
 
-		v8debugLaunch.setAttribute(LaunchParams.ATTR_APP_PROJECT_RELATIVE_PATH,
-				project.getFile(NodeDebuggerUtil.PACKAGE_JSON).getProjectRelativePath().toOSString());
+        v8debugLaunch.setAttribute(LaunchParams.ATTR_APP_PROJECT_RELATIVE_PATH,
+                project.getFile(NodeDebuggerUtil.PACKAGE_JSON).getProjectRelativePath().toOSString());
 
-		v8debugLaunch.setAttribute(LaunchParams.ATTR_REMOTE_HOME_DIR, getPodPath(server, new NullProgressMonitor()));
+        v8debugLaunch.setAttribute(LaunchParams.ATTR_REMOTE_HOME_DIR, getPodPath(server, new NullProgressMonitor()));
 
-		v8debugLaunch.setAttribute(LaunchParams.PredefinedSourceWrapperIds.CONFIG_PROPERTY,
-				NodeDebuggerUtil.encode(NodeDebuggerUtil.PREDEFIENED_WRAPPERS));
+        v8debugLaunch.setAttribute(LaunchParams.PredefinedSourceWrapperIds.CONFIG_PROPERTY,
+                NodeDebuggerUtil.encode(NodeDebuggerUtil.PREDEFIENED_WRAPPERS));
 
-		DebugPlugin.getDefault().addDebugEventListener(new NodeDebugTerminateListener(v8debugLaunch, server));
+        DebugPlugin.getDefault().addDebugEventListener(new NodeDebugTerminateListener(v8debugLaunch, server));
 
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				DebugUITools.launch(v8debugLaunch, ILaunchManager.DEBUG_MODE);
-				// Debug session has just started - adding server to tracker
-				SessionStorage.get().put(server, v8debugLaunch);
-			}
-		});
-	}
-	
+        Display.getDefault().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                DebugUITools.launch(v8debugLaunch, ILaunchManager.DEBUG_MODE);
+                // Debug session has just started - adding server to tracker
+                SessionStorage.get().put(server, v8debugLaunch);
+            }
+        });
+    }
 
-	public static void terminate(IServer server) throws DebugException {
-		ILaunchConfiguration v8debugLaunch = SessionStorage.get().get(server);
-		if (v8debugLaunch != null) {
-			ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-			ILaunch[] runningLaunches = manager.getLaunches();
-			for (ILaunch launch : runningLaunches) {
-				if (v8debugLaunch.equals(launch.getLaunchConfiguration())) {
-					launch.terminate();
-				}
-			}
-		}
-	}
+    public static void terminate(IServer server) throws DebugException {
+        ILaunchConfiguration v8debugLaunch = SessionStorage.get().get(server);
+        if (v8debugLaunch != null) {
+            ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+            ILaunch[] runningLaunches = manager.getLaunches();
+            for (ILaunch launch : runningLaunches) {
+                if (v8debugLaunch.equals(launch.getLaunchConfiguration())) {
+                    launch.terminate();
+                }
+            }
+        }
+    }
 
-	private static String getPodPath(IServer server, IProgressMonitor monitor) throws CoreException {
-		IResource resource = OpenShiftServerUtils.getResource(server, monitor);
-		return OpenShiftServerUtils.loadPodPath(resource, server);
-	}
+    private static String getPodPath(IServer server, IProgressMonitor monitor) throws CoreException {
+        IResource resource = OpenShiftServerUtils.getResource(server, monitor);
+        return OpenShiftServerUtils.loadPodPath(resource, server);
+    }
 
 }

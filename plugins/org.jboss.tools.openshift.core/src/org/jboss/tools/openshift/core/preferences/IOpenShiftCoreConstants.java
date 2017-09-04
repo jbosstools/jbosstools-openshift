@@ -14,18 +14,17 @@ package org.jboss.tools.openshift.core.preferences;
  * @author jeff.cantrill
  */
 public interface IOpenShiftCoreConstants {
-	
-	static final String OPENSHIFT_CLI_LOC = "openshift.cli.location"; 
-	
-	/**
-	 * URL of the web page for Openshift 3 download instructions.
-	 */
-	public static final String DOWNLOAD_INSTRUCTIONS_URL = 
-	            "https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
-	
-	/**
-	 * Identifier of the Openshift 3 preference page.
-	 */
+
+    static final String OPENSHIFT_CLI_LOC = "openshift.cli.location";
+
+    /**
+     * URL of the web page for Openshift 3 download instructions.
+     */
+    public static final String DOWNLOAD_INSTRUCTIONS_URL = "https://github.com/openshift/origin/blob/master/CONTRIBUTING.adoc#download-from-github";
+
+    /**
+     * Identifier of the Openshift 3 preference page.
+     */
     public static final String OPEN_SHIFT_PREFERENCE_PAGE_ID = "org.jboss.tools.openshift.ui.preferences.OpenShiftPreferencePage";
 
 }

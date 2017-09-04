@@ -17,41 +17,38 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
  */
 public class RestoreSnapshotWizardPageModel extends ObservableUIPojo {
 
-	public static final String PROPERTY_FILEPATH = "filepath";
-	public static final String PROPERTY_DEPLOYMENT_SNAPSHOT = "deploymentSnapshot";
-	public static final String PROPERTY_HOT_DEPLOY = "hotDeploy";
-	
-	private RestoreSnapshotWizardModel wizardModel;
+    public static final String PROPERTY_FILEPATH = "filepath";
+    public static final String PROPERTY_DEPLOYMENT_SNAPSHOT = "deploymentSnapshot";
+    public static final String PROPERTY_HOT_DEPLOY = "hotDeploy";
 
-	public RestoreSnapshotWizardPageModel(RestoreSnapshotWizardModel wizardModel) {
-		this.wizardModel = wizardModel;
-	}
+    private RestoreSnapshotWizardModel wizardModel;
 
-	public void setFilepath(String filepath) {		
-		firePropertyChange(
-				PROPERTY_FILEPATH, this.wizardModel.getFilepath(), this.wizardModel.setFilepath(filepath));
-	}
+    public RestoreSnapshotWizardPageModel(RestoreSnapshotWizardModel wizardModel) {
+        this.wizardModel = wizardModel;
+    }
 
-	public String getFilepath() {
-		return wizardModel.getFilepath();
-	}
+    public void setFilepath(String filepath) {
+        firePropertyChange(PROPERTY_FILEPATH, this.wizardModel.getFilepath(), this.wizardModel.setFilepath(filepath));
+    }
 
-	public void setDeploymentSnapshot(boolean deploymentSnapshot) {
-		firePropertyChange(
-				PROPERTY_DEPLOYMENT_SNAPSHOT, this.wizardModel.isDeploymentSnapshot(),
-				this.wizardModel.setDeploymentSnapshot(deploymentSnapshot));
-	}
+    public String getFilepath() {
+        return wizardModel.getFilepath();
+    }
 
-	public boolean isDeploymentSnapshot() {
-		return wizardModel.isDeploymentSnapshot();
-	}
+    public void setDeploymentSnapshot(boolean deploymentSnapshot) {
+        firePropertyChange(PROPERTY_DEPLOYMENT_SNAPSHOT, this.wizardModel.isDeploymentSnapshot(),
+                this.wizardModel.setDeploymentSnapshot(deploymentSnapshot));
+    }
 
-	public void setHotDeploy(boolean hotDeploy) {
-		firePropertyChange(
-				PROPERTY_HOT_DEPLOY, this.wizardModel.isHotDeploy(), this.wizardModel.setHotDeploy(hotDeploy));
-	}
+    public boolean isDeploymentSnapshot() {
+        return wizardModel.isDeploymentSnapshot();
+    }
 
-	public boolean isHotDeploy() {
-		return wizardModel.isHotDeploy();
-	}
+    public void setHotDeploy(boolean hotDeploy) {
+        firePropertyChange(PROPERTY_HOT_DEPLOY, this.wizardModel.isHotDeploy(), this.wizardModel.setHotDeploy(hotDeploy));
+    }
+
+    public boolean isHotDeploy() {
+        return wizardModel.isHotDeploy();
+    }
 }

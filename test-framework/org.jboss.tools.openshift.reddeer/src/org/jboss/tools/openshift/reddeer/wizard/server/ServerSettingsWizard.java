@@ -22,8 +22,8 @@ import org.jboss.tools.openshift.reddeer.view.resources.Service;
  * @author jnovak@redhat.com
  */
 public class ServerSettingsWizard extends WizardDialog {
-	
-	public ServerSettingsWizard openFromOpenshiftView(Service openshiftService){
+
+	public ServerSettingsWizard openFromOpenshiftView(Service openshiftService) {
 		openshiftService.select();
 		new ContextMenu(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
 		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS), TimePeriod.LONG);

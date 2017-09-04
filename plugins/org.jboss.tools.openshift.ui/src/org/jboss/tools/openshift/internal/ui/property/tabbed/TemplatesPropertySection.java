@@ -21,7 +21,7 @@ import com.openshift.restclient.ResourceKind;
  */
 public class TemplatesPropertySection extends OpenShiftResourcePropertySection {
 
-	public TemplatesPropertySection() {
-		super("popup:org.jboss.tools.openshift.ui.properties.tab.TemplatesTab", ResourceKind.TEMPLATE);
-	}
+    public TemplatesPropertySection() {
+        super("popup:org.jboss.tools.openshift.ui.properties.tab.TemplatesTab", ResourceKind.TEMPLATE);
+    }
 }

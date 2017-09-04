@@ -21,17 +21,16 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class EmptyStringToNullConverter extends Converter {
 
-	public EmptyStringToNullConverter() {
-		super(String.class, String.class);
-	}
+    public EmptyStringToNullConverter() {
+        super(String.class, String.class);
+    }
 
-	@Override
-	public Object convert(Object fromObject) {
-		if (!(fromObject instanceof String)
-				|| StringUtils.isEmpty((String) fromObject)) {
-			return null;
-		} else {
-			return fromObject;
-		}
-	}
+    @Override
+    public Object convert(Object fromObject) {
+        if (!(fromObject instanceof String) || StringUtils.isEmpty((String)fromObject)) {
+            return null;
+        } else {
+            return fromObject;
+        }
+    }
 }

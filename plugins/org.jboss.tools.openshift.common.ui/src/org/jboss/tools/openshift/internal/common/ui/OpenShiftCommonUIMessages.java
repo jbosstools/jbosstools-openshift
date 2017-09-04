@@ -18,19 +18,19 @@ import org.eclipse.osgi.util.NLS;
  *
  */
 public class OpenShiftCommonUIMessages extends NLS {
-	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages"; //$NON-NLS-1$
-	static {
-		NLS.initializeMessages(BUNDLE_NAME, OpenShiftCommonUIMessages.class);
-	}
-	
-	private OpenShiftCommonUIMessages() {
-	}
-	
+    private static final String BUNDLE_NAME = "org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages"; //$NON-NLS-1$
+    static {
+        NLS.initializeMessages(BUNDLE_NAME, OpenShiftCommonUIMessages.class);
+    }
+
+    private OpenShiftCommonUIMessages() {
+    }
+
     public static String GeneralProjectWarningMessage;
-	public static String MavenProjectWarningMessage;
-	public static String MavenProjectsWarningMessage;
-	public static String OverwriteProjectsDialogTitle;
-	
-	public static String ImportButtonLabel;
-	
+    public static String MavenProjectWarningMessage;
+    public static String MavenProjectsWarningMessage;
+    public static String OverwriteProjectsDialogTitle;
+
+    public static String ImportButtonLabel;
+
 }

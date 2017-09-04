@@ -16,6 +16,6 @@ package org.jboss.tools.openshift.core;
  * @author Andre Dietisheim
  */
 public interface OpenShiftResourceSelectors {
-	/** as in eap templates **/
-	static final String DEPLOYMENT_CONFIG = "deploymentconfig";
+    /** as in eap templates **/
+    static final String DEPLOYMENT_CONFIG = "deploymentconfig";
 }

@@ -19,11 +19,11 @@ import com.openshift.client.IDomain;
  */
 public class DomainColumnLabelProvider extends ColumnLabelProvider {
 
-	@Override
-	public String getText(Object element) {
-		if (!(element instanceof IDomain)) {
-			return super.getText(element);
-		}
-		return ((IDomain) element).getId();
-	}
+    @Override
+    public String getText(Object element) {
+        if (!(element instanceof IDomain)) {
+            return super.getText(element);
+        }
+        return ((IDomain)element).getId();
+    }
 }

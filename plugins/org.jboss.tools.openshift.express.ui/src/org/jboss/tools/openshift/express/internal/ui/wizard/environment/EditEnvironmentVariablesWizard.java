@@ -32,139 +32,135 @@ import com.openshift.client.IEnvironmentVariable;
  */
 public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariablesWizard<EditEnvironmentVariablesWizardModel> {
 
-	public EditEnvironmentVariablesWizard(IApplication application) {
-		super(NLS.bind("Manage Application Environment Variable(s) for application {0}", application.getName()),
-				new EditEnvironmentVariablesWizardModel(application));
-	}
+    public EditEnvironmentVariablesWizard(IApplication application) {
+        super(NLS.bind("Manage Application Environment Variable(s) for application {0}", application.getName()),
+                new EditEnvironmentVariablesWizardModel(application));
+    }
 
-	@Override
-	public boolean performFinish() {
-		if (!isSupported()) {
-			return true;
-		}
-		
-		IApplication application = getModel().getApplication();
-		try {
-			WizardUtils.runInWizard(new UpdateEnvironmentVariableJob(application, getModel().getVariables()), getContainer());
-		} catch (InvocationTargetException e) {
-			Logger.error((application == null ?
-					"Could not edit environment variables"
-					: NLS.bind("Could not edit environment variables for application {0}", application.getName())),
-					e);
-		} catch (InterruptedException e) {
-			Logger.error((application == null ?
-					"Could not edit environment variables"
-					: NLS.bind("Could not edit environment variables for application {0}", application.getName())),
-					e);
-		}
-		return true;
-	}
+    @Override
+    public boolean performFinish() {
+        if (!isSupported()) {
+            return true;
+        }
 
-	private class UpdateEnvironmentVariableJob extends AbstractDelegatingMonitorJob {
+        IApplication application = getModel().getApplication();
+        try {
+            WizardUtils.runInWizard(new UpdateEnvironmentVariableJob(application, getModel().getVariables()), getContainer());
+        } catch (InvocationTargetException e) {
+            Logger.error((application == null ? "Could not edit environment variables"
+                    : NLS.bind("Could not edit environment variables for application {0}", application.getName())), e);
+        } catch (InterruptedException e) {
+            Logger.error((application == null ? "Could not edit environment variables"
+                    : NLS.bind("Could not edit environment variables for application {0}", application.getName())), e);
+        }
+        return true;
+    }
 
-		private IApplication application;
-		private List<EnvironmentVariableItem> variables;
+    private class UpdateEnvironmentVariableJob extends AbstractDelegatingMonitorJob {
 
-		public UpdateEnvironmentVariableJob(IApplication application, List<EnvironmentVariableItem> variables) {
-			super("Processing environment variables...");
-			this.application = application;
-			this.variables = variables;
-		}
+        private IApplication application;
+        private List<EnvironmentVariableItem> variables;
 
-		@Override
-		protected IStatus doRun(IProgressMonitor monitor) {
-			EnvironmentVariablesDiff diff = new EnvironmentVariablesDiff(variables, application.getEnvironmentVariables());
-			remove(diff.getRemovals(), application);
-			add(diff.getAdditions(), application);
-			update(diff.getUpdates(), application);
-			return Status.OK_STATUS;
-		}
+        public UpdateEnvironmentVariableJob(IApplication application, List<EnvironmentVariableItem> variables) {
+            super("Processing environment variables...");
+            this.application = application;
+            this.variables = variables;
+        }
 
-		private void add(List<EnvironmentVariableItem> toAdd, IApplication application) {
-			for (EnvironmentVariableItem variable : toAdd) {
-				application.addEnvironmentVariable(variable.getName(), variable.getValue());
-			}
-		}
+        @Override
+        protected IStatus doRun(IProgressMonitor monitor) {
+            EnvironmentVariablesDiff diff = new EnvironmentVariablesDiff(variables, application.getEnvironmentVariables());
+            remove(diff.getRemovals(), application);
+            add(diff.getAdditions(), application);
+            update(diff.getUpdates(), application);
+            return Status.OK_STATUS;
+        }
 
-		private void update(List<EnvironmentVariableItem> toUpdate, IApplication application) {
-			for (EnvironmentVariableItem variable : toUpdate) {
-				if (application.getEnvironmentVariable(variable.getName()) != null) {
-					application.updateEnvironmentVariable(variable.getName(), variable.getValue());
-				}
-			}
-		}
+        private void add(List<EnvironmentVariableItem> toAdd, IApplication application) {
+            for (EnvironmentVariableItem variable : toAdd) {
+                application.addEnvironmentVariable(variable.getName(), variable.getValue());
+            }
+        }
 
-		private void remove(List<String> namesToRemove, IApplication application) {
-			for (String name : namesToRemove) {
-				application.removeEnvironmentVariable(name);
-			}
-		}
-	}
+        private void update(List<EnvironmentVariableItem> toUpdate, IApplication application) {
+            for (EnvironmentVariableItem variable : toUpdate) {
+                if (application.getEnvironmentVariable(variable.getName()) != null) {
+                    application.updateEnvironmentVariable(variable.getName(), variable.getValue());
+                }
+            }
+        }
 
-	private class EnvironmentVariablesDiff {
+        private void remove(List<String> namesToRemove, IApplication application) {
+            for (String name : namesToRemove) {
+                application.removeEnvironmentVariable(name);
+            }
+        }
+    }
 
-		private List<String> removals = new ArrayList<>();
-		private List<EnvironmentVariableItem> additions = new ArrayList<>();
-		private List<EnvironmentVariableItem> updates = new ArrayList<>();
-		
-		public EnvironmentVariablesDiff(List<EnvironmentVariableItem> editedVariables, Map<String, IEnvironmentVariable> existingVariables) {
-			init(editedVariables, existingVariables);
-		}
+    private class EnvironmentVariablesDiff {
 
-		private void init(List<EnvironmentVariableItem> editedVariables, Map<String, IEnvironmentVariable> existingVariables) {
-			processAdditionsAndUpdates(editedVariables, existingVariables);
-			processRemovals(editedVariables, existingVariables);
-		}
-		
-		private void processAdditionsAndUpdates(List<EnvironmentVariableItem> editedVariables,
-				Map<String, IEnvironmentVariable> existingVariables) {
-			for (EnvironmentVariableItem variable : editedVariables) {
-				IEnvironmentVariable existingVariable = existingVariables.get(variable.getName());
-				if (existingVariable == null) {
-					additions.add(variable);
-				} else if(!equals(existingVariable.getValue(), variable.getValue())) {
-					updates.add(variable);
-				}
-			}
-		}
+        private List<String> removals = new ArrayList<>();
+        private List<EnvironmentVariableItem> additions = new ArrayList<>();
+        private List<EnvironmentVariableItem> updates = new ArrayList<>();
 
-		private boolean equals(String thisValue, String thatValue) {
-			if (thisValue == null) {
-				return thatValue == null;
-			} else {
-				return thisValue.equals(thatValue);
-			}
-		}
+        public EnvironmentVariablesDiff(List<EnvironmentVariableItem> editedVariables,
+                Map<String, IEnvironmentVariable> existingVariables) {
+            init(editedVariables, existingVariables);
+        }
 
-		private void processRemovals(List<EnvironmentVariableItem> editedVariables,
-				Map<String, IEnvironmentVariable> existingVariables) {
-			for (String name : existingVariables.keySet()) {
-				if (!contains(name, editedVariables)) {
-					removals.add(name);
-				}
-			}
-		}
+        private void init(List<EnvironmentVariableItem> editedVariables, Map<String, IEnvironmentVariable> existingVariables) {
+            processAdditionsAndUpdates(editedVariables, existingVariables);
+            processRemovals(editedVariables, existingVariables);
+        }
 
-		private boolean contains(String name, List<EnvironmentVariableItem> editedVariables) {
-			for (EnvironmentVariableItem variable : editedVariables) {
-				if (variable.getName().equals(name)) {
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		public List<EnvironmentVariableItem> getUpdates() {
-			return updates;
-		}
-		
-		public List<EnvironmentVariableItem> getAdditions() {
-			return additions;
-		}
-		
-		public List<String> getRemovals() {
-			return removals;
-		}
-	}
-	
+        private void processAdditionsAndUpdates(List<EnvironmentVariableItem> editedVariables,
+                Map<String, IEnvironmentVariable> existingVariables) {
+            for (EnvironmentVariableItem variable : editedVariables) {
+                IEnvironmentVariable existingVariable = existingVariables.get(variable.getName());
+                if (existingVariable == null) {
+                    additions.add(variable);
+                } else if (!equals(existingVariable.getValue(), variable.getValue())) {
+                    updates.add(variable);
+                }
+            }
+        }
+
+        private boolean equals(String thisValue, String thatValue) {
+            if (thisValue == null) {
+                return thatValue == null;
+            } else {
+                return thisValue.equals(thatValue);
+            }
+        }
+
+        private void processRemovals(List<EnvironmentVariableItem> editedVariables, Map<String, IEnvironmentVariable> existingVariables) {
+            for (String name : existingVariables.keySet()) {
+                if (!contains(name, editedVariables)) {
+                    removals.add(name);
+                }
+            }
+        }
+
+        private boolean contains(String name, List<EnvironmentVariableItem> editedVariables) {
+            for (EnvironmentVariableItem variable : editedVariables) {
+                if (variable.getName().equals(name)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public List<EnvironmentVariableItem> getUpdates() {
+            return updates;
+        }
+
+        public List<EnvironmentVariableItem> getAdditions() {
+            return additions;
+        }
+
+        public List<String> getRemovals() {
+            return removals;
+        }
+    }
+
 }

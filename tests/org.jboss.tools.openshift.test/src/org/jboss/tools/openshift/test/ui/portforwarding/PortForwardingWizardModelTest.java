@@ -33,35 +33,35 @@ import com.openshift.restclient.model.IPort;
 @RunWith(MockitoJUnitRunner.class)
 public class PortForwardingWizardModelTest {
 
-	@Mock
-	private IPod pod;
-	@Mock
-	private IPort port;
-	private PortForwardingWizardModel model;
+    @Mock
+    private IPod pod;
+    @Mock
+    private IPort port;
+    private PortForwardingWizardModel model;
 
-	@Before
-	public void setUp() throws Exception {
-		when(port.getName()).thenReturn("http");
-		when(port.getContainerPort()).thenReturn(3436);
-		when(port.getProtocol()).thenReturn("TCP");
-		when(pod.getName()).thenReturn("apodname");
-		Set<IPort> ports = new HashSet<>();
-		ports.add(port);
-		
-		when(pod.getNamespace()).thenReturn("anamespace");
-		when(pod.getContainerPorts()).thenReturn(ports);
-		this.model = new PortForwardingWizardModel(pod);
-	}
-	
-	@Test
-	public void testGetPodName() {
-		assertEquals(pod.getNamespace()+"\\"+pod.getName(), model.getPodName());
-	}
-	
-	@Test
-	public void getForwardablePorts() {
-		List<IPortForwardable.PortPair> ports = new ArrayList<>();
-		ports.add(new IPortForwardable.PortPair(port));
-		assertArrayEquals(ports.toArray(), model.getForwardablePorts().toArray());
-	}
+    @Before
+    public void setUp() throws Exception {
+        when(port.getName()).thenReturn("http");
+        when(port.getContainerPort()).thenReturn(3436);
+        when(port.getProtocol()).thenReturn("TCP");
+        when(pod.getName()).thenReturn("apodname");
+        Set<IPort> ports = new HashSet<>();
+        ports.add(port);
+
+        when(pod.getNamespace()).thenReturn("anamespace");
+        when(pod.getContainerPorts()).thenReturn(ports);
+        this.model = new PortForwardingWizardModel(pod);
+    }
+
+    @Test
+    public void testGetPodName() {
+        assertEquals(pod.getNamespace() + "\\" + pod.getName(), model.getPodName());
+    }
+
+    @Test
+    public void getForwardablePorts() {
+        List<IPortForwardable.PortPair> ports = new ArrayList<>();
+        ports.add(new IPortForwardable.PortPair(port));
+        assertArrayEquals(ports.toArray(), model.getForwardablePorts().toArray());
+    }
 }

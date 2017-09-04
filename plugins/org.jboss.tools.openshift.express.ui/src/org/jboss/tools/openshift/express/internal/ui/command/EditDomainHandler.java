@@ -24,15 +24,15 @@ import com.openshift.client.IDomain;
  */
 public class EditDomainHandler extends AbstractDomainHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IDomain domain = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IDomain.class);
-		if (domain == null) {
-			return null;
-		}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        IDomain domain = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IDomain.class);
+        if (domain == null) {
+            return null;
+        }
 
-		WizardUtils.openWizardDialog(new EditDomainWizard(domain), HandlerUtil.getActiveShell(event));
-		return null;
-	}
-	
+        WizardUtils.openWizardDialog(new EditDomainWizard(domain), HandlerUtil.getActiveShell(event));
+        return null;
+    }
+
 }

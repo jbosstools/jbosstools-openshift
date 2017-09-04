@@ -24,97 +24,97 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
  */
 public class ObservableTreeItem extends ObservableUIPojo {
 
-	public static final String PROPERTY_CHILDREN = "children";
+    public static final String PROPERTY_CHILDREN = "children";
 
-	private List<ObservableTreeItem> children;
+    private List<ObservableTreeItem> children;
 
-	private Object model;
-	private IModelFactory factory;
+    private Object model;
+    private IModelFactory factory;
 
-	public ObservableTreeItem(Object model) {
-		this(model, null);
-	}
+    public ObservableTreeItem(Object model) {
+        this(model, null);
+    }
 
-	public ObservableTreeItem(Object model, IModelFactory factory) {
-		this.model = model;
-		this.factory = factory;
-	}
+    public ObservableTreeItem(Object model, IModelFactory factory) {
+        this.model = model;
+        this.factory = factory;
+    }
 
-	public List<ObservableTreeItem> getChildren() {
-		return children;
-	}
+    public List<ObservableTreeItem> getChildren() {
+        return children;
+    }
 
-	public void setChildren(List<ObservableTreeItem> children) {
-		firePropertyChange(PROPERTY_CHILDREN, this.children, this.children = children);
-	}
+    public void setChildren(List<ObservableTreeItem> children) {
+        firePropertyChange(PROPERTY_CHILDREN, this.children, this.children = children);
+    }
 
-	public Object getModel() {
-		return model;
-	}
+    public Object getModel() {
+        return model;
+    }
 
-	public void load() {
-		List<ObservableTreeItem> children = createTreeItems(loadChildren());
-		setChildren(children);
-		for (ObservableTreeItem item : children) {
-			item.load();
-		}
-	}
+    public void load() {
+        List<ObservableTreeItem> children = createTreeItems(loadChildren());
+        setChildren(children);
+        for (ObservableTreeItem item : children) {
+            item.load();
+        }
+    }
 
-	public boolean isLoaded() {
-		return children != null;
-	}
-	
-	protected List<? extends Object> loadChildren() {
-		if (factory != null) {
-			return factory.createChildren(model);
-		} else {
-			return Collections.emptyList();
-		}
-	}
+    public boolean isLoaded() {
+        return children != null;
+    }
 
-	protected List<ObservableTreeItem> createTreeItems(List<?> children) {
-		List<ObservableTreeItem> items = new ArrayList<>();
-		for (Object child : children) {
-			ObservableTreeItem childItem = createChildItem(child);
-			if (childItem != null) {
-				items.add(childItem);
-			}
-		}
-		return items;
-	}
+    protected List<? extends Object> loadChildren() {
+        if (factory != null) {
+            return factory.createChildren(model);
+        } else {
+            return Collections.emptyList();
+        }
+    }
 
-	protected ObservableTreeItem createChildItem(Object model) {
-		return new ObservableTreeItem(model, this.factory);
-	}
+    protected List<ObservableTreeItem> createTreeItems(List<?> children) {
+        List<ObservableTreeItem> items = new ArrayList<>();
+        for (Object child : children) {
+            ObservableTreeItem childItem = createChildItem(child);
+            if (childItem != null) {
+                items.add(childItem);
+            }
+        }
+        return items;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((model == null) ? 0 : model.hashCode());
-		return result;
-	}
+    protected ObservableTreeItem createChildItem(Object model) {
+        return new ObservableTreeItem(model, this.factory);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (!(obj instanceof ObservableTreeItem))
-			return false;
-		ObservableTreeItem other = (ObservableTreeItem) obj;
-		if (model == null) {
-			if (other.model != null)
-				return false;
-		} else if (!model.equals(other.model))
-			return false;
-		return true;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((model == null) ? 0 : model.hashCode());
+        return result;
+    }
 
-	@Override
-	public String toString() {
-		return "ObservableTreeItem [children=" + children + ", model=" + model + "]";
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof ObservableTreeItem))
+            return false;
+        ObservableTreeItem other = (ObservableTreeItem)obj;
+        if (model == null) {
+            if (other.model != null)
+                return false;
+        } else if (!model.equals(other.model))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "ObservableTreeItem [children=" + children + ", model=" + model + "]";
+    }
 
 }

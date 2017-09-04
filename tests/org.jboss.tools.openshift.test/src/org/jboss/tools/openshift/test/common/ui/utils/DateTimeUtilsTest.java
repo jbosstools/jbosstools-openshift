@@ -23,41 +23,41 @@ import org.junit.Test;
 
 public class DateTimeUtilsTest {
 
-	private static Locale originalLocale;
-	
-	@BeforeClass
-	public static void beforeClass() {
-		originalLocale = Locale.getDefault();
-		Locale.setDefault(Locale.ENGLISH);
-	}
-	
-	@AfterClass
-	public static void afterClass() {
-		Locale.setDefault(originalLocale);
-	}
-	
-	@Test
-	public void testFormatDurationLessThanSec() {
-		long duration = 33000000L;
-		assertEquals("Now", formatDuration(duration));
-	}
+    private static Locale originalLocale;
 
-	@Test
-	public void testFormatDurationLessThanHour() {
-		long duration = 330000000000L;
-		assertEquals("5 min. 30 sec.", formatDuration(duration));
-	}
+    @BeforeClass
+    public static void beforeClass() {
+        originalLocale = Locale.getDefault();
+        Locale.setDefault(Locale.ENGLISH);
+    }
 
-	@Test
-	public void testFormatDurationLessThanDay() {
-		long duration = 33000000000000L;
-		assertEquals("9 hrs. 10 min.", formatDuration(duration));
-	}
-	
-	@Test
-	public void testFormatSince() {
-		String date = "2015-11-11T20:32:37Z";
-		assertEquals("11/11/15 3:32:37 PM EST", formatSince(date, TimeZone.getTimeZone("EST")));
-	}
+    @AfterClass
+    public static void afterClass() {
+        Locale.setDefault(originalLocale);
+    }
+
+    @Test
+    public void testFormatDurationLessThanSec() {
+        long duration = 33000000L;
+        assertEquals("Now", formatDuration(duration));
+    }
+
+    @Test
+    public void testFormatDurationLessThanHour() {
+        long duration = 330000000000L;
+        assertEquals("5 min. 30 sec.", formatDuration(duration));
+    }
+
+    @Test
+    public void testFormatDurationLessThanDay() {
+        long duration = 33000000000000L;
+        assertEquals("9 hrs. 10 min.", formatDuration(duration));
+    }
+
+    @Test
+    public void testFormatSince() {
+        String date = "2015-11-11T20:32:37Z";
+        assertEquals("11/11/15 3:32:37 PM EST", formatSince(date, TimeZone.getTimeZone("EST")));
+    }
 
 }

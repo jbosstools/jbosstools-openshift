@@ -24,23 +24,21 @@ import org.jboss.tools.openshift.express.internal.core.server.ExpressServerUtils
  */
 public class ServerTypePropertyTester extends PropertyTester {
 
-	private final static String PROPERTY_IS_OPENSHIFT_SERVER = "isOpenShiftServer";
+    private final static String PROPERTY_IS_OPENSHIFT_SERVER = "isOpenShiftServer";
 
-	@Override
-	public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
-		if (PROPERTY_IS_OPENSHIFT_SERVER.equals(property)) {
-			return isOpenShiftServer(receiver, args, expectedValue);
-		}
-		return false;
-	}
+    @Override
+    public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
+        if (PROPERTY_IS_OPENSHIFT_SERVER.equals(property)) {
+            return isOpenShiftServer(receiver, args, expectedValue);
+        }
+        return false;
+    }
 
-	private boolean isOpenShiftServer(Object receiver, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof IServer)
-				|| !(expectedValue instanceof Boolean)) {
-			return false;
-		}
+    private boolean isOpenShiftServer(Object receiver, Object[] args, Object expectedValue) {
+        if (!(receiver instanceof IServer) || !(expectedValue instanceof Boolean)) {
+            return false;
+        }
 
-		return ((Boolean) expectedValue).equals(
-				ExpressServerUtils.isExpressRuntime((IServer) receiver));
-	}
+        return ((Boolean)expectedValue).equals(ExpressServerUtils.isExpressRuntime((IServer)receiver));
+    }
 }

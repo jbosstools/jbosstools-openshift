@@ -30,31 +30,31 @@ import com.openshift.client.IDomain;
  */
 public class NewExpressApplicationHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IDomain domain = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IDomain.class);
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
-		Shell shell = HandlerUtil.getActiveShell(event);
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        IDomain domain = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IDomain.class);
+        ISelection selection = HandlerUtil.getCurrentSelection(event);
+        Shell shell = HandlerUtil.getActiveShell(event);
 
-		if (domain != null) {
-			open(new NewExpressApplicationWizard(domain), shell);
-		} else {
-			ExpressConnection connection = UIUtils.getFirstElement(selection, ExpressConnection.class);
-			if (connection != null) {
-				open(new NewExpressApplicationWizard(connection), shell);
-			}
-		}
+        if (domain != null) {
+            open(new NewExpressApplicationWizard(domain), shell);
+        } else {
+            ExpressConnection connection = UIUtils.getFirstElement(selection, ExpressConnection.class);
+            if (connection != null) {
+                open(new NewExpressApplicationWizard(connection), shell);
+            }
+        }
 
-		return Status.OK_STATUS;
-	}
+        return Status.OK_STATUS;
+    }
 
-	private void open(IWorkbenchWizard wizard, Shell shell) {
-		try {
-			WizardUtils.openWizardDialog(wizard, shell);
-		} catch (NullPointerException e) {
-			// swallow NPE that's caused by cancelling ssh keys / domain wizard
-			// https://issues.jboss.org/browse/JBIDE-14575
-		}
+    private void open(IWorkbenchWizard wizard, Shell shell) {
+        try {
+            WizardUtils.openWizardDialog(wizard, shell);
+        } catch (NullPointerException e) {
+            // swallow NPE that's caused by cancelling ssh keys / domain wizard
+            // https://issues.jboss.org/browse/JBIDE-14575
+        }
 
-	}
+    }
 }

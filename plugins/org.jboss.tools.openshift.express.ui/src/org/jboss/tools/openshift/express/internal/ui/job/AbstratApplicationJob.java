@@ -26,49 +26,49 @@ import com.openshift.client.OpenShiftException;
  */
 public abstract class AbstratApplicationJob extends AbstractDelegatingMonitorJob {
 
-	private ApplicationProvider applicationProvider;
+    private ApplicationProvider applicationProvider;
 
-	protected AbstratApplicationJob(ApplicationProvider applicationProvider, String name) {
-		super(name);
-		this.applicationProvider = applicationProvider;
-	}
+    protected AbstratApplicationJob(ApplicationProvider applicationProvider, String name) {
+        super(name);
+        this.applicationProvider = applicationProvider;
+    }
 
-	@Override
-	protected IStatus doRun(IProgressMonitor monitor) {
-		Logger.debug(getName());
-		IApplication application = null;
-		try {
-			application = applicationProvider.getApplication();
-			if (application != null) {
-				doRun(application);
-			}
-		} catch (OpenShiftException e) {
-			return ExpressUIActivator.createErrorStatus(NLS.bind("Could not {0}", getName()), e);
-		}
-		return Status.OK_STATUS;
-	}
+    @Override
+    protected IStatus doRun(IProgressMonitor monitor) {
+        Logger.debug(getName());
+        IApplication application = null;
+        try {
+            application = applicationProvider.getApplication();
+            if (application != null) {
+                doRun(application);
+            }
+        } catch (OpenShiftException e) {
+            return ExpressUIActivator.createErrorStatus(NLS.bind("Could not {0}", getName()), e);
+        }
+        return Status.OK_STATUS;
+    }
 
-	protected abstract void doRun(IApplication application);
-	
-	public static class ApplicationProvider {
-		
-		private IApplication application;
-		private LoadApplicationJob applicationJob;
-		
-		public ApplicationProvider(IApplication application) {
-			this.application = application;
-		}
+    protected abstract void doRun(IApplication application);
 
-		public ApplicationProvider(LoadApplicationJob applicationJob) {
-			this.applicationJob = applicationJob;
-		}
+    public static class ApplicationProvider {
 
-		public IApplication getApplication() {
-			if (application != null) {
-				return application;
-			} else {
-				return applicationJob.getApplication();
-			}
-		}
-	}
+        private IApplication application;
+        private LoadApplicationJob applicationJob;
+
+        public ApplicationProvider(IApplication application) {
+            this.application = application;
+        }
+
+        public ApplicationProvider(LoadApplicationJob applicationJob) {
+            this.applicationJob = applicationJob;
+        }
+
+        public IApplication getApplication() {
+            if (application != null) {
+                return application;
+            } else {
+                return applicationJob.getApplication();
+            }
+        }
+    }
 }

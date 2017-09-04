@@ -23,47 +23,47 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class RequiredStringMultiValidator extends MultiValidator {
 
-	private IObservableValue<String> observableValue;
-	private String name;
-	private String errorMessage;
-	
-	public RequiredStringMultiValidator(IObservableValue<String> value, String name) {
-		this(value, name, null);
-	}
+    private IObservableValue<String> observableValue;
+    private String name;
+    private String errorMessage;
 
-	public RequiredStringMultiValidator(String errorMessage, IObservableValue<String> value) {
-		this(value, null, errorMessage);
-	}
+    public RequiredStringMultiValidator(IObservableValue<String> value, String name) {
+        this(value, name, null);
+    }
 
-	protected RequiredStringMultiValidator(IObservableValue<String> value, String name, String errorMessage) {
-		this.observableValue = value;
-		this.name = name;
-		this.errorMessage = errorMessage;
-	}
+    public RequiredStringMultiValidator(String errorMessage, IObservableValue<String> value) {
+        this(value, null, errorMessage);
+    }
 
-	@Override
-	protected IStatus validate() {
-		String value = observableValue.getValue();
-		if (!isValueProvided(value)) {
-			return ValidationStatus.cancel(getErrorMessage());
-		}
-		return validateValue(value);
-	}
+    protected RequiredStringMultiValidator(IObservableValue<String> value, String name, String errorMessage) {
+        this.observableValue = value;
+        this.name = name;
+        this.errorMessage = errorMessage;
+    }
 
-	protected boolean isValueProvided(String value) {
-		return !StringUtils.isEmpty(value);
-	}
+    @Override
+    protected IStatus validate() {
+        String value = observableValue.getValue();
+        if (!isValueProvided(value)) {
+            return ValidationStatus.cancel(getErrorMessage());
+        }
+        return validateValue(value);
+    }
 
-	protected IStatus validateValue(String value) {
-		return ValidationStatus.ok();
-	}
+    protected boolean isValueProvided(String value) {
+        return !StringUtils.isEmpty(value);
+    }
 
-	protected String getErrorMessage() {
-		if (errorMessage != null) {
-			return errorMessage;
-		} else {
-			return "Please provide a value for " + name;
-		}
-	}
-	
-}		
+    protected IStatus validateValue(String value) {
+        return ValidationStatus.ok();
+    }
+
+    protected String getErrorMessage() {
+        if (errorMessage != null) {
+            return errorMessage;
+        } else {
+            return "Please provide a value for " + name;
+        }
+    }
+
+}

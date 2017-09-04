@@ -45,82 +45,82 @@ import com.openshift.restclient.model.volume.IPersistentVolumeClaim;
  */
 public class OpenInWebConsoleHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection currentSelection = UIUtils.getCurrentSelection(event);
-		IResource resource = UIUtils.getFirstElement(currentSelection, IResource.class);
-		Connection connection = null;
-		if ( resource == null) {
-			connection = UIUtils.getFirstElement(currentSelection, Connection.class);
-		} else {
-			connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
-		}
-		String msg;
-		if (connection == null) {
-			msg = "Could not find an OpenShift connection to open a console for";
-		} else {
-			String url = getWebConsoleUrl(connection, resource);
-			if (!StringUtils.isEmpty(url)) {
-				new BrowserUtility().checkedCreateExternalBrowser(url,
-						OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
-				return Status.OK_STATUS;
-			}
-			msg = NLS.bind("Could not determine the url for the web console on {0}", connection.getHost());
-		}
-		MessageDialog.openWarning(HandlerUtil.getActiveShell(event), "No Web Console Url", msg);
-		return new Status(IStatus.WARNING, OpenShiftUIActivator.PLUGIN_ID, msg);
-	}
+    @Override
+    public Object execute(final ExecutionEvent event) throws ExecutionException {
+        ISelection currentSelection = UIUtils.getCurrentSelection(event);
+        IResource resource = UIUtils.getFirstElement(currentSelection, IResource.class);
+        Connection connection = null;
+        if (resource == null) {
+            connection = UIUtils.getFirstElement(currentSelection, Connection.class);
+        } else {
+            connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
+        }
+        String msg;
+        if (connection == null) {
+            msg = "Could not find an OpenShift connection to open a console for";
+        } else {
+            String url = getWebConsoleUrl(connection, resource);
+            if (!StringUtils.isEmpty(url)) {
+                new BrowserUtility().checkedCreateExternalBrowser(url, OpenShiftUIActivator.PLUGIN_ID,
+                        OpenShiftUIActivator.getDefault().getLog());
+                return Status.OK_STATUS;
+            }
+            msg = NLS.bind("Could not determine the url for the web console on {0}", connection.getHost());
+        }
+        MessageDialog.openWarning(HandlerUtil.getActiveShell(event), "No Web Console Url", msg);
+        return new Status(IStatus.WARNING, OpenShiftUIActivator.PLUGIN_ID, msg);
+    }
 
-	protected String getWebConsoleUrl(Connection connection, IResource resource) {
-		StringBuilder url = new StringBuilder(connection.getHost()).append("/console");
-		String projectName = resource == null? null : resource.getNamespace();
-		if (projectName != null) {
-			url.append("/project/").append(projectName);
-		}
-		if (resource != null && !(resource instanceof IProject)) {
-			url.append(getResourceURL(resource));
-		}
-		return url.toString();
-	}
-	
-	protected String getResourceURL(IResource resource) {
-		for (ResourceUrls resUrl : ResourceUrls.values()) {
-			if (resUrl.getResType().isInstance(resource)) {
-				return resUrl.getUrlPart() + resUrl.getEndUrlFunc().apply(resource);
-			}
-		}
-		return "/browse";
-	}
-	
-	protected enum ResourceUrls {
-		BuildConfig			  (IBuildConfig.class, "/browse/builds/", IResource::getName),
-		Build				  (IBuild.class, "/browse/builds/", r -> String.join("/", r.getLabels().get("buildconfig"), r.getName())),
-		DeploymentConfig	  (IDeploymentConfig.class, "/browse/deployments/", IResource::getName),
-		Pod					  (IPod.class, "/browse/pods/", IResource::getName),
-		Service				  (IService.class, "/browse/services/", IResource::getName),
-		ImageStream			  (IImageStream.class, "/browse/images/", IResource::getName),
-		PersistentVolumeClaim (IPersistentVolumeClaim.class, "/browse/persistentvolumeclaims/", IResource::getName),
-		Event                 (IEvent.class, "/browse/events/", r -> org.apache.commons.lang.StringUtils.EMPTY);
-		
-		private final Class<? extends IResource> resType;
-		private final String urlPart;
-		private final Function<IResource, String> endUrlFunc;
-		private ResourceUrls(Class<? extends IResource> resType, String urlPart, Function<IResource, String> endUrlFunc) {
-			this.resType = resType;
-			this.urlPart = urlPart;
-			this.endUrlFunc = endUrlFunc;
-		}
+    protected String getWebConsoleUrl(Connection connection, IResource resource) {
+        StringBuilder url = new StringBuilder(connection.getHost()).append("/console");
+        String projectName = resource == null ? null : resource.getNamespace();
+        if (projectName != null) {
+            url.append("/project/").append(projectName);
+        }
+        if (resource != null && !(resource instanceof IProject)) {
+            url.append(getResourceURL(resource));
+        }
+        return url.toString();
+    }
 
-		public Class<? extends IResource> getResType() {
-			return resType;
-		}
+    protected String getResourceURL(IResource resource) {
+        for (ResourceUrls resUrl : ResourceUrls.values()) {
+            if (resUrl.getResType().isInstance(resource)) {
+                return resUrl.getUrlPart() + resUrl.getEndUrlFunc().apply(resource);
+            }
+        }
+        return "/browse";
+    }
 
-		public String getUrlPart() {
-			return urlPart;
-		}
+    protected enum ResourceUrls {
+        BuildConfig(IBuildConfig.class, "/browse/builds/", IResource::getName), Build(IBuild.class, "/browse/builds/",
+                r -> String.join("/", r.getLabels().get("buildconfig"), r.getName())), DeploymentConfig(IDeploymentConfig.class,
+                        "/browse/deployments/", IResource::getName), Pod(IPod.class, "/browse/pods/", IResource::getName), Service(
+                                IService.class, "/browse/services/", IResource::getName), ImageStream(IImageStream.class, "/browse/images/",
+                                        IResource::getName), PersistentVolumeClaim(IPersistentVolumeClaim.class,
+                                                "/browse/persistentvolumeclaims/", IResource::getName), Event(IEvent.class,
+                                                        "/browse/events/", r -> org.apache.commons.lang.StringUtils.EMPTY);
 
-		public Function<IResource, String> getEndUrlFunc() {
-			return endUrlFunc;
-		}
-	}
+        private final Class<? extends IResource> resType;
+        private final String urlPart;
+        private final Function<IResource, String> endUrlFunc;
+
+        private ResourceUrls(Class<? extends IResource> resType, String urlPart, Function<IResource, String> endUrlFunc) {
+            this.resType = resType;
+            this.urlPart = urlPart;
+            this.endUrlFunc = endUrlFunc;
+        }
+
+        public Class<? extends IResource> getResType() {
+            return resType;
+        }
+
+        public String getUrlPart() {
+            return urlPart;
+        }
+
+        public Function<IResource, String> getEndUrlFunc() {
+            return endUrlFunc;
+        }
+    }
 }

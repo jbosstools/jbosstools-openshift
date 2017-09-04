@@ -19,7 +19,7 @@ public class TemplateParameter {
 
 	private String name;
 	private String value;
-	
+
 	/**
 	 * Creates new template parameter with specified name and value.
 	 * 
@@ -34,7 +34,7 @@ public class TemplateParameter {
 	public String getName() {
 		return name;
 	}
-	
+
 	public String getValue() {
 		return value;
 	}

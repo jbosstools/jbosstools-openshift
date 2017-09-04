@@ -72,685 +72,683 @@ import com.openshift.restclient.model.route.IRoute;
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("serial")
 public class ResourceUtilsTest {
-	
-	private static final String IMAGE_REF = "foo:latest";
 
-	private static final IService SERVICE_42 =
-			ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, service -> when(service.getName()).thenReturn("42"));
+    private static final String IMAGE_REF = "foo:latest";
 
-	private static final IBuildConfig[] BUILDCONFIGS = new IBuildConfig[] {
-			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("41")),
-			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42")),
-			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42a")),
-			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42")),
-			ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("a42a"))
-	};
+    private static final IService SERVICE_42 = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE,
+            service -> when(service.getName()).thenReturn("42"));
 
-	private static final IRoute[] ROUTES = new IRoute[] {
-			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("41")),
-			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42")),
-			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42a")),
-			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42")),
-			ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("a42a"))
-	};
+    private static final IBuildConfig[] BUILDCONFIGS = new IBuildConfig[] {
+            ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("41")),
+            ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42")),
+            ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42a")),
+            ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG, config -> when(config.getName()).thenReturn("42")),
+            ResourceMocks.createResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG,
+                    config -> when(config.getName()).thenReturn("a42a")) };
 
-	private Map<String, String> podLabels = new HashMap<>();
-	private Map<String, String> serviceSelector = new HashMap<>();
-	@Mock private IPod pod;
-	@Mock private IBuildConfig buildConfig;
-	@Mock private IBuild build;
-	@Mock private IDeploymentImageChangeTrigger deployTrigger;
-	@Mock private IObjectReference objectRef;
-	@Mock private ITags tagsCap;
-	
-	@SuppressWarnings("unchecked")
-	@Before
-	public void setup() {
-		podLabels.put("foo", "bar");
-		podLabels.put("xyz", "bar");
+    private static final IRoute[] ROUTES = new IRoute[] {
+            ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("41")),
+            ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42")),
+            ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42a")),
+            ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("42")),
+            ResourceMocks.createResource(IRoute.class, ResourceKind.ROUTE, route -> when(route.getServiceName()).thenReturn("a42a")) };
 
-		when(pod.getLabels()).thenReturn(podLabels);
-		
-		serviceSelector.put("foo", "bar");
-		
-		when(buildConfig.getBuildOutputReference()).thenReturn(objectRef);
-		when(objectRef.getName()).thenReturn(IMAGE_REF);
-		when(build.getName()).thenReturn("build");
-		when(build.accept(any(CapabilityVisitor.class), anyBoolean()))
-			.then(new Answer<Boolean>() {
+    private Map<String, String> podLabels = new HashMap<>();
+    private Map<String, String> serviceSelector = new HashMap<>();
+    @Mock
+    private IPod pod;
+    @Mock
+    private IBuildConfig buildConfig;
+    @Mock
+    private IBuild build;
+    @Mock
+    private IDeploymentImageChangeTrigger deployTrigger;
+    @Mock
+    private IObjectReference objectRef;
+    @Mock
+    private ITags tagsCap;
 
-				@Override
-				public Boolean answer(InvocationOnMock invocation) throws Throwable {
-					CapabilityVisitor<ITags, Boolean> vis = (CapabilityVisitor<ITags, Boolean>) invocation.getArguments()[0];
-					return vis.visit(tagsCap);
-				}
-				
-			});
-		when(tagsCap.getTags()).thenReturn(Collections.emptyList());
-	}
-	
-	@Test
-	public void testIsMatchingWhenFilterIsBlank() {
-		assertTrue("Exp. a match on blank string", isMatching("   ","something", Collections.emptyList()));
-	}
-	
-	@Test
-	public void testIsMatchingResourceWhenFilterIsBlank() {
-		assertTrue("Exp. a match on blank string", isMatching("   ", build));
-	}
+    @SuppressWarnings("unchecked")
+    @Before
+    public void setup() {
+        podLabels.put("foo", "bar");
+        podLabels.put("xyz", "bar");
 
-	@Test
-	public void testIsMatchingWhenNameIsInFilterTextThatIsDelimited() {
-		assertTrue("Exp. a match on delimited filter", isMatching("java,jruby","torque-java-jruby", Collections.emptyList()));
-	}
-	
-	@Test
-	public void testIsMatchingResourceWhenNameIsInFilterTextThatIsDelimited() {
-		when(build.getName()).thenReturn("torque-java-jruby");
-		assertTrue("Exp. a match on delimited filter", isMatching("java,jruby",build));
-	}
-	
-	@Test
-	public void testIsMatchingWhenNameIsInFilterTextThatIsNotDelimited() {
-		assertTrue("Exp. a match on undelimited filter", isMatching(" bar ","bar", Collections.emptyList()));
-	}
-	
-	@Test
-	public void testIsMatchingResourceWhenNameIsInFilterTextThatIsNotDelimited() {
-		when(build.getName()).thenReturn("bar");
-		assertTrue("Exp. a match on undelimited filter", isMatching(" bar ",build));
-	}
+        when(pod.getLabels()).thenReturn(podLabels);
 
-	@Test
-	public void testIsMatchingWhenNameMatchesTags() {
-		assertTrue("Exp. a match on a tag", isMatching("bar","barrr", Arrays.asList("xyz","bar")));
-	}
+        serviceSelector.put("foo", "bar");
 
-	@Test
-	public void testIsMatchingResourceWhenNameMatchesTags() {
-		when(build.getName()).thenReturn("barrr");
-		when(tagsCap.getTags()).thenReturn(Arrays.asList("xyz","bar"));
-		assertTrue("Exp. a match on a tag", isMatching("bar",build));
-	}
-	
-	@Test
-	public void testIsNotMatchingWhenNameIsInFilterTextIsNotNameOrInTag() {
-		assertFalse("Exp. no match", isMatching("foo","bar", Arrays.asList("xyz","123")));
-	}
+        when(buildConfig.getBuildOutputReference()).thenReturn(objectRef);
+        when(objectRef.getName()).thenReturn(IMAGE_REF);
+        when(build.getName()).thenReturn("build");
+        when(build.accept(any(CapabilityVisitor.class), anyBoolean())).then(new Answer<Boolean>() {
 
-	@Test
-	public void testIsNotMatchingResourceWhenNameIsInFilterTextIsNotNameOrInTag() {
-		when(build.getName()).thenReturn("bar");
-		when(tagsCap.getTags()).thenReturn(Arrays.asList("xyz","123"));
-		assertFalse("Exp. no match", isMatching("foo","bar", Arrays.asList("xyz","123")));
-	}
+            @Override
+            public Boolean answer(InvocationOnMock invocation) throws Throwable {
+                CapabilityVisitor<ITags, Boolean> vis = (CapabilityVisitor<ITags, Boolean>)invocation.getArguments()[0];
+                return vis.visit(tagsCap);
+            }
 
-	@Test
-	public void testIsMatchingForNullResourceIsFalse() {
-		assertTrue(isMatching("text", null));
-	}
-	
-	
-	@Test
-	public void testContainsAllDoesNotNullPointer() {
-		assertFalse(containsAll(null, new HashMap<>()));
-		assertFalse(containsAll(new HashMap<>(), null));
-	}
-	
-	@Test
-	public void testContainsAllDoNotMatchWhenTargetDoesNotContainAllSourceKeys() {
-		Map<String, String> source = new HashMap<>(); 
-		source.put("foo", "bar");
-		Map<String, String> target = new HashMap<>(); 
-		target.put("xyz", "abc");
-		
-		assertFalse(containsAll(source, target));
-	}
-	
-	@Test
-	public void testContainsAllDoNotMatchWhenTargetValuesDoNotMatchSourceValues() {
-		Map<String, String> source = new HashMap<>(); 
-		source.put("foo", "bar");
-		Map<String, String> target = new HashMap<>(); 
-		target.put("foo", "abc");
-		target.put("xyz", "bar");
-		
-		assertFalse(containsAll(source, target));
-	}
-	
-	@Test
-	public void testContainsAllMatchesWhenTargetIncludesAllSourceKeyAndValues() {
-		Map<String, String> source = new HashMap<>(); 
-		source.put("foo", "bar");
-		Map<String, String> target= new HashMap<>(); 
-		target.put("foo", "bar");
-		target.put("xyz", "bar");
-		assertTrue(containsAll(source, target));
-	}
+        });
+        when(tagsCap.getTags()).thenReturn(Collections.emptyList());
+    }
 
-	@Test
-	public void containsAll_wont_match_if_target_contains_source_key_in_different_case() {
-		Map<String, String> source = new HashMap<>(); 
-		source.put("foo", "bar");
-		Map<String, String> target= new HashMap<>(); 
-		target.put("FoO", "bar");
-		target.put("xyz", "bar");
-		assertFalse(ResourceUtils.containsAll(source, target));
-	}
+    @Test
+    public void testIsMatchingWhenFilterIsBlank() {
+        assertTrue("Exp. a match on blank string", isMatching("   ", "something", Collections.emptyList()));
+    }
 
-	@Test
-	public void testGetServicesForPod() {
-		IService match = mock(IService.class);
-		when(match.getSelector()).thenReturn(serviceSelector);
-		IService nomatch = mock(IService.class);
-		when(nomatch.getSelector()).thenReturn(new HashMap<>());
-		
-		Collection<IService> services = Arrays.asList(nomatch,match);
-		IService [] exp = new IService[] {match};
-		assertArrayEquals(exp, getServicesFor(pod, services).toArray());
-	}
-	
-	@Test
-	public void testIsBuildPodWhenHasBuildAnnotation() {
-		when(pod.isAnnotatedWith(OpenShiftAPIAnnotations.BUILD_NAME)).thenReturn(true);
-		assertTrue(isBuildPod(pod));
-	}
-	@Test
-	public void testIsBuildPodWhenDoesNotHaveBuildAnnotation() {
-		when(pod.isAnnotatedWith(OpenShiftAPIAnnotations.BUILD_NAME)).thenReturn(false);
-		assertFalse(isBuildPod(pod));
-	}
-	
-	@Test
-	public void testImageRefForBuildConfig() {
-		assertEquals("", imageRef((IBuildConfig)null));
+    @Test
+    public void testIsMatchingResourceWhenFilterIsBlank() {
+        assertTrue("Exp. a match on blank string", isMatching("   ", build));
+    }
 
-		when(objectRef.getKind()).thenReturn("something");
-		assertEquals("", imageRef(buildConfig));
-		
-		when(objectRef.getKind()).thenReturn(ResourceKind.IMAGE_STREAM_TAG);
-		assertEquals(IMAGE_REF, imageRef(buildConfig));
-		
-		when(objectRef.getKind()).thenReturn(ResourceUtils.IMAGE_STREAM_IMAGE_KIND);
-		assertEquals(IMAGE_REF, imageRef(buildConfig));
-	}
+    @Test
+    public void testIsMatchingWhenNameIsInFilterTextThatIsDelimited() {
+        assertTrue("Exp. a match on delimited filter", isMatching("java,jruby", "torque-java-jruby", Collections.emptyList()));
+    }
 
-	@Test
-	public void nullBuildConfigListShouldReturnNullImageRefsList() {
-		// given
-		// when
-		List<String> imageRefs = getImageRefs(null);
-		// then
-		assertThat(imageRefs).isNull();
-	}
+    @Test
+    public void testIsMatchingResourceWhenNameIsInFilterTextThatIsDelimited() {
+        when(build.getName()).thenReturn("torque-java-jruby");
+        assertTrue("Exp. a match on delimited filter", isMatching("java,jruby", build));
+    }
 
-	@Test
-	public void emptyBuildConfigListShouldReturnEmptyImageRefsList() {
-		// given
-		List<IBuildConfig> buildConfigs = new ArrayList<IBuildConfig>();
-		// when
-		List<String> imageRefs = getImageRefs(buildConfigs);
-		// then
-		assertThat(imageRefs).isEmpty();
-	}
-	
-	@Test
-	public void buildConfigListWithNullEntryShouldReturnEmptyStringImageRef() {
-		// given
-		// when
-		List<String> imageRefs = getImageRefs(Arrays.asList((IBuildConfig) null));
-		// then
-		assertThat(imageRefs).containsExactly("");
-	}
+    @Test
+    public void testIsMatchingWhenNameIsInFilterTextThatIsNotDelimited() {
+        assertTrue("Exp. a match on undelimited filter", isMatching(" bar ", "bar", Collections.emptyList()));
+    }
 
-	@Test
-	public void buildConfigsListWithErronousKindsShouldReturnEmptyStringAndValidImageRefs() {
-		// given
-		List<IBuildConfig> buildConfigs = Arrays.asList(
-				ResourceMocks.createBuildConfig(null, null, "nullKind"),
-				ResourceMocks.createBuildConfig(null, ResourceKind.IMAGE_STREAM_TAG, "imageStreamTagKind"),
-				ResourceMocks.createBuildConfig(null, "foo", "fooKind"),
-				ResourceMocks.createBuildConfig(null, ResourceUtils.IMAGE_STREAM_IMAGE_KIND, "imageStreamImageKind"));
-		// when
-		List<String> imageRefs = getImageRefs(buildConfigs);
-		// then
-		assertThat(imageRefs).containsOnly("", "", "imageStreamTagKind", "imageStreamImageKind");
-	}
+    @Test
+    public void testIsMatchingResourceWhenNameIsInFilterTextThatIsNotDelimited() {
+        when(build.getName()).thenReturn("bar");
+        assertTrue("Exp. a match on undelimited filter", isMatching(" bar ", build));
+    }
 
-	@Test
-	public void testImageRefForDeploymentImageChangeTrigger() {
-		assertEquals("", imageRef((IDeploymentImageChangeTrigger)null));
-		
-		when(deployTrigger.getKind()).thenReturn("something");
-		assertEquals("", imageRef(deployTrigger));
+    @Test
+    public void testIsMatchingWhenNameMatchesTags() {
+        assertTrue("Exp. a match on a tag", isMatching("bar", "barrr", Arrays.asList("xyz", "bar")));
+    }
 
-		DockerImageURI uri = new DockerImageURI(IMAGE_REF);
-		when(deployTrigger.getFrom()).thenReturn(uri);
-		
-		when(deployTrigger.getKind()).thenReturn(ResourceKind.IMAGE_STREAM_TAG);
-		assertEquals(IMAGE_REF, imageRef(deployTrigger));
-		
-		when(deployTrigger.getKind()).thenReturn(ResourceUtils.IMAGE_STREAM_IMAGE_KIND);
-		assertEquals(IMAGE_REF, imageRef(deployTrigger));
-		
-		when(deployTrigger.getKind()).thenReturn(ResourceUtils.DOCKER_IMAGE_KIND);
-		assertEquals(IMAGE_REF, imageRef(deployTrigger));
-	}
+    @Test
+    public void testIsMatchingResourceWhenNameMatchesTags() {
+        when(build.getName()).thenReturn("barrr");
+        when(tagsCap.getTags()).thenReturn(Arrays.asList("xyz", "bar"));
+        assertTrue("Exp. a match on a tag", isMatching("bar", build));
+    }
 
-	@Test
-	public void testImageRefForBuild() {
-		assertEquals("", imageRef((IBuild)null));
-		
-		when(build.getOutputKind()).thenReturn("something");
-		assertEquals("", imageRef(build));
-		
-		DockerImageURI uri = new DockerImageURI(IMAGE_REF);
-		when(build.getOutputTo()).thenReturn(uri);
-		
-		when(build.getOutputKind()).thenReturn(ResourceKind.IMAGE_STREAM_TAG);
-		assertEquals(IMAGE_REF, imageRef(build));
-		
-		when(build.getOutputKind()).thenReturn(ResourceUtils.IMAGE_STREAM_IMAGE_KIND);
-		assertEquals(IMAGE_REF, imageRef(build));
-		
-		when(build.getOutputKind()).thenReturn(ResourceUtils.DOCKER_IMAGE_KIND);
-		assertEquals(IMAGE_REF, imageRef(build));
-	}
-	
-	@Test
-	public void testAreRelatedForBuildConfigAndService() {
-		// given
-		// when
-		// then
-		assertThat(areRelated((IBuildConfig) null, (IService) null)).isFalse();
+    @Test
+    public void testIsNotMatchingWhenNameIsInFilterTextIsNotNameOrInTag() {
+        assertFalse("Exp. no match", isMatching("foo", "bar", Arrays.asList("xyz", "123")));
+    }
 
-		// given
-		// when
-		// then
-		assertThat(areRelated(mock(IBuildConfig.class), (IService) null)).isFalse();
+    @Test
+    public void testIsNotMatchingResourceWhenNameIsInFilterTextIsNotNameOrInTag() {
+        when(build.getName()).thenReturn("bar");
+        when(tagsCap.getTags()).thenReturn(Arrays.asList("xyz", "123"));
+        assertFalse("Exp. no match", isMatching("foo", "bar", Arrays.asList("xyz", "123")));
+    }
 
-		// given
-		// when
-		// then
-		assertThat(areRelated((IBuildConfig) null, mock(IService.class))).isFalse();
+    @Test
+    public void testIsMatchingForNullResourceIsFalse() {
+        assertTrue(isMatching("text", null));
+    }
 
-		// given
-		IBuildConfig buildConfig = mock(IBuildConfig.class);
-		when(buildConfig.getName()).thenReturn("42");
-		IService service = mock(IService.class);
-		when(service.getName()).thenReturn("24");
-		// when
-		// then
-		assertThat(areRelated(buildConfig, service)).isFalse();
-		
-		// given
-		buildConfig = mock(IBuildConfig.class);
-		when(buildConfig.getName()).thenReturn("42");
-		service = mock(IService.class);
-		when(service.getName()).thenReturn("42");
-		// when
-		// then
-		assertThat(areRelated(buildConfig, service)).isTrue();
-	}
+    @Test
+    public void testContainsAllDoesNotNullPointer() {
+        assertFalse(containsAll(null, new HashMap<>()));
+        assertFalse(containsAll(new HashMap<>(), null));
+    }
 
-	@Test
-	public void testGetBuildConfigsForService() {
-		// given
-		// when
-		List<IBuildConfig> matchingConfigs = getBuildConfigsFor(SERVICE_42, Arrays.asList(BUILDCONFIGS));
-		// then
-		assertThat(matchingConfigs).containsExactly(BUILDCONFIGS[1], BUILDCONFIGS[3]);
+    @Test
+    public void testContainsAllDoNotMatchWhenTargetDoesNotContainAllSourceKeys() {
+        Map<String, String> source = new HashMap<>();
+        source.put("foo", "bar");
+        Map<String, String> target = new HashMap<>();
+        target.put("xyz", "abc");
 
-		// when
-		matchingConfigs = getBuildConfigsFor(SERVICE_42, null);
-		// then
-		assertThat(matchingConfigs).isEmpty();
-		
-		// when
-		matchingConfigs = getBuildConfigsFor((IService) null, Arrays.asList(BUILDCONFIGS));
-		// then
-		assertThat(matchingConfigs).isEmpty();
+        assertFalse(containsAll(source, target));
+    }
 
-		// when
-		matchingConfigs = getBuildConfigsFor(
-				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
-				Arrays.asList(BUILDCONFIGS));
-		// then
-		assertThat(matchingConfigs).isEmpty();
-	}
+    @Test
+    public void testContainsAllDoNotMatchWhenTargetValuesDoNotMatchSourceValues() {
+        Map<String, String> source = new HashMap<>();
+        source.put("foo", "bar");
+        Map<String, String> target = new HashMap<>();
+        target.put("foo", "abc");
+        target.put("xyz", "bar");
 
-	@Test
-	public void testGetBuildConfigForService() {
-		// given
-		// when
-		IBuildConfig matchingConfig = getBuildConfigFor(SERVICE_42, Arrays.asList(BUILDCONFIGS));
-		// then
-		assertThat(matchingConfig).isEqualTo(BUILDCONFIGS[1]);
+        assertFalse(containsAll(source, target));
+    }
 
-		// when
-		matchingConfig = getBuildConfigFor(SERVICE_42, null);
-		// then
-		assertThat(matchingConfig).isNull();
-		
-		// when
-		matchingConfig = getBuildConfigFor((IService) null, Arrays.asList(BUILDCONFIGS));
-		// then
-		assertThat(matchingConfig).isNull();
+    @Test
+    public void testContainsAllMatchesWhenTargetIncludesAllSourceKeyAndValues() {
+        Map<String, String> source = new HashMap<>();
+        source.put("foo", "bar");
+        Map<String, String> target = new HashMap<>();
+        target.put("foo", "bar");
+        target.put("xyz", "bar");
+        assertTrue(containsAll(source, target));
+    }
 
-		// when
-		matchingConfig = getBuildConfigFor(
-				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
-				Arrays.asList(BUILDCONFIGS));
-		// then
-		assertThat(matchingConfig).isNull();
-	}
+    @Test
+    public void containsAll_wont_match_if_target_contains_source_key_in_different_case() {
+        Map<String, String> source = new HashMap<>();
+        source.put("foo", "bar");
+        Map<String, String> target = new HashMap<>();
+        target.put("FoO", "bar");
+        target.put("xyz", "bar");
+        assertFalse(ResourceUtils.containsAll(source, target));
+    }
 
-	@Test
-	public void testGetReplicationControllerForService() {
-		// given
-		IReplicationController rc1 = ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER,
-				r -> 
-					doReturn(new HashMap<String, String>() {{
-						put("name", "42");
-						put("bookaroobanzai", "84"); }})
-					.when(r).getTemplateLabels());
-		IReplicationController rc2 = ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER,
-				r -> {
-					doReturn(new HashMap<String, String>() {{
-						put("name", "42");
-						put("deploymentConfig", "84");
-						put("foo", "bar"); }})
-					.when(r).getTemplateLabels();
-				});
-		IService srv1 = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE,
-				r -> 
-					doReturn(new HashMap<String, String>() {{
-						put("name", "42");
-						put("deploymentConfig", "84");}})
-					.when(r).getSelector());
-		// when
-		IReplicationController matching = ResourceUtils.getReplicationControllerFor(srv1, Arrays.asList(rc1, rc2));
-		// then
-		assertThat(matching).isEqualTo(rc2);
-	}
+    @Test
+    public void testGetServicesForPod() {
+        IService match = mock(IService.class);
+        when(match.getSelector()).thenReturn(serviceSelector);
+        IService nomatch = mock(IService.class);
+        when(nomatch.getSelector()).thenReturn(new HashMap<>());
 
-	@Test
-	public void NullRouteAndNullServiceShouldNotBeRelated() {
-		// given
-		// when
-		// then
-		assertThat(areRelated((IRoute) null, (IService) null)).isFalse();
-	}
+        Collection<IService> services = Arrays.asList(nomatch, match);
+        IService[] exp = new IService[] { match };
+        assertArrayEquals(exp, getServicesFor(pod, services).toArray());
+    }
 
-	public void routeShouldNotBerelatedToNullService() {
-		// given
-		// when
-		// then
-		assertThat(areRelated(mock(IRoute.class), (IService) null)).isFalse();
-	}
-	
-	public void serviceShouldNotBeRelatedToNullRoute() {
-		// given
-		// when
-		// then
-		assertThat(areRelated((IRoute) null, mock(IService.class))).isFalse();
-	}
+    @Test
+    public void testIsBuildPodWhenHasBuildAnnotation() {
+        when(pod.isAnnotatedWith(OpenShiftAPIAnnotations.BUILD_NAME)).thenReturn(true);
+        assertTrue(isBuildPod(pod));
+    }
 
-	public void serviceAndRouteWithDifferentNameShouldNotBeRelated() {
-		// given
-		IRoute route = mock(IRoute.class);
-		when(route.getServiceName()).thenReturn("42");
-		IService service = mock(IService.class);
-		when(service.getName()).thenReturn("24");
-		// when
-		// then
-		assertThat(areRelated(route, service)).isFalse();
-	}
+    @Test
+    public void testIsBuildPodWhenDoesNotHaveBuildAnnotation() {
+        when(pod.isAnnotatedWith(OpenShiftAPIAnnotations.BUILD_NAME)).thenReturn(false);
+        assertFalse(isBuildPod(pod));
+    }
 
-	public void serviceAndRouteWithSameNameShouldBeRelated() {
-		// given
-		IRoute route = mock(IRoute.class);
-		when(route.getServiceName()).thenReturn("42");
-		IService service = mock(IService.class);
-		when(service.getName()).thenReturn("42");
-		// when
-		// then
-		assertThat(areRelated(route, service)).isTrue();
-	}
+    @Test
+    public void testImageRefForBuildConfig() {
+        assertEquals("", imageRef((IBuildConfig)null));
 
-	@Test
-	public void routesWithServiceNameThatMatchServiceByNameShouldGetReturned() {
-		// given
-		// when
-		List<IRoute> routes = getRoutesFor(SERVICE_42, Arrays.asList(ROUTES));
-		// then
-		assertThat(routes).containsExactly(ROUTES[1], ROUTES[3]);
-	}
-	
-	@Test
-	public void serviceShouldNotMatchNullRoutes() {
-		// when
-		List<IRoute> routes = getRoutesFor(SERVICE_42, null);
-		// then
-		assertThat(routes).isEmpty();
-	}
+        when(objectRef.getKind()).thenReturn("something");
+        assertEquals("", imageRef(buildConfig));
 
-	@Test
-	public void routesShouldNotMatchNullService() {
-		// when
-		List<IRoute> routes = getRoutesFor((IService) null, Arrays.asList(ROUTES));
-		// then
-		assertThat(routes).isEmpty();
-	}
+        when(objectRef.getKind()).thenReturn(ResourceKind.IMAGE_STREAM_TAG);
+        assertEquals(IMAGE_REF, imageRef(buildConfig));
 
-	@Test
-	public void testGetRoutesForService() {
-		// when
-		List<IRoute> routes = getRoutesFor(
-				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")), 
-				Arrays.asList(ROUTES));
-		// then
-		assertThat(routes).isEmpty();
-	}
+        when(objectRef.getKind()).thenReturn(ResourceUtils.IMAGE_STREAM_IMAGE_KIND);
+        assertEquals(IMAGE_REF, imageRef(buildConfig));
+    }
 
-	@Test
-	public void routeServiceNameShouldMatchServiceInName() {
-		// given
-		// when
-		IRoute route = getRouteFor(SERVICE_42, Arrays.asList(ROUTES));
-		// then
-		assertThat(route).isEqualTo(ROUTES[1]);
-	}
-	
-	@Test
-	public void nullRouteShouldBeReturnedIfNullRouteIsGiven() {
-		// when
-		IRoute route = getRouteFor(SERVICE_42, null);
-		// then
-		assertThat(route).isNull();
-	}
+    @Test
+    public void nullBuildConfigListShouldReturnNullImageRefsList() {
+        // given
+        // when
+        List<String> imageRefs = getImageRefs(null);
+        // then
+        assertThat(imageRefs).isNull();
+    }
 
-	@Test
-	public void nullRouteShouldBeReturnedIfNullServiceIsGiven() {
-		// when
-		IRoute route = getRouteFor((IService) null, Arrays.asList(ROUTES));
-		// then
-		assertThat(route).isNull();
-	}
+    @Test
+    public void emptyBuildConfigListShouldReturnEmptyImageRefsList() {
+        // given
+        List<IBuildConfig> buildConfigs = new ArrayList<IBuildConfig>();
+        // when
+        List<String> imageRefs = getImageRefs(buildConfigs);
+        // then
+        assertThat(imageRefs).isEmpty();
+    }
 
-	@Test
-	public void testGetRouteForService() {
-		// when
-		IRoute route = getRouteFor(
-				ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, service -> when(service.getName()).thenReturn("0")), 
-				Arrays.asList(ROUTES));
-		// then
-		assertThat(route).isNull();
-	}
+    @Test
+    public void buildConfigListWithNullEntryShouldReturnEmptyStringImageRef() {
+        // given
+        // when
+        List<String> imageRefs = getImageRefs(Arrays.asList((IBuildConfig)null));
+        // then
+        assertThat(imageRefs).containsExactly("");
+    }
 
-	@Test
-	public void nullPodsShouldReturnNullDeploymentConfigName() {
-		// given
-		// when
-		String name = getDeploymentConfigNameFor((List<IPod>) null);
-		// then
-		assertThat(name).isNull();
-	}
+    @Test
+    public void buildConfigsListWithErronousKindsShouldReturnEmptyStringAndValidImageRefs() {
+        // given
+        List<IBuildConfig> buildConfigs = Arrays.asList(ResourceMocks.createBuildConfig(null, null, "nullKind"),
+                ResourceMocks.createBuildConfig(null, ResourceKind.IMAGE_STREAM_TAG, "imageStreamTagKind"),
+                ResourceMocks.createBuildConfig(null, "foo", "fooKind"),
+                ResourceMocks.createBuildConfig(null, ResourceUtils.IMAGE_STREAM_IMAGE_KIND, "imageStreamImageKind"));
+        // when
+        List<String> imageRefs = getImageRefs(buildConfigs);
+        // then
+        assertThat(imageRefs).containsOnly("", "", "imageStreamTagKind", "imageStreamImageKind");
+    }
 
-	@Test
-	public void emptyPodListShouldReturnNullDeploymentConfigName() {
-		// given empty pod list
-		// when
-		String name = getDeploymentConfigNameFor(Collections.emptyList());
-		// then
-		assertThat(name).isNull();
-	}
+    @Test
+    public void testImageRefForDeploymentImageChangeTrigger() {
+        assertEquals("", imageRef((IDeploymentImageChangeTrigger)null));
 
-	@Test
-	public void podListWithoutDeploymentConfigKeyShouldReturnNullDeploymentConfigName() {
-		// given
-		List<IPod> pods = Arrays.asList(
-				ResourceMocks.createResource(IPod.class, ResourceKind.POD),
-				pod,
-				ResourceMocks.createResource(IPod.class, ResourceKind.POD));
-		// when
-		String name = getDeploymentConfigNameFor(pods);
-		// then
-		assertThat(name).isNull();
-	}
+        when(deployTrigger.getKind()).thenReturn("something");
+        assertEquals("", imageRef(deployTrigger));
 
-	@Test
-	public void podListWithDeploymentConfigKeyShouldReturnDeploymentConfigName() {
-		// given 
-		final HashMap<String, String> podLabels = new HashMap<>();
-		podLabels.put("foo", "booh");
-		podLabels.put("bar", "car");
-		podLabels.put(ResourceUtils.DEPLOYMENT_CONFIG, "hooolahoo");
-		IPod pod = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels));
-		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD),
-				pod,
-				ResourceMocks.createResource(IPod.class, ResourceKind.POD));
-		// when
-		String name = getDeploymentConfigNameFor(pods);
-		// then
-		assertThat(name).isEqualTo("hooolahoo");
-	}
+        DockerImageURI uri = new DockerImageURI(IMAGE_REF);
+        when(deployTrigger.getFrom()).thenReturn(uri);
 
-	@Test
-	public void podListWithSeveralDeploymentConfigKeyShouldReturnFirstDeploymentConfigName() {
-		// given 2 pods with deployment-config-key label
-		HashMap<String, String> podLabels1 = new HashMap<>();
-		podLabels1.put("foo", "bar");
-		podLabels1.put("bar", "car");
-		podLabels1.put(ResourceUtils.DEPLOYMENT_CONFIG, "hooolahoo");
-		IPod pod1 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels1));		
+        when(deployTrigger.getKind()).thenReturn(ResourceKind.IMAGE_STREAM_TAG);
+        assertEquals(IMAGE_REF, imageRef(deployTrigger));
 
-		final HashMap<String, String> podLabels2 = new HashMap<>();
-		podLabels2.put("kung", "foo");
-		podLabels2.put(ResourceUtils.DEPLOYMENT_CONFIG, "hookaboo");
-		IPod pod2 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels2));		
-		List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD), pod1, pod2);
-		// when
-		String name = getDeploymentConfigNameFor(pods);
-		// then
-		assertThat(name).isEqualTo("hooolahoo");
-	}
+        when(deployTrigger.getKind()).thenReturn(ResourceUtils.IMAGE_STREAM_IMAGE_KIND);
+        assertEquals(IMAGE_REF, imageRef(deployTrigger));
 
-	@Test
-	public void shouldReturnDeploymentConfigForServiceByNameGivenServiceHasDCNameSelector() throws CoreException {
-		// given
-		Connection connection = ResourceMocks.create3ProjectsConnection();
-		IService service = ResourceMocks.PROJECT2_SERVICES[1];
-		// when
-		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
-		// then
-		assertThat(dc).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2]);
-	}
+        when(deployTrigger.getKind()).thenReturn(ResourceUtils.DOCKER_IMAGE_KIND);
+        assertEquals(IMAGE_REF, imageRef(deployTrigger));
+    }
 
-	@Test
-	public void shouldReturnDeploymentConfigForServiceByRCAndPodGivenServiceHasNoDCNameSelector() throws CoreException {
-		// given
-		Connection connection = ResourceMocks.create3ProjectsConnection();
-		IService service = ResourceMocks.PROJECT2_SERVICES[2];
-		// when
-		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
-		// then
-		assertThat(dc).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[0]);
-	}
+    @Test
+    public void testImageRefForBuild() {
+        assertEquals("", imageRef((IBuild)null));
 
-	@Test
-	public void shouldReturnNullGivenNoDCNameSelectorNorRCisFoundForService() throws CoreException {
-		// given
-		Connection connection = ResourceMocks.create3ProjectsConnection();
-		IService service = ResourceMocks.PROJECT2_SERVICES[0];
-		// when
-		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
-		// then 
-		assertThat(dc).isNull();
-	}
+        when(build.getOutputKind()).thenReturn("something");
+        assertEquals("", imageRef(build));
 
-	@Test
-	public void shouldReturnNullIfSelectReplicationControllerByDeploymentConfigOnEmptyList() {
-		// given
-		List<IReplicationController> noRcs = Collections.<IReplicationController> emptyList();
-		// when
-		IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(noRcs);
-		// then
-		assertThat(rc).isNull();
-	}
+        DockerImageURI uri = new DockerImageURI(IMAGE_REF);
+        when(build.getOutputTo()).thenReturn(uri);
 
-	@Test
-	public void shouldReturnNullIfSelectReplicationControllerByDeploymentConfigOnNullList() {
-		// given
-		List<IReplicationController> nullRcs = null;
-		// when
-		IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(nullRcs);
-		// then
-		assertThat(rc).isNull();
+        when(build.getOutputKind()).thenReturn(ResourceKind.IMAGE_STREAM_TAG);
+        assertEquals(IMAGE_REF, imageRef(build));
 
-	}
+        when(build.getOutputKind()).thenReturn(ResourceUtils.IMAGE_STREAM_IMAGE_KIND);
+        assertEquals(IMAGE_REF, imageRef(build));
 
-	@Test
-	public void shouldSelectLatestReplicationControllerGiven4Versions() {
-		// given
-		List<IReplicationController> noRcs = Arrays.asList(
-				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
-						doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
-						doReturn("4").when(rc).getName();
-					}),
-				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
-					doReturn("-1").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
-					doReturn("-1").when(rc).getName();
-				}),
-				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
-					doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
-					doReturn("4").when(rc).getName();
-				}),
-				ResourceMocks.createResource(IReplicationController.class,  ResourceKind.REPLICATION_CONTROLLER, rc -> {
-					doReturn("6").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
-					doReturn("6").when(rc).getName();
-				})
-				);
-		// when
-		IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(noRcs);
-		// then
-		assertThat(rc).isNotNull();
-		assertThat(rc.getName()).isEqualTo("6");
-	}
-	
-	@Test
-	public void extractProjectNameFromURI() {
-		assertNull(ResourceUtils.getProjectNameForURI(null));
-		assertEquals("bar", ResourceUtils.getProjectNameForURI("http://foo/bar"));
-		assertEquals("bar", ResourceUtils.getProjectNameForURI("http://foo/bar.git"));
-		assertEquals("bar", ResourceUtils.getProjectNameForURI("http://foo/bar/"));
-		assertEquals("ba.r", ResourceUtils.getProjectNameForURI("http://foo/ba.r"));
-		assertNull(ResourceUtils.getProjectNameForURI("http://foo/bar/.git"));
+        when(build.getOutputKind()).thenReturn(ResourceUtils.DOCKER_IMAGE_KIND);
+        assertEquals(IMAGE_REF, imageRef(build));
+    }
 
-		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart"));
-		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart.git"));
-		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart/"));
-		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart.git/"));
-		assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart.git///"));
-	}
+    @Test
+    public void testAreRelatedForBuildConfigAndService() {
+        // given
+        // when
+        // then
+        assertThat(areRelated((IBuildConfig)null, (IService)null)).isFalse();
+
+        // given
+        // when
+        // then
+        assertThat(areRelated(mock(IBuildConfig.class), (IService)null)).isFalse();
+
+        // given
+        // when
+        // then
+        assertThat(areRelated((IBuildConfig)null, mock(IService.class))).isFalse();
+
+        // given
+        IBuildConfig buildConfig = mock(IBuildConfig.class);
+        when(buildConfig.getName()).thenReturn("42");
+        IService service = mock(IService.class);
+        when(service.getName()).thenReturn("24");
+        // when
+        // then
+        assertThat(areRelated(buildConfig, service)).isFalse();
+
+        // given
+        buildConfig = mock(IBuildConfig.class);
+        when(buildConfig.getName()).thenReturn("42");
+        service = mock(IService.class);
+        when(service.getName()).thenReturn("42");
+        // when
+        // then
+        assertThat(areRelated(buildConfig, service)).isTrue();
+    }
+
+    @Test
+    public void testGetBuildConfigsForService() {
+        // given
+        // when
+        List<IBuildConfig> matchingConfigs = getBuildConfigsFor(SERVICE_42, Arrays.asList(BUILDCONFIGS));
+        // then
+        assertThat(matchingConfigs).containsExactly(BUILDCONFIGS[1], BUILDCONFIGS[3]);
+
+        // when
+        matchingConfigs = getBuildConfigsFor(SERVICE_42, null);
+        // then
+        assertThat(matchingConfigs).isEmpty();
+
+        // when
+        matchingConfigs = getBuildConfigsFor((IService)null, Arrays.asList(BUILDCONFIGS));
+        // then
+        assertThat(matchingConfigs).isEmpty();
+
+        // when
+        matchingConfigs = getBuildConfigsFor(
+                ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")),
+                Arrays.asList(BUILDCONFIGS));
+        // then
+        assertThat(matchingConfigs).isEmpty();
+    }
+
+    @Test
+    public void testGetBuildConfigForService() {
+        // given
+        // when
+        IBuildConfig matchingConfig = getBuildConfigFor(SERVICE_42, Arrays.asList(BUILDCONFIGS));
+        // then
+        assertThat(matchingConfig).isEqualTo(BUILDCONFIGS[1]);
+
+        // when
+        matchingConfig = getBuildConfigFor(SERVICE_42, null);
+        // then
+        assertThat(matchingConfig).isNull();
+
+        // when
+        matchingConfig = getBuildConfigFor((IService)null, Arrays.asList(BUILDCONFIGS));
+        // then
+        assertThat(matchingConfig).isNull();
+
+        // when
+        matchingConfig = getBuildConfigFor(
+                ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")),
+                Arrays.asList(BUILDCONFIGS));
+        // then
+        assertThat(matchingConfig).isNull();
+    }
+
+    @Test
+    public void testGetReplicationControllerForService() {
+        // given
+        IReplicationController rc1 = ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER,
+                r -> doReturn(new HashMap<String, String>() {
+                    {
+                        put("name", "42");
+                        put("bookaroobanzai", "84");
+                    }
+                }).when(r).getTemplateLabels());
+        IReplicationController rc2 = ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER, r -> {
+            doReturn(new HashMap<String, String>() {
+                {
+                    put("name", "42");
+                    put("deploymentConfig", "84");
+                    put("foo", "bar");
+                }
+            }).when(r).getTemplateLabels();
+        });
+        IService srv1 = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, r -> doReturn(new HashMap<String, String>() {
+            {
+                put("name", "42");
+                put("deploymentConfig", "84");
+            }
+        }).when(r).getSelector());
+        // when
+        IReplicationController matching = ResourceUtils.getReplicationControllerFor(srv1, Arrays.asList(rc1, rc2));
+        // then
+        assertThat(matching).isEqualTo(rc2);
+    }
+
+    @Test
+    public void NullRouteAndNullServiceShouldNotBeRelated() {
+        // given
+        // when
+        // then
+        assertThat(areRelated((IRoute)null, (IService)null)).isFalse();
+    }
+
+    public void routeShouldNotBerelatedToNullService() {
+        // given
+        // when
+        // then
+        assertThat(areRelated(mock(IRoute.class), (IService)null)).isFalse();
+    }
+
+    public void serviceShouldNotBeRelatedToNullRoute() {
+        // given
+        // when
+        // then
+        assertThat(areRelated((IRoute)null, mock(IService.class))).isFalse();
+    }
+
+    public void serviceAndRouteWithDifferentNameShouldNotBeRelated() {
+        // given
+        IRoute route = mock(IRoute.class);
+        when(route.getServiceName()).thenReturn("42");
+        IService service = mock(IService.class);
+        when(service.getName()).thenReturn("24");
+        // when
+        // then
+        assertThat(areRelated(route, service)).isFalse();
+    }
+
+    public void serviceAndRouteWithSameNameShouldBeRelated() {
+        // given
+        IRoute route = mock(IRoute.class);
+        when(route.getServiceName()).thenReturn("42");
+        IService service = mock(IService.class);
+        when(service.getName()).thenReturn("42");
+        // when
+        // then
+        assertThat(areRelated(route, service)).isTrue();
+    }
+
+    @Test
+    public void routesWithServiceNameThatMatchServiceByNameShouldGetReturned() {
+        // given
+        // when
+        List<IRoute> routes = getRoutesFor(SERVICE_42, Arrays.asList(ROUTES));
+        // then
+        assertThat(routes).containsExactly(ROUTES[1], ROUTES[3]);
+    }
+
+    @Test
+    public void serviceShouldNotMatchNullRoutes() {
+        // when
+        List<IRoute> routes = getRoutesFor(SERVICE_42, null);
+        // then
+        assertThat(routes).isEmpty();
+    }
+
+    @Test
+    public void routesShouldNotMatchNullService() {
+        // when
+        List<IRoute> routes = getRoutesFor((IService)null, Arrays.asList(ROUTES));
+        // then
+        assertThat(routes).isEmpty();
+    }
+
+    @Test
+    public void testGetRoutesForService() {
+        // when
+        List<IRoute> routes = getRoutesFor(
+                ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, config -> when(config.getName()).thenReturn("0")),
+                Arrays.asList(ROUTES));
+        // then
+        assertThat(routes).isEmpty();
+    }
+
+    @Test
+    public void routeServiceNameShouldMatchServiceInName() {
+        // given
+        // when
+        IRoute route = getRouteFor(SERVICE_42, Arrays.asList(ROUTES));
+        // then
+        assertThat(route).isEqualTo(ROUTES[1]);
+    }
+
+    @Test
+    public void nullRouteShouldBeReturnedIfNullRouteIsGiven() {
+        // when
+        IRoute route = getRouteFor(SERVICE_42, null);
+        // then
+        assertThat(route).isNull();
+    }
+
+    @Test
+    public void nullRouteShouldBeReturnedIfNullServiceIsGiven() {
+        // when
+        IRoute route = getRouteFor((IService)null, Arrays.asList(ROUTES));
+        // then
+        assertThat(route).isNull();
+    }
+
+    @Test
+    public void testGetRouteForService() {
+        // when
+        IRoute route = getRouteFor(
+                ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, service -> when(service.getName()).thenReturn("0")),
+                Arrays.asList(ROUTES));
+        // then
+        assertThat(route).isNull();
+    }
+
+    @Test
+    public void nullPodsShouldReturnNullDeploymentConfigName() {
+        // given
+        // when
+        String name = getDeploymentConfigNameFor((List<IPod>)null);
+        // then
+        assertThat(name).isNull();
+    }
+
+    @Test
+    public void emptyPodListShouldReturnNullDeploymentConfigName() {
+        // given empty pod list
+        // when
+        String name = getDeploymentConfigNameFor(Collections.emptyList());
+        // then
+        assertThat(name).isNull();
+    }
+
+    @Test
+    public void podListWithoutDeploymentConfigKeyShouldReturnNullDeploymentConfigName() {
+        // given
+        List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD), pod,
+                ResourceMocks.createResource(IPod.class, ResourceKind.POD));
+        // when
+        String name = getDeploymentConfigNameFor(pods);
+        // then
+        assertThat(name).isNull();
+    }
+
+    @Test
+    public void podListWithDeploymentConfigKeyShouldReturnDeploymentConfigName() {
+        // given 
+        final HashMap<String, String> podLabels = new HashMap<>();
+        podLabels.put("foo", "booh");
+        podLabels.put("bar", "car");
+        podLabels.put(ResourceUtils.DEPLOYMENT_CONFIG, "hooolahoo");
+        IPod pod = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels));
+        List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD), pod,
+                ResourceMocks.createResource(IPod.class, ResourceKind.POD));
+        // when
+        String name = getDeploymentConfigNameFor(pods);
+        // then
+        assertThat(name).isEqualTo("hooolahoo");
+    }
+
+    @Test
+    public void podListWithSeveralDeploymentConfigKeyShouldReturnFirstDeploymentConfigName() {
+        // given 2 pods with deployment-config-key label
+        HashMap<String, String> podLabels1 = new HashMap<>();
+        podLabels1.put("foo", "bar");
+        podLabels1.put("bar", "car");
+        podLabels1.put(ResourceUtils.DEPLOYMENT_CONFIG, "hooolahoo");
+        IPod pod1 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels1));
+
+        final HashMap<String, String> podLabels2 = new HashMap<>();
+        podLabels2.put("kung", "foo");
+        podLabels2.put(ResourceUtils.DEPLOYMENT_CONFIG, "hookaboo");
+        IPod pod2 = ResourceMocks.createResource(IPod.class, ResourceKind.POD, p -> when(p.getLabels()).thenReturn(podLabels2));
+        List<IPod> pods = Arrays.asList(ResourceMocks.createResource(IPod.class, ResourceKind.POD), pod1, pod2);
+        // when
+        String name = getDeploymentConfigNameFor(pods);
+        // then
+        assertThat(name).isEqualTo("hooolahoo");
+    }
+
+    @Test
+    public void shouldReturnDeploymentConfigForServiceByNameGivenServiceHasDCNameSelector() throws CoreException {
+        // given
+        Connection connection = ResourceMocks.create3ProjectsConnection();
+        IService service = ResourceMocks.PROJECT2_SERVICES[1];
+        // when
+        IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
+        // then
+        assertThat(dc).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2]);
+    }
+
+    @Test
+    public void shouldReturnDeploymentConfigForServiceByRCAndPodGivenServiceHasNoDCNameSelector() throws CoreException {
+        // given
+        Connection connection = ResourceMocks.create3ProjectsConnection();
+        IService service = ResourceMocks.PROJECT2_SERVICES[2];
+        // when
+        IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
+        // then
+        assertThat(dc).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[0]);
+    }
+
+    @Test
+    public void shouldReturnNullGivenNoDCNameSelectorNorRCisFoundForService() throws CoreException {
+        // given
+        Connection connection = ResourceMocks.create3ProjectsConnection();
+        IService service = ResourceMocks.PROJECT2_SERVICES[0];
+        // when
+        IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
+        // then 
+        assertThat(dc).isNull();
+    }
+
+    @Test
+    public void shouldReturnNullIfSelectReplicationControllerByDeploymentConfigOnEmptyList() {
+        // given
+        List<IReplicationController> noRcs = Collections.<IReplicationController>emptyList();
+        // when
+        IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(noRcs);
+        // then
+        assertThat(rc).isNull();
+    }
+
+    @Test
+    public void shouldReturnNullIfSelectReplicationControllerByDeploymentConfigOnNullList() {
+        // given
+        List<IReplicationController> nullRcs = null;
+        // when
+        IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(nullRcs);
+        // then
+        assertThat(rc).isNull();
+
+    }
+
+    @Test
+    public void shouldSelectLatestReplicationControllerGiven4Versions() {
+        // given
+        List<IReplicationController> noRcs = Arrays
+                .asList(ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER, rc -> {
+                    doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
+                    doReturn("4").when(rc).getName();
+                }), ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER, rc -> {
+                    doReturn("-1").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
+                    doReturn("-1").when(rc).getName();
+                }), ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER, rc -> {
+                    doReturn("4").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
+                    doReturn("4").when(rc).getName();
+                }), ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER, rc -> {
+                    doReturn("6").when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_LATEST_VERSION);
+                    doReturn("6").when(rc).getName();
+                }));
+        // when
+        IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(noRcs);
+        // then
+        assertThat(rc).isNotNull();
+        assertThat(rc.getName()).isEqualTo("6");
+    }
+
+    @Test
+    public void extractProjectNameFromURI() {
+        assertNull(ResourceUtils.getProjectNameForURI(null));
+        assertEquals("bar", ResourceUtils.getProjectNameForURI("http://foo/bar"));
+        assertEquals("bar", ResourceUtils.getProjectNameForURI("http://foo/bar.git"));
+        assertEquals("bar", ResourceUtils.getProjectNameForURI("http://foo/bar/"));
+        assertEquals("ba.r", ResourceUtils.getProjectNameForURI("http://foo/ba.r"));
+        assertNull(ResourceUtils.getProjectNameForURI("http://foo/bar/.git"));
+
+        assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart"));
+        assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart.git"));
+        assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart/"));
+        assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart.git/"));
+        assertEquals("quickstart", ResourceUtils.getProjectNameForURI("https://github.com/akram/quickstart.git///"));
+    }
 }

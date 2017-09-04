@@ -25,47 +25,44 @@ import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProv
  * 
  * @author Andre Dietisheim
  */
-public class ObservableTreeItemLabelProvider 
-	extends BaseLabelProvider 
-	implements IStyledLabelProvider, ILabelProvider {
+public class ObservableTreeItemLabelProvider extends BaseLabelProvider implements IStyledLabelProvider, ILabelProvider {
 
-	private OpenShiftExplorerLabelProvider explorerLabelProvider;
+    private OpenShiftExplorerLabelProvider explorerLabelProvider;
 
-	public ObservableTreeItemLabelProvider() {
-		this.explorerLabelProvider = new OpenShiftExplorerLabelProvider();
-	}
+    public ObservableTreeItemLabelProvider() {
+        this.explorerLabelProvider = new OpenShiftExplorerLabelProvider();
+    }
 
-	@Override
-	public Image getImage(Object element) {
-		if (element == null
-				|| !(element instanceof ObservableTreeItem)) {
-			return null;
-		}
-		return explorerLabelProvider.getImage(((ObservableTreeItem) element).getModel());
-	}
+    @Override
+    public Image getImage(Object element) {
+        if (element == null || !(element instanceof ObservableTreeItem)) {
+            return null;
+        }
+        return explorerLabelProvider.getImage(((ObservableTreeItem)element).getModel());
+    }
 
-	@Override
-	public StyledString getStyledText(Object element) {
-		if (element == null) {
-			return null;
-		} else if (!(element instanceof ObservableTreeItem)) {
-			return new StyledString(ObjectUtils.toString(element));
-		}
-		return explorerLabelProvider.getStyledText(((ObservableTreeItem) element).getModel());
-	}
+    @Override
+    public StyledString getStyledText(Object element) {
+        if (element == null) {
+            return null;
+        } else if (!(element instanceof ObservableTreeItem)) {
+            return new StyledString(ObjectUtils.toString(element));
+        }
+        return explorerLabelProvider.getStyledText(((ObservableTreeItem)element).getModel());
+    }
 
-	@Override
-	public void removeListener(ILabelProviderListener listener) {
-	}
+    @Override
+    public void removeListener(ILabelProviderListener listener) {
+    }
 
-	@Override
-	public String getText(Object element) {
-		if (element == null) {
-			return null;
-		} else if (!(element instanceof ObservableTreeItem)) {
-			return ObjectUtils.toString(element);
-		}
-		return explorerLabelProvider.getText(((ObservableTreeItem) element).getModel());
-	}
+    @Override
+    public String getText(Object element) {
+        if (element == null) {
+            return null;
+        } else if (!(element instanceof ObservableTreeItem)) {
+            return ObjectUtils.toString(element);
+        }
+        return explorerLabelProvider.getText(((ObservableTreeItem)element).getModel());
+    }
 
 }

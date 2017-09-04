@@ -19,32 +19,32 @@ import org.jboss.tools.foundation.core.plugin.AbstractTrace;
  * @author jeff.cantrill
  *
  */
-public class Trace extends AbstractTrace{
-	
-	private static Trace instance = null;
-	
-	protected Trace(OpenShiftCoreActivator plugin) {
-		super(plugin);
-		instance = this;
-	}
-	
-	public static void debug(String message, Object...args) {
-		debug(message,null,args);
-	}
+public class Trace extends AbstractTrace {
 
-	public static void debug(String message, Throwable err, Object...args) {
-		traceInternal(instance, STRING_FINER, NLS.bind(message, args),err);
-	}
+    private static Trace instance = null;
 
-	public static void info(String message, Object...args) {
-		traceInternal(instance, STRING_INFO, NLS.bind(message, args));
-	}
-	
-	public static void error(String message, Throwable err, Object...args) {
-		traceInternal(instance, STRING_SEVERE, NLS.bind(message, args), err);
-	}
-	
-	public static void warn(String message, Throwable err, Object...args) {
-		traceInternal(instance, STRING_WARNING, NLS.bind(message, args), err);
-	}
+    protected Trace(OpenShiftCoreActivator plugin) {
+        super(plugin);
+        instance = this;
+    }
+
+    public static void debug(String message, Object... args) {
+        debug(message, null, args);
+    }
+
+    public static void debug(String message, Throwable err, Object... args) {
+        traceInternal(instance, STRING_FINER, NLS.bind(message, args), err);
+    }
+
+    public static void info(String message, Object... args) {
+        traceInternal(instance, STRING_INFO, NLS.bind(message, args));
+    }
+
+    public static void error(String message, Throwable err, Object... args) {
+        traceInternal(instance, STRING_SEVERE, NLS.bind(message, args), err);
+    }
+
+    public static void warn(String message, Throwable err, Object... args) {
+        traceInternal(instance, STRING_WARNING, NLS.bind(message, args), err);
+    }
 }

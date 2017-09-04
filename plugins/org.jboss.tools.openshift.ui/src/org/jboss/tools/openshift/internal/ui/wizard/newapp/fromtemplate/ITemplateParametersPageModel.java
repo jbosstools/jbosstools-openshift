@@ -19,47 +19,47 @@ import com.openshift.restclient.model.template.IParameter;
  * @author jeff.cantrill
  */
 public interface ITemplateParametersPageModel {
-	static final String PARAMETER_SOURCE_REPOSITORY_URL = "SOURCE_REPOSITORY_URL";
-	static final String PARAMETER_GIT_URI = "GIT_URI"; //legacy key
-	
-	static final String PROPERTY_SELECTED_PARAMETER = "selectedParameter";
-	static final String PROPERTY_PARAMETERS = "parameters";
-	
-	/**
-	 * Retrieve the list of template parameters
-	 * @return
-	 */
-	List<IParameter> getParameters();
-	
-	/**
-	 * Set the list of template parameters
-	 * @param parameters
-	 */
-	void setParameters(Collection<IParameter> parameters);
-	
-	/**
-	 * Get the selected parameter
-	 * @return
-	 */
-	IParameter getSelectedParameter();
-	
-	/**
-	 * Set the selected parameter
-	 * @param parameter
-	 */
-	void setSelectedParameter(IParameter parameter);
-	
-	/**
-	 * Update the given parameter with the given value
-	 * @param param
-	 * @param value
-	 */
-	void updateParameterValue(IParameter param, String value);
+    static final String PARAMETER_SOURCE_REPOSITORY_URL = "SOURCE_REPOSITORY_URL";
+    static final String PARAMETER_GIT_URI = "GIT_URI"; //legacy key
 
-	/**
-	 * Reset the given parameter to its default value
-	 * @param parameter
-	 */
-	void resetParameter(IParameter parameter);
+    static final String PROPERTY_SELECTED_PARAMETER = "selectedParameter";
+    static final String PROPERTY_PARAMETERS = "parameters";
+
+    /**
+     * Retrieve the list of template parameters
+     * @return
+     */
+    List<IParameter> getParameters();
+
+    /**
+     * Set the list of template parameters
+     * @param parameters
+     */
+    void setParameters(Collection<IParameter> parameters);
+
+    /**
+     * Get the selected parameter
+     * @return
+     */
+    IParameter getSelectedParameter();
+
+    /**
+     * Set the selected parameter
+     * @param parameter
+     */
+    void setSelectedParameter(IParameter parameter);
+
+    /**
+     * Update the given parameter with the given value
+     * @param param
+     * @param value
+     */
+    void updateParameterValue(IParameter param, String value);
+
+    /**
+     * Reset the given parameter to its default value
+     * @param parameter
+     */
+    void resetParameter(IParameter parameter);
 
 }

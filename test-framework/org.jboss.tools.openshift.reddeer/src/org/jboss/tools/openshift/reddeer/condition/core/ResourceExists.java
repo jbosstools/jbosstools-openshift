@@ -52,7 +52,7 @@ public class ResourceExists extends AbstractWaitCondition {
 		try {
 			List<IResource> resources = connection.getResources(kind, project);
 			return matcher.matches(resources);
-		} catch(OpenShiftException e) {
+		} catch (OpenShiftException e) {
 			return false;
 		}
 	}

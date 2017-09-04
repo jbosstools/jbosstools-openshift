@@ -22,51 +22,51 @@ import org.jboss.dmr.Property;
 
 public class ImportImageMetaData implements IDockerImageMetadata {
 
-	private static final String[] ROOT = new String [] {"image","dockerImageMetadata","ContainerConfig"};
-	private static final String[] PORTS = (String[]) ArrayUtils.add(ROOT, "ExposedPorts");
-	private static final String[] ENV = (String[]) ArrayUtils.add(ROOT, "Env");
-	private static final String[] LABELS = (String[]) ArrayUtils.add(ROOT, "Labels");
-	private static final String[] VOLUMES = (String[]) ArrayUtils.add(ROOT, "Volumes");
+    private static final String[] ROOT = new String[] { "image", "dockerImageMetadata", "ContainerConfig" };
+    private static final String[] PORTS = (String[])ArrayUtils.add(ROOT, "ExposedPorts");
+    private static final String[] ENV = (String[])ArrayUtils.add(ROOT, "Env");
+    private static final String[] LABELS = (String[])ArrayUtils.add(ROOT, "Labels");
+    private static final String[] VOLUMES = (String[])ArrayUtils.add(ROOT, "Volumes");
 
-	private final ModelNode node;
+    private final ModelNode node;
 
-	public ImportImageMetaData(final String json) {
-		this.node = ModelNode.fromJSONString(json);
-	}
+    public ImportImageMetaData(final String json) {
+        this.node = ModelNode.fromJSONString(json);
+    }
 
-	@Override
-	public Set<String> exposedPorts(){
-		ModelNode ports = node.get(PORTS);
-		if(ports.isDefined()) {
-			return ports.keys();
-		}
-		return Collections.emptySet();
-	}
-	
-	@Override
-	public List<String> env(){
-		ModelNode env = node.get(ENV);
-		if(env.isDefined()) {
-			return env.asList().stream().map(n->n.asString()).collect(Collectors.toList());
-		}
-		return Collections.emptyList();
-	}
-	
-	@Override
-	public Map<String, String> labels(){
-		ModelNode labels = node.get(LABELS);
-		if (labels.isDefined()) {
-			return labels.asPropertyList().stream().collect(Collectors.toMap(Property::getName, p -> p.getValue().asString()));
-		}
-		return Collections.emptyMap();
-	}
+    @Override
+    public Set<String> exposedPorts() {
+        ModelNode ports = node.get(PORTS);
+        if (ports.isDefined()) {
+            return ports.keys();
+        }
+        return Collections.emptySet();
+    }
 
-	@Override
-	public Set<String> volumes(){
-		ModelNode volumes = node.get(VOLUMES);
-		if(volumes.isDefined()) {
-			return volumes.keys();
-		}
-		return Collections.emptySet();
-	}
+    @Override
+    public List<String> env() {
+        ModelNode env = node.get(ENV);
+        if (env.isDefined()) {
+            return env.asList().stream().map(n -> n.asString()).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Map<String, String> labels() {
+        ModelNode labels = node.get(LABELS);
+        if (labels.isDefined()) {
+            return labels.asPropertyList().stream().collect(Collectors.toMap(Property::getName, p -> p.getValue().asString()));
+        }
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Set<String> volumes() {
+        ModelNode volumes = node.get(VOLUMES);
+        if (volumes.isDefined()) {
+            return volumes.keys();
+        }
+        return Collections.emptySet();
+    }
 }

@@ -28,22 +28,19 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView.Authenticati
  *
  */
 public class DatastoreOS3 {
-	
+
 	private static final String KEY_AUTHMETHOD = "openshift.authmethod";
 	private static final String KEY_TOKEN = "openshift.token";
 	public static final String KEY_PASSWORD = "openshift.password";
 	public static final String KEY_NEXUS_MIRROR = "openshift.nexus.mirror";
-	
+
 	static {
-		AuthenticationMethod authMethod = AuthenticationMethod.safeValueOf(
-				getRequiredProperty(KEY_AUTHMETHOD, 
-						new String[] { "basic", "oauth" }, 
-						"Please add '-D" + KEY_AUTHMETHOD + "=[basic|oauth]' to your launch arguments"));
-		if (AuthenticationMethod.BASIC.equals(authMethod)) { 
-			assertTrue("Please add '-D" + KEY_PASSWORD + "=[password]'", 
-					StringUtils.isNotBlank(System.getProperty(KEY_PASSWORD)));
+		AuthenticationMethod authMethod = AuthenticationMethod.safeValueOf(getRequiredProperty(KEY_AUTHMETHOD,
+				new String[] { "basic", "oauth" }, "Please add '-D" + KEY_AUTHMETHOD + "=[basic|oauth]' to your launch arguments"));
+		if (AuthenticationMethod.BASIC.equals(authMethod)) {
+			assertTrue("Please add '-D" + KEY_PASSWORD + "=[password]'", StringUtils.isNotBlank(System.getProperty(KEY_PASSWORD)));
 		} else if (AuthenticationMethod.OAUTH.equals(authMethod)) {
-			assertTrue("Please add '-D" + KEY_TOKEN + "=[token]' to your launch arguments", 
+			assertTrue("Please add '-D" + KEY_TOKEN + "=[token]' to your launch arguments",
 					StringUtils.isNotBlank(System.getProperty(KEY_TOKEN)));
 		}
 	}
@@ -57,21 +54,19 @@ public class DatastoreOS3 {
 	public static String PUBLIC_OS3_SERVER = "https://console.preview.openshift.com";
 	public static String NEXUS_MIRROR_URL = System.getProperty(KEY_NEXUS_MIRROR);
 	public static AuthenticationMethod AUTH_METHOD = AuthenticationMethod.valueOfIgnoreCase(System.getProperty(KEY_AUTHMETHOD));
-	
+
 	// github credentials
 	public static final String GIT_USERNAME = System.getProperty("github.username", "openshift-tools-testing-account");
 	public static final String GIT_PASSWORD = System.getProperty("github.password");
-	
+
 	public static String PROJECT1 = "project-name01-" + System.currentTimeMillis();
 	public static String PROJECT1_DISPLAYED_NAME = "displayedName-" + System.currentTimeMillis();
 	public static String PROJECT2 = "project-name02-" + System.currentTimeMillis();
 	public static final String TEST_PROJECT = "test-project";
 
-	
-	public static String TEMPLATE_PATH = new File("").getAbsolutePath() 
-			+ File.separator + "resources" 
-			+ File.separator + "eap64-basic-s2i.json";
-	
+	public static String TEMPLATE_PATH = new File("").getAbsolutePath() + File.separator + "resources" + File.separator
+			+ "eap64-basic-s2i.json";
+
 	/**
 	 * Generates a new project name for DatastoreOS3.PROJECT1 variable.
 	 */

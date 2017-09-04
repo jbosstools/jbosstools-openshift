@@ -36,49 +36,43 @@ import com.openshift.client.cartridge.IEmbeddableCartridge;
  */
 public abstract class AbstractCheckEmbeddableCartridgeStrategy implements ICheckStateListener {
 
-	private EmbeddedCartridgesWizardPageModel pageModel;
-	private IWizardPage wizardPage;
+    private EmbeddedCartridgesWizardPageModel pageModel;
+    private IWizardPage wizardPage;
 
-	protected AbstractCheckEmbeddableCartridgeStrategy(EmbeddedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
-		this.pageModel = pageModel;
-		this.wizardPage = wizardPage;
-	}
+    protected AbstractCheckEmbeddableCartridgeStrategy(EmbeddedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
+        this.pageModel = pageModel;
+        this.wizardPage = wizardPage;
+    }
 
-	@Override
-	public void checkStateChanged(CheckStateChangedEvent event) {
-		Assert.isLegal(event.getElement() instanceof ICartridge);
-		
-		ICartridge cartridge = (ICartridge) event.getElement();
-		if(event.getChecked()) {
-			add(cartridge, event);
-		} else {
-			remove(cartridge, event);
-		}
-	}
-	
-	protected abstract void add(ICartridge cartridge, CheckStateChangedEvent event);
-	
-	protected abstract void remove(ICartridge cartridge, CheckStateChangedEvent event);
-	
-	protected int openQuestionDialog(String title, String message) {
-		return new MessageDialog(getShell(),
-				title,
-				null,
-				message,
-				MessageDialog.QUESTION,
-				new String[] { "No", "Yes" }, 0)
-				.open();
-	}
+    @Override
+    public void checkStateChanged(CheckStateChangedEvent event) {
+        Assert.isLegal(event.getElement() instanceof ICartridge);
 
-	protected EmbeddedCartridgesWizardPageModel getPageModel() {
-		return pageModel;
-	}
-	
-	protected Shell getShell() {
-		return wizardPage.getControl().getShell();
-	}
+        ICartridge cartridge = (ICartridge)event.getElement();
+        if (event.getChecked()) {
+            add(cartridge, event);
+        } else {
+            remove(cartridge, event);
+        }
+    }
 
-	protected IWizardContainer getContainer() {
-		return wizardPage.getWizard().getContainer();
-	}
+    protected abstract void add(ICartridge cartridge, CheckStateChangedEvent event);
+
+    protected abstract void remove(ICartridge cartridge, CheckStateChangedEvent event);
+
+    protected int openQuestionDialog(String title, String message) {
+        return new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { "No", "Yes" }, 0).open();
+    }
+
+    protected EmbeddedCartridgesWizardPageModel getPageModel() {
+        return pageModel;
+    }
+
+    protected Shell getShell() {
+        return wizardPage.getControl().getShell();
+    }
+
+    protected IWizardContainer getContainer() {
+        return wizardPage.getWizard().getContainer();
+    }
 }

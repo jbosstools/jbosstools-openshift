@@ -19,64 +19,64 @@ import org.junit.Test;
  *
  */
 public class ServiceNameValidatorTest extends AbstractValidatorTest {
-	
-	public ServiceNameValidatorTest() {
-		super(new ServiceNameValidator());
-	}
-	
-	@Test
-	public void testShouldReturnPassIfConforms() {
-		assertPass("spring");
-		assertPass("spring09");
-		assertPass("spring-09");
-		assertPass("spring-09-09");
-	}
 
-	@Test
-	public void testShouldReturnFalseIfBeginsWithCapital() {
-		assertFailure("Spring");
-	}
+    public ServiceNameValidatorTest() {
+        super(new ServiceNameValidator());
+    }
 
-	@Test
-	public void testShouldReturnFalseIfDoesntBeginWithAlpha() {
-		assertFailure("99spring");
-		assertFailure("$$spring");
-	}
+    @Test
+    public void testShouldReturnPassIfConforms() {
+        assertPass("spring");
+        assertPass("spring09");
+        assertPass("spring-09");
+        assertPass("spring-09-09");
+    }
 
-	@Test
-	public void testShouldReturnFalseIfDoesntEndWithAlphanumeric() {
-		assertFailure("spring-");
-		assertFailure("spring-$");
-	}
+    @Test
+    public void testShouldReturnFalseIfBeginsWithCapital() {
+        assertFailure("Spring");
+    }
 
-	@Test
-	public void testShouldReturnFalseForGreaterThanMax() {
-		assertFailure("spring-boot-helloworld-ui");
-	}
+    @Test
+    public void testShouldReturnFalseIfDoesntBeginWithAlpha() {
+        assertFailure("99spring");
+        assertFailure("$$spring");
+    }
 
-	@Test
-	public void testShouldReturnPForEqualToMax() {
-		assertPass("spring-boot-helloworld-u");
-	}
-	
-	@Test
-	public void testShouldReturnFalseForNonString() {
-		assertCancel(Boolean.FALSE);
-	}
+    @Test
+    public void testShouldReturnFalseIfDoesntEndWithAlphanumeric() {
+        assertFailure("spring-");
+        assertFailure("spring-$");
+    }
 
-	@Test
-	public void testShouldReturnFalseForNull() {
-		assertCancel(null);
-	}
+    @Test
+    public void testShouldReturnFalseForGreaterThanMax() {
+        assertFailure("spring-boot-helloworld-ui");
+    }
 
-	@Test
-	public void testShouldReturnFalseForEmptyString() {
-		assertCancel("");
-	}
+    @Test
+    public void testShouldReturnPForEqualToMax() {
+        assertPass("spring-boot-helloworld-u");
+    }
 
-	@Test
-	public void testShouldReturnFalseForBlankString() {
-		assertCancel(" ");
-	}
+    @Test
+    public void testShouldReturnFalseForNonString() {
+        assertCancel(Boolean.FALSE);
+    }
+
+    @Test
+    public void testShouldReturnFalseForNull() {
+        assertCancel(null);
+    }
+
+    @Test
+    public void testShouldReturnFalseForEmptyString() {
+        assertCancel("");
+    }
+
+    @Test
+    public void testShouldReturnFalseForBlankString() {
+        assertCancel(" ");
+    }
 
 }

@@ -18,21 +18,21 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
  * @author Thomas Mäder
  *
  */
-public interface IConnectionWrapper extends IOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel>,
-		IResourceContainer<IOpenShiftConnection, OpenshiftUIModel> {
-	/**
-	 * @return the state the connection is in.
-	 */
-	LoadingState getState();
+public interface IConnectionWrapper
+        extends IOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel>, IResourceContainer<IOpenShiftConnection, OpenshiftUIModel> {
+    /**
+     * @return the state the connection is in.
+     */
+    LoadingState getState();
 
-	/**
-	 * Start loading the projects in this connection from Openshift. When the
-	 * loading is complete, a change notification will be sent. Loading will
-	 * only start when no attempt at loading has been made (i.e. not failed, not
-	 * in loading, etc.)
-	 * 
-	 * @param handler a callback where errors will be reported. May be called from an arbitrary thread.
-	 * @return whether a load job has been started.
-	 */
-	boolean load(IExceptionHandler handler);
+    /**
+     * Start loading the projects in this connection from Openshift. When the
+     * loading is complete, a change notification will be sent. Loading will
+     * only start when no attempt at loading has been made (i.e. not failed, not
+     * in loading, etc.)
+     * 
+     * @param handler a callback where errors will be reported. May be called from an arbitrary thread.
+     * @return whether a load job has been started.
+     */
+    boolean load(IExceptionHandler handler);
 }

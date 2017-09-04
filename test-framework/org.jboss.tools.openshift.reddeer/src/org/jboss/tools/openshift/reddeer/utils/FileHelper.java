@@ -32,7 +32,7 @@ import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 public class FileHelper {
 
 	private static Logger logger = new Logger(FileHelper.class);
-	
+
 	public static void extractTarGz(File archive, File outputDirectory) {
 		InputStream inputStream = null;
 		try {
@@ -41,7 +41,7 @@ public class FileHelper {
 		} catch (IOException ex) {
 			throw new OpenShiftToolsException("Exception occured while processing tar.gz file.\n" + ex.getMessage());
 		}
-		
+
 		logger.info("Opening stream to tar archive");
 		BufferedOutputStream outputStream = null;
 		TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(inputStream);
@@ -53,20 +53,20 @@ public class FileHelper {
 					createDirectory(new File(outputDirectory, currentEntry.getName()));
 				} else {
 					File outputFile = new File(outputDirectory, currentEntry.getName());
-	            	if (!outputFile.getParentFile().exists()) {
-	            		logger.info("Creating directory: " + outputFile.getParentFile());
-	            		createDirectory(outputFile.getParentFile());
-	            	}
-	            	
-	            	outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
-	            	
-	            	logger.info("Extracting file: " + currentEntry.getName());
-	            	copy(tarArchiveInputStream, outputStream, (int) currentEntry.getSize());
-	            	outputStream.close();
-	            	
-	            	outputFile.setExecutable(true);
-	        		outputFile.setReadable(true);
-	        		outputFile.setWritable(true);
+					if (!outputFile.getParentFile().exists()) {
+						logger.info("Creating directory: " + outputFile.getParentFile());
+						createDirectory(outputFile.getParentFile());
+					}
+
+					outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
+
+					logger.info("Extracting file: " + currentEntry.getName());
+					copy(tarArchiveInputStream, outputStream, (int) currentEntry.getSize());
+					outputStream.close();
+
+					outputFile.setExecutable(true);
+					outputFile.setReadable(true);
+					outputFile.setWritable(true);
 				}
 			}
 		} catch (IOException e) {
@@ -74,13 +74,15 @@ public class FileHelper {
 		} finally {
 			try {
 				tarArchiveInputStream.close();
-			} catch (Exception ex) {}
+			} catch (Exception ex) {
+			}
 			try {
 				outputStream.close();
-			} catch (Exception ex) {}
+			} catch (Exception ex) {
+			}
 		}
 	}
-	
+
 	public static void unzipFile(File zipArchive, File outputDirectory) {
 		ZipFile zipfile = null;
 		try {
@@ -88,16 +90,15 @@ public class FileHelper {
 		} catch (IOException ex) {
 			throw new OpenShiftToolsException("Exception occured while processing zip file.\n" + ex.getMessage());
 		}
-		String extractedDirectory = StringUtils.chomp(zipArchive.getName(), ".zip");	
+		String extractedDirectory = StringUtils.chomp(zipArchive.getName(), ".zip");
 		Enumeration<? extends ZipEntry> entries = zipfile.entries();
 		while (entries.hasMoreElements()) {
 			ZipEntry entry = (ZipEntry) entries.nextElement();
 			unzipEntry(zipfile, entry, new File(outputDirectory, extractedDirectory));
 		}
 	}
-	
-	private static void unzipEntry(ZipFile zipfile, ZipEntry entry,
-			File outputDirectory) {
+
+	private static void unzipEntry(ZipFile zipfile, ZipEntry entry, File outputDirectory) {
 
 		if (entry.isDirectory()) {
 			createDirectory(new File(outputDirectory, entry.getName()));
@@ -112,31 +113,31 @@ public class FileHelper {
 		BufferedInputStream inputStream = null;
 		BufferedOutputStream outputStream = null;
 		try {
-		inputStream = new BufferedInputStream(
-				zipfile.getInputStream(entry));
-		outputStream = new BufferedOutputStream(
-				new FileOutputStream(outputFile));
-		copy(inputStream, outputStream, 1024);
+			inputStream = new BufferedInputStream(zipfile.getInputStream(entry));
+			outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
+			copy(inputStream, outputStream, 1024);
 		} catch (IOException ex) {
 		} finally {
 			try {
 				outputStream.close();
-			} catch (Exception ex) {} 
+			} catch (Exception ex) {
+			}
 			try {
 				inputStream.close();
-			} catch (Exception ex) {}
+			} catch (Exception ex) {
+			}
 		}
 		outputFile.setExecutable(true);
 		outputFile.setReadable(true);
 		outputFile.setWritable(true);
 	}
-	
+
 	public static void createDirectory(File directory) {
 		if (!directory.exists()) {
 			directory.mkdirs();
 		}
 	}
-	
+
 	public static void deleteDirectory(File directory) {
 		if (directory.exists()) {
 			File[] files = directory.listFiles();
@@ -150,7 +151,7 @@ public class FileHelper {
 		}
 		directory.delete();
 	}
-	
+
 	private static void copy(InputStream inputStream, OutputStream outputStream, int bufferSize) throws IOException {
 		byte[] buffer = new byte[bufferSize];
 		int length;

@@ -20,5 +20,5 @@ package org.jboss.tools.openshift.internal.common.ui.explorer;
  */
 public interface ILink {
 
-	public void execute();
+    public void execute();
 }

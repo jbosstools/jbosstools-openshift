@@ -19,11 +19,11 @@ import com.openshift.client.cartridge.ICartridge;
  * @author Andre Dietisheim
  */
 public interface IApplicationProperties {
-	
-	public ApplicationScale getApplicationScale();
-	
-	public ICartridge getStandaloneCartridge();
-	
-	public String getApplicationName();
-	
+
+    public ApplicationScale getApplicationScale();
+
+    public ICartridge getStandaloneCartridge();
+
+    public String getApplicationName();
+
 }

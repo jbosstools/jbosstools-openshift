@@ -24,22 +24,20 @@ import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtil
  */
 public class OpenShiftProjectPropertyTester extends PropertyTester {
 
-	private final static String PROPERTY_IS_OPENSHIFT_PROJECT = "isOpenShiftProject";
+    private final static String PROPERTY_IS_OPENSHIFT_PROJECT = "isOpenShiftProject";
 
-	@Override
-	public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
-		if (PROPERTY_IS_OPENSHIFT_PROJECT.equals(property)) {
-			return isOpenShiftProject(receiver, args, expectedValue);
-		}
-		return false;
-	}
+    @Override
+    public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
+        if (PROPERTY_IS_OPENSHIFT_PROJECT.equals(property)) {
+            return isOpenShiftProject(receiver, args, expectedValue);
+        }
+        return false;
+    }
 
-	private boolean isOpenShiftProject(Object receiver, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof IProject)
-				|| !(expectedValue instanceof Boolean)) {
-			return false;
-		}
-		return ((Boolean) expectedValue).equals(
-				OpenShiftProjectUtils.isOpenShiftProject((IProject) receiver));
-	}
+    private boolean isOpenShiftProject(Object receiver, Object[] args, Object expectedValue) {
+        if (!(receiver instanceof IProject) || !(expectedValue instanceof Boolean)) {
+            return false;
+        }
+        return ((Boolean)expectedValue).equals(OpenShiftProjectUtils.isOpenShiftProject((IProject)receiver));
+    }
 }

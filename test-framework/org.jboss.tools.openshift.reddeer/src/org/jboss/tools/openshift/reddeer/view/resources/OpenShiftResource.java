@@ -33,11 +33,11 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 public class OpenShiftResource {
 
 	private TableItem tableItem;
-	
+
 	public OpenShiftResource(TableItem tableItem) {
 		this.tableItem = tableItem;
 	}
-	
+
 	/**
 	 * Gets name of OpenShift resource.
 	 * @return name of OpenShift resource
@@ -45,7 +45,7 @@ public class OpenShiftResource {
 	public String getName() {
 		return getColumnText("Name");
 	}
-	
+
 	/**
 	 * Gets status of OpenShift resource (pod, build...) if it exists.
 	 * 
@@ -54,7 +54,7 @@ public class OpenShiftResource {
 	public String getStatus() {
 		return getColumnText("Status");
 	}
-	
+
 	/**
 	 * Gets property value for the OpenShift resource.
 	 * 
@@ -65,20 +65,21 @@ public class OpenShiftResource {
 		tableItem.select();
 		return new PropertiesView().getProperty(propertyPath).getPropertyValue();
 	}
-	
+
 	protected String getColumnText(String columnHeader) {
-		int index = -1; 
+		int index = -1;
 		try {
 			index = new DefaultTable().getHeaderIndex(columnHeader);
-		} catch (SWTLayerException ex) { }
-		
+		} catch (SWTLayerException ex) {
+		}
+
 		if (index >= 0) {
 			return tableItem.getText(index);
 		} else {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Selects resource.
 	 */
@@ -86,19 +87,19 @@ public class OpenShiftResource {
 		tableItem.click();
 		tableItem.select();
 	}
-	
+
 	/**
 	 * Deletes resource via properties view.
 	 */
 	public void delete() {
 		select();
 		new ContextMenu(OpenShiftLabel.ContextMenu.DELETE_RESOURCE).select();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.DELETE_RESOURCE);
 		new OkButton().click();
-		
+
 		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.DELETE_RESOURCE), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
-	
+
 }

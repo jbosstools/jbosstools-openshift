@@ -20,23 +20,23 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public class CartridgeNameComparator implements Comparator<ICartridge> {
 
-	private Collator collator;
+    private Collator collator;
 
-	public CartridgeNameComparator() {
-		this.collator = Collator.getInstance();
-	}
+    public CartridgeNameComparator() {
+        this.collator = Collator.getInstance();
+    }
 
-	@Override
-	public int compare(ICartridge thisCartridge, ICartridge thatCartridge) {
-		if (thisCartridge == null) {
-			if (thatCartridge == null) {
-				return 0;
-			} else {
-				return -1;
-			}
-		} else if (thatCartridge == null) {
-			return 1;
-		}
-		return collator.compare(thisCartridge.getName(), thatCartridge.getName());
-	}
+    @Override
+    public int compare(ICartridge thisCartridge, ICartridge thatCartridge) {
+        if (thisCartridge == null) {
+            if (thatCartridge == null) {
+                return 0;
+            } else {
+                return -1;
+            }
+        } else if (thatCartridge == null) {
+            return 1;
+        }
+        return collator.compare(thisCartridge.getName(), thatCartridge.getName());
+    }
 }

@@ -21,27 +21,27 @@ import com.openshift.client.IOpenShiftSSHKey;
  */
 public class NewSSHKeyWizard extends Wizard {
 
-	private ExpressConnection user;
-	private NewSSHKeyWizardPage newSSHKeyWizardPage;
-	
-	public NewSSHKeyWizard(ExpressConnection user) {
-		this.user = user;
-		setWindowTitle("New SSH Key");
-		setNeedsProgressMonitor(true);
-	}
+    private ExpressConnection user;
+    private NewSSHKeyWizardPage newSSHKeyWizardPage;
 
-	@Override
-	public boolean performFinish() {
-		IStatus status = newSSHKeyWizardPage.addConfiguredSSHKey();
-		return status.isOK();
-	}
+    public NewSSHKeyWizard(ExpressConnection user) {
+        this.user = user;
+        setWindowTitle("New SSH Key");
+        setNeedsProgressMonitor(true);
+    }
 
-	@Override
-	public void addPages() {
-		addPage(this.newSSHKeyWizardPage = new NewSSHKeyWizardPage(user, this));
-	}
-	
-	public IOpenShiftSSHKey getSSHKey() {
-		return newSSHKeyWizardPage.getSSHKey();
-	}
+    @Override
+    public boolean performFinish() {
+        IStatus status = newSSHKeyWizardPage.addConfiguredSSHKey();
+        return status.isOK();
+    }
+
+    @Override
+    public void addPages() {
+        addPage(this.newSSHKeyWizardPage = new NewSSHKeyWizardPage(user, this));
+    }
+
+    public IOpenShiftSSHKey getSSHKey() {
+        return newSSHKeyWizardPage.getSSHKey();
+    }
 }

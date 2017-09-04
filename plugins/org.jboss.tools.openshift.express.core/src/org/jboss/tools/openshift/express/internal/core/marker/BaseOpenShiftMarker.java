@@ -29,112 +29,109 @@ import org.jboss.tools.openshift.express.internal.core.util.OpenShiftProjectUtil
  */
 public class BaseOpenShiftMarker implements IOpenShiftMarker {
 
-	private String name;
-	private String fileName;
-	private String description;
+    private String name;
+    private String fileName;
+    private String description;
 
-	protected BaseOpenShiftMarker(String fileName, String name, String description) {
-		this.name = name;
-		this.fileName = fileName;
-		this.description = description;
-	}
+    protected BaseOpenShiftMarker(String fileName, String name, String description) {
+        this.name = name;
+        this.fileName = fileName;
+        this.description = description;
+    }
 
-	@Override
-	public IFile addTo(IProject project, IProgressMonitor monitor) throws CoreException {
-		assertProjectIsOpen(project);
-		IFile file = getMarkerFile(project, monitor);
-		if (file.isAccessible()) {
-			return null;
-		}
-		file.create(new ByteArrayInputStream(new byte[] {}), IResource.NONE, monitor);
-		return file;
-	}
+    @Override
+    public IFile addTo(IProject project, IProgressMonitor monitor) throws CoreException {
+        assertProjectIsOpen(project);
+        IFile file = getMarkerFile(project, monitor);
+        if (file.isAccessible()) {
+            return null;
+        }
+        file.create(new ByteArrayInputStream(new byte[] {}), IResource.NONE, monitor);
+        return file;
+    }
 
-	@Override
-	public IFile removeFrom(IProject project, IProgressMonitor monitor) throws CoreException {
-		assertProjectIsOpen(project);
-		IFile file = getMarkerFile(project, monitor);
-		if (!file.isAccessible()) {
-			return null;
-		}
-		file.delete(false, monitor);
-		return file;
-	}
+    @Override
+    public IFile removeFrom(IProject project, IProgressMonitor monitor) throws CoreException {
+        assertProjectIsOpen(project);
+        IFile file = getMarkerFile(project, monitor);
+        if (!file.isAccessible()) {
+            return null;
+        }
+        file.delete(false, monitor);
+        return file;
+    }
 
-	private IFile getMarkerFile(IProject project, IProgressMonitor monitor) throws CoreException {
-		IFolder markersFolder = OpenShiftProjectUtils.getMarkersFolder(project);
-		OpenShiftProjectUtils.ensureMarkersFolderExists(project, monitor);
-		return markersFolder.getFile(getFileName());
-	}
+    private IFile getMarkerFile(IProject project, IProgressMonitor monitor) throws CoreException {
+        IFolder markersFolder = OpenShiftProjectUtils.getMarkersFolder(project);
+        OpenShiftProjectUtils.ensureMarkersFolderExists(project, monitor);
+        return markersFolder.getFile(getFileName());
+    }
 
-	@Override
-	public boolean existsIn(IProject project, IProgressMonitor monitor) throws CoreException {
-		IFile file = getMarkerFile(project, monitor);
-		return file.exists();
-	}
+    @Override
+    public boolean existsIn(IProject project, IProgressMonitor monitor) throws CoreException {
+        IFile file = getMarkerFile(project, monitor);
+        return file.exists();
+    }
 
-	@Override
-	public boolean matchesFilename(String fileName) {
-		return this.fileName.equals(fileName);
-	}
+    @Override
+    public boolean matchesFilename(String fileName) {
+        return this.fileName.equals(fileName);
+    }
 
-	private void assertProjectIsOpen(IProject project) throws CoreException {
-		if (!project.exists()) {
-			throw new CoreException(ExpressCoreActivator.statusFactory().errorStatus(NLS.bind("Project {0} does not exist",
-					project.getName())));
-		}
-		if (!project.isOpen()) {
-			throw new CoreException(ExpressCoreActivator.statusFactory().errorStatus(NLS.bind("Project {0} is not opened",
-					project.getName())));
-		}
-	}
+    private void assertProjectIsOpen(IProject project) throws CoreException {
+        if (!project.exists()) {
+            throw new CoreException(
+                    ExpressCoreActivator.statusFactory().errorStatus(NLS.bind("Project {0} does not exist", project.getName())));
+        }
+        if (!project.isOpen()) {
+            throw new CoreException(
+                    ExpressCoreActivator.statusFactory().errorStatus(NLS.bind("Project {0} is not opened", project.getName())));
+        }
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public String getFileName() {
-		return fileName;
-	}
+    @Override
+    public String getFileName() {
+        return fileName;
+    }
 
-	@Override
-	public String getDescription() {
-		return description;
-	}
+    @Override
+    public String getDescription() {
+        return description;
+    }
 
-	@Override
-	public String toString() {
-		return "BaseOpenShiftMarker ["
-				+ "name=" + name
-				+ ", fileName=" + fileName
-				+ "]";
-	}
+    @Override
+    public String toString() {
+        return "BaseOpenShiftMarker [" + "name=" + name + ", fileName=" + fileName + "]";
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		BaseOpenShiftMarker other = (BaseOpenShiftMarker) obj;
-		if (fileName == null) {
-			if (other.fileName != null)
-				return false;
-		} else if (!fileName.equals(other.fileName))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        BaseOpenShiftMarker other = (BaseOpenShiftMarker)obj;
+        if (fileName == null) {
+            if (other.fileName != null)
+                return false;
+        } else if (!fileName.equals(other.fileName))
+            return false;
+        return true;
+    }
 
 }

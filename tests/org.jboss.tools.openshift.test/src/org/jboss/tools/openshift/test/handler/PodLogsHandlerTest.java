@@ -38,29 +38,33 @@ import com.openshift.restclient.model.IPod;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PodLogsHandlerTest {
-	
-	@Mock private IBuild build;
-	@Mock private IResourceWrapper<IBuild, ?> uiModel;
-	@Mock private IPod pod;
-	@Mock private IContainer container;
-	
-	private TestPodLogsHandler handler;
-	@SuppressWarnings("rawtypes")
-	private Map parameters = new HashMap();
-	private ExecutionEvent event;
-	
-	@Before
-	public void setUp() {
-		handler = spy(new TestPodLogsHandler());
-		event = new ExecutionEvent(null, parameters, null, null);
-	}
 
-	@Test
-	public void testGetLogsFromPodWhenRunning() throws ExecutionException {
-		givenAPodIsSelected("Running");
-		handler.execute(event);
-		thenTheLogsShouldBeShown();
-	}
+    @Mock
+    private IBuild build;
+    @Mock
+    private IResourceWrapper<IBuild, ?> uiModel;
+    @Mock
+    private IPod pod;
+    @Mock
+    private IContainer container;
+
+    private TestPodLogsHandler handler;
+    @SuppressWarnings("rawtypes")
+    private Map parameters = new HashMap();
+    private ExecutionEvent event;
+
+    @Before
+    public void setUp() {
+        handler = spy(new TestPodLogsHandler());
+        event = new ExecutionEvent(null, parameters, null, null);
+    }
+
+    @Test
+    public void testGetLogsFromPodWhenRunning() throws ExecutionException {
+        givenAPodIsSelected("Running");
+        handler.execute(event);
+        thenTheLogsShouldBeShown();
+    }
 
     @Test
     public void testGetLogsFromPodWhenSucceeded() throws ExecutionException {
@@ -98,19 +102,20 @@ public class PodLogsHandlerTest {
     }
 
     private void givenAPodIsSelected(String status) {
-	    doReturn(status).when(pod).getStatus();
-	    doReturn(Arrays.asList(container)).when(pod).getContainers();
-	    doReturn(pod).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IPod.class));
-	}
+        doReturn(status).when(pod).getStatus();
+        doReturn(Arrays.asList(container)).when(pod).getContainers();
+        doReturn(pod).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IPod.class));
+    }
 
-	private void thenTheLogsShouldBeShown() {
-		verify(handler, times(1)).showLogs(any(), any());
-		verify(handler, times(0)).showDialog(any(ExecutionEvent.class), anyString(), anyString());
-	}
+    private void thenTheLogsShouldBeShown() {
+        verify(handler, times(1)).showLogs(any(), any());
+        verify(handler, times(0)).showDialog(any(ExecutionEvent.class), anyString(), anyString());
+    }
 
     private void thenInvalidStateShouldBeShown(String status) {
         verify(handler, times(1)).showLogs(any(), any());
-        verify(handler, times(1)).showDialog(any(ExecutionEvent.class), anyString(), eq(NLS.bind(PodLogsHandler.INVALID_POD_STATUS_MESSAGE,  status)));
+        verify(handler, times(1)).showDialog(any(ExecutionEvent.class), anyString(),
+                eq(NLS.bind(PodLogsHandler.INVALID_POD_STATUS_MESSAGE, status)));
     }
 
     public static class TestPodLogsHandler extends PodLogsHandler {

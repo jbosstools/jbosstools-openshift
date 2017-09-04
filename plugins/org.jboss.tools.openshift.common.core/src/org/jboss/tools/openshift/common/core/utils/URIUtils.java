@@ -17,30 +17,30 @@ import java.net.URISyntaxException;
  * Helper methods for manipulating URIs
  */
 public class URIUtils {
-	
-	private URIUtils(){
-	}
-	
-	public static  Map<String, String> splitFragment(String location){
-		URI uri = null;
-		try {
-			uri = new URI(location);
-		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-		return splitFragment(uri);
-	}
-	
-	public static Map<String, String> splitFragment(URI uri){
-		HashMap<String, String> fragments = new HashMap<>();
-		String fragment = uri.getFragment();
-		if(fragment != null){
-			String [] entries = fragment.split("&");
-			for (String entry : entries) {
-				String[] pair = entry.split("=");
-				fragments.put(pair[0], pair[1]);
-			}
-		}
-		return fragments;
-	}
+
+    private URIUtils() {
+    }
+
+    public static Map<String, String> splitFragment(String location) {
+        URI uri = null;
+        try {
+            uri = new URI(location);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        return splitFragment(uri);
+    }
+
+    public static Map<String, String> splitFragment(URI uri) {
+        HashMap<String, String> fragments = new HashMap<>();
+        String fragment = uri.getFragment();
+        if (fragment != null) {
+            String[] entries = fragment.split("&");
+            for (String entry : entries) {
+                String[] pair = entry.split("=");
+                fragments.put(pair[0], pair[1]);
+            }
+        }
+        return fragments;
+    }
 }

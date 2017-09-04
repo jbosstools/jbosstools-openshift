@@ -18,9 +18,9 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 
 public class OpenShiftProjectExists extends AbstractWaitCondition {
 
-	private OpenShift3Connection connection; 
+	private OpenShift3Connection connection;
 	private String projectName;
-	
+
 	/**
 	 * Creates condition OpenShift project exists for a project with specified 
 	 * name. Beware, if project has specified project display name, then use 
@@ -33,10 +33,10 @@ public class OpenShiftProjectExists extends AbstractWaitCondition {
 	public OpenShiftProjectExists(String projectName) {
 		this(projectName, null);
 	}
-	
+
 	public OpenShiftProjectExists(String projectName, Connection connection) {
 		this.projectName = projectName;
-		
+
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		if (connection == null) {
 			this.connection = explorer.getOpenShift3Connection();
@@ -51,7 +51,7 @@ public class OpenShiftProjectExists extends AbstractWaitCondition {
 	public OpenShiftProjectExists() {
 		this(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 	}
-	
+
 	@Override
 	public boolean test() {
 		connection.refresh();

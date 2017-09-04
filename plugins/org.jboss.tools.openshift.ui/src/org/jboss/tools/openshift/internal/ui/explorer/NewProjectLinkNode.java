@@ -19,19 +19,19 @@ import org.jboss.tools.openshift.internal.ui.handler.NewProjectHandler;
  *
  */
 public class NewProjectLinkNode implements ILink {
-	private Connection connection;
+    private Connection connection;
 
-	public NewProjectLinkNode(Connection connection) {
-		this.connection = connection;
-	}
+    public NewProjectLinkNode(Connection connection) {
+        this.connection = connection;
+    }
 
-	@Override
-	public String toString() {
-		return "No projects are available. Click here to create a new project...";
-	}
+    @Override
+    public String toString() {
+        return "No projects are available. Click here to create a new project...";
+    }
 
-	@Override
-	public void execute() {
-		NewProjectHandler.openNewProjectDialog(connection, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());		
-	}
+    @Override
+    public void execute() {
+        NewProjectHandler.openNewProjectDialog(connection, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+    }
 }

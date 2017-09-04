@@ -24,27 +24,25 @@ import org.eclipse.ui.views.properties.IPropertyDescriptor;
  */
 public class Assert {
 
-	public static void assertPropertyDescriptorsContains(IPropertyDescriptor[] expected, IPropertyDescriptor[] actual){
-		List<String> actualToString = new ArrayList<>(actual.length);
-		for (IPropertyDescriptor descriptor : actual) {
-			actualToString.add(propertyDescriptorToString(descriptor));
-		}
-		for (IPropertyDescriptor desc : expected) {
-			String expectedString = propertyDescriptorToString(desc);
-			assertTrue(String.format("Expected property descriptor: %s", expectedString), actualToString.contains(expectedString));
-		}
-	}
+    public static void assertPropertyDescriptorsContains(IPropertyDescriptor[] expected, IPropertyDescriptor[] actual) {
+        List<String> actualToString = new ArrayList<>(actual.length);
+        for (IPropertyDescriptor descriptor : actual) {
+            actualToString.add(propertyDescriptorToString(descriptor));
+        }
+        for (IPropertyDescriptor desc : expected) {
+            String expectedString = propertyDescriptorToString(desc);
+            assertTrue(String.format("Expected property descriptor: %s", expectedString), actualToString.contains(expectedString));
+        }
+    }
 
-	public static void assertPropertyDescriptorsEquals(IPropertyDescriptor[] expected, IPropertyDescriptor[] actual){
-		assertNotNull("Actual value is null", actual);
-		assertEquals("The array lengths are not the same",expected.length, actual.length);
-		assertPropertyDescriptorsContains(expected, actual);
-	}
-	
-	private static String propertyDescriptorToString(IPropertyDescriptor descriptor){
-		return new ToStringBuilder(descriptor, StandardToStringStyle.SIMPLE_STYLE)
-		.append("category",descriptor.getCategory())
-		.append("id",descriptor.getId())
-		.append("displayname", descriptor.getDisplayName()).toString();
-	}
+    public static void assertPropertyDescriptorsEquals(IPropertyDescriptor[] expected, IPropertyDescriptor[] actual) {
+        assertNotNull("Actual value is null", actual);
+        assertEquals("The array lengths are not the same", expected.length, actual.length);
+        assertPropertyDescriptorsContains(expected, actual);
+    }
+
+    private static String propertyDescriptorToString(IPropertyDescriptor descriptor) {
+        return new ToStringBuilder(descriptor, StandardToStringStyle.SIMPLE_STYLE).append("category", descriptor.getCategory())
+                .append("id", descriptor.getId()).append("displayname", descriptor.getDisplayName()).toString();
+    }
 }

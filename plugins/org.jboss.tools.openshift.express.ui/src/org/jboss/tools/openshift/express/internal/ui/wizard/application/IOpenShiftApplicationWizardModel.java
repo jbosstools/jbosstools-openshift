@@ -46,456 +46,454 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public interface IOpenShiftApplicationWizardModel extends IConnectionAware<ExpressConnection>, IObservablePojo {
 
-	public static final String PROP_APPLICATION = "application";
-	public static final String PROP_APPLICATION_NAME = "applicationName";
-	public static final String PROP_APPLICATION_GEAR_PROFILE = "applicationGearProfile";
-	public static final String PROP_APPLICATION_SCALE = "applicationScale";
-	public static final String PROP_AVAILABLE_EMBEDDABLE_CARTRIDGES = "allEmbeddableCartridges";
-	public static final String PROP_AVAILABLE_STANDALONE_CARTRIDGES = "allStandaloneCartridges";
-	public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
-	public static final String PROP_CONNECTION = "connection";
-	public static final String PROP_DOMAIN = "domain";
-	public static final String PROP_DOMAINS = "domains";
-	public static final String PROP_EMBEDDED_CARTRIDGES = "embeddedCartridges";
-	public static final String PROP_ENVIRONMENT_VARIABLES = "environmentVariables";
-	public static final String PROP_INITIAL_GIT_URL = "initialGitUrl";
-	public static final String PROP_MERGE_URI = "mergeUri";
-	public static final String PROP_NEW_PROJECT = "newProject";
-	public static final String PROP_PROJECT_NAME = "projectName";
-	public static final String PROP_REMOTE_NAME = "remoteName";
-	public static final String PROP_USE_DEFAULT_REPO_PATH = "useDefaultRepoPath";
-	public static final String PROP_REPOSITORY_PATH = "repositoryPath";
-	public static final String PROP_SKIP_MAVEN_BUILD = "skipMavenBuild";
-	public static final String PROP_SERVER_ADAPTER = "serverAdapter";
-	public static final String PROP_SELECTED_APPLICATION_TEMPLATE = "selectedApplicationTemplate";
-	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
-	public static final String PROP_USE_INITIAL_GIT_URL = "useInitialGitUrl";
-	
-	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
-	public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
-	public static final String DEFAULT_REPOSITORY_PATH = EGitUIUtils.getEGitDefaultRepositoryPath();
-	
-	/**
-	 * Imports the project that the user has chosen into the workspace.
-	 * 
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @return 
-	 * @throws OpenShiftException
-	 * @throws CoreException
-	 * @throws InterruptedException
-	 * @throws URISyntaxException
-	 * @throws InvocationTargetException
-	 * @throws IOException
-	 * @throws GitAPIException 
-	 * @throws NoWorkTreeException 
-	 */
-	public IProject importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
-			URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException;
+    public static final String PROP_APPLICATION = "application";
+    public static final String PROP_APPLICATION_NAME = "applicationName";
+    public static final String PROP_APPLICATION_GEAR_PROFILE = "applicationGearProfile";
+    public static final String PROP_APPLICATION_SCALE = "applicationScale";
+    public static final String PROP_AVAILABLE_EMBEDDABLE_CARTRIDGES = "allEmbeddableCartridges";
+    public static final String PROP_AVAILABLE_STANDALONE_CARTRIDGES = "allStandaloneCartridges";
+    public static final String PROP_CREATE_SERVER_ADAPTER = "createServerAdapter";
+    public static final String PROP_CONNECTION = "connection";
+    public static final String PROP_DOMAIN = "domain";
+    public static final String PROP_DOMAINS = "domains";
+    public static final String PROP_EMBEDDED_CARTRIDGES = "embeddedCartridges";
+    public static final String PROP_ENVIRONMENT_VARIABLES = "environmentVariables";
+    public static final String PROP_INITIAL_GIT_URL = "initialGitUrl";
+    public static final String PROP_MERGE_URI = "mergeUri";
+    public static final String PROP_NEW_PROJECT = "newProject";
+    public static final String PROP_PROJECT_NAME = "projectName";
+    public static final String PROP_REMOTE_NAME = "remoteName";
+    public static final String PROP_USE_DEFAULT_REPO_PATH = "useDefaultRepoPath";
+    public static final String PROP_REPOSITORY_PATH = "repositoryPath";
+    public static final String PROP_SKIP_MAVEN_BUILD = "skipMavenBuild";
+    public static final String PROP_SERVER_ADAPTER = "serverAdapter";
+    public static final String PROP_SELECTED_APPLICATION_TEMPLATE = "selectedApplicationTemplate";
+    public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
+    public static final String PROP_USE_INITIAL_GIT_URL = "useInitialGitUrl";
 
-	/**
-	 * Enables the user chosen, unshared project to be used on the chosen
-	 * OpenShift application. Clones the application git repository, copies the
-	 * configuration files to the user project (in the workspace), shares the
-	 * user project with git and creates the server adapter.
-	 * 
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @return 
-	 * @throws URISyntaxException
-	 *             The OpenShift application repository could not be cloned,
-	 *             because the uri it is located at is not a valid git uri
-	 * @throws OpenShiftException
-	 * 
-	 * @throws InvocationTargetException
-	 *             The OpenShift application repository could not be cloned, the
-	 *             clone operation failed.
-	 * @throws InterruptedException
-	 *             The OpenShift application repository could not be cloned, the
-	 *             clone operation was interrupted.
-	 * @throws IOException
-	 *             The configuration files could not be copied from the git
-	 *             clone to the user project
-	 * @throws CoreException
-	 *             The user project could not be shared with the git
-	 */
-	public IProject mergeIntoUnsharedProject(IProgressMonitor monitor)
-			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
-			URISyntaxException;
+    public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
+    public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
+    public static final String DEFAULT_REPOSITORY_PATH = EGitUIUtils.getEGitDefaultRepositoryPath();
 
-	/**
-	 * Enables the user chosen, unshared project to be used on the chosen
-	 * OpenShift application. Clones the application git repository, copies the
-	 * configuration files to the user project (in the workspace), adds the
-	 * appication git repo as remote and creates the server adapter.
-	 * 
-	 * @param monitor
-	 *            the monitor to report progress to
-	 * @return 
-	 * @throws URISyntaxException
-	 *             The OpenShift application repository could not be cloned,
-	 *             because the uri it is located at is not a valid git uri
-	 * @throws OpenShiftException
-	 * 
-	 * @throws InvocationTargetException
-	 *             The OpenShift application repository could not be cloned, the
-	 *             clone operation failed.
-	 * @throws InterruptedException
-	 *             The OpenShift application repository could not be cloned, the
-	 *             clone operation was interrupted.
-	 * @throws IOException
-	 *             The configuration files could not be copied from the git
-	 *             clone to the user project
-	 * @throws CoreException
-	 *             The user project could not be shared with the git
-	 * @throws GitAPIException 
-	 * @throws NoWorkTreeException 
-	 */
-	public IProject mergeIntoGitSharedProject(IProgressMonitor monitor)
-			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
-			URISyntaxException, NoWorkTreeException, GitAPIException;
+    /**
+     * Imports the project that the user has chosen into the workspace.
+     * 
+     * @param monitor
+     *            the monitor to report progress to
+     * @return 
+     * @throws OpenShiftException
+     * @throws CoreException
+     * @throws InterruptedException
+     * @throws URISyntaxException
+     * @throws InvocationTargetException
+     * @throws IOException
+     * @throws GitAPIException 
+     * @throws NoWorkTreeException 
+     */
+    public IProject importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
+            URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException;
 
-	public File getRepositoryFile();
+    /**
+     * Enables the user chosen, unshared project to be used on the chosen
+     * OpenShift application. Clones the application git repository, copies the
+     * configuration files to the user project (in the workspace), shares the
+     * user project with git and creates the server adapter.
+     * 
+     * @param monitor
+     *            the monitor to report progress to
+     * @return 
+     * @throws URISyntaxException
+     *             The OpenShift application repository could not be cloned,
+     *             because the uri it is located at is not a valid git uri
+     * @throws OpenShiftException
+     * 
+     * @throws InvocationTargetException
+     *             The OpenShift application repository could not be cloned, the
+     *             clone operation failed.
+     * @throws InterruptedException
+     *             The OpenShift application repository could not be cloned, the
+     *             clone operation was interrupted.
+     * @throws IOException
+     *             The configuration files could not be copied from the git
+     *             clone to the user project
+     * @throws CoreException
+     *             The user project could not be shared with the git
+     */
+    public IProject mergeIntoUnsharedProject(IProgressMonitor monitor)
+            throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException, URISyntaxException;
 
-	public IDomain setDomain(IDomain domain);
+    /**
+     * Enables the user chosen, unshared project to be used on the chosen
+     * OpenShift application. Clones the application git repository, copies the
+     * configuration files to the user project (in the workspace), adds the
+     * appication git repo as remote and creates the server adapter.
+     * 
+     * @param monitor
+     *            the monitor to report progress to
+     * @return 
+     * @throws URISyntaxException
+     *             The OpenShift application repository could not be cloned,
+     *             because the uri it is located at is not a valid git uri
+     * @throws OpenShiftException
+     * 
+     * @throws InvocationTargetException
+     *             The OpenShift application repository could not be cloned, the
+     *             clone operation failed.
+     * @throws InterruptedException
+     *             The OpenShift application repository could not be cloned, the
+     *             clone operation was interrupted.
+     * @throws IOException
+     *             The configuration files could not be copied from the git
+     *             clone to the user project
+     * @throws CoreException
+     *             The user project could not be shared with the git
+     * @throws GitAPIException 
+     * @throws NoWorkTreeException 
+     */
+    public IProject mergeIntoGitSharedProject(IProgressMonitor monitor) throws OpenShiftException, InvocationTargetException,
+            InterruptedException, IOException, CoreException, URISyntaxException, NoWorkTreeException, GitAPIException;
 
-	/**
-	 * Sets the default to this wizard if there's no domain set to it yet.
-	 * 
-	 * @see ExpressConnection#getDefaultDomain()
-	 * @see #setDomain(IDomain)
-	 * @see #hasDomain()
-	 */
-	public void setDefaultDomainIfRequired();
+    public File getRepositoryFile();
 
-	/**
-	 * Returns <code>true</code> if this wizard has a domain.
-	 * 
-	 * @return true if this wizard has a domain
-	 */
-	public boolean hasDomain();
+    public IDomain setDomain(IDomain domain);
 
-	/**
-	 * Returns the domain that this wizard will create the application for
-	 * 
-	 * @return
-	 */
-	public IDomain getDomain();
+    /**
+     * Sets the default to this wizard if there's no domain set to it yet.
+     * 
+     * @see ExpressConnection#getDefaultDomain()
+     * @see #setDomain(IDomain)
+     * @see #hasDomain()
+     */
+    public void setDefaultDomainIfRequired();
 
-	/**
-	 * Returns the application used in this model. Returns the application
-	 * that's being imported or the new application once it's created.
-	 * 
-	 * @return the (new or existing) application in this model
-	 */
-	public IApplication getApplication();
+    /**
+     * Returns <code>true</code> if this wizard has a domain.
+     * 
+     * @return true if this wizard has a domain
+     */
+    public boolean hasDomain();
 
-	public IApplication setApplication(IApplication application);
+    /**
+     * Returns the domain that this wizard will create the application for
+     * 
+     * @return
+     */
+    public IDomain getDomain();
 
-	public String setApplicationName(String name);
+    /**
+     * Returns the application used in this model. Returns the application
+     * that's being imported or the new application once it's created.
+     * 
+     * @return the (new or existing) application in this model
+     */
+    public IApplication getApplication();
 
-	/**
-	 * Returns the name for the new application that this wizard will create
-	 * upon completion.
-	 * 
-	 * @return
-	 * 
-	 * @see IDomain#createApplication(String, IStandaloneCartridge,
-	 *      ApplicationScale, IGearProfile, String, int, Map,
-	 *      com.openshift.client.cartridge.IEmbeddableCartridge...)
-	 */
-	public String getApplicationName();
+    public IApplication setApplication(IApplication application);
 
-	public List<IStandaloneCartridge> setAvailableStandaloneCartridges(List<IStandaloneCartridge> cartridges);
+    public String setApplicationName(String name);
 
-	/**
-	 * Returns all standalone cartridges that are available in OpenShift
-	 * 
-	 * @return all available standalone cartridges
-	 */
-	public List<IStandaloneCartridge> getAvailableStandaloneCartridges();
+    /**
+     * Returns the name for the new application that this wizard will create
+     * upon completion.
+     * 
+     * @return
+     * 
+     * @see IDomain#createApplication(String, IStandaloneCartridge,
+     *      ApplicationScale, IGearProfile, String, int, Map,
+     *      com.openshift.client.cartridge.IEmbeddableCartridge...)
+     */
+    public String getApplicationName();
 
-	public String setRemoteName(String remoteName);
+    public List<IStandaloneCartridge> setAvailableStandaloneCartridges(List<IStandaloneCartridge> cartridges);
 
-	/**
-	 * Returns the git remote name we're using to store the OpenShift
-	 * (fetch-/pull- uri) git repo to.
-	 * 
-	 * @return
-	 */
-	public String getRemoteName();
+    /**
+     * Returns all standalone cartridges that are available in OpenShift
+     * 
+     * @return all available standalone cartridges
+     */
+    public List<IStandaloneCartridge> getAvailableStandaloneCartridges();
 
-	public boolean setUseDefaultRepoPath(boolean useDefaultRepositoryPath);
-	
-	/**
-	 * Returns the flag to stores the information if the default path to the local git repository the wizard will clone the
-	 * existing/new OpenShift application to should be used or not.
-	 * 
-	 * @return
-	 */
-	public boolean isUseDefaultRepoPath();
-	
-	public String setRepositoryPath(String repositoryPath);
+    public String setRemoteName(String remoteName);
 
-	/**
-	 * Returns the path to the local git repository the wizard will clone the
-	 * existing/new OpenShift application to.
-	 * 
-	 * @return
-	 */
-	public String getRepositoryPath();
+    /**
+     * Returns the git remote name we're using to store the OpenShift
+     * (fetch-/pull- uri) git repo to.
+     * 
+     * @return
+     */
+    public String getRemoteName();
 
-	/**
-	 * Returns <code>true</code> if this wizard is set to import (the new or
-	 * existing application) into a new project. Returns <code>false</code> if
-	 * the model is set to import into an existing application.
-	 * 
-	 * @return true if this wizard is about to import into a new project
-	 */
-	public boolean isNewProject();
+    public boolean setUseDefaultRepoPath(boolean useDefaultRepositoryPath);
 
-	public Boolean setNewProject(boolean newProject);
+    /**
+     * Returns the flag to stores the information if the default path to the local git repository the wizard will clone the
+     * existing/new OpenShift application to should be used or not.
+     * 
+     * @return
+     */
+    public boolean isUseDefaultRepoPath();
 
-	public String setProjectName(String projectName);
+    public String setRepositoryPath(String repositoryPath);
 
-	/**
-	 * Returns the name of the project that we're merging the new/existing application into.
-	 * @return
-	 */
-	public String getProjectName();
+    /**
+     * Returns the path to the local git repository the wizard will clone the
+     * existing/new OpenShift application to.
+     * 
+     * @return
+     */
+    public String getRepositoryPath();
 
-	/**
-	 * Sets the project that the new or existing application will get imported
-	 * to.
-	 * 
-	 * @param project
-	 *            the project that the application will get imported to.
-	 * @return
-	 */
-	public IProject setProject(IProject project);
+    /**
+     * Returns <code>true</code> if this wizard is set to import (the new or
+     * existing application) into a new project. Returns <code>false</code> if
+     * the model is set to import into an existing application.
+     * 
+     * @return true if this wizard is about to import into a new project
+     */
+    public boolean isNewProject();
 
-	/**
-	 * Returns the project that this wizard is using to import the new or
-	 * existing application to. The project may be new or existing.
-	 * 
-	 * @return
-	 * @see #isNewProject()
-	 */
-	public IProject getProject();
+    public Boolean setNewProject(boolean newProject);
 
-	/**
-	 * Returns <code>true</code> if the project that this wizard is importing to
-	 * is shared with a git repo.
-	 * 
-	 * @return true if the project that we're importing to is shared with git.
-	 */
-	public boolean isGitSharedProject();
+    public String setProjectName(String projectName);
 
-	public Boolean setCreateServerAdapter(Boolean createServerAdapter);
+    /**
+     * Returns the name of the project that we're merging the new/existing application into.
+     * @return
+     */
+    public String getProjectName();
 
-	/**
-	 * Returns <code>true</code> if the wizard told to create a server adapter
-	 * when importing the OpenShift application into the local workspace.
-	 * 
-	 * @return
-	 */
-	public boolean isCreateServerAdapter();
+    /**
+     * Sets the project that the new or existing application will get imported
+     * to.
+     * 
+     * @param project
+     *            the project that the application will get imported to.
+     * @return
+     */
+    public IProject setProject(IProject project);
 
-	/**
-	 * Creates the server adapter for the new or existing application.
-	 * 
-	 * @param monitor
-	 *            the monitor to report the progress to
-	 * @return
-	 * @throws OpenShiftException
-	 */
-	public IServer createServerAdapter(IProgressMonitor monitor) throws OpenShiftException;
+    /**
+     * Returns the project that this wizard is using to import the new or
+     * existing application to. The project may be new or existing.
+     * 
+     * @return
+     * @see #isNewProject()
+     */
+    public IProject getProject();
 
-	/**
-	 * Sets the wizard to create the marker which prevents OpenShift from maven
-	 * building when one pushed the (cloned git repo) of the application to
-	 * OpenShift
-	 * 
-	 * @param skipMavenBuild
-	 * @return
-	 */
-	public Boolean setSkipMavenBuild(Boolean skipMavenBuild);
+    /**
+     * Returns <code>true</code> if the project that this wizard is importing to
+     * is shared with a git repo.
+     * 
+     * @return true if the project that we're importing to is shared with git.
+     */
+    public boolean isGitSharedProject();
 
-	/**
-	 * Returns <code>true</code> if we're setting the marker to skip the maven
-	 * build when pushing (the cloned application git repo) to OpenShift
-	 * 
-	 * @return
-	 */
-	public boolean isSkipMavenBuild();
+    public Boolean setCreateServerAdapter(Boolean createServerAdapter);
 
-	public String setMergeUri(String mergeUri);
+    /**
+     * Returns <code>true</code> if the wizard told to create a server adapter
+     * when importing the OpenShift application into the local workspace.
+     * 
+     * @return
+     */
+    public boolean isCreateServerAdapter();
 
-	public String getMergeUri();
+    /**
+     * Creates the server adapter for the new or existing application.
+     * 
+     * @param monitor
+     *            the monitor to report the progress to
+     * @return
+     * @throws OpenShiftException
+     */
+    public IServer createServerAdapter(IProgressMonitor monitor) throws OpenShiftException;
 
-	/**
-	 * Returns <code>true</code> if the model is set to import an existing application
-	 * 
-	 * @return true if the wizard is set to import an existing application
-	 */
-	public boolean isUseExistingApplication();
+    /**
+     * Sets the wizard to create the marker which prevents OpenShift from maven
+     * building when one pushed the (cloned git repo) of the application to
+     * OpenShift
+     * 
+     * @param skipMavenBuild
+     * @return
+     */
+    public Boolean setSkipMavenBuild(Boolean skipMavenBuild);
 
-	public boolean setUseExistingApplication(boolean useExistingApplication);
+    /**
+     * Returns <code>true</code> if we're setting the marker to skip the maven
+     * build when pushing (the cloned application git repo) to OpenShift
+     * 
+     * @return
+     */
+    public boolean isSkipMavenBuild();
 
-	/**
-	 * Adds the given cartridges to the cartridges that shall be used for the new application
-	 * @param cartridges
-	 */
-	public void addEmbeddedCartridges(List<ICartridge> cartridges);
+    public String setMergeUri(String mergeUri);
 
-	/**
-	 * Removes the given cartridge from the cartridges that shall be used for the new application
-	 * @param cartridge
-	 */
-	public void removeEmbeddedCartridge(ICartridge cartridge);
+    public String getMergeUri();
 
-	/**
-	 * Removes the given cartridges from the list of cartridges for the new application
-	 *  
-	 * @param cartridges
-	 */
-	public void removeEmbeddedCartridges(List<ICartridge> cartridges);
+    /**
+     * Returns <code>true</code> if the model is set to import an existing application
+     * 
+     * @return true if the wizard is set to import an existing application
+     */
+    public boolean isUseExistingApplication();
 
-	/**
-	 * Returns all embeddable cartridges that available in OpenShift
-	 * 
-	 * @return all available embeddable cartridges
-	 */
-	public List<ICartridge> getAvailableEmbeddableCartridges();
+    public boolean setUseExistingApplication(boolean useExistingApplication);
 
-	public List<ICartridge> setAvailableEmbeddableCartridges(List<ICartridge> embeddableCartridges);
+    /**
+     * Adds the given cartridges to the cartridges that shall be used for the new application
+     * @param cartridges
+     */
+    public void addEmbeddedCartridges(List<ICartridge> cartridges);
 
-	/**
-	 * Returns all the (standalone- and embedded-) cartridges that are set to be
-	 * used (used as standalone or added as embedded) in the new application.
-	 * 
-	 * @return all cartridges for the new application
-	 * 
-	 * @see IDomain#createApplication(String, IStandaloneCartridge,
-	 *      ApplicationScale, IGearProfile, String, int, Map,
-	 *      com.openshift.client.cartridge.IEmbeddableCartridge...)
-	 */
-	public Set<ICartridge> getEmbeddedCartridges();
-	
-	public Set<ICartridge> setEmbeddedCartridges(Set<ICartridge> selectedEmbeddableCartridges);
+    /**
+     * Removes the given cartridge from the cartridges that shall be used for the new application
+     * @param cartridge
+     */
+    public void removeEmbeddedCartridge(ICartridge cartridge);
 
-	/**
-	 * Returns the standalone cartridge used to create the new application.
-	 * <p>
-	 * Warning: There's no standalone cartridge if we're set to use a
-	 * quickstart. Quickstarts unfortunately only use non-specified cartridges
-	 * (no distinction btw. IEmbeddableCartridge and IStandaloneCartridge,
-	 * there's just a collection of ICartridge).
-	 * </p>
-	 * 
-	 * @return the standalone cartridge used to create the new application or
-	 *         null (in case of a quickstart)
-	 *         
-	 * @see #getSelectedApplicationTemplate()
-	 * @see ICartridgeApplicationTemplate
-	 * @see IQuickstartApplicationTemplate
-	 */
-	public ICartridge getStandaloneCartridge();
+    /**
+     * Removes the given cartridges from the list of cartridges for the new application
+     *  
+     * @param cartridges
+     */
+    public void removeEmbeddedCartridges(List<ICartridge> cartridges);
 
-	/**
-	 * Returns all (standalone and embedded) cartridges.
-	 * 
-	 * @return
-	 */
-	public Set<ICartridge> getCartridges();
+    /**
+     * Returns all embeddable cartridges that available in OpenShift
+     * 
+     * @return all available embeddable cartridges
+     */
+    public List<ICartridge> getAvailableEmbeddableCartridges();
 
-	public IGearProfile setApplicationGearProfile(IGearProfile gearProfile);
+    public List<ICartridge> setAvailableEmbeddableCartridges(List<ICartridge> embeddableCartridges);
 
-	/**
-	 * Returns the gear profile that the new application will get created with.
-	 * 
-	 * @return
-	 * 
-	 * @see IGearProfile
-	 * @see IDomain#createApplication(String, IStandaloneCartridge,
-	 *      ApplicationScale, IGearProfile, String, int, Map,
-	 *      com.openshift.client.cartridge.IEmbeddableCartridge...)
-	 */
-	public IGearProfile getApplicationGearProfile();
+    /**
+     * Returns all the (standalone- and embedded-) cartridges that are set to be
+     * used (used as standalone or added as embedded) in the new application.
+     * 
+     * @return all cartridges for the new application
+     * 
+     * @see IDomain#createApplication(String, IStandaloneCartridge,
+     *      ApplicationScale, IGearProfile, String, int, Map,
+     *      com.openshift.client.cartridge.IEmbeddableCartridge...)
+     */
+    public Set<ICartridge> getEmbeddedCartridges();
 
-	public ApplicationScale setApplicationScale(ApplicationScale scale);
+    public Set<ICartridge> setEmbeddedCartridges(Set<ICartridge> selectedEmbeddableCartridges);
 
-	/**
-	 * Returns the application scale that the new application will get created
-	 * with.
-	 * 
-	 * @return
-	 * 
-	 * @see ApplicationScale
-	 * @see IDomain#createApplication(String, IStandaloneCartridge,
-	 *      ApplicationScale, IGearProfile, String, int, Map,
-	 *      com.openshift.client.cartridge.IEmbeddableCartridge...)
-	 */
-	public ApplicationScale getApplicationScale();
+    /**
+     * Returns the standalone cartridge used to create the new application.
+     * <p>
+     * Warning: There's no standalone cartridge if we're set to use a
+     * quickstart. Quickstarts unfortunately only use non-specified cartridges
+     * (no distinction btw. IEmbeddableCartridge and IStandaloneCartridge,
+     * there's just a collection of ICartridge).
+     * </p>
+     * 
+     * @return the standalone cartridge used to create the new application or
+     *         null (in case of a quickstart)
+     *         
+     * @see #getSelectedApplicationTemplate()
+     * @see ICartridgeApplicationTemplate
+     * @see IQuickstartApplicationTemplate
+     */
+    public ICartridge getStandaloneCartridge();
 
-	public IApplicationTemplate setSelectedApplicationTemplate(IApplicationTemplate template);
+    /**
+     * Returns all (standalone and embedded) cartridges.
+     * 
+     * @return
+     */
+    public Set<ICartridge> getCartridges();
 
-	/**
-	 * Returns the application template that this wizard is using when creating
-	 * the new application
-	 * 
-	 * @return the application template that the wizard is using
-	 * 
-	 * @see IApplicationTemplate
-	 * @see ICartridgeApplicationTemplate
-	 * @see IQuickstartApplicationTemplate
-	 */
-	public IApplicationTemplate getSelectedApplicationTemplate();
+    public IGearProfile setApplicationGearProfile(IGearProfile gearProfile);
 
-	/**
-	 * Returns the initial git url that this wizard is using when creating the
-	 * new application.
-	 * 
-	 * @return
-	 * 
-	 * @see IDomain#createApplication(String, IStandaloneCartridge,
-	 *      ApplicationScale, IGearProfile, String, int, Map,
-	 *      com.openshift.client.cartridge.IEmbeddableCartridge...)
-	 */
-	public String getInitialGitUrl();
-	
-	public String setInitialGitUrl(String initialGitUrl);
-	
-	/**
-	 * Returns <code>true</code> if we're using an initial git url when creating
-	 * the new application.
-	 * 
-	 * @return
-	 */
-	public boolean isUseInitialGitUrl();
-	
-	public boolean setUseInitialGitUrl(boolean useInitialGitUrl);
+    /**
+     * Returns the gear profile that the new application will get created with.
+     * 
+     * @return
+     * 
+     * @see IGearProfile
+     * @see IDomain#createApplication(String, IStandaloneCartridge,
+     *      ApplicationScale, IGearProfile, String, int, Map,
+     *      com.openshift.client.cartridge.IEmbeddableCartridge...)
+     */
+    public IGearProfile getApplicationGearProfile();
 
-	public List<IDomain> setDomains(List<IDomain> domains);
+    public ApplicationScale setApplicationScale(ApplicationScale scale);
 
-	/**
-	 * Returns all domains that exist in the connection that's used in this
-	 * wizard.
-	 * 
-	 * @return all domains that exist in the connection used in this wizard.
-	 * 
-	 * @see #getConnection()
-	 * @see ExpressConnection#getDomains()
-	 */
-	public List<IDomain> getDomains();
-	
-	/**
-	 * Returns the environment variabels that this wizard will set to the new
-	 * application.
-	 * 
-	 * @return
-	 */
-	public Map<String, String> getEnvironmentVariables();
-	
-	public Map<String, String> setEnvironmentVariables(Map<String, String> environmentVariables);
+    /**
+     * Returns the application scale that the new application will get created
+     * with.
+     * 
+     * @return
+     * 
+     * @see ApplicationScale
+     * @see IDomain#createApplication(String, IStandaloneCartridge,
+     *      ApplicationScale, IGearProfile, String, int, Map,
+     *      com.openshift.client.cartridge.IEmbeddableCartridge...)
+     */
+    public ApplicationScale getApplicationScale();
+
+    public IApplicationTemplate setSelectedApplicationTemplate(IApplicationTemplate template);
+
+    /**
+     * Returns the application template that this wizard is using when creating
+     * the new application
+     * 
+     * @return the application template that the wizard is using
+     * 
+     * @see IApplicationTemplate
+     * @see ICartridgeApplicationTemplate
+     * @see IQuickstartApplicationTemplate
+     */
+    public IApplicationTemplate getSelectedApplicationTemplate();
+
+    /**
+     * Returns the initial git url that this wizard is using when creating the
+     * new application.
+     * 
+     * @return
+     * 
+     * @see IDomain#createApplication(String, IStandaloneCartridge,
+     *      ApplicationScale, IGearProfile, String, int, Map,
+     *      com.openshift.client.cartridge.IEmbeddableCartridge...)
+     */
+    public String getInitialGitUrl();
+
+    public String setInitialGitUrl(String initialGitUrl);
+
+    /**
+     * Returns <code>true</code> if we're using an initial git url when creating
+     * the new application.
+     * 
+     * @return
+     */
+    public boolean isUseInitialGitUrl();
+
+    public boolean setUseInitialGitUrl(boolean useInitialGitUrl);
+
+    public List<IDomain> setDomains(List<IDomain> domains);
+
+    /**
+     * Returns all domains that exist in the connection that's used in this
+     * wizard.
+     * 
+     * @return all domains that exist in the connection used in this wizard.
+     * 
+     * @see #getConnection()
+     * @see ExpressConnection#getDomains()
+     */
+    public List<IDomain> getDomains();
+
+    /**
+     * Returns the environment variabels that this wizard will set to the new
+     * application.
+     * 
+     * @return
+     */
+    public Map<String, String> getEnvironmentVariables();
+
+    public Map<String, String> setEnvironmentVariables(Map<String, String> environmentVariables);
 }

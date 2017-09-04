@@ -32,7 +32,7 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
     private IProject project;
     private List<ObservableTreeItem> projectItems = new ArrayList<>();
     private String source;
-	private Comparator<ObservableTreeItem> comparator;
+    private Comparator<ObservableTreeItem> comparator;
 
     /* (non-Javadoc)
      * @see org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel#loadResources()
@@ -88,22 +88,21 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
         firePropertyChange(PROPERTY_PROJECT, this.project, this.project = getDefaultProject(project, projectItems));
         firePropertyChange(PROPERTY_SOURCE, this.source, this.source = source);
     }
-    
-    private IProject getDefaultProject(IProject project, List<ObservableTreeItem> projectItems) {
-    	if (CollectionUtils.isEmpty(projectItems)) {
-    		return null;
-    	}
 
-    	if (project == null
-    			|| !ObservableTreeItemUtils.contains(project, projectItems)) {
-    		if (comparator != null) {
-    			Collections.sort(projectItems, comparator);
-    		}
-			project = ObservableTreeItemUtils.getFirstModel(IProject.class, projectItems);
+    private IProject getDefaultProject(IProject project, List<ObservableTreeItem> projectItems) {
+        if (CollectionUtils.isEmpty(projectItems)) {
+            return null;
+        }
+
+        if (project == null || !ObservableTreeItemUtils.contains(project, projectItems)) {
+            if (comparator != null) {
+                Collections.sort(projectItems, comparator);
+            }
+            project = ObservableTreeItemUtils.getFirstModel(IProject.class, projectItems);
         }
         return project;
     }
-    
+
     /* (non-Javadoc)
      * @see org.jboss.tools.openshift.internal.ui.wizard.common.IProjectAware#getProject()
      */
@@ -128,7 +127,7 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
     public List<ObservableTreeItem> getProjectItems() {
         return projectItems;
     }
-    
+
     private void updateProjectItems(List<ObservableTreeItem> projectItems) {
         List<ObservableTreeItem> oldItems = new ArrayList<>(this.projectItems);
         // ensure we're not operating on the same list
@@ -140,17 +139,16 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
         this.projectItems.addAll(newItems);
         firePropertyChange(PROPERTY_PROJECT_ITEMS, oldItems, this.projectItems);
     }
-    
+
     private IProject checkProject(IProject project, List<ObservableTreeItem> projects) {
         if (projects != null) {
-            return (IProject) projects.stream().map(o -> o.getModel())
-            .filter(model -> ObjectUtils.equals(project, model))
-            .findFirst()
-            .orElse(null);
+            return (IProject)projects.stream().map(o -> o.getModel()).filter(model -> ObjectUtils.equals(project, model)).findFirst()
+                    .orElse(null);
         } else {
             return null;
         }
     }
+
     public void setProjectItems(List<ObservableTreeItem> projectItems) {
         update(checkProject(this.project, projectItems), projectItems, this.source);
     }
@@ -169,7 +167,7 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
     @Override
     public void setSource(String source) {
         update(this.project, this.projectItems, source);
-   }
+    }
 
     /* (non-Javadoc)
      * @see org.jboss.tools.openshift.internal.ui.wizard.resource.IResourcePayloadPageModel#getLocalSourceFileName()
@@ -178,10 +176,10 @@ public class NewResourceWizardModel extends ObservablePojo implements IResourceP
     public String getSource() {
         return source;
     }
-    
+
     @Override
     public void setProjectsComparator(Comparator<ObservableTreeItem> comparator) {
-    	this.comparator = comparator;
+        this.comparator = comparator;
     }
 
 }

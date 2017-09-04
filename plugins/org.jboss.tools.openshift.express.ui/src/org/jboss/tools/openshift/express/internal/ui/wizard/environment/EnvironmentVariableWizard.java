@@ -18,49 +18,49 @@ import org.eclipse.jface.wizard.Wizard;
  */
 public class EnvironmentVariableWizard extends Wizard {
 
-	private EnvironmentVariableWizardModel model;
-	
-	/**
-	 * Used to create a new environment variable for the given application
-	 * 
-	 * @param application the application that we create an environment variable for
-	 */
-	public EnvironmentVariableWizard(AbstractEnvironmentVariablesWizardModel variablesModel) {
-		this(new EnvironmentVariableItem(), variablesModel);
-	}
-	
-	/**
-	 * Used to edit an existing environment variable
-	 * 
-	 * @param variable the variable that shall get edited
-	 * @param variablesModel 
-	 */
-	public EnvironmentVariableWizard(EnvironmentVariableItem variable, AbstractEnvironmentVariablesWizardModel variablesModel) {
-		this.model = new EnvironmentVariableWizardModel(variable, variablesModel);
-		setWindowTitle(variable);
-		setNeedsProgressMonitor(true);
-	}
+    private EnvironmentVariableWizardModel model;
 
-	private void setWindowTitle(EnvironmentVariableItem variable) {
-		if (variable == null) {
-			setWindowTitle("Add Environment variable");
-		} else {
-			setWindowTitle("Edit Environment variable");
-		}
-	}
+    /**
+     * Used to create a new environment variable for the given application
+     * 
+     * @param application the application that we create an environment variable for
+     */
+    public EnvironmentVariableWizard(AbstractEnvironmentVariablesWizardModel variablesModel) {
+        this(new EnvironmentVariableItem(), variablesModel);
+    }
 
-	@Override
-	public boolean performFinish() {
-		model.updateVariable();
-		return true;
-	}
+    /**
+     * Used to edit an existing environment variable
+     * 
+     * @param variable the variable that shall get edited
+     * @param variablesModel 
+     */
+    public EnvironmentVariableWizard(EnvironmentVariableItem variable, AbstractEnvironmentVariablesWizardModel variablesModel) {
+        this.model = new EnvironmentVariableWizardModel(variable, variablesModel);
+        setWindowTitle(variable);
+        setNeedsProgressMonitor(true);
+    }
 
-	@Override
-	public void addPages() {
-		addPage(new EnvironmentVariableWizardPage(model, this));
-	}
-	
-	public EnvironmentVariableItem getVariable() {
-		return model.getVariable();
-	}
+    private void setWindowTitle(EnvironmentVariableItem variable) {
+        if (variable == null) {
+            setWindowTitle("Add Environment variable");
+        } else {
+            setWindowTitle("Edit Environment variable");
+        }
+    }
+
+    @Override
+    public boolean performFinish() {
+        model.updateVariable();
+        return true;
+    }
+
+    @Override
+    public void addPages() {
+        addPage(new EnvironmentVariableWizardPage(model, this));
+    }
+
+    public EnvironmentVariableItem getVariable() {
+        return model.getVariable();
+    }
 }

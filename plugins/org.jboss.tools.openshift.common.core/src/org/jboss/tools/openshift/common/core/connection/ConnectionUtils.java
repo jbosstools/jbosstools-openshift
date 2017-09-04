@@ -25,35 +25,35 @@ import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
  */
 public class ConnectionUtils {
 
-	private ConnectionUtils() {
-		// inhibit instantiation
-	}
-	
-	public static Connection getConnectionByUrl(ConnectionURL connectionUrl, Map<ConnectionURL, Connection> connectionsByUrl) {
-		if (connectionUrl == null) {
-			return null;
-		}
-		return connectionsByUrl.get(connectionUrl);
-	}
-	
-	/**
-	 * Returns the connection for the given username if it exists. The
-	 * connection must use the default host to match the query by username.
-	 * 
-	 * @param username
-	 *            the username that the connection must use
-	 * @return the connection with the given username that uses the default host
-	 * 
-	 * @see ConnectionUtils#getDefaultHostUrl()
-	 */
-	public static Connection getConnectionByUsername(String username, Map<ConnectionURL, Connection> connectionsByUrl) {
-		try {
-			return getConnectionByUrl(ConnectionURL.forUsername(username), connectionsByUrl);
-		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftCoreException(NLS.bind("Could not get url for connection {0}", username), e);
-		} catch (MalformedURLException e) {
-			throw new OpenShiftCoreException(NLS.bind("Could not get url for connection {0}", username), e);
-		}
-	}
-	
+    private ConnectionUtils() {
+        // inhibit instantiation
+    }
+
+    public static Connection getConnectionByUrl(ConnectionURL connectionUrl, Map<ConnectionURL, Connection> connectionsByUrl) {
+        if (connectionUrl == null) {
+            return null;
+        }
+        return connectionsByUrl.get(connectionUrl);
+    }
+
+    /**
+     * Returns the connection for the given username if it exists. The
+     * connection must use the default host to match the query by username.
+     * 
+     * @param username
+     *            the username that the connection must use
+     * @return the connection with the given username that uses the default host
+     * 
+     * @see ConnectionUtils#getDefaultHostUrl()
+     */
+    public static Connection getConnectionByUsername(String username, Map<ConnectionURL, Connection> connectionsByUrl) {
+        try {
+            return getConnectionByUrl(ConnectionURL.forUsername(username), connectionsByUrl);
+        } catch (UnsupportedEncodingException e) {
+            throw new OpenShiftCoreException(NLS.bind("Could not get url for connection {0}", username), e);
+        } catch (MalformedURLException e) {
+            throw new OpenShiftCoreException(NLS.bind("Could not get url for connection {0}", username), e);
+        }
+    }
+
 }

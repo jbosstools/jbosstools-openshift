@@ -7,24 +7,24 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
 public class CDK2LocationSection extends AbstractLocationSection {
 
-	private static String SECTION_TITLE = "CDK Details";
-	private static String LABEL_STRING = "Vagrantfile Location: ";
-	private static String COMMAND_NAME = "Modify Vagrantfile Location";
-	private static String LOC_ATTR = CDKServer.PROP_FOLDER;
-	
-	public CDK2LocationSection() {
-		super(SECTION_TITLE, LABEL_STRING, COMMAND_NAME, LOC_ATTR);
-	}
+    private static String SECTION_TITLE = "CDK Details";
+    private static String LABEL_STRING = "Vagrantfile Location: ";
+    private static String COMMAND_NAME = "Modify Vagrantfile Location";
+    private static String LOC_ATTR = CDKServer.PROP_FOLDER;
 
-	@Override
-	protected void locationBrowseClicked() {
-		browseClicked(getLocationText(), FOLDER);
-	}
+    public CDK2LocationSection() {
+        super(SECTION_TITLE, LABEL_STRING, COMMAND_NAME, LOC_ATTR);
+    }
+
+    @Override
+    protected void locationBrowseClicked() {
+        browseClicked(getLocationText(), FOLDER);
+    }
 }
