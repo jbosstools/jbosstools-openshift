@@ -24,8 +24,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import org.jboss.tools.openshift.common.core.connection.HumanReadableX509Certificate;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.ui.utils.SSLCertificateUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +56,7 @@ public class HumanReadableX509CertificateTest {
 		String issuedTo = certificate.getIssuedTo();
 		// then
 		assertThat(getValue(LABEL_PRINCIPAL_COUNTRY, issuedTo)).isEqualTo("US");
-		assertThat(getValue(LABEL_PRINCIPAL_STATE, issuedTo)).isEqualTo("NORTH CAROLINA");
+		assertThat(getValue(LABEL_PRINCIPAL_STATE, issuedTo)).isEqualTo("North Carolina");
 		assertThat(getValue(LABEL_PRINCIPAL_LOCALITY, issuedTo)).isEqualTo("Raleigh");
 		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedTo)).isEqualTo("Red Hat, Inc.");
 		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedTo)).isEqualTo("IT");
@@ -76,20 +78,10 @@ public class HumanReadableX509CertificateTest {
 		// when
 		String issuedBy = certificate.getIssuedBy();
 		// then
-		assertThat(getValue(LABEL_PRINCIPAL_COUNTRY, issuedBy)).isEqualTo("GB");
-		assertThat(getValue(LABEL_PRINCIPAL_STATE, issuedBy)).isEqualTo("Greater Manchester");
-		assertThat(getValue(LABEL_PRINCIPAL_LOCALITY, issuedBy)).isEqualTo("Salford");
-		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedBy)).isEqualTo("COMODO CA Limited");
-		assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedBy)).isEqualTo("COMODO RSA Extended Validation Secure Server CA 2");
-	}
-
-	@Test
-	public void shouldReportIssuedByState() {
-		// given
-		// when
-		String issuedToCommonName = certificate.getIssuedBy(HumanReadableX509Certificate.PRINCIPAL_STATE);
-		// then
-		assertThat(issuedToCommonName).isEqualTo("Greater Manchester");
+		assertThat(getValue(LABEL_PRINCIPAL_COUNTRY, issuedBy)).isEqualTo("US");
+        assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedBy)).isEqualTo("Symantec Corporation");
+        assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedBy)).isEqualTo("Symantec Trust Network");
+		assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedBy)).isEqualTo("Symantec Class 3 EV SSL CA - G3");
 	}
 
 	@Test
@@ -98,15 +90,15 @@ public class HumanReadableX509CertificateTest {
 		// when
 		String fingerprint = certificate.getFingerprint();
 		// then
-		assertThat(fingerprint).isEqualTo("A1C3587B794993BCFD0AFD023BAA07680F20B3F2");
+		assertThat(fingerprint).isEqualTo("917871FF8DC3E10638AEE136547F4E85C1404D2D");
 	}
 
 	@Test
 	public void shouldReportValidity() throws CertificateException, ParseException {
 		// given
-		SimpleDateFormat dateParser = new SimpleDateFormat(DATE_FORMAT);
-		Calendar expectedIssuedOn = getCalendar(dateParser.parse("Sat, 5 Sep 2015 01:00:00 CET"));
-		Calendar expectedExpiresOn = getCalendar(dateParser.parse("Sun, 3 Sep 2017 00:59:59 CET"));
+		SimpleDateFormat dateParser = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+		Calendar expectedIssuedOn = getCalendar(dateParser.parse("Tue, 6 Jun 2017 01:00:00 CET"));
+		Calendar expectedExpiresOn = getCalendar(dateParser.parse("Fri, 7 Jun 2019 00:59:59 CET"));
 		// when
 		String validity = certificate.getValidity();
 		// then
@@ -128,7 +120,7 @@ public class HumanReadableX509CertificateTest {
 		int valueIndexOf = string.indexOf(identifier);
 		assertThat(valueIndexOf).as("identifier %s could not be found in %s", identifier, string).isNotNegative();
 
-		int eolIndexOf = string.indexOf('\n', valueIndexOf);
+		int eolIndexOf = string.indexOf(StringUtils.getLineSeparator(), valueIndexOf);
 		if (eolIndexOf == -1 ) {
 			eolIndexOf = string.length();
 		}
