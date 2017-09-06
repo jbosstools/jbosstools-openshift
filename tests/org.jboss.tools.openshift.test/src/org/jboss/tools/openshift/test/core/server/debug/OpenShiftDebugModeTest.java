@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -49,6 +50,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
 import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
@@ -144,7 +146,7 @@ public class OpenShiftDebugModeTest {
 		// then		
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
 		// send updated dc
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -156,7 +158,7 @@ public class OpenShiftDebugModeTest {
 		debugMode.execute(new NullProgressMonitor());
 		// then
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
 	public void shouldNotEnableDevmodeNorSendItGivenItIsAlreadyEnabled() 
@@ -171,7 +173,7 @@ public class OpenShiftDebugModeTest {
 		// dont alter dc
 		verify(dc, never()).setEnvironmentVariable(eq(KEY_DEVMODE), any()); 
 		// dont send potentially altered dc
-		verify(debugMode, never()).sendAndGetNewPod(any(IDeploymentConfig.class), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, never()).send(any(IDeploymentConfig.class), eq(connection), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -185,7 +187,7 @@ public class OpenShiftDebugModeTest {
 		// then
 		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEVMODE);
 		// send updated dc
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -222,7 +224,7 @@ public class OpenShiftDebugModeTest {
 		// then
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -238,7 +240,7 @@ public class OpenShiftDebugModeTest {
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
 		// send updated dc
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -256,8 +258,8 @@ public class OpenShiftDebugModeTest {
 		verify(dc, never()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
 		verify(dc, never()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
 		// dont send untouched dc
-		verify(debugMode, never()).sendAndGetNewPod(any(IDeploymentConfig.class), eq(connection), any(IProgressMonitor.class));
-		verify(debugMode, atLeastOnce()).getPod(any(IDeploymentConfig.class), eq(connection), any(IProgressMonitor.class));		
+		verify(debugMode, never()).send(any(IDeploymentConfig.class), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, atLeastOnce()).getExistingPod(any(IDeploymentConfig.class), eq(connection), any(IProgressMonitor.class));		
 	}
 
 	@Test
@@ -275,7 +277,7 @@ public class OpenShiftDebugModeTest {
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
 		// send updated dc
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -293,7 +295,7 @@ public class OpenShiftDebugModeTest {
 		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEVMODE);
 		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEBUGPORT);
 		// send updated dc
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -311,11 +313,11 @@ public class OpenShiftDebugModeTest {
 		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEVMODE);
 		verify(dc, atLeastOnce()).removeEnvironmentVariable(KEY_DEBUGPORT);
 		// send updated dc
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
 	@Test
-	public void shouldNotReplaceDebugPortGiveExistingPortMatchesRequestedPort() 
+	public void shouldNotReplaceContainerDebugPortGivenExistingPortMatchesRequestedPort() 
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
 		mockGetEnvironmentVariables(
@@ -324,31 +326,28 @@ public class OpenShiftDebugModeTest {
 						createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
 		Set<IPort> ports = singleton(createPort(toInt(VALUE_DEBUGPORT)));
 		IContainer container = createContainer("someDc-container1", ports); 
-		mockGetContainers(
-				asList(container)
-				, dc);
+		mockGetContainers(asList(container), dc);
 		// when
 		context.setDebugEnabled(true);
 		debugMode.execute(new NullProgressMonitor());
 		// then
 		verify(container, never()).setPorts(any());
 		// send updated dc
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 	
 	@Test
-	public void shouldReplaceDebugPortGivenExistingPortDiffersFromRequestedPort() 
+	public void shouldReplaceContainerDebugPortGivenExistingPortDiffersFromRequestedPort() 
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
 		mockGetEnvironmentVariables(
 				asList(
 						createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString()),
-						createEnvironmentVariable(KEY_DEBUGPORT, "88")), dc);
+						createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
+		// has container port 88, should have port matching env var
 		Set<IPort> ports = singleton(createPort(toInt(String.valueOf("88"))));
 		IContainer container = createContainer("someDc-container1", ports); 
-		mockGetContainers(
-				asList(container)
-				, dc);
+		mockGetContainers(asList(container), dc);
 		// when
 		context.setDebugEnabled(true);
 		debugMode.execute(new NullProgressMonitor());
@@ -356,14 +355,35 @@ public class OpenShiftDebugModeTest {
 		verify(container, atLeastOnce()).setPorts(
 				and(
 						// new set of ports contains requested port
-						argThat(setThatContainsPort(toInt(VALUE_DEBUGPORT))),
+						argThat(aSetThatContainsPort(toInt(VALUE_DEBUGPORT))),
 						// but not previously existing port
-						argThat(not(setThatContainsPort(88)))));
+						argThat(not(aSetThatContainsPort(88)))));
 		// send updated dc
-		verify(debugMode, times(1)).sendAndGetNewPod(eq(dc), eq(connection), any(IProgressMonitor.class));
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
-	private static Matcher<Set<IPort>> setThatContainsPort(final int port) {
+	@Test
+	public void shouldAddContainerDebugPortGivenNoPortExistsYet() 
+			throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		// given
+		mockGetEnvironmentVariables(
+				asList(
+						createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString())), dc);
+		final IPort existingContainerPort = new PortSpecAdapter("papaSmurf", "transport", 42);
+		Set<IPort> ports = singleton(existingContainerPort);
+		IContainer container = createContainer("someDc-container1", ports); 
+		mockGetContainers(asList(container), dc);
+		// when
+		context.setDebugEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
+		// then
+		verify(container, atLeastOnce()).setPorts(
+						argThat(aSetEqualTo(existingContainerPort, createPort(toInt(VALUE_DEBUGPORT)))));
+		// send updated dc
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
+	}
+	
+	private static Matcher<Set<IPort>> aSetThatContainsPort(final int port) {
 		return new TypeSafeMatcher<Set<IPort>>() {
 
 			@Override
@@ -382,7 +402,22 @@ public class OpenShiftDebugModeTest {
 		};
 	}
 
-//	private static class MockRedeploymentJob extends Job {
+	private static Matcher<Set<IPort>> aSetEqualTo(final IPort... ports) {
+		return new TypeSafeMatcher<Set<IPort>>() {
+
+			@Override
+			protected boolean matchesSafely(Set<IPort> set) {
+				return CollectionUtils.disjunction(Arrays.asList(ports), set).isEmpty();
+			}
+
+			@Override
+			public void describeTo(Description description) {
+				description.appendText("Set of ports that contains exactly the given ports.");
+			}
+		};
+	}
+
+	//	private static class MockRedeploymentJob extends Job {
 //
 //		private IDeploymentConfig dc;
 //
@@ -431,13 +466,16 @@ public class OpenShiftDebugModeTest {
 		}
 
 		@Override
-		public IPod sendAndGetNewPod(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor)
-				throws CoreException {
-			return null;
+		protected void send(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) throws CoreException {
 		}
 		
 		@Override
-		protected IPod getPod(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) {
+		protected IPod waitForNewPod(IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
+			return null;
+		}
+
+		@Override
+		protected IPod getExistingPod(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) {
 			return null;
 		}
 	}
