@@ -158,9 +158,9 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 			beh.setServerStopped();
 			if (minishiftLoc == null)
 				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
-						"Unable to locate minishift command. Please check to ensure that the command is available on your Path environment variable."));
+						"Unable to locate minishift command. Please set a correct value in the server editor."));
 			throw new CoreException(CDKCoreActivator.statusFactory()
-					.errorStatus("Expected location of minishift command does not exist: " + minishiftLoc));
+					.errorStatus("Expected location of minishift command does not exist: " + minishiftLoc + "\nPlease set a correct value in the server editor."));
 		}
 
 		CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());

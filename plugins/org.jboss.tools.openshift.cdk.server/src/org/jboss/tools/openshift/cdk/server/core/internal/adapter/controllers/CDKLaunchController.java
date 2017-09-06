@@ -136,7 +136,7 @@ public class CDKLaunchController extends AbstractCDKLaunchController implements 
 		if(vagrantLoc == null || !(new File(vagrantLoc).exists())) {
 			beh.setServerStopped();
 			if( vagrantLoc == null )
-				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Unable to locate vagrant command. Please check to ensure that the command is available on your Path environment variable."));
+				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Unable to locate vagrant command. Please check the server's launch configuration on the 'Environment' tab to ensure that the command is available on your Path environment variable."));
 			throw new CoreException(CDKCoreActivator.statusFactory().errorStatus("Expected location of vagrant command does not exist: " + vagrantLoc));
 		}
 		
