@@ -109,6 +109,10 @@
 	<!-- Node.js Debugger integration -->
     <extension-point id="org.jboss.tools.openshift.core.serverAdapterProfileDetector" name="Openshift Server Adapter Profile Detector" schema="schema/org.jboss.tools.openshift.core.serverAdapterProfileDetector.exsd"/>
    		
+   		
+   	<!-- Discovery Method for registry url -->
+    <extension-point id="org.jboss.tools.openshift.core.connection.registryprovider" name="registryprovider" schema="schema/org.jboss.tools.openshift.core.connection.registryprovider.exsd"/>
+   	
    	<extension
          point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
   

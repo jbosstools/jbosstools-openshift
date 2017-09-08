@@ -48,6 +48,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -61,6 +62,7 @@ import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionFactory;
+import org.jboss.tools.openshift.core.connection.registry.RegistryProviderModel;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAdvancedPropertiesProvider;
@@ -113,8 +115,21 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				
 				Text txtRegistry = new Text(advancedComposite, SWT.BORDER);
 				GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
+					.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1)
 					.applyTo(txtRegistry);
+				
+				Button registryDiscover = new Button(advancedComposite, SWT.PUSH);
+				registryDiscover.setText("Discover...");
+				registryDiscover.addSelectionListener(new SelectionAdapter() {
+					
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						discoverRegistryPressed();
+					}
+				});
+				GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1)
+				.applyTo(registryDiscover);
 				
 				registryURLObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, txtRegistry);
 				ValueBindingBuilder.bind(registryURLObservable)
@@ -276,6 +291,17 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		return composite;
 	}
 
+	private void discoverRegistryPressed() {
+		String ret = RegistryProviderModel.getDefault().getRegistryURL(pageModel.getSelectedConnection());
+		if( ret == null ) {
+			System.out.println("Nothing found");
+			// TODO error out
+		} else {
+			registryURLObservable.setValue(ret);
+		}
+	}
+	
+	
 	private IStatus validateOCLocation(String location) {
 		IStatus validity = ValidationStatus.ok();
 		if (StringUtils.isBlank(location)) {
