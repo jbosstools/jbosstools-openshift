@@ -35,8 +35,7 @@ public class CDKRegistryProvider implements IConnectionRegistryProvider {
 		if( s != null ) {
 			ServiceManagerEnvironmentLoader type = ServiceManagerEnvironmentLoader.type(s);
 			ServiceManagerEnvironment env = type.getOrLoadServiceManagerEnvironment(s, true);
-			String dockerReg = env.getDockerRegistry();
-			return dockerReg;
+			return env.getDockerRegistry();
 		}
 		return null;
 	}

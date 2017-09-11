@@ -22,7 +22,7 @@ public class RegistryProviderModel {
 	private ProviderPair[] registryProviders = null;
 	
 	public RegistryProviderModel() {
-		
+		// Nothing needs to be done to initialize
 	}
 	
 	/**
@@ -49,7 +49,7 @@ public class RegistryProviderModel {
 		List<ProviderPair> l = new ArrayList<ProviderPair>(Arrays.asList(registryProviders));
 		Comparator<ProviderPair> c = (e1, e2) -> e2.getWeight() - e1.getWeight();
 		List<IConnectionRegistryProvider> ret = l.stream().sorted(c).map(ProviderPair::getProvider).collect(Collectors.toList());
-		return (IConnectionRegistryProvider[]) ret.toArray(new IConnectionRegistryProvider[ret.size()]);
+		return ret.toArray(new IConnectionRegistryProvider[ret.size()]);
 	}
 	
 	private void loadProviders() {
@@ -68,7 +68,7 @@ public class RegistryProviderModel {
 				OpenShiftCoreActivator.pluginLog().logError("Failure loading registry provider extension", e);
 			}
 		}
-		registryProviders = (ProviderPair[]) ret.toArray(new ProviderPair[ret.size()]);
+		registryProviders = ret.toArray(new ProviderPair[ret.size()]);
 	}
 	
 	private static class ProviderPair {

@@ -33,9 +33,9 @@ public abstract class ServiceManagerEnvironmentLoader {
 	public static final String SHARED_INFO_KEY = "cdk.sharedinfo.serviceManagerEnvironment";
 	public static final String OC_LOCATION_KEY = "cdk.oc.location.jbt.prop";
 	
-	protected static int TYPE_NULL = 0;
-	protected static int TYPE_VAGRANT = 1;
-	protected static int TYPE_MINISHIFT = 2;
+	protected static final int TYPE_NULL = 0;
+	protected static final int TYPE_VAGRANT = 1;
+	protected static final int TYPE_MINISHIFT = 2;
 	
 	public static ServiceManagerEnvironmentLoader getVagrantLoader() {
 		return new VagrantServiceManagerEnvironmentLoader();
