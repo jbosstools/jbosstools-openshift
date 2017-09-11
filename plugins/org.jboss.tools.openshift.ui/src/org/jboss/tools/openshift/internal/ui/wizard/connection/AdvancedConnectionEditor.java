@@ -293,10 +293,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 
 	private void discoverRegistryPressed() {
 		String ret = RegistryProviderModel.getDefault().getRegistryURL(pageModel.getSelectedConnection());
-		if( ret == null ) {
-			System.out.println("Nothing found");
-			// TODO error out
-		} else {
+		if( ret != null ) {
 			registryURLObservable.setValue(ret);
 		}
 	}
