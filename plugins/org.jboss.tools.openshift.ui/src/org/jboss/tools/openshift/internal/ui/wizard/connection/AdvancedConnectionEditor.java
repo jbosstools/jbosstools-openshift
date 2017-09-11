@@ -50,6 +50,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -120,7 +122,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 					
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						discoverRegistryPressed();
+						discoverRegistryPressed(registryDiscover.getShell());
 					}
 				});
 				GridDataFactory.fillDefaults()
@@ -287,10 +289,14 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		return composite;
 	}
 
-	private void discoverRegistryPressed() {
+	private void discoverRegistryPressed(Shell shell) {
 		String ret = RegistryProviderModel.getDefault().getRegistryURL(pageModel.getSelectedConnection());
 		if( ret != null ) {
 			registryURLObservable.setValue(ret);
+		} else {
+			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+		    messageBox.setMessage("No registry provider found for the given connection.");
+		    int rc = messageBox.open();
 		}
 	}
 	
