@@ -36,7 +36,10 @@ public class CDKCoreActivator extends BaseUIPlugin {
 	
 	private UnitedServerListener configureDependentFrameworksListener;
 	
-	private UnitedServerListener getConfigureDependentFrameworksListener() {
+	/*
+	 * NOT API, public only for testing
+	 */
+	public UnitedServerListener getConfigureDependentFrameworksListener() {
 		if( configureDependentFrameworksListener == null ) {
 			configureDependentFrameworksListener = new ConfigureDependentFrameworksListener();
 		}

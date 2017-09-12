@@ -16,10 +16,9 @@ public class CDKRegistryProvider implements IConnectionRegistryProvider {
 		IServer[] all = ServerCore.getServers();
 		for( int i = 0; i < all.length; i++ ) {
 			if( all[i].getServerState() == IServer.STATE_STARTED ) {
-				ServiceManagerEnvironmentLoader type = ServiceManagerEnvironmentLoader.type(all[i]);
-				if( !(type instanceof NullEnvironmentLoader)) {
-					ServiceManagerEnvironment adb = type.getOrLoadServiceManagerEnvironment(all[i], true);
-					IConnection con = util.findExistingOpenshiftConnection(all[i], adb);
+				ServiceManagerEnvironment env = getServiceManagerEnvironment(all[i]);
+				if( env != null ) {
+					IConnection con = util.findExistingOpenshiftConnection(all[i], env);
 					if( connection.equals(con)) {
 						return all[i];
 					}
@@ -28,13 +27,24 @@ public class CDKRegistryProvider implements IConnectionRegistryProvider {
 		}
 		return null;
 	}
+	
+	/*
+	 * Test classes should override 
+	 */
+	protected ServiceManagerEnvironment getServiceManagerEnvironment(IServer server) {
+		ServiceManagerEnvironmentLoader type = ServiceManagerEnvironmentLoader.type(server);
+		if( !(type instanceof NullEnvironmentLoader)) {
+			ServiceManagerEnvironment adb = type.getOrLoadServiceManagerEnvironment(server, true);
+			return adb;
+		}
+		return null;
+	}
 
 	@Override
 	public String getRegistryURL(IConnection connection) {
 		IServer s = findServer(connection);
 		if( s != null ) {
-			ServiceManagerEnvironmentLoader type = ServiceManagerEnvironmentLoader.type(s);
-			ServiceManagerEnvironment env = type.getOrLoadServiceManagerEnvironment(s, true);
+			ServiceManagerEnvironment env = getServiceManagerEnvironment(s);
 			return env.getDockerRegistry();
 		}
 		return null;

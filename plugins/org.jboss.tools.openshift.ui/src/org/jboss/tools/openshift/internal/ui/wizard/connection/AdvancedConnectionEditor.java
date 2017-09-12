@@ -295,7 +295,8 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 			registryURLObservable.setValue(ret);
 		} else {
 			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-		    messageBox.setMessage("No registry provider found for the given connection.");
+			messageBox.setText("Registry URL not found");
+		    messageBox.setMessage("No registry provider found for the given connection. If your Openshift connection is backed by a CDK or minishift installation, please ensure the CDK is running.");
 		    int rc = messageBox.open();
 		}
 	}

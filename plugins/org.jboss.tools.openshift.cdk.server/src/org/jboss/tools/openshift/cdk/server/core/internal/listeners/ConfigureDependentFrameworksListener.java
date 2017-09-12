@@ -25,9 +25,18 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 public class ConfigureDependentFrameworksListener extends UnitedServerListener {
+	private boolean enabled = true;
+	public void enable() {
+		enabled = true;
+	}
+	public void disable() {
+		enabled = false;
+	}
+	
+	
 	@Override
 	public void serverChanged(final ServerEvent event) {
-		if( canHandleServer(event.getServer())) {
+		if( enabled && canHandleServer(event.getServer())) {
 			if( serverSwitchesToState(event, IServer.STATE_STARTED)) {
 				scheduleConfigureFrameworksJob(event);
 			} else if( serverSwitchesToState(event, IServer.STATE_STOPPED)) {
@@ -93,9 +102,9 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
 		IConnection con = util.findExistingOpenshiftConnection(server, adb);
 		if( con == null ) {
-			con = util.createOpenshiftConnection(server, adb);
+			con = util.createOpenshiftConnection(adb);
 		} else {
-			util.updateOpenshiftConnection(server, adb, con);
+			util.updateOpenshiftConnection(adb, con);
 		}
 		if( con != null ) {
 			con.connect();
