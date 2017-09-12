@@ -260,5 +260,12 @@
             weight="10">
       </resolutionProvider>
    </extension>
+   <extension
+         point="org.jboss.tools.openshift.core.connection.registryprovider">
+      <registryProvider
+            class="org.jboss.tools.openshift.cdk.server.core.internal.registry.CDKRegistryProvider"
+            weight="5">
+      </registryProvider>
+   </extension>
 	
 </plugin>

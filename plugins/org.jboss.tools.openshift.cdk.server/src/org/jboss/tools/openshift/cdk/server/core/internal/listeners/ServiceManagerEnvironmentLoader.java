@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,8 +33,9 @@ public abstract class ServiceManagerEnvironmentLoader {
 	public static final String SHARED_INFO_KEY = "cdk.sharedinfo.serviceManagerEnvironment";
 	public static final String OC_LOCATION_KEY = "cdk.oc.location.jbt.prop";
 	
-	protected static int TYPE_VAGRANT = 1;
-	protected static int TYPE_MINISHIFT = 2;
+	protected static final int TYPE_NULL = 0;
+	protected static final int TYPE_VAGRANT = 1;
+	protected static final int TYPE_MINISHIFT = 2;
 	
 	public static ServiceManagerEnvironmentLoader getVagrantLoader() {
 		return new VagrantServiceManagerEnvironmentLoader();
@@ -43,10 +45,30 @@ public abstract class ServiceManagerEnvironmentLoader {
 	}
 	
 	public static ServiceManagerEnvironmentLoader type(IServer s) {
-		if( s.getServerType().getId().equals(CDKServer.CDK_SERVER_TYPE)) {
+		String typeId = s.getServerType().getId();
+		if( typeId.equals(CDKServer.CDK_SERVER_TYPE)) {
 			return getVagrantLoader();
+		} else if( typeId.equals(CDKServer.CDK_V3_SERVER_TYPE)) {
+			return getMinishiftLoader();
 		}
-		return getMinishiftLoader();
+		return new NullEnvironmentLoader();
+	}
+	
+	
+	public static class NullEnvironmentLoader extends ServiceManagerEnvironmentLoader {
+		public NullEnvironmentLoader() {
+			super(TYPE_NULL);
+		}
+
+		@Override
+		public ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, boolean suppressErrors) {
+			try {
+				return new ServiceManagerEnvironment(new HashMap<String, String>());
+			} catch (URISyntaxException e) {
+				return null;
+			}
+		}
+		
 	}
 	
 	
@@ -70,7 +92,7 @@ public abstract class ServiceManagerEnvironmentLoader {
 		IControllableServerBehavior behavior = JBossServerBehaviorUtils.getControllableBehavior(server);
 		Object o = behavior.getSharedData(SHARED_INFO_KEY);
 		ServiceManagerEnvironment ret = null;
-		if( !(o instanceof ServiceManagerEnvironmentLoader )) {
+		if( !(o instanceof ServiceManagerEnvironment )) {
 			ret = loadServiceManagerEnvironment(server, maxTries, suppressErrors);
 		} else {
 			ret = (ServiceManagerEnvironment)o;

@@ -40,11 +40,11 @@ public class CDKOpenshiftUtility {
 		return null;
 	}
 	
-	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment env) {
-		return createOpenshiftConnection(server, env, ConnectionsRegistrySingleton.getInstance());
+	public IConnection createOpenshiftConnection(ServiceManagerEnvironment env) {
+		return createOpenshiftConnection(env, ConnectionsRegistrySingleton.getInstance());
 	}
 	
-	public IConnection createOpenshiftConnection(IServer server, ServiceManagerEnvironment env, ConnectionsRegistry registry) {
+	public IConnection createOpenshiftConnection(ServiceManagerEnvironment env, ConnectionsRegistry registry) {
 		
 		// Create the connection
 		String soughtHost = env.openshiftHost + ":" + env.openshiftPort;
@@ -76,7 +76,7 @@ public class CDKOpenshiftUtility {
 			((Connection)con).setExtendedProperty(ICommonAttributes.OC_OVERRIDE_KEY, true);
 		}
 		
-		updateOpenshiftConnection(server, env, con, false);
+		updateOpenshiftConnection(env, con, false);
 		
 		
 		if( registry != null )
@@ -84,11 +84,11 @@ public class CDKOpenshiftUtility {
 		return con;
 	}
 	
-	public void updateOpenshiftConnection(IServer server, ServiceManagerEnvironment env, IConnection con) {
-		updateOpenshiftConnection(server, env, con, true);
+	public void updateOpenshiftConnection(ServiceManagerEnvironment env, IConnection con) {
+		updateOpenshiftConnection(env, con, true);
 	}
 	
-	public void updateOpenshiftConnection(IServer server, ServiceManagerEnvironment env, IConnection con, boolean fireUpdate) {
+	public void updateOpenshiftConnection(ServiceManagerEnvironment env, IConnection con, boolean fireUpdate) {
 		String dockerReg = env.getDockerRegistry();
 		((Connection)con).setExtendedProperty(ICommonAttributes.IMAGE_REGISTRY_URL_KEY, dockerReg);
 		if( fireUpdate) {

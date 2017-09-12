@@ -39,6 +39,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.core,
  org.jboss.tools.openshift.core.connection,
+ org.jboss.tools.openshift.core.connection.registry,
  org.jboss.tools.openshift.core.preferences,
  org.jboss.tools.openshift.core.server,
  org.jboss.tools.openshift.core.server.adapter,

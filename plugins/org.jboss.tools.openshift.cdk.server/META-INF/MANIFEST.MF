@@ -46,4 +46,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.jboss.tools.openshift.cdk.server.core.internal;x-friends:="org.jboss.tools.openshift.cdk.server.test",
  org.jboss.tools.openshift.cdk.server.core.internal.adapter;x-friends:="org.jboss.tools.openshift.cdk.server.test",
  org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;x-friends:="org.jboss.tools.openshift.cdk.server.test",
- org.jboss.tools.openshift.cdk.server.core.internal.listeners;x-friends:="org.jboss.tools.openshift.cdk.server.test"
+ org.jboss.tools.openshift.cdk.server.core.internal.listeners;x-friends:="org.jboss.tools.openshift.cdk.server.test",
+ org.jboss.tools.openshift.cdk.server.core.internal.registry

@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,8 +20,6 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.IObservable;
-import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -53,6 +50,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -61,6 +60,7 @@ import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionFactory;
+import org.jboss.tools.openshift.core.connection.registry.RegistryProviderModel;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAdvancedPropertiesProvider;
@@ -113,8 +113,21 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				
 				Text txtRegistry = new Text(advancedComposite, SWT.BORDER);
 				GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
+					.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1)
 					.applyTo(txtRegistry);
+				
+				Button registryDiscover = new Button(advancedComposite, SWT.PUSH);
+				registryDiscover.setText("Discover...");
+				registryDiscover.addSelectionListener(new SelectionAdapter() {
+					
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						discoverRegistryPressed(registryDiscover.getShell());
+					}
+				});
+				GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1)
+				.applyTo(registryDiscover);
 				
 				registryURLObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, txtRegistry);
 				ValueBindingBuilder.bind(registryURLObservable)
@@ -276,6 +289,19 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		return composite;
 	}
 
+	private void discoverRegistryPressed(Shell shell) {
+		String ret = RegistryProviderModel.getDefault().getRegistryURL(pageModel.getSelectedConnection());
+		if( ret != null ) {
+			registryURLObservable.setValue(ret);
+		} else {
+			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
+			messageBox.setText("Registry URL not found");
+		    messageBox.setMessage("No registry provider found for the given connection. If your Openshift connection is backed by a CDK or minishift installation, please ensure the CDK is running.");
+		    int rc = messageBox.open();
+		}
+	}
+	
+	
 	private IStatus validateOCLocation(String location) {
 		IStatus validity = ValidationStatus.ok();
 		if (StringUtils.isBlank(location)) {
