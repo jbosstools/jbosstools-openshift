@@ -173,12 +173,16 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 
 	protected DebugContext createDebugContext(OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
 		monitor.subTask("Initialising debugging...");
+
 		DockerImageLabels imageLabels = getDockerImageLabels(beh, monitor);
-		String devmodeKey = getDevmodeKey(beh.getServer(), imageLabels);
-		String debugPortKey = getDebugPortKey(beh.getServer(), imageLabels);
-		String debugPort = getDebugPort(beh.getServer(), imageLabels);
-		DebugContext debugContext = new DebugContext(beh.getServer(), devmodeKey, debugPortKey, debugPort);
-		return debugContext;
+		IServer server = beh.getServer();
+		String devmodeKey = StringUtils.defaultIfBlank(
+				OpenShiftServerUtils.getDevmodeKey(server), imageLabels.getDevmodeKey());
+		String debugPortKey = StringUtils.defaultIfBlank(
+				OpenShiftServerUtils.getDebugPortKey(server), imageLabels.getDevmodePortKey());
+		String debugPort = StringUtils.defaultIfBlank(
+				OpenShiftServerUtils.getDebugPort(server), imageLabels.getDevmodePortValue());
+		return new DebugContext(beh.getServer(), devmodeKey, debugPortKey, debugPort);
 	}
 
 	private DockerImageLabels getDockerImageLabels(OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
@@ -186,30 +190,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		DockerImageLabels metadata = DockerImageLabels.getInstance(resource, beh);
 		waitForDockerImageLabelsReady(metadata, monitor);
 		return metadata;
-	}
-
-	private static String getDevmodeKey(IServer server, DockerImageLabels metadata) {
-		String devmodeKey = OpenShiftServerUtils.getDevmodeKey(server);
-		if (StringUtils.isBlank(devmodeKey)) {
-			devmodeKey = metadata.getDevmodeKey();
-		}
-		return devmodeKey;
-	}
-
-	private static String getDebugPortKey(IServer server, DockerImageLabels metadata) {
-		String debugPortKey = OpenShiftServerUtils.getDebugPortKey(server);
-		if (StringUtils.isBlank(debugPortKey)) {
-			debugPortKey = metadata.getDevmodePortKey();
-		}
-		return debugPortKey;
-	}
-
-	private static String getDebugPort(IServer server, DockerImageLabels metadata) {
-		String debugPort = OpenShiftServerUtils.getDebugPort(server);
-		if (StringUtils.isBlank(debugPort)) {
-			debugPort = metadata.getDevmodePortValue();
-		}
-		return debugPort;
 	}
 
 	protected void setServerState(OpenShiftServerBehaviour beh, String mode, IProgressMonitor monitor) {
@@ -279,10 +259,9 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 			public void onDebugChange(DebugContext context, IProgressMonitor monitor)
 					throws CoreException {
 				int localPort = mapPortForwarding(context, monitor);
-				IServer server = behaviour.getServer();
-				ILaunch debuggerLaunch = attachRemoteDebugger(server, localPort, monitor);
+				ILaunch debuggerLaunch = attachRemoteDebugger(behaviour.getServer(), localPort, monitor);
 				if (debuggerLaunch != null) {
-					overrideHotcodeReplace(server, debuggerLaunch);
+					overrideHotcodeReplace(behaviour.getServer(), debuggerLaunch);
 				}
 			}
 
@@ -367,10 +346,10 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 
 		Optional<PortPair> debugPort = podPorts.stream()
 				.filter(p -> remotePort == p.getRemotePort())
-				.findFirst();		
+				.findFirst();
 		if (!debugPort.isPresent()) {
 			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-					NLS.bind("Pod port specified in server adapter \"{0}\" is no present in pod \"{1}\"", getServer().getName(), pod.getName())));
+					NLS.bind("Pod port specified in server adapter \"{0}\" is not present in pod \"{1}\"", getServer().getName(), pod.getName())));
 		}
 
 		if (PortForwardingUtils.isPortForwardingStarted(pod)) {
