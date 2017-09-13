@@ -13,8 +13,8 @@
 	<packaging>pom</packaging>
 	<properties>
 		<tycho.scmUrl>scm:git:https://github.com/jbosstools/jbosstools-openshift.git</tycho.scmUrl>
-		<sonar.test.inclusions>**/*Test.*,**/test/**/*</sonar.test.inclusions>
-		<sonar.exclusions>**/openshift/reddeer/**/*</sonar.exclusions>
+		<sonar.test.inclusions>**/*Test.*,**/test/**/*,**/*AllTests*,**/*AllBotTests*,**/*TestSuite*</sonar.test.inclusions>
+		<sonar.exclusions>**/reddeer/**/*</sonar.exclusions>
 	</properties>
 	<modules>
 		<module>plugins</module>
@@ -58,8 +58,11 @@
 						<configuration>
 							<append>true</append>
 							<includes>
-								<include>org.jboss.tools.openshift.*</include>
+								<include>org/jboss/tools/openshift/**/*</include>
 							</includes>
+							<excludes>
+								<exclude>**/*.reddeer/**/*</exclude>
+							</excludes>
 						</configuration>
 						<executions>
 							<execution>
