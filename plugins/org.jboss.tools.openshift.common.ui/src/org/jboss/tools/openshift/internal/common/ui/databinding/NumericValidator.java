@@ -8,7 +8,7 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.ui.validator;
+package org.jboss.tools.openshift.internal.common.ui.databinding;
 
 import java.util.function.Function;
 
