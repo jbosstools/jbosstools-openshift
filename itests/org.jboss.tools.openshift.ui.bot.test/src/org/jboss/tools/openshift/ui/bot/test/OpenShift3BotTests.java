@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test;
 
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
@@ -26,7 +26,6 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapte
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.CreateResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.DeleteResourceTest;
-import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.DeployEclipseProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.HandleCustomTemplateTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.ImportApplicationTest;
@@ -51,6 +50,7 @@ import org.jboss.tools.openshift.ui.bot.test.connection.v3.CreateNewConnectionTe
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.OpenNewConnectionWizardTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.RemoveConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.StoreConnectionTest;
+import org.jboss.tools.openshift.ui.bot.test.integration.docker.DeployDockerImageTest;
 import org.jboss.tools.openshift.ui.bot.test.project.CreateNewProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.project.DeleteProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.project.LinkToCreateNewProjectTest;
@@ -97,32 +97,31 @@ import org.junit.runners.Suite.SuiteClasses;
 	
 	// Creation of a new application
 	CreateApplicationFromTemplateTest.class,
-	CreateApplicationOnBuilderImageTest.class,
+	CreateApplicationOnBuilderImageTest.class, 
 	DeploymentTest.class,
 	
 	// Application handling
-	DeleteResourceTest.class,
+	DeleteResourceTest.class, 
 	OSExplorerResourceTest.class,
-	TriggerBuildTest.class,
+	TriggerBuildTest.class, 
 	ImportApplicationTest.class,
-	PortForwardingTest.class,
-	LogsTest.class,
+	PortForwardingTest.class, 
+	LogsTest.class, 
 	EditResourcesTest.class,
 	HandleCustomTemplateTest.class,
 	ImportApplicationWizardTest.class,
 
 	// Advanced application testing
- 	DeployEclipseProjectTest.class,	
-// 	DeployDockerImageTest.class,	
+	DeployDockerImageTest.class,	
  	CreateResourcesTest.class,
-	ScalingTest.class,
+	ScalingTest.class, 
 
 	// Server adapter
 	ServerAdapterWizardHandlingTest.class,
 	CreateServerAdapterTest.class,
 	ServerAdapterFromResourceTest.class,
- 	PublishChangesTest.class,
- 	DebuggingEAPAppTest.class,
+	PublishChangesTest.class,
+	DebuggingEAPAppTest.class,
 })
 public class OpenShift3BotTests {
 	

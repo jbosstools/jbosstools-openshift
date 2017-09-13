@@ -13,30 +13,34 @@ package org.jboss.tools.openshift.ui.bot.test.application.v3.adapter;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.eclipse.condition.ServerHasState;
-import org.jboss.reddeer.eclipse.exception.EclipseLayerException;
-import org.jboss.reddeer.eclipse.jdt.ui.ProjectExplorer;
-import org.jboss.reddeer.eclipse.wst.server.ui.view.Server;
-import org.jboss.reddeer.eclipse.wst.server.ui.view.ServersView;
-import org.jboss.reddeer.eclipse.wst.server.ui.view.ServersViewEnums.ServerState;
-import org.jboss.reddeer.junit.requirement.inject.InjectRequirement;
-import org.jboss.reddeer.swt.impl.button.CheckBox;
-import org.jboss.reddeer.swt.impl.button.FinishButton;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.styledtext.DefaultStyledText;
-import org.jboss.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.eclipse.condition.ServerHasState;
+import org.eclipse.reddeer.eclipse.exception.EclipseLayerException;
+import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
+import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
+import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
+import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.styledtext.DefaultStyledText;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.condition.ServerAdapterExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
+import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -52,6 +56,7 @@ import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter.Version;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenshiftTestInFailureException;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -79,8 +84,8 @@ public class ServerAdapterFromResourceTest {
 		project = explorer.getOpenShift3Connection().getProject(DatastoreOS3.TEST_PROJECT);
 		project.getService(OpenShiftResources.NODEJS_SERVICE).select();
 		
-		new ContextMenu(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
 		
 		try {
 			CheckBox checkBox = new CheckBox("Do not clone - use existing repository");
@@ -91,10 +96,10 @@ public class ServerAdapterFromResourceTest {
 		} catch (RedDeerException ex) {
 			LOGGER.debug("No existing project found, importing");
 		}
-			
 		new FinishButton().click();
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-	}
+		new WaitUntil(new OpenShiftResourceExists(Resource.DEPLOYMENT, OpenShiftResources.NODEJS_APP_REPLICATION_CONTROLLER, ResourceState.UNSPECIFIED, DatastoreOS3.TEST_PROJECT), TimePeriod.LONG);
+	}	
 	
 	@After
 	public void removeAdapterIfExists() {
@@ -148,7 +153,7 @@ public class ServerAdapterFromResourceTest {
 	
 	private void assertAdapterWorks() {
 		String serverName = adapter.getLabel();
-		Server server = new ServersView().getServer(serverName);
+		Server server = new ServersView2().getServer(serverName);
 	
 		try {
 			new WaitUntil(new ServerHasState(server, ServerState.STARTED), TimePeriod.LONG);
@@ -159,7 +164,7 @@ public class ServerAdapterFromResourceTest {
 	
 	private void newAdapterFromResource(Resource type, String name) {
 		project.getOpenShiftResource(type, name).select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
 		
@@ -183,11 +188,12 @@ public class ServerAdapterFromResourceTest {
 		}
 		
 		new FinishButton().click();
-		new WaitWhile(new ShellWithTextIsAvailable(""));
+		new WaitWhile(new ShellIsAvailable(""));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
 		
 		assertTrue("OpenShift 3 server adapter was not created.", 
 				new ServerAdapterExists(Version.OPENSHIFT3, name, resourceType).test());	
 		adapter = new ServerAdapter(Version.OPENSHIFT3, name, resourceType);
 	}
+	
 }

@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.ui.bot.test.common;
 
 public class OpenshiftTestInFailureException extends RuntimeException {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public OpenshiftTestInFailureException(String message) {
 		super(message);
 	}

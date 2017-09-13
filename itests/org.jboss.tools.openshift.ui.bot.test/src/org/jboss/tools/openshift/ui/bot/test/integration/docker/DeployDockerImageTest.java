@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -17,36 +17,37 @@ import static org.junit.Assert.fail;
 import java.util.List;
 
 import org.eclipse.linuxtools.docker.reddeer.ui.DockerExplorerView;
+import org.eclipse.linuxtools.docker.reddeer.ui.resources.AuthenticationMethod;
 import org.eclipse.linuxtools.docker.reddeer.ui.resources.DockerConnection;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.platform.RunningPlatform;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
+import org.eclipse.reddeer.jface.exception.JFaceLayerException;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.junit.screenshot.CaptureScreenshotException;
+import org.eclipse.reddeer.junit.screenshot.ScreenshotCapturer;
+import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.condition.TreeContainsItem;
+import org.eclipse.reddeer.swt.impl.button.BackButton;
+import org.eclipse.reddeer.swt.impl.button.CancelButton;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.button.NextButton;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.core.StringContains;
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.common.platform.RunningPlatform;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.eclipse.ui.browser.BrowserEditor;
-import org.jboss.reddeer.jface.exception.JFaceLayerException;
-import org.jboss.reddeer.junit.requirement.inject.InjectRequirement;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.reddeer.junit.screenshot.CaptureScreenshotException;
-import org.jboss.reddeer.junit.screenshot.ScreenshotCapturer;
-import org.jboss.reddeer.swt.api.TreeItem;
-import org.jboss.reddeer.swt.condition.TreeContainsItem;
-import org.jboss.reddeer.swt.condition.WidgetIsEnabled;
-import org.jboss.reddeer.swt.impl.button.BackButton;
-import org.jboss.reddeer.swt.impl.button.CancelButton;
-import org.jboss.reddeer.swt.impl.button.CheckBox;
-import org.jboss.reddeer.swt.impl.button.FinishButton;
-import org.jboss.reddeer.swt.impl.button.NextButton;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.combo.LabeledCombo;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
@@ -77,13 +78,13 @@ public class DeployDockerImageTest {
 	public static String PROJECT1 = "deployimagetesting1" + System.currentTimeMillis();
 	public static String PROJECT2 = "deployimagetesting2" + System.currentTimeMillis();
 	
-	public static String DOCKER_CONNECTION = "default";
+	public static String DOCKER_CONNECTION = "CDK";
 	public static final String HELLO_OS_DOCKER_IMAGE = "docker.io/openshift/hello-openshift";
 	public static final String TAG = "v1.2.1";
 	
 	@BeforeClass
 	public static void setUp() {
-		prepareDockerConnection();
+		createDockerConnection();
 		try {
 			pullHelloImageIfDoesNotExist();
 		} catch (JFaceLayerException ex) {
@@ -91,6 +92,20 @@ public class DeployDockerImageTest {
 			throw new RuntimeException(newExceptionMessage, ex);
 		}
 		createProjects();
+	}
+	
+	public static void createDockerConnection () {
+		String connectionsURI = System.getProperty("openshift.server").replaceAll(":8443", ":2376");
+		String pathToCertificate = System.getProperty("user.dir") + "/.minishift/certs";
+		dockerExplorer = new DockerExplorerView();
+		dockerExplorer.open();
+		List<String> connectionsNames = dockerExplorer.getDockerConnectionNames();
+		if (!connectionsNames.isEmpty()) {
+			for(String connectionName: connectionsNames) {
+				dockerExplorer.getDockerConnectionByName(connectionName).removeConnection();
+			}
+		}
+		dockerExplorer.createDockerConnection(AuthenticationMethod.TCP_CONNECTION, connectionsURI, pathToCertificate, "CDK");
 	}
 
 	/**
@@ -203,7 +218,7 @@ public class DeployDockerImageTest {
 	@Test
 	public void testDeployDockerImageFromOpenShiftExplorer() {
 		selectProject(PROJECT2);
-		new ContextMenu(OpenShiftLabel.ContextMenu.DEPLOY_DOCKER_IMAGE).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.DEPLOY_DOCKER_IMAGE).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.DEPLOY_IMAGE_TO_OPENSHIFT);
 		
@@ -240,7 +255,7 @@ public class DeployDockerImageTest {
 		
 		new OpenShiftExplorerView().getOpenShift3Connection().getProject(projectName).
 				getOpenShiftResources(Resource.ROUTE).get(0).select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.SHOW_IN_BROWSER).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.SHOW_IN_BROWSER).select();
 		
 		try {
 			new WaitUntil(new BrowserContainsText("Hello OpenShift!"), TimePeriod.VERY_LONG);
@@ -254,14 +269,14 @@ public class DeployDockerImageTest {
 	 * connection, project and image name.
 	 */
 	private void proceedThroughDeployImageToOpenShiftWizard() {
-		new WaitUntil(new WidgetIsEnabled(new NextButton()), TimePeriod.NORMAL, false);
+		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.DEFAULT, false);
 		
 		assertTrue("Next button should be enabled if all details are set correctly",
 				new NextButton().isEnabled());
 		
 		new NextButton().click();
 		
-		new WaitUntil(new WidgetIsEnabled(new BackButton()), TimePeriod.LONG);
+		new WaitUntil(new ControlIsEnabled(new BackButton()), TimePeriod.LONG);
 		
 		new NextButton().click();
 		
@@ -274,7 +289,7 @@ public class DeployDockerImageTest {
 		new ShellWithButton("Deploy Image to OpenShift", "OK");
 		new OkButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable("Deploy Image to OpenShift"), TimePeriod.LONG);
+		new WaitWhile(new ShellIsAvailable("Deploy Image to OpenShift"), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 	
@@ -286,7 +301,7 @@ public class DeployDockerImageTest {
 	 */
 	private void assertDockerImageIsProcessedCorrectlyWhenUsedFromOpenShiftExplorer(String projectName) {
 		selectProject(projectName);
-		new ContextMenu(OpenShiftLabel.ContextMenu.DEPLOY_DOCKER_IMAGE).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.DEPLOY_DOCKER_IMAGE).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.DEPLOY_IMAGE_TO_OPENSHIFT);
 		
@@ -335,7 +350,7 @@ public class DeployDockerImageTest {
 	private void openDeployToOpenShiftWizardFromDockerExplorer() {
 		dockerExplorer.getDockerConnectionByName(DOCKER_CONNECTION).getImage(
 				HELLO_OS_DOCKER_IMAGE, TAG).select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.DEPLOY_TO_OPENSHIFT).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.DEPLOY_TO_OPENSHIFT).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.DEPLOY_IMAGE_TO_OPENSHIFT);
 	}
@@ -346,7 +361,7 @@ public class DeployDockerImageTest {
 	private void closeWizard() {
 		new CancelButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.DEPLOY_IMAGE_TO_OPENSHIFT));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DEPLOY_IMAGE_TO_OPENSHIFT));
 	}
 	
 	/**

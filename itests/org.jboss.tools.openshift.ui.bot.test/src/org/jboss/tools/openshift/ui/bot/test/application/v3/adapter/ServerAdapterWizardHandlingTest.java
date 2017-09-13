@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -21,34 +21,34 @@ import java.util.HashSet;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.util.Display;
+import org.eclipse.reddeer.common.util.ResultRunnable;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.lookup.ShellLookup;
+import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
+import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizard;
+import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.swt.api.Button;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.BackButton;
+import org.eclipse.reddeer.swt.impl.button.CancelButton;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.button.NextButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsKilled;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob;
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsKilled;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsActive;
-import org.jboss.reddeer.core.lookup.ShellLookup;
-import org.jboss.reddeer.core.util.Display;
-import org.jboss.reddeer.core.util.ResultRunnable;
-import org.jboss.reddeer.eclipse.jdt.ui.ProjectExplorer;
-import org.jboss.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardDialog;
-import org.jboss.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
-import org.jboss.reddeer.junit.requirement.inject.InjectRequirement;
-import org.jboss.reddeer.swt.api.Button;
-import org.jboss.reddeer.swt.condition.WidgetIsEnabled;
-import org.jboss.reddeer.swt.impl.button.BackButton;
-import org.jboss.reddeer.swt.impl.button.CancelButton;
-import org.jboss.reddeer.swt.impl.button.CheckBox;
-import org.jboss.reddeer.swt.impl.button.FinishButton;
-import org.jboss.reddeer.swt.impl.button.NextButton;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.combo.LabeledCombo;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
-import org.jboss.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.jboss.tools.common.reddeer.utils.FileUtils;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
@@ -104,6 +104,7 @@ public class ServerAdapterWizardHandlingTest {
 		directory.add(new File(GIT_REPO_DIRECTORY + File.separator + PROJECT_NAME));
 		job.setDirectoriesToImport(directory);
 		job.run(new NullProgressMonitor());
+		//TODO Cheatsheet
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 	}
 
@@ -214,7 +215,7 @@ public class ServerAdapterWizardHandlingTest {
 
 	private boolean buttonIsEnabled(Button button) {
 		try {
-			new WaitUntil(new WidgetIsEnabled(button), TimePeriod.getCustom(5));
+			new WaitUntil(new ControlIsEnabled(button), TimePeriod.getCustom(5));
 			return true;
 		} catch (WaitTimeoutExpiredException ex) {
 			return false;
@@ -226,12 +227,13 @@ public class ServerAdapterWizardHandlingTest {
 		TestUtils.acceptSSLCertificate();
 
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		new WaitUntil(new WidgetIsEnabled(new BackButton()));
+		new WaitUntil(new ControlIsEnabled(new BackButton()));
 	}
 
 	private void openNewServerAdapterWizard() {
-		NewServerWizardDialog dialog = new NewServerWizardDialog();
-		NewServerWizardPage page = new NewServerWizardPage();
+		NewServerWizard dialog = new NewServerWizard();
+		dialog.open();
+		NewServerWizardPage page = new NewServerWizardPage(dialog);
 
 		dialog.open();
 		new WaitUntil(new JobIsKilled("Refreshing server adapter list"), TimePeriod.LONG, false);
@@ -245,7 +247,7 @@ public class ServerAdapterWizardHandlingTest {
 		if (shell != null) {
 			new DefaultShell(OpenShiftLabel.Shell.ADAPTER);
 			new CancelButton().click();
-			new WaitWhile(new ShellWithTextIsActive(OpenShiftLabel.Shell.ADAPTER));
+			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.ADAPTER));
 		}
 
 		new WaitWhile(new JobIsRunning());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -19,34 +19,39 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.StringStartsWith;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.core.exception.CoreLayerException;
-import org.jboss.reddeer.core.matcher.WithTextMatcher;
-import org.jboss.reddeer.eclipse.condition.ProjectExists;
-import org.jboss.reddeer.eclipse.jdt.ui.ProjectExplorer;
-import org.jboss.reddeer.eclipse.ui.wizards.datatransfer.ExternalProjectImportWizardDialog;
-import org.jboss.reddeer.junit.requirement.inject.InjectRequirement;
-import org.jboss.reddeer.swt.condition.WidgetIsEnabled;
-import org.jboss.reddeer.swt.impl.button.BackButton;
-import org.jboss.reddeer.swt.impl.button.CancelButton;
-import org.jboss.reddeer.swt.impl.button.CheckBox;
-import org.jboss.reddeer.swt.impl.button.FinishButton;
-import org.jboss.reddeer.swt.impl.button.NextButton;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.combo.DefaultCombo;
-import org.jboss.reddeer.swt.impl.link.DefaultLink;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.tab.DefaultTabItem;
-import org.jboss.reddeer.swt.impl.table.DefaultTable;
-import org.jboss.reddeer.swt.impl.text.DefaultText;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
-import org.jboss.reddeer.swt.impl.tree.DefaultTree;
-import org.jboss.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.matcher.RegexMatcher;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.core.matcher.WithTextMatcher;
+import org.eclipse.reddeer.eclipse.condition.ProjectExists;
+import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
+import org.eclipse.reddeer.eclipse.ui.wizards.datatransfer.ExternalProjectImportWizardDialog;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.BackButton;
+import org.eclipse.reddeer.swt.impl.button.CancelButton;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.button.NextButton;
+import org.eclipse.reddeer.swt.impl.button.NoButton;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.button.YesButton;
+import org.eclipse.reddeer.swt.impl.combo.DefaultCombo;
+import org.eclipse.reddeer.swt.impl.link.DefaultLink;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.tab.DefaultTabItem;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
+import org.eclipse.reddeer.swt.impl.text.DefaultText;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
@@ -101,7 +106,7 @@ public class CreateApplicationFromTemplateTest {
 		new DefaultCombo().setText(TESTS_PROJECT_LOCATION);
 		new PushButton("Refresh").click();
 
-		new WaitUntil(new WidgetIsEnabled(new FinishButton()), TimePeriod.LONG);
+		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.LONG);
 
 		new FinishButton().click();
 
@@ -146,7 +151,7 @@ public class CreateApplicationFromTemplateTest {
 				new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).getText().equals("${workspace_loc:"
 						+ File.separator + TESTS_PROJECT + File.separator + "eap64-basic-s2i.json}"));
 
-		new WaitUntil(new WidgetIsEnabled(new CancelButton()));
+		new WaitUntil(new ControlIsEnabled(new CancelButton()));
 
 //		TODO: Remove comment once JBIDE-24492 is resolved	
 //		assertTrue("Defined resource button should be enabled",
@@ -197,11 +202,11 @@ public class CreateApplicationFromTemplateTest {
 	}
 
 	private void completeWizardAndVerify() {
-		new WaitUntil(new WidgetIsEnabled(new NextButton()), TimePeriod.NORMAL);
+		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.DEFAULT);
 
 		new NextButton().click();
 
-		new WaitUntil(new WidgetIsEnabled(new BackButton()), TimePeriod.LONG);
+		new WaitUntil(new ControlIsEnabled(new BackButton()), TimePeriod.LONG);
 
 		String srcRepoRef = new DefaultTable().getItem(TemplateParametersTest.SOURCE_REPOSITORY_REF).getText(1);
 		srcRepoURI = new DefaultTable().getItem(TemplateParametersTest.SOURCE_REPOSITORY_URL).getText(1);
@@ -209,11 +214,11 @@ public class CreateApplicationFromTemplateTest {
 		applicationName = new DefaultTable().getItem(TemplateParametersTest.APPLICATION_NAME).getText(1);
 		new NextButton().click();
 
-		new WaitWhile(new WidgetIsEnabled(new NextButton()), TimePeriod.LONG);
+		new WaitWhile(new ControlIsEnabled(new NextButton()), TimePeriod.LONG);
 
 		new FinishButton().click();
 
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.APPLICATION_SUMMARY), TimePeriod.LONG);
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.APPLICATION_SUMMARY), TimePeriod.LONG);
 
 		new DefaultShell(OpenShiftLabel.Shell.APPLICATION_SUMMARY);
 
@@ -251,29 +256,38 @@ public class CreateApplicationFromTemplateTest {
 
 		new OkButton().click();
 
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.WEBHOOK_TRIGGERS));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.WEBHOOK_TRIGGERS));
 
 		new DefaultShell(OpenShiftLabel.Shell.APPLICATION_SUMMARY);
 		new OkButton().click();
 	}
 
 	public static void importApplicationAndVerify(String projectName) {
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
 
 		new DefaultShell(OpenShiftLabel.Shell.IMPORT_APPLICATION);
 		try {
-			new CheckBox(new WithTextMatcher(new StringStartsWith("Reuse"))).toggle(true);
+			new CheckBox(new WithTextMatcher(new StringStartsWith("Do not clone"))).toggle(true);
 		} catch (CoreLayerException ex) {
 			// git directory is not in use 
+		} catch (WaitTimeoutExpiredException ex) {
+			//swallow, checkbox is disabled
 		}
 		new FinishButton().click();
 
 		ProjectExplorer projectExplorer = new ProjectExplorer();
 		projectExplorer.open();
 
-		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		try {
+			new WaitUntil(new ShellIsAvailable(new WithTextMatcher(new RegexMatcher("Found cheatsheet|Create server adapter"))), TimePeriod.VERY_LONG);
+			new NoButton().click();
+			new DefaultShell("Create server adapter");
+			new NoButton().click();
+		} catch (CoreLayerException ex) {
+			// Swallow, shells are not opened
+		}
 		new WaitUntil(new ProjectExists(projectName, new ProjectExplorer()), TimePeriod.LONG, false);
-		assertTrue("Project Explorer should contain imported project jboss-helloworld",
+		assertTrue("Project Explorer should contain imported project " + projectName,
 				projectExplorer.containsProject(projectName));
 	}
 
@@ -322,11 +336,13 @@ public class CreateApplicationFromTemplateTest {
 		deleteProject(helloworldProject);
 
 		cleanReq.fulfill();
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 
 	@AfterClass
 	public static void deleteTestsProjectFromWorkspace() {
 		new ProjectExplorer().getProject(TESTS_PROJECT).delete(false);
 		DatastoreOS3.generateProjectName();
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 }

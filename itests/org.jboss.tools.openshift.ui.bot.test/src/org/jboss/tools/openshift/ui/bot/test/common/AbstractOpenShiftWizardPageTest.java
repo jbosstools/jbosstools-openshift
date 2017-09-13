@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,14 +22,15 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.reddeer.common.util.Display;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.jface.wizard.WizardDialog;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.core.condition.ShellWithTextIsActive;
-import org.jboss.reddeer.jface.wizard.WizardDialog;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage.Direction;
 import org.junit.After;
@@ -52,7 +53,7 @@ public class AbstractOpenShiftWizardPageTest {
 	public void setUp() {
 		this.wizard = new OpenShiftEventTestWizard();
 		Shell shell = new WorkbenchShell().getSWTWidget();
-		org.jboss.reddeer.core.util.Display.asyncExec(new Runnable() {
+		Display.asyncExec(new Runnable() {
 
 			@Override
 			public void run() {
@@ -62,7 +63,7 @@ public class AbstractOpenShiftWizardPageTest {
 				dialog.open();
 			}
 		});
-		new WaitUntil(new ShellWithTextIsActive(OpenShiftEventTestWizard.TITLE));
+		new WaitUntil(new ShellIsAvailable(OpenShiftEventTestWizard.TITLE));
 		wizardBot = new WizardDialog();
 	}
 

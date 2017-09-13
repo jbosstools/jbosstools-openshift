@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -14,21 +14,21 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.Matcher;
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.junit.requirement.inject.InjectRequirement;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -53,17 +53,17 @@ public class TriggerBuildTest {
 		explorer.reopen();
 		
 		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD_CONFIG, (Matcher<String>) null, ResourceState.UNSPECIFIED, projectReq.getProjectName()), 
-				TimePeriod.getCustom(120), true, TimePeriod.getCustom(7));
+				TimePeriod.getCustom(120), true);
 		
 		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.UNSPECIFIED, projectReq.getProjectName()), 
-				TimePeriod.LONG, true, TimePeriod.getCustom(7));
+				TimePeriod.LONG, true);
 		
 		List<OpenShiftResource> builds = explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).
 				getOpenShiftResources(Resource.BUILD);
 		int oldAmountOfBuilds = builds.size();
 		
 		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getOpenShiftResources(Resource.BUILD_CONFIG).get(0).select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.START_BUILD).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.START_BUILD).select();
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		try {
@@ -79,12 +79,12 @@ public class TriggerBuildTest {
 		explorer.reopen();
 		
 		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, (Matcher<String>) null, ResourceState.UNSPECIFIED, projectReq.getProjectName()), 
-					TimePeriod.getCustom(240), true, TimePeriod.getCustom(7));
+					TimePeriod.getCustom(240), true);
 		
 		List<OpenShiftResource> builds = explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).
 				getOpenShiftResources(Resource.BUILD);
 		builds.get(0).select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.CLONE_BUILD).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.CLONE_BUILD).select();
 
 		int oldAmountOfBuilds = builds.size();
 		

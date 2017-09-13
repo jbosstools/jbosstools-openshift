@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test;
 
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
@@ -109,7 +109,6 @@ import org.junit.runners.Suite.SuiteClasses;
 	ImportApplicationWizardGitTest.class,
 
 	// Advanced application testing
-// 	DeployEclipseProjectTest.class, //This one is currently broken!	dependencies on private repo
  	DeployDockerImageTest.class,
  	CreateResourcesTest.class,
 	

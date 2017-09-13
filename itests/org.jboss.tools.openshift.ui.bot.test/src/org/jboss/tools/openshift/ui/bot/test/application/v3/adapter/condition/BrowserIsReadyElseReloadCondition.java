@@ -10,14 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.condition;
 
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
+import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.core.exception.CoreLayerException;
-import org.jboss.reddeer.eclipse.ui.browser.BrowserEditor;
-import org.jboss.reddeer.eclipse.wst.server.ui.view.ServersView;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
 import org.jboss.tools.common.reddeer.utils.StackTraceUtils;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter;
 
@@ -55,9 +55,9 @@ public class BrowserIsReadyElseReloadCondition extends AbstractWaitCondition {
 		String text = browserEditor.getText();
 		if (text.contains("Unable to load page") || text.contains("404")) {
 			LOGGER.debug("Refreshing browser");
-			new ServersView().open();
+			new ServersView2().open();
 			serverAdapter.select();
-			new ContextMenu("Show In", "Web Browser").select();
+			new ContextMenuItem("Show In", "Web Browser").select();
 			return false;
 		} else {
 			// Browser is ready

@@ -15,26 +15,30 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.core.matcher.WithTextMatcher;
+import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.impl.editor.TextEditor;
 import org.hamcrest.core.StringContains;
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.exception.CoreLayerException;
-import org.jboss.reddeer.eclipse.jdt.ui.ProjectExplorer;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.workbench.impl.editor.TextEditor;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -55,8 +59,13 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 @RequiredBasicConnection
 @CleanConnection
+@RequiredProject(
+		name = DatastoreOS3.TEST_PROJECT)
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
 public class EditResourcesTest{
+	
+	@InjectRequirement
+	private OpenShiftProjectRequirement requiredProject;
 	
 	private static String GIT_FOLDER = "jboss-eap-quickstarts";
 	private String customRepo = "https://github.com/rhopp/jboss-eap-quickstarts";
@@ -64,7 +73,7 @@ public class EditResourcesTest{
 	private static String TEMPLATE_PATH = CreateResourcesTest.RESOURCES_LOCATION +
 			File.separator + "eap64-basic-s2i.json";
 	private static String PROJECT_NAME = "jboss-helloworld";
-	private static String DEFAULT_NEXUS_MIRROR = "http://10.8.175.83:8081/nexus/content/groups/all-in-one/";
+	private static String DEFAULT_NEXUS_MIRROR = "https://repository.jboss.org/nexus/content/groups/public-jboss/";
 	private String buildConfig;
 	
 	private static final String BUILD_CONFIG_EDITOR = "[" + DatastoreOS3.PROJECT1 + "] Build Config : eap-app.json";
@@ -74,10 +83,10 @@ public class EditResourcesTest{
 		TestUtils.cleanupGitFolder(GIT_FOLDER);
 		TestUtils.setUpOcBinary();
 		
-		// If project does not exists, e.g. something went south in recreation earlier, create it
-		if (!new OpenShiftProjectExists(DatastoreOS3.PROJECT1_DISPLAYED_NAME).test()) {
-			new OpenShiftExplorerView().getOpenShift3Connection().createNewProject();
-		}
+//		// If project does not exists, e.g. something went south in recreation earlier, create it
+//		if (!new OpenShiftProjectExists(DatastoreOS3.PROJECT1_DISPLAYED_NAME).test()) {
+//			new OpenShiftExplorerView().getOpenShift3Connection().createNewProject();
+//		}
 		
 		if (getNexusMirror() != null) {
 			new TemplatesCreator().createOpenShiftApplicationBasedOnLocalTemplate(
@@ -92,10 +101,10 @@ public class EditResourcesTest{
 	@Test
 	public void testCanEditResource() {
 		getBuildConfig().select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.EDIT).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.EDIT).select();
 		
 		try {
-			new TextEditor(BUILD_CONFIG_EDITOR);
+			new TextEditor(new WithTextMatcher("*.eap-app.json"));
 			// pass
 		} catch (RedDeerException ex) {
 			fail("Text editor to modify build config resource has not been opened.");
@@ -135,7 +144,7 @@ public class EditResourcesTest{
 			// ok
 		}
 		
-		new WaitWhile(new JobIsRunning(), TimePeriod.NORMAL, false);
+		new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT, false);
 		assertTrue("Editor should be dirty, it should not be able to save incorrect content", editor.isDirty());
 		try {
 			new DefaultShell("Problem Occurred");
@@ -183,16 +192,17 @@ public class EditResourcesTest{
 
 	private TextEditor getBuildConfigTextEditor() {
 		getBuildConfig().select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.EDIT).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.EDIT).select();
+		System.out.println("TESTING:" + "["+requiredProject.getProjectName() + "] Build Config : eap-app.json");
 		
-		return new TextEditor(BUILD_CONFIG_EDITOR);
+		return new TextEditor("["+requiredProject.getProjectName() + "] Build Config : eap-app.json");
 	}
 	
 	@After
 	public void setOriginalBuildConfigContent() {
 		if (buildConfig != null) {
 			getBuildConfig().select();
-			new ContextMenu(OpenShiftLabel.ContextMenu.EDIT).select();
+			new ContextMenuItem(OpenShiftLabel.ContextMenu.EDIT).select();
 			
 			TextEditor editor = new TextEditor(BUILD_CONFIG_EDITOR);
 			editor.setText(buildConfig);

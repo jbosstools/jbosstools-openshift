@@ -26,6 +26,7 @@ Eclipse-BundleShape: jar
 Bundle-Localization: plugin
 Bundle-Vendor: JBoss by Red Hat
 Export-Package: org.jboss.tools.openshift.reddeer.condition,
+ org.jboss.tools.openshift.reddeer.condition.core,
  org.jboss.tools.openshift.reddeer.enums,
  org.jboss.tools.openshift.reddeer.exception,
  org.jboss.tools.openshift.reddeer.preference.page,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -15,22 +15,22 @@ import java.util.List;
 import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.eclipse.equinox.security.ui.StoragePreferencePage;
-import org.jboss.reddeer.swt.api.TableItem;
-import org.jboss.reddeer.swt.impl.browser.InternalBrowser;
-import org.jboss.reddeer.swt.impl.button.BackButton;
-import org.jboss.reddeer.swt.impl.button.CancelButton;
-import org.jboss.reddeer.swt.impl.button.CheckBox;
-import org.jboss.reddeer.swt.impl.button.NextButton;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.toolbar.DefaultToolItem;
-import org.jboss.reddeer.workbench.impl.shell.WorkbenchShell;
-import org.jboss.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.eclipse.equinox.security.ui.storage.PasswordProvider;
+import org.eclipse.reddeer.eclipse.equinox.security.ui.storage.StoragePreferencePage;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.browser.InternalBrowser;
+import org.eclipse.reddeer.swt.impl.button.BackButton;
+import org.eclipse.reddeer.swt.impl.button.CancelButton;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.swt.impl.button.NextButton;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
+import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
+import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.openshift.reddeer.condition.CentralIsLoaded;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -47,17 +47,19 @@ public class StoreConnectionTest {
 	
 	@BeforeClass
 	public static void setupClass(){
-		StoragePreferencePage storagePreferencePage = new StoragePreferencePage();
+		//WorkbenchPreferenceDialog preferenceDialog = new WorkbenchPreferenceDialog();
 		WorkbenchPreferenceDialog preferences = new WorkbenchPreferenceDialog();
 		preferences.open();
-		preferences.select(storagePreferencePage);
-		List<TableItem> masterPasswordProviders = storagePreferencePage.getMasterPasswordProviders();
-		for (TableItem tableItem : masterPasswordProviders) {
+		//preferences.select(storagePreferencePage);
+		StoragePreferencePage storagePreferencePage = new StoragePreferencePage(preferences);
+
+		List<PasswordProvider> masterPasswordProviders = storagePreferencePage.getMasterPasswordProviders();
+		for (PasswordProvider tableItem : masterPasswordProviders) {
 			// The second part of this if is because https://issues.jboss.org/browse/JBIDE-24567
-			if (tableItem.getText().contains("UI Prompt") ||tableItem.getText().contains("secureStorageProvider.name")){
-				tableItem.setChecked(true);
+			if (tableItem.getDescription().contains("UI Prompt") ||tableItem.getDescription().contains("secureStorageProvider.name")){
+				tableItem.setEnabled(true);
 			}else{
-				tableItem.setChecked(false);
+				tableItem.setEnabled(false);
 			}
 		}
 		preferences.ok();
@@ -102,7 +104,7 @@ public class StoreConnectionTest {
 		
 		new InternalBrowser().execute(OpenShiftLabel.Others.OPENSHIFT_CENTRAL_SCRIPT);
 	
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD),
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD),
 				TimePeriod.LONG);
 		new DefaultShell("New OpenShift Application");
 	}

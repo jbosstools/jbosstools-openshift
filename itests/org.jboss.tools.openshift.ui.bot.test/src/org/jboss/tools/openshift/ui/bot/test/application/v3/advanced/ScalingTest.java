@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -13,20 +13,20 @@ package org.jboss.tools.openshift.ui.bot.test.application.v3.advanced;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.junit.requirement.inject.InjectRequirement;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
-import org.jboss.reddeer.swt.condition.WidgetIsEnabled;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.button.YesButton;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.spinner.DefaultSpinner;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.button.YesButton;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.spinner.DefaultSpinner;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.PodsAreDeployed;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
@@ -48,7 +48,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * @author mlabubda@red
+ * @author mlabuda@redhat.com
  * @author adietish
  *
  */
@@ -150,20 +150,20 @@ public class ScalingTest {
 	}
 
 	private void scaleUp() {
-		new ContextMenu(OpenShiftLabel.ContextMenu.SCALE_UP).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.SCALE_UP).select();
 	}
 
 	private void scaleDown() {
-		new ContextMenu(OpenShiftLabel.ContextMenu.SCALE_DOWN).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.SCALE_DOWN).select();
 	}
 
 	private void scaleTo(int amountOfPods) {
-		new ContextMenu(OpenShiftLabel.ContextMenu.SCALE_TO).select();
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.SCALE_DEPLOYMENTS));
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.SCALE_TO).select();
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.SCALE_DEPLOYMENTS));
 		new DefaultShell(OpenShiftLabel.Shell.SCALE_DEPLOYMENTS).setFocus();
-		new WaitWhile(new WidgetIsEnabled(new OkButton()));
+		new WaitWhile(new ControlIsEnabled(new OkButton()));
 		new DefaultSpinner().setValue(amountOfPods);
-		new WaitUntil(new WidgetIsEnabled(new OkButton()));
+		new WaitUntil(new ControlIsEnabled(new OkButton()));
 		new OkButton().click();
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.connection.v3;
 
-import org.jboss.reddeer.junit.execution.TestMethodShouldRun;
+import org.eclipse.reddeer.junit.execution.TestMethodShouldRun;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.junit.runners.model.FrameworkMethod;
 

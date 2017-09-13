@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -23,27 +23,27 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
+import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizard;
+import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.BackButton;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.button.NextButton;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsKilled;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob;
 import org.hamcrest.core.StringContains;
-import org.jboss.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsKilled;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.eclipse.wst.server.ui.view.ServersView;
-import org.jboss.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardDialog;
-import org.jboss.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
-import org.jboss.reddeer.junit.requirement.inject.InjectRequirement;
-import org.jboss.reddeer.swt.condition.WidgetIsEnabled;
-import org.jboss.reddeer.swt.impl.button.BackButton;
-import org.jboss.reddeer.swt.impl.button.FinishButton;
-import org.jboss.reddeer.swt.impl.button.NextButton;
-import org.jboss.reddeer.swt.impl.menu.ContextMenu;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
-import org.jboss.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.jboss.tools.common.reddeer.utils.FileUtils;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
@@ -141,8 +141,9 @@ public class CreateServerAdapterTest {
 
 	@Test
 	public void testCreateOpenShift3ServerAdapterViaShellMenu() {
-		NewServerWizardDialog dialog = new NewServerWizardDialog();
-		NewServerWizardPage page = new NewServerWizardPage();
+		NewServerWizard dialog = new NewServerWizard();
+		dialog.open();
+		NewServerWizardPage page = new NewServerWizardPage(dialog);
 
 		dialog.open();
 		page.selectType(OpenShiftLabel.Others.OS3_SERVER_ADAPTER);
@@ -155,9 +156,9 @@ public class CreateServerAdapterTest {
 
 	@Test
 	public void testCreateOpenShift3ServerAdapterViaServersView() {
-		ServersView serversView = new ServersView();
+		ServersView2 serversView = new ServersView2();
 		serversView.open();
-		new ContextMenu(OpenShiftLabel.ContextMenu.NEW_SERVER).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_SERVER).select();
 
 		new DefaultShell(OpenShiftLabel.Shell.ADAPTER);
 		new DefaultTreeItem(OpenShiftLabel.Others.OS3_SERVER_ADAPTER).select();
@@ -172,7 +173,7 @@ public class CreateServerAdapterTest {
 	public void testCreateOpenShift3ServerAdapterViaOpenShiftExplorerView() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getService("eap-app").select();
-		new ContextMenu(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
 
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
 
@@ -183,7 +184,7 @@ public class CreateServerAdapterTest {
 
 		new FinishButton().click();
 
-		new WaitWhile(new ShellWithTextIsAvailable(""));
+		new WaitWhile(new ShellIsAvailable(""));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
 
 		assertTrue("OpenShift 3 server adapter was not created.",
@@ -201,7 +202,7 @@ public class CreateServerAdapterTest {
 	public void finishNewServerAdapterWizardAndVerifyExistence() {
 		new FinishButton().click();
 
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.ADAPTER));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.ADAPTER));
 
 		boolean jobExists = false;
 		try {
@@ -221,12 +222,12 @@ public class CreateServerAdapterTest {
 	}
 
 	private void next() {
-		new WaitUntil(new WidgetIsEnabled(new NextButton()));
+		new WaitUntil(new ControlIsEnabled(new NextButton()));
 
 		new NextButton().click();
 		TestUtils.acceptSSLCertificate();
 
-		new WaitUntil(new WidgetIsEnabled(new BackButton()));
+		new WaitUntil(new ControlIsEnabled(new BackButton()));
 	}
 
 	@After

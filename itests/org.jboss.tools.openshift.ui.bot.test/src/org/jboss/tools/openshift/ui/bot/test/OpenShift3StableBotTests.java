@@ -10,28 +10,25 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test;
 
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.BuilderImageApplicationWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.LabelsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.NewApplicationWizardHandlingTest;
-import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.OpenNewApplicationWizardTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.TemplateParametersTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OCBinaryLocationTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionPropertiesTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionWizardHandlingTest;
-import org.jboss.tools.openshift.ui.bot.test.connection.v3.CreateNewConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.OpenNewConnectionWizardTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.RemoveConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.project.CreateNewProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.project.DeleteProjectTest;
-import org.jboss.tools.openshift.ui.bot.test.project.LinkToCreateNewProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.project.ProjectNameValidationTest;
 import org.jboss.tools.openshift.ui.bot.test.project.ProjectPropertiesTest;
 import org.jboss.tools.openshift.ui.bot.test.project.ResourcesTest;
@@ -45,32 +42,25 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(RedDeerSuite.class)
 @SuiteClasses({	
-	// General
-	OCBinaryLocationTest.class,
-	
 	// Connection
 	OpenNewConnectionWizardTest.class,
-	CreateNewConnectionTest.class,
 	RemoveConnectionTest.class,
 	ConnectionWizardHandlingTest.class,
 	ConnectionPropertiesTest.class,
 	
 	// Project
 	ProjectNameValidationTest.class,
-	LinkToCreateNewProjectTest.class,
 	CreateNewProjectTest.class,
 	DeleteProjectTest.class,
 	ResourcesTest.class,
 	ProjectPropertiesTest.class,
 	
 	// Application wizard handling
-	OpenNewApplicationWizardTest.class,
 	NewApplicationWizardHandlingTest.class,
 	TemplateParametersTest.class,
 	LabelsTest.class,
-	BuilderImageApplicationWizardHandlingTest.class,
 })
-public class OpenShift3StableTests {
+public class OpenShift3StableBotTests {
 
 	@AfterClass
 	public static void cleanUp() {

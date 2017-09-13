@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -16,15 +16,17 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
-import org.jboss.reddeer.core.exception.CoreLayerException;
-import org.jboss.reddeer.eclipse.ui.views.properties.PropertiesView;
-import org.jboss.reddeer.eclipse.ui.views.properties.PropertiesViewProperty;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
+import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheetProperty;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.swt.api.TableItem;
+import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
@@ -47,7 +49,7 @@ public class ProjectPropertiesTest {
 			{"Details", "Builds", "Build Configs", "Deployments",
 			"Deployment Configs", "Image Streams", "Pods", "Routes", "Services"};
 
-	private PropertiesView propertiesView;
+	private PropertySheet propertiesView;
 	private OpenShiftProject project;
 	
 	@Before
@@ -60,7 +62,7 @@ public class ProjectPropertiesTest {
 		project.select();
 		project.openProperties();
 		
-		propertiesView = new PropertiesView();
+		propertiesView = new PropertySheet();
 	}
 
 	@Test
@@ -84,6 +86,9 @@ public class ProjectPropertiesTest {
 	public void testTabs() {
 		for (String tabName : BASIC_TABS) {
 			project.selectTabbedProperty(tabName);
+			if(!tabName.equals("Details")) {
+				new DefaultTable().getItem(0).select();
+			}
 			assertBasicProperties();
 			assertAnnotationProperties();
 		}
@@ -117,7 +122,7 @@ public class ProjectPropertiesTest {
 
 	private List<TreeItem> getCurrentAnnotationProperties() {
 		try {
-			PropertiesViewProperty annotationPropertiesRoot = propertiesView.getProperty("Annotations");
+			PropertySheetProperty annotationPropertiesRoot = propertiesView.getProperty("Annotations");
 			List<TreeItem> annotationProperties = annotationPropertiesRoot.getTreeItem().getItems();
 			assertTrue("There should be some annotation properties in the tab", 
 				annotationProperties != null && annotationProperties.size() > 0);

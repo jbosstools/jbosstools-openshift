@@ -287,7 +287,7 @@ public class TemplatesCreator {
 			}
 
 			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD), TimePeriod.LONG);
-			new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+			new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 		}
 	}
 }

@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.application.v3.adapter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,10 +20,14 @@ import java.io.IOException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.StoredConfig;
-import org.jboss.reddeer.eclipse.ui.views.properties.PropertiesView;
-import org.jboss.reddeer.swt.impl.button.CheckBox;
-import org.jboss.reddeer.swt.impl.group.DefaultGroup;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
+import org.eclipse.reddeer.swt.impl.group.DefaultGroup;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
+import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.wizard.importapp.GitCloningWizardPage;
 import org.jboss.tools.openshift.reddeer.wizard.importapp.ImportApplicationWizard;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenshiftTestInFailureException;
@@ -39,8 +45,11 @@ public class ImportApplicationWizardGitTest extends ImportApplicationBase{
 	public void testNotGitRepo() {
 		assertTrue("Failed to create test project non git folder!", projectFolder.mkdir());
 		
-		ImportApplicationWizard importWizard = 
-				new ImportApplicationWizard().openFromOpenshiftView(service);
+		service.select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
+		
+		ImportApplicationWizard importWizard = new ImportApplicationWizard();
 		assertProjectExistsErrorInWizard(importWizard);
 		
 		CheckBox useExistingRepositoryCheckBox = new CheckBox(
@@ -57,8 +66,11 @@ public class ImportApplicationWizardGitTest extends ImportApplicationBase{
 	public void testNoRepoRemote() {
 		createRepo();
 
-		ImportApplicationWizard importWizard = 
-				new ImportApplicationWizard().openFromOpenshiftView(service);
+		service.select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
+		
+		ImportApplicationWizard importWizard = new ImportApplicationWizard();
 		assertProjectExistsErrorInWizard(importWizard);
 		
 		GitCloningWizardPage gitCloningWizardPage = new GitCloningWizardPage();
@@ -73,8 +85,11 @@ public class ImportApplicationWizardGitTest extends ImportApplicationBase{
 		Git repo = createRepo();
 		setRemote(repo);
 
-		ImportApplicationWizard importWizard = 
-				new ImportApplicationWizard().openFromOpenshiftView(service);
+		service.select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
+		
+		ImportApplicationWizard importWizard = new ImportApplicationWizard();
 		assertProjectExistsErrorInWizard(importWizard);
 		
 		GitCloningWizardPage gitCloningWizardPage = new GitCloningWizardPage();
@@ -91,8 +106,11 @@ public class ImportApplicationWizardGitTest extends ImportApplicationBase{
 		performCommit(repo);
 		renameMaster(repo);
 		
-		ImportApplicationWizard importWizard = 
-				new ImportApplicationWizard().openFromOpenshiftView(service);
+		service.select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
+		
+		ImportApplicationWizard importWizard = new ImportApplicationWizard();
 		assertProjectExistsErrorInWizard(importWizard);
 		
 		GitCloningWizardPage gitCloningWizardPage = new GitCloningWizardPage();
@@ -109,12 +127,12 @@ public class ImportApplicationWizardGitTest extends ImportApplicationBase{
 	
 	private void assertProjectExistsErrorInWizard(ImportApplicationWizard importWizard) {
 		assertTrue("There should be an error in the wizard! (There already is a folder named...)",
-				importWizard.getPageDescription().trim().startsWith("There already is a folder named"));
+				importWizard.getMessage().trim().startsWith("There already is a folder named"));
 	}
 	
 	private void assertGitRemoteErrorInWizzard(ImportApplicationWizard importWizard) {
 		assertTrue("There should be an error in the wizard! (The reused git repository has no remote to...)",
-				importWizard.getPageDescription().trim().startsWith("The reused git repository has no remote to "));
+				importWizard.getMessage().trim().startsWith("The reused git repository has no remote to "));
 	}
 	
 	private Git createRepo() {
@@ -146,7 +164,7 @@ public class ImportApplicationWizardGitTest extends ImportApplicationBase{
 		project.select();
 		project.openProperties();
 		project.selectTabbedProperty("Builds");
-		PropertiesView propertiesView = new PropertiesView();
+		PropertySheet propertiesView = new PropertySheet();
 		String originURL = propertiesView.getProperty("Misc", "Source Repo").getPropertyValue();
 		return originURL;
 	}

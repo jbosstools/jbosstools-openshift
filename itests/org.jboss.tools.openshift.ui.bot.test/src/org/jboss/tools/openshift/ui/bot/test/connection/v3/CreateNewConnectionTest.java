@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -14,24 +14,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.jboss.reddeer.common.condition.WaitCondition;
-import org.jboss.reddeer.common.exception.RedDeerException;
-import org.jboss.reddeer.common.logging.Logger;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.core.condition.ShellWithTextIsActive;
-import org.jboss.reddeer.core.exception.CoreLayerException;
-import org.jboss.reddeer.junit.execution.annotation.RunIf;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.reddeer.swt.api.Browser;
-import org.jboss.reddeer.swt.impl.browser.InternalBrowser;
-import org.jboss.reddeer.swt.impl.button.CancelButton;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.button.YesButton;
-import org.jboss.reddeer.swt.impl.combo.LabeledCombo;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.common.condition.WaitCondition;
+import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.junit.execution.annotation.RunIf;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.swt.api.Browser;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.browser.InternalBrowser;
+import org.eclipse.reddeer.swt.impl.button.CancelButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.button.YesButton;
+import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.common.reddeer.label.IDELabel.ServerType;
 import org.jboss.tools.common.reddeer.utils.StackTraceUtils;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.EmulatedLinkStyledText;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -45,6 +47,7 @@ import org.junit.runner.RunWith;
  * @author adietish@redhat.com
  */
 @SuppressWarnings("unused")
+@CleanOpenShiftExplorer
 @RunWith(RedDeerSuite.class)
 public class CreateNewConnectionTest {
 
@@ -99,8 +102,8 @@ public class CreateNewConnectionTest {
 		new DefaultShell("Untrusted SSL Certificate");
 		new YesButton().click();
 		
-		new WaitUntil(new ShellWithTextIsActive(""));
-		final InternalBrowser internalBrowser = new InternalBrowser();
+		DefaultShell browser = new DefaultShell();
+		InternalBrowser internalBrowser = new InternalBrowser(browser);
 
 		login(internalBrowser);
 
@@ -129,7 +132,7 @@ public class CreateNewConnectionTest {
 	}
 
 	private void login(final InternalBrowser internalBrowser) {
-		new WaitUntil(new LoginPageIsLoaded(() -> containsLoginForm(internalBrowser)));
+		new WaitUntil(new LoginPageIsLoaded(() -> containsLoginForm(internalBrowser)),TimePeriod.LONG);
 		fillAndSubmitCredentials(internalBrowser);
 	}
 
@@ -177,7 +180,18 @@ public class CreateNewConnectionTest {
 		}
 
 		@Override
-		public String errorMessage() {
+		public <T> T getResult() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String errorMessageWhile() {
+			return "Login page is not fully loaded";
+		}
+
+		@Override
+		public String errorMessageUntil() {
 			return "Login page is not fully loaded";
 		}
 

@@ -12,9 +12,9 @@ package org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.condition;
 
 import java.util.List;
 
-import org.jboss.reddeer.common.condition.AbstractWaitCondition;
-import org.jboss.reddeer.core.exception.CoreLayerException;
-import org.jboss.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.swt.api.TreeItem;
 
 public class SuspendedTreeItemIsReady extends AbstractWaitCondition {
 	

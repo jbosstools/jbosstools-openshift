@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -13,30 +13,30 @@ package org.jboss.tools.openshift.ui.bot.test.application.v3.basic;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.core.condition.WidgetIsFound;
-import org.jboss.reddeer.core.matcher.WithTextMatcher;
-import org.jboss.reddeer.junit.requirement.inject.InjectRequirement;
-import org.jboss.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
-import org.jboss.reddeer.swt.api.TableItem;
-import org.jboss.reddeer.swt.condition.WidgetIsEnabled;
-import org.jboss.reddeer.swt.impl.button.BackButton;
-import org.jboss.reddeer.swt.impl.button.CancelButton;
-import org.jboss.reddeer.swt.impl.button.FinishButton;
-import org.jboss.reddeer.swt.impl.button.NextButton;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.button.PushButton;
-import org.jboss.reddeer.swt.impl.button.YesButton;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.spinner.DefaultSpinner;
-import org.jboss.reddeer.swt.impl.table.DefaultTable;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
-import org.jboss.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.condition.WidgetIsFound;
+import org.eclipse.reddeer.core.matcher.WithTextMatcher;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
+import org.eclipse.reddeer.swt.api.TableItem;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.BackButton;
+import org.eclipse.reddeer.swt.impl.button.CancelButton;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.button.NextButton;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.button.YesButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.spinner.DefaultSpinner;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
@@ -51,13 +51,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
 @RequiredProject(name="builderimagevalidationproject")
-@OpenPerspective(JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
 public class BuilderImageApplicationWizardHandlingTest {
 
-	public static final String BUILDER_IMAGE = OpenShiftLabel.Others.EAP_BUILDER_IMAGE;
+	public static final String BUILDER_IMAGE = "httpd:latest (builder, httpd) - openshift";
 	
 	@InjectRequirement
 	private OpenShiftProjectRequirement projectRequirement;
@@ -67,10 +67,10 @@ public class BuilderImageApplicationWizardHandlingTest {
 	
 	private EnvVar envVar = new EnvVar("varname1", "varvalue1");
 	private EnvVar envVar2 = new EnvVar("varname1", "varvalue2");
-	private EnvVar homeVar = new EnvVar("HOME", "/home/jboss");
+	private EnvVar homeVar = new EnvVar("HOME", "/opt/app-root/src");
 	private EnvVar homeVar2 = new EnvVar("HOME", "/home/jbosstools");
-	private EnvVar javaVar = new EnvVar("JAVA_VENDOR", "openjdk");
-	private EnvVar javaVar2 = new EnvVar("JAVA_VENDOR", "rhjdk");
+	private EnvVar dataVar = new EnvVar("HTTPD_DATA_PATH", "/var/www");
+	private EnvVar dataVar2 = new EnvVar("HTTPD_DATA_PATH", "/temp/www");
 				
 	@Before
 	public void openNewApplicationWizard() {
@@ -105,7 +105,7 @@ public class BuilderImageApplicationWizardHandlingTest {
 		nextToBuildConfigurationWizardPage();
 		
 		LabeledText resourceName = new LabeledText(OpenShiftLabel.TextLabels.BUILDER_RESOURCE_NAME);
-		String defaultName = "jboss-eap70-openshift";
+		String defaultName = "httpd";
 		
 		assertTrue("Resource name has not been inferred correctly.", 
 				resourceName.getText().equals(defaultName));
@@ -247,10 +247,10 @@ public class BuilderImageApplicationWizardHandlingTest {
 				environmentVariablesPage.resetEnvironmentVariable(homeVar2, homeVar));
 	
 		environmentVariablesPage.editEnvironmentVariable(homeVar, homeVar2);
-		environmentVariablesPage.editEnvironmentVariable(javaVar, javaVar2);
+		environmentVariablesPage.editEnvironmentVariable(dataVar, dataVar2);
 		
 		assertTrue("Default variables have not been reset successfully", 
-				environmentVariablesPage.resetAllVariables(homeVar, javaVar));
+				environmentVariablesPage.resetAllVariables(homeVar, dataVar));
 		
 		assertManagmentOfCustomEnvironmentVariable();
 	}
@@ -309,10 +309,10 @@ public class BuilderImageApplicationWizardHandlingTest {
 		new DefaultSpinner(OpenShiftLabel.TextLabels.SERVICE_PORT).setValue(Integer.valueOf(newServicePort));
 		new OkButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.SERVICE_PORTS));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.SERVICE_PORTS));
 		
 		assertTrue("There should port mapping with name " + newName + ", but there is not.",
-				new WidgetIsFound<org.eclipse.swt.widgets.TableItem>(
+				new WidgetIsFound(org.eclipse.swt.widgets.TableItem.class,
 						new WithTextMatcher(newName)).test());
 		
 		TableItem portMapping = new DefaultTable().getItem(newName);
@@ -325,11 +325,11 @@ public class BuilderImageApplicationWizardHandlingTest {
 		new DefaultShell(OpenShiftLabel.Shell.RESET_PORTS);
 		new YesButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.RESET_PORTS));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.RESET_PORTS));
 		new WaitWhile(new JobIsRunning());
 		
 		assertTrue("There should port mapping with name " + defaultName + ", but there is not.",
-				new WidgetIsFound<org.eclipse.swt.widgets.TableItem>(
+				new WidgetIsFound(org.eclipse.swt.widgets.TableItem.class,
 						new WithTextMatcher(defaultName)).test());
 		
 		portMapping = new DefaultTable().getItem(defaultName);
@@ -346,7 +346,7 @@ public class BuilderImageApplicationWizardHandlingTest {
 	public void closeNewApplicationWizard() {
 		new CancelButton().click();
 		
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD), TimePeriod.LONG);
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning());
 	}
 	
@@ -354,13 +354,21 @@ public class BuilderImageApplicationWizardHandlingTest {
 	  NAVIGATATION
 	***************/
 	public static void nextToBuildConfigurationWizardPage() {
+//		List<TreeItem> templates = new DefaultTree().getAllItems();
+//		for (TreeItem item : templates) {
+//			if (item.getText().contains(BUILDER_IMAGE)) {
+//				item.select();
+//				break;
+//			}
+//		}
 		new DefaultTreeItem(BUILDER_IMAGE).select();
 		
-		new WaitUntil(new WidgetIsEnabled(new NextButton()));
+		
+		new WaitUntil(new ControlIsEnabled(new NextButton()));
 		
 		new NextButton().click();
 		
-		new WaitUntil(new WidgetIsEnabled(new BackButton()));
+		new WaitUntil(new ControlIsEnabled(new BackButton()), TimePeriod.LONG);
 	}
 	
 	public static void nextToResourceLabelWizardPage() {
@@ -373,7 +381,7 @@ public class BuilderImageApplicationWizardHandlingTest {
 	private static void next() {		
 		new NextButton().click();
 		
-		new WaitUntil(new WidgetIsEnabled(new BackButton()));
+		new WaitUntil(new ControlIsEnabled(new BackButton()));
 	}
 	
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2016 Red Hat, Inc.
+ * Copyright (c) 2007-2017 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -16,25 +16,27 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.reddeer.common.wait.TimePeriod;
-import org.jboss.reddeer.common.wait.WaitUntil;
-import org.jboss.reddeer.common.wait.WaitWhile;
-import org.jboss.reddeer.core.condition.JobIsRunning;
-import org.jboss.reddeer.core.condition.ShellWithTextIsAvailable;
-import org.jboss.reddeer.eclipse.condition.ProjectExists;
-import org.jboss.reddeer.eclipse.jdt.ui.ProjectExplorer;
-import org.jboss.reddeer.junit.requirement.inject.InjectRequirement;
-import org.jboss.reddeer.swt.condition.WidgetIsEnabled;
-import org.jboss.reddeer.swt.impl.button.BackButton;
-import org.jboss.reddeer.swt.impl.button.CancelButton;
-import org.jboss.reddeer.swt.impl.button.FinishButton;
-import org.jboss.reddeer.swt.impl.button.NextButton;
-import org.jboss.reddeer.swt.impl.button.OkButton;
-import org.jboss.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.reddeer.swt.impl.table.DefaultTable;
-import org.jboss.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.eclipse.condition.ProjectExists;
+import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.BackButton;
+import org.eclipse.reddeer.swt.impl.button.CancelButton;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.eclipse.reddeer.swt.impl.button.NextButton;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
+import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
@@ -53,6 +55,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @RequiredBasicConnection
+@CleanConnection
 public class CreateApplicationOnBuilderImageTest {
 
 	private String gitFolder = "jboss-eap-quickstarts";
@@ -82,16 +85,16 @@ public class CreateApplicationOnBuilderImageTest {
 
 		applicationName = new LabeledText("Name: ").getText();
 
-		new WaitUntil(new WidgetIsEnabled(new FinishButton()));
+		new WaitUntil(new ControlIsEnabled(new FinishButton()));
 
 		new FinishButton().click();
 
-		new WaitUntil(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.APPLICATION_SUMMARY), TimePeriod.LONG);
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.APPLICATION_SUMMARY), TimePeriod.LONG);
 
 		new DefaultShell(OpenShiftLabel.Shell.APPLICATION_SUMMARY);
 		new OkButton().click();
 
-		new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.APPLICATION_SUMMARY));
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.APPLICATION_SUMMARY));
 
 		CreateApplicationFromTemplateTest.importApplicationAndVerify(projectName);
 
@@ -133,17 +136,17 @@ public class CreateApplicationOnBuilderImageTest {
 		assertNotNull(gitUrl);
 		if (gitUrl.length() < 1){
 			new CancelButton().click();
-			new WaitWhile(new ShellWithTextIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD));
+			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD));
 			throw new OpenshiftTestInFailureException("JBIDE-23704 should be fixed now.");
 		}
 
-		new WaitUntil(new WidgetIsEnabled(new NextButton()));
+		new WaitUntil(new ControlIsEnabled(new NextButton()));
 
 		/*
 		 * switch to the Deployment page
 		 */
 		new NextButton().click();
-		new WaitUntil(new WidgetIsEnabled(new BackButton()));
+		new WaitUntil(new ControlIsEnabled(new BackButton()));
 
 		int numberofEnvironmentVariables = new DefaultTable().rowCount();
 		assertTrue(numberofEnvironmentVariables > 0);
@@ -152,7 +155,7 @@ public class CreateApplicationOnBuilderImageTest {
 		 * switch to the Routing page
 		 */
 		new NextButton().click();
-		new WaitUntil(new WidgetIsEnabled(new BackButton()));
+		new WaitUntil(new ControlIsEnabled(new BackButton()));
 
 		int numberOfServicePorts = new DefaultTable().rowCount();
 		assertTrue(numberOfServicePorts > 0);
@@ -185,5 +188,6 @@ public class CreateApplicationOnBuilderImageTest {
 		if (projectExplorer.containsProject(projectName)) {
 			projectExplorer.getProject(projectName).delete(true);
 		}
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 }
