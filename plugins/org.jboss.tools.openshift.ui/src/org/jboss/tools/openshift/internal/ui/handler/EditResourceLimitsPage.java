@@ -31,9 +31,9 @@ import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.internal.common.ui.databinding.AggregatingConverter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.KeywordConverter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.NumericValidator;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
-import org.jboss.tools.openshift.internal.ui.validator.NumericValidator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.EditResourceLimitsPageModel;
 
 public class EditResourceLimitsPage extends AbstractOpenShiftWizardPage {
