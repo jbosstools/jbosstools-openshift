@@ -366,6 +366,34 @@
    			</command>
 		</menuContribution>
 
+        <menuContribution
+            allPopups="false"
+            locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
+           <command
+                 commandId="org.jboss.tools.openshift.ui.command.deployment.editresourcelimits"
+                 label="%openshift.command.deploymentconfig.editresourcelimits">
+              <visibleWhen>
+                 <with
+                       variable="selection">
+                    <and>
+                       <count
+                             value="1">
+                       </count>
+                       <iterate
+                             ifEmpty="false">
+                          <or>
+                       <adapt type="com.openshift.restclient.model.IService" />
+                       <adapt type="com.openshift.restclient.model.IDeploymentConfig" />
+                       <adapt type="com.openshift.restclient.model.IReplicationController" />
+                       <adapt type="com.openshift.restclient.model.IPod" />
+                          </or>
+                       </iterate>
+                    </and>
+                 </with>
+              </visibleWhen>
+           </command>
+        </menuContribution>
+
 		<menuContribution
 			allPopups="false"
 			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.modify">
@@ -1172,6 +1200,10 @@
         commandId="org.jboss.tools.openshift.ui.command.deployment.scale">
   </handler>
   <handler
+        class="org.jboss.tools.openshift.internal.ui.wizard.common.EditResourceLimitsHandler"
+        commandId="org.jboss.tools.openshift.ui.command.deployment.editresourcelimits">
+  </handler>
+  <handler
         class="org.jboss.tools.openshift.internal.ui.handler.ManageEnvironmentVariablesHandler"
         commandId="org.jboss.tools.openshift.ui.command.deployment.envvar">
   </handler>
@@ -1338,6 +1370,10 @@
            name="Replica Differential"
            optional="true">
      </commandParameter>
+  </command>
+  <command
+        id="org.jboss.tools.openshift.ui.command.deployment.editresourcelimits"
+        name="%openshift.command.deploymentconfig.editresourcelimits">
   </command>
   		<command
           id="org.jboss.tools.openshift.ui.command.deployment.envvar"
