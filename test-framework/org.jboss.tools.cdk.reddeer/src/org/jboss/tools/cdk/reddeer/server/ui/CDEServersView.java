@@ -14,17 +14,13 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
 
 public class CDEServersView extends ServersView2 {
-	
-	protected boolean cdk3 = false;
-	
-	public CDEServersView(boolean cdk3) {
-		this.cdk3 = cdk3;
-	}
 
+	public CDEServersView() {
+		super();
+	}
+	
 	@Override
 	public Server getServer(String name) {
-		return super.getServer(CDEServer.class, name);
+		return getServer(CDEServer.class, name);
 	}
-	
-	
 }

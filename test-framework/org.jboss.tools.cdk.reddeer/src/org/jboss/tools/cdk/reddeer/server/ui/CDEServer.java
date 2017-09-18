@@ -12,6 +12,8 @@ package org.jboss.tools.cdk.reddeer.server.ui;
 
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.util.Display;
+import org.eclipse.reddeer.common.util.ResultRunnable;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
@@ -24,6 +26,7 @@ import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
@@ -37,19 +40,20 @@ public class CDEServer extends DefaultServer {
 	
 	private static final String SSL_DIALOG_NAME = "Untrusted SSL Certificate";
 	
+	private static final String CDK3_SERVER_TYPE_ID = "org.jboss.tools.openshift.cdk.server.type.v3";
+	
 	private static Logger log = Logger.getLogger(CDEServer.class);
 	
 	private boolean certificateAccepted = false;
 	
-	protected boolean cdk3 = false;
+	private final String serverTypeId;
+	
+	private final boolean isCDK3;
 	
 	public CDEServer(TreeItem item) {
 		super(item);
-	}
-	
-	public CDEServer(TreeItem item, boolean cdk3) {
-		super(item);
-		this.cdk3 = cdk3;
+		this.serverTypeId = getServerTypeIdFromItem(item);
+		this.isCDK3 = getIsCDK3();
 	}
 	
 	public void setCertificateAccepted(boolean accepted) {
@@ -103,7 +107,8 @@ public class CDEServer extends DefaultServer {
 	 */
 	private void confirmSSLCertificateDialog() {
 		try {
-			new WaitUntil(new ShellIsAvailable(SSL_DIALOG_NAME), this.cdk3 ? TimePeriod.getCustom(600) : TimePeriod.getCustom(300));
+			log.info(this.isCDK3() ? "CDK3 server adapter has extended timeout set to 720s" : "CDK 2.x server adapter has timeout set to 300s");
+			new WaitUntil(new ShellIsAvailable(SSL_DIALOG_NAME), this.isCDK3() ? TimePeriod.getCustom(720) : TimePeriod.VERY_LONG);
 			new DefaultShell(SSL_DIALOG_NAME);
 			new PushButton("Yes").click();
 			log.info("SSL Certificate Dialog appeared during " + this.getLabel().getState().toString());
@@ -115,5 +120,30 @@ public class CDEServer extends DefaultServer {
 			log.error(message);
 			throw new CDKServerException(message, ex);
 		}
+	}
+	
+	public boolean isCDK3() {
+		return this.isCDK3;
+	}
+	
+	public String getServerTypeId() {
+		return this.serverTypeId;
+	}
+	
+	public static String getServerTypeIdFromItem(TreeItem item) {
+		Object itemData = Display.syncExec(new ResultRunnable<Object>() {
+			@Override
+			public Object run() {
+				return item.getSWTWidget().getData();
+			}
+		});
+		if (IServer.class.isInstance(itemData)) {
+			return ((IServer)itemData).getServerType().getId();
+		}
+		return "";
+	}
+	
+	private boolean getIsCDK3() {
+		return !this.serverTypeId.isEmpty() && serverTypeId.equals(CDK3_SERVER_TYPE_ID) ? true : false;
 	}
 }
