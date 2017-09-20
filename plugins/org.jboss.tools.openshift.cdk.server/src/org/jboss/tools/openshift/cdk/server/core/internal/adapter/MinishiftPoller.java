@@ -54,7 +54,11 @@ public class MinishiftPoller extends AbstractCDKPoller {
 
 	
 	private File getWorkingDirectory(IServer s) throws PollingException {
-		return JBossServerCorePlugin.getServerStateLocation(s).toFile();
+		File f = JBossServerCorePlugin.getServerStateLocation(s).toFile();
+		if( !f.exists()) {
+			f.mkdirs();
+		}
+		return f;
 	}
 		
 	
