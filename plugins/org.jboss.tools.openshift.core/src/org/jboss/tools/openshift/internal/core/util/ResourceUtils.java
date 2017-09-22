@@ -637,8 +637,8 @@ public class ResourceUtils {
 	 */
 	public static boolean isOlder(IResource thisResource, IResource thatResource) {
 		try {
-			int thisVersion = Integer.valueOf(thisResource.getResourceVersion());
-			int thatVersion = Integer.valueOf(thatResource.getResourceVersion());
+			int thisVersion = Integer.parseInt(thisResource.getResourceVersion());
+			int thatVersion = Integer.parseInt(thatResource.getResourceVersion());
 			return thisVersion < thatVersion;
 		} catch (NumberFormatException e) {
 			return true;
