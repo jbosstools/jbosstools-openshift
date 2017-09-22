@@ -204,6 +204,72 @@ public class ServerSettingsWizardPageModelTest {
 	}
 
 	@Test
+	public void shouldUseDevmodeKeyThatIsSet() {
+		// given
+		model.setUseImageDevmodeKey(false);
+		//when
+		model.setDevmodeKey("gargamel");
+		// then
+		assertThat(model.isUseImageDevmodeKey()).isFalse();
+		assertThat(model.getDevmodeKey()).isEqualTo("gargamel");
+	}
+
+	@Test
+	public void shouldUseImageDevmodeKey() {
+		// given
+		model.setUseImageDevmodeKey(true);
+		//when
+		model.setDevmodeKey("gargamel");
+		// then
+		assertThat(model.isUseImageDevmodeKey()).isTrue();
+		assertThat(model.getDevmodeKey()).isNull();
+	}
+
+	@Test
+	public void shouldUseDebugPortKeyThatIsSet() {
+		// given
+		model.setUseImageDebugPortKey(false);
+		//when
+		model.setDebugPortKey("bugging-the-bugs");
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isFalse();
+		assertThat(model.getDebugPortKey()).isEqualTo("bugging-the-bugs");
+	}
+
+	@Test
+	public void shouldUseImageDebugPortKey() {
+		// given
+		model.setUseImageDebugPortKey(true);
+		//when
+		model.setDebugPortKey("bugging-the-bugs");
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isTrue();
+		assertThat(model.getDebugPortKey()).isNull();
+	}
+
+	@Test
+	public void shouldUseDebugPortValueThatIsSet() {
+		// given
+		model.setUseImageDebugPortKey(false);
+		//when
+		model.setDebugPortValue("42");
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isFalse();
+		assertThat(model.getDebugPortValue()).isEqualTo("42");
+	}
+
+	@Test
+	public void shouldUseImageDebugPortValue() {
+		// given
+		model.setUseImageDebugPortKey(true);
+		//when
+		model.setDebugPortValue("42");
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isTrue();
+		assertThat(model.getDebugPortValue()).isNull();
+	}
+
+	@Test
 	public void shouldUpdateSourcePathIfNewDeployProjectIsSet() {
 		// given
 		assertThat(model.getSourcePath()).isEqualTo(

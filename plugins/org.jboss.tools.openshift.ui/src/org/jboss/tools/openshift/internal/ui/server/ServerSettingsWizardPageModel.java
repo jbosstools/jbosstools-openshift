@@ -637,6 +637,8 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
     		String oldDevmodeKey = this.devmodeKey;
     		if (useImageDevmodeKey) {
     			this.devmodeKey = null;
+    		} else {
+    			this.devmodeKey = devmodeKey;
     		}
     		firePropertyChange(PROPERTY_DEVMODE_KEY, oldDevmodeKey, this.devmodeKey);
 
@@ -659,7 +661,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
         		);
     }
 
-    public void setUseDevmodeKey(String devmodeKey) {
+    public void setDevmodeKey(String devmodeKey) {
         update(getConnection(), getConnections(),
                 this.deployProject, this.projects, 
                 this.sourcePath, this.podPath, this.useInferredPodPath,
@@ -717,6 +719,9 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		if (useImageDebugPortKey) {
 			this.debugPortKey = null;
 			this.debugPortValue = null;
+		} else {
+			this.debugPortKey = debugPortKey;
+			this.debugPortValue = debugPortValue;
 		}
 		firePropertyChange(PROPERTY_DEBUG_PORT_KEY, oldDebugPortKey, this.debugPortKey);
 		firePropertyChange(PROPERTY_DEBUG_PORT_VALUE, oldDebugPort, this.debugPortValue);
