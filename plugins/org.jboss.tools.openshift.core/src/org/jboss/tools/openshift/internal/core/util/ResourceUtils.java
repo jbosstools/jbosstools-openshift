@@ -1120,7 +1120,7 @@ public class ResourceUtils {
 	}
 
 	private static String getLastPathSegment(String mangledUri) {
-		int index = mangledUri.lastIndexOf("/");
+		int index = mangledUri.lastIndexOf('/');
 		if (index >= 0) {
 			return mangledUri.substring(index + 1);
 		} else {
