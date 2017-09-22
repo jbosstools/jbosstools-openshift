@@ -46,14 +46,14 @@ public class RegistryProviderModel {
 		if( registryProviders == null ) {
 			loadProviders();
 		}
-		List<ProviderPair> l = new ArrayList<ProviderPair>(Arrays.asList(registryProviders));
+		List<ProviderPair> l = new ArrayList<>(Arrays.asList(registryProviders));
 		Comparator<ProviderPair> c = (e1, e2) -> e2.getWeight() - e1.getWeight();
 		List<IConnectionRegistryProvider> ret = l.stream().sorted(c).map(ProviderPair::getProvider).collect(Collectors.toList());
 		return ret.toArray(new IConnectionRegistryProvider[ret.size()]);
 	}
 	
 	private void loadProviders() {
-		ArrayList<ProviderPair> ret = new ArrayList<ProviderPair>();
+		ArrayList<ProviderPair> ret = new ArrayList<>();
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IConfigurationElement[] cf = registry.getConfigurationElementsFor("org.jboss.tools.openshift.core.connection", "registryprovider");
 		for( int i = 0; i < cf.length; i++ ) {
