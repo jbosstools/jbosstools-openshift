@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
+import org.eclipse.wst.server.ui.internal.command.ServerCommand;
 import org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyCommand;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -40,12 +41,14 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 
 	private boolean overrideProject = false;
 	private ServerEditorSection section;
+	private boolean initializing = false;
+
 	public OpenShiftServerEditorModel(IServerWorkingCopy server, ServerEditorSection section, Connection connection) {
 		super(null, null, null, connection, server, Status.OK_STATUS);
 		this.section = section;
 	}
 
-  	private void update(boolean overrideProject, Connection connection, List<Connection> connections,  
+	private void update(boolean overrideProject, Connection connection, List<Connection> connections,  
   			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
   			String sourcePath, String podPath, boolean isUseInferredPodPath,
   			IResource resource, List<ObservableTreeItem> resourceItems, 
@@ -92,6 +95,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	public void setRoute(IRoute newRoute) {
 		setRoute(newRoute, !initializing);
 	}
+
 	public void setRoute(IRoute newRoute, boolean executeCommand) {
 		String prevHost = getHost(getRoute());
 		String prevRouteURL = getRouteURL(isSelectDefaultRoute(), getRoute());
@@ -104,8 +108,10 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	}
 	
 	public class SetRouteCommand extends ServerWorkingCopyPropertyCommand {
+
 		private IRoute oldRoute, newRoute;
 		private String oldHost, newHost;
+		
 		public SetRouteCommand(IServerWorkingCopy server, IRoute oldRoute, IRoute newRoute, String newRouteURL,
 				String oldHost, String newHost) {
 			super(server, "Set Route...", null, newRouteURL, 
@@ -113,11 +119,15 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 			this.oldRoute = oldRoute;
 			this.newRoute = newRoute;
 		}
+
+		@Override
 		public void undo() {
 			super.undo();
 			setRoute(oldRoute, false);
 			server.setHost(oldHost);
 		}
+
+		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setRoute(newRoute, false);
 			IStatus s = super.redo(monitor, adapt);
@@ -152,14 +162,17 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 			this.oldConnection = oldConnection;
 			this.newConnection = newConnection;
 		}
+
+		@Override
 		public void undo() {
 			super.undo();
 			setConnection(oldConnection, false);
 		}
+
+		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setConnection(newConnection, false);
-			IStatus s = super.redo(monitor, adapt);
-			return s;
+			return super.redo(monitor, adapt);
 		}
 	}
 
@@ -187,15 +200,16 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 			this.newResource = newResource;
 		}
 
+		@Override
 		public void undo() {
 			super.undo();
 			setResource(oldResource, false);
 		}
 
+		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setResource(newResource, false);
-			IStatus s = super.redo(monitor, adapt);
-			return s;
+			return super.redo(monitor, adapt);
 		}
 	}
 	
@@ -218,21 +232,26 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	
 
 	public class SetDeployProjectCommand extends ServerWorkingCopyPropertyCommand {
+
 		private org.eclipse.core.resources.IProject oldProj, newProj;
+
 		public SetDeployProjectCommand(IServerWorkingCopy server, org.eclipse.core.resources.IProject oldProj, org.eclipse.core.resources.IProject newProj) {
 			super(server, "Set Project...", null, ProjectUtils.getName(deployProject), 
 					OpenShiftServerUtils.ATTR_DEPLOYPROJECT, null);
 			this.oldProj = oldProj;
 			this.newProj = newProj;
 		}
+		
+		@Override
 		public void undo() {
 			super.undo();
 			setDeployProject(oldProj, false);
 		}
+		
+		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setDeployProject(newProj, false);
-			IStatus s = super.redo(monitor, adapt);
-			return s;
+			return super.redo(monitor, adapt);
 		}
 	}
 	
@@ -241,6 +260,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	public void setSourcePath(String sourcePath) {
 		setSourcePath(sourcePath, !initializing);
 	}
+
 	public void setSourcePath(String sourcePath, boolean executeCommand) {
 
 		String previous = getSourcePath();
@@ -251,17 +271,23 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	}
 
 	public class SetSourcePathCommand extends ServerWorkingCopyPropertyCommand {
+
 		private String oldPath, newPath;
+
 		public SetSourcePathCommand(IServerWorkingCopy server, String oldPath, String newPath) {
 			super(server, "Set Source Path...", null, newPath, 
 					OpenShiftServerUtils.ATTR_SOURCE_PATH, null);
 			this.oldPath = oldPath;
 			this.newPath = newPath;
 		}
+
+		@Override
 		public void undo() {
 			super.undo();
 			setSourcePath(oldPath, false);
 		}
+
+		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setSourcePath(newPath, false);
 			IStatus s = super.redo(monitor, adapt);
@@ -270,11 +296,11 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 		
 	}
 	
-	
 	@Override
 	public void setPodPath(String podPath) {
 		setPodPath(podPath, !initializing);
 	}
+	
 	public void setPodPath(String podPath, boolean executeCommand) {
 
 		String previous = getPodPath();
@@ -285,28 +311,159 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	}
 
 	public class SetPodPathCommand extends ServerWorkingCopyPropertyCommand {
+
 		private String oldPath, newPath;
+
 		public SetPodPathCommand(IServerWorkingCopy server, String oldPath, String newPath) {
 			super(server, "Set Pod Path...", null, newPath, 
 					OpenShiftServerUtils.ATTR_POD_PATH, null);
 			this.oldPath = oldPath;
 			this.newPath = newPath;
 		}
+
+		@Override
 		public void undo() {
 			super.undo();
 			setPodPath(oldPath, false);
 		}
+
+		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setPodPath(newPath, false);
 			IStatus s = super.redo(monitor, adapt);
 			return s;
 		}
+	}
+
+	@Override
+	public void setUseImageDevmodeKey(boolean useImageDevmodeKey) {
+		setUseImageDevmodeKey(useImageDevmodeKey, !initializing);
+	}
+
+	public void setUseImageDevmodeKey(boolean useImageDevmodeKey, boolean executeCommand) {
+		super.setUseImageDevmodeKey(useImageDevmodeKey);
+		if (executeCommand) {
+			setDevmodeKey(null, executeCommand);
+		}
+	}
+
+	@Override
+	public void setDevmodeKey(String devmodeKey) {
+		setDevmodeKey(devmodeKey, !initializing);
+	}
+
+	public void setDevmodeKey(String devmodeKey, boolean executeCommand) {
+		String oldDevmodeKey = getDevmodeKey();
+		if (executeCommand)
+			section.execute(new SetStringCommand(getServer(), "Set devmode key", OpenShiftServerUtils.ATTR_DEVMODE_KEY, 
+					oldDevmodeKey, devmodeKey) {
+
+						@Override
+						protected void updateModel(String devmodeKey) {
+							OpenShiftServerEditorModel.super.setDevmodeKey(devmodeKey);
+						}			
+			});
+	}
+
+	@Override
+	public void setUseImageDebugPortKey(boolean useImageDebugPortKey) {
+		setUseImageDebugPortKey(useImageDebugPortKey, !initializing);
+	}
+
+	public void setUseImageDebugPortKey(boolean useImageDebugPortKey, boolean executeCommand) {
+		super.setUseImageDebugPortKey(useImageDebugPortKey);
+		if (executeCommand) {
+			setDebugPortKey(null, executeCommand);
+			setDebugPortValue(null, executeCommand);
+		}
+	}
+
+	@Override
+	public void setDebugPortKey(String debugPortKey) {
+		setDebugPortKey(debugPortKey, !initializing);
+	}
+
+	public void setDebugPortKey(String debugPortKey, boolean executeCommand) {
+		String oldDebugPortKey = getDebugPortKey();
+		if (executeCommand)
+			section.execute(new SetStringCommand(getServer(), "Set debug port key", OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY, 
+					oldDebugPortKey, debugPortKey) {
+
+						@Override
+						protected void updateModel(String debugPortKey) {
+							OpenShiftServerEditorModel.super.setDebugPortKey(debugPortKey);
+						}			
+			});
+	}
+
+	@Override
+	public void setDebugPortValue(String debugPortValue) {
+		setDebugPortValue(debugPortValue, !initializing);
+	}
+
+	public void setDebugPortValue(String debugPortValue, boolean executeCommand) {
+		String oldDebugPortValue = getDebugPortValue();
+		if (executeCommand)
+			section.execute(new SetStringCommand(getServer(), "Set debug port", OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE, 
+					oldDebugPortValue, debugPortValue) {
+
+						@Override
+						protected void updateModel(String debugPortValue) {
+							OpenShiftServerEditorModel.super.setDebugPortValue(debugPortValue);
+						}			
+			});
+	}
+
+	public abstract class SetStringCommand extends SetValueCommand<String> {
+
+		public SetStringCommand(IServerWorkingCopy server, String cmd, String attributeKey, String oldValue, String newValue) {
+			super(server, cmd, attributeKey, oldValue, newValue);
+		}
+
+		@Override
+		protected String valueToString(String value) {
+			return value;
+		}
+	}
+
+	public abstract class SetValueCommand<T> extends ServerCommand {
+
+		private T oldValue;
+		private T newValue;
+		private String attributeKey;
+
+		public SetValueCommand(IServerWorkingCopy server, String cmd, String attributeKey, T oldValue, T newValue) {
+			super(server, cmd);
+			this.attributeKey = attributeKey;
+			this.newValue = newValue;
+			this.oldValue = oldValue;
+		}
+
+		protected abstract void updateModel(T value); 
+
+		protected abstract String valueToString(T value);
+	
+		@Override
+		public void execute() {
+			getServer().setAttribute(attributeKey, valueToString(newValue));
+			updateModel(newValue);
+		}
 		
+		@Override
+		public void undo() {
+			updateModel(oldValue);
+		}
+
+		@Override
+		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
+			updateModel(newValue);
+			return super.redo(monitor, adapt);
+		}
 	}
 	
-	private boolean initializing = false;
-	public void setInitializing(boolean val) {
-		initializing = val;
+	
+	public void setInitializing(boolean initializing) {
+		this.initializing = initializing;
 	}
 	
 }

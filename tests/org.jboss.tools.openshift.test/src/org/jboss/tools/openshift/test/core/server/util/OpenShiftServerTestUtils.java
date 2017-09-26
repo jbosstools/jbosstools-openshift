@@ -53,6 +53,12 @@ public class OpenShiftServerTestUtils {
 
 	public static IServer createOpenshift3Server(String name, String profile, IService service, IOpenShiftConnection connection)
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		IServerWorkingCopy workingCopy = createOpenshift3ServerWorkingCopy(name, profile, service, connection);
+		return workingCopy.save(false, null);
+	}
+
+	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name, String profile, IService service, IOpenShiftConnection connection)
+			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		IServerType type = OpenShiftServerUtils.getServerType();
 		IServerWorkingCopy wc = type.createServer(name, null, null);
 		String serviceId = service == null? null : OpenShiftResourceUniqueId.get(service);
@@ -62,7 +68,7 @@ public class OpenShiftServerTestUtils {
 		if (profile != null) {
 			ServerProfileModel.setProfile(wc, profile);
 		}
-		return wc.save(false, null);
+		return wc;
 	}
 
 	public static IServer mockServer(IResource resource, Connection connection)
