@@ -71,6 +71,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.TrimmingStringCo
 import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
+import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinaryVersionValidator;
 import org.jboss.tools.openshift.internal.ui.validator.URLValidator;
 import org.osgi.framework.Version;
@@ -126,8 +127,9 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 					}
 				});
 				GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(1, 1)
-				.applyTo(registryDiscover);
+					.align(SWT.FILL, SWT.CENTER)
+					.applyTo(registryDiscover);
+				UIUtils.setDefaultButtonWidth(registryDiscover);
 				
 				registryURLObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, txtRegistry);
 				ValueBindingBuilder.bind(registryURLObservable)
@@ -216,8 +218,10 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				Button ocBrowse = new Button(advancedComposite, SWT.PUSH);
 				ocBrowse.setText("Browse...");
 				GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT)
+					.align(SWT.LEFT, SWT.CENTER)
 					.applyTo(ocBrowse);
+				UIUtils.setDefaultButtonWidth(ocBrowse);
+
 				// Validation here is done via a listener rather than dbc validators
 				// because dbc validators will validate in the UI thread, but validation
 				// of this field requires a background job.
@@ -276,7 +280,6 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				dbc.addValidationStatusProvider(ocValidator);
 				ControlDecorationSupport
 					.create(ocValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-				
 			}
 
 			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
