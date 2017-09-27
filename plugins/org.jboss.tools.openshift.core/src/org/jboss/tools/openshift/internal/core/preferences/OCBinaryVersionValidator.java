@@ -106,11 +106,18 @@ public class OCBinaryVersionValidator {
         	try {
         		version = Version.parseVersion(matcher.group(1));
         		if ((matcher.groupCount() > 1) && version.getQualifier().isEmpty()) {
-        			version = new Version(
-        					version.getMajor(),
-        					version.getMinor(),
-        					version.getMicro(),
-        					matcher.group(6));
+        			// Since we are using the OSGi Version class to assist, 
+        			// and an OSGi qualifier must fit (alpha|numeric|-|_)+ format,  
+        			// remove all invalid characters in group6? alpha.1.dumb -> alpha1dumb
+        			String group6 = matcher.group(6);
+        			if( group6 != null ) {
+	        			group6 = group6.replaceAll("[^a-zA-Z0-9_-]", "_");
+	        			version = new Version(
+	        					version.getMajor(),
+	        					version.getMinor(),
+	        					version.getMicro(),
+	        					group6);
+        			}
         		}
         	} catch (IllegalArgumentException e) {
         		OpenShiftCoreActivator.logError(NLS.bind("Could not parse oc version {0}.",line), e);
