@@ -133,16 +133,19 @@ public enum OCBinary {
 	 */
 	public IStatus getStatus(IConnection connection, IProgressMonitor monitor) {
 		String location = getLocation(connection);
-	    IStatus status = Status.OK_STATUS;
-	    if (new OCBinaryVersionValidator(getLocation(connection)).isCompatibleForPublishing(monitor)) {
-	        if (location == null) {
-	            status = OpenShiftCoreActivator.statusFactory().errorStatus(OpenShiftCoreMessages.NoOCBinaryLocationErrorMessage);
-	        } else if (!new File(location).exists()) {
-	            status = OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind(OpenShiftCoreMessages.OCBinaryLocationDontExistsErrorMessage, location));
-	        } else {
-	            status = OpenShiftCoreActivator.statusFactory().warningStatus(OpenShiftCoreMessages.OCBinaryLocationIncompatibleErrorMessage);
-	        }
-	    }
-	    return status;
+		IStatus status = Status.OK_STATUS;
+		if (new OCBinaryVersionValidator(location).isCompatibleForPublishing(monitor)) {
+			if (location == null) {
+				status = OpenShiftCoreActivator.statusFactory()
+						.errorStatus(OpenShiftCoreMessages.NoOCBinaryLocationErrorMessage);
+			} else if (!new File(location).exists()) {
+				status = OpenShiftCoreActivator.statusFactory()
+						.errorStatus(NLS.bind(OpenShiftCoreMessages.OCBinaryLocationDontExistsErrorMessage, location));
+			}
+		} else {
+			status = OpenShiftCoreActivator.statusFactory()
+					.warningStatus(OpenShiftCoreMessages.OCBinaryLocationIncompatibleErrorMessage);
+		}
+		return status;
 	}
 }
