@@ -336,8 +336,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		IStatus status = Status.OK_STATUS;
 		listener.secureStoreException = null;
 		try {
-			IConnection connection = 
-					createConnection(connectionFactory, connectionAuthenticationProvider, connectionAdvancedPropertiesProvider);
+			IConnection connection = createConnection();
 			if(connection != null) {
 				addConnectionListener(connection);
 				if (connection.connect()) {
@@ -361,6 +360,16 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		}
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, status);
 		return status;
+	}
+	
+	/**
+	 * Create a temporary connection with the details as displayed in the wizard
+	 * @return
+	 */
+	public IConnection createConnection() {
+		IConnection connection = 
+				createConnection(connectionFactory, connectionAuthenticationProvider, connectionAdvancedPropertiesProvider);
+		return connection;
 	}
 
 	private void removeConnectionListener(IConnection connection) {

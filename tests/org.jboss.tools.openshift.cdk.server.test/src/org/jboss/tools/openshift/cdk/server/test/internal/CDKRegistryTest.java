@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.wst.server.core.IServer;
@@ -85,13 +86,15 @@ public class CDKRegistryTest extends TestCase {
 				return null;
 			}
 		};
-		String reg = prov.getRegistryURL(con);
-		assertNull(reg);
+		IStatus reg = prov.getRegistryURL(con);
+		assertNotNull(reg);
+		assertFalse(reg.isOK());
 		
 		ControllableServerBehavior beh = (ControllableServerBehavior) cdkServer.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
 		beh.setServerStarted();
 		reg = prov.getRegistryURL(con);
 		assertNotNull(reg);
+		assertTrue(reg.isOK());
 		
 		configureListener.enable();
 		beh.setServerStopped();

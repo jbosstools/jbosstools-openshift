@@ -1,5 +1,6 @@
 package org.jboss.tools.openshift.core.connection.registry;
 
+import org.eclipse.core.runtime.IStatus;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 public interface IConnectionRegistryProvider {
@@ -10,5 +11,5 @@ public interface IConnectionRegistryProvider {
 	 * @param connection
 	 * @return
 	 */
-	public String getRegistryURL(IConnection connection);
+	public IStatus getRegistryURL(IConnection connection);
 }

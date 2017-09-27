@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
@@ -293,17 +294,40 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	}
 
 	private void discoverRegistryPressed(Shell shell) {
-		String ret = RegistryProviderModel.getDefault().getRegistryURL(pageModel.getSelectedConnection());
-		if( ret != null ) {
-			registryURLObservable.setValue(ret);
+		IConnection tmp = pageModel.createConnection();
+		IStatus ret = RegistryProviderModel.getDefault().getRegistryURL(tmp);
+		
+		String oldVal = (String)registryURLObservable.getValue();
+		String newVal = ret.getMessage();
+		if( ret != null && ret.isOK()) {
+			// If they're equal, do nothing
+			if( !eq(oldVal, newVal) ) {
+				// Verify with user
+				String title = "Overwrite registry URL?";
+				String msg = "Are you sure you want to change the registry URL from " + oldVal + " to " + newVal + "?";
+				MessageBox mb = new MessageBox(shell, SWT.OK | SWT.CANCEL);
+				mb.setText(title);
+				mb.setMessage(msg);
+				String old = registryURLObservable.getValue().toString().trim();
+				if(old.isEmpty() || mb.open() == SWT.OK ) {
+					registryURLObservable.setValue(ret.getMessage());
+				} 
+			}
 		} else {
-			MessageBox messageBox = new MessageBox(shell, SWT.ICON_ERROR | SWT.OK);
-			messageBox.setText("Registry URL not found");
-		    messageBox.setMessage("No registry provider found for the given connection. If your Openshift connection is backed by a CDK or minishift installation, please ensure the CDK is running.");
-		    int rc = messageBox.open();
+			String title = "Registry URL not found";
+			String msg = "No registry provider found for the given connection. If your Openshift connection is backed by a CDK or minishift installation, please ensure the CDK is running.";
+			ErrorDialog ed = new ErrorDialog(shell, title, msg, ret, IStatus.ERROR | IStatus.WARNING | IStatus.INFO | IStatus.CANCEL);
+			ed.open();
 		}
 	}
 	
+	private boolean eq(String s1, String s2) {
+		if( s1 == null && s2 == null )
+			return true;
+		if( s1 == null )
+			return false;
+		return s1.equals(s2);
+	}
 	
 	private IStatus validateOCLocation(String location) {
 		IStatus validity = ValidationStatus.ok();
