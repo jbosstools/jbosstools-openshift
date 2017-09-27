@@ -167,9 +167,9 @@ public class WatchManager {
 		
 		private static final int NOT_FOUND = -1;
 		
-		final private IOpenShiftConnection conn;
-		final private IProject project;
-		final private String kind;
+		private final IOpenShiftConnection conn;
+		private final IProject project;
+		private final String kind;
 		private int backoff = 0;
 		private long lastConnect = 0;
 		private AtomicReference<State> state = new AtomicReference<>(State.DISCONNECTED);

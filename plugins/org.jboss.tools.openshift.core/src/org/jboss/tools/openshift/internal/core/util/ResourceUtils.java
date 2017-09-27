@@ -637,8 +637,8 @@ public class ResourceUtils {
 	 */
 	public static boolean isOlder(IResource thisResource, IResource thatResource) {
 		try {
-			int thisVersion = Integer.valueOf(thisResource.getResourceVersion());
-			int thatVersion = Integer.valueOf(thatResource.getResourceVersion());
+			int thisVersion = Integer.parseInt(thisResource.getResourceVersion());
+			int thatVersion = Integer.parseInt(thatResource.getResourceVersion());
 			return thisVersion < thatVersion;
 		} catch (NumberFormatException e) {
 			return true;
@@ -1120,7 +1120,7 @@ public class ResourceUtils {
 	}
 
 	private static String getLastPathSegment(String mangledUri) {
-		int index = mangledUri.lastIndexOf("/");
+		int index = mangledUri.lastIndexOf('/');
 		if (index >= 0) {
 			return mangledUri.substring(index + 1);
 		} else {

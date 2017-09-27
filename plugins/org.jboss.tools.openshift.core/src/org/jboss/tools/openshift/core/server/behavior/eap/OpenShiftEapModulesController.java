@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
@@ -56,7 +57,7 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 	private MultiStatus syncDown(IProgressMonitor monitor) throws CoreException {
 		final RSync rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, 
+		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK, 
 				NLS.bind("Could not sync all pods to folder {0}.", localDeploymentDirectory.getAbsolutePath()), null);
 		rsync.syncPodsToDirectory(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		return status;
@@ -66,7 +67,7 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 		// do rsync local to remote
 		final RSync rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, 
+		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK, 
 				NLS.bind("Could not sync folder {0} to all pods.", localDeploymentDirectory.getAbsolutePath()), null);
 		rsync.syncDirectoryToPods(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		return status;
