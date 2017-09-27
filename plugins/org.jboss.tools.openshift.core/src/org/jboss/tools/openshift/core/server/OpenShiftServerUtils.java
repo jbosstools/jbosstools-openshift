@@ -352,6 +352,8 @@ public class OpenShiftServerUtils {
 		if (server == null) {
 			return null;
 		}
+		
+		Connection connection = null;
 		try {
 			String url = getConnectionURL(server);
 			if (StringUtils.isEmpty(url)) {
@@ -359,14 +361,19 @@ public class OpenShiftServerUtils {
 			}
 			ConnectionURL connectionUrl = ConnectionURL.forURL(url);
 			if (connectionUrl != null) {
-				return ConnectionsRegistrySingleton.getInstance().getByUrl(connectionUrl, Connection.class);
+				connection = ConnectionsRegistrySingleton.getInstance().getByUrl(connectionUrl, Connection.class);
+			}
+			if (connection == null) {
+				OpenShiftCoreActivator.pluginLog().logError(NLS.bind(
+						"Could not find an existing OpenShift connection to host {0} with user {1} for server {2}",
+						new String[] { connectionUrl.getHost(), connectionUrl.getUsername(), server.getName() }));
 			}
 		} catch (UnsupportedEncodingException | MalformedURLException e) {
 			OpenShiftCoreActivator.pluginLog()
-					.logError(NLS.bind("Could not get connection url for server {0}", server.getName()), e);
+					.logError(NLS.bind("Connection url stored in server {0} is malformed.", server.getName()), e);
 		}
 
-		return null;
+		return connection;
 	}
 
 	public static String getConnectionURL(IServerAttributes server) {

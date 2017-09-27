@@ -251,22 +251,22 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void shouldUseDebugPortValueThatIsSet() {
 		// given
-		model.setUseImageDebugPortKey(false);
+		model.setUseImageDebugPortValue(false);
 		//when
 		model.setDebugPortValue("42");
 		// then
-		assertThat(model.isUseImageDebugPortKey()).isFalse();
+		assertThat(model.isUseImageDebugPortValue()).isFalse();
 		assertThat(model.getDebugPortValue()).isEqualTo("42");
 	}
 
 	@Test
 	public void shouldUseImageDebugPortValue() {
 		// given
-		model.setUseImageDebugPortKey(true);
+		model.setUseImageDebugPortValue(true);
 		//when
 		model.setDebugPortValue("42");
 		// then
-		assertThat(model.isUseImageDebugPortKey()).isTrue();
+		assertThat(model.isUseImageDebugPortValue()).isTrue();
 		assertThat(model.getDebugPortValue()).isNull();
 	}
 
@@ -657,6 +657,52 @@ public class ServerSettingsWizardPageModelTest {
 	}
 
 	@Test
+	public void shouldUpdateServerDebugPortKeyGivenIsUseImagePortKeyIsFalse() throws Exception {
+		// given
+		model.setUseImageDebugPortKey(false);
+		model.setDebugPortKey("aDebugPortKey");
+		// when
+		model.updateServer();
+		// then
+		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY), eq("aDebugPortKey"));
+	}
+
+	@Test
+	public void shouldUpdateServerDebugPortKeyToNullGivenIsUseImagePortKeyIsTrue() throws Exception {
+		// given
+		model.setUseImageDebugPortKey(true);
+		model.setDebugPortKey("aDebugKey");
+		// when
+		model.updateServer();
+		// then
+		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY), eq((String) null));
+	}
+
+	@Test
+	public void shouldInitializeUseImageDebugPortValueToFalseIfKeyIsPresent() throws Exception {
+		// given
+		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
+		doReturn("debugPortValue").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE), anyString());
+
+		// when
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// then
+		assertThat(model.isUseImageDebugPortValue()).isFalse();
+	}
+
+	@Test
+	public void shouldInitializeUseImageDebugPortValueToTrueIfKeyIsNotPresent() throws Exception {
+		// given
+		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
+		doReturn(null).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE), anyString());
+
+		// when
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// then
+		assertThat(model.isUseImageDebugPortValue()).isTrue();
+	}
+
+	@Test
 	public void shouldInitializeDebugPortValue() throws Exception {
 		// given
 		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
@@ -666,6 +712,28 @@ public class ServerSettingsWizardPageModelTest {
 		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
 		// then
 		assertThat(model.getDebugPortValue()).isEqualTo("4242");
+	}
+
+	@Test
+	public void shouldUpdateServerDebugPortValueGivenIsUseImagePortValueIsFalse() throws Exception {
+		// given
+		model.setUseImageDebugPortValue(false);
+		model.setDebugPortValue("42");
+		// when
+		model.updateServer();
+		// then
+		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE), eq("42"));
+	}
+
+	@Test
+	public void shouldUpdateServerDebugPortValueToNullGivenIsUseImagePortValueIsTrue() throws Exception {
+		// given
+		model.setUseImageDebugPortValue(true);
+		model.setDebugPortValue("42");
+		// when
+		model.updateServer();
+		// then
+		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE), eq((String) null));
 	}
 
 	private ServerSettingsWizardPageModel createModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject,

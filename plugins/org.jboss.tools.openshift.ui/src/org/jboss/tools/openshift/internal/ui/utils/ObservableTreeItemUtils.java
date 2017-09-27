@@ -83,8 +83,11 @@ public class ObservableTreeItemUtils {
 		}
 
 		return items.stream()
-			.filter(item -> ((ObservableTreeItem) item).getModel() != null 
-						&& type.isAssignableFrom(((ObservableTreeItem) item).getModel().getClass()))
+			.filter(item -> {
+				Object model = ((ObservableTreeItem) item).getModel();
+				return model != null
+						&& type.isAssignableFrom(model.getClass());
+			})
 			.map(child -> (T) ((ObservableTreeItem) child).getModel()) 
 			.collect(Collectors.toList());
 	}
