@@ -10,9 +10,14 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.common.core.connection.ConnectionType;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsFactoryTracker;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
@@ -26,19 +31,65 @@ import org.jboss.tools.openshift.core.connection.Connection;
 public class CDKOpenshiftUtility {
 
 
+	/**
+	 * Return the first connection that matches this server 
+	 * @param server
+	 * @param adb
+	 * @return
+	 */
 	public IConnection findExistingOpenshiftConnection(IServer server, ServiceManagerEnvironment adb) {
-		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
 		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
 		for(IConnection c : connections) {
-			if( c.getType() == ConnectionType.Kubernetes) {
-				String host = c.getHost();
-				if( host.equals(soughtHost)) {
-					return c;
-				}
+			if( serverMatchesConnection(server, c, adb)) {
+				return c;
 			}
 		}
 		return null;
 	}
+	
+	/**
+	 * Return all existing openshift connections that match this server
+	 * 
+	 * @param server
+	 * @param adb
+	 * @return
+	 */
+	public IConnection[] findExistingOpenshiftConnections(IServer server, ServiceManagerEnvironment adb) {
+		Collection<IConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll();
+		ArrayList<IConnection> ret = new ArrayList<IConnection>();
+		for(IConnection c : connections) {
+			if( serverMatchesConnection(server, c, adb)) {
+				ret.add(c);
+			}
+		}
+		return (IConnection[]) ret.toArray(new IConnection[ret.size()]);
+	}
+
+	
+	public boolean serverMatchesConnection(IServer server, IConnection c, ServiceManagerEnvironment adb) {
+		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
+		if( c.getType() == ConnectionType.Kubernetes) {
+			String host = c.getHost();
+			if( host.equals(soughtHost)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public MultiStatus serverConnectionMatchError(IServer server, IConnection c, ServiceManagerEnvironment adb) {
+		MultiStatus ms = new MultiStatus(CDKCoreActivator.PLUGIN_ID, 0, "Server " + server.getName() + " fails to match openshift connection " + c.toString() + ".", null);
+		String soughtHost = adb.openshiftHost + ":" + adb.openshiftPort;
+		if( c.getType() != ConnectionType.Kubernetes) {
+			ms.add(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Connection type is expected to be kubernetes."));
+		} else {
+			String host = c.getHost();
+			if( !host.equals(soughtHost)) {
+				ms.add(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Host is " + host + " but is expected to be " + soughtHost));
+			}
+		}
+		return ms;
+	}
+
 	
 	public IConnection createOpenshiftConnection(ServiceManagerEnvironment env) {
 		return createOpenshiftConnection(env, ConnectionsRegistrySingleton.getInstance());
