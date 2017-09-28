@@ -71,7 +71,7 @@ public class AccountModel implements IAccountModel {
 	}
 	
 	void fireEvent(Event event, IAccount account) {
-		listeners.stream().forEach(listener -> {
+		listeners.forEach(listener -> {
 			switch (event) {
 			case ACCOUNT_ADDED:
 				listener.accountAdded(this, account);
@@ -84,7 +84,7 @@ public class AccountModel implements IAccountModel {
 	}
 	
 	void fireEvent(Event event, ICluster cluster) {
-		listeners.stream().forEach(listener -> {
+		listeners.forEach(listener -> {
 			switch (event) {
 			case CLUSTER_ADDED:
 				listener.clusterAdded(this, cluster);
@@ -121,10 +121,10 @@ public class AccountModel implements IAccountModel {
 
 	@Override
 	public void save() {
-		clusters.stream().forEach(ICluster::save);
+		clusters.forEach(ICluster::save);
 		Preferences accountRoot = getAccountsPreferences();
 		ISecurePreferences accountSecureRoot = getSecureAccountsPreferences();
-		removed.stream().forEach(id -> {
+		removed.forEach(id -> {
 			try {
 				accountRoot.node(id).removeNode();
 				accountSecureRoot.node(id).removeNode();

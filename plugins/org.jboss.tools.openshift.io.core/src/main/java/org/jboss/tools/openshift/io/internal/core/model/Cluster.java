@@ -109,7 +109,7 @@ public class Cluster implements ICluster {
 				Preferences clusterNode = accountsNode.node(getId());
 				ISecurePreferences clusterSecureNode = AccountModel.getSecureAccountsPreferences().node(getId());
 				clusterNode.put(ENDPOINT_URL_KEY, getEndpointURL());
-				removed.stream().forEach(id -> {
+				removed.forEach(id -> {
 					try {
 						clusterNode.node(id).removeNode();
 						clusterSecureNode.node(id).removeNode();
