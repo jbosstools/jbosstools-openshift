@@ -99,11 +99,11 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	private Map<IProject, List<IBuildConfig>> buildConfigsByProject;
 	private boolean useInferredPodPath = true;
 	private IStatus ocBinaryStatus = Status.OK_STATUS;
-	private boolean useImageDevmodeKey = true;
-	private String devmodeKey;
-	private boolean useImageDebugPortKey = true;
-	private String debugPortKey;
-	private String debugPortValue;
+	protected boolean useImageDevmodeKey = true;
+	protected String devmodeKey;
+	protected boolean useImageDebugPortKey = true;
+	protected String debugPortKey;
+	protected String debugPortValue;
 
 	protected ServerSettingsWizardPageModel(IResource resource, IRoute route, org.eclipse.core.resources.IProject deployProject, 
 			Connection connection, IServerWorkingCopy server) {
@@ -116,9 +116,18 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		this.route = route;
 		this.deployProject = deployProject;
 		this.server = server;
+		init(server);
 		this.ocBinaryStatus = ocBinaryStatus;
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
 	}
+
+  	private void init(IServerWorkingCopy server) {
+  		this.devmodeKey = OpenShiftServerUtils.getDevmodeKey(server);
+  		this.useImageDevmodeKey = isUseImageDevmodeKey(devmodeKey);
+  		this.debugPortKey = OpenShiftServerUtils.getDebugPortKey(server);
+  		this.debugPortValue = OpenShiftServerUtils.getDebugPort(server);
+  		this.useImageDebugPortKey = isUseImageDebugPortKey(debugPortKey);
+  	}
 
 	protected void update(Connection connection, List<Connection> connections, 
 			org.eclipse.core.resources.IProject deployProject, List<org.eclipse.core.resources.IProject> projects, 
@@ -437,9 +446,9 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		String host = getHost(getRoute(), getConnection());
 		String routeURL = getRouteURL(isSelectDefaultRoute(), getRoute());
 		String podPath = useInferredPodPath ? "" : this.podPath;
-		String devmodeKey = useImageDevmodeKey ? null : this.devmodeKey;
-		String debugPortKey = useImageDebugPortKey ? null : this.debugPortKey;
-		String debugPortValue = useImageDebugPortKey ? null : this.debugPortValue;
+		String devmodeKey = getDevmodeKey(useImageDevmodeKey, this.devmodeKey);
+		String debugPortKey = getDebugPortKey(useImageDebugPortKey, this.debugPortKey);
+		String debugPortValue = getDebugPortValue(useImageDebugPortKey, this.debugPortValue);
 
 		OpenShiftServerUtils.updateServer(
 				serverName, host, connectionUrl, getResource(), sourcePath, podPath, deployProject, routeURL, 
@@ -635,19 +644,13 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
     
     private void updateDevmode(boolean useImageDevmodeKey, String devmodeKey) {
     		String oldDevmodeKey = this.devmodeKey;
-    		if (useImageDevmodeKey) {
-    			this.devmodeKey = null;
-    		}
+    		this.devmodeKey = getDevmodeKey(useImageDevmodeKey, devmodeKey);
     		firePropertyChange(PROPERTY_DEVMODE_KEY, oldDevmodeKey, this.devmodeKey);
 
     		firePropertyChange(PROPERTY_USE_IMAGE_DEVMODE_KEY, this.useImageDevmodeKey, this.useImageDevmodeKey = useImageDevmodeKey);
     }
 
-    public boolean isUseImageDevmodeKey() {
-    		return useImageDevmodeKey;
-    }
-
-    public void setUseImageDevmodeKey(boolean useImageDevmodeKey) {
+	public void setUseImageDevmodeKey(boolean useImageDevmodeKey) {
         update(getConnection(), getConnections(), 
                 this.deployProject, this.projects, 
                 this.sourcePath, this.podPath, this.useInferredPodPath,
@@ -659,7 +662,15 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
         		);
     }
 
-    public void setUseDevmodeKey(String devmodeKey) {
+	public boolean isUseImageDevmodeKey() {
+    		return useImageDevmodeKey;
+    }
+
+	protected boolean isUseImageDevmodeKey(String devmodeKey) {
+		return StringUtils.isEmpty(devmodeKey);
+	}
+
+	public void setDevmodeKey(String devmodeKey) {
         update(getConnection(), getConnections(),
                 this.deployProject, this.projects, 
                 this.sourcePath, this.podPath, this.useInferredPodPath,
@@ -675,8 +686,11 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
     		return devmodeKey;
     	}
     
-	public boolean isUseImageDebugPortKey() {
-		return useImageDebugPortKey;
+	private String getDevmodeKey(boolean useImageDevmodeKey, String devmodeKey) {
+		if (useImageDevmodeKey) {
+			devmodeKey = null;
+		}
+		return devmodeKey;
 	}
 
 	public void setUseImageDebugPortKey(boolean useImageDebugPortKey) {
@@ -685,6 +699,14 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 				this.routesByProject, this.ocBinaryStatus, 
 				this.useImageDevmodeKey, this.devmodeKey, 
 				useImageDebugPortKey, this.debugPortKey, this.debugPortValue);
+	}
+
+	public boolean isUseImageDebugPortKey() {
+		return useImageDebugPortKey;
+	}
+
+	protected boolean isUseImageDebugPortKey(String debugPortKey) {
+		return StringUtils.isEmpty(debugPortKey);
 	}
 
 	public void setDebugPortKey(String debugPortKey) {
@@ -699,6 +721,14 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		return debugPortKey;
 	}
 
+	private String getDebugPortKey(boolean useImageDebugPortKey, String debugPortKey) {
+		if (useImageDebugPortKey) {
+			return null;
+		} else {
+			return debugPortKey;
+		}
+	}
+
 	public void setDebugPortValue(String debugPortValue) {
 		update(getConnection(), getConnections(), this.deployProject, this.projects, this.sourcePath, this.podPath,
 				this.useInferredPodPath, getResource(), getResourceItems(), this.route, this.selectDefaultRoute,
@@ -710,14 +740,20 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	public String getDebugPortValue() {
 		return debugPortValue;
 	}
+	
+	private String getDebugPortValue(boolean useImageDebugPortKey, String debugPortValue) {
+		if (useImageDebugPortKey) {
+			return null;
+		} else {
+			return debugPortValue;
+		}
+	}
 
 	private void updateDebugPort(boolean useImageDebugPortKey, String debugPortKey, String debugPortValue) {
 		String oldDebugPortKey = this.debugPortKey;
+		this.debugPortKey = getDebugPortKey(useImageDebugPortKey, debugPortKey);
 		String oldDebugPort = this.debugPortValue;
-		if (useImageDebugPortKey) {
-			this.debugPortKey = null;
-			this.debugPortValue = null;
-		}
+		this.debugPortValue = getDebugPortValue(useImageDebugPortKey, debugPortValue);
 		firePropertyChange(PROPERTY_DEBUG_PORT_KEY, oldDebugPortKey, this.debugPortKey);
 		firePropertyChange(PROPERTY_DEBUG_PORT_VALUE, oldDebugPort, this.debugPortValue);
 

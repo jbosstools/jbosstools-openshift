@@ -47,6 +47,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServer;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.ui.server.ServerSettingsWizardPageModel;
+import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.After;
 import org.junit.Before;
@@ -201,6 +202,72 @@ public class ServerSettingsWizardPageModelTest {
 		model.setPodPath("somePath");
 		// then
 		assertThat(model.getPodPath()).isEqualTo("somePath");
+	}
+
+	@Test
+	public void shouldUseDevmodeKeyThatIsSet() {
+		// given
+		model.setUseImageDevmodeKey(false);
+		//when
+		model.setDevmodeKey("gargamel");
+		// then
+		assertThat(model.isUseImageDevmodeKey()).isFalse();
+		assertThat(model.getDevmodeKey()).isEqualTo("gargamel");
+	}
+
+	@Test
+	public void shouldUseImageDevmodeKey() {
+		// given
+		model.setUseImageDevmodeKey(true);
+		//when
+		model.setDevmodeKey("gargamel");
+		// then
+		assertThat(model.isUseImageDevmodeKey()).isTrue();
+		assertThat(model.getDevmodeKey()).isNull();
+	}
+
+	@Test
+	public void shouldUseDebugPortKeyThatIsSet() {
+		// given
+		model.setUseImageDebugPortKey(false);
+		//when
+		model.setDebugPortKey("bugging-the-bugs");
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isFalse();
+		assertThat(model.getDebugPortKey()).isEqualTo("bugging-the-bugs");
+	}
+
+	@Test
+	public void shouldUseImageDebugPortKey() {
+		// given
+		model.setUseImageDebugPortKey(true);
+		//when
+		model.setDebugPortKey("bugging-the-bugs");
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isTrue();
+		assertThat(model.getDebugPortKey()).isNull();
+	}
+
+	@Test
+	public void shouldUseDebugPortValueThatIsSet() {
+		// given
+		model.setUseImageDebugPortKey(false);
+		//when
+		model.setDebugPortValue("42");
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isFalse();
+		assertThat(model.getDebugPortValue()).isEqualTo("42");
+	}
+
+	@Test
+	public void shouldUseImageDebugPortValue() {
+		// given
+		model.setUseImageDebugPortKey(true);
+		//when
+		model.setDebugPortValue("42");
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isTrue();
+		assertThat(model.getDebugPortValue()).isNull();
 	}
 
 	@Test
@@ -516,7 +583,91 @@ public class ServerSettingsWizardPageModelTest {
 
 		assertEquals("openshift3.eap", this.model.getProfileId());
 	}
-	
+
+	@Test
+	public void shouldInitializeUseImageDevmodeKeyToFalseIfKeyIsPresent() throws Exception {
+		// given
+		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
+		doReturn("aDevmodeKey").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEVMODE_KEY), anyString());
+
+		// when
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// then
+		assertThat(model.isUseImageDevmodeKey()).isFalse();
+	}
+
+	@Test
+	public void shouldInitializeUseImageDevmodeKeyToTrueIfKeyIsNotPresent() throws Exception {
+		// given
+		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
+		doReturn(null).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEVMODE_KEY), anyString());
+
+		// when
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// then
+		assertThat(model.isUseImageDevmodeKey()).isTrue();
+	}
+
+	@Test
+	public void shouldInitializeDevmodeKey() throws Exception {
+		// given
+		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
+		doReturn("aDevmodeKey").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEVMODE_KEY), anyString());
+
+		// when
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// then
+		assertThat(model.getDevmodeKey()).isEqualTo("aDevmodeKey");
+	}
+
+	@Test
+	public void shouldInitializeUseImageDebugPortKeyToFalseIfKeyIsPresent() throws Exception {
+		// given
+		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
+		doReturn("debugPortKey").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY), anyString());
+
+		// when
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isFalse();
+	}
+
+	@Test
+	public void shouldInitializeUseImageDebugPortKeyToTrueIfKeyIsNotPresent() throws Exception {
+		// given
+		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
+		doReturn(null).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY), anyString());
+
+		// when
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// then
+		assertThat(model.isUseImageDebugPortKey()).isTrue();
+	}
+
+	@Test
+	public void shouldInitializeDebugPortKey() throws Exception {
+		// given
+		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
+		doReturn("aDebugPortKey").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY), anyString());
+
+		// when
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// then
+		assertThat(model.getDebugPortKey()).isEqualTo("aDebugPortKey");
+	}
+
+	@Test
+	public void shouldInitializeDebugPortValue() throws Exception {
+		// given
+		IServerWorkingCopy server = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("aServer", null, null, null));
+		doReturn("4242").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE), anyString());
+
+		// when
+		ServerSettingsWizardPageModel model = createModel(null, null, null, null, null, server);
+		// then
+		assertThat(model.getDebugPortValue()).isEqualTo("4242");
+	}
+
 	private ServerSettingsWizardPageModel createModel(IService service, IRoute route, org.eclipse.core.resources.IProject deployProject,
 			List<IProject> projects, Connection connection) {
 		return createModel(service, route, deployProject, projects, connection, null);
