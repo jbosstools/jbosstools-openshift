@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.5"?>
+<plugin>
+   <extension-point id="org.jboss.tools.openshift.io.core.tokenProvider" name="tokenProvider" schema="schema/org.jboss.tools.openshift.io.core.tokenProvider.exsd"/>
+   <extension-point id="org.jboss.tools.openshift.io.core.loginProvider" name="loginProvider" schema="schema/org.jboss.tools.openshift.io.core.loginProvider.exsd"/>
+   <extension
+         point="org.jboss.tools.openshift.io.core.tokenProvider">
+      <tokenProvider
+            class="org.jboss.tools.openshift.io.internal.core.DefaultTokenProvider">
+      </tokenProvider>
+   </extension>
+</plugin>
