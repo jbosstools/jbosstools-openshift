@@ -114,10 +114,7 @@ public class AccountService {
 			LoginResponse response = provider.login(cluster, account);
 			if (null != response) {
 				if (null == account) {
-						String id = OSIOUtils.decodeEmailFromToken(response.getAccessToken());
-						IAccount newAccount = cluster.createAccount(id);
-						updateAccount(response, newAccount);
-						cluster.addAccount(newAccount);
+						IAccount newAccount = createAccount(cluster, response);
 						return newAccount.getAccessToken();
 				} else {
 					updateAccount(response, account);
@@ -129,6 +126,14 @@ public class AccountService {
 		} else {
 			throw new OpenshiftIOConfigurationException("No login provider found");
 		}
+	}
+
+	IAccount createAccount(ICluster cluster, LoginResponse response) {
+		String id = OSIOUtils.decodeEmailFromToken(response.getAccessToken());
+		IAccount newAccount = cluster.createAccount(id);
+		updateAccount(response, newAccount);
+		cluster.addAccount(newAccount);
+		return newAccount;
 	}
 
 	void updateAccount(LoginResponse info, IAccount account) {

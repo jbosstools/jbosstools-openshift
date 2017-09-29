@@ -55,18 +55,22 @@ public class AccountModel implements IAccountModel {
 				Cluster cluster = new Cluster(this, id);
 				Preferences clusterNode = accountsRoot.node(id);
 				ISecurePreferences secureClusterNode = secureAccountRoot.node(id);
-				try {
-					cluster.load(clusterNode, secureClusterNode);
-					clusters.add(cluster);
-				} catch (StorageException e) {
-					OpenShiftIOCoreActivator.logError(e.getLocalizedMessage(), e);
-				}
+				addCluster(cluster, clusterNode, secureClusterNode);
 			}
 		} catch (BackingStoreException e) {
 			OpenShiftIOCoreActivator.logError(e.getLocalizedMessage(), e);
 		}
 		if (clusters.isEmpty()) {
 			addCluster(createCluster("OpenShift.io"));
+		}
+	}
+
+	void addCluster(Cluster cluster, Preferences clusterNode, ISecurePreferences secureClusterNode) {
+		try {
+			cluster.load(clusterNode, secureClusterNode);
+			clusters.add(cluster);
+		} catch (StorageException e) {
+			OpenShiftIOCoreActivator.logError(e.getLocalizedMessage(), e);
 		}
 	}
 	
@@ -125,14 +129,18 @@ public class AccountModel implements IAccountModel {
 		Preferences accountRoot = getAccountsPreferences();
 		ISecurePreferences accountSecureRoot = getSecureAccountsPreferences();
 		removed.forEach(id -> {
-			try {
-				accountRoot.node(id).removeNode();
-				accountSecureRoot.node(id).removeNode();
-			} catch (BackingStoreException e) {
-				OpenShiftIOCoreActivator.logError(e.getLocalizedMessage(), e);
-			}
+			removeAccount(id ,accountRoot, accountSecureRoot);
 		});
 		removed.clear();
+	}
+
+	void removeAccount(String id, Preferences accountRoot, ISecurePreferences accountSecureRoot) {
+		try {
+			accountRoot.node(id).removeNode();
+			accountSecureRoot.node(id).removeNode();
+		} catch (BackingStoreException e) {
+			OpenShiftIOCoreActivator.logError(e.getLocalizedMessage(), e);
+		}
 	}
 
 	@Override
