@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.io.core;
 
 public final class OSIOCoreConstants {
 	
+	private OSIOCoreConstants() {}
+	
 	public static final String TOKEN_PROVIDER_EXTENSION_POINT = "org.jboss.tools.openshift.io.core.tokenProvider";
 	
 	public static final String LOGIN_PROVIDER_EXTENSION_POINT = "org.jboss.tools.openshift.io.core.loginProvider";

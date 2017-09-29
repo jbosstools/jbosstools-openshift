@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.io.core.LoginResponse;
+import org.jboss.tools.openshift.io.internal.ui.OpenShiftIOUIActivator;
 import org.jboss.tools.openshift.io.internal.ui.processor.DefaultRequestProcessor;
 import org.jboss.tools.openshift.io.internal.ui.processor.RequestProcessor;
 
@@ -83,7 +84,7 @@ public class BrowserBasedLoginDialog extends Dialog {
 			@Override
 			public void completed(ProgressEvent event) {
 				progressBar.setSelection(0);
-				System.out.println("URL=" + browser.getUrl());
+				OpenShiftIOUIActivator.getDefault().logInfo("URL=" + browser.getUrl());
 				info = processor.getRequestInfo(browser, browser.getUrl(), browser.getText());
 				if (null != info) {
 					close();

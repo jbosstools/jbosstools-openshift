@@ -19,7 +19,7 @@ import org.jboss.tools.openshift.io.internal.ui.OpenShiftIOUIActivator;
 
 public class DefaultRequestProcessor implements RequestProcessor {
 
-	private static String SCRIPT = "           var request = (function() {\r\n" + 
+	private static final String SCRIPT = "           var request = (function() {\r\n" + 
 			"    var _get = {};\r\n" + 
 			"    var re = /[?&]([^=&]+)(=?)([^&]*)/g;\r\n" + 
 			"    while (m = re.exec(location.search))\r\n" + 

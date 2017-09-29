@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.io.core;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +24,8 @@ import io.jsonwebtoken.Jwts;
 public class OSIOUtils {
 
 	private static final ObjectMapper mapper = new ObjectMapper();
+	
+	private OSIOUtils() {}
 	
 	/**
 	 * Decode the login JSON as an object.
@@ -71,10 +75,10 @@ public class OSIOUtils {
 
 	public static String computeLandingURL(String endpointURL, String devstudioOsioLandingPageSuffix) {
 		try {
-			URL url = new URL(endpointURL);
-			URL landingURL = new URL(url.getProtocol(), url.getHost(), url.getPort(), devstudioOsioLandingPageSuffix);
-			return landingURL.toExternalForm();
-		} catch (MalformedURLException e) {
+			URI uri = new URI(endpointURL);
+			URI landingURI = new URI(uri.getScheme(), null, uri.getAuthority(), uri.getPort(), devstudioOsioLandingPageSuffix, null, null);
+			return landingURI.toString();
+		} catch (URISyntaxException e) {
 			return null;
 		}
 	}

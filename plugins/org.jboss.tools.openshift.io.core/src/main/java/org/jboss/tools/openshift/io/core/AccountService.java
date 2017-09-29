@@ -68,11 +68,19 @@ public class AccountService {
 				return AccountStatus.NEEDS_REFRESH;
 			}
 		}
-		if (((current - lastRefreshed) > OSIOCoreConstants.DURATION_24_HOURS)
-				|| ((current - lastRefreshed) > ((account.getAccessTokenExpiryTime() - current) / 2))) {
+		if (wasRefreshed24HAgo(lastRefreshed, current)
+				|| wasRefreshedMoreThanHalfTheTotalValidPeriod(account.getAccessTokenExpiryTime(), lastRefreshed, current)) {
 			return AccountStatus.NEEDS_REFRESH;
 		}
 		return AccountStatus.VALID;
+	}
+
+	boolean wasRefreshedMoreThanHalfTheTotalValidPeriod(long expiryTime, long lastRefreshed, long current) {
+		return (current - lastRefreshed) > (expiryTime - current);
+	}
+
+	boolean wasRefreshed24HAgo(long lastRefreshed, long current) {
+		return (current - lastRefreshed) > OSIOCoreConstants.DURATION_24_HOURS;
 	}
 
 	public String getToken(IResource t) {

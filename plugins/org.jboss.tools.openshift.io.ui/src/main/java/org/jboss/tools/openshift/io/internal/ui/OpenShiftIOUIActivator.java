@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.io.internal.ui;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 
 public class OpenShiftIOUIActivator extends BaseCorePlugin {
@@ -29,6 +31,11 @@ public class OpenShiftIOUIActivator extends BaseCorePlugin {
 	
 	public static void logError(String message, Throwable t) {
 		getDefault().pluginLogInternal().logError(message, t);
+	}
+
+	public void logInfo(String message) {
+		IStatus status = new Status(IStatus.INFO, PLUGIN_ID, message);
+		getLog().log(status);
 	}
 
 }

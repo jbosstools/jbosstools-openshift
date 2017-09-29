@@ -17,6 +17,8 @@ public class OpenshiftIORefreshException extends OpenshiftIOException {
 	private final IAccount account;
 	private final int status;
 	
+	public static final int NO_STATUS = -1;
+	
 	public OpenshiftIORefreshException(IAccount account, int status) {
 		super("Error refreshing token for " + account.getId() + " on cluster " + account.getCluster().getId());
 		this.account = account;
@@ -26,7 +28,7 @@ public class OpenshiftIORefreshException extends OpenshiftIOException {
 	public OpenshiftIORefreshException(IAccount account, Throwable t) {
 		super("Error refreshing token for " + account.getId() + " on cluster " + account.getCluster().getId(), t);
 		this.account = account;
-		this.status = (-1);
+		this.status = NO_STATUS;
 	}
 
 	/**
