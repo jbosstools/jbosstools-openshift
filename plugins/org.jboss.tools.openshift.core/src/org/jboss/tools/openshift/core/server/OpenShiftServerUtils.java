@@ -59,10 +59,8 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 /**
  * @author Andre Dietisheim
@@ -548,36 +546,6 @@ public class OpenShiftServerUtils {
 	 */
 	private static String getProjectAttribute(String name, String defaultValue, IProject project) {
 		return ServerUtils.getProjectAttribute(name, defaultValue, SERVER_PROJECT_QUALIFIER, project);
-	}
-	
-	/**
-	 * Returns the deployment config for the given server (attributes). The
-	 * match is done by the service that the given (openshift server) is bound
-	 * to. 
-	 * This method does remote calls to the OpenShift server and thus should
-	 * never be called from the UI thread.
-	 * 
-	 * @param server
-	 * @return the replication controller for the given server
-	 * 
-	 * @see #getResource(IServerAttributes)
-	 * @see ResourceUtils#getPodsFor(IService, Collection)
-	 */
-	public static IDeploymentConfig getDeploymentConfig(IServerAttributes server, IProgressMonitor monitor) throws CoreException {
-		assertServerNotNull(server);
-		
-		Connection connection = getConnectionChecked(server);
-		IResource resource = getResourceChecked(server, connection, monitor);
-		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(resource, connection);
-		if (dc == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-		            NLS.bind("Could not find deployment config for {0}. "
-		                    + "Your build might be still running and pods not created yet or "
-		                    + "there might be no labels on your pods pointing to the wanted deployment config.", 
-							server.getName())));
-		}
-
-		return dc;
 	}
 
 	/**

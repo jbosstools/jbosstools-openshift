@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.core.server.debug;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -22,11 +23,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
@@ -39,6 +41,9 @@ import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * A class that handles the debug and devmode mode in OpenShift.
@@ -155,25 +160,86 @@ public class OpenShiftDebugMode {
 	 * @throws CoreException
 	 */
 	public OpenShiftDebugMode execute(IProgressMonitor monitor) throws CoreException {
-		IDeploymentConfig dc = getDeploymentConfig(context, monitor);
+		Connection connection = OpenShiftServerUtils.getConnection(context.getServer());
+		IResource resource = OpenShiftServerUtils.getResource(context.getServer(), monitor);
+		IDeploymentConfig dc = getDeploymentConfig(context, resource, connection, monitor);
 		if (dc == null) {
-			throw new CoreException(StatusFactory.errorStatus(
-					OpenShiftCoreActivator.PLUGIN_ID, "No deployment config present that can be updated."));
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+		            NLS.bind("Could not find deployment config for resource {0}. "
+		                    + "Your build might be still running and pods not created yet or "
+		                    + "there might be no labels on your pods pointing to the wanted deployment config.", 
+							resource.getName())));
 		}
 
-		IPod pod = getNewPod(monitor, dc, ConnectionsRegistryUtil.getConnectionFor(dc));
+		boolean dcUpdated = updateDc(dc, connection, monitor);
+		IPod pod = getPod(dcUpdated, dc, connection, monitor);
 		context.setPod(pod);
 
+		toggleTimeout(resource, connection, context, monitor);
 		toggleDebugger(context, monitor);
 		
 		return this;
 	}
 
-	protected IPod getNewPod(IProgressMonitor monitor, IDeploymentConfig dc, Connection connection) throws CoreException {
-		IPod pod;
-		if (updateDebugmode(dc, context, monitor)
+	private void toggleTimeout(IResource resource, Connection connection, DebugContext context, IProgressMonitor monitor) {
+		if (context.isDebugEnabled()) {
+			setTimeout(resource, connection, monitor);
+		} else {
+			
+		}
+
+	}
+	
+	private void setTimeout(IResource resource, Connection connection, IProgressMonitor monitor) {
+		monitor.subTask("Increasing timeout while debugging...");
+
+		IRoute route = getRoute(resource, connection, monitor);
+		if (route == null) {
+			OpenShiftCoreActivator.pluginLog().logInfo(
+					NLS.bind("Could not increase timeout: Could not find any route for resource {0}", resource.getName()));
+			return;
+		}
+		OpenShiftCoreActivator.pluginLog().logInfo(
+				NLS.bind("Setting haproxy timeout for route {0}", route.getName()));
+		route.setAnnotation(OpenShiftAPIAnnotations.TIMEOUT, "1h");
+		connection.updateResource(route);
+	}
+
+	private IRoute getRoute(IResource resource, Connection connection, IProgressMonitor monitor) {
+		SubMonitor routeMonitor = SubMonitor.convert(monitor);
+		routeMonitor.beginTask("Determine route to set the haproxy timeout for...", 2);
+		if (routeMonitor.isCanceled()) {
+			return null;
+		}
+		List<IService> services = connection.getResources(ResourceKind.SERVICE, resource.getNamespace());
+		Collection<IService> matchingServices = ResourceUtils.getServicesFor(resource, services);
+		routeMonitor.worked(1);
+		if (routeMonitor.isCanceled()) {
+			return null;
+		}
+		List<IRoute> routes = connection.getResources(ResourceKind.ROUTE, resource.getNamespace());
+		// TODO: support multiple matching routes, for now only get first
+		Optional<IRoute> matchingRoute = matchingServices.stream()
+				.flatMap(service -> ResourceUtils.getRoutesFor(service, routes).stream())
+				.findFirst();
+		routeMonitor.worked(1);
+		return matchingRoute.orElse(null);
+	}
+
+	private boolean updateDc(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor)
+			throws CoreException {
+		boolean dcUpdated = false;
+		if(updateDebugmode(dc, context, monitor) 
 				| updateDevmode(dc, context, monitor)) {
 			send(dc, connection, monitor);
+			dcUpdated = true;
+		}
+		return dcUpdated;
+	}
+
+	protected IPod getPod(boolean dcUpdated, IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) throws CoreException {
+		IPod pod = null;
+		if (dcUpdated) {
 			// do not kill all existing pods, the rc will re-create new ones before the
 			// updated dc eventually then kills them and re-creates new ones.
 			pod = waitForNewPod(dc, monitor);
@@ -341,8 +407,8 @@ public class OpenShiftDebugMode {
 		}
 	}
 	
-	private IDeploymentConfig getDeploymentConfig(DebugContext context, IProgressMonitor monitor) throws CoreException {
-		return OpenShiftServerUtils.getDeploymentConfig(context.getServer(), monitor);
+	private IDeploymentConfig getDeploymentConfig(DebugContext context, IResource resource, Connection connection, IProgressMonitor monitor) throws CoreException {
+		return ResourceUtils.getDeploymentConfigFor(resource, connection);
 	}
 
 	protected IPod waitForNewPod(IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {

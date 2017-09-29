@@ -111,7 +111,8 @@ public class OpenShiftServerUtilsTest {
 	public void should_return_deploymentconfig() throws CoreException {
 		// given
 		// when
-		IDeploymentConfig deploymentConfig = (IDeploymentConfig) OpenShiftServerUtils.getDeploymentConfig(server, new NullProgressMonitor());
+		IDeploymentConfig deploymentConfig = 
+				OpenShiftServerUtils.getDeploymentConfig(server, connection, new NullProgressMonitor());
 		// then
 		assertThat(deploymentConfig).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2]);
 	}
@@ -122,7 +123,7 @@ public class OpenShiftServerUtilsTest {
 		// when
 		try {
 			OpenShiftServerUtils.getDeploymentConfig(
-				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[0], connection), new NullProgressMonitor());
+				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[0], connection), connection, new NullProgressMonitor());
 		// then
 			fail("CoreException expected");
 		} catch(CoreException e) {
@@ -136,7 +137,7 @@ public class OpenShiftServerUtilsTest {
 		// when
 		try {
 			OpenShiftServerUtils.getDeploymentConfig(
-				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[3], connection), new NullProgressMonitor());
+				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[3], connection), connection, new NullProgressMonitor());
 		// then
 			fail("CoreException expected");
 		} catch(CoreException e) {

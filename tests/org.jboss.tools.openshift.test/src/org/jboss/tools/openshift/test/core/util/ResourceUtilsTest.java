@@ -707,7 +707,6 @@ public class ResourceUtilsTest {
 		IReplicationController rc = ResourceUtils.getLatestDeploymentConfigVersion(nullRcs);
 		// then
 		assertThat(rc).isNull();
-
 	}
 
 	@Test
