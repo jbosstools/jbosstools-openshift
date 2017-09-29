@@ -223,6 +223,18 @@ public class ResourceUtils {
 		return true;
 	}
 	
+	public static Collection<IService> getServicesFor(IResource resource, Collection<IService> services) {
+		if (resource instanceof IService) {
+				return Collections.singleton((IService) resource);
+		} else if (resource instanceof IReplicationController) {
+			return getServicesFor((IReplicationController) resource, services);
+		} else if (resource instanceof IPod) {
+			return getServicesFor((IPod) resource, services);
+		} else {
+			return Collections.emptyList();
+		}
+	}
+	
 	/**
 	 * Find the collection of services whos selectors match the given pod
 	 * @param pod

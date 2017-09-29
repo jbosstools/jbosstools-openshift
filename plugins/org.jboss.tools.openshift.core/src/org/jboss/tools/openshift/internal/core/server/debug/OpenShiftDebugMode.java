@@ -26,7 +26,6 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
@@ -39,6 +38,8 @@ import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.route.IRoute;
 
 /**
  * A class that handles the debug and devmode mode in OpenShift.
@@ -51,11 +52,9 @@ public class OpenShiftDebugMode {
 	
 	private static final String DEBUG_PORT_PROTOCOL = "TCP";
 	private static final String DEBUG_PORT_NAME = "debug";
+
 	protected DebugContext context;
 
-	/**
-	 * For testing purposes
-	 */
 	public OpenShiftDebugMode(DebugContext context) {
 		Assert.isNotNull(context);
 		this.context = context;
@@ -100,10 +99,11 @@ public class OpenShiftDebugMode {
 	
 	private boolean isDebugEnabled(IDeploymentConfig dc, String devmodeKey, String debugPortKey, int requestedDebugPort, boolean enableRequested) {
 		boolean debugEnabled = false;
-		boolean devmodeEnabled = isDevmodeEnabled(dc, devmodeKey);
+		EnvironmentVariables env = new EnvironmentVariables(dc);
+		boolean devmodeEnabled = env.getBoolean(devmodeKey);
 		if (devmodeEnabled) {
 			// debugging is enabled if devmode and debug port are set
-			String debugPort = getEnv(dc, debugPortKey);
+			String debugPort = env.getString(debugPortKey);
 			if (enableRequested) {
 				// if we should enable, compare current port to requested one
 				debugEnabled = !StringUtils.isBlank(debugPort) 
@@ -155,25 +155,72 @@ public class OpenShiftDebugMode {
 	 * @throws CoreException
 	 */
 	public OpenShiftDebugMode execute(IProgressMonitor monitor) throws CoreException {
-		IDeploymentConfig dc = getDeploymentConfig(context, monitor);
+		Connection connection = OpenShiftServerUtils.getConnection(context.getServer());
+		IResource resource = OpenShiftServerUtils.getResource(context.getServer(), monitor);
+		IDeploymentConfig dc = getDeploymentConfig(resource, connection, monitor);
 		if (dc == null) {
-			throw new CoreException(StatusFactory.errorStatus(
-					OpenShiftCoreActivator.PLUGIN_ID, "No deployment config present that can be updated."));
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+		            NLS.bind("Could not find deployment config for resource {0}. "
+		                    + "Your build might be still running and pods not created yet or "
+		                    + "there might be no labels on your pods pointing to the wanted deployment config.", 
+							resource != null? resource.getName() : "")));
 		}
 
-		IPod pod = getNewPod(monitor, dc, ConnectionsRegistryUtil.getConnectionFor(dc));
+		boolean dcUpdated = updateDc(dc, connection, monitor);
+		IPod pod = getPod(dcUpdated, dc, connection, monitor);
 		context.setPod(pod);
 
+		toggleRouteTimeout(resource, connection, context, monitor);
 		toggleDebugger(context, monitor);
 		
 		return this;
 	}
 
-	protected IPod getNewPod(IProgressMonitor monitor, IDeploymentConfig dc, Connection connection) throws CoreException {
-		IPod pod;
-		if (updateDebugmode(dc, context, monitor)
-				| updateDevmode(dc, context, monitor)) {
+	private void toggleRouteTimeout(IResource resource, Connection connection, DebugContext context, IProgressMonitor monitor)
+			throws CoreException {
+		if (context.isDebugEnabled()) {
+			setRouteTimeout(resource, connection, monitor);
+		} else {
+			resetRouteTimeout(resource, connection, monitor);
+		}
+	}
+
+	private void setRouteTimeout(IResource resource, Connection connection, IProgressMonitor monitor) throws CoreException {
+		monitor.subTask("Increasing route timeout while debugging...");
+
+		IRoute route = new RouteTimeout(resource, connection).set(context, monitor);
+		if (route != null) {
+			safeSend(route, connection, monitor);
+		}
+	}
+
+	private void resetRouteTimeout(IResource resource, Connection connection, IProgressMonitor monitor) 
+		throws CoreException {
+		monitor.subTask("Clearing/restoring route timeout after debugging...");
+
+		IRoute route = new RouteTimeout(resource, connection).reset(context, monitor);
+		if (route != null) {
+			safeSend(route, connection, monitor);
+		}
+	}
+
+	private boolean updateDc(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor)
+			throws CoreException {
+		boolean dcUpdated = updateDebugmode(dc, context, monitor) 
+				| updateDevmode(dc, context, monitor) 
+				| updateLifenessProbe(dc, context, monitor);
+
+		if (dcUpdated) {
 			send(dc, connection, monitor);
+		}
+
+		return dcUpdated;
+	}
+
+	protected IPod getPod(boolean dcUpdated, IDeploymentConfig dc, Connection connection, IProgressMonitor monitor)
+			throws CoreException {
+		IPod pod = null;
+		if (dcUpdated) {
 			// do not kill all existing pods, the rc will re-create new ones before the
 			// updated dc eventually then kills them and re-creates new ones.
 			pod = waitForNewPod(dc, monitor);
@@ -301,48 +348,50 @@ public class OpenShiftDebugMode {
 	}
 
 	private boolean needsDevmodeUpdate(IDeploymentConfig dc, DebugContext context) {
-		boolean devmodeEnabled = isDevmodeEnabled(dc, context.getDevmodeKey());
+		boolean devmodeEnabled = new EnvironmentVariables(dc).getBoolean(context.getDevmodeKey());
 		return devmodeEnabled != context.isDevmodeEnabled();
-	}
-
-	private boolean isDevmodeEnabled(IDeploymentConfig dc, String devmodeKey) {
-		return Boolean.parseBoolean(getEnv(dc, devmodeKey));
-	}
-
-	private String getEnv(IDeploymentConfig dc, String key) {
-		if (dc == null
-				|| dc.getEnvironmentVariables() == null
-				|| StringUtils.isEmpty(key)) {
-			return null;
-		}
-		return dc.getEnvironmentVariables().stream()
-				.filter(ev -> key.equals(ev.getName()))
-				.findFirst()
-				.map(ev -> ev.getValue())
-				.orElse(null);
 	}
 
 	private void updateDevmodeEnvVar(boolean enable, IDeploymentConfig dc, DebugContext context) {
 		if (enable) {
-			dc.setEnvironmentVariable(context.getDevmodeKey(), String.valueOf(enable));
+			new EnvironmentVariables(dc).set(context.getDevmodeKey(), String.valueOf(enable));
 		} else {
-			dc.removeEnvironmentVariable(context.getDevmodeKey());
+			new EnvironmentVariables(dc).remove(context.getDevmodeKey());
 		}
 	}
 
-	protected void send(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) throws CoreException {
-		monitor.subTask(NLS.bind("Updating deployment config {0} and waiting for new pods to run.", dc.getName()));
+	private boolean updateLifenessProbe(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) throws CoreException {
+		if (context.isDebugEnabled()) {
+			return new LivenessProbe(dc).setInitialDelay(context, monitor);
+		} else {
+			return new LivenessProbe(dc).resetInitialDelay(context, monitor);
+		}
+	}
+
+	protected void safeSend(IResource resource, Connection connection, IProgressMonitor monitor) {
+		try {
+			send(resource, connection, monitor);
+		} catch(CoreException e) {
+			OpenShiftCoreActivator.pluginLog().logError(e.getMessage());
+		}
+	}
+
+	protected void send(IResource resource, Connection connection, IProgressMonitor monitor) throws CoreException {
+		monitor.subTask(NLS.bind("Updating {0}...", resource.getName()));
 
 		try {
-			connection.updateResource(dc);
+			connection.updateResource(resource);
 		} catch (OpenShiftException e) {
 			throw new CoreException(
-					StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, NLS.bind("Could update resource {0}.", dc.getName()), e));
+					StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
+							NLS.bind("Could update resource {0}.", resource.getName()), e));
 		}
 	}
-	
-	private IDeploymentConfig getDeploymentConfig(DebugContext context, IProgressMonitor monitor) throws CoreException {
-		return OpenShiftServerUtils.getDeploymentConfig(context.getServer(), monitor);
+
+	private IDeploymentConfig getDeploymentConfig(IResource resource, Connection connection, IProgressMonitor monitor) {
+		monitor.subTask(NLS.bind("Retrieving deployment config for resource {0}.", resource.getName()));
+
+		return ResourceUtils.getDeploymentConfigFor(resource, connection);
 	}
 
 	protected IPod waitForNewPod(IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
@@ -365,6 +414,4 @@ public class OpenShiftDebugMode {
 			throw new OpenShiftCoreException(e);
 		}
 	}
-
-
 }

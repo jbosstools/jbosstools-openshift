@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -47,7 +49,6 @@ import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingl
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.server.ServerUtils;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -59,10 +60,8 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
-import com.openshift.restclient.model.IService;
 
 /**
  * @author Andre Dietisheim
@@ -81,6 +80,9 @@ public class OpenShiftServerUtils {
 	public static final String ATTR_DEVMODE_KEY = "org.jboss.tools.openshift.DevmodeKey"; //$NON-NLS-1$
 	public static final String ATTR_DEBUG_PORT_KEY = "org.jboss.tools.openshift.DebugPortKey"; //$NON-NLS-1$
 	public static final String ATTR_DEBUG_PORT_VALUE = "org.jboss.tools.openshift.DebugPortValue"; //$NON-NLS-1$
+	public static final String ATTR_DEBUG_ROUTE_TIMEOUT = "org.jboss.tools.openshift.debug.RouteTimeout"; //$NON-NLS-1$
+	public static final String ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY = "org.jboss.tools.openshift.debug.livenessProbe.InitialDelay"; //$NON-NLS-1$
+	public static final int VALUE_LIVENESSPROBE_NODELAY = -1; // 1h
 
 	public static final String ATTR_IGNORE_CONTEXT_ROOT = "org.jboss.tools.openshift.IgnoreContextRoot";//$NON-NLS-1$
 	public static final String ATTR_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.Override";//$NON-NLS-1$
@@ -192,6 +194,10 @@ public class OpenShiftServerUtils {
 		server.setAttribute(ATTR_DEBUG_PORT_VALUE, debugPortValue);
 	}
 
+	public static void updateServerAttribute(String attribute, String value, IServerAttributes server) throws CoreException {
+		updateServerAttribute(attribute, value, server.createWorkingCopy());
+	}
+
 	/**
 	 * Sets the given value for the given attribute in the given server and saves it.
 	 * 
@@ -200,14 +206,10 @@ public class OpenShiftServerUtils {
 	 * @param server
 	 * @throws CoreException
 	 */
-	public static void updateServer(String attribute, String value, IServerWorkingCopy server) throws CoreException {
-		if (!StringUtils.isEmpty(attribute)) {
+	public static void updateServerAttribute(String attribute, String value, IServerWorkingCopy server) throws CoreException {
+		if (StringUtils.isEmpty(attribute)) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					"Could not update server project, setting name missing."));
-		}
-		if (!StringUtils.isEmpty(value)) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not update server project, value for setting {0} is missing.", attribute)));
+					NLS.bind("Could not update server {0}, attribute name is missing.", server.getName())));
 		}
 		server.setAttribute(attribute, value);
 		server.save(true, new NullProgressMonitor());
@@ -467,6 +469,32 @@ public class OpenShiftServerUtils {
 		return getAttribute(ATTR_DEBUG_PORT_VALUE, server);
 	}
 
+	public static boolean hasRouteTimeout(IServerAttributes server) {
+		return !StringUtils.isEmpty(getAttribute(ATTR_DEBUG_ROUTE_TIMEOUT, server));
+	}
+
+	public static String getRouteTimeout(IServerAttributes server) {
+		return getAttribute(ATTR_DEBUG_ROUTE_TIMEOUT, server);
+	}
+
+	public static void setRouteTimeout(String timeout, IServerAttributes server) throws CoreException {
+		updateServerAttribute(ATTR_DEBUG_ROUTE_TIMEOUT, timeout, server);
+	}
+
+	public static int getLivenessProbeInitialDelay(IServerAttributes server) {
+		return NumberUtils.toInt(getAttribute(ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY, server), VALUE_LIVENESSPROBE_NODELAY);
+	}
+
+	public static void setLivenessProbeInitialDelay(int delay, IServerAttributes server) throws CoreException {
+		String stringDelay = null;
+		if (delay == VALUE_LIVENESSPROBE_NODELAY) {
+			stringDelay = null;
+		} else {
+			stringDelay = String.valueOf(delay);
+		}
+		updateServerAttribute(ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY, stringDelay, server);
+	}
+
 	/**
 	 * Loads the pod path from docker image metadata for the given resource and server.
 	 * Should <strong>NOT</strong> be executed from display thread.
@@ -558,36 +586,6 @@ public class OpenShiftServerUtils {
 	 */
 	private static String getProjectAttribute(String name, String defaultValue, IProject project) {
 		return ServerUtils.getProjectAttribute(name, defaultValue, SERVER_PROJECT_QUALIFIER, project);
-	}
-	
-	/**
-	 * Returns the deployment config for the given server (attributes). The
-	 * match is done by the service that the given (openshift server) is bound
-	 * to. 
-	 * This method does remote calls to the OpenShift server and thus should
-	 * never be called from the UI thread.
-	 * 
-	 * @param server
-	 * @return the replication controller for the given server
-	 * 
-	 * @see #getResource(IServerAttributes)
-	 * @see ResourceUtils#getPodsFor(IService, Collection)
-	 */
-	public static IDeploymentConfig getDeploymentConfig(IServerAttributes server, IProgressMonitor monitor) throws CoreException {
-		assertServerNotNull(server);
-		
-		Connection connection = getConnectionChecked(server);
-		IResource resource = getResourceChecked(server, connection, monitor);
-		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(resource, connection);
-		if (dc == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-		            NLS.bind("Could not find deployment config for {0}. "
-		                    + "Your build might be still running and pods not created yet or "
-		                    + "there might be no labels on your pods pointing to the wanted deployment config.", 
-							server.getName())));
-		}
-
-		return dc;
 	}
 
 	/**

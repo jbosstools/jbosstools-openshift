@@ -35,4 +35,5 @@ public interface OpenShiftAPIAnnotations {
 	static final String ICON_CLASS = "iconClass";
 	static final String PROVIDER = "provider";
 	static final String TAGS = "tags";
+	static final String TIMEOUT = "haproxy.router.openshift.io/timeout";
 }
