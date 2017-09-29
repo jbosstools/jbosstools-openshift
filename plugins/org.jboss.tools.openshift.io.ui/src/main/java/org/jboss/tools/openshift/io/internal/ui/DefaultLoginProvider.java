@@ -19,17 +19,34 @@ import org.jboss.tools.openshift.io.core.model.IAccount;
 import org.jboss.tools.openshift.io.internal.ui.dialog.BrowserBasedLoginDialog;
 
 /**
- * Login provider that will launch a browser to perform the login and extract the JSON.
+ * Login provider that will launch a browser to perform the login and extract
+ * the JSON.
  * 
  */
 public class DefaultLoginProvider implements LoginProvider {
 
-
 	@Override
 	public LoginResponse login(ICluster cluster, IAccount account) {
+		if (null == Display.getCurrent()) {
+			final LoginResponse response[] = new LoginResponse[1];
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					response[0] = loginInUI(cluster, account);
+				}
+			});
+			return response[0];
+			
+		} else {
+			return loginInUI(cluster, account);
+		}
+	}
+
+	public LoginResponse loginInUI(ICluster cluster, IAccount account) {
 		LoginResponse response = null;
-		
-		BrowserBasedLoginDialog dialog = new BrowserBasedLoginDialog(Display.getCurrent().getActiveShell(), cluster.getLoginURL(), cluster.getLandingURL());
+
+		BrowserBasedLoginDialog dialog = new BrowserBasedLoginDialog(Display.getCurrent().getActiveShell(),
+				cluster.getLoginURL(), cluster.getLandingURL());
 		if (dialog.open() == Window.OK) {
 			response = dialog.getInfo();
 		}
