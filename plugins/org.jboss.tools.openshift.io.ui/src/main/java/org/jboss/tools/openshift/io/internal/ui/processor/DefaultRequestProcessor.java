@@ -11,6 +11,11 @@
 package org.jboss.tools.openshift.io.internal.ui.processor;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.swt.browser.Browser;
 import org.jboss.tools.openshift.io.core.LoginResponse;
@@ -19,14 +24,8 @@ import org.jboss.tools.openshift.io.internal.ui.OpenShiftIOUIActivator;
 
 public class DefaultRequestProcessor implements RequestProcessor {
 
-	private static final String SCRIPT = "           var request = (function() {\r\n" + 
-			"    var _get = {};\r\n" + 
-			"    var re = /[?&]([^=&]+)(=?)([^&]*)/g;\r\n" + 
-			"    while (m = re.exec(location.search))\r\n" + 
-			"        _get[decodeURIComponent(m[1])] = (m[2] == '=' ? decodeURIComponent(m[3]) : true);\r\n" + 
-			"    return _get;\r\n" + 
-			"})();\r\n" + 
-			"return request.token_json;";
+	private static final String SCRIPT = "return location.search;";
+	
 	private String landingURL;
 			
 	public DefaultRequestProcessor(String landingURL) {
@@ -39,12 +38,27 @@ public class DefaultRequestProcessor implements RequestProcessor {
 		try {
 			if (url.startsWith(landingURL)) {
 				String tokenJSON = (String) browser.evaluate(SCRIPT);
-				response = OSIOUtils.decodeLoginResponse(tokenJSON);
+				URI uri = new URI(tokenJSON);
+				String json = getJSON(uri);
+				if (json != null) {
+					response = OSIOUtils.decodeLoginResponse(json);
+				}
 			}
 		}
-		catch (RuntimeException | IOException e) {
+		catch (RuntimeException | IOException | URISyntaxException e) {
 			OpenShiftIOUIActivator.logError(e.getLocalizedMessage(), e);
 		}
 		return response;
+	}
+
+	private String getJSON(URI uri) {
+		String[] query = uri.getQuery().split("&");
+		Map<String, String> parameters = Arrays.stream(query).map(parameter -> new String[] { parameter.split("=")[0], parameter.split("=")[1]}).collect(Collectors.toMap(element -> element[0], element -> element[1]));
+		if (parameters.containsKey("token_json")) {
+			return parameters.get("token_json");
+		} else if (parameters.containsKey("api_token")) {
+			return parameters.get("api_token");
+		}
+		return null;
 	}
 }
