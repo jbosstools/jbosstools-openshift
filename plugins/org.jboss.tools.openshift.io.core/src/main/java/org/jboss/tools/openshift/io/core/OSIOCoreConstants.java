@@ -22,7 +22,7 @@ public final class OSIOCoreConstants {
 	
 	public static final String OSIO_ENDPOINT = "https://auth.openshift.io/api/";
 	
-	public static final String LOGIN_SUFFIX = "login?api_token=jbosstools&redirect=";
+	public static final String LOGIN_SUFFIX = "login?api_client=jbosstools&redirect=";
 	
 	public static final String REFRESH_SUFFIX = "token/refresh";
 	

@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.io.internal.ui.preferences;
 
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.internal.layout.ICachingLayout;
 import org.jboss.tools.openshift.io.core.AccountService;
 import org.jboss.tools.openshift.io.core.model.ICluster;
 import org.jboss.tools.openshift.io.core.model.IAccount;
@@ -53,6 +54,8 @@ public class MainPreferencePage
 	
 	private Button button;
 	
+	private ICluster osioCluster = AccountService.getDefault().getModel().getClusters().get(0);
+	
 	public MainPreferencePage() {
 		super();
 	}
@@ -78,7 +81,9 @@ public class MainPreferencePage
 		button = new Button(parent, SWT.PUSH);
 		button.setText("Remove");
 		button.addSelectionListener(SelectionListener.widgetSelectedAdapter(this::onButton));
-		
+		if (osioCluster.getAccounts().isEmpty()) {
+			button.setEnabled(false);
+		}
 	}
 
 	void onButton(SelectionEvent event) {
@@ -89,11 +94,10 @@ public class MainPreferencePage
 	}
 	void updateLabel() {
 		String msg;
-		ICluster cluster = AccountService.getDefault().getModel().getClusters().get(0);
-		if (removed || cluster.getAccounts().isEmpty()) {
+		if (removed || osioCluster.getAccounts().isEmpty()) {
 			msg = "No configured accounts";
 		} else {
-			IAccount account = cluster.getAccounts().get(0);
+			IAccount account = osioCluster.getAccounts().get(0);
 			msg = account.getId() + " account configured valid until " + Date.from(Instant.ofEpochMilli(account.getAccessTokenExpiryTime()));
 		}
 		label.setText(msg);

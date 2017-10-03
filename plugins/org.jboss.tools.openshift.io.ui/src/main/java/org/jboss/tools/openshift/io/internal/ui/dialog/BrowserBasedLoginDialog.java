@@ -84,7 +84,6 @@ public class BrowserBasedLoginDialog extends Dialog {
 			@Override
 			public void completed(ProgressEvent event) {
 				progressBar.setSelection(0);
-				OpenShiftIOUIActivator.getDefault().logInfo("URL=" + browser.getUrl());
 				info = processor.getRequestInfo(browser, browser.getUrl(), browser.getText());
 				if (null != info) {
 					close();
