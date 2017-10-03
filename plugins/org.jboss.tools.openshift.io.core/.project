@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.jboss.tools.openshift.test</name>
+	<name>org.jboss.tools.openshift.io.core</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -21,17 +21,12 @@
 			</arguments>
 		</buildCommand>
 		<buildCommand>
-			<name>org.sonarlint.eclipse.core.sonarlintBuilder</name>
+			<name>org.zeroturnaround.eclipse.rebelXmlBuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.m2e.core.maven2Builder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>org.zeroturnaround.eclipse.rebelXmlBuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>

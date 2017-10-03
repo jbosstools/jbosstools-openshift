@@ -21,6 +21,8 @@
 		<module>org.jboss.tools.openshift.cdk.feature</module>
 		<module>org.jboss.tools.openshift.cdk.test.feature</module>
 		<module>org.jboss.tools.openshift.js.feature</module>
+		<module>org.jboss.tools.openshift.io.feature</module>
+		<module>org.jboss.tools.openshift.io.test.feature</module>
 	</modules>
 	<build>
 		<plugins>
