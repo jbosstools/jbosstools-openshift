@@ -21,6 +21,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.VagrantBinaryUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
 
 public class VagrantServiceManagerEnvironmentLoader extends ServiceManagerEnvironmentLoader {
 	private static final String DEFAULT_IMAGE_REGISTRY_URL = "https://hub.openshift.rhel-cdk.10.1.2.2.xip.io";
@@ -66,6 +67,8 @@ public class VagrantServiceManagerEnvironmentLoader extends ServiceManagerEnviro
 		Map<String, String> env = getEnv(server);
 		String[] args = new String[] { CDKConstants.VAGRANT_CMD_SERVICE_MANAGER,
 				CDKConstants.VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV };
+		args = CDK32Server.getArgsWithProfile(server, args);
+
 		String cmdLoc = VagrantBinaryUtility.getVagrantLocation(server);
 		File wd =  CDKServerUtility.getWorkingDirectory(server);
 		try {

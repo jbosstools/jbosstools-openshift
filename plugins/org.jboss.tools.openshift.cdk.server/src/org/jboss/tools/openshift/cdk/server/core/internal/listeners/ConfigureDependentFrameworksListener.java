@@ -78,6 +78,8 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 			return true;
 		if( server.getServerType().getId().equals(CDKServer.CDK_V3_SERVER_TYPE)) 
 			return true;
+		if( server.getServerType().getId().equals(CDKServer.CDK_V32_SERVER_TYPE)) 
+			return true;
 		return false;
 	}
 	

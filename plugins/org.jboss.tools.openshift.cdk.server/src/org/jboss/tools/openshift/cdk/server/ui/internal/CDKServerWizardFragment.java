@@ -226,10 +226,11 @@ public class CDKServerWizardFragment extends WizardFragment {
 		String retString = null;
 		if( homeDir == null || !(new File(homeDir)).exists()) {
 			retString = "The selected folder does not exist.";
+			toggleDecorator(homeText, retString);
 		} else if( !(new File(homeDir, "Vagrantfile").exists())) {
 			retString = "The selected folder does not have a Vagrantfile";
+			toggleDecorator(homeText, retString);
 		}
-		toggleDecorator(homeText, retString);
 		return retString;
 	}
 	

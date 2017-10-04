@@ -110,18 +110,42 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 
 		
 		String retString = null;
+		String tmpStr = null;
 		if( homeDir == null || !(new File(homeDir)).exists()) {
-			retString = "The selected file does not exist.";
+			tmpStr = "The selected file does not exist.";
 		} else if( !(new File(homeDir).canExecute())) {
-			retString = "The selected file is not executable.";
-		} else if( minishiftVersionProps != null && !minishiftVersionProps.isValid()) {
-			// We have props but it's missing the expected version key
-			String err = minishiftVersionProps.getError();
-			String defErr = "Unknown error while checking minishift version";
-			retString = (err == null ? defErr : err);
+			tmpStr = "The selected file is not executable.";
 		}
-		toggleDecorator(homeText, retString);
+		
+		toggleDecorator(homeText, tmpStr);
+		retString = tmpStr;
+		tmpStr = null;
+		if( minishiftVersionProps == null ) {
+			return "Unknown error when checking minishift version: " + homeDir;
+		} else if( !minishiftVersionProps.isValid()) {
+			String err = minishiftVersionProps.getError();
+			if( err == null ) {
+				err = "Unknown error while checking minishift version";
+			}
+			return err;
+		} else {
+			String versionCompatError = isVersionCompatible(minishiftVersionProps);
+			if( versionCompatError != null )
+				return versionCompatError;
+		}
 		return retString;
+	}
+	
+
+	protected String isVersionCompatible(MinishiftVersions versions) {
+		String cdkVers = versions.getCDKVersion();
+		if( cdkVers == null ) {
+			return "Cannot determine CDK version.";
+		}
+		if( cdkVers.startsWith("3.0.") || cdkVers.startsWith("3.1")) {
+			return null;
+		}
+		return "CDK version " + cdkVers + " is not compatible with this server adapter.";
 	}
 	
 	@Override

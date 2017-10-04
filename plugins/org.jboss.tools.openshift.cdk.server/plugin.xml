@@ -37,6 +37,23 @@
             startTimeout="1800000"
             stopTimeout="900000"
             supportsRemoteHosts="false"/>
+    
+    <serverType
+            behaviourClass="org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour"
+            class="org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server"
+            name="%openshift.cdk32.name"
+            description="%openshift.cdk32.description"
+            hasConfiguration="false"
+            id="org.jboss.tools.openshift.cdk.server.type.v32"
+            initialState="stopped"
+            launchConfigId="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchType"
+            launchModes="run"
+            runtime="false"
+            runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type"
+            startBeforePublish="false"
+            startTimeout="1800000"
+            stopTimeout="900000"
+            supportsRemoteHosts="false"/>
     </extension>
     
     
@@ -76,7 +93,7 @@
          point="org.eclipse.wst.server.ui.serverImages">
       <image
             icon="$nl$/icons/cdk_box_16.png"
-            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3,org.jboss.tools.openshift.cdk.server.runtime.type"
+            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3,org.jboss.tools.openshift.cdk.server.type.v32,org.jboss.tools.openshift.cdk.server.runtime.type"
             id="org.jboss.tools.openshift.cdk.server.type.icon"/>
    </extension>
 
@@ -95,6 +112,10 @@
             class="org.jboss.tools.openshift.cdk.server.ui.internal.CDK3ServerWizardFragment"
             typeIds="org.jboss.tools.openshift.cdk.server.type.v3"
         	id="org.jboss.tools.openshift.cdk.server.ui.internal.CDK3ServerWizardFragment"/>
+      <fragment
+            class="org.jboss.tools.openshift.cdk.server.ui.internal.CDK32ServerWizardFragment"
+            typeIds="org.jboss.tools.openshift.cdk.server.type.v32"
+        	id="org.jboss.tools.openshift.cdk.server.ui.internal.CDK32ServerWizardFragment"/>
    </extension>
 
 
@@ -121,17 +142,23 @@
             typeIds="org.jboss.tools.openshift.cdk.server.type"/>
       <section
             class="org.jboss.tools.openshift.cdk.server.ui.internal.MinishiftLocationSection"
-            id="org.jboss.tools.openshift.cdk.server.ui.internal.LocationSection2"
+            id="org.jboss.tools.openshift.cdk.server.ui.internal.LocationSection3"
             insertionId="org.eclipse.wst.server.editor.overview.left"
             order="8"
             typeIds="org.jboss.tools.openshift.cdk.server.type.v3"/>
+      <section
+            class="org.jboss.tools.openshift.cdk.server.ui.internal.CDK32LocationSection"
+            id="org.jboss.tools.openshift.cdk.server.ui.internal.LocationSection32"
+            insertionId="org.eclipse.wst.server.editor.overview.left"
+            order="8"
+            typeIds="org.jboss.tools.openshift.cdk.server.type.v32"/>
             
       <section
             class="org.jboss.tools.openshift.cdk.server.ui.internal.CDKCredentialSection"
             id="org.jboss.tools.openshift.cdk.server.ui.internal.CDKCredentialSection"
             insertionId="org.eclipse.wst.server.editor.overview.left"
             order="9"
-            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3"/>
+            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3,,org.jboss.tools.openshift.cdk.server.type.v32"/>
    </extension>
    
    
@@ -162,6 +189,12 @@
             enabled="true"
             id="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector"
             name="%cdk.detector.3">
+      </runtimeDetector>
+      <runtimeDetector
+            class="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK32RuntimeDetector"
+            enabled="true"
+            id="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK32RuntimeDetector"
+            name="%cdk.detector.32">
       </runtimeDetector>
    </extension>
 
@@ -208,7 +241,7 @@
       <subsystemMapping
             id="launch.cdk3"
             mappedId="launch.cdk3"
-            serverTypes="org.jboss.tools.openshift.cdk.server.type.v3">
+            serverTypes="org.jboss.tools.openshift.cdk.server.type.v3,org.jboss.tools.openshift.cdk.server.type.v32">
       </subsystemMapping>
 
       <subsystem
@@ -220,7 +253,7 @@
       <subsystemMapping
             id="shutdown.cdk3"
             mappedId="shutdown.cdk3"
-            serverTypes="org.jboss.tools.openshift.cdk.server.type.v3">
+            serverTypes="org.jboss.tools.openshift.cdk.server.type.v3,org.jboss.tools.openshift.cdk.server.type.v32">
       </subsystemMapping>
    </extension>
    

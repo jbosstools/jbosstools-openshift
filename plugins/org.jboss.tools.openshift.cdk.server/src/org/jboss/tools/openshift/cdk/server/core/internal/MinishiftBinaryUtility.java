@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IExternalLaunchConstants;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
 
@@ -34,6 +35,10 @@ public class MinishiftBinaryUtility {
 	
 	public static String getMinishiftLocation(IServer server) {
 		if( server != null ) {
+			String minishiftFile = server.getAttribute(CDK32Server.MINISHIFT_FILE, (String)null);
+			if( minishiftFile != null )
+				return minishiftFile;
+			
 			try {
 				ILaunchConfiguration lc = server.getLaunchConfiguration(false, new NullProgressMonitor());
 				return getMinishiftLocation(lc);

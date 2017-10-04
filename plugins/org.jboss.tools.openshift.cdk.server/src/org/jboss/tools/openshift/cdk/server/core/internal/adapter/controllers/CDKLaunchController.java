@@ -148,7 +148,7 @@ public class CDKLaunchController extends AbstractCDKLaunchController implements 
 		}
 		
 		// Poll the server once more 
-		IStatus stat = getCDKPoller().getCurrentStateSynchronous(getServer());
+		IStatus stat = getCDKPoller(s).getCurrentStateSynchronous(s);
 		if( stat.isOK()) {
 			beh.setServerStarted();
 			((Server) beh.getServer()).setMode(ILaunchManager.RUN_MODE);
@@ -252,9 +252,8 @@ public class CDKLaunchController extends AbstractCDKLaunchController implements 
 		return (LaunchManager)DebugPlugin.getDefault().getLaunchManager();
 	}
 	
-	protected AbstractCDKPoller getCDKPoller() {
-		VagrantPoller vp = new VagrantPoller();
-		return vp;
+	protected AbstractCDKPoller getCDKPoller(IServer server) {
+		return new VagrantPoller();
 	}
 	
 	protected void processTerminatedDelay() {
@@ -276,5 +275,4 @@ public class CDKLaunchController extends AbstractCDKLaunchController implements 
 			
 		}.schedule();
 	}
-	
 }

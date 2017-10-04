@@ -227,7 +227,7 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 		processTerminatedDelay();
 		
 		// Poll the server once more 
-		AbstractCDKPoller vp = getCDKPoller();
+		AbstractCDKPoller vp = getCDKPoller(getServer());
 		IStatus stat = vp.getCurrentStateSynchronous(getServer());
 		if( stat.isOK()) {
 			beh.setServerStarted();
@@ -270,7 +270,7 @@ public abstract class AbstractCDKLaunchController extends AbstractSubsystemContr
 		return false;
 	}
 
-	protected abstract AbstractCDKPoller getCDKPoller();
+	protected abstract AbstractCDKPoller getCDKPoller(IServer server);
 	
 	protected void processTerminatedDelay() {
 		// Do nothing, subclass may sleep here depending on their use case

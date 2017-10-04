@@ -49,7 +49,8 @@ public abstract class AbstractCDKRuntimeDetector extends AbstractRuntimeDetector
 	@Override
 	public boolean initializeRuntime(RuntimeDefinition runtimeDefinition) throws CoreException {
 		if (!exists(runtimeDefinition) && validate(runtimeDefinition.getLocation())) {
-			IServerType st = ServerCore.findServerType(getServerType());
+			String serverTypeId = getServerType();
+			IServerType st = ServerCore.findServerType(serverTypeId);
 			String possibleId = runtimeDefinition.getName();
 			String suffixed = ServerNamingUtility.getDefaultServerName(possibleId);
 			try {

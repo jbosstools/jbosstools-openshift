@@ -12,6 +12,8 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +40,9 @@ import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.OpenShiftException;
 
 public class MinishiftPoller extends AbstractCDKPoller {
-
+	public MinishiftPoller() {
+		
+	}
 	protected void launchThread() {
 		launchThread("CDK Minishift Poller");
 	}	
@@ -60,12 +64,12 @@ public class MinishiftPoller extends AbstractCDKPoller {
 		}
 		return f;
 	}
-		
 	
 	protected IStatus onePing(IServer server, Map<String, String> env)
 			throws PollingException, IOException, TimeoutException {
 
 		String[] args = new String[] { CDKConstants.VAGRANT_CMD_STATUS };
+		args = CDK32Server.getArgsWithProfile(server, args);
 		String vagrantcmdloc = MinishiftBinaryUtility.getMinishiftLocation(server);
 		try {
 			String[] lines = CDKLaunchUtility.callMachineReadable(
@@ -95,7 +99,7 @@ public class MinishiftPoller extends AbstractCDKPoller {
 		}
 	}
 
-	private IStatus parseOutput(String[] lines) {
+	protected IStatus parseOutput(String[] lines) {
 		if( lines.length == 1 && lines[0] != null ) {
 			if("Running".equals(lines[0])) {
 				// throws OpenShiftNotReadyPollingException on failure

@@ -159,7 +159,13 @@ public class CDKRegistryTest extends TestCase {
 			IServerType stt = getServerType(CDKServer.CDK_V3_SERVER_TYPE);
 			assertNotNull(stt);
 			IServerWorkingCopy swc = stt.createServer(name, null, null, new NullProgressMonitor());
-			swc.setAttribute(CDK3Server.MINISHIFT_FILE, "/home/user/minishift_folder/minishift");
+			try {
+				File f = File.createTempFile("minishift", System.currentTimeMillis() + "");
+				swc.setAttribute(CDK3Server.MINISHIFT_FILE, f.getAbsolutePath());
+				f.createNewFile();
+			} catch(IOException ioe) {
+				swc.setAttribute(CDK3Server.MINISHIFT_FILE, "/home/user/minishift_folder/minishift");
+			}
 			swc.setAttribute(CDKServer.PROP_USERNAME, "user");
 			swc.setAttribute(CDK3Server.PROP_HYPERVISOR, "virtualbox");
 			return swc.save(true, new NullProgressMonitor());

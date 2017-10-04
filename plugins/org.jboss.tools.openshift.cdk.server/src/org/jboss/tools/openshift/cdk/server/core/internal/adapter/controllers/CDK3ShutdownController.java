@@ -16,17 +16,23 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Poller;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPoller;
 
 public class CDK3ShutdownController extends AbstractCDKShutdownController {
 
-	protected AbstractCDKPoller getCDKPoller() {
-		MinishiftPoller vp = new MinishiftPoller();
-		return vp;
+	@Override
+	protected AbstractCDKPoller getCDKPoller(IServer server) {
+		if( server.getServerType().getId().equals(CDK3Server.CDK_V3_SERVER_TYPE)) {
+			return new MinishiftPoller();
+		}
+		return new CDK32Poller();
 	}
-	
+
 	protected String getShutdownArgs() {
-		String cmd = "stop";
+		String profiles = CDK3LaunchController.getProfileString(getServer());
+		String cmd = profiles + "stop";
 		return cmd;
 	}
 	

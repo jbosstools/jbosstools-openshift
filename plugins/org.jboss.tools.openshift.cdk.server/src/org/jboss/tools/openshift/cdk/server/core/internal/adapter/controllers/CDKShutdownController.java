@@ -21,7 +21,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 
 public class CDKShutdownController extends AbstractCDKShutdownController {
 
-	protected AbstractCDKPoller getCDKPoller() {
+	protected AbstractCDKPoller getCDKPoller(IServer server) {
 		return new VagrantPoller();
 	}
 

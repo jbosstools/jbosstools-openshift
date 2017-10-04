@@ -41,6 +41,8 @@ import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Poller;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
@@ -79,11 +81,20 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		String cmdLoc = server.getAttribute(CDK3Server.MINISHIFT_FILE, (String) null);
 		wc.setAttribute(ATTR_LOCATION, cmdLoc);
 
-		String defaultArgs = "start --vm-driver="
+		String profiles = getProfileString(server);
+		String defaultArgs = profiles + "start --vm-driver="
 				+ cdkServer.getServer().getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
 
 		String currentVal = wc.getAttribute(ATTR_ARGS, defaultArgs);
 		wc.setAttribute(ATTR_ARGS, currentVal);
+	}
+	
+	static String getProfileString(IServer server) {
+		String profiles = String.join(" ", CDK32Server.getArgsWithProfile(server, new String[] {}));
+		if( !profiles.isEmpty()) {
+			profiles = profiles + " ";
+		}
+		return profiles;
 	}
 
 	@Override
@@ -120,7 +131,8 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		// override vm-driver args
 		String targetedHypervisor = cdkServer.getServer().getAttribute(CDK3Server.PROP_HYPERVISOR,
 				CDK3Server.getHypervisors()[0]);
-		String defaultArgs = "start --vm-driver=" + targetedHypervisor;
+		String profiles = getProfileString(getServer());
+		String defaultArgs = profiles + "start --vm-driver=" + targetedHypervisor;
 		String currentVal = workingCopy.getAttribute(ATTR_ARGS, defaultArgs);
 		String replaced = ArgsUtil.setArg(currentVal, null, "--vm-driver", targetedHypervisor);
 		workingCopy.setAttribute(ATTR_ARGS, replaced);
@@ -170,7 +182,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		}
 
 		// Poll the server once more
-		IStatus stat = getCDKPoller().getCurrentStateSynchronous(getServer());
+		IStatus stat = getCDKPoller(s).getCurrentStateSynchronous(s);
 		if (stat.isOK()) {
 			beh.setServerStarted();
 			((Server) beh.getServer()).setMode("run");
@@ -250,9 +262,11 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 	}
 
 	@Override
-	protected AbstractCDKPoller getCDKPoller() {
-		MinishiftPoller vp = new MinishiftPoller();
-		return vp;
+	protected AbstractCDKPoller getCDKPoller(IServer server) {
+		if( server.getServerType().getId().equals(CDK3Server.CDK_V3_SERVER_TYPE)) {
+			return new MinishiftPoller();
+		}
+		return new CDK32Poller();
 	}
 
 	@Override

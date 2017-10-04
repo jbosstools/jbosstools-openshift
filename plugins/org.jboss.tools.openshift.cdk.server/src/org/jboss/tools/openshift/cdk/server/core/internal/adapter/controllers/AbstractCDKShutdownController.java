@@ -50,7 +50,7 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 	
 	
 
-	protected abstract AbstractCDKPoller getCDKPoller();
+	protected abstract AbstractCDKPoller getCDKPoller(IServer server);
 
 	protected abstract String getShutdownArgs();
 	
@@ -89,7 +89,7 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 	public void stop(boolean force) {
 		getBehavior().setServerStopping();
 
-		IStatus state = PollThreadUtils.isServerStarted(getServer(), getCDKPoller());
+		IStatus state = PollThreadUtils.isServerStarted(getServer(), getCDKPoller(getServer()));
 		boolean started = state.isOK();
 		if( !started ) {
 			if( state.getSeverity() == IStatus.ERROR ) {
@@ -222,7 +222,7 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 				} catch( InterruptedException ie) {}
 				
 				// Poll the server once more 
-				IStatus stat = getCDKPoller().getCurrentStateSynchronous(getServer());
+				IStatus stat = getCDKPoller(server).getCurrentStateSynchronous(getServer());
 				if( stat.getSeverity() == IStatus.ERROR) {
 					beh.setServerStopped();
 					beh.setRunMode("run");

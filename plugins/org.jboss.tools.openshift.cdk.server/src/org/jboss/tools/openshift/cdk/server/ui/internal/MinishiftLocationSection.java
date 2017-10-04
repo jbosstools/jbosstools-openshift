@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
@@ -55,7 +54,12 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 	private Job longValidation;
 	private MinishiftVersions minishiftVersionProps = null;
 
-	
+	Text msHomeText;
+	Button msHomeBrowse;
+	ControlDecoration msHomeDecor;
+	SelectionListener msHomeSelListener;
+	ModifyListener msHomeModListener;
+
 	public MinishiftLocationSection() {
 		super(SECTION_TITLE, LABEL_STRING, COMMAND_NAME, LOC_ATTR);
 	}
@@ -68,19 +72,14 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 	}
 
 	protected void createHypervisorWidgets(FormToolkit toolkit, Composite composite) {
-		Label l = toolkit.createLabel(composite, "Hypervisor:");
+		toolkit.createLabel(composite, "Hypervisor:");
 		hypervisorCombo = new Combo(composite,  SWT.READ_ONLY);
 		hypervisorCombo.setLayoutData(GridDataFactory.defaultsFor(hypervisorCombo).span(4, 1).create());
 		hypervisorCombo.setItems(CDK3Server.getHypervisors());
 	}
 	
-	Text msHomeText;
-	Button msHomeBrowse;
-	ControlDecoration msHomeDecor;
-	SelectionListener msHomeSelListener;
-	ModifyListener msHomeModListener;
 	protected void createMinishiftHomeWidgets(FormToolkit toolkit, Composite composite) {
-		Label l = toolkit.createLabel(composite, "Minishift Home:");
+		toolkit.createLabel(composite, "Minishift Home:");
 		msHomeText = toolkit.createText(composite, "", SWT.SINGLE | SWT.BORDER);
 		msHomeBrowse = toolkit.createButton(composite, "Browse...", SWT.PUSH);
 		
@@ -211,7 +210,7 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		longValidation.schedule(750);
 	}
 	
-	private String getErrorString() {
+	protected String getErrorString() {
 		// Subclass override
 		Text t = getLocationText();
 		if( t != null && !t.isDisposed()) {
@@ -229,10 +228,26 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 					err = "Unknown error while checking minishift version";
 				}
 				return err;
+			} else {
+				String versionCompatError = isVersionCompatible(minishiftVersionProps);
+				if( versionCompatError != null )
+					return versionCompatError;
 			}
 		}
 		return null;
 	}
+	
+	protected String isVersionCompatible(MinishiftVersions versions) {
+		String cdkVers = versions.getCDKVersion();
+		if( cdkVers == null ) {
+			return "Cannot determine CDK version.";
+		}
+		if( cdkVers.startsWith("3.0.") || cdkVers.startsWith("3.1")) {
+			return null;
+		}
+		return "CDK version " + cdkVers + " is not compatible with this server adapter.";
+	}
+	
 	
 	@Override
 	public IStatus[] getSaveStatus() {

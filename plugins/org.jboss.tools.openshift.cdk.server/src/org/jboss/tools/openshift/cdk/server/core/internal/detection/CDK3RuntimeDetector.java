@@ -48,8 +48,19 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 		
 		String envvar = System.getenv("MINISHIFT_HOME");
 		boolean matchesEnvVar = envvar != null && new File(envvar).exists() && super.validate(root);
-		return matchesEnvVar;
-		
+		if( matchesEnvVar ) {
+			String vers = getDefinitionVersion(root);
+			if( matchesExpectedVersion(vers)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	protected boolean matchesExpectedVersion(String version) {
+		if( version.startsWith("3.0") || version.startsWith("3.1.")) 
+			return true;
+		return false;
 	}
 	
 	@Override

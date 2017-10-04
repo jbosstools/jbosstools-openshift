@@ -24,6 +24,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 
 public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvironmentLoader {
@@ -34,6 +35,15 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 
 	@Override
 	public ServiceManagerEnvironment loadServiceManagerEnvironment(IServer server, boolean suppressErrors) {
+		String minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
+		if( minishiftLoc == null || minishiftLoc.isEmpty() || !(new File(minishiftLoc).exists())) {
+			if( !suppressErrors ) {
+				String msg = "Server " + server.getName() + " does not have a minishift location defined.";
+				CDKCoreActivator.pluginLog().logError(msg);
+			}
+			return null;
+		}
+		
 		// Load the docker env
 		Map<String, String> adbEnv = loadDockerEnv(server);
 		
@@ -97,6 +107,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
 		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
 		String[] args = new String[] { "openshift", "registry" };
+		args = CDK32Server.getArgsWithProfile(server, args);
 		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
 		
 		try {
@@ -143,6 +154,8 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
 		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
 		String[] args = new String[] { "docker-env" };
+		args = CDK32Server.getArgsWithProfile(server, args);
+
 		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
 		try {
 			HashMap<String, String> adbEnv = callAndParseEnvVar(env, args, cmdLoc, wd);
@@ -157,6 +170,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 	protected Properties loadOpenshiftConsoleDetails(IServer server, boolean suppressError) {
 		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
 		String[] args = new String[] { "console", "--machine-readable" };
+		args = CDK32Server.getArgsWithProfile(server, args);
 		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();
 		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
 		try {
