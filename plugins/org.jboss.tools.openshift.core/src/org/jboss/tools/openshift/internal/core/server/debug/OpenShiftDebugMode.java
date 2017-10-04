@@ -62,13 +62,17 @@ public class OpenShiftDebugMode {
 	}
 
 	/**
-	 * Enables debugging in given context.  No change is
-	 * executed in OpenShift, the change is only in the given local context. To have
-	 * the changes set to OpenShift one has to call
-	 * {@link #sendChanges(DebugContext, IProgressMonitor)}
+	 * Enables debugging in given context. Debugging implies devmode being enabled,
+	 * too. 
+	 * No change is executed in OpenShift, the change is only in the given
+	 * local context. To have the changes set to OpenShift one has to call
+	 * {@link #send(DebugContext, IProgressMonitor)}
 	 * 
 	 * @param context
 	 * @param monitor
+	 * 
+	 * @see #send(IDeploymentConfig, Connection, IProgressMonitor)
+	 * @see #enableDevmode()
 	 */
 	public OpenShiftDebugMode enableDebugging() {
 		context.setDebugEnabled(true);
