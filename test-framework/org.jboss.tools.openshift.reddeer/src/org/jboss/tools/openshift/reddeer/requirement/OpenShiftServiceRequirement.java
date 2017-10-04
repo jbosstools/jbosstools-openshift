@@ -97,6 +97,8 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		String template();
 		/** whether the resources created by the requirement should be automatically deleted after test class, default false */
 		boolean cleanup() default false;
+		/** whether wait for resource build, default true */
+		boolean waitForBuild() default true;
 	}
 
 	private RequiredService serviceSpec;
@@ -139,9 +141,10 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		
 		assertNotNull(template);
 		this.service = getOrCreateService(projectName, serviceName, template);
-
-		waitForResources(serviceName, projectName, service);
-		waitForUI(serviceName, projectName);
+		if (serviceSpec.waitForBuild()) {
+			waitForResources(serviceName, projectName, service);
+			waitForUI(serviceName, projectName);
+		}
 	}
 
 	private void waitForResources(final String serviceName, final String projectName, final IService service) {

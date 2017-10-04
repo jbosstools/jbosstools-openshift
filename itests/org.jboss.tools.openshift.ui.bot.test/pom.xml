@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jboss.tools.openshift</groupId>
+		<artifactId>itests</artifactId>
+		<version>3.4.1-SNAPSHOT</version>
+	</parent>
+	<groupId>org.jboss.tools.openshift.tests</groupId>
+	<artifactId>org.jboss.tools.openshift.ui.bot.test</artifactId>
+	<packaging>eclipse-test-plugin</packaging>
+
+	<properties>
+		<systemProperties>
+			-Dtest.configurations.dir=${configurations.dir} -Dopenshift.server=${openshift.server} -Dopenshift.username=${openshift.username} -Dopenshift.password=${openshift.password} -Dopenshift.token=${openshift.token} -Dgithub.username=${github.username} -Dgithub.password=${github.password} -Dopenshift.authmethod=${openshift.authmethod} -Dsecurestorage.password=${securestorage.password} -Dopenshift.nexus.mirror=${openshift.nexus.mirror}
+		</systemProperties>
+		<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3StableBotTests</test.class>
+		<surefire.timeout>7200</surefire.timeout>
+		<openshift.server></openshift.server>
+		<openshift.username></openshift.username>
+		<openshift.password></openshift.password>
+		<openshift.token></openshift.token>
+		<openshift.authmethod></openshift.authmethod>
+		<openshift.nexus.mirror></openshift.nexus.mirror>
+		<github.username></github.username>
+		<github.password></github.password>
+		<securestorage.password></securestorage.password>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<dependency-resolution>
+						<extraRequirements>
+							<requirement>
+								<type>p2-installable-unit</type>
+								<id>org.jboss.tools.central.feature.feature.group</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
+						</extraRequirements>
+					</dependency-resolution>
+					<skip>${skipITests}</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<configuration>
+					<appArgLine>-pluginCustomization ${requirementsDirectory}/pluginCustomization.ini</appArgLine>
+					<testSuite>org.jboss.tools.openshift.ui.bot.test</testSuite>
+					<useUIThread>false</useUIThread>
+					<testClass>${test.class}</testClass>
+					<skip>${skipITests}</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<id>smoke</id>
+			<properties>
+				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3SmokeBotTests</test.class>
+			</properties>
+		</profile>
+		<profile>
+			<id>full</id>
+			<properties>
+				<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3BotTests</test.class>
+			</properties>
+		</profile>
+	</profiles>
+	<repositories>
+		<!-- needed for org.jboss.tools.central -->
+		<repository>
+			<id>jbosstools</id>
+			<layout>p2</layout>
+			<url>https://devstudio.redhat.com/11/stable/updates/</url>
+		</repository>
+	</repositories>
+</project>

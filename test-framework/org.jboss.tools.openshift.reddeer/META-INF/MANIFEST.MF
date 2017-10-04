@@ -20,12 +20,13 @@ Require-Bundle:
  org.jboss.tools.openshift.core;bundle-version="3.3.0",
  org.jboss.tools.openshift.client;bundle-version="3.3.0",
  org.jboss.tools.common.reddeer;bundle-version="3.9.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: jar
 Bundle-Localization: plugin
 Bundle-Vendor: JBoss by Red Hat
 Export-Package: org.jboss.tools.openshift.reddeer.condition,
+ org.jboss.tools.openshift.reddeer.condition.core,
  org.jboss.tools.openshift.reddeer.enums,
  org.jboss.tools.openshift.reddeer.exception,
  org.jboss.tools.openshift.reddeer.preference.page,

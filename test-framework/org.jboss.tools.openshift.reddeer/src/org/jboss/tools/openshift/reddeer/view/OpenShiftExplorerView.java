@@ -18,7 +18,6 @@ import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
-import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.jface.handler.TreeViewerHandler;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
@@ -84,7 +83,7 @@ public class OpenShiftExplorerView extends WorkbenchView {
 		// there is either a link or context menu
 		try {
 			new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_CONNECTION).select();
-		} catch (CoreLayerException ex) {
+		} catch (RedDeerException ex) {
 			new DefaultLink(OpenShiftLabel.TextLabels.CREATE_CONNECTION).click();
 		}
 	}

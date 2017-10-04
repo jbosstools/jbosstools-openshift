@@ -157,7 +157,7 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 			} else { 
 				return ClientVersion.LINUX_1_3_64.getDownloadLink();
 			}
-		} else if (Platform.OS_WIN32.equals(Platform.getOSArch())){
+		} else if (Platform.getOS().startsWith(Platform.OS_WIN32) && Platform.getOSArch().equals(Platform.ARCH_X86_64)){
 			return ClientVersion.WINDOWS_1_3_64.getDownloadLink();
 		} else if (Platform.OS_MACOSX.equals(Platform.getOS())){
 			return ClientVersion.MAC_1_3.getDownloadLink();

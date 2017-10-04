@@ -10,10 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard;
 
-import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.ui.dialogs.NewWizard;
 import org.eclipse.reddeer.jface.handler.TreeViewerHandler;
 import org.eclipse.reddeer.swt.api.Combo;
@@ -85,9 +85,9 @@ public abstract class AbstractOpenShiftApplicationWizard {
 
 	private void processUntrustedSSLCertificate() {
 		try{
-			new WaitUntil(new ShellIsAvailable("Untrusted SSL Certificate"), TimePeriod.SHORT);
+			new DefaultShell("Untrusted SSL Certificate");
 			new YesButton().click();
-		}catch (WaitTimeoutExpiredException ex){
+		}catch (CoreLayerException ex){
 			//do nothing SSL Certificate shell did not appear.
 		}
 	}
