@@ -61,6 +61,7 @@ import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOpti
 import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -89,6 +90,11 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 			if (waitForDeploymentConfigReady(beh.getServer(), monitor)) {
 				DebugContext context = createDebugContext(beh, monitor);
 				toggleDebugging(mode, beh, context, monitor);
+				if (!isDebugMode(mode)) {
+					// enable devmode if we're not in debug mode. Debug mode has dev mode enabled
+					// anyhow
+					enableDevMode(context);
+				}
 				new OpenShiftDebugMode(context).execute(monitor);
 			}
 		} catch (Exception e) {
@@ -169,6 +175,14 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		} else { //run, profile
 			stopDebugging(context, monitor);
 		}
+	}
+
+	/**
+	 * Enables the dev mode environment variable in the given
+	 * {@link IReplicationController}.
+	 */
+	protected void enableDevMode(DebugContext context) {
+		new OpenShiftDebugMode(context).enableDevmode();
 	}
 
 	protected DebugContext createDebugContext(OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
