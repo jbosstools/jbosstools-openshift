@@ -29,7 +29,6 @@ import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.property.list.IListProperty;
@@ -62,7 +61,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -73,7 +71,6 @@ import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -91,8 +88,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
-import org.eclipse.ui.forms.events.IExpansionListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -130,7 +127,6 @@ import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 
-import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.route.IRoute;
@@ -140,6 +136,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Jeff Maury
  */
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
+	private static final String DOWNLOAD_LINK_TEXT = "download";
 	private static final int RESOURCE_PANEL_WIDTH = 800;
 	private static final int RESOURCE_TREE_WIDTH = 400;
 	private static final int RESOURCE_TREE_HEIGHT = 120;
@@ -189,7 +186,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		return model;
 	}
 	
-	void updateServer() throws OpenShiftException {
+	void updateServer() {
 		model.updateServer();
 	}
 	
@@ -323,13 +320,14 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
                 @Override
                 public Object convert(Object fromObject) {
-                    switch (((IStatus)fromObject).getSeverity()) {
-                        case IStatus.WARNING:
+                	switch (((IStatus)fromObject).getSeverity()) {
+                    	case IStatus.WARNING:
                             return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
                         case IStatus.ERROR:
                             return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_ERROR);
+                        default:
+                        	return null;
                     }
-                    return null;
                 }
              })
             .in(dbc);
@@ -345,49 +343,48 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	            }
 			})
 			.in(dbc);
-        link.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                if ("download".equals(e.text)) {
-                    new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL, 
-                            OpenShiftUIActivator.PLUGIN_ID, 
-                            OpenShiftUIActivator.getDefault().getLog());
-                } else {
-					int rc = PreferencesUtil.createPreferenceDialogOn(getShell(), 
-							OPEN_SHIFT_PREFERENCE_PAGE_ID,
-							new String[] { OPEN_SHIFT_PREFERENCE_PAGE_ID }, null)
-							.open();
-                    if (rc == Dialog.OK) {
-                        new Job("Checking oc binary") {
+		link.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (DOWNLOAD_LINK_TEXT.equals(e.text)) {
+					new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL,
+							OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+				} else {
+					int rc = PreferencesUtil.createPreferenceDialogOn(getShell(), OPEN_SHIFT_PREFERENCE_PAGE_ID,
+							new String[] { OPEN_SHIFT_PREFERENCE_PAGE_ID }, null).open();
+					if (rc == Dialog.OK) {
+						new Job("Checking oc binary") {
 
-                            @Override
-                            protected IStatus run(IProgressMonitor monitor) {
-                            	return OCBinary.getInstance().getStatus(model.getConnection(), monitor);
-                            }
-                        }.schedule();
-                    }
-                }
-            }
-        });
+							@Override
+							protected IStatus run(IProgressMonitor monitor) {
+								return OCBinary.getInstance().getStatus(model.getConnection(), monitor);
+							}
+						}.schedule();
+					}
+				}
+			}
+		});
         GridDataFactory.fillDefaults()
         		.hint(600, SWT.DEFAULT)
         		.applyTo(link);
-        MultiValidator validator = new MultiValidator() {
-            
-            @Override
-            protected IStatus validate() {
-				IObservableValue<IStatus> observable = BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model);
-                Status status = (Status)observable.getValue();
-                switch (status.getSeverity()) {
-                case IStatus.ERROR:
-                    return OpenShiftUIActivator.statusFactory().errorStatus(OpenShiftUIMessages.OCBinaryErrorMessage);
-                case IStatus.WARNING:
-                    return OpenShiftUIActivator.statusFactory().warningStatus(OpenShiftUIMessages.OCBinaryWarningMessage);
-                }
-                return status;
-            }
-        };
-        dbc.addValidationStatusProvider(validator);
+		MultiValidator validator = new MultiValidator() {
+
+			@Override
+			protected IStatus validate() {
+				IObservableValue<IStatus> observable = BeanProperties
+						.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model);
+				Status status = (Status) observable.getValue();
+				switch (status.getSeverity()) {
+				case IStatus.ERROR:
+					return OpenShiftUIActivator.statusFactory().errorStatus(OpenShiftUIMessages.OCBinaryErrorMessage);
+				case IStatus.WARNING:
+					return OpenShiftUIActivator.statusFactory()
+							.warningStatus(OpenShiftUIMessages.OCBinaryWarningMessage);
+				}
+				return status;
+			}
+		};
+		dbc.addValidationStatusProvider(validator);
 	}
 	
 	private void createEclipseProjectSourceControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
@@ -423,14 +420,10 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	}
 
 	private IDoubleClickListener onDoubleClickService() {
-		return new IDoubleClickListener() {
-
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				if (getWizard().canFinish()) {
-					Button finishButton = getShell().getDefaultButton();
-					UIUtils.clickButton(finishButton);
-				}
+		return event -> {
+			if (getWizard().canFinish()) {
+				Button finishButton = getShell().getDefaultButton();
+				UIUtils.clickButton(finishButton);
 			}
 		};
 	}
@@ -693,11 +686,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		expandable.setLayout(new FillLayout());
 		Composite detailsContainer = new Composite(expandable, SWT.NONE);
 		expandable.setClient(detailsContainer);
-		expandable.addExpansionListener(new IExpansionListener() {
-			@Override
-			public void expansionStateChanging(ExpansionEvent e) {
-			}
-			
+		expandable.addExpansionListener(new ExpansionAdapter() {
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
 				getControl().update();
@@ -705,7 +694,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			}
 		});
 
-		IObservableValue<IResource> selectedResource = new WritableValue<IResource>();
+		IObservableValue<IResource> selectedResource = new WritableValue<>();
 		ValueBindingBuilder
 			.bind(selectedResourceTreeItem)
 			.converting(new ObservableTreeItem2ModelConverter())
@@ -743,15 +732,12 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		ValueBindingBuilder
 				.bind(selectedResourceTreeItem)
 				.converting(new ObservableTreeItem2ModelConverter(IResource.class))
-				.validatingAfterConvert(new IValidator() {
-					
-					@Override
-					public IStatus validate(Object value) {
-						if ((value instanceof IResource) && OpenShiftServerUtils.isAllowedForServerAdapter((IResource) value)) {
-	                        return ValidationStatus.ok();
-						}
-                        return ValidationStatus.cancel("Please select a resource that this adapter will be bound to.");
+				.validatingAfterConvert(value -> {
+					if ((value instanceof IResource)
+							&& OpenShiftServerUtils.isAllowedForServerAdapter((IResource) value)) {
+						return ValidationStatus.ok();
 					}
+					return ValidationStatus.cancel("Please select a resource that this adapter will be bound to.");
 				})
 				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RESOURCE).observe(model))
 				.converting(new Model2ObservableTreeItemConverter(new ServerSettingsWizardPageModel.ResourceTreeItemsFactory()))
@@ -1079,21 +1065,14 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	}
 
 	private IListChangeListener<ObservableTreeItem> onResourceItemsChanged(final TreeViewer resourcesViewer) {
-		return new IListChangeListener<ObservableTreeItem>() {
-
-			@Override
-			public void handleListChange(ListChangeEvent<? extends ObservableTreeItem> event) {
-				resourcesViewer.expandAll();
-			}
-			
-		};
+		return event ->	resourcesViewer.expandAll();
 	}
 
 	@SuppressWarnings("unchecked")
 	private TreeViewer createResourcesTreeViewer(Composite parent, ServerSettingsWizardPageModel model, Text selectorText) {
 		TreeViewer applicationTemplatesViewer =
 				new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
-		IListProperty<ServerSettingsWizardPageModel, ObservableTreeItem> childrenProperty = new MultiListProperty<ServerSettingsWizardPageModel, ObservableTreeItem>(
+		IListProperty<ServerSettingsWizardPageModel, ObservableTreeItem> childrenProperty = new MultiListProperty<>(
 				new IListProperty[] {
 						BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_RESOURCE_ITEMS),
 						BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
@@ -1109,13 +1088,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	}	
 
 	protected ModifyListener onFilterTextModified(final TreeViewer applicationTemplatesViewer) {
-		return new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				applicationTemplatesViewer.refresh();
-				applicationTemplatesViewer.expandAll();
-			}
+		return event -> {
+			applicationTemplatesViewer.refresh();
+			applicationTemplatesViewer.expandAll();
 		};
 	}
 
@@ -1152,10 +1127,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 		@Override
 		protected IStatus validate() {
-			if (BooleanUtils.isFalse((Boolean) useDefaultRoute.getValue())) {
-				if (selectedRoute.getValue() == null) {
-					return ValidationStatus.cancel("You have to choose a route that will be used for this server adapter.");
-				}
+			if (BooleanUtils.isFalse((Boolean) useDefaultRoute.getValue()) 
+					&& selectedRoute.getValue() == null) {
+				return ValidationStatus.cancel("You have to choose a route that will be used for this server adapter.");
 			}
 			return ValidationStatus.ok();
 		}

@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.internal.common.ui.detailviews;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
-import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -21,8 +20,8 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Composite;
@@ -46,10 +45,11 @@ public abstract class AbstractStackedDetailViews {
 	private final StackLayout stackLayout = new StackLayout();
 	private Object context;
 	private DataBindingContext dbc;
-	private IObservableValue detailViewModel;
+	private IObservableValue<?> detailViewModel;
 
-	public AbstractStackedDetailViews(IObservableValue detailViewModel, Object context, Composite parent, DataBindingContext dbc) {
+	public AbstractStackedDetailViews(IObservableValue<?> detailViewModel, Object context, Composite parent, DataBindingContext dbc) {
 		Assert.isLegal(parent != null && !parent.isDisposed());
+
 		this.parent = parent;
 		parent.addDisposeListener(onDispose());
 		this.context = context;
@@ -73,21 +73,15 @@ public abstract class AbstractStackedDetailViews {
 
 	protected abstract IDetailView[] getDetailViews();
 	
-	private IValueChangeListener onDetailViewModelChanged() {
-		return new IValueChangeListener() {
-
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				showView(event.getObservableValue(), dbc);
-			}
-		};
+	private IValueChangeListener<?> onDetailViewModelChanged() {
+		return event -> showView(event.getObservableValue(), dbc);
 	}
 
-	protected void showView(IObservableValue detailViewsModel, DataBindingContext dbc) {
+	protected void showView(IObservableValue<?> detailViewsModel, DataBindingContext dbc) {
 		showView(detailViewsModel, getView(detailViewsModel), dbc);
 	}
 
-	protected void showView(IObservableValue detailViewsModel, IDetailView view, DataBindingContext dbc) {
+	protected void showView(IObservableValue<?> detailViewsModel, IDetailView view, DataBindingContext dbc) {
 		if (view == null
 				|| view.getControl() == null
 				|| detailViewsModel == null) {
@@ -107,11 +101,11 @@ public abstract class AbstractStackedDetailViews {
 		}
 	}
 
-	protected IDetailView getView(IObservableValue detailViewsModel) {
+	protected IDetailView getView(IObservableValue<?> detailViewsModel) {
 		return getViewFor(detailViewsModel, getDetailViews());
 	}
 
-	protected IDetailView getViewFor(IObservableValue detailViewsModel, IDetailView... detailViews) {
+	protected IDetailView getViewFor(IObservableValue<?> detailViewsModel, IDetailView... detailViews) {
 		Object value = detailViewsModel.getValue();
 		IDetailView view = createControls(emptyView);
 
@@ -140,13 +134,7 @@ public abstract class AbstractStackedDetailViews {
 	}
 	
 	private DisposeListener onDispose() {
-		return new DisposeListener() {
-			
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				dispose();
-			}
-		};
+		return (e -> dispose());
 	}
 
 	private void dispose() {
@@ -202,7 +190,7 @@ public abstract class AbstractStackedDetailViews {
 			StyledTextUtils.setTransparent(styledText);
 			GridDataFactory.fillDefaults()
 					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(styledText);
-			styledText.addFocusListener(fl);
+			styledText.addFocusListener(clearSelectionOnFocusLost);
 			new SmartTooltip(styledText);
 			return styledText;
 		}
@@ -212,19 +200,14 @@ public abstract class AbstractStackedDetailViews {
 		 * This prevents independent selecting on several widgets. As selection is used
 		 * for copying text to the clipboard, it is not needed without focus. 
 		 */
-		protected FocusListener fl = new FocusListener() {
-
-			@Override
-			public void focusGained(FocusEvent e) {
-				//nothing to do
-			}
+		protected FocusListener clearSelectionOnFocusLost = new FocusAdapter() {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				if(e.getSource() instanceof StyledText) {
-					((StyledText)e.getSource()).setSelection(0, 0);
-				} else if(e.getSource() instanceof Text) {
-					((Text)e.getSource()).setSelection(0, 0);
+				if (e.getSource() instanceof StyledText) {
+					((StyledText) e.getSource()).setSelection(0, 0);
+				} else if (e.getSource() instanceof Text) {
+					((Text) e.getSource()).setSelection(0, 0);
 				}
 			}
 
@@ -236,9 +219,9 @@ public abstract class AbstractStackedDetailViews {
 
 		public Composite createControls(Composite parent, Object context, DataBindingContext dbc);
 
-		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
+		public void onVisible(IObservableValue<?> selectedItemObservable, DataBindingContext dbc);
 
-		public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc);
+		public void onInVisible(IObservableValue<?> selectedItemObservable, DataBindingContext dbc);
 
 		public Control getControl();
 		
