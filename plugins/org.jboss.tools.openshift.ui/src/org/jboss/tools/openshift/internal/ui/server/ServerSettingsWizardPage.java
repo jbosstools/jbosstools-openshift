@@ -71,12 +71,15 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -137,8 +140,8 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Jeff Maury
  */
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
+	private static final int RESOURCE_PANEL_WIDTH = 800;
 	private static final int RESOURCE_TREE_WIDTH = 400;
-	private static final int DETAILS_PANE_WIDTH = 400;
 	private static final int RESOURCE_TREE_HEIGHT = 120;
 	
 	protected ServerSettingsWizardPageModel model;
@@ -666,34 +669,29 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		createResourcePathControls(container, model, dbc);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void createResourceControls(Composite parent, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
-		Label resourceLabel = new Label(parent, SWT.NONE);
-		resourceLabel.setText("OpenShift Resource:");
+		SashForm resourceControlsContainer = new SashForm(parent, SWT.HORIZONTAL);
 		GridDataFactory.fillDefaults()
-			.span(2, 1).align(SWT.FILL, SWT.FILL)
-			.applyTo(resourceLabel);
+			.align(SWT.FILL, SWT.CENTER).hint(RESOURCE_PANEL_WIDTH, SWT.DEFAULT)
+			.applyTo(resourceControlsContainer);
 
-		// filter
-		Text selectorText = UIUtils.createSearchText(parent);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.applyTo(selectorText);
+		IViewerObservableValue selectedResourceTreeItem = 
+				createResourceTree(model, resourceControlsContainer, dbc);
+		createResourceDetails(selectedResourceTreeItem, resourceControlsContainer, dbc);
 
-		// details
-		ExpandableComposite expandable = new ExpandableComposite(parent, SWT.None);
+		resourceControlsContainer.setWeights(new int[] {1,2});
+	}
+
+	private void createResourceDetails(IViewerObservableValue selectedResourceTreeItem, Composite parent, DataBindingContext dbc) {
+		ScrolledComposite scrolledComposite = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
+		scrolledComposite.setExpandHorizontal(true);
+		scrolledComposite.setExpandVertical(true);
+		ExpandableComposite expandable = new ExpandableComposite(scrolledComposite, SWT.None);
+		scrolledComposite.setContent(expandable);
 		expandable.setText("Resource Details");
 		expandable.setExpanded(true);
-		GridDataFactory.fillDefaults()
-			.span(1, 2).align(SWT.FILL, SWT.FILL).grab(false, true).hint(DETAILS_PANE_WIDTH, 150)
-			.applyTo(expandable);
-		GridLayoutFactory.fillDefaults()
-			.margins(0, 0)
-			.applyTo(expandable);		
+		expandable.setLayout(new FillLayout());
 		Composite detailsContainer = new Composite(expandable, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true)
-			.applyTo(detailsContainer);
 		expandable.setClient(detailsContainer);
 		expandable.addExpansionListener(new IExpansionListener() {
 			@Override
@@ -702,15 +700,36 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
-				parent.update();
-				parent.layout(true);
+				getControl().update();
+				((Composite) getControl()).layout(true);
 			}
 		});
+
 		IObservableValue<IResource> selectedResource = new WritableValue<IResource>();
+		ValueBindingBuilder
+			.bind(selectedResourceTreeItem)
+			.converting(new ObservableTreeItem2ModelConverter())
+			.to(selectedResource)
+			.notUpdatingParticipant()
+			.in(dbc);
 		new ResourceDetailViews(selectedResource, detailsContainer, dbc).createControls();
+	}
+
+	@SuppressWarnings("unchecked")
+	private IViewerObservableValue createResourceTree(ServerSettingsWizardPageModel model, 
+			SashForm resourceControlsContainer, DataBindingContext dbc) {
+		Composite resourceTreeContainer = new Composite(resourceControlsContainer, SWT.None);
+		GridLayoutFactory.fillDefaults()
+			.applyTo(resourceTreeContainer);
+		
+		// filter
+		Text selectorText = UIUtils.createSearchText(resourceTreeContainer);
+		GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.applyTo(selectorText);
 
 		// resource tree
-		final TreeViewer resourcesViewer = createResourcesTreeViewer(parent, model, selectorText);
+		final TreeViewer resourcesViewer = createResourcesTreeViewer(resourceTreeContainer, model, selectorText);
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, true).hint(RESOURCE_TREE_WIDTH, RESOURCE_TREE_HEIGHT)
 			.applyTo(resourcesViewer.getControl());
@@ -737,15 +756,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RESOURCE).observe(model))
 				.converting(new Model2ObservableTreeItemConverter(new ServerSettingsWizardPageModel.ResourceTreeItemsFactory()))
 				.in(dbc);
-
-		// selected resource details binding
-		ValueBindingBuilder
-			.bind(selectedResourceTreeItem)
-			.converting(new ObservableTreeItem2ModelConverter())
-			.to(selectedResource)
-			.notUpdatingParticipant()
-			.in(dbc);
-
+		return selectedResourceTreeItem;
 	}
 
 	@SuppressWarnings("unchecked")

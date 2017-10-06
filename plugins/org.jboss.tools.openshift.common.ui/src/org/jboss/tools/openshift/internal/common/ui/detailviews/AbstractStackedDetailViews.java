@@ -197,6 +197,7 @@ public abstract class AbstractStackedDetailViews {
 		 */
 		protected StyledText createNonEditableStyledText(Composite container) {
 			StyledText styledText = new StyledText(container, SWT.READ_ONLY);
+			styledText.setCaret(null);
 			styledText.setAlwaysShowScrollBars(false);
 			StyledTextUtils.setTransparent(styledText);
 			GridDataFactory.fillDefaults()
