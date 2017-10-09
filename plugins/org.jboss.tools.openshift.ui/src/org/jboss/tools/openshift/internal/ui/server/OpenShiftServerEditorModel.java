@@ -149,7 +149,6 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 
 	public void setRoute(IRoute newRoute, boolean executeCommand) {
 		String prevHost = getHost(getRoute());
-		String prevRouteURL = getRouteURL(isSelectDefaultRoute(), getRoute());
 		super.setRoute(newRoute);
 		String newHost = getHost(newRoute);
 		String newRouteURL = getRouteURL(isSelectDefaultRoute(), newRoute);
@@ -160,8 +159,10 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	
 	public class SetRouteCommand extends ServerWorkingCopyPropertyCommand {
 
-		private IRoute oldRoute, newRoute;
-		private String oldHost, newHost;
+		private IRoute oldRoute;
+		private IRoute newRoute;
+		private String oldHost;
+		private String newHost;
 		
 		public SetRouteCommand(IServerWorkingCopy server, IRoute oldRoute, IRoute newRoute, String newRouteURL,
 				String oldHost, String newHost) {
@@ -175,14 +176,14 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 		public void undo() {
 			super.undo();
 			setRoute(oldRoute, false);
-			server.setHost(oldHost);
+			getServer().setHost(oldHost);
 		}
 
 		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setRoute(newRoute, false);
 			IStatus s = super.redo(monitor, adapt);
-			server.setHost(newHost);
+			getServer().setHost(newHost);
 			return s;
 		}
 	}
@@ -194,17 +195,17 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 
 	public void setConnection(Connection connection, boolean executeCommand) {
 		Connection previous = getConnection();
-		String previousUrl = previous == null ? null : getConnectionUrl(previous);
 		String newUrl = connection == null ? null : getConnectionUrl(connection);
 		super.setConnection(connection);
 		// fire server command 
-		if (executeCommand)
+		if (executeCommand) 
 			section.execute(new SetConnectionCommand(getServer(), previous, connection, newUrl));
 	}
 	
 	public class SetConnectionCommand extends ServerWorkingCopyPropertyCommand {
 
-		private Connection oldConnection, newConnection;
+		private Connection oldConnection;
+		private Connection newConnection;
 
 		public SetConnectionCommand(IServerWorkingCopy server, Connection oldConnection, Connection newConnection, String conUrl) {
 			super(server, "Set Connection...", null, conUrl, 
@@ -241,7 +242,8 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 
 	private class SetResourceCommand extends ServerWorkingCopyPropertyCommand {
 
-		private IResource oldResource, newResource;
+		private IResource oldResource;
+		private IResource newResource;
 
 		public SetResourceCommand(IServerWorkingCopy server, IResource oldResource, IResource newResource) {
 			super(server, "Set Resource...", null, OpenShiftResourceUniqueId.get(newResource), 
@@ -269,11 +271,9 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	}
 	
 	public void setDeployProject(org.eclipse.core.resources.IProject project, boolean executeCommand) {
-//		public static final String PROPERTY_DEPLOYPROJECT = "deployProject";
 		org.eclipse.core.resources.IProject previous = super.getDeployProject();
 		super.setDeployProject(project);
 		// fire server command 
-		// 		server.setAttribute(OpenShiftServerUtils.ATTR_DEPLOYPROJECT, deployProjectName);
 		if( executeCommand ) 
 			section.execute(new SetDeployProjectCommand(getServer(), previous, project));
 	}
@@ -281,7 +281,8 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 
 	public class SetDeployProjectCommand extends ServerWorkingCopyPropertyCommand {
 
-		private org.eclipse.core.resources.IProject oldProj, newProj;
+		private org.eclipse.core.resources.IProject oldProj;
+		private org.eclipse.core.resources.IProject newProj;
 
 		public SetDeployProjectCommand(IServerWorkingCopy server, org.eclipse.core.resources.IProject oldProj, org.eclipse.core.resources.IProject newProj) {
 			super(server, "Set Project...", null, ProjectUtils.getName(deployProject), 
@@ -320,7 +321,9 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 
 	public class SetSourcePathCommand extends ServerWorkingCopyPropertyCommand {
 
-		private String oldPath, newPath;
+		private String oldPath; 
+		private String newPath;
+		
 
 		public SetSourcePathCommand(IServerWorkingCopy server, String oldPath, String newPath) {
 			super(server, "Set Source Path...", null, newPath, 
@@ -338,8 +341,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setSourcePath(newPath, false);
-			IStatus s = super.redo(monitor, adapt);
-			return s;
+			return super.redo(monitor, adapt);
 		}
 		
 	}
@@ -360,7 +362,8 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 
 	public class SetPodPathCommand extends ServerWorkingCopyPropertyCommand {
 
-		private String oldPath, newPath;
+		private String oldPath; 
+		private String newPath;
 
 		public SetPodPathCommand(IServerWorkingCopy server, String oldPath, String newPath) {
 			super(server, "Set Pod Path...", null, newPath, 
@@ -378,8 +381,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 		@Override
 		public IStatus redo(IProgressMonitor monitor, IAdaptable adapt) {
 			setPodPath(newPath, false);
-			IStatus s = super.redo(monitor, adapt);
-			return s;
+			return super.redo(monitor, adapt);
 		}
 	}
 
