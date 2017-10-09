@@ -238,7 +238,7 @@ public class ConnectionTest {
 				.usingToken("mytoken").build(), null);
 		Connection two = (Connection) connection.clone();
 		assertThat(two).isEqualTo(connection);
-		assertThat(two.credentialsEqual(connection));
+		assertThat(two.credentialsEqual(connection)).isTrue();
 		// when
 		two.setToken("tokenTwo");
 		// then

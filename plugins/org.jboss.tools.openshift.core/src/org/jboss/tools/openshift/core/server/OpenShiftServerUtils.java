@@ -354,13 +354,16 @@ public class OpenShiftServerUtils {
 		}
 		try {
 			String url = getConnectionURL(server);
+			if (StringUtils.isEmpty(url)) {
+				return null;
+			}
 			ConnectionURL connectionUrl = ConnectionURL.forURL(url);
 			if (connectionUrl != null) {
 				return ConnectionsRegistrySingleton.getInstance().getByUrl(connectionUrl, Connection.class);
 			}
 		} catch (UnsupportedEncodingException | MalformedURLException e) {
 			OpenShiftCoreActivator.pluginLog()
-					.logError(NLS.bind("Could not get connection url for user {0}", server.getName()), e);
+					.logError(NLS.bind("Could not get connection url for server {0}", server.getName()), e);
 		}
 
 		return null;
