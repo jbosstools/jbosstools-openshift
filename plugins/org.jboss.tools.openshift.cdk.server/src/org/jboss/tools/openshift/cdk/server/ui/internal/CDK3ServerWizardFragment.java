@@ -101,25 +101,25 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 
 	@Override
 	protected String findError() {
+		// Validate credentials
 		if( credentials.getDomain() == null || credentials.getUser() == null) {
 			return "The Container Development Environment Server Adapter requires Red Hat Access credentials.";
 		}
+		// Validate hypervisor
 		if( selectedHypervisor == null ) {
 			return "You must choose a hypervisor.";
 		}
 
+		// Validate home directory
+		String retString = validateHomeDirectory();
+		if( retString != null )
+			return retString;
 		
-		String retString = null;
-		String tmpStr = null;
-		if( homeDir == null || !(new File(homeDir)).exists()) {
-			tmpStr = "The selected file does not exist.";
-		} else if( !(new File(homeDir).canExecute())) {
-			tmpStr = "The selected file is not executable.";
-		}
-		
-		toggleDecorator(homeText, tmpStr);
-		retString = tmpStr;
-		tmpStr = null;
+		// Validate versions
+		return validateMinishiftVersion();
+	}
+	
+	protected String validateMinishiftVersion() {
 		if( minishiftVersionProps == null ) {
 			return "Unknown error when checking minishift version: " + homeDir;
 		} else if( !minishiftVersionProps.isValid()) {
@@ -133,9 +133,19 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 			if( versionCompatError != null )
 				return versionCompatError;
 		}
-		return retString;
+		return null;
 	}
 	
+	protected String validateHomeDirectory() {
+		String retString = null;
+		if( homeDir == null || !(new File(homeDir)).exists()) {
+			retString = "The selected file does not exist.";
+		} else if( !(new File(homeDir).canExecute())) {
+			retString = "The selected file is not executable.";
+		}
+		toggleHomeDecorator(retString);
+		return retString;
+	}
 
 	protected String isVersionCompatible(MinishiftVersions versions) {
 		String cdkVers = versions.getCDKVersion();

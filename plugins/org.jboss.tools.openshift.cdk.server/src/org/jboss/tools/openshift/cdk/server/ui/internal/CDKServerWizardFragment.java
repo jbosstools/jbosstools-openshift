@@ -29,7 +29,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -207,33 +206,36 @@ public class CDKServerWizardFragment extends WizardFragment {
 		return null;
 	}
 	
-	protected void toggleDecorator(Control c, String message) {
-		if( c == homeText ) {
-			if( message == null ) {
-				homeDecorator.hide();
-			} else {
-				homeDecorator.setDescriptionText(message);
-				homeDecorator.show();
-			}
+	protected void toggleHomeDecorator(String message) {
+		if( message == null ) {
+			homeDecorator.hide();
+		} else {
+			homeDecorator.setDescriptionText(message);
+			homeDecorator.show();
 		}
 	}
 	protected String findError() {
-
 		if( credentials.getDomain() == null || credentials.getUser() == null) {
 			return "The Container Development Environment Server Adapter requires Red Hat Access credentials.";
 		}
-		
+		String retString = validateHomeDirectory();
+		if( retString != null )
+			return retString;
+
+		return retString;
+	}
+
+	protected String validateHomeDirectory() {
 		String retString = null;
 		if( homeDir == null || !(new File(homeDir)).exists()) {
 			retString = "The selected folder does not exist.";
-			toggleDecorator(homeText, retString);
 		} else if( !(new File(homeDir, "Vagrantfile").exists())) {
 			retString = "The selected folder does not have a Vagrantfile";
-			toggleDecorator(homeText, retString);
 		}
+		toggleHomeDecorator(retString);
 		return retString;
 	}
-	
+
 	protected void browseHomeDirClicked() {
 		browseHomeDirClicked(true);
 	}
