@@ -108,10 +108,9 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 
 		Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String, String>) null);
 		env = (env == null ? new HashMap<>() : new HashMap<>(env));
-		String msHome = s.getAttribute(CDK3Server.MINISHIFT_HOME, (String) null);
-		if (msHome != null) {
-			env.put("MINISHIFT_HOME", msHome);
-		}
+		
+		String msHome = getMinishiftHome(s);
+		env.put("MINISHIFT_HOME", msHome);
 
 		String userKey = cdkServer.getUserEnvironmentKey();
 		boolean passCredentials = cdkServer.passCredentials();
@@ -143,6 +142,15 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		workingCopy.setAttribute(ATTR_ARGS, replaced);
 	}
 
+	protected String getMinishiftHome(IServer server) {
+		String home = System.getProperty("user.home");
+		String defaultMinishiftHome = new File(home, CDK3Server.DOT_MINISHIFT).getAbsolutePath();
+		String msHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, defaultMinishiftHome);
+		if( !StringUtils.isEmpty(msHome))
+			msHome = defaultMinishiftHome;
+		return msHome;
+	}
+	
 	private void setMinishiftLocationOnLaunchConfig(CDKServer cdkServer, ILaunchConfigurationWorkingCopy workingCopy,
 			Map<String, String> env) throws CoreException {
 
