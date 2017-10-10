@@ -38,17 +38,15 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 	public static final String PROP_CDK_VERSION = "cdk.version";
 	
 	public static final String OVERRIDE_MINISHIFT_LOCATION = "OVERRIDE_MINISHIFT_LOCATION";
-	
+
 	@Override
 	protected boolean validate(File root) {
 		boolean matchesHomeMinishift = isHomeDirectory(root.getParentFile()) && 
 				".minishift".equals(root.getName()) && super.validate(root);
-		if( matchesHomeMinishift )
-			return true;
-		
 		String envvar = System.getenv("MINISHIFT_HOME");
 		boolean matchesEnvVar = envvar != null && new File(envvar).exists() && super.validate(root);
-		if( matchesEnvVar ) {
+
+		if( matchesHomeMinishift || matchesEnvVar ) {
 			String vers = getDefinitionVersion(root);
 			if( matchesExpectedVersion(vers)) {
 				return true;
