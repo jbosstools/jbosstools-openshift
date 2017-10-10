@@ -47,6 +47,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPoller;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 
 public class CDK3LaunchController extends AbstractCDKLaunchController
@@ -115,11 +116,10 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		String userKey = cdkServer.getUserEnvironmentKey();
 		boolean passCredentials = cdkServer.passCredentials();
 		if (passCredentials) {
-			// These environment variables are visible AND persisted in the launch
-			// configuration.
-			// It is not safe to persist the password here, but rather add it on-the-fly to
-			// the
-			// program launch later on.
+			// These environment variables are visible AND persisted 
+			// in the launch configuration.
+			// It is not safe to persist the password here, but rather 
+			// add it on-the-fly to the program launch later on.
 			env.put(userKey, cdkServer.getUsername());
 		} else {
 			env.remove(userKey);
@@ -132,9 +132,14 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		String targetedHypervisor = cdkServer.getServer().getAttribute(CDK3Server.PROP_HYPERVISOR,
 				CDK3Server.getHypervisors()[0]);
 		String profiles = getProfileString(getServer());
+		String profileName = s.getAttribute(CDK32Server.PROFILE_ID, (String)null);
+		
 		String defaultArgs = profiles + "start --vm-driver=" + targetedHypervisor;
 		String currentVal = workingCopy.getAttribute(ATTR_ARGS, defaultArgs);
 		String replaced = ArgsUtil.setArg(currentVal, null, "--vm-driver", targetedHypervisor);
+		if( !StringUtils.isEmpty(profileName)) {
+			replaced = ArgsUtil.setArg(replaced, "--profile", null, profileName);
+		}
 		workingCopy.setAttribute(ATTR_ARGS, replaced);
 	}
 
