@@ -10,6 +10,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<artifactId>tests</artifactId>
 	<name>openshift.tests</name>
 	<packaging>pom</packaging>
+	
+	<properties>
+		<sonar.sources></sonar.sources>
+		<sonar.tests>src</sonar.tests>
+	</properties>
+	
 	<modules>
 		<module>org.jboss.tools.openshift.egit.test</module>
 		<module>org.jboss.tools.openshift.express.test</module>
