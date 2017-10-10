@@ -122,11 +122,11 @@ public class OpenShiftServerUtilsTest {
 		// when
 		try {
 			OpenShiftServerUtils.getDeploymentConfig(
-				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[0], connection), new NullProgressMonitor());
+				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[0], null), new NullProgressMonitor());
 		// then
 			fail("CoreException expected");
 		} catch(CoreException e) {
-			assertThat(e.getMessage().contains("not find pods"));
+			assertThat(e.getMessage()).contains("not find the connection");
 		}
 	}
 
@@ -140,7 +140,7 @@ public class OpenShiftServerUtilsTest {
 		// then
 			fail("CoreException expected");
 		} catch(CoreException e) {
-			assertThat(e.getMessage().contains("not find deployment config"));
+			assertThat(e.getMessage()).contains("not find deployment config");
 		}
 	}
 	
