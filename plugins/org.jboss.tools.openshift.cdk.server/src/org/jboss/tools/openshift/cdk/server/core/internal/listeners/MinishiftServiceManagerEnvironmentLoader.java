@@ -19,13 +19,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.JBossServerCorePlugin;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvironmentLoader {
 	
@@ -56,13 +59,11 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		// merge the two 
 		Map<String, String> merged = merge(adbEnv, props);
 		
-		String minishiftHomeDefault = System.getProperty("user.home") + File.separator + ".minishift";
-		String minishiftHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, minishiftHomeDefault);
 		
-		Properties dotCDK = CDKServerUtility.getDotCDK(minishiftHome, "cdk");
+		Properties dotCDK = getCDKProperties(server);
 		merged = merge(merged, dotCDK);
 		
-		File ocLocation = findOCLocation();
+		File ocLocation = findOCLocation(server);
 		if( ocLocation != null ) {
 			merged.put(OC_LOCATION_KEY, ocLocation.getAbsolutePath());
 		}
@@ -76,13 +77,32 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 			}
 			return null;
 		}
-		
-		
 	}
 	
-	private File findOCLocation() {
-		String dotMinishift = System.getProperty("user.home") + File.separator + ".minishift";
-		File root = new File(dotMinishift);
+	private String getMinishiftHome(IServer server) {
+		String minishiftHomeDefault = System.getProperty("user.home") + File.separator + CDKConstants.CDK_RESOURCE_DOTMINISHIFT;
+		String minishiftHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, minishiftHomeDefault);
+		return minishiftHome;
+	}
+	
+	private String getMinishiftProfileHome(IServer server) {
+		String profile = server.getAttribute(CDK32Server.PROFILE_ID, (String)null);
+		String msHome = getMinishiftHome(server);
+		if( StringUtils.isEmpty(profile) || profile.equals(CDK32Server.MINISHIFT_DEFAULT_PROFILE)) {
+			return msHome;
+		}
+		return new Path(msHome).append(CDKConstants.CDK32_RESOURCE_PROFILES).append(profile).toOSString();
+	}
+	
+	private Properties getCDKProperties(IServer server) {
+		String profileHome = getMinishiftProfileHome(server);
+		Properties dotCDK = CDKServerUtility.getDotCDK(profileHome, CDKConstants.CDK_RESOURCE_CDK);
+		return dotCDK;
+	}
+	
+	private File findOCLocation(IServer server) {
+		String profileHome = getMinishiftProfileHome(server);
+		File root = new File(profileHome);
 		if( root.exists()) {
 			File cache = new File(root, "cache");
 			File oc = new File(cache, "oc");

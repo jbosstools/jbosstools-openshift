@@ -17,7 +17,8 @@ import org.eclipse.wst.server.core.IServer;
 
 public class CDK32Server extends CDK3Server {
 	public static final String PROFILE_ID = "minishift.profile";
-	
+	public static final String MINISHIFT_DEFAULT_PROFILE = "minishift";
+
 
 	protected String getBaseName() {
 		return CDK32Server.getServerTypeBaseName();

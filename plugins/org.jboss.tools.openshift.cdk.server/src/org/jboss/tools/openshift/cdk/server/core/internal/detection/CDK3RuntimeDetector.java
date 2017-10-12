@@ -42,7 +42,7 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 	@Override
 	protected boolean validate(File root) {
 		boolean matchesHomeMinishift = isHomeDirectory(root.getParentFile()) && 
-				".minishift".equals(root.getName()) && super.validate(root);
+				CDKConstants.CDK_RESOURCE_DOTMINISHIFT.equals(root.getName()) && super.validate(root);
 		String envvar = System.getenv("MINISHIFT_HOME");
 		boolean matchesEnvVar = envvar != null && new File(envvar).exists() && super.validate(root);
 
