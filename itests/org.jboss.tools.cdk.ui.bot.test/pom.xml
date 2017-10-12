@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jboss.tools.openshift</groupId>
+		<artifactId>itests</artifactId>
+		<version>3.4.1-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.jboss.tools.cdk.tests</groupId>
+	<artifactId>org.jboss.tools.cdk.ui.bot.test</artifactId>
+	<packaging>eclipse-test-plugin</packaging>
+	<properties>
+		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+		<systemProperties>-Dvagrantfile.path=${vagrantfile.path} -Ddevelopers.username=${developers.username} -Ddevelopers.password=${developers.password} -Dminishift.path=${minishift.path} -Dminishift.hypervisor=${minishift.hypervisor}</systemProperties>
+		<developers.username></developers.username>
+		<vagrantfile.path></vagrantfile.path>
+		<minishift.path></minishift.path>
+		<minishift.hypervisor></minishift.hypervisor>
+	        <skipITests>false</skipITests>
+	</properties>
+	
+	<profiles>
+		<profile>
+			<id>all-tests</id>
+			<properties>
+				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDKAllTestsSuite</suiteClass>
+			</properties>
+		</profile>
+		<profile>
+			<id>smoke-tests</id>
+			<properties>
+				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDKSmokeTestsSuite</suiteClass>
+			</properties>
+		</profile>
+		<profile>
+			<id>cdk3-all-tests</id>
+			<properties>
+				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDK3AllTestsSuite</suiteClass>
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<skip>${skipITests}</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<configuration>
+                    <appArgLine>-pluginCustomization ${requirementsDirectory}/pluginCustomization.ini</appArgLine>
+					<useUIThread>false</useUIThread>
+					<surefire.timeout>7200</surefire.timeout>
+					<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
+					<testSuite>org.jboss.tools.cdk.ui.bot.test</testSuite>
+					<testClass>${suiteClass}</testClass>
+					<skip>${skipITests}</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+

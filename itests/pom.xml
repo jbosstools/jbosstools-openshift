@@ -10,8 +10,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<artifactId>itests</artifactId>
 	<name>openshift.itests</name>
 	<packaging>pom</packaging>
+    <properties>
+        <tpc.version>${TARGET_PLATFORM_VERSION_MAX}</tpc.version>
+    </properties>
 	<modules>
         <module>org.jboss.tools.openshift.ui.bot.test</module>
+        <module>org.jboss.tools.cdk.ui.bot.test</module>
 	</modules>
 
 </project>
