@@ -18,8 +18,12 @@ import static org.junit.Assert.fail;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.reddeer.common.matcher.RegexMatcher;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
@@ -64,13 +68,37 @@ public class OpenShiftUtils {
 	
 	public static void deleteAllProjects() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
+		explorer.getOpenShift3Connection().refresh();
+		new WaitWhile(new JobIsRunning());
 		List<OpenShiftProject> projects = explorer.getOpenShift3Connection().getAllProjects();
 		for (OpenShiftProject project : projects) {
 			if (project != null) {
 				String projectName = project.getName();
-				project.delete();
-				new WaitWhile(new OpenShiftProjectExists(projectName), TimePeriod.LONG);
+				try {
+					project.delete();
+					new WaitWhile(new OpenShiftProjectExists(projectName), TimePeriod.LONG);
+				} catch (CoreLayerException ex) {
+					// project does not exist - project has been deleted but view has not been
+					// refreshed
+					explorer.getOpenShift3Connection().refresh();
+				}
 			}
+		}
+	}
+	
+	public static void closeBrowser() {
+		try {
+			BrowserEditor browser = new BrowserEditor(new RegexMatcher(".*"));
+			while (browser != null) {
+				browser.close();
+				try {
+					browser = new BrowserEditor(new RegexMatcher(".*"));
+				} catch (CoreLayerException ex) {
+					browser = null;
+				}
+			}
+		} catch (CoreLayerException ex) {
+			return;
 		}
 	}
 	

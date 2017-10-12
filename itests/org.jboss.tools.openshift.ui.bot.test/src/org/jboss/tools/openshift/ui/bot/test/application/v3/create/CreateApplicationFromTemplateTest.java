@@ -85,8 +85,7 @@ public class CreateApplicationFromTemplateTest {
 	private static final String TESTS_PROJECT = "os3projectWithResources";
 	private static final String TESTS_PROJECT_LOCATION = new File("resources/os3projectWithResources")
 			.getAbsolutePath();
-	private static final String URL = "https://raw.githubusercontent.com/jbosstools/jbosstools-integration-tests"
-			+ "/master/tests/org.jboss.tools.openshift.ui.bot.test/resources/eap70-basic-s2i-helloworld.json";
+	private static final String URL = "https://raw.githubusercontent.com/jbosstools/jbosstools-openshift/master/itests/org.jboss.tools.openshift.ui.bot.test/resources/eap70-basic-s2i-helloworld.json";
 
 	private String genericWebhookURL;
 	private String githubWebhookURL;
