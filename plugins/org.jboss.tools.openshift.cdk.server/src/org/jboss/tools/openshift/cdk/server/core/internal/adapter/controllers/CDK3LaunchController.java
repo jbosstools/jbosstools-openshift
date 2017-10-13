@@ -38,6 +38,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ILaunchServerController;
 import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLaunchDelegate;
 import org.jboss.tools.foundation.core.credentials.UsernameChangedException;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
@@ -84,7 +85,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 
 		String profiles = getProfileString(server);
 		String defaultArgs = profiles + "start --vm-driver="
-				+ cdkServer.getServer().getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
+				+ server.getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
 
 		String currentVal = wc.getAttribute(ATTR_ARGS, defaultArgs);
 		wc.setAttribute(ATTR_ARGS, currentVal);
@@ -124,13 +125,14 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 			env.remove(userKey);
 		}
 
-		setMinishiftLocationOnLaunchConfig(cdkServer, workingCopy, env);
+		setMinishiftLocationOnLaunchConfig(s, workingCopy, env);
 		workingCopy.setAttribute(ENVIRONMENT_VARS_KEY, env);
 
 		// override vm-driver args
-		String targetedHypervisor = cdkServer.getServer().getAttribute(CDK3Server.PROP_HYPERVISOR,
+		String targetedHypervisor = s.getAttribute(CDK3Server.PROP_HYPERVISOR,
 				CDK3Server.getHypervisors()[0]);
-		String profiles = getProfileString(getServer());
+		
+		String profiles = getProfileString(s);
 		String profileName = s.getAttribute(CDK32Server.PROFILE_ID, (String)null);
 		
 		String defaultArgs = profiles + "start --vm-driver=" + targetedHypervisor;
@@ -144,17 +146,17 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 
 	protected String getMinishiftHome(IServer server) {
 		String home = System.getProperty("user.home");
-		String defaultMinishiftHome = new File(home, CDK3Server.DOT_MINISHIFT).getAbsolutePath();
+		String defaultMinishiftHome = new File(home, CDKConstants.CDK_RESOURCE_DOTMINISHIFT).getAbsolutePath();
 		String msHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, defaultMinishiftHome);
 		if( !StringUtils.isEmpty(msHome))
 			msHome = defaultMinishiftHome;
 		return msHome;
 	}
 	
-	private void setMinishiftLocationOnLaunchConfig(CDKServer cdkServer, ILaunchConfigurationWorkingCopy workingCopy,
+	private void setMinishiftLocationOnLaunchConfig(IServer s, ILaunchConfigurationWorkingCopy workingCopy,
 			Map<String, String> env) throws CoreException {
 
-		String minishiftLoc = cdkServer.getServer().getAttribute(CDK3Server.MINISHIFT_FILE, (String) null);
+		String minishiftLoc = s.getAttribute(CDK3Server.MINISHIFT_FILE, (String) null);
 		if (minishiftLoc == null)
 			minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation(workingCopy);
 

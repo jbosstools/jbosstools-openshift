@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.test;
 
+import org.jboss.tools.openshift.cdk.server.test.internal.CDK32LaunchControllerTest;
 import org.jboss.tools.openshift.cdk.server.test.internal.CDKDockerUtilityTest;
 import org.jboss.tools.openshift.cdk.server.test.internal.CDKLaunchControllerTest;
 import org.jboss.tools.openshift.cdk.server.test.internal.CDKOpenshiftUtilityTest;
@@ -27,6 +28,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	CDKDockerUtilityTest.class,
 	CDKOpenshiftUtilityTest.class,
 	CDKLaunchControllerTest.class,
+	CDK32LaunchControllerTest.class,
 	VagrantPollerTest.class,
 	CDKRegistryTest.class,
 	CDKRuntimeDetectorTest.class
