@@ -92,6 +92,23 @@ public class TestUtils {
 		}
 	}
 	
+	public static void cleanupGitFolder(File gitDir) {
+		boolean exists = gitDir.exists() ? true : gitDir.mkdir();
+
+		if (exists && gitDir.isDirectory() && gitDir.listFiles().length > 0) {
+			for (File file : gitDir.listFiles()) {
+				if (file.isDirectory()) {
+					closeGitRepository(file);
+				}
+				try {
+					TestUtils.delete(file);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	public static void cleanupGitFolder(String appname) {
 		File gitDir = new File(System.getProperty("user.home") + File.separatorChar + "git");
 		cleanupGitFolder(gitDir, appname);

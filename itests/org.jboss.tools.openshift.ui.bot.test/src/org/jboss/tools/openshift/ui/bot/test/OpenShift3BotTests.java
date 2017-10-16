@@ -10,16 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test;
 
-import org.eclipse.reddeer.common.exception.RedDeerException;
-import org.eclipse.reddeer.common.wait.TimePeriod;
-import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
-import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.CreateServerAdapterTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.DebuggingEAPAppTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplicationWizardGitTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplicationWizardTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.PublishChangesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterFromResourceTest;
@@ -43,6 +37,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.TemplateParame
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationFromTemplateTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationOnBuilderImageTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.DeploymentTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.debug.NodeJSAppDebugTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OCBinaryLocationTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionPropertiesTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionWizardHandlingTest;
@@ -57,7 +52,6 @@ import org.jboss.tools.openshift.ui.bot.test.project.LinkToCreateNewProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.project.ProjectNameValidationTest;
 import org.jboss.tools.openshift.ui.bot.test.project.ProjectPropertiesTest;
 import org.jboss.tools.openshift.ui.bot.test.project.ResourcesTest;
-import org.junit.AfterClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
@@ -65,6 +59,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * <b>OpenShift 3 All Tests suite</b>
  * 
  * @author mlabuda@redhat.com
+ * @contributor jkopriva@redhat.com
  */
 @RunWith(RedDeerSuite.class)
 @SuiteClasses({
@@ -110,6 +105,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	EditResourcesTest.class,
 	HandleCustomTemplateTest.class,
 	ImportApplicationWizardTest.class,
+	ImportApplicationWizardGitTest.class,
 
 	// Advanced application testing
 	DeployDockerImageTest.class,	
@@ -122,32 +118,9 @@ import org.junit.runners.Suite.SuiteClasses;
 	ServerAdapterFromResourceTest.class,
 	PublishChangesTest.class,
 	DebuggingEAPAppTest.class,
+	NodeJSAppDebugTest.class,
 })
-public class OpenShift3BotTests {
+public class OpenShift3BotTests extends AbstractBotTests{
 	
-	
-	@AfterClass
-	public static void cleanUp() {
-		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		explorer.open();
-		OpenShift3Connection connection = explorer.getOpenShift3Connection();
-
-		if (connection != null) {
-			for (OpenShiftProject project : connection.getAllProjects()) {
-				safeDeleteProject(project, connection);
-			}
-
-			new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		}
-	}
-
-	private static void safeDeleteProject(OpenShiftProject project, OpenShift3Connection connection) {
-		try {
-			connection.refresh();
-			project.delete();
-		} catch (RedDeerException e) {
-			// swallow intentionally
-		}
-	}
 	
 }

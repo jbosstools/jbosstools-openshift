@@ -139,7 +139,7 @@ public class DebuggingEAPAppTest {
 	}
 
 	private static void cloneGitRepository() {
-		TestUtils.cleanupGitFolder(new File(GIT_REPO_DIRECTORY),"jboss-eap-quickstarts");
+		TestUtils.cleanupGitFolder(new File(GIT_REPO_DIRECTORY));
 		try {
 			Git.cloneRepository().setURI(GIT_REPO_URL).setDirectory(new File(GIT_REPO_DIRECTORY)).call();
 		} catch (GitAPIException e) {
