@@ -10,6 +10,12 @@
 	<artifactId>plugins</artifactId>
 	<name>openshift.plugins</name>
 	<packaging>pom</packaging>
+	
+	<properties>
+		<sonar.sources>src</sonar.sources>
+		<sonar.tests></sonar.tests>
+	</properties>
+	
 	<modules>
 		<module>org.jboss.tools.openshift.egit.core</module>
 		<module>org.jboss.tools.openshift.egit.ui</module>

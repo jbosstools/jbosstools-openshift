@@ -12,5 +12,6 @@
 	<packaging>eclipse-repository</packaging>
 	<properties>
 		<skipDeployToJBossOrg>false</skipDeployToJBossOrg>
+		<sonar.skip>true</sonar.skip>
 	</properties>
 </project>
