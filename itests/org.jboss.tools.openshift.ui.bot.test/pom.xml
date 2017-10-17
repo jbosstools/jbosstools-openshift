@@ -14,7 +14,7 @@
 
 	<properties>
 		<systemProperties>
-			-Dtest.configurations.dir=${configurations.dir} -Dopenshift.server=${openshift.server} -Dopenshift.username=${openshift.username} -Dopenshift.password=${openshift.password} -Dopenshift.token=${openshift.token} -Dgithub.username=${github.username} -Dgithub.password=${github.password} -Dopenshift.authmethod=${openshift.authmethod} -Dsecurestorage.password=${securestorage.password} -Dopenshift.nexus.mirror=${openshift.nexus.mirror}
+			-Dtest.configurations.dir=${configurations.dir} -Dopenshift.server=${openshift.server} -Dopenshift.username=${openshift.username} -Dopenshift.password=${openshift.password} -Dopenshift.token=${openshift.token} -Dgithub.username=${github.username} -Dgithub.password=${github.password} -Dopenshift.authmethod=${openshift.authmethod} -Dsecurestorage.password=${securestorage.password} -Dusage_reporting_enabled=false
 		</systemProperties>
 		<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3StableBotTests</test.class>
 		<surefire.timeout>7200</surefire.timeout>
@@ -22,8 +22,7 @@
 		<openshift.username></openshift.username>
 		<openshift.password></openshift.password>
 		<openshift.token></openshift.token>
-		<openshift.authmethod></openshift.authmethod>
-		<openshift.nexus.mirror></openshift.nexus.mirror>
+		<openshift.authmethod>basic</openshift.authmethod>
 		<github.username></github.username>
 		<github.password></github.password>
 		<securestorage.password></securestorage.password>
