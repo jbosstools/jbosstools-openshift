@@ -140,6 +140,9 @@ public class ConnectionURL {
 	
 	public static ConnectionURL forConnection(IConnection connection) 
 			throws UnsupportedEncodingException, MalformedURLException {
+		if (connection == null) {
+			return null;
+		}
 		if (connection.isDefaultHost()) {
 			return forUsername(connection.getUsername());
 		}

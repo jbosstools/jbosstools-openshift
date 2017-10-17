@@ -97,7 +97,37 @@ public class OpenShiftServerUtilsTest {
 		// then
 		assertThat(connection).isEqualTo(this.connection);
 	}
-	
+
+	@Test
+	public void should_not_return_connection_from_server_given_malformed_url() {
+		// given
+		doReturn("htt:/bogus").when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_CONNECTIONURL), anyString());
+		// when
+		Connection connection = OpenShiftServerUtils.getConnection(server);
+		// then
+		assertThat(connection).isNull();
+	}
+
+	@Test
+	public void should_not_return_connection_from_server_given_non_registered_connection() {
+		// given
+		ConnectionsRegistrySingleton.getInstance().clear();
+		// when
+		Connection connection = OpenShiftServerUtils.getConnection(server);
+		// then
+		assertThat(connection).isNull();
+	}
+
+	@Test(expected=CoreException.class)
+	public void should_throw_exception_given_no_connection() throws Exception {
+		// given
+		ConnectionsRegistrySingleton.getInstance().clear();
+		// when
+		OpenShiftServerUtils.getConnectionChecked(server);
+		// then
+		fail("CoreException expected");
+	}
+
 	@Test
 	public void should_return_service_from_server() {
 		// given

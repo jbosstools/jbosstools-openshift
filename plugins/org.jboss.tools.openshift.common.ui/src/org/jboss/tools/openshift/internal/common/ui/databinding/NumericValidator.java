@@ -24,10 +24,16 @@ import org.eclipse.core.runtime.IStatus;
 public class NumericValidator implements IValidator {
     private String type;
     private Function<String, Number> validator;
+	private boolean errorOnEmpty = false;
 
-    public NumericValidator(String type, Function<String, Number> validator) {
+    public NumericValidator(String type, Function<String, Number> validator, boolean errorOnEmpty) {
         this.type = type;
         this.validator = validator;
+    	this.errorOnEmpty = errorOnEmpty;
+    }
+
+    public NumericValidator(String type, Function<String, Number> validator) {
+    	this(type, validator, false);
     }
 
     @Override
@@ -37,8 +43,12 @@ public class NumericValidator implements IValidator {
         }
         String str = (String) value;
         IStatus status = ValidationStatus.ok();
-        if (!StringUtils.isEmpty(str)) {
-            try {
+        if (StringUtils.isEmpty(str)) {
+        	if (errorOnEmpty) {
+        		status = ValidationStatus.error("Please provide a value");
+        	}
+        } else {
+        	try {
                 validator.apply(str);
             }
             catch (NumberFormatException e) {

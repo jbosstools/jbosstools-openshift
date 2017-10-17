@@ -334,6 +334,10 @@ public class FormPresenterSupport {
 		formPresenter = null;
 	}
 
+	public IStatus getCurrentStatus() {
+		return currentStatus;
+	}
+	
 	public interface IFormPresenter {
 		
 		public void setMessage(String message, int type);

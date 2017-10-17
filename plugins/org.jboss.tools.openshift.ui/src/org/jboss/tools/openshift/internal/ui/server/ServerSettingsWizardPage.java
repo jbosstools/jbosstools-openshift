@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
@@ -109,9 +108,10 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.SelectProjectComponentBuilder;
-import org.jboss.tools.openshift.internal.common.ui.databinding.DisablableRequiredStringMultiValidator;
+import org.jboss.tools.openshift.internal.common.ui.databinding.DisableableMultiValitdator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport.IFormPresenter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.NumericValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
@@ -125,6 +125,7 @@ import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog.RouteLabel
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
+import org.jboss.tools.openshift.internal.ui.validator.OpenShiftIdentifierValidator;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 
 import com.openshift.restclient.model.IBuildConfig;
@@ -871,8 +872,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
 		ValidationStatusProvider devmodeKeyValidator = 
-				new DisablableRequiredStringMultiValidator(devmodeKeyObservable, useImageDevmodeKeyObservable,
-						"Please provide an environment variable key to use when enabling debugging.");
+				new DisableableMultiValitdator<String>(useImageDevmodeKeyObservable, devmodeKeyObservable,
+						new OpenShiftIdentifierValidator());
+		dbc.addValidationStatusProvider(devmodeKeyValidator);
 		ControlDecorationSupport.create(devmodeKeyValidator, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater(true));
 	}
@@ -886,15 +888,15 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			.applyTo(debugPortLabel);
 
 		// use image key & value checkbox
-		Button useImageDebugPortKeyText = new Button(parent, SWT.CHECK);
-		useImageDebugPortKeyText.setText("use image provided key and value");
+		Button useImageDebugPortKeyButton = new Button(parent, SWT.CHECK);
+		useImageDebugPortKeyButton.setText("use image provided key and value");
 		GridDataFactory.fillDefaults()
 			.span(3, 1).align(SWT.FILL, SWT.CENTER)
-			.applyTo(useImageDebugPortKeyText);
+			.applyTo(useImageDebugPortKeyButton);
 		IObservableValue<Boolean> useImageDebugPortKey = 
 				BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_KEY).observe(model);
 		ValueBindingBuilder
-			.bind(WidgetProperties.selection().observe(useImageDebugPortKeyText))
+			.bind(WidgetProperties.selection().observe(useImageDebugPortKeyButton))
 			.to(useImageDebugPortKey)
 			.in(dbc);
 		//filler
@@ -922,11 +924,21 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			.notUpdating(useImageDebugPortKey)
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
-		ControlDecorationSupport.create(
-				new DisablableRequiredStringMultiValidator(debugPortKeyTextObservable, useImageDebugPortKey, "Please provide a port to use.")
-				, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		
+		ValidationStatusProvider debugPortKeyValidator = 
+				new DisableableMultiValitdator<String>(useImageDebugPortKey, debugPortKeyTextObservable, 
+						new OpenShiftIdentifierValidator());
+		dbc.addValidationStatusProvider(debugPortKeyValidator);
+		ControlDecorationSupport.create(debugPortKeyValidator, SWT.LEFT | SWT.TOP, parent,
+				new RequiredControlDecorationUpdater(true));
 
 		// port text field
+		IObservableValue<Boolean> useImageDebugPortValue = 
+				BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_VALUE).observe(model);
+		ValueBindingBuilder
+			.bind(WidgetProperties.selection().observe(useImageDebugPortKeyButton))
+			.to(useImageDebugPortValue)
+			.in(dbc);
 		Label portLabel = new Label(parent, SWT.NONE);
 		portLabel.setText("Port:");
 		GridDataFactory.fillDefaults()
@@ -936,31 +948,23 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(debugPortText);
-		IObservableValue<String> debugPortTextObservable = 
+		IObservableValue<String> debugPortValueObservable = 
 				WidgetProperties.text(SWT.Modify).observe(debugPortText);
 		ValueBindingBuilder
-			.bind(debugPortTextObservable)
+			.bind(debugPortValueObservable)
 			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_DEBUG_PORT_VALUE).observe(model))
 			.in(dbc);
 		ValueBindingBuilder
 			.bind(WidgetProperties.enabled().observe(debugPortText))
-			.notUpdating(useImageDebugPortKey)
+			.notUpdating(useImageDebugPortValue)
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
-		ControlDecorationSupport.create(
-				new DisablableRequiredStringMultiValidator(debugPortTextObservable, useImageDebugPortKey, "Please provide a port to use.") {
-
-					@Override
-					protected IStatus validateValue(String value) {
-						if (!NumberUtils.isDigits(value)) {
-							return ValidationStatus.error(
-									"Please provide a numeric port value");
-						}
-						return ValidationStatus.ok();
-					}
-					
-				}
-				, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		ValidationStatusProvider debugPortValueValidator = 
+				new DisableableMultiValitdator<String>(useImageDebugPortValue, debugPortValueObservable, 
+						new NumericValidator("integer", Integer::parseInt, true));
+		dbc.addValidationStatusProvider(debugPortValueValidator);
+		ControlDecorationSupport.create(debugPortValueValidator, SWT.LEFT | SWT.TOP, parent,
+				new RequiredControlDecorationUpdater(true));
 	}
 	
 	@SuppressWarnings("unchecked")

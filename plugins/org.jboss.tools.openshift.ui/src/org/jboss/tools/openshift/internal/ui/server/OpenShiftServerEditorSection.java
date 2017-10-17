@@ -11,10 +11,7 @@
 package org.jboss.tools.openshift.internal.ui.server;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 
-import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
@@ -34,6 +31,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
@@ -65,7 +63,6 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
-import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.IServerEditorPartInput;
 import org.eclipse.wst.server.ui.editor.ServerEditorPart;
@@ -73,7 +70,6 @@ import org.eclipse.wst.server.ui.editor.ServerEditorSection;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
-import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.utils.FileUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -83,10 +79,14 @@ import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.SelectExistingProjectDialog;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionColumLabelProvider;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
-import org.jboss.tools.openshift.internal.common.ui.databinding.DisablableRequiredStringMultiValidator;
+import org.jboss.tools.openshift.internal.common.ui.databinding.DisableableMultiValitdator;
+import org.jboss.tools.openshift.internal.common.ui.databinding.FormEditorPresenter;
+import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
+import org.jboss.tools.openshift.internal.common.ui.databinding.NumericValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.validator.OpenShiftIdentifierValidator;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IResource;
@@ -100,6 +100,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 
 	private IServerEditorPartInput input;
 	private OpenShiftServerEditorModel model;
+	private DataBindingContext dbc;
+	private FormPresenterSupport formPresenterSupport;
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input) {
@@ -119,7 +121,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		super.createSection(parent);
 
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		DataBindingContext dbc = new DataBindingContext();
+		this.dbc = new DataBindingContext();
 
 		Section section = toolkit.createSection(parent,
 				ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED | ExpandableComposite.TITLE_BAR);
@@ -141,6 +143,9 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.applyTo(container);
 		
 		section.setClient(container);
+
+		this.formPresenterSupport = new FormPresenterSupport(
+				new FormEditorPresenter(getManagedForm().getForm().getForm()), dbc);
 
 		loadResources(section, model, dbc);
 		dbc.updateTargets();
@@ -552,15 +557,14 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER)
 			.applyTo(enableDevmodeLabel);
-		Button useImageDevmodeKey = toolkit.createButton(container, "use image provided key", SWT.CHECK);
+		Button useImageDevmodeKeyButton = toolkit.createButton(container, "use image provided key", SWT.CHECK);
 		GridDataFactory.fillDefaults()
 			.span(4, 1).align(SWT.FILL, SWT.CENTER)
-			.applyTo(useImageDevmodeKey);
-		IObservableValue<Boolean> useImageDevmodeKeyObservable = 
-				BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEVMODE_KEY).observe(model);
+			.applyTo(useImageDevmodeKeyButton);
+		ISWTObservableValue useImageDevmodeObservable = WidgetProperties.selection().observe(useImageDevmodeKeyButton);
 		ValueBindingBuilder
-			.bind(WidgetProperties.selection().observe(useImageDevmodeKey))
-			.to(useImageDevmodeKeyObservable)
+			.bind(useImageDevmodeObservable)
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEVMODE_KEY).observe(model))
 			.in(dbc);
 		// filler
 		new Label(container, SWT.NONE);
@@ -580,13 +584,15 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.in(dbc);
 		ValueBindingBuilder
 			.bind(WidgetProperties.enabled().observe(devmodeKeyText))
-			.notUpdating(useImageDevmodeKeyObservable)
+			.notUpdating(useImageDevmodeObservable)
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
+		
 		ValidationStatusProvider devmodeKeyValidator = 
-				new DisablableRequiredStringMultiValidator(devmodeKeyObservable, useImageDevmodeKeyObservable,
-						"Please provide an environment variable key to use when enabling debugging.");
-		ControlDecorationSupport.create(devmodeKeyValidator, SWT.LEFT | SWT.TOP, null,
+				new DisableableMultiValitdator<String>(useImageDevmodeObservable, devmodeKeyObservable, 
+						new OpenShiftIdentifierValidator());
+		dbc.addValidationStatusProvider(devmodeKeyValidator);
+		ControlDecorationSupport.create(devmodeKeyValidator, SWT.LEFT | SWT.TOP, container,
 				new RequiredControlDecorationUpdater(true));
 	}
 
@@ -599,19 +605,23 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.applyTo(debugPortLabel);
 
 		// use image key & value checkbox
-		Button useImageDebugPortKeyText = new Button(container, SWT.CHECK);
-		useImageDebugPortKeyText.setText("use image provided key and value");
+		Button useImageDebugPortKeyButton = new Button(container, SWT.CHECK);
+		useImageDebugPortKeyButton.setText("use image provided key and value");
 		GridDataFactory.fillDefaults()
 			.span(4, 1).align(SWT.FILL, SWT.CENTER)
-			.applyTo(useImageDebugPortKeyText);
+			.applyTo(useImageDebugPortKeyButton);
 		IObservableValue<Boolean> useImageDebugPortKey = 
-				BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_KEY).observe(model);
+				WidgetProperties.selection().observe(useImageDebugPortKeyButton);
 		ValueBindingBuilder
-			.bind(WidgetProperties.selection().observe(useImageDebugPortKeyText))
-			.to(useImageDebugPortKey)
+			.bind(useImageDebugPortKey)
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_KEY).observe(model))
+			.in(dbc);
+		ValueBindingBuilder
+			.bind(useImageDebugPortKey)
+			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_VALUE).observe(model))
 			.in(dbc);
 
-		// key text field
+		// port key field
 		new Label(container, SWT.NONE); // filler
 		Label keyLabel = new Label(container, SWT.NONE);
 		keyLabel.setText("Key:");
@@ -622,10 +632,10 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(debugPortKeyText);
-		IObservableValue<String> debugPortKeyTextObservable = 
+		IObservableValue<String> debugPortKeyObservable = 
 				WidgetProperties.text(SWT.Modify).observe(debugPortKeyText);
 		ValueBindingBuilder
-			.bind(debugPortKeyTextObservable)
+			.bind(debugPortKeyObservable)
 			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_DEBUG_PORT_KEY).observe(model))
 			.in(dbc);
 		ValueBindingBuilder
@@ -633,11 +643,15 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.notUpdating(useImageDebugPortKey)
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
-		ControlDecorationSupport.create(
-				new DisablableRequiredStringMultiValidator(debugPortKeyTextObservable, useImageDebugPortKey, "Please provide a port to use.")
-				, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
 
-		// port text field
+		ValidationStatusProvider debugPortKeyValidator = 
+				new DisableableMultiValitdator<String>(useImageDebugPortKey, debugPortKeyObservable, 
+						new OpenShiftIdentifierValidator());
+		dbc.addValidationStatusProvider(debugPortKeyValidator);
+		ControlDecorationSupport.create(debugPortKeyValidator, SWT.LEFT | SWT.TOP, container,
+				new RequiredControlDecorationUpdater(true));
+		
+		// port value field
 		Label portLabel = new Label(container, SWT.NONE);
 		portLabel.setText("Port:");
 		GridDataFactory.fillDefaults()
@@ -647,31 +661,26 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.CENTER).grab(true, false)
 			.applyTo(debugPortText);
-		IObservableValue<String> debugPortTextObservable = 
+		IObservableValue<String> debugPortValueObservable = 
 				WidgetProperties.text(SWT.Modify).observe(debugPortText);
-		ValueBindingBuilder
-			.bind(debugPortTextObservable)
+		Binding debugPortBinding = ValueBindingBuilder
+			.bind(debugPortValueObservable)
 			.to(BeanProperties.value(OpenShiftServerEditorModel.PROPERTY_DEBUG_PORT_VALUE).observe(model))
 			.in(dbc);
+		ControlDecorationSupport.create(debugPortBinding,SWT.LEFT | SWT.TOP, container
+				, new RequiredControlDecorationUpdater(true));
 		ValueBindingBuilder
 			.bind(WidgetProperties.enabled().observe(debugPortText))
 			.notUpdating(useImageDebugPortKey)
 			.converting(new InvertingBooleanConverter())
 			.in(dbc);
-		ControlDecorationSupport.create(
-				new DisablableRequiredStringMultiValidator(debugPortTextObservable, useImageDebugPortKey, "Please provide a port to use.") {
 
-					@Override
-					protected IStatus validateValue(String value) {
-						if (!NumberUtils.isDigits(value)) {
-							return ValidationStatus.error(
-									"Please provide a numeric port value");
-						}
-						return ValidationStatus.ok();
-					}
-					
-				}
-				, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		ValidationStatusProvider debugPortValueValidator = 
+				new DisableableMultiValitdator<String>(useImageDebugPortKey, debugPortValueObservable, 
+						new NumericValidator("integer", Integer::parseInt, true));
+		dbc.addValidationStatusProvider(debugPortValueValidator);
+		ControlDecorationSupport.create(debugPortValueValidator, SWT.LEFT | SWT.TOP, container,
+				new RequiredControlDecorationUpdater(true));
 	}
 
 	private SelectionListener onSelectResource(OpenShiftServerEditorModel model, final Shell shell) {
@@ -688,7 +697,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			}
 		};
 	}
-	
+
 	private class LoadProjectsJob extends Job {
 		private OpenShiftServerEditorModel model;
 		private IServerWorkingCopy server;
@@ -703,7 +712,11 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			model.setInitializing(true);
-			Connection con = loadConnection();
+
+			Connection con = OpenShiftServerUtils.getConnection(server);
+			if (con != null) {
+				model.loadResources(con);
+			}
 			if (deployProject != null) {
 				model.setDeployProject(deployProject);
 			}
@@ -727,32 +740,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			}			
 			return Status.OK_STATUS;
 		}
-
-		private Connection loadConnection() {
-			String url = OpenShiftServerUtils.getConnectionURL(server);
-			Connection con = null;
-			try {
-				if (url != null) {
-					ConnectionURL conUrl = ConnectionURL.forURL(url);
-					con = ConnectionsRegistrySingleton.getInstance().getByUrl(conUrl, Connection.class);
-					model.loadResources(con);
-				}
-			} catch(UnsupportedEncodingException | MalformedURLException | OpenShiftException e) {
-				IStatus s = OpenShiftUIActivator.statusFactory().errorStatus(getConnectionErrorMessage(url, server), e);
-				OpenShiftUIActivator.getDefault().getLogger().logStatus(s);
-			}
-			return con;
-		}
-		
-		private String getConnectionErrorMessage(String url, IServerAttributes server) {
-			ConnectionURL connectionUrl = ConnectionURL.safeForURL(OpenShiftServerUtils.getConnectionURL(server));
-			if (connectionUrl == null) {
-				return "Could not find OpenShift connection for server \"{0}\"";
-			} else {
-				return NLS.bind("Could not find OpenShift connection to host \"{0}\" with user \"{1}\" for server \"{2}\"", 
-					new String[] { connectionUrl.getHost(), connectionUrl.getUsername(), server.getName() } );
-			}
-		}
 	}
 	
 	private void loadResources(final Composite container, OpenShiftServerEditorModel model, DataBindingContext dbc) {
@@ -771,6 +758,17 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			.runWhenDone(new LoadProjectsJob(model, server, deployProject))
 			.runWhenDone(new DisableAllWidgetsJobFixed(false, container, false, busyCursor, dbc))
 			.schedule();
+	}
+
+	@Override
+	public IStatus[] getSaveStatus() {
+		return new IStatus[] { formPresenterSupport.getCurrentStatus() };
+	}
+
+	@Override
+	public void dispose() {
+		formPresenterSupport.dispose();
+		model.dispose();
 	}
 
 	//Temporal fix until superclass is fixed. Then just remove this class.
