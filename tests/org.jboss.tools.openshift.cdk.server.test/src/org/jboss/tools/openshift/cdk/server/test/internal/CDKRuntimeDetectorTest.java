@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.jboss.ide.eclipse.as.core.util.FileUtil;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.runtime.core.model.IRuntimeDetector;
 import org.jboss.tools.runtime.core.model.RuntimeDefinition;
 import org.jboss.tools.runtime.core.model.RuntimePath;
@@ -53,20 +54,20 @@ public class CDKRuntimeDetectorTest extends TestCase {
 
 	private File getDotMinishift() {
 		File home = getHomeDirectory();
-		File minishift = new File(home, ".minishift");
+		File minishift = new File(home, CDKConstants.CDK_RESOURCE_DOTMINISHIFT);
 		return minishift;
 	}
 	private void cleanupCDK() {
 		File home = getHomeDirectory();
 		home.mkdirs();
-		File minishift = new File(home, ".minishift");
+		File minishift = new File(home, CDKConstants.CDK_RESOURCE_DOTMINISHIFT);
 		FileUtil.completeDelete(minishift);
 	}
 	private void createCDK(String version) throws IOException {
 		cleanupCDK();
 		File home = getHomeDirectory();
 		home.mkdirs();
-		File minishift = new File(home, ".minishift");
+		File minishift = new File(home,CDKConstants.CDK_RESOURCE_DOTMINISHIFT);
 		minishift.mkdir();
 		File config = new File(minishift, "config");
 		config.mkdir();

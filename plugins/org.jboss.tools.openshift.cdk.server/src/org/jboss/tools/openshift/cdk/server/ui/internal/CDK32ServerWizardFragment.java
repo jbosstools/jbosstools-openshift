@@ -62,8 +62,8 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		profileData.horizontalSpan = 2;
 		profileText = new Text(main, SWT.BORDER | SWT.SINGLE);
 		profileText.setLayoutData(profileData);
-		profileText.setText("");
-		profileName = "";
+		profileText.setText(CDK32Server.MINISHIFT_DEFAULT_PROFILE);
+		profileName = CDK32Server.MINISHIFT_DEFAULT_PROFILE;
 		
 		profileText.addModifyListener(new ModifyListener() {
 			@Override

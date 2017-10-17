@@ -14,10 +14,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 public class CDK32Server extends CDK3Server {
 	public static final String PROFILE_ID = "minishift.profile";
-	
+	public static final String MINISHIFT_DEFAULT_PROFILE = "minishift";
+
 
 	protected String getBaseName() {
 		return CDK32Server.getServerTypeBaseName();
@@ -37,6 +39,9 @@ public class CDK32Server extends CDK3Server {
 	public static String[] getArgsWithProfile(IServer server, String[] args) {
 		if( supportsProfiles(server)) {
 			String profileName = server.getAttribute(CDK32Server.PROFILE_ID, (String)null);
+			if( StringUtils.isEmpty(profileName)) {
+				profileName = CDK32Server.MINISHIFT_DEFAULT_PROFILE;
+			}
 			if( profileName != null ) {
 				ArrayList<String> al = new ArrayList<String>();
 				al.add("--profile");

@@ -30,8 +30,11 @@ public interface CDKConstants {
 	
 	
 	public static final String CDK_RESOURCE_VAGRANTFILE = "Vagrantfile";
+	public static final String CDK_RESOURCE_DOTMINISHIFT= ".minishift";
 	public static final String CDK_RESOURCE_DOTCDK= ".cdk";
 	public static final String CDK_RESOURCE_CDK= "cdk";
+	
+	public static final String CDK32_RESOURCE_PROFILES = "profiles";
 
 	
 	// Response strings from a status call
