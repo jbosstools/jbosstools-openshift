@@ -19,7 +19,6 @@
 		<vagrantfile.path></vagrantfile.path>
 		<minishift.path></minishift.path>
 		<minishift.hypervisor></minishift.hypervisor>
-	        <skipITests>false</skipITests>
 	</properties>
 	
 	<profiles>
