@@ -20,17 +20,24 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.reddeer.common.matcher.RegexMatcher;
 import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
+import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
+import org.jboss.tools.openshift.reddeer.view.resources.Service;
+import org.jboss.tools.openshift.reddeer.wizard.importapp.ImportApplicationWizard;
+import org.jboss.tools.openshift.reddeer.wizard.server.ServerSettingsWizard;
 
 public class OpenShiftUtils {
 	
@@ -52,7 +59,6 @@ public class OpenShiftUtils {
 				if (matcher.matches(pod.getName())) {
 					return pod;
 				}
-			
 		}
 		fail("Pod with matcher:" + matcher.toString() + " for project " + projectName + " was not found");
 		return null;
@@ -100,6 +106,20 @@ public class OpenShiftUtils {
 		} catch (CoreLayerException ex) {
 			return;
 		}
+	}
+	
+	public static ImportApplicationWizard openImportApplicationWizardFromOpenshiftView(Service openshiftService){
+		openshiftService.select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
+		return new ImportApplicationWizard();
+	}
+	
+	public static ServerSettingsWizard openServerSettingsWizardFromOpenshiftView(Service openshiftService){
+		openshiftService.select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS), TimePeriod.LONG);
+		return new ServerSettingsWizard();
 	}
 	
 

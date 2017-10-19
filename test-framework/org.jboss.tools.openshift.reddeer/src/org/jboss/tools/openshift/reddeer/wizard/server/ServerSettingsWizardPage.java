@@ -10,14 +10,23 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard.server;
 
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.wizard.importapp.ImportApplicationWizard;
 
 /**
  * @author jnovak@redhat.com
+ * @contributor jkopriva@redhat.com
  */
 public class ServerSettingsWizardPage {
 
 	public ImportApplicationWizard importProject(){
-		return new ImportApplicationWizard().openFromServerAdapterSettings();
+		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
+		new PushButton("Import...").click();
+		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
+		return new ImportApplicationWizard();
 	}
 }

@@ -17,18 +17,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.reddeer.common.util.Display;
+import org.eclipse.reddeer.core.matcher.TreeItemRegexMatcher;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.swt.impl.button.CancelButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
+import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.wizard.importapp.GitCloningWizardPage;
 import org.jboss.tools.openshift.reddeer.wizard.importapp.ImportApplicationWizard;
 import org.jboss.tools.openshift.reddeer.wizard.server.ServerSettingsWizard;
 import org.jboss.tools.openshift.reddeer.wizard.server.ServerSettingsWizardPage;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenshiftTestInFailureException;
 import org.junit.Test;
 
@@ -39,23 +42,24 @@ public class ImportApplicationWizardTest extends ImportApplicationBase {
 	
 	@Test
 	public void testImportOpenShift3AppViaOpenshiftView() {
-		ImportApplicationWizard importWizard = 
-				new ImportApplicationWizard().openFromOpenshiftView(service);
+		ImportApplicationWizard importWizard = OpenShiftUtils.openImportApplicationWizardFromOpenshiftView(service);
 		
 		importWizard.finish();
 		assertProjectExistsInProjectView(OpenShiftResources.NODEJS_GIT_NAME);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test(expected=OpenshiftTestInFailureException.class)
 	public void testImportOpenShift3AppViaServerAdapterSettings() {
-		ServerSettingsWizard serverWizard = new ServerSettingsWizard().openFromOpenshiftView(service);
+		ServerSettingsWizard serverWizard = OpenShiftUtils.openServerSettingsWizardFromOpenshiftView(service);
 		
 		ImportApplicationWizard importWizard = new ServerSettingsWizardPage().importProject();
+		new DefaultTree(importWizard).getItem(new TreeItemRegexMatcher(OpenShiftResources.NODEJS_SERVICE+".*")).select();
 		importWizard.next();
 		importWizard.finish();
 		
-		new DefaultShell(serverWizard.getTitle());
-		assertProjectNameFilled();
+		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
+		assertProjectNameFilled(); 
 		serverWizard.cancel();
 		
 		assertProjectExistsInProjectView(OpenShiftResources.NODEJS_GIT_NAME);
@@ -63,8 +67,8 @@ public class ImportApplicationWizardTest extends ImportApplicationBase {
 	
 	@Test
 	public void testImportOpenShift3AppWizardGitAPI() {
-		ImportApplicationWizard importWizard = 
-				new ImportApplicationWizard().openFromOpenshiftView(service);
+		ImportApplicationWizard importWizard = OpenShiftUtils.openImportApplicationWizardFromOpenshiftView(service);
+
 		
 		String gitUrl = getGitUrlFromWizard();		
 		
@@ -78,8 +82,8 @@ public class ImportApplicationWizardTest extends ImportApplicationBase {
 	public void testImportOpenShift3AppViaOpenshiftViewTwice() {
 		testImportOpenShift3AppViaOpenshiftView();
 		
-		ImportApplicationWizard importWizard = 
-				new ImportApplicationWizard().openFromOpenshiftView(service);		
+		ImportApplicationWizard importWizard = OpenShiftUtils.openImportApplicationWizardFromOpenshiftView(service);
+		
 		GitCloningWizardPage gitWizardPage = new GitCloningWizardPage();
 		
 		assertTrue("There should be an error in the wizard (There already is a project with specified name)",

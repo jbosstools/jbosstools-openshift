@@ -11,61 +11,39 @@
 package org.jboss.tools.openshift.reddeer.wizard.importapp;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
-import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.jface.wizard.WizardDialog;
-import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
-import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.button.YesButton;
-import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
-import org.jboss.tools.openshift.reddeer.view.resources.Service;
 
 /**
  * @author jnovak@redhat.com
+ * @contributor jkopriva@redhat.com
  */
 public class ImportApplicationWizard extends WizardDialog {
 	
 	public ImportApplicationWizard() {
 		super(OpenShiftLabel.Shell.IMPORT_APPLICATION);
 	}
-
-	public ImportApplicationWizard openFromOpenshiftView(Service openshiftService){
-		openshiftService.select();
-		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
-		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
-		return this;
-	}
-	
-	public ImportApplicationWizard openFromServerAdapterSettings(){
-		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);
-		new PushButton("Import...").click();
-		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
-		return this;
-	}
 	
 	public void finishAndOverrideExisting(){
-		String shellText = new DefaultShell().getText();
-		Button button = new FinishButton();
-		button.click();
+		new FinishButton().click();
 		
 		new DefaultShell("Overwrite project(s) ?");
 		new YesButton().click();
 
-		new WaitWhile(new ShellIsAvailable(shellText), TimePeriod.LONG);
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 	
 	public void finish(){
-		String shellText = new DefaultShell().getText();
-		Button button = new FinishButton();
-		button.click();
+		new FinishButton().click();
 		
-		new WaitWhile(new ShellIsAvailable(shellText), TimePeriod.LONG);
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 }
