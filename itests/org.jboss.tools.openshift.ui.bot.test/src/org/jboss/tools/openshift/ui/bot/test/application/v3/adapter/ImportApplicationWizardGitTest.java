@@ -26,6 +26,7 @@ import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.group.DefaultGroup;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.wizard.importapp.GitCloningWizardPage;
@@ -165,6 +166,7 @@ public class ImportApplicationWizardGitTest extends ImportApplicationBase{
 		project.openProperties();
 		project.selectTabbedProperty("Builds");
 		PropertySheet propertiesView = new PropertySheet();
+		new DefaultTable().getItem(0).select();
 		String originURL = propertiesView.getProperty("Misc", "Source Repo").getPropertyValue();
 		return originURL;
 	}

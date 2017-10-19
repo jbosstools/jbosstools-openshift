@@ -55,6 +55,7 @@ public class CleanOpenShiftConnectionRequirement implements Requirement<CleanCon
 			connection.deleteResource(project);
 			new WaitWhile(new ProjectExists(projectName, connection), TimePeriod.LONG);
 		}
+		connection.refresh();
 	}
 
 	@Override

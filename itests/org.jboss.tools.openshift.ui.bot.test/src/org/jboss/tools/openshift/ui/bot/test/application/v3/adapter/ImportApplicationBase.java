@@ -70,7 +70,8 @@ public abstract class ImportApplicationBase {
 		OpenShift3Connection connection = openshiftExplorer.getOpenShift3Connection(requiredConnection.getConnection());
 		project = connection.getProject(requiredProject.getProjectName());
 		project.expand();
-		service = project.getService(requiredService.getService().getName());
+		project.refresh();
+		service = (project.getServicesWithName(requiredService.getService().getName())).get(0);
 		
 		assertNotNull("OpenShift service '" + OpenShiftResources.NODEJS_SERVICE 
 					+ "' was not found!", service);

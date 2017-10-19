@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.reddeer.view.resources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
@@ -52,6 +53,12 @@ public class OpenShiftProject extends AbstractOpenShiftExplorerItem {
 	 */
 	public Service getService(String name) {
 		return new Service(treeViewerHandler.getTreeItem(item, name));
+	}
+	
+	public List<Service> getServicesWithName(String name) {
+		List<TreeItem> items = treeViewerHandler.getTreeItems(item, name);
+		List<Service> services = items.stream().map(a -> new Service(a)).collect(Collectors.toList());
+		return services;
 	}
 	
 	/**

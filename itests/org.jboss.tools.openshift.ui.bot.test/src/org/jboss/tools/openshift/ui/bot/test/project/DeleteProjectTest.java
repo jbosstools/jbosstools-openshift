@@ -13,10 +13,13 @@ package org.jboss.tools.openshift.ui.bot.test.project;
 import static org.junit.Assert.assertFalse;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
@@ -25,19 +28,25 @@ import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.v3.OpenShift3NativeProjectUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
 @CleanConnection
+@RunWith(RedDeerSuite.class)
 public class DeleteProjectTest {
 
 	@InjectRequirement
@@ -95,6 +104,8 @@ public class DeleteProjectTest {
 		new PushButton("Refresh...").click();
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 
+		new WaitUntil(new ProjectDoesNotExistInManageOSProject(new DefaultShell(OpenShiftLabel.Shell.MANAGE_OS_PROJECTS), PROJECT_NAME), TimePeriod.LONG);
+
 		assertFalse("There should not be present project in the table.",
 				new DefaultTable().containsItem(PROJECT_NAME));
 		new OkButton().click();
@@ -104,4 +115,52 @@ public class DeleteProjectTest {
 		assertFalse("Project is still presented in OpenShift explorer under a connection.",
 				connection.projectExists(PROJECT_NAME));
 	}
+	
+	@After
+	public void tearDown() {
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
+	}
+	
+	private class ProjectDoesNotExistInManageOSProject implements WaitCondition{
+		
+		private String projectName;
+		private DefaultShell shell;
+
+		public ProjectDoesNotExistInManageOSProject(DefaultShell shell, String projectName) {
+			this.shell = shell;
+			this.projectName = projectName;
+		}
+
+		@Override
+		public boolean test() {
+			new WaitUntil(new ControlIsEnabled(new PushButton("Refresh...")), TimePeriod.DEFAULT);
+			new PushButton("Refresh...").click();
+			new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+			
+			return !new DefaultTable(this.shell).containsItem(this.projectName);
+		}
+
+		@Override
+		public String description() {
+			return "Project does not exist in manage " + OpenShiftLabel.Shell.MANAGE_OS_PROJECTS;
+		}
+
+		@Override
+		public <T> T getResult() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String errorMessageWhile() {
+			return "Project with name exists in " + OpenShiftLabel.Shell.MANAGE_OS_PROJECTS;
+		}
+
+		@Override
+		public String errorMessageUntil() {
+			return "Project with name exists in " + OpenShiftLabel.Shell.MANAGE_OS_PROJECTS;
+		}
+
+}
+
 }

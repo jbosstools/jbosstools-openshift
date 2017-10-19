@@ -359,6 +359,7 @@ public class DeployDockerImageTest {
 	 */
 	private void selectProject(String projectName) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
+		explorer.getOpenShift3Connection(openshiftConnectionRequirement.getConnection()).refresh();
 		explorer.getOpenShift3Connection(openshiftConnectionRequirement.getConnection()).
 			getProject(projectName).select();
 	}
