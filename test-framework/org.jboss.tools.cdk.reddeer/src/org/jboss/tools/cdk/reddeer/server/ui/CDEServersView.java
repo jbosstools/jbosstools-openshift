@@ -12,6 +12,7 @@ package org.jboss.tools.cdk.reddeer.server.ui;
 
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 
 public class CDEServersView extends ServersView2 {
 
@@ -23,4 +24,15 @@ public class CDEServersView extends ServersView2 {
 	public Server getServer(String name) {
 		return getServer(CDEServer.class, name);
 	}
+
+	/**
+	 * Calls parent's newServer method, executes its steps
+	 * and return new CDK server wizard instead
+	 * 
+	 * @return Wizard for adding new cdk server
+	 */
+	public NewCDKServerWizard newCDKServer() {
+		super.newServer();
+		return new NewCDKServerWizard();
+	}		
 }

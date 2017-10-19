@@ -11,21 +11,25 @@
 package org.jboss.tools.cdk.ui.bot.test;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK3IntegrationTest;
-import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK3ServerEditorTest;
-import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK3ServerWizardTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterConnectionTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterRestartTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterStartTest;
+import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK32ServerEditorTest;
+import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK32ServerWizardTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(RedDeerSuite.class)
 @Suite.SuiteClasses({
-	CDK3ServerWizardTest.class,
-	CDK3ServerEditorTest.class,
-	CDK3IntegrationTest.class
+	CDK32ServerWizardTest.class,
+	CDK32ServerEditorTest.class,
+	CDK32ServerAdapterStartTest.class,
+	CDK32ServerAdapterRestartTest.class,
+	CDK32ServerAdapterConnectionTest.class
 })
 /**
  * @author ondrej dockal
  */
-public class CDK3AllTestsSuite {
+public class CDK32AllTestsSuite {
 
 }

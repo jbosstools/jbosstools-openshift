@@ -19,23 +19,24 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Tests restart of CDK 3 server adapter
+ * Tests restart of CDK 3.2+ server adapter
  * @author odockal
  *
  */
-@Deprecated
 @RunWith(RedDeerSuite.class)
-public class CDK3ServerAdapterRestartTest extends CDKServerAdapterAbstractTest {
-
-	@Override
-	protected String getServerAdapter() {
-		return SERVER_ADAPTER_3;
-	}
+public class CDK32ServerAdapterRestartTest extends CDKServerAdapterAbstractTest {
 
 	@BeforeClass
 	public static void setup() {
-		checkMinishiftParameters();
-		addNewCDK3Server(CDK3_SERVER_NAME, SERVER_ADAPTER_3, MINISHIFT_HYPERVISOR, MINISHIFT);
+		checkMinishiftProfileParameters();
+		addNewCDK3Server(CDK32_SERVER_NAME, "Container Development Environment 3.2", MINISHIFT_HYPERVISOR, MINISHIFT_PROFILE);
+	}
+
+	@Override
+	protected String getServerAdapter() {
+		// return SERVER_ADAPTER_32; 
+		//workaround for https://github.com/eclipse/reddeer/issues/1841
+		return "Container Development Environment 3.2";
 	}
 	
 	@Test

@@ -55,7 +55,7 @@ public class CDEServerEditor extends ServerEditor {
 		} finally {
 			activate();
 		}
-	}	
+	}
 
 	public LabeledText getPasswordLabel() {
 		return new LabeledText(new DefaultSection(CREDENTIALS), "Password: ");

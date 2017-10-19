@@ -24,7 +24,7 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
-import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizard;
+import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -39,6 +39,7 @@ import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.junit.After;
@@ -65,6 +66,10 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	protected static final String CANNOT_RUN_PROGRAM = "Cannot run program";
 	
 	protected static final String NOT_EXECUTABLE = IS_WINDOWS ? CANNOT_RUN_PROGRAM : "is not executable";
+	
+	protected static final String CHECK_MINISHIFT_VERSION = "Unknown error while checking minishift version";
+	
+	protected static final String NOT_COMPATIBLE = "is not compatible with this server adapter";
 	
 	// possible dialog values passed by user
 	
@@ -96,12 +101,11 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	@After
 	public void teardown() {
 		closeOpenShells();
-		CDKTestUtils.deleteCDEServer(getServerAdapter());
 		CDKTestUtils.removeAccessRedHatCredentials(CREDENTIALS_DOMAIN, USERNAME);
 	}
 	
 	protected void assertServerType(final String serverType) {
-		NewServerWizard wizard = CDKTestUtils.openNewServerWizardDialog();
+		NewCDKServerWizard wizard = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		try {
 			TreeItem item = new DefaultTreeItem(new String[] {SERVER_TYPE_GROUP}).getItem(serverType);
 			item.select();
@@ -136,7 +140,7 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 		}
 	}
 	
-	protected void assertSameMessage(final NewServerWizard dialog, final String message) {
+	protected void assertSameMessage(final NewMenuWizard dialog, final String message) {
 		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
 		String description = dialog.getMessage();
 		assertTrue("Expected page description should contain text: " + message +
@@ -144,7 +148,7 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 				description.contains(message));		
 	}
 	
-	protected void assertDiffMessage(final NewServerWizard dialog, final String message) {
+	protected void assertDiffMessage(final NewMenuWizard dialog, final String message) {
 		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
 		String description = dialog.getMessage();
 		assertFalse("Page descrition should not contain: " + message,

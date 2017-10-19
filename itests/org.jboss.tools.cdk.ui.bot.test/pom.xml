@@ -14,10 +14,12 @@
 	<packaging>eclipse-test-plugin</packaging>
 	<properties>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
-		<systemProperties>-Dvagrantfile.path=${vagrantfile.path} -Ddevelopers.username=${developers.username} -Ddevelopers.password=${developers.password} -Dminishift.path=${minishift.path} -Dminishift.hypervisor=${minishift.hypervisor}</systemProperties>
+		<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDKAllTestsSuite</suiteClass>
+		<systemProperties>-Dvagrantfile=${vagrantfile} -Ddevelopers.username=${developers.username} -Ddevelopers.password=${developers.password} -Dminishift=${minishift} -Dminishift.profile=${minishift.profile} -Dminishift.hypervisor=${minishift.hypervisor}</systemProperties>
 		<developers.username></developers.username>
-		<vagrantfile.path></vagrantfile.path>
-		<minishift.path></minishift.path>
+		<vagrantfile></vagrantfile>
+		<minishift></minishift>
+		<minishift.profile></minishift.profile>
 		<minishift.hypervisor></minishift.hypervisor>
 	</properties>
 	
@@ -38,6 +40,12 @@
 			<id>cdk3-all-tests</id>
 			<properties>
 				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDK3AllTestsSuite</suiteClass>
+			</properties>
+		</profile>
+		<profile>
+			<id>cdk32-all-tests</id>
+			<properties>
+				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDK32AllTestsSuite</suiteClass>
 			</properties>
 		</profile>
 	</profiles>
