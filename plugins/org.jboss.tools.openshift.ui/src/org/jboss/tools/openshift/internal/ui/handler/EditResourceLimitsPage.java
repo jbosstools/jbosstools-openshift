@@ -57,19 +57,19 @@ public class EditResourceLimitsPage extends AbstractOpenShiftWizardPage {
         GridLayoutFactory.fillDefaults().applyTo(parent);
         final Composite dialogArea = new Composite(parent, SWT.NONE);
         GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
-        GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 20).spacing(20, SWT.DEFAULT).applyTo(dialogArea);
+        GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).spacing(20, SWT.DEFAULT).applyTo(dialogArea);
 
         Group group = new Group(dialogArea, SWT.NONE);
         group.setText(OpenShiftUIMessages.MemoryLabel);
         GridDataFactory.fillDefaults().span(3, 1).grab(true, false).align(SWT.FILL, SWT.FILL).applyTo(group);
-        GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 20).spacing(10, 4).applyTo(group);
+        GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).spacing(10, 4).applyTo(group);
         createResourceWidgets(dbc, group, OpenShiftUIMessages.RequestLabel, EditResourceLimitsPageModel.REQUESTS_MEMORY, MEMORY_SUFFIXES, MEMORY_SUFFIXES_LABELS);
         createResourceWidgets(dbc, group, OpenShiftUIMessages.LimitLabel, EditResourceLimitsPageModel.LIMITS_MEMORY, MEMORY_SUFFIXES, MEMORY_SUFFIXES_LABELS);
         
         group = new Group(dialogArea, SWT.NONE);
         group.setText(OpenShiftUIMessages.CPULabel);
         GridDataFactory.fillDefaults().span(3, 1).grab(true, false).align(SWT.FILL, SWT.FILL).applyTo(group);
-        GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 20).spacing(10, 4).applyTo(group);
+        GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).spacing(10, 4).applyTo(group);
         createResourceWidgets(dbc, group, OpenShiftUIMessages.RequestLabel, EditResourceLimitsPageModel.REQUESTS_CPU, CPU_SUFFIXES, CPU_SUFFIXES_LABELS);
         createResourceWidgets(dbc, group, OpenShiftUIMessages.LimitLabel, EditResourceLimitsPageModel.LIMITS_CPU, CPU_SUFFIXES, CPU_SUFFIXES_LABELS);
     }
