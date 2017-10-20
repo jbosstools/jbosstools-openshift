@@ -7,7 +7,9 @@
  *
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
- ******************************************************************************/package org.jboss.tools.openshift.internal.ui.wizard.common;
+ ******************************************************************************/
+package org.jboss.tools.openshift.internal.ui.wizard.common;
+
 import org.jboss.tools.common.databinding.ObservablePojo;
 
 import com.openshift.restclient.capability.resources.IClientCapability;
@@ -16,31 +18,31 @@ import com.openshift.restclient.model.IReplicationController;
 
 public class EditResourceLimitsPageModel extends ObservablePojo {
 
-    public static final String SELECTED_CONTAINER = "selectedContainer";
-    public static final String CONTAINERS = "containers";
-    
-    public static final String REQUESTS_MEMORY = "requestsMemory";
-    public static final String REQUESTS_CPU = "requestsCPU";
-    public static final String LIMITS_MEMORY = "limitsMemory";
-    public static final String LIMITS_CPU = "limitsCPU";
+	public static final String SELECTED_CONTAINER = "selectedContainer";
+	public static final String CONTAINERS = "containers";
 
-    private IReplicationController rc;
-    private IContainer selectedContainer;
+	public static final String REQUESTS_MEMORY = "requestsMemory";
+	public static final String REQUESTS_CPU = "requestsCPU";
+	public static final String LIMITS_MEMORY = "limitsMemory";
+	public static final String LIMITS_CPU = "limitsCPU";
 
-    public EditResourceLimitsPageModel(IReplicationController rc) {
-        this.rc = rc.getCapability(IClientCapability.class).getClient().getResourceFactory().create(rc.toJson(true));
-        setSelectedContainer(this.rc.getContainers().iterator().next());
-    }
-    
-    public IReplicationController getUpdatedReplicationController() {
-        return rc;
-    }
+	private IReplicationController rc;
+	private IContainer selectedContainer;
 
-    public void setSelectedContainer(IContainer selectedContainer) {
-        firePropertyChange(SELECTED_CONTAINER, this.selectedContainer, this.selectedContainer = selectedContainer);
-    }
-    
-    public IContainer getSelectedContainer() {
-    	return selectedContainer;
-    }
+	public EditResourceLimitsPageModel(IReplicationController rc) {
+		this.rc = rc.getCapability(IClientCapability.class).getClient().getResourceFactory().create(rc.toJson(true));
+		setSelectedContainer(this.rc.getContainers().iterator().next());
+	}
+
+	public IReplicationController getUpdatedReplicationController() {
+		return rc;
+	}
+
+	public void setSelectedContainer(IContainer selectedContainer) {
+		firePropertyChange(SELECTED_CONTAINER, this.selectedContainer, this.selectedContainer = selectedContainer);
+	}
+
+	public IContainer getSelectedContainer() {
+		return selectedContainer;
+	}
 }
