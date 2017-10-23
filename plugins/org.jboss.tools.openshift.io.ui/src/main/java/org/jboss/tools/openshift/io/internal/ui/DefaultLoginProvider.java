@@ -10,8 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.io.internal.ui;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.openshift.io.core.LoginProvider;
 import org.jboss.tools.openshift.io.core.LoginResponse;
 import org.jboss.tools.openshift.io.core.model.ICluster;
@@ -25,20 +31,77 @@ import org.jboss.tools.openshift.io.internal.ui.dialog.BrowserBasedLoginDialog;
  */
 public class DefaultLoginProvider implements LoginProvider {
 
+	private class LoginJob extends UIJob {
+		private boolean runninginUI = false;
+		private boolean shouldRun = true;
+		private ICluster cluster;
+		private IAccount account;
+		private LoginResponse response;
+		
+		public LoginJob(ICluster cluster, IAccount account) {
+			super("Logging to OpenShift.io");
+			this.cluster = cluster;
+			this.account = account;
+		}
+
+		@Override
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			if (shouldRun && !monitor.isCanceled()) {
+				runninginUI = true;
+				response = loginInUI(cluster, account);
+				return new Status(IStatus.OK, OpenShiftIOUIActivator.PLUGIN_ID, null);
+			}
+			return new Status(IStatus.CANCEL, OpenShiftIOUIActivator.PLUGIN_ID, null);
+		}
+
+		public boolean isRunninginUI() {
+			return runninginUI;
+		}
+		
+		public void setShouldRun(boolean shouldRun) {
+			this.shouldRun = shouldRun;
+		}
+
+		public LoginResponse getResponse() {
+			return response;
+		}
+	}
+	
 	@Override
 	public LoginResponse login(ICluster cluster, IAccount account) {
 		if (null == Display.getCurrent()) {
-			final LoginResponse response[] = new LoginResponse[1];
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					response[0] = loginInUI(cluster, account);
-				}
-			});
-			return response[0];
-			
+			return runInJob(cluster, account);
 		} else {
 			return loginInUI(cluster, account);
+		}
+	}
+
+	LoginResponse runInJob(ICluster cluster, IAccount account) {
+		LoginJob job = new LoginJob(cluster, account);
+		job.schedule();
+		IProgressMonitor monitor = new NullProgressMonitor();
+		try {
+			if (job.join(10000, monitor)) {
+				return job.getResponse();
+			} else {
+				throw new InterruptedException();
+			}
+		} catch (OperationCanceledException e) {
+			return null;
+		} catch (InterruptedException e) {
+			if (job.isRunninginUI()) {
+				try {
+					job.join();
+					return job.getResponse();
+				} catch (InterruptedException e1) {
+					return null;
+				}
+			} else {
+				job.setShouldRun(false);
+				monitor.setCanceled(true);
+				job.cancel();
+				return null;
+			}
 		}
 	}
 
