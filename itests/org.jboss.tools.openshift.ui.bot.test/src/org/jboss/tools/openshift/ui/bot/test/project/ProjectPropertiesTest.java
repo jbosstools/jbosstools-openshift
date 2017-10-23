@@ -20,7 +20,6 @@ import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheetProperty;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.swt.api.TableItem;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
@@ -84,6 +83,8 @@ public class ProjectPropertiesTest {
 
 	@Test
 	public void testTabs() {
+		project.select();
+		project.openProperties();
 		for (String tabName : BASIC_TABS) {
 			project.selectTabbedProperty(tabName);
 			if(!tabName.equals("Details")) {
