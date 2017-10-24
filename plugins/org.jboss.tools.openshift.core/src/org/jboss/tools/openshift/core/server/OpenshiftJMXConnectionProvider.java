@@ -10,6 +10,8 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.core.server;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import org.jboss.tools.jmx.core.IConnectionWrapper;
 import org.jboss.tools.jmx.jolokia.JolokiaConnectionWrapper;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.ResourceKind;
@@ -30,6 +33,10 @@ import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
 
 public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionProvider {
+	
+	private static final String AUTHORIZATION_HEADER_KEY = "Authorization"; //$NON-NLS-1$
+	private static final String AUTHORIZATION_HEADER_VALUE_PREFIX = "Bearer "; //$NON-NLS-1$
+	
 	public static final String PROVIDER_ID = "org.jboss.tools.openshift.core.server.OpenshiftJMXConnection"; //$NON-NLS-1$
 
 	@Override 
@@ -39,54 +46,65 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 	
 	@Override
 	protected boolean belongsHere(IServer server) {
-		if( server != null && server.getServerType().getId().equals(OpenShiftServer.SERVER_TYPE_ID) &&
-		        OpenShiftServerUtils.isJavaProject(server)) {
-			return true;
-		}
-		return false;
+		return server != null
+				&& OpenShiftServer.SERVER_TYPE_ID.equals(server.getServerType().getId())
+				&& OpenShiftServerUtils.isJavaProject(server);
 	}
 
 	@Override
 	public String getId() {
-		return  PROVIDER_ID;
+		return PROVIDER_ID;
 	}
 
 	@Override
 	protected IConnectionWrapper createConnection(IServer server) {
 		IConnection openshiftCon = OpenShiftServerUtils.getConnection(server);
-		IResource resource = OpenShiftServerUtils.getResource(server, new NullProgressMonitor());
-		
-		if (resource == null) {
-		    return null;
-		}
-		String token = ((Connection)openshiftCon).getToken();
-		String projName =  resource.getNamespace();
-		List<IPod> pods = ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD));
-		if( pods.isEmpty() ) {
+		String url = computeJolokiaURL(server);
+		if(url != null) {
+			JolokiaConnectionWrapper cw = new JolokiaConnectionWrapper() {
+				@Override
+				public IConnectionProvider getProvider() {
+					return ExtensionManager.getProvider(PROVIDER_ID);
+				}
+				
+			};
+			cw.setId(server.getName());
+			cw.setUrl(url);
+			cw.setType("POST");
+			cw.setIgnoreSSLErrors(true);
+			Map<String, String> headers = new HashMap<>();
+			headers.put(AUTHORIZATION_HEADER_KEY, AUTHORIZATION_HEADER_VALUE_PREFIX + ((Connection)openshiftCon).getToken());
+			cw.setHeaders(headers);
+			return cw;
+		} else {
 			return null;
 		}
-		String pod =  pods.get(0).getName();
-		
-		String host = server.getHost();
-		String url = "https://" + host + ":8443/api/v1/namespaces/" 
-				+ projName + "/pods/https:" + pod + ":8778/proxy/jolokia/";
-		String headerKey = "Authorization";
-		String headerVal = "Bearer " + token;
-		
-		JolokiaConnectionWrapper cw = new JolokiaConnectionWrapper() {
-			@Override
-			public IConnectionProvider getProvider() {
-				return ExtensionManager.getProvider(PROVIDER_ID);
+	}
+
+	protected String computeJolokiaURL(IServer server) {
+		IResource resource = OpenShiftServerUtils.getResource(server, new NullProgressMonitor());
+		if (resource != null) {		
+			String projName =  resource.getNamespace();
+			List<IPod> pods = ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD));
+			if( !pods.isEmpty() ) {
+				String podName =  pods.get(0).getName();
+				String host = server.getHost();
+				String portUrlPart = getOpenShiftPort(server);
+				return "https://" + host + portUrlPart + "/api/v1/namespaces/" + projName + "/pods/https:" + podName + ":8778/proxy/jolokia/";
 			}
-		};
-		cw.setId(server.getName());
-		cw.setUrl(url);
-		cw.setType("POST");
-		cw.setIgnoreSSLErrors(true);
-		Map<String, String> headers = new HashMap<>();
-		headers.put(headerKey, headerVal);
-		cw.setHeaders(headers);
-		return cw;
+		}
+		return null;
+	}
+
+	protected String getOpenShiftPort(IServer server) {
+		int port = -1;
+		try {
+			URL connectionUrl = new URL(server.getAttribute(OpenShiftServerUtils.ATTR_CONNECTIONURL, ""));
+			port = connectionUrl.getPort();
+		} catch (MalformedURLException e) {
+			OpenShiftCoreActivator.logError("Cannot determine port for JMX Connection from OpenShift connection URL", e); //$NON-NLS-1$
+		}
+		return port != -1 ? ":" + port : "";
 	}
 
 	@Override
