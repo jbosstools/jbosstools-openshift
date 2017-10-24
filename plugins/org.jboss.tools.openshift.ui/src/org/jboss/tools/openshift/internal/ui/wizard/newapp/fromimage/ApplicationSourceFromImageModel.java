@@ -62,6 +62,7 @@ public class ApplicationSourceFromImageModel
 	private static final String DEFAULT_REFERENCE = "master";
 
 	private ImageStreamApplicationSource source;
+	private org.eclipse.core.resources.IProject eclipseProject;
 	private IWizardContainer container;
 	private IEnvironmentVariablesPageModel envModel = new EnvironmentVariablesPageModel();
 	private String gitRepositoryUrl = "";
@@ -100,15 +101,15 @@ public class ApplicationSourceFromImageModel
 	}
 	
 	private void handleEclipseProject(PropertyChangeEvent evt) {
-		org.eclipse.core.resources.IProject project = (org.eclipse.core.resources.IProject) evt.getNewValue();
-		if(project != null) {
+		this.eclipseProject = (org.eclipse.core.resources.IProject) evt.getNewValue();
+		if (this.eclipseProject != null) {
 			try {
-				setGitRepositoryUrl(EGitUtils.getDefaultRemoteRepo(project));
-				setGitReference(EGitUtils.getCurrentBranch(project));
+				setGitRepositoryUrl(EGitUtils.getDefaultRemoteRepo(this.eclipseProject));
+				setGitReference(EGitUtils.getCurrentBranch(this.eclipseProject));
 				setContextDir(StringUtils.EMPTY);
 				return;
 			} catch (CoreException e) {
-				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to retrieve the remote git repo from " + project.getName(), e);
+				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to retrieve the remote git repo from " + this.eclipseProject.getName(), e);
 			}
 		}
 		setGitRepositoryUrl(null);
@@ -121,7 +122,11 @@ public class ApplicationSourceFromImageModel
 				&& ResourceKind.IMAGE_STREAM.equals(((IApplicationSource) evt.getNewValue()).getKind())) {
 			this.source = (ImageStreamApplicationSource) evt.getNewValue();
 			staleRepoInfo.set(true);
-			setGitRepositoryUrl(null);
+			if (this.eclipseProject == null) {
+			    setGitRepositoryUrl(null);
+		        setGitReference(null);
+		        setContextDir(null);
+			}
 			setResourceName(null);
 		}
 	}
