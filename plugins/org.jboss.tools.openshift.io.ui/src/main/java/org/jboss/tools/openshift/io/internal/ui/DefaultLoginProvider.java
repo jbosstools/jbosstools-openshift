@@ -31,6 +31,8 @@ import org.jboss.tools.openshift.io.internal.ui.dialog.BrowserBasedLoginDialog;
  */
 public class DefaultLoginProvider implements LoginProvider {
 
+	private static final int TIMEOUT_JOB_ON_UI_THREAD = 10000;
+
 	private class LoginJob extends UIJob {
 		private boolean runninginUI = false;
 		private boolean shouldRun = true;
@@ -81,7 +83,7 @@ public class DefaultLoginProvider implements LoginProvider {
 		job.schedule();
 		IProgressMonitor monitor = new NullProgressMonitor();
 		try {
-			if (job.join(10000, monitor)) {
+			if (job.join(TIMEOUT_JOB_ON_UI_THREAD, monitor)) {
 				return job.getResponse();
 			} else {
 				throw new InterruptedException();
