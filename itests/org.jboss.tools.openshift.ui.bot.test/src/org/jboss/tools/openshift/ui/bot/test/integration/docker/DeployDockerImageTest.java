@@ -17,12 +17,10 @@ import static org.junit.Assert.fail;
 import java.util.List;
 
 import org.eclipse.linuxtools.docker.reddeer.ui.DockerExplorerView;
-import org.eclipse.linuxtools.docker.reddeer.ui.resources.AuthenticationMethod;
 import org.eclipse.linuxtools.docker.reddeer.ui.resources.DockerConnection;
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
-import org.eclipse.reddeer.common.platform.RunningPlatform;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
@@ -32,6 +30,7 @@ import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.junit.screenshot.CaptureScreenshotException;
 import org.eclipse.reddeer.junit.screenshot.ScreenshotCapturer;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -48,10 +47,12 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.core.StringContains;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -64,7 +65,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * 
+ * @author mlabuda@redhat.com
+ * @contributor jkopriva@redhat.com
+ */
+@OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
+@CleanConnection
 @RunWith(RedDeerSuite.class)
 public class DeployDockerImageTest {
 	
@@ -78,9 +86,11 @@ public class DeployDockerImageTest {
 	public static String PROJECT1 = "deployimagetesting1" + System.currentTimeMillis();
 	public static String PROJECT2 = "deployimagetesting2" + System.currentTimeMillis();
 	
-	public static String DOCKER_CONNECTION = "CDK";
-	public static final String HELLO_OS_DOCKER_IMAGE = "docker.io/openshift/hello-openshift";
-	public static final String TAG = "v1.2.1";
+	private static final String HELLO_OS_DOCKER_IMAGE = "docker.io/openshift/hello-openshift";
+	private static final String TAG = "v1.2.1";
+	private static final String connectionsURI = System.getProperty("openshift.server").replaceAll("\\:[0-9]*$", ":2376");
+	private static final String pathToCertificate = System.getProperty("user.home") + "/.minishift/certs";
+	private static String DOCKER_CONNECTION = connectionsURI;
 	
 	@BeforeClass
 	public static void setUp() {
@@ -95,8 +105,6 @@ public class DeployDockerImageTest {
 	}
 	
 	public static void createDockerConnection () {
-		String connectionsURI = System.getProperty("openshift.server").replaceAll(":8443", ":2376");
-		String pathToCertificate = System.getProperty("user.dir") + "/.minishift/certs";
 		dockerExplorer = new DockerExplorerView();
 		dockerExplorer.open();
 		List<String> connectionsNames = dockerExplorer.getDockerConnectionNames();
@@ -105,7 +113,7 @@ public class DeployDockerImageTest {
 				dockerExplorer.getDockerConnectionByName(connectionName).removeConnection();
 			}
 		}
-		dockerExplorer.createDockerConnection(AuthenticationMethod.TCP_CONNECTION, connectionsURI, pathToCertificate, "CDK");
+		dockerExplorer.createDockerConnectionURI(connectionsURI, connectionsURI, pathToCertificate);
 	}
 
 	/**
@@ -135,37 +143,14 @@ public class DeployDockerImageTest {
 		return message;
 	}
 	
-	private static void prepareDockerConnection() {
-		dockerExplorer = new DockerExplorerView();
-		dockerExplorer.open();
-		List<String> connectionsNames = dockerExplorer.getDockerConnectionNames();
-		if (connectionsNames.isEmpty()) {
-			if (RunningPlatform.isWindows() || RunningPlatform.isOSX()) {
-				dockerExplorer.createDockerConnectionSearch(DOCKER_CONNECTION);
-			} else {
-				dockerExplorer.createDockerConnectionUnix(DOCKER_CONNECTION, 
-						"unix:///var/run/docker.sock");
-			}
-		} else if (RunningPlatform.isLinux() && connectionsNames.size() > 1) {
-			for (String name : connectionsNames) {
-				if (name.startsWith("unix:///var/run/docker.sock")) {
-					DOCKER_CONNECTION = name;
-					break;
-				}
-			}
-		} else {
-			DOCKER_CONNECTION = connectionsNames.get(0);
-		}
-	}
-	
 	/**
 	 * If hello world docker image does not exist, this method will pull it.
 	 */
 	private static void pullHelloImageIfDoesNotExist() {
 		DockerExplorerView dockerExplorer = new DockerExplorerView();
 		DockerConnection dockerConnection = dockerExplorer.getDockerConnectionByName(DOCKER_CONNECTION);
-		
 		dockerConnection.getTreeItem().expand();
+		new WaitWhile(new JobIsRunning());
 		new WaitWhile(new TreeContainsItem(dockerConnection.getTreeItem().getParent(),
 				dockerConnection.getTreeItem().getText(), "Loading..."),TimePeriod.LONG);
 		
@@ -185,10 +170,14 @@ public class DeployDockerImageTest {
 	
 	@AfterClass
 	public static void cleanUp() {
-		OpenShift3Connection connection  = new OpenShiftExplorerView().getOpenShift3Connection(
-				openshiftConnectionRequirement.getConnection());
-		connection.getProject(PROJECT1).delete();
-		connection.getProject(PROJECT2).delete();
+		OpenShift3Connection connection = new OpenShiftExplorerView()
+				.getOpenShift3Connection(openshiftConnectionRequirement.getConnection());
+		if (connection.projectExists(PROJECT1)) {
+			connection.getProject(PROJECT1).delete();
+		}
+		if (connection.projectExists(PROJECT2)) {
+			connection.getProject(PROJECT2).delete();
+		}
 	}
 	
 	@After
@@ -252,15 +241,14 @@ public class DeployDockerImageTest {
 			fail("There should be a running application pod for a deployed docker image, "
 					+ "but it does not exist.");
 		}
-		
+		new OpenShiftExplorerView().getOpenShift3Connection().refresh();	
 		new OpenShiftExplorerView().getOpenShift3Connection().getProject(projectName).
 				getOpenShiftResources(Resource.ROUTE).get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.SHOW_IN_BROWSER).select();
-		
 		try {
-			new WaitUntil(new BrowserContainsText("Hello OpenShift!"), TimePeriod.VERY_LONG);
+			new WaitUntil(new BrowserContainsText(getRouteURL("hello-openshift", projectName),"Hello OpenShift!"), TimePeriod.VERY_LONG);
 		} catch (WaitTimeoutExpiredException ex) {
-			fail("Browser does not containg hello world content.");
+			fail("Browser does not contain hello world content.");
 		}
 	}
 	
@@ -373,6 +361,13 @@ public class DeployDockerImageTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.getOpenShift3Connection(openshiftConnectionRequirement.getConnection()).
 			getProject(projectName).select();
+	}
+	
+	private String getRouteURL(String routeName, String projectName) {
+		String url = "";
+		url = openshiftConnectionRequirement.getHost().replaceAll(".*\\/|\\:[0-9]*$","");
+		url = "http://"+ routeName+"-" + projectName + "." + url + ".nip.io/";	
+		return url;
 	}
 	
 }
