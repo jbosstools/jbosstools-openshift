@@ -30,10 +30,10 @@ public class FormEditorPresenter implements IFormPresenter {
 			return;
 		}
 		if (!StringUtils.isEmpty(message)) {
- 			form.setMessage("Please correct the error(s) in the form",
+ 			form.setMessage(message,
 					type, new IMessage[] { new MessageFactory().create(message, type) });
 		} else {
-			form.setMessage("", IMessage.INFORMATION); // clear the header from errors/messages
+			form.setMessage("", IMessage.NONE); // clear the header from errors/messages
 		}
 	}
 	

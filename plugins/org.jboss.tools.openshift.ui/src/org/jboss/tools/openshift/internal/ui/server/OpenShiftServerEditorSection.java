@@ -21,6 +21,7 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -58,6 +59,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormText;
@@ -65,8 +67,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.editor.IServerEditorPartInput;
-import org.eclipse.wst.server.ui.editor.ServerEditorPart;
 import org.eclipse.wst.server.ui.editor.ServerEditorSection;
+import org.eclipse.wst.server.ui.internal.editor.ServerEditor;
+import org.eclipse.wst.server.ui.internal.editor.ServerEditorPartInput;
+import org.eclipse.wst.server.ui.internal.editor.ServerResourceCommandManager;
 import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.common.ui.databinding.InvertingBooleanConverter;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -84,6 +88,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.FormEditorPresen
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport;
 import org.jboss.tools.openshift.internal.common.ui.databinding.NumericValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.validator.OpenShiftIdentifierValidator;
@@ -112,16 +117,16 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	}
 
 	@Override
-	public void setServerEditorPart(ServerEditorPart editor) {
-		super.setServerEditorPart(editor);
-	}
-
-	@Override
 	public void createSection(Composite parent) {
 		super.createSection(parent);
 
-		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
 		this.dbc = new DataBindingContext();
+		this.formPresenterSupport = new FormPresenterSupport(
+				new FormEditorPresenter(getManagedForm().getForm().getForm()), dbc);
+
+		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
+
+		this.model = new OpenShiftServerEditorModel(server, this, null);
 
 		Section section = toolkit.createSection(parent,
 				ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED | ExpandableComposite.TITLE_BAR);
@@ -129,8 +134,6 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults()
 			.align(SWT.FILL, SWT.FILL).grab(true, true)
 			.applyTo(section);
-
-		this.model = new OpenShiftServerEditorModel(server, this, null);
 
 		Composite container = createControls(toolkit, section, dbc);
 		GridDataFactory.fillDefaults()
@@ -144,8 +147,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		
 		section.setClient(container);
 
-		this.formPresenterSupport = new FormPresenterSupport(
-				new FormEditorPresenter(getManagedForm().getForm().getForm()), dbc);
+		setupWarningToRestartAdapter(getServerEditor());
 
 		loadResources(section, model, dbc);
 		dbc.updateTargets();
@@ -698,11 +700,11 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		};
 	}
 
-	private class LoadProjectsJob extends Job {
+	private class LoadResourcesJob extends Job {
 		private OpenShiftServerEditorModel model;
 		private IServerWorkingCopy server;
 		private IProject deployProject;
-		public LoadProjectsJob(OpenShiftServerEditorModel model, IServerWorkingCopy server, IProject deployProject) {
+		public LoadResourcesJob(OpenShiftServerEditorModel model, IServerWorkingCopy server, IProject deployProject) {
 			super("Loading OpenShift Server Resources...");
 			this.model = model;
 			this.server = server;
@@ -755,20 +757,74 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		};
 		new JobChainBuilder(
 				new DisableAllWidgetsJobFixed(true, container, busyCursor, dbc), chainProgressMonitor)
-			.runWhenDone(new LoadProjectsJob(model, server, deployProject))
+			.runWhenDone(new LoadResourcesJob(model, server, deployProject))
 			.runWhenDone(new DisableAllWidgetsJobFixed(false, container, false, busyCursor, dbc))
 			.schedule();
 	}
 
+	private void setupWarningToRestartAdapter(IEditorPart editor) {
+		if (editor == null) {
+			return;
+		}
+
+		IObservableValue<Boolean> dirtyStatusObservable = DataBindingUtils.createDirtyStatusObservable(editor);
+		dbc.addValidationStatusProvider(new MultiValidator() {
+
+			@Override
+			protected IStatus validate() {
+				if (Boolean.TRUE.equals(dirtyStatusObservable.getValue())) {
+					return ValidationStatus.warning(
+							"Changes will only get active once the editor is saved and the adapter restarted.");
+				}
+				return ValidationStatus.ok();
+			}
+		});
+	}
+
+	private ServerEditor getServerEditor() {
+		if (!(input instanceof ServerEditorPartInput)) {
+			return null;
+		}
+		ServerResourceCommandManager commandManager = ((ServerEditorPartInput) input).getServerCommandManager();
+		return commandManager.getServerEditor();
+	}
+
 	@Override
 	public IStatus[] getSaveStatus() {
-		return new IStatus[] { formPresenterSupport.getCurrentStatus() };
+		return new IStatus[] { ignoreWarning(getFormPresenterStatus()) };
+	}
+
+	private IStatus getFormPresenterStatus() {
+		IStatus status = Status.OK_STATUS;
+		if (formPresenterSupport.getCurrentStatus() != null) {
+			status = formPresenterSupport.getCurrentStatus();
+		}
+		return status;
+	}
+	
+	/**
+	 * Replaces WARNING status by an OK Status. This is useful when the given status
+	 * is used to report the save state. warnings upon saving dont prevent saving
+	 * but they're displayed in a dialog, something that you might want to prevent.
+	 * 
+	 * @param status
+	 * @return
+	 * 
+	 * @see IStatus#WARNING
+	 * @see IStatus#OK
+	 */
+	private IStatus ignoreWarning(IStatus status) {
+		if (IStatus.WARNING == status.getSeverity()) {
+			return Status.OK_STATUS;
+		}
+		return status;
 	}
 
 	@Override
 	public void dispose() {
 		formPresenterSupport.dispose();
 		model.dispose();
+		dbc.dispose();
 	}
 
 	//Temporal fix until superclass is fixed. Then just remove this class.

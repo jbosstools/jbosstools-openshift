@@ -21,11 +21,14 @@ import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.observable.IObservable;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IEditorPart;
 
 /**
  * @author Andre Dietisheim
@@ -154,4 +157,26 @@ public class DataBindingUtils {
 			}
 		});
 	}
+	
+	/**
+	 * Returns an observable value that holds the dirty status of the given editor.
+	 * 
+	 * @param editor
+	 * @param dbc
+	 * @return
+	 * 
+	 * @see IObservableValue 
+	 */
+	public static IObservableValue<Boolean> createDirtyStatusObservable(final IEditorPart editor) {
+		Assert.isNotNull(editor);
+		
+		IObservableValue<Boolean> dirtyStatus = new WritableValue<>(false, Boolean.class);
+		editor.addPropertyListener((source, propertyId) -> {
+			if (IEditorPart.PROP_DIRTY == propertyId) {
+				dirtyStatus.getRealm().exec(() -> dirtyStatus.setValue(editor.isDirty()));
+			}
+		});
+		return dirtyStatus;
+	}
+
 }
