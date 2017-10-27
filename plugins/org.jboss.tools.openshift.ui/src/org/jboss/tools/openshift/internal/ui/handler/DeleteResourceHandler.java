@@ -88,10 +88,12 @@ public class DeleteResourceHandler extends AbstractHandler {
 	 * group so that an error dialog will be displayed at the end of the job
 	 * group.
 	 * 
+	 * made protected for test purposes only
+	 * 
 	 * @param uiResources
 	 *            the UI resources to delete
 	 */
-	private void deleteResources(final IResourceWrapper<?, ?>[] uiResources) {
+	protected void deleteResources(final IResourceWrapper<?, ?>[] uiResources) {
 		final JobGroup group = new JobGroup("Delete Openshift resources", 1, uiResources.length) {
 
 			/*
