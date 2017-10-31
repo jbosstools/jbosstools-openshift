@@ -56,7 +56,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 
 	@Override
 	public void initialize(ILaunchConfigurationWorkingCopy wc) throws CoreException {
-		final IServer s = ServerUtil.getServer(wc);
+		final IServer s = getServerFromLaunch(wc);
 		final CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		// for testing purposes.
 		// we can't mock final methods like getServer(), so we need to be creative
@@ -98,12 +98,23 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		}
 		return profiles;
 	}
+	
+	protected IServer getServerFromLaunch(ILaunchConfigurationWorkingCopy wc) throws CoreException {
+		return ServerUtil.getServer(wc);
+	}
 
 	@Override
 	protected void performOverrides(ILaunchConfigurationWorkingCopy workingCopy) throws CoreException {
 		// Overrides, things that should always match whats in server editor
-		final IServer s = ServerUtil.getServer(workingCopy);
+		final IServer s = getServerFromLaunch(workingCopy);
 		final CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
+		performOverrides(workingCopy, s, cdkServer);
+	}
+	
+	/*
+	 * Not expected to be extended. 
+	 */
+	protected void performOverrides(ILaunchConfigurationWorkingCopy workingCopy, IServer s, CDKServer cdkServer) throws CoreException {
 		String workingDir = JBossServerCorePlugin.getServerStateLocation(s).toOSString();
 		workingCopy.setAttribute(ATTR_WORKING_DIR, workingDir);
 
@@ -148,7 +159,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		String home = System.getProperty("user.home");
 		String defaultMinishiftHome = new File(home, CDKConstants.CDK_RESOURCE_DOTMINISHIFT).getAbsolutePath();
 		String msHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, defaultMinishiftHome);
-		if( !StringUtils.isEmpty(msHome))
+		if( StringUtils.isEmpty(msHome))
 			msHome = defaultMinishiftHome;
 		return msHome;
 	}
