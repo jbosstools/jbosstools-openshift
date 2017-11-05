@@ -26,6 +26,8 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 public class CDK32ServerAdapterRestartTest extends CDKServerAdapterAbstractTest {
 
+	private static final String DOCKER_DAEMON_CONNECTION = "Container Development Environment 3.2";
+	
 	@BeforeClass
 	public static void setup() {
 		checkMinishiftProfileParameters();
@@ -44,6 +46,9 @@ public class CDK32ServerAdapterRestartTest extends CDKServerAdapterAbstractTest 
 		startServerAdapter();
 		getCDEServer().restart();
 		assertEquals(ServerState.STARTED, getCDEServer().getLabel().getState());
+		// add check that os and docker is working after restart
+		testOpenshiftConncetion(OPENSHIFT_USER_NAME);
+		testDockerConnection(DOCKER_DAEMON_CONNECTION);
 	}
 	
 }

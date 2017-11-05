@@ -62,7 +62,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	public abstract void setServerEditor();
 	
 	@After
-	public void tearDown() {
+	public void tearDownServerAbstract() {
 		cleanUp();
 	}
 	
@@ -86,7 +86,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	}
 
 	public void addCDKServer() {
-		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
+		NewCDKServerWizard dialog = CDKTestUtils.openNewServerWizardDialog();
 		
 		try {
 			setupServerWizardPage(dialog);
@@ -127,7 +127,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	 * @param editor
 	 *            IEditorPart to work with during saving
 	 */
-	private void performSave(final IEditorPart editor) {
+	protected void performSave(final IEditorPart editor) {
 		EditorHandler.getInstance().activate(editor);
 		Display.asyncExec(new Runnable() {
 

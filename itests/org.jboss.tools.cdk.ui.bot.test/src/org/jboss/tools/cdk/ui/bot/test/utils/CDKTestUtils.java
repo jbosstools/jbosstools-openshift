@@ -23,7 +23,6 @@ import org.eclipse.reddeer.core.condition.WidgetIsFound;
 import org.eclipse.reddeer.core.matcher.WithMnemonicTextMatcher;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.eclipse.exception.EclipseLayerException;
-import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
 import org.eclipse.reddeer.jface.exception.JFaceLayerException;
@@ -35,6 +34,7 @@ import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.cdk.reddeer.server.ui.CDEServersView;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 
 /**
  * Utilities for CDK tests
@@ -64,7 +64,7 @@ public class CDKTestUtils {
 	}
 	
 	public static void deleteCDEServer(String adapter) {
-		log.info("Deleting Container Development Environment server adapter:" + adapter); //$NON-NLS-1$
+		log.info("Deleting Container Development Environment server adapter: " + adapter); //$NON-NLS-1$
 		ServersView2 servers = new ServersView2();
 		servers.open();
 		try {
@@ -93,12 +93,12 @@ public class CDKTestUtils {
 		}
 	}
 	
-	public static NewMenuWizard openNewServerWizardDialog() {
+	public static NewCDKServerWizard openNewServerWizardDialog() {
 		log.info("Adding new Container Development Environment server adapter"); //$NON-NLS-1$
 		// call new server dialog from servers view
 		CDEServersView view = new CDEServersView();
 		view.open();
-		NewMenuWizard dialog = view.newCDKServer();
+		NewCDKServerWizard dialog = view.newCDKServer();
 		new WaitWhile(new JobIsRunning(), TimePeriod.MEDIUM, false);
 		return dialog;
 	}

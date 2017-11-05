@@ -89,7 +89,7 @@ public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 		assertDiffMessage(dialog, CHECK_MINISHIFT_VERSION);
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.MEDIUM, false);
 		assertTrue("Expected Finish button is not enabled", dialog.isFinishEnabled());
-		dialog.finish(TimePeriod.MEDIUM);
+		dialog.cancel();
 	}	
 
 }

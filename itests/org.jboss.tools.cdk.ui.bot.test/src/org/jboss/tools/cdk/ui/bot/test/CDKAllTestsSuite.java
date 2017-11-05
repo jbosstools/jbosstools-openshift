@@ -17,6 +17,7 @@ import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterStartTes
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK32ServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK3ServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDKServerEditorTest;
+import org.jboss.tools.cdk.ui.bot.test.server.editor.launch.CDKLaunchConfigurationTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK32ServerWizardTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK3ServerWizardTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDKServerWizardTest;
@@ -31,6 +32,7 @@ import org.junit.runners.Suite;
 	CDKServerEditorTest.class,
 	CDK3ServerEditorTest.class,
 	CDK32ServerEditorTest.class,
+	CDKLaunchConfigurationTest.class,
 	CDK32ServerAdapterStartTest.class,
 	CDK32ServerAdapterRestartTest.class,
 	CDK32ServerAdapterConnectionTest.class

@@ -40,9 +40,18 @@ public class CDK32IntegrationTest extends CDKServerAdapterAbstractTest {
 	
 	@Test
 	public void testCDK3ServerAdapter() {
+		// cdk start verification
 		startServerAdapter();
+		// OS3 and docker connection created verification
 		testOpenshiftConncetion(OPENSHIFT_USER_NAME);
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
+		// cdk restart check
+		getCDEServer().restart();
+		assertEquals(ServerState.STARTED, getCDEServer().getLabel().getState());
+		// OS and docker connection should be operational after restart
+		testOpenshiftConncetion(OPENSHIFT_USER_NAME);
+		testDockerConnection(DOCKER_DAEMON_CONNECTION);
+		// cdk stop verification
 		getCDEServer().stop();
 		assertEquals(ServerState.STOPPED, getCDEServer().getLabel().getState());
 	}

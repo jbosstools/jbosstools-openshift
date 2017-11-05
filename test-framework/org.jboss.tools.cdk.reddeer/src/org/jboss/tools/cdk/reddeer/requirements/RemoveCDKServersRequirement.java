@@ -14,16 +14,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.reddeer.common.logging.Logger;
-import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.junit.requirement.Requirement;
-import org.eclipse.reddeer.swt.api.TreeItem;
 import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
-import org.jboss.tools.cdk.reddeer.server.adapter.CDKServerAdapterType;
-import org.jboss.tools.cdk.reddeer.server.ui.CDEServersView;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 
 /**
@@ -42,7 +36,8 @@ public class RemoveCDKServersRequirement implements Requirement<RemoveCDKServers
 
 	@Override
 	public void fulfill() {
-		deleteCDKServers();
+		log.info("Deleting all CDK server adapters...");
+		CDKUtils.deleteAllCDKServerAdapters();
 	}
 
 	@Override
@@ -60,32 +55,14 @@ public class RemoveCDKServersRequirement implements Requirement<RemoveCDKServers
 		// already happens in runAfter
 	}
 	
+	/**
+	 * https://github.com/eclipse/reddeer/issues/1847
+	 */
 	@Override
 	public void runAfter() {
-		deleteCDKServers();
+		// log.info("Deleting all CDK server adapters in runAfter");
 	}
 	
-	private List<Server> getAllServers() {
-		CDEServersView view = new CDEServersView();
-		view.open();
-		
-		return view.getServers();
-	}
-	
-	private void deleteCDKServers() {
-		for (Server server : getAllServers()) {
-			log.info("Found server with name " + server.getLabel().getName());
-			if (isCDKServer(server.getTreeItem())) {
-				log.info("Deleting server...");
-				server.delete(true);
-			}
-		}
-	}
-	
-	private boolean isCDKServer(TreeItem item) {
-		String type = CDKUtils.getServerTypeIdFromItem(item);
-		log.info("Server type id is " + type);
-		return Arrays.stream(CDKServerAdapterType.values()).anyMatch(e -> e.serverType().equals(type));
-	}
+
 
 }

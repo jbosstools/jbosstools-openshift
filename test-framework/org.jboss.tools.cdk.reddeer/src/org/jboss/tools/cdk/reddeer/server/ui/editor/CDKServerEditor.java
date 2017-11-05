@@ -13,7 +13,6 @@ package org.jboss.tools.cdk.reddeer.server.ui.editor;
 import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
-import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
 
 /**
  * Class representing CDK 2.x Server Editor page
@@ -27,11 +26,11 @@ public class CDKServerEditor extends CDEServerEditor {
 	}
 
 	public LabeledText getVagrantfileLocation() {
-		return new LabeledText(new DefaultSection(CDK_DETAILS), "Vagrantfile Location: ");
+		return new LabeledText(getCDKSection(), "Vagrantfile Location: ");
 	}
 	
 	public Button getVagrantfileBrowse() {
-		return new PushButton(new DefaultSection(CDK_DETAILS), "Browse...");
+		return new PushButton(getCDKSection(), "Browse...");
 	}
 
 }
