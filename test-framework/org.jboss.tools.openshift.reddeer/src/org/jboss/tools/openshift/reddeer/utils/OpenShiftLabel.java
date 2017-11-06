@@ -235,6 +235,7 @@ public class OpenShiftLabel {
 		public static final String TOKEN = "Token";
 		public static final String RETRIEVE_TOKEN = "Enter a token or retrieve a new one.";
 		public static final String LINK_RETRIEVE = "retrieve";
+		public static final String IMAGE_REGISTRY_URL = "Image Registry URL:";
 
 		// Domain related
 		public static final String DOMAIN_NAME = "Domain Name:";
