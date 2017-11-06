@@ -14,12 +14,12 @@ import static org.junit.Assert.*;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
-import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.NextButton;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerContainerWizardPage;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -54,7 +54,7 @@ public class CDKServerWizardTest extends CDKServerWizardAbstractTest {
 	
 	@Test
 	public void testNewCDKServerWizard() {
-		NewServerWizard dialog = CDKTestUtils.openNewServerWizardDialog();
+		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		
 		page.selectType(SERVER_TYPE_GROUP, CDK_SERVER_NAME);
@@ -78,7 +78,7 @@ public class CDKServerWizardTest extends CDKServerWizardAbstractTest {
 		assertSameMessage(dialog, NO_VAGRANTFILE);
 		containerPage.setFolder(NON_EXISTING_PATH);
 		assertSameMessage(dialog, DOES_NOT_EXIST);
-		containerPage.setFolder(VAGRANTFILE_PATH);
+		containerPage.setFolder(VAGRANTFILE);
 		assertDiffMessage(dialog, DOES_NOT_EXIST);
 		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.MEDIUM, false);
 		assertTrue("Expected Finish button is not enabled", dialog.isFinishEnabled());

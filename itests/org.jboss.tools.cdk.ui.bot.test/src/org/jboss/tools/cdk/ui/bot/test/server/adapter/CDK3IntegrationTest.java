@@ -19,16 +19,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Testing CDK3 server adapter with minishift using vm driver passed via system property
+ * 
+ * Soon to be deprecated as CDK 3.2 will became only supported version.
+ * Testing CDK 3.x server adapter with minishift using vm driver passed via system property.
  * @author odockal
  *
  */
 @RunWith(RedDeerSuite.class)
 public class CDK3IntegrationTest extends CDKServerAdapterAbstractTest {
-	
-	private static final String OPENSHIFT_USER_NAME = "developer"; //$NON-NLS-1$
-	
-	private static final String OPENSHIFT_PROJECT_NAME = "My Project"; //$NON-NLS-1$
 	
 	private static final String DOCKER_DAEMON_CONNECTION = SERVER_ADAPTER_3;
 
@@ -40,13 +38,13 @@ public class CDK3IntegrationTest extends CDKServerAdapterAbstractTest {
 	@BeforeClass
 	public static void setup() {
 		checkMinishiftParameters();
-		addNewCDK3Server(CDK3_SERVER_NAME, SERVER_ADAPTER_3, MINISHIFT_HYPERVISOR, MINISHIFT_PATH);
+		addNewCDK3Server(CDK3_SERVER_NAME, SERVER_ADAPTER_3, MINISHIFT_HYPERVISOR, MINISHIFT);
 	}
 	
 	@Test
 	public void testCDK3ServerAdapter() {
 		startServerAdapter();
-		testOpenshiftConncetion(OPENSHIFT_PROJECT_NAME, OPENSHIFT_USER_NAME);
+		testOpenshiftConncetion(OPENSHIFT_USER_NAME);
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
 		getCDEServer().stop();
 		assertEquals(ServerState.STOPPED, getCDEServer().getLabel().getState());

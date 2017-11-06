@@ -29,31 +29,45 @@ public abstract class CDKAbstractTest {
 
 	public static final String CDK3_SERVER_NAME = "Red Hat Container Development Kit 3"; //$NON-NLS-1$
 	
+	public static final String CDK32_SERVER_NAME = "Red Hat Container Development Kit 3.2+"; //$NON-NLS-1$
+	
 	public static final String SERVER_ADAPTER = "Container Development Environment"; //$NON-NLS-1$
 	
 	public static final String SERVER_ADAPTER_3 = "Container Development Environment 3"; //$NON-NLS-1$
+	
+	public static final String SERVER_ADAPTER_32 = "Container Development Environment 3.2+"; //$NON-NLS-1$
 	
 	public static final String USERNAME;
 	
 	public static final String PASSWORD;
 	
-	public static final String VAGRANTFILE_PATH;
+	public static final String VAGRANTFILE;
 	
 	public static final String MINISHIFT_HYPERVISOR;
 	
-	public static final String MINISHIFT_PATH;
+	public static final String MINISHIFT;
+	
+	public static final String MINISHIFT_PROFILE;
 	
 	static {
 		USERNAME = CDKTestUtils.getSystemProperty("developers.username"); //$NON-NLS-1$
 		PASSWORD = CDKTestUtils.getSystemProperty("developers.password"); //$NON-NLS-1$
-		VAGRANTFILE_PATH = CDKTestUtils.getSystemProperty("vagrantfile.path"); //$NON-NLS-1$
-		MINISHIFT_PATH = CDKTestUtils.getSystemProperty("minishift.path"); //$NON-NLS-1$
+		VAGRANTFILE = CDKTestUtils.getSystemProperty("vagrantfile"); //$NON-NLS-1$
+		MINISHIFT = CDKTestUtils.getSystemProperty("minishift"); //$NON-NLS-1$
+		MINISHIFT_PROFILE = CDKTestUtils.getSystemProperty("minishift.profile"); //$NON-NLS-1$
 		MINISHIFT_HYPERVISOR = CDKTestUtils.getSystemProperty("minishift.hypervisor"); //$NON-NLS-1$
 	}
 	
 	public static void checkMinishiftParameters() {
 		Map<String, String> dict = new HashMap<>();
-		dict.put("Minishift path", MINISHIFT_PATH);
+		dict.put("Minishift path", MINISHIFT);
+		dict.put("Minishift hypervisor", MINISHIFT_HYPERVISOR == null ? "" : MINISHIFT_HYPERVISOR);
+		CDKTestUtils.checkParameterNotNull(dict);
+	}
+	
+	public static void checkMinishiftProfileParameters() {
+		Map<String, String> dict = new HashMap<>();
+		dict.put("Minishift profile path", MINISHIFT_PROFILE);
 		dict.put("Minishift hypervisor", MINISHIFT_HYPERVISOR == null ? "" : MINISHIFT_HYPERVISOR);
 		CDKTestUtils.checkParameterNotNull(dict);
 	}
@@ -67,7 +81,7 @@ public abstract class CDKAbstractTest {
 	
 	public static void checkVagrantfileParameters() {
 		Map<String, String> dict = new HashMap<>();
-		dict.put("Vagrantfile path", VAGRANTFILE_PATH);
+		dict.put("Vagrantfile path", VAGRANTFILE);
 		CDKTestUtils.checkParameterNotNull(dict);		
 	}
 	

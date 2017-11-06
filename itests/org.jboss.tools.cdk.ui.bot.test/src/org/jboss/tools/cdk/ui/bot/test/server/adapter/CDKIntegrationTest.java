@@ -13,19 +13,23 @@ package org.jboss.tools.cdk.ui.bot.test.server.adapter;
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
+ * Deprecated as CDK 2.x is not supported
  * Basic Devstudio and CDK integration test
  * Requires Secure Storage disabled
  * @author odockal
  *
- */public class CDKIntegrationTest extends CDKServerAdapterAbstractTest {
+ */
+@RunWith(RedDeerSuite.class)
+@Deprecated
+public class CDKIntegrationTest extends CDKServerAdapterAbstractTest {
 	
-	private static final String OPENSHIFT_USER_NAME = "openshift-dev"; //$NON-NLS-1$
-	
-	private static final String OPENSHIFT_PROJECT_NAME = "OpenShift sample project"; //$NON-NLS-1$
+	private static final String OS_USER_NAME = "openshift-dev"; //$NON-NLS-1$
 	
 	private static final String DOCKER_DAEMON_CONNECTION = SERVER_ADAPTER;
 	
@@ -37,7 +41,7 @@ import org.junit.Test;
 	@BeforeClass
 	public static void setup() {
 		checkVagrantfileParameters();
-		addNewCDKServer(CDK_SERVER_NAME, SERVER_ADAPTER, VAGRANTFILE_PATH);
+		addNewCDKServer(CDK_SERVER_NAME, SERVER_ADAPTER, VAGRANTFILE);
 	}
 	
 	@Test
@@ -57,7 +61,7 @@ import org.junit.Test;
 	@Test
 	public void testOpenShiftConnection() {
 		startServerAdapter();
-		testOpenshiftConncetion(OPENSHIFT_PROJECT_NAME, OPENSHIFT_USER_NAME);
+		testOpenshiftConncetion(OS_USER_NAME);
 	}
 	
 	@Test

@@ -57,6 +57,11 @@ public class RemoveCDKServersRequirement implements Requirement<RemoveCDKServers
 
 	@Override
 	public void cleanUp() {
+		// already happens in runAfter
+	}
+	
+	@Override
+	public void runAfter() {
 		deleteCDKServers();
 	}
 	

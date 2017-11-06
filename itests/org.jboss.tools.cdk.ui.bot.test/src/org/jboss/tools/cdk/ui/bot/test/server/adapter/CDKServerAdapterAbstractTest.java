@@ -28,7 +28,6 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewException;
-import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.jface.exception.JFaceLayerException;
 import org.eclipse.reddeer.jface.handler.TreeViewerHandler;
@@ -43,8 +42,10 @@ import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.Remo
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.server.ui.CDEServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDEServersView;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerContainerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerContainerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerContainerWizardPage;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
@@ -66,6 +67,8 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	protected ServersView2 serversView;
 	
 	protected Server server;
+	
+	public static final String OPENSHIFT_USER_NAME = "developer"; //$NON-NLS-1$
 	
 	private static final Logger log = Logger.getLogger(CDKServerAdapterAbstractTest.class);
 	
@@ -165,9 +168,37 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		preferencePage.apply();
         dialog.ok();
 	}
+
+	public static void addNewCDK32Server(String serverName, String serverAdapter, String hypervisor, String path, String profile) {
+		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
+		NewServerWizardPage page = new NewServerWizardPage(dialog);
+		// set first dialog page
+		page.selectType(SERVER_TYPE_GROUP, serverName);
+		page.setHostName(SERVER_HOST);
+		page.setName(serverAdapter);
+		dialog.next();
+		
+		// set second new server dialog page
+		NewCDK32ServerContainerWizardPage containerPage = new NewCDK32ServerContainerWizardPage();
+		containerPage.setCredentials(USERNAME, PASSWORD);
+		if (hypervisor != null && !hypervisor.isEmpty()) {
+			log.info("Setting hypervisor to " + hypervisor); //$NON-NLS-1$
+			containerPage.setHypervisor(hypervisor);
+		}
+		log.info("Setting minishift binary file folder to " + path); //$NON-NLS-1$
+		containerPage.setMinishiftBinary(path);
+		log.info("Setting minishift profile to " + profile); //$NON-NLS-1$
+		containerPage.setMinishiftProfile(profile);
+		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.DEFAULT);
+		log.info("Finishing Add new server dialog"); //$NON-NLS-1$
+		if (!(new FinishButton().isEnabled())) {
+			log.error("Finish button was not enabled"); //$NON-NLS-1$
+		}
+		dialog.finish(TimePeriod.MEDIUM);
+	}
 	
 	public static void addNewCDK3Server(String serverName, String serverAdapter, String hypervisor, String path) {
-		NewServerWizard dialog = CDKTestUtils.openNewServerWizardDialog();
+		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		// set first dialog page
 		page.selectType(SERVER_TYPE_GROUP, serverName);
@@ -179,10 +210,10 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		NewCDK3ServerContainerWizardPage containerPage = new NewCDK3ServerContainerWizardPage();
 		containerPage.setCredentials(USERNAME, PASSWORD);
 		if (hypervisor != null && !hypervisor.isEmpty()) {
-			log.info("Setting hypervisor"); //$NON-NLS-1$
+			log.info("Setting hypervisor to " + hypervisor); //$NON-NLS-1$
 			containerPage.setHypervisor(hypervisor);
 		}
-		log.info("Setting minishift binary file folder"); //$NON-NLS-1$
+		log.info("Setting minishift binary file folder to " + path); //$NON-NLS-1$
 		containerPage.setMinishiftBinary(path);
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.DEFAULT);
 		log.info("Finishing Add new server dialog"); //$NON-NLS-1$
@@ -193,7 +224,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	}
 	
 	public static void addNewCDKServer(String serverName, String serverAdapter, String path) {
-		NewServerWizard dialog = CDKTestUtils.openNewServerWizardDialog();
+		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		// set first dialog page
 		page.selectType(SERVER_TYPE_GROUP, serverName);
@@ -215,7 +246,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		dialog.finish(TimePeriod.MEDIUM);
 	}
 	
-	public static void testOpenshiftConncetion(String projectName, String userName) {
+	public static void testOpenshiftConncetion(String userName) {
 		OpenShiftExplorerView osExplorer = new OpenShiftExplorerView();
 		osExplorer.open();
 		try {
@@ -230,12 +261,6 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 				// no dialog appeared, which is ok
 				log.debug("Expected WaitTimeoutExpiredException occured"); //$NON-NLS-1$
 				ex.printStackTrace();
-			}
-			try {
-				TreeViewerHandler.getInstance().getTreeItem(connection.getTreeItem(), projectName);
-			} catch (JFaceLayerException ex) {
-				ex.printStackTrace();
-				fail("Could not find deployed sample OpenShift project"); //$NON-NLS-1$
 			}
 		} catch (RedDeerException ex) {
 			ex.printStackTrace();

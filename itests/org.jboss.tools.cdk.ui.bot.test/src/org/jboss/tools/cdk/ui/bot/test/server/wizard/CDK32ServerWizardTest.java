@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
-import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerContainerWizardPage;
@@ -23,43 +22,41 @@ import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
- * Class for testing CDK 3.x server wizard functionality
+ * Class for testing CDK 3.2 server wizard functionality
  * @author odockal
  *
  */
-@RunWith(RedDeerSuite.class)
-public class CDK3ServerWizardTest extends CDKServerWizardAbstractTest {
-	
-	@Override
-	protected String getServerAdapter() {
-		return SERVER_ADAPTER_3;
-	}
-	
+public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
+
 	@BeforeClass
 	public static void setUpEnvironment() {
 		checkMinishiftParameters();
 		checkMinishiftProfileParameters();
 	}
 	
-	@Test
-	public void testCDK3ServerType() {
-		assertServerType(CDK3_SERVER_NAME);
+	@Override
+	protected String getServerAdapter() {
+		return SERVER_ADAPTER_32;
 	}
 	
 	@Test
-	public void testNewCDK3ServerWizard() {
+	public void testCDK3ServerType() {
+		assertServerType(CDK32_SERVER_NAME);
+	}
+	
+	@Test
+	public void testNewCDK32ServerWizard() {
 		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		
-		page.selectType(SERVER_TYPE_GROUP, CDK3_SERVER_NAME);
+		page.selectType(SERVER_TYPE_GROUP, CDK32_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
 		NewCDK3ServerContainerWizardPage containerPage = new NewCDK3ServerContainerWizardPage();
 		
-		checkWizardPagewidget("Minishift Binary: ", CDK3_SERVER_NAME);
+		checkWizardPagewidget("Minishift Binary: ", CDK32_SERVER_NAME);
 
 		// just check that default domain is choosen correctly
 		assertTrue(containerPage.getDomain().equalsIgnoreCase(CREDENTIALS_DOMAIN));
@@ -84,15 +81,15 @@ public class CDK3ServerWizardTest extends CDKServerWizardAbstractTest {
 		assertSameMessage(dialog, CHECK_MINISHIFT_VERSION);
 		
 		// check compatibility of cdk version with server adapter
-		containerPage.setMinishiftBinary(MINISHIFT_PROFILE);
+		containerPage.setMinishiftBinary(MINISHIFT);
 		assertSameMessage(dialog, NOT_COMPATIBLE);
 		
 		// Positive test of proper minishift binary
-		containerPage.setMinishiftBinary(MINISHIFT);
+		containerPage.setMinishiftBinary(MINISHIFT_PROFILE);
 		assertDiffMessage(dialog, CHECK_MINISHIFT_VERSION);
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.MEDIUM, false);
 		assertTrue("Expected Finish button is not enabled", dialog.isFinishEnabled());
 		dialog.finish(TimePeriod.MEDIUM);
-	}
+	}	
 
 }

@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
  * @author odockal
  *
  */
+@Deprecated
 @RunWith(RedDeerSuite.class)
 public class CDK3ServerAdapterStartTest extends CDKServerAdapterAbstractTest {
 
@@ -34,7 +35,7 @@ public class CDK3ServerAdapterStartTest extends CDKServerAdapterAbstractTest {
 	@BeforeClass
 	public static void setup() {
 		checkMinishiftParameters();
-		addNewCDK3Server(CDK3_SERVER_NAME, SERVER_ADAPTER_3, MINISHIFT_HYPERVISOR, MINISHIFT_PATH);
+		addNewCDK3Server(CDK3_SERVER_NAME, SERVER_ADAPTER_3, MINISHIFT_HYPERVISOR, MINISHIFT);
 	}
 	
 	@Test
