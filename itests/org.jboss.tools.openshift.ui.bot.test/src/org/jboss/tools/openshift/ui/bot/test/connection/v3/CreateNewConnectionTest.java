@@ -23,13 +23,17 @@ import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.junit.execution.annotation.RunIf;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.api.Browser;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.browser.InternalBrowser;
 import org.eclipse.reddeer.swt.impl.button.CancelButton;
+import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.button.YesButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
+import org.eclipse.reddeer.swt.impl.label.DefaultLabel;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.DefaultText;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.common.reddeer.label.IDELabel.ServerType;
 import org.jboss.tools.common.reddeer.utils.StackTraceUtils;
@@ -119,8 +123,26 @@ public class CreateNewConnectionTest {
 
 		new CancelButton().click();
 	}
+	
+	@Test
+	public void invalidRegistryURLShouldReportErrorMessage() {
+		openConnectionWizardAndSetDefaultServer();
+		new LabeledCombo(OpenShiftLabel.TextLabels.PROTOCOL).setSelection(AuthenticationMethod.BASIC.toString());
+		new LabeledText(OpenShiftLabel.TextLabels.USERNAME).setText(DatastoreOS3.USERNAME);
+		new LabeledText(OpenShiftLabel.TextLabels.PASSWORD).setText(DatastoreOS3.PASSWORD);
+		new PushButton(OpenShiftLabel.Button.ADVANCED_OPEN).click();
+		new LabeledText(OpenShiftLabel.TextLabels.IMAGE_REGISTRY_URL).setText("invalidURL");
+		new WaitUntil(new ControlIsEnabled(new CancelButton()), TimePeriod.DEFAULT);
+		new WaitUntil(new ControlIsEnabled(new DefaultText(" Please provide a valid image registry (HTTP/S) URL.")), TimePeriod.DEFAULT);
+		new CancelButton().click();
+	}
 
 	private void openConnectionWizardAndSetDefaultServerOAuth() {
+		openConnectionWizardAndSetDefaultServer();
+		new LabeledCombo(OpenShiftLabel.TextLabels.PROTOCOL).setSelection(AuthenticationMethod.OAUTH.toString());
+	}
+
+	private void openConnectionWizardAndSetDefaultServer() {
 		OpenShiftExplorerView openShiftExplorerView = new OpenShiftExplorerView();
 		openShiftExplorerView.open();
 		openShiftExplorerView.openConnectionShell();
@@ -128,7 +150,6 @@ public class CreateNewConnectionTest {
 		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER_TYPE)
 				.setSelection(OpenShiftLabel.Others.OPENSHIFT3);
 		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER).setText(DatastoreOS3.SERVER);
-		new LabeledCombo(OpenShiftLabel.TextLabels.PROTOCOL).setSelection(AuthenticationMethod.OAUTH.toString());
 	}
 
 	private void login(final InternalBrowser internalBrowser) {

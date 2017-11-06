@@ -133,11 +133,14 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				UIUtils.setDefaultButtonWidth(registryDiscover);
 				
 				registryURLObservable = WidgetProperties.text(SWT.Modify).observeDelayed(DELAY, txtRegistry);
-				ValueBindingBuilder.bind(registryURLObservable)
+				Binding registryURLBinding = ValueBindingBuilder.bind(registryURLObservable)
 					.validatingAfterConvert(new URLValidator(VALIDATOR_URL_TYPE, true))
 					.converting(new TrimTrailingSlashConverter())
 					.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_REGISTRY_URL).observe(model))
 					.in(dbc);
+				ControlDecorationSupport
+					.create(registryURLBinding, SWT.LEFT | SWT.TOP);
+
 				
                 Label lblNamespace = new Label(advancedComposite, SWT.NONE);
                 lblNamespace.setText("Cluster namespace:");
