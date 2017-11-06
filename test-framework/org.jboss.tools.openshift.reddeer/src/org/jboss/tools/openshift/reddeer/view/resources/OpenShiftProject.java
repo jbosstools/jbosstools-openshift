@@ -152,7 +152,7 @@ public class OpenShiftProject extends AbstractOpenShiftExplorerItem {
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_OS_PROJECT), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		
-		new WaitWhile(new OpenShiftProjectExists(projectName));
+		new WaitWhile(new OpenShiftProjectExists(projectName), TimePeriod.LONG);
 	}
 	
 	/**
