@@ -122,6 +122,8 @@ public class OpenShiftResourceExists extends AbstractWaitCondition {
 		if (project.getTreeItem().isDisposed()) {
 			this.project = explorer.getOpenShift3Connection().getProject(project.getName());
 		}
+		
+		this.project.refresh();
 
 		List<OpenShiftResource> resources = getResources();
 		for (OpenShiftResource rsrc: resources) {

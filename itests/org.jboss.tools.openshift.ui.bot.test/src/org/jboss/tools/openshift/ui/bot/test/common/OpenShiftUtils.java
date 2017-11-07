@@ -108,8 +108,8 @@ public class OpenShiftUtils {
 		}
 	}
 	
-	public static ImportApplicationWizard openImportApplicationWizardFromOpenshiftView(Service openshiftService){
-		openshiftService.select();
+	public static ImportApplicationWizard openImportApplicationWizardFromOpenshiftView(OpenShiftProject openshiftProject){
+		openshiftProject.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
 		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
 		return new ImportApplicationWizard();

@@ -42,7 +42,7 @@ public class ImportApplicationWizardTest extends ImportApplicationBase {
 	
 	@Test
 	public void testImportOpenShift3AppViaOpenshiftView() {
-		ImportApplicationWizard importWizard = OpenShiftUtils.openImportApplicationWizardFromOpenshiftView(service);
+		ImportApplicationWizard importWizard = OpenShiftUtils.openImportApplicationWizardFromOpenshiftView(project);
 		
 		importWizard.finish();
 		assertProjectExistsInProjectView(OpenShiftResources.NODEJS_GIT_NAME);
@@ -67,7 +67,7 @@ public class ImportApplicationWizardTest extends ImportApplicationBase {
 	
 	@Test
 	public void testImportOpenShift3AppWizardGitAPI() {
-		ImportApplicationWizard importWizard = OpenShiftUtils.openImportApplicationWizardFromOpenshiftView(service);
+		ImportApplicationWizard importWizard = OpenShiftUtils.openImportApplicationWizardFromOpenshiftView(project);
 
 		
 		String gitUrl = getGitUrlFromWizard();		
@@ -82,7 +82,7 @@ public class ImportApplicationWizardTest extends ImportApplicationBase {
 	public void testImportOpenShift3AppViaOpenshiftViewTwice() {
 		testImportOpenShift3AppViaOpenshiftView();
 		
-		ImportApplicationWizard importWizard = OpenShiftUtils.openImportApplicationWizardFromOpenshiftView(service);
+		ImportApplicationWizard importWizard = OpenShiftUtils.openImportApplicationWizardFromOpenshiftView(project);
 		
 		GitCloningWizardPage gitWizardPage = new GitCloningWizardPage();
 		
