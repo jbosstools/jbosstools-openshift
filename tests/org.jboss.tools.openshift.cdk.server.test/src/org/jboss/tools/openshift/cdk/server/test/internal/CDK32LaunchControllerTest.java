@@ -59,7 +59,7 @@ public class CDK32LaunchControllerTest {
 		List<String> allKeys = keyCaptor.getAllValues();
 		List<String> allVals = valCaptor.getAllValues();
 		
-		assertTrue(allVals.get(0).endsWith(".metadata/.plugins/org.jboss.ide.eclipse.as.core"));
+		assertTrue(allVals.get(0).replace("\\", "/").endsWith(".metadata/.plugins/org.jboss.ide.eclipse.as.core"));
 		assertTrue(allVals.get(1).endsWith("/home/user/apps/minishift"));
 		assertTrue(allVals.get(2).endsWith("--profile minishift start --vm-driver=virtualbox"));
 	}
