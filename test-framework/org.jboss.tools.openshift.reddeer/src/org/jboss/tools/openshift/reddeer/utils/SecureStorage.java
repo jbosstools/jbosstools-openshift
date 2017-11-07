@@ -88,18 +88,7 @@ public class SecureStorage {
 
 			TestUtils.acceptSSLCertificate();
 
-			boolean firstStorage = provideSecureStoragePassword(SystemProperties.SECURE_STORAGE_PASSWORD);
-
-			if (firstStorage) {
-				// Did "Password hint needed" shell appear? Get rid of it.
-				try {
-					new DefaultShell(OpenShiftLabel.Shell.PASSWORD_HINT_NEEDED);
-					new NoButton().click();
-				} catch (CoreLayerException ex) {
-					// do nothing
-					LOGGER.debug("Password hint did not appear. Skipping.");
-				}
-			}
+			handleSecureStoragePasswordAndHint(SystemProperties.SECURE_STORAGE_PASSWORD);
 			// Remove password if it is stored
 		} else if (new CheckBox(1).isChecked() && !storePassword) {
 			new CheckBox(1).click();
@@ -107,6 +96,21 @@ public class SecureStorage {
 		}
 
 		new WaitWhile(new JobIsRunning());
+	}
+	
+	public static void handleSecureStoragePasswordAndHint(String secureStoragePassword) {
+		boolean firstStorage = provideSecureStoragePassword(secureStoragePassword);
+
+		if (firstStorage) {
+			// Did "Password hint needed" shell appear? Get rid of it.
+			try {
+				new DefaultShell(OpenShiftLabel.Shell.PASSWORD_HINT_NEEDED);
+				new NoButton().click();
+			} catch (CoreLayerException ex) {
+				// do nothing
+				LOGGER.debug("Password hint did not appear. Skipping.");
+			}
+		}
 	}
 
 	private static boolean provideSecureStoragePassword(String password) {
