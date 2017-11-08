@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %Bundle-Name
+Bundle-SymbolicName: org.jboss.tools.openshift.springboot;singleton:=true
+Bundle-Version: 3.4.2.qualifier
+Bundle-Vendor: %Bundle-Vendor
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.core.resources;bundle-version="3.12.0",
+ org.eclipse.core.runtime;bundle-version="3.13.0",
+ org.eclipse.jdt.core;bundle-version="3.13.50",
+ org.jboss.tools.openshift.common.core;bundle-version="3.4.2",
+ org.jboss.tools.openshift.core;bundle-version="3.4.2",
+ org.jboss.tools.openshift.client;bundle-version="3.4.2",
+ org.jboss.tools.foundation.core

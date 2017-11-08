@@ -30,5 +30,5 @@ public class OpenShiftIOCoreActivator extends BaseCorePlugin {
 	public static void logError(String message, Throwable t) {
 		getDefault().pluginLogInternal().logError(message, t);
 	}
-
+	
 }

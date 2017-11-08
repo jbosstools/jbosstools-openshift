@@ -29,7 +29,6 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.as.core.server.internal.v7.DeploymentMarkerUtils;
 import org.jboss.ide.eclipse.as.wtp.core.console.ServerConsoleModel;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IPublishController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.as.core.server.controllable.subsystems.internal.StandardFileSystemPublishController;
 import org.jboss.tools.common.util.FileUtils;
@@ -41,7 +40,7 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.model.IResource;
 
-public class OpenShiftPublishController extends StandardFileSystemPublishController implements IPublishController {
+public class OpenShiftPublishController extends StandardFileSystemPublishController {
 
 	private RSync rsync = null;
 	protected boolean syncDownFailed = false;
@@ -100,10 +99,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	protected boolean isEapProfile() {
 		// quick and dirty
 		String profile = ServerProfileModel.getProfile(getServer());
-		if( "openshift3.eap".equals(profile)) {
-			return true;
-		}
-		return false;
+		return "openshift3.eap".equals(profile);
 	}
 
 	private void publishMagicProjectSimpleCopy(IServer server, File localDeploymentDirectory) throws CoreException {
@@ -216,5 +212,11 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	@Override
 	protected void launchUpdateModuleStateJob() throws CoreException {
 		// No-op for now, until other problems are fixed
+	}
+	
+	@Override
+	protected boolean treatAsBinaryModule(IModule[] module) {
+		boolean treatAsBinaryModule = super.treatAsBinaryModule(module);
+		return treatAsBinaryModule;
 	}
 }
