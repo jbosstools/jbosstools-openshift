@@ -22,6 +22,7 @@
 		<module>org.jboss.tools.openshift.cdk.test.feature</module>
         <module>org.jboss.tools.openshift.integration.tests.feature</module>
 		<module>org.jboss.tools.openshift.js.feature</module>
+		<module>org.jboss.tools.openshift.springboot.feature</module>
 		<module>org.jboss.tools.openshift.io.feature</module>
 		<module>org.jboss.tools.openshift.io.test.feature</module>
 	</modules>
