@@ -123,6 +123,7 @@ public class OpenShiftLabel {
 		public static final String NEW_APP_WIZARD = "New OpenShift Application";
 		public static final String NEW_CONNECTION = "New OpenShift Connection";
 		public static final String NEW_RESOURCE = "New OpenShift resource";
+		public static final String OVERWRITE_REGISTRY_URL = "Overwrite registry URL?";
 		public static final String PORTS_FORWARDING = "Application port forwarding";
 		public static final String SAVE_SNAPSHOT = "Save Snapshot";
 		public static final String SCALE_DEPLOYMENTS = "Scale Deployments";
@@ -131,6 +132,7 @@ public class OpenShiftLabel {
 		public static final String SELECT_EXISTING_PROJECT = "Select Existing Project";
 		public static final String SELECT_OPENSHIFT_TEMPLATE = "Select an OpenShift template";
 		public static final String PREFERENCES = "Preferences";
+		public static final String REGISTRY_URL_NOT_FOUND = "Registry URL not found";
 		public static final String REMOVE_CONNECTION = "Remove connection";
 		public static final String REMOVE_ENV_VAR = "Remove Environment Variable";
 		public static final String REMOVE_PORT = "Remove port";
@@ -204,6 +206,7 @@ public class OpenShiftLabel {
 		public static final String CREATE_SSH_KEY = "New...";
 		public static final String DEFINED_RESOURCES = "Defined Resources...";
 		public static final String DESELECT_ALL = "Deselect all";
+		public static final String DISCOVER = "Discover...";
 		public static final String EDIT = "Edit...";
 		public static final String EDIT_DOMAIN = "Edit...";
 		public static final String ENV_VAR = "Environment Variables... ";
@@ -238,6 +241,8 @@ public class OpenShiftLabel {
 		public static final String RETRIEVE_TOKEN = "Enter a token or retrieve a new one.";
 		public static final String LINK_RETRIEVE = "retrieve";
 		public static final String IMAGE_REGISTRY_URL = "Image Registry URL:";
+		public static final String CLUSTER_NAMESPACE = "Cluster namespace:";
+		public static final String OVERRIDE_OC_LOCATION = "Override 'oc' location: ";
 
 		// Domain related
 		public static final String DOMAIN_NAME = "Domain Name:";

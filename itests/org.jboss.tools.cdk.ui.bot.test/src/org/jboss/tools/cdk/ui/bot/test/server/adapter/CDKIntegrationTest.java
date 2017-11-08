@@ -54,8 +54,22 @@ public class CDKIntegrationTest extends CDKServerAdapterAbstractTest {
 		// cdk restart check
 		getCDEServer().restart();
 		assertEquals(ServerState.STARTED, getCDEServer().getLabel().getState());
+<<<<<<< HEAD
 		// OS and docker connection should be operational after restart
 		testOpenshiftConncetion(OS_USER_NAME);
+=======
+	}
+	
+	@Test
+	public void testOpenShiftConnection() {
+		startServerAdapter();
+		testOpenshiftConncetion(findOpenShiftConnection(null, OS_USER_NAME));
+	}
+	
+	@Test
+	public void testDockerDaemonConnection() {
+		startServerAdapter();
+>>>>>>> CDK discovery new itests
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
 		// cdk stop verification
 		getCDEServer().stop();

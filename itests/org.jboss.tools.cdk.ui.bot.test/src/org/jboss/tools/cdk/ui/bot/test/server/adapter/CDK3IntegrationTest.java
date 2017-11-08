@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.server.adapter;
 
-import static org.junit.Assert.assertEquals;
-
-import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,9 +42,8 @@ public class CDK3IntegrationTest extends CDKServerAdapterAbstractTest {
 	@Test
 	public void testCDK3ServerAdapter() {
 		startServerAdapter();
-		testOpenshiftConncetion(OPENSHIFT_USER_NAME);
+		testOpenshiftConncetion(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
-		getCDEServer().stop();
-		assertEquals(ServerState.STOPPED, getCDEServer().getLabel().getState());
+		stopServerAdapter();
 	}
 }

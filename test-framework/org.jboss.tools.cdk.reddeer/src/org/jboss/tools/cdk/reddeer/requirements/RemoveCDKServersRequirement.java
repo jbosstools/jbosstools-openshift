@@ -22,17 +22,18 @@ import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 
 /**
  * Requirement for deleting all CDK servers
+ * 
  * @author odockal
  *
  */
 public class RemoveCDKServersRequirement implements Requirement<RemoveCDKServers> {
-	
+
 	private static final Logger log = Logger.getLogger(RemoveCDKServersRequirement.class);
-	
+
 	@Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    public @interface RemoveCDKServers {
-    }
+	@Target(ElementType.TYPE)
+	public @interface RemoveCDKServers {
+	}
 
 	@Override
 	public void fulfill() {
@@ -62,7 +63,5 @@ public class RemoveCDKServersRequirement implements Requirement<RemoveCDKServers
 	public void runAfter() {
 		// log.info("Deleting all CDK server adapters in runAfter");
 	}
-	
-
 
 }

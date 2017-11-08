@@ -48,6 +48,7 @@ import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
+import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.junit.After;
@@ -68,7 +69,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	
 	protected Server server;
 	
-	public static final String OPENSHIFT_USER_NAME = "developer"; //$NON-NLS-1$
+	public static final String OPENSHIFT_USERNAME = "developer"; //$NON-NLS-1$
 	
 	private static final Logger log = Logger.getLogger(CDKServerAdapterAbstractTest.class);
 	
@@ -116,7 +117,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	@After
 	public void tearDownServers() {
 		if (getCDEServer().getLabel().getState() == ServerState.STARTED) {
-			getCDEServer().stop();
+			stopServerAdapter();
 		}
 		// remove SSL Certificate to be added at next server start at method annotated with before
 		deleteCertificates();
@@ -125,6 +126,10 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		getServersView().close();
 	}
 	
+	/**
+	 * Starts server adapter defined in getServerAdapter abstract method and
+	 * checks server's state
+	 */
 	protected void startServerAdapter() {
 		log.info("Starting server adapter"); //$NON-NLS-1$
 		try {
@@ -137,18 +142,65 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 			fail(exc.getMessage() + "\r\n" + console);
 		}
 		printCertificates();
-		checkAvailableServers();
+		checkServerIsAvailable();
 		assertEquals(ServerState.STARTED, getCDEServer().getLabel().getState());
 	}
 	
-	protected void checkAvailableServers() {
-		for (Server serverItem : getServersView().getServers()) {
-			String serverName = serverItem.getLabel().getName();
-			log.info(serverName);
+	/**
+	 * Restarts server adapter defined in getServerAdapter abstract method and
+	 * checks server's state
+	 */
+	protected void restartServerAdapter() {
+		log.info("Restarting server adapter"); //$NON-NLS-1$
+		try {
+			getCDEServer().restart();
+		} catch (ServersViewException serversExc) {
+			log.error(serversExc.getMessage());
+			serversExc.printStackTrace();
+		} catch (CDKServerException exc) {
+			String console = collectConsoleOutput(log, true);
+			fail(exc.getMessage() + "\r\n" + console);
 		}
-		assertTrue(getCDEServer().getLabel().getName().contains(getServerAdapter()));
+		checkServerIsAvailable();
+		assertEquals(ServerState.STARTED, getCDEServer().getLabel().getState());
 	}
 	
+	/**
+	 * Stops server adapter defined in getServerAdapter abstract method and
+	 * checks server's state
+	 */
+	protected void stopServerAdapter() {
+		log.info("Stopping server adapter"); //$NON-NLS-1$
+		try {
+			getCDEServer().stop();
+		} catch (ServersViewException serversExc) {
+			log.error(serversExc.getMessage());
+			serversExc.printStackTrace();
+		} catch (CDKServerException exc) {
+			String console = collectConsoleOutput(log, true);
+			fail(exc.getMessage() + "\r\n" + console);
+		}
+		checkServerIsAvailable();
+		assertEquals(ServerState.STOPPED, getCDEServer().getLabel().getState());
+	}
+	
+	/**
+	 * Checks for given server adapter
+	 */
+	protected void checkServerIsAvailable() {
+		if(!getCDEServer().getLabel().getName().contains(getServerAdapter())) {
+			log.info("List of available servers: ");
+			for (Server serverItem : getServersView().getServers()) {
+				String serverName = serverItem.getLabel().getName();
+				log.info(serverName);
+			}
+			fail("Required server " + getServerAdapter() + " is not available");
+		}
+	}
+	
+	/**
+	 * Prints out Openshift 3 accepted certificates
+	 */
 	protected static void printCertificates() {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
 		dialog.open();
@@ -159,6 +211,10 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
         dialog.ok();
 	}
 	
+	/**
+	 * Deletes all Openshift 3 SSL certificates that were accepted from
+	 * Preferences -> JBossTools -> OpenShift 3 -> SSL Certificates
+	 */
 	protected static void deleteCertificates() {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
 		dialog.open();
@@ -170,6 +226,15 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
         dialog.ok();
 	}
 
+	/**
+	 * Creates new CDK 3.2+ server adapter via ServersView -> New -> Server
+	 * 
+	 * @param serverName the name of the Server
+	 * @param serverAdapter server adapter name
+	 * @param hypervisor hypervisor to use
+	 * @param path path to minishift binary file
+	 * @param profile what profile to use
+	 */
 	public static void addNewCDK32Server(String serverName, String serverAdapter, String hypervisor, String path, String profile) {
 		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
@@ -198,6 +263,14 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		dialog.finish(TimePeriod.MEDIUM);
 	}
 	
+	/**
+	 * Creates new CDK 3.x server adapter via ServersView -> New -> Server
+	 * 
+	 * @param serverName the name of the Server
+	 * @param serverAdapter server adapter name
+	 * @param hypervisor hypervisor to use
+	 * @param path path to minishift binary file
+	 */
 	public static void addNewCDK3Server(String serverName, String serverAdapter, String hypervisor, String path) {
 		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
@@ -223,7 +296,14 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		}
 		dialog.finish(TimePeriod.MEDIUM);
 	}
-	
+
+	/**
+	 * Creates new CDK 2.x server adapter via ServersView -> New -> Server
+	 * 
+	 * @param serverName the name of the Server
+	 * @param serverAdapter server adapter name
+	 * @param path path to vagrantfile
+	 */
 	public static void addNewCDKServer(String serverName, String serverAdapter, String path) {
 		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
@@ -247,32 +327,31 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		dialog.finish(TimePeriod.MEDIUM);
 	}
 	
-	public static void testOpenshiftConncetion(String userName) {
-		OpenShiftExplorerView osExplorer = new OpenShiftExplorerView();
-		osExplorer.open();
+	/**
+	 * Tests Openshift 3 connection and try to refresh it
+	 * 
+	 * @param connection
+	 */
+	public void testOpenshiftConncetion(OpenShift3Connection connection) {
+		// usually, when server adapter is not started, openshift connection after refresh should cause 
+		// problem occured dialog
+		connection.refresh();
 		try {
-			OpenShift3Connection connection = osExplorer.getOpenShift3Connection(null, userName);
-			// usually, when server adapter is not started, openshift connection after refresh should cause 
-			// problem occurs dialog
-			connection.refresh();
-			try {
-				new WaitUntil(new ShellIsAvailable("Problem occurred"), TimePeriod.getCustom(30)); //$NON-NLS-1$
-				fail("Problem dialog occured when refreshing OpenShift connection"); //$NON-NLS-1$
-			} catch (WaitTimeoutExpiredException ex) {
-				// no dialog appeared, which is ok
-				log.debug("Expected WaitTimeoutExpiredException occured"); //$NON-NLS-1$
-				ex.printStackTrace();
-			}
-		} catch (RedDeerException ex) {
+			new WaitUntil(new ShellIsAvailable("Problem occurred"), TimePeriod.getCustom(30)); //$NON-NLS-1$
+			fail("Problem dialog occured when refreshing OpenShift connection"); //$NON-NLS-1$
+		} catch (WaitTimeoutExpiredException ex) {
+			// no dialog appeared, which is ok
+			log.debug("Expected WaitTimeoutExpiredException occured"); //$NON-NLS-1$
 			ex.printStackTrace();
-			fail("Could not open OpenShift connection for " + userName + //$NON-NLS-1$
-					" ended with exception: " + ex.getMessage()); //$NON-NLS-1$
 		}
-		osExplorer.close();
-		
 	}
 	
-	public static void testDockerConnection(String dockerDaemon) {
+	/**
+	 * Tests Docker connection
+	 * 
+	 * @param dockerDaemon name of docker connection
+	 */
+	public void testDockerConnection(String dockerDaemon) {
 		DockerExplorerView dockerExplorer = new DockerExplorerView();
 		dockerExplorer.open();
 		DockerConnection connection =  dockerExplorer.getDockerConnectionByName(dockerDaemon);
@@ -282,7 +361,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		connection.select();
 		connection.enableConnection();
 		connection.refresh();
-		new WaitWhile(new JobIsRunning(), TimePeriod.getCustom(30));
+		new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT);
 		try {
 			assertTrue("Docker connection does not contain any images", connection.getImagesNames().size() > 0); //$NON-NLS-1$
 		} catch (WaitTimeoutExpiredException ex) {
@@ -296,6 +375,13 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		dockerExplorer.close();
 	}
 	
+	/**
+	 * Prints out console output via logger and returns console content
+	 * 
+	 * @param log reference to logger
+	 * @param onFail if true then error log method is used, debug otherwise
+	 * @return returns console output
+	 */
 	public String collectConsoleOutput(Logger log, boolean onFail) {
 		ConsoleView view = new ConsoleView();
 		view.open();
@@ -308,6 +394,26 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 			log.debug(consoleOutput);
 		}
 		return consoleOutput;
+	}
+	
+	/**
+	 * Finds OpenShift 3 connection based on server username parameters
+	 * 
+	 * @param server server name
+	 * @param username connection username
+	 * @return openshift 3 connection object if found
+	 */
+	public OpenShift3Connection findOpenShiftConnection(String server, String username) {
+		try {
+			OpenShiftExplorerView osExplorer = new OpenShiftExplorerView();
+			osExplorer.open();
+			return osExplorer.getOpenShift3Connection(server, username);
+		} catch (RedDeerException ex) {
+				ex.printStackTrace();
+				throw new OpenShiftToolsException("Could not find OpenShift connection for " +
+						server + " and " + username + //$NON-NLS-1$
+						", ended with exception: " + ex.getMessage()); //$NON-NLS-1$
+		}
 	}
 	
 }

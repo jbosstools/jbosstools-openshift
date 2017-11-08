@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.server.adapter;
 
-import static org.junit.Assert.assertEquals;
-
-import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,8 +39,7 @@ public class CDK32ServerAdapterStartTest extends CDKServerAdapterAbstractTest {
 	@Test
 	public void testStartServerAdapter() {
 		startServerAdapter();
-		getCDEServer().stop();
-		assertEquals(ServerState.STOPPED, getCDEServer().getLabel().getState());
-	}	
+		stopServerAdapter();
+	}
 
 }

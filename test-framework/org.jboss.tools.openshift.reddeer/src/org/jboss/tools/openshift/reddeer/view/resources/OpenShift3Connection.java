@@ -25,6 +25,7 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
+import org.jboss.tools.openshift.reddeer.wizard.v3.OpenShift3ConnectionWizard;
 
 public class OpenShift3Connection extends AbstractOpenShiftConnection {
 	
@@ -46,6 +47,12 @@ public class OpenShift3Connection extends AbstractOpenShiftConnection {
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 		
 		return new OpenShiftProject(treeViewerHandler.getTreeItem(item, projectName));
+	}
+	
+	public OpenShift3ConnectionWizard editConnection() {
+		activateOpenShiftExplorerView();
+		new ContextMenuItem(getTreeItem(), OpenShiftLabel.ContextMenu.EDIT_CONNECTION).select();
+		return new OpenShift3ConnectionWizard(OpenShiftLabel.Shell.EDIT_CONNECTION);
 	}
 
 	/**

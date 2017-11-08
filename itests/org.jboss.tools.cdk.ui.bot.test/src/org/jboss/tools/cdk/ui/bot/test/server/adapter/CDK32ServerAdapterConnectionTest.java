@@ -41,7 +41,7 @@ public class CDK32ServerAdapterConnectionTest extends CDKServerAdapterAbstractTe
 	@Test
 	public void testCDK3ServerAdapterConnection() {
 		startServerAdapter();
-		testOpenshiftConncetion(OPENSHIFT_USER_NAME);
+		testOpenshiftConncetion(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
 	}
 

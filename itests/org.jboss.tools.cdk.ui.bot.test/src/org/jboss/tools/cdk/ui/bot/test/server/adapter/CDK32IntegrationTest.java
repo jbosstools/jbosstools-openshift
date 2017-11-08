@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.server.adapter;
 
-import static org.junit.Assert.assertEquals;
-
-import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

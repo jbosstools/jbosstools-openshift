@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView.AuthenticationMethod;
+import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
 
 /**
  * Storage for settings that are used in the OpenShift 3 integration tests.
