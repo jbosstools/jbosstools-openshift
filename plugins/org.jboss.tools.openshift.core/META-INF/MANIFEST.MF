@@ -11,7 +11,7 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.openshift.common.core;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.common.core;bundle-version="[3.7.0,4.0.0)",
  org.jboss.tools.foundation.core;bundle-version="1.2.0",
- org.jboss.ide.eclipse.as.core;bundle-version="3.1.1",
+ org.jboss.ide.eclipse.as.core;bundle-version="3.5.2",
  org.jboss.ide.eclipse.as.dmr;bundle-version="3.1.0",
  org.jboss.tools.usage;bundle-version="2.1.0",
  org.eclipse.wst.server.core;bundle-version="1.6.100",
@@ -45,13 +45,42 @@ Export-Package: org.jboss.tools.openshift.core,
  org.jboss.tools.openshift.core.server.adapter,
  org.jboss.tools.openshift.core.server.behavior,
  org.jboss.tools.openshift.core.server.behavior.eap,
+ org.jboss.tools.openshift.core.server.behavior.springboot,
  org.jboss.tools.openshift.core.util,
- org.jboss.tools.openshift.internal.core;x-friends:="org.jboss.tools.openshift.ui,org.jboss.tools.openshift.js,org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
- org.jboss.tools.openshift.internal.core.docker;x-friends:="org.jboss.tools.openshift.ui,org.jboss.tools.openshift.js,org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
- org.jboss.tools.openshift.internal.core.models;x-friends:="org.jboss.tools.openshift.ui,org.jboss.tools.openshift.js,org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
- org.jboss.tools.openshift.internal.core.portforwarding;x-friends:="org.jboss.tools.openshift.ui,org.jboss.tools.openshift.js,org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
- org.jboss.tools.openshift.internal.core.preferences;x-friends:="org.jboss.tools.openshift.ui,org.jboss.tools.openshift.js,org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
- org.jboss.tools.openshift.internal.core.server.debug;x-friends:="org.jboss.tools.openshift.ui,org.jboss.tools.openshift.js,org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
- org.jboss.tools.openshift.internal.core.util;x-friends:="org.jboss.tools.openshift.ui,org.jboss.tools.openshift.js,org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer"
+ org.jboss.tools.openshift.internal.core;
+  x-friends:="org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.js,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.docker;
+  x-friends:="org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.js,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.models;
+  x-friends:="org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.js,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.portforwarding;
+  x-friends:="org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.js,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.preferences;
+  x-friends:="org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.js,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.server.debug;
+  x-friends:="org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.js,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.util;
+  x-friends:="org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.js,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.reddeer"
 Service-Component: META-INF/connectionFactory.xml
 

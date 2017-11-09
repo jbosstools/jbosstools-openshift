@@ -257,6 +257,17 @@
                mappedId="publish.rsync.filesystem.eap"
                serverTypes="org.jboss.tools.openshift.server.type">
          </subsystemMapping>
+         <subsystem
+               class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootPublishController"
+               id="publish.rsync.filesystem.springboot"
+               name="Local Filesystem Publish with RSync for SpringBoot"
+               system="publish">
+         </subsystem>
+         <subsystemMapping
+               id="publish.rsync.filesystem.springboot"
+               mappedId="publish.rsync.filesystem.springboot"
+               serverTypes="org.jboss.tools.openshift.server.type">
+         </subsystemMapping>
    	</extension>
    	
    	
@@ -275,6 +286,14 @@
           </subsystem>
           <subsystem system="modules" subsystem="modules.state.openshift.wf.fs"/>
           <subsystem system="moduleDeployPath" subsystem="moduleDeployPath.xmlprefs.openshift.eap"/>
+       </serverProfile>
+       <serverProfile
+             id="openshift3.springboot"
+             serverTypes="org.jboss.tools.openshift.server.type">
+          <description
+                description="A profile configured to publish to a local folder and rsync to a remote OpenShift pod based on SpringBoot starter."
+                name="openshift3.springboot">
+          </description>
        </serverProfile>
    	</extension>
     <extension
@@ -299,6 +318,9 @@
        point="org.jboss.tools.openshift.core.serverAdapterProfileDetector">
     <detector
           class="org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector">
+    </detector>
+    <detector
+          class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootApplicationProfileDetector">
     </detector>
  </extension>
     
