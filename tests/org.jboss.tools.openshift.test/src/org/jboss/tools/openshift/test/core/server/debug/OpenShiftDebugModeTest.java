@@ -21,10 +21,13 @@ import static org.jboss.tools.openshift.test.util.ResourceMocks.createDeployment
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createEnvironmentVariable;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createPort;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.createProject;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.createRoute;
+import static org.jboss.tools.openshift.test.util.ResourceMocks.createService;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.mockGetContainers;
 import static org.jboss.tools.openshift.test.util.ResourceMocks.mockGetEnvironmentVariables;
 import static org.mockito.AdditionalMatchers.and;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -33,10 +36,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -49,6 +55,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.core.models.PortSpecAdapter;
 import org.jboss.tools.openshift.internal.core.server.debug.DebugContext;
@@ -58,10 +65,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
+import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.IService;
+import com.openshift.restclient.model.route.IRoute;
 
 public class OpenShiftDebugModeTest {
 	
@@ -71,19 +83,19 @@ public class OpenShiftDebugModeTest {
 
 	private Connection connection;
 	private IDeploymentConfig dc;
+	private IProject project;
 	private IServer server;
 	private TestableDebugContext context;
 	private TestableDebugMode debugMode;
 	
 	@Before
 	public void setUp() throws CoreException, UnsupportedEncodingException, MalformedURLException {
-//		System.setProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, "2000");
-
 		this.connection = createConnection("https://localhost:8181", "aUser");
 		ConnectionsRegistrySingleton.getInstance().add(connection);
+		this.project = createProject("someProject");
 		this.dc = createDeploymentConfig(
 				"someDc", 
-				createProject("someProject"), 
+				project, 
 				// no env var
 				null,
 				// no containers
@@ -97,7 +109,6 @@ public class OpenShiftDebugModeTest {
 
 	@After
 	public void tearDown() {
-//		System.clearProperty(NewPodDetectorJob.DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY);
 		ConnectionsRegistrySingleton.getInstance().remove(connection);
 	}
 
@@ -382,7 +393,87 @@ public class OpenShiftDebugModeTest {
 		// send updated dc
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
-	
+
+	@Test
+	public void shouldAddRouteTimeoutIfDoesntExist() throws CoreException {
+		// given
+		IRoute route = createRouteFor(dc, project, connection);
+		// when
+		context.setDebugEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
+		// then
+		verify(route, atLeastOnce()).setAnnotation(
+						eq(OpenShiftAPIAnnotations.TIMEOUT), anyString());
+		// send updated dc
+		verify(debugMode, times(1)).send(eq(route), eq(connection), any(IProgressMonitor.class));
+	}
+
+	@Test
+	public void shouldNotAddRouteTimeoutIfExistAlready() throws CoreException {
+		// given
+		IRoute route = createRouteFor(dc, project, connection);
+		doReturn(debugMode.getRouteDebugTimeoutValue()).when(route).getAnnotation(eq(OpenShiftAPIAnnotations.TIMEOUT));
+		// when
+		context.setDebugEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
+		// then
+		verify(route, never()).setAnnotation(
+						eq(OpenShiftAPIAnnotations.TIMEOUT), anyString());
+		// dont send updated dc
+		verify(debugMode, never()).send(eq(route), eq(connection), any(IProgressMonitor.class));
+	}
+
+	@Test
+	public void shouldReplaceRouteTimeoutIfCustomTimeoutExistAlready() throws CoreException {
+		// given
+		IRoute route = createRouteFor(dc, project, connection);
+		doReturn("4242").when(route).getAnnotation(eq(OpenShiftAPIAnnotations.TIMEOUT));
+		// when
+		context.setDebugEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
+		// then
+		verify(route, atLeastOnce()).setAnnotation(
+						eq(OpenShiftAPIAnnotations.TIMEOUT), anyString());
+		// dont send updated dc
+		verify(debugMode, atLeastOnce()).send(eq(route), eq(connection), any(IProgressMonitor.class));
+	}
+
+	@Test
+	public void shouldRemoveTimeoutFromRouteIfDebuggingIsDisabled() throws CoreException {
+		// given
+		IRoute route = createRouteFor(dc, project, connection);
+		doReturn(debugMode.getRouteDebugTimeoutValue()).when(route).getAnnotation(eq(OpenShiftAPIAnnotations.TIMEOUT));
+		// when
+		context.setDebugEnabled(false);
+		debugMode.execute(new NullProgressMonitor());
+		// then
+		verify(route, atLeastOnce()).removeAnnotation(eq(OpenShiftAPIAnnotations.TIMEOUT));
+		// send updated dc
+		verify(debugMode, times(1)).send(eq(route), eq(connection), any(IProgressMonitor.class));
+	}
+
+	/**
+	 * Returns a route that points to a service, that's related to the given deployment config.
+	 * Creating the route it will stub 2 services and 2 routes to the given connection.
+	 * 
+	 * @param dc to create a route for
+	 * @param connection to create the route, services and routes in
+	 * @return
+	 */
+	private IRoute createRouteFor(IDeploymentConfig dc, IProject project, Connection connection) {
+		@SuppressWarnings("serial")
+		Map<String, String> selectors = new HashMap<String, String>() {{ put("aSelector", "42"); }};
+		doReturn(selectors).when(dc).getReplicaSelector();
+		IService service1 = createService("service1", project, new HashMap<String, String>()); // doesnt match dc
+		IService service2 = createService("service2", project, selectors);  // matches dc
+		when(connection.getResources(ResourceKind.SERVICE, project.getNamespace())).thenReturn(Arrays.asList(service1, service2));
+		
+		IRoute route1 = createRoute("route1", project, "service42"); // matches inexistent service
+		IRoute route2 = createRoute("route2", project, "service2"); // matches service2
+		when(connection.getResources(ResourceKind.ROUTE, project.getNamespace())).thenReturn(Arrays.asList(route1, route2));
+		return route2;
+	}
+
 	private static Matcher<Set<IPort>> aSetThatContainsPort(final int port) {
 		return new TypeSafeMatcher<Set<IPort>>() {
 
@@ -417,48 +508,6 @@ public class OpenShiftDebugModeTest {
 		};
 	}
 
-	//	private static class MockRedeploymentJob extends Job {
-//
-//		private IDeploymentConfig dc;
-//
-//		public MockRedeploymentJob(IDeploymentConfig dc) {
-//			super("MockRedeploymentJob");
-//			this.dc = dc;
-//			schedule(600);
-//		}
-//
-//		@Override
-//		protected IStatus run(IProgressMonitor monitor) {
-//			IConnection connection = mock(IConnection.class);
-//			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, null, mock(IDeploymentConfig.class), mock(IDeploymentConfig.class));
-//			waitFor(50);
-//			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, null, dc, dc);
-//			waitFor(50);
-//			IPod deployPod = mock(IPod.class);
-//			when(deployPod.getName()).thenReturn("foo-deploy");
-//			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, null, null, deployPod);
-//			waitFor(50);
-//			IPod pendingPod = mock(IPod.class);
-//			when(pendingPod.getStatus()).thenReturn("Pending");
-//			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, null, deployPod, pendingPod);
-//			waitFor(100);
-//			IPod runningPod = mock(IPod.class);
-//			when(runningPod.getStatus()).thenReturn("Running");
-//			when(runningPod.getName()).thenReturn("RunningPod");
-//			when(runningPod.getLabels()).thenReturn(Collections.singletonMap("foo", "bar"));
-//			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, null, pendingPod, runningPod);
-//			return Status.OK_STATUS;
-//		}
-//
-//		private void waitFor(long millis) {
-//			try {
-//				Thread.sleep(millis);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//	}
-
 	public class TestableDebugMode extends OpenShiftDebugMode {
 
 		public TestableDebugMode(DebugContext context) {
@@ -466,7 +515,7 @@ public class OpenShiftDebugModeTest {
 		}
 
 		@Override
-		protected void send(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) throws CoreException {
+		protected void send(IResource resource, Connection connection, IProgressMonitor monitor) throws CoreException {
 		}
 		
 		@Override
@@ -477,6 +526,10 @@ public class OpenShiftDebugModeTest {
 		@Override
 		protected IPod getExistingPod(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) {
 			return null;
+		}
+		
+		public String getRouteDebugTimeoutValue() {
+			return ROUTE_DEBUG_TIMEOUT;
 		}
 	}
 
