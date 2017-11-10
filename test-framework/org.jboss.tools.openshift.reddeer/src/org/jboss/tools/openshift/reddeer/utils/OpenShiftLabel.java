@@ -60,6 +60,7 @@ public class OpenShiftLabel {
 		public static final String[] SCALE_UP = {"Scale", "Up"};
 		public static final String[] SCALE_DOWN = {"Scale", "Down"};
 		public static final String[] SCALE_TO = {"Scale", "To..."};
+		public static final String EDIT_RESOURCE_LIMITS = "Edit Resource Limits...";
 		
 		// Application related
 		public static final String APPLICATION_DETAILS = "Details...";
@@ -125,6 +126,7 @@ public class OpenShiftLabel {
 		public static final String PORTS_FORWARDING = "Application port forwarding";
 		public static final String SAVE_SNAPSHOT = "Save Snapshot";
 		public static final String SCALE_DEPLOYMENTS = "Scale Deployments";
+		public static final String EDIT_RESOURCE_LIMITS = "Edit resource limits";
 		public static final String SELECT_EXISTING_APPLICATION = "Select Existing Application";
 		public static final String SELECT_EXISTING_PROJECT = "Select Existing Project";
 		public static final String SELECT_OPENSHIFT_TEMPLATE = "Select an OpenShift template";

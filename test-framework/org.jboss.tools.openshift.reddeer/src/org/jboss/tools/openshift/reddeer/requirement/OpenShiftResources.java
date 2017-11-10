@@ -34,5 +34,6 @@ public class OpenShiftResources {
 	public static final String NODEJS_TEMPLATE = "https://raw.githubusercontent.com/projectatomic/adb-utils/master/services/openshift/templates/common/nodejs.json";
 	public static final String NODEJS_SERVICE = "nodejs-example";
 	public static final String NODEJS_APP_REPLICATION_CONTROLLER = "nodejs-example-1";
+	public static final String NODEJS_APP_DEPLOYMENT_CONFIG = "nodejs-example";
 	public static final String NODEJS_GIT_NAME = "nodejs-ex";
 }
