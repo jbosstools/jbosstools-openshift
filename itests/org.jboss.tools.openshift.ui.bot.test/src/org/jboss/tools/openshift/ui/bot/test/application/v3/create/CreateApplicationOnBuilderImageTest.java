@@ -58,8 +58,8 @@ import org.junit.Test;
 @CleanConnection
 public class CreateApplicationOnBuilderImageTest {
 
-	private String gitFolder = "jboss-eap-quickstarts";
-	private String projectName = "jboss-kitchensink";
+	private String gitFolder = "httpd-ex";
+	private String projectName = "httpd-exk";
 	private String applicationName;
 
 	@InjectRequirement

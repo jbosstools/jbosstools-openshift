@@ -34,10 +34,10 @@ import org.hamcrest.core.StringContains;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
@@ -46,8 +46,6 @@ import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
-import org.jboss.tools.openshift.reddeer.wizard.v3.TemplateParameter;
-import org.jboss.tools.openshift.reddeer.wizard.v3.TemplatesCreator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -76,24 +74,13 @@ public class EditResourcesTest{
 	private static String DEFAULT_NEXUS_MIRROR = "https://repository.jboss.org/nexus/content/groups/public-jboss/";
 	private String buildConfig;
 	
-	private static final String BUILD_CONFIG_EDITOR = "[" + DatastoreOS3.PROJECT1 + "] Build Config : eap-app.json";
+	private static final String BUILD_CONFIG_EDITOR = "[" + DatastoreOS3.TEST_PROJECT + "] Build Config : eap-app.json";
 	
 	@BeforeClass
 	public static void setUp() {
 		TestUtils.cleanupGitFolder(GIT_FOLDER);
 		TestUtils.setUpOcBinary();
 		
-//		// If project does not exists, e.g. something went south in recreation earlier, create it
-//		if (!new OpenShiftProjectExists(DatastoreOS3.PROJECT1_DISPLAYED_NAME).test()) {
-//			new OpenShiftExplorerView().getOpenShift3Connection().createNewProject();
-//		}
-		
-		if (getNexusMirror() != null) {
-			new TemplatesCreator().createOpenShiftApplicationBasedOnLocalTemplate(
-				TEMPLATE_PATH, new TemplateParameter(OpenShiftLabel.Others.MAVEN_MIRROR_URL, getNexusMirror()));
-		} else {
-			new TemplatesCreator().createOpenShiftApplicationBasedOnLocalTemplate(TEMPLATE_PATH);
-		}
 	}
 	
 	
@@ -186,7 +173,7 @@ public class EditResourcesTest{
 	
 	private OpenShiftResource getBuildConfig() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		return explorer.getOpenShift3Connection().getProject().
+		return explorer.getOpenShift3Connection().getProject(DatastoreOS3.TEST_PROJECT).
 				getOpenShiftResources(Resource.BUILD_CONFIG).get(0);
 	}
 

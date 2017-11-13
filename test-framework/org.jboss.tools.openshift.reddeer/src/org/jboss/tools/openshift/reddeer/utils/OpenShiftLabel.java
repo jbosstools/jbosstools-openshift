@@ -307,8 +307,7 @@ public class OpenShiftLabel {
 		public static final String MAVEN_MIRROR_URL = "MAVEN_MIRROR_URL";
 		public static final String[] NEW_APP_MENU = {"File", "New", "OpenShift Application"};
 		public static final String OPENSHIFT_APP = "OpenShift Application";
-		public static final String OPENSHIFT_CENTRAL_SCRIPT = "$(\"#wizards\" ).find('a').filter(\""
-				+ ":contains('OpenShift Application')\").click()";
+		public static final String OPENSHIFT_CENTRAL_SCRIPT = "$(\"#wizards\" ).find('a').filter(\":contains('OpenShift Application')\").click()";
 		
 		public static final String OPENSHIFT3 = "OpenShift 3";
 		// Server adapter

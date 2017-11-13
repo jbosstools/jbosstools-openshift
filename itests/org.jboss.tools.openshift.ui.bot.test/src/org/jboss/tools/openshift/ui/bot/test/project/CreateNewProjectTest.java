@@ -17,6 +17,8 @@ import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
@@ -26,14 +28,18 @@ import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
+@RunWith(RedDeerSuite.class)
 public class CreateNewProjectTest {
 
 	@Test

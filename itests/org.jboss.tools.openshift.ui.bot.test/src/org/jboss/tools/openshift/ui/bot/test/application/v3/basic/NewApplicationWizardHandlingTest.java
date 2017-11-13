@@ -27,6 +27,8 @@ import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -40,8 +42,9 @@ import org.eclipse.reddeer.swt.impl.text.DefaultText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -52,9 +55,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
 @CleanConnection
+@RunWith(RedDeerSuite.class)
 public class NewApplicationWizardHandlingTest {
 
 	@InjectRequirement

@@ -15,7 +15,7 @@ import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.swt.impl.browser.InternalBrowser;
 
 /**
- * Wait until JBoss Central is fully loaded (meaning jQuery is loaded).
+ * Wait until JBoss Central is loaded.
  * 
  * @author rhopp
  *
@@ -31,11 +31,7 @@ public class CentralIsLoaded extends AbstractWaitCondition {
 		} catch (CoreLayerException ex) {
 			return false;
 		}
-		Object jQuery = internalBrowser.evaluate("if (window.jQuery) return true; else return false;");
-		if (jQuery instanceof Boolean) {
-			return (Boolean) jQuery;
-		}
-		return false;
+		return internalBrowser.isPageLoaded();
 	}
 
 	@Override

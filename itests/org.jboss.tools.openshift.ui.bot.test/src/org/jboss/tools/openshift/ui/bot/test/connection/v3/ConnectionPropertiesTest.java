@@ -25,9 +25,9 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(RedDeerSuite.class)
 @OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection()
+@RunWith(RedDeerSuite.class)
 public class ConnectionPropertiesTest {
 	
 	private static final String PROPERTY_USERNAME = "User Name";
