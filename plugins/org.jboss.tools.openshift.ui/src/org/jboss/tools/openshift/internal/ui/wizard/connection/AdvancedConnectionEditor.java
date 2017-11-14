@@ -40,6 +40,8 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
@@ -51,7 +53,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.databinding.ObservablePojo;
@@ -308,13 +309,12 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				// Verify with user
 				String title = "Overwrite registry URL?";
 				String msg = "Are you sure you want to change the registry URL from " + oldVal + " to " + newVal + "?";
-				MessageBox mb = new MessageBox(shell, SWT.OK | SWT.CANCEL);
-				mb.setText(title);
-				mb.setMessage(msg);
+				MessageDialog dialog = new MessageDialog(shell, title, null, 
+						msg, MessageDialog.CONFIRM, new String[] {"OK", "Cancel"}, 0);
 				String old = registryURLObservable.getValue().toString().trim();
-				if(old.isEmpty() || mb.open() == SWT.OK ) {
+				if(old.isEmpty() || dialog.open() == IDialogConstants.OK_ID ) {
 					registryURLObservable.setValue(ret.getMessage());
-				} 
+				}
 			}
 		} else {
 			String title = "Registry URL not found";
