@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 
 import static org.hamcrest.core.IsNot.not;
 
+import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
@@ -111,7 +112,7 @@ public class EditResourceLimitsTest {
 		incrementLimits(index, defaultSuffix);
 		new WaitUntil(new ResourceIsUpdated(project.getName(), Resource.DEPLOYMENT_CONFIG,
 				      OpenShiftResources.NODEJS_APP_DEPLOYMENT_CONFIG, new String[] {"Basic", "Resource Version"},
-				      not(version)));
+				      not(version)), TimePeriod.getCustom(800));
 	}
 
 	private void incrementLimits(int index, String defaultSuffix) {
