@@ -120,20 +120,21 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 	}
 	
 	protected String validateMinishiftVersion() {
+		String ret = null;
 		if( minishiftVersionProps == null ) {
-			return "Unknown error when checking minishift version: " + homeDir;
+			ret = "Unknown error when checking minishift version: " + homeDir;
 		} else if( !minishiftVersionProps.isValid()) {
-			String err = minishiftVersionProps.getError();
-			if( err == null ) {
-				err = "Unknown error while checking minishift version";
+			ret = minishiftVersionProps.getError();
+			if( ret == null ) {
+				ret = "Unknown error while checking minishift version";
 			}
-			return err;
 		} else {
 			String versionCompatError = isVersionCompatible(minishiftVersionProps);
 			if( versionCompatError != null )
-				return versionCompatError;
+				ret = versionCompatError;
 		}
-		return null;
+		toggleHomeDecorator(ret);
+		return ret;
 	}
 	
 	protected String validateHomeDirectory() {
