@@ -13,10 +13,14 @@ package org.jboss.tools.openshift.test.core.server;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.UnsupportedEncodingException;
@@ -24,10 +28,12 @@ import java.net.MalformedURLException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerType;
+import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -38,7 +44,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.openshift.restclient.model.IDeploymentConfig;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -51,13 +56,16 @@ public class OpenShiftServerUtilsTest {
 
 	private IServer server;
 	private Connection connection;
+	private IServerWorkingCopy serverWorkingCopy;
 
 	@Before
 	public void setUp() throws UnsupportedEncodingException, MalformedURLException {
 		this.connection = ResourceMocks.create3ProjectsConnection();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 
-		this.server = OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[1], connection);
+		this.serverWorkingCopy = OpenShiftServerTestUtils.mockServerWorkingCopy();
+		this.server = OpenShiftServerTestUtils.mockServer(serverWorkingCopy, ResourceMocks.PROJECT2_SERVICES[1], connection);
+		
 	}
 
 	@After
@@ -138,43 +146,6 @@ public class OpenShiftServerUtilsTest {
 	}
 
 	@Test
-	public void should_return_deploymentconfig() throws CoreException {
-		// given
-		// when
-		IDeploymentConfig deploymentConfig = (IDeploymentConfig) OpenShiftServerUtils.getDeploymentConfig(server, new NullProgressMonitor());
-		// then
-		assertThat(deploymentConfig).isEqualTo(ResourceMocks.PROJECT2_DEPLOYMENTCONFIGS[2]);
-	}
-
-	@Test
-	public void should_throw_exception_no_connection() throws UnsupportedEncodingException, MalformedURLException {
-		// given
-		// when
-		try {
-			OpenShiftServerUtils.getDeploymentConfig(
-				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[0], null), new NullProgressMonitor());
-		// then
-			fail("CoreException expected");
-		} catch(CoreException e) {
-			assertThat(e.getMessage()).contains("not find the connection");
-		}
-	}
-
-	@Test
-	public void should_throw_exception_no_deployconfig_name_in_pod_labels() throws CoreException, UnsupportedEncodingException, MalformedURLException {
-		// given
-		// when
-		try {
-			OpenShiftServerUtils.getDeploymentConfig(
-				OpenShiftServerTestUtils.mockServer(ResourceMocks.PROJECT2_SERVICES[3], connection), new NullProgressMonitor());
-		// then
-			fail("CoreException expected");
-		} catch(CoreException e) {
-			assertThat(e.getMessage()).contains("not find deployment config");
-		}
-	}
-	
-	@Test
 	public void shouldNotShowJmxOnNonJavaProject() throws CoreException {
 	    IProject eclipseProject = ResourceMocks.createEclipseProject("project1");
 	    doReturn(eclipseProject.getName()).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEPLOYPROJECT), anyString());
@@ -229,6 +200,32 @@ public class OpenShiftServerUtilsTest {
 		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
 		assertThat(serverFound).isSameAs(os3Server1);
+	}
+	
+	@Test
+	public void shouldSaveServerAttribute() throws CoreException {
+		// given
+		// when
+		OpenShiftServerUtils.updateServerAttribute("anAttribute", "42", server);
+		// then
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute("anAttribute", "42");
+		verify(serverWorkingCopy, atLeastOnce()).save(anyBoolean(), any(IProgressMonitor.class));
+	}
+
+	@Test(expected=CoreException.class)
+	public void shouldThrowExceptionIfSavingEmptyAttributeValue() throws CoreException {
+		// given
+		// when
+		OpenShiftServerUtils.updateServerAttribute("", "42", server);
+		// then
+	}
+
+	@Test(expected=CoreException.class)
+	public void shouldThrowExceptionIfSavingNullAttributeValue() throws CoreException {
+		// given
+		// when
+		OpenShiftServerUtils.updateServerAttribute(null, "42", server);
+		// then
 	}
 
 	private static IServer mockOS3Server(String name, String serviceName) {

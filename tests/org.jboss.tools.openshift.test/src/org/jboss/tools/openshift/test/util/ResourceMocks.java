@@ -71,6 +71,7 @@ import com.openshift.restclient.model.build.IBuildStrategy;
 import com.openshift.restclient.model.build.IGitBuildSource;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
+import com.openshift.restclient.model.probe.IProbe;
 import com.openshift.restclient.model.route.IRoute;
 
 /**
@@ -462,9 +463,15 @@ public class ResourceMocks {
 	}
 
 	public static IContainer createContainer(String name, Set<IPort> ports) {
+		return createContainer(name, ports, null, null);
+	}
+
+	public static IContainer createContainer(String name, Set<IPort> ports, IProbe livenessProbe, IProbe readinessProbe) {
 		IContainer container = mock(IContainer.class);
 		doReturn(name).when(container).getName();
 		doReturn(ports).when(container).getPorts();
+		doReturn(livenessProbe).when(container).getLivenessProbe();
+		doReturn(readinessProbe).when(container).getReadinessProbe();
 		return container;
 	}
 
@@ -472,6 +479,17 @@ public class ResourceMocks {
 		return new PortSpecAdapter("debug", "TCP", port);
 	}
 
+	public static IProbe createProbe(int initialDelaySeconds, int periodSeconds, int successThreshold, int failureThreshold, 
+			int timeoutSeconds) {
+		IProbe probe = mock(IProbe.class);
+		doReturn(initialDelaySeconds).when(probe).getInitialDelaySeconds();
+		doReturn(periodSeconds).when(probe).getPeriodSeconds();
+		doReturn(successThreshold).when(probe).getSuccessThreshold();
+		doReturn(failureThreshold).when(probe).getFailureThreshold();
+		doReturn(timeoutSeconds).when(probe).getTimeoutSeconds();
+		return probe;
+	}
+	
 	/**
 	 * mocks the #getTriggers method of the given {@link IDeploymentConfig} so that it returns the list of {@link IDeploymentImageChangeTrigger}.
 	 * @param triggers

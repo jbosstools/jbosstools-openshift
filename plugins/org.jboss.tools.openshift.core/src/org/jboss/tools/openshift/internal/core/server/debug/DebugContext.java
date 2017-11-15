@@ -39,7 +39,7 @@ public class DebugContext {
 	private int debugPort = NO_DEBUG_PORT;
 	private IDebugListener listener;
 	private IPod pod;
-
+	
 	public DebugContext(IServer server) {
 		this(server, DEFAULT_DEVMODE_KEY, DEFAULT_DEBUG_PORT_KEY, DEFAULT_DEBUG_PORT);
 	}

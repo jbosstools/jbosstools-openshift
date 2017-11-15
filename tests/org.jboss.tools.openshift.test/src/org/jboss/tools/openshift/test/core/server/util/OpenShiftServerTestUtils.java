@@ -71,7 +71,7 @@ public class OpenShiftServerTestUtils {
 		return wc;
 	}
 
-	public static IServer mockServer(IResource resource, Connection connection)
+	public static IServer mockServer(IServerWorkingCopy workingCopy, IResource resource, Connection connection) 
 			throws UnsupportedEncodingException, MalformedURLException {
 		IServer server = mock(IServer.class);
 
@@ -82,13 +82,22 @@ public class OpenShiftServerTestUtils {
 
 		String resourceUniqueId = OpenShiftResourceUniqueId.get(resource);
 		doReturn(resourceUniqueId).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
-
+		doReturn(workingCopy).when(server).createWorkingCopy();
 		return server;
 	}
-	
+
+	public static IServer mockServer(IResource resource, Connection connection)
+			throws UnsupportedEncodingException, MalformedURLException {
+		return mockServer(mockServerWorkingCopy(), resource, connection);
+	}
+
 	public static IControllableServerBehavior mockServerBehaviour(IServer server) {
 		IControllableServerBehavior behaviour = mock(IControllableServerBehavior.class);
 		doReturn(server).when(behaviour).getServer();
 		return behaviour;
+	}
+
+	public static IServerWorkingCopy mockServerWorkingCopy() {
+		return mock(IServerWorkingCopy.class);
 	}
 }
