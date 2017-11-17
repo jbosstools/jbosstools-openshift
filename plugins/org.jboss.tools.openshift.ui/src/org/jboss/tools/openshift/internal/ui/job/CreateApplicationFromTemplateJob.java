@@ -13,7 +13,11 @@ import static org.jboss.tools.openshift.internal.ui.job.ResourceCreationJobUtils
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -21,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
+import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizard;
 
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.OpenShiftException;
@@ -28,6 +33,7 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IClientCapability;
 import com.openshift.restclient.capability.resources.IProjectTemplateProcessing;
+import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.template.IParameter;
@@ -45,21 +51,23 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 	private Collection<Label> labels;
 	private Collection<IParameter> parameters;
 	private Collection<IResource> resources;
+	private String buildConfigName;
 
 	public CreateApplicationFromTemplateJob(IProject project, ITemplate template) {
-		this(project, template, Collections.emptyList(), Collections.emptyList());
+		this(project, template, "", Collections.emptyList(),Collections.emptyList());
 	}
 
-	public CreateApplicationFromTemplateJob(IProject project, ITemplate template, Collection<IParameter> parameters,
-			Collection<Label> labels) {
+	public CreateApplicationFromTemplateJob(IProject project, ITemplate template, String buildConfigName, Collection<IParameter> parameters, Collection<Label> labels) {
 		super("Create Application From Template Job");
 		this.project = project;
 		this.template = template;
+		this.buildConfigName = buildConfigName;
 		this.labels = labels;
 		this.parameters = parameters;
 	}
 
-	@Override
+	@SuppressWarnings("serial")
+    @Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		template.updateParameterValues(parameters);
 		for (Label label : labels) {
@@ -70,28 +78,44 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 
 			@Override
 			public IStatus visit(IProjectTemplateProcessing capability) {
-
+				
 				try {
 					ITemplate processed = capability.process(template);
 					Collection<IResource> existing = findExistingResources(project, processed);
-					if (!existing.isEmpty()) {
+					if(!existing.isEmpty()) {
 						return createErrorStatusForExistingResources(existing);
 					}
 					parameters = processed.getParameters().values();
 					resources = capability.apply(processed);
 					return handleResponse(resources);
-				} catch (OpenShiftException e) {
+				}catch(OpenShiftException e) {
 					String message = e.getMessage();
-					if (e.getStatus() != null) {
+					if(e.getStatus() != null) {
 						message = e.getStatus().getMessage();
 					}
 					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, -1, message, e);
 				}
 			}
 
-		}, new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-				"Template processing is unsupported for this client and server combination.", null));
 
+		},
+		new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Template processing is unsupported for this client and server combination.", null));
+		
+//		if (resources != null) {
+//		    Collection<IResource> buildConfigs = resources.stream().filter(r -> ResourceKind.BUILD_CONFIG.equals(r.getKind())).collect(Collectors.toList());
+//		    if (!buildConfigs.isEmpty()) {
+//		        Optional<IResource> buildConfigToImport = buildConfigs.stream().filter(r -> this.buildConfigName.equals(r.getName())).findFirst();
+//		        if (buildConfigToImport.isPresent()) {
+//		            ArrayList<IBuildConfig> buildConfigList = new ArrayList<>();
+//		            buildConfigList.add((IBuildConfig)buildConfigToImport.get());
+//		            Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs = new HashMap<>();
+//		            projectsAndBuildConfigs.put(project, buildConfigList);
+//		            ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
+//		            wizard.init(workbench, selection);
+//		        }
+//		    }
+//		}
+		
 		return status;
 	}
 
@@ -109,7 +133,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 					try {
 						IResource found = client.get(resource.getKind(), resource.getName(), project.getName());
 						existing.add(found);
-					} catch (OpenShiftException e) {
+					}catch(OpenShiftException e) {
 						//this is expected if the resource is not found
 						//@TODO change to NotFoundException of some kind
 					}
@@ -118,7 +142,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 			}
 		}, new ArrayList<IResource>());
 	}
-
+	
 	/**
 	 * Get the list of parameters for this Job.  
 	 * The values
@@ -126,24 +150,25 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 	 * has been processed by the server.
 	 * @return
 	 */
-	public Collection<IParameter> getParameters() {
+	public Collection<IParameter> getParameters(){
 		return parameters;
 	}
-
+	
+	
 	@Override
-	public Collection<IResource> getResources() {
+	public Collection<IResource> getResources(){
 		return resources;
 	}
-
+	
 	private IStatus handleResponse(Collection<IResource> resources) {
 		int severity = IStatus.OK;
 		for (IResource resource : resources) {
-			if (resource.getKind() == ResourceKind.STATUS) {
+			if(resource.getKind() == ResourceKind.STATUS) {
 				severity = IStatus.WARNING;
 				break;
 			}
 		}
-		return new Status(severity, OpenShiftUIActivator.PLUGIN_ID, OK, "Resources created from template.", null);
+		return new Status(severity, OpenShiftUIActivator.PLUGIN_ID, OK,"Resources created from template.",null);
 	}
 
 }

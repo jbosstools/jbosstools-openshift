@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,14 +33,17 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPageModel;
+import org.jboss.tools.openshift.internal.ui.wizard.importapp.IGitCloningPageModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
 
 import com.openshift.restclient.IResourceFactory;
@@ -58,7 +62,9 @@ import com.openshift.restclient.model.template.ITemplate;
  * @author Andre Dietisheim
  *
  */
-public class NewApplicationWizardModel extends ResourceLabelsPageModel implements IApplicationSourceListPageModel {
+public class NewApplicationWizardModel 
+		extends ResourceLabelsPageModel 
+		implements IApplicationSourceListPageModel {
 
 	private Connection connection;
 	private IProject project;
@@ -73,21 +79,25 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 	private IResourceFactory resourceFactory;
 	private org.eclipse.core.resources.IProject eclipseProject;
 	private Comparator<ObservableTreeItem> comparator;
-
-	private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems,
+	private String cloneDestination;
+	
+	public NewApplicationWizardModel() {
+	    this.cloneDestination = EGitUIUtils.getEGitDefaultRepositoryPath();
+	}
+	
+	private void update(boolean useLocalAppSource, IProject selectedProject, List<ObservableTreeItem> projectItems, 
 			IApplicationSource appSource, String localAppSourceFilename, IStatus appSourceStatus) {
 		updateProjectItems(projectItems);
-		firePropertyChange(PROPERTY_PROJECT, this.project,
+		firePropertyChange(PROPERTY_PROJECT, this.project, 
 				this.project = selectedProject = getProjectOrDefault(selectedProject, projectItems));
-		firePropertyChange(PROPERTY_APP_SOURCES, this.projectTemplates,
+		firePropertyChange(PROPERTY_APP_SOURCES, this.projectTemplates, 
 				this.projectTemplates = getProjectTemplates(selectedProject, projectItems));
 		updateAppSourceStatus(appSourceStatus);
-		firePropertyChange(PROPERTY_USE_LOCAL_APP_SOURCE, this.useLocalAppSource,
-				this.useLocalAppSource = useLocalAppSource);
+		firePropertyChange(PROPERTY_USE_LOCAL_APP_SOURCE, this.useLocalAppSource, this.useLocalAppSource = useLocalAppSource);
 		updateSelectedAppSource(useLocalAppSource, appSource, localAppSource, localAppSourceFilename);
 	}
 
-	private void updateSelectedAppSource(boolean useLocalAppSource, IApplicationSource serverAppSource,
+	private void updateSelectedAppSource(boolean useLocalAppSource, IApplicationSource serverAppSource, 
 			IApplicationSource localAppSource, String localAppSourceFilename) {
 		IApplicationSource source;
 		if (useLocalAppSource) {
@@ -100,33 +110,32 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 		IApplicationSource oldSelectedAppSource = this.selectedAppSource;
 		this.localAppSourceFilename = localAppSourceFilename;
 		this.selectedAppSource = source;
-		firePropertyChange(PROPERTY_LOCAL_APP_SOURCE_FILENAME, oldLocalAppSourceFileName, this.localAppSourceFilename);
+        firePropertyChange(PROPERTY_LOCAL_APP_SOURCE_FILENAME, oldLocalAppSourceFileName, this.localAppSourceFilename);
 		firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, oldSelectedAppSource, this.selectedAppSource);
 	}
-
+	
 	private void updateLabels(IApplicationSource source) {
-		if (source != null && ResourceKind.TEMPLATE.equals(source.getKind())) {
+		if(source != null && ResourceKind.TEMPLATE.equals(source.getKind())) {
 			ITemplate template = (ITemplate) source.getSource();
 			setLabels(template.getObjectLabels());
 			return;
 		}
 		setLabels(Collections.emptyMap());
 	}
-
+	
 	private void updateAppSourceStatus(IStatus appSourceStatus) {
-		firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = appSourceStatus);
+	    firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = appSourceStatus);
 	}
-
+	
 	private void setLabels(Map<String, String> labelMap) {
-		if (labelMap == null)
-			return;
-		List<Label> labels = new ArrayList<>(labelMap.size());
-		for (Entry<String, String> entry : labelMap.entrySet()) {
+		if(labelMap == null) return;
+		List<Label> labels =  new ArrayList<>(labelMap.size());
+		for (Entry<String,String> entry : labelMap.entrySet()) {
 			labels.add(new Label(entry.getKey(), entry.getValue()));
 		}
 		setLabels(labels);
 	}
-
+	
 	private IApplicationSource getLocalAppSource(IProgressMonitor monitor, String filename) {
 		if (StringUtils.isBlank(filename)) {
 			return null;
@@ -138,27 +147,26 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 				return null;
 			}
 			try (InputStream input = createInputStream(filename, monitor)) {
-				resource = resourceFactory.create(input);
-				if (resource != null && !(resource instanceof ITemplate)) {
-					throw new NotATemplateException(resource.getKind());
-				}
-			}
+                resource = resourceFactory.create(input);
+                if(resource != null && !(resource instanceof ITemplate)) {
+                	throw new NotATemplateException(resource.getKind());
+                }
+            }
 		} catch (FileNotFoundException e) {
 			throw new OpenShiftException(e, NLS.bind("Could not find the file \"{0}\" to upload", filename));
 		} catch (IOException e) {
-			throw new OpenShiftException(e, NLS.bind("Error reading the file or URL \"{0}\" to upload", filename));
+            throw new OpenShiftException(e, NLS.bind("Error reading the file or URL \"{0}\" to upload", filename));
 		} catch (ResourceFactoryException | ClassCastException e) {
 			throw e;
 		}
-		switch (resource.getKind()) {
+		switch(resource.getKind()) {
 		case ResourceKind.TEMPLATE:
-			return new TemplateApplicationSource((ITemplate) resource);
+			return new TemplateApplicationSource((ITemplate)resource);
 		}
 		throw new OpenShiftException("Creating applications from local files is only allowed using a template");
 	}
-
-	private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject,
-			List<ObservableTreeItem> allProjects) {
+	
+	private List<ObservableTreeItem> getProjectTemplates(IProject selectedProject, List<ObservableTreeItem> allProjects) {
 		if (allProjects == null) {
 			return null;
 		}
@@ -181,7 +189,7 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 		this.projectItems.addAll(newItems);
 		firePropertyChange(PROPERTY_PROJECT_ITEMS, oldItems, this.projectItems);
 	}
-
+	
 	@Override
 	public void setServerAppSource(IApplicationSource appSource) {
 		update(false, this.project, this.projectItems, appSource, localAppSourceFilename, Status.OK_STATUS);
@@ -191,15 +199,15 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 	public IApplicationSource getServerAppSource() {
 		return serverAppSource;
 	}
+	
+    @Override
+    public void resetLocalAppSource() {
+        this.localAppSource = null;
+        firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, this.selectedAppSource, this.selectedAppSource = null);
+        firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = Status.OK_STATUS);
+    }
 
-	@Override
-	public void resetLocalAppSource() {
-		this.localAppSource = null;
-		firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, this.selectedAppSource, this.selectedAppSource = null);
-		firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = Status.OK_STATUS);
-	}
-
-	@Override
+    @Override
 	public IApplicationSource getSelectedAppSource() {
 		return selectedAppSource;
 	}
@@ -212,9 +220,10 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 	}
 
 	private IProject getDefaultProject(List<ObservableTreeItem> projects) {
-		if (projects == null || projects.size() == 0) {
+		if (projects == null 
+				|| projects.size() == 0) {
 			return null;
-		} else if (projects.size() == 1) {
+		} else if(projects.size() == 1) {
 			return (IProject) projects.get(0).getModel();
 		}
 		ObservableTreeItem[] items = projects.toArray(new ObservableTreeItem[projects.size()]);
@@ -226,8 +235,7 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 
 	@Override
 	public void setProject(IProject project) {
-		update(this.useLocalAppSource, project, this.projectItems, this.serverAppSource, this.localAppSourceFilename,
-				this.appSourceStatus);
+		update(this.useLocalAppSource, project, this.projectItems, this.serverAppSource, this.localAppSourceFilename, this.appSourceStatus);
 	}
 
 	@Override
@@ -248,8 +256,7 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 
 	@Override
 	public void setUseLocalAppSource(boolean useLocalTemplate) {
-		update(useLocalTemplate, this.project, this.projectItems, this.serverAppSource, this.localAppSourceFilename,
-				this.appSourceStatus);
+		update(useLocalTemplate, this.project, this.projectItems, this.serverAppSource, this.localAppSourceFilename, this.appSourceStatus);
 	}
 
 	@Override
@@ -258,17 +265,17 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 	}
 
 	public InputStream createInputStream(String filename, IProgressMonitor monitor) throws IOException {
-		if (OpenshiftUIConstants.URL_VALIDATOR.isValid(filename)) {
-			try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-				IStatus status = OpenshiftUIConstants.TRANSPORT_UTILITY.download(filename, filename, out, monitor);
-				if (!status.isOK()) {
-					throw new IOException(status.getMessage());
-				}
-				return new ByteArrayInputStream(out.toByteArray());
-			}
-		} else {
-			return new FileInputStream(filename);
-		}
+	    if (OpenshiftUIConstants.URL_VALIDATOR.isValid(filename)) {
+	        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+	            IStatus status = OpenshiftUIConstants.TRANSPORT_UTILITY.download(filename, filename, out, monitor);
+	            if (!status.isOK()) {
+	                throw new IOException(status.getMessage());
+	            }
+	            return new ByteArrayInputStream(out.toByteArray());
+	        }
+	    } else {
+	        return new FileInputStream(filename);
+	    }
 	}
 
 	@Override
@@ -280,35 +287,34 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 	public String getLocalAppSourceFileName() {
 		return this.localAppSourceFilename;
 	}
-
+	
 	/**
-	 * @return the appSourceStatus
-	 */
+     * @return the appSourceStatus
+     */
 	@Override
-	public IStatus getAppSourceStatus() {
-		return appSourceStatus;
-	}
+    public IStatus getAppSourceStatus() {
+        return appSourceStatus;
+    }
+	
+    @Override
+    public void loadAppSource(IProgressMonitor monitor) {
+        IStatus status = Status.OK_STATUS;
+        try {
+            if (useLocalAppSource) {
+                IApplicationSource source = getLocalAppSource(monitor, localAppSourceFilename);
+                updateSelectedAppSource(useLocalAppSource, serverAppSource, source, localAppSourceFilename);
+            }
+        } catch (OpenShiftException e) {
+            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, 
+            		NLS.bind("Could not load template from {0}: {1}", localAppSourceFilename, e.getLocalizedMessage()), e);
+        } catch (NotATemplateException e) {
+            status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, 
+            		NLS.bind("{0} is not a template: {1}", localAppSourceFilename, e.getLocalizedMessage()));
+        }
+        updateAppSourceStatus(status);
+    }
 
-	@Override
-	public void loadAppSource(IProgressMonitor monitor) {
-		IStatus status = Status.OK_STATUS;
-		try {
-			if (useLocalAppSource) {
-				IApplicationSource source = getLocalAppSource(monitor, localAppSourceFilename);
-				updateSelectedAppSource(useLocalAppSource, serverAppSource, source, localAppSourceFilename);
-			}
-		} catch (OpenShiftException e) {
-			status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID,
-					NLS.bind("Could not load template from {0}: {1}", localAppSourceFilename, e.getLocalizedMessage()),
-					e);
-		} catch (NotATemplateException e) {
-			status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID,
-					NLS.bind("{0} is not a template: {1}", localAppSourceFilename, e.getLocalizedMessage()));
-		}
-		updateAppSourceStatus(status);
-	}
-
-	@Override
+    @Override
 	public Connection getConnection() {
 		return connection;
 	}
@@ -346,27 +352,32 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 	public void setResourceFactory(IResourceFactory factory) {
 		this.resourceFactory = factory;
 	}
-
+	
 	protected void setProjectItems(List<ObservableTreeItem> projects) {
-		update(useLocalAppSource, findProject(this.project, projects), projects, serverAppSource,
+		update(useLocalAppSource, findProject(this.project, projects), projects, serverAppSource, 
 				localAppSourceFilename, this.appSourceStatus);
 	}
 
 	private IProject findProject(final IProject project, List<ObservableTreeItem> projects) {
-		if (project == null || CollectionUtils.isEmpty(projects)) {
+		if(project == null 
+				|| CollectionUtils.isEmpty(projects)) {
 			return null;
 		}
 
-		return (IProject) projects.stream().filter(item -> {
-			if (item.getModel() instanceof IProject) {
-				IProject p = (IProject) item.getModel();
-				if (p != null) {
-					boolean equals = ObjectUtils.equals(project, p);
-					return equals;
+		return (IProject) projects.stream()
+			.filter(item -> {
+				if(item.getModel() instanceof IProject) {
+					IProject p = (IProject) item.getModel();
+					if (p != null) {
+						boolean equals =  ObjectUtils.equals(project, p);
+						return equals;
+					}
 				}
-			}
-			return false;
-		}).findFirst().map(item -> item.getModel()).orElse(null);
+				return false;
+			})
+			.findFirst()
+			.map(item -> item.getModel())
+			.orElse(null);
 	}
 
 	@Override
@@ -378,10 +389,11 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 	public List<ObservableTreeItem> getAppSources() {
 		return this.projectTemplates;
 	}
-
+	
 	@Override
 	public boolean hasProjects() {
-		return projectItems != null && !projectItems.isEmpty();
+		return projectItems != null 
+				&& !projectItems.isEmpty();
 	}
 
 	@Override
