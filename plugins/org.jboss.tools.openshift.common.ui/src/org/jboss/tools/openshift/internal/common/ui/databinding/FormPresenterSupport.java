@@ -316,11 +316,12 @@ public class FormPresenterSupport {
 				ValidationStatusProvider validationStatusProvider = (ValidationStatusProvider) it
 						.next();
 				IObservableList targets = validationStatusProvider.getTargets();
-				targets
-						.removeListChangeListener(validationStatusProviderTargetsListener);
-				for (Iterator iter = targets.iterator(); iter.hasNext();) {
-					((IObservable) iter.next())
-							.removeChangeListener(uiChangeListener);
+				if( targets != null ) {
+					targets.removeListChangeListener(validationStatusProviderTargetsListener);
+					for (Iterator iter = targets.iterator(); iter.hasNext();) {
+						((IObservable) iter.next())
+								.removeChangeListener(uiChangeListener);
+					}
 				}
 			}
 			dbc.getValidationStatusProviders().removeListChangeListener(

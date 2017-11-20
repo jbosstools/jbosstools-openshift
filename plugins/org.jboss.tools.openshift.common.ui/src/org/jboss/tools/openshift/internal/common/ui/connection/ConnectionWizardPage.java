@@ -58,6 +58,7 @@ import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.connection.IConnectionFactory;
+import org.jboss.tools.openshift.common.core.connection.NewConnectionMarker;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
@@ -149,6 +150,8 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(connectionLabel);
 		Combo connectionCombo = new Combo(parent, SWT.BORDER | SWT.READ_ONLY);
+		// disable the connection combo if we're editing a connection or creating a new one from scratch
+		connectionCombo.setEnabled(pageModel.isAllowConnectionChange());
 		GridDataFactory.fillDefaults()
 				.span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(connectionCombo);
 		ComboViewer connectionComboViewer = new ComboViewer(connectionCombo);
@@ -189,6 +192,15 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		});
 		connectionFactoriesViewer.setInput(pageModel.getAllConnectionFactories());
+		
+		// Disable the server type when editing a connection
+		if( !pageModel.isAllowConnectionChange() && pageModel.getSelectedConnection() != null ) {
+			IConnection c = pageModel.getSelectedConnection();
+			if( !(c instanceof NewConnectionMarker)) {
+				connectionFactoryCombo.setEnabled(false);
+			}
+		}
+		
 		final IViewerObservableValue selectedServerType = ViewerProperties.singleSelection().observe(connectionFactoriesViewer);
 		ValueBindingBuilder
 				.bind(selectedServerType)
