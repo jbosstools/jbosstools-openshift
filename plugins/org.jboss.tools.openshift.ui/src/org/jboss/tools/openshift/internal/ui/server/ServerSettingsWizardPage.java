@@ -527,6 +527,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		browseSourceButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.FILL, SWT.CENTER)
+				.indent(10, SWT.DEFAULT)
 				.applyTo(browseSourceButton);		
 		browseSourceButton.addSelectionListener(onBrowseSource(browseSourceButton.getShell()));
 
