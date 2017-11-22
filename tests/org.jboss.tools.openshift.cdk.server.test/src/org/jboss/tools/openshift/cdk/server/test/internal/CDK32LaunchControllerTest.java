@@ -85,6 +85,8 @@ public class CDK32LaunchControllerTest {
 		
 		ILaunchConfigurationWorkingCopy wc = mock(ILaunchConfigurationWorkingCopy.class);
 		when(wc.getAttribute(any(String.class), any(String.class))).thenAnswer(AdditionalAnswers.returnsSecondArg());
+		when(wc.getName()).thenReturn("cdk-test-123");
+		
 		String userName = "Drumpf";
 		IPath msHome = CDKTestActivator.getDefault().getStateLocation().append("test927");
 		msHome.toFile().mkdirs();
@@ -118,6 +120,7 @@ public class CDK32LaunchControllerTest {
 		when(server.getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0])).thenReturn(CDK3Server.VIRTUALBOX);
 		when(server.getAttribute(CDK32Server.PROFILE_ID, (String)null)).thenReturn(CDK32Server.MINISHIFT_DEFAULT_PROFILE);
 		when(server.getAttribute(CDK3Server.MINISHIFT_FILE, (String) null)).thenReturn("/home/user/apps/minishift");
+		when(server.getName()).thenReturn("cdk-test-123");
 		
 		CDKServer cdk = mock(CDKServer.class);
 		when(server.loadAdapter(eq(CDKServer.class), any(IProgressMonitor.class))).thenReturn(cdk);
