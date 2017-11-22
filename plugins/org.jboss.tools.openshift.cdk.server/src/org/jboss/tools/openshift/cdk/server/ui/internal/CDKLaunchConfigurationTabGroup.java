@@ -29,12 +29,8 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 	 */
 	@Override
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
-		RefreshTab refresh = new RefreshTab();
-		refresh.setHelpContextId(IExternalToolsHelpContextIds.EXTERNAL_TOOLS_LAUNCH_CONFIGURATION_DIALOG_REFRESH_TAB);
 		EnvironmentTab env = createEnvironmentTab();
 		env.setHelpContextId(IExternalToolsHelpContextIds.EXTERNAL_TOOLS_LAUNCH_CONFIGURATION_DIALOG_ENVIRONMENT_TAB);
-		CommonTab common = new CommonTab();
-		common.setHelpContextId(IExternalToolsHelpContextIds.EXTERNAL_TOOLS_LAUNCH_CONFIGURATION_DIALOG_COMMON_TAB);
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
 				new ProgramMainTab() {
 					@Override
@@ -84,6 +80,10 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 						fileLocationButton= createPushButton(buttonComposite, ExternalToolsLaunchConfigurationMessages.ExternalToolsMainTab_Brows_e_File_System____4, null);
 						fileLocationButton.addSelectionListener(fListener);
 						addControlAccessibleListener(fileLocationButton, group.getText() + " " + fileLocationButton.getText()); //$NON-NLS-1$
+						
+						fileLocationButton.setVisible(false);
+						locationField.setEnabled(false);
+
 					}
 					protected void createWorkDirectoryComponent(Composite parent) {
 						super.createWorkDirectoryComponent(parent);
@@ -94,10 +94,7 @@ public class CDKLaunchConfigurationTabGroup extends AbstractLaunchConfigurationT
 					}
 					
 				},
-//			refresh,
-//			new ExternalToolsBuildTab(),
-			env,
-//			common
+			env
 		};
 		setTabs(tabs);
 	}
