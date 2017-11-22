@@ -10,8 +10,12 @@
  ******************************************************************************/ 
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 public class CDK3Server extends CDKServer {
 
@@ -63,5 +67,12 @@ public class CDK3Server extends CDKServer {
 	public String getPasswordEnvironmentKey() {
 		return getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK3_ENV_SUB_PASS_KEY);
 	}
-	
+	public String getMinishiftHome() {
+		String home = System.getProperty("user.home");
+		String defaultMinishiftHome = new File(home, CDKConstants.CDK_RESOURCE_DOTMINISHIFT).getAbsolutePath();
+		String msHome = getServer().getAttribute(CDK3Server.MINISHIFT_HOME, defaultMinishiftHome);
+		if( StringUtils.isEmpty(msHome))
+			msHome = defaultMinishiftHome;
+		return msHome;
+	}
 }
