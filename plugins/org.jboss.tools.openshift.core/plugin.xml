@@ -290,6 +290,15 @@
        <serverProfile
              id="openshift3.springboot"
              serverTypes="org.jboss.tools.openshift.server.type">
+          <subsystem
+                subsystem="publish.rsync.filesystem.springboot"
+                system="publish" />
+         <subsystem
+               subsystem="moduleDeployPath.xmlprefs.openshift"
+               system="moduleDeployPath" />
+         <subsystem
+               subsystem="modules.noop.default"
+               system="modules" />
           <description
                 description="A profile configured to publish to a local folder and rsync to a remote OpenShift pod based on SpringBoot starter."
                 name="openshift3.springboot">
