@@ -62,7 +62,7 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 		return status;
 	}
 
-	private MultiStatus syncUp(IProgressMonitor monitor) throws CoreException {
+	protected MultiStatus syncUp(IProgressMonitor monitor) throws CoreException {
 		// do rsync local to remote
 		final RSync rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
@@ -71,5 +71,4 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 		rsync.syncDirectoryToPods(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		return status;
 	}
-
 }

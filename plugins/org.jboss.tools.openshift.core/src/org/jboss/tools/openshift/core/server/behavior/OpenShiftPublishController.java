@@ -85,7 +85,8 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 				// This project is not a module, so we'll do a simple copy
 				publishMagicProjectSimpleCopy(getServer(), localDeploymentDirectory);
 			} else {
-				// This is a project-module which must be assembled and published (ie dynamic web, ear project, etc)
+				// This is a project-module which must be assembled and published (ie dynamic
+				// web, ear project, etc)
 				publishModule(IServer.PUBLISH_FULL, ServerBehaviourDelegate.ADDED, new IModule[] { projectModule },
 						monitor);
 			}
@@ -111,8 +112,8 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	}
 
 	private void publishMagicProjectSimpleCopy(IServer server, File localDeploymentDirectory) throws CoreException {
-		// TODO this is the dumb logic. If the magic project is in fact a 
-		// dynamic web project, we need to package it, not simply copy. 
+		// TODO this is the dumb logic. If the magic project is in fact a
+		// dynamic web project, we need to package it, not simply copy.
 		String sourcePath = OpenShiftServerUtils.getSourcePath(server);
 		if (StringUtils.isEmpty(sourcePath)) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory()
@@ -132,7 +133,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	}
 
 	private boolean modulesIncludesMagicProject(IServer server, IProject deployProject) {
-		// If we have no modules, OR the module list doesn't include magic project, 
+		// If we have no modules, OR the module list doesn't include magic project,
 		// we need to initiate a publish for the magic project
 		IModule[] all = server.getModules();
 		if (all != null) {
@@ -168,7 +169,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	}
 
 	private void loadPodPathIfEmpty(final IResource resource) throws CoreException {
-		// If the pod path is not set on the project yet, we can do that now 
+		// If the pod path is not set on the project yet, we can do that now
 		// to make future fetches faster
 		String podPath = OpenShiftServerUtils.getPodPath(getServer());
 		if (StringUtils.isEmpty(podPath)) {

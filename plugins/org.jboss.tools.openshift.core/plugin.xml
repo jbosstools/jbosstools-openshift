@@ -107,97 +107,88 @@
    		schema="schema/org.jboss.tools.openshift.core.routeChooser.exsd"/>
 	
 	<!-- Node.js Debugger integration -->
-    <extension-point id="org.jboss.tools.openshift.core.serverAdapterProfileDetector" name="Openshift Server Adapter Profile Detector" schema="schema/org.jboss.tools.openshift.core.serverAdapterProfileDetector.exsd"/>
+	<extension-point
+		id="org.jboss.tools.openshift.core.serverAdapterProfileDetector"
+		name="Openshift Server Adapter Profile Detector"
+		schema="schema/org.jboss.tools.openshift.core.serverAdapterProfileDetector.exsd"/>
    		
    		
    	<!-- Discovery Method for registry url -->
-    <extension-point id="org.jboss.tools.openshift.core.connection.registryprovider" name="registryprovider" schema="schema/org.jboss.tools.openshift.core.connection.registryprovider.exsd"/>
-   	
-   	<extension
-         point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
+    <extension-point
+		id="org.jboss.tools.openshift.core.connection.registryprovider"
+		name="registryprovider"
+		schema="schema/org.jboss.tools.openshift.core.connection.registryprovider.exsd"/>
+
+	<extension
+ 		point="org.jboss.ide.eclipse.as.wtp.core.serverSubsystem">
   
-     <!-- Launching (no-op with a quick poll) -->
-         <subsystem
-            system="launch"
-            id="launch.noop.openshift"
-            name="OpenShift Launch Controller"
-            class="org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController">
-            <properties>
-               <property
-                     key="default"
-                     value="true">
-               </property>
-            </properties>
-         </subsystem>
-         <subsystemMapping
-            id="launch.noop.openshift"
-            mappedId="launch.noop.openshift"
-            serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
+	<!-- server defaults -->
+		<subsystem
+			system="launch"
+			id="launch.noop.openshift"
+			name="OpenShift Launch Controller"
+			class="org.jboss.tools.openshift.core.server.behavior.OpenShiftLaunchController">
+			<properties>
+				<property
+					key="default"
+					value="true">
+				</property>
+			</properties>
+		</subsystem>
+		<subsystemMapping
+			id="launch.noop.openshift"
+			mappedId="launch.noop.openshift"
+			serverTypes="org.jboss.tools.openshift.server.type">
+		</subsystemMapping>
 
-     <!-- Shutdown -->
-         <subsystem
-            system="shutdown"
-            id="shutdown.openshift.default"
-            name="OpenShift Shutdown Controller"
-            class="org.jboss.tools.openshift.core.server.behavior.OpenShiftShutdownController">
-            <properties>
-               <property
-                     key="default"
-                     value="true">
-               </property>
-            </properties>
-         </subsystem>
-         <subsystemMapping
-            id="shutdown.openshift.default"
-            mappedId="shutdown.openshift.default"
-            serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
+		<subsystem
+			system="shutdown"
+			id="shutdown.openshift.default"
+			name="OpenShift Shutdown Controller"
+			class="org.jboss.tools.openshift.core.server.behavior.OpenShiftShutdownController">
+			<properties>
+				<property
+					key="default"
+					value="true">
+				</property>
+			</properties>
+		</subsystem>
+		<subsystemMapping
+			id="shutdown.openshift.default"
+			mappedId="shutdown.openshift.default"
+			serverTypes="org.jboss.tools.openshift.server.type">
+		</subsystemMapping>
          
-     <!-- Modules (no-op) for use by node-js -->
-         <subsystemMapping
-            id="modules.noop.default"
-            mappedId="modules.noop.default"
-            serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
-         <!-- wildfly-style module controller -->
-         <subsystemMapping
-            id="modules.state.wf.fs"
-            mappedId="modules.state.wf.fs"
-            serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
+		<subsystem
+			system="publish"
+			id="publish.rsync.filesystem"
+			name="Local Filesystem Publish with RSync"
+			class="org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController">
+			<properties>
+				<property
+					key="default"
+					value="true">
+				</property>
+			</properties>
+		</subsystem>
+		<subsystemMapping
+			id="publish.rsync.filesystem"
+			mappedId="publish.rsync.filesystem"
+			serverTypes="org.jboss.tools.openshift.server.type">
+		</subsystemMapping>
 
-    <!-- Publish Controller -->
-      <subsystem
-            system="publish"
-            id="publish.rsync.filesystem"
-            name="Local Filesystem Publish with RSync"
-            class="org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController">
-         <properties>
-            <property
-                  key="default"
-                  value="true">
-            </property>
-         </properties>
-      </subsystem>
-      <subsystemMapping
-            id="publish.rsync.filesystem"
-            mappedId="publish.rsync.filesystem"
-            serverTypes="org.jboss.tools.openshift.server.type">
-      </subsystemMapping>
-      
-      
+		<subsystemMapping
+			id="modules.noop.default"
+			mappedId="modules.noop.default"
+			serverTypes="org.jboss.tools.openshift.server.type">
+		</subsystemMapping>
 
-<!-- Other subsystems that are depended upon -->
-         
-     <!-- Local Filesystem -->         
          <subsystemMapping
             id="filesystem.local.default"
             mappedId="filesystem.local.default"
             serverTypes="org.jboss.tools.openshift.server.type">
          </subsystemMapping>
-         
-     <!-- deploymentOptions -->
+
          <subsystem
             system="deploymentOptions"
             id="deploymentOptions.openshift.metadata"
@@ -208,93 +199,126 @@
                      key="default"
                      value="true">
                </property>
-            </properties>
-         </subsystem>
-         <subsystemMapping
-            id="deploymentOptions.openshift.metadata"
-            mappedId="deploymentOptions.openshift.metadata"
-            serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
-         
-      <!-- moduleDeployPath -->
-         <subsystemMapping
-            id="moduleDeployPath.xmlprefs.default"
-            mappedId="moduleDeployPath.xmlprefs.openshift"
-            serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
-         
-         <subsystem
-            system="moduleDeployPath"
-            id="moduleDeployPath.xmlprefs.openshift.eap"
-            name="OpenShift Deploy Path for EAP applications"
-            class="org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapDeployPathController">
-         </subsystem>
+			</properties>
+		</subsystem>
+		<subsystemMapping
+			id="deploymentOptions.openshift.metadata"
+			mappedId="deploymentOptions.openshift.metadata"
+			serverTypes="org.jboss.tools.openshift.server.type">
+		</subsystemMapping>
+
+		<subsystemMapping
+			id="moduleDeployPath.xmlprefs.default"
+			mappedId="moduleDeployPath.xmlprefs.openshift"
+			serverTypes="org.jboss.tools.openshift.server.type" />
+
+		<subsystemMapping
+			id="module.restart.behavior.regex.default"
+			mappedId="module.restart.behavior.regex"
+            serverTypes="org.jboss.tools.openshift.server.type" />
+
+		<!-- eap -->
+		<subsystem
+			system="modules"
+			id="modules.state.openshift.wf.fs"
+			name="OpenShift Module Controller for EAP-style Filesystem Markers"
+			class="org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapModulesController" />
+		<subsystemMapping
+            id="modules.state.openshift.wf.fs"
+            mappedId="modules.state.openshift.wf.fs"
+            serverTypes="org.jboss.tools.openshift.server.type" />
+		<subsystem
+			system="moduleDeployPath"
+			id="moduleDeployPath.xmlprefs.openshift.eap"
+			name="OpenShift Deploy Path for EAP applications"
+			class="org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapDeployPathController" />
          <subsystemMapping
             id="moduleDeployPath.xmlprefs.openshift.eap"
             mappedId="moduleDeployPath.xmlprefs.openshift.eap"
-            serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
-         
-         <subsystem
-            system="modules"
-            id="modules.state.openshift.wf.fs"
-            name="OpenShift Module Controller for EAP-style Filesystem Markers"
-            class="org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapModulesController">
-         </subsystem>
+            serverTypes="org.jboss.tools.openshift.server.type" />
+		<subsystem
+			system="publish" 
+			id="publish.rsync.filesystem.eap"
+			name="Local Filesystem Publish with RSync for EAP"
+			class="org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapPublishController" />
+		<subsystemMapping
+			id="publish.rsync.filesystem.eap"
+			mappedId="publish.rsync.filesystem.eap"
+			serverTypes="org.jboss.tools.openshift.server.type" />
+
+		<!-- spring boot -->
+		<subsystem
+			system="publish"
+			id="publish.rsync.filesystem.springboot"
+			name="Local Filesystem Publish with RSync for SpringBoot"
+			class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootPublishController" />
          <subsystemMapping
-            id="modules.state.openshift.wf.fs"
-            mappedId="modules.state.openshift.wf.fs"
-            serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
-         <subsystem
-               class="org.jboss.tools.openshift.core.server.behavior.eap.OpenShiftEapPublishController"
-               id="publish.rsync.filesystem.eap"
-               name="Local Filesystem Publish with RSync for EAP"
-               system="publish">
-         </subsystem>
-         <subsystemMapping
-               id="publish.rsync.filesystem.eap"
-               mappedId="publish.rsync.filesystem.eap"
-               serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
-         <subsystem
-               class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootPublishController"
-               id="publish.rsync.filesystem.springboot"
-               name="Local Filesystem Publish with RSync for SpringBoot"
-               system="publish">
-         </subsystem>
-         <subsystemMapping
-               id="publish.rsync.filesystem.springboot"
-               mappedId="publish.rsync.filesystem.springboot"
-               serverTypes="org.jboss.tools.openshift.server.type">
-         </subsystemMapping>
+			id="publish.rsync.filesystem.springboot"
+			mappedId="publish.rsync.filesystem.springboot"
+			serverTypes="org.jboss.tools.openshift.server.type" />
+		<subsystem
+			system="modules"
+			id="modules.state.openshift.springboot.fs"
+			name="OpenShift Module Controller for SpringBoot-style Filesystem"
+			class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootModulesController" />
+		<subsystemMapping
+            id="modules.state.openshift.springboot.fs"
+            mappedId="modules.state.openshift.springboot.fs"
+            serverTypes="org.jboss.tools.openshift.server.type" />
    	</extension>
-   	
-   	
+
    	<extension
-          point="org.jboss.ide.eclipse.as.wtp.core.serverProfile">
-       <serverProfile id="openshift3" serverTypes="org.jboss.tools.openshift.server.type">
-       	  <description name="openshift3" description="A profile configured to publish to a local folder and rsync to a remote OpenShift"/>
-          <subsystem system="modules" subsystem="modules.noop.default"/>
-          <subsystem system="moduleDeployPath" subsystem="moduleDeployPath.xmlprefs.openshift"/>
-       </serverProfile>
-       <serverProfile id="openshift3.eap" serverTypes="org.jboss.tools.openshift.server.type">
-       	  <description name="openshift3.eap" description="A profile configured to publish to a local folder and rsync to a remote OpenShift running EAP"/>
-          <subsystem
-                subsystem="publish.rsync.filesystem.eap"
-                system="publish">
-          </subsystem>
-          <subsystem system="modules" subsystem="modules.state.openshift.wf.fs"/>
-          <subsystem system="moduleDeployPath" subsystem="moduleDeployPath.xmlprefs.openshift.eap"/>
-       </serverProfile>
+		point="org.jboss.ide.eclipse.as.wtp.core.serverProfile">
+
+		<!-- openshift -->
+		<serverProfile
+			id="openshift3"
+			serverTypes="org.jboss.tools.openshift.server.type">
+			<description
+				name="openshift3"
+				description="A profile configured to publish to a local folder and rsync to a remote OpenShift"/>
+			<subsystem
+				system="modules"
+				subsystem="modules.noop.default"/>
+			<subsystem
+				system="moduleDeployPath"
+				subsystem="moduleDeployPath.xmlprefs.openshift"/>
+		</serverProfile>
+
+		<!-- eap -->
+		<serverProfile 
+			id="openshift3.eap"
+			serverTypes="org.jboss.tools.openshift.server.type">
+			<description
+				name="openshift3.eap"
+				description="A profile configured to publish to a local folder and rsync to a remote OpenShift running EAP"/>
+			<subsystem
+                system="publish"
+                subsystem="publish.rsync.filesystem.eap"/>
+			<subsystem
+				system="modules"
+				subsystem="modules.state.openshift.wf.fs"/>
+			<subsystem
+				system="moduleDeployPath"
+				subsystem="moduleDeployPath.xmlprefs.openshift.eap"/>
+		</serverProfile>
+
        <serverProfile
              id="openshift3.springboot"
              serverTypes="org.jboss.tools.openshift.server.type">
-          <description
-                description="A profile configured to publish to a local folder and rsync to a remote OpenShift pod based on SpringBoot starter."
-                name="openshift3.springboot">
-          </description>
-       </serverProfile>
+			<description
+				description="A profile configured to publish to a local folder and rsync to a remote OpenShift pod based on SpringBoot starter."
+                name="openshift3.springboot" />
+			<subsystem
+				system="publish"
+				subsystem="publish.rsync.filesystem.springboot"/>
+			<subsystem
+				system="modules"
+				subsystem="modules.noop.default"/>
+			<subsystem
+				system="moduleDeployPath"
+				subsystem="moduleDeployPath.xmlprefs.openshift"/>
+		</serverProfile>
    	</extension>
     <extension
           point="org.jboss.tools.jmx.core.MBeanServerConnectionProvider">
@@ -320,7 +344,7 @@
           class="org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector">
     </detector>
     <detector
-          class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootApplicationProfileDetector">
+          class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootProfileDetector">
     </detector>
  </extension>
     

@@ -25,7 +25,7 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 		// TODO Check that the springboot-devtool mode is activated?
 		return super.canPublish();
 	}
-	
+
 	@Override
 	protected boolean treatAsBinaryModule(IModule[] module) {
 		return true;
