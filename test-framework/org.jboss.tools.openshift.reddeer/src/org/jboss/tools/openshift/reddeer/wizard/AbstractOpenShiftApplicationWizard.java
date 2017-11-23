@@ -31,6 +31,7 @@ import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.condition.CentralIsLoaded;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
@@ -45,10 +46,17 @@ public abstract class AbstractOpenShiftApplicationWizard {
 	
 	protected String server;
 	protected String username;
+	protected Connection connection;
 	
 	public AbstractOpenShiftApplicationWizard(String server, String username) {
 		this.server = server;
 		this.username = username;
+	}
+	
+	public AbstractOpenShiftApplicationWizard(Connection connection) {
+		this.connection = connection;
+		this.server = connection.getHost();
+		this.username = connection.getUsername();
 	}
 	
 	/**

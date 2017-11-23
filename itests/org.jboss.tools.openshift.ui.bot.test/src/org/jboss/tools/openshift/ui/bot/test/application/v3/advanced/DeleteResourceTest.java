@@ -17,13 +17,16 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.hamcrest.core.StringStartsWith;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
@@ -34,6 +37,7 @@ import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+@OpenPerspective(value=JBossPerspective.class)
 @OCBinary
 @RequiredBasicConnection
 @RequiredProject
@@ -41,27 +45,30 @@ import org.junit.Test;
 public class DeleteResourceTest extends AbstractTest  {
 
 	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
+	
+	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;
 
 	@BeforeClass
 	public static void waitForApplication() {
 		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.COMPLETE,
-				projectReq.getProjectName()), TimePeriod.getCustom(600), true);
+				projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.getCustom(600), true);
 
-		new WaitUntil(new AmountOfResourcesExists(Resource.POD, 2, projectReq.getProjectName()), TimePeriod.VERY_LONG,
+		new WaitUntil(new AmountOfResourcesExists(Resource.POD, 2, projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.VERY_LONG,
 				true);
 	}
 
 	@Test
 	public void testDeletePod() {
-		OpenShiftResource applicationPod = OpenShiftUtils.getOpenShiftPod(projectReq.getProjectName(),new StringStartsWith("eap-app-"));
+		OpenShiftResource applicationPod = OpenShiftUtils.getOpenShiftPod(projectReq.getProjectName(),new StringStartsWith("eap-app-"), connectionReq.getConnection());
 		String podName = applicationPod.getName();
 
 		applicationPod.delete();
 
 		try {
 			OpenShiftResourceExists openShiftResourceExists = new OpenShiftResourceExists(Resource.POD, podName,
-					ResourceState.UNSPECIFIED, projectReq.getProjectName());
+					ResourceState.UNSPECIFIED, projectReq.getProjectName(), connectionReq.getConnection());
 			new WaitWhile(openShiftResourceExists, TimePeriod.getCustom(15));
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("Application pod should be deleted at this point, but it it still present.");
@@ -100,14 +107,14 @@ public class DeleteResourceTest extends AbstractTest  {
 
 	private void deleteResourceAndAssert(Resource resource) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		OpenShiftResource rsrc = explorer.getOpenShift3Connection().getProject(projectReq.getProjectName())
+		OpenShiftResource rsrc = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName())
 				.getOpenShiftResources(resource).get(0);
 		String resourceName = rsrc.getName();
 		rsrc.delete();
 
 		try {
 			OpenShiftResourceExists openShiftResourceExists = new OpenShiftResourceExists(resource, resourceName,
-					ResourceState.UNSPECIFIED, projectReq.getProjectName());
+					ResourceState.UNSPECIFIED, projectReq.getProjectName(), connectionReq.getConnection());
 			new WaitWhile(openShiftResourceExists, TimePeriod.getCustom(15));
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("Route " + resource + " should be deleted at this point but it is still present.");

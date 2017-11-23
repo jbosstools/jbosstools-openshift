@@ -71,6 +71,11 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 		String password() default StringUtils.EMPTY;
 		
 		/**
+		 * the token to use when authenticating. If nothing is provided {@link DatastoreOS3#TOKEN} is used
+		 */
+		String token() default StringUtils.EMPTY;
+		
+		/**
 		 * whether the connection created by the requirement should be automatically deleted after test class, default false
 		 */
 		boolean cleanup() default false;
@@ -81,13 +86,19 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 		String server = TestUtils.getValueOrDefault(connectionSpec.server(), DatastoreOS3.SERVER);
 		String username = TestUtils.getValueOrDefault(connectionSpec.username(), DatastoreOS3.USERNAME);
 		String password = TestUtils.getValueOrDefault(connectionSpec.password(), DatastoreOS3.PASSWORD);
+		String token = TestUtils.getValueOrDefault(connectionSpec.token(), DatastoreOS3.TOKEN);
 
 		try {
-			ConnectionURL url = getConnectionURL(username, server);
+			ConnectionURL url;
+			if (StringUtils.isNotEmpty(password) && StringUtils.isNotEmpty(username)) {
+				url = getConnectionURL(username, server);
+			} else {
+				url = getConnectionURL(server);
+			}
 			Connection connection = ConnectionsRegistrySingleton.getInstance().getByUrl(url, Connection.class);
 			if (connection == null) {
 				LOGGER.debug(NLS.bind("No connection for {0} found. Creating a new one.", url));
-				connection = createConnection(server, username, password);
+				connection = createConnection(server, username, password, token);
 				ConnectionsRegistrySingleton.getInstance().add(connection);
 			}
 			LOGGER.debug(NLS.bind("Connecting to OpenShift 3 server at {0}", url));
@@ -97,18 +108,39 @@ public class OpenShiftConnectionRequirement implements Requirement<RequiredBasic
 			throw new OpenShiftToolsException(NLS.bind("Could not create connection for {0} : {1}", server, e));
 		}
 	}
+	
+	private ConnectionURL getConnectionURL(String server) throws UnsupportedEncodingException, MalformedURLException {
+		return ConnectionURL.forURL(server);	
+	}
 
 	private ConnectionURL getConnectionURL(String username, String server) throws UnsupportedEncodingException, MalformedURLException {
 		return ConnectionURL.forUsernameAndHost(username, server);
 	}
 
-	private Connection createConnection(String server, String username, String password) throws MalformedURLException {
+	private Connection createConnection(String server, String username, String password, String token) {
+		if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
+			return createConnectionWithCredentials(server,username,password);
+		} else {
+			return createConnectionWithToken(server,token);
+		}
+	}
+	
+	private Connection createConnectionWithCredentials(String server, String username, String password) {
 		IClient client = createClient(server);
 		Connection connection = new Connection(client, null);
 		connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
 		connection.setUsername(username);
 		connection.setPassword(password);
-
+		return connection;
+	}
+	
+	private Connection createConnectionWithToken(String server, String token) {
+		IClient client = createClient(server);
+		Connection connection = new Connection(client, null);
+		connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_OAUTH);
+		connection.setUsername(connection.getUsername());
+		connection.setToken(token);
+		connection.refresh();
 		return connection;
 	}
 

@@ -78,7 +78,6 @@ import org.junit.runner.RunWith;
 @CleanConnection
 @RunWith(RedDeerSuite.class)
 public class DeployDockerImageTest extends AbstractTest {
-	
 	private static final Logger LOGGER = new Logger(DeployDockerImageTest.class);
 	
 	@InjectRequirement
@@ -247,13 +246,13 @@ public class DeployDockerImageTest extends AbstractTest {
 				openshiftConnectionRequirement.getConnection()).refresh();
 		try {
 			new WaitUntil(new OpenShiftResourceExists(Resource.POD, new StringContains("hello-openshift"),
-				ResourceState.RUNNING, projectName), TimePeriod.VERY_LONG);
+				ResourceState.RUNNING, projectName, openshiftConnectionRequirement.getConnection()), TimePeriod.VERY_LONG);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("There should be a running application pod for a deployed docker image, "
 					+ "but it does not exist.");
 		}
-		new OpenShiftExplorerView().getOpenShift3Connection().refresh();	
-		new OpenShiftExplorerView().getOpenShift3Connection().getProject(projectName).
+		new OpenShiftExplorerView().getOpenShift3Connection(openshiftConnectionRequirement.getConnection()).refresh();	
+		new OpenShiftExplorerView().getOpenShift3Connection(openshiftConnectionRequirement.getConnection()).getProject(projectName).
 				getOpenShiftResources(Resource.ROUTE).get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.SHOW_IN_BROWSER).select();
 		try {

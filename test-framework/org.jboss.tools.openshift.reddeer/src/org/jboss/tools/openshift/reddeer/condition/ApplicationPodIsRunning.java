@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.reddeer.condition;
 import java.util.List;
 
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
@@ -39,11 +40,13 @@ public class ApplicationPodIsRunning extends AbstractWaitCondition {
 	 * are excluded from list of suitable applications pods. Be aware
 	 * that if there is a pod having one of that key words condition is 
 	 * not met. 
+	 * 
+	 * @param connection connection to OpenShift
 	 */
-	public ApplicationPodIsRunning() {
+	public ApplicationPodIsRunning(Connection connection) {
 		OpenShiftExplorerView explorer  = new OpenShiftExplorerView();
 		explorer.open();
-		this.project = explorer.getOpenShift3Connection().getProject();
+		this.project = explorer.getOpenShift3Connection(connection).getProject();
 	}
 
 	public ApplicationPodIsRunning(OpenShiftProject project) {

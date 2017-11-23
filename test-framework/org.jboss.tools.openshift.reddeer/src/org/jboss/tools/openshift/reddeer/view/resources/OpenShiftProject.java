@@ -28,7 +28,6 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
@@ -38,7 +37,7 @@ public class OpenShiftProject extends AbstractOpenShiftExplorerItem {
 	
 	public OpenShiftProject(TreeItem projectItem) {
 		super(projectItem);
-		projectName = treeViewerHandler.getNonStyledText(item);
+		this.projectName = treeViewerHandler.getNonStyledText(item);
 	}
 	
 	public String getName() {
@@ -158,8 +157,6 @@ public class OpenShiftProject extends AbstractOpenShiftExplorerItem {
 		
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.DELETE_OS_PROJECT), TimePeriod.LONG);
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
-		
-		new WaitWhile(new OpenShiftProjectExists(projectName), TimePeriod.LONG);
 	}
 	
 	/**

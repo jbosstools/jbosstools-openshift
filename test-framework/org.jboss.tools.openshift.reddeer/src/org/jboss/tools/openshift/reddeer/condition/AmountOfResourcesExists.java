@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.reddeer.condition;
 
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
@@ -21,17 +22,18 @@ public class AmountOfResourcesExists extends AbstractWaitCondition {
 	private OpenShiftProject project;
 	private Resource resource;
 	private int amount;
+	private Connection connection;
 	
-	public AmountOfResourcesExists(Resource resource, int amount) {
-		this(resource, amount, null);
+	public AmountOfResourcesExists(Resource resource, int amount, Connection connection) {
+		this(resource, amount, null, connection);
 	}
 
-	public AmountOfResourcesExists(Resource resource, int amount, String projectName) {
+	public AmountOfResourcesExists(Resource resource, int amount, String projectName, Connection connection) {
 		explorer = new OpenShiftExplorerView();
 		if (projectName == null) {
-			this.project = explorer.getOpenShift3Connection().getProject();
+			this.project = explorer.getOpenShift3Connection(connection).getProject();
 		}else {
-			this.project = explorer.getOpenShift3Connection().getProject(projectName);
+			this.project = explorer.getOpenShift3Connection(connection).getProject(projectName);
 		}
 		this.resource = resource;
 		this.amount = amount;
@@ -41,7 +43,7 @@ public class AmountOfResourcesExists extends AbstractWaitCondition {
 	public boolean test() {
 		// workaround for disposed project
 		if (project.getTreeItem().isDisposed()) {
-			project = explorer.getOpenShift3Connection().getProject();
+			project = explorer.getOpenShift3Connection(connection).getProject();
 		}
 		
 		return project.getOpenShiftResources(resource).size() == amount;

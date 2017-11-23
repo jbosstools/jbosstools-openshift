@@ -42,13 +42,13 @@ import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsKilled;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
-import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
@@ -73,6 +73,9 @@ public class ServerAdapterWizardHandlingTest extends AbstractTest  {
 	private static final String GIT_REPO_DIRECTORY = "target/git_repo";
 	
 	@InjectRequirement
+	private OpenShiftConnectionRequirement connectionReq;
+	
+	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;
 	
 	@BeforeClass
@@ -89,7 +92,7 @@ public class ServerAdapterWizardHandlingTest extends AbstractTest  {
 		openNewServerAdapterWizard();
 
 		assertTrue("There should be preselected an existing OpenShift 3 connection in new server adapter wizard.",
-				new LabeledCombo(OpenShiftLabel.TextLabels.CONNECTION).getSelection().contains(DatastoreOS3.USERNAME));
+				new LabeledCombo(OpenShiftLabel.TextLabels.CONNECTION).getSelection().contains(connectionReq.getConnection().getUsername()));
 	}
 
 	@Test

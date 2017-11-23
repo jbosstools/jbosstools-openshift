@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
 import org.hamcrest.Matcher;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
@@ -42,9 +43,10 @@ public class ResourceIsUpdated extends AbstractWaitCondition {
 	 * @param resourceName resource name
 	 * @param propertyName resource property name
 	 * @param propertyValueMatcher resource property value matcher
+	 * @param connection connection to OpenShift
 	 */
 	public ResourceIsUpdated(String project, Resource resourceType, String resourceName,
-			String[] propertyName, Matcher<String> propertyValueMatcher) {
+			String[] propertyName, Matcher<String> propertyValueMatcher, Connection connection) {
 
 		this.propertyName = propertyName;
 		this.propertyValueMatcher = propertyValueMatcher;
@@ -52,7 +54,7 @@ public class ResourceIsUpdated extends AbstractWaitCondition {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		new PropertySheet().open();
 		explorer.open();
-		List<OpenShiftResource> resources = explorer.getOpenShift3Connection().
+		List<OpenShiftResource> resources = explorer.getOpenShift3Connection(connection).
 				getProject(project).getOpenShiftResources(resourceType, true);
 		for (OpenShiftResource resource: resources) {
 			if (resource.getName().equals(resourceName)) {

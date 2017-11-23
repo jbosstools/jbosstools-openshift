@@ -23,6 +23,7 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
@@ -40,6 +41,8 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @RequiredProject
 public class OpenNewApplicationWizardTest extends AbstractTest {
+	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
 	
 	@InjectRequirement
 	OpenShiftProjectRequirement projectReq;
@@ -47,19 +50,19 @@ public class OpenNewApplicationWizardTest extends AbstractTest {
 	@Test
 	public void testOpenNewApplicationWizardViaCentral() {
 		Assume.assumeTrue(centralIsAvailable());
-		new NewOpenShift3ApplicationWizard().openWizardFromCentral();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromCentral();
 		closeWizard();
 	}
 
 	@Test
 	public void testOpenNewApplicationWizardViaShellMenu() {
-		new NewOpenShift3ApplicationWizard().openWizardFromShellMenu();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromShellMenu();
 		closeWizard();
 	}
 	
 	@Test
 	public void testOpenNewApplicationWizardViaOpenShiftExplorer() {
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer(projectReq.getProject().getDisplayName());
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(projectReq.getProject().getDisplayName());
 		closeWizard();
 	}
 	

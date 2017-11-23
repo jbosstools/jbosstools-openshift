@@ -37,6 +37,7 @@ import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
@@ -78,16 +79,19 @@ public class PublishChangesTest extends AbstractTest  {
 	private static final String PROJECT_NAME = "helloworld";
 	
 	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
+	
+	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;
 	
 	@BeforeClass	
 	public static void waitForRunningApplication() {
 		new ProjectExplorer().deleteAllProjects(true);
-		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.COMPLETE, projectReq.getProjectName()),
+		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.COMPLETE, projectReq.getProjectName(), connectionReq.getConnection()),
 				TimePeriod.getCustom(1000));
 		
 		OpenShiftExplorerView openShiftExplorerView = new OpenShiftExplorerView();
-		OpenShiftProject project = openShiftExplorerView.getOpenShift3Connection().getProject(projectReq.getProjectName());
+		OpenShiftProject project = openShiftExplorerView.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName());
 		new WaitUntil(new ApplicationPodIsRunning(project), TimePeriod.LONG);
 		cloneGitRepoAndImportProject();
 	}
@@ -107,7 +111,7 @@ public class PublishChangesTest extends AbstractTest  {
 	
 	private void createServerAdapter() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getServicesWithName("eap-app").get(0).createServerAdapter();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getServicesWithName("eap-app").get(0).createServerAdapter();
 	}
 	
 	private void changeProjectAndVerifyAutoPublish() {

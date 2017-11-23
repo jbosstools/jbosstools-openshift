@@ -28,28 +28,21 @@ public class OpenShiftProjectExists extends AbstractWaitCondition {
 	 * as a project name in OpenShift Explorer view.
 	 * 
 	 * @param projectName project name
-	 * @param projectDisplayedName project displayed name
+	 * @param connection connection to OpenShift
 	 */
-	public OpenShiftProjectExists(String projectName) {
-		this(projectName, null);
-	}
-	
 	public OpenShiftProjectExists(String projectName, Connection connection) {
 		this.projectName = projectName;
 		
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		if (connection == null) {
-			this.connection = explorer.getOpenShift3Connection();
-		} else {
-			this.connection = explorer.getOpenShift3Connection(connection);
-		}
+		this.connection = explorer.getOpenShift3Connection(connection);
+
 	}
 
 	/**
 	 * Creates condition OpenShift project exists for a project defined in {@link DatastoreOS3} as first one.
 	 */
-	public OpenShiftProjectExists() {
-		this(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
+	public OpenShiftProjectExists(Connection connection) {
+		this(DatastoreOS3.PROJECT1_DISPLAYED_NAME, connection);
 	}
 	
 	@Override

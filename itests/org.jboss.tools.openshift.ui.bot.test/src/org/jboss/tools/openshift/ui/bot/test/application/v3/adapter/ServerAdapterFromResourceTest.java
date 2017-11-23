@@ -46,6 +46,7 @@ import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionReq
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
@@ -83,13 +84,16 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 	private ServerAdapter adapter;
 	
 	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
+	
+	@InjectRequirement
 	private OpenShiftServiceRequirement serviceReq;
 	
 	@BeforeClass
 	public static void importProject() {
 		explorer = new OpenShiftExplorerView();
 		explorer.open();
-		project = explorer.getOpenShift3Connection().getProject(DatastoreOS3.TEST_PROJECT);
+		project = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(DatastoreOS3.TEST_PROJECT);
 		project.getServicesWithName(OpenShiftResources.NODEJS_SERVICE).get(0).select();
 		
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
@@ -114,7 +118,7 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 			appWizard.finish();
 		}
 		
-		new WaitUntil(new OpenShiftResourceExists(Resource.DEPLOYMENT, OpenShiftResources.NODEJS_APP_REPLICATION_CONTROLLER, ResourceState.UNSPECIFIED, DatastoreOS3.TEST_PROJECT), TimePeriod.LONG);
+		new WaitUntil(new OpenShiftResourceExists(Resource.DEPLOYMENT, OpenShiftResources.NODEJS_APP_REPLICATION_CONTROLLER, ResourceState.UNSPECIFIED, DatastoreOS3.TEST_PROJECT, connectionReq.getConnection()), TimePeriod.LONG);
 	}	
 	
 	@After

@@ -63,7 +63,6 @@ import org.junit.runner.RunWith;
 template=OpenShiftResources.NODEJS_TEMPLATE)
 
 public class EditResourceLimitsTest extends AbstractTest {
-
 	@InjectRequirement
 	private OpenShiftProjectRequirement requiredProject;
 	@InjectRequirement
@@ -113,7 +112,7 @@ public class EditResourceLimitsTest extends AbstractTest {
 		incrementLimits(index, defaultSuffix);
 		new WaitUntil(new ResourceIsUpdated(project.getName(), Resource.DEPLOYMENT_CONFIG,
 				      OpenShiftResources.NODEJS_APP_DEPLOYMENT_CONFIG, new String[] {"Basic", "Resource Version"},
-				      not(version)), TimePeriod.getCustom(800));
+				      not(version), requiredConnection.getConnection()), TimePeriod.getCustom(800));
 	}
 
 	private void incrementLimits(int index, String defaultSuffix) {

@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
@@ -30,11 +31,24 @@ public class ConnectionUtils {
 	public static Connection getConnectionOrDefault(String connectionUrl) {
 		if (!StringUtils.isBlank(connectionUrl)) {
 			return getConnection(connectionUrl);
-		} else {
+		} else if (StringUtils.isNotEmpty(DatastoreOS3.USERNAME) && StringUtils.isNotEmpty(DatastoreOS3.SERVER)) {
+			//Used for Basic connection
 			return getConnection(DatastoreOS3.USERNAME, DatastoreOS3.SERVER);
+		} else {
+			//Used for OAuth connection
+			return getConnection();
 		}
 	}
 	
+	private static Connection getConnection() {
+		for (IConnection connection : ConnectionsRegistrySingleton.getInstance().getAll(Connection.class)) {
+			if (DatastoreOS3.SERVER.contains(connection.getHost())) {
+				return (Connection) connection;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Returns a connection for the given connection url (@see {@link ConnectionURL}. ex. https://adietish@10.1.2.2:8443).
 	 * @param connectionUrlString

@@ -17,7 +17,7 @@ import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.combo.DefaultCombo;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.wizard.AbstractOpenShiftApplicationWizard;
@@ -33,8 +33,8 @@ import org.jboss.tools.openshift.reddeer.wizard.AbstractOpenShiftApplicationWiza
  */
 public class NewOpenShift3ApplicationWizard extends AbstractOpenShiftApplicationWizard {
 
-	public NewOpenShift3ApplicationWizard() {
-		super(DatastoreOS3.SERVER, DatastoreOS3.USERNAME);
+	public NewOpenShift3ApplicationWizard(Connection connection) {
+		super(connection);
 	}
 	
 	public void openWizardFromExplorer() {
@@ -60,9 +60,9 @@ public class NewOpenShift3ApplicationWizard extends AbstractOpenShiftApplication
 
 	private void selectExplorerProject(String project, OpenShiftExplorerView explorer) {
 		if (StringUtils.isEmpty(project)) {
-			explorer.getOpenShift3Connection().getProject().select();
+			explorer.getOpenShift3Connection(this.connection).getProject().select();
 		} else {
-			explorer.getOpenShift3Connection().getProject(project).select();
+			explorer.getOpenShift3Connection(this.connection).getProject(project).select();
 		}
 	}
 

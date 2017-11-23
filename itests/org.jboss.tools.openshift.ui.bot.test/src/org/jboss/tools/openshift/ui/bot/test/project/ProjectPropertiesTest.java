@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.reddeer.eclipse.ui.views.properties.PropertySheetProperty;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.TreeItem;
@@ -26,6 +27,7 @@ import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
@@ -55,12 +57,15 @@ public class ProjectPropertiesTest extends AbstractTest {
 	private PropertySheet propertiesView;
 	private OpenShiftProject project;
 	
+	@InjectRequirement
+	private OpenShiftConnectionRequirement connectionReq;
+	
 	@Before
 	public void setUp() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
 		
-		OpenShift3Connection connection = explorer.getOpenShift3Connection();
+		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		project = connection.getProject(DatastoreOS3.TEST_PROJECT);
 		project.select();
 		project.openProperties();

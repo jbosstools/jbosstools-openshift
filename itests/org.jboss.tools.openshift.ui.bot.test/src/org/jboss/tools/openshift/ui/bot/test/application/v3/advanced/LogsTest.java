@@ -87,12 +87,12 @@ public class LogsTest extends AbstractTest {
 
 	@Test
 	public void shouldShowLogFromApplicationPodContextMenu() {
-		new WaitUntil(new OpenShiftResourceExists(Resource.POD, new StringStartsWith("eap-app-"), ResourceState.RUNNING, requiredProject.getProjectName()), TimePeriod.VERY_LONG);
+		new WaitUntil(new OpenShiftResourceExists(Resource.POD, new StringStartsWith("eap-app-"), ResourceState.RUNNING, requiredProject.getProjectName(), requiredConnection.getConnection()), TimePeriod.VERY_LONG);
 		
 		this.consoleView = new ConsoleView();
 		this.consoleView.open();
 		
-		OpenShiftResource pod  = OpenShiftUtils.getOpenShiftPod(requiredProject.getProjectName(),new StringStartsWith("eap-app-"));
+		OpenShiftResource pod  = OpenShiftUtils.getOpenShiftPod(requiredProject.getProjectName(),new StringStartsWith("eap-app-"), requiredConnection.getConnection());
 		String podName = pod.getName();
 		pod.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.POD_LOG).select();
@@ -108,12 +108,12 @@ public class LogsTest extends AbstractTest {
 
 	@Test
 	public void shouldShowLogFromBuildPodContextMenu() {
-		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, new StringStartsWith("eap-app-"), ResourceState.RUNNING, requiredProject.getProjectName()), TimePeriod.VERY_LONG);
+		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, new StringStartsWith("eap-app-"), ResourceState.RUNNING, requiredProject.getProjectName(), requiredConnection.getConnection()), TimePeriod.VERY_LONG);
 		
 		this.consoleView = new ConsoleView();
 		this.consoleView.open();
 		
-		OpenShiftResource pod = OpenShiftUtils.getOpenShiftPod(requiredProject.getProjectName(), Resource.BUILD, new StringStartsWith("eap-app-"));
+		OpenShiftResource pod = OpenShiftUtils.getOpenShiftPod(requiredProject.getProjectName(), Resource.BUILD, new StringStartsWith("eap-app-"), requiredConnection.getConnection());
 		String podName = pod.getName();
 		pod.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.BUILD_LOG).select();

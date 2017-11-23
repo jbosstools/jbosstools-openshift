@@ -45,6 +45,7 @@ import org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
 import org.jboss.tools.common.reddeer.utils.FileUtils;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -58,19 +59,19 @@ import org.jboss.tools.openshift.reddeer.wizard.server.ServerSettingsWizard;
 
 public class OpenShiftUtils {
 	
-	public static OpenShiftResource getOpenShiftPod(String projectName, String podName) {
-		return getOpenShiftPod(projectName, new IsEqual<String>(podName));
+	public static OpenShiftResource getOpenShiftPod(String projectName, String podName, Connection connection) {
+		return getOpenShiftPod(projectName, new IsEqual<String>(podName), connection);
 	}
 	
-	public static OpenShiftResource getOpenShiftPod(String projectName, Matcher<String> matcher) {
-		return getOpenShiftPod(projectName, Resource.POD, matcher);
+	public static OpenShiftResource getOpenShiftPod(String projectName, Matcher<String> matcher, Connection connection) {
+		return getOpenShiftPod(projectName, Resource.POD, matcher, connection);
 	}
 	
-	public static OpenShiftResource getOpenShiftPod(String projectName, Resource resource, Matcher<String> matcher) {
+	public static OpenShiftResource getOpenShiftPod(String projectName, Resource resource, Matcher<String> matcher, Connection connection) {
 		assertTrue(!StringUtils.isBlank(projectName));
 
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		List<OpenShiftResource> pods = explorer.getOpenShift3Connection().getProject(projectName)
+		List<OpenShiftResource> pods = explorer.getOpenShift3Connection(connection).getProject(projectName)
 				.getOpenShiftResources(resource);
 		for (OpenShiftResource pod : pods) {
 				if (matcher.matches(pod.getName())) {
@@ -81,29 +82,29 @@ public class OpenShiftUtils {
 		return null;
 	}
 
-	public static OpenShiftProject getOpenShiftProject(String projectName) {
+	public static OpenShiftProject getOpenShiftProject(String projectName, Connection connection) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		OpenShiftProject project = explorer.getOpenShift3Connection().getProject(projectName);
+		OpenShiftProject project = explorer.getOpenShift3Connection(connection).getProject(projectName);
 		assertThat("Could not find project " + projectName + " in OpenShift Explorer",  project, notNullValue());
 		project.expand();
 		return project;
 	}
 	
-	public static void deleteAllProjects() {
+	public static void deleteAllProjects(Connection connection) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		explorer.getOpenShift3Connection().refresh();
+		explorer.getOpenShift3Connection(connection).refresh();
 		new WaitWhile(new JobIsRunning());
-		List<OpenShiftProject> projects = explorer.getOpenShift3Connection().getAllProjects();
+		List<OpenShiftProject> projects = explorer.getOpenShift3Connection(connection).getAllProjects();
 		for (OpenShiftProject project : projects) {
 			if (project != null) {
 				String projectName = project.getName();
 				try {
 					project.delete();
-					new WaitWhile(new OpenShiftProjectExists(projectName), TimePeriod.LONG);
+					new WaitWhile(new OpenShiftProjectExists(projectName, connection), TimePeriod.LONG);
 				} catch (CoreLayerException ex) {
 					// project does not exist - project has been deleted but view has not been
 					// refreshed
-					explorer.getOpenShift3Connection().refresh();
+					explorer.getOpenShift3Connection(connection).refresh();
 				}
 			}
 		}

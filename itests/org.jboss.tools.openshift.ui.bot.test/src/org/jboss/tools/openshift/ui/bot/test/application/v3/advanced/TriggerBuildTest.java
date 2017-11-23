@@ -19,14 +19,17 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.hamcrest.Matcher;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -37,13 +40,16 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.Test;
 
-
+@OpenPerspective(value=JBossPerspective.class)
 @OCBinary
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
 public class TriggerBuildTest extends AbstractTest {
 
+	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
+	
 	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;
 
@@ -53,22 +59,22 @@ public class TriggerBuildTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.reopen();
 		
-		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD_CONFIG, (Matcher<String>) null, ResourceState.UNSPECIFIED, projectReq.getProjectName()), 
+		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD_CONFIG, (Matcher<String>) null, ResourceState.UNSPECIFIED, projectReq.getProjectName(), connectionReq.getConnection()), 
 				TimePeriod.getCustom(120), true);
 		
-		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.UNSPECIFIED, projectReq.getProjectName()), 
+		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.UNSPECIFIED, projectReq.getProjectName(), connectionReq.getConnection()), 
 				TimePeriod.LONG, true);
 		
-		List<OpenShiftResource> builds = explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).
+		List<OpenShiftResource> builds = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).
 				getOpenShiftResources(Resource.BUILD);
 		int oldAmountOfBuilds = builds.size();
 		
-		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getOpenShiftResources(Resource.BUILD_CONFIG).get(0).select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getOpenShiftResources(Resource.BUILD_CONFIG).get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.START_BUILD).select();
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		try {
-			new WaitUntil(new AmountOfResourcesExists(Resource.BUILD, oldAmountOfBuilds + 1, projectReq.getProjectName()), TimePeriod.LONG);
+			new WaitUntil(new AmountOfResourcesExists(Resource.BUILD, oldAmountOfBuilds + 1, projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.LONG);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("New build was not triggered altough it should be.");
 		}
@@ -79,10 +85,10 @@ public class TriggerBuildTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.reopen();
 		
-		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, (Matcher<String>) null, ResourceState.UNSPECIFIED, projectReq.getProjectName()), 
+		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, (Matcher<String>) null, ResourceState.UNSPECIFIED, projectReq.getProjectName(), connectionReq.getConnection()), 
 					TimePeriod.getCustom(240), true);
 		
-		List<OpenShiftResource> builds = explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).
+		List<OpenShiftResource> builds = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).
 				getOpenShiftResources(Resource.BUILD);
 		builds.get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.CLONE_BUILD).select();
@@ -91,7 +97,7 @@ public class TriggerBuildTest extends AbstractTest {
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		try {
-			new WaitUntil(new AmountOfResourcesExists(Resource.BUILD, oldAmountOfBuilds + 1, projectReq.getProjectName()),
+			new WaitUntil(new AmountOfResourcesExists(Resource.BUILD, oldAmountOfBuilds + 1, projectReq.getProjectName(), connectionReq.getConnection()),
 					TimePeriod.LONG);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("New build was not triggered altough it should be.");

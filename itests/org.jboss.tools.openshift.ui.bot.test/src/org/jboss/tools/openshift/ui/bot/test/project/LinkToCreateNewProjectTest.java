@@ -18,6 +18,7 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.handler.TreeItemHandler;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.TreeItem;
@@ -28,6 +29,7 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
@@ -43,14 +45,17 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 public class LinkToCreateNewProjectTest extends AbstractTest {
 	
+	@InjectRequirement
+	private OpenShiftConnectionRequirement connectionReq;
+	
 	private String projectName = "os3-integration-test";
 	private boolean projectCreated = false;
 	
 	@Test
 	public void createOpenShiftProjectViaLinkInExplorer() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		OpenShiftUtils.deleteAllProjects();
-		TreeItem connectionItem = explorer.getOpenShift3Connection().getTreeItem();
+		OpenShiftUtils.deleteAllProjects(connectionReq.getConnection());
+		TreeItem connectionItem = explorer.getOpenShift3Connection(connectionReq.getConnection()).getTreeItem();
 		
 		TreeItem newProjectLinkItem = null;
 		try {
@@ -75,16 +80,15 @@ public class LinkToCreateNewProjectTest extends AbstractTest {
 		new FinishButton().click();
 		projectCreated = true;
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.CREATE_OS_PROJECT), TimePeriod.LONG);
-		
 		assertTrue("OpenShift project is not visible in OpenShift Explorer under the connection"
 				+ " although it should have been created successfully and visible.",
-				explorer.getOpenShift3Connection().projectExists(projectName));
+				explorer.getOpenShift3Connection(connectionReq.getConnection()).projectExists(projectName));
 	}
 	
 	@After
 	public void deleteTestProject() {
 		if (projectCreated) {
-			new OpenShiftExplorerView().getOpenShift3Connection().getProject(projectName).delete();
+			new OpenShiftExplorerView().getOpenShift3Connection(connectionReq.getConnection()).getProject(projectName).delete();
 		}
 	}
 }

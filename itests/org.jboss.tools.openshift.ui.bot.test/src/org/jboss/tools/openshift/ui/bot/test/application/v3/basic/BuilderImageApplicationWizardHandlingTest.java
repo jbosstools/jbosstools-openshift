@@ -38,6 +38,7 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -60,6 +61,9 @@ public class BuilderImageApplicationWizardHandlingTest extends AbstractTest {
 	public static final String BUILDER_IMAGE = "httpd:latest (builder, httpd) - openshift";
 	
 	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
+	
+	@InjectRequirement
 	private OpenShiftProjectRequirement projectRequirement;
 	
 	private ResourceLabelsWizardPage resourceLabelPage = new ResourceLabelsWizardPage();
@@ -74,7 +78,7 @@ public class BuilderImageApplicationWizardHandlingTest extends AbstractTest {
 				
 	@Before
 	public void openNewApplicationWizard() {
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer(projectRequirement.getProjectName());
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(projectRequirement.getProjectName());
 	}
 	
 	@Test

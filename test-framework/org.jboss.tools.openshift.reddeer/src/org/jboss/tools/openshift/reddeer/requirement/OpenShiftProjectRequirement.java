@@ -96,7 +96,7 @@ public class OpenShiftProjectRequirement implements Requirement<RequiredProject>
 		if (projectSpec.cleanup()) {
 			Connection connection = ConnectionUtils.getConnectionOrDefault(projectSpec.connectionURL());
 			connection.deleteResource(project);
-			new WaitWhile(new OpenShiftProjectExists(project.getName()));
+			new WaitWhile(new OpenShiftProjectExists(project.getName(), connection));
 		}
 	}
 
