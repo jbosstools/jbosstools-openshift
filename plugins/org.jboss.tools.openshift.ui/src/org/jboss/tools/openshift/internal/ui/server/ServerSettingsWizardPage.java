@@ -358,7 +358,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
-								return OCBinary.getInstance().getStatus(model.getConnection(), monitor);
+								IStatus stat = OCBinary.getInstance().getStatus(model.getConnection(), monitor);
+								model.setOCBinaryStatus(stat);
+								return stat;
 							}
 						}.schedule();
 					}

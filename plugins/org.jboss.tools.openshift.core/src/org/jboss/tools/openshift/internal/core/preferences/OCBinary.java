@@ -117,7 +117,7 @@ public enum OCBinary {
 		if( connection instanceof IOpenShiftConnection ) {
 			IOpenShiftConnection c = (IOpenShiftConnection)connection;
 			String loc = (String)c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
-			if( loc != null )
+			if( loc != null && !loc.isEmpty())
 				return loc;
 		}
 		
