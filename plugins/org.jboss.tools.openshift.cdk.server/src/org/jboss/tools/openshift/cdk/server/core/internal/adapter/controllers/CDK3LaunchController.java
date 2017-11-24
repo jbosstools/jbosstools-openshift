@@ -153,6 +153,15 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 			replaced = ArgsUtil.setArg(replaced, "--profile", null, profileName);
 		}
 		workingCopy.setAttribute(ATTR_ARGS, replaced);
+		
+		// This is a bit of a hack for JBIDE-25350   - The launch config will APPEAR to be renamed, but, 
+		// the official renaming will only occur if the user makes changes to the launch config and saves it.
+		// Otherwise this is simply cosmetic. 
+		String wcName = workingCopy.getName();
+		String serverName = s.getName();
+		if( !wcName.equals(serverName))
+			workingCopy.rename(serverName);
+
 	}
 
 	protected String getMinishiftHome(IServer server) {
