@@ -20,6 +20,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapte
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.CreateResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.DeleteResourceTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourceLimitsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.HandleCustomTemplateTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.ImportApplicationTest;
@@ -110,7 +111,8 @@ import org.junit.runners.Suite.SuiteClasses;
 	// Advanced application testing
 	DeployDockerImageTest.class,	
  	CreateResourcesTest.class,
-	ScalingTest.class, 
+	ScalingTest.class,
+	EditResourceLimitsTest.class,
 
 	// Server adapter
 	ServerAdapterWizardHandlingTest.class,

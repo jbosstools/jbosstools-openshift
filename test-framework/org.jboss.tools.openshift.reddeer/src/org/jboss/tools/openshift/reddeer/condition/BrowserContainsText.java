@@ -33,6 +33,7 @@ public class BrowserContainsText extends AbstractWaitCondition {
 	
 	@Override
 	public boolean test() {
+		browser = new InternalBrowser();
 		if (url != null) {
 			browser.setURL(url);
 			browser.refresh();
