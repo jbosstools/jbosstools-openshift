@@ -37,6 +37,14 @@ public abstract class CDKAbstractTest {
 	
 	public static final String SERVER_ADAPTER_32 = "Container Development Environment 3.2+"; //$NON-NLS-1$
 	
+	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
+	
+	public static final boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
+	
+	public static final String FOLDER = IS_LINUX ? "linux" : (IS_WINDOWS ? "win" : "mac");
+	
+	public static final String separator = System.getProperty("file.separator");
+	
 	public static final String USERNAME;
 	
 	public static final String PASSWORD;
@@ -49,6 +57,8 @@ public abstract class CDKAbstractTest {
 	
 	public static final String MINISHIFT_PROFILE;
 	
+	public static final String DEFAULT_MINISHIFT_HOME;
+	
 	static {
 		USERNAME = CDKTestUtils.getSystemProperty("developers.username"); //$NON-NLS-1$
 		PASSWORD = CDKTestUtils.getSystemProperty("developers.password"); //$NON-NLS-1$
@@ -56,6 +66,7 @@ public abstract class CDKAbstractTest {
 		MINISHIFT = CDKTestUtils.getSystemProperty("minishift"); //$NON-NLS-1$
 		MINISHIFT_PROFILE = CDKTestUtils.getSystemProperty("minishift.profile"); //$NON-NLS-1$
 		MINISHIFT_HYPERVISOR = CDKTestUtils.getSystemProperty("minishift.hypervisor"); //$NON-NLS-1$
+		DEFAULT_MINISHIFT_HOME = System.getProperty("user.home") + separator + ".minishift";
 	}
 	
 	public static void checkMinishiftParameters() {
@@ -103,7 +114,7 @@ public abstract class CDKAbstractTest {
 		File file = new File(filePath + builder.toString());
 		if (!file.exists()) {
 			throw new RedDeerException("Resource file does not exists within project path "
-					+ filePath);
+					+ filePath + builder.toString());
 		}
 
 		return file.getAbsolutePath();

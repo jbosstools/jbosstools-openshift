@@ -15,7 +15,6 @@ import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
-import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
 
 /**
  * Class representing CDK3 Server Editor part
@@ -29,23 +28,23 @@ public class CDK3ServerEditor extends CDEServerEditor {
 	}
 
 	public LabeledText getMinishiftBinaryLabel() {
-		return new LabeledText(new DefaultSection(CDK_DETAILS),"Minishift Binary: ");
+		return new LabeledText(getCDKSection(), "Minishift Binary: ");
 	}
 	
 	public LabeledCombo getHypervisorCombo() {
-		return new LabeledCombo(new DefaultSection(CDK_DETAILS), "Hypervisor:");
+		return new LabeledCombo(getCDKSection(), "Hypervisor:");
 	}
 
 	public LabeledText getMinishiftHomeLabel() {
-		return new LabeledText(new DefaultSection(CDK_DETAILS), "Minishift Home:");
+		return new LabeledText(getCDKSection(), "Minishift Home:");
 	}
 
 	public Button getMinishiftBinaryBrowseButton() {
-		return new PushButton(new DefaultSection(CDK_DETAILS), 0, new WithTextMatcher("Browse..."));
+		return new PushButton(getCDKSection(), 0, new WithTextMatcher("Browse..."));
 	}
 	
 	public Button getMinishiftHomeBrowseButton() {
-		return new PushButton(new DefaultSection(CDK_DETAILS), 1, new WithTextMatcher("Browse..."));
+		return new PushButton(getCDKSection(), 1, new WithTextMatcher("Browse..."));
 	}
 	
 }

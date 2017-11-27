@@ -11,7 +11,6 @@
 package org.jboss.tools.cdk.reddeer.server.ui.editor;
 
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
-import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
 
 /**
  * CKD 3.2+ server editor class
@@ -25,7 +24,7 @@ public class CDK32ServerEditor extends CDK3ServerEditor {
 	}
 
 	public LabeledText getMinishiftProfile() {
-		return new LabeledText(new DefaultSection(CDK_DETAILS),"Minishift Profile:");
+		return new LabeledText(getCDKSection(), "Minishift Profile:");
 	}
 	
 }

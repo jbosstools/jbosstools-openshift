@@ -82,6 +82,6 @@ public class CDKServerWizardTest extends CDKServerWizardAbstractTest {
 		assertDiffMessage(dialog, DOES_NOT_EXIST);
 		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.MEDIUM, false);
 		assertTrue("Expected Finish button is not enabled", dialog.isFinishEnabled());
-		dialog.finish(TimePeriod.MEDIUM);
+		dialog.cancel();
 	}
 }

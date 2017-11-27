@@ -40,6 +40,7 @@ import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.junit.After;
@@ -52,10 +53,6 @@ import org.junit.After;
 @DisableSecureStorage
 @RemoveCDKServers
 public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
-
-	protected static boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
-	
-	private static final String separator = System.getProperty("file.separator");
 	
 	// page description messages
 	
@@ -74,6 +71,8 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	// possible dialog values passed by user
 	
 	protected static final String EXISTING_PATH = System.getProperty("user.dir");
+	
+	protected static final String MOCK_CDK320 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/cdk-3.2.0-mock" + (IS_WINDOWS ? ".bat" : ""));
 	
 	protected static final String NON_EXISTING_PATH = EXISTING_PATH + separator + "some_random_filename";
 	
@@ -99,8 +98,9 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	}
 	
 	@After
-	public void teardown() {
+	public void tearDownAbstractServerWizard() {
 		closeOpenShells();
+		CDKUtils.deleteAllCDKServerAdapters();
 		CDKTestUtils.removeAccessRedHatCredentials(CREDENTIALS_DOMAIN, USERNAME);
 	}
 	

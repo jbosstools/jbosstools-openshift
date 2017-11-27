@@ -10,16 +10,20 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.editor;
 
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.wst.server.ui.editor.ServerEditor;
 import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.api.Combo;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.menu.ShellMenuItem;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.uiforms.impl.hyperlink.DefaultHyperlink;
 import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
 import org.eclipse.reddeer.workbench.condition.EditorIsDirty;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
@@ -31,12 +35,30 @@ import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
  */
 public class CDEServerEditor extends ServerEditor {
 	
+	private DefaultSection generalSection;
+	
+	private DefaultSection credentialsSection;
+	
+	private DefaultSection cdkSection;
+	
 	public static final String CREDENTIALS = "Credentials";
 	
 	public static final String CDK_DETAILS = "CDK Details";
 	
+	public static final String GENERAL = "General Information";
+	
 	public CDEServerEditor(String title) {
 		super(title);
+		this.generalSection = new DefaultSection(GENERAL);
+		this.credentialsSection = new DefaultSection(CREDENTIALS);
+		this.cdkSection = new DefaultSection(CDK_DETAILS);
+	}
+	
+	public void openLaunchConfigurationFromLink() {
+		log.info("Activate launch configuration via link");
+		getLaunchConfigurationHyperLink().activate();
+		ShellIsAvailable launch = new ShellIsAvailable("Edit Configuration");
+		new WaitUntil(launch, TimePeriod.MEDIUM);	
 	}
 	
 	@Override
@@ -58,35 +80,43 @@ public class CDEServerEditor extends ServerEditor {
 	}
 
 	public LabeledText getPasswordLabel() {
-		return new LabeledText(new DefaultSection(CREDENTIALS), "Password: ");
+		return new LabeledText(credentialsSection, "Password: ");
 	}
 	
 	public LabeledText getUsernameLabel() {
-		return new LabeledText(new DefaultSection(CREDENTIALS), "Username: ");
+		return new LabeledText(credentialsSection, "Username: ");
 	}
 	
 	public Button getAddButton() {
-		return new PushButton(new DefaultSection(CREDENTIALS), "Add...");
+		return new PushButton(credentialsSection, "Add...");
 	}
 	
 	public Button getEditButton() {
-		return new PushButton(new DefaultSection(CREDENTIALS), "Edit...");
+		return new PushButton(credentialsSection, "Edit...");
 	}
 	
 	public Combo getDomainCombo() {
-		return new LabeledCombo(new DefaultSection(CREDENTIALS), "Domain: ");
+		return new LabeledCombo(credentialsSection, "Domain: ");
 	}
 	
 	public Button getPassCredentialsCheckBox() {
-		return new CheckBox(new DefaultSection(CREDENTIALS), "Pass credentials to environment");
+		return new CheckBox(credentialsSection, "Pass credentials to environment");
 	}
 	
 	public LabeledText getHostnameLabel() {
-		return new LabeledText(new DefaultSection("General Information"),"Host name:");
+		return new LabeledText(generalSection,"Host name:");
 	}
 	
 	public LabeledText getServernameLabel() {
-		return new LabeledText(new DefaultSection("General Information"),"Server name:");
+		return new LabeledText(generalSection,"Server name:");
+	}
+	
+	public DefaultHyperlink getLaunchConfigurationHyperLink() {
+		return new DefaultHyperlink(generalSection, "Open launch configuration");
+	}
+	
+	public DefaultSection getCDKSection() {
+		return this.cdkSection;
 	}
 	
 }

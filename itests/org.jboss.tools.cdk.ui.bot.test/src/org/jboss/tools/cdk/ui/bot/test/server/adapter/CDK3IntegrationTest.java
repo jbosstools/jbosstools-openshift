@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(RedDeerSuite.class)
+@Deprecated
 public class CDK3IntegrationTest extends CDKServerAdapterAbstractTest {
 	
 	private static final String DOCKER_DAEMON_CONNECTION = SERVER_ADAPTER_3;

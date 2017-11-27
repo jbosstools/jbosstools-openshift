@@ -17,6 +17,7 @@ import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK3ServerWizardTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+@SuppressWarnings("deprecation")
 @RunWith(RedDeerSuite.class)
 @Suite.SuiteClasses({
 	CDK3ServerWizardTest.class,
