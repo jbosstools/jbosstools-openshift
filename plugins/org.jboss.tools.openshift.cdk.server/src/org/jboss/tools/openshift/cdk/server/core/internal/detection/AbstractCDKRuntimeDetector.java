@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.cdk.server.core.internal.detection;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -81,8 +82,8 @@ public abstract class AbstractCDKRuntimeDetector extends AbstractRuntimeDetector
 	protected Properties readProperties(File cdkFile) {
 		Properties props = new Properties();
 		if (cdkFile.exists()) {
-			try {
-				props.load(new FileInputStream(cdkFile));
+			try (InputStream is = new FileInputStream(cdkFile)){
+				props.load(is);
 			} catch (IOException ioe) {
 				// Ignore
 			}
