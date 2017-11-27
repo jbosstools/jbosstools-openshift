@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
@@ -29,7 +30,9 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.IPod;
+import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 
 public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionProvider {
@@ -90,10 +93,23 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 				String podName =  pods.get(0).getName();
 				String host = server.getHost();
 				String portUrlPart = getOpenShiftPort(server);
-				return "https://" + host + portUrlPart + "/api/v1/namespaces/" + projName + "/pods/https:" + podName + ":8778/proxy/jolokia/";
+				String jolokiaPort = getJolokiaPort(pods.get(0));
+				return "https://" + host + portUrlPart + "/api/v1/namespaces/" + projName + "/pods/https:" + podName + ":" + jolokiaPort +"/proxy/jolokia/";
 			}
 		}
 		return null;
+	}
+
+	protected String getJolokiaPort(IPod pod) {
+		String port = "8778";
+		IReplicationController rc = ResourceUtils.getDeploymentConfigOrReplicationControllerFor(pod);
+		if (rc != null) {
+			Optional<IEnvironmentVariable> envPort = rc.getEnvironmentVariables().stream().filter(env -> env.getName().equals("AB_JOLOKIA_PORT")).findFirst();
+			if (envPort.isPresent()) {
+				port = envPort.get().getValue();
+			}
+		}
+		return port;
 	}
 
 	protected String getOpenShiftPort(IServer server) {
