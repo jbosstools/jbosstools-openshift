@@ -46,6 +46,7 @@ import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.hamcrest.core.StringContains;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
@@ -94,6 +95,7 @@ public class DeployDockerImageTest {
 	
 	@BeforeClass
 	public static void setUp() {
+		closeBrowser();//try to close browser if it is opened
 		createDockerConnection();
 		try {
 			pullHelloImageIfDoesNotExist();
@@ -110,7 +112,10 @@ public class DeployDockerImageTest {
 		List<String> connectionsNames = dockerExplorer.getDockerConnectionNames();
 		if (!connectionsNames.isEmpty()) {
 			for(String connectionName: connectionsNames) {
-				dockerExplorer.getDockerConnectionByName(connectionName).removeConnection();
+				DockerConnection dockerConnection = dockerExplorer.getDockerConnectionByName(connectionName);
+				if (dockerConnection != null) {
+					dockerConnection.removeConnection();
+				}
 			}
 		}
 		dockerExplorer.createDockerConnectionURI(connectionsURI, connectionsURI, pathToCertificate);
@@ -178,10 +183,15 @@ public class DeployDockerImageTest {
 		if (connection.projectExists(PROJECT2)) {
 			connection.getProject(PROJECT2).delete();
 		}
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 	
 	@After
-	public void closeBrowser() {
+	public void cleanUpAfter() {
+		closeBrowser();
+	}
+	
+	public static void closeBrowser() {
 		try {
 			BrowserEditor browser = new BrowserEditor(new StringContains("hello"));
 			browser.close();
@@ -246,7 +256,7 @@ public class DeployDockerImageTest {
 				getOpenShiftResources(Resource.ROUTE).get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.SHOW_IN_BROWSER).select();
 		try {
-			new WaitUntil(new BrowserContainsText(getRouteURL("hello-openshift", projectName),"Hello OpenShift!"), TimePeriod.VERY_LONG);
+			new WaitUntil(new BrowserContainsText("Hello OpenShift!"), TimePeriod.VERY_LONG);//getRouteURL("hello-openshift", projectName),
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("Browser does not contain hello world content.");
 		}

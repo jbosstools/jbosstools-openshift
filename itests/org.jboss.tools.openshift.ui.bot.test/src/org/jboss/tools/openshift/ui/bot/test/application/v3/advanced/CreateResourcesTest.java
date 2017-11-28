@@ -30,6 +30,7 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
@@ -57,6 +58,8 @@ public class CreateResourcesTest {
 
 	@Before
 	public void prepareTestEnvironment() {
+		explorer.open();
+		explorer.getOpenShift3Connection().refresh();
 		testProject = "rsrc-app-project" + System.currentTimeMillis();
 		explorer.getOpenShift3Connection().createNewProject(testProject);
 	}
@@ -163,5 +166,6 @@ public class CreateResourcesTest {
 		if (explorer.getOpenShift3Connection().projectExists(testProject)) {
 			explorer.getOpenShift3Connection().getProject(testProject).delete();
 		}
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 }

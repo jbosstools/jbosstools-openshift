@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.reddeer.condition;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.swt.impl.browser.InternalBrowser;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
@@ -40,6 +41,7 @@ public class BrowserContainsText extends AbstractWaitCondition {
 		} else {
 			browser.refresh();
 		}
+		new WaitUntil(new PageIsLoaded(browser));
 
 		if (Platform.getOS().startsWith(Platform.OS_WIN32)) {
 			return browser.getText().contains(text);
