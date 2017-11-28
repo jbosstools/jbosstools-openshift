@@ -47,7 +47,7 @@ public class CDK32ServerAdapterRestartTest extends CDKServerAdapterAbstractTest 
 		getCDEServer().restart();
 		assertEquals(ServerState.STARTED, getCDEServer().getLabel().getState());
 		// add check that os and docker is working after restart
-		testOpenshiftConncetion(OPENSHIFT_USER_NAME);
+		testOpenshiftConncetion(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
 	}
 	

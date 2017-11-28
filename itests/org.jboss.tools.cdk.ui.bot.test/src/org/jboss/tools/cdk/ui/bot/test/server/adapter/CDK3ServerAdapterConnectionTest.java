@@ -16,30 +16,33 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Tests start/stop operation of CDK 3.2+ server adapter
+ * Tests that openshift and docker connection are created upon successful start of CDK 3 server adapter
  * @author odockal
  *
  */
+@Deprecated
 @RunWith(RedDeerSuite.class)
-public class CDK32ServerAdapterStartTest extends CDKServerAdapterAbstractTest {
+public class CDK3ServerAdapterConnectionTest extends CDKServerAdapterAbstractTest {
+
+	private static final String DOCKER_DAEMON_CONNECTION = SERVER_ADAPTER_3;
 
 	@Override
 	protected String getServerAdapter() {
-		// return SERVER_ADAPTER_32; 
-		//workaround for https://github.com/eclipse/reddeer/issues/1841
-		return "Container Development Environment 3.2";
+		return SERVER_ADAPTER_3;
 	}
-	
+
 	@BeforeClass
 	public static void setup() {
-		checkMinishiftProfileParameters();
-		addNewCDK3Server(CDK32_SERVER_NAME, "Container Development Environment 3.2", MINISHIFT_HYPERVISOR, MINISHIFT_PROFILE);
+		checkMinishiftParameters();
+		addNewCDK3Server(CDK3_SERVER_NAME, SERVER_ADAPTER_3, MINISHIFT_HYPERVISOR, MINISHIFT);
 	}
-	
+
 	@Test
-	public void testStartServerAdapter() {
+	public void testCDK3ServerAdapterConnection() {
 		startServerAdapter();
-		stopServerAdapter();
+		testOpenshiftConncetion(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
+		testDockerConnection(DOCKER_DAEMON_CONNECTION);
 	}
+
 
 }
