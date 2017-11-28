@@ -61,7 +61,7 @@ public class RemoveCDKServersRequirement implements Requirement<RemoveCDKServers
 	 */
 	@Override
 	public void runAfter() {
-		// log.info("Deleting all CDK server adapters in runAfter");
+		// nothing
 	}
 
 }

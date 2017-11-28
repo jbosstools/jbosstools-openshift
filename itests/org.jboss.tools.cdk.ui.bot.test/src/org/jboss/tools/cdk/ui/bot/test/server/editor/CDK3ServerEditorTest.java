@@ -21,7 +21,7 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
-import org.jboss.tools.cdk.reddeer.server.ui.CDEServersView;
+import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK3ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerContainerWizardPage;
 import org.junit.Before;
@@ -42,10 +42,16 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 	
 	private String hypervisor = MINISHIFT_HYPERVISOR;
 
+	private static String MINISHIFT_PATH;
+	
 	@BeforeClass
-	public static void setUpEnvironment() {
-		checkMinishiftParameters();
-		checkMinishiftProfileParameters();
+	public static void setupCDK3ServerEditorTest() {
+		checkMinishiftHypervisorParameters();
+		if (MINISHIFT == null) {
+			MINISHIFT_PATH = MOCK_CDK311;
+		} else {
+			MINISHIFT_PATH = MINISHIFT;
+		}
 	}
 	
 	@Before
@@ -63,13 +69,13 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 		containerPage.setCredentials(USERNAME, PASSWORD);
 		log.info("Setting hypervisor to: " + hypervisor);
 		containerPage.setHypervisor(hypervisor);
-		log.info("Setting binary to " + MINISHIFT);
-		containerPage.setMinishiftBinary(MINISHIFT);
+		log.info("Setting binary to " + MINISHIFT_PATH);
+		containerPage.setMinishiftBinary(MINISHIFT_PATH);
 		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
 	}
 	
 	public void setServerEditor() {
-		serversView = new CDEServersView();
+		serversView = new CDKServersView();
 		serversView.open();
 		serversView.getServer(getServerAdapter()).open();
 		editor = new CDK3ServerEditor(getServerAdapter());
@@ -94,7 +100,7 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 		assertTrue(
 				((CDK3ServerEditor) editor).getHypervisorCombo().getSelection().equalsIgnoreCase(MINISHIFT_HYPERVISOR));
 		assertTrue(editor.getServernameLabel().getText().equals(getServerAdapter()));
-		assertTrue(((CDK3ServerEditor) editor).getMinishiftBinaryLabel().getText().equals(MINISHIFT));
+		assertTrue(((CDK3ServerEditor) editor).getMinishiftBinaryLabel().getText().equals(MINISHIFT_PATH));
 		assertTrue(((CDK3ServerEditor) editor).getMinishiftHomeLabel().getText().contains(".minishift"));
 	}
 
@@ -118,8 +124,8 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 		checkEditorStateAfterSave(NON_EXECUTABLE_FILE, false);
 		checkEditorStateAfterSave(NON_EXISTING_PATH, false);
 		checkEditorStateAfterSave(EXECUTABLE_FILE, false);
-		checkEditorStateAfterSave(MINISHIFT_PROFILE, false);
-		checkEditorStateAfterSave(MINISHIFT, true);
+		checkEditorStateAfterSave(MOCK_CDK320, false);
+		checkEditorStateAfterSave(MINISHIFT_PATH, true);
 	}
 	
 }

@@ -21,7 +21,7 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
  * @author odockal
  *
  */
-public class CDK3ServerEditor extends CDEServerEditor {
+public class CDK3ServerEditor extends CDKServerEditor {
 	
 	public CDK3ServerEditor(String title) {
 		super(title);

@@ -74,6 +74,8 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	
 	protected static final String MOCK_CDK320 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/cdk-3.2.0-mock" + (IS_WINDOWS ? ".bat" : ""));
 	
+	protected static final String MOCK_CDK311 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/cdk-3.1.1-mock" + (IS_WINDOWS ? ".bat" : ""));
+	
 	protected static final String NON_EXISTING_PATH = EXISTING_PATH + separator + "some_random_filename";
 	
 	protected static final String NON_EXECUTABLE_FILE = getProjectAbsolutePath("resources/non-executable");

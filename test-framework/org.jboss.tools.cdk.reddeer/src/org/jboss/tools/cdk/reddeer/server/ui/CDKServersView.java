@@ -14,15 +14,15 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 
-public class CDEServersView extends ServersView2 {
+public class CDKServersView extends ServersView2 {
 
-	public CDEServersView() {
+	public CDKServersView() {
 		super();
 	}
 	
 	@Override
 	public Server getServer(String name) {
-		return getServer(CDEServer.class, name);
+		return getServer(CDKServer.class, name);
 	}
 
 	/**

@@ -37,7 +37,7 @@ import org.eclipse.reddeer.workbench.handler.EditorHandler;
 import org.eclipse.ui.IEditorPart;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
-import org.jboss.tools.cdk.reddeer.server.ui.editor.CDEServerEditor;
+import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK3ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDKServerWizardAbstractTest;
@@ -53,7 +53,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	
 	protected ServersView2 serversView;
 
-	protected CDEServerEditor editor;
+	protected CDKServerEditor editor;
 
 	protected static final String ANOTHER_HYPERVISOR = "virtualbox";
 	
@@ -73,8 +73,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 			if (!editor.isActive()) {
 				editor.activate();
 			}
-			editor.save();
-			editor.close();
+			editor.close(false);
 			editor = null;
 		}
 		if (serversView != null) {
@@ -156,13 +155,11 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 
 			@Override
 			public String errorMessageWhile() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public String errorMessageUntil() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 		}, TimePeriod.MEDIUM);
@@ -187,7 +184,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 			performSave(editor.getEditorPart());
 			log.info("Editor was saved as expected");
 		} catch (WaitTimeoutExpiredException exc) {
-			fail("Editor was not saved successfully but exception was thrown");
+			fail("Editor was not saved successfully and exception was thrown");
 		}
 		assertFalse(editor.isDirty());
 	}

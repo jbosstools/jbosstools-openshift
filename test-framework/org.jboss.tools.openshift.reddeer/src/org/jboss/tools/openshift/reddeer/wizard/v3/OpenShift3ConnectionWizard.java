@@ -70,6 +70,7 @@ public class OpenShift3ConnectionWizard {
 	 * @return page description message
 	 */
 	public String getConnectionMessage() {
+		new WaitWhile(new JobIsRunning(), TimePeriod.MEDIUM, false);
 		return new TitleAreaDialog(getShell()).getMessage();
 	}
 

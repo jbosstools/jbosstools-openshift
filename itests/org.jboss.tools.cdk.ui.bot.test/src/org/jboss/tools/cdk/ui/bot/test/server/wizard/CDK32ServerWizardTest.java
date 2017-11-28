@@ -29,10 +29,9 @@ import org.junit.Test;
  *
  */
 public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
-
+	
 	@BeforeClass
 	public static void setUpEnvironment() {
-		checkMinishiftParameters();
 		checkMinishiftProfileParameters();
 	}
 	
@@ -81,7 +80,7 @@ public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 		assertSameMessage(dialog, CHECK_MINISHIFT_VERSION);
 		
 		// check compatibility of cdk version with server adapter
-		containerPage.setMinishiftBinary(MINISHIFT);
+		containerPage.setMinishiftBinary(MOCK_CDK311);
 		assertSameMessage(dialog, NOT_COMPATIBLE);
 		
 		// Positive test of proper minishift binary
