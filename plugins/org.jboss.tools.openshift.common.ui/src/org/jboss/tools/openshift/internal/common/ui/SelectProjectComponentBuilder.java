@@ -121,7 +121,7 @@ public class SelectProjectComponentBuilder {
 		browseProjectsButton.setText("Browse...");
 		GridDataFactory.fillDefaults()
 				.align(SWT.LEFT, SWT.CENTER)
-				.grab(false, false)
+				.indent(10, SWT.DEFAULT)
 				.applyTo(browseProjectsButton);
 		UIUtils.setDefaultButtonWidth(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(selectionListener);
