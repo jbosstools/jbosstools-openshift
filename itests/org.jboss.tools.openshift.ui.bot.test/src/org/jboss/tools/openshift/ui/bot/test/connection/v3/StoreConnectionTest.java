@@ -18,6 +18,7 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.equinox.security.ui.storage.PasswordProvider;
 import org.eclipse.reddeer.eclipse.equinox.security.ui.storage.StoragePreferencePage;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -37,6 +38,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.SecureStorage;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -47,12 +49,11 @@ public class StoreConnectionTest {
 	
 	@BeforeClass
 	public static void setupClass(){
-		//WorkbenchPreferenceDialog preferenceDialog = new WorkbenchPreferenceDialog();
 		WorkbenchPreferenceDialog preferences = new WorkbenchPreferenceDialog();
 		preferences.open();
-		//preferences.select(storagePreferencePage);
 		StoragePreferencePage storagePreferencePage = new StoragePreferencePage(preferences);
-
+		preferences.select(storagePreferencePage);
+		storagePreferencePage.selectPasswordsTab();
 		List<PasswordProvider> masterPasswordProviders = storagePreferencePage.getMasterPasswordProviders();
 		for (PasswordProvider tableItem : masterPasswordProviders) {
 			// The second part of this if is because https://issues.jboss.org/browse/JBIDE-24567
@@ -75,7 +76,11 @@ public class StoreConnectionTest {
 		new NextButton().click();
 		
 		//Cancel secure storage shell
-		new DefaultShell("Secure Storage Password");
+		try {
+			new DefaultShell(OpenShiftLabel.Shell.SECURE_STORAGE_PASSWORD);
+		} catch (CoreLayerException ex) {
+			new DefaultShell(OpenShiftLabel.Shell.SECURE_STORAGE);
+		}
 		new CancelButton().click();
 		
 		//Cancel warning shell
@@ -127,5 +132,19 @@ public class StoreConnectionTest {
 		SecureStorage.removeOpenShiftPassword(DatastoreOS3.USERNAME, DatastoreOS3.SERVER);
 		SecureStorage.verifySecureStorageOfPassword(
 				DatastoreOS3.USERNAME, DatastoreOS3.SERVER.substring(8), false);
-	}	
+	}
+	
+	@AfterClass
+	public static void cleanUp(){
+		WorkbenchPreferenceDialog preferences = new WorkbenchPreferenceDialog();
+		preferences.open();
+		StoragePreferencePage storagePreferencePage = new StoragePreferencePage(preferences);
+		preferences.select(storagePreferencePage);
+		storagePreferencePage.selectPasswordsTab();
+		List<PasswordProvider> masterPasswordProviders = storagePreferencePage.getMasterPasswordProviders();
+		for (PasswordProvider tableItem : masterPasswordProviders) {
+			tableItem.setEnabled(true);
+		}
+		preferences.ok();
+	}
 }

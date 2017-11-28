@@ -16,9 +16,9 @@ import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.equinox.security.ui.storage.StoragePreferencePage;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
-import org.eclipse.reddeer.swt.exception.SWTLayerException;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.button.NoButton;
@@ -95,7 +95,7 @@ public class SecureStorage {
 				try {
 					new DefaultShell(OpenShiftLabel.Shell.PASSWORD_HINT_NEEDED);
 					new NoButton().click();
-				} catch (SWTLayerException ex) {
+				} catch (CoreLayerException ex) {
 					// do nothing
 					LOGGER.debug("Password hint did not appear. Skipping.");
 				}
@@ -112,7 +112,7 @@ public class SecureStorage {
 	private static boolean provideSecureStoragePassword(String password) {
 		try {
 			new DefaultShell(OpenShiftLabel.Shell.SECURE_STORAGE_PASSWORD);
-		} catch (SWTLayerException ex) {
+		} catch (CoreLayerException ex) {
 			LOGGER.info(String.format("Shell with label \"%s\" was not found. Trying \"%s\"",
 					OpenShiftLabel.Shell.SECURE_STORAGE_PASSWORD, OpenShiftLabel.Shell.SECURE_STORAGE));
 			new DefaultShell(OpenShiftLabel.Shell.SECURE_STORAGE);
