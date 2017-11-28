@@ -27,6 +27,8 @@ public class SystemProperties {
 	public static final String KEY_USERNAME = "openshift.username";
 	public static final String KEY_PASSWORD = "openshift.password";
 	private static final String KEY_SECURE_STORAGE_PASSWORD = "securestorage.password";
+	public static final String KEY_OPENSHIFT_IO_USERNAME = "openshift.io.username";
+	public static final String KEY_OPENSHIFT_IO_PASSWORD = "openshift.io.password";
 
 	// secure storage
 	public static final String SECURE_STORAGE_PASSWORD = getRequiredProperty(KEY_SECURE_STORAGE_PASSWORD, 

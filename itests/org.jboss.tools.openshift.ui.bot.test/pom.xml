@@ -14,7 +14,7 @@
 
 	<properties>
 		<systemProperties>
-			-Dtest.configurations.dir=${configurations.dir} -Dopenshift.server=${openshift.server} -Dopenshift.username=${openshift.username} -Dopenshift.password=${openshift.password} -Dopenshift.token=${openshift.token} -Dgithub.username=${github.username} -Dgithub.password=${github.password} -Dopenshift.authmethod=${openshift.authmethod} -Dsecurestorage.password=${securestorage.password} -Dusage_reporting_enabled=false
+			-Dtest.configurations.dir=${configurations.dir} -Dopenshift.server=${openshift.server} -Dopenshift.username=${openshift.username} -Dopenshift.password=${openshift.password} -Dopenshift.token=${openshift.token} -Dopenshift.authmethod=${openshift.authmethod} -Dsecurestorage.password=${securestorage.password} -Dusage_reporting_enabled=false -Dopenshift.io.username=${openshift.io.username} -Dopenshift.io.password=${openshift.io.password}
 		</systemProperties>
 		<test.class>org.jboss.tools.openshift.ui.bot.test.OpenShift3StableBotTests</test.class>
 		<surefire.timeout>7200</surefire.timeout>
@@ -23,6 +23,8 @@
 		<openshift.password></openshift.password>
 		<openshift.token></openshift.token>
 		<openshift.authmethod>basic</openshift.authmethod>
+		<openshift.io.username></openshift.io.username>
+		<openshift.io.password></openshift.io.password>
 		<github.username></github.username>
 		<github.password></github.password>
 		<securestorage.password></securestorage.password>
