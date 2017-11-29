@@ -84,11 +84,7 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 		getControllableBehavior().putSharedData(AbstractStartJavaServerLaunchDelegate.NEXT_STOP_REQUIRES_FORCE, val);
 	}
 	
-	
-	@Override
-	public void stop(boolean force) {
-		getBehavior().setServerStopping();
-
+	protected void pollState() {
 		IStatus state = PollThreadUtils.isServerStarted(getServer(), getCDKPoller(getServer()));
 		boolean started = state.isOK();
 		if( !started ) {
@@ -99,7 +95,19 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 				return;
 			}
 		}
-		
+	}
+	
+	@Override
+	public void stop(boolean force) {
+		getBehavior().setServerStopping();
+		pollState();
+		if( getServer().getServerState() == IServer.STATE_STOPPED) {
+			return;
+		}
+		issueShutdownCommand();
+	}
+	
+	protected void issueShutdownCommand() {
 		try {
 			if( useTerminal() )
 				shutdownViaTerminal();

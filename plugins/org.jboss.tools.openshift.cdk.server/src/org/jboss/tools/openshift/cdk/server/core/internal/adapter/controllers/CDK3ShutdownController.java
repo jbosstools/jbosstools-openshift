@@ -10,10 +10,15 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Poller;
@@ -21,7 +26,28 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPoller;
 
 public class CDK3ShutdownController extends AbstractCDKShutdownController {
-
+	@Override
+	public void stop(boolean force) {
+		getBehavior().setServerStopping();
+		CDK3Server cdk3 = (CDK3Server)getServer().loadAdapter(CDK3Server.class, new NullProgressMonitor());
+		String msHome = cdk3.getMinishiftHome();
+		if( !(new File(msHome).exists())) {
+			// The minishift home doesn't exist. We need to mark server as stopped and log an error
+			String msg = "The minishift-home for server \"" + getServer().getName() + "\" does not exist: " + msHome +
+			"\n\nPlease make sure that the virtual machine associated with this server has been properly shutdown.";
+			IStatus err = new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, msg, new Exception(msg));
+			CDKCoreActivator.pluginLog().logStatus(err);
+			getBehavior().setServerStopped();
+			return;
+		}
+		
+		pollState();
+		if( getServer().getServerState() == IServer.STATE_STOPPED) {
+			return;
+		}
+		issueShutdownCommand();
+	}
+	
 	@Override
 	protected AbstractCDKPoller getCDKPoller(IServer server) {
 		if( server.getServerType().getId().equals(CDK3Server.CDK_V3_SERVER_TYPE)) {
