@@ -74,6 +74,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private Class<? extends IConnection> connectionType;
 	private IConnectionAware<IConnection> wizardModel;
 	private boolean enablePromptCredentialsBackup = false;
+	private boolean allowConnectionChange = true;
 	
 	protected ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, 
 			Class<? extends IConnection> connectionType, boolean allowConnectionChange, IConnectionAware<IConnection> wizardModel) {
@@ -82,13 +83,16 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		this.wizardModel = wizardModel;
 		this.allHosts = createAllHosts(allConnections);
 		this.connectionsFactory = createConnectionsFactory();
+		this.allowConnectionChange = allowConnectionChange;
 		init(editedConnection, connectionType, connectionFactory);
 	}
 
 	private Collection<IConnection> filterAllConnections(IConnection editedConnection, Collection<IConnection> allConnections,
 			Class<? extends IConnection> connectionType, boolean allowConnectionChange) {
 		if (!allowConnectionChange) {
-			return Collections.singletonList(editedConnection);
+			if( editedConnection != null ) 
+				return Collections.singletonList(editedConnection);
+			return Collections.emptyList();
 		} else if (connectionType == null) {
 			return allConnections;
 		} else {
@@ -284,7 +288,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public Collection<IConnection> getAllConnections() {
 		List<IConnection> connections = new ArrayList<>();
 		connections.add(NewConnectionMarker.getInstance());
-		connections.addAll(allConnections);
+		if( allConnections != null ) 
+			connections.addAll(allConnections);
 		return connections;
 	}
 
@@ -538,6 +543,10 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	
 	public Object getContext() {
 		return wizardModel.getContext();
+	}
+
+	public boolean isAllowConnectionChange() {
+		return allowConnectionChange;
 	}
 
 	public static interface IConnectionFilter {

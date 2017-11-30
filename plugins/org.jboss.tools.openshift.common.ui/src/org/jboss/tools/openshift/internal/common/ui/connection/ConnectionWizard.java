@@ -65,11 +65,15 @@ public class ConnectionWizard extends Wizard {
 	 * @param context  A context that is useful to ConnectionEditors
 	 */
 	public ConnectionWizard(final IConnection connection, Object context, String title) {
-		this.page = new ConnectionWizardPage(this, new ConnectionWizardModel(connection, context));
+		this.page = new ConnectionWizardPage(this, new ConnectionWizardModel(connection, context), false);
 		setNeedsProgressMonitor(true);
 		if (title != null) {
 			setWindowTitle(title);
 		}
+	}
+	
+	public IConnection getConnection() {
+		return page.getConnection();
 	}
 	
 	@Override
