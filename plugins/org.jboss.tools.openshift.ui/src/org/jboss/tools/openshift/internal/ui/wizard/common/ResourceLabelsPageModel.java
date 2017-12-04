@@ -36,7 +36,7 @@ public class ResourceLabelsPageModel extends ObservablePojo implements IResource
 
 	@Override
 	public void setLabels(List<Label> labels) {
-		firePropertyChange(PROPERTY_LABELS, this.labels, this.labels = labels);
+		firePropertyChange(PROPERTY_LABELS, this.labels, this.labels = new ArrayList<Label>(labels));
 	}
 
 	@Override
