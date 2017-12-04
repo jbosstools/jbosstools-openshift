@@ -75,4 +75,9 @@ public class CDK3Server extends CDKServer {
 			msHome = defaultMinishiftHome;
 		return msHome;
 	}
+	
+	public static boolean matchesCDK3(String version) {
+		return (version.startsWith("3.0.") || version.startsWith("3.1."));
+	}
+	
 }
