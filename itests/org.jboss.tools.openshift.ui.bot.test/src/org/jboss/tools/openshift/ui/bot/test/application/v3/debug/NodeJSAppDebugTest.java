@@ -66,6 +66,7 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter.Version;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -83,7 +84,7 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = OpenShiftResources.NODEJS_SERVICE, template = OpenShiftResources.NODEJS_TEMPLATE)
-public class NodeJSAppDebugTest {
+public class NodeJSAppDebugTest extends AbstractTest {
 
 	@InjectRequirement
 	private OpenShiftProjectRequirement requiredProject;

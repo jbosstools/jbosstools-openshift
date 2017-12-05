@@ -32,6 +32,7 @@ import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +44,7 @@ import org.junit.runner.RunWith;
 		service = OpenShiftResources.NODEJS_SERVICE, 
 		template = OpenShiftResources.NODEJS_TEMPLATE)
 @RunWith(RedDeerSuite.class)
-public class ProjectPropertiesTest {
+public class ProjectPropertiesTest extends AbstractTest {
 
 	private static final String[] BASIC_PROPERTIES =
 			{"Creation Timestamp", "Kind", "Name", "Namespace", "Resource Version"};

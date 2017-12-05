@@ -167,6 +167,7 @@ public class OpenShiftLabel {
 		
 		// Server adapter related
 		public static final String PUBLISH_CHANGES = "Publish Changes";
+		public static final String CREATE_SERVER_ADAPTER = "Create server adapter";
 		
 		// Application related
 		public static final String APPLICATION_SUMMARY = "Create Application Summary";
@@ -305,8 +306,8 @@ public class OpenShiftLabel {
 	 */
 	public static class Others {
 		public static final String CONNECT_TOOL_ITEM = "Connection...";
-		public static final String EAP_TEMPLATE = "eap70-basic-s2i (eap, javaee, java, jboss, xpaas) - openshift";
-		public static final String EAP_BUILDER_IMAGE = "jboss-eap70-openshift:1.5 (builder, eap, javaee, java, jboss, xpaas) - openshift";
+		public static final String EAP_TEMPLATE = "eap70-basic-s2i (eap, javaee, java, jboss) - openshift";
+		public static final String EAP_BUILDER_IMAGE = "jboss-eap70-openshift:1.5 (builder, eap, javaee, java, jboss) - openshift";
 		public static final String NODEJS_TEMPLATE = "nodejs-example (quickstart, nodejs) - openshift";
 		public static final String RED_HAT_CENTRAL = "Red Hat Central";
 		public static final String MAVEN_MIRROR_URL = "MAVEN_MIRROR_URL";

@@ -55,7 +55,7 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @CleanConnection
 @RunWith(RedDeerSuite.class)
-public class LabelsTest {
+public class LabelsTest extends AbstractTest {
 	
 	private ResourceLabelsWizardPage page = new ResourceLabelsWizardPage();
 	

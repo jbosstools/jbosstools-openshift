@@ -13,10 +13,12 @@ package org.jboss.tools.openshift.reddeer.wizard.importapp;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.jface.wizard.WizardDialog;
+import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.button.YesButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
@@ -28,6 +30,15 @@ public class ImportApplicationWizard extends WizardDialog {
 	
 	public ImportApplicationWizard() {
 		super(OpenShiftLabel.Shell.IMPORT_APPLICATION);
+	}
+	
+	public void selectExistingBuildConfiguration(String buildConfigurationName) {
+		for(TreeItem ti : new DefaultTree().getItems()) {
+			if (ti.getText().contains(buildConfigurationName)) {
+				ti.select();
+				break;
+			}	
+		}
 	}
 	
 	public void finishAndOverrideExisting(){

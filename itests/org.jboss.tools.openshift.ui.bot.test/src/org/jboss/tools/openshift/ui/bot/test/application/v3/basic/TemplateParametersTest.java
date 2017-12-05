@@ -52,7 +52,7 @@ import org.junit.runner.RunWith;
 @OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
 @RunWith(RedDeerSuite.class)
-public class TemplateParametersTest {
+public class TemplateParametersTest extends AbstractTest {
 
 	public static final String APPLICATION_DOMAIN = "APPLICATION_DOMAIN";
 	public static final String APPLICATION_NAME = "APPLICATION_NAME *";

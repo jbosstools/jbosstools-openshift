@@ -47,6 +47,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,7 +55,7 @@ import org.junit.Test;
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
-public class ImportApplicationTest {
+public class ImportApplicationTest extends AbstractTest {
 	
 	public static String PROJECT_NAME = "jboss-helloworld";
 	

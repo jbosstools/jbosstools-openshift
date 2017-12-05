@@ -14,15 +14,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -31,6 +27,8 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.BackButton;
@@ -42,35 +40,38 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsKilled;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob;
 import org.hamcrest.core.StringContains;
-import org.jboss.tools.common.reddeer.utils.FileUtils;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.condition.ServerAdapterExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter.Version;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-@OCBinary
+@OpenPerspective(value=JBossPerspective.class)
 @RequiredBasicConnection
 @RequiredProject
-@RequiredService(service = "eap-app", template = "https://raw.githubusercontent.com/jboss-openshift/application-templates/ose-v1.3.7/eap/eap70-basic-s2i.json")
-public class CreateServerAdapterTest {
+@RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE)
+@RunWith(RedDeerSuite.class)
+public class CreateServerAdapterTest extends AbstractTest  {
 
 	private static final String PROJECT_NAME = "kitchensink";
 
@@ -94,28 +95,8 @@ public class CreateServerAdapterTest {
 	}
 
 	private static void cloneGitRepoAndImportProject() {
-		cloneGitRepository();
-		importProjectUsingSmartImport();
-	}
-	
-	private static void cloneGitRepository() {
-		try {
-			FileUtils.deleteDirectory(new File(GIT_REPO_DIRECTORY));
-			Git.cloneRepository().setURI(GIT_REPO_URL).setDirectory(new File(GIT_REPO_DIRECTORY)).call();
-		} catch (GitAPIException|IOException e) {
-			throw new RuntimeException("Unable to clone git repository from " + GIT_REPO_URL, e);
-		}
-	}
-
-	@SuppressWarnings("restriction")
-	private static void importProjectUsingSmartImport() {
-		SmartImportJob job = new SmartImportJob(new File(GIT_REPO_DIRECTORY + File.separator + PROJECT_NAME),
-				Collections.emptySet(), true, true);
-		HashSet<File> directory = new HashSet<File>();
-		directory.add(new File(GIT_REPO_DIRECTORY + File.separator + PROJECT_NAME));
-		job.setDirectoriesToImport(directory);
-		job.run(new NullProgressMonitor());
-		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		OpenShiftUtils.cloneGitRepository(GIT_REPO_DIRECTORY, GIT_REPO_URL, true);
+		OpenShiftUtils.importProjectUsingSmartImport(GIT_REPO_DIRECTORY, PROJECT_NAME);
 	}
 
 	@AfterClass
@@ -213,7 +194,7 @@ public class CreateServerAdapterTest {
 		}
 
 		if (jobExists) {
-			new WaitUntil(new JobIsKilled(JOB_NAME), TimePeriod.LONG);
+			new WaitUntil(new JobIsKilled(JOB_NAME), TimePeriod.VERY_LONG);
 		}
 
 		assertTrue("OpenShift 3 server adapter was not created.",
@@ -233,7 +214,7 @@ public class CreateServerAdapterTest {
 	@After
 	public void removeAdapterIfExists() {
 		try {
-			new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+			new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 			new ServerAdapter(Version.OPENSHIFT3, "eap-app", "Service").delete();
 		} catch (OpenShiftToolsException ex) {
 			// do nothing, adapter does not exists

@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage.Direction;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +43,7 @@ import org.junit.runner.RunWith;
  * @author adietish@redhat.com
  */
 @RunWith(RedDeerSuite.class)
-public class AbstractOpenShiftWizardPageTest {
+public class AbstractOpenShiftWizardPageTest extends AbstractTest  {
 
 	private OpenShiftTestPage page1;
 	private OpenShiftTestPage page2;

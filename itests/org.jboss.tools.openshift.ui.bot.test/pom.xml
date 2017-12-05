@@ -51,6 +51,11 @@
 								<id>org.jboss.tools.central.feature.feature.group</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
+							<requirement>
+								<type>p2-installable-unit</type>
+								<id>org.jboss.tools.maven.feature.feature.group</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
 						</extraRequirements>
 					</dependency-resolution>
 					<skip>${skipITests}</skip>

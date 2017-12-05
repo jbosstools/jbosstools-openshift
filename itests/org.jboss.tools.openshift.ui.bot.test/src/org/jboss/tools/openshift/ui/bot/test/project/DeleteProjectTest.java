@@ -28,7 +28,6 @@ import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
@@ -38,7 +37,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.v3.OpenShift3NativeProjectUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
-import org.junit.After;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +46,7 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @CleanConnection
 @RunWith(RedDeerSuite.class)
-public class DeleteProjectTest {
+public class DeleteProjectTest extends AbstractTest {
 
 	@InjectRequirement
 	private OpenShiftConnectionRequirement connectionReq;
@@ -114,11 +113,6 @@ public class DeleteProjectTest {
 
 		assertFalse("Project is still presented in OpenShift explorer under a connection.",
 				connection.projectExists(PROJECT_NAME));
-	}
-	
-	@After
-	public void tearDown() {
-		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 	
 	private class ProjectDoesNotExistInManageOSProject implements WaitCondition{

@@ -13,14 +13,6 @@ package org.jboss.tools.openshift.ui.bot.test.application.v3.adapter;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.util.Display;
 import org.eclipse.reddeer.common.util.ResultRunnable;
@@ -32,6 +24,8 @@ import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -48,25 +42,27 @@ import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsKilled;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob;
-import org.jboss.tools.common.reddeer.utils.FileUtils;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-@OCBinary
+@OpenPerspective(value=JBossPerspective.class)
+@RunWith(RedDeerSuite.class)
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = "eap-app", template = "resources/eap64-basic-s2i.json")
-public class ServerAdapterWizardHandlingTest {
+public class ServerAdapterWizardHandlingTest extends AbstractTest  {
 	
 	private static final String PROJECT_NAME = "kitchensink";
 
@@ -83,30 +79,8 @@ public class ServerAdapterWizardHandlingTest {
 	}
 	
 	private static void cloneGitRepoAndImportProject() {
-		cloneGitRepository();
-		importProjectUsingSmartImport();
-	}
-	
-	private static void cloneGitRepository() {
-		try {
-			FileUtils.deleteDirectory(new File(GIT_REPO_DIRECTORY));
-			Git.cloneRepository().setURI(GIT_REPO_URL).setDirectory(new File(GIT_REPO_DIRECTORY)).call();
-		} catch (GitAPIException|IOException e) {
-			throw new RuntimeException("Unable to clone git repository from " + GIT_REPO_URL, e);
-		}
-	}
-	
-	@SuppressWarnings("restriction")
-	private static void importProjectUsingSmartImport() {
-		SmartImportJob job = new SmartImportJob(new File(GIT_REPO_DIRECTORY + File.separator + PROJECT_NAME),
-				Collections.emptySet(), true, true);
-		HashSet<File> directory = new HashSet<File>();
-		directory.add(new File(GIT_REPO_DIRECTORY + File.separator + PROJECT_NAME));
-		job.setDirectoriesToImport(directory);
-		job.run(new NullProgressMonitor());
-		//TODO Cheatsheet
-		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-	}
+		OpenShiftUtils.cloneGitRepository(GIT_REPO_DIRECTORY, GIT_REPO_URL , true);
+		OpenShiftUtils.importProjectUsingSmartImport(GIT_REPO_DIRECTORY, PROJECT_NAME);	}
 
 	@Test
 	public void testPreselectedConnectionForNewOpenShift3ServerAdapter() {

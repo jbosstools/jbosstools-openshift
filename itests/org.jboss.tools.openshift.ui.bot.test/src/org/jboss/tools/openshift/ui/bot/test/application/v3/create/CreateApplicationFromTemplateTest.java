@@ -17,10 +17,7 @@ import java.io.File;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.hamcrest.Matcher;
-import org.hamcrest.core.StringStartsWith;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
-import org.eclipse.reddeer.common.matcher.RegexMatcher;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
@@ -30,6 +27,8 @@ import org.eclipse.reddeer.eclipse.condition.ProjectExists;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.ui.wizards.datatransfer.ExternalProjectImportWizardDialog;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.BackButton;
@@ -37,10 +36,8 @@ import org.eclipse.reddeer.swt.impl.button.CancelButton;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.button.NextButton;
-import org.eclipse.reddeer.swt.impl.button.NoButton;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
-import org.eclipse.reddeer.swt.impl.button.YesButton;
 import org.eclipse.reddeer.swt.impl.combo.DefaultCombo;
 import org.eclipse.reddeer.swt.impl.link.DefaultLink;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
@@ -52,11 +49,15 @@ import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
+import org.hamcrest.Matcher;
+import org.hamcrest.core.StringStartsWith;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
@@ -67,16 +68,22 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
 import org.jboss.tools.openshift.reddeer.wizard.v3.NewOpenShift3ApplicationWizard;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.TemplateParametersTest;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@OpenPerspective(value=JBossPerspective.class)
+@RunWith(RedDeerSuite.class)
+@OCBinary
 @RequiredBasicConnection
 @CleanConnection
-public class CreateApplicationFromTemplateTest {
+public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	private String gitFolder = "jboss-eap-quickstarts";
 	private String helloworldProject = "jboss-helloworld";
@@ -277,14 +284,8 @@ public class CreateApplicationFromTemplateTest {
 		ProjectExplorer projectExplorer = new ProjectExplorer();
 		projectExplorer.open();
 
-		try {
-			new WaitUntil(new ShellIsAvailable(new WithTextMatcher(new RegexMatcher("Found cheatsheet|Create server adapter"))), TimePeriod.VERY_LONG);
-			new NoButton().click();
-			new DefaultShell("Create server adapter");
-			new NoButton().click();
-		} catch (CoreLayerException ex) {
-			// Swallow, shells are not opened
-		}
+		OpenShiftUtils.handleCheatSheetCreateServerAdapter();
+		
 		new WaitUntil(new ProjectExists(projectName, new ProjectExplorer()), TimePeriod.LONG, false);
 		assertTrue("Project Explorer should contain imported project " + projectName,
 				projectExplorer.containsProject(projectName));
@@ -340,8 +341,7 @@ public class CreateApplicationFromTemplateTest {
 
 	@AfterClass
 	public static void deleteTestsProjectFromWorkspace() {
-		new ProjectExplorer().getProject(TESTS_PROJECT).delete(false);
+		new ProjectExplorer().deleteAllProjects(true);
 		DatastoreOS3.generateProjectName();
-		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 }

@@ -29,6 +29,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,7 +38,7 @@ import org.junit.Test;
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
-public class DeleteResourceTest {
+public class DeleteResourceTest extends AbstractTest  {
 
 	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;

@@ -45,6 +45,7 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
 import org.jboss.tools.openshift.reddeer.view.resources.Service;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +62,7 @@ import org.junit.runner.RunWith;
 @RequiredService(service=OpenShiftResources.NODEJS_SERVICE, 
 template=OpenShiftResources.NODEJS_TEMPLATE)
 
-public class EditResourceLimitsTest {
+public class EditResourceLimitsTest extends AbstractTest {
 
 	@InjectRequirement
 	private OpenShiftProjectRequirement requiredProject;

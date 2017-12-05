@@ -31,7 +31,7 @@ import org.junit.Test;
 @CleanOpenShiftExplorer
 @RequiredBasicConnection
 @RequiredProject
-public class OpenNewApplicationWizardTest {
+public class OpenNewApplicationWizardTest extends AbstractTest {
 	
 	@InjectRequirement
 	OpenShiftProjectRequirement projectReq;

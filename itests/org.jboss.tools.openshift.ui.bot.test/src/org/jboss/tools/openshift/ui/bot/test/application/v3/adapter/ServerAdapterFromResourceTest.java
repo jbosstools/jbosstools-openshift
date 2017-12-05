@@ -26,7 +26,8 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
-import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
@@ -35,12 +36,12 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.styledtext.DefaultStyledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.condition.ServerAdapterExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
-import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -53,21 +54,25 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter.Version;
+import org.jboss.tools.openshift.reddeer.wizard.importapp.ImportApplicationWizard;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenshiftTestInFailureException;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 
+@OpenPerspective(value=JBossPerspective.class)
+@RunWith(RedDeerSuite.class)
 @OCBinary
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(project=DatastoreOS3.TEST_PROJECT, service=OpenShiftResources.NODEJS_SERVICE, template=OpenShiftResources.NODEJS_TEMPLATE)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class ServerAdapterFromResourceTest {
+public class ServerAdapterFromResourceTest extends AbstractTest  {
 	
 	private static final Logger LOGGER = Logger.getLogger(ServerAdapterFromResourceTest.class);
 	private static OpenShiftExplorerView explorer;
@@ -87,6 +92,7 @@ public class ServerAdapterFromResourceTest {
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
 		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
 		
+		ImportApplicationWizard appWizard = new ImportApplicationWizard();
 		try {
 			CheckBox checkBox = new CheckBox("Do not clone - use existing repository");
 			if (checkBox.isEnabled()) {
@@ -96,8 +102,9 @@ public class ServerAdapterFromResourceTest {
 		} catch (RedDeerException ex) {
 			LOGGER.debug("No existing project found, importing");
 		}
-		new FinishButton().click();
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		
+		appWizard.selectExistingBuildConfiguration(OpenShiftResources.NODEJS_APP_DEPLOYMENT_CONFIG);
+		appWizard.finish();
 		new WaitUntil(new OpenShiftResourceExists(Resource.DEPLOYMENT, OpenShiftResources.NODEJS_APP_REPLICATION_CONTROLLER, ResourceState.UNSPECIFIED, DatastoreOS3.TEST_PROJECT), TimePeriod.LONG);
 	}	
 	
