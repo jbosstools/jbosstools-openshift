@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -43,7 +44,7 @@ public class CDK32Server extends CDK3Server {
 				profileName = CDK32Server.MINISHIFT_DEFAULT_PROFILE;
 			}
 			if( profileName != null ) {
-				ArrayList<String> al = new ArrayList<String>();
+				List<String> al = new ArrayList<String>();
 				al.add("--profile");
 				al.add(profileName);
 				al.addAll(Arrays.asList(args));
@@ -52,5 +53,10 @@ public class CDK32Server extends CDK3Server {
 		}
 		return args;
 	}
+
+	public static boolean matchesCDK32(String version) {
+		return version.startsWith("3.") && !(CDK3Server.matchesCDK3(version));
+	}
+
 	
 }

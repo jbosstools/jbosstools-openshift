@@ -56,9 +56,7 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector{
 	}
 	
 	protected boolean matchesExpectedVersion(String version) {
-		if( version.startsWith("3.0") || version.startsWith("3.1.")) 
-			return true;
-		return false;
+		return CDK3Server.matchesCDK3(version);
 	}
 	
 	@Override

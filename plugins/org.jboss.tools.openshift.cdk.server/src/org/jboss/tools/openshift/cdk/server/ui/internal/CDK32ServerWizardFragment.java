@@ -79,7 +79,7 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		if( cdkVers == null ) {
 			return "Cannot determine CDK version.";
 		}
-		if( cdkVers.startsWith("3.") && !cdkVers.startsWith("3.0.") && !cdkVers.startsWith("3.1.")) {
+		if( CDK32Server.matchesCDK32(cdkVers)) {
 			return null;
 		}
 		return "CDK version " + cdkVers + " is not compatible with this server adapter.";

@@ -17,11 +17,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
 public class CDK32RuntimeDetector extends CDK3RuntimeDetector {
 	protected boolean matchesExpectedVersion(String version) {
-		boolean v3 = version.startsWith("3.");
-		boolean not30or31 = !(version.startsWith("3.0.") || version.startsWith("3.1."));
-		if( v3 && not30or31) 
-			return true;
-		return false;
+		return CDK32Server.matchesCDK32(version);
 	}
 	
 	@Override
