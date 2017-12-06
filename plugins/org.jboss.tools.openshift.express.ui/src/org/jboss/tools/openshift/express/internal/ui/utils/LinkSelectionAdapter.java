@@ -22,8 +22,7 @@ public abstract class LinkSelectionAdapter extends SelectionAdapter {
 	private String text;
 
 	public LinkSelectionAdapter(String text) {
-		Assert.isLegal(text != null
-				&& !text.isEmpty());
+		Assert.isLegal(text != null && !text.isEmpty());
 		this.text = text;
 	}
 
@@ -36,5 +35,4 @@ public abstract class LinkSelectionAdapter extends SelectionAdapter {
 
 	protected abstract void doWidgetSelected(SelectionEvent e);
 
-	
 }

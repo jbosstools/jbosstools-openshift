@@ -19,16 +19,16 @@ public class ExtTextPropertyDescriptorTest {
 	public void testCategoryIsSet() {
 		assertEquals("Common", new ExtTextPropertyDescriptor("foo", "bar", "Common").getCategory());
 	}
-	
+
 	@Test
-	public void testDisplayNameFromEnum(){
+	public void testDisplayNameFromEnum() {
 		ExtTextPropertyDescriptor descriptor = new ExtTextPropertyDescriptor(Foo.Bar, "foo");
 		assertEquals("Bar", descriptor.getDisplayName());
 		assertEquals("foo", descriptor.getCategory());
 	}
-	
-	private enum Foo{
+
+	private enum Foo {
 		Bar;
 	}
-	
+
 }

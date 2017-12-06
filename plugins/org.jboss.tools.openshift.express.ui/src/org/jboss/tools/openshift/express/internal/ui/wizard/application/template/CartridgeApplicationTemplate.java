@@ -34,12 +34,12 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 	public ICartridge getStandaloneCartridge() {
 		return cartridge;
 	}
-	
+
 	@Override
 	public Set<ICartridge> getAllCartridges() {
-		return Collections.<ICartridge> singleton(cartridge);
+		return Collections.<ICartridge>singleton(cartridge);
 	}
-	
+
 	@Override
 	public boolean canAddRemoveCartridges() {
 		return true;
@@ -54,7 +54,7 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 	public boolean isCodeAnything() {
 		return cartridge.isDownloadable();
 	}
-	
+
 	@Override
 	public boolean isMatching(String expression) {
 		if (super.isMatching(expression)) {
@@ -65,8 +65,7 @@ public class CartridgeApplicationTemplate extends AbstractApplicationTemplate im
 			return false;
 		}
 
-		return isMatching(
-				StringUtils.toLowerCase(expression), StringUtils.toLowerCase(cartridge.getName()));
+		return isMatching(StringUtils.toLowerCase(expression), StringUtils.toLowerCase(cartridge.getName()));
 	}
 
 	@Override

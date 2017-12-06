@@ -38,40 +38,41 @@ public class OpenShiftServerTestUtils {
 
 	public static void cleanup() {
 		IServer[] all = ServerCore.getServers();
-		for( int i = 0; i < all.length; i++ ) {
+		for (int i = 0; i < all.length; i++) {
 			try {
 				all[i].delete();
-			} catch(CoreException ce) {
+			} catch (CoreException ce) {
 				ce.printStackTrace();
 			}
 		}
 	}
 
-	public static IServer createOpenshift3Server(String name, String profile) throws CoreException, UnsupportedEncodingException, MalformedURLException {
+	public static IServer createOpenshift3Server(String name, String profile)
+			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		return createOpenshift3Server(name, profile, null, null);
 	}
 
-	public static IServer createOpenshift3Server(String name, String profile, IService service, IOpenShiftConnection connection)
-			throws CoreException, UnsupportedEncodingException, MalformedURLException {
+	public static IServer createOpenshift3Server(String name, String profile, IService service,
+			IOpenShiftConnection connection) throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		IServerWorkingCopy workingCopy = createOpenshift3ServerWorkingCopy(name, profile, service, connection);
 		return workingCopy.save(false, null);
 	}
 
-	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name, String profile, IService service, IOpenShiftConnection connection)
-			throws CoreException, UnsupportedEncodingException, MalformedURLException {
+	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name, String profile, IService service,
+			IOpenShiftConnection connection) throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		IServerType type = OpenShiftServerUtils.getServerType();
 		IServerWorkingCopy wc = type.createServer(name, null, null);
-		String serviceId = service == null? null : OpenShiftResourceUniqueId.get(service);
-		String connectionUrl = connection == null? null : ConnectionURL.forConnection(connection).getUrl();
-		OpenShiftServerUtils.updateServer(
-				name, "http://www.example.com", "dummy", connectionUrl, "dummy", serviceId, "dummy", "dummy", "dummy", "dummy", "dummy", wc);
+		String serviceId = service == null ? null : OpenShiftResourceUniqueId.get(service);
+		String connectionUrl = connection == null ? null : ConnectionURL.forConnection(connection).getUrl();
+		OpenShiftServerUtils.updateServer(name, "http://www.example.com", "dummy", connectionUrl, "dummy", serviceId,
+				"dummy", "dummy", "dummy", "dummy", "dummy", wc);
 		if (profile != null) {
 			ServerProfileModel.setProfile(wc, profile);
 		}
 		return wc;
 	}
 
-	public static IServer mockServer(IServerWorkingCopy workingCopy, IResource resource, Connection connection) 
+	public static IServer mockServer(IServerWorkingCopy workingCopy, IResource resource, Connection connection)
 			throws UnsupportedEncodingException, MalformedURLException {
 		IServer server = mock(IServer.class);
 

@@ -85,12 +85,12 @@ public class ConsoleUtils implements IConsoleUtility {
 		displayConsoleView(console);
 		return console;
 	}
-	
+
 	private static String getMessageConsoleName(final IApplication application) {
-		return MessageFormat.format(
-				"Snapshot Restore/Deploy for application {0} ({1}):",
-				application.getName(), application.getDomain().getId());
+		return MessageFormat.format("Snapshot Restore/Deploy for application {0} ({1}):", application.getName(),
+				application.getDomain().getId());
 	}
+
 	/**
 	 * Displays the given console in the consoles view which becomes visible if
 	 * it was not the case before.
@@ -100,7 +100,7 @@ public class ConsoleUtils implements IConsoleUtility {
 	public static void displayConsoleView(final IConsole console) {
 		org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils.displayConsoleView(console);
 	}
-	
+
 	public static OutputStream getConsoleOutputStream(IServer server) {
 		MessageConsole console = ConsoleUtils.findMessageConsole(server.getId());
 		if (console == null) {
@@ -112,18 +112,18 @@ public class ConsoleUtils implements IConsoleUtility {
 	public static void appendGitPushToConsole(IServer server, PushOperationResult result) {
 		appendToConsole(server, getPushResultAsString(result));
 	}
-	
+
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1
 	private static final String SPACE = " "; //$NON-NLS-1$
 	private static final String NL = "\n";//$NON-NLS-1$
-	
+
 	private static String getPushResultAsString(PushOperationResult pushOperationResult) {
 		StringBuilder result = new StringBuilder(EMPTY_STRING);
 		result.append(getPushErrors(pushOperationResult));
 		result.append(NL);
 		Set<URIish> uris = pushOperationResult.getURIs();
 		Iterator<URIish> i = uris.iterator();
-		while(i.hasNext()) {
+		while (i.hasNext()) {
 			URIish uri = i.next();
 			if (pushOperationResult.getPushResult(uri) == null) {
 				continue;
@@ -134,9 +134,9 @@ public class ConsoleUtils implements IConsoleUtility {
 		}
 		return result.toString();
 	}
-	
-	private static String getOneResultAsString(PushOperationResult pushOperationResult, 
-			URIish uri, RemoteRefUpdate update) {
+
+	private static String getOneResultAsString(PushOperationResult pushOperationResult, URIish uri,
+			RemoteRefUpdate update) {
 		StringBuilder result = new StringBuilder(EMPTY_STRING);
 		result.append("Repository");
 		result.append(SPACE);
@@ -146,8 +146,7 @@ public class ConsoleUtils implements IConsoleUtility {
 		String message = update.getMessage();
 		if (message != null)
 			result.append(message).append(Text.DELIMITER);
-		StringBuilder messagesBuffer = new StringBuilder(pushOperationResult
-				.getPushResult(uri).getMessages());
+		StringBuilder messagesBuffer = new StringBuilder(pushOperationResult.getPushResult(uri).getMessages());
 		trim(messagesBuffer);
 		if (messagesBuffer.length() > 0)
 			result.append(messagesBuffer).append(Text.DELIMITER);
@@ -160,9 +159,7 @@ public class ConsoleUtils implements IConsoleUtility {
 		while (s.length() > 0 && (s.charAt(0) == '\n' || s.charAt(0) == '\r'))
 			s.deleteCharAt(0);
 		// remove trailing line breaks
-		while (s.length() > 0
-				&& (s.charAt(s.length() - 1) == '\n' || s
-						.charAt(s.length() - 1) == '\r'))
+		while (s.length() > 0 && (s.charAt(s.length() - 1) == '\n' || s.charAt(s.length() - 1) == '\r'))
 			s.deleteCharAt(s.length() - 1);
 	}
 
@@ -179,8 +176,7 @@ public class ConsoleUtils implements IConsoleUtility {
 		return messages.toString();
 	}
 
-	
-	public static void appendToConsole(IServer server, String message ) {
+	public static void appendToConsole(IServer server, String message) {
 		if (ExpressServerUtils.isExpressRuntime(server)) {
 			final MessageConsole console = ConsoleUtils.findMessageConsole(server.getId());
 			MessageConsoleStream newMessageStream = console.newMessageStream();

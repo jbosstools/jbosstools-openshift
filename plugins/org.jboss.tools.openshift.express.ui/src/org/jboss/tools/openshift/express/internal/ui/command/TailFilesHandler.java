@@ -103,11 +103,12 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 		if (WizardUtils.openWizardDialog(wizard, shell) == Window.OK) {
 			try {
 				final String host = new URL(application.getApplicationUrl()).getHost();
-				for(IGearGroup gearGroup : wizard.getSelectedGearGroups()) {
+				for (IGearGroup gearGroup : wizard.getSelectedGearGroups()) {
 					final Collection<IGear> gears = gearGroup.getGears();
 					final String cartridgeNames = GearGroupsUtils.getCartridgeDisplayNames(gearGroup);
-					for(IGear gear : gears) {
-						final MessageConsole console = ConsoleUtils.findMessageConsole(createConsoleId(host, gear.getId(), cartridgeNames));
+					for (IGear gear : gears) {
+						final MessageConsole console = ConsoleUtils
+								.findMessageConsole(createConsoleId(host, gear.getId(), cartridgeNames));
 						ConsoleUtils.displayConsoleView(console);
 						if (!this.consoleWorkers.containsKey(console.getName())) {
 							launchTailServerJob(gear.getSshUrl(), wizard.getFilePattern(), console);
@@ -115,37 +116,35 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 					}
 				}
 			} catch (MalformedURLException e) {
-				return ExpressUIActivator.createErrorStatus(
-						NLS.bind("Could tail files for application {0}", application.getName()), e);
+				return ExpressUIActivator
+						.createErrorStatus(NLS.bind("Could tail files for application {0}", application.getName()), e);
 			}
 		}
 		return Status.OK_STATUS;
 	}
 
 	private static String createConsoleId(final String host, final String gearId, final String cartridgeNames) {
-		return host + " [" + cartridgeNames + " on gear #" + gearId + "]" ;
+		return host + " [" + cartridgeNames + " on gear #" + gearId + "]";
 	}
 
 	private IStatus execute(final IServer server, final Shell shell) throws MalformedURLException {
-		if (!ExpressServerUtils.isExpressRuntime(server)
-				|| !ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
-			return ExpressUIActivator.createErrorStatus(
-					NLS.bind("Server {0} is not an OpenShift Server Adapter", server.getName()));
+		if (!ExpressServerUtils.isExpressRuntime(server) || !ExpressServerUtils.isInOpenshiftBehaviourMode(server)) {
+			return ExpressUIActivator
+					.createErrorStatus(NLS.bind("Server {0} is not an OpenShift Server Adapter", server.getName()));
 		}
 		final LoadApplicationJob applicationJob = new LoadApplicationJob(server);
-		new JobChainBuilder(applicationJob)
-			.runWhenSuccessfullyDone(new UIJob("Tail files") {
-				
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					IApplication application = applicationJob.getApplication();
-					if (application == null) {
-						return ExpressUIActivator.createErrorStatus(
-								NLS.bind("Could not retrieve application for server adapter {0}", server.getName()));
-					}
-					return execute(application, shell);
+		new JobChainBuilder(applicationJob).runWhenSuccessfullyDone(new UIJob("Tail files") {
+
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				IApplication application = applicationJob.getApplication();
+				if (application == null) {
+					return ExpressUIActivator.createErrorStatus(
+							NLS.bind("Could not retrieve application for server adapter {0}", server.getName()));
 				}
-			}).schedule();
+				return execute(application, shell);
+			}
+		}).schedule();
 		return Status.OK_STATUS;
 	}
 
@@ -154,17 +153,16 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					final TailServerLogWorker tailServerLogWorker =
-							startTailProcess(sshUrl, filePattern, console);
+					final TailServerLogWorker tailServerLogWorker = startTailProcess(sshUrl, filePattern, console);
 					consoleWorkers.put(console.getName(), tailServerLogWorker);
 					Thread thread = new Thread(tailServerLogWorker);
 					thread.start();
 				} catch (IOException e) {
-					return ExpressUIActivator.createErrorStatus(
-							NLS.bind("Failed to tail files from ''{0}''", sshUrl), e);
+					return ExpressUIActivator.createErrorStatus(NLS.bind("Failed to tail files from ''{0}''", sshUrl),
+							e);
 				} catch (URISyntaxException e) {
-					return ExpressUIActivator.createErrorStatus(
-							NLS.bind("Failed to tail files from ''{0}''", sshUrl), e);
+					return ExpressUIActivator.createErrorStatus(NLS.bind("Failed to tail files from ''{0}''", sshUrl),
+							e);
 				}
 				return Status.OK_STATUS;
 			}
@@ -187,21 +185,21 @@ public class TailFilesHandler extends AbstractHandler implements IConsoleListene
 	 * @throws URISyntaxException 
 	 * @throws IOException 
 	 */
-	private TailServerLogWorker startTailProcess(final String sshUrl, final String optionsAndFile, final MessageConsole console) throws URISyntaxException, IOException {
+	private TailServerLogWorker startTailProcess(final String sshUrl, final String optionsAndFile,
+			final MessageConsole console) throws URISyntaxException, IOException {
 		JSch.setLogger(new JschToEclipseLogger());
 		final SshSessionFactory sshSessionFactory = SshSessionFactory.getInstance();
 		URI uri = new URI(sshUrl);
 		uri.getHost();
 		final URIish urish = new URIish().setHost(uri.getHost()).setUser(uri.getUserInfo());
-		RemoteSession remoteSession =
-				sshSessionFactory.getSession(urish, CredentialsProvider.getDefault(), FS.DETECTED, 0);
+		RemoteSession remoteSession = sshSessionFactory.getSession(urish, CredentialsProvider.getDefault(), FS.DETECTED,
+				0);
 		final String command = new TailCommandBuilder(optionsAndFile).build();
 
 		Logger.debug("ssh command to execute: " + command);
 		Process process = remoteSession.exec(command, 0);
 		return new TailServerLogWorker(console, process, remoteSession);
 	}
-
 
 	@Override
 	public void consolesAdded(IConsole[] consoles) {

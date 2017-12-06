@@ -29,10 +29,10 @@ public class GearGroupsUtils {
 	 */
 	public static String getCartridgeDisplayNames(final IGearGroup gearGroup) {
 		final StringBuffer cartridgeNamesBuffer = new StringBuffer();
-		for(Iterator<ICartridge> iterator = gearGroup.getCartridges().iterator(); iterator.hasNext();) {
+		for (Iterator<ICartridge> iterator = gearGroup.getCartridges().iterator(); iterator.hasNext();) {
 			ICartridge cartridge = iterator.next();
 			cartridgeNamesBuffer.append(cartridge.getDisplayName());
-			if(iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				cartridgeNamesBuffer.append(", ");
 			}
 		}

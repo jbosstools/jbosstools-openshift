@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
 import org.eclipse.core.runtime.CoreException;
@@ -26,89 +26,91 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 	private boolean enabled = true;
+
 	public void enable() {
 		enabled = true;
 	}
+
 	public void disable() {
 		enabled = false;
 	}
-	
-	
+
 	@Override
 	public void serverChanged(final ServerEvent event) {
-		if( enabled && canHandleServer(event.getServer())) {
-			if( serverSwitchesToState(event, IServer.STATE_STARTED)) {
+		if (enabled && canHandleServer(event.getServer())) {
+			if (serverSwitchesToState(event, IServer.STATE_STARTED)) {
 				scheduleConfigureFrameworksJob(event);
-			} else if( serverSwitchesToState(event, IServer.STATE_STOPPED)) {
+			} else if (serverSwitchesToState(event, IServer.STATE_STOPPED)) {
 				IServer s = event.getServer();
 				ServiceManagerEnvironmentLoader.type(s).clearServiceManagerEnvironment(event.getServer());
 			}
 		}
 	}
-	
+
 	private void scheduleConfigureFrameworksJob(final ServerEvent event) {
 		new Job("Inspecting CDK environment...") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					if( canHandleServer(event.getServer()))
+					if (canHandleServer(event.getServer()))
 						configureFrameworks(event.getServer());
 					return Status.OK_STATUS;
-				} catch(CoreException ce) {
+				} catch (CoreException ce) {
 					return ce.getStatus();
 				}
 			}
 		}.schedule(1000);
 	}
-	
+
 	protected void configureFrameworks(IServer server) throws CoreException {
-		ServiceManagerEnvironment adb = ServiceManagerEnvironmentLoader.type(server).getOrLoadServiceManagerEnvironment(server, true);
-		if( adb != null ) {
+		ServiceManagerEnvironment adb = ServiceManagerEnvironmentLoader.type(server)
+				.getOrLoadServiceManagerEnvironment(server, true);
+		if (adb != null) {
 			configureOpenshift(server, adb);
 			configureDocker(server, adb);
 		} else {
-			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Unable to configure docker and openshift. Calls to vagrant service-manager are returning empty environments."));
+			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID,
+					"Unable to configure docker and openshift. Calls to vagrant service-manager are returning empty environments."));
 		}
 	}
-	
 
 	@Override
 	public boolean canHandleServer(IServer server) {
-		if( server.getServerType().getId().equals(CDKServer.CDK_SERVER_TYPE)) 
+		if (server.getServerType().getId().equals(CDKServer.CDK_SERVER_TYPE))
 			return true;
-		if( server.getServerType().getId().equals(CDKServer.CDK_V3_SERVER_TYPE)) 
+		if (server.getServerType().getId().equals(CDKServer.CDK_V3_SERVER_TYPE))
 			return true;
-		if( server.getServerType().getId().equals(CDKServer.CDK_V32_SERVER_TYPE)) 
+		if (server.getServerType().getId().equals(CDKServer.CDK_V32_SERVER_TYPE))
 			return true;
 		return false;
 	}
-	
+
 	private void configureDocker(IServer server, ServiceManagerEnvironment adb) {
 		try {
 			CDKDockerUtility util = new CDKDockerUtility();
 			IDockerConnection dc = util.findDockerConnection(server.getName());
-			if( dc != null ) {
+			if (dc != null) {
 				// update
 				util.updateConnection(dc, server.getName(), adb);
 			} else {
 				// create
 				util.createDockerConnection(server, adb);
 			}
-		} catch(DockerException de) {
-			CDKCoreActivator.pluginLog().logError(
-					"Error while creating docker connection for server " + server.getName(), de);
+		} catch (DockerException de) {
+			CDKCoreActivator.pluginLog()
+					.logError("Error while creating docker connection for server " + server.getName(), de);
 		}
 	}
-	
+
 	private void configureOpenshift(IServer server, ServiceManagerEnvironment adb) {
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
 		IConnection con = util.findExistingOpenshiftConnection(server, adb);
-		if( con == null ) {
+		if (con == null) {
 			con = util.createOpenshiftConnection(adb);
 		} else {
 			util.updateOpenshiftConnection(adb, con);
 		}
-		if( con != null ) {
+		if (con != null) {
 			con.connect();
 		}
 	}

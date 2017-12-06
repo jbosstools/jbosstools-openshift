@@ -15,59 +15,59 @@ import java.util.List;
 
 public class ContainerElement implements IProperty {
 
-		private final String property;
-		private final List<Object> children;
-		private final ContainerElement parent;
+	private final String property;
+	private final List<Object> children;
+	private final ContainerElement parent;
 
-		public ContainerElement(String property) {
-			this(property, null);
-		}
-
-		public ContainerElement(String property, ContainerElement parent) {
-			this.property = property;
-			this.children = new ArrayList<>();
-			this.parent = parent;
-		}
-
-		public final String getProperty() {
-			return property;
-		}
-
-		public final void add(StringElement child) {
-			children.add(child);
-		}
-
-		public final void add(ContainerElement child) {
-			children.add(child);
-		}
-
-		@Override
-		public final Object[] getChildren() {
-			return children.toArray();
-		}
-
-		@Override
-		public boolean hasChildren() {
-			return !children.isEmpty();
-		}
-
-		@Override
-		public final ContainerElement getParent() {
-			return parent;
-		}
-
-		@Override
-		public boolean isLink() {
-			return false;
-		}
-
-		@Override
-		public String getName() {
-			return property;
-		}
-
-		@Override
-		public String getValue() {
-			return null;
-		}
+	public ContainerElement(String property) {
+		this(property, null);
 	}
+
+	public ContainerElement(String property, ContainerElement parent) {
+		this.property = property;
+		this.children = new ArrayList<>();
+		this.parent = parent;
+	}
+
+	public final String getProperty() {
+		return property;
+	}
+
+	public final void add(StringElement child) {
+		children.add(child);
+	}
+
+	public final void add(ContainerElement child) {
+		children.add(child);
+	}
+
+	@Override
+	public final Object[] getChildren() {
+		return children.toArray();
+	}
+
+	@Override
+	public boolean hasChildren() {
+		return !children.isEmpty();
+	}
+
+	@Override
+	public final ContainerElement getParent() {
+		return parent;
+	}
+
+	@Override
+	public boolean isLink() {
+		return false;
+	}
+
+	@Override
+	public String getName() {
+		return property;
+	}
+
+	@Override
+	public String getValue() {
+		return null;
+	}
+}

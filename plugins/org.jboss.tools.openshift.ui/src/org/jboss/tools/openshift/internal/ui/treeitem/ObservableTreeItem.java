@@ -63,7 +63,7 @@ public class ObservableTreeItem extends ObservableUIPojo {
 	public boolean isLoaded() {
 		return children != null;
 	}
-	
+
 	protected List<? extends Object> loadChildren() {
 		if (factory != null) {
 			return factory.createChildren(model);

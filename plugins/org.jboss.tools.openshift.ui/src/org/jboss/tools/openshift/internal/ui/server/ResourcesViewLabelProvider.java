@@ -30,20 +30,20 @@ public class ResourcesViewLabelProvider extends StyledCellLabelProvider {
 		Object element = cell.getElement();
 		if (!(element instanceof ObservableTreeItem)) {
 			return;
-		} 
-		if (!(((ObservableTreeItem) element).getModel() instanceof IResource)) {
-				return;
 		}
-		
+		if (!(((ObservableTreeItem) element).getModel() instanceof IResource)) {
+			return;
+		}
+
 		IResource resource = (IResource) ((ObservableTreeItem) element).getModel();
-		
+
 		StyledString text = new StyledString();
 		if (resource instanceof com.openshift.restclient.model.IProject) {
 			createProjectLabel(text, (com.openshift.restclient.model.IProject) resource);
 		} else if (resource instanceof IService) {
 			createServiceLabel(text, (IService) resource);
 		} else if (resource instanceof IReplicationController) {
-		    createReplicationControllerLabel(text, (IReplicationController) resource);
+			createReplicationControllerLabel(text, (IReplicationController) resource);
 		}
 
 		cell.setText(text.toString());
@@ -51,13 +51,14 @@ public class ResourcesViewLabelProvider extends StyledCellLabelProvider {
 		super.update(cell);
 	}
 
-    private void createProjectLabel(StyledString text, com.openshift.restclient.model.IProject resource) {
+	private void createProjectLabel(StyledString text, com.openshift.restclient.model.IProject resource) {
 		text.append(resource.getName());
 	}
 
 	private void createServiceLabel(StyledString text, IService service) {
 		text.append(service.getName());
-		String selectorsDecoration = org.jboss.tools.openshift.common.core.utils.StringUtils.toString(service.getSelector());
+		String selectorsDecoration = org.jboss.tools.openshift.common.core.utils.StringUtils
+				.toString(service.getSelector());
 		if (!StringUtils.isEmpty(selectorsDecoration)) {
 			text.append(" ", StyledString.DECORATIONS_STYLER);
 			text.append(selectorsDecoration, StyledString.DECORATIONS_STYLER);
@@ -65,12 +66,13 @@ public class ResourcesViewLabelProvider extends StyledCellLabelProvider {
 	}
 
 	private void createReplicationControllerLabel(StyledString text, IReplicationController rc) {
-        text.append(rc.getName());
-        String selectorsDecoration = org.jboss.tools.openshift.common.core.utils.StringUtils.toString(rc.getReplicaSelector());
-        if (!StringUtils.isEmpty(selectorsDecoration)) {
-            text.append(" ", StyledString.DECORATIONS_STYLER);
-            text.append(selectorsDecoration, StyledString.DECORATIONS_STYLER);
-        }
-    }
+		text.append(rc.getName());
+		String selectorsDecoration = org.jboss.tools.openshift.common.core.utils.StringUtils
+				.toString(rc.getReplicaSelector());
+		if (!StringUtils.isEmpty(selectorsDecoration)) {
+			text.append(" ", StyledString.DECORATIONS_STYLER);
+			text.append(selectorsDecoration, StyledString.DECORATIONS_STYLER);
+		}
+	}
 
 }

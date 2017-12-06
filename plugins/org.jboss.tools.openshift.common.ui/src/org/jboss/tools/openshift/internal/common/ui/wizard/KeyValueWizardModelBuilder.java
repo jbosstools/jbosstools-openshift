@@ -18,7 +18,7 @@ import org.eclipse.core.databinding.validation.IValidator;
  * @param <T extends IKeyValueItem> A type that is being edited
  */
 public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
-	
+
 	private String title;
 	private String description;
 	private IValidator keyAfterConvertValidator;
@@ -36,70 +36,64 @@ public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
 	public KeyValueWizardModelBuilder() {
 		this(null);
 	}
-	
-	public KeyValueWizardModelBuilder(T  label) {
+
+	public KeyValueWizardModelBuilder(T label) {
 		if (label == null) {
 			return;
 		}
 		this.key = label.getKey();
 		this.value = label.getValue();
 	}
-	
-	public  IKeyValueWizardModel<T> build(){
-		KeyValueWizardModel<T> model = new KeyValueWizardModel<>(
-				windowTitle,
-				title,
-				keyLabel, 
-				valueLabel,
-				description,
-				groupLabel,
-				keyAfterConvertValidator,
-				valueAfterConvertValidator,
-				keyEditable);
+
+	public IKeyValueWizardModel<T> build() {
+		KeyValueWizardModel<T> model = new KeyValueWizardModel<>(windowTitle, title, keyLabel, valueLabel, description,
+				groupLabel, keyAfterConvertValidator, valueAfterConvertValidator, keyEditable);
 		model.setKey(key);
 		model.setValue(value);
 		model.setKeyDescription(keyDescription);
 		model.setValueDescription(valueDescription);
 		return model;
-	}		
-	public KeyValueWizardModelBuilder<T> editableKey(boolean editable){
-		this.keyEditable  = editable;
+	}
+
+	public KeyValueWizardModelBuilder<T> editableKey(boolean editable) {
+		this.keyEditable = editable;
 		return this;
 	}
-	public KeyValueWizardModelBuilder<T>  keyLabel(String label) {
+
+	public KeyValueWizardModelBuilder<T> keyLabel(String label) {
 		this.keyLabel = label;
 		return this;
 	}
-	
-	public KeyValueWizardModelBuilder<T>  valueLabel(String label) {
+
+	public KeyValueWizardModelBuilder<T> valueLabel(String label) {
 		this.valueLabel = label;
 		return this;
 	}
-	
-	public KeyValueWizardModelBuilder<T>  keyDescription(String keyDescription) {
+
+	public KeyValueWizardModelBuilder<T> keyDescription(String keyDescription) {
 		this.keyDescription = keyDescription;
 		return this;
 	}
-	
-	public KeyValueWizardModelBuilder<T>  valueDescription(String valueDescription) {
+
+	public KeyValueWizardModelBuilder<T> valueDescription(String valueDescription) {
 		this.valueDescription = valueDescription;
 		return this;
 	}
-	
-	public KeyValueWizardModelBuilder<T>  title(String title) {
+
+	public KeyValueWizardModelBuilder<T> title(String title) {
 		this.title = title;
 		return this;
 	}
-	
+
 	public KeyValueWizardModelBuilder<T> description(String description) {
 		this.description = description;
 		return this;
 	}
 
-	public KeyValueWizardModelBuilder<T>  keyAfterConvertValidator(IValidator validator) {
+	public KeyValueWizardModelBuilder<T> keyAfterConvertValidator(IValidator validator) {
 		this.keyAfterConvertValidator = validator;
 		return this;
-	}	
+	}
 
 	public KeyValueWizardModelBuilder<T> valueAfterConvertValidator(IValidator validator) {
 		this.valueAfterConvertValidator = validator;
@@ -110,7 +104,7 @@ public class KeyValueWizardModelBuilder<T extends IKeyValueItem> {
 		this.groupLabel = groupLabel;
 		return this;
 	}
-	
+
 	public KeyValueWizardModelBuilder<T> windowTitle(String windowTitle) {
 		this.windowTitle = windowTitle;
 		return this;

@@ -40,10 +40,10 @@ public class ExpressExplorerLabelProvider extends BaseExplorerLabelProvider {
 		}
 		if (element instanceof IApplication) {
 			return ExpressImages.QUERY_IMG;
-		} 
+		}
 		if (element instanceof IEmbeddedCartridge) {
 			return ExpressImages.TASK_REPO_IMG;
-		} 
+		}
 		return super.getImage(element);
 	}
 
@@ -87,9 +87,8 @@ public class ExpressExplorerLabelProvider extends BaseExplorerLabelProvider {
 
 	private StyledString createStyledString(IDomain domain) {
 		String id = domain.getId();
-		String fullName = ExpressResourceLabelUtils.toString(domain); 
-		String label = 
-				new StringBuilder(id).append(' ').append(fullName).toString();
+		String fullName = ExpressResourceLabelUtils.toString(domain);
+		String label = new StringBuilder(id).append(' ').append(fullName).toString();
 
 		StyledString styledString = new StyledString(label);
 		styledString.setStyle(id.length() + 1, fullName.length(), StyledString.QUALIFIER_STYLER);

@@ -60,11 +60,9 @@ public class SSLCertificateUtils {
 	 * @throws CertificateEncodingException
 	 */
 	public static String toString(X509Certificate certificate) throws CertificateEncodingException {
-		StringBuilder sb = new StringBuilder()
-			.append(BEGIN_CERTIFICATE_MARKER)
-			.append(Base64.getEncoder().encodeToString(certificate.getEncoded()))
-			.append(END_CERTIFICATE_MARKER);
+		StringBuilder sb = new StringBuilder().append(BEGIN_CERTIFICATE_MARKER)
+				.append(Base64.getEncoder().encodeToString(certificate.getEncoded())).append(END_CERTIFICATE_MARKER);
 		return sb.toString();
 	}
-	
+
 }

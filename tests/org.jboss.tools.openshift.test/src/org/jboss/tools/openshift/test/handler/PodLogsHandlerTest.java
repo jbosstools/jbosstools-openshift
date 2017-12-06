@@ -38,17 +38,21 @@ import com.openshift.restclient.model.IPod;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PodLogsHandlerTest {
-	
-	@Mock private IBuild build;
-	@Mock private IResourceWrapper<IBuild, ?> uiModel;
-	@Mock private IPod pod;
-	@Mock private IContainer container;
-	
+
+	@Mock
+	private IBuild build;
+	@Mock
+	private IResourceWrapper<IBuild, ?> uiModel;
+	@Mock
+	private IPod pod;
+	@Mock
+	private IContainer container;
+
 	private TestPodLogsHandler handler;
 	@SuppressWarnings("rawtypes")
 	private Map parameters = new HashMap();
 	private ExecutionEvent event;
-	
+
 	@Before
 	public void setUp() {
 		handler = spy(new TestPodLogsHandler());
@@ -62,45 +66,45 @@ public class PodLogsHandlerTest {
 		thenTheLogsShouldBeShown();
 	}
 
-    @Test
-    public void testGetLogsFromPodWhenSucceeded() throws ExecutionException {
-        givenAPodIsSelected("Succeeded");
-        handler.execute(event);
-        thenTheLogsShouldBeShown();
-    }
+	@Test
+	public void testGetLogsFromPodWhenSucceeded() throws ExecutionException {
+		givenAPodIsSelected("Succeeded");
+		handler.execute(event);
+		thenTheLogsShouldBeShown();
+	}
 
-    @Test
-    public void testGetLogsFromPodWhenFailed() throws ExecutionException {
-        givenAPodIsSelected("Failed");
-        handler.execute(event);
-        thenTheLogsShouldBeShown();
-    }
+	@Test
+	public void testGetLogsFromPodWhenFailed() throws ExecutionException {
+		givenAPodIsSelected("Failed");
+		handler.execute(event);
+		thenTheLogsShouldBeShown();
+	}
 
-    @Test
-    public void testGetLogsFromPodWhenCompleted() throws ExecutionException {
-        givenAPodIsSelected("Completed");
-        handler.execute(event);
-        thenTheLogsShouldBeShown();
-    }
+	@Test
+	public void testGetLogsFromPodWhenCompleted() throws ExecutionException {
+		givenAPodIsSelected("Completed");
+		handler.execute(event);
+		thenTheLogsShouldBeShown();
+	}
 
-    @Test
-    public void testGetLogsFromPodWhenPending() throws ExecutionException {
-        givenAPodIsSelected("Pending");
-        handler.execute(event);
-        thenInvalidStateShouldBeShown("Pending");
-    }
+	@Test
+	public void testGetLogsFromPodWhenPending() throws ExecutionException {
+		givenAPodIsSelected("Pending");
+		handler.execute(event);
+		thenInvalidStateShouldBeShown("Pending");
+	}
 
-    @Test
-    public void testGetLogsFromPodWhenUnknown() throws ExecutionException {
-        givenAPodIsSelected("Unknown");
-        handler.execute(event);
-        thenInvalidStateShouldBeShown("Unknown");
-    }
+	@Test
+	public void testGetLogsFromPodWhenUnknown() throws ExecutionException {
+		givenAPodIsSelected("Unknown");
+		handler.execute(event);
+		thenInvalidStateShouldBeShown("Unknown");
+	}
 
-    private void givenAPodIsSelected(String status) {
-	    doReturn(status).when(pod).getStatus();
-	    doReturn(Arrays.asList(container)).when(pod).getContainers();
-	    doReturn(pod).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IPod.class));
+	private void givenAPodIsSelected(String status) {
+		doReturn(status).when(pod).getStatus();
+		doReturn(Arrays.asList(container)).when(pod).getContainers();
+		doReturn(pod).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IPod.class));
 	}
 
 	private void thenTheLogsShouldBeShown() {
@@ -108,32 +112,33 @@ public class PodLogsHandlerTest {
 		verify(handler, times(0)).showDialog(any(ExecutionEvent.class), anyString(), anyString());
 	}
 
-    private void thenInvalidStateShouldBeShown(String status) {
-        verify(handler, times(1)).showLogs(any(), any());
-        verify(handler, times(1)).showDialog(any(ExecutionEvent.class), anyString(), eq(NLS.bind(PodLogsHandler.INVALID_POD_STATUS_MESSAGE,  status)));
-    }
+	private void thenInvalidStateShouldBeShown(String status) {
+		verify(handler, times(1)).showLogs(any(), any());
+		verify(handler, times(1)).showDialog(any(ExecutionEvent.class), anyString(),
+				eq(NLS.bind(PodLogsHandler.INVALID_POD_STATUS_MESSAGE, status)));
+	}
 
-    public static class TestPodLogsHandler extends PodLogsHandler {
-        @Override
-        public Object execute(ExecutionEvent event) throws ExecutionException {
-            handleEvent(event);
-            return null;
-        }
+	public static class TestPodLogsHandler extends PodLogsHandler {
+		@Override
+		public Object execute(ExecutionEvent event) throws ExecutionException {
+			handleEvent(event);
+			return null;
+		}
 
-        @Override
-        public <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
-            return super.getSelectedElement(event, klass);
-        }
+		@Override
+		public <T> T getSelectedElement(ExecutionEvent event, Class<T> klass) {
+			return super.getSelectedElement(event, klass);
+		}
 
-        @Override
-        protected void showLogs(IPod pod, ExecutionEvent event) {
-            super.showLogs(pod, event);
-        }
+		@Override
+		protected void showLogs(IPod pod, ExecutionEvent event) {
+			super.showLogs(pod, event);
+		}
 
-        @Override
-        protected void showDialog(ExecutionEvent event, String title, String message) {
-            //suppressed for non UI interactions
-        }
-    }
+		@Override
+		protected void showDialog(ExecutionEvent event, String title, String message) {
+			//suppressed for non UI interactions
+		}
+	}
 
 }

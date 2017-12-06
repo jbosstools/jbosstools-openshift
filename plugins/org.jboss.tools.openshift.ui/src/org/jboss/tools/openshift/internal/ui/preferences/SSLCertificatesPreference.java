@@ -42,7 +42,7 @@ public class SSLCertificatesPreference {
 	/** key for deprecated incompletely stored ssl certificates **/
 	@SuppressWarnings("unused")
 	private final static String ALLOWED_CERTIFICATES = "allowed_certificates";
-	
+
 	/** key for ssl certificates **/
 	private final static String ALLOWED_CERTIFICATES_NEW = "allowed_certificates_new";
 
@@ -50,12 +50,13 @@ public class SSLCertificatesPreference {
 
 	private List<HostCertificate> savedItems = null;
 
-	protected SSLCertificatesPreference() {}
+	protected SSLCertificatesPreference() {
+	}
 
 	public static enum CertificateState {
 		ACCEPTED, REJECTED, NOT_PRESENT;
 	}
-	
+
 	public static SSLCertificatesPreference getInstance() {
 		return INSTANCE;
 	}
@@ -139,21 +140,18 @@ public class SSLCertificatesPreference {
 		try {
 			return SSLCertificateUtils.createX509Certificate(certificateString);
 		} catch (CertificateException e) {
-			IStatus status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, 
-					NLS.bind("Could not read certificate for certificate {0}", 
-							StringUtils.abbreviate(certificateString, 50)));
+			IStatus status = StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, NLS.bind(
+					"Could not read certificate for certificate {0}", StringUtils.abbreviate(certificateString, 50)));
 			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
 		}
 		return null;
 	}
 
 	private HostCertificate findCertificate(List<HostCertificate> existingCertificates, HostCertificate lookedUp) {
-		if (existingCertificates == null 
-				|| existingCertificates.isEmpty()) {
+		if (existingCertificates == null || existingCertificates.isEmpty()) {
 			return null;
 		}
-		return existingCertificates.stream()
-				.filter(existing -> existing.equals(lookedUp)).findFirst().orElse(null);
+		return existingCertificates.stream().filter(existing -> existing.equals(lookedUp)).findFirst().orElse(null);
 	}
 
 	/**
@@ -190,14 +188,12 @@ public class SSLCertificatesPreference {
 		certificates.stream().forEach(certificate -> {
 			String base64Certificate = toPreferenceValue(certificate);
 			if (!StringUtils.isBlank(base64Certificate)) {
-				builder
-					.append(base64Certificate)
-					.append(SEPARATOR);
+				builder.append(base64Certificate).append(SEPARATOR);
 			}
 		});
 		return builder.toString();
 	}
-	
+
 	/**
 	 * Returns the given HostCertificate as a string that can be stored in preferences. 
 	 * 
@@ -207,17 +203,15 @@ public class SSLCertificatesPreference {
 	 */
 	private String toPreferenceValue(HostCertificate certificate) {
 		try {
-			return new StringBuilder()
-					.append(certificate.isAccepted()).append(SEPARATOR)
-					.append(SSLCertificateUtils.toString(certificate.getCertificate()))
-					.toString();
+			return new StringBuilder().append(certificate.isAccepted()).append(SEPARATOR)
+					.append(SSLCertificateUtils.toString(certificate.getCertificate())).toString();
 		} catch (CertificateEncodingException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(
-					NLS.bind("Could not encode certificate {0}", certificate.toString()), e);
-			return  null;
+			OpenShiftUIActivator.getDefault().getLogger()
+					.logError(NLS.bind("Could not encode certificate {0}", certificate.toString()), e);
+			return null;
 		}
 	}
-	
+
 	protected IPreferenceStore getPreferenceStore() {
 		return OpenShiftUIActivator.getDefault().getCorePreferenceStore();
 	}

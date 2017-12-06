@@ -31,7 +31,7 @@ public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_AVAILABLE_MARKERS = "availableMarkers";
 	public static final String PROPERTY_CHECKED_MARKERS = "checkedMarkers";
 	public static final String PROPERTY_SELECTED_MARKER = "selectedMarker";
-	
+
 	private List<IOpenShiftMarker> availableMarkers;
 	private Set<IOpenShiftMarker> presentMarkers = new HashSet<>();
 	private Set<IOpenShiftMarker> checkedMarkers = new HashSet<>();
@@ -41,23 +41,22 @@ public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 	public ConfigureMarkersWizardPageModel(IProject project) {
 		this.project = project;
 	}
-	
+
 	public void loadMarkers() throws CoreException {
 		OpenShiftMarkers markers = new OpenShiftMarkers(project);
 		setAvailableMarkers(markers.getAll());
 		this.presentMarkers = toSet(markers.getPresent());
 		setCheckedMarkers(presentMarkers);
 	}
-	
+
 	private Set<IOpenShiftMarker> toSet(List<IOpenShiftMarker> markers) {
 		Set<IOpenShiftMarker> markersSet = new HashSet<>();
 		markersSet.addAll(markers);
-		return markersSet; 
+		return markersSet;
 	}
-	
+
 	public void setAvailableMarkers(List<IOpenShiftMarker> markers) {
-		firePropertyChange(
-				PROPERTY_AVAILABLE_MARKERS, this.availableMarkers, this.availableMarkers = markers);
+		firePropertyChange(PROPERTY_AVAILABLE_MARKERS, this.availableMarkers, this.availableMarkers = markers);
 	}
 
 	public List<IOpenShiftMarker> getAvailableMarkers() {
@@ -76,12 +75,11 @@ public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 		}
 		firePropertyChange(PROPERTY_CHECKED_MARKERS, oldValue, checkedMarkers);
 	}
-	
+
 	public void setSelectedMarker(IOpenShiftMarker marker) {
-		firePropertyChange(
-				PROPERTY_SELECTED_MARKER, this.selectedMarker, this.selectedMarker = marker);
+		firePropertyChange(PROPERTY_SELECTED_MARKER, this.selectedMarker, this.selectedMarker = marker);
 	}
-	
+
 	public IOpenShiftMarker getSelectedMarker() {
 		return selectedMarker;
 	}
@@ -103,12 +101,12 @@ public class ConfigureMarkersWizardPageModel extends ObservableUIPojo {
 	public Collection<IOpenShiftMarker> getAddedMarkers() {
 		return DiffUtils.getAdditions(presentMarkers, checkedMarkers);
 	}
-	
+
 	public void removeFromProject(IOpenShiftMarker marker, IProgressMonitor monitor) throws CoreException {
 		if (marker == null) {
 			return;
 		}
-		
+
 		marker.removeFrom(project, monitor);
 	}
 

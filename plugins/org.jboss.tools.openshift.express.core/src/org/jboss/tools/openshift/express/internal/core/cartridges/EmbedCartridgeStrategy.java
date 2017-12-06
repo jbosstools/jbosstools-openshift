@@ -41,23 +41,20 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public class EmbedCartridgeStrategy {
 
-	private final ApplicationRequirement[] applicationRequirements =
-			new ApplicationRequirement[] {
-				new JBossApplicationRequirement(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_SWITCHYARD)),
-				new NonScalableApplicationRequirement(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_PHPMYADMIN))
-	};
+	private final ApplicationRequirement[] applicationRequirements = new ApplicationRequirement[] {
+			new JBossApplicationRequirement(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_SWITCHYARD)),
+			new NonScalableApplicationRequirement(
+					new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_PHPMYADMIN)) };
 
-	private final EmbeddableCartridgeRelations[] cartridgeDependencies =
-			new EmbeddableCartridgeRelations[] {
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_JENKINS_CLIENT),
-							null, null, new CartridgeSelector(IStandaloneCartridge.NAME_JENKINS)),
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_PHPMYADMIN),
-							null, new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_MYSQL), null),
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_ROCKMONGO),
-							null, new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_MONGODB), null),
-					new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_10GEN_MMS_AGENT),
-							null, new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_MONGODB), null)
-			};
+	private final EmbeddableCartridgeRelations[] cartridgeDependencies = new EmbeddableCartridgeRelations[] {
+			new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_JENKINS_CLIENT),
+					null, null, new CartridgeSelector(IStandaloneCartridge.NAME_JENKINS)),
+			new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_PHPMYADMIN),
+					null, new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_MYSQL), null),
+			new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_ROCKMONGO), null,
+					new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_MONGODB), null),
+			new EmbeddableCartridgeRelations(new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_10GEN_MMS_AGENT),
+					null, new EmbeddableCartridgeSelector(IEmbeddableCartridge.NAME_MONGODB), null) };
 
 	private Map<ICartridge, EmbeddableCartridgeRelations> dependenciesByCartridge;
 	private HashMap<ICartridge, Set<ICartridge>> dependantsByCartridge;
@@ -89,11 +86,9 @@ public class EmbedCartridgeStrategy {
 			EmbeddableCartridgeRelations dependency) {
 		Set<ICartridge> dependants = dependantsByCartridge.get(dependency.getRequired(allEmbeddableCartridges));
 		if (dependants == null) {
-			ICartridge dependantCartridge = dependency.getRequired(allEmbeddableCartridges); 
+			ICartridge dependantCartridge = dependency.getRequired(allEmbeddableCartridges);
 			if (dependantCartridge != null) {
-				dependantsByCartridge.put(
-						dependantCartridge,
-						dependants = new HashSet<>());
+				dependantsByCartridge.put(dependantCartridge, dependants = new HashSet<>());
 			}
 		}
 		if (dependants != null) {
@@ -106,28 +101,28 @@ public class EmbedCartridgeStrategy {
 		ICartridge requiringCartridge = dependency.getSubject(allEmbeddableCartridges);
 		dependenciesByCartridge.put(requiringCartridge, dependency);
 	}
-	
-	public ApplicationRequirement getMissingRequirement(ICartridge requestedCartridge, IApplicationProperties application) {
+
+	public ApplicationRequirement getMissingRequirement(ICartridge requestedCartridge,
+			IApplicationProperties application) {
 		for (ApplicationRequirement requirement : applicationRequirements) {
-			if (requirement.isForCartridge(requestedCartridge)
-					&& !requirement.meetsRequirements(application)) {
+			if (requirement.isForCartridge(requestedCartridge) && !requirement.meetsRequirements(application)) {
 				return requirement;
 			}
 		}
 		return null;
 	}
-	
+
 	public EmbeddableCartridgeDiff add(ICartridge cartridge, Set<ICartridge> currentCartridges)
 			throws OpenShiftException {
 		EmbeddableCartridgeDiff cartridgeDiff = new EmbeddableCartridgeDiff(cartridge);
-		add(cartridge, currentCartridges, cartridgeDiff, allEmbeddableCartridges, allStandaloneCartridges, allApplications);
+		add(cartridge, currentCartridges, cartridgeDiff, allEmbeddableCartridges, allStandaloneCartridges,
+				allApplications);
 		return cartridgeDiff;
 	}
 
 	private void add(ICartridge cartridge, Set<ICartridge> currentCartridges, EmbeddableCartridgeDiff diff,
 			Collection<ICartridge> allEmbeddableCartridges, Collection<ICartridge> allStandaloneCartridges,
-			Collection<IApplication> allApplications)
-			throws OpenShiftException {
+			Collection<IApplication> allApplications) throws OpenShiftException {
 		EmbeddableCartridgeRelations relation = dependenciesByCartridge.get(cartridge);
 		if (relation == null) {
 			return;
@@ -139,10 +134,10 @@ public class EmbedCartridgeStrategy {
 
 	private void addRequired(Set<ICartridge> currentCartridges, EmbeddableCartridgeDiff diff,
 			ICartridge requiredCartridge, Collection<ICartridge> allEmbeddableCartridges) throws OpenShiftException {
-		if (requiredCartridge != null
-				&& !currentCartridges.contains(requiredCartridge)) {
+		if (requiredCartridge != null && !currentCartridges.contains(requiredCartridge)) {
 			// recurse
-			add(requiredCartridge, currentCartridges, diff, allEmbeddableCartridges, allStandaloneCartridges, allApplications);
+			add(requiredCartridge, currentCartridges, diff, allEmbeddableCartridges, allStandaloneCartridges,
+					allApplications);
 			diff.addAddition(requiredCartridge);
 		}
 	}
@@ -151,23 +146,23 @@ public class EmbedCartridgeStrategy {
 			Collection<ICartridge> allStandaloneCartridges, Collection<IApplication> allApplications)
 			throws OpenShiftException {
 		ICartridge requiredCartridge = relation.getRequiredApplication(allStandaloneCartridges);
-		if (requiredCartridge != null
-				&& !containsApplicationByCartridge(requiredCartridge, allApplications)) {
+		if (requiredCartridge != null && !containsApplicationByCartridge(requiredCartridge, allApplications)) {
 			diff.addApplicationAddition(requiredCartridge);
 		}
 	}
 
 	private boolean containsApplicationByCartridge(ICartridge cartridge, Collection<IApplication> applications) {
-		for(IApplication application : applications) {
+		for (IApplication application : applications) {
 			if (cartridge.equals(application.getCartridge())) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	private void removeConflicting(Set<ICartridge> currentCartridges, EmbeddableCartridgeDiff cartridgeDiff,
-			EmbeddableCartridgeRelations relation, Collection<ICartridge> allEmbeddableCartridges) throws OpenShiftException {
+			EmbeddableCartridgeRelations relation, Collection<ICartridge> allEmbeddableCartridges)
+			throws OpenShiftException {
 		ICartridge conflictingCartridge = relation.getConflicting(allEmbeddableCartridges);
 		if (conflictingCartridge != null) {
 			remove(conflictingCartridge, currentCartridges, cartridgeDiff);
@@ -184,8 +179,7 @@ public class EmbedCartridgeStrategy {
 		return cartridgeDiff;
 	}
 
-	private void remove(ICartridge cartridge, Set<ICartridge> currentCartridges,
-			EmbeddableCartridgeDiff cartridgeDiff)
+	private void remove(ICartridge cartridge, Set<ICartridge> currentCartridges, EmbeddableCartridgeDiff cartridgeDiff)
 			throws OpenShiftException {
 		Set<ICartridge> dependantCartridges = dependantsByCartridge.get(cartridge);
 		if (dependantCartridges == null) {
@@ -207,7 +201,8 @@ public class EmbedCartridgeStrategy {
 		private CartridgeSelector requiredApplication;
 
 		protected EmbeddableCartridgeRelations(EmbeddableCartridgeSelector cartridgeSelector,
-				EmbeddableCartridgeSelector conflicting, EmbeddableCartridgeSelector required, CartridgeSelector requiredApplication) {
+				EmbeddableCartridgeSelector conflicting, EmbeddableCartridgeSelector required,
+				CartridgeSelector requiredApplication) {
 			this.subject = cartridgeSelector;
 			this.conflicting = conflicting;
 			this.required = required;
@@ -251,16 +246,16 @@ public class EmbedCartridgeStrategy {
 		public boolean isForCartridge(ICartridge requestedCartridge) {
 			return cartridge.matches(requestedCartridge);
 		}
-		
+
 		public String getCartridgeName() {
 			return cartridge.getName();
 		}
-		
+
 		protected abstract boolean meetsRequirements(IApplicationProperties application);
 
 		public abstract String getMessage(ICartridge requestedCartridge, IApplicationProperties application);
 	}
-	
+
 	private static class NonScalableApplicationRequirement extends ApplicationRequirement {
 
 		protected NonScalableApplicationRequirement(EmbeddableCartridgeSelector cartridgeSelector) {
@@ -270,14 +265,13 @@ public class EmbedCartridgeStrategy {
 		@Override
 		protected boolean meetsRequirements(IApplicationProperties application) {
 			ApplicationScale scale = application.getApplicationScale();
-			return scale == ApplicationScale.NO_SCALE
-					|| scale == null;
+			return scale == ApplicationScale.NO_SCALE || scale == null;
 		}
 
 		@Override
 		public String getMessage(ICartridge requestedCartridge, IApplicationProperties application) {
 			return NLS.bind(
-							"It is not recommended to add cartridge {0} to your application {1}."
+					"It is not recommended to add cartridge {0} to your application {1}."
 							+ " The cartridge cannot scale and requires a non-scalable application. "
 							+ "Your application is scalable.",
 					requestedCartridge.getName(), application.getApplicationName());
@@ -292,27 +286,24 @@ public class EmbedCartridgeStrategy {
 		protected JBossApplicationRequirement(EmbeddableCartridgeSelector cartridgeSelector) {
 			super(cartridgeSelector);
 			this.eapSelector = new CartridgeSelector(IStandaloneCartridge.NAME_JBOSSEAP);
-			this.asSelector = new CartridgeSelector(IStandaloneCartridge.NAME_JBOSSAS);			
+			this.asSelector = new CartridgeSelector(IStandaloneCartridge.NAME_JBOSSAS);
 		}
 
 		@Override
 		protected boolean meetsRequirements(IApplicationProperties application) {
 			ICartridge standaloneCartridge = application.getStandaloneCartridge();
-			return eapSelector.isMatching(standaloneCartridge)
-					|| asSelector.isMatching(standaloneCartridge);
+			return eapSelector.isMatching(standaloneCartridge) || asSelector.isMatching(standaloneCartridge);
 		}
 
 		@Override
 		public String getMessage(ICartridge requestedCartridge, IApplicationProperties application) {
 			ICartridge standaloneCartridge = application.getStandaloneCartridge();
-			return NLS.bind("It is not recommended to add cartridge {0} to your application {1}."
-					+ " The cartridge requires a {3} or {4} application and your application is a {2}."
-							, new String[] { 
-									requestedCartridge.getName(), 
-									application.getApplicationName(),
-									standaloneCartridge == null? "'unknwon'" : standaloneCartridge.getName(),
-									eapSelector.getName(),
-									asSelector.getName()});
+			return NLS.bind(
+					"It is not recommended to add cartridge {0} to your application {1}."
+							+ " The cartridge requires a {3} or {4} application and your application is a {2}.",
+					new String[] { requestedCartridge.getName(), application.getApplicationName(),
+							standaloneCartridge == null ? "'unknwon'" : standaloneCartridge.getName(),
+							eapSelector.getName(), asSelector.getName() });
 		}
 
 	}
@@ -350,7 +341,7 @@ public class EmbedCartridgeStrategy {
 		public List<ICartridge> getRemovals() {
 			return removals;
 		}
-		
+
 		public boolean hasRemovals() {
 			return getRemovals().size() > 0;
 		}
@@ -372,11 +363,9 @@ public class EmbedCartridgeStrategy {
 		}
 
 		public boolean hasChanges() {
-			return hasApplicationAdditions()
-					|| hasRemovals()
-					|| hasAdditions();
+			return hasApplicationAdditions() || hasRemovals() || hasAdditions();
 		}
-		
+
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
@@ -387,7 +376,7 @@ public class EmbedCartridgeStrategy {
 			if (hasRemovals()) {
 				builder.append(NLS.bind("\n- Remove {0}",
 						StringUtils.toString(getRemovals(), new CartridgeToStringConverter())));
-			
+
 			}
 			if (hasAdditions()) {
 				builder.append(NLS.bind("\n- Add {0}",
@@ -406,12 +395,11 @@ public class EmbedCartridgeStrategy {
 		}
 
 		public ICartridge getCartridge(Collection<ICartridge> embeddableCartridges) {
-			if (embeddableCartridges == null
-					|| embeddableCartridges.isEmpty()) {
+			if (embeddableCartridges == null || embeddableCartridges.isEmpty()) {
 				return null;
 			}
-			
-			for(ICartridge cartridge : embeddableCartridges) {
+
+			for (ICartridge cartridge : embeddableCartridges) {
 				if (matches(cartridge)) {
 					return cartridge;
 				}
@@ -420,15 +408,14 @@ public class EmbedCartridgeStrategy {
 		}
 
 		private boolean matches(ICartridge cartridge) {
-			return cartridge.getName() != null
-					&& cartridge.getName().startsWith(nameStartsWith);
+			return cartridge.getName() != null && cartridge.getName().startsWith(nameStartsWith);
 		}
 
 		public String getName() {
 			return nameStartsWith;
 		}
 	}
-	
+
 	private static class CartridgeSelector {
 
 		private String nameStartsWith;
@@ -438,39 +425,36 @@ public class EmbedCartridgeStrategy {
 		}
 
 		public ICartridge getCartridge(Collection<ICartridge> cartridges) {
-			if (cartridges == null
-					|| cartridges.isEmpty()) {
+			if (cartridges == null || cartridges.isEmpty()) {
 				return null;
 			}
-			
-			for(ICartridge cartridge : cartridges) {
+
+			for (ICartridge cartridge : cartridges) {
 				if (isMatching(cartridge)) {
 					return cartridge;
 				}
 			}
 			return null;
 		}
-		
+
 		public boolean isMatching(ICartridge cartridge) {
-			return cartridge != null
-					&& cartridge.getName() != null
-					&& cartridge.getName().startsWith(nameStartsWith);
+			return cartridge != null && cartridge.getName() != null && cartridge.getName().startsWith(nameStartsWith);
 		}
-		
+
 		public String getName() {
 			return nameStartsWith;
 		}
 	}
-	
+
 	/**
 	 * Provides properties for a (new or existing)  application
 	 */
 	public interface IApplicationProperties {
-		
+
 		public ApplicationScale getApplicationScale();
-		
+
 		public ICartridge getStandaloneCartridge();
-		
+
 		public String getApplicationName();
 	}
 }

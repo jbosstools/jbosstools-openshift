@@ -35,7 +35,7 @@ public class SmartTooltipTest {
 		Text text = window.text;
 		SmartTooltip tooltip = SmartTooltip.get(text);
 		Assert.assertNotNull(tooltip);
-		
+
 		try {
 			window.open();
 			Assert.assertNull(text.getToolTipText());
@@ -47,7 +47,7 @@ public class SmartTooltipTest {
 			//2. Test that on long text there is tooltip.
 			text.setText(LONG_TEXT);
 			Assert.assertEquals(LONG_TEXT, text.getToolTipText());
-			
+
 			//3. Test that if custom tooltip is assigned, it is respected.
 			tooltip.setToolTip(CUSTOM_TOOLTIP);
 			Assert.assertEquals(LONG_TEXT + "\n" + CUSTOM_TOOLTIP, text.getToolTipText());
@@ -78,7 +78,7 @@ public class SmartTooltipTest {
 		protected TestWindow(Shell shell) {
 			super(shell);
 		}
-		
+
 		protected Control createContents(Composite parent) {
 			Composite container = new Composite(parent, SWT.NONE);
 			GridLayoutFactory.fillDefaults().applyTo(container);

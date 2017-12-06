@@ -70,11 +70,11 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	public static final String PROP_SELECTED_APPLICATION_TEMPLATE = "selectedApplicationTemplate";
 	public static final String PROP_USE_EXISTING_APPLICATION = "useExistingApplication";
 	public static final String PROP_USE_INITIAL_GIT_URL = "useInitialGitUrl";
-	
+
 	public static final String NEW_PROJECT_REMOTE_NAME_DEFAULT = "origin";
 	public static final String EXISTING_PROJECT_REMOTE_NAME_DEFAULT = "openshift";
 	public static final String DEFAULT_REPOSITORY_PATH = EGitUIUtils.getEGitDefaultRepositoryPath();
-	
+
 	/**
 	 * Imports the project that the user has chosen into the workspace.
 	 * 
@@ -90,8 +90,9 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	 * @throws GitAPIException 
 	 * @throws NoWorkTreeException 
 	 */
-	public IProject importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
-			URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException;
+	public IProject importProject(IProgressMonitor monitor)
+			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
+			InvocationTargetException, IOException, NoWorkTreeException, GitAPIException;
 
 	/**
 	 * Enables the user chosen, unshared project to be used on the chosen
@@ -119,9 +120,8 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	 * @throws CoreException
 	 *             The user project could not be shared with the git
 	 */
-	public IProject mergeIntoUnsharedProject(IProgressMonitor monitor)
-			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
-			URISyntaxException;
+	public IProject mergeIntoUnsharedProject(IProgressMonitor monitor) throws OpenShiftException,
+			InvocationTargetException, InterruptedException, IOException, CoreException, URISyntaxException;
 
 	/**
 	 * Enables the user chosen, unshared project to be used on the chosen
@@ -226,7 +226,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	public String getRemoteName();
 
 	public boolean setUseDefaultRepoPath(boolean useDefaultRepositoryPath);
-	
+
 	/**
 	 * Returns the flag to stores the information if the default path to the local git repository the wizard will clone the
 	 * existing/new OpenShift application to should be used or not.
@@ -234,7 +234,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	 * @return
 	 */
 	public boolean isUseDefaultRepoPath();
-	
+
 	public String setRepositoryPath(String repositoryPath);
 
 	/**
@@ -381,7 +381,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	 *      com.openshift.client.cartridge.IEmbeddableCartridge...)
 	 */
 	public Set<ICartridge> getEmbeddedCartridges();
-	
+
 	public Set<ICartridge> setEmbeddedCartridges(Set<ICartridge> selectedEmbeddableCartridges);
 
 	/**
@@ -463,9 +463,9 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	 *      com.openshift.client.cartridge.IEmbeddableCartridge...)
 	 */
 	public String getInitialGitUrl();
-	
+
 	public String setInitialGitUrl(String initialGitUrl);
-	
+
 	/**
 	 * Returns <code>true</code> if we're using an initial git url when creating
 	 * the new application.
@@ -473,7 +473,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	 * @return
 	 */
 	public boolean isUseInitialGitUrl();
-	
+
 	public boolean setUseInitialGitUrl(boolean useInitialGitUrl);
 
 	public List<IDomain> setDomains(List<IDomain> domains);
@@ -488,7 +488,7 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	 * @see ExpressConnection#getDomains()
 	 */
 	public List<IDomain> getDomains();
-	
+
 	/**
 	 * Returns the environment variabels that this wizard will set to the new
 	 * application.
@@ -496,6 +496,6 @@ public interface IOpenShiftApplicationWizardModel extends IConnectionAware<Expre
 	 * @return
 	 */
 	public Map<String, String> getEnvironmentVariables();
-	
+
 	public Map<String, String> setEnvironmentVariables(Map<String, String> environmentVariables);
 }

@@ -36,13 +36,12 @@ public class GeneralProjectImportOperation extends AbstractProjectImportOperatio
 		super(projectDirectory);
 	}
 
-	public List<IProject> importToWorkspace(IProgressMonitor monitor)
-			throws CoreException, InterruptedException {
+	public List<IProject> importToWorkspace(IProgressMonitor monitor) throws CoreException, InterruptedException {
 
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IProject project = workspace.getRoot().getProject(getProjectDirectory().getName());
 		if (overwriteExistingProject(project, workspace, monitor)) {
-	        importToWorkspace(getProjectDirectory(), workspace, monitor);
+			importToWorkspace(getProjectDirectory(), workspace, monitor);
 		}
 		return Collections.singletonList(project);
 	}
@@ -59,17 +58,16 @@ public class GeneralProjectImportOperation extends AbstractProjectImportOperatio
 
 	private boolean overwriteExistingProject(final IProject project, IWorkspace workspace, IProgressMonitor monitor)
 			throws CoreException {
-		if (project == null
-				|| !project.exists()) {
+		if (project == null || !project.exists()) {
 			return true;
 		}
 
 		final boolean overwrite = displayOverwriteDialog(OpenShiftCommonUIMessages.OverwriteProjectsDialogTitle,
-		                                                 NLS.bind(OpenShiftCommonUIMessages.GeneralProjectWarningMessage, project.getName()));
+				NLS.bind(OpenShiftCommonUIMessages.GeneralProjectWarningMessage, project.getName()));
 		if (overwrite) {
 			project.delete(false, true, monitor);
 		} else {
-		    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 		}
 		return overwrite;
 	}

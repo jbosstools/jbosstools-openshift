@@ -27,36 +27,34 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
  * @author jeff.cantrill
  *
  */
-public class EnvironmentVariablesPageModel extends ObservablePojo implements IEnvironmentVariablesPageModel{
-	
+public class EnvironmentVariablesPageModel extends ObservablePojo implements IEnvironmentVariablesPageModel {
+
 	private List<EnvironmentVariable> environmentVariables = new ArrayList<>();
 	private Map<String, String> imageEnvVars = new HashMap<>();
 	private EnvironmentVariable selectedEnvironmentVariable = null;
-	
-	public  Map<String, String> getImageEnvVars(){
+
+	public Map<String, String> getImageEnvVars() {
 		return Collections.unmodifiableMap(imageEnvVars);
 	}
-	
+
 	@Override
 	public List<EnvironmentVariable> getEnvironmentVariables() {
 		return environmentVariables;
 	}
-	
+
 	@Override
 	public void setEnvironmentVariables(List<EnvironmentVariable> envVars) {
-		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, 
-				this.environmentVariables, 
+		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, this.environmentVariables,
 				this.environmentVariables = envVars);
 		this.imageEnvVars.clear();
 		for (IKeyValueItem label : envVars) {
 			imageEnvVars.put(label.getKey(), label.getValue());
 		}
 	}
-	
+
 	@Override
 	public void setSelectedEnvironmentVariable(EnvironmentVariable envVar) {
-		firePropertyChange(PROPERTY_SELECTED_ENVIRONMENT_VARIABLE, 
-				this.selectedEnvironmentVariable, 
+		firePropertyChange(PROPERTY_SELECTED_ENVIRONMENT_VARIABLE, this.selectedEnvironmentVariable,
 				this.selectedEnvironmentVariable = envVar);
 	}
 
@@ -67,46 +65,48 @@ public class EnvironmentVariablesPageModel extends ObservablePojo implements IEn
 
 	@Override
 	public void removeEnvironmentVariable(EnvironmentVariable envVar) {
-		if(isPersistent(envVar)) {
+		if (isPersistent(envVar)) {
 			updateEnvironmentVariable(envVar, envVar.getKey(), DELETED);
 			return;
 		}
 		final int i = environmentVariables.indexOf(envVar);
-		if(i > -1) {
+		if (i > -1) {
 			List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
 			this.environmentVariables.remove(i);
-			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old, Collections.unmodifiableList(environmentVariables));
+			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old,
+					Collections.unmodifiableList(environmentVariables));
 		}
 	}
 
 	@Override
 	public void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value) {
-		if((isPersistent(envVar) || isPersistent(key)) && !key.equals(envVar.getKey())) {
+		if ((isPersistent(envVar) || isPersistent(key)) && !key.equals(envVar.getKey())) {
 			addEnvironmentVariable(key, value);
 			removeEnvironmentVariable(envVar);
 			return;
 		}
 		final int i = environmentVariables.indexOf(envVar);
-		if(i > -1) {
+		if (i > -1) {
 			List<EnvironmentVariable> old = new ArrayList<>(environmentVariables);
 			EnvironmentVariable prev = environmentVariables.get(i);
 			environmentVariables.set(i, new EnvironmentVariable(key, value, prev.isNew()));
-			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old, Collections.unmodifiableList(environmentVariables));
+			fireIndexedPropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, i, old,
+					Collections.unmodifiableList(environmentVariables));
 		}
-	}	
+	}
+
 	@Override
 	public void resetEnvironmentVariable(EnvironmentVariable envVar) {
-		if(isPersistent(envVar)) {
+		if (isPersistent(envVar)) {
 			updateEnvironmentVariable(envVar, envVar.getKey(), imageEnvVars.get(envVar.getKey()));
 		}
 	}
 
-
 	@Override
 	public void addEnvironmentVariable(String key, String value) {
-		if(isPersistent(key)) {
+		if (isPersistent(key)) {
 			EnvironmentVariable envVar = find(key);
-			if(envVar != null) {
+			if (envVar != null) {
 				updateEnvironmentVariable(envVar, key, value);
 				return;
 			}
@@ -118,9 +118,10 @@ public class EnvironmentVariablesPageModel extends ObservablePojo implements IEn
 
 	@Override
 	public boolean isEnvironmentVariableModified(EnvironmentVariable envVar) {
-		return envVar.isNew() || (isPersistent(envVar) && !Objects.equals(imageEnvVars.get(envVar.getKey()), envVar.getValue()));
+		return envVar.isNew()
+				|| (isPersistent(envVar) && !Objects.equals(imageEnvVars.get(envVar.getKey()), envVar.getValue()));
 	}
-	
+
 	@Override
 	public EnvironmentVariable getEnvironmentVariable(String key) {
 		return environmentVariables.stream().filter(var -> key.equals(var.getKey())).findAny().orElse(null);

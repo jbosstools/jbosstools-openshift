@@ -54,7 +54,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_USERDOCURL = "userdocUrl";
 	public static final String PROPERTY_HAS_DEFAULT_HOST = "hasDefaultHost";
 	private static final IStatus NOT_CONNECTED_STATUS = null;
-	
+
 	/** the connection that the user wants to edit */
 	private IConnection selectedConnection;
 	/** the connection that this wizard operates on */
@@ -69,16 +69,18 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	private String userdocUrl;
 	private IStatus connectedStatus;
 	private IConnectionAuthenticationProvider connectionAuthenticationProvider;
-	private IConnectionAdvancedPropertiesProvider  connectionAdvancedPropertiesProvider;
+	private IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider;
 	private Collection<IConnection> allConnections;
 	private Class<? extends IConnection> connectionType;
 	private IConnectionAware<IConnection> wizardModel;
 	private boolean enablePromptCredentialsBackup = false;
 	private boolean allowConnectionChange = true;
-	
-	protected ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections, 
-			Class<? extends IConnection> connectionType, boolean allowConnectionChange, IConnectionAware<IConnection> wizardModel) {
-		this.allConnections = filterAllConnections(editedConnection, allConnections, connectionType, allowConnectionChange);
+
+	protected ConnectionWizardPageModel(IConnection editedConnection, Collection<IConnection> allConnections,
+			Class<? extends IConnection> connectionType, boolean allowConnectionChange,
+			IConnectionAware<IConnection> wizardModel) {
+		this.allConnections = filterAllConnections(editedConnection, allConnections, connectionType,
+				allowConnectionChange);
 		this.connectionType = connectionType;
 		this.wizardModel = wizardModel;
 		this.allHosts = createAllHosts(allConnections);
@@ -87,18 +89,18 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		init(editedConnection, connectionType, connectionFactory);
 	}
 
-	private Collection<IConnection> filterAllConnections(IConnection editedConnection, Collection<IConnection> allConnections,
-			Class<? extends IConnection> connectionType, boolean allowConnectionChange) {
+	private Collection<IConnection> filterAllConnections(IConnection editedConnection,
+			Collection<IConnection> allConnections, Class<? extends IConnection> connectionType,
+			boolean allowConnectionChange) {
 		if (!allowConnectionChange) {
-			if( editedConnection != null ) 
+			if (editedConnection != null)
 				return Collections.singletonList(editedConnection);
 			return Collections.emptyList();
 		} else if (connectionType == null) {
 			return allConnections;
 		} else {
-			return allConnections.stream()
-						.filter(connection -> connection.getClass().equals(connectionType))
-						.collect(Collectors.toList());			
+			return allConnections.stream().filter(connection -> connection.getClass().equals(connectionType))
+					.collect(Collectors.toList());
 		}
 	}
 
@@ -107,11 +109,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			return Collections.emptyList();
 		}
 
-		return allConnections.stream()
-				.map(connection -> connection.getHost())
-				.filter(host -> !StringUtils.isEmpty(host))
-				.distinct()
-				.collect(Collectors.toList());
+		return allConnections.stream().map(connection -> connection.getHost())
+				.filter(host -> !StringUtils.isEmpty(host)).distinct().collect(Collectors.toList());
 	}
 
 	protected ConnectionsFactoryTracker createConnectionsFactory() {
@@ -119,8 +118,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		connectionsFactory.open();
 		return connectionsFactory;
 	}
-	
-	private void init(IConnection editedConnection, Class<? extends IConnection> connectionType, IConnectionFactory connectionFactory) {
+
+	private void init(IConnection editedConnection, Class<? extends IConnection> connectionType,
+			IConnectionFactory connectionFactory) {
 		this.connectedStatus = Status.OK_STATUS;
 		this.connectionFactoryError = Status.OK_STATUS;
 		initConnection(editedConnection, connectionType);
@@ -155,11 +155,12 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		}
 	}
 
-	private IConnectionFactory getConnectionFactory(Class<? extends IConnection> connectionType, IConnectionsFactory connectionsFactory) {
+	private IConnectionFactory getConnectionFactory(Class<? extends IConnection> connectionType,
+			IConnectionsFactory connectionsFactory) {
 		IConnectionFactory factory = null;
 		if (connectionType == null) {
 			factory = getDefaultConnectionFactory(connectionsFactory);
-		} else{
+		} else {
 			factory = connectionsFactory.getByConnection(connectionType);
 		}
 		return factory;
@@ -173,19 +174,22 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return factory;
 	}
 
-	private void update(IConnection selectedConnection, IConnectionFactory factory, String host, boolean useDefaultHost, IStatus connectionFactoryError, IStatus connectError) {
+	private void update(IConnection selectedConnection, IConnectionFactory factory, String host, boolean useDefaultHost,
+			IStatus connectionFactoryError, IStatus connectError) {
 		factory = updateFactory(factory, selectedConnection);
 		useDefaultHost = updateUseDefaultHost(useDefaultHost, selectedConnection, factory);
 		host = updateHost(host, useDefaultHost, selectedConnection, factory);
 		String userdocUrl = getUserdocUrl(factory);
 
-		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection, this.selectedConnection = selectedConnection);
+		firePropertyChange(PROPERTY_SELECTED_CONNECTION, this.selectedConnection,
+				this.selectedConnection = selectedConnection);
 		firePropertyChange(PROPERTY_CONNECTION_FACTORY, this.connectionFactory, this.connectionFactory = factory);
 		firePropertyChange(PROPERTY_HOST, this.host, this.host = host);
 		firePropertyChange(PROPERTY_USE_DEFAULT_HOST, this.useDefaultHost, this.useDefaultHost = useDefaultHost);
-		firePropertyChange(PROPERTY_HAS_DEFAULT_HOST, this.hasDefaultHost, this.hasDefaultHost = factory != null && factory.hasDefaultHost());
+		firePropertyChange(PROPERTY_HAS_DEFAULT_HOST, this.hasDefaultHost,
+				this.hasDefaultHost = factory != null && factory.hasDefaultHost());
 		firePropertyChange(PROPERTY_USERDOCURL, this.userdocUrl, this.userdocUrl = userdocUrl);
-		
+
 		setConnectionFactoryError(connectionFactoryError);
 		setConnectedStatus(connectError);
 	}
@@ -194,7 +198,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		if (selectedConnection instanceof NewConnectionMarker) {
 			return factory;
 		}
-		
+
 		if (!selectedConnection.equals(this.selectedConnection)) {
 			// selectedConnection changed
 			if (!(selectedConnection instanceof NewConnectionMarker)) {
@@ -204,7 +208,8 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return factory;
 	}
 
-	private String updateHost(String host, boolean useDefaultHost, IConnection selectedConnection, IConnectionFactory factory) {
+	private String updateHost(String host, boolean useDefaultHost, IConnection selectedConnection,
+			IConnectionFactory factory) {
 		if (!selectedConnection.equals(this.selectedConnection)) {
 			// changed connection
 			if (selectedConnection instanceof NewConnectionMarker) {
@@ -212,8 +217,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			} else {
 				host = selectedConnection.getHost();
 			}
-		} else if (!factory.equals(this.connectionFactory)
-				&& useDefaultHost) {
+		} else if (!factory.equals(this.connectionFactory) && useDefaultHost) {
 			// selected other server type
 			host = factory.getDefaultHost();
 		} else if (useDefaultHost != this.useDefaultHost) {
@@ -223,9 +227,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return host;
 	}
 
-	private boolean updateUseDefaultHost(boolean useDefaultHost, IConnection selectedConnection, IConnectionFactory factory) {
-		if (selectedConnection != null
-			&& !selectedConnection.equals(this.selectedConnection)) {
+	private boolean updateUseDefaultHost(boolean useDefaultHost, IConnection selectedConnection,
+			IConnectionFactory factory) {
+		if (selectedConnection != null && !selectedConnection.equals(this.selectedConnection)) {
 			// connection changed
 			if (selectedConnection instanceof NewConnectionMarker) {
 				// <New Connection> selected
@@ -234,11 +238,9 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 				// existing connection selected
 				useDefaultHost = selectedConnection.isDefaultHost();
 			}
-		} else if (factory != null
-				&& !factory.equals(connectionFactory)) {
+		} else if (factory != null && !factory.equals(connectionFactory)) {
 			// server type changed
-			if (useDefaultHost
-					|| StringUtils.isEmpty(this.host)) {
+			if (useDefaultHost || StringUtils.isEmpty(this.host)) {
 				useDefaultHost = factory.hasDefaultHost();
 			}
 		} else if (useDefaultHost) {
@@ -260,7 +262,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	protected boolean isNewConnection() {
 		return selectedConnection instanceof NewConnectionMarker;
 	}
-	
+
 	public void setSelectedConnection(IConnection selectedConnection) {
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, NOT_CONNECTED_STATUS);
 	}
@@ -272,11 +274,12 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public IConnection getConnection() {
 		return connection;
 	}
-	
+
 	public void setConnectionFactory(IConnectionFactory factory) {
-		update(NewConnectionMarker.getInstance(), factory, host, useDefaultHost, Status.OK_STATUS, NOT_CONNECTED_STATUS);
+		update(NewConnectionMarker.getInstance(), factory, host, useDefaultHost, Status.OK_STATUS,
+				NOT_CONNECTED_STATUS);
 	}
-	
+
 	public IConnectionFactory getConnectionFactory() {
 		return connectionFactory;
 	}
@@ -284,11 +287,11 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public boolean isHasDefaultHost() {
 		return hasDefaultHost;
 	}
-	
+
 	public Collection<IConnection> getAllConnections() {
 		List<IConnection> connections = new ArrayList<>();
 		connections.add(NewConnectionMarker.getInstance());
-		if( allConnections != null ) 
+		if (allConnections != null)
 			connections.addAll(allConnections);
 		return connections;
 	}
@@ -296,27 +299,28 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public String getHost() {
 		return host;
 	}
-	
+
 	public String getUserdocUrl() {
 		return userdocUrl;
 	}
-	
+
 	public void setHost(String host) {
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, NOT_CONNECTED_STATUS);
 	}
-	
+
 	private void setConnectionFactoryError(IStatus status) {
-		firePropertyChange(PROPERTY_CONNECTION_FACTORY_ERROR, this.connectionFactoryError, this.connectionFactoryError = status);
+		firePropertyChange(PROPERTY_CONNECTION_FACTORY_ERROR, this.connectionFactoryError,
+				this.connectionFactoryError = status);
 	}
 
 	public IStatus getConnectionFactoryError() {
 		return connectionFactoryError;
 	}
-	
+
 	public void setUseDefaultHost(boolean useDefaultHost) {
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, NOT_CONNECTED_STATUS);
 	}
-	
+
 	public boolean isUseDefaultHost() {
 		return useDefaultHost;
 	}
@@ -324,25 +328,24 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public void setAllHosts(Collection<String> allHosts) {
 		firePropertyChange(PROPERTY_ALL_HOSTS, this.allHosts, this.allHosts = allHosts);
 	}
-	
+
 	public Collection<String> getAllHosts() {
 		return allHosts;
 	}
-	
+
 	public void refreshWizardModel() {
 		wizardModel.setConnection(connection);
 	}
 
 	public IStatus connect() {
-		if (isConnected() 
-				&& listener.secureStoreException == null) {
+		if (isConnected() && listener.secureStoreException == null) {
 			return Status.OK_STATUS;
 		}
 		IStatus status = Status.OK_STATUS;
 		listener.secureStoreException = null;
 		try {
 			IConnection connection = createConnection();
-			if(connection != null) {
+			if (connection != null) {
 				addConnectionListener(connection);
 				if (connection.connect()) {
 					connection.enablePromptCredentials(true);
@@ -357,8 +360,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 				}
 			}
 		} catch (Exception e) {
-			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID,
-					                           e.getMessage());
+			status = StatusFactory.errorStatus(OpenShiftCommonUIActivator.PLUGIN_ID, e.getMessage());
 			OpenShiftCommonUIActivator.log(e);
 		} finally {
 			removeConnectionListener(connection);
@@ -366,38 +368,40 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		update(selectedConnection, connectionFactory, host, useDefaultHost, Status.OK_STATUS, status);
 		return status;
 	}
-	
+
 	/**
 	 * Create a temporary connection with the details as displayed in the wizard
 	 * @return
 	 */
 	public IConnection createConnection() {
-		IConnection connection = 
-				createConnection(connectionFactory, connectionAuthenticationProvider, connectionAdvancedPropertiesProvider);
+		IConnection connection = createConnection(connectionFactory, connectionAuthenticationProvider,
+				connectionAdvancedPropertiesProvider);
 		return connection;
 	}
 
 	private void removeConnectionListener(IConnection connection) {
-		if(connection instanceof IObservablePojo) {
-			((IObservablePojo)connection).removePropertyChangeListener(listener);
+		if (connection instanceof IObservablePojo) {
+			((IObservablePojo) connection).removePropertyChangeListener(listener);
 		}
 	}
 
 	private void addConnectionListener(IConnection connection) {
-		if(connection instanceof IObservablePojo) {
-			((IObservablePojo)connection).addPropertyChangeListener(listener);
+		if (connection instanceof IObservablePojo) {
+			((IObservablePojo) connection).addPropertyChangeListener(listener);
 		}
 	}
 
 	StorageAccessListener listener = new StorageAccessListener();
-	
+
 	class StorageAccessListener implements PropertyChangeListener {
 		SecureStoreException secureStoreException = null;
+
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			if(SecureStoreException.ID.equals(evt.getPropertyName()) && evt.getNewValue() instanceof SecureStoreException) {
-				secureStoreException = (SecureStoreException)evt.getNewValue();
-			}			
+			if (SecureStoreException.ID.equals(evt.getPropertyName())
+					&& evt.getNewValue() instanceof SecureStoreException) {
+				secureStoreException = (SecureStoreException) evt.getNewValue();
+			}
 		}
 	}
 
@@ -405,23 +409,21 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		return listener.secureStoreException;
 	}
 
-	private IConnection createConnection(
-				IConnectionFactory factory, 
-				IConnectionAuthenticationProvider authProvider, 
-				IConnectionAdvancedPropertiesProvider advPropsProvider) {
+	private IConnection createConnection(IConnectionFactory factory, IConnectionAuthenticationProvider authProvider,
+			IConnectionAdvancedPropertiesProvider advPropsProvider) {
 		if (factory == null) {
 			return null;
 		}
-		
+
 		IConnection connection = factory.create(getHost());
 		if (connection == null) {
 			return null;
 		}
-		
+
 		if (authProvider != null) {
 			authProvider.update(connection);
 		}
-		
+
 		if (advPropsProvider != null) {
 			advPropsProvider.update(connection);
 		}
@@ -432,7 +434,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public void setNotConnected() {
 		setConnectedStatus(NOT_CONNECTED_STATUS);
 	}
-	
+
 	private void setConnectedStatus(IStatus status) {
 		firePropertyChange(PROPERTY_CONNECTED_STATUS, this.connectedStatus, this.connectedStatus = status);
 		if (isConnected()) {
@@ -455,27 +457,25 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	 * @return true if the
 	 */
 	public boolean isConnected() {
-		return connectedStatus != null
-				&& connectedStatus != NOT_CONNECTED_STATUS
-				&& connectedStatus.isOK();
+		return connectedStatus != null && connectedStatus != NOT_CONNECTED_STATUS && connectedStatus.isOK();
 	}
 
 	public void saveRecentConnection() {
-//		IConnection connection = getConnection();
-//		if (connection != null) {
-//			connection.accept(new IConnectionVisitor() {
-//				
-//				@Override
-//				public void visit(KubernetesConnection connection) {
-//					//TODO figure out how to save connection
-//				}
-//				
-//				@Override
-//				public void visit(ExpressConnection connection) {
-//					ConnectionsRegistrySingleton.getInstance().setRecent(connection);
-//				}
-//			});
-//		}
+		//		IConnection connection = getConnection();
+		//		if (connection != null) {
+		//			connection.accept(new IConnectionVisitor() {
+		//				
+		//				@Override
+		//				public void visit(KubernetesConnection connection) {
+		//					//TODO figure out how to save connection
+		//				}
+		//				
+		//				@Override
+		//				public void visit(ExpressConnection connection) {
+		//					ConnectionsRegistrySingleton.getInstance().setRecent(connection);
+		//				}
+		//			});
+		//		}
 	}
 
 	public Collection<IConnectionFactory> getAllConnectionFactories() {
@@ -489,7 +489,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 			selectedConnection.enablePromptCredentials(enablePromptCredentialsBackup);
 		}
 	}
-	
+
 	/**
 	 * Either adds the connection that was created to the connection registry or
 	 * updates the connection that was edited.
@@ -497,8 +497,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	 * @return
 	 */
 	public boolean saveConnection() {
-		if (connection == null
-				|| !connectedStatus.isOK()) {
+		if (connection == null || !connectedStatus.isOK()) {
 			return false;
 		}
 
@@ -516,15 +515,16 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 	public void cancel() {
 		this.connection.enablePromptCredentials(true);
 	}
-	
+
 	public void setConnectionAuthenticationProvider(IConnectionAuthenticationProvider authenticationProvider) {
 		this.connectionAuthenticationProvider = authenticationProvider;
 	}
-	
-	public void setConnectionAdvancedPropertiesProvider(IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider) {
+
+	public void setConnectionAdvancedPropertiesProvider(
+			IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider) {
 		this.connectionAdvancedPropertiesProvider = connectionAdvancedPropertiesProvider;
 	}
-	
+
 	public IConnectionAdvancedPropertiesProvider getConnectionAdvancedPropertiesProvider() {
 		return this.connectionAdvancedPropertiesProvider;
 	}
@@ -534,13 +534,13 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 		public IConnection update(IConnection connection);
 
 	}
-	
+
 	public interface IConnectionAdvancedPropertiesProvider {
 
 		public IConnection update(IConnection connection);
 
 	}
-	
+
 	public Object getContext() {
 		return wizardModel.getContext();
 	}
@@ -551,7 +551,7 @@ public class ConnectionWizardPageModel extends ObservableUIPojo {
 
 	public static interface IConnectionFilter {
 
-		public boolean accept(IConnection connection); 
+		public boolean accept(IConnection connection);
 	}
 
 }

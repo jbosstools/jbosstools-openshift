@@ -26,12 +26,12 @@ public class OpenShiftCoreUIIntegration {
 	private static final String SSLCERTIFICATE_CALLBACK_UI_EXTENSION = "org.jboss.tools.openshift.core.sslCertificateCallbackUI";
 	private static final String CREDENTIALS_PROMPTER_UI_EXTENSION = "org.jboss.tools.openshift.core.credentialsPrompterUI";
 	private static final String ROUTE_CHOOSER_EXTENSION = "org.jboss.tools.openshift.core.routeChooser";
-	
+
 	private static final String ATTRIBUTE_CLASS = "class";
 
 	private static OpenShiftCoreUIIntegration INSTANCE = new OpenShiftCoreUIIntegration();
 
-	public static OpenShiftCoreUIIntegration getInstance(){
+	public static OpenShiftCoreUIIntegration getInstance() {
 		return INSTANCE;
 	}
 
@@ -45,14 +45,16 @@ public class OpenShiftCoreUIIntegration {
 
 	public ISSLCertificateCallback getSSLCertificateCallback() {
 		if (sslCertificateCallback == null) {
-			sslCertificateCallback = ExtensionUtils.getFirstExtension(SSLCERTIFICATE_CALLBACK_UI_EXTENSION, ATTRIBUTE_CLASS);
+			sslCertificateCallback = ExtensionUtils.getFirstExtension(SSLCERTIFICATE_CALLBACK_UI_EXTENSION,
+					ATTRIBUTE_CLASS);
 		}
 		return sslCertificateCallback;
 	}
-	
+
 	public ICredentialsPrompter getCredentialPrompter() {
 		if (credentialPrompter == null) {
-			this.credentialPrompter = ExtensionUtils.getFirstExtension(CREDENTIALS_PROMPTER_UI_EXTENSION, ATTRIBUTE_CLASS);
+			this.credentialPrompter = ExtensionUtils.getFirstExtension(CREDENTIALS_PROMPTER_UI_EXTENSION,
+					ATTRIBUTE_CLASS);
 		}
 		return credentialPrompter;
 	}

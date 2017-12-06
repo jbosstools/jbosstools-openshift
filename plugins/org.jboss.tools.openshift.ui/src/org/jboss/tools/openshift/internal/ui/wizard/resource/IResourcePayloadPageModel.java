@@ -18,19 +18,19 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IProjectPageModel;
  *
  */
 public interface IResourcePayloadPageModel extends IProjectPageModel<Connection> {
-    public static final String PROPERTY_SOURCE = "source";
-    
-    /**
-     * Set the source. The source can be a file path or an URL.
-     * 
-     * @param source the source
-     */
-    void setSource(String source);
-    
-    /**
-     * Gets the source. The source can be a file path or an URL.
-     * 
-     * @return the source
-     */
-    String getSource();
+	public static final String PROPERTY_SOURCE = "source";
+
+	/**
+	 * Set the source. The source can be a file path or an URL.
+	 * 
+	 * @param source the source
+	 */
+	void setSource(String source);
+
+	/**
+	 * Gets the source. The source can be a file path or an URL.
+	 * 
+	 * @return the source
+	 */
+	String getSource();
 }

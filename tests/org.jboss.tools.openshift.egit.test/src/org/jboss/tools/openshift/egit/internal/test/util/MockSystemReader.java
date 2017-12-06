@@ -105,7 +105,7 @@ public class MockSystemReader extends SystemReader {
 		setProperty("path.separator", System.getProperty("path.separator"));
 		setProperty("line.separator", System.getProperty("line.separator"));
 	}
-	
+
 	public void clearProperties() {
 		values.clear();
 	}

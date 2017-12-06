@@ -35,15 +35,15 @@ import com.openshift.restclient.model.IResource;
  * @author Fred Bricon
  */
 public class EditResourceHandler extends OpenInWebBrowserHandler {
-	
+
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		ISelection currentSelection = UIUtils.getCurrentSelection(event);
-		
+
 		IResource resource = UIUtils.getFirstElement(currentSelection, IResource.class);
 		Connection connection = null;
 		Shell shell = HandlerUtil.getActiveShell(event);
-		if ( resource == null) {
+		if (resource == null) {
 			MessageDialog.openWarning(shell, "Nothing to edit", "This is not the resource you are looking for.");
 			return null;
 		}
@@ -53,21 +53,23 @@ public class EditResourceHandler extends OpenInWebBrowserHandler {
 			try {
 				openInEditor(win, connection, resource);
 			} catch (PartInitException e) {
-				String msg = NLS.bind("Error opening {0} : \"{1}\" in editor: {2}", new String[]{resource.getKind(), resource.getName(), e.getMessage()});
+				String msg = NLS.bind("Error opening {0} : \"{1}\" in editor: {2}",
+						new String[] { resource.getKind(), resource.getName(), e.getMessage() });
 				OpenShiftUIActivator.getDefault().getLogger().logError(msg, e);
 			}
 		}
 		return null;
 	}
 
-	private void openInEditor(IWorkbenchWindow window, Connection connection, IResource resource) throws PartInitException {
-		   IStorageEditorInput input = new OpenShiftResourceInput(connection, resource);
-		   IWorkbenchPage page = window.getActivePage();
-		   if (page != null) {
-			   IEditorRegistry editorRegistry= PlatformUI.getWorkbench().getEditorRegistry();
-			   String defaultJsonEditorId = getDefaultJSONEditorDescriptorId(editorRegistry);
-			   page.openEditor(input, defaultJsonEditorId);
-		   }
+	private void openInEditor(IWorkbenchWindow window, Connection connection, IResource resource)
+			throws PartInitException {
+		IStorageEditorInput input = new OpenShiftResourceInput(connection, resource);
+		IWorkbenchPage page = window.getActivePage();
+		if (page != null) {
+			IEditorRegistry editorRegistry = PlatformUI.getWorkbench().getEditorRegistry();
+			String defaultJsonEditorId = getDefaultJSONEditorDescriptorId(editorRegistry);
+			page.openEditor(input, defaultJsonEditorId);
+		}
 	}
 
 	/**
@@ -77,7 +79,7 @@ public class EditResourceHandler extends OpenInWebBrowserHandler {
 	 * @param editorRegistry the Eclipse editor registry
 	 * @return the id of the editor to use
 	 */
-    private String getDefaultJSONEditorDescriptorId(IEditorRegistry editorRegistry) {
-        return editorRegistry.findEditor("org.eclipse.ui.DefaultTextEditor").getId();
+	private String getDefaultJSONEditorDescriptorId(IEditorRegistry editorRegistry) {
+		return editorRegistry.findEditor("org.eclipse.ui.DefaultTextEditor").getId();
 	}
 }

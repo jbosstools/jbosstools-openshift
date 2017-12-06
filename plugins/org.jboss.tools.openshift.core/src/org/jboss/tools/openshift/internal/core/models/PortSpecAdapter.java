@@ -20,36 +20,36 @@ import com.openshift.restclient.model.IPort;
  * @author jeff.cantrill
  *
  */
-public class PortSpecAdapter implements IPort{
-	
+public class PortSpecAdapter implements IPort {
+
 	private String name;
 	private String protocol;
 	private int port;
-	
+
 	/**
 	 * 
 	 * @param spec A string in the form of "port/protocol"
 	 * @throws IllegalArgumentException if the port info can not be determined from the spec
 	 */
-	public PortSpecAdapter(String spec){
+	public PortSpecAdapter(String spec) {
 		String[] parts = StringUtils.defaultIfBlank(spec, "").split("/");
-		if(parts.length != 2){
+		if (parts.length != 2) {
 			throw new IllegalArgumentException(NLS.bind("Unable to determine port info from spec {0}", spec));
 		}
 		port = Integer.valueOf(parts[0]);
-		protocol = parts[1].toUpperCase(); 
+		protocol = parts[1].toUpperCase();
 		name = getName(port, protocol);
 	}
-	
-	public PortSpecAdapter(String name, String protocol, int port){
-		if(StringUtils.isBlank(protocol)){
+
+	public PortSpecAdapter(String name, String protocol, int port) {
+		if (StringUtils.isBlank(protocol)) {
 			throw new IllegalArgumentException("protocol must be set");
 		}
 		this.port = port;
-		this.protocol = protocol; 
-		this.name = (name == null)?getName(port, protocol):name;
+		this.protocol = protocol;
+		this.name = (name == null) ? getName(port, protocol) : name;
 	}
-	
+
 	@Override
 	public String getName() {
 		return name;
@@ -98,17 +98,17 @@ public class PortSpecAdapter implements IPort{
 			return false;
 		return true;
 	}
-	
-    /**
-     * For better test reporting
-     */
-    @Override
-    public String toString() {
-        return "PortSpecAdapter [name=" + name + ", protocol=" + protocol + ", port=" + port + "]";
-    }
 
-    private String getName(int port, String protocol) {
+	/**
+	 * For better test reporting
+	 */
+	@Override
+	public String toString() {
+		return "PortSpecAdapter [name=" + name + ", protocol=" + protocol + ", port=" + port + "]";
+	}
+
+	private String getName(int port, String protocol) {
 		return NLS.bind("{0}-{1}", port, protocol.toLowerCase());
 	}
-	
+
 }

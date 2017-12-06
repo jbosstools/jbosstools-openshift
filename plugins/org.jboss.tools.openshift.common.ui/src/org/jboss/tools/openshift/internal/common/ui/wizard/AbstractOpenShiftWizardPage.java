@@ -44,18 +44,19 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 			public IWizardPage getFollowingPage(IWizardPage page) {
 				return page.getNextPage();
 			}
-		}, BACKWARDS {
+		},
+		BACKWARDS {
 			@Override
 			public IWizardPage getFollowingPage(IWizardPage page) {
 				return page.getPreviousPage();
 			}
 		};
-		
+
 		public abstract IWizardPage getFollowingPage(IWizardPage currentPage);
 	}
-	
+
 	private DataBindingContext dbc;
-	
+
 	protected AbstractOpenShiftWizardPage(String title, String description, String pageName, IWizard wizard) {
 		super(pageName);
 		setWizard(wizard);
@@ -69,7 +70,7 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 		this.dbc = new DataBindingContext();
 		setupWizardPageSupport(dbc);
 		Composite container = new Composite(parent, SWT.NONE);
-		GridLayoutFactory.fillDefaults().margins(6,6).applyTo(container);
+		GridLayoutFactory.fillDefaults().margins(6, 6).applyTo(container);
 		Composite child = new Composite(container, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(child);
 		setControl(container);
@@ -94,10 +95,10 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 				Shell shell = getControl().getShell();
 				int y = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).y;
 				int h = Display.getDefault().getBounds().height;
-				if(y > h) {
+				if (y > h) {
 					y = h;
 				}
-				if(y > shell.getSize().y) {
+				if (y > shell.getSize().y) {
 					shell.setSize(shell.getSize().x, y);
 				}
 			}
@@ -105,8 +106,7 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 	}
 
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(
-				IStatus.ERROR | IStatus.INFO | IStatus.WARNING | IStatus.CANCEL, this,
+		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.INFO | IStatus.WARNING | IStatus.CANCEL, this,
 				dbc);
 	}
 
@@ -150,7 +150,7 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 			private boolean isChangingToThisPage(PageChangingEvent event) {
 				return equals((IWizardPage) event.getTargetPage(), AbstractOpenShiftWizardPage.this);
 			}
-			
+
 			private boolean isChangingFromThisPage(PageChangingEvent event) {
 				return equals((IWizardPage) event.getCurrentPage(), AbstractOpenShiftWizardPage.this);
 			}
@@ -159,12 +159,12 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 				if (!(thisPage instanceof IWizardPage)) {
 					return thatPage == null;
 				}
-				
+
 				if (!(thatPage instanceof IWizardPage)) {
 					return false;
 				}
-				
-				return thisPage == thatPage 
+
+				return thisPage == thatPage
 						|| ((IWizardPage) thisPage).getControl() == ((IWizardPage) thatPage).getControl();
 			}
 
@@ -191,7 +191,7 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 
 	protected void onPageActivated(DataBindingContext dbc) {
 	}
-	
+
 	protected void onPageDeactivated(DataBindingContext dbc) {
 	}
 

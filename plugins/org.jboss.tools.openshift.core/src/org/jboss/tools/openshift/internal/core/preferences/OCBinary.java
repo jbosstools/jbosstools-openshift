@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.core.preferences;
 
 import java.io.File;
@@ -27,16 +27,14 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 public enum OCBinary {
 
-	WINDOWS("oc.exe"), 
-	OTHER("oc");
-	
+	WINDOWS("oc.exe"), OTHER("oc");
+
 	// The base name, without any suffixes applied
 	private static final String CMD_BASE_NAME = "oc";
-	
+
 	// The default location on linux. 
 	private static final String OC_DEFAULTLOCATION_LINUX = "/usr/bin/oc";
-	
-	
+
 	public static OCBinary getInstance() {
 		if (Platform.OS_WIN32.equals(Platform.getOS())) {
 			return WINDOWS;
@@ -73,7 +71,7 @@ public enum OCBinary {
 	}
 
 	private CommandLocationBinary getLocationBinary() {
-		if( locationBinary == null ) {
+		if (locationBinary == null) {
 			// CommandLocationBinary holds information for all platforms, 
 			// so we're just setting the name and default location for all platforms 
 			// where this we think we know this.  
@@ -85,7 +83,7 @@ public enum OCBinary {
 		}
 		return locationBinary;
 	}
-	
+
 	/**
 	 * Returns the location from preferences or looks it up on the path.
 	 * This method is used to get the global workspace setting for the oc location.
@@ -99,7 +97,7 @@ public enum OCBinary {
 	public String getLocation() {
 		return getWorkspaceLocation();
 	}
-	
+
 	/**
 	 * Get the location of the workspace preference pointing to an oc install. 
 	 * 
@@ -112,18 +110,18 @@ public enum OCBinary {
 		}
 		return location;
 	}
-	
+
 	public String getLocation(IConnection connection) {
-		if( connection instanceof IOpenShiftConnection ) {
-			IOpenShiftConnection c = (IOpenShiftConnection)connection;
-			String loc = (String)c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
-			if( loc != null && !loc.isEmpty())
+		if (connection instanceof IOpenShiftConnection) {
+			IOpenShiftConnection c = (IOpenShiftConnection) connection;
+			String loc = (String) c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
+			if (loc != null && !loc.isEmpty())
 				return loc;
 		}
-		
+
 		return getWorkspaceLocation();
 	}
-	
+
 	/**
 	 * Compute the error message for the OCBinary state and path.
 	 * 

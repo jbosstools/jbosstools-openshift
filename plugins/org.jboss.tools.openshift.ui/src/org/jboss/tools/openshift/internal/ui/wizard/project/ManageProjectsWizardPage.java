@@ -71,7 +71,8 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 
 	private List<IProject> initialProjects;
 
-	public ManageProjectsWizardPage(String title, String description, ManageProjectsWizardPageModel pageModel, IWizard wizard) {
+	public ManageProjectsWizardPage(String title, String description, ManageProjectsWizardPageModel pageModel,
+			IWizard wizard) {
 		super(title, description, title, wizard);
 		this.pageModel = pageModel;
 	}
@@ -82,19 +83,15 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 
 		Group group = new Group(parent, SWT.NONE);
 		group.setText("OpenShift Projects");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(group);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(group);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(group);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(group);
 
 		// table
 		Composite tableContainer = new Composite(group, SWT.NONE);
 		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults()
-				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		viewer.setContentProvider(new ObservableListContentProvider());
-		viewer.setInput(BeanProperties.list(
-				ManageProjectsWizardPageModel.PROPERTY_PROJECTS).observe(pageModel));
+		viewer.setInput(BeanProperties.list(ManageProjectsWizardPageModel.PROPERTY_PROJECTS).observe(pageModel));
 		loadProjects(dbc);
 		initialProjects = getProjects();
 		viewer.setComparator(new ProjectViewerComparator());
@@ -106,34 +103,26 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 
 		// new 
 		Button newButton = new Button(group, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(newButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(newButton);
 		newButton.setText("New...");
 		newButton.addSelectionListener(onNew());
 		UIUtils.setDefaultButtonWidth(newButton);
 
 		// remove
 		Button removeButton = new Button(group, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
 		removeButton.addSelectionListener(onRemove(dbc));
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
-				.notUpdatingParticipant()
-				.to(viewerSingleSelection)
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(removeButton)).notUpdatingParticipant()
+				.to(viewerSingleSelection).converting(new IsNotNull2BooleanConverter()).in(dbc);
 		UIUtils.setDefaultButtonWidth(removeButton);
 
 		Composite filler = new Composite(group, SWT.None);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(filler);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(filler);
 
 		// refresh
 		Button refreshButton = new Button(group, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.END).applyTo(refreshButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.END).applyTo(refreshButton);
 		refreshButton.setText("Refresh...");
 		refreshButton.addSelectionListener(onRefresh(dbc));
 		UIUtils.setDefaultButtonWidth(refreshButton);
@@ -141,17 +130,17 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 
 	private void loadProjects(DataBindingContext dbc) {
 		try {
-			WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob("Loading OpenShift projects...") {
+			WizardUtils.runInWizard(new AbstractDelegatingMonitorJob("Loading OpenShift projects...") {
 
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							pageModel.loadProjects();
-							return Status.OK_STATUS;
-						}
-					}, new DelegatingProgressMonitor(), getContainer(), dbc);
+				@Override
+				protected IStatus doRun(IProgressMonitor monitor) {
+					pageModel.loadProjects();
+					return Status.OK_STATUS;
+				}
+			}, new DelegatingProgressMonitor(), getContainer(), dbc);
 		} catch (InvocationTargetException | InterruptedException e) {
-			LOG.logError(NLS.bind("Could not load projects for connection {0}", pageModel.getConnection().toString()), e);
+			LOG.logError(NLS.bind("Could not load projects for connection {0}", pageModel.getConnection().toString()),
+					e);
 		}
 	}
 
@@ -160,7 +149,8 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				NewProjectWizard newProjectWizard = new NewProjectWizard(pageModel.getConnection(), pageModel.getProjects());
+				NewProjectWizard newProjectWizard = new NewProjectWizard(pageModel.getConnection(),
+						pageModel.getProjects());
 				int res = WizardUtils.openWizardDialog(newProjectWizard, getShell());
 				if (res == IDialogConstants.OK_ID) {
 					IProject newOrSelectedProject = newProjectWizard.getProject();
@@ -181,18 +171,18 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 				if (project == null) {
 					return;
 				}
-				boolean confirm = MessageDialog.openConfirm(getShell(), 
-						OpenShiftUIMessages.ResourceDeletionDialogTitle, 
+				boolean confirm = MessageDialog.openConfirm(getShell(), OpenShiftUIMessages.ResourceDeletionDialogTitle,
 						NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, project.getName()));
 				if (!confirm) {
 					return;
 				}
 				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(project);
 				try {
-					org.jboss.tools.common.ui.WizardUtils.runInWizard(
-							job, job.getDelegatingProgressMonitor(), getContainer(), dbc);
+					org.jboss.tools.common.ui.WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(),
+							getContainer(), dbc);
 				} catch (InvocationTargetException | InterruptedException ex) {
-					OpenShiftUIActivator.getDefault().getLogger().logError(NLS.bind("Could not delete OpenShift project {0}", project.getName()), ex);
+					OpenShiftUIActivator.getDefault().getLogger()
+							.logError(NLS.bind("Could not delete OpenShift project {0}", project.getName()), ex);
 				}
 			}
 		};
@@ -214,8 +204,7 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		ICellToolTipProvider<IProject> cellToolTipProvider = new ICellToolTipProvider<IProject>() {
@@ -230,46 +219,40 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 				return 0;
 			}
 		};
-		
-		this.viewer = new TableViewerBuilder(table, tableContainer)
-				.contentProvider(new ArrayContentProvider())
+
+		this.viewer = new TableViewerBuilder(table, tableContainer).contentProvider(new ArrayContentProvider())
 				.column(new IColumnLabelProvider<IProject>() {
 
 					@Override
 					public String getValue(IProject project) {
 						return project.getName();
 					}
-				})
-				.cellToolTipProvider(cellToolTipProvider)
-				.name("Name").align(SWT.LEFT).weight(1).minWidth(75).buildColumn()
-				.column(new IColumnLabelProvider<IProject>() {
+				}).cellToolTipProvider(cellToolTipProvider).name("Name").align(SWT.LEFT).weight(1).minWidth(75)
+				.buildColumn().column(new IColumnLabelProvider<IProject>() {
 
 					@Override
 					public String getValue(IProject project) {
 						return project.getDisplayName();
 					}
-				})
-				.cellToolTipProvider(cellToolTipProvider)
-				.name("Display Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.buildViewer();
+				}).cellToolTipProvider(cellToolTipProvider).name("Display Name").align(SWT.LEFT).weight(2).minWidth(100)
+				.buildColumn().buildViewer();
 
 		return viewer;
 	}
 
 	private void refreshModel(final DataBindingContext dbc) {
 		try {
-			WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob("Refreshing Projects...") {
+			WizardUtils.runInWizard(new AbstractDelegatingMonitorJob("Refreshing Projects...") {
 
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							pageModel.refresh();
-							return Status.OK_STATUS;
-						}
-					}
-					, new DelegatingProgressMonitor(), getContainer(), dbc);
+				@Override
+				protected IStatus doRun(IProgressMonitor monitor) {
+					pageModel.refresh();
+					return Status.OK_STATUS;
+				}
+			}, new DelegatingProgressMonitor(), getContainer(), dbc);
 		} catch (InvocationTargetException | InterruptedException e) {
-			LOG.logError(NLS.bind("Could not refresh projects for connection {0}", pageModel.getConnection().toString()), e);
+			LOG.logError(
+					NLS.bind("Could not refresh projects for connection {0}", pageModel.getConnection().toString()), e);
 		}
 	}
 
@@ -288,6 +271,6 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	public boolean hasChanged() {
-		return !Objects.deepEquals(initialProjects,getProjects());
+		return !Objects.deepEquals(initialProjects, getProjects());
 	}
 }

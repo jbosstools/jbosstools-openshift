@@ -82,7 +82,7 @@ public abstract class AbstractCDKRuntimeDetector extends AbstractRuntimeDetector
 	protected Properties readProperties(File cdkFile) {
 		Properties props = new Properties();
 		if (cdkFile.exists()) {
-			try (InputStream is = new FileInputStream(cdkFile)){
+			try (InputStream is = new FileInputStream(cdkFile)) {
 				props.load(is);
 			} catch (IOException ioe) {
 				// Ignore

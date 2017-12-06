@@ -64,20 +64,21 @@ public class OpenShiftServerUtilsTest {
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 
 		this.serverWorkingCopy = OpenShiftServerTestUtils.mockServerWorkingCopy();
-		this.server = OpenShiftServerTestUtils.mockServer(serverWorkingCopy, ResourceMocks.PROJECT2_SERVICES[1], connection);
-		
+		this.server = OpenShiftServerTestUtils.mockServer(serverWorkingCopy, ResourceMocks.PROJECT2_SERVICES[1],
+				connection);
+
 	}
 
 	@After
 	public void tearDown() {
 		ConnectionsRegistrySingleton.getInstance().remove(connection);
 	}
-	
+
 	@Test
 	public void testGetPodPathFromServer() {
 		// Only tests resolution from server
 		IServerAttributes server = mock(IServerAttributes.class);
-		when(server.getAttribute(OpenShiftServerUtils.ATTR_POD_PATH, (String)null)).thenReturn("test1");
+		when(server.getAttribute(OpenShiftServerUtils.ATTR_POD_PATH, (String) null)).thenReturn("test1");
 		assertEquals("test1", OpenShiftServerUtils.getPodPath(server));
 	}
 
@@ -85,7 +86,7 @@ public class OpenShiftServerUtilsTest {
 	public void testGetSourceFromServer() {
 		// Only tests resolution from server
 		IServerAttributes server = mock(IServerAttributes.class);
-		when(server.getAttribute(OpenShiftServerUtils.ATTR_SOURCE_PATH, (String)null)).thenReturn("test1");
+		when(server.getAttribute(OpenShiftServerUtils.ATTR_SOURCE_PATH, (String) null)).thenReturn("test1");
 		assertEquals("test1", OpenShiftServerUtils.getSourcePath(server));
 	}
 
@@ -93,10 +94,10 @@ public class OpenShiftServerUtilsTest {
 	public void testGetRouteURLFromServer() {
 		// Only tests resolution from server
 		IServerAttributes server = mock(IServerAttributes.class);
-		when(server.getAttribute(OpenShiftServerUtils.ATTR_ROUTE, (String)null)).thenReturn("test1");
+		when(server.getAttribute(OpenShiftServerUtils.ATTR_ROUTE, (String) null)).thenReturn("test1");
 		assertEquals("test1", OpenShiftServerUtils.getRouteURL(server));
 	}
-	
+
 	@Test
 	public void should_return_connection_from_server() {
 		// given
@@ -126,7 +127,7 @@ public class OpenShiftServerUtilsTest {
 		assertThat(connection).isNull();
 	}
 
-	@Test(expected=CoreException.class)
+	@Test(expected = CoreException.class)
 	public void should_throw_exception_given_no_connection() throws Exception {
 		// given
 		ConnectionsRegistrySingleton.getInstance().clear();
@@ -147,20 +148,18 @@ public class OpenShiftServerUtilsTest {
 
 	@Test
 	public void shouldNotShowJmxOnNonJavaProject() throws CoreException {
-	    IProject eclipseProject = ResourceMocks.createEclipseProject("project1");
-	    doReturn(eclipseProject.getName()).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEPLOYPROJECT), anyString());
-	    assertThat(OpenShiftServerUtils.isJavaProject(server)).isFalse();
+		IProject eclipseProject = ResourceMocks.createEclipseProject("project1");
+		doReturn(eclipseProject.getName()).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEPLOYPROJECT),
+				anyString());
+		assertThat(OpenShiftServerUtils.isJavaProject(server)).isFalse();
 	}
 
 	@Test
 	public void shouldFindServerGivenListOfServersContainsServerWithNullType() throws CoreException {
 		// given
 		IServer os3Server = mockOS3Server("os3", "someService");
-		IServer[] servers = new IServer[] {
-				mockServer("null", null),
-				os3Server,
-				mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70))
-		};
+		IServer[] servers = new IServer[] { mockServer("null", null), os3Server,
+				mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70)) };
 		// when
 		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
@@ -172,11 +171,8 @@ public class OpenShiftServerUtilsTest {
 		// given
 		IServer os3Server1 = mockOS3Server("os3-1", "someService");
 		IServer os3Server2 = mockOS3Server("os3-2", "someService");
-		IServer[] servers = new IServer[] {
-				mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70)),
-				os3Server1,
-				os3Server2
-		};
+		IServer[] servers = new IServer[] { mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70)),
+				os3Server1, os3Server2 };
 		// when
 		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
@@ -190,18 +186,14 @@ public class OpenShiftServerUtilsTest {
 		IServer os3Server2 = mockOS3Server("os3-2", "otherService");
 		IServer serviceServer = mockServer("serviceServer", mockServerType(IJBossToolingConstants.AS_71));
 		doReturn("someService").when(serviceServer).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
-		IServer[] servers = new IServer[] {
-				mockServer("null", null),
-				os3Server2,
-				os3Server1,
-				mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70))
-		};
+		IServer[] servers = new IServer[] { mockServer("null", null), os3Server2, os3Server1,
+				mockServer("as7", mockServerType(IJBossToolingConstants.SERVER_AS_70)) };
 		// when
 		IServer serverFound = OpenShiftServerUtils.findServerForResource("someService", servers);
 		// then
 		assertThat(serverFound).isSameAs(os3Server1);
 	}
-	
+
 	@Test
 	public void shouldSaveServerAttribute() throws CoreException {
 		// given
@@ -212,7 +204,7 @@ public class OpenShiftServerUtilsTest {
 		verify(serverWorkingCopy, atLeastOnce()).save(anyBoolean(), any(IProgressMonitor.class));
 	}
 
-	@Test(expected=CoreException.class)
+	@Test(expected = CoreException.class)
 	public void shouldThrowExceptionIfSavingEmptyAttributeValue() throws CoreException {
 		// given
 		// when
@@ -220,7 +212,7 @@ public class OpenShiftServerUtilsTest {
 		// then
 	}
 
-	@Test(expected=CoreException.class)
+	@Test(expected = CoreException.class)
 	public void shouldThrowExceptionIfSavingNullAttributeValue() throws CoreException {
 		// given
 		// when
@@ -240,7 +232,7 @@ public class OpenShiftServerUtilsTest {
 		doReturn(type).when(server).getServerType();
 		return server;
 	}
-	
+
 	private static IServerType mockServerType(String id) {
 		IServerType type = mock(IServerType.class);
 		doReturn(id).when(type).getId();

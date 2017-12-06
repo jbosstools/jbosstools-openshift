@@ -20,11 +20,11 @@ public class ExpressConnectionFake extends ExpressConnection {
 
 	private static final String USERNAME = "testUser";
 	private boolean authenticationTriggered;
-	
+
 	public ExpressConnectionFake() {
 		this(USERNAME);
 	}
-	
+
 	public ExpressConnectionFake(String username) {
 		this(username, null);
 	}
@@ -36,7 +36,7 @@ public class ExpressConnectionFake extends ExpressConnection {
 	public ExpressConnectionFake(String username, String scheme, String host) {
 		super(username, null, scheme, host, false, null, null);
 	}
-	
+
 	public void setConnected(boolean connected) {
 		if (connected) {
 			setUser(new NoopUserFake());
@@ -44,7 +44,7 @@ public class ExpressConnectionFake extends ExpressConnection {
 			clearUser();
 		}
 	}
-	
+
 	@Override
 	protected boolean createUser() {
 		return this.authenticationTriggered = true;
@@ -53,7 +53,7 @@ public class ExpressConnectionFake extends ExpressConnection {
 	public boolean isAuthenticationTriggered() {
 		return authenticationTriggered;
 	}
-	
+
 	@Override
 	public void save() {
 		// dont do anything

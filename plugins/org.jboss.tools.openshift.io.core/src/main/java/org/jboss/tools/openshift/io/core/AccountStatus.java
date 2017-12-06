@@ -11,7 +11,5 @@
 package org.jboss.tools.openshift.io.core;
 
 public enum AccountStatus {
-	VALID,
-	NEEDS_REFRESH,
-	NEEDS_LOGIN
+	VALID, NEEDS_REFRESH, NEEDS_LOGIN
 }

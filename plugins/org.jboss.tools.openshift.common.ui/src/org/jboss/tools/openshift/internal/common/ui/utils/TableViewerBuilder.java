@@ -68,26 +68,26 @@ public class TableViewerBuilder {
 		viewer.setContentProvider(contentProvider);
 		return this;
 	}
-	
+
 	public TableViewerBuilder comparer(IElementComparer sorter) {
 		viewer.setComparer(sorter);
 		return this;
 	}
-	
+
 	public TableViewerBuilder sorter(ViewerComparator sorter) {
 		viewer.setComparator(sorter);
 		return this;
 	}
 
-	public <E>ColumnBuilder<E> column(String name) {
+	public <E> ColumnBuilder<E> column(String name) {
 		return new ColumnBuilder<E>().name(name);
 	}
-	
-	public <E>ColumnBuilder<E> column(IColumnLabelProvider<E> columnLabelProvider) {
+
+	public <E> ColumnBuilder<E> column(IColumnLabelProvider<E> columnLabelProvider) {
 		return new ColumnBuilder<E>().labelProvider(columnLabelProvider);
 	}
 
-	public <E>ColumnBuilder<E> column(CellLabelProvider cellLabelProvider) {
+	public <E> ColumnBuilder<E> column(CellLabelProvider cellLabelProvider) {
 		return new ColumnBuilder<E>().labelProvider(cellLabelProvider);
 	}
 
@@ -108,9 +108,9 @@ public class TableViewerBuilder {
 	public void applyFont(ViewerCell cell, boolean italic) {
 		cell.setFont(italic ? italicFont : normalFont);
 	}
-	
+
 	public class ColumnBuilder<E> {
-		
+
 		private int alignement;
 		private IColumnLabelProvider<E> columnLabelProvider;
 		private CellLabelProvider cellLabelProvider;
@@ -121,7 +121,7 @@ public class TableViewerBuilder {
 
 		private ColumnBuilder() {
 		}
-		
+
 		public ColumnBuilder<E> labelProvider(IColumnLabelProvider<E> labelProvider) {
 			this.columnLabelProvider = labelProvider;
 			return this;
@@ -146,20 +146,20 @@ public class TableViewerBuilder {
 			this.name = name;
 			return this;
 		}
-		
+
 		public ColumnBuilder<E> weight(int weight) {
 			this.weight = weight;
 			return this;
 		}
-		
+
 		public ColumnBuilder<E> minWidth(int minWidth) {
 			this.minWidth = minWidth;
 			return this;
 		}
 
 		public TableViewerBuilder buildColumn() {
-			if(cellToolTipProvider != null || cellLabelProvider instanceof IToolTipProvider) {
-				ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE); 
+			if (cellToolTipProvider != null || cellLabelProvider instanceof IToolTipProvider) {
+				ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE);
 			}
 			TableViewerColumn column = new TableViewerColumn(viewer, alignement);
 			column.getColumn().setText(name);
@@ -168,11 +168,11 @@ public class TableViewerBuilder {
 			return TableViewerBuilder.this;
 		}
 
-		private void setLabelAndTooltipProviders(
-				final IColumnLabelProvider<E> labelProvider, final CellLabelProvider cellLabelProvider, final ICellToolTipProvider<E> tooltipProvider, TableViewerColumn column) {
-			Assert.isLegal((cellLabelProvider != null && tooltipProvider == null)
-					|| cellLabelProvider == null
-					, "cannot use ITooltipProvider with CellLabelProvider");
+		private void setLabelAndTooltipProviders(final IColumnLabelProvider<E> labelProvider,
+				final CellLabelProvider cellLabelProvider, final ICellToolTipProvider<E> tooltipProvider,
+				TableViewerColumn column) {
+			Assert.isLegal((cellLabelProvider != null && tooltipProvider == null) || cellLabelProvider == null,
+					"cannot use ITooltipProvider with CellLabelProvider");
 			if (labelProvider != null) {
 				column.setLabelProvider(new CellLabelProvider() {
 
@@ -208,18 +208,19 @@ public class TableViewerBuilder {
 					}
 				});
 			} else if (cellLabelProvider != null) {
-					column.setLabelProvider(cellLabelProvider);
+				column.setLabelProvider(cellLabelProvider);
 			}
 		}
 	}
 
 	public static interface IColumnLabelProvider<E> {
 		public String getValue(E e);
+
 		default public boolean isModified(E e) {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Add tooltips to a cell on hoveover
 	 * @link {@link CellLabelProvider}
@@ -228,9 +229,9 @@ public class TableViewerBuilder {
 	 * @param <T>
 	 */
 	public static interface ICellToolTipProvider<T> {
-		
+
 		String getToolTipText(T object);
-		
+
 		int getToolTipDisplayDelayTime(T object);
 	}
 

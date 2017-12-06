@@ -25,9 +25,7 @@ import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProv
  * 
  * @author Andre Dietisheim
  */
-public class ObservableTreeItemLabelProvider 
-	extends BaseLabelProvider 
-	implements IStyledLabelProvider, ILabelProvider {
+public class ObservableTreeItemLabelProvider extends BaseLabelProvider implements IStyledLabelProvider, ILabelProvider {
 
 	private OpenShiftExplorerLabelProvider explorerLabelProvider;
 
@@ -37,8 +35,7 @@ public class ObservableTreeItemLabelProvider
 
 	@Override
 	public Image getImage(Object element) {
-		if (element == null
-				|| !(element instanceof ObservableTreeItem)) {
+		if (element == null || !(element instanceof ObservableTreeItem)) {
 			return null;
 		}
 		return explorerLabelProvider.getImage(((ObservableTreeItem) element).getModel());

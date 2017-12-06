@@ -34,27 +34,28 @@ public class ConnectionTestUtils {
 		IClient client = createClient(username, token, host);
 		return new Connection(client, null);
 	}
-	
+
 	public static IClient createClient(String username, String token, String host) throws MalformedURLException {
 		IClient client = mock(IClient.class);
 		when(client.getBaseURL()).thenReturn(new URL(host));
 		doReturn(mockAuthorizationContext(username, token, true)).when(client).getAuthorizationContext();
 		return client;
 	}
-	
+
 	public static IAuthorizationContext mockAuthorizationContext(String username, String token, boolean isAuthorized) {
-		TestableAuthorizationContext authorizationContext = spy(new TestableAuthorizationContext(username, token, isAuthorized));
+		TestableAuthorizationContext authorizationContext = spy(
+				new TestableAuthorizationContext(username, token, isAuthorized));
 
 		IUser user = mock(IUser.class);
 		doReturn(username).when(user).getName();
 		doReturn(user).when(authorizationContext).getUser();
-		
+
 		authorizationContext.setUser(user);
 
 		return authorizationContext;
 	}
 
-	public static class TestableAuthorizationContext implements IAuthorizationContext{
+	public static class TestableAuthorizationContext implements IAuthorizationContext {
 
 		private String password;
 		private String username;
@@ -127,8 +128,7 @@ public class ConnectionTestUtils {
 		public IAuthorizationDetails getAuthorizationDetails() {
 			return null;
 		}
-		
-		
+
 	}
 
 }

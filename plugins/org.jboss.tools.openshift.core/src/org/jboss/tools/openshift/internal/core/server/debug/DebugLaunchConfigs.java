@@ -48,32 +48,34 @@ public class DebugLaunchConfigs {
 	public static DebugLaunchConfigs get(ILaunchManager launchManager) {
 		return new DebugLaunchConfigs(launchManager);
 	}
-	
+
 	private DebugLaunchConfigs(ILaunchManager launchManager) {
 		this.launchManager = launchManager;
 	}
 
 	public ILaunchConfiguration getRemoteDebuggerLaunchConfiguration(IServer server) throws CoreException {
-		ILaunchConfigurationType launchConfigurationType = launchManager.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
+		ILaunchConfigurationType launchConfigurationType = launchManager
+				.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
 		ILaunchConfiguration[] launchConfigs = launchManager.getLaunchConfigurations(launchConfigurationType);
 		String name = getRemoteDebuggerLaunchConfigurationName(server);
-		Optional<ILaunchConfiguration> maybeLaunch = Stream.of(launchConfigs)
-				.filter(lc -> name.equals(lc.getName()))
+		Optional<ILaunchConfiguration> maybeLaunch = Stream.of(launchConfigs).filter(lc -> name.equals(lc.getName()))
 				.findFirst();
-		
+
 		return maybeLaunch.orElse(null);
 	}
-	
-	public ILaunchConfigurationWorkingCopy createRemoteDebuggerLaunchConfiguration(IServer server) throws CoreException {
+
+	public ILaunchConfigurationWorkingCopy createRemoteDebuggerLaunchConfiguration(IServer server)
+			throws CoreException {
 		String name = getRemoteDebuggerLaunchConfigurationName(server);
-		ILaunchConfigurationType launchConfigurationType = launchManager.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
+		ILaunchConfigurationType launchConfigurationType = launchManager
+				.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
 		return launchConfigurationType.newInstance(null, name);
 	}
-	
-	public void setupRemoteDebuggerLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProject project, int debugPort) 
-			throws CoreException {
-	    workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE, false);
-		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR, 
+
+	public void setupRemoteDebuggerLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProject project,
+			int debugPort) throws CoreException {
+		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE, false);
+		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR,
 				IJavaLaunchConfigurationConstants.ID_SOCKET_ATTACH_VM_CONNECTOR);
 		Map<String, String> connectMap = new HashMap<>(2);
 		String portString = String.valueOf(debugPort);
@@ -81,7 +83,7 @@ public class DebugLaunchConfigs {
 		connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
 		workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectMap);
 		if (project != null) {
-			   workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getName());
+			workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getName());
 		}
 	}
 
@@ -94,13 +96,10 @@ public class DebugLaunchConfigs {
 	 * @
 	 */
 	public boolean isRunning(ILaunchConfiguration launchConfiguration) {
-		return getLaunches()
-				.filter(l -> !l.isTerminated() && launchMatches(l, launchConfiguration))
-				.findFirst()
+		return getLaunches().filter(l -> !l.isTerminated() && launchMatches(l, launchConfiguration)).findFirst()
 				.isPresent();
 	}
-	
-	
+
 	private boolean launchMatches(ILaunch l, ILaunchConfiguration launchConfiguration) {
 		return Objects.equals(l.getLaunchConfiguration(), launchConfiguration);
 	}
@@ -108,20 +107,20 @@ public class DebugLaunchConfigs {
 	public static String getRemoteDebuggerLaunchConfigurationName(IServer server) {
 		return "Remote debugger to " + server.getName();
 	}
-	
+
 	public void terminateRemoteDebugger(IServer server) throws CoreException {
 		ILaunchConfiguration launchConfig = getRemoteDebuggerLaunchConfiguration(server);
 		if (launchConfig == null) {
 			return;
 		}
 		List<IStatus> errors = new ArrayList<>();
-		getLaunches().filter(l -> launchConfig.equals(l.getLaunchConfiguration()))
-					 .filter(l -> l.canTerminate())
-					 .forEach(l -> terminate(l, errors));
-		
+		getLaunches().filter(l -> launchConfig.equals(l.getLaunchConfiguration())).filter(l -> l.canTerminate())
+				.forEach(l -> terminate(l, errors));
+
 		if (!errors.isEmpty()) {
-			MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.ERROR, 
-					errors.toArray(new IStatus[errors.size()]), "Failed to terminate remote launch configuration", null);
+			MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.ERROR,
+					errors.toArray(new IStatus[errors.size()]), "Failed to terminate remote launch configuration",
+					null);
 			throw new CoreException(status);
 		}
 	}

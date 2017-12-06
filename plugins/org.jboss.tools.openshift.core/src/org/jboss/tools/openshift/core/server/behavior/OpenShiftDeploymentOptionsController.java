@@ -16,7 +16,8 @@ import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.AbstractSubsystemController;
 import org.jboss.tools.as.core.server.controllable.systems.IDeploymentOptionsController;
 
-public class OpenShiftDeploymentOptionsController extends AbstractSubsystemController implements IDeploymentOptionsController {
+public class OpenShiftDeploymentOptionsController extends AbstractSubsystemController
+		implements IDeploymentOptionsController {
 
 	public OpenShiftDeploymentOptionsController() {
 		// TODO Auto-generated constructor stub

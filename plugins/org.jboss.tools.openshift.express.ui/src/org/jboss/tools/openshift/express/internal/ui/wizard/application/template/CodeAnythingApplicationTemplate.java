@@ -18,8 +18,8 @@ import com.openshift.client.cartridge.ICartridge;
 /**
  * @author Andre Dietisheim
  */
-public class CodeAnythingApplicationTemplate
-		extends CartridgeApplicationTemplate implements ICodeAnythingApplicationTemplate {
+public class CodeAnythingApplicationTemplate extends CartridgeApplicationTemplate
+		implements ICodeAnythingApplicationTemplate {
 
 	public CodeAnythingApplicationTemplate() {
 		super(new CodeAnythingCartridge());
@@ -34,7 +34,7 @@ public class CodeAnythingApplicationTemplate
 	public String getUrl() {
 		return getCartridgeUrl((CodeAnythingCartridge) getStandaloneCartridge());
 	}
-	
+
 	@Override
 	public void setUrl(String url) {
 		String oldUrl = getUrl();
@@ -42,7 +42,7 @@ public class CodeAnythingApplicationTemplate
 		firePropertyChange(PROPERTY_CARTRIDGE_URL, oldUrl, url);
 		firePropertyChange(PROPERTY_NAME, null, getName());
 	}
-	
+
 	@Override
 	public String getName() {
 		StringBuilder builder = new StringBuilder(super.getName());
@@ -54,8 +54,7 @@ public class CodeAnythingApplicationTemplate
 	}
 
 	protected String getCartridgeUrl(CodeAnythingCartridge cartridge) {
-		if (cartridge == null
-				|| cartridge.getUrlString() == null) {
+		if (cartridge == null || cartridge.getUrlString() == null) {
 			return null;
 		}
 		return cartridge.getUrlString();

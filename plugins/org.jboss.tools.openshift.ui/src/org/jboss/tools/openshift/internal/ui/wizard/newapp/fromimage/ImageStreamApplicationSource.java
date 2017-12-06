@@ -52,7 +52,7 @@ public class ImageStreamApplicationSource implements IApplicationSource {
 	public IImageStream getSource() {
 		return is;
 	}
-	
+
 	@Override
 	public String getKind() {
 		return is.getKind();
@@ -64,7 +64,7 @@ public class ImageStreamApplicationSource implements IApplicationSource {
 
 	@Override
 	public Collection<String> getTags() {
-		if(tag.isAnnotatedWith(OpenShiftAPIAnnotations.TAGS)) {
+		if (tag.isAnnotatedWith(OpenShiftAPIAnnotations.TAGS)) {
 			return Arrays.asList(tag.getAnnotation(OpenShiftAPIAnnotations.TAGS).split(","));
 		}
 		return Collections.emptyList();
@@ -84,7 +84,5 @@ public class ImageStreamApplicationSource implements IApplicationSource {
 	public Map<String, String> getAnnotations() {
 		return tag.getAnnotations();
 	}
-	
-	
 
 }

@@ -51,7 +51,7 @@ public class ApplicationTemplateCategory extends AbstractApplicationTemplate imp
 		firePropertyChange(PROPERTY_CHILDREN, null, children);
 		return this;
 	}
-	
+
 	@Override
 	public boolean isMatching(String expression) {
 		boolean matching = super.isMatching(expression);

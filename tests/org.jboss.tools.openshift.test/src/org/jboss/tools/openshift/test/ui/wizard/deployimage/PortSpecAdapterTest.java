@@ -32,23 +32,23 @@ public class PortSpecAdapterTest {
 		assertEquals("TCP", port.getProtocol());
 		assertEquals("8080-tcp", port.getName());
 	}
-	
-	@Test(expected=IllegalArgumentException.class)
+
+	@Test(expected = IllegalArgumentException.class)
 	public void testEmptyString() {
 		new PortSpecAdapter("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testNullString() {
 		new PortSpecAdapter(null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testMissingProtocol() {
 		new PortSpecAdapter("8080");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testNonNumericPort() {
 		new PortSpecAdapter("foo/tcp");
 	}

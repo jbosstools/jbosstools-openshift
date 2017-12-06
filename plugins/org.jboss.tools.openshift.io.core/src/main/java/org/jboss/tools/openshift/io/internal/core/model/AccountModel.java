@@ -30,28 +30,25 @@ import org.osgi.service.prefs.Preferences;
 public class AccountModel implements IAccountModel {
 
 	private List<ICluster> clusters = new ArrayList<>();
-	
+
 	private List<String> removed = new ArrayList<>();
-	
+
 	private List<IAccountModelListener> listeners = new ArrayList<>();
 
 	enum Event {
-		ACCOUNT_ADDED,
-		ACCOUNT_REMOVED,
-		CLUSTER_ADDED,
-		CLUSTER_REMOVED
+		ACCOUNT_ADDED, ACCOUNT_REMOVED, CLUSTER_ADDED, CLUSTER_REMOVED
 	}
-	
+
 	public AccountModel() {
 		loadModel();
 	}
-	
+
 	private void loadModel() {
 		ISecurePreferences secureAccountRoot = getSecureAccountsPreferences();
 		Preferences accountsRoot = getAccountsPreferences();
 		try {
 			String[] ids = accountsRoot.childrenNames();
-			for(String id: ids) {
+			for (String id : ids) {
 				Cluster cluster = new Cluster(this, id);
 				Preferences clusterNode = accountsRoot.node(id);
 				ISecurePreferences secureClusterNode = secureAccountRoot.node(id);
@@ -73,7 +70,7 @@ public class AccountModel implements IAccountModel {
 			OpenShiftIOCoreActivator.logError(e.getLocalizedMessage(), e);
 		}
 	}
-	
+
 	void fireEvent(Event event, IAccount account) {
 		listeners.forEach(listener -> {
 			switch (event) {
@@ -81,12 +78,12 @@ public class AccountModel implements IAccountModel {
 				listener.accountAdded(this, account);
 				break;
 			case ACCOUNT_REMOVED:
-				listener.accountRemoved(this,  account);
+				listener.accountRemoved(this, account);
 				break;
 			}
 		});
 	}
-	
+
 	void fireEvent(Event event, ICluster cluster) {
 		listeners.forEach(listener -> {
 			switch (event) {
@@ -94,12 +91,12 @@ public class AccountModel implements IAccountModel {
 				listener.clusterAdded(this, cluster);
 				break;
 			case CLUSTER_REMOVED:
-				listener.clusterRemoved(this,  cluster);
+				listener.clusterRemoved(this, cluster);
 				break;
 			}
 		});
 	}
-	
+
 	@Override
 	public ICluster createCluster(String id) {
 		return new Cluster(this, id);
@@ -129,7 +126,7 @@ public class AccountModel implements IAccountModel {
 		Preferences accountRoot = getAccountsPreferences();
 		ISecurePreferences accountSecureRoot = getSecureAccountsPreferences();
 		removed.forEach(id -> {
-			removeAccount(id ,accountRoot, accountSecureRoot);
+			removeAccount(id, accountRoot, accountSecureRoot);
 		});
 		removed.clear();
 	}

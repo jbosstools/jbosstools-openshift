@@ -40,7 +40,6 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.ResourceLabelsPage;
 
 import com.openshift.restclient.model.IProject;
 
-
 /**
  * The deploy image wizard that allows you to deploy a docker image to openshift
  * with a reasonable set of openshift resources
@@ -52,13 +51,14 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 
 	private static final String TITLE = "Deploy Image to OpenShift";
 
-	public DeployImageWizard(IDockerConnection dockerConnection, IDockerImage image, Connection connection, IProject project, boolean isAuthorized) {
+	public DeployImageWizard(IDockerConnection dockerConnection, IDockerImage image, Connection connection,
+			IProject project, boolean isAuthorized) {
 		super(TITLE, new DeployImageWizardModel());
 
-		DeployImageWizardModel model = (DeployImageWizardModel)getModel();
-		if(dockerConnection != null || image != null) {
+		DeployImageWizardModel model = (DeployImageWizardModel) getModel();
+		if (dockerConnection != null || image != null) {
 			model.setDockerConnection(image != null ? image.getConnection() : dockerConnection);
-			if(image != null) {
+			if (image != null) {
 				model.setOriginatedFromDockerExplorer(true);
 				model.setImageName(getImageNameWithTag(image));
 			}
@@ -66,13 +66,13 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 		model.setStartedWithActiveConnection(isAuthorized);
 		model.setConnection(connection);
 		model.setProject(project);
-		
+
 		setNeedsProgressMonitor(true);
 	}
 
 	private String getImageNameWithTag(IDockerImage image) {
 		String imageName = image.repo();
-		if(!image.tags().isEmpty()) {
+		if (!image.tags().isEmpty()) {
 			TreeSet<String> tags = new TreeSet<>(image.tags());
 			imageName += ":" + tags.first();
 		}
@@ -81,19 +81,19 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 
 	@Override
 	public void addPages() {
-	    if (getModel().originatedFromDockerExplorer()
-				|| !((DeployImageWizardModel)getModel()).isStartedWithActiveConnection()) {
-	        addPage(new ConnectionWizardPage(this, getModel(), Connection.class));
-	    }
+		if (getModel().originatedFromDockerExplorer()
+				|| !((DeployImageWizardModel) getModel()).isStartedWithActiveConnection()) {
+			addPage(new ConnectionWizardPage(this, getModel(), Connection.class));
+		}
 		addPage(new DeployImagePage(this, getModel()));
 		addPage(new DeploymentConfigPage(this, getModel()));
-		addPage(new ServicesAndRoutingPage(this,  getModel()));
-		addPage(new ResourceLabelsPage(this,  getModel()));
+		addPage(new ServicesAndRoutingPage(this, getModel()));
+		addPage(new ResourceLabelsPage(this, getModel()));
 	}
 
 	@Override
 	public IWizardPage getStartingPage() {
-		if(((DeployImageWizardModel)getModel()).isStartedWithActiveConnection()) {
+		if (((DeployImageWizardModel) getModel()).isStartedWithActiveConnection()) {
 			return getPage(DeployImagePage.DEPLOY_IMAGE_PAGE_NAME);
 		}
 		return super.getStartingPage();
@@ -107,12 +107,12 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 			@Override
 			public void done(IJobChangeEvent event) {
 				final IStatus status = event.getResult();
-				UsageStats.getInstance().newV3Application( getModel().getConnection().getHost(), isFailed(status));
+				UsageStats.getInstance().newV3Application(getModel().getConnection().getHost(), isFailed(status));
 				super.done(event);
 			}
 		});
 		job.schedule();
-			
+
 		return true;
 	}
 
@@ -125,31 +125,26 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 	private Job getJobChain(final IDeployImageParameters model, final Shell shell) {
 		final DeployImageJob deployJob = getDeployImageJob(getModel(), getShell());
 		final boolean pushImageToRegistry = model.isPushImageToRegistry();
-		if(pushImageToRegistry) {
+		if (pushImageToRegistry) {
 			final PushImageToRegistryJob pushImageToRegistryJob = getPushImageToRegistryJob(model);
 			return new JobChainBuilder(pushImageToRegistryJob).runWhenSuccessfullyDone(deployJob)
 					.runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true)).build();
 		}
-		return new JobChainBuilder(deployJob)
-				.runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true))
-				.build();
+		return new JobChainBuilder(deployJob).runWhenSuccessfullyDone(new RefreshResourcesJob(deployJob, true)).build();
 	}
 
 	private static DeployImageJob getDeployImageJob(final IDeployImageParameters model, final Shell shell) {
 		final DeployImageJob deployJob = new DeployImageJob(model);
-		deployJob.addJobChangeListener(new JobChangeAdapter(){
+		deployJob.addJobChangeListener(new JobChangeAdapter() {
 
 			@Override
 			public void done(IJobChangeEvent event) {
 				IStatus status = event.getResult();
-				if((JobUtils.isOk(status) || JobUtils.isWarning(status)) && !deployJob.getResources().isEmpty()) {
+				if ((JobUtils.isOk(status) || JobUtils.isWarning(status)) && !deployJob.getResources().isEmpty()) {
 					Display.getDefault().syncExec(new Runnable() {
 						@Override
 						public void run() {
-							new ResourceSummaryDialog(
-									shell, 
-									deployJob.getResources(),
-									TITLE,
+							new ResourceSummaryDialog(shell, deployJob.getResources(), TITLE,
 									deployJob.getSummaryMessage()).open();
 						}
 					});
@@ -159,38 +154,38 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 		});
 		return deployJob;
 	}
-	
+
 	private static PushImageToRegistryJob getPushImageToRegistryJob(final IDeployImageParameters model) {
 		final IDockerConnection dockerConnection = model.getDockerConnection();
 		final String imageName = model.getImageName();
 		final String deployProjectName = model.getProject().getName();
 		final IRegistryAccount registryAccount = new IRegistryAccount() {
-			
+
 			@Override
 			public String getServerAddress() {
 				return model.getTargetRegistryLocation();
 			}
-			
+
 			@Override
 			public String getUsername() {
 				return model.getTargetRegistryUsername();
 			}
-			
+
 			@Override
 			public char[] getPassword() {
 				return model.getTargetRegistryPassword().toCharArray();
 			}
-			
+
 			@Override
 			public String getEmail() {
 				return null;
 			}
-			
+
 			@Override
 			public List<IRepositoryTag> getTags(String arg0) throws DockerException {
 				return null;
 			}
-			
+
 			@Override
 			public boolean isVersion2() {
 				return false;
@@ -200,10 +195,10 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 			public List<IDockerImageSearchResult> getImages(String arg0) throws DockerException {
 				return null;
 			}
-		}; 
+		};
 		return new PushImageToRegistryJob(dockerConnection, registryAccount, deployProjectName, imageName);
 	}
-	
+
 	/**
 	 * Checks if the given {@code status}
 	 * 
@@ -217,10 +212,10 @@ public class DeployImageWizard extends AbstractOpenShiftWizard<IDeployImageParam
 		return JobUtils.isOk(status) || JobUtils.isWarning(status);
 	}
 
-    @Override
-    public void dispose() {
-        super.dispose();
-        //getModel().dispose();
-    }
+	@Override
+	public void dispose() {
+		super.dispose();
+		//getModel().dispose();
+	}
 
 }

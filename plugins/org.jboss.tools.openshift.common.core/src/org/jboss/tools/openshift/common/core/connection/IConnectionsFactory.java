@@ -23,7 +23,7 @@ public interface IConnectionsFactory {
 
 	/** connection factory for OpenShift 3 */
 	public static final String CONNECTIONFACTORY_OPENSHIFT_ID = "org.jboss.tools.openshift.core.ConnectionFactory";
-	
+
 	/**
 	 * Creates a connections for the given host. Queries the connection
 	 * factories that are registered and returns the first one that can create a
@@ -43,7 +43,7 @@ public interface IConnectionsFactory {
 	 * @throws IOException
 	 */
 	public IConnectionFactory getFactory(String host) throws IOException;
-	
+
 	/**
 	 * Returns all connection factories that are registered to this composite
 	 * factory.
@@ -51,7 +51,7 @@ public interface IConnectionsFactory {
 	 * @return
 	 */
 	public Collection<IConnectionFactory> getAll();
-	
+
 	/**
 	 * Returns all connection factories that can create connections of the given
 	 * type. Returns all connection factories if the given type is {@code null}
@@ -59,6 +59,7 @@ public interface IConnectionsFactory {
 	 * @return
 	 */
 	public <T extends IConnection> Collection<IConnectionFactory> getAll(Class<T> clazz);
+
 	/**
 	 * Returns the connection factory that is registered to this composite
 	 * factory for the given id. Returns <code>null</code> otherwise.

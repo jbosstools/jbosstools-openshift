@@ -36,8 +36,7 @@ public class TailFilesWizard extends Wizard {
 		final Collection<IGearGroup> selectedGearGroups = getSelectedGearGroups();
 		return selectedGearGroups != null && !selectedGearGroups.isEmpty();
 	}
-	
-	
+
 	@Override
 	public boolean performFinish() {
 		return true;
@@ -47,7 +46,7 @@ public class TailFilesWizard extends Wizard {
 	public void addPages() {
 		addPage(new TailFilesWizardPage(model, this));
 	}
-	
+
 	public String getFilePattern() {
 		return model.getFilePattern();
 	}

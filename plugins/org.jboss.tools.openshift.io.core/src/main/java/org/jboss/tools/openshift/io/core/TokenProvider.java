@@ -26,10 +26,11 @@ public interface TokenProvider extends Function<IResource, String> {
 	default String getToken(IResource resource) {
 		return apply(resource);
 	}
-	
+
 	static TokenProvider get() {
-		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(OSIOCoreConstants.TOKEN_PROVIDER_EXTENSION_POINT);
-		for(IConfigurationElement element : elements) {
+		IConfigurationElement[] elements = Platform.getExtensionRegistry()
+				.getConfigurationElementsFor(OSIOCoreConstants.TOKEN_PROVIDER_EXTENSION_POINT);
+		for (IConfigurationElement element : elements) {
 			try {
 				return (TokenProvider) element.createExecutableExtension("class");
 			} catch (CoreException e) {

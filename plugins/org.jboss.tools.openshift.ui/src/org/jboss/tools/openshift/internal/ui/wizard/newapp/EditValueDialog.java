@@ -44,8 +44,8 @@ public class EditValueDialog extends InputDialog {
 
 	private IValidator valueValidator;
 
-	public EditValueDialog(Shell shell, 
-			String title, String message, String name, String initialValue, boolean required) {
+	public EditValueDialog(Shell shell, String title, String message, String name, String initialValue,
+			boolean required) {
 		super(shell, title, message, initialValue, new InputValidator());
 		this.name = name;
 		this.initialValue = initialValue;
@@ -59,15 +59,15 @@ public class EditValueDialog extends InputDialog {
 
 	@Override
 	public InputValidator getValidator() {
-		return (InputValidator)super.getValidator();
+		return (InputValidator) super.getValidator();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		Composite control = (Composite)super.createDialogArea(parent);
+		Composite control = (Composite) super.createDialogArea(parent);
 		Text text = getTextControl(control);
-		if(text != null) {
+		if (text != null) {
 			IObservableValue modelObservable = BeanProperties.value(InputModel.VALUE).observe(model);
 			IObservableValue textObservable = WidgetProperties.text(SWT.Modify).observe(text);
 			ValueBindingBuilder.bind(textObservable).to(modelObservable).in(dbc);
@@ -77,7 +77,8 @@ public class EditValueDialog extends InputDialog {
 			ControlDecorationSupport.create(validator, SWT.LEFT | SWT.TOP);
 		} else {
 			//May happen only if InputDialog implementation changes.
-			OpenShiftUIActivator.getDefault().getLogger().logError(new NullPointerException("Cannot find text widget."));
+			OpenShiftUIActivator.getDefault().getLogger()
+					.logError(new NullPointerException("Cannot find text widget."));
 		}
 		return control;
 	}
@@ -91,9 +92,9 @@ public class EditValueDialog extends InputDialog {
 
 	private Text getTextControl(Composite control) {
 		Text text = null;
-		for (Control c: control.getChildren()) {
-			if(c instanceof Text) {
-				text = (Text)c;
+		for (Control c : control.getChildren()) {
+			if (c instanceof Text) {
+				text = (Text) c;
 				break;
 			}
 		}
@@ -102,13 +103,13 @@ public class EditValueDialog extends InputDialog {
 
 	public static class InputModel extends ObservableUIPojo {
 		static final String VALUE = "value";
-		
+
 		String value = "";
 
 		public String getValue() {
 			return value;
 		}
-	
+
 		public void setValue(String value) {
 			this.value = value;
 		}
@@ -119,45 +120,45 @@ public class EditValueDialog extends InputDialog {
 
 		@Override
 		public String isValid(String newText) {
-			if(provider != null) {
+			if (provider != null) {
 				IStatus status = provider.validate();
-				if(!status.isOK()) {
+				if (!status.isOK()) {
 					return status.getMessage();
 				}
 			}
 			return null;
 		}
-		
+
 		public void setProvider(ValidationStatusProvider provider) {
 			this.provider = provider;
 		}
-		
+
 	}
-	
+
 	class ValidationStatusProvider extends MultiValidator {
 		IObservableValue textObservable;
 
 		ValidationStatusProvider(IObservableValue textObservable) {
 			this.textObservable = textObservable;
 		}
-		
+
 		@Override
 		protected IStatus validate() {
-			String text = (String)textObservable.getValue();
+			String text = (String) textObservable.getValue();
 			boolean isTextEmpty = StringUtils.isEmpty(text);
-			if(required && isTextEmpty) {
+			if (required && isTextEmpty) {
 				return ValidationStatus.error(NLS.bind(PROVIDE_REQUIRED_VALUE, name));
 			}
 			boolean isInitEmpty = StringUtils.isEmpty(initialValue);
-			if((isTextEmpty == isInitEmpty) && (isTextEmpty || text.equals(initialValue))) {
+			if ((isTextEmpty == isInitEmpty) && (isTextEmpty || text.equals(initialValue))) {
 				return ValidationStatus.cancel(PROVIDE_NEW_VALUE);
 			}
-			if(valueValidator != null) {
+			if (valueValidator != null) {
 				return valueValidator.validate(text);
 			}
 			return ValidationStatus.ok();
 		}
-		
+
 	}
 
 }

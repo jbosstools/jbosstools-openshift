@@ -51,7 +51,7 @@ public class NodeDebugTerminateListener implements IDebugEventSetListener {
 			}
 		}
 	}
-	
+
 	private ILaunchConfiguration getLaunchConfiguration(DebugEvent event) {
 		ILaunchConfiguration lc = null;
 		Object source = event.getSource();

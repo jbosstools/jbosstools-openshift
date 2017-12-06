@@ -30,11 +30,9 @@ public class ObservablePojoUtils {
 	}
 
 	public static void removePropertyChangeListener(PropertyChangeListener listener, Object object) {
-		if (listener != null
-				&& object instanceof IObservablePojo) {
+		if (listener != null && object instanceof IObservablePojo) {
 			((IObservablePojo) object).removePropertyChangeListener(listener);
 		}
 	}
 
-	
 }

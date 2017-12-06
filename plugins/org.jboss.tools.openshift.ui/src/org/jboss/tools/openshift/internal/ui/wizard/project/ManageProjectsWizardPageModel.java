@@ -44,32 +44,33 @@ public class ManageProjectsWizardPageModel extends ObservableUIPojo {
 	public ManageProjectsWizardPageModel(Connection connection) {
 		this.connection = connection;
 		this.connectionChangeListener = onConnectionsChanged();
-		ConnectionsRegistrySingleton.getInstance().addListener(connectionChangeListener );
+		ConnectionsRegistrySingleton.getInstance().addListener(connectionChangeListener);
 	}
 
 	private IConnectionsRegistryListener onConnectionsChanged() {
 		return new IConnectionsRegistryListener() {
-		
+
 			@Override
 			public void connectionRemoved(IConnection connection) {
-				if(connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)){
+				if (connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)) {
 					ManageProjectsWizardPageModel.this.connection = null;
 					setProjects(Collections.<IProject>emptyList());
 				}
 			}
-			
+
 			@SuppressWarnings("unchecked")
 			@Override
 			public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 
-				if(connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection) && ConnectionProperties.PROPERTY_PROJECTS.equals(property)){
-					setProjects((List<IProject>) newValue); 
+				if (connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)
+						&& ConnectionProperties.PROPERTY_PROJECTS.equals(property)) {
+					setProjects((List<IProject>) newValue);
 				}
 			}
-			
+
 			@Override
 			public void connectionAdded(IConnection connection) {
-				if(connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)){
+				if (connection != null && connection.equals(ManageProjectsWizardPageModel.this.connection)) {
 					ManageProjectsWizardPageModel.this.connection = (Connection) connection;
 					loadProjects();
 				}
@@ -110,7 +111,7 @@ public class ManageProjectsWizardPageModel extends ObservableUIPojo {
 	public Connection getConnection() {
 		return connection;
 	}
-	
+
 	@Override
 	public void dispose() {
 		ConnectionsRegistrySingleton.getInstance().removeListener(connectionChangeListener);

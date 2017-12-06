@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
 import java.net.URI;
@@ -15,70 +15,68 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 public class ServiceManagerEnvironment {
-	
+
 	public static final String SHARED_INFO_KEY = "cdk.sharedinfo.serviceManagerEnvironment";
-	
-	
+
 	public static final String KEY_DOCKER_HOST = "DOCKER_HOST";
-	public static final String KEY_DOCKER_TLS_VERIFY="DOCKER_TLS_VERIFY";
+	public static final String KEY_DOCKER_TLS_VERIFY = "DOCKER_TLS_VERIFY";
 	public static final String KEY_DOCKER_CERT_PATH = "DOCKER_CERT_PATH";
 	public static final String KEY_DOCKER_API_VERSION = "DOCKER_API_VERSION";
 	public static final String IMAGE_REGISTRY_KEY = "DOCKER_REGISTRY";
 	public static final String KEY_DEFAULT_IMAGE_REGISTRY = "jbt.default.DOCKER_REGISTRY";
-	
-	
+
 	public static final String KEY_OPENSHIFT_HOST = "HOST";
 	public static final String KEY_OPENSHIFT_PORT = "PORT";
 	public static final String KEY_OPENSHIFT_CONSOLE_URL = "CONSOLE_URL";
-	
+
 	private static final String DOTCDK_AUTH_SCHEME = "openshift.auth.scheme";
 	private static final String DOTCDK_AUTH_USERNAME = "openshift.auth.username";
 	private static final String DOTCDK_AUTH_PASS = "openshift.auth.password";
-	
+
 	private static final String HTTPS_SCHEMA = "https://";
-	
+
 	int openshiftPort = 8443;
 	String openshiftHost = "https://10.1.2.2";
-	
-	private Map<String,String> env;
-	public ServiceManagerEnvironment(Map<String,String> env) throws URISyntaxException {
+
+	private Map<String, String> env;
+
+	public ServiceManagerEnvironment(Map<String, String> env) throws URISyntaxException {
 		this.env = env;
-		
+
 		String osPort = env.get(KEY_OPENSHIFT_PORT);
-		if( osPort != null ) {
+		if (osPort != null) {
 			try {
 				this.openshiftPort = Integer.parseInt(osPort);
 			} catch (NumberFormatException nfe) {
 				// ignore, use default
 			}
 		}
-		
+
 		String osHost = env.get(KEY_OPENSHIFT_HOST);
-		if( osHost == null ) {
+		if (osHost == null) {
 			String dockerHost = env.get(KEY_DOCKER_HOST);
-			if( dockerHost != null ) {
+			if (dockerHost != null) {
 				URI url = new URI(dockerHost);
 				osHost = url.getHost();
 			}
 		}
-		if( osHost != null )
+		if (osHost != null)
 			this.openshiftHost = HTTPS_SCHEMA + osHost;
 	}
-	
+
 	public String getOpenShiftHost() {
 		return openshiftHost;
 	}
-	
+
 	public int getOpenShiftPort() {
 		return openshiftPort;
 	}
-	
 
 	public String getDockerRegistry() {
 		String dockerReg = env.get(IMAGE_REGISTRY_KEY);
-		if( dockerReg == null ) {
+		if (dockerReg == null) {
 			dockerReg = env.get(KEY_DEFAULT_IMAGE_REGISTRY);
-		} 
+		}
 		if (dockerReg != null && !dockerReg.contains("://")) {
 			dockerReg = "https://" + dockerReg;
 		}
@@ -101,20 +99,21 @@ public class ServiceManagerEnvironment {
 		String pass = env.containsKey(DOTCDK_AUTH_PASS) ? env.get(DOTCDK_AUTH_PASS) : defPass;
 		return pass;
 	}
-	
+
 	public String getDockerHost() {
 		return env.get(KEY_DOCKER_HOST);
 	}
-	
+
 	public String getDockerTLSVerify() {
 		return env.get(KEY_DOCKER_TLS_VERIFY);
 	}
+
 	public String getDockerCertPath() {
 		return env.get(KEY_DOCKER_CERT_PATH);
 	}
-	
-	public String get(String k){
+
+	public String get(String k) {
 		return env.get(k);
 	}
-	
+
 }

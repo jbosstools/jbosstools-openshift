@@ -31,7 +31,7 @@ public class EventsPropertySection extends OpenShiftResourcePropertySection {
 	public EventsPropertySection() {
 		super("popup:org.jboss.tools.openshift.ui.properties.tab.EventsTab", ResourceKind.EVENT);
 	}
-	
+
 	@Override
 	protected void setSorter(TableViewerBuilder tableViewerBuilder) {
 		tableViewerBuilder.sorter(createCreationTimestampSorter(true));
@@ -42,35 +42,30 @@ public class EventsPropertySection extends OpenShiftResourcePropertySection {
 	protected void addColumns(TableViewerBuilder tableViewerBuilder) {
 		addCreatedColumn(tableViewerBuilder);
 		ICellToolTipProvider toolTipProvider = new ICellToolTipProvider() {
-			
+
 			@Override
 			public String getToolTipText(Object object) {
-				if(object instanceof IResourceWrapper && ((IResourceWrapper) object).getWrapped() instanceof IEvent) {
-					return ((IEvent)((IResourceWrapper) object).getWrapped()).getMessage();
+				if (object instanceof IResourceWrapper && ((IResourceWrapper) object).getWrapped() instanceof IEvent) {
+					return ((IEvent) ((IResourceWrapper) object).getWrapped()).getMessage();
 				}
 				return null;
 			}
-			
+
 			@Override
 			public int getToolTipDisplayDelayTime(Object event) {
 				return 0;
 			}
 		};
 		tableViewerBuilder
-		//name
-		.column(model -> StringUtils.substringBefore(getResource(model).getName(),".")).name("Name").align(SWT.LEFT).weight(1)
-		.minWidth(15)
-		.cellToolTipProvider(toolTipProvider)
-		.buildColumn()
-		//kind
-		.column(model -> ((IEvent)getResource(model)).getInvolvedObject().getKind()).name("Kind").align(SWT.LEFT).weight(1).minWidth(5)
-		.cellToolTipProvider(toolTipProvider)
-		.buildColumn()
-		//reason
-		.column(model -> ((IEvent)getResource(model)).getReason()).name("Reason").align(SWT.LEFT).weight(1).minWidth(5)
-		.cellToolTipProvider(toolTipProvider)
-		.buildColumn();
+				//name
+				.column(model -> StringUtils.substringBefore(getResource(model).getName(), ".")).name("Name")
+				.align(SWT.LEFT).weight(1).minWidth(15).cellToolTipProvider(toolTipProvider).buildColumn()
+				//kind
+				.column(model -> ((IEvent) getResource(model)).getInvolvedObject().getKind()).name("Kind")
+				.align(SWT.LEFT).weight(1).minWidth(5).cellToolTipProvider(toolTipProvider).buildColumn()
+				//reason
+				.column(model -> ((IEvent) getResource(model)).getReason()).name("Reason").align(SWT.LEFT).weight(1)
+				.minWidth(5).cellToolTipProvider(toolTipProvider).buildColumn();
 	}
-	
-	
+
 }

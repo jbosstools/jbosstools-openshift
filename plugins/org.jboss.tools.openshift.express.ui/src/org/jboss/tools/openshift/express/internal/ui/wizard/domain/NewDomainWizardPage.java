@@ -50,7 +50,7 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		super(title, description, "", wizard);
 		this.pageModel = model;
 	}
-	
+
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.TOP).applyTo(parent);
@@ -59,29 +59,23 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 		// domain name
 		Label namespaceLabel = new Label(parent, SWT.NONE);
 		namespaceLabel.setText(ExpressUIMessages.DomainName);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(namespaceLabel);
 		Text namespaceText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(namespaceText);
-		ISWTObservableValue namespaceTextObservable =
-				WidgetProperties.text(SWT.Modify).observe(namespaceText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(namespaceText);
+		ISWTObservableValue namespaceTextObservable = WidgetProperties.text(SWT.Modify).observe(namespaceText);
 		NamespaceValidator namespaceValidator = new NamespaceValidator(namespaceTextObservable);
 		dbc.addValidationStatusProvider(namespaceValidator);
 		ControlDecorationSupport.create(namespaceValidator, SWT.LEFT | SWT.TOP, null,
 				new RequiredControlDecorationUpdater());
-		IObservableValue namespaceModelObservable =
-				BeanProperties.value(DomainWizardModel.PROPERTY_DOMAIN_ID).observe(pageModel);
-		ValueBindingBuilder
-				.bind(namespaceTextObservable)
-				.to(namespaceModelObservable)
-				.in(dbc);
+		IObservableValue namespaceModelObservable = BeanProperties.value(DomainWizardModel.PROPERTY_DOMAIN_ID)
+				.observe(pageModel);
+		ValueBindingBuilder.bind(namespaceTextObservable).to(namespaceModelObservable).in(dbc);
 	}
 
 	protected DomainWizardModel getModel() {
 		return pageModel;
 	}
-	
+
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
 		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
@@ -102,16 +96,13 @@ public class NewDomainWizardPage extends AbstractOpenShiftWizardPage {
 				return ValidationStatus.cancel(getDescription());
 			}
 			if (domainName.isEmpty()) {
-				return ValidationStatus.cancel(
-						ExpressUIMessages.EnterDomainName);
+				return ValidationStatus.cancel(ExpressUIMessages.EnterDomainName);
 			}
 			if (!StringUtils.isAlphaNumeric(domainName)) {
-				return ValidationStatus.error(
-						ExpressUIMessages.DomainNameMayHaveLettersAndDigits);
+				return ValidationStatus.error(ExpressUIMessages.DomainNameMayHaveLettersAndDigits);
 			}
 			if (domainName.length() > 16) {
-				return ValidationStatus.error(
-						ExpressUIMessages.DomainNameMaximumLength);
+				return ValidationStatus.error(ExpressUIMessages.DomainNameMaximumLength);
 			}
 			return ValidationStatus.ok();
 		}

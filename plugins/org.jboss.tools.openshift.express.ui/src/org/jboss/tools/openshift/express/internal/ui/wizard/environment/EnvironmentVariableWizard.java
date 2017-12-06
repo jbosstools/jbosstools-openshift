@@ -19,7 +19,7 @@ import org.eclipse.jface.wizard.Wizard;
 public class EnvironmentVariableWizard extends Wizard {
 
 	private EnvironmentVariableWizardModel model;
-	
+
 	/**
 	 * Used to create a new environment variable for the given application
 	 * 
@@ -28,14 +28,15 @@ public class EnvironmentVariableWizard extends Wizard {
 	public EnvironmentVariableWizard(AbstractEnvironmentVariablesWizardModel variablesModel) {
 		this(new EnvironmentVariableItem(), variablesModel);
 	}
-	
+
 	/**
 	 * Used to edit an existing environment variable
 	 * 
 	 * @param variable the variable that shall get edited
 	 * @param variablesModel 
 	 */
-	public EnvironmentVariableWizard(EnvironmentVariableItem variable, AbstractEnvironmentVariablesWizardModel variablesModel) {
+	public EnvironmentVariableWizard(EnvironmentVariableItem variable,
+			AbstractEnvironmentVariablesWizardModel variablesModel) {
 		this.model = new EnvironmentVariableWizardModel(variable, variablesModel);
 		setWindowTitle(variable);
 		setNeedsProgressMonitor(true);
@@ -59,7 +60,7 @@ public class EnvironmentVariableWizard extends Wizard {
 	public void addPages() {
 		addPage(new EnvironmentVariableWizardPage(model, this));
 	}
-	
+
 	public EnvironmentVariableItem getVariable() {
 		return model.getVariable();
 	}

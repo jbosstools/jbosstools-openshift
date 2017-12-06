@@ -52,14 +52,14 @@ public class PortForwardingUtils {
 		if (port < 0 || port >= 65536) {
 			return false;
 		}
-		try (ServerSocket socket = new ServerSocket(port)){
+		try (ServerSocket socket = new ServerSocket(port)) {
 			//not in use
-		    return false;
+			return false;
 		} catch (IOException e) {
 			return true;//in use
 		}
 	}
-	
+
 	/**
 	 * Checks if any of the given ports is already used.
 	 * @param ports the ports to check
@@ -83,7 +83,7 @@ public class PortForwardingUtils {
 		final IPortForwardable capability = REGISTRY.get(pod);
 		return capability != null && capability.isForwarding();
 	}
-	
+
 	/**
 	 * Returns the {@link PortPair} for the given {@code pod}
 	 * @param pod the pod to analyze
@@ -112,24 +112,24 @@ public class PortForwardingUtils {
 	 *         forwarded, or <code>null</code> if port-forwarding was already
 	 *         started on the given pod.
 	 */
-	public static IPortForwardable startPortForwarding(final IPod pod, final Collection<IPortForwardable.PortPair> ports, final OpenShiftBinaryOption... options) {
+	public static IPortForwardable startPortForwarding(final IPod pod,
+			final Collection<IPortForwardable.PortPair> ports, final OpenShiftBinaryOption... options) {
 		// skip if port-forwarding is already started
 		if (isPortForwardingStarted(pod)) {
 			return null;
 		}
-		final IPortForwardable portForwarding = pod
-				.accept(new CapabilityVisitor<IPortForwardable, IPortForwardable>() {
+		final IPortForwardable portForwarding = pod.accept(new CapabilityVisitor<IPortForwardable, IPortForwardable>() {
+			@Override
+			public IPortForwardable visit(final IPortForwardable portForwarding) {
+				new OCBinaryOperation() {
 					@Override
-					public IPortForwardable visit(final IPortForwardable portForwarding) {
-						new OCBinaryOperation() {
-							@Override
-							protected void runOCBinary(MultiStatus multiStatus) {
-								portForwarding.forwardPorts(ports, options);
-							}
-						}.run(ConnectionsRegistryUtil.safeGetConnectionFor(pod), null);
-						return portForwarding;
+					protected void runOCBinary(MultiStatus multiStatus) {
+						portForwarding.forwardPorts(ports, options);
 					}
-				}, null);
+				}.run(ConnectionsRegistryUtil.safeGetConnectionFor(pod), null);
+				return portForwarding;
+			}
+		}, null);
 		if (portForwarding != null) {
 			REGISTRY.put(pod, portForwarding);
 		}
@@ -147,7 +147,8 @@ public class PortForwardingUtils {
 	 *         forwarded, or <code>null</code> if port-forwarding was already
 	 *         started on the given pod.
 	 */
-	public static IPortForwardable startPortForwarding(final IPod pod, final PortPair port, final OpenShiftBinaryOption... options) {
+	public static IPortForwardable startPortForwarding(final IPod pod, final PortPair port,
+			final OpenShiftBinaryOption... options) {
 		return startPortForwarding(pod, Arrays.asList(port), options);
 	}
 
@@ -182,15 +183,16 @@ public class PortForwardingUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	public static boolean waitForPortsToGetFree(Collection<PortPair> ports, int pollingTimeSeconds, OutputStream stream) throws IOException {
+	public static boolean waitForPortsToGetFree(Collection<PortPair> ports, int pollingTimeSeconds, OutputStream stream)
+			throws IOException {
 		int pollCount = pollingTimeSeconds * 10; //One poll per 100 ms.
 		for (int i = 0; i < pollCount; i++) {
-			if(!PortForwardingUtils.hasPortInUse(ports)) {
+			if (!PortForwardingUtils.hasPortInUse(ports)) {
 				return true;
 			}
 			if (i % 10 == 0) {
 				// report once a second;
-				if(stream != null) {
+				if (stream != null) {
 					stream.write("Waiting for port-forwarding to stop...\n".getBytes());
 				}
 			}

@@ -21,24 +21,23 @@ import com.openshift.restclient.model.IResource;
  */
 public class ServerAdapterPropertyTester extends PropertyTester {
 
-    private final static String PROPERTY_IS_SERVER_ADAPTER_ALLOWED = "isServerAdapterAllowed";
+	private final static String PROPERTY_IS_SERVER_ADAPTER_ALLOWED = "isServerAdapterAllowed";
 
-    @Override
-    public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
-        if (PROPERTY_IS_SERVER_ADAPTER_ALLOWED.equals(property)) {
-            return isServerAdapterAllowed(receiver, args, expectedValue);
-        }
-        return false;
-    }
+	@Override
+	public boolean test(final Object receiver, final String property, final Object[] args, final Object expectedValue) {
+		if (PROPERTY_IS_SERVER_ADAPTER_ALLOWED.equals(property)) {
+			return isServerAdapterAllowed(receiver, args, expectedValue);
+		}
+		return false;
+	}
 
-    private boolean isServerAdapterAllowed(Object receiver, Object[] args, Object expectedValue) {
-        if (!(receiver instanceof IResource)
-                || !(expectedValue instanceof Boolean)) {
-            return false;
-        }
-        IResource resource = (IResource) receiver;
-        Boolean allowed = OpenShiftServerUtils.isAllowedForServerAdapter(resource);
-        return ((Boolean) expectedValue).equals(allowed);
-    }
+	private boolean isServerAdapterAllowed(Object receiver, Object[] args, Object expectedValue) {
+		if (!(receiver instanceof IResource) || !(expectedValue instanceof Boolean)) {
+			return false;
+		}
+		IResource resource = (IResource) receiver;
+		Boolean allowed = OpenShiftServerUtils.isAllowedForServerAdapter(resource);
+		return ((Boolean) expectedValue).equals(allowed);
+	}
 
 }

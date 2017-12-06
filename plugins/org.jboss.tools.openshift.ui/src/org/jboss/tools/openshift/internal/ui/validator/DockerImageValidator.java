@@ -40,7 +40,8 @@ public class DockerImageValidator implements IValidator {
 	// repository name to
 	// start with a component as defined by hostnameRegexp and followed by an
 	// optional port.
-	private String hostnameRegexp = "(?:" + hostnameComponentRegexp + "\\.)*" + hostnameComponentRegexp + "(?::[0-9]+)?";
+	private String hostnameRegexp = "(?:" + hostnameComponentRegexp + "\\.)*" + hostnameComponentRegexp
+			+ "(?::[0-9]+)?";
 
 	// TagRegexp matches valid tag names. From docker/docker:graph/tags.go.
 	private String tagRegexp = "[\\w][\\w.-]{0,127}";
@@ -62,19 +63,20 @@ public class DockerImageValidator implements IValidator {
 
 	// referenceRegexp is the full supported format of a reference. The
 	// regexp has capturing groups for name, tag, and digest components.
-	private String referenceRegexp = "^((?:" + hostnameRegexp + "/)?" + nameRegexp + ")(?:[:](" + tagRegexp +"))?(?:[@](" + digestRegexp + "))?$";
+	private String referenceRegexp = "^((?:" + hostnameRegexp + "/)?" + nameRegexp + ")(?:[:](" + tagRegexp
+			+ "))?(?:[@](" + digestRegexp + "))?$";
 
 	private Pattern IMAGE_PATTERN = Pattern.compile(referenceRegexp);
 
 	private static String ERROR_MSG = "Please provide an existing docker image in the format of [[<repo>/]<namespace>/]<name>[:<tag>].\n"
 			+ " The defaults are: repo=docker.io, namespace=library, tag=latest";
-	
+
 	@Override
 	public IStatus validate(Object value) {
 		if (!(value instanceof String)) {
 			return ValidationStatus.cancel(ERROR_MSG);
 		}
-		String name = (String) value; 
+		String name = (String) value;
 		IStatus status = validateImageName(name);
 		if (status.isOK()) {
 			status = additionalValidation(name);

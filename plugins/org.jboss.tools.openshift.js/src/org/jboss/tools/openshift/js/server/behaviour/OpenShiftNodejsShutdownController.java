@@ -22,7 +22,7 @@ public class OpenShiftNodejsShutdownController extends OpenShiftShutdownControll
 	public OpenShiftNodejsShutdownController() {
 		super();
 	}
-	
+
 	@Override
 	public void stop(boolean force) {
 		OpenShiftServerBehaviour behavior = getBehavior();
@@ -30,7 +30,7 @@ public class OpenShiftNodejsShutdownController extends OpenShiftShutdownControll
 		try {
 			NodeDebugLauncher.terminate(behavior.getServer());
 			behavior.setServerStopped();
-		} catch(CoreException ce) {
+		} catch (CoreException ce) {
 			log(IStatus.ERROR, "Error shutting down server", ce);
 			getBehavior().setServerStarted();
 		}

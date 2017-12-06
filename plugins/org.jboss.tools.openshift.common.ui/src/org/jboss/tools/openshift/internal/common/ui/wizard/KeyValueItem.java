@@ -16,7 +16,7 @@ package org.jboss.tools.openshift.internal.common.ui.wizard;
  *
  */
 public class KeyValueItem implements IKeyValueItem {
-	
+
 	private String key;
 	private String value;
 
@@ -24,7 +24,7 @@ public class KeyValueItem implements IKeyValueItem {
 		this.key = key;
 		this.value = value;
 	}
-	
+
 	@Override
 	public String getKey() {
 		return key;
@@ -44,7 +44,7 @@ public class KeyValueItem implements IKeyValueItem {
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
+
 	@Override
 	public KeyValueItem clone() {
 		return new KeyValueItem(getKey(), getValue());
@@ -80,7 +80,5 @@ public class KeyValueItem implements IKeyValueItem {
 			return false;
 		return true;
 	}
-	
-	
 
 }

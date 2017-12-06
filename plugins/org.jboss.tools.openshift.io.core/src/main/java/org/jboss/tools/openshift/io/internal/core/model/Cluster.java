@@ -30,22 +30,22 @@ public class Cluster implements ICluster {
 	private static final String ENDPOINT_URL_KEY = "endpointURL";
 
 	private String id;
-	
+
 	private String endpointURL = OSIOCoreConstants.OSIO_ENDPOINT;
-	
+
 	private String landingURL;
-	
+
 	private List<IAccount> identities = new ArrayList<>();
-	
+
 	private List<String> removed = new ArrayList<>();
 
 	private AccountModel model;
-	
+
 	public Cluster(AccountModel model, String id) {
 		this.model = model;
 		this.id = id;
 	}
-	
+
 	@Override
 	public String getId() {
 		return id;
@@ -63,13 +63,14 @@ public class Cluster implements ICluster {
 
 	@Override
 	public String getLoginURL() {
-		return getEndpointURL() +  OSIOCoreConstants.LOGIN_SUFFIX + getLandingURL();
+		return getEndpointURL() + OSIOCoreConstants.LOGIN_SUFFIX + getLandingURL();
 	}
 
 	@Override
 	public String getLandingURL() {
 		if (null == landingURL) {
-			landingURL = OSIOUtils.computeLandingURL(getEndpointURL(), OSIOCoreConstants.DEVSTUDIO_OSIO_LANDING_PAGE_SUFFIX);
+			landingURL = OSIOUtils.computeLandingURL(getEndpointURL(),
+					OSIOCoreConstants.DEVSTUDIO_OSIO_LANDING_PAGE_SUFFIX);
 		}
 		return landingURL;
 	}
@@ -104,33 +105,33 @@ public class Cluster implements ICluster {
 
 	@Override
 	public void save() {
-			try {
-				Preferences accountsNode = AccountModel.getAccountsPreferences();
-				Preferences clusterNode = accountsNode.node(getId());
-				ISecurePreferences clusterSecureNode = AccountModel.getSecureAccountsPreferences().node(getId());
-				clusterNode.put(ENDPOINT_URL_KEY, getEndpointURL());
-				removed.forEach(id -> {
-					try {
-						clusterNode.node(id).removeNode();
-						clusterSecureNode.node(id).removeNode();
-					} catch (BackingStoreException e) {
-						OpenShiftIOCoreActivator.logError(e.getLocalizedMessage(), e);
-					}
-				});
-				removed.clear();
+		try {
+			Preferences accountsNode = AccountModel.getAccountsPreferences();
+			Preferences clusterNode = accountsNode.node(getId());
+			ISecurePreferences clusterSecureNode = AccountModel.getSecureAccountsPreferences().node(getId());
+			clusterNode.put(ENDPOINT_URL_KEY, getEndpointURL());
+			removed.forEach(id -> {
+				try {
+					clusterNode.node(id).removeNode();
+					clusterSecureNode.node(id).removeNode();
+				} catch (BackingStoreException e) {
+					OpenShiftIOCoreActivator.logError(e.getLocalizedMessage(), e);
+				}
+			});
+			removed.clear();
 
-				clusterNode.flush();
-				clusterSecureNode.flush();
-			} catch (BackingStoreException | IOException e) {
-				OpenShiftIOCoreActivator.logError("Error saving cluster in storage", e);
-			}
+			clusterNode.flush();
+			clusterSecureNode.flush();
+		} catch (BackingStoreException | IOException e) {
+			OpenShiftIOCoreActivator.logError("Error saving cluster in storage", e);
+		}
 	}
 
 	public void load(Preferences clusterNode, ISecurePreferences secureClusterNode) throws StorageException {
 		clusterNode.get(ENDPOINT_URL_KEY, OSIOCoreConstants.OSIO_ENDPOINT);
 		try {
 			String[] ids = clusterNode.childrenNames();
-			for(String id: ids) {
+			for (String id : ids) {
 				Account account = new Account(id, this);
 				Preferences accountNode = clusterNode.node(id);
 				ISecurePreferences secureAccountNode = secureClusterNode.node(id);

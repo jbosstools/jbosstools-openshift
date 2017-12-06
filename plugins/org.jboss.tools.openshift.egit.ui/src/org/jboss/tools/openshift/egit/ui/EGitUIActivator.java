@@ -8,7 +8,7 @@ public class EGitUIActivator extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.egit.ui"; //$NON-NLS-1$
 
 	private static EGitUIActivator plugin;
-	
+
 	public EGitUIActivator() {
 	}
 

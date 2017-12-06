@@ -31,10 +31,8 @@ public class ObservableTreeItemUtils {
 	 * @return a Stream containing the given {@code treeItem} along with all its children, grand-children, etc. items.
 	 */
 	public static Stream<ObservableTreeItem> flatten(final ObservableTreeItem treeItem) {
-		return Stream.concat(
-				Stream.of(treeItem), 
-				treeItem.getChildren().stream()
-					.flatMap(ObservableTreeItemUtils::flatten));
+		return Stream.concat(Stream.of(treeItem),
+				treeItem.getChildren().stream().flatMap(ObservableTreeItemUtils::flatten));
 	}
 
 	/**
@@ -44,22 +42,18 @@ public class ObservableTreeItemUtils {
 	 * @return <code>true</code> if any match was found, <code>false</code> otherwise.
 	 */
 	public static boolean contains(final Object targetModel, final List<ObservableTreeItem> items) {
-		if (items == null
-				|| items.isEmpty()
-				|| targetModel == null) {
+		if (items == null || items.isEmpty() || targetModel == null) {
 			return false;
 		}
-		return items.stream()
-				.flatMap(ObservableTreeItemUtils::flatten)
+		return items.stream().flatMap(ObservableTreeItemUtils::flatten)
 				.anyMatch(item -> targetModel.equals(item.getModel()));
 	}
-	
+
 	public static ObservableTreeItem getItemFor(Object model, final List<ObservableTreeItem> items) {
-		if (items == null
-				|| model == null) {
+		if (items == null || model == null) {
 			return null;
 		}
-		Optional<ObservableTreeItem> item =  items.stream()
+		Optional<ObservableTreeItem> item = items.stream()
 				.filter(i -> Objects.equals(model, ((ObservableTreeItem) i).getModel())).findFirst();
 		if (item.isPresent()) {
 			return item.get();
@@ -77,19 +71,14 @@ public class ObservableTreeItemUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> getAllModels(Class<? extends T> type, List<ObservableTreeItem> items) {
-		if (items == null 
-				|| items.isEmpty()) {
+		if (items == null || items.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		return items.stream()
-			.filter(item -> {
-				Object model = ((ObservableTreeItem) item).getModel();
-				return model != null
-						&& type.isAssignableFrom(model.getClass());
-			})
-			.map(child -> (T) ((ObservableTreeItem) child).getModel()) 
-			.collect(Collectors.toList());
+		return items.stream().filter(item -> {
+			Object model = ((ObservableTreeItem) item).getModel();
+			return model != null && type.isAssignableFrom(model.getClass());
+		}).map(child -> (T) ((ObservableTreeItem) child).getModel()).collect(Collectors.toList());
 	}
 
 	/**
@@ -105,13 +94,9 @@ public class ObservableTreeItemUtils {
 		if (items == null) {
 			return null;
 		}
-		return items.stream()
-				.flatMap(ObservableTreeItemUtils::flatten)
-				.filter(item -> item.getModel() != null 
-					&& (type == null
-						|| type.isAssignableFrom(item.getModel().getClass())))
-				.map(item -> (T) item.getModel())
-				.findFirst()
-				.orElseGet(() -> null);
+		return items.stream().flatMap(ObservableTreeItemUtils::flatten)
+				.filter(item -> item.getModel() != null
+						&& (type == null || type.isAssignableFrom(item.getModel().getClass())))
+				.map(item -> (T) item.getModel()).findFirst().orElseGet(() -> null);
 	}
 }

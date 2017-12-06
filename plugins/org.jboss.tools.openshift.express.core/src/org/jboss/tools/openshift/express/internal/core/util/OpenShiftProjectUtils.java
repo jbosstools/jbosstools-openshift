@@ -25,10 +25,9 @@ public class OpenShiftProjectUtils {
 
 	public static boolean isOpenShiftProject(IProject project) {
 		IFolder folder = getOpenShiftFolder(project);
-		return folder != null
-				&& folder.isAccessible();
+		return folder != null && folder.isAccessible();
 	}
-	
+
 	public static IFolder getOpenShiftFolder(IProject project) {
 		return project.getFolder(FOLDER_DOT_OPENSHIFT);
 
@@ -50,5 +49,5 @@ public class OpenShiftProjectUtils {
 		return folder;
 
 	}
-	
+
 }

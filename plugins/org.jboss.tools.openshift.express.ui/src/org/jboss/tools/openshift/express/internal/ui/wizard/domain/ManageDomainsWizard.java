@@ -37,12 +37,12 @@ public class ManageDomainsWizard extends AbstractOpenShiftWizard<ManageDomainsWi
 	public boolean performFinish() {
 		return true;
 	}
-	
+
 	@Override
 	public void addPages() {
 		addPage(new ManageDomainsWizardPage(getWindowTitle(), description, getModel(), this));
 	}
-	
+
 	public List<IDomain> getDomains() {
 		return getModel().getDomains();
 	}

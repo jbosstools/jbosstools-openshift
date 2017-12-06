@@ -23,22 +23,22 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ WatchManager.class, ConnectionsRegistryUtil.class})
+@PrepareForTest({ WatchManager.class, ConnectionsRegistryUtil.class })
 public class DeleteResourceHandlerTest {
 
 	@Test
-	public void testStopWatchProject() throws Exception {		
+	public void testStopWatchProject() throws Exception {
 		IProject project = mock(IProject.class);
 		when(project.getName()).thenReturn("ProjectName");
 		when(project.getKind()).thenReturn(ResourceKind.PROJECT);
-		
+
 		IProjectWrapper projectWrapper = mock(IProjectWrapper.class);
 		when(projectWrapper.getWrapped()).thenReturn(project);
-		
+
 		WatchManager watchManager = mock(WatchManager.class);
 		PowerMockito.mockStatic(WatchManager.class);
 		PowerMockito.when(WatchManager.getInstance()).thenReturn(watchManager);
-		
+
 		Connection connection = mock(Connection.class);
 		PowerMockito.mockStatic(ConnectionsRegistryUtil.class);
 		PowerMockito.when(ConnectionsRegistryUtil.getConnectionFor(eq(project))).thenReturn(connection);
@@ -49,11 +49,11 @@ public class DeleteResourceHandlerTest {
 		//difficult, because it's a job (runs async) and has overriden `doRun` method in OpenShiftJobs
 		verify(watchManager, timeout(200).times(1)).stopWatch(eq(project), eq(connection));
 	}
-	
+
 	class DeleteResourceHandlerTestExtension extends DeleteResourceHandler {
-	    
-	    public void deleteResources(final IResourceWrapper<?, ?>[] uiResources) {
-	        super.deleteResources(uiResources);
-	    }
+
+		public void deleteResources(final IResourceWrapper<?, ?>[] uiResources) {
+			super.deleteResources(uiResources);
+		}
 	}
 }

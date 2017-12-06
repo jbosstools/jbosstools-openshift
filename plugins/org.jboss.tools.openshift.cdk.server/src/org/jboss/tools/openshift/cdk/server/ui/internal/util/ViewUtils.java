@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal.util;
 
 import org.eclipse.core.runtime.CoreException;
@@ -21,7 +21,6 @@ import org.eclipse.ui.PlatformUI;
 public class ViewUtils {
 	public static final String TERMINAL_VIEW_ID = "org.eclipse.tm.terminal.view.ui.TerminalsView";
 
-	
 	/**
 	 * opens the properties view if not already open
 	 */
@@ -36,7 +35,7 @@ public class ViewUtils {
 		});
 		return ret[0];
 	}
-	
+
 	public static IViewPart openTerminalViewUI() {
 		IWorkbench wb = PlatformUI.getWorkbench();
 		if (wb != null) {
@@ -44,7 +43,7 @@ public class ViewUtils {
 			if (activeWindow != null) {
 				IWorkbenchPage activePage = activeWindow.getActivePage();
 				if (activePage != null) {
-					try { 
+					try {
 						return activePage.showView(TERMINAL_VIEW_ID);
 					} catch (CoreException ex) {
 						// TODO
@@ -54,5 +53,5 @@ public class ViewUtils {
 		}
 		return null;
 	}
-	
+
 }

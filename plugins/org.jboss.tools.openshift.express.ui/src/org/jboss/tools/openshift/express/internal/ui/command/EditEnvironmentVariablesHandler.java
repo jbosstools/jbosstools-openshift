@@ -50,8 +50,7 @@ public class EditEnvironmentVariablesHandler extends AbstractDomainHandler {
 
 	private Object openEnvironmentVariablesWizard(IApplication application, Shell shell) {
 		try {
-			WizardUtils.openWizardDialog(
-					new EditEnvironmentVariablesWizard(application), shell);
+			WizardUtils.openWizardDialog(new EditEnvironmentVariablesWizard(application), shell);
 			return null;
 		} catch (OpenShiftException e) {
 			Logger.error("Failed to edit cartridges", e);
@@ -73,7 +72,7 @@ public class EditEnvironmentVariablesHandler extends AbstractDomainHandler {
 					return;
 				}
 				shell.getDisplay().asyncExec(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						openEnvironmentVariablesWizard(application, shell);

@@ -27,22 +27,23 @@ import com.openshift.internal.client.cartridge.BaseCartridge;
 public class CodeAnythingCartridge extends BaseCartridge implements IStandaloneCartridge {
 
 	public static final String PROPERTY_URL_STRING = "urlString";
-	
+
 	private String urlString;
-	
+
 	public CodeAnythingCartridge() {
-		super("Downloadable cartridge", "Code Anything", 
-				"Have your own framework? Provide the URL of a cartridge here, and OpenShift will download and provision it automatically into your new app!", false);
+		super("Downloadable cartridge", "Code Anything",
+				"Have your own framework? Provide the URL of a cartridge here, and OpenShift will download and provision it automatically into your new app!",
+				false);
 	}
 
 	public void setUrlString(String url) {
 		this.urlString = url;
 	}
-	
+
 	public String getUrlString() {
 		return urlString;
 	}
-	
+
 	@Override
 	public URL getUrl() {
 		try {

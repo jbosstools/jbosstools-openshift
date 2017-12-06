@@ -60,14 +60,13 @@ public class SelectProjectDialog extends ElementListSelectionDialog {
 
 	public IProject getSelectedProject() {
 		Object[] results = getResult();
-		if (results == null 
-				|| results.length < 1) {
+		if (results == null || results.length < 1) {
 			return null;
 		} else {
 			return (IProject) results[0];
 		}
 	}
-	
+
 	private static class ProjectLabelProvider extends LabelProvider {
 
 		@Override

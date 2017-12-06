@@ -29,25 +29,22 @@ public class RoutePropertySource extends ResourcePropertySource<IRoute> {
 
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new UneditablePropertyDescriptor(HOST_PATH, "URI"),
-				new UneditablePropertyDescriptor(SERVICE, "Service"),
-				new UneditablePropertyDescriptor(PORT, "Port"),
-		};
+		return new IPropertyDescriptor[] { new UneditablePropertyDescriptor(HOST_PATH, "URI"),
+				new UneditablePropertyDescriptor(SERVICE, "Service"), new UneditablePropertyDescriptor(PORT, "Port"), };
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		if(HOST_PATH.equals(id)){
+		if (HOST_PATH.equals(id)) {
 			return NLS.bind("{0}{1}", getResource().getHost(), getResource().getPath());
 		}
-		if(SERVICE.equals(id)){
+		if (SERVICE.equals(id)) {
 			return getResource().getServiceName();
 		}
 		if (PORT.equals(id)) {
-		    return getResource().createPort().getTargetPortName();
+			return getResource().createPort().getTargetPortName();
 		}
 		return super.getPropertyValue(id);
 	}
-	
+
 }

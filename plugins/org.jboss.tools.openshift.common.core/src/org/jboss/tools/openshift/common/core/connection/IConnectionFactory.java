@@ -21,7 +21,7 @@ public interface IConnectionFactory {
 	 * @return
 	 */
 	public String getName();
-	
+
 	/**
 	 * Returns the unique id of this factory.
 	 * 
@@ -36,7 +36,7 @@ public interface IConnectionFactory {
 	 * @return
 	 */
 	public IConnection create(String host);
-	
+
 	/**
 	 * Returns the default host for this factory. 
 	 * 
@@ -45,7 +45,7 @@ public interface IConnectionFactory {
 	public String getDefaultHost();
 
 	boolean hasDefaultHost();
-	
+
 	/**
 	 * Returns <code>true</code> if this factory can create a connection of the given type.
 	 * @param connection

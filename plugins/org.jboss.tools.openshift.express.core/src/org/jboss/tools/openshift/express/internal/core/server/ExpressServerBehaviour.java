@@ -31,17 +31,18 @@ public class ExpressServerBehaviour extends ServerBehaviourDelegate {
 	@Override
 	public IStatus publish(int kind, IProgressMonitor monitor) {
 		boolean shouldPublish = false;
-		if( publishAdaptableInfo != null ) {
+		if (publishAdaptableInfo != null) {
 			// Previous reference to Shell.class was redundant and unnecessary
 			shouldPublish = "user".equals(publishAdaptableInfo.getAdapter(String.class));
 		}
-		if( shouldPublish )
+		if (shouldPublish)
 			return super.publish(kind, monitor);
 		return Status.OK_STATUS;
 	}
-	
+
 	@Override
-	public void publish(int kind, List<IModule[]> modules, IProgressMonitor monitor, IAdaptable info) throws CoreException {
+	public void publish(int kind, List<IModule[]> modules, IProgressMonitor monitor, IAdaptable info)
+			throws CoreException {
 		publishAdaptableInfo = info;
 		try {
 			super.publish(kind, modules, monitor, info);
@@ -49,19 +50,21 @@ public class ExpressServerBehaviour extends ServerBehaviourDelegate {
 			publishAdaptableInfo = null;
 		}
 	}
-	
+
 	public IAdaptable getPublishAdaptableInfo() {
 		return publishAdaptableInfo;
 	}
-	
+
 	@Override
-	public boolean canRestartModule(IModule[] module){
-		if( module.length == 1 ) 
+	public boolean canRestartModule(IModule[] module) {
+		if (module.length == 1)
 			return true;
 		return false;
 	}
+
 	@Override
-	public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor) throws CoreException {
+	public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
+			throws CoreException {
 		// Do no setup
 	}
 
@@ -69,26 +72,27 @@ public class ExpressServerBehaviour extends ServerBehaviourDelegate {
 	public void stop(boolean force) {
 		// No stopping either
 	}
-	
-	
+
 	/*
 	 * Publishing code below
 	 */
 	private ExpressServerPublishMethod publishMethod;
+
 	private ExpressServerPublishMethod getPublishMethod() {
-		if( publishMethod == null ) {
+		if (publishMethod == null) {
 			publishMethod = new ExpressServerPublishMethod();
 		}
 		return publishMethod;
 	}
-	
+
 	@Override
 	protected void publishStart(IProgressMonitor monitor) throws CoreException {
 		getPublishMethod().publishStart(getServer(), monitor);
 	}
 
 	@Override
-	protected void publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor) throws CoreException {
+	protected void publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor)
+			throws CoreException {
 		int state = getPublishMethod().publishModule(getServer(), kind, deltaKind, module, monitor);
 		setModulePublishState(module, state);
 	}
@@ -97,7 +101,7 @@ public class ExpressServerBehaviour extends ServerBehaviourDelegate {
 	protected void publishFinish(IProgressMonitor monitor) throws CoreException {
 		getPublishMethod().publishFinish(getServer(), monitor);
 	}
-	
+
 	@Override
 	public IStatus canStart(String launchMode) {
 		return Status.CANCEL_STATUS;
@@ -111,6 +115,6 @@ public class ExpressServerBehaviour extends ServerBehaviourDelegate {
 	@Override
 	public IStatus canStop() {
 		return Status.CANCEL_STATUS;
-	}	
-	
+	}
+
 }

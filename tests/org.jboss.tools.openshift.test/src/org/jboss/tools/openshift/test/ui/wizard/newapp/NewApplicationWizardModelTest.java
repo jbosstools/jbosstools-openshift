@@ -61,7 +61,7 @@ public class NewApplicationWizardModelTest {
 	@Mock
 	private IResourceFactory factory;
 	private List<ObservableTreeItem> projectItems;
-	
+
 	@Before
 	public void setup() throws Exception {
 		when(template.getKind()).thenReturn(ResourceKind.TEMPLATE);
@@ -92,12 +92,14 @@ public class NewApplicationWizardModelTest {
 	 * @return 
 	 */
 	private List<ObservableTreeItem> createProjectTemplateItems() {
-		List<ObservableTreeItem> projectItems = createObservableTreeItems(createResources(3, IProject.class, ResourceKind.PROJECT,
-				resource -> {
+		List<ObservableTreeItem> projectItems = createObservableTreeItems(
+				createResources(3, IProject.class, ResourceKind.PROJECT, resource -> {
 					when(resource.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
-					}));
+				}));
 		for (int i = 0; i < 3; i++) {
-			projectItems.get(i).setChildren(createObservableTreeItems(createResources(i + 1, ITemplate.class, ResourceKind.TEMPLATE)));;
+			projectItems.get(i).setChildren(
+					createObservableTreeItems(createResources(i + 1, ITemplate.class, ResourceKind.TEMPLATE)));
+			;
 		}
 		return projectItems;
 	}
@@ -117,7 +119,7 @@ public class NewApplicationWizardModelTest {
 	@Test
 	public void setProjectShouldReturnSameProject() {
 		// pre-conditions
-		assertThat(model.getProjectItems().size()).isGreaterThan(2); 
+		assertThat(model.getProjectItems().size()).isGreaterThan(2);
 		IProject project2 = (IProject) model.getProjectItems().get(1).getModel();
 
 		// operations
@@ -132,16 +134,16 @@ public class NewApplicationWizardModelTest {
 		// pre-conditions
 		this.projectItems.add(new ObservableTreeItem(project));
 		model.setProject(project);
-		IProject selectedProject = model.getProject(); 
+		IProject selectedProject = model.getProject();
 		assertThat(selectedProject).isNotNull();
-		
+
 		// operations
 		model.setProjectItems(projectItems);
 
 		// verification
 		assertThat(model.getProject()).isEqualTo(selectedProject);
 	}
-	
+
 	@Test
 	public void setProjectItemsShouldSelect1stProjectIfCurrentNotContained() {
 		// pre-conditions
@@ -166,12 +168,12 @@ public class NewApplicationWizardModelTest {
 		// verification
 		assertThat(model.getProject()).isEqualTo(getProject(0));
 	}
-	
+
 	@Test
 	public void setNullProjectShouldSetNullIfNoProjectsAvailable() {
 		// pre-conditions
 		model.setProjectItems(Collections.emptyList());
-		
+
 		// operations
 		model.setProject(null);
 
@@ -182,12 +184,12 @@ public class NewApplicationWizardModelTest {
 	@Test
 	public void setProjectToProject2ShouldHaveGetTemplatesReturnTemplatesForProject2() {
 		// pre-conditions
-		IProject project2 = getProject(1); 
+		IProject project2 = getProject(1);
 
 		// operations
 		model.setProject(project2);
 		List<ObservableTreeItem> templates = model.getAppSources();
-		
+
 		// verification
 		assertThat(templates).containsAll(getTemplateItemsForProject(1));
 	}
@@ -198,12 +200,12 @@ public class NewApplicationWizardModelTest {
 		IApplicationSource template = mock(IApplicationSource.class);
 
 		// operations
-		model.setServerAppSource(template );
+		model.setServerAppSource(template);
 
 		// verification
 		assertThat(model.isUseLocalAppSource()).isFalse();
 	}
-	
+
 	@Test
 	public void setLocalTemplateFilenameShouldSetUseLocalTemplateToTrue() {
 		// pre-conditions
@@ -215,18 +217,18 @@ public class NewApplicationWizardModelTest {
 		assertThat(model.isUseLocalAppSource()).isTrue();
 	}
 
-    @Test
-    public void setLocalTemplateURLShouldSetUseLocalTemplateToTrue() {
-        // pre-conditions
+	@Test
+	public void setLocalTemplateURLShouldSetUseLocalTemplateToTrue() {
+		// pre-conditions
 
-        // operations
-        model.setLocalAppSourceFileName("http://nowhere.com");
+		// operations
+		model.setLocalAppSourceFileName("http://nowhere.com");
 
-        // verification
-        assertThat(model.isUseLocalAppSource()).isTrue();
-    }
+		// verification
+		assertThat(model.isUseLocalAppSource()).isTrue();
+	}
 
-    @Test
+	@Test
 	public void setTemplateFileNameShouldLoadAndParseTheTemplate() {
 		when(factory.create(any(InputStream.class))).thenReturn(template);
 		model.setUseLocalAppSource(true);
@@ -235,18 +237,18 @@ public class NewApplicationWizardModelTest {
 		verify(factory).create(any(InputStream.class));
 		assertEquals(TemplateApplicationSource.class, model.getSelectedAppSource().getClass());
 	}
-	
-    @Test
-    public void setTemplateURLShouldLoadAndParseTheTemplate() {
-        when(factory.create(any(InputStream.class))).thenReturn(template);
-        model.setUseLocalAppSource(true);
-        model.setLocalAppSourceFileName("http://nowhere.com");
-        model.loadAppSource(null);
-        verify(factory).create(any(InputStream.class));
-        assertEquals(TemplateApplicationSource.class, model.getSelectedAppSource().getClass());
-    }
 
-    @Test
+	@Test
+	public void setTemplateURLShouldLoadAndParseTheTemplate() {
+		when(factory.create(any(InputStream.class))).thenReturn(template);
+		model.setUseLocalAppSource(true);
+		model.setLocalAppSourceFileName("http://nowhere.com");
+		model.loadAppSource(null);
+		verify(factory).create(any(InputStream.class));
+		assertEquals(TemplateApplicationSource.class, model.getSelectedAppSource().getClass());
+	}
+
+	@Test
 	public void setWrongJsonAsTemplateFile() throws Exception {
 		IRoute route = Mockito.mock(IRoute.class);
 		when(route.getKind()).thenReturn(ResourceKind.ROUTE);
@@ -256,7 +258,7 @@ public class NewApplicationWizardModelTest {
 		assertFalse(model.getAppSourceStatus().isOK());
 		assertNull(model.getAppSourceStatus().getException());
 	}
-	
+
 	private IProject getProject(int i) {
 		assertThat(projectItems.size()).isGreaterThan(i + 1);
 
@@ -266,8 +268,7 @@ public class NewApplicationWizardModelTest {
 	private List<ObservableTreeItem> getTemplateItemsForProject(int i) {
 		assertThat(projectItems.size()).isGreaterThan(i + 1);
 
-		return projectItems.get(i).getChildren().stream()
-				.collect(Collectors.<ObservableTreeItem>toList());
+		return projectItems.get(i).getChildren().stream().collect(Collectors.<ObservableTreeItem>toList());
 	}
 
 	public static class TestableNewApplicationWizardModel extends NewApplicationWizardModel {

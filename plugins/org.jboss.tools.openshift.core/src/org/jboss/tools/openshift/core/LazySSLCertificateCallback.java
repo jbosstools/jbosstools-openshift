@@ -22,18 +22,20 @@ public class LazySSLCertificateCallback implements ISSLCertificateCallback {
 
 	@Override
 	public boolean allowCertificate(X509Certificate[] certs) {
-		if(!loadCallback()) return false;
+		if (!loadCallback())
+			return false;
 		return callback.allowCertificate(certs);
 	}
 
 	@Override
 	public boolean allowHostname(String hostname, SSLSession session) {
-		if(!loadCallback()) return false;
+		if (!loadCallback())
+			return false;
 		return callback.allowHostname(hostname, session);
 	}
-	
-	private boolean loadCallback(){
-		if(callback == null) {
+
+	private boolean loadCallback() {
+		if (callback == null) {
 			callback = getExtension();
 			return callback != null;
 		}

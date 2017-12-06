@@ -35,12 +35,10 @@ public class ServerTypePropertyTester extends PropertyTester {
 	}
 
 	private boolean isOpenShiftServer(Object receiver, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof IServer)
-				|| !(expectedValue instanceof Boolean)) {
+		if (!(receiver instanceof IServer) || !(expectedValue instanceof Boolean)) {
 			return false;
 		}
 
-		return ((Boolean) expectedValue).equals(
-				ExpressServerUtils.isExpressRuntime((IServer) receiver));
+		return ((Boolean) expectedValue).equals(ExpressServerUtils.isExpressRuntime((IServer) receiver));
 	}
 }

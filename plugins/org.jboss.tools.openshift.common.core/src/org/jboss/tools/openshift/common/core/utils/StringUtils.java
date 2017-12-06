@@ -23,14 +23,14 @@ import org.apache.commons.lang.WordUtils;
  * @author André Dietisheim
  */
 public class StringUtils {
-	
+
 	private static final String LINE_SEPARATOR_KEY = "line.separator";
 	private static final String SHORTENING_MARKER = "...";
-	
+
 	public static String pluralize(String value) {
 		return value + "s";
 	}
-	
+
 	public static String null2emptyString(String value) {
 		if (value != null) {
 			return value;
@@ -44,20 +44,18 @@ public class StringUtils {
 		}
 		return String.valueOf(value);
 	}
-	
+
 	/** 
 	 * Returns true if value is null or empty string.
 	 * @param value
 	 * @return
 	 */
 	public static boolean isEmpty(String value) {
-		return value == null
-				|| value.length() == 0;
+		return value == null || value.length() == 0;
 	}
 
 	public static boolean isEmpty(Object value) {
-		return (value instanceof String)
-				&& isEmpty((String) value);
+		return (value instanceof String) && isEmpty((String) value);
 	}
 
 	public static <T> String toString(List<T> elements) {
@@ -72,15 +70,14 @@ public class StringUtils {
 			}
 		});
 	}
-	
+
 	public static <T> String toString(Collection<T> elements, ToStringConverter<T> converter) {
-		if (elements == null
-				|| elements.isEmpty()) {
+		if (elements == null || elements.isEmpty()) {
 			return "";
 		}
 		StringBuilder builder = new StringBuilder();
 		int i = 0;
-		for(T element : elements) {
+		for (T element : elements) {
 			builder.append(converter.toString(element));
 			if (++i < elements.size()) {
 				builder.append(", ");
@@ -88,20 +85,16 @@ public class StringUtils {
 		}
 		return builder.toString();
 	}
-		
+
 	public static <T> String toString(Map<String, String> map) {
-		if (map == null
-				|| map.isEmpty()) {
+		if (map == null || map.isEmpty()) {
 			return null;
 		}
 		return toString(map.entrySet(), new ToStringConverter<Entry<String, String>>() {
 
 			@Override
 			public String toString(Entry<String, String> entry) {
-				return new StringBuilder(entry.getKey())
-					.append('=')
-					.append(entry.getValue())
-					.toString();
+				return new StringBuilder(entry.getKey()).append('=').append(entry.getValue()).toString();
 			}
 		});
 	}
@@ -109,7 +102,7 @@ public class StringUtils {
 	public static interface ToStringConverter<T> {
 		public String toString(T object);
 	}
-	
+
 	public static String getLineSeparator() {
 		return System.getProperty(LINE_SEPARATOR_KEY);
 	}
@@ -123,7 +116,7 @@ public class StringUtils {
 		}
 		return true;
 	}
-	
+
 	public static boolean isAlphaNumericOrUnderscore(String value) {
 		for (int i = 0; i < value.length(); ++i) {
 			final char c = value.charAt(i);
@@ -141,13 +134,11 @@ public class StringUtils {
 			return false;
 		}
 		char character = value.charAt(0);
-		return character == '_' 
-				|| Character.isLetter(character);
+		return character == '_' || Character.isLetter(character);
 	}
 
 	public static boolean isEmptyOrNull(String value) {
-		return value == null
-				|| value.isEmpty();
+		return value == null || value.isEmpty();
 	}
 
 	public static String shorten(String text, int maxLength) {
@@ -155,16 +146,14 @@ public class StringUtils {
 			return text;
 		}
 		int availableCharacters = maxLength - SHORTENING_MARKER.length();
-		if(availableCharacters <= 0) {
+		if (availableCharacters <= 0) {
 			//Did we ask for it? Yeah, we got it.
 			return SHORTENING_MARKER;
 		}
 		//This is how computer enhances math:
 		//availableCharacters = (availableCharacters + 1) / 2 + availableCharacters / 2
-		return new StringBuilder(text.substring(0, (availableCharacters + 1) / 2))
-				.append(SHORTENING_MARKER)
-				.append(text.substring(text.length() - availableCharacters / 2, text.length()))
-				.toString();
+		return new StringBuilder(text.substring(0, (availableCharacters + 1) / 2)).append(SHORTENING_MARKER)
+				.append(text.substring(text.length() - availableCharacters / 2, text.length())).toString();
 	}
 
 	/**
@@ -174,24 +163,24 @@ public class StringUtils {
 	 * @return Passed array parts with modified elements.
 	 */
 	public static String[] shorten(String[] parts, int maxLength) {
-		if(parts == null || parts.length == 0) {
+		if (parts == null || parts.length == 0) {
 			return parts;
-		} else if(parts.length == 1) {
+		} else if (parts.length == 1) {
 			parts[0] = shorten(parts[0], maxLength);
-		} else if(parts.length == 2) {
+		} else if (parts.length == 2) {
 			//Let's take most useful case 2 separately.
 			int length0 = isEmpty(parts[0]) ? 0 : parts[0].length();
 			int length1 = isEmpty(parts[1]) ? 0 : parts[1].length();
-			if(length0 + length1 > maxLength) {
+			if (length0 + length1 > maxLength) {
 				int partLimit = maxLength / 2;
-					if(length1 <= partLimit) {
-						parts[0] = shorten(parts[0],  maxLength - length1);
-					} else if(length0 <= partLimit) {
-						parts[1] = shorten(parts[1],  maxLength - length0);
-					} else {
-						parts[0] = shorten(parts[0], partLimit);
-						parts[1] = shorten(parts[1], partLimit);
-					}
+				if (length1 <= partLimit) {
+					parts[0] = shorten(parts[0], maxLength - length1);
+				} else if (length0 <= partLimit) {
+					parts[1] = shorten(parts[1], maxLength - length0);
+				} else {
+					parts[0] = shorten(parts[0], partLimit);
+					parts[1] = shorten(parts[1], partLimit);
+				}
 			}
 		} else {
 			//Let's be cool mathematicians here.
@@ -201,13 +190,13 @@ public class StringUtils {
 				lengths[i] = isEmpty(parts[i]) ? 0 : parts[i].length();
 				totalLength += lengths[i];
 			}
-			if(totalLength > maxLength) {
+			if (totalLength > maxLength) {
 				int totalCut = totalLength - maxLength;
 				//Let's distribute that cut proportionally.
 				int[] cuts = new int[parts.length];
 				int currentCut = 0;
 				for (int i = 0; i < parts.length; i++) {
-					if(lengths[i] >= SHORTENING_MARKER.length()) {
+					if (lengths[i] >= SHORTENING_MARKER.length()) {
 						//Cannot cut more than adding ellipses is going to cut.
 						cuts[i] = (lengths[i] * totalCut) / totalLength;
 						currentCut += cuts[i];
@@ -217,31 +206,31 @@ public class StringUtils {
 				while (currentCut < totalCut) {
 					boolean changed = false;
 					for (int i = 0; i < parts.length; i++) {
-						if(lengths[i] - cuts[i] > SHORTENING_MARKER.length()) {
+						if (lengths[i] - cuts[i] > SHORTENING_MARKER.length()) {
 							//Still remembering that ellipses replace that much. 
 							cuts[i]++;
 							currentCut++;
-							if(currentCut == totalCut) {
+							if (currentCut == totalCut) {
 								break;
 							}
 							changed = true;
 						}
 					}
-					if(!changed) {
+					if (!changed) {
 						//At this moment, it is possible that currentCut < totalCut,
 						//but there is nothing to take anymore, I swear. 
 						break;
 					}
-				}				
+				}
 				//Measured seven times, now cut them once.
 				for (int i = 0; i < parts.length; i++) {
-					if(cuts[i] > 0) {
+					if (cuts[i] > 0) {
 						parts[i] = shorten(parts[i], parts[i].length() - cuts[i]);
 					}
-				}				
+				}
 			}
 		}
-		
+
 		return parts;
 	}
 
@@ -253,19 +242,19 @@ public class StringUtils {
 		}
 		return stringNoSuffix;
 	}
-	
+
 	public static String trim(String string) {
 		if (string == null) {
 			return string;
 		}
 		return string.trim();
 	}
-	
+
 	public static String toLowerCase(String string) {
 		if (isEmpty(string)) {
 			return string;
 		}
-		
+
 		return string.toLowerCase();
 	}
 
@@ -286,16 +275,16 @@ public class StringUtils {
 	public static String humanize(String value) {
 		String[] parts = org.apache.commons.lang.StringUtils.splitByCharacterTypeCamelCase(value);
 		String split = org.apache.commons.lang.StringUtils.join(parts, " ");
-		return  WordUtils.capitalize(split);
+		return WordUtils.capitalize(split);
 	}
-	
+
 	/**
 	 * Serialize Map<String, String> to a string
 	 * of key value pairs
 	 * @param map
 	 * @return String
 	 */
-	public static String serialize(Map<String, String> map){
+	public static String serialize(Map<String, String> map) {
 		List<String> out = new ArrayList<>(map.size());
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			out.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
@@ -314,8 +303,7 @@ public class StringUtils {
 	}
 
 	public static String removeAll(String regex, String value) {
-		if (isEmpty(value)
-				|| isEmpty(regex)) {
+		if (isEmpty(value) || isEmpty(regex)) {
 			return value;
 		}
 

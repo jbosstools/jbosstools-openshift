@@ -73,109 +73,88 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 
 		Group envVariableGroup = new Group(container, SWT.NONE);
 		envVariableGroup.setText(ExpressUIMessages.EnvironmentVariables);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(envVariableGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(envVariableGroup);
-		
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(envVariableGroup);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(envVariableGroup);
+
 		Composite tableContainer = new Composite(envVariableGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults()
-				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
 				.to(BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
 				.in(dbc);
 		viewer.setComparator(new ViewerComparator());
 		viewer.setContentProvider(new ObservableListContentProvider());
-		viewer.setInput(BeanProperties.list(
-				AbstractEnvironmentVariablesWizardModel.PROPERTY_VARIABLES).observe(model));
+		viewer.setInput(BeanProperties.list(AbstractEnvironmentVariablesWizardModel.PROPERTY_VARIABLES).observe(model));
 
 		Button addButton = new Button(envVariableGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(addButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(addButton);
 		addButton.setText(ExpressUIMessages.Add);
 		addButton.addSelectionListener(onAdd());
 
 		Button editExistingButton = new Button(envVariableGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
 		editExistingButton.setText(ExpressUIMessages.Edit);
 		editExistingButton.addSelectionListener(onEdit());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(editExistingButton))
-				.notUpdatingParticipant()
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(editExistingButton)).notUpdatingParticipant()
 				.to(BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+				.converting(new IsNotNull2BooleanConverter()).in(dbc);
 
 		Button removeButton = new Button(envVariableGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText(ExpressUIMessages.Remove);
 		removeButton.addSelectionListener(onRemove());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
-				.notUpdatingParticipant()
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(removeButton)).notUpdatingParticipant()
 				.to(BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SELECTED).observe(model))
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+				.converting(new IsNotNull2BooleanConverter()).in(dbc);
 
 		Label filler = new Label(envVariableGroup, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(false, true).applyTo(filler);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, true).applyTo(filler);
 
 		Button refreshButton = new Button(envVariableGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(refreshButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(refreshButton);
 		refreshButton.setText(ExpressUIMessages.Refresh);
 		refreshButton.addSelectionListener(onRefresh());
-		
+
 		// not supported
 		enableEnvVariableGroup(model.isSupported(), envVariableGroup);
 		Label validationLabel = new Label(envVariableGroup, SWT.NONE);
 		validationLabel.setVisible(false);
 		GridDataFactory.fillDefaults().exclude(true).applyTo(validationLabel);
-		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(validationLabel))
-			.notUpdating(BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SUPPORTED).observe(model))
-			.validatingAfterGet(new IValidator() {
-				
-				@Override
-				public IStatus validate(Object value) {
-					if (Boolean.FALSE.equals((Boolean) value)) {
-						return ValidationStatus.warning(NLS.bind(
-								ExpressUIMessages.ServerDoesNotSupportChanging, model.getHost()));
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(validationLabel))
+				.notUpdating(
+						BeanProperties.value(AbstractEnvironmentVariablesWizardModel.PROPERTY_SUPPORTED).observe(model))
+				.validatingAfterGet(new IValidator() {
+
+					@Override
+					public IStatus validate(Object value) {
+						if (Boolean.FALSE.equals((Boolean) value)) {
+							return ValidationStatus
+									.warning(NLS.bind(ExpressUIMessages.ServerDoesNotSupportChanging, model.getHost()));
+						}
+						return ValidationStatus.ok();
 					}
-					return ValidationStatus.ok();
-				}
-			})
-			.in(dbc);
+				}).in(dbc);
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
-		this.viewer = new TableViewerBuilder(table, tableContainer)
-				.contentProvider(new ArrayContentProvider())
+		this.viewer = new TableViewerBuilder(table, tableContainer).contentProvider(new ArrayContentProvider())
 				.column(new IColumnLabelProvider<EnvironmentVariableItem>() {
 
 					@Override
 					public String getValue(EnvironmentVariableItem variable) {
 						return variable.getName();
 					}
-				})
-				.name("Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
+				}).name("Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
 				.column(new IColumnLabelProvider<EnvironmentVariableItem>() {
 
 					@Override
 					public String getValue(EnvironmentVariableItem variable) {
 						return variable.getValue();
 					}
-				})
-				.name("Value").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.buildViewer();
+				}).name("Value").align(SWT.LEFT).weight(2).minWidth(100).buildColumn().buildViewer();
 
 		return viewer;
 	}
@@ -210,9 +189,8 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				OkCancelButtonWizardDialog editVariableWizardDialog =
-						new OkCancelButtonWizardDialog(getShell(),
-								new EnvironmentVariableWizard(model.getSelected(), model));
+				OkCancelButtonWizardDialog editVariableWizardDialog = new OkCancelButtonWizardDialog(getShell(),
+						new EnvironmentVariableWizard(model.getSelected(), model));
 				editVariableWizardDialog.open();
 				viewer.refresh();
 			}
@@ -228,13 +206,9 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 				if (selectedVariable == null) {
 					return;
 				}
-				if (MessageDialog
-						.openConfirm(
-								getShell(),
-								ExpressUIMessages.RemoveVariable,
-								NLS.bind(
-										ExpressUIMessages.DoYouWantToRemoveVariable,
-										selectedVariable.getName() + "=" + selectedVariable.getValue())))
+				if (MessageDialog.openConfirm(getShell(), ExpressUIMessages.RemoveVariable,
+						NLS.bind(ExpressUIMessages.DoYouWantToRemoveVariable,
+								selectedVariable.getName() + "=" + selectedVariable.getValue())))
 					model.remove(selectedVariable);
 			}
 		};
@@ -245,12 +219,10 @@ public class EnvironmentVariablesWizardPage extends AbstractOpenShiftWizardPage 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				try {
-					if (MessageDialog
-							.openConfirm(
-									getShell(),
-									ExpressUIMessages.RefreshVariables,
-									ExpressUIMessages.DoYouWantToRefreshVariables))
-					WizardUtils.runInWizard(new RefreshEnvironmentVariablesJob(), getContainer(), getDatabindingContext());
+					if (MessageDialog.openConfirm(getShell(), ExpressUIMessages.RefreshVariables,
+							ExpressUIMessages.DoYouWantToRefreshVariables))
+						WizardUtils.runInWizard(new RefreshEnvironmentVariablesJob(), getContainer(),
+								getDatabindingContext());
 				} catch (InvocationTargetException e) {
 					Logger.error(ExpressUIMessages.CouldNotRefreshVariables, e);
 				} catch (InterruptedException e) {

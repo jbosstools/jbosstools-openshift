@@ -46,16 +46,16 @@ public class LazySSLCertificateCallbackTest {
 	private X509Certificate[] certs = new X509Certificate[] { mock(X509Certificate.class) };
 	@Mock
 	private SSLSession session;
-	
+
 	@Before
-	public void setup(){
+	public void setup() {
 		lazyCallback = spy(new LazySSLCertificateCallback());
 		when(permissiveExtensionCallback.allowCertificate(any(X509Certificate[].class))).thenReturn(true);
 		when(permissiveExtensionCallback.allowHostname(any(String.class), any(SSLSession.class))).thenReturn(true);
 		when(denyingExtensionCallback.allowCertificate(any(X509Certificate[].class))).thenReturn(false);
 		when(denyingExtensionCallback.allowHostname(any(String.class), any(SSLSession.class))).thenReturn(false);
 	}
-	
+
 	@Test
 	public void testAllowCertificateWhenHasCallback() {
 		when(lazyCallback.getExtension()).thenReturn(permissiveExtensionCallback);
@@ -92,7 +92,8 @@ public class LazySSLCertificateCallbackTest {
 	public void testWontVerifyHostnameWhenHasCallback() {
 		when(lazyCallback.getExtension()).thenReturn(denyingExtensionCallback);
 
-		assertFalse("Exp. to not verify hostname", lazyCallback.allowHostname(any((String.class)), any(SSLSession.class)));
+		assertFalse("Exp. to not verify hostname",
+				lazyCallback.allowHostname(any((String.class)), any(SSLSession.class)));
 		verify(denyingExtensionCallback, times(1)).allowHostname(any((String.class)), any(SSLSession.class));
 	}
 
@@ -100,7 +101,8 @@ public class LazySSLCertificateCallbackTest {
 	public void testWontVerifyHostnameWhenHasNoCallback() {
 		when(lazyCallback.getExtension()).thenReturn(null);
 
-		assertFalse("Exp. to not verify hostname", lazyCallback.allowHostname(any((String.class)), any(SSLSession.class)));
+		assertFalse("Exp. to not verify hostname",
+				lazyCallback.allowHostname(any((String.class)), any(SSLSession.class)));
 		verify(denyingExtensionCallback, never()).allowHostname(any((String.class)), any(SSLSession.class));
 	}
 }

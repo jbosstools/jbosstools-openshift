@@ -51,32 +51,29 @@ public class PortForwardingHandler extends AbstractHandler {
 
 	private IStatus openPortForwardingDialogFor(final IApplication application) {
 		final CreateSSHSessionJob sshJob = new CreateSSHSessionJob(application);
-		new JobChainBuilder(sshJob)
-				.runWhenSuccessfullyDone(new UIJob("Configuring port forwarding") {
+		new JobChainBuilder(sshJob).runWhenSuccessfullyDone(new UIJob("Configuring port forwarding") {
 
-					@Override
-					public IStatus runInUIThread(IProgressMonitor monitor) {
-						if (sshJob.isValidSession()) {
-							openPortForwardingWizard(application);
-						}
-						return Status.OK_STATUS;
-					}
-				}).schedule();
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				if (sshJob.isValidSession()) {
+					openPortForwardingWizard(application);
+				}
+				return Status.OK_STATUS;
+			}
+		}).schedule();
 		return Status.OK_STATUS;
 	}
 
 	private void openPortForwardingDialogFor(final IServer server) {
 		final LoadApplicationJob applicationJob = new LoadApplicationJob(server);
 		final CreateSSHSessionJob sshJob = new CreateSSHSessionJob(applicationJob);
-		new JobChainBuilder(applicationJob)
-				.runWhenSuccessfullyDone(sshJob)
+		new JobChainBuilder(applicationJob).runWhenSuccessfullyDone(sshJob)
 				.runWhenSuccessfullyDone(new UIJob("Configuring port forwarding") {
 
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						IApplication application = applicationJob.getApplication();
-						if (application != null
-								&& sshJob.isValidSession()) {
+						if (application != null && sshJob.isValidSession()) {
 							openPortForwardingWizard(application);
 						}
 						return Status.OK_STATUS;

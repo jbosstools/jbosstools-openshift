@@ -64,9 +64,10 @@ public class ApplicationDetailsFake extends NoopApplicationFake {
 
 	@Override
 	public IDeployedStandaloneCartridge getCartridge() {
-		return new StandaloneCartridgeResource(
-				"mockApplicationName", "mockApplicationName","mockApplicationName", null, null, false, null, null, null, null) {};
-		}
+		return new StandaloneCartridgeResource("mockApplicationName", "mockApplicationName", "mockApplicationName",
+				null, null, false, null, null, null, null) {
+		};
+	}
 
 	@Override
 	public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {

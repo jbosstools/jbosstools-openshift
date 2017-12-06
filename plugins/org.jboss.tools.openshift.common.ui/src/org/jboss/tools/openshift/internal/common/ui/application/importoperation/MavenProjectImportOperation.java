@@ -51,46 +51,43 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 	public void setFilters(Collection<String> filters) {
 		this.filters = filters;
 	}
-	
-	public List<IProject> importToWorkspace(IProgressMonitor monitor)
-			throws CoreException, InterruptedException {
+
+	public List<IProject> importToWorkspace(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		MavenPluginActivator mavenPlugin = MavenPluginActivator.getDefault();
 		IProjectConfigurationManager configurationManager = mavenPlugin.getProjectConfigurationManager();
 		MavenModelManager modelManager = mavenPlugin.getMavenModelManager();
 		Set<MavenProjectInfo> projectInfos = getMavenProjects(getProjectDirectory(), filters, modelManager, monitor);
 		ProjectImportConfiguration projectImportConfiguration = new ProjectImportConfiguration();
 		if (overwriteMavenProjects(projectInfos, projectImportConfiguration, monitor)) {
-	        List<IMavenProjectImportResult> importResults =
-	                configurationManager.importProjects(projectInfos, projectImportConfiguration, monitor);
-	        return validate(toProjects(importResults));
+			List<IMavenProjectImportResult> importResults = configurationManager.importProjects(projectInfos,
+					projectImportConfiguration, monitor);
+			return validate(toProjects(importResults));
 		} else {
-		    return Collections.emptyList();
+			return Collections.emptyList();
 		}
 	}
 
-	private boolean overwriteMavenProjects(Collection<MavenProjectInfo> projectInfos, final ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
-	    final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-	    Set<IProject> s1 = projectInfos.stream()
-	                                      .map(project -> configuration.getProjectName(project.getModel()))
-	                                      .map(root::getProject)
-	                                      .filter(project -> project.exists())
-	                                      .collect(Collectors.toSet());
-        boolean overwrite = true;
-	    if (!s1.isEmpty()) {
-	        final String message = (s1.size() == 1) ? NLS.bind(OpenShiftCommonUIMessages.MavenProjectWarningMessage,
-                                                               s1.iterator().next().getName())
-	                                                : OpenShiftCommonUIMessages.MavenProjectsWarningMessage; 
-                        
-	        overwrite = displayOverwriteDialog(OpenShiftCommonUIMessages.OverwriteProjectsDialogTitle, message);
-            for(IProject project : s1) {
-                if (overwrite) {
-                    project.delete(false, true, monitor);
-                } else {
-                    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-                }
-            }
-	    }
-	    return overwrite;
+	private boolean overwriteMavenProjects(Collection<MavenProjectInfo> projectInfos,
+			final ProjectImportConfiguration configuration, IProgressMonitor monitor) throws CoreException {
+		final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		Set<IProject> s1 = projectInfos.stream().map(project -> configuration.getProjectName(project.getModel()))
+				.map(root::getProject).filter(project -> project.exists()).collect(Collectors.toSet());
+		boolean overwrite = true;
+		if (!s1.isEmpty()) {
+			final String message = (s1.size() == 1)
+					? NLS.bind(OpenShiftCommonUIMessages.MavenProjectWarningMessage, s1.iterator().next().getName())
+					: OpenShiftCommonUIMessages.MavenProjectsWarningMessage;
+
+			overwrite = displayOverwriteDialog(OpenShiftCommonUIMessages.OverwriteProjectsDialogTitle, message);
+			for (IProject project : s1) {
+				if (overwrite) {
+					project.delete(false, true, monitor);
+				} else {
+					project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+				}
+			}
+		}
+		return overwrite;
 	}
 
 	private List<IProject> toProjects(List<IMavenProjectImportResult> importResults) {
@@ -107,19 +104,19 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 
 	private List<IProject> validate(List<IProject> projects) {
 		if (projects.size() == 0) {
-			throw new ImportFailedException(
-					NLS.bind("There was a maven related error that prevented us from importing the project. "
+			throw new ImportFailedException(NLS.bind(
+					"There was a maven related error that prevented us from importing the project. "
 							+ "We encourage you to look into the pom in the cloned repository at {0}.\n "
 							+ "One of the possible reasons is that there is already a project in your workspace "
 							+ "that matches the maven name of the OpenShift application. "
-							+ "You can then rename your workspace project and start over again.\n"
-							, getProjectDirectory()));
+							+ "You can then rename your workspace project and start over again.\n",
+					getProjectDirectory()));
 		}
 		return projects;
 	}
 
-	private Set<MavenProjectInfo> getMavenProjects(File directory, Collection<String> filters, MavenModelManager modelManager,
-			IProgressMonitor monitor) throws InterruptedException {
+	private Set<MavenProjectInfo> getMavenProjects(File directory, Collection<String> filters,
+			MavenModelManager modelManager, IProgressMonitor monitor) throws InterruptedException {
 		if (filters == null || filters.isEmpty()) {
 			return scan(directory, modelManager, monitor);
 		}
@@ -131,18 +128,18 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 		return projectInfos;
 	}
 
-	private Set<MavenProjectInfo> scan(File directory, MavenModelManager modelManager,
-			IProgressMonitor monitor) throws InterruptedException {
+	private Set<MavenProjectInfo> scan(File directory, MavenModelManager modelManager, IProgressMonitor monitor)
+			throws InterruptedException {
 		LocalProjectScanner scanner = new LocalProjectScanner(directory.getParentFile(), directory.toString(), false,
 				modelManager);
 		scanner.run(monitor);
 		return collectProjects(scanner.getProjects());
 	}
-	
+
 	public boolean isMavenProject() {
 		File root = getProjectDirectory();
 		if (filters == null || filters.isEmpty()) {
-			return  isMavenProject(root);
+			return isMavenProject(root);
 		}
 		for (String path : filters) {
 			File dir = new File(root, path);
@@ -152,23 +149,20 @@ public class MavenProjectImportOperation extends AbstractProjectImportOperation 
 		}
 		return false;
 	}
-	
+
 	private boolean isMavenProject(File dir) {
-		if (!isReadable(dir)
-				|| !dir.isDirectory()) {
+		if (!isReadable(dir) || !dir.isDirectory()) {
 			return false;
 		}
 
 		return isReadable(new File(dir, POM_FILE));
 	}
-	
-	public Set<MavenProjectInfo> collectProjects(
-			Collection<MavenProjectInfo> projects) {
+
+	public Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects) {
 		return new LinkedHashSet<MavenProjectInfo>() {
 			private static final long serialVersionUID = 1L;
 
-			public Set<MavenProjectInfo> collectProjects(
-					Collection<MavenProjectInfo> projects) {
+			public Set<MavenProjectInfo> collectProjects(Collection<MavenProjectInfo> projects) {
 				for (MavenProjectInfo projectInfo : projects) {
 					add(projectInfo);
 					collectProjects(projectInfo.getProjects());

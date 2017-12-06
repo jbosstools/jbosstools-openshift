@@ -27,7 +27,7 @@ public abstract class AbstractDelegatingMonitorJob extends Job {
 
 	public AbstractDelegatingMonitorJob(String name) {
 		super(name);
-		
+
 		this.delegatingMonitor = new DelegatingProgressMonitor();
 	}
 
@@ -42,9 +42,9 @@ public abstract class AbstractDelegatingMonitorJob extends Job {
 	}
 
 	protected abstract IStatus doRun(IProgressMonitor monitor);
-		
-	public boolean isTimeouted(IStatus status){
+
+	public boolean isTimeouted(IStatus status) {
 		return status.getCode() == TIMEOUTED;
 	}
-	
+
 }

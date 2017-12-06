@@ -20,9 +20,10 @@ public class KeyValuePropertySource implements IPropertySource {
 
 	private Map<String, String> map = new HashMap<>();
 
-	public KeyValuePropertySource(Map<String, String> variables){
+	public KeyValuePropertySource(Map<String, String> variables) {
 		this.map = variables;
 	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -30,6 +31,7 @@ public class KeyValuePropertySource implements IPropertySource {
 		result = prime * result + ((map == null) ? 0 : map.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -46,6 +48,7 @@ public class KeyValuePropertySource implements IPropertySource {
 			return false;
 		return true;
 	}
+
 	@Override
 	public Object getEditableValue() {
 		return null;
@@ -57,7 +60,7 @@ public class KeyValuePropertySource implements IPropertySource {
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			desc.add(new UneditablePropertyDescriptor(entry.getKey(), entry.getKey()));
 		}
-		return desc.toArray(new IPropertyDescriptor[]{});
+		return desc.toArray(new IPropertyDescriptor[] {});
 	}
 
 	@Override

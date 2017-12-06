@@ -77,11 +77,11 @@ import org.jboss.tools.foundation.ui.widget.WidgetVisitorUtility;
  * @author André Dietisheim
  */
 public class UIUtils {
-	
+
 	public static final String PACKAGE_EXPLORER_ID = "org.eclipse.jdt.ui.PackageExplorer";
 	public static final String PROJECT_EXPLORER_ID = "org.eclipse.ui.navigator.ProjectExplorer";
 	public static final String RESOURCE_NAVIGATOR_ID = "org.eclipse.ui.views.ResourceNavigator";
-	
+
 	public static void selectAllOnFocus(final Text text) {
 		final FocusListener onFocus = new FocusAdapter() {
 
@@ -145,8 +145,7 @@ public class UIUtils {
 	 * @see DisposeListener
 	 */
 	public static void registerContributionManager(final String id, final IContributionManager contributionManager,
-			final Control control)
-	{
+			final Control control) {
 		Assert.isNotNull(id);
 		Assert.isNotNull(contributionManager);
 		Assert.isTrue(control != null && !control.isDisposed());
@@ -154,11 +153,9 @@ public class UIUtils {
 		final IMenuService menuService = (IMenuService) PlatformUI.getWorkbench().getService(IMenuService.class);
 		menuService.populateContributionManager((ContributionManager) contributionManager, id);
 		contributionManager.update(true);
-		control.addDisposeListener(new DisposeListener()
-		{
+		control.addDisposeListener(new DisposeListener() {
 			@Override
-			public void widgetDisposed(DisposeEvent e)
-			{
+			public void widgetDisposed(DisposeEvent e) {
 				menuService.releaseContributions((ContributionManager) contributionManager);
 			}
 		});
@@ -172,8 +169,7 @@ public class UIUtils {
 	 * 
 	 * @return the i menu manager
 	 */
-	public static IMenuManager createContextMenu(final Control control)
-	{
+	public static IMenuManager createContextMenu(final Control control) {
 		Assert.isTrue(control != null && !control.isDisposed());
 
 		MenuManager menuManager = new MenuManager();
@@ -195,11 +191,10 @@ public class UIUtils {
 		// just by chance. 
 		new WidgetVisitorUtility(false).setEnablementRecursive(composite, enabled);
 	}
-	
+
 	public static Shell getShell() {
 		Shell shell = null;
-		final IWorkbenchWindow window =
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		final IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (window != null) {
 			shell = window.getShell();
 		}
@@ -209,27 +204,27 @@ public class UIUtils {
 	public static boolean isFirstElementOfType(Class<?> clazz, ISelection selection) {
 		return getFirstElement(selection, clazz) != null;
 	}
-	
+
 	public static <E> E getFirstElement(ISelection selection, Class<E> clazz) {
-			return adapt(getFirstElement(selection), clazz);
+		return adapt(getFirstElement(selection), clazz);
 	}
-	
+
 	public static <E> E adapt(Object object, Class<E> clazz) {
 		return Adapters.adapt(object, clazz);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <E> E[] getElements(ISelection selection, Class<E> clazz) {
-			ArrayList<E> elements = new ArrayList<>();
-			
-			for(Object element: getElements(selection)) {
-				E adapted = Adapters.adapt(element, clazz);
-				if( adapted != null )
-					elements.add(adapted);
-			}
-			return elements.toArray((E[])Array.newInstance(clazz, 0));
+		ArrayList<E> elements = new ArrayList<>();
+
+		for (Object element : getElements(selection)) {
+			E adapted = Adapters.adapt(element, clazz);
+			if (adapted != null)
+				elements.add(adapted);
+		}
+		return elements.toArray((E[]) Array.newInstance(clazz, 0));
 	}
-	
+
 	public static Object getFirstElement(ISelection selection) {
 		if (!(selection instanceof IStructuredSelection)) {
 			return null;
@@ -248,7 +243,7 @@ public class UIUtils {
 		if (!(selection instanceof IStructuredSelection)) {
 			return false;
 		}
-		
+
 		return ((IStructuredSelection) selection).size() == numOf;
 	}
 
@@ -269,7 +264,7 @@ public class UIUtils {
 		ISelection selection = workbenchWindow.getSelectionService().getSelection(viewId);
 		return getFirstElement(selection, clazz);
 	}
-	
+
 	/**
 	 * Returns the 1st project that's selected in the following views (in a fallback order):
 	 * <ul>
@@ -299,13 +294,13 @@ public class UIUtils {
 	public static IViewPart getVisibleProjectsView() {
 		return getFirstVisibleViewPart(PACKAGE_EXPLORER_ID, PROJECT_EXPLORER_ID, RESOURCE_NAVIGATOR_ID);
 	}
-	
+
 	public static IViewPart getFirstVisibleViewPart(String... partIds) {
 		List<IViewPart> parts = getVisibleViewParts(partIds);
 		if (parts.isEmpty()) {
 			return null;
 		}
-		return parts.get(0);		
+		return parts.get(0);
 	}
 
 	/**
@@ -326,14 +321,11 @@ public class UIUtils {
 			parts = new ArrayList<>(partIds.length);
 		}
 
-		for(IViewReference viewReference : page.getViewReferences()) {
+		for (IViewReference viewReference : page.getViewReferences()) {
 			String partId = viewReference.getId();
-			if (partIdsList == null
-				|| partIdsList.isEmpty()
-				|| partIdsList.contains(partId)) {
+			if (partIdsList == null || partIdsList.isEmpty() || partIdsList.contains(partId)) {
 				IViewPart part = viewReference.getView(false);
-				if (part != null
-					&& page.isPartVisible(part)) {
+				if (part != null && page.isPartVisible(part)) {
 					parts.add(part);
 				}
 			}
@@ -348,7 +340,7 @@ public class UIUtils {
 				return -1;
 			}
 		});
-		
+
 		return parts;
 	}
 
@@ -371,7 +363,7 @@ public class UIUtils {
 			runnable.run();
 		}
 	}
-	
+
 	public static Text createSearchText(Composite parent) {
 		final Text searchText = new Text(parent, SWT.SEARCH | SWT.ICON_CANCEL | SWT.ICON_SEARCH);
 		searchText.setMessage("type filter text");
@@ -396,7 +388,7 @@ public class UIUtils {
 	public static void setVisibleAndExclude(boolean visible, final Control control) {
 		Assert.isLegal(control != null && !control.isDisposed());
 		Assert.isLegal(control.getLayoutData() instanceof GridData);
-		
+
 		control.setVisible(visible);
 		((GridData) control.getLayoutData()).exclude = !visible;
 		control.getParent().layout();
@@ -409,7 +401,7 @@ public class UIUtils {
 		}
 		return selection;
 	}
-	
+
 	/**
 	 * Sets the standard width to the given button if it's layouted via
 	 * {@code GridLayout}}.
@@ -418,8 +410,8 @@ public class UIUtils {
 	 */
 	public static void setDefaultButtonWidth(Button button) {
 		assertCanSetGridData(button);
-		((GridData)button.getLayoutData()).widthHint =  
-				convertHorizontalDLUsToPixels(button, IDialogConstants.BUTTON_WIDTH);
+		((GridData) button.getLayoutData()).widthHint = convertHorizontalDLUsToPixels(button,
+				IDialogConstants.BUTTON_WIDTH);
 	}
 
 	/**
@@ -431,38 +423,39 @@ public class UIUtils {
 	 * @param button
 	 */
 	public static void setEqualButtonWidth(Button... buttons) {
-		if(buttons == null || buttons.length == 0) {
+		if (buttons == null || buttons.length == 0) {
 			return;
 		}
 		int width = convertHorizontalDLUsToPixels(buttons[0], IDialogConstants.BUTTON_WIDTH);
-		for (Button button: buttons) {
+		for (Button button : buttons) {
 			assertCanSetGridData(button);
 			int w = button.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-			if(width < w) {
+			if (width < w) {
 				width = w;
 			}
 		}
-		for (Button button: buttons) {
-			((GridData)button.getLayoutData()).widthHint = width;
+		for (Button button : buttons) {
+			((GridData) button.getLayoutData()).widthHint = width;
 		}
 	}
 
 	private static void assertCanSetGridData(Button button) {
 		Assert.isLegal(!DisposeUtils.isDisposed(button), "Button is disposed");
-		Assert.isLegal(button.getLayoutData() instanceof GridData, "Button " + button.getText() + " is not layouted with a GridLayout");
+		Assert.isLegal(button.getLayoutData() instanceof GridData,
+				"Button " + button.getText() + " is not layouted with a GridLayout");
 	}
 
 	private static int convertHorizontalDLUsToPixels(Control control, int dlus) {
 		GC gc = new GC(control);
 		gc.setFont(control.getFont());
-		int averageWidth= gc.getFontMetrics().getAverageCharWidth();
+		int averageWidth = gc.getFontMetrics().getAverageCharWidth();
 		gc.dispose();
-	
+
 		double horizontalDialogUnitSize = averageWidth * 0.25;
-	
-		return (int)Math.round(dlus * horizontalDialogUnitSize);
+
+		return (int) Math.round(dlus * horizontalDialogUnitSize);
 	}
-	
+
 	/**
 	 * Create a file selection dialog.
 	 * 
@@ -473,89 +466,79 @@ public class UIUtils {
 	 * @param initialSelection the initial selection resource (used if selectedFile is null)
 	 * @return the dialog
 	 */
-    public static ElementTreeSelectionDialog createFileDialog(String selectedFile,
-                                                              String title,
-                                                              String message,
-                                                              String extension,
-                                                              IResource initialSelection) {
-        ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
-                    getShell(),
-                    new WorkbenchLabelProvider(),
-                    new WorkbenchContentProvider()
-        );
-        dialog.setTitle(title);
-        dialog.setMessage(message);
-        dialog.setInput( ResourcesPlugin.getWorkspace().getRoot() );
-        dialog.addFilter(new ViewerFilter() {
-            
-            @Override
-            public boolean select(Viewer viewer, Object parentElement, Object element) {
-				return element instanceof IContainer || 
-						(element instanceof IFile && 
-								(StringUtils.isEmpty(extension) || extension.equals(((IFile)element).getFileExtension()))
-						);
-			}
-        });
-        dialog.setAllowMultiple( false );
-        if (StringUtils.isNotBlank(selectedFile)) {
-            String prefix = "${workspace_loc:";
-            String path = selectedFile;
-            if (selectedFile.startsWith(prefix) && selectedFile.endsWith("}")) {
-                path = path.substring(prefix.length(), path.length()-1);
-            }
-            initialSelection = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
-        }
-        if (initialSelection != null) {
-            dialog.setInitialSelection(initialSelection);
-        }
-        
-        return dialog;
-    }
+	public static ElementTreeSelectionDialog createFileDialog(String selectedFile, String title, String message,
+			String extension, IResource initialSelection) {
+		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(getShell(), new WorkbenchLabelProvider(),
+				new WorkbenchContentProvider());
+		dialog.setTitle(title);
+		dialog.setMessage(message);
+		dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
+		dialog.addFilter(new ViewerFilter() {
 
-    /**
-     * Use this method instead of HandlerUtil.getCurrentSelection(event)
-     * when action is called on Properties View.
-     * 
-     * @param event
-     * @return
-     */
-    public static ISelection getCurrentSelection(ExecutionEvent event) {
-    	IWorkbenchPart part = HandlerUtil.getActivePart(event);
-    	IWorkbenchPartSite site = (part != null) ? part.getSite() : null;
-    	IWorkbenchWindow window = (site != null) ? site.getWorkbenchWindow() : null;
-    	ISelectionService service = (window != null) ? window.getSelectionService() : null;
-    	return service != null ? service.getSelection() : null;
-    }
-    
-    /**
-     * Makes sure combos in GTK3 are displayed in the correct size.
-     * 
-     * @param combo the container which contains combos wont have those in too small size
-     * 
-     * @see https://issues.jboss.org/browse/JBIDE-16877,
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				return element instanceof IContainer || (element instanceof IFile
+						&& (StringUtils.isEmpty(extension) || extension.equals(((IFile) element).getFileExtension())));
+			}
+		});
+		dialog.setAllowMultiple(false);
+		if (StringUtils.isNotBlank(selectedFile)) {
+			String prefix = "${workspace_loc:";
+			String path = selectedFile;
+			if (selectedFile.startsWith(prefix) && selectedFile.endsWith("}")) {
+				path = path.substring(prefix.length(), path.length() - 1);
+			}
+			initialSelection = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+		}
+		if (initialSelection != null) {
+			dialog.setInitialSelection(initialSelection);
+		}
+
+		return dialog;
+	}
+
+	/**
+	 * Use this method instead of HandlerUtil.getCurrentSelection(event)
+	 * when action is called on Properties View.
+	 * 
+	 * @param event
+	 * @return
+	 */
+	public static ISelection getCurrentSelection(ExecutionEvent event) {
+		IWorkbenchPart part = HandlerUtil.getActivePart(event);
+		IWorkbenchPartSite site = (part != null) ? part.getSite() : null;
+		IWorkbenchWindow window = (site != null) ? site.getWorkbenchWindow() : null;
+		ISelectionService service = (window != null) ? window.getSelectionService() : null;
+		return service != null ? service.getSelection() : null;
+	}
+
+	/**
+	 * Makes sure combos in GTK3 are displayed in the correct size.
+	 * 
+	 * @param combo the container which contains combos wont have those in too small size
+	 * 
+	 * @see https://issues.jboss.org/browse/JBIDE-16877,
 	 * @see https://bugs.eclipse.org/bugs/show_bug.cgi?id=431425
-     */
-    public static void ensureGTK3CombosAreCorrectSize(final Composite composite) {
-    	if (!Platform.WS_GTK.equals(Platform.getWS())
-    			|| DisposeUtils.isDisposed(composite)) {
-    		return;
-    	}
+	 */
+	public static void ensureGTK3CombosAreCorrectSize(final Composite composite) {
+		if (!Platform.WS_GTK.equals(Platform.getWS()) || DisposeUtils.isDisposed(composite)) {
+			return;
+		}
 
 		composite.addPaintListener(new PaintListener() {
 
 			@Override
 			public void paintControl(PaintEvent e) {
-				if (!DisposeUtils.isDisposed(composite)
-						&& composite.isVisible()) {
+				if (!DisposeUtils.isDisposed(composite) && composite.isVisible()) {
 					composite.layout(true, true);
 					composite.update();
 					composite.removePaintListener(this);
 				}
 			}
 		});
-    }
+	}
 
-    /**
+	/**
 	 * Send a selection event to the given button. If the button is {@code null}
 	 * or disposed, no action is taken.
 	 * 
@@ -563,11 +546,10 @@ public class UIUtils {
 	 *            that shall be clicked
 	 */
 	public static void clickButton(Button button) {
-		if(button == null || 
-				button.isDisposed()) {
+		if (button == null || button.isDisposed()) {
 			return;
 		}
-	
+
 		button.setFocus();
 		button.setSelection(true);
 		Event evt = new Event();
@@ -575,4 +557,4 @@ public class UIUtils {
 		evt.display = button.getDisplay();
 		button.notifyListeners(SWT.Selection, evt);
 	}
-   }
+}

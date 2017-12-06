@@ -31,32 +31,32 @@ import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ConnectionWrapper.class, ProjectWrapper.class, Display.class })
 @SuppressStaticInitializationFor("org.eclipse.swt.widgets.Display")
 public class ConnectionWrapperTest {
-	
+
 	private static final String NAMESPACE = "myproject";
-	
+
 	private IResource resource;
 	private IProject project;
 	private ProjectWrapper projectWrapper;
 	private WatchListenerTestable watchListener;
-	
+
 	@Before
 	public void prepareData() throws Exception {
 		IOpenShiftConnection connection = mock(IOpenShiftConnection.class);
 		when(connection.isDefaultHost()).thenReturn(true);
 		when(connection.getUsername()).thenReturn("bdshadow");
-		
+
 		PowerMockito.mockStatic(Display.class);
 		PowerMockito.when(Display.getCurrent()).thenReturn(mock(Display.class));
-		
+
 		OpenshiftUIModel.getInstance();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
-		ConnectionWrapper connectionWrapper = OpenshiftUIModel.getInstance().getConnectionWrapperForConnection(connection);
-		
+		ConnectionWrapper connectionWrapper = OpenshiftUIModel.getInstance()
+				.getConnectionWrapperForConnection(connection);
+
 		this.project = mock(IProject.class);
 		when(project.getName()).thenReturn(NAMESPACE);
 		when(project.getNamespace()).thenReturn(NAMESPACE);
@@ -64,16 +64,16 @@ public class ConnectionWrapperTest {
 		this.projectWrapper = PowerMockito.spy(new ProjectWrapper(connectionWrapper, project));
 		PowerMockito.whenNew(ProjectWrapper.class).withArguments(connectionWrapper, project).thenReturn(projectWrapper);
 		connectionWrapper.refresh();
-		
+
 		this.resource = mock(IBuildConfig.class);
 		when(this.resource.getKind()).thenReturn(ResourceKind.BUILD_CONFIG);
 		when(this.resource.getNamespace()).thenReturn(NAMESPACE);
 		when(this.resource.getProject()).thenReturn(project);
-		
+
 		WatchManager watchManager = WatchManager.getInstance();
-		this.watchListener = new WatchListenerTestable(
-				watchManager, project, connection, ResourceKind.BUILD_CONFIG, 0, 0);
-		
+		this.watchListener = new WatchListenerTestable(watchManager, project, connection, ResourceKind.BUILD_CONFIG, 0,
+				0);
+
 		watchListener.setState("CONNECTED");
 	}
 
@@ -88,17 +88,17 @@ public class ConnectionWrapperTest {
 		this.watchListener.received(this.project, ChangeType.DELETED);
 		// then
 		//deleting project doesn't call updateWithResources
-		PowerMockito.verifyPrivate(projectWrapper, times(4)).invoke("updateWithResources", any()); 
+		PowerMockito.verifyPrivate(projectWrapper, times(4)).invoke("updateWithResources", any());
 		assertTrue(projectWrapper.getResources().size() == 0);
 	}
 
 	private static class WatchListenerTestable extends WatchListener {
-		
+
 		@Override
 		public void setState(String state) {
 			super.setState(state);
 		}
-		
+
 		protected WatchListenerTestable(WatchManager watchManager, IProject project, IOpenShiftConnection conn,
 				String kind, int backoff, long lastConnect) {
 			watchManager.super(project, conn, kind, backoff, lastConnect);

@@ -28,7 +28,7 @@ public class OkCancelButtonWizardDialog extends WizardDialog {
 	public OkCancelButtonWizardDialog(Shell parentShell, IWizard newWizard) {
 		super(parentShell, newWizard);
 	}
-	
+
 	@Override
 	protected Control createButtonBar(Composite parent) {
 		Control control = super.createButtonBar(parent);
@@ -42,12 +42,12 @@ public class OkCancelButtonWizardDialog extends WizardDialog {
 			GridDataFactory.fillDefaults().exclude(true).applyTo(button);
 		}
 	}
-	
+
 	public boolean autoFinish() {
-		if(getWizard().canFinish()) {
-			if(!getWizard().performFinish()) {
+		if (getWizard().canFinish()) {
+			if (!getWizard().performFinish()) {
 				return false;
-			}			
+			}
 			okPressed();
 			return true;
 		}

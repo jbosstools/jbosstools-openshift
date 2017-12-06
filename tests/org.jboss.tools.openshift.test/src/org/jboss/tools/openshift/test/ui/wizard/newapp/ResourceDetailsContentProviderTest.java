@@ -67,24 +67,19 @@ public class ResourceDetailsContentProviderTest {
 
 	private ResourceProperty getResourceProperty(String label, Object[] children) {
 		assertThat(label).isNotNull();
-		
+
 		if (children == null) {
 			return null;
 		}
-		return 
-				Arrays.stream(children)
-					.map(object -> { 
-						if (object instanceof ResourceProperty) { 
-							return (ResourceProperty) object;
-						} else { 
-							return null; 
-						}
-					})
-					.filter(property -> property != null)
-					.filter(property -> { return label.equals(property.getProperty()); } )
-					.findFirst()
-					.orElse(null);
+		return Arrays.stream(children).map(object -> {
+			if (object instanceof ResourceProperty) {
+				return (ResourceProperty) object;
+			} else {
+				return null;
+			}
+		}).filter(property -> property != null).filter(property -> {
+			return label.equals(property.getProperty());
+		}).findFirst().orElse(null);
 	}
-	
-}
 
+}

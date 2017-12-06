@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -50,27 +50,28 @@ public class CDKCredentialSection extends ServerEditorSection {
 	private ChooseCredentialComponent credentialComposite;
 	private Text envUserText, envPassText;
 	private ModifyListener envUserListener, envPassListener;
-	
+
 	public CDKCredentialSection() {
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	@Override
 	public void init(IEditorSite site, IEditorInput input) {
 		super.init(site, input);
 	}
-	
+
 	@Override
 	public void createSection(Composite parent) {
 		super.createSection(parent);
-		CDKServer cdkServer = (CDKServer)server.getOriginal().loadAdapter(CDKServer.class, new NullProgressMonitor());
-		
+		CDKServer cdkServer = (CDKServer) server.getOriginal().loadAdapter(CDKServer.class, new NullProgressMonitor());
+
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		
-		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE|ExpandableComposite.EXPANDED|ExpandableComposite.TITLE_BAR);
+
+		Section section = toolkit.createSection(parent,
+				ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED | ExpandableComposite.TITLE_BAR);
 		section.setText("Credentials");
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
-		
+
 		Composite composite = toolkit.createComposite(section);
 		composite.setLayout(new GridLayout(3, false));
 
@@ -83,8 +84,7 @@ public class CDKCredentialSection extends ServerEditorSection {
 			}
 		};
 		passCredentialsButton.addSelectionListener(passCredentialsListener);
-		
-		
+
 		credentialComposite = createChooseCredentialComponent(composite);
 		credentialComposite.addCredentialListener(new ICredentialCompositeListener() {
 			@Override
@@ -94,13 +94,13 @@ public class CDKCredentialSection extends ServerEditorSection {
 		});
 
 		Label environmentVars = toolkit.createLabel(composite, "Environment Variables: ");
-		
+
 		Label userEnvLabel = toolkit.createLabel(composite, "Username: ");
 		envUserText = toolkit.createText(composite, cdkServer.getUserEnvironmentKey());
-		
+
 		Label passEnvLabel = toolkit.createLabel(composite, "Password: ");
 		envPassText = toolkit.createText(composite, cdkServer.getPasswordEnvironmentKey());
-		
+
 		envUserListener = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -108,7 +108,7 @@ public class CDKCredentialSection extends ServerEditorSection {
 			}
 		};
 		envUserText.addModifyListener(envUserListener);
-		
+
 		envPassListener = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -116,56 +116,53 @@ public class CDKCredentialSection extends ServerEditorSection {
 			}
 		};
 		envPassText.addModifyListener(envPassListener);
-		
-		
+
 		// Layout the widgets
-		GridDataFactory.generate(passCredentialsButton, new Point(3,1));
+		GridDataFactory.generate(passCredentialsButton, new Point(3, 1));
 		credentialComposite.gridLayout(3);
-		GridDataFactory.generate(environmentVars, new Point(3,1));
-		GridDataFactory.generate(envUserText, new Point(2,1));
-		GridDataFactory.generate(envPassText, new Point(2,1));
-		
+		GridDataFactory.generate(environmentVars, new Point(3, 1));
+		GridDataFactory.generate(envUserText, new Point(2, 1));
+		GridDataFactory.generate(envPassText, new Point(2, 1));
+
 		toolkit.paintBordersFor(composite);
 		section.setClient(composite);
 	}
-	
-	
+
 	private ChooseCredentialComponent createChooseCredentialComponent(Composite parent) {
-		String initialUsername = server.getAttribute(CDKServer.PROP_USERNAME, (String)null);
+		String initialUsername = server.getAttribute(CDKServer.PROP_USERNAME, (String) null);
 		final ChooseCredentialComponent comp = new ChooseCredentialComponent(
-				new String[]{CredentialService.REDHAT_ACCESS},
-				initialUsername);
+				new String[] { CredentialService.REDHAT_ACCESS }, initialUsername);
 		comp.create(parent);
 		return comp;
 	}
-	
+
 	public class SetUsernameCommand extends ServerWorkingCopyPropertyComboCommand {
 		public SetUsernameCommand(IServerWorkingCopy server) {
-			super(server, "Change Username", credentialComposite.getUserCombo(), 
-					credentialComposite.getUser(), CDKServer.PROP_USERNAME, credentialComposite.getUserListener());
+			super(server, "Change Username", credentialComposite.getUserCombo(), credentialComposite.getUser(),
+					CDKServer.PROP_USERNAME, credentialComposite.getUserListener());
 		}
 	}
 
 	public class SetUsernameVariableCommand extends ServerWorkingCopyPropertyCommand {
 		public SetUsernameVariableCommand(IServerWorkingCopy server) {
-			super(server, "Change Username Variable", envUserText, 
-					envUserText.getText(), CDKServer.PROP_USER_ENV_VAR, envUserListener);
+			super(server, "Change Username Variable", envUserText, envUserText.getText(), CDKServer.PROP_USER_ENV_VAR,
+					envUserListener);
 		}
 	}
 
 	public class SetPasswordVariableCommand extends ServerWorkingCopyPropertyCommand {
 		public SetPasswordVariableCommand(IServerWorkingCopy server) {
-			super(server, "Change Password Variable", envPassText, 
-					envPassText.getText(), CDKServer.PROP_PASS_ENV_VAR, envPassListener);
+			super(server, "Change Password Variable", envPassText, envPassText.getText(), CDKServer.PROP_PASS_ENV_VAR,
+					envPassListener);
 		}
 	}
 
-	
 	public class SetPassCredentialsCommand extends ServerWorkingCopyPropertyButtonCommand {
 		public SetPassCredentialsCommand(IServerWorkingCopy server) {
-			super(server, "Pass credentials to server", passCredentialsButton, passCredentialsButton.getSelection(), 
+			super(server, "Pass credentials to server", passCredentialsButton, passCredentialsButton.getSelection(),
 					CDKServer.PROP_PASS_CREDENTIALS, passCredentialsListener);
 		}
+
 		@Override
 		protected void postOp(int type) {
 			boolean pass = wc.getAttribute(CDKServer.PROP_PASS_CREDENTIALS, true);

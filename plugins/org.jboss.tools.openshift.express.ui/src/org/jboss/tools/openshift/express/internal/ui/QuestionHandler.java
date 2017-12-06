@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -27,12 +27,12 @@ public class QuestionHandler implements IQuestionHandler {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				
+
 				Shell shell = Display.getCurrent().getActiveShell();
 				String[] labels = new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL };
 				int defaultValue = defaultAnswer ? 0 : 1;
-				MessageDialog dialog = 
-						new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, labels, defaultValue);
+				MessageDialog dialog = new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, labels,
+						defaultValue);
 				answer[0] = dialog.open() == 0;
 			}
 		});

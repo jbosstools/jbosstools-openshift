@@ -24,7 +24,7 @@ class ServiceWrapper extends ResourceContainer<IService, ProjectWrapper> impleme
 	protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated,
 			boolean changed) {
 		// do nothing
-		
+
 	}
 
 	protected ResourceWrapper createNewWrapper(Collection<IResource> resources, IResource r) {

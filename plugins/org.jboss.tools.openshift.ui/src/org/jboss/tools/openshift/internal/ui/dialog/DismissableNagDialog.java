@@ -23,10 +23,10 @@ public class DismissableNagDialog extends MessageDialog implements IDialogConsta
 	public static final int ALWAYS = 0;
 	public static final int NO = 1;
 	public static final int YES = 2;
-	private static final String [] LABELS = new String []{"Always Replace", NO_LABEL, YES_LABEL}; 
-	
+	private static final String[] LABELS = new String[] { "Always Replace", NO_LABEL, YES_LABEL };
+
 	public AtomicBoolean isOpen = new AtomicBoolean(false);
-	
+
 	public DismissableNagDialog(Shell parentShell, String dialogTitle, String dialogMessage) {
 		super(parentShell, dialogTitle, null, dialogMessage, QUESTION, LABELS, YES);
 	}
@@ -36,13 +36,13 @@ public class DismissableNagDialog extends MessageDialog implements IDialogConsta
 		try {
 			isOpen.set(true);
 			return super.open();
-		}finally {
+		} finally {
 			isOpen.set(false);
 		}
 	}
-	
+
 	public boolean isOpen() {
 		return isOpen.get();
 	}
-	
+
 }

@@ -22,15 +22,15 @@ public class OpenShiftCommonUIMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, OpenShiftCommonUIMessages.class);
 	}
-	
+
 	private OpenShiftCommonUIMessages() {
 	}
-	
-    public static String GeneralProjectWarningMessage;
+
+	public static String GeneralProjectWarningMessage;
 	public static String MavenProjectWarningMessage;
 	public static String MavenProjectsWarningMessage;
 	public static String OverwriteProjectsDialogTitle;
-	
+
 	public static String ImportButtonLabel;
-	
+
 }

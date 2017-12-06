@@ -124,7 +124,7 @@ public class PortForwardingUtilsTest {
 		// then
 		assertThat(forwardablePorts).isNotNull().hasSize(1);
 	}
-	
+
 	/**
 	 * Adds the given {@code element} in a new {@link Set}
 	 * @param element the element to add

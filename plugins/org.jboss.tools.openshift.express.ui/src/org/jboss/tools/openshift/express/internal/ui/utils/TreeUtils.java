@@ -43,15 +43,14 @@ public class TreeUtils {
 	 * @see ViewerCell
 	 * @see TreeEditor
 	 */
-	public static TreeEditor createTreeEditor( Control control, String cellText, ViewerCell cell )
-	{
+	public static TreeEditor createTreeEditor(Control control, String cellText, ViewerCell cell) {
 		Assert.isTrue(cell.getControl() instanceof Tree);
-		
-		Tree tree = ( Tree ) cell.getControl();
-		final TreeEditor treeEditor = new TreeEditor( tree );
-		initializeTreeEditor( treeEditor, control, cellText, cell );
+
+		Tree tree = (Tree) cell.getControl();
+		final TreeEditor treeEditor = new TreeEditor(tree);
+		initializeTreeEditor(treeEditor, control, cellText, cell);
 		tree.addDisposeListener(new DisposeListener() {
-			
+
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				treeEditor.dispose();
@@ -71,14 +70,13 @@ public class TreeUtils {
 	 * @see TreeEditor
 	 * @see ViewerCell
 	 */
-	public static void initializeTreeEditor( TreeEditor treeEditor, Control control, String cellText, ViewerCell cell )
-	{
+	public static void initializeTreeEditor(TreeEditor treeEditor, Control control, String cellText, ViewerCell cell) {
 		treeEditor.grabHorizontal = true;
 		treeEditor.grabVertical = true;
 		treeEditor.horizontalAlignment = SWT.FILL;
 		treeEditor.verticalAlignment = SWT.FILL;
-		TreeItem treeItem = ( TreeItem ) cell.getItem();
-		treeEditor.setEditor( control, treeItem, cell.getColumnIndex() );
+		TreeItem treeItem = (TreeItem) cell.getItem();
+		treeEditor.setEditor(control, treeItem, cell.getColumnIndex());
 		// ensure cell is as large as space needed for link
 		//cell.setText( " " + cellText + " ");
 	}
@@ -90,15 +88,12 @@ public class TreeUtils {
 	 * @param height the height in pixels
 	 * @param table the table
 	 */
-	public static void setRowHeight( final int height, Tree tree )
-	{
-		tree.addListener( SWT.MeasureItem, new Listener()
-		{
+	public static void setRowHeight(final int height, Tree tree) {
+		tree.addListener(SWT.MeasureItem, new Listener() {
 			@Override
-			public void handleEvent( Event event )
-			{
+			public void handleEvent(Event event) {
 				event.height = height;
 			}
-		} );
+		});
 	}
 }

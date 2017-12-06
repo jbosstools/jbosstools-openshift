@@ -36,19 +36,21 @@ public class ConnectionValidatorFactory {
 	 * @param urlObservable
 	 * @return
 	 */
-	public static MultiValidator createBasicAuthenticationValidator(ConnectionWizardPageModel pageModel, IObservableValue usernameObservable, IObservableValue<?> urlObservable) {
+	public static MultiValidator createBasicAuthenticationValidator(ConnectionWizardPageModel pageModel,
+			IObservableValue usernameObservable, IObservableValue<?> urlObservable) {
 		return new MultiValidator() {
 			@Override
 			protected IStatus validate() {
-				String user1 = (String)usernameObservable.getValue();
-				String mHost = (String)urlObservable.getValue();
+				String user1 = (String) usernameObservable.getValue();
+				String mHost = (String) urlObservable.getValue();
 				IConnection current = pageModel.getSelectedConnection();
-				for (Connection c: ConnectionsRegistrySingleton.getInstance().getAll(Connection.class)) {
-					if(c != current && IAuthorizationContext.AUTHSCHEME_BASIC.equals(c.getAuthScheme())) {
+				for (Connection c : ConnectionsRegistrySingleton.getInstance().getAll(Connection.class)) {
+					if (c != current && IAuthorizationContext.AUTHSCHEME_BASIC.equals(c.getAuthScheme())) {
 						String host = c.getHost();
 						String user = c.getUsername();
-						if(host != null && host.equals(mHost) && user != null && user.equals(user1)) {
-							return ValidationStatus.error("Connection for the server with this username already exists.");
+						if (host != null && host.equals(mHost) && user != null && user.equals(user1)) {
+							return ValidationStatus
+									.error("Connection for the server with this username already exists.");
 						}
 					}
 				}
@@ -65,18 +67,19 @@ public class ConnectionValidatorFactory {
 	 * @param urlObservable
 	 * @return
 	 */
-	public static MultiValidator createOAuthAuthenticationValidator(ConnectionWizardPageModel pageModel, IObservableValue tokenObservable, IObservableValue<?> urlObservable) {
+	public static MultiValidator createOAuthAuthenticationValidator(ConnectionWizardPageModel pageModel,
+			IObservableValue tokenObservable, IObservableValue<?> urlObservable) {
 		return new MultiValidator() {
 			@Override
 			protected IStatus validate() {
-				String token1 = (String)tokenObservable.getValue();
-				String mHost = (String)urlObservable.getValue();
+				String token1 = (String) tokenObservable.getValue();
+				String mHost = (String) urlObservable.getValue();
 				IConnection current = pageModel.getSelectedConnection();
-				for (Connection c: ConnectionsRegistrySingleton.getInstance().getAll(Connection.class)) {
-					if(c != current && IAuthorizationContext.AUTHSCHEME_OAUTH.equals(c.getAuthScheme())) {
+				for (Connection c : ConnectionsRegistrySingleton.getInstance().getAll(Connection.class)) {
+					if (c != current && IAuthorizationContext.AUTHSCHEME_OAUTH.equals(c.getAuthScheme())) {
 						String host = c.getHost();
 						String token = c.getToken();
-						if(host != null && host.equals(mHost) && token != null && token.equals(token1)) {
+						if (host != null && host.equals(mHost) && token != null && token.equals(token1)) {
 							return ValidationStatus.error("Connection for the server with this token already exists.");
 						}
 					}

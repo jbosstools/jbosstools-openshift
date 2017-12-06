@@ -37,7 +37,7 @@ public class FileUtils {
 	private static final Pattern NUMERIC_SUFFIX_FILENAME_REGEX = Pattern.compile("(.*)\\([0-9]+\\)");
 
 	private static final byte[] buffer = new byte[1024];
-	
+
 	private FileUtils() {
 		// private default constructor for utils class
 	}
@@ -62,7 +62,7 @@ public class FileUtils {
 		}
 		return canWrite(new File(path));
 	}
-	
+
 	public static boolean canWrite(File file) {
 		if (file == null) {
 			return false;
@@ -72,15 +72,13 @@ public class FileUtils {
 		}
 		return file.canWrite();
 	}
-	
+
 	public static boolean exists(File file) {
-		return file != null
-				&& file.exists();
+		return file != null && file.exists();
 	}
 
 	public static boolean isDirectory(File file) {
-		return file != null
-				&& file.isDirectory();
+		return file != null && file.isDirectory();
 	}
 
 	public static File getSystemTmpFolder() {
@@ -107,8 +105,7 @@ public class FileUtils {
 	 * @throws IOException
 	 */
 	public static void copy(File source, File destination, boolean overwrite) throws IOException {
-		if (!exists(source)
-				|| destination == null) {
+		if (!exists(source) || destination == null) {
 			return;
 		}
 
@@ -154,8 +151,7 @@ public class FileUtils {
 
 		destination = getDestinationFile(source, destination);
 
-		if (exists(destination)
-				&& !overwrite) {
+		if (exists(destination) && !overwrite) {
 			return;
 		}
 
@@ -277,7 +273,8 @@ public class FileUtils {
 		String newFilename = filepath;
 		int i = 1;
 		while (new File(newFilename).exists()) {
-			newFilename = MessageFormat.format(NUMERIC_SUFFIX_FILENAME_PATTERN, dir, filenameWithoutExtension, i++, extension);
+			newFilename = MessageFormat.format(NUMERIC_SUFFIX_FILENAME_PATTERN, dir, filenameWithoutExtension, i++,
+					extension);
 		}
 		return newFilename;
 	}
@@ -294,8 +291,7 @@ public class FileUtils {
 			return filepath;
 		}
 		Matcher matcher = NUMERIC_SUFFIX_FILENAME_REGEX.matcher(filepath);
-		if (!matcher.matches()
-				|| matcher.groupCount() < 1) {
+		if (!matcher.matches() || matcher.groupCount() < 1) {
 			return filepath;
 		}
 		return matcher.group(1);
@@ -305,7 +301,7 @@ public class FileUtils {
 		if (StringUtils.isEmpty(filename)) {
 			return filename;
 		}
-		if(filename.endsWith(EXT_TAR_GZ)){
+		if (filename.endsWith(EXT_TAR_GZ)) {
 			return EXT_TAR_GZ;
 		}
 		return FilenameUtils.getExtension(filename);
@@ -322,8 +318,7 @@ public class FileUtils {
 			return filename;
 		}
 		if (filename.endsWith(EXT_TAR_GZ)) {
-			filename = filename.substring(0,
-					filename.length() - EXT_TAR_GZ.length());
+			filename = filename.substring(0, filename.length() - EXT_TAR_GZ.length());
 		}
 
 		return FilenameUtils.getBaseName(filename);

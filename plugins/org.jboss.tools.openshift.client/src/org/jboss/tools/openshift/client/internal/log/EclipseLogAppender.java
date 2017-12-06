@@ -17,21 +17,21 @@ import org.apache.log4j.spi.LoggingEvent;
 public class EclipseLogAppender extends AppenderSkeleton {
 
 	private static final String OPENSHIFT_CLIENT_TRACE = "/client";
-	
+
 	private Trace trace;
 
-	public EclipseLogAppender(){
+	public EclipseLogAppender() {
 		this.trace = new Trace("org.jboss.tools.openshift.client");
 	}
-	
+
 	@Override
 	protected void append(LoggingEvent event) {
 		// always put client-lib logging to tracing, gets too chatty otherwise
-			trace(event);
-	}	
+		trace(event);
+	}
 
 	private void trace(LoggingEvent event) {
-		if(trace.isDebugging()) {
+		if (trace.isDebugging()) {
 			trace.trace(OPENSHIFT_CLIENT_TRACE, String.valueOf(event.getMessage()));
 		}
 	}

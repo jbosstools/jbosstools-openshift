@@ -34,36 +34,36 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 	public void update(ViewerCell cell) {
 		final Object element = cell.getElement();
 		StyledString text = getStyledText(element);
-		if(text != null) {
+		if (text != null) {
 			cell.setText(text.getString());
 			cell.setStyleRanges(text.getStyleRanges());
-		}		
+		}
 		super.update(cell);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public  StyledString getStyledText(Object element) {
-		if(element instanceof IResource) {
+	public StyledString getStyledText(Object element) {
+		if (element instanceof IResource) {
 			IResource resource = (IResource) element;
 			StyledString text = new StyledString(StringUtils.capitalize(resource.getKind().toString()));
 			text.append(NLS.bind(" ({0})", resource.getName()), StyledString.QUALIFIER_STYLER);
 			return text;
 		}
-		if(element instanceof ResourceProperty) {
+		if (element instanceof ResourceProperty) {
 			ResourceProperty property = (ResourceProperty) element;
 			StyledString text = new StyledString(StringUtils.capitalize(property.getProperty()));
 			text.append(": ");
 			String value = null;
-			if(property.getValue() instanceof Map) {
+			if (property.getValue() instanceof Map) {
 				value = org.jboss.tools.openshift.common.core.utils.StringUtils.serialize((Map) property.getValue());
-			} else if(property.getValue() instanceof Collection) {
+			} else if (property.getValue() instanceof Collection) {
 				value = StringUtils.join((Collection) property.getValue(), ", ");
 			} else {
 				value = property.getValue() != null ? property.getValue().toString() : "";
 			}
 
-			if(StringUtils.isBlank(value)) {
+			if (StringUtils.isBlank(value)) {
 				if (property.isUnknownValue()) {
 					value = LABEL_UNKNOWN;
 				} else {
@@ -80,6 +80,5 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 	public Image getImage(Object paramObject) {
 		return null;
 	}
-	
-	
+
 }

@@ -45,15 +45,14 @@ public class WebHooksDialog extends Dialog {
 		shell.setText("Webhooks triggers");
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
-	
+
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
 		WebHooksComponent webHookComponent = new WebHooksComponent(buildConfigs, container, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, SWT.DEFAULT)
-			.applyTo(webHookComponent);
-		
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, SWT.DEFAULT)
+				.applyTo(webHookComponent);
+
 		return container;
 	}
 

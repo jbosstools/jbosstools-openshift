@@ -34,15 +34,15 @@ import com.openshift.restclient.model.image.IImageStreamImport;
 
 public class DockerImageLabels {
 
-//	private static final String DOCKER_IMAGE_DIGEST_IDENTIFIER = "sha256:";
+	//	private static final String DOCKER_IMAGE_DIGEST_IDENTIFIER = "sha256:";
 	private static final String SHARED_DATA_KEY = "DOCKER_IMAGE_LABELS";
-	
+
 	private IResource resource;
 	private Connection connection;
 	private String metadata;
 	private DevmodeMetadata devmodeMetadata;
 	private PodDeploymentPathMetadata podPathMetadata;
-	
+
 	/**
 	 * Returns an instance for a given server behaviour and resource. The server
 	 * behaviour shared data is looked up for a matching instance. If it doesn't
@@ -59,15 +59,14 @@ public class DockerImageLabels {
 	 */
 	public static DockerImageLabels getInstance(IResource resource, IControllableServerBehavior behaviour) {
 		DockerImageLabels metadata = (DockerImageLabels) behaviour.getSharedData(SHARED_DATA_KEY);
-		if (metadata == null
-				|| !Objects.equals(resource, metadata.resource)) {
+		if (metadata == null || !Objects.equals(resource, metadata.resource)) {
 			Connection connection = OpenShiftServerUtils.getConnection(behaviour.getServer());
 			metadata = new DockerImageLabels(resource, connection);
 			behaviour.putSharedData(SHARED_DATA_KEY, metadata);
 		}
 		return metadata;
 	}
-	
+
 	protected DockerImageLabels(IResource resource, Connection connection) {
 		this.resource = resource;
 		this.connection = connection;
@@ -79,7 +78,7 @@ public class DockerImageLabels {
 		}
 		return devmodeMetadata.getEnablementKey();
 	}
-	
+
 	public String getDevmodePortKey() {
 		if (!loadIfRequired()) {
 			return null;
@@ -105,11 +104,11 @@ public class DockerImageLabels {
 	public boolean load() {
 		return loadIfRequired();
 	}
-	
+
 	private boolean isLoaded() {
 		return metadata != null;
 	}
-	
+
 	protected boolean loadIfRequired() {
 		if (isLoaded()) {
 			return true;
@@ -148,22 +147,22 @@ public class DockerImageLabels {
 		}
 		DockerImageURI uri = trigger.getFrom();
 		return getImageStreamTag(uri, resource.getNamespace());
-//		String imageRef = getImageRef(dc, connection);
-//		int imageDigestIndex = imageRef.indexOf(DOCKER_IMAGE_DIGEST_IDENTIFIER);
-//		if (imageDigestIndex > 0) {
-//			String imageDigest = imageRef.substring(imageDigestIndex);
-//			return getImageStreamTag(imageDigest, imageRef, project.getName(), connection);
-//		} else {
-//			IImageStream imageStream = connection.getResource(ResourceKind.IMAGE_STREAM, project.getName(), imageRef);
-//			if (	imageStream != null) {
-////				DockerImageURI uri = imageStream.getDockerImageRepository();
-////				return importImageStream(uri.getAbsoluteUri(), project);
-//				IDockerImageMetadata metadata = DockerImageUtils.lookupImageMetadata(project, uri);
-//				return metadata.toString();
-//			} else {
-//				return importImageStream(imageRef, project);
-//			}
-//		}
+		//		String imageRef = getImageRef(dc, connection);
+		//		int imageDigestIndex = imageRef.indexOf(DOCKER_IMAGE_DIGEST_IDENTIFIER);
+		//		if (imageDigestIndex > 0) {
+		//			String imageDigest = imageRef.substring(imageDigestIndex);
+		//			return getImageStreamTag(imageDigest, imageRef, project.getName(), connection);
+		//		} else {
+		//			IImageStream imageStream = connection.getResource(ResourceKind.IMAGE_STREAM, project.getName(), imageRef);
+		//			if (	imageStream != null) {
+		////				DockerImageURI uri = imageStream.getDockerImageRepository();
+		////				return importImageStream(uri.getAbsoluteUri(), project);
+		//				IDockerImageMetadata metadata = DockerImageUtils.lookupImageMetadata(project, uri);
+		//				return metadata.toString();
+		//			} else {
+		//				return importImageStream(imageRef, project);
+		//			}
+		//		}
 	}
 
 	private IDeploymentImageChangeTrigger getImageChangeTrigger(Collection<IDeploymentTrigger> triggers) {
@@ -177,14 +176,14 @@ public class DockerImageLabels {
 
 	private String getImageStreamTag(DockerImageURI uri, String namespace) {
 		try {
-			IResource imageStreamTag = connection.getResource(ResourceKind.IMAGE_STREAM_TAG, namespace, uri.getAbsoluteUri());
+			IResource imageStreamTag = connection.getResource(ResourceKind.IMAGE_STREAM_TAG, namespace,
+					uri.getAbsoluteUri());
 			return imageStreamTag.toJson();
-		} catch(OpenShiftException e) {
+		} catch (OpenShiftException e) {
 			return null;
 		}
 	}
 
-	
 	private String getImageRef(IDeploymentConfig dc, Connection connection) throws CoreException {
 		Collection<String> images = dc.getImages();
 		if (images.isEmpty()) {
@@ -208,12 +207,13 @@ public class DockerImageLabels {
 	}
 
 	private String importImageStream(String imageRef, IProject project) {
-		IImageStreamImportCapability imageStreamImportCapability = project.getCapability(IImageStreamImportCapability.class);
+		IImageStreamImportCapability imageStreamImportCapability = project
+				.getCapability(IImageStreamImportCapability.class);
 		DockerImageURI uri = new DockerImageURI(imageRef);
 		IImageStreamImport imageStreamImport = imageStreamImportCapability.importImageMetadata(uri);
 		if (!ResourceUtils.isSuccessful(imageStreamImport)) {
 			return null;
-		} 
+		}
 		return imageStreamImport.getImageJsonFor(uri);
 	}
 }

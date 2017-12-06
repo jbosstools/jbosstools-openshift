@@ -39,22 +39,20 @@ import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants
  *
  */
 public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
-	
+
 	protected abstract void handleEvent(ExecutionEvent event);
-	
+
 	protected abstract IConnection getConnection(ExecutionEvent event);
-	
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		String location = OCBinary.getInstance().getLocation(getConnection(event));
-		if(StringUtils.isBlank(location)) {
-			
+		if (StringUtils.isBlank(location)) {
+
 			final MessageDialog dialog = new MessageDialog(HandlerUtil.getActiveShell(event),
-													"Unknown executable location",
-													null,
-													"The OpenShift Client '"+ OCBinary.getInstance().getName()+"' executable can not be found.",
-													MessageDialog.ERROR,
-													new String[] { IDialogConstants.OK_LABEL }, 0) {
+					"Unknown executable location", null,
+					"The OpenShift Client '" + OCBinary.getInstance().getName() + "' executable can not be found.",
+					MessageDialog.ERROR, new String[] { IDialogConstants.OK_LABEL }, 0) {
 				@Override
 				protected Control createCustomArea(Composite parent) {
 					Composite container = new Composite(parent, SWT.NONE);
@@ -89,11 +87,10 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					PreferencesUtil.createPreferenceDialogOn(Display.getDefault().getActiveShell(),
-							OPEN_SHIFT_PREFERENCE_PAGE_ID,
-							new String[] {OPEN_SHIFT_PREFERENCE_PAGE_ID},
-							null
-							).open();
+					PreferencesUtil
+							.createPreferenceDialogOn(Display.getDefault().getActiveShell(),
+									OPEN_SHIFT_PREFERENCE_PAGE_ID, new String[] { OPEN_SHIFT_PREFERENCE_PAGE_ID }, null)
+							.open();
 				}
 			});
 		}

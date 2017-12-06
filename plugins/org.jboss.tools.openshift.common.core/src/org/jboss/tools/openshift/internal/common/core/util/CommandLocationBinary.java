@@ -22,13 +22,13 @@ public class CommandLocationBinary {
 	private String commandName;
 	private String foundLoc = null;
 	private boolean searchFailed = false;
-	
+
 	public CommandLocationBinary(String commandName) {
 		commandMap = new HashMap<>();
 		defaultLocMap = new HashMap<>();
 		this.commandName = commandName;
 	}
-	
+
 	/**
 	 * Add a default command location for a given platform. 
 	 * 
@@ -39,11 +39,11 @@ public class CommandLocationBinary {
 	public void addPlatformLocation(String platform, String loc) {
 		defaultLocMap.put(platform, loc);
 	}
-	
+
 	public void addPlatformCommandName(String platform, String command) {
 		commandMap.put(platform, command);
 	}
-	
+
 	/**
 	 * Set which command / default location should be used in the event that 
 	 * the user is on an unexpected platform such as OS_AIX, it can use the command name 
@@ -54,31 +54,31 @@ public class CommandLocationBinary {
 	public void setDefaultPlatform(String platform) {
 		this.defaultPlatform = platform;
 	}
-	
+
 	public String getCommand(String platform) {
 		return commandMap.containsKey(platform) ? commandMap.get(platform) : commandName;
 	}
-	
+
 	public String getDefaultLoc(String platform) {
 		return defaultLocMap.containsKey(platform) ? defaultLocMap.get(platform) : defaultLocMap.get(defaultPlatform);
 	}
-	
+
 	public String findLocation() {
 		return findLocation(2000);
 	}
-	
+
 	public String findLocation(int timeout) {
-		if( foundLoc != null || searchFailed ) 
+		if (foundLoc != null || searchFailed)
 			return foundLoc;
-		
+
 		String searched = CommandLocationLookupStrategy.get().search(this, timeout);
-		if( searched == null ) {
+		if (searched == null) {
 			searchFailed = true;
 		}
 		foundLoc = searched;
 		return searched;
 	}
-	
+
 	public String[] getPossibleSuffixes() {
 		return CommandLocationLookupStrategy.get().getSuffixes();
 	}

@@ -33,17 +33,16 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.build.IBuildConfigBuilder;
 
-public class CreateApplicationFromImageJob 
-	extends DeployImageJob 
-	implements IResourcesModelJob{
+public class CreateApplicationFromImageJob extends DeployImageJob implements IResourcesModelJob {
 
 	private IBuildConfigPageModel buildConfigModel;
 
-	public CreateApplicationFromImageJob(IBuildConfigPageModel buildConfigModel, IDeployImageParameters deployImageModel){
+	public CreateApplicationFromImageJob(IBuildConfigPageModel buildConfigModel,
+			IDeployImageParameters deployImageModel) {
 		super("Create Application From Builder Image Job", deployImageModel);
 		this.buildConfigModel = buildConfigModel;
 	}
-	
+
 	@Override
 	public Job getJob() {
 		return this;
@@ -52,46 +51,36 @@ public class CreateApplicationFromImageJob
 	@Override
 	public Runnable getSummaryRunnable(final Shell shell) {
 		return new Runnable() {
-			
+
 			@Override
 			public void run() {
-				String message = NLS.bind(
-						"Results of creating the resources from the {0}/{1} builder image.", 
-						buildConfigModel.getBuilderImageNamespace(),
-						buildConfigModel.getBuilderImageName());
-				new ResourceSummaryDialog(shell, getResources(),"Create Application Summary",message).open();
+				String message = NLS.bind("Results of creating the resources from the {0}/{1} builder image.",
+						buildConfigModel.getBuilderImageNamespace(), buildConfigModel.getBuilderImageName());
+				new ResourceSummaryDialog(shell, getResources(), "Create Application Summary", message).open();
 			}
 		};
 	}
-	
+
 	@Override
-	protected void addToGeneratedResources(Map<String, IResource> resources, final Connection connection, final String name, final IProject project) {
+	protected void addToGeneratedResources(Map<String, IResource> resources, final Connection connection,
+			final String name, final IProject project) {
 		IBuildConfigBuilder builder = connection.getResourceBuilder(IBuildConfigBuilder.class);
-		IBuildConfig bc = builder
-			.named(name)
-			.inNamespace(project.getName())
-			.fromGitSource()
+		IBuildConfig bc = builder.named(name).inNamespace(project.getName()).fromGitSource()
 				.fromGitUrl(buildConfigModel.getGitRepositoryUrl())
-				.usingGitReference(buildConfigModel.getGitReference())
-				.inContextDir(buildConfigModel.getContextDir())
-			.end()
-			.usingSourceStrategy()
-				.fromImageStreamTag(buildConfigModel.getBuilderImageName())
-				.inNamespace(buildConfigModel.getBuilderImageNamespace())
-				.withEnvVars(createEnvVars())
-			.end()
-			.buildOnSourceChange(buildConfigModel.isConfigWebHook())
-			.buildOnConfigChange(buildConfigModel.isConfigChangeTrigger())
-			.buildOnImageChange(buildConfigModel.isImageChangeTrigger())
-			.toImageStreamTag(new DockerImageURI(name).getNameAndTag())
-		.build();
-		
+				.usingGitReference(buildConfigModel.getGitReference()).inContextDir(buildConfigModel.getContextDir())
+				.end().usingSourceStrategy().fromImageStreamTag(buildConfigModel.getBuilderImageName())
+				.inNamespace(buildConfigModel.getBuilderImageNamespace()).withEnvVars(createEnvVars()).end()
+				.buildOnSourceChange(buildConfigModel.isConfigWebHook())
+				.buildOnConfigChange(buildConfigModel.isConfigChangeTrigger())
+				.buildOnImageChange(buildConfigModel.isImageChangeTrigger())
+				.toImageStreamTag(new DockerImageURI(name).getNameAndTag()).build();
+
 		resources.put(ResourceKind.BUILD_CONFIG, bc);
 	}
-	
-	
+
 	@Override
-	public IResource stubDeploymentConfig(IResourceFactory factory, String name, DockerImageURI imageUri, IImageStream is) {
+	public IResource stubDeploymentConfig(IResourceFactory factory, String name, DockerImageURI imageUri,
+			IImageStream is) {
 		return super.stubDeploymentConfig(factory, name, new DockerImageURI(name), is);
 	}
 
@@ -101,38 +90,34 @@ public class CreateApplicationFromImageJob
 		return factory.stub(ResourceKind.IMAGE_STREAM, name, project.getName());
 	}
 
-	private List<IEnvironmentVariable> createEnvVars(){
+	private List<IEnvironmentVariable> createEnvVars() {
 		List<IEnvironmentVariable> list = new ArrayList<>();
-		buildConfigModel.getEnvVariablesModel()
-			.getEnvironmentVariables()
-			.forEach(v-> list.add(
-					new IEnvironmentVariable() {
-						@Override
-						public String getName() {
-							return v.getKey();
-						}
-		
-						@Override
-						public String getValue() {
-							return v.getValue();
-						}
-		
-						@Override
-						public IEnvVarSource getValueFrom() {
-							return null;
-						}
-
-						@Override
-						public String toJson() {
-							ModelNode node = new ModelNode();
-							node.get("name").set(getName());
-							node.get("value").set(getValue());
-							return node.toJSONString(true);
-						}
-						
-						
+		buildConfigModel.getEnvVariablesModel().getEnvironmentVariables()
+				.forEach(v -> list.add(new IEnvironmentVariable() {
+					@Override
+					public String getName() {
+						return v.getKey();
 					}
-			));
+
+					@Override
+					public String getValue() {
+						return v.getValue();
+					}
+
+					@Override
+					public IEnvVarSource getValueFrom() {
+						return null;
+					}
+
+					@Override
+					public String toJson() {
+						ModelNode node = new ModelNode();
+						node.get("name").set(getName());
+						node.get("value").set(getValue());
+						return node.toJSONString(true);
+					}
+
+				}));
 		return list;
 	}
 }

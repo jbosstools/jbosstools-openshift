@@ -24,16 +24,16 @@ public class EnvironmentVariable implements IKeyValueItem {
 	 * @param value
 	 * @param isNew   true if the value is new (e.g. not declared in a docker image
 	 */
-	public EnvironmentVariable(String name, String value, boolean isNew){
+	public EnvironmentVariable(String name, String value, boolean isNew) {
 		this.name = name;
 		this.value = value;
 		this.isNew = isNew;
 	}
-	
-	public EnvironmentVariable(String name, String value){
-		this(name,value, false);
+
+	public EnvironmentVariable(String name, String value) {
+		this(name, value, false);
 	}
-	
+
 	@Override
 	public String getKey() {
 		return name;
@@ -53,7 +53,7 @@ public class EnvironmentVariable implements IKeyValueItem {
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
+
 	/**
 	 * 
 	 * @return true if this is a new value
@@ -99,8 +99,8 @@ public class EnvironmentVariable implements IKeyValueItem {
 	/**
 	 * For better test reporting
 	 */
-    @Override
-    public String toString() {
-        return "EnvironmentVariable [name=" + name + ", value=" + value + ", isNew=" + isNew + "]";
-    }
+	@Override
+	public String toString() {
+		return "EnvironmentVariable [name=" + name + ", value=" + value + ", isNew=" + isNew + "]";
+	}
 }

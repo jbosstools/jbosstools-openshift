@@ -23,18 +23,18 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  * @author Jeff Cantrill
  * @author Andre Dietisheim
  */
-public class ConnectionPersistency extends AbstractConnectionPersistency<Connection>{
-	
+public class ConnectionPersistency extends AbstractConnectionPersistency<Connection> {
+
 	private final IOpenShiftCorePreferences preferences;
-	
+
 	public ConnectionPersistency() {
 		this(OpenShiftCorePreferences.INSTANCE);
 	}
-	
+
 	protected ConnectionPersistency(IOpenShiftCorePreferences preferences) {
 		this.preferences = preferences;
 	}
-	
+
 	@Override
 	protected String[] loadPersisted() {
 		return preferences.loadConnections();
@@ -55,8 +55,7 @@ public class ConnectionPersistency extends AbstractConnectionPersistency<Connect
 
 	@Override
 	protected Connection createConnection(ConnectionURL connectionURL) {
-		Connection connection = new ConnectionFactory().create(
-				connectionURL.getHostWithScheme());
+		Connection connection = new ConnectionFactory().create(connectionURL.getHostWithScheme());
 		if (connection == null) {
 			return null;
 		} else {

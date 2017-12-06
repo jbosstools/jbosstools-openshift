@@ -21,7 +21,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
 public class Account implements IAccount {
-	
+
 	private static final String ACCESS_TOKEN_EXPIRY_TIME_KEY = "accessTokenExpiryTime";
 
 	private static final String KEYREFRESH_TOKEN_EXPIRY_TIME = "refreshTokenExpiryTime";
@@ -33,15 +33,15 @@ public class Account implements IAccount {
 	private static final String REFRESH_TOKEN_KEY = "refreshToken";
 
 	private String id;
-	
+
 	private String accessToken;
-	
+
 	private String refreshToken;
-	
+
 	private long accessTokenExpiryTime = Long.MAX_VALUE;
-	
+
 	private long refreshTokenExpiryTime = Long.MAX_VALUE;
-	
+
 	private long lastRefreshedTime;
 
 	private ICluster cluster;
@@ -118,17 +118,17 @@ public class Account implements IAccount {
 			Preferences accountsRoot = AccountModel.getAccountsPreferences();
 			ISecurePreferences secureAccountNode = secureAccountsRoot.node(cluster.getId()).node(getId());
 			Preferences accountNode = accountsRoot.node(cluster.getId()).node(getId());
-			
+
 			accountNode.putLong(ACCESS_TOKEN_EXPIRY_TIME_KEY, getAccessTokenExpiryTime());
 			accountNode.putLong(KEYREFRESH_TOKEN_EXPIRY_TIME, getRefreshTokenExpiryTime());
 			accountNode.putLong(LAST_REFRESHED_TIME_KEY, getLastRefreshedTime());
-			
+
 			secureAccountNode.put(ACCESS_TOKEN_KEY, getAccessToken(), true);
 			secureAccountNode.put(REFRESH_TOKEN_KEY, getRefreshToken(), true);
-			
+
 			accountNode.flush();
 			secureAccountNode.flush();
-		} catch(StorageException | BackingStoreException | IOException e) {
+		} catch (StorageException | BackingStoreException | IOException e) {
 			OpenShiftIOCoreActivator.logError("Error saving credentials ", e);
 		}
 	}

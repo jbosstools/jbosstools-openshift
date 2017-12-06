@@ -39,7 +39,7 @@ import com.openshift.restclient.model.IService;
 public class ScaleDeploymentContributionItem extends CompoundContributionItem implements IWorkbenchContribution {
 	static final String COMMAND_ID = "org.jboss.tools.openshift.ui.command.deployment.scale";
 	static final String DYNAMIC_ITEM_ID = "org.jboss.tools.openshift.ui.command.deployment.dynamic.scale";
-    private IServiceLocator fServiceLocator;
+	private IServiceLocator fServiceLocator;
 
 	@Override
 	public void initialize(IServiceLocator serviceLocator) {
@@ -51,22 +51,22 @@ public class ScaleDeploymentContributionItem extends CompoundContributionItem im
 		return isRelevant();
 	}
 
-    @Override
+	@Override
 	public void fill(Menu menu, int index) {
-    	if(!isRelevant()) {
-    		return;
-    	}
-        Menu m = new Menu(menu);
-       	super.fill(m, 0);
-       	MenuItem item = new MenuItem(menu, SWT.CASCADE);
-       	item.setMenu(m);
-       	item.setText("Scale");
-    }
-    
+		if (!isRelevant()) {
+			return;
+		}
+		Menu m = new Menu(menu);
+		super.fill(m, 0);
+		MenuItem item = new MenuItem(menu, SWT.CASCADE);
+		item.setMenu(m);
+		item.setText("Scale");
+	}
+
 	private boolean isRelevant() {
 		ISelectionService service = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService();
 		ISelection selection = service != null ? service.getSelection() : null;
-		if(selection == null || selection.isEmpty()) {
+		if (selection == null || selection.isEmpty()) {
 			return false;
 		}
 		IRunningPodHolder podHolder = UIUtils.getFirstElement(selection, IRunningPodHolder.class);
@@ -77,43 +77,37 @@ public class ScaleDeploymentContributionItem extends CompoundContributionItem im
 		if (!(podUIElement instanceof IResourceWrapper)) {
 			return false;
 		}
-		IResourceWrapper<?,?> podWrapper = (IResourceWrapper<?, ?>) podUIElement;
-		if(ResourceWrapperUtils.getServiceWrapperFor(
-						podWrapper,
-						serviceWrapper -> ResourceUtils.areRelated(
-								(IPod) podWrapper.getWrapped(), 
-								(IService) serviceWrapper.getWrapped())) 
-					== null) {
+		IResourceWrapper<?, ?> podWrapper = (IResourceWrapper<?, ?>) podUIElement;
+		if (ResourceWrapperUtils.getServiceWrapperFor(podWrapper, serviceWrapper -> ResourceUtils
+				.areRelated((IPod) podWrapper.getWrapped(), (IService) serviceWrapper.getWrapped())) == null) {
 			return false;
 		}
 		return true;
-    }
+	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected IContributionItem[] getContributionItems() {
-    	if(!isRelevant()) {
+		if (!isRelevant()) {
 			return new IContributionItem[0];
 		}
-		
+
 		Map mapUp = new HashMap();
 		mapUp.put(ScaleDeploymentHandler.REPLICA_DIFF, "1");
-		CommandContributionItemParameter pUp = new CommandContributionItemParameter(
-				fServiceLocator, DYNAMIC_ITEM_ID + ".up", COMMAND_ID,
-				mapUp, OpenShiftImages.TREND_UP, null, null, "Up", null, "Increment the number of deployed replicas by one.", 0, null, true);
+		CommandContributionItemParameter pUp = new CommandContributionItemParameter(fServiceLocator,
+				DYNAMIC_ITEM_ID + ".up", COMMAND_ID, mapUp, OpenShiftImages.TREND_UP, null, null, "Up", null,
+				"Increment the number of deployed replicas by one.", 0, null, true);
 		Map mapDown = new HashMap();
 		mapDown.put(ScaleDeploymentHandler.REPLICA_DIFF, "-1");
-		CommandContributionItemParameter pDown = new CommandContributionItemParameter(
-				fServiceLocator,  DYNAMIC_ITEM_ID + ".down", COMMAND_ID, mapDown, 
-				OpenShiftImages.TREND_DOWN, null, null, "Down", null, "Increment the number of deployed replicas by one.", 0, null, true);
-		CommandContributionItemParameter pTo = new CommandContributionItemParameter(
-				fServiceLocator, DYNAMIC_ITEM_ID + ".to", COMMAND_ID,
-				new HashMap(), null, null, null, "To...", null, "Scale the number of deployed replicas to a specific value.", 0, null, true);
+		CommandContributionItemParameter pDown = new CommandContributionItemParameter(fServiceLocator,
+				DYNAMIC_ITEM_ID + ".down", COMMAND_ID, mapDown, OpenShiftImages.TREND_DOWN, null, null, "Down", null,
+				"Increment the number of deployed replicas by one.", 0, null, true);
+		CommandContributionItemParameter pTo = new CommandContributionItemParameter(fServiceLocator,
+				DYNAMIC_ITEM_ID + ".to", COMMAND_ID, new HashMap(), null, null, null, "To...", null,
+				"Scale the number of deployed replicas to a specific value.", 0, null, true);
 
-		return new IContributionItem[] {
-				new CommandContributionItem(pUp),
-				new CommandContributionItem(pDown),
-				new CommandContributionItem(pTo)};
- 	}
+		return new IContributionItem[] { new CommandContributionItem(pUp), new CommandContributionItem(pDown),
+				new CommandContributionItem(pTo) };
+	}
 
 }

@@ -27,7 +27,7 @@ import com.openshift.restclient.ResourceKind;
 public class ProjectTreeItems implements IModelFactory {
 
 	public static final ProjectTreeItems INSTANCE = new ProjectTreeItems();
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> List<T> createChildren(Object parent) {

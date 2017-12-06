@@ -22,8 +22,8 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
  */
 public class HostNameValidator implements IValidator {
 
-	private static final Pattern urlPattern =
-			Pattern.compile("(https?://){0,1}[^\\.:0-9]+(\\.[^\\.:0-9]+)*(:[0-9]+){0,1}");
+	private static final Pattern urlPattern = Pattern
+			.compile("(https?://){0,1}[^\\.:0-9]+(\\.[^\\.:0-9]+)*(:[0-9]+){0,1}");
 
 	@Override
 	public IStatus validate(Object value) {

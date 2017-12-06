@@ -23,7 +23,7 @@ public class ConnectionFake extends AbstractConnection {
 
 	private String username;
 	private String password;
-	
+
 	protected ConnectionFake(String host) {
 		super(host);
 	}
@@ -71,7 +71,7 @@ public class ConnectionFake extends AbstractConnection {
 	public boolean isRememberPassword() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isDefaultHost() {
 		return false;
@@ -90,12 +90,12 @@ public class ConnectionFake extends AbstractConnection {
 	public boolean isConnected() {
 		return false;
 	}
-	
+
 	@Override
 	public IConnection clone() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void update(IConnection connection) {
 		throw new UnsupportedOperationException();

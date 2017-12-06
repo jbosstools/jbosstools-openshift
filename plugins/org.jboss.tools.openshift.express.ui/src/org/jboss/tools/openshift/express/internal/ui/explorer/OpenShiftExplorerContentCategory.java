@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.express.internal.core.connection.ExpressConnect
 public class OpenShiftExplorerContentCategory {
 
 	private final ExpressConnection user;
-	
+
 	public OpenShiftExplorerContentCategory(final ExpressConnection user) {
 		this.user = user;
 	}
@@ -29,6 +29,5 @@ public class OpenShiftExplorerContentCategory {
 	public ExpressConnection getUser() {
 		return user;
 	}
-	
-	
+
 }

@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
 import org.eclipse.core.runtime.CoreException;
@@ -19,39 +19,46 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehav
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IModuleStateController;
 
-public class CDKServerBehaviour extends ControllableServerBehavior implements IControllableServerBehavior  {
-	
-	public static final String PROP_CACHED_PASSWORD = "CDKServerBehaviour.CACHED_PASSWORD"; 
+public class CDKServerBehaviour extends ControllableServerBehavior implements IControllableServerBehavior {
+
+	public static final String PROP_CACHED_PASSWORD = "CDKServerBehaviour.CACHED_PASSWORD";
 	public static final String PROP_CACHED_USER = "CDKServerBehaviour.CACHED_USER";
-	
+
 	public CDKServerBehaviour() {
 	}
 
-	
 	// Unused  methods below since we don't support modules
-	
+
 	@Override
 	protected void publishFinish(IProgressMonitor monitor) throws CoreException {
 	}
+
 	@Override
-	protected void publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor) throws CoreException {
+	protected void publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor)
+			throws CoreException {
 	}
+
 	@Override
 	protected void publishServer(int kind, IProgressMonitor monitor) throws CoreException {
 	}
+
 	@Override
 	protected void publishStart(IProgressMonitor monitor) throws CoreException {
 	}
+
 	@Override
 	public boolean canRestartModule(IModule[] module) {
 		return false;
 	}
+
 	@Override
 	public void startModule(IModule[] module, IProgressMonitor monitor) throws CoreException {
 	}
+
 	@Override
 	public void stopModule(IModule[] module, IProgressMonitor monitor) throws CoreException {
 	}
+
 	@Override
 	public void restartModule(IModule[] module, IProgressMonitor monitor) throws CoreException {
 		IModuleStateController controller = getModuleStateController();
@@ -63,9 +70,9 @@ public class CDKServerBehaviour extends ControllableServerBehavior implements IC
 	public IStatus canPublish() {
 		return Status.CANCEL_STATUS;
 	}
-	
+
 	@Override
-	public boolean canPublishModule(IModule[] module){
+	public boolean canPublishModule(IModule[] module) {
 		return false;
 	}
 }

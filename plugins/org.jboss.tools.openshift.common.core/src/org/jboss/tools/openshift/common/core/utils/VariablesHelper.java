@@ -25,43 +25,44 @@ public class VariablesHelper {
 	public static final String VARIABLE_PREFIX = "${";
 	public static final String VARIABLE_SUFFIX = "}";
 	public static final String WORKSPACE_LOC = "workspace_loc";
-	public static final String WORKSPACE_PREFIX = VARIABLE_PREFIX+WORKSPACE_LOC+":";
-	
-	private VariablesHelper() {}
-	
+	public static final String WORKSPACE_PREFIX = VARIABLE_PREFIX + WORKSPACE_LOC + ":";
+
+	private VariablesHelper() {
+	}
+
 	/**
 	 * @return true if the value contains <code>${</code>
 	 */
 	public static boolean containsVariables(String value) {
 		return StringUtils.isNotBlank(value) && value.indexOf(VARIABLE_PREFIX) < value.indexOf(VARIABLE_SUFFIX);
 	}
-	
+
 	public static String addWorkspacePrefix(String value) {
 		if (StringUtils.isBlank(value) || value.startsWith(WORKSPACE_PREFIX)) {
 			return value;
 		}
 		return VariablesPlugin.getDefault().getStringVariableManager().generateVariableExpression(WORKSPACE_LOC, value);
 	}
-	
+
 	public static String getWorkspacePath(String value) {
 		if (StringUtils.isBlank(value) || !(value.startsWith(WORKSPACE_PREFIX) && value.endsWith(VARIABLE_SUFFIX))) {
 			return value;
 		}
-		String path = value.substring(WORKSPACE_PREFIX.length(), value.length()-1);
+		String path = value.substring(WORKSPACE_PREFIX.length(), value.length() - 1);
 		return path;
 	}
-	
+
 	public static String replaceVariables(String value) {
 		return replaceVariables(value, false);
 	}
-	
+
 	public static String replaceVariables(String value, boolean ignoreErrors) {
 		if (containsVariables(value)) {
 			try {
 				return VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(value);
 			} catch (CoreException e) {
 				if (ignoreErrors) {
-					OpenShiftCommonCoreActivator.log("Could not interpolate "+value, e);
+					OpenShiftCommonCoreActivator.log("Could not interpolate " + value, e);
 				} else {
 					throw new OpenShiftCoreException(e);
 				}

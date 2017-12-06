@@ -32,8 +32,7 @@ public class StopApplicationHandler extends AbstractApplicationHandler {
 
 	@Override
 	protected IStatus execute(LoadApplicationJob job, Shell shell) {
-		new JobChainBuilder(job)
-				.runWhenSuccessfullyDone(new StopApplicationJob(job)).schedule();
+		new JobChainBuilder(job).runWhenSuccessfullyDone(new StopApplicationJob(job)).schedule();
 		return Status.OK_STATUS;
 	}
 

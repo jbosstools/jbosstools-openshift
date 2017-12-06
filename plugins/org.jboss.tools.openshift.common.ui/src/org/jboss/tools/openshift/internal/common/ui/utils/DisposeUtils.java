@@ -19,12 +19,10 @@ import org.eclipse.swt.widgets.Control;
 public class DisposeUtils {
 
 	public static boolean isDisposed(Control control) {
-		return control == null
-				|| control.isDisposed();
+		return control == null || control.isDisposed();
 	}
-	
+
 	public static boolean isDisposed(Viewer viewer) {
-		return viewer == null
-				|| isDisposed(viewer.getControl());
+		return viewer == null || isDisposed(viewer.getControl());
 	}
 }

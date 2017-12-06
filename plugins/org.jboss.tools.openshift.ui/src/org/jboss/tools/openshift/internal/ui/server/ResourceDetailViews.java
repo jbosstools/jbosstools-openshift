@@ -80,35 +80,35 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 		public boolean isViewFor(Object object) {
 			return object instanceof IResource;
 		}
-	   }
+	}
 
-	   private abstract class ProjectResourceDetailView extends ResourceDetailView {
+	private abstract class ProjectResourceDetailView extends ResourceDetailView {
 
-        private StyledText namespaceText;
-        private StyledText labelsText;
+		private StyledText namespaceText;
+		private StyledText labelsText;
 
-        @Override
+		@Override
 		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
-        	Composite container = super.createControls(parent, context, dbc);
-        	this.namespaceText = createLabeledValue("Namespace:", container);
+			Composite container = super.createControls(parent, context, dbc);
+			this.namespaceText = createLabeledValue("Namespace:", container);
 			this.labelsText = createLabeledValue("Labels:", container);
 			return container;
 		}
 
-        @Override
-        public void onVisible(IObservableValue resourceObservable, DataBindingContext dbc) {
-        	super.onVisible(resourceObservable, dbc);
-        	Object value = resourceObservable.getValue();
-            if (!(value instanceof IResource)) {
-                return;
+		@Override
+		public void onVisible(IObservableValue resourceObservable, DataBindingContext dbc) {
+			super.onVisible(resourceObservable, dbc);
+			Object value = resourceObservable.getValue();
+			if (!(value instanceof IResource)) {
+				return;
 			}
 
-            IResource resource = (IResource) value;
+			IResource resource = (IResource) value;
 			namespaceText.setText(resource.getNamespace());
 			String labels = StringUtils.toString(resource.getLabels());
-            labels = org.apache.commons.lang.StringUtils.defaultString(labels); //replaces null by empty string
+			labels = org.apache.commons.lang.StringUtils.defaultString(labels); //replaces null by empty string
 			labelsText.setText(labels);
-        }
+		}
 
 		@Override
 		public boolean isViewFor(Object object) {
@@ -116,13 +116,13 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 		}
 	}
 
-    private class ProjectDetailView extends ResourceDetailView {
+	private class ProjectDetailView extends ResourceDetailView {
 
 		@Override
 		public boolean isViewFor(Object object) {
 			return object instanceof IProject;
 		}
-    }
+	}
 
 	private class ServiceDetailView extends ProjectResourceDetailView {
 
@@ -141,7 +141,7 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 
 		@Override
 		public void onVisible(IObservableValue serviceObservable, DataBindingContext dbc) {
-		    super.onVisible(serviceObservable, dbc);
+			super.onVisible(serviceObservable, dbc);
 			Object value = serviceObservable.getValue();
 			if (!(value instanceof IService)) {
 				return;
@@ -149,12 +149,10 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 
 			IService service = (IService) value;
 			String selectors = StringUtils.toString(service.getSelector());
-            selectors = org.apache.commons.lang.StringUtils.defaultString(selectors); //replaces null by empty string
+			selectors = org.apache.commons.lang.StringUtils.defaultString(selectors); //replaces null by empty string
 			selectorsText.setText(selectors);
-			ipText.setText(
-					org.apache.commons.lang.StringUtils.join(new String[] {
-							service.getPortalIP(), StringUtils.toStringOrNull(service.getTargetPort())
-					}, ':'));
+			ipText.setText(org.apache.commons.lang.StringUtils.join(
+					new String[] { service.getPortalIP(), StringUtils.toStringOrNull(service.getTargetPort()) }, ':'));
 			portText.setText(StringUtils.toStringOrNull(service.getPort()));
 		}
 
@@ -163,36 +161,36 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 			return object instanceof IService;
 		}
 	}
-    
-    private class ReplicationControllerDetailView extends ProjectResourceDetailView {
 
-        private StyledText selectorsText;
+	private class ReplicationControllerDetailView extends ProjectResourceDetailView {
 
-        @Override
-        public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
-            Composite container = super.createControls(parent, context, dbc);
-            this.selectorsText = createLabeledValue("Selectors:", container);
-            return container;
-        }
+		private StyledText selectorsText;
 
-        @Override
-        public void onVisible(IObservableValue serviceObservable, DataBindingContext dbc) {
-            super.onVisible(serviceObservable, dbc);
-            Object value = serviceObservable.getValue();
-            if (!(value instanceof IReplicationController)) {
-                return;
-            }
+		@Override
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
+			Composite container = super.createControls(parent, context, dbc);
+			this.selectorsText = createLabeledValue("Selectors:", container);
+			return container;
+		}
+
+		@Override
+		public void onVisible(IObservableValue serviceObservable, DataBindingContext dbc) {
+			super.onVisible(serviceObservable, dbc);
+			Object value = serviceObservable.getValue();
+			if (!(value instanceof IReplicationController)) {
+				return;
+			}
 
 			IReplicationController replicationController = (IReplicationController) value;
 			String selectors = StringUtils.toString(replicationController.getReplicaSelector());
 			selectors = org.apache.commons.lang.StringUtils.defaultString(selectors); //replaces null by empty string
 			selectorsText.setText(selectors);
-        }
+		}
 
-        @Override
-        public boolean isViewFor(Object object) {
-            return object instanceof IReplicationController;
-        }
-    }
+		@Override
+		public boolean isViewFor(Object object) {
+			return object instanceof IReplicationController;
+		}
+	}
 
 }

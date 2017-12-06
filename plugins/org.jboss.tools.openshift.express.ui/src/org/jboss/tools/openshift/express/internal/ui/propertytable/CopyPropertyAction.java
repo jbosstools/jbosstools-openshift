@@ -38,8 +38,8 @@ public class CopyPropertyAction extends SelectionProviderAction {
 		ISharedImages sharedImages = PlatformUI.getWorkbench().getSharedImages();
 		setImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		setDisabledImageDescriptor(sharedImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
-//		setActionDefinitionId(ActionFactory.COPY.getCommandId());
-//		setAccelerator(SWT.CTRL | 'C');
+		//		setActionDefinitionId(ActionFactory.COPY.getCommandId());
+		//		setAccelerator(SWT.CTRL | 'C');
 	}
 
 	@Override
@@ -50,8 +50,7 @@ public class CopyPropertyAction extends SelectionProviderAction {
 			if (structuredSelection.getFirstElement() instanceof IProperty) {
 				IProperty property = (IProperty) structuredSelection.getFirstElement();
 				Clipboard clipboard = new Clipboard(Display.getDefault());
-				clipboard.setContents(
-						new Object[] { property.getValue() },
+				clipboard.setContents(new Object[] { property.getValue() },
 						new Transfer[] { TextTransfer.getInstance() });
 			}
 		}

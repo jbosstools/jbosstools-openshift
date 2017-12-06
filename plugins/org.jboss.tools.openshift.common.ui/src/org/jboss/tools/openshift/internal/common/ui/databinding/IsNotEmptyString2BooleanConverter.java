@@ -26,9 +26,9 @@ public class IsNotEmptyString2BooleanConverter extends Converter {
 
 	@Override
 	public Object convert(Object fromObject) {
-		if(!(fromObject instanceof String)) {
+		if (!(fromObject instanceof String)) {
 			return Boolean.FALSE;
-		} 
-		return !StringUtils.isEmpty((String) fromObject) ;
+		}
+		return !StringUtils.isEmpty((String) fromObject);
 	}
 }

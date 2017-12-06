@@ -87,9 +87,8 @@ public class MergeIntoGitSharedProject extends AbstractImportApplicationOperatio
 	 * @see #createServerAdapterIfRequired
 	 */
 	@Override
-	public IProject execute(IProgressMonitor monitor)
-			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
-			URISyntaxException, NoWorkTreeException, GitAPIException {
+	public IProject execute(IProgressMonitor monitor) throws OpenShiftException, InvocationTargetException,
+			InterruptedException, IOException, CoreException, URISyntaxException, NoWorkTreeException, GitAPIException {
 		IProject project = getProject();
 		Assert.isTrue(EGitUtils.isSharedWithGit(project));
 
@@ -137,20 +136,16 @@ public class MergeIntoGitSharedProject extends AbstractImportApplicationOperatio
 	 * @throws OpenShiftException
 	 */
 	private Collection<IResource> copyOpenshiftConfigurations(IApplication application, String remoteName,
-			IProject project, IProgressMonitor monitor)
-			throws IOException, CoreException, OpenShiftException, InvocationTargetException, InterruptedException,
-			URISyntaxException {
+			IProject project, IProgressMonitor monitor) throws IOException, CoreException, OpenShiftException,
+			InvocationTargetException, InterruptedException, URISyntaxException {
 		Assert.isLegal(project != null);
 		monitor.subTask(NLS.bind("Copying openshift configuration to project {0}...", project.getName()));
 
 		File tmpFolder = FileUtils.getRandomTmpFolder();
 		cloneRepository(application, remoteName, tmpFolder, false, monitor);
 
-		Collection<IResource> copiedResources =
-				ResourceUtils.copy(tmpFolder, new String[] {
-						".openshift",
-						"deployments",
-						"pom.xml" }, project, monitor);
+		Collection<IResource> copiedResources = ResourceUtils.copy(tmpFolder,
+				new String[] { ".openshift", "deployments", "pom.xml" }, project, monitor);
 		FileUtil.safeDelete(tmpFolder);
 		return copiedResources;
 	}

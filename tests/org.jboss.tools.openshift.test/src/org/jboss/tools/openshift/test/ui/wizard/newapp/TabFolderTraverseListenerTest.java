@@ -41,7 +41,7 @@ public class TabFolderTraverseListenerTest {
 
 	@After
 	public void after() {
-		if(window != null) {
+		if (window != null) {
 			window.close();
 			window = null;
 		}
@@ -83,7 +83,7 @@ public class TabFolderTraverseListenerTest {
 
 	private void checkFocus(Control expected) {
 		Assert.assertTrue(expected == window.listener.lastFocused);
-//		Assert.assertTrue(expected.isFocusControl());
+		//		Assert.assertTrue(expected.isFocusControl());
 	}
 
 	private Event createTraverseEvent() {
@@ -95,9 +95,9 @@ public class TabFolderTraverseListenerTest {
 	class TestWindow extends Window {
 		TabFolder tabFolder;
 		TestableTabFolderTraverseListener listener;
-		
+
 		TestItem[] items;
-		
+
 		//A control to be focused after all child controls of the selected tab are traversed. 
 		Control next;
 
@@ -113,7 +113,7 @@ public class TabFolderTraverseListenerTest {
 			tabFolder = new TabFolder(root, SWT.NONE);
 
 			listener = new TestableTabFolderTraverseListener(tabFolder);
-			
+
 			for (int i = 0; i < items.length; i++) {
 				items[i] = new TestItem();
 				items[i].create(tabFolder, listener);
@@ -131,10 +131,10 @@ public class TabFolderTraverseListenerTest {
 		public void create(TabFolder tabFolder, TabFolderTraverseListener listener) {
 			tabItem = new TabItem(tabFolder, SWT.NONE);
 			tabItem.setText("Tab " + tabFolder.getItemCount());
-			
+
 			Composite parent = new Composite(tabFolder, SWT.NONE);
 			tabItem.setControl(parent);
-			
+
 			for (int i = 0; i < controls.length - 1; i++) {
 				Label label = new Label(parent, SWT.NONE); //Label will not get focus.
 				label.setText("Input " + i);
@@ -143,7 +143,7 @@ public class TabFolderTraverseListenerTest {
 				disabledText.setEnabled(false);
 			}
 			controls[controls.length - 1] = new Button(parent, SWT.NONE);
-			
+
 			listener.bindTabControls(tabFolder.getItemCount() - 1, controls);
 		}
 	}
@@ -154,6 +154,7 @@ public class TabFolderTraverseListenerTest {
 	 */
 	class TestableTabFolderTraverseListener extends TabFolderTraverseListener {
 		Control lastFocused;
+
 		public TestableTabFolderTraverseListener(TabFolder tabFolder) {
 			super(tabFolder);
 		}

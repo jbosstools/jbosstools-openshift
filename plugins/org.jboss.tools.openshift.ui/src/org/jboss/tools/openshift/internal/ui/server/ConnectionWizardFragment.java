@@ -53,10 +53,10 @@ public class ConnectionWizardFragment extends WizardFragment {
 
 	@Override
 	public boolean isComplete() {
-		if(connectionPage == null || !connectionPage.isPageComplete()) {
+		if (connectionPage == null || !connectionPage.isPageComplete()) {
 			return false;
 		}
-		if(getTaskModel() != null) {
+		if (getTaskModel() != null) {
 			Object isLoadingServices = getTaskModel().getObject(ServerSettingsWizardFragment.IS_LOADING_SERVICES);
 			return !(Boolean.TRUE.equals(isLoadingServices));
 		}
@@ -77,14 +77,14 @@ public class ConnectionWizardFragment extends WizardFragment {
 
 			@Override
 			public void handlePageChanging(PageChangingEvent event) {
-				if (event.getCurrentPage() == getPage(wizardHandle)){
+				if (event.getCurrentPage() == getPage(wizardHandle)) {
 					if (event.getTargetPage() == null
 							|| event.getTargetPage().equals(getPage(wizardHandle).getNextPage())) {
-						connectionPage.onPageWillGetDeactivated(Direction.FORWARDS, event);							
+						connectionPage.onPageWillGetDeactivated(Direction.FORWARDS, event);
 					} else {
 						connectionPage.onPageWillGetDeactivated(Direction.BACKWARDS, event);
 					}
-					
+
 					IConnection connection = connectionPage.getConnection();
 					if (connection instanceof Connection) {
 						OpenShiftServerTaskModelAccessor.set((Connection) connection, getTaskModel());
@@ -109,7 +109,7 @@ public class ConnectionWizardFragment extends WizardFragment {
 	private IWizardPage getPage(IWizardHandle wizardHandle) {
 		return (IWizardPage) wizardHandle;
 	}
-	
+
 	private WizardDialog getContainer(IWizardPage wizardPage) {
 		return (WizardDialog) wizardPage.getWizard().getContainer();
 	}
@@ -119,9 +119,10 @@ public class ConnectionWizardFragment extends WizardFragment {
 		private IWizardHandle wizardHandle;
 
 		private WrappedConnectionWizardPage(IWizardHandle wizardHandle) {
-			super(((IWizardPage) wizardHandle).getWizard(), new ConnectionWizardModel(Connection.class), Connection.class);
+			super(((IWizardPage) wizardHandle).getWizard(), new ConnectionWizardModel(Connection.class),
+					Connection.class);
 			this.wizardHandle = wizardHandle;
-			if(connectionChangeListener != null) {
+			if (connectionChangeListener != null) {
 				getModel().addPropertyChangeListener(connectionChangeListener);
 			}
 		}

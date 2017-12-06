@@ -26,11 +26,11 @@ import com.openshift.client.SSHPublicKey;
 public class AddSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 
 	public static final String PROPERTY_PUBLICKEY_PATH = "publicKeyPath";
-	
+
 	private String keyPath;
 
 	private IOpenShiftSSHKey key;
-	
+
 	public AddSSHKeyWizardPageModel(ExpressConnection user) {
 		super(user);
 	}
@@ -51,8 +51,8 @@ public class AddSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 	@Override
 	public boolean hasPublicKey(String publicKeyContent) {
 		return getConnection().hasSSHPublicKey(publicKeyContent);
-	}	
-	
+	}
+
 	@Override
 	public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException {
 		return this.key = getConnection().putSSHKey(getName(), new SSHPublicKey(getPublicKey()));
@@ -63,4 +63,3 @@ public class AddSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		return key;
 	}
 }
-

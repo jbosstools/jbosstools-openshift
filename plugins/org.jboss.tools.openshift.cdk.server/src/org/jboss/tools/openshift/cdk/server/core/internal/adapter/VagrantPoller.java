@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
 import java.io.File;
@@ -46,27 +46,25 @@ public class VagrantPoller extends AbstractCDKPoller {
 
 	protected void launchThread() {
 		launchThread("CDK Vagrant Poller");
-	}	
+	}
 
 	protected Map<String, String> createEnvironment(IServer server) {
 		return CDKLaunchEnvironmentUtil.createEnvironment(server);
 	}
-	
+
 	@Override
 	public int getTimeoutBehavior() {
 		return TIMEOUT_BEHAVIOR_FAIL;
 	}
 
-	
 	private File getWorkingDirectory(IServer s) throws PollingException {
-		String str = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);
-		if( str != null && new File(str).exists()) {
+		String str = s.getAttribute(CDKServer.PROP_FOLDER, (String) null);
+		if (str != null && new File(str).exists()) {
 			return new File(str);
 		}
-		throw  new PollingException("Working Directory not found: " + str);
+		throw new PollingException("Working Directory not found: " + str);
 	}
-		
-	
+
 	protected IStatus onePing(IServer server, Map<String, String> env)
 			throws PollingException, IOException, TimeoutException {
 
@@ -74,12 +72,12 @@ public class VagrantPoller extends AbstractCDKPoller {
 				CDKConstants.VAGRANT_FLAG_NO_COLOR };
 		String vagrantcmdloc = VagrantBinaryUtility.getVagrantLocation(server);
 		try {
-			String[] lines = CDKLaunchUtility.callMachineReadable(
-					vagrantcmdloc, args, getWorkingDirectory(server), env);
+			String[] lines = CDKLaunchUtility.callMachineReadable(vagrantcmdloc, args, getWorkingDirectory(server),
+					env);
 			IStatus vmStatus = parseOutput(lines);
 			if (vmStatus.isOK()) {
 				// throws OpenShiftNotReadyPollingException on failure
-				checkOpenShiftHealth(server, 4000); 
+				checkOpenShiftHealth(server, 4000);
 			}
 			return vmStatus;
 		} catch (CommandTimeoutException vte) {
@@ -99,51 +97,55 @@ public class VagrantPoller extends AbstractCDKPoller {
 	}
 
 	private boolean checkOpenShiftHealth(IServer server, int timeout) throws OpenShiftNotReadyPollingException {
-		ServiceManagerEnvironment adb = ServiceManagerEnvironmentLoader.type(server).getOrLoadServiceManagerEnvironment(server, true);
-		if( adb == null ) {
+		ServiceManagerEnvironment adb = ServiceManagerEnvironmentLoader.type(server)
+				.getOrLoadServiceManagerEnvironment(server, true);
+		if (adb == null) {
 			return false;
 		}
 		String url = adb.getOpenShiftHost() + ":" + adb.getOpenShiftPort();
 		return checkOpenShiftHealth(url, timeout);
 	}
-	protected boolean checkOpenShiftHealth(String url,  int timeout) throws OpenShiftNotReadyPollingException {
-		ISSLCertificateCallback sslCallback = new LazySSLCertificateCallback(); 
-		IClient client = new ClientBuilder(url)
-				.sslCertificateCallback(sslCallback)
-				.withConnectTimeout(timeout, TimeUnit.MILLISECONDS)
-				.build();
-   	
-    	Exception e = null;
-    	try {
-    		if( "ok".equals(client.getServerReadyStatus()))
-    			return true;
-    	} catch(OpenShiftException ex) {
-    		e = ex;
-    	}
 
-    	String msg = NLS.bind("The CDK VM is up and running, but OpenShift is unreachable at url {0}. " + 
-    	"The VM may not have been registered successfully. Please check your console output for more information", url);
-		throw new OpenShiftNotReadyPollingException(CDKCoreActivator.statusFactory().errorStatus(CDKCoreActivator.PLUGIN_ID,
-				msg, e, OpenShiftNotReadyPollingException.OPENSHIFT_UNREACHABLE_CODE));
+	protected boolean checkOpenShiftHealth(String url, int timeout) throws OpenShiftNotReadyPollingException {
+		ISSLCertificateCallback sslCallback = new LazySSLCertificateCallback();
+		IClient client = new ClientBuilder(url).sslCertificateCallback(sslCallback)
+				.withConnectTimeout(timeout, TimeUnit.MILLISECONDS).build();
+
+		Exception e = null;
+		try {
+			if ("ok".equals(client.getServerReadyStatus()))
+				return true;
+		} catch (OpenShiftException ex) {
+			e = ex;
+		}
+
+		String msg = NLS.bind(
+				"The CDK VM is up and running, but OpenShift is unreachable at url {0}. "
+						+ "The VM may not have been registered successfully. Please check your console output for more information",
+				url);
+		throw new OpenShiftNotReadyPollingException(CDKCoreActivator.statusFactory().errorStatus(
+				CDKCoreActivator.PLUGIN_ID, msg, e, OpenShiftNotReadyPollingException.OPENSHIFT_UNREACHABLE_CODE));
 	}
-	
+
 	private class VagrantStatus implements CDKConstants {
-		
+
 		private HashMap<String, String> kv;
 		private String id;
+
 		public VagrantStatus(String vmId) {
 			this.id = vmId;
 			this.kv = new HashMap<>();
 		}
+
 		public void setProperty(String k, String v) {
 			kv.put(k, v);
 		}
+
 		public String getState() {
 			return kv.get(STATE);
 		}
 	}
-	
-	
+
 	protected IStatus parseOutput(String[] lines) {
 		Map<String, VagrantStatus> status = new HashMap<>();
 		if (lines != null && lines.length > 0) {
@@ -166,25 +168,26 @@ public class VagrantPoller extends AbstractCDKPoller {
 						}
 					}
 				} //else {
-				  // The given line isn't csv or doesn't have at least 2 items in the csv array
-				  // and so should be ignored
-				  //return IStatus.INFO;
-				  //}
+					// The given line isn't csv or doesn't have at least 2 items in the csv array
+					// and so should be ignored
+					//return IStatus.INFO;
+					//}
 			}
-		}		
+		}
 		Collection<VagrantStatus> stats = status.values();
-		if( stats.isEmpty() ) {
+		if (stats.isEmpty()) {
 			return CDKCoreActivator.statusFactory().errorStatus("Unable to retrieve vagrant status for the given CDK");
 		}
-		if( allRunning(stats)) {
+		if (allRunning(stats)) {
 			return Status.OK_STATUS;
 		}
-		if( allStopped(stats)) {
-			return CDKCoreActivator.statusFactory().errorStatus("Vagrant status indicates the CDK is stopped: " + String.join("\n", Arrays.asList(lines)));
+		if (allStopped(stats)) {
+			return CDKCoreActivator.statusFactory().errorStatus(
+					"Vagrant status indicates the CDK is stopped: " + String.join("\n", Arrays.asList(lines)));
 		}
-		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID, "Vagrant status indicates the CDK is starting.");
+		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID,
+				"Vagrant status indicates the CDK is starting.");
 	}
-
 
 	private VagrantStatus getVagrantStatus(Map<String, VagrantStatus> status, String vmId) {
 		VagrantStatus vs = status.get(vmId);
@@ -194,7 +197,6 @@ public class VagrantPoller extends AbstractCDKPoller {
 		}
 		return vs;
 	}
-
 
 	private IStatus createErrorStatus(String[] csv) {
 		IStatus s = null;
@@ -207,12 +209,12 @@ public class VagrantPoller extends AbstractCDKPoller {
 		CDKCoreActivator.pluginLog().logError("Unable to access CDK status via vagrant status.", new CoreException(s));
 		return s;
 	}
-	
+
 	private boolean allRunning(Collection<VagrantStatus> stats) {
 		List<String> on = Arrays.asList(getValidRunningStates());
 		Iterator<VagrantStatus> i = stats.iterator();
-		while(i.hasNext()) {
-			if( !on.contains(i.next().getState())) {
+		while (i.hasNext()) {
+			if (!on.contains(i.next().getState())) {
 				return false;
 			}
 		}
@@ -220,20 +222,21 @@ public class VagrantPoller extends AbstractCDKPoller {
 	}
 
 	private String[] getValidRunningStates() {
-		return new String[]{VagrantStatus.STATE_RUNNING};
+		return new String[] { VagrantStatus.STATE_RUNNING };
 	}
 
 	private String[] getValidStoppedStates() {
-		return new String[]{VagrantStatus.STATE_SHUTOFF, VagrantStatus.STATE_POWEROFF, VagrantStatus.STATE_NOT_CREATED};
+		return new String[] { VagrantStatus.STATE_SHUTOFF, VagrantStatus.STATE_POWEROFF,
+				VagrantStatus.STATE_NOT_CREATED };
 	}
 
 	private boolean allStopped(Collection<VagrantStatus> stats) {
 		List<String> off = Arrays.asList(getValidStoppedStates());
 		Iterator<VagrantStatus> i = stats.iterator();
 		VagrantStatus tmp;
-		while(i.hasNext()) {
+		while (i.hasNext()) {
 			tmp = i.next();
-			if( !off.contains(tmp.getState())) {
+			if (!off.contains(tmp.getState())) {
 				return false;
 			}
 		}

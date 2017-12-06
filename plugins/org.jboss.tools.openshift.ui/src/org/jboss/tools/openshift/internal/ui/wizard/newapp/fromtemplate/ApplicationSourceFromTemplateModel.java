@@ -53,66 +53,60 @@ import com.openshift.restclient.model.template.ITemplate;
  * @author jeff.cantrill
  *
  */
-public class ApplicationSourceFromTemplateModel 
-	extends ResourceLabelsPageModel 
-	implements IResourceDetailsModel, ITemplateParametersPageModel, IApplicationSourceModel {
+public class ApplicationSourceFromTemplateModel extends ResourceLabelsPageModel
+		implements IResourceDetailsModel, ITemplateParametersPageModel, IApplicationSourceModel {
 
 	//intentionally package local, facilitates refresh of widgets in TemplateParametersPage
 	static final String PROPERTY_MODIFIED_PARAMETER = "modifiedParameter";
-	
+
 	private IProject project;
 	private ITemplate template;
 	private List<IParameter> parameters = new ArrayList<>();
 	private IParameter selectedParameter;
 	private Map<String, String> originalValueMap;
-	private Collection<IResource> items = new ArrayList<>(); 
+	private Collection<IResource> items = new ArrayList<>();
 	private org.eclipse.core.resources.IProject eclipseProject;
 
 	@Override
 	public IResourcesModelJob createFinishJob() {
 		return new AppFromTemplateJob();
 	}
-	
-	class AppFromTemplateJob implements IResourcesModelJob{
-		
+
+	class AppFromTemplateJob implements IResourcesModelJob {
+
 		private final CreateApplicationFromTemplateJob job;
-		
-		AppFromTemplateJob(){
-			job = new CreateApplicationFromTemplateJob(
-					project,
-					template,
-					getParameters(),
-					getLabels());
+
+		AppFromTemplateJob() {
+			job = new CreateApplicationFromTemplateJob(project, template, getParameters(), getLabels());
 		}
-		
+
 		@Override
 		public Collection<IResource> getResources() {
 			return job.getResources();
 		}
-		
+
 		@Override
 		public Runnable getSummaryRunnable(final Shell shell) {
 			return new Runnable() {
 				@Override
 				public void run() {
-					final String message = NLS.bind(
-							"Results of creating the resources from the {0} template.", 
+					final String message = NLS.bind("Results of creating the resources from the {0} template.",
 							template.getName());
 					new NewApplicationSummaryFromTemplateDialog(shell, job, message).open();
 				}
 			};
 		}
-		
+
 		@Override
 		public Job getJob() {
 			return job;
 		}
-		
+
 		@Override
 		public DelegatingProgressMonitor getDelegatingProgressMonitor() {
 			return job.getDelegatingProgressMonitor();
 		}
-		
+
 		@Override
 		public void addJobChangeListener(IJobChangeListener listener) {
 			job.addJobChangeListener(listener);
@@ -122,7 +116,7 @@ public class ApplicationSourceFromTemplateModel
 	@SuppressWarnings("unchecked")
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		switch(evt.getPropertyName()) {
+		switch (evt.getPropertyName()) {
 		case IResourceLabelsPageModel.PROPERTY_LABELS:
 			setLabels((List<Label>) evt.getNewValue());
 			break;
@@ -137,23 +131,24 @@ public class ApplicationSourceFromTemplateModel
 			break;
 		}
 	}
-	
+
 	private void handleSelectedAppSource(PropertyChangeEvent evt) {
-		if(evt.getNewValue() instanceof IApplicationSource
-				&& ResourceKind.TEMPLATE.equals(((IApplicationSource) evt.getNewValue()).getKind())){
+		if (evt.getNewValue() instanceof IApplicationSource
+				&& ResourceKind.TEMPLATE.equals(((IApplicationSource) evt.getNewValue()).getKind())) {
 			IApplicationSource source = (IApplicationSource) evt.getNewValue();
 			ITemplate newTemplate = (ITemplate) source.getSource();
 			if (!Objects.equals(newTemplate, this.template)) {
 				this.template = newTemplate;
 				updateTemplateParameters(newTemplate);
 			}
-		} 
+		}
 	}
+
 	private void handleEclipseProject(PropertyChangeEvent evt) {
-		if(evt.getNewValue() instanceof org.eclipse.core.resources.IProject) {
+		if (evt.getNewValue() instanceof org.eclipse.core.resources.IProject) {
 			this.eclipseProject = (org.eclipse.core.resources.IProject) evt.getNewValue();
 			updateTemplateParameters(template);
-		} 
+		}
 	}
 
 	@Override
@@ -181,7 +176,7 @@ public class ApplicationSourceFromTemplateModel
 
 	public boolean isParameterModified(IParameter param) {
 		return param != null && originalValueMap != null
-			&& !Objects.equals(param.getValue(), originalValueMap.get(param.getName()));
+				&& !Objects.equals(param.getValue(), originalValueMap.get(param.getName()));
 	}
 
 	@Override
@@ -206,21 +201,22 @@ public class ApplicationSourceFromTemplateModel
 	private Map<String, String> toMap(Collection<IParameter> parameters) {
 		Map<String, String> paramsMap = new HashMap<>();
 		if (parameters != null) {
-		  parameters.forEach(p -> paramsMap.put(p.getName(), p.getValue()));
+			parameters.forEach(p -> paramsMap.put(p.getName(), p.getValue()));
 		}
 		return paramsMap;
 	}
 
-	private Collection<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project, Collection<IParameter> originalParameters) {
+	private Collection<IParameter> injectProjectParameters(org.eclipse.core.resources.IProject project,
+			Collection<IParameter> originalParameters) {
 		if (originalParameters == null || originalParameters.isEmpty()) {
 			return originalParameters;
 		}
 		Map<String, String> projectParams = getProjectParameters(project);
 
-		originalParameters = originalParameters.stream().map(p -> { 
+		originalParameters = originalParameters.stream().map(p -> {
 			String value = projectParams.get(p.getName());
 			if (value != null) {
-			    p = p.clone();
+				p = p.clone();
 				p.setValue(value);
 			}
 			return p;
@@ -230,20 +226,20 @@ public class ApplicationSourceFromTemplateModel
 	}
 
 	private Map<String, String> getProjectParameters(org.eclipse.core.resources.IProject project) {
-		if(project == null) {
+		if (project == null) {
 			return Collections.emptyMap();
 		}
 
-		Map<String,String> projectParams = new HashMap<>();
+		Map<String, String> projectParams = new HashMap<>();
 		String gitRepo = getGitRepo(project);
 		if (gitRepo != null) {
 			projectParams.put(PARAMETER_SOURCE_REPOSITORY_URL, gitRepo);
 			projectParams.put(PARAMETER_GIT_URI, gitRepo);//legacy key
-			
+
 			String branch = getGitBranch(project);
 			projectParams.put("SOURCE_REPOSITORY_REF", branch);
 			projectParams.put("GIT_REF", branch);//legacy key
-			
+
 			//Setting the context dir is a really bad idea if we're dealing with a multi module project
 			//Better let the user do it manually if needed.
 			//String contextDir = getDefaultContextDir(project);
@@ -258,7 +254,8 @@ public class ApplicationSourceFromTemplateModel
 		try {
 			return StringUtils.defaultString(EGitUtils.getCurrentBranch(project));
 		} catch (CoreException e) {
-			throw new OpenShiftException(e, NLS.bind("Could not determine the default Git branch for \"{0}\"", project.getName()));
+			throw new OpenShiftException(e,
+					NLS.bind("Could not determine the default Git branch for \"{0}\"", project.getName()));
 		}
 	}
 
@@ -266,7 +263,8 @@ public class ApplicationSourceFromTemplateModel
 		try {
 			return StringUtils.defaultString(EGitUtils.getDefaultRemoteRepo(project));
 		} catch (CoreException e) {
-			throw new OpenShiftException(e, NLS.bind("Could not determine the default remote Git repository for \"{0}\"", project.getName()));
+			throw new OpenShiftException(e,
+					NLS.bind("Could not determine the default remote Git repository for \"{0}\"", project.getName()));
 		}
 	}
 
@@ -276,8 +274,7 @@ public class ApplicationSourceFromTemplateModel
 	}
 
 	private IParameter getSelectedParameterOrDefault() {
-		if (selectedParameter == null
-				|| !parameters.contains(selectedParameter)) {
+		if (selectedParameter == null || !parameters.contains(selectedParameter)) {
 			if (CollectionUtils.isEmpty(parameters)) {
 				return null;
 			} else {
@@ -312,9 +309,10 @@ public class ApplicationSourceFromTemplateModel
 	}
 
 	private void setLabels(Map<String, String> labelMap) {
-		if(labelMap == null) return;
-		List<Label> labels =  new ArrayList<>(labelMap.size());
-		for (Entry<String,String> entry : labelMap.entrySet()) {
+		if (labelMap == null)
+			return;
+		List<Label> labels = new ArrayList<>(labelMap.size());
+		for (Entry<String, String> entry : labelMap.entrySet()) {
 			labels.add(new Label(entry.getKey(), entry.getValue()));
 		}
 		setLabels(labels);
@@ -327,7 +325,7 @@ public class ApplicationSourceFromTemplateModel
 		template = null;
 		parameters.clear();
 		selectedParameter = null;
-		if(originalValueMap != null) {
+		if (originalValueMap != null) {
 			originalValueMap.clear();
 		}
 		items.clear();

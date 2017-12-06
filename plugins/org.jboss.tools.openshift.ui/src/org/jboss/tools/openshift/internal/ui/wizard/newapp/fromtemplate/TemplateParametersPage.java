@@ -77,13 +77,11 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 	public static final String PAGE_NAME = "Template Parameter Page";
 	private ITemplateParametersPageModel model;
 	private TableViewer viewer;
-	
+
 	private static final String CELL_NOT_PARAMETER_ERROR = "cell element is not a IParameter";
 
 	public TemplateParametersPage(IWizard wizard, ITemplateParametersPageModel model) {
-		super("Template Parameters", 
-				"Edit the parameter values to be substituted into the template.", 
-				PAGE_NAME, 
+		super("Template Parameters", "Edit the parameter values to be substituted into the template.", PAGE_NAME,
 				wizard);
 		this.model = model;
 	}
@@ -91,103 +89,85 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults()
-			.numColumns(2).margins(10, 10)
-			.applyTo(container);
-		
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).applyTo(container);
+
 		// parameters table
 		Composite tableContainer = new Composite(container, SWT.NONE);
-		IObservableList<IParameter> parametersObservable = 
-				BeanProperties.list(ITemplateParametersPageModel.PROPERTY_PARAMETERS).observe(model);
+		IObservableList<IParameter> parametersObservable = BeanProperties
+				.list(ITemplateParametersPageModel.PROPERTY_PARAMETERS).observe(model);
 		this.viewer = createTable(tableContainer, parametersObservable, dbc);
-		GridDataFactory.fillDefaults()
-				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300)
+				.applyTo(tableContainer);
 		viewer.setInput(parametersObservable);
-		IObservableValue<IParameter> selectedParameter = 
-				BeanProperties.value(ITemplateParametersPageModel.PROPERTY_SELECTED_PARAMETER).observe(model);
-		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(selectedParameter)
-				.in(dbc);
+		IObservableValue<IParameter> selectedParameter = BeanProperties
+				.value(ITemplateParametersPageModel.PROPERTY_SELECTED_PARAMETER).observe(model);
+		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer)).to(selectedParameter).in(dbc);
 		viewer.addDoubleClickListener(onDoubleClick());
 
 		// edit button
 		Button editExistingButton = new Button(container, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
 		UIUtils.setDefaultButtonWidth(editExistingButton);
 		editExistingButton.addSelectionListener(onEdit());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(editExistingButton))
-				.notUpdatingParticipant()
-				.to(selectedParameter)
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(editExistingButton)).notUpdatingParticipant()
+				.to(selectedParameter).converting(new IsNotNull2BooleanConverter()).in(dbc);
 
 		// reset button
 		Button resetButton = new Button(container, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(resetButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(resetButton);
 		resetButton.setText("Reset");
 		UIUtils.setDefaultButtonWidth(resetButton);
 		resetButton.addSelectionListener(onReset());
-		ValueBindingBuilder
-		.bind(WidgetProperties.enabled().observe(resetButton))
-		.notUpdatingParticipant()
-		.to(selectedParameter)
-		.converting(new IsNotNull2BooleanConverter() {
-			@Override
-			public Object convert(Object fromObject) {
-				return fromObject instanceof IParameter
-						&& ((ApplicationSourceFromTemplateModel)model).isParameterModified((IParameter)fromObject);
-			}
-		})
-		.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(resetButton)).notUpdatingParticipant()
+				.to(selectedParameter).converting(new IsNotNull2BooleanConverter() {
+					@Override
+					public Object convert(Object fromObject) {
+						return fromObject instanceof IParameter && ((ApplicationSourceFromTemplateModel) model)
+								.isParameterModified((IParameter) fromObject);
+					}
+				}).in(dbc);
 
 		// reset all button
 		Button resetAllButton = new Button(container, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(resetAllButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(resetAllButton);
 		resetAllButton.setText("Reset All");
 		UIUtils.setDefaultButtonWidth(resetAllButton);
 		resetAllButton.addSelectionListener(onResetAll());
-		ValueBindingBuilder
-		.bind(WidgetProperties.enabled().observe(resetAllButton))
-		.notUpdatingParticipant()
-		.to(selectedParameter)
-		.converting(new IsNotNull2BooleanConverter() {
-			@Override
-			public Object convert(Object fromObject) {
-				return model.getParameters().stream().anyMatch(p -> ((ApplicationSourceFromTemplateModel)model).isParameterModified(p));
-			}
-		})
-		.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(resetAllButton)).notUpdatingParticipant()
+				.to(selectedParameter).converting(new IsNotNull2BooleanConverter() {
+					@Override
+					public Object convert(Object fromObject) {
+						return model.getParameters().stream()
+								.anyMatch(p -> ((ApplicationSourceFromTemplateModel) model).isParameterModified(p));
+					}
+				}).in(dbc);
 
 		// required explanation
 		Label requiredExplanationLabel = new Label(container, SWT.None);
-		requiredExplanationLabel.setText("* = value required, click the 'Edit...' button or double-click on a value to edit it.");
-		GridDataFactory.fillDefaults()
-			.grab(true, false).align(SWT.FILL, SWT.FILL).span(2,1).applyTo(requiredExplanationLabel);
+		requiredExplanationLabel
+				.setText("* = value required, click the 'Edit...' button or double-click on a value to edit it.");
+		GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.FILL).span(2, 1)
+				.applyTo(requiredExplanationLabel);
 
 		// selected parameter details
 		final Group detailsContainer = new Group(container, SWT.NONE);
 		detailsContainer.setText("Details");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).span(2,1).hint(SWT.DEFAULT, 106)
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(2, 1).hint(SWT.DEFAULT, 106)
 				.applyTo(detailsContainer);
-		new TemplateParameterDetailViews(selectedParameter, detailsContainer, dbc)
-				.createControls();
-		((ApplicationSourceFromTemplateModel)model).addPropertyChangeListener(new PropertyChangeListener() {
+		new TemplateParameterDetailViews(selectedParameter, detailsContainer, dbc).createControls();
+		((ApplicationSourceFromTemplateModel) model).addPropertyChangeListener(new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				if(ApplicationSourceFromTemplateModel.PROPERTY_MODIFIED_PARAMETER.equals(evt.getPropertyName())) {
+				if (ApplicationSourceFromTemplateModel.PROPERTY_MODIFIED_PARAMETER.equals(evt.getPropertyName())) {
 					viewer.refresh(evt.getNewValue());
 				}
 			}
 		});
 	}
 
-	private IListChangeListener<IParameter> onParametersChanged(final TableViewerCellDecorationManager cellDecorations, final ObservableMap<String, IStatus> validationStatusByParameter) {
+	private IListChangeListener<IParameter> onParametersChanged(final TableViewerCellDecorationManager cellDecorations,
+			final ObservableMap<String, IStatus> validationStatusByParameter) {
 		return new IListChangeListener<IParameter>() {
 
 			@Override
@@ -209,33 +189,33 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 			}
 		};
 	}
-	
-	public TableViewer createTable(final Composite tableContainer, IObservableList<IParameter> parametersObservable, DataBindingContext dbc) {
-		final Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+
+	public TableViewer createTable(final Composite tableContainer, IObservableList<IParameter> parametersObservable,
+			DataBindingContext dbc) {
+		final Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
-		Image decorationImage = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
-		final ObservableMap<String, IStatus> cellsValidationStatusObservable = new WritableMap<>(String.class, IStatus.class);
-		final TableViewerCellDecorationManager decorations = new TableViewerCellDecorationManager(decorationImage, table);
-		DataBindingUtils.addDisposableListChangeListener(
-				onParametersChanged(decorations, cellsValidationStatusObservable), 
-				parametersObservable, 
+		Image decorationImage = FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
+		final ObservableMap<String, IStatus> cellsValidationStatusObservable = new WritableMap<>(String.class,
+				IStatus.class);
+		final TableViewerCellDecorationManager decorations = new TableViewerCellDecorationManager(decorationImage,
 				table);
+		DataBindingUtils.addDisposableListChangeListener(
+				onParametersChanged(decorations, cellsValidationStatusObservable), parametersObservable, table);
 		TableViewer viewer = buildTableViewer(table, tableContainer, cellsValidationStatusObservable, decorations);
 		viewer.setComparator(new TemplateParameterViewerUtils.ParameterNameViewerComparator());
 		viewer.setContentProvider(new ObservableListContentProvider());
 
 		// cells validity
 		dbc.addValidationStatusProvider(new MultiValidator() {
-			
+
 			@Override
 			protected IStatus validate() {
-				for (Iterator<IStatus> iterator = 
-						(Iterator<IStatus>) cellsValidationStatusObservable.values().iterator(); iterator.hasNext(); ) {
+				for (Iterator<IStatus> iterator = (Iterator<IStatus>) cellsValidationStatusObservable.values()
+						.iterator(); iterator.hasNext();) {
 					IStatus cellValidationStatus = iterator.next();
-					if (cellValidationStatus != null
-							&& !cellValidationStatus.isOK()) {
+					if (cellValidationStatus != null && !cellValidationStatus.isOK()) {
 						return cellValidationStatus;
 					}
 				}
@@ -244,99 +224,86 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		});
 		return viewer;
 	}
-	
+
 	private TableViewer buildTableViewer(Table table, Composite tableContainer,
 			ObservableMap<String, IStatus> cellsValidationStatusObservable,
 			TableViewerCellDecorationManager decorations) {
 		final TableViewerBuilder builder = new TableViewerBuilder(table, tableContainer);
-		TableViewer viewer = builder
-				.contentProvider(new ArrayContentProvider())
-				.column(new CellLabelProvider() {
-							
-							@Override
-							public void update(ViewerCell cell) {
-								Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+		TableViewer viewer = builder.contentProvider(new ArrayContentProvider()).column(new CellLabelProvider() {
 
-								IParameter parameter = (IParameter) cell.getElement();
-								String label = parameter.getName();
-								if (parameter.isRequired()) {
-									label = markRequired(label);
-								}
-								cell.setText(label);
-							}
+			@Override
+			public void update(ViewerCell cell) {
+				Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
 
-							private String markRequired(String label) {
-								return label += " *";
-							}
+				IParameter parameter = (IParameter) cell.getElement();
+				String label = parameter.getName();
+				if (parameter.isRequired()) {
+					label = markRequired(label);
+				}
+				cell.setText(label);
+			}
 
-							@Override
-							public String getToolTipText(Object object) {
-								Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+			private String markRequired(String label) {
+				return label += " *";
+			}
 
-								return ((IParameter) object).getDescription();
-							}
+			@Override
+			public String getToolTipText(Object object) {
+				Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
 
-							@Override
-							public int getToolTipDisplayDelayTime(Object object) {
-								return 0;
-							}
-					})
-					.name("Name")
-					.align(SWT.LEFT)
-					.weight(1)
-					.minWidth(180)
-					.buildColumn()
-				.column(new CellLabelProvider() {
+				return ((IParameter) object).getDescription();
+			}
 
-							@Override
-							public void update(ViewerCell cell) {
-								Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+			@Override
+			public int getToolTipDisplayDelayTime(Object object) {
+				return 0;
+			}
+		}).name("Name").align(SWT.LEFT).weight(1).minWidth(180).buildColumn().column(new CellLabelProvider() {
 
-								final IParameter parameter = (IParameter) cell.getElement();
-								String label = TemplateParameterViewerUtils.getValueLabel(parameter);
-								cell.setText(label);
+			@Override
+			public void update(ViewerCell cell) {
+				Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
 
-								boolean italic = ((ApplicationSourceFromTemplateModel)model).isParameterModified(parameter);
-								builder.applyFont(cell, italic);
+				final IParameter parameter = (IParameter) cell.getElement();
+				String label = TemplateParameterViewerUtils.getValueLabel(parameter);
+				cell.setText(label);
 
-								IStatus validationStatus = validate(parameter);
-								cellsValidationStatusObservable.put(parameter.getName(), validationStatus);
-								decorations.toggle(!validationStatus.isOK(), cell);
-							}
+				boolean italic = ((ApplicationSourceFromTemplateModel) model).isParameterModified(parameter);
+				builder.applyFont(cell, italic);
 
-							private IStatus validate(IParameter parameter) {
-								if (parameter.isRequired()) {
-									if (StringUtils.isEmpty(parameter.getValue())
-													&& StringUtils.isEmpty(parameter.getGeneratorName())) {
-										return ValidationStatus.error(
-												NLS.bind("Parameter {0} is required, please provide a value.", parameter.getName()));
-									}
-								} 
-								IStatus status = gitSourceValidator.validate(parameter);
-								if(!status.isOK()) {
-									return status;
-								}
-								return ValidationStatus.ok();
-							}
+				IStatus validationStatus = validate(parameter);
+				cellsValidationStatusObservable.put(parameter.getName(), validationStatus);
+				decorations.toggle(!validationStatus.isOK(), cell);
+			}
 
-							@Override
-							public String getToolTipText(Object object) {
-								Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+			private IStatus validate(IParameter parameter) {
+				if (parameter.isRequired()) {
+					if (StringUtils.isEmpty(parameter.getValue())
+							&& StringUtils.isEmpty(parameter.getGeneratorName())) {
+						return ValidationStatus.error(
+								NLS.bind("Parameter {0} is required, please provide a value.", parameter.getName()));
+					}
+				}
+				IStatus status = gitSourceValidator.validate(parameter);
+				if (!status.isOK()) {
+					return status;
+				}
+				return ValidationStatus.ok();
+			}
 
-								return ((IParameter) object).getDescription();
-							}
+			@Override
+			public String getToolTipText(Object object) {
+				Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
 
-							@Override
-							public int getToolTipDisplayDelayTime(Object object) {
-								return 0;
-							}
+				return ((IParameter) object).getDescription();
+			}
 
-						})
-						.name("Value")
-						.align(SWT.LEFT)
-						.weight(1)
-						.buildColumn()
-			.buildViewer();
+			@Override
+			public int getToolTipDisplayDelayTime(Object object) {
+				return 0;
+			}
+
+		}).name("Value").align(SWT.LEFT).weight(1).buildColumn().buildViewer();
 		return viewer;
 	}
 
@@ -353,7 +320,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 	 */
 	class GitSourceValidator implements IValidator {
 		private IParameter parameter;
-	
+
 		public void setParameter(IParameter parameter) {
 			this.parameter = parameter;
 		}
@@ -362,19 +329,19 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		public IStatus validate(Object value) {
 			IParameter parameter = null;
 			String paramaterValue = null;
-			if(value instanceof IParameter) {
+			if (value instanceof IParameter) {
 				//The case in cell editor
-				parameter = (IParameter)value;
+				parameter = (IParameter) value;
 				paramaterValue = parameter.getValue();
-			} else if(value instanceof String) {
+			} else if (value instanceof String) {
 				//The case in edit dialog
 				parameter = this.parameter;
-				paramaterValue = (String)value;
+				paramaterValue = (String) value;
 			}
-			if(parameter != null && !StringUtils.isEmpty(paramaterValue)) {
+			if (parameter != null && !StringUtils.isEmpty(paramaterValue)) {
 				String message = validateGitSource(parameter.getName(), paramaterValue);
-				if(message != null) {
-					if(parameter.isRequired()) {
+				if (message != null) {
+					if (parameter.isRequired()) {
 						return ValidationStatus.error(message);
 					} else {
 						//Normally, git source url parameter should be marked as required,
@@ -385,17 +352,16 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 			}
 			return ValidationStatus.ok();
 		}
-		
+
 		private String validateGitSource(String name, String value) {
-			if(StringUtils.isEmpty(value)) {
+			if (StringUtils.isEmpty(value)) {
 				return null;
 			}
-			if(isGitSourceParameterName(name)) {
-				if(!UrlUtils.isValid(value)) {
+			if (isGitSourceParameterName(name)) {
+				if (!UrlUtils.isValid(value)) {
 					return NLS.bind("Parameter {0} is not a valid URL.", name);
 				}
-				if(!value.startsWith("http://")
-						&& !value.startsWith("https://")) {
+				if (!value.startsWith("http://") && !value.startsWith("https://")) {
 					return NLS.bind("Parameter {0} should be an http(s) connection.", name);
 				}
 			}
@@ -403,7 +369,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		}
 
 	}
-	
+
 	private SelectionListener onEdit() {
 		return new SelectionAdapter() {
 			@Override
@@ -414,13 +380,10 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private void openEditDialog(final IParameter parameter) {
-		EditValueDialog dialog = new EditValueDialog(getShell(), 
-				"Edit Template Parameter",
-				NLS.bind("Please enter a value for {0}.\n{1}", parameter.getName(), parameter.getDescription()), 
-				parameter.getName(), 
-				parameter.getValue(), 
-				parameter.isRequired());
-		if(isGitSourceParameterName(parameter.getName())) {
+		EditValueDialog dialog = new EditValueDialog(getShell(), "Edit Template Parameter",
+				NLS.bind("Please enter a value for {0}.\n{1}", parameter.getName(), parameter.getDescription()),
+				parameter.getName(), parameter.getValue(), parameter.isRequired());
+		if (isGitSourceParameterName(parameter.getName())) {
 			GitSourceValidator valueValidator = new GitSourceValidator();
 			valueValidator.setParameter(parameter);
 			dialog.setValueValidator(valueValidator);
@@ -443,11 +406,11 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				model.getParameters().stream().forEach(p  -> model.resetParameter(p));
+				model.getParameters().stream().forEach(p -> model.resetParameter(p));
 			}
 		};
 	}
-	
+
 	private IParameter getSelectedParameter() {
 		return (IParameter) viewer.getStructuredSelection().getFirstElement();
 	}

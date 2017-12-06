@@ -52,7 +52,7 @@ public class TableViewerCellDecorationManager {
 			hide(cell);
 		}
 	}
-	
+
 	public void show(ViewerCell cell) {
 		TableEditor editor = decorationByCell.get(cell);
 		if (editor == null) {
@@ -87,7 +87,7 @@ public class TableViewerCellDecorationManager {
 		}
 		decorationByCell.clear();
 	}
-	
+
 	private Control createDecoration(Image image, Table table) {
 		Label validationDecoration = new Label(table, SWT.None);
 		validationDecoration.setImage(image);

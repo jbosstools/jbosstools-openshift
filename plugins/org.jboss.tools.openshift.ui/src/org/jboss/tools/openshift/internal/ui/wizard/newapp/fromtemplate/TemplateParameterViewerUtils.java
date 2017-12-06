@@ -30,10 +30,10 @@ public class TemplateParameterViewerUtils {
 		if (parameter == null) {
 			return null;
 		}
-		
+
 		boolean hasGenerator = isNotBlank(parameter.getGeneratorName());
 		boolean hasValue = isNotBlank(parameter.getValue());
-		if(hasGenerator) {
+		if (hasGenerator) {
 			return hasValue ? parameter.getValue() : "(generated)";
 		}
 		return defaultIfBlank(parameter.getValue(), "");

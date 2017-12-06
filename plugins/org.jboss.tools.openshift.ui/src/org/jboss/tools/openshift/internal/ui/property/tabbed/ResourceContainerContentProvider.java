@@ -21,12 +21,12 @@ public class ResourceContainerContentProvider implements IStructuredContentProvi
 	private String resourceKind;
 
 	public ResourceContainerContentProvider(String kind) {
-		this.resourceKind= kind;
+		this.resourceKind = kind;
 	}
-	
+
 	private StructuredViewer viewer;
-	private IElementListener listener= new IElementListener() {
-		
+	private IElementListener listener = new IElementListener() {
+
 		@Override
 		public void elementChanged(IOpenshiftUIElement<?, ?> element) {
 			viewer.refresh();
@@ -35,7 +35,7 @@ public class ResourceContainerContentProvider implements IStructuredContentProvi
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.viewer= (StructuredViewer) viewer;
+		this.viewer = (StructuredViewer) viewer;
 		if (oldInput instanceof IOpenshiftUIElement<?, ?>) {
 			((IOpenshiftUIElement<?, ?>) oldInput).getRoot().removeListener(listener);
 		}
@@ -43,7 +43,7 @@ public class ResourceContainerContentProvider implements IStructuredContentProvi
 			((IOpenshiftUIElement<?, ?>) newInput).getRoot().addListener(listener);
 		}
 	}
-	
+
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof IResourceContainer<?, ?>) {

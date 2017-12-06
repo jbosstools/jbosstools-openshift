@@ -39,7 +39,8 @@ public abstract class AbstractCheckEmbeddableCartridgeStrategy implements ICheck
 	private EmbeddedCartridgesWizardPageModel pageModel;
 	private IWizardPage wizardPage;
 
-	protected AbstractCheckEmbeddableCartridgeStrategy(EmbeddedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
+	protected AbstractCheckEmbeddableCartridgeStrategy(EmbeddedCartridgesWizardPageModel pageModel,
+			IWizardPage wizardPage) {
 		this.pageModel = pageModel;
 		this.wizardPage = wizardPage;
 	}
@@ -47,33 +48,28 @@ public abstract class AbstractCheckEmbeddableCartridgeStrategy implements ICheck
 	@Override
 	public void checkStateChanged(CheckStateChangedEvent event) {
 		Assert.isLegal(event.getElement() instanceof ICartridge);
-		
+
 		ICartridge cartridge = (ICartridge) event.getElement();
-		if(event.getChecked()) {
+		if (event.getChecked()) {
 			add(cartridge, event);
 		} else {
 			remove(cartridge, event);
 		}
 	}
-	
+
 	protected abstract void add(ICartridge cartridge, CheckStateChangedEvent event);
-	
+
 	protected abstract void remove(ICartridge cartridge, CheckStateChangedEvent event);
-	
+
 	protected int openQuestionDialog(String title, String message) {
-		return new MessageDialog(getShell(),
-				title,
-				null,
-				message,
-				MessageDialog.QUESTION,
-				new String[] { "No", "Yes" }, 0)
-				.open();
+		return new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { "No", "Yes" },
+				0).open();
 	}
 
 	protected EmbeddedCartridgesWizardPageModel getPageModel() {
 		return pageModel;
 	}
-	
+
 	protected Shell getShell() {
 		return wizardPage.getControl().getShell();
 	}

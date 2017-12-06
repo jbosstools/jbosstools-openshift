@@ -28,7 +28,8 @@ import org.junit.Test;
 public class ConnectionURLTest {
 
 	@Test
-	public void shouldCorrectMisplacedSchemeWithDefaultHost() throws UnsupportedEncodingException, MalformedURLException {
+	public void shouldCorrectMisplacedSchemeWithDefaultHost()
+			throws UnsupportedEncodingException, MalformedURLException {
 		// pre-conditions
 		String username = "adietish@redhat.com";
 		String schemeOnlyUrl = UrlUtils.SCHEME_HTTP;
@@ -43,14 +44,14 @@ public class ConnectionURLTest {
 		assertEquals(schemeOnlyUrl, connectionURL.getScheme());
 		assertEquals(schemeOnlyUrl + URLEncoder.encode(username, "UTF-8") + '@', connectionURL.getUrl());
 	}
-	
+
 	@Test
 	public void shouldCorrectMisplacedScheme() throws UnsupportedEncodingException, MalformedURLException {
 		// pre-conditions
 		String username = "adietish@redhat.com";
 		String scheme = UrlUtils.SCHEME_HTTP;
 		String host = "openshift.local";
-		
+
 		// operation
 		ConnectionURL connectionUrl = ConnectionURL.forURL(URLEncoder.encode(username, "UTF-8") + '@' + scheme + host);
 
@@ -60,13 +61,14 @@ public class ConnectionURLTest {
 		assertEquals(username, connectionUrl.getUsername());
 		assertEquals(scheme, connectionUrl.getScheme());
 	}
-	
+
 	@Test
-	public void shouldCorrectMisplacedSchemeWithDefaultServer() throws UnsupportedEncodingException, MalformedURLException {
+	public void shouldCorrectMisplacedSchemeWithDefaultServer()
+			throws UnsupportedEncodingException, MalformedURLException {
 		// pre-conditions
 		String username = "adietish@redhat.com";
 		String scheme = UrlUtils.SCHEME_HTTP;
-		
+
 		// operation
 		ConnectionURL connectionUrl = ConnectionURL.forURL(URLEncoder.encode(username, "UTF-8") + '@' + scheme);
 
@@ -82,17 +84,17 @@ public class ConnectionURLTest {
 		// pre-conditions
 		String username = "adietish@redhat.com";
 		String server = "https://openshift.redhat.com";
-		
+
 		// operation
 		ConnectionURL connectionUrl = ConnectionURL.forUsernameAndHost(username, server);
-		
+
 		// verifications
 		assertEquals("openshift.redhat.com", connectionUrl.getHost());
 		assertFalse(connectionUrl.isDefaultHost());
 		assertEquals(username, connectionUrl.getUsername());
 		assertEquals("https://", connectionUrl.getScheme());
 	}
-	
+
 	@Test
 	public void shouldAllowPortInUrl() throws UnsupportedEncodingException, MalformedURLException {
 		// pre-conditions
@@ -103,7 +105,7 @@ public class ConnectionURLTest {
 		// verifications
 		assertEquals("http://localhost:8081", connectionUrl.getHostWithScheme());
 	}
-	
+
 	@Test
 	public void shouldExtractUrlPortions() throws UnsupportedEncodingException, MalformedURLException {
 		// pre-conditions
@@ -113,8 +115,8 @@ public class ConnectionURLTest {
 		String server = "openshift.redhat.com";
 
 		// operations
-		ConnectionURL connectionUrl = ConnectionURL.forURL(
-				scheme + URLEncoder.encode(username, "UTF-8") + ":" + password + "@" + server);
+		ConnectionURL connectionUrl = ConnectionURL
+				.forURL(scheme + URLEncoder.encode(username, "UTF-8") + ":" + password + "@" + server);
 
 		// verifications
 		assertEquals(scheme, connectionUrl.getScheme());

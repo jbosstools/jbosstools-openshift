@@ -27,31 +27,30 @@ import com.openshift.client.IApplication;
  * @author Jeff Cantrill
  */
 public class ApplicationPropertySourceTest {
-	
+
 	private IApplication app;
 	private ApplicationPropertySource propertySource;
-	
+
 	@Before
-	public void setup(){
-		app = new ApplicationDetailsFake(); 
+	public void setup() {
+		app = new ApplicationDetailsFake();
 		propertySource = new ApplicationPropertySource(app);
 	}
 
 	@Test
 	public void testGetPropertyDescriptors() {
-		String [] exp = new String [] {
-				"Created on", "Public URL", "Name", "UUID", "Git URL", "Type", "Port Forwarding", "Scalable"
-		};
-		assertPropertyDescriptors(exp,propertySource.getPropertyDescriptors());
+		String[] exp = new String[] { "Created on", "Public URL", "Name", "UUID", "Git URL", "Type", "Port Forwarding",
+				"Scalable" };
+		assertPropertyDescriptors(exp, propertySource.getPropertyDescriptors());
 	}
-	
+
 	@Test
-	public void testGetPropertyValueForScalable(){
+	public void testGetPropertyValueForScalable() {
 		assertEquals("", app.getApplicationScale().getValue(), propertySource.getPropertyValue("8.Scalable"));
 	}
-	
-	private void assertPropertyDescriptors(String [] properties, IPropertyDescriptor [] descriptors){
-		String [] actuals = new String [descriptors.length] ;
+
+	private void assertPropertyDescriptors(String[] properties, IPropertyDescriptor[] descriptors) {
+		String[] actuals = new String[descriptors.length];
 		for (int i = 0; i < descriptors.length; i++) {
 			actuals[i] = descriptors[i].getDisplayName();
 		}

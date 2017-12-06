@@ -42,8 +42,7 @@ public class ServerUtils {
 	 * @return
 	 */
 	public static String getProjectAttribute(String name, String defaultValue, String nodeQualifier, IProject project) {
-		if (!ProjectUtils.isAccessible(project)
-				|| StringUtils.isEmpty(nodeQualifier)) {
+		if (!ProjectUtils.isAccessible(project) || StringUtils.isEmpty(nodeQualifier)) {
 			return defaultValue;
 		}
 		IEclipsePreferences node = getProjectNode(nodeQualifier, project);
@@ -62,27 +61,27 @@ public class ServerUtils {
 	public static void setProjectAttribute(String name, String value, String nodeQualifier, IProject project) {
 		setProjectAttribute(name, value, nodeQualifier, project, false);
 	}
-	
-	public static void setProjectAttribute(String name, String value, String nodeQualifier, IProject project, boolean flush) {
+
+	public static void setProjectAttribute(String name, String value, String nodeQualifier, IProject project,
+			boolean flush) {
 		IEclipsePreferences node = getProjectNode(nodeQualifier, project);
 		node.put(name, value);
-		if( flush ) {
+		if (flush) {
 			try {
 				node.flush();
-			} catch(BackingStoreException bse) {
+			} catch (BackingStoreException bse) {
 				OpenShiftCommonCoreActivator.pluginLog().logError("Error saving project setting", bse);
 			}
 		}
 	}
 
-	
 	public static String getServerAttribute(String name, String defaultValue, IServerAttributes attributes) {
 		if (attributes == null) {
 			return null;
 		}
 		return attributes.getAttribute(name, defaultValue);
 	}
-	
+
 	public static IContainer getContainer(String name, IProject project) {
 		if (!StringUtils.isEmpty(name)) {
 			return (IContainer) project.findMember(new Path(name));

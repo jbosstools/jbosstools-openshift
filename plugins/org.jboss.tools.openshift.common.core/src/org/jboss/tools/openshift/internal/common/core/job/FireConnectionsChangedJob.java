@@ -26,7 +26,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 public class FireConnectionsChangedJob extends AbstractDelegatingMonitorJob {
 
 	protected List<IConnection> connections = new ArrayList<>();
-	
+
 	public FireConnectionsChangedJob(IConnection connection) {
 		super(NLS.bind("Refreshing connection {0}", connection.getHost()));
 		add(connection);
@@ -35,7 +35,7 @@ public class FireConnectionsChangedJob extends AbstractDelegatingMonitorJob {
 	protected FireConnectionsChangedJob(String jobName) {
 		super(jobName);
 	}
-	
+
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		for (IConnection connection : getConnections()) {
@@ -43,7 +43,7 @@ public class FireConnectionsChangedJob extends AbstractDelegatingMonitorJob {
 		}
 		return Status.OK_STATUS;
 	}
-	
+
 	protected List<IConnection> getConnections() {
 		return connections;
 	}

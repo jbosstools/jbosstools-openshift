@@ -77,7 +77,8 @@ public class ConnectionValidatorsTest {
 
 		WritableValue<String> usernameObservable = new WritableValue<String>();
 		WritableValue<String> urlObservable = new WritableValue<String>();
-		MultiValidator v = ConnectionValidatorFactory.createBasicAuthenticationValidator(pageModel, usernameObservable, urlObservable);
+		MultiValidator v = ConnectionValidatorFactory.createBasicAuthenticationValidator(pageModel, usernameObservable,
+				urlObservable);
 
 		v.observeValidatedValue(urlObservable);
 
@@ -136,10 +137,11 @@ public class ConnectionValidatorsTest {
 
 	private MultiValidator findValidator(DataBindingContext dbc) {
 		MultiValidator result = null;
-		for (Object o: dbc.getValidationStatusProviders()) {
-			if(o instanceof MultiValidator) {
-				Assert.assertNull("Multiple validators: " + result + ", " + o + ". Please improve the test to pick the right validator.", result);
-				result = (MultiValidator)o;
+		for (Object o : dbc.getValidationStatusProviders()) {
+			if (o instanceof MultiValidator) {
+				Assert.assertNull("Multiple validators: " + result + ", " + o
+						+ ". Please improve the test to pick the right validator.", result);
+				result = (MultiValidator) o;
 			}
 		}
 		Assert.assertNotNull("Validator not found", result);
@@ -155,7 +157,8 @@ public class ConnectionValidatorsTest {
 
 		WritableValue<String> tokenObservable = new WritableValue<String>();
 		WritableValue<String> urlObservable = new WritableValue<String>();
-		MultiValidator v = ConnectionValidatorFactory.createOAuthAuthenticationValidator(pageModel, tokenObservable, urlObservable);
+		MultiValidator v = ConnectionValidatorFactory.createOAuthAuthenticationValidator(pageModel, tokenObservable,
+				urlObservable);
 
 		v.observeValidatedValue(urlObservable);
 
@@ -225,7 +228,7 @@ public class ConnectionValidatorsTest {
 		Mockito.when(connection.getUsername()).thenReturn(username);
 		Mockito.when(connection.getToken()).thenReturn(token);
 		Mockito.when(connection.getAuthScheme())
-			.thenReturn(isOAuth ? IAuthorizationContext.AUTHSCHEME_OAUTH : IAuthorizationContext.AUTHSCHEME_BASIC);
+				.thenReturn(isOAuth ? IAuthorizationContext.AUTHSCHEME_OAUTH : IAuthorizationContext.AUTHSCHEME_BASIC);
 		registry.add(connection);
 		connections.add(connection);
 		return connection;
@@ -239,12 +242,12 @@ public class ConnectionValidatorsTest {
 
 	@After
 	public void clear() {
-		if(registry != null && !connections.isEmpty()) {
+		if (registry != null && !connections.isEmpty()) {
 			connections.stream().forEach(c -> registry.remove(c));
 		}
 	}
 
 	private int getStatusSeverity(MultiValidator v) {
-		return ((IStatus)v.getValidationStatus().getValue()).getSeverity();
+		return ((IStatus) v.getValidationStatus().getValue()).getSeverity();
 	}
 }

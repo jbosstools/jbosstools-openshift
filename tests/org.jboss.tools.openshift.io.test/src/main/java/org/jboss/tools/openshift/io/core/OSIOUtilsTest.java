@@ -21,41 +21,38 @@ import io.jsonwebtoken.Jwts;
 
 public class OSIOUtilsTest {
 	private static final String LOGIN_RESPONSE = "{\"access_token\":\"a\",\"expires_in\":1,\"refresh_token\":\"b\",\"refresh_expires_in\":2}";
-	
-	private static final String REFRESH_RESPONSE = "{\r\n" + 
-			"  \"token\": {\r\n" + 
-			"    \"access_token\": \"Beatae fuga enim suscipit sapiente vitae eligendi.\",\r\n" + 
-			"    \"expires_in\": 5476746541684266001,\r\n" + 
-			"    \"not-before-policy\": \"0f968573-530f-4287-a500-ddb1ac80e7eb\",\r\n" + 
-			"    \"refresh_expires_in\": 5476746541684266000,\r\n" + 
-			"    \"refresh_token\": \"Eum sed nobis provident aut quae occaecati.\",\r\n" + 
-			"    \"token_type\": \"Consequatur quasi voluptatem non accusamus.\"\r\n" + 
-			"  }\r\n" + 
-			"}";
-	
+
+	private static final String REFRESH_RESPONSE = "{\r\n" + "  \"token\": {\r\n"
+			+ "    \"access_token\": \"Beatae fuga enim suscipit sapiente vitae eligendi.\",\r\n"
+			+ "    \"expires_in\": 5476746541684266001,\r\n"
+			+ "    \"not-before-policy\": \"0f968573-530f-4287-a500-ddb1ac80e7eb\",\r\n"
+			+ "    \"refresh_expires_in\": 5476746541684266000,\r\n"
+			+ "    \"refresh_token\": \"Eum sed nobis provident aut quae occaecati.\",\r\n"
+			+ "    \"token_type\": \"Consequatur quasi voluptatem non accusamus.\"\r\n" + "  }\r\n" + "}";
+
 	@Test
 	public void checkThatAccessTokenIsReturned() throws IOException {
 		LoginResponse info = OSIOUtils.decodeLoginResponse(LOGIN_RESPONSE);
 		assertEquals("a", info.getAccessToken());
-		
-	}
 
+	}
 
 	@Test
 	public void checkThatRefreshTokenIsReturned() throws IOException {
 		LoginResponse info = OSIOUtils.decodeLoginResponse(LOGIN_RESPONSE);
 		assertEquals("b", info.getRefreshToken());
-		
+
 	}
 
 	@Test
 	public void checkRefreshResponse() throws IOException {
 		RefreshResponse response = OSIOUtils.decodeRefreshResponse(REFRESH_RESPONSE);
 		assertNotNull(response.getLoginResponse());
-		assertEquals("Beatae fuga enim suscipit sapiente vitae eligendi.", response.getLoginResponse().getAccessToken());
+		assertEquals("Beatae fuga enim suscipit sapiente vitae eligendi.",
+				response.getLoginResponse().getAccessToken());
 		assertEquals("Eum sed nobis provident aut quae occaecati.", response.getLoginResponse().getRefreshToken());
 	}
-	
+
 	public void checkEmailIsExtracted() {
 		String token = Jwts.builder().claim("email", "info@jboss.org").compact();
 		String email = OSIOUtils.decodeEmailFromToken(token);

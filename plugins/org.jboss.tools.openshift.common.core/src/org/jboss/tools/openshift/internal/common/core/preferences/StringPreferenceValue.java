@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.core.preferences;
 
-
 /**
  * @author Andre Dietisheim
  */
@@ -18,6 +17,7 @@ public class StringPreferenceValue extends AbstractPreferenceValue<String> {
 
 	private String pluginId;
 	private String prefsKey;
+
 	public StringPreferenceValue(String prefsKey, String pluginId) {
 		super(prefsKey, pluginId);
 		this.pluginId = pluginId;
@@ -33,7 +33,7 @@ public class StringPreferenceValue extends AbstractPreferenceValue<String> {
 	public void set(String value) {
 		doStore(value);
 	}
-	
+
 	public void remove() {
 		getPreferences(pluginId).remove(prefsKey);
 	}

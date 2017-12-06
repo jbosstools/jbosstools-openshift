@@ -63,23 +63,26 @@ import com.openshift.restclient.model.IResource;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ConnectionTest {
-	
+
 	private Connection connection;
-	@Mock private SecureStore store;
-	@Mock private ICredentialsPrompter prompter;
+	@Mock
+	private SecureStore store;
+	@Mock
+	private ICredentialsPrompter prompter;
 	private IClient client;
 	private TestableConnection testableConnection;
-	
+
 	@Before
 	public void setup() throws Exception {
 		this.client = createClient("foo", "42", "https://localhost:8443");
 		this.connection = new Connection(client, prompter);
 		this.testableConnection = createTestableConnection("42", client, prompter);
-		
+
 		doReturn(createClient("foo", "42", "https://localhost:8443")).when(client).clone();
 	}
 
-	private TestableConnection createTestableConnection(String passwordToken, IClient client, ICredentialsPrompter prompter) throws SecureStoreException {
+	private TestableConnection createTestableConnection(String passwordToken, IClient client,
+			ICredentialsPrompter prompter) throws SecureStoreException {
 		doReturn(passwordToken).when(store).get(anyString()); // password/token
 
 		return spy(new TestableConnection(client, prompter, store));
@@ -88,25 +91,26 @@ public class ConnectionTest {
 	@Test
 	public void ownsResource_should_return_true_if_clients_are_same() {
 		Map<String, Object> mocks = givenAResourceThatAcceptsAVisitorForIClientCapability(client);
-		assertTrue(connection.ownsResource((IResource)mocks.get("resource")));
+		assertTrue(connection.ownsResource((IResource) mocks.get("resource")));
 	}
 
 	@Test
 	public void ownsResource_should_return_false_when_clients_are_different() {
 		IClient diffClient = mock(IClient.class);
 		Map<String, Object> mocks = givenAResourceThatAcceptsAVisitorForIClientCapability(diffClient);
-		assertFalse(connection.ownsResource((IResource)mocks.get("resource")));
+		assertFalse(connection.ownsResource((IResource) mocks.get("resource")));
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	private Map<String, Object> givenAResourceThatAcceptsAVisitorForIClientCapability(IClient client){
+	private Map<String, Object> givenAResourceThatAcceptsAVisitorForIClientCapability(IClient client) {
 		final IClientCapability capability = mock(IClientCapability.class);
 		when(capability.getClient()).thenReturn(client);
 		IResource resource = mock(IResource.class);
 		when(resource.accept(any(CapabilityVisitor.class), any())).thenAnswer(new Answer<IClient>() {
 			@Override
 			public IClient answer(InvocationOnMock invocation) throws Throwable {
-				CapabilityVisitor<IClientCapability, IClient> visitor = (CapabilityVisitor<IClientCapability, IClient>)invocation.getArguments()[0];
+				CapabilityVisitor<IClientCapability, IClient> visitor = (CapabilityVisitor<IClientCapability, IClient>) invocation
+						.getArguments()[0];
 				return visitor.visit(capability);
 			}
 		});
@@ -115,7 +119,7 @@ public class ConnectionTest {
 		mocks.put("resource", resource);
 		return mocks;
 	}
-	
+
 	@Test
 	public void getResource_with_kind_should_call_client() {
 		// given
@@ -137,7 +141,7 @@ public class ConnectionTest {
 		// then
 		assertEquals("https://", connection.getScheme());
 	}
-	
+
 	@Test
 	public void should_not_equals_if_different_user() throws Exception {
 		// given
@@ -191,7 +195,7 @@ public class ConnectionTest {
 		// then
 		assertThat(connection).isEqualTo(two);
 	}
-	
+
 	@Test
 	public void should_equal_if_different_token() throws Exception {
 		// given
@@ -232,9 +236,7 @@ public class ConnectionTest {
 	@Test
 	public void should_not_credentialsEqual_if_different_token() throws Exception {
 		// given
-		connection = new Connection(new ClientBuilder("https://someplace")
-				.withUserName("foo")
-				.withPassword("bar")
+		connection = new Connection(new ClientBuilder("https://someplace").withUserName("foo").withPassword("bar")
 				.usingToken("mytoken").build(), null);
 		Connection two = (Connection) connection.clone();
 		assertThat(two).isEqualTo(connection);
@@ -310,7 +312,7 @@ public class ConnectionTest {
 		updatingConnection.setRememberPassword(newRememberPassword);
 		updatingConnection.setToken(newToken);
 		updatingConnection.setRememberToken(newRememberToken);
-		
+
 		// operations
 		connection.update(updatingConnection);
 
@@ -323,7 +325,7 @@ public class ConnectionTest {
 		assertThat(connection.isRememberToken()).isEqualTo(newRememberToken);
 	}
 
-	@Test 
+	@Test
 	public void should_add_extendedProperty() throws Exception {
 		// given
 		Connection connection = new Connection("http://localhost", null, null);
@@ -336,21 +338,24 @@ public class ConnectionTest {
 	}
 
 	@SuppressWarnings("serial")
-	@Test 
+	@Test
 	public void shouldReplaceExtendedProperty() throws Exception {
 		// given
 		Connection connection = new Connection("http://localhost", null, null);
 		connection.setExtendedProperty("kung", "foo");
 		connection.setExtendedProperty("foo", "bar");
-		assertThat(connection.getExtendedProperties())
-			.containsEntry("kung", "foo").containsEntry("foo", "bar");
+		assertThat(connection.getExtendedProperties()).containsEntry("kung", "foo").containsEntry("foo", "bar");
 		// when
-		connection.setExtendedProperties(new HashMap<String, Object>() {{ put("foo", "bar"); }});
+		connection.setExtendedProperties(new HashMap<String, Object>() {
+			{
+				put("foo", "bar");
+			}
+		});
 		// then
 		assertThat(connection.getExtendedProperties()).hasSize(1);
 		assertThat(connection.getExtendedProperties()).containsExactly(MapEntry.entry("foo", "bar"));
 	}
-	
+
 	@Test
 	public void should_return_authScheme_that_was_previously_set() {
 		// given
@@ -377,7 +382,7 @@ public class ConnectionTest {
 		// then
 		verify(store).get(Connection.SECURE_STORAGE_PASSWORD_KEY);
 	}
-	
+
 	@Test
 	public void should_not_load_password_if_already_loaded() throws Exception {
 		// given
@@ -449,10 +454,11 @@ public class ConnectionTest {
 		verify(prompter).promptAndAuthenticate(eq(testableConnection), any(IAuthorizationContext.class));
 	}
 
-	@Test(expected=com.openshift.restclient.authorization.UnauthorizedException.class)
+	@Test(expected = com.openshift.restclient.authorization.UnauthorizedException.class)
 	public void should_throw_when_connecting_while_being_unauthorized_but_prompting_disabled() {
 		// given no or outdated token
-		doThrow(com.openshift.restclient.authorization.UnauthorizedException.class).when(client).getAuthorizationContext();
+		doThrow(com.openshift.restclient.authorization.UnauthorizedException.class).when(client)
+				.getAuthorizationContext();
 		testableConnection.enablePromptCredentials(false);
 		// when
 		testableConnection.connect();
@@ -472,7 +478,7 @@ public class ConnectionTest {
 		// then
 		verify(store).put(Connection.SECURE_STORAGE_PASSWORD_KEY, "kungfoo");
 	}
-	
+
 	@Test
 	public void should_not_save_password_when_connecting_successfully_with_rememberPassword_off() throws Exception {
 		// given
@@ -513,8 +519,8 @@ public class ConnectionTest {
 		verify(store).remove(Connection.SECURE_STORAGE_PASSWORD_KEY);
 		assertThat(testableConnection.getPassword()).isNullOrEmpty();
 		assertThat(testableConnection.isRememberPassword()).isFalse();
-	}	
-	
+	}
+
 	@Test
 	public void should_not_clear_token_when_connecting_successfully_with_password() throws Exception {
 		// given
@@ -529,7 +535,7 @@ public class ConnectionTest {
 		//normally, even with basic auth, the connection should get a token
 		assertThat(testableConnection.getToken()).isEqualTo("42");
 		assertThat(testableConnection.isRememberToken()).isFalse();
-	}	
+	}
 
 	@Test
 	public void should_prompt_if_refreshing_unauthorized_connection() {
@@ -541,23 +547,23 @@ public class ConnectionTest {
 		// then
 		verify(prompter).promptAndAuthenticate(eq(testableConnection), any(IAuthorizationContext.class));
 	}
-	
+
 	@Test
 	public void should_clear_secure_data_when_connection_deleted() throws MalformedURLException {
 		// pre-conditions
 		Connection connection = ConnectionTestUtils.createConnection("bdshadow", "13", "https://localhost.com");
 		connection.connect();
-		
+
 		//when
-		IStoreKey key = new OpenShiftSecureStorageKey(
-				Connection.SECURE_STORAGE_BASEKEY, connection.getHost(), connection.getUsername());
+		IStoreKey key = new OpenShiftSecureStorageKey(Connection.SECURE_STORAGE_BASEKEY, connection.getHost(),
+				connection.getUsername());
 		assertTrue(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
 		connection.removeSecureStoreData();
-		
+
 		//then
 		assertFalse(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
 	}
-	
+
 	public class TestableConnection extends Connection {
 
 		private SecureStore store;
@@ -576,9 +582,7 @@ public class ConnectionTest {
 		public void saveAuthSchemePreference() {
 			super.saveAuthSchemePreference();
 		}
-		
-		
+
 	}
-	
 
 }

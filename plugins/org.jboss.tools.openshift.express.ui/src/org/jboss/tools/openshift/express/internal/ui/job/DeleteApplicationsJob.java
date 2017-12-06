@@ -33,21 +33,21 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 	private LoadApplicationJob job;
 
 	public DeleteApplicationsJob(LoadApplicationJob job) {
-		super(ExpressUIMessages.DeletingOpenShiftApplications); 
+		super(ExpressUIMessages.DeletingOpenShiftApplications);
 		this.job = job;
 	}
 
 	public DeleteApplicationsJob(final List<IApplication> applications) {
-		super(ExpressUIMessages.DeletingOpenShiftApplications); 
+		super(ExpressUIMessages.DeletingOpenShiftApplications);
 		this.applications = applications;
 	}
-	
+
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		List<IApplication> applications = getApplications();
 		int totalWork = applications.size();
 		monitor.beginTask(ExpressUIMessages.DeletingOpenShiftApplications, totalWork);
-		try{
+		try {
 			for (final IApplication application : applications) {
 				if (application == null) {
 					monitor.worked(1);
@@ -62,11 +62,11 @@ public class DeleteApplicationsJob extends AbstractDelegatingMonitorJob {
 					application.destroy();
 					monitor.worked(1);
 				} catch (OpenShiftException e) {
-					return ExpressUIActivator.createErrorStatus(
-							NLS.bind(ExpressUIMessages.FailedToDeleteApplication, appName), e);
+					return ExpressUIActivator
+							.createErrorStatus(NLS.bind(ExpressUIMessages.FailedToDeleteApplication, appName), e);
 				}
 			}
-		}finally {
+		} finally {
 			monitor.done();
 		}
 		return Status.OK_STATUS;

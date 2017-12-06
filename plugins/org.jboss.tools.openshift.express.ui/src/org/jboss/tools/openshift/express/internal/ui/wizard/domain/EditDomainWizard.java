@@ -42,13 +42,11 @@ public class EditDomainWizard extends AbstractOpenShiftWizard<DomainWizardModel>
 					getModel().renameDomain();
 					return Status.OK_STATUS;
 				} catch (OpenShiftEndpointException e) {
-					return ExpressUIActivator.createErrorStatus(
-							NLS.bind(
-									"Could not rename domain \"{0}\": {1}", getModel().getDomainId(),
-									e.getRestResponseMessages()), e);
+					return ExpressUIActivator.createErrorStatus(NLS.bind("Could not rename domain \"{0}\": {1}",
+							getModel().getDomainId(), e.getRestResponseMessages()), e);
 				} catch (Exception e) {
-					return ExpressUIActivator.createErrorStatus(NLS.bind(
-							"Could not rename domain {0}", getModel().getDomainId()), e);
+					return ExpressUIActivator
+							.createErrorStatus(NLS.bind("Could not rename domain {0}", getModel().getDomainId()), e);
 				}
 			}
 		};

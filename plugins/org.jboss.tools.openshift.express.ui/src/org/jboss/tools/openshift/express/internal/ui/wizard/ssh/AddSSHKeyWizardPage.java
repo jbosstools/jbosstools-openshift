@@ -62,65 +62,50 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults()
-				.margins(10, 10).applyTo(parent);
+		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
 		Group addSSHKeyGroup = new Group(parent, SWT.NONE);
 		addSSHKeyGroup.setText("Add existing SSH Key");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(addSSHKeyGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(3).margins(6, 6).applyTo(addSSHKeyGroup);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(addSSHKeyGroup);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(6, 6).applyTo(addSSHKeyGroup);
 
 		Label nameLabel = new Label(addSSHKeyGroup, SWT.NONE);
 		nameLabel.setText("Name:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(nameLabel);
 
 		Text nameText = new Text(addSSHKeyGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(nameText);
-		Binding nameBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(nameText))
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1).applyTo(nameText);
+		Binding nameBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(nameText))
 				.validatingAfterConvert(new SSHPublicKeyNameValidator(pageModel))
 				.to(BeanProperties.value(AddSSHKeyWizardPageModel.PROPERTY_NAME).observe(pageModel))
-				.notUpdatingParticipant()
-				.in(dbc);
-		ControlDecorationSupport.create(
-				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+				.notUpdatingParticipant().in(dbc);
+		ControlDecorationSupport.create(nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		Label publicKeyLabel = new Label(addSSHKeyGroup, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(publicKeyLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(publicKeyLabel);
 		publicKeyLabel.setText("Public Key:");
 
 		Text publicKeyText = new Text(addSSHKeyGroup, SWT.BORDER);
 		publicKeyText.setEditable(false);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(publicKeyText);
-		IObservableValue publicKeyObservable =
-				WidgetProperties.text(SWT.Modify).observe(publicKeyText);
-		ValueBindingBuilder
-				.bind(publicKeyObservable)
-				.to(BeanProperties.value(AddSSHKeyWizardPageModel.PROPERTY_PUBLICKEY_PATH).observe(pageModel))
-				.in(dbc);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(publicKeyText);
+		IObservableValue publicKeyObservable = WidgetProperties.text(SWT.Modify).observe(publicKeyText);
+		ValueBindingBuilder.bind(publicKeyObservable)
+				.to(BeanProperties.value(AddSSHKeyWizardPageModel.PROPERTY_PUBLICKEY_PATH).observe(pageModel)).in(dbc);
 
 		Button browseButton = new Button(addSSHKeyGroup, SWT.PUSH);
 		browseButton.setText("Browse...");
 		browseButton.addSelectionListener(onBrowse());
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(browseButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(browseButton);
 
 		SSHPublicKeyValidator sshPublicKeyValidator = new SSHPublicKeyValidator(publicKeyObservable, pageModel);
 		dbc.addValidationStatusProvider(sshPublicKeyValidator);
-		ControlDecorationSupport.create(
-				sshPublicKeyValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		ControlDecorationSupport.create(sshPublicKeyValidator, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
 
 		Link sshPrefsLink = new Link(parent, SWT.NONE);
-		sshPrefsLink
-				.setText("Please make sure that your private key for this public key is listed in the\n<a>SSH2 Preferences</a>");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
+		sshPrefsLink.setText(
+				"Please make sure that your private key for this public key is listed in the\n<a>SSH2 Preferences</a>");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
 		sshPrefsLink.addSelectionListener(onSshPrefs(sshPublicKeyValidator));
 
 	}
@@ -167,9 +152,7 @@ public class AddSSHKeyWizardPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(
-				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
-				dbc);
+		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this, dbc);
 	}
 
 	public IOpenShiftSSHKey getSSHKey() {

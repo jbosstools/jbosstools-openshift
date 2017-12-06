@@ -113,7 +113,7 @@ public class ExpressConnectionTest {
 		// pre-conditions
 		ExpressConnection connection = new ExpressConnection("fakeUser", "openshift.redhat.com");
 		int hashCode = connection.hashCode();
-		
+
 		// operations
 		connection.setUsername("foobar");
 
@@ -127,20 +127,20 @@ public class ExpressConnectionTest {
 		ExpressConnection connection = new ExpressConnection("fakeUser", "openshift.redhat.com");
 		connection.setPassword("111111");
 		int hashCode = connection.hashCode();
-		
+
 		// operations
 		connection.setPassword("22222");
 
 		// verifications
 		assertEquals(hashCode, connection.hashCode());
 	}
-	
+
 	@Test
 	public void cloneShouldCreateIdenticalConnection() {
 		// pre-conditions
 		ExpressConnection connection = new ExpressConnection("foo", "https://openshift.redhat.com");
 		connection.setPassword("bar");
-		
+
 		// operations
 		IConnection clonedConnection = connection.clone();
 
@@ -164,7 +164,7 @@ public class ExpressConnectionTest {
 		updatingConnection.setPassword("foo");
 		updatingConnection.setRememberPassword(false);
 		updatingConnection.setConnected(true);
-		
+
 		// operations
 		updatedConnection.update(updatingConnection);
 

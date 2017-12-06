@@ -58,10 +58,10 @@ public class ExpressServerFactory {
 	 * @return 
 	 * @throws OpenShiftException
 	 */
-	protected IServer createAdapterAndModules(IProject project, IApplication application,
-			IDomain domain, String remoteName, IProgressMonitor monitor) throws OpenShiftException {
+	protected IServer createAdapterAndModules(IProject project, IApplication application, IDomain domain,
+			String remoteName, IProgressMonitor monitor) throws OpenShiftException {
 		monitor.subTask(NLS.bind("Creating server adapter for project {0}", project.getName()));
-		
+
 		IServer server = null;
 		try {
 			IServerType serverType = ServerCore.findServerType(ExpressServerUtils.EXPRESS_SERVER_TYPE);
@@ -76,27 +76,26 @@ public class ExpressServerFactory {
 		}
 		return server;
 	}
-	
+
 	private IServer createAdapter(IServerType serverType, IApplication application, IDomain domain,
-			String deployProject, String remoteName) throws CoreException,
-			OpenShiftException {
+			String deployProject, String remoteName) throws CoreException, OpenShiftException {
 		Assert.isLegal(serverType != null, "Missing server adapter type");
 		Assert.isLegal(application != null, "Missing application");
 
 		String serverName = ExpressServerUtils.getDefaultServerName(application);
 		IServer server = ExpressServerUtils.createServer(serverType, serverName);
-		ExpressServerUtils.fillServerWithOpenShiftDetails(
-				server, deployProject, remoteName, serverName, application, domain);
+		ExpressServerUtils.fillServerWithOpenShiftDetails(server, deployProject, remoteName, serverName, application,
+				domain);
 		return server;
 	}
-	
-	public void addModules(IServer server, List<IProject> importedProjects, IProgressMonitor monitor) throws CoreException {
+
+	public void addModules(IServer server, List<IProject> importedProjects, IProgressMonitor monitor)
+			throws CoreException {
 		addModules(getModules(importedProjects), server, monitor);
 	}
 
 	private IServer addModules(List<IModule> modules, IServer server, IProgressMonitor monitor) throws CoreException {
-		if (modules == null
-				|| modules.size() == 0) {
+		if (modules == null || modules.size() == 0) {
 			return server;
 		}
 		IServerWorkingCopy wc = server.createWorkingCopy();

@@ -60,30 +60,31 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 		String welcomePageUrl = null;
 		try {
 
-		//Get connection explicitly to report failure. Try and connect right now to know if it fails.
-		//Do not catch OpenShiftException, let it be reported. We are more concerned of NPE.
-		Connection connection = OpenShiftServerUtils.getConnection(server);
-		if(connection == null || !connection.connect()) {
-			throw new GetWelcomePageURLException("Connection is not established.");
-		}
-
-		IResource resource = OpenShiftServerUtils.getResource(server, connection, new NullProgressMonitor());
-		if(resource == null) {
-			throw new GetWelcomePageURLException("Resource is missing.");
-		}
-
-		IProject project = resource.getProject();
-		if ((project != null) && (resource instanceof IService)) {
-			List<IRoute> routes = ResourceUtils.getRoutesFor((IService) resource, project.getResources(ResourceKind.ROUTE));
-			IRoute route = getRoute(OpenShiftServerUtils.getRouteURL(server), routes);
-			if (route == null) {
-				route = getRoute(routes); 
+			//Get connection explicitly to report failure. Try and connect right now to know if it fails.
+			//Do not catch OpenShiftException, let it be reported. We are more concerned of NPE.
+			Connection connection = OpenShiftServerUtils.getConnection(server);
+			if (connection == null || !connection.connect()) {
+				throw new GetWelcomePageURLException("Connection is not established.");
 			}
-			//Reporting route == null is implemented in getRoute.
-			if (route != null) {
-				welcomePageUrl = route.getURL();
+
+			IResource resource = OpenShiftServerUtils.getResource(server, connection, new NullProgressMonitor());
+			if (resource == null) {
+				throw new GetWelcomePageURLException("Resource is missing.");
 			}
-		}
+
+			IProject project = resource.getProject();
+			if ((project != null) && (resource instanceof IService)) {
+				List<IRoute> routes = ResourceUtils.getRoutesFor((IService) resource,
+						project.getResources(ResourceKind.ROUTE));
+				IRoute route = getRoute(OpenShiftServerUtils.getRouteURL(server), routes);
+				if (route == null) {
+					route = getRoute(routes);
+				}
+				//Reporting route == null is implemented in getRoute.
+				if (route != null) {
+					welcomePageUrl = route.getURL();
+				}
+			}
 
 		} catch (OpenShiftException e) {
 			throw new GetWelcomePageURLException(e.getMessage(), e);
@@ -99,9 +100,9 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 	 * @return
 	 */
 	private IRoute getRoute(String url, List<IRoute> routes) {
-		if(!StringUtils.isEmpty(url)) {
-			for (IRoute route: routes) {
-				if(url.equals(route.getURL())) {
+		if (!StringUtils.isEmpty(url)) {
+			for (IRoute route : routes) {
+				if (url.equals(route.getURL())) {
 					return route;
 				}
 			}
@@ -118,14 +119,13 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 		IRouteChooser chooser = OpenShiftCoreUIIntegration.getInstance().getRouteChooser();
 		IRoute route = null;
 
-		if (routes == null
-				|| routes.isEmpty()) {
+		if (routes == null || routes.isEmpty()) {
 			chooser.noRouteErrorDialog();
 			return null;
 		}
 		if (routes.size() > 1) {
 			route = chooser.chooseRoute(routes);
-			if(route != null && chooser.isRememberChoice()) {
+			if (route != null && chooser.isRememberChoice()) {
 				fireUpdateRoute(server, route.getURL());
 			}
 		} else {
@@ -144,7 +144,7 @@ public class OpenShiftServerExtendedProperties extends ServerExtendedProperties 
 				wc.setHost(UrlUtils.getHost(route));
 				try {
 					wc.save(true, new NullProgressMonitor());
-				} catch(CoreException ce) {
+				} catch (CoreException ce) {
 					return ce.getStatus();
 				}
 				return Status.OK_STATUS;

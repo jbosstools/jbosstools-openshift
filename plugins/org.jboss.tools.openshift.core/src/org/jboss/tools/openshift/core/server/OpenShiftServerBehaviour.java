@@ -28,9 +28,9 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
  */
 public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 	public static final String PROFILE_OPENSHIFT3 = "openshift3";
-	
+
 	private static final String CURRENTLY_RESTARTING = "openshift.server.restarting";
-	
+
 	@Override
 	public void setServerStarted() {
 		super.setServerStarted();
@@ -46,7 +46,7 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 	public boolean isRestarting() {
 		return Boolean.TRUE.equals(getSharedData(CURRENTLY_RESTARTING));
 	}
-	
+
 	public void setRestarting(boolean restarting) {
 		putSharedData(CURRENTLY_RESTARTING, restarting);
 	}
@@ -57,14 +57,13 @@ public class OpenShiftServerBehaviour extends CachedPublisherProfileBehavior {
 			IServer s = getServer();
 			IModuleStateController modules = getModuleStateController();
 			Job moduleStateJob = null;
-			if( modules != null ) {
+			if (modules != null) {
 				moduleStateJob = new UpdateModuleStateJob(modules, s, true, 10000);
 				moduleStateJob.schedule();
 			}
-		} catch(CoreException ce) {
+		} catch (CoreException ce) {
 			OpenShiftCoreActivator.pluginLog().logError(ce);
 		}
 	}
-
 
 }

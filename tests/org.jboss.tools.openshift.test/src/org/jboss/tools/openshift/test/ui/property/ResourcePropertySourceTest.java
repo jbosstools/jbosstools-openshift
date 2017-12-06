@@ -29,19 +29,20 @@ import com.openshift.restclient.model.IResource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourcePropertySourceTest {
-	
-	@Mock private IResource resource;
+
+	@Mock
+	private IResource resource;
 	private ResourcePropertySource<IResource> source;
-	
+
 	@Before
-	public void setup(){
+	public void setup() {
 		Map<String, String> labels = new HashMap<>();
-		labels.put("foo","bar");
-		labels.put("bar","bbar");
+		labels.put("foo", "bar");
+		labels.put("bar", "bbar");
 		Map<String, String> annotations = new HashMap<>();
 		annotations.put("xyz", "abc");
 		annotations.put("efg", "def");
-		
+
 		when(resource.getName()).thenReturn("aname");
 		when(resource.getNamespace()).thenReturn("anamespace");
 		when(resource.getKind()).thenReturn("akind");
@@ -54,9 +55,9 @@ public class ResourcePropertySourceTest {
 
 		source = new ResourcePropertySource<>(resource);
 	}
-	
+
 	@Test
-	public void getPropertyValue(){
+	public void getPropertyValue() {
 		assertEquals("aname", source.getPropertyValue(ResourcePropertySource.Ids.NAME));
 		assertEquals("anamespace", source.getPropertyValue(ResourcePropertySource.Ids.NAMESPACE));
 		assertEquals("akind", source.getPropertyValue(ResourcePropertySource.Ids.KIND));
@@ -66,10 +67,10 @@ public class ResourcePropertySourceTest {
 		assertEquals("def", source.getPropertyValue(new PrefixPropertySourceKey("Annotations", "efg")));
 		assertEquals("bar", source.getPropertyValue(new PrefixPropertySourceKey("Labels", "foo")));
 	}
-	
+
 	@Test
 	public void getPropertyDescriptor() {
-		IPropertyDescriptor [] exp = new IPropertyDescriptor[]{
+		IPropertyDescriptor[] exp = new IPropertyDescriptor[] {
 				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.KIND, "Kind", "Basic"),
 				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.NAME, "Name", "Basic"),
 				new ExtTextPropertyDescriptor(ResourcePropertySource.Ids.NAMESPACE, "Namespace", "Basic"),
@@ -78,8 +79,7 @@ public class ResourcePropertySourceTest {
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Annotations", "xyz"), "xyz", "Annotations"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Annotations", "efg"), "efg", "Annotations"),
 				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Labels", "foo"), "foo", "Labels"),
-				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Labels", "bar"), "bar", "Labels")
-		};
+				new ExtTextPropertyDescriptor(new PrefixPropertySourceKey("Labels", "bar"), "bar", "Labels") };
 		assertPropertyDescriptorsEquals(exp, source.getPropertyDescriptors());
 	}
 

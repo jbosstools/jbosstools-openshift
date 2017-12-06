@@ -34,7 +34,7 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 	public static final String PROPERTY_PROJECT_NAME = "projectName";
 	public static final String PROPERTY_DESCRIPTION = "description";
 	public static final String PROPERTY_DISPLAY_NAME = "displayName";
-	
+
 	private String description;
 	private String displayName;
 	private String projectName;
@@ -47,7 +47,6 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 		this.projects = projects;
 	}
 
-	
 	public IProject createProject() {
 		if (connection == null) {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Could not create project, missing connection.");
@@ -56,30 +55,27 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 		IProjectRequest request = connection.getResourceFactory().stub(ResourceKind.PROJECT_REQUEST, getProjectName());
 		request.setDescription(getDescription());
 		request.setDisplayName(getDisplayName());
-		IProject project = (IProject)connection.createResource(request);
+		IProject project = (IProject) connection.createResource(request);
 		List<IProject> newProjects = new ArrayList<>(projects);
-		newProjects.add((IProject)connection.refresh(project));
-		
-		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(
-				connection, 
-				ConnectionProperties.PROPERTY_PROJECTS, 
-				projects, 
-				Collections.unmodifiableList(newProjects));
+		newProjects.add((IProject) connection.refresh(project));
+
+		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection,
+				ConnectionProperties.PROPERTY_PROJECTS, projects, Collections.unmodifiableList(newProjects));
 		return this.project = project;
 	}
+
 	public String getProjectName() {
 		return this.projectName;
 	}
 
 	public void setProjectName(String projectName) {
-		firePropertyChange(PROPERTY_PROJECT_NAME,
-				this.projectName, this.projectName = projectName);
+		firePropertyChange(PROPERTY_PROJECT_NAME, this.projectName, this.projectName = projectName);
 	}
-	
+
 	public String getDescription() {
 		return this.description;
 	}
-	
+
 	public void setDescription(String description) {
 		firePropertyChange(PROPERTY_DESCRIPTION, this.description, this.description = description);
 	}
@@ -91,11 +87,11 @@ public class NewProjectWizardModel extends ObservableUIPojo {
 	public void setDisplayName(String displayName) {
 		firePropertyChange(PROPERTY_DISPLAY_NAME, this.displayName, this.displayName = displayName);
 	}
-	
+
 	public IProject getProject() {
 		return project;
 	}
-	
+
 	public Collection<String> getUnavailableNames() {
 		if (projects == null || projects.isEmpty()) {
 			return Collections.emptySet();

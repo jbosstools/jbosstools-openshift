@@ -46,7 +46,7 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
 /**
  * @author jeff.cantrill
  */
-public class BasicAuthenticationDetailView extends BaseDetailsView implements IConnectionEditorDetailView{
+public class BasicAuthenticationDetailView extends BaseDetailsView implements IConnectionEditorDetailView {
 
 	private ConnectionWizardPageModel pageModel;
 	IObservableValue<?> urlObservable;
@@ -61,16 +61,17 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	private IConnectionAuthenticationProvider connectionAuthProvider;
 	private Button rememberPasswordCheckbox;
 	private Binding rememberPasswordBinding;
-	
+
 	private MultiValidator connectionValidator;
 
-	public BasicAuthenticationDetailView(ConnectionWizardPageModel pageModel, IValueChangeListener changeListener, Object context) {
+	public BasicAuthenticationDetailView(ConnectionWizardPageModel pageModel, IValueChangeListener changeListener,
+			Object context) {
 		this.changeListener = changeListener;
 		this.pageModel = pageModel;
 		urlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel);
 		usernameObservable = new WritableValue(null, String.class);
-		connectionValidator = ConnectionValidatorFactory.
-				createBasicAuthenticationValidator(pageModel, usernameObservable, urlObservable);
+		connectionValidator = ConnectionValidatorFactory.createBasicAuthenticationValidator(pageModel,
+				usernameObservable, urlObservable);
 	}
 
 	public final Text getUsernameTextControl() {
@@ -80,37 +81,32 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 	public final Text getPasswordTextControl() {
 		return passwordText;
 	}
-	
+
 	@Override
 	public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 		Composite composite = setControl(new Composite(parent, SWT.None));
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(0, 0).spacing(10, 10).applyTo(composite);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(0, 0).spacing(10, 10).applyTo(composite);
 
 		// username
 		Label usernameLabel = new Label(composite, SWT.NONE);
 		usernameLabel.setText("&Username:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(usernameLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(usernameLabel);
 		this.usernameText = new Text(composite, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
-		
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
+
 		// password
 		Label passwordLabel = new Label(composite, SWT.NONE);
 		passwordLabel.setText("&Password:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
 		this.passwordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
 		this.passwordObservable = new WritableValue(null, String.class);
 
 		this.rememberPasswordObservable = new WritableValue(Boolean.FALSE, Boolean.class);
 		this.rememberPasswordCheckbox = new Button(composite, SWT.CHECK);
 		rememberPasswordCheckbox.setText("&Save password (could trigger secure storage login)");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckbox);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false)
+				.applyTo(rememberPasswordCheckbox);
 		return composite;
 	}
 
@@ -119,17 +115,15 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		return object == this;
 	}
 
-	
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		dbc.addValidationStatusProvider(connectionValidator);
 		bindWidgetsToInternalModel(dbc);
 		this.rememberPasswordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(rememberPasswordCheckbox))
-				.to(rememberPasswordObservable)
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckbox)).to(rememberPasswordObservable)
 				.in(dbc);
 	}
-	
+
 	@Override
 	public void setSelectedConnection(IConnection conn) {
 		if (conn instanceof Connection) {
@@ -152,29 +146,23 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
 		// username
-		this.usernameBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
+		this.usernameBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
 				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("v3 username"))
-				.to(usernameObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		org.jboss.tools.common.ui.databinding.DataBindingUtils
-			.addDisposableValueChangeListener(changeListener, usernameObservable, usernameText);
+				.validatingAfterConvert(new RequiredStringValidator("v3 username")).to(usernameObservable).in(dbc);
+		ControlDecorationSupport.create(usernameBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
+		org.jboss.tools.common.ui.databinding.DataBindingUtils.addDisposableValueChangeListener(changeListener,
+				usernameObservable, usernameText);
 
 		// password
-		this.passwordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
+		this.passwordBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
 				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("v3 password"))
-				.to(passwordObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		org.jboss.tools.common.ui.databinding.DataBindingUtils
-		.addDisposableValueChangeListener(changeListener, passwordObservable, passwordText);
-		
+				.validatingAfterConvert(new RequiredStringValidator("v3 password")).to(passwordObservable).in(dbc);
+		ControlDecorationSupport.create(passwordBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
+		org.jboss.tools.common.ui.databinding.DataBindingUtils.addDisposableValueChangeListener(changeListener,
+				passwordObservable, passwordText);
+
 		connectionAuthProvider = new ConnectionAuthenticationProvider();
 	}
 
@@ -187,30 +175,27 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 		DataBindingUtils.dispose(usernameBinding);
 		DataBindingUtils.dispose(passwordBinding);
 	}
-	
+
 	@Override
-	public  IConnectionAuthenticationProvider getConnectionAuthenticationProvider() {
+	public IConnectionAuthenticationProvider getConnectionAuthenticationProvider() {
 		return this.connectionAuthProvider;
 	}
-	
 
 	@Override
 	public String toString() {
 		return IAuthorizationContext.AUTHSCHEME_BASIC;
 	}
 
-
-
 	private class ConnectionAuthenticationProvider implements IConnectionAuthenticationProvider {
 
 		@Override
 		public IConnection update(IConnection conn) {
 			Assert.isLegal(conn instanceof Connection);
-			
+
 			final Connection connection = (Connection) conn;
 			// might be called from job, switch to display thread to access observables
 			Display.getDefault().syncExec(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_BASIC);
@@ -223,7 +208,7 @@ public class BasicAuthenticationDetailView extends BaseDetailsView implements IC
 
 			return connection;
 		}
-		
+
 	}
 
 }

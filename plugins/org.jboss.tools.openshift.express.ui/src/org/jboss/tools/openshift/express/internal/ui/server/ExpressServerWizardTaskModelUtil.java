@@ -43,7 +43,7 @@ public class ExpressServerWizardTaskModelUtil {
 	public static void put(IDomain domain, TaskModel taskModel) {
 		taskModel.putObject(TASK_WIZARD_ATTR_DOMAIN, domain);
 	}
- 
+
 	public static IDomain getDomain(IServerModeUICallback callback) {
 		return (IDomain) callback.getAttribute(TASK_WIZARD_ATTR_DOMAIN);
 	}
@@ -51,7 +51,7 @@ public class ExpressServerWizardTaskModelUtil {
 	public static void put(IApplication application, TaskModel taskModel) {
 		taskModel.putObject(TASK_WIZARD_ATTR_SELECTED_APP, application);
 	}
-	
+
 	public static IApplication getApplication(IServerModeUICallback callback) {
 		return (IApplication) callback.getAttribute(TASK_WIZARD_ATTR_SELECTED_APP);
 	}

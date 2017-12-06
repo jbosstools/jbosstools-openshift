@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.detection;
 
 import java.io.File;
@@ -22,21 +22,21 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.runtime.core.model.RuntimeDefinition;
 
 public class CDKRuntimeDetector extends AbstractCDKRuntimeDetector {
-	
+
 	public static final String CDK_RUNTIME_TYPE = "CDK";
 	public static final String DOT_CDK_BOX_VERSION = "cdk.box.version";
-	
+
 	@Override
 	protected boolean matches(RuntimeDefinition def, IServer server) {
-		String s = server.getAttribute(CDKServer.PROP_FOLDER, (String)null);
-		if( s != null ) {
-			if( new File(s).equals(def.getLocation())) {
+		String s = server.getAttribute(CDKServer.PROP_FOLDER, (String) null);
+		if (s != null) {
+			if (new File(s).equals(def.getLocation())) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	@Override
 	protected String getServerType() {
 		return CDKServer.CDK_SERVER_TYPE;
@@ -44,24 +44,20 @@ public class CDKRuntimeDetector extends AbstractCDKRuntimeDetector {
 
 	@Override
 	protected String[] getRequiredChildren() {
-		return new String[]{
-				CDKConstants.CDK_RESOURCE_VAGRANTFILE,
-				CDKConstants.CDK_RESOURCE_DOTCDK
-		};
+		return new String[] { CDKConstants.CDK_RESOURCE_VAGRANTFILE, CDKConstants.CDK_RESOURCE_DOTCDK };
 	}
-	
 
 	@Override
 	protected String getDefinitionName(File root) {
 		return CDKServer.getServerTypeBaseName();
 
 	}
-	
+
 	@Override
 	protected String getRuntimeDetectionType() {
 		return CDK_RUNTIME_TYPE;
 	}
-	
+
 	@Override
 	protected String getDefinitionVersion(File root) {
 		File cdkFile = new File(root, CDKConstants.CDK_RESOURCE_DOTCDK);
@@ -70,7 +66,7 @@ public class CDKRuntimeDetector extends AbstractCDKRuntimeDetector {
 		version = (version == null ? "2.0" : version);
 		return version;
 	}
-	
+
 	@Override
 	protected void initializeServer(IServerWorkingCopy wc, RuntimeDefinition runtimeDefinition) throws CoreException {
 		String folder = runtimeDefinition.getLocation().getAbsolutePath();
@@ -78,7 +74,7 @@ public class CDKRuntimeDetector extends AbstractCDKRuntimeDetector {
 		Properties props = readProperties(cdkFile);
 		String user = props.getProperty(DOT_CDK_SUBSCRIPTION_USERNAME);
 		String password = System.getenv(DOT_CDK_SUBSCRIPTION_PASSWORD);
-		if( user != null ) {
+		if (user != null) {
 			addToCredentialsModel(CredentialService.REDHAT_ACCESS, user, password);
 		}
 		wc.setAttribute(CDKServer.PROP_FOLDER, folder);

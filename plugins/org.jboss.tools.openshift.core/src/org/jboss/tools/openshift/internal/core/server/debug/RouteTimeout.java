@@ -40,7 +40,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @see <a href="https://docs.openshift.com/container-platform/3.6/architecture/networking/routes.html#route-specific-annotations" />
  */
 public class RouteTimeout {
-	
+
 	public static final String ROUTE_DEBUG_TIMEOUT = "1h";
 
 	private IResource resource;
@@ -63,13 +63,15 @@ public class RouteTimeout {
 	public IRoute set(DebugContext context, IProgressMonitor monitor) throws CoreException {
 		IRoute route = getRoute(resource, connection, monitor);
 		if (route == null) {
-			OpenShiftCoreActivator.pluginLog().logInfo(
-					NLS.bind("Could not increase timeout for debugging: could not find any route for resource {0}", resource.getName()));
+			OpenShiftCoreActivator.pluginLog()
+					.logInfo(NLS.bind(
+							"Could not increase timeout for debugging: could not find any route for resource {0}",
+							resource.getName()));
 			return null;
 		}
 
 		monitor.subTask(NLS.bind("Setting haproxy timeout for route {0}...", route.getName()));
-		
+
 		String currentTimeout = getAnnotation(route);
 		if (!StringUtils.isBlank(currentTimeout)) {
 			OpenShiftServerUtils.setRouteTimeout(currentTimeout, context.getServer()); // store for latter restore
@@ -98,12 +100,12 @@ public class RouteTimeout {
 
 		IRoute route = getRoute(resource, connection, monitor);
 		if (route == null) {
-			OpenShiftCoreActivator.pluginLog().logInfo(
-					NLS.bind("Could not find any route for resource {0}", resource.getName()));
+			OpenShiftCoreActivator.pluginLog()
+					.logInfo(NLS.bind("Could not find any route for resource {0}", resource.getName()));
 			return null;
 		}
 
-		monitor.subTask(	NLS.bind("Removing/restoring timeout for route {0}", route.getName()));
+		monitor.subTask(NLS.bind("Removing/restoring timeout for route {0}", route.getName()));
 		if (OpenShiftServerUtils.hasRouteTimeout(context.getServer())) {
 			setAnnotation(OpenShiftServerUtils.getRouteTimeout(context.getServer()), route);
 			OpenShiftServerUtils.setRouteTimeout(null, context.getServer()); // clear backup
@@ -112,7 +114,7 @@ public class RouteTimeout {
 		}
 		return route;
 	}
-	
+
 	private IRoute getRoute(IResource resource, Connection connection, IProgressMonitor monitor) {
 		SubMonitor routeMonitor = SubMonitor.convert(monitor);
 		routeMonitor.beginTask("Determine route to set the haproxy timeout for...", 2);
@@ -128,15 +130,14 @@ public class RouteTimeout {
 		List<IRoute> routes = connection.getResources(ResourceKind.ROUTE, resource.getNamespace());
 		// TODO: support multiple matching routes, for now only get first
 		Optional<IRoute> matchingRoute = matchingServices.stream()
-				.flatMap(service -> ResourceUtils.getRoutesFor(service, routes).stream())
-				.findFirst();
+				.flatMap(service -> ResourceUtils.getRoutesFor(service, routes).stream()).findFirst();
 		routeMonitor.worked(1);
 		routeMonitor.done();
 		return matchingRoute.orElse(null);
 	}
 
 	private void setAnnotation(String timeout, IRoute route) {
-		route.setAnnotation(OpenShiftAPIAnnotations.TIMEOUT, timeout);	
+		route.setAnnotation(OpenShiftAPIAnnotations.TIMEOUT, timeout);
 	}
 
 	private String getAnnotation(IRoute route) {
@@ -144,6 +145,6 @@ public class RouteTimeout {
 	}
 
 	private void removeAnnotation(IRoute route) {
-		route.removeAnnotation(OpenShiftAPIAnnotations.TIMEOUT);		
+		route.removeAnnotation(OpenShiftAPIAnnotations.TIMEOUT);
 	}
 }

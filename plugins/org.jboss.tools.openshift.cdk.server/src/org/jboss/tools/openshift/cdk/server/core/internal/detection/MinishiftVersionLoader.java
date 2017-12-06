@@ -15,7 +15,6 @@ public class MinishiftVersionLoader {
 	public static String CDK_VERSION_KEY = "CDK";
 	public static String CDK_VERSION_KEY_OLD = "CDK Version";
 
-
 	public static MinishiftVersions getVersionProperties(String homeDir) {
 		Properties ret = new Properties();
 		try {

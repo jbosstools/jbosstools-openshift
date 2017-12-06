@@ -32,11 +32,14 @@ public class DataBindingUtilsTest {
 
 		DataBindingUtils.addDisposableListChangeListener(listener, observable, table);
 		observable.add(new Object());
-		Assert.assertEquals("After the listener is added, it should listen to changes in the observable list", 1, listener.changes);
+		Assert.assertEquals("After the listener is added, it should listen to changes in the observable list", 1,
+				listener.changes);
 
 		table.dispose();
 		observable.add(new Object());
-		Assert.assertEquals("After the table is disposed, the listener should not listen to changes in the observable list", 1, listener.changes);
+		Assert.assertEquals(
+				"After the table is disposed, the listener should not listen to changes in the observable list", 1,
+				listener.changes);
 	}
 
 	class ListChangeListener implements IListChangeListener<Object> {
@@ -46,6 +49,6 @@ public class DataBindingUtilsTest {
 		public void handleListChange(ListChangeEvent<? extends Object> event) {
 			changes++;
 		}
-		
+
 	}
 }

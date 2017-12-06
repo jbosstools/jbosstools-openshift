@@ -24,9 +24,10 @@ import io.jsonwebtoken.Jwts;
 public class OSIOUtils {
 
 	private static final ObjectMapper mapper = new ObjectMapper();
-	
-	private OSIOUtils() {}
-	
+
+	private OSIOUtils() {
+	}
+
 	/**
 	 * Decode the login JSON as an object.
 	 * 
@@ -37,7 +38,7 @@ public class OSIOUtils {
 	public static LoginResponse decodeLoginResponse(String jsonString) throws IOException {
 		return mapper.readValue(jsonString, LoginResponse.class);
 	}
-	
+
 	/**
 	 * Decode the refresh JSON as an object.
 	 * 
@@ -48,7 +49,7 @@ public class OSIOUtils {
 	public static RefreshResponse decodeRefreshResponse(String response) throws IOException {
 		return mapper.readValue(response, RefreshResponse.class);
 	}
-	
+
 	/**
 	 * Extract the email from the OpenShift.io access token.
 	 * 
@@ -70,13 +71,14 @@ public class OSIOUtils {
 	public static long decodeExpiryFromToken(String token) {
 		String payloads[] = token.split("\\.");
 		Claims claims = (Claims) Jwts.parser().parse(payloads[0] + '.' + payloads[1] + '.').getBody();
-		return  claims.get("exp", Date.class).getTime();
+		return claims.get("exp", Date.class).getTime();
 	}
 
 	public static String computeLandingURL(String endpointURL, String devstudioOsioLandingPageSuffix) {
 		try {
 			URI uri = new URI(endpointURL);
-			URI landingURI = new URI(uri.getScheme(), null, uri.getAuthority(), uri.getPort(), devstudioOsioLandingPageSuffix, null, null);
+			URI landingURI = new URI(uri.getScheme(), null, uri.getAuthority(), uri.getPort(),
+					devstudioOsioLandingPageSuffix, null, null);
 			return landingURI.toString();
 		} catch (URISyntaxException e) {
 			return null;

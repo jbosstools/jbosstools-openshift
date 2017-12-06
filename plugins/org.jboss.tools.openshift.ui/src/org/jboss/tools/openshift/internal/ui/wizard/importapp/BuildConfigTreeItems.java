@@ -33,7 +33,7 @@ public class BuildConfigTreeItems {
 		}
 
 	}
-	
+
 	public static class ProjectTreeItem extends ObservableTreeItem {
 
 		ProjectTreeItem(Object model) {
@@ -54,7 +54,7 @@ public class BuildConfigTreeItems {
 		}
 
 	}
-	
+
 	public static class BuildConfigTreeItem extends ObservableTreeItem {
 
 		BuildConfigTreeItem(Object model) {
@@ -67,23 +67,23 @@ public class BuildConfigTreeItems {
 		}
 
 	}
-	
+
 	public static class Model2ObservableTreeItemConverter extends Converter {
-		
+
 		Model2ObservableTreeItemConverter() {
 			super(Object.class, ObservableTreeItem.class);
 		}
 
 		@Override
 		public Object convert(Object fromObject) {
-				if (fromObject instanceof IProject) {
-					return new ProjectTreeItem(fromObject);
-				} else if (fromObject instanceof IBuildConfig) {
-					return new BuildConfigTreeItem(fromObject);
-				} else {
-					return fromObject;
-				}
+			if (fromObject instanceof IProject) {
+				return new ProjectTreeItem(fromObject);
+			} else if (fromObject instanceof IBuildConfig) {
+				return new BuildConfigTreeItem(fromObject);
+			} else {
+				return fromObject;
+			}
 		}
 	}
-	
+
 }

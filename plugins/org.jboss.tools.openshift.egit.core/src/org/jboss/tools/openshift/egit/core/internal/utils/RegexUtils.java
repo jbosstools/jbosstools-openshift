@@ -22,12 +22,12 @@ public class RegexUtils {
 			if ("\\.^$|?*+[]{}()".indexOf(ch) != -1) {
 				// reserved char char
 				builder.append('\\').append(ch);
-//			} else if (Character.isLetter(ch)) {
-//				// letter
-//				builder.append("[A-Za-z]");
-//			} else if (Character.isDigit(ch)) {
-//				// digit
-//				builder.append("\\d");
+				//			} else if (Character.isLetter(ch)) {
+				//				// letter
+				//				builder.append("[A-Za-z]");
+				//			} else if (Character.isDigit(ch)) {
+				//				// digit
+				//				builder.append("\\d");
 			} else {
 				builder.append(ch);
 			}

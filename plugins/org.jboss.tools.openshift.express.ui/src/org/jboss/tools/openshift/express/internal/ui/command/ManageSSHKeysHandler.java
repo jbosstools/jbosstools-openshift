@@ -30,7 +30,8 @@ public class ManageSSHKeysHandler extends AbstractHandler {
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ExpressConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), ExpressConnection.class);
+		ExpressConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event),
+				ExpressConnection.class);
 		if (connection != null) {
 			new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), new ManageSSHKeysWizard(connection)).open();
 		}

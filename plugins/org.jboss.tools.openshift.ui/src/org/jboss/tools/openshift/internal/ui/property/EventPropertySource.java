@@ -24,45 +24,42 @@ public class EventPropertySource extends ResourcePropertySource<IEvent> {
 	public EventPropertySource(IEvent resource) {
 		super(resource);
 	}
-	
+
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-			new UneditablePropertyDescriptor("firstSeen", "First Seen"),
-			new UneditablePropertyDescriptor("lastSeen", "Last Seen"),
-			new UneditablePropertyDescriptor("count", "Count"),
-			new UneditablePropertyDescriptor("name", "Name"),
-			new UneditablePropertyDescriptor("kind", "Kind"),
-			new UneditablePropertyDescriptor("subobject", "Subobject"),
-			new UneditablePropertyDescriptor("type", "Type"),
-			new UneditablePropertyDescriptor("reason", "Reason"),
-			new UneditablePropertyDescriptor("source", "Source"),
-			new UneditablePropertyDescriptor("message", "Message"),
-		};
+		return new IPropertyDescriptor[] { new UneditablePropertyDescriptor("firstSeen", "First Seen"),
+				new UneditablePropertyDescriptor("lastSeen", "Last Seen"),
+				new UneditablePropertyDescriptor("count", "Count"), new UneditablePropertyDescriptor("name", "Name"),
+				new UneditablePropertyDescriptor("kind", "Kind"),
+				new UneditablePropertyDescriptor("subobject", "Subobject"),
+				new UneditablePropertyDescriptor("type", "Type"), new UneditablePropertyDescriptor("reason", "Reason"),
+				new UneditablePropertyDescriptor("source", "Source"),
+				new UneditablePropertyDescriptor("message", "Message"), };
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
 		IEvent e = getResource();
-		switch((String)id) {
-		case "firstSeen": return DateTimeUtils.formatSince(e.getFirstSeenTimestamp());
-		case "lastSeen": 
+		switch ((String) id) {
+		case "firstSeen":
+			return DateTimeUtils.formatSince(e.getFirstSeenTimestamp());
+		case "lastSeen":
 			return DateTimeUtils.formatSince(e.getLastSeenTimestamp());
-		case "count": 
+		case "count":
 			return e.getCount();
-		case "name" :
+		case "name":
 			return StringUtils.substringBefore(e.getName(), ".");
-		case "kind" :
+		case "kind":
 			return e.getKind();
-		case "type": 
+		case "type":
 			return e.getType();
-		case "reason" :
+		case "reason":
 			return e.getReason();
-		case "source" :
+		case "source":
 			return e.getEventSource();
-		case "subobject" :
+		case "subobject":
 			return e.getInvolvedObject() != null ? e.getInvolvedObject().getFieldPath() : null;
-		case "message" :
+		case "message":
 			return e.getMessage();
 		}
 		return super.getPropertyValue(id);

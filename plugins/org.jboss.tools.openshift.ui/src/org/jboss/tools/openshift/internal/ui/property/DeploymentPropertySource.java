@@ -41,8 +41,7 @@ public class DeploymentPropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new ExtTextPropertyDescriptor("service.name", "Name", "Service"),
+		return new IPropertyDescriptor[] { new ExtTextPropertyDescriptor("service.name", "Name", "Service"),
 				new ExtTextPropertyDescriptor("service.port", "Port Mapping", "Service"),
 				new ExtTextPropertyDescriptor("service.route", "Route", "Service"),
 				new ExtTextPropertyDescriptor("deployment.name", "Name", "Deployment"),
@@ -50,32 +49,33 @@ public class DeploymentPropertySource implements IPropertySource {
 				new UneditablePropertyDescriptor("pods", "Pods") //running, pending, succeeded/ failed/ unknown
 		};
 	}
-	
-//	private Collection<IPropertyDescriptor> getPodStatusDescriptors(){
-//		Set<IPropertyDescriptor> status = new HashSet<>();
-//		for (IPod pod : deployment.getPods()) {
-//			status.add(new ExtTextPropertyDescriptor("pod", pod.getStatus(), "Pods"));
-//		}
-//		return status;
-//	}
+
+	//	private Collection<IPropertyDescriptor> getPodStatusDescriptors(){
+	//		Set<IPropertyDescriptor> status = new HashSet<>();
+	//		for (IPod pod : deployment.getPods()) {
+	//			status.add(new ExtTextPropertyDescriptor("pod", pod.getStatus(), "Pods"));
+	//		}
+	//		return status;
+	//	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		switch((String)id) {
+		switch ((String) id) {
 		case "service.name":
 			return deployment.getWrapped().getName();
 		case "service.port":
 			List<IServicePort> ports = deployment.getWrapped().getPorts();
-			if(ports.size() > 0) {
+			if (ports.size() > 0) {
 				IServicePort port = ports.get(0);
-				return NLS.bind("{0}/{1}->{2}", new Object[] { port.getPort(), port.getProtocol(), port.getTargetPort()});
+				return NLS.bind("{0}/{1}->{2}",
+						new Object[] { port.getPort(), port.getProtocol(), port.getTargetPort() });
 			}
 			break;
 		case "service.route":
 		case "deployment.name":
-//			return NLS.bind("", deployment.get)
+			//			return NLS.bind("", deployment.get)
 		case "deployment.date":
-			
+
 		case "pods":
 			return deployment.getResourcesOfKind(ResourceKind.POD).size();
 		}

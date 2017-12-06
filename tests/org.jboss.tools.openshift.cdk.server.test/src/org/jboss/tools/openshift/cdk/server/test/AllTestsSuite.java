@@ -23,16 +23,9 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-	ServiceManagerParsingTest.class,
-	CDKDockerUtilityTest.class,
-	CDKOpenshiftUtilityTest.class,
-	CDKLaunchControllerTest.class,
-	CDK32LaunchControllerTest.class,
-	VagrantPollerTest.class,
-	CDKRegistryTest.class,
-	CDKRuntimeDetectorTest.class
-})
+@SuiteClasses({ ServiceManagerParsingTest.class, CDKDockerUtilityTest.class, CDKOpenshiftUtilityTest.class,
+		CDKLaunchControllerTest.class, CDK32LaunchControllerTest.class, VagrantPollerTest.class, CDKRegistryTest.class,
+		CDKRuntimeDetectorTest.class })
 /**
  * @author Andre Dietisheim
  */

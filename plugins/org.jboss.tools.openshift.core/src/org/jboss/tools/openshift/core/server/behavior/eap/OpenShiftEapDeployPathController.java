@@ -23,24 +23,24 @@ public class OpenShiftEapDeployPathController extends ModuleDeployPathController
 	public OpenShiftEapDeployPathController() {
 		super();
 	}
-	
+
 	@Override
 	protected ModuleDeploymentPrefsUtil createModuleDeploymentPrefsUtil() {
 		return new OpenShiftModuleDeploymentPrefsUtil();
 	}
-	
+
 	public static class OpenShiftModuleDeploymentPrefsUtil extends ModuleDeploymentPrefsUtil {
 		// We must override the presumed name given to the module upon publish if it is our magic project
 		@Override
 		protected String getOutputNameFromSettings(IServerAttributes server, IModule module) {
 			String ret = super.getOutputNameFromSettings(server, module);
-			if( ret == null && module.equals(findProjectModule(server))) {
+			if (ret == null && module.equals(findProjectModule(server))) {
 				String suffix = ServerModelUtilities.getDefaultSuffixForModule(module);
 				ret = "ROOT" + suffix;
 			}
 			return ret;
 		}
-		
+
 		protected IModule findProjectModule(IServerAttributes server) {
 			return OpenShiftServerUtils.findProjectModule(OpenShiftServerUtils.getDeployProject(server));
 		}

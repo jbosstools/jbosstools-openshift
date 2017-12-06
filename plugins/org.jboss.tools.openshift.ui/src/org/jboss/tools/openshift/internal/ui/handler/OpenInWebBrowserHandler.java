@@ -68,13 +68,14 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 			new RouteOpenerJob(service.getWrapped().getNamespace(), shell) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					this.routes = service.getResourcesOfKind(ResourceKind.ROUTE).stream().map(r -> (IRoute)r.getWrapped()).collect(Collectors.toList());
+					this.routes = service.getResourcesOfKind(ResourceKind.ROUTE).stream()
+							.map(r -> (IRoute) r.getWrapped()).collect(Collectors.toList());
 					return Status.OK_STATUS;
 				}
 			}.schedule();
 			return Status.OK_STATUS;
 		}
-		
+
 		//Open Project
 		final IProject project = UIUtils.getFirstElement(currentSelection, IProject.class);
 		if (project != null) {
@@ -87,7 +88,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 			}.schedule();
 			return Status.OK_STATUS;
 		}
-		
+
 		//Open Connection
 		final IConnection connection = UIUtils.getFirstElement(currentSelection, IConnection.class);
 		if (connection != null) {
@@ -96,12 +97,12 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 
 		return nothingToOpenDialog(shell);
 	}
-	
+
 	static IStatus nothingToOpenDialog(Shell shell) {
-		MessageDialog.openWarning(shell,"No Route", NO_ROUTE_MSG);
+		MessageDialog.openWarning(shell, "No Route", NO_ROUTE_MSG);
 		return OpenShiftUIActivator.statusFactory().cancelStatus(NO_ROUTE_MSG);
 	}
-	
+
 	protected IStatus openBrowser(Shell shell, IRoute route) {
 		if (route == null) {
 			return nothingToOpenDialog(shell);
@@ -113,8 +114,8 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 		if (StringUtils.isBlank(url)) {
 			return nothingToOpenDialog(shell);
 		}
-		new BrowserUtility().checkedCreateInternalBrowser(url,
-				"", OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
+		new BrowserUtility().checkedCreateInternalBrowser(url, "", OpenShiftUIActivator.PLUGIN_ID,
+				OpenShiftUIActivator.getDefault().getLog());
 		return Status.OK_STATUS;
 	}
 
@@ -137,7 +138,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 				return openBrowser(shell, routes.get(0));
 			}
 			IRoute selectedRoute = SelectedRoutePreference.instance.getSelectedRoute(routes);
-			if(selectedRoute != null) {
+			if (selectedRoute != null) {
 				openBrowser(shell, selectedRoute);
 				return Status.OK_STATUS;
 			}
@@ -145,7 +146,7 @@ public class OpenInWebBrowserHandler extends AbstractHandler {
 			SelectRouteDialog routeDialog = new SelectRouteDialog(routes, shell);
 			if (routeDialog.open() == Dialog.OK) {
 				selectedRoute = routeDialog.getSelectedRoute();
-				if(routeDialog.isRememberChoice()) {
+				if (routeDialog.isRememberChoice()) {
 					SelectedRoutePreference.instance.setSelectedRoute(routes, selectedRoute);
 				}
 				return openBrowser(shell, selectedRoute);
@@ -176,12 +177,14 @@ class SelectedRoutePreference {
 	}
 
 	private void load(String storedValue) {
-		if(StringUtils.isBlank(storedValue)) return;
+		if (StringUtils.isBlank(storedValue))
+			return;
 		String[] items = storedValue.split(ITEMS_SEPARATOR);
-		for (String item: items) {
-			if(StringUtils.isBlank(item)) continue;
+		for (String item : items) {
+			if (StringUtils.isBlank(item))
+				continue;
 			String[] keys = item.split(ITEM_SEPARATOR);
-			if(keys.length == 2) {
+			if (keys.length == 2) {
 				history.add(keys[0]);
 				choices.put(keys[0], keys[1]);
 			}
@@ -190,10 +193,10 @@ class SelectedRoutePreference {
 
 	public IRoute getSelectedRoute(List<IRoute> routes) {
 		String key = getKey(routes);
-		if(choices.containsKey(key)) {
+		if (choices.containsKey(key)) {
 			String selectedRoute = choices.get(key);
-			for (IRoute route: routes) {
-				if(selectedRoute.equals(getKey(route))) {
+			for (IRoute route : routes) {
+				if (selectedRoute.equals(getKey(route))) {
 					//move item to most recent
 					history.remove(key);
 					history.add(key);
@@ -207,13 +210,13 @@ class SelectedRoutePreference {
 	public void setSelectedRoute(List<IRoute> routes, IRoute route) {
 		String routesKey = getKey(routes);
 		String routeKey = getKey(route);
-		if(routeKey == null) {
+		if (routeKey == null) {
 			return; //should not happen, just a precaution
 		}
 		choices.put(routesKey, routeKey);
 		history.remove(routesKey);
 		history.add(routesKey);
-		if(history.size() > HISTORY_LIMIT) {
+		if (history.size() > HISTORY_LIMIT) {
 			String ancient = history.remove(0);
 			choices.remove(ancient);
 		}
@@ -222,15 +225,16 @@ class SelectedRoutePreference {
 
 	private void save() {
 		StringBuilder preference = new StringBuilder();
-		for (String _routesKey: history) {
+		for (String _routesKey : history) {
 			String _routeKey = choices.get(_routesKey);
-			if(preference.length() > 0) preference.append(ITEMS_SEPARATOR);
+			if (preference.length() > 0)
+				preference.append(ITEMS_SEPARATOR);
 			preference.append(_routesKey).append(ITEM_SEPARATOR).append(_routeKey);
 		}
 		preferences.putValue(SELECTED_ROUTE, preference.toString());
 		try {
-			if(preferences instanceof IPersistentPreferenceStore) {
-				((IPersistentPreferenceStore)preferences).save();
+			if (preferences instanceof IPersistentPreferenceStore) {
+				((IPersistentPreferenceStore) preferences).save();
 			}
 		} catch (IOException e) {
 			OpenShiftUIActivator.getDefault().getLogger().logError(e);
@@ -239,7 +243,7 @@ class SelectedRoutePreference {
 
 	public void removeSelectedRoute(List<IRoute> routes) {
 		String routesKey = getKey(routes);
-		if(choices.containsKey(routesKey)) {
+		if (choices.containsKey(routesKey)) {
 			choices.remove(routesKey);
 			history.remove(routesKey);
 			save();
@@ -249,13 +253,15 @@ class SelectedRoutePreference {
 	String getKey(List<IRoute> routes) {
 		//sort to remove the dependency on order
 		Set<String> set = new TreeSet<>();
-		for (IRoute route: routes) {
+		for (IRoute route : routes) {
 			String key = getKey(route);
-			if(key != null) set.add(key);
+			if (key != null)
+				set.add(key);
 		}
 		StringBuilder sb = new StringBuilder();
-		for (String key: set) {
-			if(sb.length() > 0) sb.append(KEY_SEPARATOR);
+		for (String key : set) {
+			if (sb.length() > 0)
+				sb.append(KEY_SEPARATOR);
 			sb.append(key);
 		}
 		return sb.toString();

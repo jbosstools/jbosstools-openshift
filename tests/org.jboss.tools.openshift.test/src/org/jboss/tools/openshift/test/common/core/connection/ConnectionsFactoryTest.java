@@ -34,16 +34,16 @@ public class ConnectionsFactoryTest {
 	private static String OTHER_CONNECTION_FACTORY_ID = OtherConnection.class.getSimpleName() + "ConnectionFactory";
 
 	private IConnectionsFactory connectionsFactory;
-	
+
 	@Before
 	public void setUp() {
 		this.connectionsFactory = new ConnectionsFactory();
-		((ConnectionsFactory) connectionsFactory)
-				.addConnectionFactory(createConnectionFactory(A_CONNECTION_FACTORY_ID, AConnection.class, A_CONNECTION_SERVER));
-		((ConnectionsFactory) connectionsFactory)
-				.addConnectionFactory(createConnectionFactory(OTHER_CONNECTION_FACTORY_ID, OtherConnection.class, OTHER_CONNECTION_SERVER));
+		((ConnectionsFactory) connectionsFactory).addConnectionFactory(
+				createConnectionFactory(A_CONNECTION_FACTORY_ID, AConnection.class, A_CONNECTION_SERVER));
+		((ConnectionsFactory) connectionsFactory).addConnectionFactory(
+				createConnectionFactory(OTHER_CONNECTION_FACTORY_ID, OtherConnection.class, OTHER_CONNECTION_SERVER));
 	}
-	
+
 	@Test
 	public void getAllShouldReturnAllFactories() {
 		// pre-condition
@@ -58,10 +58,11 @@ public class ConnectionsFactoryTest {
 		ConnectionsFactory connectionsFactory = new ConnectionsFactory();
 		Collection<IConnectionFactory> allFactories = connectionsFactory.getAll();
 		assertThat(allFactories).isEmpty();
-	
+
 		// operation
-		((ConnectionsFactory) connectionsFactory).addConnectionFactory(createConnectionFactory(A_CONNECTION_FACTORY_ID, AConnection.class, "http://localhost"));
-		
+		((ConnectionsFactory) connectionsFactory).addConnectionFactory(
+				createConnectionFactory(A_CONNECTION_FACTORY_ID, AConnection.class, "http://localhost"));
+
 		// verification
 		assertThat(connectionsFactory.getAll()).hasSize(1);
 	}
@@ -85,11 +86,13 @@ public class ConnectionsFactoryTest {
 			public DifferentConnection(String host) {
 				super(host);
 			}
-			
+
 		}
-		((ConnectionsFactory) connectionsFactory).addConnectionFactory(createConnectionFactory(createConnectionFactoryId(DifferentConnection.class), DifferentConnection.class, OTHER_CONNECTION_SERVER));
+		((ConnectionsFactory) connectionsFactory)
+				.addConnectionFactory(createConnectionFactory(createConnectionFactoryId(DifferentConnection.class),
+						DifferentConnection.class, OTHER_CONNECTION_SERVER));
 		assertThat(connectionsFactory.getAll()).hasSize(3);
-		
+
 		// operation
 		Collection<IConnectionFactory> aConnectionFactories = connectionsFactory.getAll(AConnection.class);
 
@@ -165,7 +168,7 @@ public class ConnectionsFactoryTest {
 			public String getUserDocText() {
 				return null;
 			}
-};
+		};
 	}
 
 	private static String createConnectionFactoryId(Class<? extends IConnection> clazz) {

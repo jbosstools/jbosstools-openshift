@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.express.internal.ui.wizard.environment;
 import com.openshift.client.IApplication;
 import com.openshift.client.IEnvironmentVariable;
 
-
 /**
  * Wizard that lists the environment variables and edit, add, remove them.
  * 
@@ -21,9 +20,9 @@ import com.openshift.client.IEnvironmentVariable;
 public class EditEnvironmentVariablesWizardModel extends AbstractEnvironmentVariablesWizardModel {
 
 	private IApplication application;
-	
+
 	public EditEnvironmentVariablesWizardModel(IApplication application) {
-		this.application = application;		
+		this.application = application;
 	}
 
 	@Override
@@ -31,7 +30,7 @@ public class EditEnvironmentVariablesWizardModel extends AbstractEnvironmentVari
 		if (!isSupported()) {
 			return;
 		}
-		
+
 		application.refresh();
 		loadEnvironmentVariables();
 	}
@@ -41,7 +40,7 @@ public class EditEnvironmentVariablesWizardModel extends AbstractEnvironmentVari
 		if (!isSupported()) {
 			return;
 		}
-		
+
 		clear();
 		add(application);
 	}
@@ -58,16 +57,13 @@ public class EditEnvironmentVariablesWizardModel extends AbstractEnvironmentVari
 
 	@Override
 	public boolean isSupported() {
-		return application != null
-				&& application.canUpdateEnvironmentVariables()
+		return application != null && application.canUpdateEnvironmentVariables()
 				&& application.canGetEnvironmentVariables();
 	}
-	
+
 	@Override
 	public String getHost() {
-		if (application == null
-				|| application.getDomain() == null
-				|| application.getDomain().getUser() == null) {
+		if (application == null || application.getDomain() == null || application.getDomain().getUser() == null) {
 			return "";
 		}
 		return application.getDomain().getUser().getServer();

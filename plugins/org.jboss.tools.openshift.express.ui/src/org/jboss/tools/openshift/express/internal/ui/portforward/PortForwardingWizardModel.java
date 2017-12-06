@@ -57,7 +57,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	public final IApplication getApplication() {
 		return application;
 	}
-	
+
 	public boolean isPortForwardingStarted() {
 		return application.isPortFowardingStarted();
 	}
@@ -67,7 +67,8 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	}
 
 	public boolean hasForwardablePorts() {
-		return application != null && application.getForwardablePorts() != null && !application.getForwardablePorts().isEmpty();
+		return application != null && application.getForwardablePorts() != null
+				&& !application.getForwardablePorts().isEmpty();
 	}
 
 	public boolean getPortForwarding() throws OpenShiftSSHOperationException {
@@ -161,7 +162,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	 */
 	public void setUseFreePorts(Boolean useFreePorts) throws OpenShiftSSHOperationException {
 		// do not change the current bindings if port forwarding is already started.
-		if (!application.isPortFowardingStarted()) { 
+		if (!application.isPortFowardingStarted()) {
 			updateLocalPortBindings(useFreePorts);
 		}
 		firePropertyChange(PROPERTY_USE_DEFAULT_LOCAL_IP_ADDRESS, this.useFreePorts, this.useFreePorts = useFreePorts);
@@ -212,7 +213,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	public void refreshForwardablePorts() throws OpenShiftSSHOperationException {
 		// we don't reload/refresh the ports if port forwarding is already running since
 		// we then loose the existing local ip/ports.
-		if (!application.isPortFowardingStarted()) { 
+		if (!application.isPortFowardingStarted()) {
 			application.refreshForwardablePorts();
 			updateLocalAddressBindings(this.useDefaultLocalIpAddress);
 			updateLocalPortBindings(this.useFreePorts);
@@ -231,13 +232,11 @@ public class PortForwardingWizardModel extends ObservablePojo {
 		final boolean hasAlreadySSHSession = getApplication().hasSSHSession();
 		if (!hasAlreadySSHSession) {
 			Logger.debug("Opening a new SSH Session for application '" + getApplication().getName() + "'");
-			final Session session = SSHSessionRepository.getInstance().getSession(
-					getApplication());
-				getApplication().setSSHSession(session);
+			final Session session = SSHSessionRepository.getInstance().getSession(getApplication());
+			getApplication().setSSHSession(session);
 		}
 		// now, check if the session is valid (ie, not null and still connected)
 		return getApplication().hasSSHSession();
 	}
-
 
 }

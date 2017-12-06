@@ -40,76 +40,61 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 		if (inputElement instanceof IApplication) {
 			final IApplication application = (IApplication) inputElement;
 			try {
-				elements.add(
-						new StringElement("Name",
-								new ApplicationPropertyGetter(application) {
-									@Override
-									protected String doGet(IApplication application) {
-										return application.getName();
-									}
-								}.safeGet()));
-				elements.add(
-						new StringElement("Public URL",
-								new ApplicationPropertyGetter(application) {
-									@Override
-									protected String doGet(IApplication application) {
-										return application.getApplicationUrl();
-									}
-								}.safeGet(), true));
-				elements.add(new StringElement("Type",
-						new ApplicationPropertyGetter(application) {
-							@Override
-							protected String doGet(IApplication application) {
-								return ExpressResourceLabelUtils.toString(application.getCartridge());
-							}
-						}.safeGet()));
-				elements.add(
-						new StringElement("Created on",
-								new ApplicationPropertyGetter(application) {
-									@Override
-									protected String doGet(IApplication application) {
-										return new SimpleDateFormat("yyyy/MM/dd 'at' HH:mm:ss").format(application
-												.getCreationTime());
-									}
-								}.safeGet()));
-				elements.add(new StringElement("UUID",
-						new ApplicationPropertyGetter(application) {
-							@Override
-							protected String doGet(IApplication application) {
-								return application.getUUID();
-							}
-						}.safeGet()));
-				elements.add(new StringElement("Git URL",
-						new ApplicationPropertyGetter(application) {
-							@Override
-							protected String doGet(IApplication application) {
-								return application.getGitUrl();
-							}
-						}.safeGet()));
-				elements.add(new StringElement("SSH ExpressConnection",
-						new ApplicationPropertyGetter(application) {
-							@Override
-							protected String doGet(IApplication application) {
-								String gitUrl = application.getGitUrl();
-								return new StringBuilder(EGitUtils.getGitUsername(gitUrl))
-										.append('@')
-										.append(EGitUtils.getGitHost(gitUrl))
-										.toString();
-							}
-						}.safeGet()));
-				elements.add(new StringElement("Scalable",
-						new ApplicationPropertyGetter(application) {
-							@Override
-							protected String doGet(IApplication application) {
-								return application.getApplicationScale().getValue();
-							}
-						}.safeGet()));
-				elements.add(
-						createCartridges(new ContainerElement("Cartridges"), application));
+				elements.add(new StringElement("Name", new ApplicationPropertyGetter(application) {
+					@Override
+					protected String doGet(IApplication application) {
+						return application.getName();
+					}
+				}.safeGet()));
+				elements.add(new StringElement("Public URL", new ApplicationPropertyGetter(application) {
+					@Override
+					protected String doGet(IApplication application) {
+						return application.getApplicationUrl();
+					}
+				}.safeGet(), true));
+				elements.add(new StringElement("Type", new ApplicationPropertyGetter(application) {
+					@Override
+					protected String doGet(IApplication application) {
+						return ExpressResourceLabelUtils.toString(application.getCartridge());
+					}
+				}.safeGet()));
+				elements.add(new StringElement("Created on", new ApplicationPropertyGetter(application) {
+					@Override
+					protected String doGet(IApplication application) {
+						return new SimpleDateFormat("yyyy/MM/dd 'at' HH:mm:ss").format(application.getCreationTime());
+					}
+				}.safeGet()));
+				elements.add(new StringElement("UUID", new ApplicationPropertyGetter(application) {
+					@Override
+					protected String doGet(IApplication application) {
+						return application.getUUID();
+					}
+				}.safeGet()));
+				elements.add(new StringElement("Git URL", new ApplicationPropertyGetter(application) {
+					@Override
+					protected String doGet(IApplication application) {
+						return application.getGitUrl();
+					}
+				}.safeGet()));
+				elements.add(new StringElement("SSH ExpressConnection", new ApplicationPropertyGetter(application) {
+					@Override
+					protected String doGet(IApplication application) {
+						String gitUrl = application.getGitUrl();
+						return new StringBuilder(EGitUtils.getGitUsername(gitUrl)).append('@')
+								.append(EGitUtils.getGitHost(gitUrl)).toString();
+					}
+				}.safeGet()));
+				elements.add(new StringElement("Scalable", new ApplicationPropertyGetter(application) {
+					@Override
+					protected String doGet(IApplication application) {
+						return application.getApplicationScale().getValue();
+					}
+				}.safeGet()));
+				elements.add(createCartridges(new ContainerElement("Cartridges"), application));
 
 			} catch (Exception e) {
-				Logger.error(
-						NLS.bind("Could not display details for OpenShift application {0}", application.getName()), e);
+				Logger.error(NLS.bind("Could not display details for OpenShift application {0}", application.getName()),
+						e);
 			}
 		}
 		return elements.toArray();
@@ -118,15 +103,12 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 	private ContainerElement createCartridges(ContainerElement cartridgesContainer, IApplication application)
 			throws OpenShiftException {
 		for (IEmbeddedCartridge cartridge : application.getEmbeddedCartridges()) {
-			cartridgesContainer.add(
-					new StringElement(
-							cartridge.getName(),
-							new ApplicationPropertyGetter(application) {
-								@Override
-								protected String doGet(IApplication application) {
-									return application.getApplicationScale().getValue();
-								}
-							}.safeGet(), true));
+			cartridgesContainer.add(new StringElement(cartridge.getName(), new ApplicationPropertyGetter(application) {
+				@Override
+				protected String doGet(IApplication application) {
+					return application.getApplicationScale().getValue();
+				}
+			}.safeGet(), true));
 		}
 		return cartridgesContainer;
 	}
@@ -145,8 +127,8 @@ public class ApplicationDetailsContentProvider extends AbstractPropertyTableCont
 			try {
 				return doGet(application);
 			} catch (Exception e) {
-				Logger.error(
-						NLS.bind("Could not display details for OpenShift application {0}", application.getName()), e);
+				Logger.error(NLS.bind("Could not display details for OpenShift application {0}", application.getName()),
+						e);
 				return "<could not get property>";
 			}
 		}

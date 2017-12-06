@@ -80,10 +80,8 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 	private RemoteNameValidationStatusProvider remoteNameValidator;
 	private Link sshLink;
 
-	public GitCloningSettingsWizardPage(ExpressApplicationWizard wizard,
-			IOpenShiftApplicationWizardModel wizardModel) {
-		super(
-				"Import an existing OpenShift application",
+	public GitCloningSettingsWizardPage(ExpressApplicationWizard wizard, IOpenShiftApplicationWizardModel wizardModel) {
+		super("Import an existing OpenShift application",
 				"Configure the cloning settings by specifying the clone destination if you create a new project, and the git remote name if you're using an existing project.",
 				"Cloning settings", wizard);
 		this.pageModel = new GitCloningSettingsWizardPageModel(wizardModel);
@@ -103,14 +101,11 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 		Group cloneGroup = new Group(parent, SWT.NONE);
 		cloneGroup.setText("Cloning settings");
 		cloneGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		GridLayoutFactory.fillDefaults()
-				.numColumns(3).equalWidth(false).margins(10, 10).applyTo(cloneGroup);
+		GridLayoutFactory.fillDefaults().numColumns(3).equalWidth(false).margins(10, 10).applyTo(cloneGroup);
 
 		Composite composite = new Composite(cloneGroup, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(3).margins(15, 15).applyTo(composite);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(composite);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(15, 15).applyTo(composite);
 		// Repo Path Management
 		this.useDefaultRepoPathButton = new Button(composite, SWT.CHECK);
 		useDefaultRepoPathButton.setText("Use default clone destination");
@@ -124,20 +119,18 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).align(SWT.FILL, SWT.CENTER).grab(true, false)
 				.applyTo(repoPathText);
 		final IObservableValue repoPathObservable = WidgetProperties.text(SWT.Modify).observe(repoPathText);
-		final IObservableValue repoPathModelObservable =
-				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REPO_PATH).observe(pageModel);
+		final IObservableValue repoPathModelObservable = BeanProperties
+				.value(GitCloningSettingsWizardPageModel.PROPERTY_REPO_PATH).observe(pageModel);
 		ValueBindingBuilder.bind(repoPathObservable).to(repoPathModelObservable).in(dbc);
 
 		Button browseRepoPathButton = new Button(composite, SWT.PUSH);
 		browseRepoPathButton.setText("Browse...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseRepoPathButton);
 		browseRepoPathButton.addSelectionListener(onRepoPath());
 
-		final IObservableValue isDefaultRepoObservable =
-				WidgetProperties.selection().observe(useDefaultRepoPathButton);
-		final IObservableValue useDefaultRepoModelObservable = BeanProperties.value(
-				GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REPO_PATH).observe(pageModel);
+		final IObservableValue isDefaultRepoObservable = WidgetProperties.selection().observe(useDefaultRepoPathButton);
+		final IObservableValue useDefaultRepoModelObservable = BeanProperties
+				.value(GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REPO_PATH).observe(pageModel);
 		ValueBindingBuilder.bind(isDefaultRepoObservable).to(useDefaultRepoModelObservable).in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(repoPathText))
 				.notUpdating(useDefaultRepoModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
@@ -147,13 +140,9 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 		// 'Use default location' option.
 		UIUtils.focusOnSelection(useDefaultRepoPathButton, repoPathText);
 
-		this.repoPathValidator =
-				new RepoPathValidationStatusProvider(
-						repoPathObservable
-						, BeanProperties.value(
-								GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel)
-						, BeanProperties.value(
-								GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel));
+		this.repoPathValidator = new RepoPathValidationStatusProvider(repoPathObservable,
+				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel),
+				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_NEW_PROJECT).observe(pageModel));
 		dbc.addValidationStatusProvider(repoPathValidator);
 		ControlDecorationSupport.create(repoPathValidator, SWT.LEFT | SWT.TOP);
 
@@ -171,50 +160,41 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 				.grab(true, false).applyTo(remoteNameText);
 
 		final IObservableValue remoteNameTextObservable = WidgetProperties.text(SWT.Modify).observe(remoteNameText);
-		final IObservableValue remoteNameModelObservable =
-				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_REMOTE_NAME).observe(pageModel);
+		final IObservableValue remoteNameModelObservable = BeanProperties
+				.value(GitCloningSettingsWizardPageModel.PROPERTY_REMOTE_NAME).observe(pageModel);
 		ValueBindingBuilder.bind(remoteNameTextObservable).to(remoteNameModelObservable).in(dbc);
 
-		final IObservableValue useDefaultRemoteNameModelObservable =
-				BeanProperties.value(GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REMOTE_NAME).observe(
-						pageModel);
-		final IObservableValue useDefaultRemoteNameObservable =
-				WidgetProperties.selection().observe(useDefaultRemoteNameButton);
-		ValueBindingBuilder
-				.bind(useDefaultRemoteNameObservable)
-				.to(useDefaultRemoteNameModelObservable)
-				.in(dbc);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(remoteNameText))
+		final IObservableValue useDefaultRemoteNameModelObservable = BeanProperties
+				.value(GitCloningSettingsWizardPageModel.PROPERTY_USE_DEFAULT_REMOTE_NAME).observe(pageModel);
+		final IObservableValue useDefaultRemoteNameObservable = WidgetProperties.selection()
+				.observe(useDefaultRemoteNameButton);
+		ValueBindingBuilder.bind(useDefaultRemoteNameObservable).to(useDefaultRemoteNameModelObservable).in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(remoteNameText))
 				.notUpdating(useDefaultRemoteNameModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(remoteNameLabel))
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(remoteNameLabel))
 				.notUpdating(useDefaultRemoteNameModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
 		// move focus to the project name text control when choosing the 'Use an
 		// existing project' option.
 		useDefaultRemoteNameButton.addSelectionListener(onDefaultRemoteNameUnchecked());
-		final IObservableValue projectNameModelObservable =
-				BeanProperties.value(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME).observe(wizardModel);
+		final IObservableValue projectNameModelObservable = BeanProperties
+				.value(IOpenShiftApplicationWizardModel.PROP_PROJECT_NAME).observe(wizardModel);
 
-		dbc.addValidationStatusProvider(
-				this.remoteNameValidator =
-						new RemoteNameValidationStatusProvider(remoteNameTextObservable, projectNameModelObservable));
+		dbc.addValidationStatusProvider(this.remoteNameValidator = new RemoteNameValidationStatusProvider(
+				remoteNameTextObservable, projectNameModelObservable));
 		ControlDecorationSupport.create(remoteNameValidator, SWT.LEFT | SWT.TOP);
 
 		this.sshLink = new Link(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0).applyTo(sshLink);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).indent(10, 0).applyTo(sshLink);
 		sshLink.addSelectionListener(onSshPrefs("SSH2 Preferences"));
 		sshLink.addSelectionListener(onManageSSHKeys("SSH Keys wizard", dbc));
-		
+
 		// we need a binding to have validation setting wizard validation status
 		Label dummyLabel = new Label(parent, SWT.None);
 		dummyLabel.setVisible(false);
 		GridDataFactory.fillDefaults().exclude(true).applyTo(dummyLabel);
 		ValueBindingBuilder
-				.bind(WidgetProperties.text().observe(dummyLabel))
-				.notUpdating(BeanProperties.value(
-						GitCloningSettingsWizardPageModel.PROPERTY_HAS_REMOTEKEYS).observe(pageModel))
+				.bind(WidgetProperties.text().observe(dummyLabel)).notUpdating(BeanProperties
+						.value(GitCloningSettingsWizardPageModel.PROPERTY_HAS_REMOTEKEYS).observe(pageModel))
 				.validatingAfterGet(new IValidator() {
 
 					@Override
@@ -230,8 +210,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 									.error("No public keys found in your account. Please use the SSH keys wizard.");
 						}
 					}
-				})
-				.in(dbc);
+				}).in(dbc);
 		refreshHasRemoteKeys(dbc);
 		return cloneGroup;
 	}
@@ -277,8 +256,8 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void doWidgetSelected(SelectionEvent e) {
-				WizardDialog manageSSHKeysWizard =
-						new OkButtonWizardDialog(getShell(), new ManageSSHKeysWizard(pageModel.getConnection()));
+				WizardDialog manageSSHKeysWizard = new OkButtonWizardDialog(getShell(),
+						new ManageSSHKeysWizard(pageModel.getConnection()));
 				if (manageSSHKeysWizard.open() == Dialog.OK) {
 					refreshHasRemoteKeys(dbc);
 				}
@@ -300,7 +279,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 	private void setSSHLinkText() {
 		if (pageModel.isConnected()) {
 			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account "
-					+ pageModel.getConnection().getUsername() 
+					+ pageModel.getConnection().getUsername()
 					+ " via <a>SSH Keys wizard</a> and that the private keys are listed in <a>SSH2 Preferences</a>");
 		} else {
 			sshLink.setText("Make sure that you have SSH keys added to your OpenShift account"
@@ -319,12 +298,12 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 				@Override
 				public IStatus runInUIThread(IProgressMonitor monitor) {
-					IStatus status = loadKeysJob.getResult(); 
-					if(status.equals(Status.OK_STATUS)){
+					IStatus status = loadKeysJob.getResult();
+					if (status.equals(Status.OK_STATUS)) {
 						pageModel.setHasRemoteKeys(loadKeysJob.getKeys().size() > 0);
 						setErrorMessage(null);
 						return Status.OK_STATUS;
-					}else{
+					} else {
 						setErrorMessage(status.getMessage());
 						return status;
 					}
@@ -332,8 +311,8 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 			});
 			WizardUtils.runInWizard(loadKeysJob, getContainer(), dbc);
 		} catch (Exception e) {
-			StatusManager.getManager().handle(
-					ExpressUIActivator.createErrorStatus("Could not load ssh keys.", e), StatusManager.LOG);
+			StatusManager.getManager().handle(ExpressUIActivator.createErrorStatus("Could not load ssh keys.", e),
+					StatusManager.LOG);
 		}
 	}
 
@@ -386,19 +365,17 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 			if (newProject) {
 				final IPath repoResourcePath = new Path(repoPath);
-				if (repoResourcePath.isEmpty()
-						|| !repoResourcePath.isAbsolute()) {
+				if (repoResourcePath.isEmpty() || !repoResourcePath.isAbsolute()) {
 					return ValidationStatus.cancel("You need to provide an absolute path that we'll clone to.");
 				} else if (!FileUtils.canWrite(repoResourcePath.toOSString())) {
-					return ValidationStatus.error(
-							NLS.bind("The location {0} is not writeable.", repoResourcePath.toOSString()));
-				} 
-				final IPath applicationPath = applicationName != null ?
-						repoResourcePath.append(new Path(applicationName)) : null;
-				if (applicationPath != null
-						&& applicationPath.toFile().exists()) {
-					return ValidationStatus.error(
-							NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
+					return ValidationStatus
+							.error(NLS.bind("The location {0} is not writeable.", repoResourcePath.toOSString()));
+				}
+				final IPath applicationPath = applicationName != null
+						? repoResourcePath.append(new Path(applicationName)) : null;
+				if (applicationPath != null && applicationPath.toFile().exists()) {
+					return ValidationStatus
+							.error(NLS.bind("The location \"{0}\" already contains a folder named \"{1}\"",
 									repoResourcePath.toOSString(), applicationName));
 				}
 			}
@@ -436,15 +413,12 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 			// The name and state of the existing project do
 			// not matter...
 			if (StringUtils.isEmpty(remoteName)) {
-				return ExpressUIActivator.createErrorStatus(
-						"The custom remote name must not be empty.");
+				return ExpressUIActivator.createErrorStatus("The custom remote name must not be empty.");
 			} else if (!remoteName.matches("\\S+")) {
+				return ExpressUIActivator.createErrorStatus("The custom remote name must not contain spaces.");
+			} else if (!pageModel.isNewProject() && hasRemoteName(remoteName, getProject(projectName))) {
 				return ExpressUIActivator.createErrorStatus(
-						"The custom remote name must not contain spaces.");
-			} else if (!pageModel.isNewProject()
-					&& hasRemoteName(remoteName, getProject(projectName))) {
-				return ExpressUIActivator.createErrorStatus(NLS.bind(
-						"The project {0} already has a remote named {1}.", projectName, remoteName));
+						NLS.bind("The project {0} already has a remote named {1}.", projectName, remoteName));
 			}
 			return status;
 		}
@@ -458,8 +432,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 
 		private boolean hasRemoteName(String remoteName, IProject project) {
 			try {
-				if (project == null
-						|| !project.isAccessible()) {
+				if (project == null || !project.isAccessible()) {
 					return false;
 				}
 
@@ -473,7 +446,7 @@ public class GitCloningSettingsWizardPage extends AbstractOpenShiftWizardPage {
 				return false;
 			}
 		}
-		
+
 		public void forceRevalidate() {
 			revalidate();
 		}

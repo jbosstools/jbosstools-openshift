@@ -46,8 +46,7 @@ public class GitIgnore {
 
 	private void initEntries(IFile gitIgnore) throws IOException, CoreException {
 		this.entries = new LinkedHashSet<>();
-		if (gitIgnore == null
-				|| !gitIgnore.isAccessible()) {
+		if (gitIgnore == null || !gitIgnore.isAccessible()) {
 			return;
 		}
 		BufferedReader reader = null;
@@ -99,8 +98,7 @@ public class GitIgnore {
 	}
 
 	public boolean exists() {
-		return file != null
-				&& file.exists();
+		return file != null && file.exists();
 	}
 
 	private void safeClose(Reader reader) {

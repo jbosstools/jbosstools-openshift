@@ -13,7 +13,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 import com.openshift.restclient.model.IService;
 
-public class ServicePropertySource extends ResourcePropertySource<IService>{
+public class ServicePropertySource extends ResourcePropertySource<IService> {
 
 	public ServicePropertySource(IService resource) {
 		super(resource);
@@ -21,24 +21,23 @@ public class ServicePropertySource extends ResourcePropertySource<IService>{
 
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new UneditablePropertyDescriptor("selector", "Selector"),
-				new UneditablePropertyDescriptor("port", "Port"),
-				new UneditablePropertyDescriptor("portalIp", "IP"),
-				new UneditablePropertyDescriptor("containerPort", "Container Port")
-		};
+		return new IPropertyDescriptor[] { new UneditablePropertyDescriptor("selector", "Selector"),
+				new UneditablePropertyDescriptor("port", "Port"), new UneditablePropertyDescriptor("portalIp", "IP"),
+				new UneditablePropertyDescriptor("containerPort", "Container Port") };
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		if("portalIp".equals(id)) return getResource().getPortalIP();
-		if("containerPort".equals(id)) return getResource().getTargetPort();
-		if("selector".equals(id)){
+		if ("portalIp".equals(id))
+			return getResource().getPortalIP();
+		if ("containerPort".equals(id))
+			return getResource().getTargetPort();
+		if ("selector".equals(id)) {
 			return StringUtils.serialize(getResource().getSelector());
 		}
-		if("port".equals(id))
+		if ("port".equals(id))
 			return getResource().getPort();
 		return super.getPropertyValue(id);
 	}
-	
+
 }

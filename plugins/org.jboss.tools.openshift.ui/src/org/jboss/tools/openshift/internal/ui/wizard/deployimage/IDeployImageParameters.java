@@ -21,18 +21,15 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageMo
  * @author jeff.cantrill
  *
  */
-public interface IDeployImageParameters 
-	extends IDeployImagePageModel, 
-			IDeploymentConfigPageModel, 
-			IResourceLabelsPageModel,
-			IServiceAndRoutingPageModel{
+public interface IDeployImageParameters extends IDeployImagePageModel, IDeploymentConfigPageModel,
+		IResourceLabelsPageModel, IServiceAndRoutingPageModel {
 
 	void setOriginatedFromDockerExplorer(boolean b);
-	
+
 	/**
 	 * Retrieve the env vars declared by the image
 	 * @return
 	 */
 	Map<String, String> getImageEnvVars();
-	
+
 }

@@ -90,7 +90,7 @@ public class GitIgnoreTest {
 			silentlyDelete(project);
 		}
 	}
-	
+
 	@Test
 	public void writingDoesNotAlterOrdering() throws CoreException, IOException {
 		IFile gitIgnoreFile = null;
@@ -104,7 +104,7 @@ public class GitIgnoreTest {
 
 			String entriesAfterWrite = FileUtil.readStream(gitIgnoreFile);
 			assertEquals(entries, entriesAfterWrite);
-			
+
 		} finally {
 			silentlyDelete(project);
 		}
@@ -169,8 +169,7 @@ public class GitIgnoreTest {
 	}
 
 	private void silentlyDelete(IProject project) {
-		if (project == null
-				|| !project.isAccessible()) {
+		if (project == null || !project.isAccessible()) {
 			return;
 		}
 		try {

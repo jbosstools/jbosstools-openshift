@@ -47,36 +47,35 @@ import com.openshift.client.IHttpClient.ISSLCertificateCallback;
  * @author André Dietisheim
  */
 public class SSLCertificateCallback implements ISSLCertificateCallback {
-	
+
 	private static final boolean REMEMBER_DECISION_DEFAULT = true;
 
 	private boolean rememberDecision = REMEMBER_DECISION_DEFAULT;
 
 	// TODO: store certificates and decision in Eclipse preferences
 	private Map<X509Certificate, Boolean> allowByCertificate = new HashMap<>();
-	
+
 	@Override
 	public boolean allowCertificate(final X509Certificate[] certificateChain) {
 
-		if(allowByCertificate.containsKey(certificateChain[0])) {
+		if (allowByCertificate.containsKey(certificateChain[0])) {
 			return allowByCertificate.get(certificateChain[0]);
 		}
-		
+
 		boolean allow = openCertificateDialog(certificateChain);
 		if (rememberDecision) {
 			allowByCertificate.put(certificateChain[0], allow);
 		}
 		return allow;
 	}
-	
+
 	protected boolean openCertificateDialog(final X509Certificate[] certificateChain) {
 		final AtomicBoolean atomicBoolean = new AtomicBoolean();
 		Display.getDefault().syncExec(new Runnable() {
-			
+
 			@Override
 			public void run() {
-				atomicBoolean.set(
-						new SSLCertificateDialog(UIUtils.getShell(), certificateChain).open() == Dialog.OK);
+				atomicBoolean.set(new SSLCertificateDialog(UIUtils.getShell(), certificateChain).open() == Dialog.OK);
 			}
 		});
 		return atomicBoolean.get();
@@ -121,17 +120,16 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 
 			StyledText certificateText = new StyledText(container, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
 			certificateText.setEditable(false);
-			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.FILL).grab(false, true).hint(400, SWT.DEFAULT).applyTo(certificateText);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, true).hint(400, SWT.DEFAULT)
+					.applyTo(certificateText);
 			writeCertificate(certificateChain, certificateText);
-			
+
 			Button rememberCheckbox = new Button(container, SWT.CHECK);
 			rememberCheckbox.setText("Remember decision for the current Eclipse session");
 			rememberCheckbox.setSelection(rememberDecision);
 			rememberCheckbox.addSelectionListener(onRememberCertificate(certificateChain[0]));
-			GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(rememberCheckbox);
-			
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(rememberCheckbox);
+
 			return container;
 		}
 
@@ -144,8 +142,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 		private void writeCertificate(X509Certificate[] certificateChain, StyledText styledText) {
 			List<StyleRange> styles = new ArrayList<>();
 			StringBuilder builder = new StringBuilder();
-			if (certificateChain == null
-					|| certificateChain.length == 0) {
+			if (certificateChain == null || certificateChain.length == 0) {
 				return;
 			}
 
@@ -158,7 +155,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 			if (certificate == null) {
 				return;
 			}
-			
+
 			HumanReadableX509Certificate humanReadableCertificate = new HumanReadableX509Certificate(certificate);
 			appendLabeledValue("Issued By:\n", humanReadableCertificate.getIssuedBy(), builder, styles);
 			appendLabeledValue("Validity:\n", humanReadableCertificate.getValidity(), builder, styles);
@@ -171,10 +168,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 		}
 
 		private void appendValue(String value, StringBuilder builder) {
-			builder
-					.append(value)
-					.append(StringUtils.getLineSeparator())
-					.append(StringUtils.getLineSeparator());
+			builder.append(value).append(StringUtils.getLineSeparator()).append(StringUtils.getLineSeparator());
 		}
 
 		private void appendLabel(String label, StringBuilder builder, List<StyleRange> styles) {

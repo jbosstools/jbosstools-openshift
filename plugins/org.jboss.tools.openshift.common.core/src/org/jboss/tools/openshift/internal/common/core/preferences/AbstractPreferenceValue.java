@@ -28,7 +28,7 @@ public abstract class AbstractPreferenceValue<TYPE> {
 	}
 
 	public abstract TYPE get();
-			
+
 	protected String doGet() {
 		Preferences prefs = getPreferences(pluginId);
 		return prefs.get(prefsKey, "");
@@ -36,23 +36,20 @@ public abstract class AbstractPreferenceValue<TYPE> {
 
 	public void clear() throws BackingStoreException {
 		String prefsValue = doGet();
-		if (prefsValue == null
-				|| prefsValue == null) {
+		if (prefsValue == null || prefsValue == null) {
 			return;
 		}
 		getPreferences(pluginId).clear();
 	}
-		
+
 	public void set(TYPE value) {
 		doStore(String.valueOf(value));
 	}
-	
+
 	protected void doStore(String value) {
 		Preferences prefs = getPreferences(pluginId);
 		String prefsValue = prefs.get(prefsKey, "");
-		if (prefsValue == null
-				|| prefsValue.equals("") 
-				|| !prefsValue.equals(value)) {
+		if (prefsValue == null || prefsValue.equals("") || !prefsValue.equals(value)) {
 			prefs.put(prefsKey, value);
 			try {
 				prefs.flush();

@@ -27,7 +27,7 @@ public class OkButtonWizardDialog extends WizardDialog {
 	public OkButtonWizardDialog(Shell parentShell, IWizard newWizard) {
 		super(parentShell, newWizard);
 	}
-	
+
 	@Override
 	protected Control createButtonBar(Composite parent) {
 		Control control = super.createButtonBar(parent);

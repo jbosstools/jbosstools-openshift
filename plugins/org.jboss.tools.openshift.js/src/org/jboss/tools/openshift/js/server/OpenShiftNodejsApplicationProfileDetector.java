@@ -19,7 +19,7 @@ import org.jboss.tools.openshift.core.server.adapter.ProjectBuilderTypeDetector;
 import com.openshift.restclient.model.IResource;
 
 public class OpenShiftNodejsApplicationProfileDetector implements IOpenshiftServerAdapterProfileDetector {
-	
+
 	public static final String PROFILE = "openshift3.nodejs";
 	private static final String TEMPLATES_TAG_NODEJS = "node";
 

@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.test.internal;
 
 import static org.mockito.Matchers.anyString;
@@ -31,9 +31,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class CDKLaunchControllerTest {
-	
+
 	private CDKLaunchController controller;
-	
+
 	@Before
 	public void setUp() {
 		controller = new CDKLaunchController();
@@ -44,23 +44,24 @@ public class CDKLaunchControllerTest {
 		ILaunchConfigurationWorkingCopy wc = mock(ILaunchConfigurationWorkingCopy.class);
 		String userName = "Drumpf";
 		IServer server = mockServer();
-		
+
 		controller.initialize(wc, userName, server);
-		
+
 		Map<String, String> env = Collections.singletonMap(CDKConstants.CDK_ENV_SUB_USERNAME, userName);
 		verify(wc).setAttribute(CDKLaunchController.FLAG_INITIALIZED, Boolean.TRUE);
 		verify(wc).setAttribute(eq(IExternalLaunchConstants.ENVIRONMENT_VARS_KEY), eq(env));
 		verify(wc).setAttribute(IExternalLaunchConstants.ATTR_ARGS, "up --no-color");
 		verify(wc).setAttribute(eq(IExternalLaunchConstants.ATTR_LOCATION), anyString());
 	}
-	
+
 	private IServer mockServer() {
 		IServer server = mock(IServer.class);
 		when(server.getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false)).thenReturn(Boolean.TRUE);
-		when(server.getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME)).thenReturn(CDKConstants.CDK_ENV_SUB_USERNAME);
-		
+		when(server.getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME))
+				.thenReturn(CDKConstants.CDK_ENV_SUB_USERNAME);
+
 		CDKServer cdk = mock(CDKServer.class);
-		
+
 		when(cdk.passCredentials()).thenReturn(Boolean.TRUE);
 		when(cdk.getUserEnvironmentKey()).thenReturn(CDKConstants.CDK_ENV_SUB_USERNAME);
 		when(server.loadAdapter(eq(CDKServer.class), any(IProgressMonitor.class))).thenReturn(cdk);

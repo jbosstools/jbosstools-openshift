@@ -36,7 +36,7 @@ import org.jboss.tools.openshift.internal.common.core.OpenShiftCommonCoreActivat
 public class ConnectionURL {
 
 	private static final Pattern MALFORMED_URL_PATTERN = Pattern.compile("(https?://)?([^@]+)?@(https?://)?(.*)");
-	
+
 	private String username;
 	private String host;
 	private String scheme;
@@ -63,7 +63,7 @@ public class ConnectionURL {
 		}
 		return scheme + host;
 	}
-	
+
 	public boolean isDefaultHost() {
 		return StringUtils.isEmpty(host);
 	}
@@ -101,7 +101,7 @@ public class ConnectionURL {
 	public String toString() {
 		return url;
 	}
-	
+
 	public String getUrl() {
 		return url;
 	}
@@ -125,7 +125,7 @@ public class ConnectionURL {
 	public static ConnectionURL forHost(String host) {
 		return forHost(host);
 	}
-	
+
 	public static ConnectionURL forUsernameAndHost(String username, String host)
 			throws UnsupportedEncodingException, MalformedURLException {
 		if (StringUtils.isEmpty(username)) {
@@ -137,8 +137,8 @@ public class ConnectionURL {
 		UrlPortions portions = UrlUtils.toPortions(host);
 		return new ConnectionURL(username, portions.getHost(), portions.getScheme());
 	}
-	
-	public static ConnectionURL forConnection(IConnection connection) 
+
+	public static ConnectionURL forConnection(IConnection connection)
 			throws UnsupportedEncodingException, MalformedURLException {
 		if (connection == null) {
 			return null;
@@ -159,13 +159,17 @@ public class ConnectionURL {
 	 * @param connection
 	 * @return the value or null if there is an exception
 	 */
-	public static ConnectionURL safeForConnection(IConnection connection) { 
+	public static ConnectionURL safeForConnection(IConnection connection) {
 		try {
 			return forConnection(connection);
 		} catch (MalformedURLException e) {
-			OpenShiftCommonCoreActivator.pluginLog().logError(NLS.bind("Unable to getConnectionURL for connection {0}@{1}", connection.getUsername(), connection.getHost()), e);
+			OpenShiftCommonCoreActivator.pluginLog()
+					.logError(NLS.bind("Unable to getConnectionURL for connection {0}@{1}", connection.getUsername(),
+							connection.getHost()), e);
 		} catch (UnsupportedEncodingException e) {
-			OpenShiftCommonCoreActivator.pluginLog().logError(NLS.bind("Unable to getConnectionURL for connection {0}@{1}", connection.getUsername(), connection.getHost()), e);
+			OpenShiftCommonCoreActivator.pluginLog()
+					.logError(NLS.bind("Unable to getConnectionURL for connection {0}@{1}", connection.getUsername(),
+							connection.getHost()), e);
 		}
 		return null;
 	}
@@ -194,7 +198,8 @@ public class ConnectionURL {
 		try {
 			return forURL(url);
 		} catch (UnsupportedEncodingException | MalformedURLException e) {
-			OpenShiftCommonCoreActivator.pluginLog().logError(NLS.bind("Unable to getConnectionURL for connection url {0}", url), e);
+			OpenShiftCommonCoreActivator.pluginLog()
+					.logError(NLS.bind("Unable to getConnectionURL for connection url {0}", url), e);
 			return null;
 		}
 	}
@@ -221,8 +226,7 @@ public class ConnectionURL {
 
 	private static String correctMalformedUrl(String url) {
 		Matcher matcher = MALFORMED_URL_PATTERN.matcher(url);
-		if (!matcher.matches()
-				|| matcher.groupCount() != 4) {
+		if (!matcher.matches() || matcher.groupCount() != 4) {
 			return url;
 		}
 
@@ -231,19 +235,12 @@ public class ConnectionURL {
 			return url;
 		}
 
-		if (StringUtils.isEmpty(matcher.group(4))
-				&& !StringUtils.isEmpty(matcher.group(3))) {
+		if (StringUtils.isEmpty(matcher.group(4)) && !StringUtils.isEmpty(matcher.group(3))) {
 			// adietish%40redhat.com@http://
-			return new StringBuilder(matcher.group(3))
-					.append(matcher.group(2))
-					.append('@')
-					.toString();
+			return new StringBuilder(matcher.group(3)).append(matcher.group(2)).append('@').toString();
 		} else if (!StringUtils.isEmpty(matcher.group(3))) {
 			// adietish%40redhat.com@https://openshift.redhat.com
-			return new StringBuilder(matcher.group(3))
-					.append(matcher.group(2))
-					.append('@')
-					.append(matcher.group(4))
+			return new StringBuilder(matcher.group(3)).append(matcher.group(2)).append('@').append(matcher.group(4))
 					.toString();
 		} else {
 			return url;

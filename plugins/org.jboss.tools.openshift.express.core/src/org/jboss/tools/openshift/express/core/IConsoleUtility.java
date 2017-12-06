@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.express.core;
 
 import java.io.OutputStream;
@@ -24,7 +24,7 @@ import org.eclipse.wst.server.core.IServer;
  * in the {@link ExpressCoreUIIntegration} class. 
  */
 public interface IConsoleUtility {
-	
+
 	/**
 	 * Open and bring to the front the console 
 	 * for the given server. 
@@ -40,7 +40,7 @@ public interface IConsoleUtility {
 	 * @return
 	 */
 	public OutputStream getServerConsoleOutputStream(IServer server);
-	
+
 	/**
 	 * Append the given text to the console for the given server. 
 	 * This is a convenience method and is functionally equivilent to 

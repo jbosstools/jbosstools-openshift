@@ -46,7 +46,8 @@ public class HumanReadableX509CertificateTest {
 
 	@Before
 	public void setup() throws Exception {
-		this.certificate = new HumanReadableX509Certificate(SSLCertificateUtils.createX509Certificate(CERTIFICATE_REDHAT_COM));
+		this.certificate = new HumanReadableX509Certificate(
+				SSLCertificateUtils.createX509Certificate(CERTIFICATE_REDHAT_COM));
 	}
 
 	@Test
@@ -79,8 +80,8 @@ public class HumanReadableX509CertificateTest {
 		String issuedBy = certificate.getIssuedBy();
 		// then
 		assertThat(getValue(LABEL_PRINCIPAL_COUNTRY, issuedBy)).isEqualTo("US");
-        assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedBy)).isEqualTo("Symantec Corporation");
-        assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedBy)).isEqualTo("Symantec Trust Network");
+		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATION, issuedBy)).isEqualTo("Symantec Corporation");
+		assertThat(getValue(LABEL_PRINCIPAL_ORGANISATIONAL_UNIT, issuedBy)).isEqualTo("Symantec Trust Network");
 		assertThat(getValue(LABEL_PRINCIPAL_COMMON_NAME, issuedBy)).isEqualTo("Symantec Class 3 EV SSL CA - G3");
 	}
 
@@ -113,7 +114,7 @@ public class HumanReadableX509CertificateTest {
 		calendar.setTime(date);
 		return calendar;
 	}
-	
+
 	private String getValue(String identifier, String string) {
 		assertThat(string).isNotEmpty();
 
@@ -121,9 +122,11 @@ public class HumanReadableX509CertificateTest {
 		assertThat(valueIndexOf).as("identifier %s could not be found in %s", identifier, string).isNotNegative();
 
 		int eolIndexOf = string.indexOf(StringUtils.getLineSeparator(), valueIndexOf);
-		if (eolIndexOf == -1 ) {
+		if (eolIndexOf == -1) {
 			eolIndexOf = string.length();
 		}
-		return string.substring(valueIndexOf + identifier.length() + HumanReadableX509Certificate.SEPARATOR_LABEL_VALUE.length(), eolIndexOf);
+		return string.substring(
+				valueIndexOf + identifier.length() + HumanReadableX509Certificate.SEPARATOR_LABEL_VALUE.length(),
+				eolIndexOf);
 	}
-}	
+}

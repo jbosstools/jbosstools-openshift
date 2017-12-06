@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Andre Dietisheim
  */
 public class OpenShiftCorePreferences implements IOpenShiftCoreConstants, IOpenShiftCorePreferences {
-	
+
 	public static final OpenShiftCorePreferences INSTANCE = new OpenShiftCorePreferences();
 
 	/** available connections */
@@ -35,12 +35,12 @@ public class OpenShiftCorePreferences implements IOpenShiftCoreConstants, IOpenS
 	private static final String CONNECTION_AUTH_PREFIX = "org.jboss.tools.openshift.core.connection.auth";
 	private static final String CONNECTION_EXT_PROPERTY_PREFIX = "org.jboss.tools.openshift.core.connection.extproperties";
 
-	private final StringsPreferenceValue connectionsPreferenceValue = 
-			new StringsPreferenceValue('|', CONNECTIONS, OpenShiftCoreActivator.PLUGIN_ID);
+	private final StringsPreferenceValue connectionsPreferenceValue = new StringsPreferenceValue('|', CONNECTIONS,
+			OpenShiftCoreActivator.PLUGIN_ID);
 
-	private final StringPreferenceValue ocBinaryLocation = 
-			new StringPreferenceValue(OPENSHIFT_CLI_LOC, OpenShiftCoreActivator.PLUGIN_ID);
-	
+	private final StringPreferenceValue ocBinaryLocation = new StringPreferenceValue(OPENSHIFT_CLI_LOC,
+			OpenShiftCoreActivator.PLUGIN_ID);
+
 	private OpenShiftCorePreferences() {
 	}
 
@@ -53,7 +53,7 @@ public class OpenShiftCorePreferences implements IOpenShiftCoreConstants, IOpenS
 	public void saveConnections(String[] connections) {
 		connectionsPreferenceValue.set(connections);
 	}
-	
+
 	@Override
 	public void saveAuthScheme(String connectionURL, String scheme) {
 		createAuthSchemePreferenceValue(connectionURL).set(scheme);
@@ -63,21 +63,21 @@ public class OpenShiftCorePreferences implements IOpenShiftCoreConstants, IOpenS
 	public void removeAuthScheme(String connectionURL) {
 		createAuthSchemePreferenceValue(connectionURL).remove();
 	}
-	
+
 	@Override
 	public String loadScheme(String connectionURL) {
 		return createAuthSchemePreferenceValue(connectionURL).get();
 	}
 
 	private StringPreferenceValue createAuthSchemePreferenceValue(String connectionURL) {
-		return createPreferenceValue(CONNECTION_AUTH_PREFIX,connectionURL);
+		return createPreferenceValue(CONNECTION_AUTH_PREFIX, connectionURL);
 	}
-	
+
 	@Override
 	public String getOCBinaryLocation() {
 		return ocBinaryLocation.get();
 	}
-	
+
 	@Override
 	public void saveOCBinaryLocation(String location) {
 		ocBinaryLocation.set(location);
@@ -85,8 +85,9 @@ public class OpenShiftCorePreferences implements IOpenShiftCoreConstants, IOpenS
 
 	@Override
 	public void saveExtProperties(String connectionURL, Map<String, Object> ext) {
-		if(connectionURL == null || ext == null) return;
-		try{
+		if (connectionURL == null || ext == null)
+			return;
+		try {
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(ext);
 			createPreferenceValue(CONNECTION_EXT_PROPERTY_PREFIX, connectionURL).set(json);
@@ -101,7 +102,7 @@ public class OpenShiftCorePreferences implements IOpenShiftCoreConstants, IOpenS
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			String json = createPreferenceValue(CONNECTION_EXT_PROPERTY_PREFIX, connectionURL).get();
-			if(StringUtils.isNotBlank(json)) {
+			if (StringUtils.isNotBlank(json)) {
 				return mapper.readValue(new StringReader(json), Map.class);
 			}
 		} catch (IOException e) {
@@ -109,8 +110,8 @@ public class OpenShiftCorePreferences implements IOpenShiftCoreConstants, IOpenS
 		}
 		return new HashMap<>();
 	}
-	
+
 	private StringPreferenceValue createPreferenceValue(String prefix, String connectionURL) {
-		return new StringPreferenceValue(NLS.bind("{0}.{1}",prefix,connectionURL), OpenShiftCoreActivator.PLUGIN_ID);
+		return new StringPreferenceValue(NLS.bind("{0}.{1}", prefix, connectionURL), OpenShiftCoreActivator.PLUGIN_ID);
 	}
 }

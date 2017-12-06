@@ -38,6 +38,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	private static OpenShiftCoreActivator instance;
 	private IServerLifecycleListener serverListener;
 	private ResourceChangePublisher resourceChangeListener;
+
 	public OpenShiftCoreActivator() {
 		super();
 		instance = this;
@@ -48,7 +49,7 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	}
 
 	public static OpenShiftCoreActivator getDefault() {
-	    return instance;
+		return instance;
 	}
 
 	public static BundleContext getBundleContext() {
@@ -59,68 +60,70 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	}
 
 	@Override
-    public void start(BundleContext context) throws Exception {
-        super.start(context);
-        registerDebugOptionsListener(PLUGIN_ID, new Trace(this), context);
-        Collection<Connection> connections = new ConnectionPersistency().load();
-        ConnectionsRegistrySingleton.getInstance().addAll(connections);
-        ConnectionsRegistrySingleton.getInstance().addListener(new ConnectionsRegistryAdapter() {
-        	
-        	//@TODO I think we need to handle the cleanup case where a connection
-            //username changes since username is what makes up part of the
-        	//the key that is saved which seems to apply to secure values
-        	//and preference values
-        	
-        	
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		registerDebugOptionsListener(PLUGIN_ID, new Trace(this), context);
+		Collection<Connection> connections = new ConnectionPersistency().load();
+		ConnectionsRegistrySingleton.getInstance().addAll(connections);
+		ConnectionsRegistrySingleton.getInstance().addListener(new ConnectionsRegistryAdapter() {
+
+			//@TODO I think we need to handle the cleanup case where a connection
+			//username changes since username is what makes up part of the
+			//the key that is saved which seems to apply to secure values
+			//and preference values
+
 			@Override
 			public void connectionRemoved(IConnection connection) {
 				if (!(connection instanceof Connection)) {
 					return;
 				}
-				((Connection)connection).removeSecureStoreData();
+				((Connection) connection).removeSecureStoreData();
 				ConnectionURL url = ConnectionURL.safeForConnection(connection);
-				if(url != null) {
+				if (url != null) {
 					OpenShiftCorePreferences.INSTANCE.removeAuthScheme(url.toString());
 				}
 				saveAllConnections();
 
 			}
-			
+
 			@Override
 			public void connectionAdded(IConnection connection) {
 				if (connection instanceof Connection) {
 					saveAllConnections();
 				}
 			}
-        	
+
 			@Override
 			public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-				if (connection instanceof Connection && (oldValue instanceof Connection || newValue instanceof Connection) ) {
+				if (connection instanceof Connection
+						&& (oldValue instanceof Connection || newValue instanceof Connection)) {
 					saveAllConnections();
 				}
 			}
-        });
-        ServerCore.addServerLifecycleListener(getServerListener());
-        // A clone of the auto-publish thread implementation
-        resourceChangeListener = new ResourceChangePublisher();
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
+		});
+		ServerCore.addServerLifecycleListener(getServerListener());
+		// A clone of the auto-publish thread implementation
+		resourceChangeListener = new ResourceChangePublisher();
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
+				IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
 	}
 
-    @Override
+	@Override
 	public void stop(BundleContext context) throws Exception {
-    	saveAllConnections();
-    	ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
-    	ServerCore.removeServerLifecycleListener(getServerListener());
-    	super.stop(context);
+		saveAllConnections();
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+		ServerCore.removeServerLifecycleListener(getServerListener());
+		super.stop(context);
 	}
 
 	private IServerLifecycleListener getServerListener() {
-		if( serverListener == null ) {
+		if (serverListener == null) {
 			serverListener = new OpenshiftServerLifecycleListener();
 		}
 		return serverListener;
 	}
+
 	/**
 	 * Get the IPluginLog for this plugin. This method 
 	 * helps to make logging easier, for example:
@@ -136,11 +139,11 @@ public class OpenShiftCoreActivator extends BaseCorePlugin {
 	public static void logError(String message, Throwable t) {
 		pluginLog().logError(message, t);
 	}
-	
+
 	public static void logWarning(String message, Throwable t) {
 		pluginLog().logWarning(message, t);
 	}
-	
+
 	/**
 	 * Get a status factory for this plugin
 	 * @return status factory

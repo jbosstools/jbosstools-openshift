@@ -28,7 +28,7 @@ import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 public class UserPropertySection extends AbstractPropertySection {
 
 	private Text labelText;
-    
+
 	@Override
 	public void createControls(Composite parent, TabbedPropertySheetPage aTabbedPropertySheetPage) {
 		super.createControls(parent, aTabbedPropertySheetPage);
@@ -54,15 +54,15 @@ public class UserPropertySection extends AbstractPropertySection {
 	@Override
 	public void setInput(IWorkbenchPart part, ISelection selection) {
 		super.setInput(part, selection);
-//		Assert.isTrue(selection instanceof IStructuredSelection);
-//		Object input = ((IStructuredSelection) selection).getFirstElement();
+		//		Assert.isTrue(selection instanceof IStructuredSelection);
+		//		Object input = ((IStructuredSelection) selection).getFirstElement();
 	}
 
 	@Override
 	public void refresh() {
-//		labelText.removeModifyListener(listener);
-//		ButtonElementProperties properties = (ButtonElementProperties) buttonElement.getAdapter(IPropertySource.class);
-//		labelText.setText(properties.strText);
-//		labelText.addModifyListener(listener);
+		//		labelText.removeModifyListener(listener);
+		//		ButtonElementProperties properties = (ButtonElementProperties) buttonElement.getAdapter(IPropertySource.class);
+		//		labelText.setText(properties.strText);
+		//		labelText.addModifyListener(listener);
 	}
 }

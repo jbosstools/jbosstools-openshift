@@ -7,19 +7,19 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui;
 
 import org.eclipse.osgi.util.NLS;
 
 public class ExpressUIMessages extends NLS {
-	
+
 	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages"; //$NON-NLS-1$
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, ExpressUIMessages.class);
 	}
-	
+
 	private ExpressUIMessages() {
 	}
 
@@ -43,7 +43,7 @@ public class ExpressUIMessages extends NLS {
 	public static String DeletingOpenShiftApplications;
 	public static String DeletingApplication;
 	public static String FailedToDeleteApplication;
-	
+
 	public static String EnvironmentVariables;
 	public static String PleaseProvadeNewVariable;
 	public static String Add;
@@ -61,7 +61,7 @@ public class ExpressUIMessages extends NLS {
 	public static String RefreshingVariables;
 
 	public static String NoConnectionsAreAvailable;
-	
+
 	public static String OpenShiftServerWizardConnection;
 	public static String OpenShiftServerWizardNew;
 	public static String OpenShiftServerWizardDomainName;
@@ -95,12 +95,12 @@ public class ExpressUIMessages extends NLS {
 	public static String BTN_KEEP_WAITING;
 	public static String BTN_CLOSE_WIZARD;
 	public static String RESTARTING_APPLICATION;
-	
+
 	public static String ADDING_REMOVING_CARTRIDGES;
-	
+
 	public static String USER_NOT_CONNECTED_LABEL;
 	public static String LOADING_USER_APPLICATIONS_LABEL;
-	
+
 	public static String MANAGE_SSH_KEYS_WIZARD_PAGE;
 	public static String MANAGE_SSH_KEYS_WIZARD_PAGE_DESCRIPTION;
 	public static String SSH_PUBLIC_KEYS_GROUP;
@@ -108,7 +108,7 @@ public class ExpressUIMessages extends NLS {
 	public static String NEW_BUTTON;
 	public static String REMOVE_BUTTON;
 	public static String REFRESH_BUTTON;
-	
+
 	public static String SSH_PREFS_LINK;
 	public static String REMOVE_SSH_KEY_DIALOG_TITLE;
 	public static String REMOVE_SSH_KEY_QUESTION;

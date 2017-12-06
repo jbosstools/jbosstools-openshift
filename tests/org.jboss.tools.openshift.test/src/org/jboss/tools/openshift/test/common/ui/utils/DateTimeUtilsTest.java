@@ -24,18 +24,18 @@ import org.junit.Test;
 public class DateTimeUtilsTest {
 
 	private static Locale originalLocale;
-	
+
 	@BeforeClass
 	public static void beforeClass() {
 		originalLocale = Locale.getDefault();
 		Locale.setDefault(Locale.ENGLISH);
 	}
-	
+
 	@AfterClass
 	public static void afterClass() {
 		Locale.setDefault(originalLocale);
 	}
-	
+
 	@Test
 	public void testFormatDurationLessThanSec() {
 		long duration = 33000000L;
@@ -53,7 +53,7 @@ public class DateTimeUtilsTest {
 		long duration = 33000000000000L;
 		assertEquals("9 hrs. 10 min.", formatDuration(duration));
 	}
-	
+
 	@Test
 	public void testFormatSince() {
 		String date = "2015-11-11T20:32:37Z";

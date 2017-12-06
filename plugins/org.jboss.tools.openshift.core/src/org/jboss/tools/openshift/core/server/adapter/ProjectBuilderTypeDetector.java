@@ -24,7 +24,7 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
  */
 public class ProjectBuilderTypeDetector {
 
-	private static IProjectBuilderType UNKNOWN = new IProjectBuilderType(){
+	private static IProjectBuilderType UNKNOWN = new IProjectBuilderType() {
 		@Override
 		public boolean applies(IProject project) {
 			return true;
@@ -42,16 +42,15 @@ public class ProjectBuilderTypeDetector {
 		// See Detection table in 
 		// https://docs.openshift.com/enterprise/3.2/dev_guide/new_app.html#build-strategy-detection
 		// https://github.com/openshift/origin/blob/e696f479805c2e6fe8e57c17f61d9307734dd3c3/pkg/generate/source/detector.go#L20
-		this(new SimpleTypeDetector("eap", "pom.xml"),//TODO be more specific wrt Tomcat 7/8, Micro services
-			 new SimpleTypeDetector("php", "index.php", "composer.json"),
-			 new SimpleTypeDetector("ruby", "Rakefile", "Gemfile", "config.ru"),
-			 new SimpleTypeDetector("python", "requirements.txt", "config.py"),
-			 new SimpleTypeDetector("perl", "index.pl", "cpanfile"),
-			 new SimpleTypeDetector("node", "app.json", "package.json")
-			 );
+		this(new SimpleTypeDetector("eap", "pom.xml"), //TODO be more specific wrt Tomcat 7/8, Micro services
+				new SimpleTypeDetector("php", "index.php", "composer.json"),
+				new SimpleTypeDetector("ruby", "Rakefile", "Gemfile", "config.ru"),
+				new SimpleTypeDetector("python", "requirements.txt", "config.py"),
+				new SimpleTypeDetector("perl", "index.pl", "cpanfile"),
+				new SimpleTypeDetector("node", "app.json", "package.json"));
 	}
 
-	public ProjectBuilderTypeDetector(IProjectBuilderType...detectors) {
+	public ProjectBuilderTypeDetector(IProjectBuilderType... detectors) {
 		this.detectors = Arrays.asList(detectors);
 	}
 
@@ -59,20 +58,15 @@ public class ProjectBuilderTypeDetector {
 		if (project == null) {
 			return UNKNOWN;
 		}
-		return detectors.stream()
-						.filter(d -> 
-							d.applies(project))
-						.findFirst()
-						.orElse(UNKNOWN);
+		return detectors.stream().filter(d -> d.applies(project)).findFirst().orElse(UNKNOWN);
 	}
 
 	public String findTemplateFilter(final IProject project) {
 		if (project == null) {
 			return null;
 		}
-		return identify(project)
-				.getTags(project);//that's a bit ugly but we'll prolly need to get specific tags 
-		                          //depending on some other project settings
+		return identify(project).getTags(project);//that's a bit ugly but we'll prolly need to get specific tags 
+													//depending on some other project settings
 	}
 
 	private static class SimpleTypeDetector implements IProjectBuilderType {
@@ -80,9 +74,9 @@ public class ProjectBuilderTypeDetector {
 		private String type;
 		private Collection<String> files;
 
-		SimpleTypeDetector(String type, String...files) {
+		SimpleTypeDetector(String type, String... files) {
 			this.type = type;
-			this.files = files == null ? Collections.emptyList():Arrays.asList(files);
+			this.files = files == null ? Collections.emptyList() : Arrays.asList(files);
 		}
 
 		@Override
@@ -91,11 +85,7 @@ public class ProjectBuilderTypeDetector {
 		}
 
 		protected boolean hasAnyFile(final IProject project, Collection<String> files) {
-			return files.stream()
-						.filter(f -> 
-							project.getFile(f).exists())
-						.findFirst()
-						.isPresent();
+			return files.stream().filter(f -> project.getFile(f).exists()).findFirst().isPresent();
 		}
 
 		@Override
@@ -105,7 +95,7 @@ public class ProjectBuilderTypeDetector {
 
 		@Override
 		public String toString() {
-			return "["+type+"] type detector";
+			return "[" + type + "] type detector";
 		}
 	}
 

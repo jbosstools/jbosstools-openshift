@@ -33,8 +33,10 @@ public class BuildsPropertySection extends OpenShiftResourcePropertySection impl
 	@Override
 	protected void addColumns(TableViewerBuilder tableViewerBuilder) {
 		addNameColumn(tableViewerBuilder);
-		tableViewerBuilder.column(model -> getResource(model).getAnnotation(BUILD_NUMBER)).name("Build").align(SWT.LEFT).weight(1).minWidth(5).buildColumn()
-		.column(model -> ((IBuild)getResource(model)).getStatus()).name("Status").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
-		.column(model-> DateTimeUtils.formatSince(getResource(model).getCreationTimeStamp())).name("Started").align(SWT.LEFT).weight(1).buildColumn();
+		tableViewerBuilder.column(model -> getResource(model).getAnnotation(BUILD_NUMBER)).name("Build").align(SWT.LEFT)
+				.weight(1).minWidth(5).buildColumn().column(model -> ((IBuild) getResource(model)).getStatus())
+				.name("Status").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
+				.column(model -> DateTimeUtils.formatSince(getResource(model).getCreationTimeStamp())).name("Started")
+				.align(SWT.LEFT).weight(1).buildColumn();
 	}
 }

@@ -50,7 +50,8 @@ public class ServerResourceViewModelWithReplicationControllerTest {
 	public void setUp() {
 		this.connection = ResourceMocks.create3ProjectsConnection();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
-		this.model = new ServerResourceViewModel(this.selectedReplicationController = ResourceMocks.PROJECT5_REPLICATINCONTROLLERS[0], connection);
+		this.model = new ServerResourceViewModel(
+				this.selectedReplicationController = ResourceMocks.PROJECT5_REPLICATINCONTROLLERS[0], connection);
 		model.loadResources();
 	}
 
@@ -136,7 +137,8 @@ public class ServerResourceViewModelWithReplicationControllerTest {
 	@Test
 	public void shouldReturn1stServiceInListIfInitializedServiceIsNotInListOfAllReplicationControllers() {
 		// given
-		IReplicationController otherReplicationController = ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER);
+		IReplicationController otherReplicationController = ResourceMocks.createResource(IReplicationController.class,
+				ResourceKind.REPLICATION_CONTROLLER);
 		ServerResourceViewModel model = new ServerResourceViewModel(otherReplicationController, connection);
 		model.loadResources();
 		// when
@@ -164,9 +166,9 @@ public class ServerResourceViewModelWithReplicationControllerTest {
 
 		Connection connection = ResourceMocks.createConnection("http://localhost:8080", "dev@42.org");
 		IProject project = ResourceMocks.createResource(IProject.class, ResourceKind.PROJECT);
-		when(connection.getResources(ResourceKind.PROJECT))
-				.thenReturn(Collections.singletonList(project));
-		IReplicationController replicationController = ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER);
+		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Collections.singletonList(project));
+		IReplicationController replicationController = ResourceMocks.createResource(IReplicationController.class,
+				ResourceKind.REPLICATION_CONTROLLER);
 		when(project.getResources(ResourceKind.REPLICATION_CONTROLLER))
 				.thenReturn(Collections.singletonList(replicationController));
 
@@ -188,9 +190,9 @@ public class ServerResourceViewModelWithReplicationControllerTest {
 
 		try {
 			IProject project = ResourceMocks.createResource(IProject.class, ResourceKind.PROJECT);
-			when(connection.getResources(ResourceKind.PROJECT))
-					.thenReturn(Collections.singletonList(project));
-			IReplicationController replicationController = ResourceMocks.createResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER);
+			when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Collections.singletonList(project));
+			IReplicationController replicationController = ResourceMocks.createResource(IReplicationController.class,
+					ResourceKind.REPLICATION_CONTROLLER);
 			when(project.getResources(ResourceKind.REPLICATION_CONTROLLER))
 					.thenReturn(Collections.singletonList(replicationController));
 

@@ -24,7 +24,7 @@ import com.openshift.restclient.model.IStatus;
 /**
  * @author jeff.cantrill
  */
-public class ResourceSummaryLabelProvider  implements IStyledLabelProvider, ILabelProvider {
+public class ResourceSummaryLabelProvider implements IStyledLabelProvider, ILabelProvider {
 
 	@Override
 	public void addListener(ILabelProviderListener arg0) {
@@ -45,9 +45,9 @@ public class ResourceSummaryLabelProvider  implements IStyledLabelProvider, ILab
 
 	@Override
 	public String getText(Object arg) {
-		if(arg instanceof IResource) {
+		if (arg instanceof IResource) {
 			IResource resource = (IResource) arg;
-			if(isFailedStatus(resource)) {
+			if (isFailedStatus(resource)) {
 				return org.apache.commons.lang.StringUtils.capitalize(((IStatus) resource).getMessage());
 			}
 			return NLS.bind("{0} - {1}", resource.getKind(), resource.getName());
@@ -57,9 +57,9 @@ public class ResourceSummaryLabelProvider  implements IStyledLabelProvider, ILab
 
 	@Override
 	public Image getImage(Object arg) {
-		if(arg instanceof IResource) {
+		if (arg instanceof IResource) {
 			IResource resource = (IResource) arg;
-			if(isFailedStatus(resource)) {
+			if (isFailedStatus(resource)) {
 				return OpenShiftCommonImages.ERROR;
 			}
 			return OpenShiftCommonImages.OK_IMG;
@@ -69,12 +69,12 @@ public class ResourceSummaryLabelProvider  implements IStyledLabelProvider, ILab
 
 	@Override
 	public StyledString getStyledText(Object arg) {
-		if(arg instanceof IResource) {
-			IResource resource = (IResource)arg;
+		if (arg instanceof IResource) {
+			IResource resource = (IResource) arg;
 			StyledString text = new StyledString();
-			if(isFailedStatus(resource)) {
+			if (isFailedStatus(resource)) {
 				text.append(((IStatus) resource).getMessage());
-			}else {
+			} else {
 				text.append(StringUtils.humanize(resource.getKind().toString()));
 				text.append(resource.getName(), StyledString.QUALIFIER_STYLER);
 			}
@@ -82,9 +82,9 @@ public class ResourceSummaryLabelProvider  implements IStyledLabelProvider, ILab
 		}
 		return null;
 	}
-	
+
 	private boolean isFailedStatus(IResource resource) {
-		return ResourceKind.STATUS.equals(resource.getKind()) && ((IStatus) resource).isFailure(); 
+		return ResourceKind.STATUS.equals(resource.getKind()) && ((IStatus) resource).isFailure();
 	}
 
 }

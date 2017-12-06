@@ -32,5 +32,5 @@ public class NewApplicationProperties implements IApplicationProperties {
 	public String getApplicationName() {
 		return wizardModel.getApplicationName();
 	}
-	
+
 }

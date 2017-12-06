@@ -76,9 +76,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  * @author Jeff Maury
  */
-public class NewApplicationWizard 
-	extends Wizard 
-	implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
+public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<Connection> {
 
 	private NewApplicationWizardModel model = new NewApplicationWizardModel();
 	private ApplicationSourceFromTemplateModel fromTemplateModel = new ApplicationSourceFromTemplateModel();
@@ -87,8 +85,8 @@ public class NewApplicationWizard
 	public NewApplicationWizard() {
 		setWindowTitle("New OpenShift Application");
 		setNeedsProgressMonitor(true);
-		
-		Stream.of(fromTemplateModel, fromImageModel).forEach(m->{
+
+		Stream.of(fromTemplateModel, fromImageModel).forEach(m -> {
 			model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE, m);
 			model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT, m);
 			model.addPropertyChangeListener(IApplicationSourceListPageModel.PROPERTY_PROJECT, m);
@@ -98,14 +96,14 @@ public class NewApplicationWizard
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-        fromImageModel.setContainer(getContainer());
-		if (selection == null
-				|| selection.isEmpty()) {
+		fromImageModel.setContainer(getContainer());
+		if (selection == null || selection.isEmpty()) {
 			return;
 		}
-		org.eclipse.core.resources.IProject selectedProject = UIUtils.getFirstElement(selection, org.eclipse.core.resources.IProject.class);
+		org.eclipse.core.resources.IProject selectedProject = UIUtils.getFirstElement(selection,
+				org.eclipse.core.resources.IProject.class);
 		model.setEclipseProject(selectedProject);
-		
+
 		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
 		if (connection != null) {
 			setConnection(connection);
@@ -115,9 +113,9 @@ public class NewApplicationWizard
 				connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
 				setConnection(connection);
 				model.setProject(resource.getProject());
-			} 
+			}
 		}
-		if(connection != null) {
+		if (connection != null) {
 			ConnectionsRegistrySingleton.getInstance().setRecent(connection);
 		}
 	}
@@ -129,7 +127,7 @@ public class NewApplicationWizard
 		 *   |                                                    |
 		 *    ----> buildconfig -> deployconfig -> serviceconfig -|
 		 */
-		
+
 		//app from image
 		BuildConfigPage bcPage = new BuildConfigPage(this, fromImageModel) {
 			@Override
@@ -149,20 +147,18 @@ public class NewApplicationWizard
 			public boolean isPageComplete() {
 				return isTemplateFlow() ? true : super.isPageComplete();
 			}
-			
+
 		};
 
 		//app from template
 		TemplateParametersPage paramPage = new TemplateParametersPage(this, fromTemplateModel) {
-			
+
 			@Override
 			public boolean isPageComplete() {
-				return isTemplateFlow() ? 
-						//force visiting parameters page
-						getContainer() != null 
-						&& !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage) 
-						&& super.isPageComplete()  
-						: true;
+				return isTemplateFlow() ?
+				//force visiting parameters page
+				getContainer() != null && !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage)
+						&& super.isPageComplete() : true;
 			}
 
 			@Override
@@ -170,22 +166,21 @@ public class NewApplicationWizard
 				return getPage(ResourceLabelsPage.PAGE_NAME);
 			}
 		};
-		
+
 		ResourceLabelsPage labelsPage = new ResourceLabelsPage(this, model);
 
 		ApplicationSourceListPage listPage = new ApplicationSourceListPage(this, model) {
 
 			@Override
 			public IWizardPage getNextPage() {
-				if(isTemplateFlow()){
+				if (isTemplateFlow()) {
 					return getPage(TemplateParametersPage.PAGE_NAME);
 				}
 				return getPage(BuildConfigPage.PAGE_NAME);
 			}
-			
+
 		};
 
-		
 		addPage(listPage);
 		addPage(paramPage);
 		addPage(bcPage);
@@ -206,7 +201,7 @@ public class NewApplicationWizard
 	}
 
 	private boolean isTemplateFlow() {
-		if(model.getSelectedAppSource() != null && model.getSelectedAppSource().getSource() != null) {
+		if (model.getSelectedAppSource() != null && model.getSelectedAppSource().getSource() != null) {
 			return ResourceKind.TEMPLATE.equals(model.getSelectedAppSource().getSource().getKind());
 		}
 		return true;
@@ -215,17 +210,15 @@ public class NewApplicationWizard
 	@Override
 	public boolean performFinish() {
 
-		final IResourcesModelJob createJob = isTemplateFlow()
-				? fromTemplateModel.createFinishJob() 
+		final IResourcesModelJob createJob = isTemplateFlow() ? fromTemplateModel.createFinishJob()
 				: fromImageModel.createFinishJob();
-		
+
 		createJob.addJobChangeListener(new JobChangeAdapter() {
 
 			@Override
 			public void done(IJobChangeEvent event) {
 				IStatus status = event.getResult();
-				if(JobUtils.isOk(status) 
-						|| JobUtils.isWarning(status)) {
+				if (JobUtils.isOk(status) || JobUtils.isWarning(status)) {
 					Display.getDefault().syncExec(createJob.getSummaryRunnable(getShell()));
 					OpenShiftUIUtils.showOpenShiftExplorer();
 					if (model.getEclipseProject() != null) {
@@ -243,22 +236,25 @@ public class NewApplicationWizard
 						public void run() {
 							ImportApplicationWizard wizard = new ImportApplicationWizard(projectsAndBuildConfigs);
 							wizard.addImportJobChangeListener(new JobChangeAdapter() {
-								
+
 								@Override
 								public void done(IJobChangeEvent event) {
 									IService service = getService(resources);
-									List<org.eclipse.core.resources.IProject> importedProjects = wizard.getImportJob().getImportedProjects();
+									List<org.eclipse.core.resources.IProject> importedProjects = wizard.getImportJob()
+											.getImportedProjects();
 									if (service != null && importedProjects.size() == 1) {
 										Display.getDefault().asyncExec(new Runnable() {
 
-								            @Override
-								            public void run() {
-								            	if (MessageDialog.openQuestion(getShell(), "Create server adapter", NLS.bind(
-														"Would you like to create a server adapter for the imported {0} project?",
-														importedProjects.get(0).getName()))) {
-								            		createServerAdapter(importedProjects.get(0), connection, service, getRoute(resources));
-								            	}
-								            }
+											@Override
+											public void run() {
+												if (MessageDialog.openQuestion(getShell(), "Create server adapter",
+														NLS.bind(
+																"Would you like to create a server adapter for the imported {0} project?",
+																importedProjects.get(0).getName()))) {
+													createServerAdapter(importedProjects.get(0), connection, service,
+															getRoute(resources));
+												}
+											}
 										});
 									}
 								}
@@ -268,12 +264,12 @@ public class NewApplicationWizard
 					});
 				}
 			}
-			
+
 			protected Map<IProject, Collection<IBuildConfig>> getBuildConfigs(Collection<IResource> resources) {
 				Map<IProject, Collection<IBuildConfig>> projects = new LinkedHashMap<>();
 				for (IResource resource : resources) {
 					if (resource instanceof IBuildConfig) {
-						IBuildConfig buildConfig = (IBuildConfig)resource;
+						IBuildConfig buildConfig = (IBuildConfig) resource;
 						if (StringUtils.isNotBlank(buildConfig.getSourceURI())) {
 							IProject p = buildConfig.getProject();
 							Collection<IBuildConfig> buildConfigs = projects.get(p);
@@ -287,17 +283,17 @@ public class NewApplicationWizard
 				}
 				return projects;
 			}
-			
+
 			protected IService getService(Collection<IResource> resources) {
 				IResource service = getResourceOfType(resources, IService.class);
-				return service == null ? null : (IService)service;
+				return service == null ? null : (IService) service;
 			}
-			
+
 			protected IRoute getRoute(Collection<IResource> resources) {
 				IResource route = getResourceOfType(resources, IRoute.class);
-				return route == null ? null : (IRoute)route;
+				return route == null ? null : (IRoute) route;
 			}
-			
+
 			private IResource getResourceOfType(Collection<IResource> resources, Class<? extends IResource> type) {
 				for (IResource resource : resources) {
 					if (type.isInstance(resource)) {
@@ -306,8 +302,9 @@ public class NewApplicationWizard
 				}
 				return null;
 			}
-			
-			protected void createServerAdapter(org.eclipse.core.resources.IProject project, Connection connection, IService service, IRoute route) {
+
+			protected void createServerAdapter(org.eclipse.core.resources.IProject project, Connection connection,
+					IService service, IRoute route) {
 				try {
 					IServerWorkingCopy server = OpenShiftServerUtils.create(OpenShiftResourceUniqueId.get(service));
 					ServerSettingsWizardPageModel serverModel = new ServerSettingsWizardPageModel(service, route,
@@ -317,21 +314,19 @@ public class NewApplicationWizard
 					serverModel.updateServer();
 					server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false);
 					serverModel.saveServer(null);
-				} catch(CoreException ce) {
-					OpenShiftUIActivator.getDefault().getLogger().logError("Error occured while creating a server adapter", ce);
+				} catch (CoreException ce) {
+					OpenShiftUIActivator.getDefault().getLogger()
+							.logError("Error occured while creating a server adapter", ce);
 					return;
 				}
 			}
 		});
-		
+
 		boolean success = false;
 		try {
 			Job job = new JobChainBuilder(createJob.getJob())
 					.runWhenSuccessfullyDone(new RefreshResourcesJob(createJob, true)).build();
-			IStatus status = runInWizard(
-					job, 
-					createJob.getDelegatingProgressMonitor(), 
-					getContainer());
+			IStatus status = runInWizard(job, createJob.getDelegatingProgressMonitor(), getContainer());
 			success = isFailed(status);
 		} catch (InvocationTargetException | InterruptedException e) {
 			OpenShiftUIActivator.getDefault().getLogger().logError(e);
@@ -343,8 +338,7 @@ public class NewApplicationWizard
 	}
 
 	private boolean isFailed(IStatus status) {
-		return JobUtils.isOk(status) 
-				|| JobUtils.isWarning(status);
+		return JobUtils.isOk(status) || JobUtils.isWarning(status);
 	}
 
 	@Override
@@ -360,7 +354,7 @@ public class NewApplicationWizard
 	@Override
 	public void setConnection(Connection connection) {
 		model.setConnection(connection);
-		if(model == null || fromImageModel == null) {
+		if (model == null || fromImageModel == null) {
 			//wizard is disposed by canceling the creation of a required project;
 			return;
 		}

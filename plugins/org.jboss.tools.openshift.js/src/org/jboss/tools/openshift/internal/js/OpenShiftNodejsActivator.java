@@ -31,6 +31,6 @@ public class OpenShiftNodejsActivator extends BaseCorePlugin {
 	}
 
 	public static OpenShiftNodejsActivator getDefault() {
-	    return instance;
+		return instance;
 	}
 }

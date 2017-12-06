@@ -31,7 +31,7 @@ import com.openshift.restclient.model.IResource;
  * A dialog to display info about a list of resources
  * @author jeff.cantrill
  */
-public class ResourceSummaryDialog  extends TitleAreaDialog {
+public class ResourceSummaryDialog extends TitleAreaDialog {
 
 	private Collection<IResource> resources;
 	private String message;
@@ -39,18 +39,14 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 	private IStyledLabelProvider labelProvider;
 	private ITreeContentProvider contentProvider;
 
-	public ResourceSummaryDialog(Shell parentShell,
-			Collection<IResource> resources, 
-			String dialogTitle,
+	public ResourceSummaryDialog(Shell parentShell, Collection<IResource> resources, String dialogTitle,
 			String message) {
-		this(parentShell, resources, dialogTitle, message, new ResourceSummaryLabelProvider(), new ResourceSummaryContentProvider());
+		this(parentShell, resources, dialogTitle, message, new ResourceSummaryLabelProvider(),
+				new ResourceSummaryContentProvider());
 	}
-	public ResourceSummaryDialog(Shell parentShell, 
-			Collection<IResource> resources, 
-			String dialogTitle,
-			String message, 
-			IStyledLabelProvider labelProvider, 
-			ITreeContentProvider contetProvider) {
+
+	public ResourceSummaryDialog(Shell parentShell, Collection<IResource> resources, String dialogTitle, String message,
+			IStyledLabelProvider labelProvider, ITreeContentProvider contetProvider) {
 		super(parentShell);
 		this.dialogTitle = dialogTitle;
 		this.resources = resources;
@@ -59,13 +55,11 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 		this.contentProvider = contetProvider;
 		setHelpAvailable(false);
 	}
-	
+
 	@Override
 	protected boolean isResizable() {
 		return true;
 	}
-
-
 
 	@Override
 	protected Control createContents(Composite parent) {
@@ -73,59 +67,54 @@ public class ResourceSummaryDialog  extends TitleAreaDialog {
 		setupDialog(parent);
 		return control;
 	}
-	
+
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Label titleSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleSeparator);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleSeparator);
 
 		Composite dialogArea = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(dialogArea);
 		TreeViewer viewer = createTable(dialogArea);
 		viewer.setInput(resources);
-		
+
 		//hook for subclassing
 		createAreaAfterResourceSummary(parent);
-		
+
 		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
 
 		return dialogArea;
 	}
-	
+
 	/**
 	 * Hook to allow sublcasses to add content
 	 * @param  parent   the dialog area to which the tree viewer is added
 	 */
 	protected void createAreaAfterResourceSummary(Composite parent) {
 	}
-	
+
 	private TreeViewer createTable(Composite parent) {
 		Composite tableContainer = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL)
-			.grab(true, true)
-			.hint(400, 150).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(400, 150)
+				.applyTo(tableContainer);
 
 		TreeColumnLayout treeLayout = new TreeColumnLayout();
 		tableContainer.setLayout(treeLayout);
-		final TreeViewer viewer = new TreeViewer(tableContainer, SWT.BORDER  | SWT.V_SCROLL | SWT.H_SCROLL);
+		final TreeViewer viewer = new TreeViewer(tableContainer, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(labelProvider);
-		
+
 		return viewer;
 	}
-	
+
 	private void setupDialog(Composite parent) {
 		parent.getShell().setText(dialogTitle);
 		setTitle(message);
 		setTitleImage(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM_IMG);
 	}
-	
+
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);

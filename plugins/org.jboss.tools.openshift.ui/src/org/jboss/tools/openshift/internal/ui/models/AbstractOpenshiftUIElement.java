@@ -19,23 +19,24 @@ import org.eclipse.core.runtime.IAdaptable;
  * @param <R> the wrapped element type
  * @param <P> the parent type
  */
-abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElement<?, ?>> implements IAdaptable, IOpenshiftUIElement<R, P> {
+abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElement<?, ?>>
+		implements IAdaptable, IOpenshiftUIElement<R, P> {
 	private P parent;
 	private R wrapped;
 
 	public AbstractOpenshiftUIElement(P parent, R wrapped) {
 		this.parent = parent;
-		this.wrapped= wrapped;
+		this.wrapped = wrapped;
 	}
 
 	public P getParent() {
 		return parent;
 	}
-	
+
 	public R getWrapped() {
 		return wrapped;
 	}
-	
+
 	public OpenshiftUIModel getRoot() {
 		return getParent().getRoot();
 	}
@@ -49,7 +50,7 @@ abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElemen
 		}
 		return null;
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (o == null || o.getClass() != getClass()) {
@@ -58,14 +59,11 @@ abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElemen
 		if (o == this) {
 			return true;
 		}
-		AbstractOpenshiftUIElement<?, ?> other= (AbstractOpenshiftUIElement<?, ?>) o;
-		return wrapped.equals(other.getWrapped()) 
-				&& (
-						getParent() != null && getParent().equals(other.getParent())
-						|| getParent() == null && other.getParent() == null
-					);
+		AbstractOpenshiftUIElement<?, ?> other = (AbstractOpenshiftUIElement<?, ?>) o;
+		return wrapped.equals(other.getWrapped()) && (getParent() != null && getParent().equals(other.getParent())
+				|| getParent() == null && other.getParent() == null);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -74,17 +72,16 @@ abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElemen
 		result = prime * result + wrapped.hashCode();
 		return result;
 	}
-	
+
 	synchronized void updateWith(R r) {
-		wrapped= r;
+		wrapped = r;
 		fireChanged();
 	}
-	
 
 	protected void fireChanged() {
 		fireChanged(this);
 	}
-	
+
 	protected void fireChanged(IOpenshiftUIElement<?, ?> source) {
 		getParent().fireChanged(source);
 	}
@@ -96,6 +93,5 @@ abstract class AbstractOpenshiftUIElement<R, P extends AbstractOpenshiftUIElemen
 		// refresh makes sense.
 		getParent().refresh();
 	}
-
 
 }

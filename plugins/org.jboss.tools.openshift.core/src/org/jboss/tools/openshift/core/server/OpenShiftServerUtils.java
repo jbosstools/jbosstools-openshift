@@ -88,20 +88,16 @@ public class OpenShiftServerUtils {
 	public static final String ATTR_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.Override";//$NON-NLS-1$
 
 	public static final String ATTR_CONNECTIONURL = "org.jboss.tools.openshift.Connection";//$NON-NLS-1$
-	
+
 	/** the OpensHift Server Type as defined in the plugin.xml. */
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.openshift.server.type";//$NON-NLS-1$
 
 	public static final String SERVER_START_ON_CREATION = "org.jboss.tools.openshift.SERVER_START_ON_CREATION";
 
-	private static final Collection<String> SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES = Collections.unmodifiableCollection(
-			Arrays.asList(
-					ResourceKind.ROUTE,
-					ResourceKind.SERVICE,
-	                ResourceKind.REPLICATION_CONTROLLER,
-	                ResourceKind.DEPLOYMENT_CONFIG,
-	                ResourceKind.POD));
-	
+	private static final Collection<String> SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES = Collections
+			.unmodifiableCollection(Arrays.asList(ResourceKind.ROUTE, ResourceKind.SERVICE,
+					ResourceKind.REPLICATION_CONTROLLER, ResourceKind.DEPLOYMENT_CONFIG, ResourceKind.POD));
+
 	/**
 	 * Checks if the resource is allowed for OpenShift server adapter.
 	 * 
@@ -109,9 +105,9 @@ public class OpenShiftServerUtils {
 	 * @return true if allowed
 	 */
 	public static boolean isAllowedForServerAdapter(IResource resource) {
-	    return SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES.contains(resource.getKind());
+		return SERVER_ADAPTER_ALLOWED_RESOURCE_TYPES.contains(resource.getKind());
 	}
-	
+
 	/**
 	 * Returns the first openshift 3 server in the current workspace
 	 * that matches the given OpenShift resource (service,
@@ -126,14 +122,12 @@ public class OpenShiftServerUtils {
 	/**
 	 * Returns the first openshift 3 server within the given list of servers
 	 * that matches the given OpenShift resource (service,
-     * deployment config, replication controller) name.
+	 * deployment config, replication controller) name.
 	 * 
 	 * @see #ATTR_SERVICE
 	 */
 	public static IServer findServerForResource(String serviceName, IServer[] servers) {
-		if (StringUtils.isEmpty(serviceName)
-				|| servers == null
-				|| servers.length == 0) {
+		if (StringUtils.isEmpty(serviceName) || servers == null || servers.length == 0) {
 			return null;
 		}
 
@@ -142,42 +136,36 @@ public class OpenShiftServerUtils {
 			return null;
 		}
 
-		return Stream.of(servers)
-				.filter(server -> serverType.equals(server.getServerType())
-						&& server.getAttribute(ATTR_SERVICE, "").equals(serviceName))
-				.findFirst().orElse(null);
+		return Stream.of(servers).filter(server -> serverType.equals(server.getServerType())
+				&& server.getAttribute(ATTR_SERVICE, "").equals(serviceName)).findFirst().orElse(null);
 	}
-	
+
 	public static IServerType getServerType() {
 		return ServerCore.findServerType(OpenShiftServer.SERVER_TYPE_ID);
 	}
-	
+
 	public static String getServerName(IResource resource, IConnection connection) {
 		if (resource == null) {
 			return null;
 		}
 
-		String baseName = new StringBuilder(resource.getName())
-		        .append(" (")
-		        .append(resource.getKind())
-				.append(") at OpenShift 3 (")
-				.append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
-				.append(")")
-				.toString();
+		String baseName = new StringBuilder(resource.getName()).append(" (").append(resource.getKind())
+				.append(") at OpenShift 3 (").append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
+				.append(")").toString();
 		return ServerUtils.getServerName(baseName);
 	}
 
-	public static void updateServer(String serverName, String host, String connectionUrl, IResource resource, String sourcePath, 
-			String podPath, IProject deployProject, String routeURL, String devmodeKey, String debugPortKey, String debugPortValue,
-			IServerWorkingCopy server) {
+	public static void updateServer(String serverName, String host, String connectionUrl, IResource resource,
+			String sourcePath, String podPath, IProject deployProject, String routeURL, String devmodeKey,
+			String debugPortKey, String debugPortValue, IServerWorkingCopy server) {
 		String deployProjectName = ProjectUtils.getName(deployProject);
-		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(resource), 
+		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(resource),
 				sourcePath, podPath, routeURL, devmodeKey, debugPortKey, debugPortValue, server);
 	}
 
-	public static void updateServer(String serverName, String host, String connectionUrl, String deployProjectName, String serviceId, 
-			String sourcePath, String podPath, String routeURL, String devmodeKey, String debugPortKey, String debugPortValue, 
-			IServerWorkingCopy server) {
+	public static void updateServer(String serverName, String host, String connectionUrl, String deployProjectName,
+			String serviceId, String sourcePath, String podPath, String routeURL, String devmodeKey,
+			String debugPortKey, String debugPortValue, IServerWorkingCopy server) {
 		updateServer(server);
 
 		server.setName(serverName);
@@ -194,7 +182,8 @@ public class OpenShiftServerUtils {
 		server.setAttribute(ATTR_DEBUG_PORT_VALUE, debugPortValue);
 	}
 
-	public static void updateServerAttribute(String attribute, String value, IServerAttributes server) throws CoreException {
+	public static void updateServerAttribute(String attribute, String value, IServerAttributes server)
+			throws CoreException {
 		updateServerAttribute(attribute, value, server.createWorkingCopy());
 	}
 
@@ -206,7 +195,8 @@ public class OpenShiftServerUtils {
 	 * @param server
 	 * @throws CoreException
 	 */
-	public static void updateServerAttribute(String attribute, String value, IServerWorkingCopy server) throws CoreException {
+	public static void updateServerAttribute(String attribute, String value, IServerWorkingCopy server)
+			throws CoreException {
 		if (StringUtils.isEmpty(attribute)) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
 					NLS.bind("Could not update server {0}, attribute name is missing.", server.getName())));
@@ -214,7 +204,7 @@ public class OpenShiftServerUtils {
 		server.setAttribute(attribute, value);
 		server.save(true, new NullProgressMonitor());
 	}
-	
+
 	private static void updateServer(IServerWorkingCopy server) {
 		server.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServer.OPENSHIFT3_MODE_ID);
 		((ServerWorkingCopy) server).setAutoPublishSetting(Server.AUTO_PUBLISH_RESOURCE);
@@ -227,14 +217,14 @@ public class OpenShiftServerUtils {
 		server.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
 	}
 
-	public static void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath, String routeURL, 
-			String devmodeKey, String debugPortKey, String debugPortValue, IProject project) {
-		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(resource), sourcePath, podPath, routeURL, 
+	public static void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath,
+			String routeURL, String devmodeKey, String debugPortKey, String debugPortValue, IProject project) {
+		updateServerProject(connectionUrl, OpenShiftResourceUniqueId.get(resource), sourcePath, podPath, routeURL,
 				devmodeKey, debugPortKey, debugPortValue, project);
 	}
 
-	public static void updateServerProject(String connectionUrl, String serviceId, String sourcePath, String podPath, String routeURL, 
-			String devmodeKey, String debugPortKey, String debugPortValue, IProject project) {
+	public static void updateServerProject(String connectionUrl, String serviceId, String sourcePath, String podPath,
+			String routeURL, String devmodeKey, String debugPortKey, String debugPortValue, IProject project) {
 		IEclipsePreferences node = ServerUtils.getProjectNode(SERVER_PROJECT_QUALIFIER, project);
 		node.put(ATTR_CONNECTIONURL, connectionUrl);
 		node.put(ATTR_DEPLOYPROJECT, project.getName());
@@ -255,11 +245,11 @@ public class OpenShiftServerUtils {
 			node.remove(attribute);
 		}
 	}
-	
+
 	public static void updateServerProject(String attribute, String value, IProject project) throws CoreException {
 		if (!StringUtils.isEmpty(attribute)) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					"Could not update server project, setting name missing."));
+			throw new CoreException(OpenShiftCoreActivator.statusFactory()
+					.errorStatus("Could not update server project, setting name missing."));
 		}
 		if (!StringUtils.isEmpty(value)) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
@@ -281,16 +271,16 @@ public class OpenShiftServerUtils {
 
 	public static IModule findProjectModule(IProject p) {
 		IModule[] all = org.eclipse.wst.server.core.ServerUtil.getModules(p);
-		for( int i = 0; i < all.length; i++ ) {
-			ModuleDelegate md = (ModuleDelegate)all[i].loadAdapter(ModuleDelegate.class, new NullProgressMonitor());
-			if( md instanceof ProjectModule 
+		for (int i = 0; i < all.length; i++) {
+			ModuleDelegate md = (ModuleDelegate) all[i].loadAdapter(ModuleDelegate.class, new NullProgressMonitor());
+			if (md instanceof ProjectModule
 					&& !(md instanceof org.eclipse.jst.j2ee.internal.deployables.BinaryFileModuleDelegate)) {
 				return all[i];
 			}
 		}
 		return null;
 	}
-	
+
 	public static IProject getDeployProject(IServerAttributes server) {
 		// TODO: implement override project settings with server settings
 		return ProjectUtils.getProject(getDeployProjectName(server));
@@ -319,8 +309,8 @@ public class OpenShiftServerUtils {
 	}
 
 	public static IServerWorkingCopy create(String name) throws CoreException {
-		final IServerWorkingCopy serverWorkingCopy = 
-				(IServerWorkingCopy) getServerType().createServer(name, null, null);
+		final IServerWorkingCopy serverWorkingCopy = (IServerWorkingCopy) getServerType().createServer(name, null,
+				null);
 		return serverWorkingCopy;
 	}
 
@@ -335,10 +325,11 @@ public class OpenShiftServerUtils {
 	public static Connection getConnectionChecked(IServerAttributes server) throws CoreException {
 		Connection connection = getConnection(server);
 		if (connection == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not find the connection for server {0}."
-							+ " Your server adapter might refer to an inexistant connection."
-							, server == null? "" : server.getName())));
+			throw new CoreException(OpenShiftCoreActivator.statusFactory()
+					.errorStatus(NLS.bind(
+							"Could not find the connection for server {0}."
+									+ " Your server adapter might refer to an inexistant connection.",
+							server == null ? "" : server.getName())));
 		}
 		return connection;
 	}
@@ -354,7 +345,7 @@ public class OpenShiftServerUtils {
 		if (server == null) {
 			return null;
 		}
-		
+
 		Connection connection = null;
 		try {
 			String url = getConnectionURL(server);
@@ -396,14 +387,15 @@ public class OpenShiftServerUtils {
 	 * @return
 	 * @throws CoreException
 	 */
-	public static IResource getResourceChecked(IServerAttributes server, Connection connection, IProgressMonitor monitor) 
-			throws CoreException {
+	public static IResource getResourceChecked(IServerAttributes server, Connection connection,
+			IProgressMonitor monitor) throws CoreException {
 		IResource resource = getResource(server, connection, monitor);
 		if (resource == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Could not find the resource for server {0}." 
-							+ " Your server adapter might refer to an inexistant resource.",
-							server == null? "" : server.getName())));
+			throw new CoreException(OpenShiftCoreActivator.statusFactory()
+					.errorStatus(NLS.bind(
+							"Could not find the resource for server {0}."
+									+ " Your server adapter might refer to an inexistant resource.",
+							server == null ? "" : server.getName())));
 		}
 		return resource;
 	}
@@ -451,12 +443,12 @@ public class OpenShiftServerUtils {
 	 * 
 	 * @param server the server to get the pod path attribute from
 	 * @return
-	 */	
+	 */
 	public static String getPodPath(IServerAttributes server) {
 		// TODO: implement override project settings with server settings
 		return getAttribute(OpenShiftServerUtils.ATTR_POD_PATH, server);
 	}
-	
+
 	public static String getDevmodeKey(IServerAttributes server) {
 		return getAttribute(ATTR_DEVMODE_KEY, server);
 	}
@@ -482,7 +474,8 @@ public class OpenShiftServerUtils {
 	}
 
 	public static int getLivenessProbeInitialDelay(IServerAttributes server) {
-		return NumberUtils.toInt(getAttribute(ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY, server), VALUE_LIVENESSPROBE_NODELAY);
+		return NumberUtils.toInt(getAttribute(ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY, server),
+				VALUE_LIVENESSPROBE_NODELAY);
 	}
 
 	public static void setLivenessProbeInitialDelay(int delay, IServerAttributes server) throws CoreException {
@@ -511,7 +504,7 @@ public class OpenShiftServerUtils {
 	public static IControllableServerBehavior getBehaviour(IServer server) {
 		return server.getAdapter(IControllableServerBehavior.class);
 	}
-	
+
 	public static OpenShiftServerBehaviour getOpenShiftServerBehaviour(IServer server) throws CoreException {
 		IControllableServerBehavior serverBehavior = getBehaviour(server);
 		if (!(serverBehavior instanceof OpenShiftServerBehaviour)) {
@@ -520,7 +513,8 @@ public class OpenShiftServerUtils {
 		return (OpenShiftServerBehaviour) serverBehavior;
 	}
 
-	public static OpenShiftServerBehaviour getOpenShiftServerBehaviour(ILaunchConfiguration configuration) throws CoreException {
+	public static OpenShiftServerBehaviour getOpenShiftServerBehaviour(ILaunchConfiguration configuration)
+			throws CoreException {
 		return getOpenShiftServerBehaviour(ServerUtil.getServer(configuration));
 	}
 
@@ -555,13 +549,13 @@ public class OpenShiftServerUtils {
 		if (StringUtils.isEmpty(podPath)) {
 			podPath = loadPodPath(resource, server);
 			if (StringUtils.isEmpty(podPath)) {
-				throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Server {0} could not determine the destination directory to publish to.", server.getName())));
+				throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind(
+						"Server {0} could not determine the destination directory to publish to.", server.getName())));
 			}
 		}
 		return podPath;
 	}
-	
+
 	public static String getSourcePath(IServerAttributes server) {
 		// TODO: implement override project settings with server settings
 		String rawSourcePath = getAttribute(ATTR_SOURCE_PATH, server);
@@ -625,14 +619,14 @@ public class OpenShiftServerUtils {
 		}
 		return false;
 	}
-	
-    private static void assertServerNotNull(IServerAttributes server) throws CoreException {
-        if (server == null) {
-            throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-                    "Could not determine the server to use."));
-        }
-    }
-    
+
+	private static void assertServerNotNull(IServerAttributes server) throws CoreException {
+		if (server == null) {
+			throw new CoreException(
+					OpenShiftCoreActivator.statusFactory().errorStatus("Could not determine the server to use."));
+		}
+	}
+
 	public static CoreException toCoreException(String msg, Exception e) {
 		return new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, msg, e));
 	}
@@ -640,7 +634,7 @@ public class OpenShiftServerUtils {
 	public static CoreException toCoreException(String msg) {
 		return toCoreException(msg, null);
 	}
-	
+
 	/**
 	 * Returns all pods for the given server. Returns an empty list otherwise.
 	 * 

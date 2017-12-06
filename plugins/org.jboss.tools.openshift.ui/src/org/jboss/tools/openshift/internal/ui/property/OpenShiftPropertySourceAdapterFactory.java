@@ -35,32 +35,32 @@ public class OpenShiftPropertySourceAdapterFactory implements IAdapterFactory {
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adapterType == IPropertySource.class) {
 			Connection connection = Adapters.adapt(adaptableObject, Connection.class);
-			if(connection != null) {
-				if(currentConnectionPropertySource != null) {
+			if (connection != null) {
+				if (currentConnectionPropertySource != null) {
 					currentConnectionPropertySource.dispose();
 				}
 				return currentConnectionPropertySource = new ConnectionPropertySource(connection);
 			}
-			IResource resource= Adapters.adapt(adaptableObject, IResource.class);
-			if(resource != null){
-				switch(resource.getKind()){
+			IResource resource = Adapters.adapt(adaptableObject, IResource.class);
+			if (resource != null) {
+				switch (resource.getKind()) {
 				case ResourceKind.BUILD:
-					return new BuildPropertySource((IBuild)resource);
-				case ResourceKind.BUILD_CONFIG: 
-					return new BuildConfigPropertySource((IBuildConfig)resource);
-				case ResourceKind.EVENT: 
-					return new EventPropertySource((IEvent)resource);
+					return new BuildPropertySource((IBuild) resource);
+				case ResourceKind.BUILD_CONFIG:
+					return new BuildConfigPropertySource((IBuildConfig) resource);
+				case ResourceKind.EVENT:
+					return new EventPropertySource((IEvent) resource);
 				case ResourceKind.IMAGE_STREAM:
 					return new ImageStreamPropertySource((IImageStream) resource);
 				case ResourceKind.POD:
-					return new PodPropertySource((IPod)resource);
-				case ResourceKind.REPLICATION_CONTROLLER: 
+					return new PodPropertySource((IPod) resource);
+				case ResourceKind.REPLICATION_CONTROLLER:
 					return new ReplicationControllerPropertySource((IReplicationController) resource);
 				case ResourceKind.ROUTE:
 					return new RoutePropertySource((IRoute) resource);
-				case ResourceKind.SERVICE: 
+				case ResourceKind.SERVICE:
 					return new ServicePropertySource((IService) resource);
-				case ResourceKind.PVC: 
+				case ResourceKind.PVC:
 					return new StoragePropertySource((IPersistentVolumeClaim) resource);
 				default:
 					return new ResourcePropertySource<>(resource);

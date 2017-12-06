@@ -49,8 +49,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		Shell shell = HandlerUtil.getActiveShell(event);
 		final List<IApplication> appsToDelete = getApplicationsToDelete(HandlerUtil.getCurrentSelection(event));
-		if (appsToDelete != null
-				&& !appsToDelete.isEmpty()) {
+		if (appsToDelete != null && !appsToDelete.isEmpty()) {
 			return deleteApplications(appsToDelete, shell);
 		} else {
 			IServer server = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
@@ -65,8 +64,7 @@ public class DeleteApplicationHandler extends AbstractHandler {
 		if (promptForDeleteConfirmation(appsToDelete, shell)) {
 			List<IUser> users = getUsers(appsToDelete);
 			new JobChainBuilder(new DeleteApplicationsJob(appsToDelete))
-					.runWhenDone(new FireExpressConnectionsChangedJob(users))
-					.schedule();
+					.runWhenDone(new FireExpressConnectionsChangedJob(users)).schedule();
 			return Status.OK_STATUS;
 		} else {
 			return ExpressUIActivator.createCancelStatus("Cancelled application removal.");
@@ -87,48 +85,43 @@ public class DeleteApplicationHandler extends AbstractHandler {
 
 	private boolean promptForDeleteConfirmation(final List<IApplication> appsToDelete, Shell shell) {
 		if (appsToDelete.size() == 1) {
-			return MessageDialog.openConfirm(shell,
-					"Application removal",
+			return MessageDialog.openConfirm(shell, "Application removal",
 					NLS.bind(
 							"You are about to destroy the \"{0}\" application.\n"
 									+ "This is NOT reversible, all remote data for this application will be removed.",
 							appsToDelete.get(0).getName()));
 		} else if (appsToDelete.size() > 1) {
-			return MessageDialog.openConfirm(shell,
-					"Application removal",
-					NLS.bind("You are about to destroy {0} applications.\n"
-							+ "This is NOT reversible, all remote data for those applications will be removed.",
+			return MessageDialog.openConfirm(shell, "Application removal",
+					NLS.bind(
+							"You are about to destroy {0} applications.\n"
+									+ "This is NOT reversible, all remote data for those applications will be removed.",
 							appsToDelete.size()));
 		}
 		return false;
 	}
 
 	private IStatus deleteApplicationAndServer(final IServer server, Shell shell) {
-		if (MessageDialog
-				.openConfirm(
-						shell,
-						"Application and Server removal",
-						NLS.bind(
-								"You are about to remove the application and the server adapter \"{0}\".\n"
-										+ "This is NOT reversible, all remote data for this application and the local server adapter will be removed.",
-								server.getName()))) {
+		if (MessageDialog.openConfirm(shell, "Application and Server removal",
+				NLS.bind(
+						"You are about to remove the application and the server adapter \"{0}\".\n"
+								+ "This is NOT reversible, all remote data for this application and the local server adapter will be removed.",
+						server.getName()))) {
 			LoadApplicationJob applicationJob = new LoadApplicationJob(server);
-			new JobChainBuilder(applicationJob)
-					.runWhenSuccessfullyDone(
-							new DeleteApplicationsJob(applicationJob))
+			new JobChainBuilder(applicationJob).runWhenSuccessfullyDone(new DeleteApplicationsJob(applicationJob))
 					.runWhenSuccessfullyDone(new FireExpressConnectionsChangedJob(applicationJob))
-					.runWhenSuccessfullyDone(new AbstractDelegatingMonitorJob(NLS.bind("Delete Server Adapter {0}", server.getName())) {
-						
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							try {
-								server.delete();
-								return Status.OK_STATUS;
-							} catch (CoreException e) {
-								return e.getStatus();
-							}
-						}
-					})
+					.runWhenSuccessfullyDone(
+							new AbstractDelegatingMonitorJob(NLS.bind("Delete Server Adapter {0}", server.getName())) {
+
+								@Override
+								protected IStatus doRun(IProgressMonitor monitor) {
+									try {
+										server.delete();
+										return Status.OK_STATUS;
+									} catch (CoreException e) {
+										return e.getStatus();
+									}
+								}
+							})
 					.schedule();
 		}
 		return Status.OK_STATUS;

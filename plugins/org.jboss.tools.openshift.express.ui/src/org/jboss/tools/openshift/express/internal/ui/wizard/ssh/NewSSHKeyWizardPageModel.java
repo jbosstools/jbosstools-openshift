@@ -65,15 +65,14 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		return privateKeyPathphraseConfirm;
 	}
 
-	
 	public void setPrivateKeyPassphraseConfirm(String confirm) {
-		firePropertyChange(PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE, this.privateKeyPathphraseConfirm, 
+		firePropertyChange(PROPERTY_PRIVATEKEY_CONFIRM_PASSPHRASE, this.privateKeyPathphraseConfirm,
 				this.privateKeyPathphraseConfirm = confirm);
 	}
-	
+
 	public void setPrivateKeyPathphrase(String privateKeyPathphrase) {
-		firePropertyChange(PROPERTY_PRIVATEKEY_PASSPHRASE,
-				this.privateKeyPathphrase, this.privateKeyPathphrase = privateKeyPathphrase);
+		firePropertyChange(PROPERTY_PRIVATEKEY_PASSPHRASE, this.privateKeyPathphrase,
+				this.privateKeyPathphrase = privateKeyPathphrase);
 	}
 
 	public String getPrivateKeyName() {
@@ -129,14 +128,13 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		ensureSSHHomeExists(ssh2Home);
 		File privateKey = new File(ssh2Home, privateKeyName);
 		File publicKey = new File(ssh2Home, publicKeyName);
-		SSHKeyPair keyPair =
-				SSHKeyPair.create(privateKeyPathphrase, privateKey.getAbsolutePath(), publicKey.getAbsolutePath());
+		SSHKeyPair keyPair = SSHKeyPair.create(privateKeyPathphrase, privateKey.getAbsolutePath(),
+				publicKey.getAbsolutePath());
 		SSHUtils.setPrivateKeyPermissions(privateKey);
 		return keyPair;
 	}
 
-	private void ensureSSHHomeExists(String ssh2Home)
-			throws OpenShiftException {
+	private void ensureSSHHomeExists(String ssh2Home) throws OpenShiftException {
 		File ssh2HomeFile = new File(ssh2Home);
 		if (FileUtils.canRead(ssh2HomeFile)) {
 			if (!FileUtils.isDirectory(ssh2HomeFile)) {
@@ -147,10 +145,10 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		}
 
 		try {
-			if(!ssh2HomeFile.mkdirs()) {
+			if (!ssh2HomeFile.mkdirs()) {
 				throw new OpenShiftException("Could not create ssh2 home directory at {0}", ssh2Home);
 			}
-		} catch(SecurityException e) {
+		} catch (SecurityException e) {
 			throw new OpenShiftException(e, "Could not create ssh2 home directory at {0}", ssh2Home);
 		}
 	}
@@ -160,5 +158,4 @@ public class NewSSHKeyWizardPageModel extends AbstractSSHKeyWizardPageModel {
 		return key;
 	}
 
-	
 }

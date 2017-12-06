@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.test.internal;
 
 import static org.mockito.Mockito.mock;
@@ -36,7 +36,7 @@ public class CDKDockerUtilityTest extends TestCase {
 	@Before
 	public void setUp() {
 		mgr = mock(DockerConnectionManager.class);
-		when(mgr.getConnections()).thenReturn(new IDockerConnection[]{});
+		when(mgr.getConnections()).thenReturn(new IDockerConnection[] {});
 		util = new CDKDockerUtility(mgr);
 	}
 
@@ -48,7 +48,7 @@ public class CDKDockerUtilityTest extends TestCase {
 		IDockerConnection existingConnection = mock(IDockerConnection.class);
 		when(existingConnection.getUri()).thenReturn("https://10.1.2.2:2376");
 		when(existingConnection.getName()).thenReturn("test");
-		when(mgr.getConnections()).thenReturn(new IDockerConnection[]{existingConnection });
+		when(mgr.getConnections()).thenReturn(new IDockerConnection[] { existingConnection });
 		assertTrue(util.dockerConnectionExists("test"));
 		IDockerConnection found = util.findDockerConnection("test");
 		assertEquals(found, existingConnection);
@@ -63,7 +63,7 @@ public class CDKDockerUtilityTest extends TestCase {
 		assertNotNull(dockerConnection);
 		verify(mgr).addConnection(dockerConnection);
 
-		assertEquals(name, dockerConnection.getName());	
+		assertEquals(name, dockerConnection.getName());
 		assertEquals("https://10.1.2.2:2376", dockerConnection.getUri());
 		assertEquals("/cert/path/.docker", dockerConnection.getTcpCertPath());
 	}
@@ -79,11 +79,11 @@ public class CDKDockerUtilityTest extends TestCase {
 	}
 
 	private ServiceManagerEnvironment createADB(String host, String port) throws URISyntaxException {
-		HashMap<String,String> env = new HashMap<>();
-		env.put("DOCKER_HOST","tcp://" + host + ":" + port);
-		env.put("DOCKER_CERT_PATH","/cert/path/.docker");
-		env.put("DOCKER_TLS_VERIFY","1");
-		env.put("DOCKER_MACHINE_NAME","e5d7d0a");
+		HashMap<String, String> env = new HashMap<>();
+		env.put("DOCKER_HOST", "tcp://" + host + ":" + port);
+		env.put("DOCKER_CERT_PATH", "/cert/path/.docker");
+		env.put("DOCKER_TLS_VERIFY", "1");
+		env.put("DOCKER_MACHINE_NAME", "e5d7d0a");
 		return new ServiceManagerEnvironment(env);
 	}
 }

@@ -36,7 +36,7 @@ public class DialogChildVisibilityAdapter {
 	private final Shell shell;
 	private int invisibleChildShellHeight;
 	private boolean resizing;
-	
+
 	public DialogChildVisibilityAdapter(Composite child, boolean visible) {
 		Assert.isTrue(child != null && !child.isDisposed());
 		this.composite = child;
@@ -44,14 +44,14 @@ public class DialogChildVisibilityAdapter {
 		Assert.isTrue(layoutData instanceof GridData, "only supports GridLayout");
 		this.gridData = (GridData) layoutData;
 		gridData.exclude = !visible;
-		Assert.isTrue(child.getShell() != null	&& !child.getShell().isDisposed());
+		Assert.isTrue(child.getShell() != null && !child.getShell().isDisposed());
 		this.shell = child.getShell();
 		shell.addControlListener(onShellResized(shell));
 		this.invisibleChildShellHeight = computeChildHeight(visible, child, shell);
 		this.visible = visible;
 		child.setVisible(visible);
 	}
-	
+
 	private ControlListener onShellResized(final Shell shell) {
 		final ControlListener listener = new ControlAdapter() {
 
@@ -63,9 +63,9 @@ public class DialogChildVisibilityAdapter {
 			}
 
 		};
-		
+
 		shell.addDisposeListener(new DisposeListener() {
-			
+
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				shell.removeControlListener(listener);
@@ -78,8 +78,8 @@ public class DialogChildVisibilityAdapter {
 		Point size = shell.getSize();
 		if (visible) {
 			Point childSize = child.computeSize(child.getSize().x, SWT.DEFAULT);
-			size.y = size.y - childSize.y ;
-		} 
+			size.y = size.y - childSize.y;
+		}
 		return size.y;
 	}
 
@@ -89,13 +89,13 @@ public class DialogChildVisibilityAdapter {
 		}
 		toggle();
 	}
-	
+
 	public boolean toggle() {
 		this.resizing = true;
 		this.visible = !visible;
 		composite.setVisible(visible);
 		gridData.exclude = !visible;
-		int newShellHeight= computeShellHeight(shell.getSize());
+		int newShellHeight = computeShellHeight(shell.getSize());
 		shell.setSize(shell.getSize().x, newShellHeight);
 		shell.layout(true, true);
 		this.resizing = false;
@@ -113,5 +113,5 @@ public class DialogChildVisibilityAdapter {
 	public boolean isVisible() {
 		return visible;
 	}
-	
+
 }

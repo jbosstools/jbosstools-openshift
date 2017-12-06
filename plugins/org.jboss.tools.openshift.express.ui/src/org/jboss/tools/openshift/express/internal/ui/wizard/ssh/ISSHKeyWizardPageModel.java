@@ -35,6 +35,6 @@ public interface ISSHKeyWizardPageModel {
 	public IOpenShiftSSHKey addSSHKey() throws FileNotFoundException, OpenShiftException, IOException;
 
 	public IOpenShiftSSHKey getSSHKey();
-	
+
 	public File getPublicKey();
 }

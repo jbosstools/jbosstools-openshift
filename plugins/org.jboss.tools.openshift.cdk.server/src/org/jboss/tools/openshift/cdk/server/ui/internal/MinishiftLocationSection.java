@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import java.io.File;
@@ -47,9 +47,8 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 	private static String LABEL_STRING = "Minishift Binary: ";
 	private static String COMMAND_NAME = "Modify Minishift Location";
 	private static String LOC_ATTR = CDK3Server.MINISHIFT_FILE;
-	
+
 	private Combo hypervisorCombo;
-	
 
 	private Job longValidation;
 	private MinishiftVersions minishiftVersionProps = null;
@@ -73,41 +72,40 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 
 	protected void createHypervisorWidgets(FormToolkit toolkit, Composite composite) {
 		toolkit.createLabel(composite, "Hypervisor:");
-		hypervisorCombo = new Combo(composite,  SWT.READ_ONLY);
+		hypervisorCombo = new Combo(composite, SWT.READ_ONLY);
 		hypervisorCombo.setLayoutData(GridDataFactory.defaultsFor(hypervisorCombo).span(4, 1).create());
 		hypervisorCombo.setItems(CDK3Server.getHypervisors());
 	}
-	
+
 	protected void createMinishiftHomeWidgets(FormToolkit toolkit, Composite composite) {
 		toolkit.createLabel(composite, "Minishift Home:");
 		msHomeText = toolkit.createText(composite, "", SWT.SINGLE | SWT.BORDER);
 		msHomeBrowse = toolkit.createButton(composite, "Browse...", SWT.PUSH);
-		
-		msHomeText.setLayoutData(GridDataFactory.defaultsFor(msHomeText).span(3,1).minSize(150, SWT.DEFAULT).create());
-		
-		msHomeDecor = new ControlDecoration(msHomeText, SWT.TOP|SWT.LEFT);
-		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry .DEC_ERROR);
+
+		msHomeText.setLayoutData(GridDataFactory.defaultsFor(msHomeText).span(3, 1).minSize(150, SWT.DEFAULT).create());
+
+		msHomeDecor = new ControlDecoration(msHomeText, SWT.TOP | SWT.LEFT);
+		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
 		Image img = fieldDecoration.getImage();
 		msHomeDecor.setImage(img);
 		msHomeDecor.hide(); // hiding it initially
 	}
-	
+
 	@Override
 	protected void setDefaultValues() {
 		// set initial values
 		super.setDefaultValues();
 		String hyp = server.getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
 		int ind = Arrays.asList(CDK3Server.getHypervisors()).indexOf(hyp);
-		if( ind != -1 ) {
+		if (ind != -1) {
 			hypervisorCombo.select(ind);
 		}
 		String defMSHome = new Path(System.getProperty("user.home")).append(".minishift").toOSString();
 		String msHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, defMSHome);
 		msHomeText.setText(msHome);
 	}
-	
-	
-	
+
 	@Override
 	protected void addListeners() {
 		super.addListeners();
@@ -118,13 +116,14 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 			}
 		};
 		hypervisorCombo.addSelectionListener(sl);
-		
+
 		msHomeSelListener = new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				browseClicked(msHomeText, FOLDER);
 				validate();
 			}
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
@@ -144,20 +143,23 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 			}
 		});
 
-		
 	}
-	public class SetMinishiftHomePropertyCommand extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyTextCommand {
+
+	public class SetMinishiftHomePropertyCommand
+			extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyTextCommand {
 		public SetMinishiftHomePropertyCommand(IServerWorkingCopy server) {
-			super(server, "Change Minishift Home", msHomeText, msHomeText.getText(), CDK3Server.MINISHIFT_HOME, msHomeModListener);
+			super(server, "Change Minishift Home", msHomeText, msHomeText.getText(), CDK3Server.MINISHIFT_HOME,
+					msHomeModListener);
 		}
 	}
-	
-	public class SetHypervisorPropertyCommand extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyComboCommand {
+
+	public class SetHypervisorPropertyCommand
+			extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyComboCommand {
 		public SetHypervisorPropertyCommand(IServerWorkingCopy server, SelectionListener sl) {
-			super(server, "Change hypervisor", hypervisorCombo, hypervisorCombo.getItem(hypervisorCombo.getSelectionIndex()), CDK3Server.PROP_HYPERVISOR, sl);
+			super(server, "Change hypervisor", hypervisorCombo,
+					hypervisorCombo.getItem(hypervisorCombo.getSelectionIndex()), CDK3Server.PROP_HYPERVISOR, sl);
 		}
 	}
-	
 
 	@Override
 	protected void locationBrowseClicked() {
@@ -168,32 +170,32 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 	protected void validate() {
 		kickValidationJob();
 	}
-	
+
 	protected void validate2() {
 		String s = getErrorString();
-		if( s == null ) {
+		if (s == null) {
 			txtDecorator.hide();
 		} else {
 			txtDecorator.setDescriptionText(s);
 			txtDecorator.show();
 		}
 	}
-	
+
 	private synchronized void kickValidationJob() {
-		if( longValidation != null ) {
-			longValidation.cancel(); 
-		} 
+		if (longValidation != null) {
+			longValidation.cancel();
+		}
 		Text t = getLocationText();
-		if( t == null || t.isDisposed()) {
+		if (t == null || t.isDisposed()) {
 			return;
 		}
 		File f = new File(t.getText());
-		if( !f.exists() || !f.canExecute()) {
+		if (!f.exists() || !f.canExecute()) {
 			validate2();
 			return;
 		}
 		String homeDir = t.getText();
-		
+
 		longValidation = new Job("Validate minishift location") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -209,53 +211,50 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		longValidation.setSystem(true);
 		longValidation.schedule(750);
 	}
-	
+
 	protected String getErrorString() {
 		// Subclass override
 		Text t = getLocationText();
-		if( t != null && !t.isDisposed()) {
+		if (t != null && !t.isDisposed()) {
 			String v = t.getText();
 			File f = new File(v);
-			if( !f.exists()) {
+			if (!f.exists()) {
 				return "File " + v + " does not exist.";
-			} else if( !f.canExecute()) {
+			} else if (!f.canExecute()) {
 				return "File " + v + " is not executable.";
-			} else if( minishiftVersionProps == null ) {
+			} else if (minishiftVersionProps == null) {
 				return "Unknown error when checking minishift version: " + v;
-			} else if( !minishiftVersionProps.isValid()) {
+			} else if (!minishiftVersionProps.isValid()) {
 				String err = minishiftVersionProps.getError();
-				if( err == null ) {
+				if (err == null) {
 					err = "Unknown error while checking minishift version";
 				}
 				return err;
 			} else {
 				String versionCompatError = isVersionCompatible(minishiftVersionProps);
-				if( versionCompatError != null )
+				if (versionCompatError != null)
 					return versionCompatError;
 			}
 		}
 		return null;
 	}
-	
+
 	protected String isVersionCompatible(MinishiftVersions versions) {
 		String cdkVers = versions.getCDKVersion();
-		if( cdkVers == null ) {
+		if (cdkVers == null) {
 			return "Cannot determine CDK version.";
 		}
-		if( CDK3Server.matchesCDK3(cdkVers)) {
+		if (CDK3Server.matchesCDK3(cdkVers)) {
 			return null;
 		}
 		return "CDK version " + cdkVers + " is not compatible with this server adapter.";
 	}
-	
-	
+
 	@Override
 	public IStatus[] getSaveStatus() {
 		String err = getErrorString();
-		if( err != null ) {
-			return new Status[] {
-					new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, err)
-			};
+		if (err != null) {
+			return new Status[] { new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, err) };
 		}
 		return new IStatus[] { Status.OK_STATUS };
 	}

@@ -39,14 +39,14 @@ public class LoadKeysJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		try{
+		try {
 			this.keys = user.getSSHKeys();
-			return Status.OK_STATUS; 
-		}catch(OpenShiftException ex){
+			return Status.OK_STATUS;
+		} catch (OpenShiftException ex) {
 			return ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, ex);
 		}
 	}
-	
+
 	public List<IOpenShiftSSHKey> getKeys() {
 		return keys;
 	}

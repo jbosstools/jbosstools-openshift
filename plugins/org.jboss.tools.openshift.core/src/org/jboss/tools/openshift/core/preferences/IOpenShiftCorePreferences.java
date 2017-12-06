@@ -18,20 +18,20 @@ import java.util.Map;
  */
 public interface IOpenShiftCorePreferences {
 
-	String[] loadConnections() ;
+	String[] loadConnections();
 
 	void saveConnections(String[] connections);
-	
+
 	void saveAuthScheme(String connectionURL, String scheme);
 
 	void removeAuthScheme(String connectionURL);
-	
+
 	String loadScheme(String connectionURL);
 
 	String getOCBinaryLocation();
-	
+
 	void saveOCBinaryLocation(String location);
-	
+
 	/**
 	 * Save the extended properties of a connection.  This will
 	 * create a preference key by connectionURL
@@ -39,7 +39,7 @@ public interface IOpenShiftCorePreferences {
 	 * @param ext
 	 */
 	void saveExtProperties(String connectionURL, Map<String, Object> ext);
-	
+
 	/**
 	 * Load the extended properties of a connection
 	 * @param connectionURL

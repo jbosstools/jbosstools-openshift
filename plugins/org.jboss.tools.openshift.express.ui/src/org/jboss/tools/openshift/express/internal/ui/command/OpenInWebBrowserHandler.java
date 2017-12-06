@@ -25,18 +25,19 @@ import com.openshift.client.IApplication;
  * @author Xavier Coulon
  * @author Andre Dietisheim
  */
-public class OpenInWebBrowserHandler extends AbstractHandler{
+public class OpenInWebBrowserHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IApplication.class);
+		final IApplication application = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event),
+				IApplication.class);
 		if (application == null) {
 			return ExpressUIActivator.createCancelStatus("Could not find application to show in a browser.");
 		}
 		final String appName = application.getName();
 		final String appUrl = application.getApplicationUrl();
-		new BrowserUtility().checkedCreateInternalBrowser(appUrl, appName,
-				ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
+		new BrowserUtility().checkedCreateInternalBrowser(appUrl, appName, ExpressUIActivator.PLUGIN_ID,
+				ExpressUIActivator.getDefault().getLog());
 		return Status.OK_STATUS;
 	}
 

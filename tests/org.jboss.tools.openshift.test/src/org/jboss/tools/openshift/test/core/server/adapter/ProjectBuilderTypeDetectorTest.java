@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.server.adapter;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -28,16 +27,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ProjectBuilderTypeDetectorTest {
 
 	private ProjectBuilderTypeDetector detector;
-	
+
 	@Mock
 	private IProject project;
-	
+
 	@Mock
 	private IFile existingFile;
-	
+
 	@Mock
 	private IFile missingFile;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		detector = new ProjectBuilderTypeDetector();
@@ -47,23 +46,21 @@ public class ProjectBuilderTypeDetectorTest {
 		when(project.getFile(anyString())).thenReturn(missingFile);
 	}
 
-	
 	@Test
 	public void testRandomProject() {
 		assertType(""/*unknown type*/);
 	}
-	
-	
+
 	@Test
 	public void testMavenProject() {
 		assertType("eap", "pom.xml", "package.json");
 	}
-	
+
 	@Test
 	public void testRubyWithGemfileProject() {
 		assertType("ruby", "Gemfile", "package.json");
 	}
-	
+
 	@Test
 	public void testRubyWithRakefileProject() {
 		assertType("ruby", "Rakefile");
@@ -78,17 +75,17 @@ public class ProjectBuilderTypeDetectorTest {
 	public void testPhpWithIndexPhpProject() {
 		assertType("php", "index.php");
 	}
-	
+
 	@Test
 	public void testPhpWithComposerJsonProject() {
 		assertType("php", "composer.json");
 	}
-	
+
 	@Test
 	public void testPythonWithRequirementsTxtProject() {
 		assertType("python", "requirements.txt");
 	}
-	
+
 	@Test
 	public void testPythonWithConfigPyProject() {
 		assertType("python", "config.py");
@@ -98,28 +95,27 @@ public class ProjectBuilderTypeDetectorTest {
 	public void testNodeWithAppJsonProject() {
 		assertType("node", "app.json");
 	}
-	
+
 	@Test
 	public void testNodeWithPackageJsonProject() {
 		assertType("node", "package.json");
 	}
 
-
 	@Test
 	public void testPerlWithIndexPlProject() {
 		assertType("perl", "index.pl");
 	}
-	
+
 	@Test
 	public void testNodeWithCpanfileProject() {
 		assertType("perl", "cpanfile");
 	}
-	
-	protected void assertType(String expectedResult, String...existingFiles) {
+
+	protected void assertType(String expectedResult, String... existingFiles) {
 		for (String file : existingFiles) {
 			when(project.getFile(file)).thenReturn(existingFile);
 		}
-		String result =  detector.findTemplateFilter(project);
+		String result = detector.findTemplateFilter(project);
 		assertEquals(expectedResult, result);
 	}
 }

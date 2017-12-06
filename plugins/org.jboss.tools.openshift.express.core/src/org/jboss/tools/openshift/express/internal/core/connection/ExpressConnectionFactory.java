@@ -9,6 +9,7 @@
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.connection;
+
 import java.io.IOException;
 
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -18,7 +19,6 @@ import org.jboss.tools.openshift.express.internal.core.ExpressCoreActivator;
 
 import com.openshift.client.OpenShiftException;
 import com.openshift.client.configuration.OpenShiftConfiguration;
-
 
 /**
  * @author Andre Dietisheim
@@ -37,12 +37,11 @@ public class ExpressConnectionFactory implements IConnectionFactory {
 	public String getId() {
 		return "org.jboss.tools.openshift.express.core.ConnectionFactory";
 	}
-	
+
 	@Override
 	public ExpressConnection create(String url) {
 		return new ExpressConnection(url, ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback());
 	}
-
 
 	@Override
 	public String getDefaultHost() {

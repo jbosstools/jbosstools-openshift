@@ -53,11 +53,10 @@ import com.openshift.restclient.authorization.IAuthorizationContext;
  */
 public class ConnectionEditor extends BaseConnectionEditor {
 
-
 	private static final String PROPERTY_SELECTED_DETAIL_VIEW = "selectedDetailView";
-	
-	private Map<String,IConnectionEditorDetailView> detailViews = new HashMap<>();
-	private ConnectionEditorStackedDetailViews stackedViews ;
+
+	private Map<String, IConnectionEditorDetailView> detailViews = new HashMap<>();
+	private ConnectionEditorStackedDetailViews stackedViews;
 	private DetailViewModel detailViewModel = new DetailViewModel();
 
 	private ComboViewer authTypeViewer;
@@ -65,20 +64,21 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	private IObservableValue<IDetailView> selectedDetailViewObservable;
 	private IObservableValue<String> authSchemeObservable;
 	private Binding selectedAuthTypeBinding;
-	
+
 	private class DetailViewModel extends ObservablePojo {
 		private IConnectionEditorDetailView selectedDetailView;
-		
+
 		public IConnectionEditorDetailView getSelectedDetailView() {
 			return this.selectedDetailView;
 		}
+
 		@SuppressWarnings("unused")
-		public void  setSelectedDetailView(IConnectionEditorDetailView view) {
+		public void setSelectedDetailView(IConnectionEditorDetailView view) {
 			this.selectedDetailView = view;
 		}
-		
+
 		public void setSelectedConnection(IConnection conn) {
-			if(conn instanceof Connection) {
+			if (conn instanceof Connection) {
 				Connection connection = (Connection) conn;
 				selectedDetailViewObservable.setValue(detailViews.get(connection.getAuthScheme()));
 			} else {
@@ -88,6 +88,7 @@ public class ConnectionEditor extends BaseConnectionEditor {
 
 			setDetailViewsConnection(conn);
 		}
+
 		private void setDetailViewsConnection(IConnection conn) {
 			for (IConnectionEditorDetailView view : detailViews.values()) {
 				//reset all views
@@ -95,11 +96,11 @@ public class ConnectionEditor extends BaseConnectionEditor {
 			}
 		}
 	}
-	
-	private class ConnectionEditorStackedDetailViews extends AbstractStackedDetailViews{
 
-		public ConnectionEditorStackedDetailViews(IObservableValue<IDetailView> detailViewModel, Object context, Composite parent,
-				DataBindingContext dbc) {
+	private class ConnectionEditorStackedDetailViews extends AbstractStackedDetailViews {
+
+		public ConnectionEditorStackedDetailViews(IObservableValue<IDetailView> detailViewModel, Object context,
+				Composite parent, DataBindingContext dbc) {
 			super(detailViewModel, context, parent, dbc);
 		}
 
@@ -107,35 +108,31 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		protected IDetailView[] getDetailViews() {
 			return detailViews.values().toArray(new IConnectionEditorDetailView[detailViews.size()]);
 		}
-		
+
 	}
-	
+
 	@Override
 	public Composite createControls(Composite parent, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
 		Composite composite = setControl(new Composite(parent, SWT.None));
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
 
-		this.selectedDetailViewObservable = 
-				BeanProperties.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class).observe(detailViewModel);
-		this.authSchemeObservable = 
-				BeanProperties.value("authScheme", String.class).observe(detailViewModel);
+		this.selectedDetailViewObservable = BeanProperties
+				.value(PROPERTY_SELECTED_DETAIL_VIEW, IConnectionEditorDetailView.class).observe(detailViewModel);
+		this.authSchemeObservable = BeanProperties.value("authScheme", String.class).observe(detailViewModel);
 		//detail views
-		OAuthDetailView oAuthDetailView = new OAuthDetailView(wizardPage.getWizard(), pageModel, changeListener, pageModel.getContext(), authSchemeObservable);
-		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, 
-				oAuthDetailView);
-		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC, 
+		OAuthDetailView oAuthDetailView = new OAuthDetailView(wizardPage.getWizard(), pageModel, changeListener,
+				pageModel.getContext(), authSchemeObservable);
+		detailViews.put(IAuthorizationContext.AUTHSCHEME_OAUTH, oAuthDetailView);
+		detailViews.put(IAuthorizationContext.AUTHSCHEME_BASIC,
 				new BasicAuthenticationDetailView(pageModel, changeListener, pageModel.getContext()));
 		rememberTokenObservable = oAuthDetailView.getRememberTokenObservable();
 
 		// auth type
 		Label authTypeLabel = new Label(composite, SWT.NONE);
 		authTypeLabel.setText("Protocol:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(authTypeLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(authTypeLabel);
 		Combo authTypeCombo = new Combo(composite, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(authTypeCombo);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(authTypeCombo);
 		this.authTypeViewer = new ComboViewer(authTypeCombo);
 		authTypeViewer.setContentProvider(ArrayContentProvider.getInstance());
 		authTypeViewer.setLabelProvider(new ColumnLabelProvider() {
@@ -148,24 +145,21 @@ public class ConnectionEditor extends BaseConnectionEditor {
 
 		//connection detail views
 		final Composite detailsContainer = new Composite(composite, SWT.None);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).span(3,1).applyTo(detailsContainer);
-		stackedViews = new ConnectionEditorStackedDetailViews(
-				selectedDetailViewObservable,
-				pageModel, 
-				detailsContainer, 
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(3, 1).applyTo(detailsContainer);
+		stackedViews = new ConnectionEditorStackedDetailViews(selectedDetailViewObservable, pageModel, detailsContainer,
 				dbc);
 		stackedViews.createControls(false);
-		
+
 		return composite;
 	}
-	
+
 	@Override
-	public void onVisible(IObservableValue detailViewModelObservable, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+	public void onVisible(IObservableValue detailViewModelObservable, ConnectionWizardPageModel pageModel,
+			DataBindingContext dbc) {
 		bindWidgetsToInternalModel(dbc);
 		detailViewModel.setSelectedConnection(pageModel.getSelectedConnection());
 	}
-	
+
 	@Override
 	public void onInVisible(IObservableValue detailViewModelObservable, DataBindingContext dbc) {
 		detailViewModel.getSelectedDetailView().onInVisible(detailViewModelObservable, dbc);
@@ -177,17 +171,16 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		this.selectedAuthTypeBinding = ValueBindingBuilder
 				.bind(ViewerProperties.singleSelection().observe(authTypeViewer))
 				.validatingAfterGet(
-						new IsNotNullValidator(
-								ValidationStatus.cancel("Please select an authorization protocol.")))
-				.to(selectedDetailViewObservable)
-				.in(dbc);
-		ControlDecorationSupport
-				.create(selectedAuthTypeBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		
+						new IsNotNullValidator(ValidationStatus.cancel("Please select an authorization protocol.")))
+				.to(selectedDetailViewObservable).in(dbc);
+		ControlDecorationSupport.create(selectedAuthTypeBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
+
 	}
 
 	@Override
-	public void onInVisible(IObservableValue detailsViewModelObservable, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+	public void onInVisible(IObservableValue detailsViewModelObservable, ConnectionWizardPageModel pageModel,
+			DataBindingContext dbc) {
 		detailViewModel.getSelectedDetailView().onInVisible(detailsViewModelObservable, dbc);
 		disposeBindings();
 	}
@@ -196,10 +189,10 @@ public class ConnectionEditor extends BaseConnectionEditor {
 		DataBindingUtils.dispose(selectedAuthTypeBinding);
 		for (IDetailView view : stackedViews.getDetailViews()) {
 			view.dispose();
-		}			
-		
+		}
+
 	}
-	
+
 	@Override
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
 		IConnection conn = (IConnection) selectedConnection.getValue();
@@ -210,22 +203,23 @@ public class ConnectionEditor extends BaseConnectionEditor {
 	public boolean isViewFor(Object object) {
 		return object instanceof ConnectionFactory;
 	}
-	
+
 	private IConnectionEditorDetailView getDetailView() {
 		return detailViewModel.getSelectedDetailView();
 	}
-	
+
 	@Override
-	protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(ConnectionWizardPageModel pageModel) {
+	protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(
+			ConnectionWizardPageModel pageModel) {
 		return new ConnectionAuthenticationProviderProxy();
 	}
-	
-	private class  ConnectionAuthenticationProviderProxy implements IConnectionAuthenticationProvider {
+
+	private class ConnectionAuthenticationProviderProxy implements IConnectionAuthenticationProvider {
 		@Override
 		public IConnection update(IConnection connection) {
 			return getDetailView().getConnectionAuthenticationProvider().update(connection);
 		}
-		
+
 	}
 
 }

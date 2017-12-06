@@ -61,8 +61,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 	}
 
 	private String getDialogTitle(boolean hasProject) {
-		return hasProject ? 
-				OpenShiftUIMessages.ProjectDeletionDialogTitle
+		return hasProject ? OpenShiftUIMessages.ProjectDeletionDialogTitle
 				: OpenShiftUIMessages.ResourceDeletionDialogTitle;
 	}
 
@@ -78,7 +77,8 @@ public class DeleteResourceHandler extends AbstractHandler {
 			if (hasProject) {
 				return NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation, resource.getName());
 			} else {
-				return NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, resource.getName(), resource.getKind());
+				return NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, resource.getName(),
+						resource.getKind());
 			}
 		}
 	}

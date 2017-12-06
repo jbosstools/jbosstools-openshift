@@ -33,9 +33,7 @@ public class AbstractProjectImportOperation {
 	}
 
 	protected boolean isReadable(File destination) {
-		return destination != null
-				&& destination.exists()
-				&& destination.canRead();
+		return destination != null && destination.exists() && destination.canRead();
 	}
 
 	/**
@@ -45,20 +43,18 @@ public class AbstractProjectImportOperation {
 	 * @param message the dialog message
 	 * @return true if projects should overwritten
 	 */
-    protected boolean displayOverwriteDialog(final String title, final String message) {
-        final boolean[] overwrite = new boolean[1];
-                
-        Display.getDefault().syncExec(new Runnable() {
+	protected boolean displayOverwriteDialog(final String title, final String message) {
+		final boolean[] overwrite = new boolean[1];
 
-            @Override
-            public void run() {
-                overwrite[0] = MessageDialog.openQuestion(
-                        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-                        title,
-                        message);
-            }
+		Display.getDefault().syncExec(new Runnable() {
 
-        });
-        return overwrite[0];
-    }
+			@Override
+			public void run() {
+				overwrite[0] = MessageDialog
+						.openQuestion(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), title, message);
+			}
+
+		});
+		return overwrite[0];
+	}
 }

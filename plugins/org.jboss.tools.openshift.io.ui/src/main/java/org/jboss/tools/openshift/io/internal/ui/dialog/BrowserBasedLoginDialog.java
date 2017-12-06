@@ -33,7 +33,7 @@ public class BrowserBasedLoginDialog extends Dialog {
 	private String startURL;
 	private Browser browser;
 	private LoginResponse info;
-	
+
 	private final RequestProcessor processor;
 
 	public BrowserBasedLoginDialog(Shell parentShell, String startURL, String landingURL) {
@@ -106,6 +106,5 @@ public class BrowserBasedLoginDialog extends Dialog {
 	public LoginResponse getInfo() {
 		return info;
 	}
-
 
 }

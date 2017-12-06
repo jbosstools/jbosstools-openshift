@@ -53,8 +53,7 @@ public class BuildConfigDetailViews extends AbstractStackedDetailViews {
 		@Override
 		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
-			GridLayoutFactory.fillDefaults()
-					.numColumns(2).margins(8, 2).spacing(6, 2).applyTo(container);
+			GridLayoutFactory.fillDefaults().numColumns(2).margins(8, 2).spacing(6, 2).applyTo(container);
 			this.nameText = createLabeledValue("Name:", container);
 			this.namespaceText = createLabeledValue("Namespace:", container);
 			this.labelsText = createLabeledValue("Labels:", container);

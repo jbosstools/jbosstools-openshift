@@ -29,39 +29,38 @@ public class SaveSnapshotWizardPageModel extends ObservableUIPojo {
 
 	private SaveSnapshotWizardModel wizardModel;
 	private String directory;
-	
+
 	public SaveSnapshotWizardPageModel(SaveSnapshotWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 		String filepath = wizardModel.getFilepath();
-		if(filepath != null){
-			this.directory = StringUtils.left(filepath, 
-				filepath.length() - FilenameUtils.getName(filepath).length());
+		if (filepath != null) {
+			this.directory = StringUtils.left(filepath, filepath.length() - FilenameUtils.getName(filepath).length());
 		}
-			
+
 	}
 
 	public void setFilepath(String filepath) {
-		firePropertyChange(
-				PROPERTY_FILEPATH, this.wizardModel.getFilepath(), this.wizardModel.setFilepath(filepath));
+		firePropertyChange(PROPERTY_FILEPATH, this.wizardModel.getFilepath(), this.wizardModel.setFilepath(filepath));
 	}
 
 	public String getFilepath() {
 		return wizardModel.getFilepath();
 	}
-	
-	public String getDestination(){
+
+	public String getDestination() {
 		return this.directory;
 	}
-	
+
 	public void setDestination(String directory) {
 		this.directory = directory;
-		String filepath = getFilePath(directory, wizardModel.getApplication().getName(), getSnapshotTypeString(isDeploymentSnapshot()));
+		String filepath = getFilePath(directory, wizardModel.getApplication().getName(),
+				getSnapshotTypeString(isDeploymentSnapshot()));
 		setFilepath(filepath);
 	}
 
 	private String getFilePath(String directory, String applicationName, String snapshotType) {
 		String snashotFilename = MessageFormat.format("{0}-{1}.tar.gz", applicationName, snapshotType);
-		File destinationFile = new File(directory, snashotFilename );
+		File destinationFile = new File(directory, snashotFilename);
 		String filepath = FileUtils.getAvailableFilepath(destinationFile.getAbsolutePath());
 		return filepath;
 	}
@@ -73,7 +72,7 @@ public class SaveSnapshotWizardPageModel extends ObservableUIPojo {
 		wizardModel.setProject(project);
 		setDestination(project.getLocation().toString());
 	}
-	
+
 	private String getSnapshotTypeString(boolean deploymentSnapshot) {
 		if (deploymentSnapshot) {
 			return "deployment";
@@ -83,11 +82,11 @@ public class SaveSnapshotWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setDeploymentSnapshot(boolean deploymentSnapshot) {
-		firePropertyChange(
-				PROPERTY_DEPLOYMENT_SNAPSHOT, this.wizardModel.isDeploymentSnapshot(),
+		firePropertyChange(PROPERTY_DEPLOYMENT_SNAPSHOT, this.wizardModel.isDeploymentSnapshot(),
 				this.wizardModel.setDeploymentSnapshot(deploymentSnapshot));
 		if (directory != null) {
-			String filepath = getFilePath(directory, wizardModel.getApplication().getName(), getSnapshotTypeString(deploymentSnapshot));
+			String filepath = getFilePath(directory, wizardModel.getApplication().getName(),
+					getSnapshotTypeString(deploymentSnapshot));
 			setFilepath(filepath);
 		}
 	}

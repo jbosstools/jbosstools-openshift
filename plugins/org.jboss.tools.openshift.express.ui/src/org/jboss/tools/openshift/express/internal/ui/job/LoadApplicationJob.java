@@ -46,10 +46,10 @@ public class LoadApplicationJob extends Job {
 			failureCause = e.getCause();
 		}
 		if (application == null) {
-			return ExpressUIActivator.createErrorStatus(
-					NLS.bind("Failed to retrieve Application from server adapter {0}.\n" +
-							"Please verify that the associated OpenShift application and workspace project still exist.", 
-							server.getName()), failureCause);
+			return ExpressUIActivator.createErrorStatus(NLS.bind(
+					"Failed to retrieve Application from server adapter {0}.\n"
+							+ "Please verify that the associated OpenShift application and workspace project still exist.",
+					server.getName()), failureCause);
 		}
 		return Status.OK_STATUS;
 	}
@@ -60,7 +60,7 @@ public class LoadApplicationJob extends Job {
 	public final IApplication getApplication() {
 		return application;
 	}
-	
+
 	public String getApplicationName() {
 		return server.getName();
 	}

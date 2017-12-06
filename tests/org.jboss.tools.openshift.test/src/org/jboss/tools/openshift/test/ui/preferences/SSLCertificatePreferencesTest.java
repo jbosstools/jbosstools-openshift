@@ -40,14 +40,13 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class SSLCertificatePreferencesTest {
-	
+
 	private TestableSSLCertificatesPreference preference;
 
 	@Before
 	public void setUp() throws Exception {
 		this.preference = new TestableSSLCertificatesPreference();
-		List<HostCertificate> certificates = Arrays.asList(
-				createHostCertificate(true, CERTIFICATE_REDHAT_COM), 
+		List<HostCertificate> certificates = Arrays.asList(createHostCertificate(true, CERTIFICATE_REDHAT_COM),
 				createHostCertificate(false, CERTIFICATE_OPEN_PAAS_REDHAT_COM));
 		preference.save(certificates);
 	}
@@ -125,7 +124,7 @@ public class SSLCertificatePreferencesTest {
 		private class PreferenceStoreFake implements IPreferenceStore {
 
 			private Map<String, String> store = new HashMap<>();
-			
+
 			@Override
 			public void addPropertyChangeListener(IPropertyChangeListener listener) {
 				throw new UnsupportedOperationException();

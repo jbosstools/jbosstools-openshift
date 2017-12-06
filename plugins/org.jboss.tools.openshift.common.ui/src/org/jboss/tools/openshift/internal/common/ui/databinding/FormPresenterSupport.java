@@ -74,18 +74,14 @@ public class FormPresenterSupport {
 						.getElement();
 				IObservableList targets = validationStatusProvider.getTargets();
 				if (listDiffEntry.isAddition()) {
-					targets
-							.addListChangeListener(validationStatusProviderTargetsListener);
+					targets.addListChangeListener(validationStatusProviderTargetsListener);
 					for (Iterator it = targets.iterator(); it.hasNext();) {
-						((IObservable) it.next())
-								.addChangeListener(uiChangeListener);
+						((IObservable) it.next()).addChangeListener(uiChangeListener);
 					}
 				} else {
-					targets
-							.removeListChangeListener(validationStatusProviderTargetsListener);
+					targets.removeListChangeListener(validationStatusProviderTargetsListener);
 					for (Iterator it = targets.iterator(); it.hasNext();) {
-						((IObservable) it.next())
-								.removeChangeListener(uiChangeListener);
+						((IObservable) it.next()).removeChangeListener(uiChangeListener);
 					}
 				}
 			}
@@ -134,8 +130,7 @@ public class FormPresenterSupport {
 	 *
 	 * @since 1.4
 	 */
-	public void setValidationMessageProvider(
-			IValidationMessageProvider messageProvider) {
+	public void setValidationMessageProvider(IValidationMessageProvider messageProvider) {
 		this.messageProvider = messageProvider;
 		handleStatusChanged();
 	}
@@ -151,13 +146,12 @@ public class FormPresenterSupport {
 			ObservableTracker.setIgnore(false);
 		}
 
-		aggregateStatusProvider
-				.addValueChangeListener(new IValueChangeListener() {
-					@Override
-					public void handleValueChange(ValueChangeEvent event) {
-						statusProviderChanged();
-					}
-				});
+		aggregateStatusProvider.addValueChangeListener(new IValueChangeListener() {
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				statusProviderChanged();
+			}
+		});
 		formPresenter.getControl().addListener(SWT.Dispose, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -172,15 +166,11 @@ public class FormPresenterSupport {
 			}
 		});
 		statusProviderChanged();
-		dbc.getValidationStatusProviders().addListChangeListener(
-				validationStatusProvidersListener);
-		for (Iterator it = dbc.getValidationStatusProviders().iterator(); it
-				.hasNext();) {
-			ValidationStatusProvider validationStatusProvider = (ValidationStatusProvider) it
-					.next();
+		dbc.getValidationStatusProviders().addListChangeListener(validationStatusProvidersListener);
+		for (Iterator it = dbc.getValidationStatusProviders().iterator(); it.hasNext();) {
+			ValidationStatusProvider validationStatusProvider = (ValidationStatusProvider) it.next();
 			IObservableList targets = validationStatusProvider.getTargets();
-			targets
-					.addListChangeListener(validationStatusProviderTargetsListener);
+			targets.addListChangeListener(validationStatusProviderTargetsListener);
 			for (Iterator iter = targets.iterator(); iter.hasNext();) {
 				((IObservable) iter.next()).addChangeListener(uiChangeListener);
 			}
@@ -188,11 +178,9 @@ public class FormPresenterSupport {
 	}
 
 	private void statusProviderChanged() {
-		currentStatusProvider = (ValidationStatusProvider) aggregateStatusProvider
-				.getValue();
+		currentStatusProvider = (ValidationStatusProvider) aggregateStatusProvider.getValue();
 		if (currentStatusProvider != null) {
-			currentStatus = (IStatus) currentStatusProvider
-					.getValidationStatus().getValue();
+			currentStatus = (IStatus) currentStatusProvider.getValidationStatus().getValue();
 		} else {
 			currentStatus = null;
 		}
@@ -208,18 +196,13 @@ public class FormPresenterSupport {
 		if (currentStatus != null) {
 			handleStatusChanged();
 		}
-		dbc.getValidationStatusProviders().removeListChangeListener(
-				validationStatusProvidersListener);
-		for (Iterator it = dbc.getValidationStatusProviders().iterator(); it
-				.hasNext();) {
-			ValidationStatusProvider validationStatusProvider = (ValidationStatusProvider) it
-					.next();
+		dbc.getValidationStatusProviders().removeListChangeListener(validationStatusProvidersListener);
+		for (Iterator it = dbc.getValidationStatusProviders().iterator(); it.hasNext();) {
+			ValidationStatusProvider validationStatusProvider = (ValidationStatusProvider) it.next();
 			IObservableList targets = validationStatusProvider.getTargets();
-			targets
-					.removeListChangeListener(validationStatusProviderTargetsListener);
+			targets.removeListChangeListener(validationStatusProviderTargetsListener);
 			for (Iterator iter = targets.iterator(); iter.hasNext();) {
-				((IObservable) iter.next())
-						.removeChangeListener(uiChangeListener);
+				((IObservable) iter.next()).removeChangeListener(uiChangeListener);
 			}
 		}
 	}
@@ -237,8 +220,7 @@ public class FormPresenterSupport {
 		if (currentStatusStale) {
 			pageComplete = false;
 		} else if (currentStatus != null) {
-			pageComplete = !currentStatus.matches(IStatus.ERROR
-					| IStatus.CANCEL);
+			pageComplete = !currentStatus.matches(IStatus.ERROR | IStatus.CANCEL);
 		}
 		formPresenter.setComplete(pageComplete);
 	}
@@ -293,14 +275,8 @@ public class FormPresenterSupport {
 	}
 
 	private void logThrowable(Throwable throwable) {
-		Policy
-				.getLog()
-				.log(
-						new Status(
-								IStatus.ERROR,
-								Policy.JFACE_DATABINDING,
-								IStatus.OK,
-								"Unhandled exception: " + throwable.getMessage(), throwable)); //$NON-NLS-1$
+		Policy.getLog().log(new Status(IStatus.ERROR, Policy.JFACE_DATABINDING, IStatus.OK,
+				"Unhandled exception: " + throwable.getMessage(), throwable)); //$NON-NLS-1$
 	}
 
 	/**
@@ -311,21 +287,17 @@ public class FormPresenterSupport {
 		if (aggregateStatusProvider != null)
 			aggregateStatusProvider.dispose();
 		if (dbc != null && !uiChanged) {
-			for (Iterator it = dbc.getValidationStatusProviders().iterator(); it
-					.hasNext();) {
-				ValidationStatusProvider validationStatusProvider = (ValidationStatusProvider) it
-						.next();
+			for (Iterator it = dbc.getValidationStatusProviders().iterator(); it.hasNext();) {
+				ValidationStatusProvider validationStatusProvider = (ValidationStatusProvider) it.next();
 				IObservableList targets = validationStatusProvider.getTargets();
-				if( targets != null ) {
+				if (targets != null) {
 					targets.removeListChangeListener(validationStatusProviderTargetsListener);
 					for (Iterator iter = targets.iterator(); iter.hasNext();) {
-						((IObservable) iter.next())
-								.removeChangeListener(uiChangeListener);
+						((IObservable) iter.next()).removeChangeListener(uiChangeListener);
 					}
 				}
 			}
-			dbc.getValidationStatusProviders().removeListChangeListener(
-					validationStatusProvidersListener);
+			dbc.getValidationStatusProviders().removeListChangeListener(validationStatusProvidersListener);
 		}
 		aggregateStatusProvider = null;
 		dbc = null;
@@ -338,11 +310,13 @@ public class FormPresenterSupport {
 	public IStatus getCurrentStatus() {
 		return currentStatus;
 	}
-	
+
 	public interface IFormPresenter {
-		
+
 		public void setMessage(String message, int type);
+
 		public void setComplete(boolean complete);
+
 		public Control getControl();
 	}
 
@@ -360,10 +334,8 @@ public class FormPresenterSupport {
 			int maxSeverity = IStatus.OK;
 			ValidationStatusProvider maxSeverityProvider = null;
 			for (Iterator it = validationStatusProviders.iterator(); it.hasNext();) {
-				ValidationStatusProvider provider = (ValidationStatusProvider) it
-						.next();
-				IStatus status = (IStatus) provider.getValidationStatus()
-						.getValue();
+				ValidationStatusProvider provider = (ValidationStatusProvider) it.next();
+				IStatus status = (IStatus) provider.getValidationStatus().getValue();
 				if (status.getSeverity() > maxSeverity) {
 					maxSeverity = status.getSeverity();
 					maxSeverityProvider = provider;

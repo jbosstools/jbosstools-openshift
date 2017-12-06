@@ -38,13 +38,13 @@ public class NewProjectHandler extends AbstractHandler {
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
-		if(connection == null) {
+		if (connection == null) {
 			IProject project = UIUtils.getFirstElement(selection, IProject.class);
 			if (project != null) {
 				connection = ConnectionsRegistryUtil.getConnectionFor(project);
 			}
 		}
-		if(connection == null) {
+		if (connection == null) {
 			return OpenShiftUIActivator.statusFactory().cancelStatus("No connection selected"); //$NON-NLS-1$
 		}
 		openNewProjectDialog(connection, HandlerUtil.getActiveShell(event));

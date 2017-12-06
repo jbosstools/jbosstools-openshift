@@ -48,39 +48,38 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 
 	public static final ExpressCorePreferences INSTANCE = new ExpressCorePreferences();
 
-	private final StringsPreferenceValue connectionsPreferenceValue = 
-			new StringsPreferenceValue('|', CONNECTIONS, ExpressCoreActivator.PLUGIN_ID);
+	private final StringsPreferenceValue connectionsPreferenceValue = new StringsPreferenceValue('|', CONNECTIONS,
+			ExpressCoreActivator.PLUGIN_ID);
 
-	private final StringsPreferenceValue legacyConnectionsPreferenceValue = 
-			new StringsPreferenceValue('|', RHLOGIN_LIST_PREFS_KEY, ExpressCoreActivator.PLUGIN_ID);
-	
+	private final StringsPreferenceValue legacyConnectionsPreferenceValue = new StringsPreferenceValue('|',
+			RHLOGIN_LIST_PREFS_KEY, ExpressCoreActivator.PLUGIN_ID);
+
 	/* The following three keys are from the legacy UI plugin pref-store */
-	private final StringsPreferenceValue UI_connectionsPreferenceValue =
-			new StringsPreferenceValue('|', CONNECTIONS, UI_PLUGIN_ID);
+	private final StringsPreferenceValue UI_connectionsPreferenceValue = new StringsPreferenceValue('|', CONNECTIONS,
+			UI_PLUGIN_ID);
 
 	private final StringsPreferenceValue tailFileOptionsPreferenceValues;
 	private final Map<String, String> tailOptionsByUUID = new HashMap<>();
 
 	private final StringsPreferenceValue snapshotFilesPreferenceValues;
 	private final Map<String, Snapshots> snapshotsByUUID = new HashMap<>();
-	
-	private final StringsPreferenceValue downloadableStandaloneCartUrls =
-			new StringsPreferenceValue('|', 10, DOWNLOADABLE_STANDALONECART_URLS, ExpressCoreActivator.PLUGIN_ID);
+
+	private final StringsPreferenceValue downloadableStandaloneCartUrls = new StringsPreferenceValue('|', 10,
+			DOWNLOADABLE_STANDALONECART_URLS, ExpressCoreActivator.PLUGIN_ID);
 
 	private ExpressCorePreferences() {
 
-		this.tailFileOptionsPreferenceValues = 
-				new StringsPreferenceValue('|', TAIL_FILE_OPTIONS, ExpressCoreActivator.PLUGIN_ID);
+		this.tailFileOptionsPreferenceValues = new StringsPreferenceValue('|', TAIL_FILE_OPTIONS,
+				ExpressCoreActivator.PLUGIN_ID);
 		initTailFileOptions(tailFileOptionsPreferenceValues.get());
 
-		this.snapshotFilesPreferenceValues = 
-				new StringsPreferenceValue('|', SNAPSHOT_FILES, ExpressCoreActivator.PLUGIN_ID);
+		this.snapshotFilesPreferenceValues = new StringsPreferenceValue('|', SNAPSHOT_FILES,
+				ExpressCoreActivator.PLUGIN_ID);
 		initSnapshotFiles(snapshotFilesPreferenceValues.get());
 	}
 
 	private void initTailFileOptions(String[] options) {
-		if (options == null
-				|| options.length == 0) {
+		if (options == null || options.length == 0) {
 			return;
 		}
 		for (int i = 0; i < options.length - 1; i += 2) {
@@ -91,8 +90,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 	}
 
 	private void initSnapshotFiles(String[] snapshotFiles) {
-		if (snapshotFiles == null
-				|| snapshotFiles.length == 0) {
+		if (snapshotFiles == null || snapshotFiles.length == 0) {
 			return;
 		}
 		for (int i = 0; i < snapshotFiles.length - 1; i += 3) {
@@ -131,8 +129,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 		if (application != null) {
 			tailFileOptions = tailOptionsByUUID.get(application.getUUID());
 		}
-		if (tailFileOptions == null
-				|| tailFileOptions.isEmpty()) {
+		if (tailFileOptions == null || tailFileOptions.isEmpty()) {
 			tailFileOptions = DEFAULT_TAIL_FILE_OPTIONS;
 		}
 		return tailFileOptions;
@@ -154,8 +151,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 			uuidsAndOptions.add(uuid);
 			uuidsAndOptions.add(options);
 		}
-		tailFileOptionsPreferenceValues.set(
-				uuidsAndOptions.toArray(new String[uuidsAndOptions.size()]));
+		tailFileOptionsPreferenceValues.set(uuidsAndOptions.toArray(new String[uuidsAndOptions.size()]));
 	}
 
 	public String getFullSnapshot(IApplication application) {
@@ -183,8 +179,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 		return snapshotsByUUID.get(application.getUUID());
 	}
 
-	public void saveSnapshots(IApplication application, String fullSnapshotFile,
-			String deploymentSnapshotFile) {
+	public void saveSnapshots(IApplication application, String fullSnapshotFile, String deploymentSnapshotFile) {
 		if (application != null) {
 			snapshotsByUUID.put(application.getUUID(), new Snapshots(fullSnapshotFile, deploymentSnapshotFile));
 		}
@@ -195,7 +190,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 		if (application == null) {
 			return;
 		}
-		
+
 		Snapshots snapshots = getSnapshots(application);
 		if (snapshots == null) {
 			snapshots = new Snapshots(filepath, null);
@@ -203,12 +198,12 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 		snapshotsByUUID.put(application.getUUID(), snapshots);
 		saveAllSnapshots();
 	}
-	
+
 	public void saveDeploymentSnapshot(IApplication application, String filepath) {
 		if (application == null) {
 			return;
 		}
-		
+
 		Snapshots snapshots = getSnapshots(application);
 		if (snapshots == null) {
 			snapshots = new Snapshots(null, filepath);
@@ -216,7 +211,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 		snapshotsByUUID.put(application.getUUID(), snapshots);
 		saveAllSnapshots();
 	}
-	
+
 	private void saveAllSnapshots() {
 		List<String> uuidsAndSnapshots = new ArrayList<>();
 		for (Map.Entry<String, Snapshots> entry : snapshotsByUUID.entrySet()) {
@@ -227,15 +222,14 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 			uuidsAndSnapshots.add(snapshots.getFullSnapshotFile());
 			uuidsAndSnapshots.add(snapshots.getDeploymentSnapshotFile());
 		}
-		tailFileOptionsPreferenceValues.set(
-				uuidsAndSnapshots.toArray(new String[uuidsAndSnapshots.size()]));
+		tailFileOptionsPreferenceValues.set(uuidsAndSnapshots.toArray(new String[uuidsAndSnapshots.size()]));
 	}
 
 	public String[] loadConnections() {
 		String[] ret = connectionsPreferenceValue.get();
 		return ret == null ? UI_connectionsPreferenceValue.get() : ret;
 	}
-	
+
 	public String[] loadLegacyConnections() {
 		return legacyConnectionsPreferenceValue.get();
 	}
@@ -249,8 +243,8 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 	}
 
 	public int getClientReadTimeout(int defaultTimeout) {
-		String timeout = getPrefs(
-				ExpressCoreActivator.PLUGIN_ID).get(CLIENT_READ_TIMEOUT, String.valueOf(defaultTimeout));
+		String timeout = getPrefs(ExpressCoreActivator.PLUGIN_ID).get(CLIENT_READ_TIMEOUT,
+				String.valueOf(defaultTimeout));
 		return toInteger(timeout);
 	}
 
@@ -261,7 +255,7 @@ public class ExpressCorePreferences implements IExpressCoreConstants {
 	public void addDownloadableStandaloneCartUrl(String url) {
 		downloadableStandaloneCartUrls.add(url);
 	}
-	
+
 	public void flush() {
 		// TODO: implement
 	}

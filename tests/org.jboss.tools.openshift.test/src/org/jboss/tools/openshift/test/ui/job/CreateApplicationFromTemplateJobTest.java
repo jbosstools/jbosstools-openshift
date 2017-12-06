@@ -48,19 +48,24 @@ import com.openshift.restclient.model.template.ITemplate;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CreateApplicationFromTemplateJobTest {
-	
-	@Mock private IProjectTemplateProcessing capability;
-	@Mock private IClientCapability clientCapability;
-	@Mock private IClient client;
-	@Mock private ITemplate template;
-	@Mock private IProject project;
-	
+
+	@Mock
+	private IProjectTemplateProcessing capability;
+	@Mock
+	private IClientCapability clientCapability;
+	@Mock
+	private IClient client;
+	@Mock
+	private ITemplate template;
+	@Mock
+	private IProject project;
+
 	private Collection<Label> labels = new ArrayList<>();
 	private Collection<IParameter> parameters = new ArrayList<>();
-	
+
 	private CreateApplicationFromTemplateJobRunner job;
 	private Collection<IResource> resources = new ArrayList<>();
-	
+
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
@@ -68,23 +73,23 @@ public class CreateApplicationFromTemplateJobTest {
 		job = spy(new CreateApplicationFromTemplateJobRunner(project, template, parameters, labels));
 		when(client.get(anyString(), anyString(), anyString())).thenThrow(OpenShiftException.class);
 		when(clientCapability.getClient()).thenReturn(client);
-		
-		
-		when(project.accept(isA(CapabilityVisitor.class), any()))
-		.thenAnswer(new Answer() {
-				@Override
-				public Object answer(InvocationOnMock args) throws Throwable {
-					if( args.getArguments()[1] instanceof IStatus) {
-						CapabilityVisitor<IProjectTemplateProcessing, IStatus> visitor = (CapabilityVisitor<IProjectTemplateProcessing, IStatus>) args.getArguments()[0];
-						return visitor.visit(capability);
-						
-					} else if (args.getArguments()[1] instanceof Collection) {
-						CapabilityVisitor<IClientCapability, Collection> visitor = (CapabilityVisitor<IClientCapability, Collection>) args.getArguments()[0];
-						return visitor.visit(clientCapability);
-					}
-					return null;
+
+		when(project.accept(isA(CapabilityVisitor.class), any())).thenAnswer(new Answer() {
+			@Override
+			public Object answer(InvocationOnMock args) throws Throwable {
+				if (args.getArguments()[1] instanceof IStatus) {
+					CapabilityVisitor<IProjectTemplateProcessing, IStatus> visitor = (CapabilityVisitor<IProjectTemplateProcessing, IStatus>) args
+							.getArguments()[0];
+					return visitor.visit(capability);
+
+				} else if (args.getArguments()[1] instanceof Collection) {
+					CapabilityVisitor<IClientCapability, Collection> visitor = (CapabilityVisitor<IClientCapability, Collection>) args
+							.getArguments()[0];
+					return visitor.visit(clientCapability);
 				}
-			});
+				return null;
+			}
+		});
 
 	}
 
@@ -99,7 +104,7 @@ public class CreateApplicationFromTemplateJobTest {
 		when(status.getKind()).thenReturn(ResourceKind.STATUS);
 		resources.add(resource);
 		resources.add(status);
-		
+
 		when(capability.process(template)).thenReturn(template);
 		when(capability.apply(template)).thenReturn(resources);
 
@@ -107,7 +112,7 @@ public class CreateApplicationFromTemplateJobTest {
 
 		assertEquals(IStatus.WARNING, result.getSeverity());
 	}
-	
+
 	/*
 	 * End wizard
 	 */
@@ -115,15 +120,15 @@ public class CreateApplicationFromTemplateJobTest {
 	public void shouldReturnInfoStatusWhenAllResourcesCreatedWithoutErrors() {
 		when(capability.process(template)).thenReturn(template);
 		when(capability.apply(template)).thenReturn(resources);
-		
+
 		IStatus result = job.runMe();
-		
+
 		assertEquals(IStatus.OK, result.getSeverity());
 		assertEquals(resources, job.getResources());
 		verify(template).updateParameterValues(anyCollectionOf(IParameter.class));
 		verify(template).addObjectLabel(anyString(), anyString());
 	}
-	
+
 	/*
 	 * Display failed resources and end wizard
 	 */
@@ -135,18 +140,17 @@ public class CreateApplicationFromTemplateJobTest {
 		assertEquals(IStatus.ERROR, result.getSeverity());
 		assertEquals(message, result.getMessage());
 	}
-	
-	public static class CreateApplicationFromTemplateJobRunner extends CreateApplicationFromTemplateJob{
 
-		public CreateApplicationFromTemplateJobRunner(IProject project,
-				ITemplate template, Collection<IParameter> parameters,
-				Collection<Label> labels) {
+	public static class CreateApplicationFromTemplateJobRunner extends CreateApplicationFromTemplateJob {
+
+		public CreateApplicationFromTemplateJobRunner(IProject project, ITemplate template,
+				Collection<IParameter> parameters, Collection<Label> labels) {
 			super(project, template, parameters, labels);
 		}
-		
+
 		public IStatus runMe() {
 			return doRun(null);
 		}
-		
+
 	}
 }

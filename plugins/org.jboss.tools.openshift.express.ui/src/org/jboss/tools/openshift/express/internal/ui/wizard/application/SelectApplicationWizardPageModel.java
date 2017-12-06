@@ -37,15 +37,15 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 	public SelectApplicationWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
 		this.selectedApplication = wizardModel.getApplication();
 		this.wizardModel = wizardModel;
-		new PojoEventBridge()
-			.listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAINS, wizardModel).forwardTo(PROPERTY_DOMAINS, this);
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAINS, wizardModel)
+				.forwardTo(PROPERTY_DOMAINS, this);
 	}
 
 	public void refresh() {
 		refreshDomains();
 		this.selectedApplication = null;
 	}
-	
+
 	private void refreshDomains() {
 		ExpressConnection connection = wizardModel.getConnection();
 		if (connection == null) {
@@ -64,8 +64,8 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setSelectedApplication(IApplication application) {
-		firePropertyChange(PROPERTY_SELECTED_APPLICATION, 
-				this.selectedApplication, this.selectedApplication = application);
+		firePropertyChange(PROPERTY_SELECTED_APPLICATION, this.selectedApplication,
+				this.selectedApplication = application);
 	}
 
 	public void loadOpenShiftResources() {
@@ -80,7 +80,7 @@ public class SelectApplicationWizardPageModel extends ObservableUIPojo {
 		wizardModel.setDomains(domains);
 		return domains;
 	}
-	
+
 	public ExpressConnection getConnection() {
 		return wizardModel.getConnection();
 	}

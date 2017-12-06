@@ -14,8 +14,6 @@ import java.util.Set;
 
 import com.openshift.client.cartridge.ICartridge;
 
-
-
 /**
  * @author Andre Dietisheim
  */
@@ -29,7 +27,7 @@ public interface IApplicationTemplate {
 	public void setName(String name);
 
 	public String getDescription();
-	
+
 	/**
 	 * Returns <code>true</code> if this template matches the given expression.
 	 * 
@@ -45,7 +43,7 @@ public interface IApplicationTemplate {
 	 * @return
 	 */
 	public boolean canCreateApplication();
-	
+
 	/**
 	 * Returns <code>true</code> if one can add/remove cartridges from this
 	 * template.
@@ -53,23 +51,22 @@ public interface IApplicationTemplate {
 	 * @return
 	 */
 	public boolean canAddRemoveCartridges();
-	
+
 	/**
 	 * Returns all (embedded and standalone) cartridges for this template.
 	 * 
 	 * @return
 	 */
 	public Set<ICartridge> getAllCartridges();
-	
+
 	public Set<ICartridge> getEmbeddedCartridges();
 
 	public ICartridge getStandaloneCartridge();
 
 	public String getInitialGitUrl();
-	
-	public boolean isInitialGitUrlEditable();
-	
-	public boolean isCodeAnything();
 
+	public boolean isInitialGitUrlEditable();
+
+	public boolean isCodeAnything();
 
 }

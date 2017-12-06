@@ -37,49 +37,50 @@ public class ExpressServer extends DeployableServer implements IURLProvider, IEx
 
 	public static final String DEFAULT_SERVER_NAME_BASE = "ApplicationName";
 	public static final String OPENSHIFT_MODE_ID = "openshift";
-	
+
 	@Override
 	public void setDefaults(IProgressMonitor monitor) {
 		getServerWorkingCopy().setHost(UrlUtils.cutScheme(ExpressConnectionUtils.getDefaultHostUrl()));
-		getServerWorkingCopy().setName(ServerUtils.getServerName(DEFAULT_SERVER_NAME_BASE + ExpressServerUtils.AT_OPENSHIFT_2));
+		getServerWorkingCopy()
+				.setName(ServerUtils.getServerName(DEFAULT_SERVER_NAME_BASE + ExpressServerUtils.AT_OPENSHIFT_2));
 		setAttribute(IDeployableServer.SERVER_MODE, OPENSHIFT_MODE_ID);
 	}
 
 	@Override
-	public IStatus canModifyModules(IModule[] add, IModule[] remove) {		
+	public IStatus canModifyModules(IModule[] add, IModule[] remove) {
 		return Status.OK_STATUS;
 	}
 
-    @Override
+	@Override
 	public IModule[] getRootModules(IModule module) throws CoreException {
-        IStatus status = canModifyModules(new IModule[] { module }, null);
-        if (status != null && !status.isOK())
-            throw  new CoreException(status);
-        IModule[] parents = ServerModelUtilities.getParentModules(getServer(), module);
-        if(parents.length>0)
-        	return parents;
-        return new IModule[] { module };
-    }
+		IStatus status = canModifyModules(new IModule[] { module }, null);
+		if (status != null && !status.isOK())
+			throw new CoreException(status);
+		IModule[] parents = ServerModelUtilities.getParentModules(getServer(), module);
+		if (parents.length > 0)
+			return parents;
+		return new IModule[] { module };
+	}
 
 	@Override
 	public IModule[] getChildModules(IModule[] module) {
 		return ServerModelUtilities.getChildModules(module);
 	}
-	
+
 	@Override
-	public void modifyModules(IModule[] add, IModule[] remove,
-			IProgressMonitor monitor) throws CoreException {
+	public void modifyModules(IModule[] add, IModule[] remove, IProgressMonitor monitor) throws CoreException {
 	}
 
 	@Override
 	public URL getModuleRootURL(IModule module) {
 		String appProjString = ExpressServerUtils.getDeployProjectName(getServer());
-		IProject appProj = appProjString == null ? null : ResourcesPlugin.getWorkspace().getRoot().getProject(appProjString);
-		IProject p =module.getProject();
-		boolean shouldIgnore = ExpressServerUtils.getIgnoresContextRoot(getServer()) && p.equals(appProj);		
+		IProject appProj = appProjString == null ? null
+				: ResourcesPlugin.getWorkspace().getRoot().getProject(appProjString);
+		IProject p = module.getProject();
+		boolean shouldIgnore = ExpressServerUtils.getIgnoresContextRoot(getServer()) && p.equals(appProj);
 		return JBossServer.getModuleRootURL(module, getServer().getHost(), 80, shouldIgnore ? "" : null);
 	}
-	
+
 	@Override
 	public ServerExtendedProperties getExtendedProperties() {
 		return new ExpressServerExtendedProperties(getServer());

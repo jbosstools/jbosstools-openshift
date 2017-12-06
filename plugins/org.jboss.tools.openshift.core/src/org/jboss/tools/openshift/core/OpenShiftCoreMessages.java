@@ -13,19 +13,19 @@ package org.jboss.tools.openshift.core;
 import org.eclipse.osgi.util.NLS;
 
 public class OpenShiftCoreMessages extends NLS {
-    private static final String BUNDLE_NAME = "org.jboss.tools.openshift.core.OpenShiftCoreMessages"; //$NON-NLS-1$
-    public static String DebugOnOpenshift;
-    public static String ProfileOnOpenshift;
-    public static String RunOnOpenshift;
-    public static String OCBinaryLocationIncompatibleErrorMessage;
-    public static String OCBinaryLocationDontExistsErrorMessage;
-    public static String NoOCBinaryLocationErrorMessage;
-	
-    static {
-        // initialize resource bundle
-        NLS.initializeMessages(BUNDLE_NAME, OpenShiftCoreMessages.class);
-    }
+	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.core.OpenShiftCoreMessages"; //$NON-NLS-1$
+	public static String DebugOnOpenshift;
+	public static String ProfileOnOpenshift;
+	public static String RunOnOpenshift;
+	public static String OCBinaryLocationIncompatibleErrorMessage;
+	public static String OCBinaryLocationDontExistsErrorMessage;
+	public static String NoOCBinaryLocationErrorMessage;
 
-    private OpenShiftCoreMessages() {
-    }
+	static {
+		// initialize resource bundle
+		NLS.initializeMessages(BUNDLE_NAME, OpenShiftCoreMessages.class);
+	}
+
+	private OpenShiftCoreMessages() {
+	}
 }

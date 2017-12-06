@@ -39,11 +39,11 @@ public class ManageProjectsHandler extends AbstractHandler {
 				connection = ConnectionsRegistryUtil.getConnectionFor(resource);
 			}
 		}
-		if(connection == null) {
-			return OpenShiftUIActivator.statusFactory().cancelStatus("No connection selected that we can manage projects for.");
+		if (connection == null) {
+			return OpenShiftUIActivator.statusFactory()
+					.cancelStatus("No connection selected that we can manage projects for.");
 		}
-		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event),
-				new ManageProjectsWizard(connection)).open();
+		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), new ManageProjectsWizard(connection)).open();
 		return null;
 	}
 

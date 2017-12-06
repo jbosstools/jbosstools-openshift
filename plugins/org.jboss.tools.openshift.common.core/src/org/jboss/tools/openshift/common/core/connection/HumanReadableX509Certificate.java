@@ -165,10 +165,8 @@ public class HumanReadableX509Certificate {
 					if (i++ > 0) {
 						builder.append(StringUtils.getLineSeparator());
 					}
-					builder
-						.append(type)
-						.append(SEPARATOR_LABEL_VALUE)
-						.append(StringUtils.toStringOrNull(rdn.getValue()));
+					builder.append(type).append(SEPARATOR_LABEL_VALUE)
+							.append(StringUtils.toStringOrNull(rdn.getValue()));
 				}
 			}
 			return builder.toString();
@@ -179,12 +177,10 @@ public class HumanReadableX509Certificate {
 
 	private String getValidity(X509Certificate certificate) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
-		return new StringBuilder()
-					.append(LABEL_VALIDITY_ISSUED_ON).append(SEPARATOR_LABEL_VALUE)
-						.append(dateFormat.format(certificate.getNotBefore())).append(StringUtils.getLineSeparator())
-					.append(LABEL_VALIDITY_EXPIRES_ON).append(SEPARATOR_LABEL_VALUE)
-						.append(dateFormat.format(certificate.getNotAfter()))
-					.toString();
+		return new StringBuilder().append(LABEL_VALIDITY_ISSUED_ON).append(SEPARATOR_LABEL_VALUE)
+				.append(dateFormat.format(certificate.getNotBefore())).append(StringUtils.getLineSeparator())
+				.append(LABEL_VALIDITY_EXPIRES_ON).append(SEPARATOR_LABEL_VALUE)
+				.append(dateFormat.format(certificate.getNotAfter())).toString();
 	}
 
 	private String getFingerprint(X509Certificate certificate) {

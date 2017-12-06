@@ -17,35 +17,35 @@ public class ServiceManagerUtility {
 	private static final String PREFIX_SET = "set ";
 	private static final String PREFIX_SETX = "setx ";
 	private static final String PREFIX_EXPORT = "export ";
+
 	private static String getLineType(String line) {
 		String trimmedLower = line.trim().toLowerCase();
-		if( trimmedLower.startsWith(PREFIX_SET))
+		if (trimmedLower.startsWith(PREFIX_SET))
 			return PREFIX_SET;
-		if( trimmedLower.startsWith(PREFIX_SETX))
+		if (trimmedLower.startsWith(PREFIX_SETX))
 			return PREFIX_SETX;
-		if( trimmedLower.startsWith(PREFIX_EXPORT))
+		if (trimmedLower.startsWith(PREFIX_EXPORT))
 			return PREFIX_EXPORT;
 		return null;
 	}
-	
+
 	private static String getDelim(String type) {
-		if( type.startsWith(PREFIX_SET))
+		if (type.startsWith(PREFIX_SET))
 			return "=";
-		if( type.startsWith(PREFIX_SETX))
+		if (type.startsWith(PREFIX_SETX))
 			return " ";
-		if( type.startsWith(PREFIX_EXPORT))
+		if (type.startsWith(PREFIX_EXPORT))
 			return "=";
 		return null;
 	}
-	
-	
+
 	public static HashMap<String, String> parseLines(String[] lines) {
 		HashMap<String, String> adbEnv = new HashMap<>();
 		for (String oneAppend : lines) {
 			String[] allAppends = oneAppend.split("\n");
 			for (int i = 0; i < allAppends.length; i++) {
 				String setEnvVarCommand = getLineType(allAppends[i]);
-				if( setEnvVarCommand != null ) {
+				if (setEnvVarCommand != null) {
 					String setEnvVarDelim = getDelim(setEnvVarCommand);
 					String lineRemainder = allAppends[i].trim().substring(setEnvVarCommand.length());
 					int eq = lineRemainder.indexOf(setEnvVarDelim);
@@ -63,6 +63,5 @@ public class ServiceManagerUtility {
 		}
 		return adbEnv.size() > 0 ? adbEnv : null;
 	}
-	
-	
+
 }

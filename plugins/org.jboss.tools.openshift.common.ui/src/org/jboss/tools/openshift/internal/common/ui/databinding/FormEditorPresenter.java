@@ -17,7 +17,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSup
  * @see FormPresenterSupport
  */
 public class FormEditorPresenter implements IFormPresenter {
-	
+
 	private Form form;
 
 	public FormEditorPresenter(Form form) {
@@ -30,17 +30,16 @@ public class FormEditorPresenter implements IFormPresenter {
 			return;
 		}
 		if (!StringUtils.isEmpty(message)) {
- 			form.setMessage(message,
-					type, new IMessage[] { new MessageFactory().create(message, type) });
+			form.setMessage(message, type, new IMessage[] { new MessageFactory().create(message, type) });
 		} else {
 			form.setMessage("", IMessage.NONE); // clear the header from errors/messages
 		}
 	}
-	
+
 	@Override
-	public void setComplete(boolean complete) {				
+	public void setComplete(boolean complete) {
 	}
-	
+
 	@Override
 	public Control getControl() {
 		return form;
