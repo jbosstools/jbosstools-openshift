@@ -10,6 +10,8 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
@@ -21,6 +23,7 @@ import org.eclipse.swt.graphics.Image;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.ResourceDetailsContentProvider.ResourceProperty;
 
 import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.template.IParameter;
 
 /**
  * @author jeff.cantrill
@@ -29,6 +32,14 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 
 	private static final String LABEL_NOT_PROVIDED = "(Not Provided)";
 	private static final String LABEL_UNKNOWN = "(Unknown)";
+	private static final String LABEL_UNKNOWN_PARAMETER = "(Unknown parameter {0})";
+	
+	private Map<String, IParameter> templateParameters;
+	
+	public ResourceDetailsLabelProvider(Map<String, IParameter> templateParameters) {
+	    super();
+	    this.templateParameters = templateParameters;
+	}
 
 	@Override
 	public void update(ViewerCell cell) {
@@ -43,37 +54,54 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public  StyledString getStyledText(Object element) {
-		if(element instanceof IResource) {
+	public StyledString getStyledText(Object element) {
+		if (element instanceof IResource) {
 			IResource resource = (IResource) element;
-			StyledString text = new StyledString(StringUtils.capitalize(resource.getKind().toString()));
-			text.append(NLS.bind(" ({0})", resource.getName()), StyledString.QUALIFIER_STYLER);
+			StyledString text = new StyledString(StringUtils.capitalize(resource.getKind()));
+			text.append(" ").append(replaceParameters(resource.getName()), StyledString.QUALIFIER_STYLER);
 			return text;
 		}
-		if(element instanceof ResourceProperty) {
+		if (element instanceof ResourceProperty) {
 			ResourceProperty property = (ResourceProperty) element;
 			StyledString text = new StyledString(StringUtils.capitalize(property.getProperty()));
 			text.append(": ");
 			String value = null;
-			if(property.getValue() instanceof Map) {
+			if (property.getValue() instanceof Map) {
 				value = org.jboss.tools.openshift.common.core.utils.StringUtils.serialize((Map) property.getValue());
-			} else if(property.getValue() instanceof Collection) {
+			} else if (property.getValue() instanceof Collection) {
 				value = StringUtils.join((Collection) property.getValue(), ", ");
 			} else {
 				value = property.getValue() != null ? property.getValue().toString() : "";
 			}
 
-			if(StringUtils.isBlank(value)) {
+			if (StringUtils.isBlank(value)) {
 				if (property.isUnknownValue()) {
 					value = LABEL_UNKNOWN;
 				} else {
 					value = LABEL_NOT_PROVIDED;
 				}
 			}
-			text.append(value, StyledString.QUALIFIER_STYLER);
+			text.append(replaceParameters(value), StyledString.QUALIFIER_STYLER);
 			return text;
 		}
 		return null;
+	}
+	
+	private String replaceParameters(String str) {
+	    StringBuffer result = new StringBuffer();
+	    Pattern p = Pattern.compile("\\$\\{[^}]+\\}");
+	    Matcher m = p.matcher(str);
+	    while (m.find()) {
+	        String parameterVariable = m.group();
+	        String parameterName = parameterVariable.substring(2, parameterVariable.length() - 1);
+	        if (this.templateParameters.containsKey(parameterName)) {
+	            m.appendReplacement(result, this.templateParameters.get(parameterName).getValue());
+	        } else {
+	            m.appendReplacement(result, NLS.bind(LABEL_UNKNOWN_PARAMETER, parameterName));
+	        }
+	    }
+	    m.appendTail(result);
+	    return result.toString();
 	}
 
 	@Override
