@@ -58,7 +58,7 @@ public class ResourceLabelsPageModel extends ObservablePojo implements IResource
 	public void removeLabel(Label label) {
 		List<Label> old = new ArrayList<>(this.labels);
 		final int index = labels.indexOf(label);
-		if(index > -1) {
+		if (index > -1) {
 			this.labels.remove(label);
 			fireIndexedPropertyChange(PROPERTY_LABELS, index, old, Collections.unmodifiableList(labels));
 		}
@@ -68,7 +68,7 @@ public class ResourceLabelsPageModel extends ObservablePojo implements IResource
 	public void updateLabel(Label label, String key, String value) {
 		List<Label> old = new ArrayList<>(this.labels);
 		final int index = labels.indexOf(label);
-		if(index > -1) {
+		if (index > -1) {
 			labels.set(index, new Label(key, value));
 			fireIndexedPropertyChange(PROPERTY_LABELS, index, old, Collections.unmodifiableList(labels));
 		}

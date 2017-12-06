@@ -47,7 +47,7 @@ public class SmartTooltip {
 	 */
 	public static SmartTooltip get(Control control) {
 		Object data = control.getData(dataKey);
-		return (data instanceof SmartTooltip) ? (SmartTooltip)data : null;
+		return (data instanceof SmartTooltip) ? (SmartTooltip) data : null;
 	}
 
 	protected Shell shell;
@@ -90,7 +90,7 @@ public class SmartTooltip {
 	 * For updating when needed, call update().
 	 */
 	protected void enable() {
-		if(control.isDisposed() || controlListener != null) {
+		if (control.isDisposed() || controlListener != null) {
 			//Either cannot be enabled or already enabled.
 			return;
 		}
@@ -98,12 +98,12 @@ public class SmartTooltip {
 		shell.addControlListener(controlListener = new CL());
 		control.addControlListener(controlListener);
 		control.getParent().addControlListener(controlListener);
-		if(control instanceof Text) {
-			((Text)control).addModifyListener(modifyListener = new ML());
-		} else if(control instanceof StyledText) {
-			((StyledText)control).addModifyListener(modifyListener = new ML());
-		} else if(control instanceof Combo) {
-			((Combo)control).addModifyListener(modifyListener = new ML());
+		if (control instanceof Text) {
+			((Text) control).addModifyListener(modifyListener = new ML());
+		} else if (control instanceof StyledText) {
+			((StyledText) control).addModifyListener(modifyListener = new ML());
+		} else if (control instanceof Combo) {
+			((Combo) control).addModifyListener(modifyListener = new ML());
 		} else {
 			//update manually when setting new text to the control.
 		}
@@ -114,24 +114,24 @@ public class SmartTooltip {
 	 * Sets default tooltip to the control and turns off and deactivates the smart tooltip.
 	 */
 	protected void disable() {
-		if(control.isDisposed()) {
+		if (control.isDisposed()) {
 			controlListener = null;
 			modifyListener = null;
 			return;
 		}
-		if(controlListener != null) {
+		if (controlListener != null) {
 			shell.removeControlListener(controlListener);
 			control.getParent().removeControlListener(controlListener);
 			control.removeControlListener(controlListener);
 			controlListener = null;
 		}
-		if(modifyListener != null) {
-			if(control instanceof Text) {
-				((Text)control).removeModifyListener(modifyListener);
-			} else if(control instanceof StyledText) {
-				((StyledText)control).removeModifyListener(modifyListener);
-			} else if(control instanceof Combo) {
-				((Combo)control).removeModifyListener(modifyListener);
+		if (modifyListener != null) {
+			if (control instanceof Text) {
+				((Text) control).removeModifyListener(modifyListener);
+			} else if (control instanceof StyledText) {
+				((StyledText) control).removeModifyListener(modifyListener);
+			} else if (control instanceof Combo) {
+				((Combo) control).removeModifyListener(modifyListener);
 			}
 			modifyListener = null;
 		}
@@ -144,8 +144,8 @@ public class SmartTooltip {
 	 * @param value
 	 */
 	public void setEnabled(boolean value) {
-		if(value != isEnabled()) {
-			if(value) {
+		if (value != isEnabled()) {
+			if (value) {
 				enable();
 			} else {
 				disable();
@@ -166,11 +166,12 @@ public class SmartTooltip {
 		public void controlResized(ControlEvent e) {
 			update();
 		}
+
 		@Override
 		public void controlMoved(ControlEvent e) {
 		}
 	}
-	
+
 	class ML implements ModifyListener {
 		@Override
 		public void modifyText(ModifyEvent e) {
@@ -185,8 +186,8 @@ public class SmartTooltip {
 	 */
 	public void setToolTip(String tooltip) {
 		this.tooltip = tooltip;
-		if(!control.isDisposed()) {
-			if(isEnabled()) {
+		if (!control.isDisposed()) {
+			if (isEnabled()) {
 				update();
 			} else {
 				control.setToolTipText(tooltip);
@@ -201,19 +202,19 @@ public class SmartTooltip {
 	 * this method should be called explicitly.
 	 */
 	public void update() {
-		if(!isEnabled()) {
+		if (!isEnabled()) {
 			return;
 		}
 		int a = control.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x;
 		int x = control.getBounds().x;
 		Control parent = control.getParent();
-		while(parent != null) {
+		while (parent != null) {
 			Rectangle b = parent.getBounds();
-			if(b.width < x + a) {
+			if (b.width < x + a) {
 				control.setToolTipText(getText() + (tooltip == null ? "" : "\n" + tooltip));
 				return;
 			}
-			if(parent instanceof Shell) {
+			if (parent instanceof Shell) {
 				break;
 			}
 			x += b.x;
@@ -230,12 +231,11 @@ public class SmartTooltip {
 	 * @return
 	 */
 	protected String getText() {
-		return control instanceof Text ? ((Text)control).getText()
-			: control instanceof StyledText ? ((StyledText)control).getText()
-			: control instanceof Combo ? ((Combo)control).getText()
-			: control instanceof Label ? ((Label)control).getText()
-			: control instanceof Button ? ((Button)control).getText()
-			: control instanceof Link ? ((Link)control).getText()
-			: "";
+		return control instanceof Text ? ((Text) control).getText()
+				: control instanceof StyledText ? ((StyledText) control).getText()
+						: control instanceof Combo ? ((Combo) control).getText()
+								: control instanceof Label ? ((Label) control).getText()
+										: control instanceof Button ? ((Button) control).getText()
+												: control instanceof Link ? ((Link) control).getText() : "";
 	}
 }

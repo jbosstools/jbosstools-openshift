@@ -34,8 +34,7 @@ public abstract class AbstractPropertyTableContentProvider implements ITreeConte
 
 	@Override
 	public boolean hasChildren(Object element) {
-		return element instanceof IProperty
-				&& ((IProperty) element).hasChildren();
+		return element instanceof IProperty && ((IProperty) element).hasChildren();
 	}
 
 	@Override

@@ -47,7 +47,7 @@ public abstract class BaseExplorerLabelProvider implements IStyledLabelProvider,
 		}
 		if (element instanceof BaseExplorerContentProvider.LoadingStub) {
 			return OpenShiftCommonImages.SYSTEM_PROCESS_IMG;
-		} 
+		}
 		if (element instanceof Exception) {
 			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
 		}
@@ -64,12 +64,11 @@ public abstract class BaseExplorerLabelProvider implements IStyledLabelProvider,
 		if (element instanceof BaseExplorerContentProvider.LoadingStub) {
 			return new StyledString("Loading...");
 		}
-		if(element instanceof Exception) {
-			Exception exception = (Exception)element;
+		if (element instanceof Exception) {
+			Exception exception = (Exception) element;
 			return new StyledString(StringUtils.defaultIfBlank(exception.getMessage(), exception.getClass().getName()));
 		}
 		return new StyledString(element.toString());
 	}
-	
-	
+
 }

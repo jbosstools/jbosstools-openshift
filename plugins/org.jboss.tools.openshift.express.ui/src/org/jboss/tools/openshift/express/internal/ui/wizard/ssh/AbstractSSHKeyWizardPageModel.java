@@ -23,7 +23,7 @@ public abstract class AbstractSSHKeyWizardPageModel extends ObservableUIPojo imp
 
 	private String name;
 	private ExpressConnection connection;
-	
+
 	AbstractSSHKeyWizardPageModel(ExpressConnection user) {
 		this.connection = user;
 	}
@@ -47,15 +47,14 @@ public abstract class AbstractSSHKeyWizardPageModel extends ObservableUIPojo imp
 	public boolean hasPublicKey(String publicKeyContent) {
 		return connection.hasSSHPublicKey(publicKeyContent);
 	}
-	
+
 	protected ExpressConnection getConnection() {
 		return connection;
 	}
 
 	protected String checkedGetSSH2Home() throws OpenShiftException {
 		String ssh2Home = SSHUtils.getSSH2Home();
-		if (ssh2Home == null 
-				|| ssh2Home.trim().length() == 0) {
+		if (ssh2Home == null || ssh2Home.trim().length() == 0) {
 			throw new OpenShiftException("Could not determine your ssh2 home directory");
 		}
 		return ssh2Home;

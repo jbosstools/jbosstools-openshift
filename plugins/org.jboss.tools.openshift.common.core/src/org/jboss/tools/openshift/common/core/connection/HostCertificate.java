@@ -59,7 +59,6 @@ public class HostCertificate {
 		return certificate;
 	}
 
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;

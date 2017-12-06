@@ -25,7 +25,8 @@ import com.openshift.internal.client.AlternativeCartridges;
 /**
  * @author Andre Dietisheim
  */
-public class QuickstartApplicationTemplate extends AbstractApplicationTemplate implements IQuickstartApplicationTemplate {
+public class QuickstartApplicationTemplate extends AbstractApplicationTemplate
+		implements IQuickstartApplicationTemplate {
 
 	private IQuickstart quickstart;
 	private Set<ICartridge> cartridges;
@@ -40,12 +41,12 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 	public IQuickstart getQuickstart() {
 		return quickstart;
 	}
-	
+
 	@Override
 	public String getLanguage() {
 		return quickstart.getLanguage();
 	}
-	
+
 	@Override
 	public String getPageUrl() {
 		String href = quickstart.getHref();
@@ -56,12 +57,12 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 		}
 		return href;
 	}
-	
+
 	@Override
 	public boolean hasPageUrl() {
-		return !StringUtils.isEmpty(getPageUrl()); 
+		return !StringUtils.isEmpty(getPageUrl());
 	}
-	
+
 	@Override
 	public String getInitialGitUrl() {
 		return quickstart.getInitialGitUrl();
@@ -92,13 +93,10 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 	public Set<ICartridge> getEmbeddedCartridges() {
 		return getAllCartridges();
 	}
-	
+
 	@Override
 	public String getName() {
-		return new StringBuilder()
-			.append(super.getName())
-			.append(" (Quickstart)")
-			.toString();
+		return new StringBuilder().append(super.getName()).append(" (Quickstart)").toString();
 	}
 
 	@Override
@@ -106,10 +104,10 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 		if (quickstart == null) {
 			return Collections.emptyList();
 		}
-		
+
 		return quickstart.getTags();
 	}
-	
+
 	@Override
 	public String getTagsString() {
 		return StringUtils.toString(getTags());
@@ -119,7 +117,7 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 	public boolean isOpenShiftMaintained() {
 		return "openshift".equals(StringUtils.toLowerCase(quickstart.getProvider()));
 	}
-	
+
 	@Override
 	public boolean isAutomaticSecurityUpdates() {
 		return StringUtils.isEmpty(quickstart.getInitialGitUrl());
@@ -134,7 +132,7 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 
 		return isMatchingTag(StringUtils.toLowerCase(expression));
 	}
-	
+
 	private boolean isMatchingTag(String expression) {
 		for (String tag : quickstart.getTags()) {
 			if (isMatching(expression, tag)) {
@@ -143,7 +141,7 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean canAddRemoveCartridges() {
 		return false;
@@ -153,11 +151,10 @@ public class QuickstartApplicationTemplate extends AbstractApplicationTemplate i
 	public boolean isInitialGitUrlEditable() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isCodeAnything() {
 		return false;
 	}
-
 
 }

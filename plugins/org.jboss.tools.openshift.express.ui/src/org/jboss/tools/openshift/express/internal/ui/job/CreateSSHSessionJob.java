@@ -51,7 +51,7 @@ public class CreateSSHSessionJob extends Job {
 		if (application == null) {
 			return ExpressUIActivator.createErrorStatus("Could not verify SSH seesion. Application was not found.");
 		}
-		try {		
+		try {
 			final boolean hasAlreadySSHSession = application.hasSSHSession();
 			if (!hasAlreadySSHSession) {
 				Logger.debug(NLS.bind("Opening a new SSH Session for application {0}.", application.getName()));
@@ -63,7 +63,8 @@ public class CreateSSHSessionJob extends Job {
 			this.validSession = application.hasSSHSession();
 			return Status.OK_STATUS;
 		} catch (OpenShiftSSHOperationException e) {
-			return ExpressUIActivator.createErrorStatus(NLS.bind("Could not verify SSH session for application {0}", application.getName()));
+			return ExpressUIActivator.createErrorStatus(
+					NLS.bind("Could not verify SSH session for application {0}", application.getName()));
 		}
 	}
 

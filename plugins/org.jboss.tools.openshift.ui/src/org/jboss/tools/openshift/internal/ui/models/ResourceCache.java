@@ -51,7 +51,7 @@ class ResourceCache {
 	}
 
 	private String getCacheKey(String kind, String name) {
-		return kind+"/"+name;
+		return kind + "/" + name;
 	}
 
 	@SuppressWarnings("unchecked")

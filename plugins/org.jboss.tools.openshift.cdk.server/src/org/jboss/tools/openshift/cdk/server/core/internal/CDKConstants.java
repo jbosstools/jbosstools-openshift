@@ -7,11 +7,11 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal;
 
 public interface CDKConstants {
-	
+
 	public static final String SPACE = " ";
 	public static final String VAGRANT = "vagrant";
 	public static final String VAGRANT_CMD_STATUS = "status";
@@ -20,23 +20,21 @@ public interface CDKConstants {
 	public static final String VAGRANT_CMD_SERVICE_MANAGER = "service-manager";
 	public static final String VAGRANT_CMD_SERVICE_MANAGER_ARG_ENV = "env";
 	public static final String VAGRANT_FLAG_MACHINE_READABLE = "--machine-readable";
-	public static final String VAGRANT_FLAG_NO_COLOR= "--no-color";
+	public static final String VAGRANT_FLAG_NO_COLOR = "--no-color";
 	public static final String VAGRANT_FLAG_PROVIDER_NAME = "provider-name";
-	
+
 	public static final String CDK_ENV_SUB_USERNAME = "SUB_USERNAME";
 	public static final String CDK_ENV_SUB_PASSWORD = "SUB_PASSWORD";
 	public static final String CDK3_ENV_SUB_USER_KEY = "MINISHIFT_USERNAME";
 	public static final String CDK3_ENV_SUB_PASS_KEY = "MINISHIFT_PASSWORD";
-	
-	
+
 	public static final String CDK_RESOURCE_VAGRANTFILE = "Vagrantfile";
-	public static final String CDK_RESOURCE_DOTMINISHIFT= ".minishift";
-	public static final String CDK_RESOURCE_DOTCDK= ".cdk";
-	public static final String CDK_RESOURCE_CDK= "cdk";
-	
+	public static final String CDK_RESOURCE_DOTMINISHIFT = ".minishift";
+	public static final String CDK_RESOURCE_DOTCDK = ".cdk";
+	public static final String CDK_RESOURCE_CDK = "cdk";
+
 	public static final String CDK32_RESOURCE_PROFILES = "profiles";
 
-	
 	// Response strings from a status call
 	static final String STATE = "state";
 	static final String STATE_HUMAN_SHORT = "state-human-short";

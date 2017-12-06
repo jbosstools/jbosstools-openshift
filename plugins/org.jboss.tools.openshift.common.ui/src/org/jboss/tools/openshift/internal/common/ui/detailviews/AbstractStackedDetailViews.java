@@ -39,7 +39,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 public abstract class AbstractStackedDetailViews {
 
 	protected final IDetailView emptyView = new EmptyView();
-	
+
 	private Composite parent;
 	private IDetailView currentView = emptyView;
 	private final StackLayout stackLayout = new StackLayout();
@@ -47,7 +47,8 @@ public abstract class AbstractStackedDetailViews {
 	private DataBindingContext dbc;
 	private IObservableValue<?> detailViewModel;
 
-	public AbstractStackedDetailViews(IObservableValue<?> detailViewModel, Object context, Composite parent, DataBindingContext dbc) {
+	public AbstractStackedDetailViews(IObservableValue<?> detailViewModel, Object context, Composite parent,
+			DataBindingContext dbc) {
 		Assert.isLegal(parent != null && !parent.isDisposed());
 
 		this.parent = parent;
@@ -58,6 +59,7 @@ public abstract class AbstractStackedDetailViews {
 		Assert.isLegal(detailViewModel != null && !detailViewModel.isDisposed());
 		this.detailViewModel = detailViewModel;
 	}
+
 	public void createControls() {
 		createControls(true);
 	}
@@ -67,12 +69,12 @@ public abstract class AbstractStackedDetailViews {
 
 		parent.setLayout(stackLayout);
 		createViewControls(parent, context, dbc);
-		if(showView)
+		if (showView)
 			showView(detailViewModel, getView(detailViewModel), dbc);
 	}
 
 	protected abstract IDetailView[] getDetailViews();
-	
+
 	private IValueChangeListener<?> onDetailViewModelChanged() {
 		return event -> showView(event.getObservableValue(), dbc);
 	}
@@ -82,9 +84,7 @@ public abstract class AbstractStackedDetailViews {
 	}
 
 	protected void showView(IObservableValue<?> detailViewsModel, IDetailView view, DataBindingContext dbc) {
-		if (view == null
-				|| view.getControl() == null
-				|| detailViewsModel == null) {
+		if (view == null || view.getControl() == null || detailViewsModel == null) {
 			return;
 		}
 		currentView.onInVisible(detailViewsModel, dbc);
@@ -109,7 +109,7 @@ public abstract class AbstractStackedDetailViews {
 		Object value = detailViewsModel.getValue();
 		IDetailView view = createControls(emptyView);
 
-		for(IDetailView detailView : detailViews) {
+		for (IDetailView detailView : detailViews) {
 			if (detailView.isViewFor(value)) {
 				view = detailView;
 				break;
@@ -119,10 +119,10 @@ public abstract class AbstractStackedDetailViews {
 		if (view == null) {
 			OpenShiftCommonCoreActivator.pluginLog().logWarning(NLS.bind("No view found to display value {0}", value));
 		}
-		
+
 		return view;
 	}
-	
+
 	private IDetailView createControls(IDetailView view) {
 		if (view == null) {
 			return null;
@@ -132,7 +132,7 @@ public abstract class AbstractStackedDetailViews {
 		}
 		return view;
 	}
-	
+
 	private DisposeListener onDispose() {
 		return (e -> dispose());
 	}
@@ -144,7 +144,7 @@ public abstract class AbstractStackedDetailViews {
 			}
 		}
 	}
-	
+
 	protected IDetailView getCurrentView() {
 		return currentView;
 	}
@@ -154,11 +154,10 @@ public abstract class AbstractStackedDetailViews {
 		@Override
 		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.NONE));
-			GridLayoutFactory.fillDefaults()
-					.margins(6, 6).spacing(6, 6).applyTo(container);
+			GridLayoutFactory.fillDefaults().margins(6, 6).spacing(6, 6).applyTo(container);
 			return container;
 		}
-		
+
 		@Override
 		public boolean isViewFor(Object object) {
 			return false;
@@ -173,8 +172,7 @@ public abstract class AbstractStackedDetailViews {
 		protected StyledText createLabeledValue(String labelText, Composite container) {
 			Label label = new Label(container, SWT.NONE);
 			label.setText(labelText);
-			GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(label);
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(label);
 			return createNonEditableStyledText(container);
 		}
 
@@ -188,8 +186,7 @@ public abstract class AbstractStackedDetailViews {
 			styledText.setCaret(null);
 			styledText.setAlwaysShowScrollBars(false);
 			StyledTextUtils.setTransparent(styledText);
-			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(styledText);
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(styledText);
 			styledText.addFocusListener(clearSelectionOnFocusLost);
 			new SmartTooltip(styledText);
 			return styledText;
@@ -214,7 +211,7 @@ public abstract class AbstractStackedDetailViews {
 		};
 
 	}
-	
+
 	public interface IDetailView {
 
 		public Composite createControls(Composite parent, Object context, DataBindingContext dbc);
@@ -224,7 +221,7 @@ public abstract class AbstractStackedDetailViews {
 		public void onInVisible(IObservableValue<?> selectedItemObservable, DataBindingContext dbc);
 
 		public Control getControl();
-		
+
 		public boolean isViewFor(Object object);
 
 		public void dispose();

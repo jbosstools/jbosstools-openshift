@@ -85,7 +85,7 @@ import com.openshift.restclient.model.probe.IProbe;
 import com.openshift.restclient.model.route.IRoute;
 
 public class OpenShiftDebugModeTest {
-	
+
 	private static final String KEY_DEBUGPORT = "debugPort";
 	private static final String VALUE_DEBUGPORT = "42";
 	private static final String KEY_DEVMODE = "DEV_MODE";
@@ -97,25 +97,22 @@ public class OpenShiftDebugModeTest {
 	private IServerWorkingCopy serverWorkingCopy;
 	private TestableDebugContext context;
 	private TestableDebugMode debugMode;
-	
+
 	@Before
 	public void setUp() throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		this.connection = createConnection("https://localhost:8181", "aUser");
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 		this.project = createProject("someProject");
-		this.dc = createDeploymentConfig(
-				"someDc", 
-				project, 
+		this.dc = createDeploymentConfig("someDc", project,
 				// no env var
 				null,
 				// no containers
-				Collections.emptyList(),
-				connection);
+				Collections.emptyList(), connection);
 		doReturn(true).when(connection).ownsResource(dc);
 		this.serverWorkingCopy = OpenShiftServerTestUtils.mockServerWorkingCopy();
 		this.server = OpenShiftServerTestUtils.mockServer(serverWorkingCopy, dc, connection);
 		this.context = new TestableDebugContext(server, KEY_DEVMODE, KEY_DEBUGPORT, VALUE_DEBUGPORT);
-		this.debugMode = spy((TestableDebugMode) new TestableDebugMode(context));	
+		this.debugMode = spy((TestableDebugMode) new TestableDebugMode(context));
 	}
 
 	@After
@@ -144,7 +141,7 @@ public class OpenShiftDebugModeTest {
 		assertThat(context.isDebugEnabled()).isTrue();
 		assertThat(context.isDevmodeEnabled()).isFalse();
 	}
-	
+
 	@Test
 	public void shouldEnableContextDevmode() {
 		// given
@@ -160,9 +157,7 @@ public class OpenShiftDebugModeTest {
 	@Test
 	public void shouldEnableDevmodeGivenItIsDisabled() throws CoreException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString())),
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString())), dc);
 		// when
 		context.setDevmodeEnabled(true);
 		debugMode.execute(new NullProgressMonitor());
@@ -173,7 +168,7 @@ public class OpenShiftDebugModeTest {
 	}
 
 	@Test
-	public void shouldEnableDevmodeAndSendItGivenUserEnablesDevmodeEnvVarDoesntExist() 
+	public void shouldEnableDevmodeAndSendItGivenUserEnablesDevmodeEnvVarDoesntExist()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
 		// when
@@ -184,18 +179,16 @@ public class OpenShiftDebugModeTest {
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
-	public void shouldNotEnableDevmodeNorSendItGivenItIsAlreadyEnabled() 
+	public void shouldNotEnableDevmodeNorSendItGivenItIsAlreadyEnabled()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), dc);
 		// when
 		context.setDevmodeEnabled(true);
 		debugMode.execute(new NullProgressMonitor());
 		// then
 		// dont alter dc
-		verify(dc, never()).setEnvironmentVariable(eq(KEY_DEVMODE), any()); 
+		verify(dc, never()).setEnvironmentVariable(eq(KEY_DEVMODE), any());
 		// dont send potentially altered dc
 		verify(debugMode, never()).send(any(IDeploymentConfig.class), eq(connection), any(IProgressMonitor.class));
 	}
@@ -203,9 +196,7 @@ public class OpenShiftDebugModeTest {
 	@Test
 	public void shouldDisableDevmodeAndSendItGivenItIsEnabled() throws CoreException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), dc);
 		// when
 		context.setDevmodeEnabled(false);
 		debugMode.execute(new NullProgressMonitor());
@@ -225,8 +216,8 @@ public class OpenShiftDebugModeTest {
 		// then
 		assertThat(context.isDebugEnabled()).isFalse();
 		assertThat(context.isDevmodeEnabled()).isFalse();
-	}	
-	
+	}
+
 	@Test
 	public void shouldEnableContextDebugAndDevmode() {
 		// given
@@ -237,17 +228,17 @@ public class OpenShiftDebugModeTest {
 		// then
 		assertThat(context.isDebugEnabled()).isTrue();
 		assertThat(context.isDevmodeEnabled()).isTrue();
-	}	
+	}
 
 	@Test
-	public void shouldSendUpdatedDebugAndDevmodeGivenUserEnablesDebugAndNoEnvVarExisted() 
+	public void shouldSendUpdatedDebugAndDevmodeGivenUserEnablesDebugAndNoEnvVarExisted()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
 		context.setDebugEnabled(true);
 
 		// when
 		debugMode.execute(new NullProgressMonitor());
-		
+
 		// then
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
@@ -255,17 +246,15 @@ public class OpenShiftDebugModeTest {
 	}
 
 	@Test
-	public void shouldSendUpdatedDebugGivenUserEnablesDebugAndOnlyDevmodeIsSet() 
+	public void shouldSendUpdatedDebugGivenUserEnablesDebugAndOnlyDevmodeIsSet()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString())), dc);
 		context.setDebugEnabled(true);
 
 		// when
 		debugMode.execute(new NullProgressMonitor());
-		
+
 		// then
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
 		verify(dc, atLeastOnce()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
@@ -274,36 +263,31 @@ public class OpenShiftDebugModeTest {
 	}
 
 	@Test
-	public void shouldOnlyGetPodGivenUserEnablesDebugAndDevmodeAndDebugEnvVarAreAlreadySet() 
+	public void shouldOnlyGetPodGivenUserEnablesDebugAndDevmodeAndDebugEnvVarAreAlreadySet()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(
-						createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()), 
-						createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
 		context.setDebugEnabled(true);
 
 		// when
 		debugMode.execute(new NullProgressMonitor());
-		
+
 		// then
 		verify(dc, never()).setEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString());
 		verify(dc, never()).setEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT);
 		// dont send untouched dc
 		verify(debugMode, never()).send(any(IDeploymentConfig.class), eq(connection), any(IProgressMonitor.class));
-		verify(debugMode, atLeastOnce()).getExistingPod(any(IDeploymentConfig.class), eq(connection), any(IProgressMonitor.class));		
+		verify(debugMode, atLeastOnce()).getExistingPod(any(IDeploymentConfig.class), eq(connection),
+				any(IProgressMonitor.class));
 	}
 
 	@Test
-	public void shouldSendUpdatedDebugGivenUserEnablesDebugAndDebugEnvVarIsEnabledWithDifferentPort() 
+	public void shouldSendUpdatedDebugGivenUserEnablesDebugAndDebugEnvVarIsEnabledWithDifferentPort()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(
-						createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-						createEnvironmentVariable(KEY_DEBUGPORT, "84")),
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, "84")), dc);
 		context.setDebugEnabled(true);
 
 		// when
@@ -317,14 +301,11 @@ public class OpenShiftDebugModeTest {
 	}
 
 	@Test
-	public void shouldDisableDebugAndSendGivenUserDisablesDebugAndDebugEnvVarIsEnabled() 
+	public void shouldDisableDebugAndSendGivenUserDisablesDebugAndDebugEnvVarIsEnabled()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(
-						createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-						createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
 		context.setDebugEnabled(false);
 
 		// when
@@ -338,14 +319,11 @@ public class OpenShiftDebugModeTest {
 	}
 
 	@Test
-	public void shouldDisableDebugAndSendGivenUserDisablesDebugAndDebugEnvVarIsEnabledButOnDifferentPort() 
+	public void shouldDisableDebugAndSendGivenUserDisablesDebugAndDebugEnvVarIsEnabledButOnDifferentPort()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(
-						createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-						createEnvironmentVariable(KEY_DEBUGPORT, "99")), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, "99")), dc);
 		context.setDebugEnabled(false);
 
 		// when
@@ -359,16 +337,13 @@ public class OpenShiftDebugModeTest {
 	}
 
 	@Test
-	public void shouldNotReplaceContainerDebugPortGivenExistingPortMatchesRequestedPort() 
+	public void shouldNotReplaceContainerDebugPortGivenExistingPortMatchesRequestedPort()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(
-						createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString()),
-						createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
 		Set<IPort> ports = singleton(createPort(toInt(VALUE_DEBUGPORT)));
-		IContainer container = createContainer("someDc-container1", ports); 
+		IContainer container = createContainer("someDc-container1", ports);
 		mockGetContainers(asList(container), dc);
 		context.setDebugEnabled(true);
 
@@ -380,55 +355,49 @@ public class OpenShiftDebugModeTest {
 		// send updated dc
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
-	
+
 	@Test
-	public void shouldReplaceContainerDebugPortIfExistingPortDiffersFromRequestedPort() 
+	public void shouldReplaceContainerDebugPortIfExistingPortDiffersFromRequestedPort()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(
-						createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString()),
-						createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
 		// has container port 88, should have port matching env var
 		Set<IPort> ports = singleton(createPort(toInt(String.valueOf("88"))));
-		IContainer container = createContainer("someDc-container1", ports); 
+		IContainer container = createContainer("someDc-container1", ports);
 		mockGetContainers(asList(container), dc);
 		context.setDebugEnabled(true);
 
 		// when
 		debugMode.execute(new NullProgressMonitor());
-		
+
 		// then
-		verify(container, atLeastOnce()).setPorts(
-				and(
-						// new set of ports contains requested port
-						argThat(aSetThatContainsPort(toInt(VALUE_DEBUGPORT))),
-						// but not previously existing port
-						argThat(not(aSetThatContainsPort(88)))));
+		verify(container, atLeastOnce()).setPorts(and(
+				// new set of ports contains requested port
+				argThat(aSetThatContainsPort(toInt(VALUE_DEBUGPORT))),
+				// but not previously existing port
+				argThat(not(aSetThatContainsPort(88)))));
 		// send updated dc
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
 
 	@Test
-	public void shouldAddContainerDebugPortGivenNoPortExistsYet() 
+	public void shouldAddContainerDebugPortGivenNoPortExistsYet()
 			throws CoreException, UnsupportedEncodingException, MalformedURLException {
 		// given
-		mockGetEnvironmentVariables(
-				asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString())), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.FALSE.toString())), dc);
 		final IPort existingContainerPort = new PortSpecAdapter("papaSmurf", "transport", 42);
 		Set<IPort> ports = singleton(existingContainerPort);
-		IContainer container = createContainer("someDc-container1", ports); 
+		IContainer container = createContainer("someDc-container1", ports);
 		mockGetContainers(asList(container), dc);
 		context.setDebugEnabled(true);
 
 		// when
 		debugMode.execute(new NullProgressMonitor());
-		
+
 		// then
-		verify(container, atLeastOnce()).setPorts(
-						argThat(aSetEqualTo(existingContainerPort, createPort(toInt(VALUE_DEBUGPORT)))));
+		verify(container, atLeastOnce())
+				.setPorts(argThat(aSetEqualTo(existingContainerPort, createPort(toInt(VALUE_DEBUGPORT)))));
 		// send updated dc
 		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
@@ -439,13 +408,12 @@ public class OpenShiftDebugModeTest {
 		IRoute route = createRouteFor(dc, project, connection);
 		doReturn(null).when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_ROUTE_TIMEOUT), anyString());
 		context.setDebugEnabled(true);
-		
+
 		// when
 		debugMode.execute(new NullProgressMonitor());
-		
+
 		// then
-		verify(route, atLeastOnce()).setAnnotation(
-						eq(OpenShiftAPIAnnotations.TIMEOUT), anyString());
+		verify(route, atLeastOnce()).setAnnotation(eq(OpenShiftAPIAnnotations.TIMEOUT), anyString());
 		// send updated dc
 		verify(debugMode, times(1)).send(eq(route), eq(connection), any(IProgressMonitor.class));
 	}
@@ -456,17 +424,17 @@ public class OpenShiftDebugModeTest {
 		IRoute route = createRouteFor(dc, project, connection);
 		doReturn(RouteTimeout.ROUTE_DEBUG_TIMEOUT).when(route).getAnnotation(eq(OpenShiftAPIAnnotations.TIMEOUT));
 		context.setDebugEnabled(true);
-		
+
 		// when
 		debugMode.execute(new NullProgressMonitor());
 
 		// then
-		verify(route, never()).setAnnotation(
-						eq(OpenShiftAPIAnnotations.TIMEOUT), anyString());
+		verify(route, never()).setAnnotation(eq(OpenShiftAPIAnnotations.TIMEOUT), anyString());
 		// dont send updated dc
 		verify(debugMode, never()).send(eq(route), eq(connection), any(IProgressMonitor.class));
 		// store backup
-		verify(serverWorkingCopy).setAttribute(OpenShiftServerUtils.ATTR_DEBUG_ROUTE_TIMEOUT, RouteTimeout.ROUTE_DEBUG_TIMEOUT);
+		verify(serverWorkingCopy).setAttribute(OpenShiftServerUtils.ATTR_DEBUG_ROUTE_TIMEOUT,
+				RouteTimeout.ROUTE_DEBUG_TIMEOUT);
 	}
 
 	@Test
@@ -480,8 +448,7 @@ public class OpenShiftDebugModeTest {
 		debugMode.execute(new NullProgressMonitor());
 
 		// then
-		verify(route, atLeastOnce()).setAnnotation(
-						eq(OpenShiftAPIAnnotations.TIMEOUT), anyString());
+		verify(route, atLeastOnce()).setAnnotation(eq(OpenShiftAPIAnnotations.TIMEOUT), anyString());
 		// send updated dc
 		verify(debugMode, atLeastOnce()).send(eq(route), eq(connection), any(IProgressMonitor.class));
 		// backup stored
@@ -510,14 +477,8 @@ public class OpenShiftDebugModeTest {
 	public void shouldDisableLivenessProbeIfItExists() throws CoreException {
 		// given
 		IProbe livenessProbe = createProbe(110, 111, 112, 113, 114);
-		mockGetContainers(
-				Arrays.asList(
-					createContainer(
-							"someDc-container1", 
-							Collections.singleton(createPort(42)), 
-							livenessProbe,
-							createProbe(20, 21, 22, 23, 24))),
-				dc);
+		mockGetContainers(Arrays.asList(createContainer("someDc-container1", Collections.singleton(createPort(42)),
+				livenessProbe, createProbe(20, 21, 22, 23, 24))), dc);
 		// when
 		context.setDebugEnabled(true);
 		debugMode.execute(new NullProgressMonitor());
@@ -531,25 +492,17 @@ public class OpenShiftDebugModeTest {
 	public void shouldSetLivenessProbeInitialDelayWhenDebuggingIfItDoesntExist() throws CoreException {
 		// given
 		// debugging already enabled (thus no change in dc env vars)
-		mockGetEnvironmentVariables(
-				asList(
-					createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-					createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), 
-				dc);
-		mockGetContainers(
-				Arrays.asList(
-					createContainer(
-							"someDc-container1", 
-							Collections.singleton(createPort(42)), 
-							null,
-							createProbe(20, 21, 22, 23, 24))),
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
+		mockGetContainers(Arrays.asList(createContainer("someDc-container1", Collections.singleton(createPort(42)),
+				null, createProbe(20, 21, 22, 23, 24))), dc);
 		// when
 		context.setDebugEnabled(true);
 		debugMode.execute(new NullProgressMonitor());
 		// then
 		// dont save backup in server
-		verify(serverWorkingCopy, never()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY), anyString());
+		verify(serverWorkingCopy, never()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY),
+				anyString());
 		// dont send unchanged dc
 		verify(debugMode, never()).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
@@ -558,27 +511,18 @@ public class OpenShiftDebugModeTest {
 	public void shouldSetLivenessProbeInitialDelayWhenDebuggingIfExistingDelayIsSmaller() throws CoreException {
 		// given
 		// debugging already enabled (thus no change in dc env vars)
-		mockGetEnvironmentVariables(
-				asList(
-					createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-					createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
 		IProbe livenessProbe = createProbe(LivenessProbe.INITIAL_DELAY - 1, 11, 12, 13, 14);
-		mockGetContainers(
-				Arrays.asList(
-					createContainer(
-							"someDc-container1", 
-							Collections.singleton(createPort(42)), 
-							livenessProbe,
-							createProbe(20, 21, 22, 23, 24))),
-				dc);
+		mockGetContainers(Arrays.asList(createContainer("someDc-container1", Collections.singleton(createPort(42)),
+				livenessProbe, createProbe(20, 21, 22, 23, 24))), dc);
 		// when
 		context.setDebugEnabled(true);
 		debugMode.execute(new NullProgressMonitor());
 		// then
 		verify(livenessProbe).setInitialDelaySeconds(LivenessProbe.INITIAL_DELAY);
 		// dont save backup in server
-		verify(serverWorkingCopy).setAttribute(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY, 
+		verify(serverWorkingCopy).setAttribute(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY,
 				String.valueOf(LivenessProbe.INITIAL_DELAY - 1));
 		// send changed dc
 		verify(debugMode).send(eq(dc), eq(connection), any(IProgressMonitor.class));
@@ -588,20 +532,11 @@ public class OpenShiftDebugModeTest {
 	public void shouldNotSetLivenessProbeWhenDebuggingIfExistingDelayIsLarger() throws CoreException {
 		// given
 		// debugging already enabled (thus no change in dc env vars)
-		mockGetEnvironmentVariables(
-				asList(
-					createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-					createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), 
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
 		IProbe livenessProbe = createProbe(LivenessProbe.INITIAL_DELAY + 1, 11, 12, 13, 14);
-		mockGetContainers(
-				Arrays.asList(
-					createContainer(
-							"someDc-container1", 
-							Collections.singleton(createPort(42)), 
-							livenessProbe,
-							createProbe(20, 21, 22, 23, 24))),
-				dc);
+		mockGetContainers(Arrays.asList(createContainer("someDc-container1", Collections.singleton(createPort(42)),
+				livenessProbe, createProbe(20, 21, 22, 23, 24))), dc);
 		// when
 		context.setDebugEnabled(true);
 		debugMode.execute(new NullProgressMonitor());
@@ -609,7 +544,8 @@ public class OpenShiftDebugModeTest {
 		// dont set initial delay since existing is larger
 		verify(livenessProbe, never()).setInitialDelaySeconds(LivenessProbe.INITIAL_DELAY);
 		// dont store backup 
-		verify(serverWorkingCopy, never()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY), anyString());
+		verify(serverWorkingCopy, never()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY),
+				anyString());
 		// dont send unchanged dc
 		verify(debugMode, never()).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
@@ -618,19 +554,10 @@ public class OpenShiftDebugModeTest {
 	public void shouldNotSetLivenessProbeWhenDebuggingIfItDoesntExist() throws CoreException {
 		// given
 		// debugging already enabled
-		mockGetEnvironmentVariables(
-				asList(
-					createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
-					createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), 
-				dc);
-		mockGetContainers(
-				Arrays.asList(
-					createContainer(
-							"someDc-container1", 
-							Collections.singleton(createPort(42)), 
-							null,
-							createProbe(20, 21, 22, 23, 24))),
-				dc);
+		mockGetEnvironmentVariables(asList(createEnvironmentVariable(KEY_DEVMODE, Boolean.TRUE.toString()),
+				createEnvironmentVariable(KEY_DEBUGPORT, VALUE_DEBUGPORT)), dc);
+		mockGetContainers(Arrays.asList(createContainer("someDc-container1", Collections.singleton(createPort(42)),
+				null, createProbe(20, 21, 22, 23, 24))), dc);
 		// when
 		context.setDebugEnabled(true);
 		debugMode.execute(new NullProgressMonitor());
@@ -643,17 +570,11 @@ public class OpenShiftDebugModeTest {
 	public void shouldRestoreLivenessProbeWhenStoppingDebuggingIfItExistedBefore() throws CoreException {
 		// given
 		int initialDelay = 42;
-		doReturn(String.valueOf(initialDelay))
-			.when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY), anyString());
+		doReturn(String.valueOf(initialDelay)).when(server)
+				.getAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY), anyString());
 		IProbe livenessProbe = createProbe(110, 111, 112, 113, 114);
-		mockGetContainers(
-				Arrays.asList(
-					createContainer(
-							"someDc-container1", 
-							Collections.singleton(createPort(42)), 
-							livenessProbe,
-							createProbe(20, 21, 22, 23, 24))),
-				dc);
+		mockGetContainers(Arrays.asList(createContainer("someDc-container1", Collections.singleton(createPort(42)),
+				livenessProbe, createProbe(20, 21, 22, 23, 24))), dc);
 		// when
 		context.setDebugEnabled(false);
 		debugMode.execute(new NullProgressMonitor());
@@ -661,7 +582,8 @@ public class OpenShiftDebugModeTest {
 		// then
 		verify(livenessProbe).setInitialDelaySeconds(initialDelay);
 		// backup cleared
-		verify(serverWorkingCopy).setAttribute(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY, (String) null);
+		verify(serverWorkingCopy).setAttribute(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY,
+				(String) null);
 		// send updated dc
 		verify(debugMode).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
@@ -670,14 +592,8 @@ public class OpenShiftDebugModeTest {
 	public void shouldNotRestoreLivenessProbeWhenStoppingDebuggingIfItDidntExistBefore() throws CoreException {
 		// given
 		IProbe livenessProbe = createProbe(OpenShiftServerUtils.VALUE_LIVENESSPROBE_NODELAY, 11, 12, 13, 14);
-		mockGetContainers(
-				Arrays.asList(
-					createContainer(
-							"someDc-container1", 
-							Collections.singleton(createPort(42)), 
-							livenessProbe,
-							createProbe(20, 21, 22, 23, 24))),
-				dc);
+		mockGetContainers(Arrays.asList(createContainer("someDc-container1", Collections.singleton(createPort(42)),
+				livenessProbe, createProbe(20, 21, 22, 23, 24))), dc);
 		// when
 		context.setDebugEnabled(false);
 		debugMode.execute(new NullProgressMonitor());
@@ -685,7 +601,8 @@ public class OpenShiftDebugModeTest {
 		// then
 		verify(livenessProbe, never()).setInitialDelaySeconds(anyInt());
 		// backup cleared
-		verify(serverWorkingCopy, never()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY), anyString()); 
+		verify(serverWorkingCopy, never()).setAttribute(eq(OpenShiftServerUtils.ATTR_DEBUG_LIVENESSPROBE_INITIALDELAY),
+				anyString());
 		// send updated dc
 		verify(debugMode, never()).send(eq(dc), eq(connection), any(IProgressMonitor.class));
 	}
@@ -718,8 +635,7 @@ public class OpenShiftDebugModeTest {
 		debugMode.execute(new NullProgressMonitor());
 
 		// then
-		verify(route, atLeastOnce()).setAnnotation(
-						eq(OpenShiftAPIAnnotations.TIMEOUT), eq("4242"));
+		verify(route, atLeastOnce()).setAnnotation(eq(OpenShiftAPIAnnotations.TIMEOUT), eq("4242"));
 		// send updated route
 		verify(debugMode, atLeastOnce()).send(eq(route), eq(connection), any(IProgressMonitor.class));
 		// clear backup
@@ -736,15 +652,21 @@ public class OpenShiftDebugModeTest {
 	 */
 	private IRoute createRouteFor(IDeploymentConfig dc, IProject project, Connection connection) {
 		@SuppressWarnings("serial")
-		Map<String, String> selectors = new HashMap<String, String>() {{ put("aSelector", "42"); }};
+		Map<String, String> selectors = new HashMap<String, String>() {
+			{
+				put("aSelector", "42");
+			}
+		};
 		doReturn(selectors).when(dc).getReplicaSelector();
 		IService service1 = createService("service1", project, new HashMap<String, String>()); // doesnt match dc
-		IService service2 = createService("service2", project, selectors);  // matches dc
-		when(connection.getResources(ResourceKind.SERVICE, project.getNamespace())).thenReturn(Arrays.asList(service1, service2));
-		
+		IService service2 = createService("service2", project, selectors); // matches dc
+		when(connection.getResources(ResourceKind.SERVICE, project.getNamespace()))
+				.thenReturn(Arrays.asList(service1, service2));
+
 		IRoute route1 = createRoute("route1", project, "service42"); // matches inexistent service
 		IRoute route2 = createRoute("route2", project, "service2"); // matches service2
-		when(connection.getResources(ResourceKind.ROUTE, project.getNamespace())).thenReturn(Arrays.asList(route1, route2));
+		when(connection.getResources(ResourceKind.ROUTE, project.getNamespace()))
+				.thenReturn(Arrays.asList(route1, route2));
 		return route2;
 	}
 
@@ -756,8 +678,7 @@ public class OpenShiftDebugModeTest {
 				if (CollectionUtils.isEmpty(set)) {
 					return false;
 				}
-				return set.stream()
-					.anyMatch(portSpec -> portSpec.getContainerPort() == port);
+				return set.stream().anyMatch(portSpec -> portSpec.getContainerPort() == port);
 			}
 
 			@Override
@@ -791,7 +712,7 @@ public class OpenShiftDebugModeTest {
 		@Override
 		protected void send(IResource resource, Connection connection, IProgressMonitor monitor) throws CoreException {
 		}
-		
+
 		@Override
 		protected IPod waitForNewPod(IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
 			return null;
@@ -818,5 +739,5 @@ public class OpenShiftDebugModeTest {
 		public void setDebugEnabled(boolean debugEnabled) {
 			super.setDebugEnabled(debugEnabled);
 		}
-	}	
+	}
 }

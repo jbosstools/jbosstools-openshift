@@ -62,8 +62,7 @@ public final class Logger {
 	 *            the message to log
 	 */
 	public static void error(final String message) {
-		ExpressUIActivator.getDefault().getLog()
-				.log(new Status(Status.ERROR, ExpressUIActivator.PLUGIN_ID, message));
+		ExpressUIActivator.getDefault().getLog().log(new Status(Status.ERROR, ExpressUIActivator.PLUGIN_ID, message));
 	}
 
 	/**
@@ -86,8 +85,7 @@ public final class Logger {
 	 *            the message to log
 	 */
 	public static void warn(final String message) {
-		ExpressUIActivator.getDefault().getLog()
-				.log(new Status(Status.WARNING, ExpressUIActivator.PLUGIN_ID, message));
+		ExpressUIActivator.getDefault().getLog().log(new Status(Status.WARNING, ExpressUIActivator.PLUGIN_ID, message));
 	}
 
 	/**
@@ -97,8 +95,7 @@ public final class Logger {
 	 *            the message to log
 	 */
 	public static void info(String message) {
-		ExpressUIActivator.getDefault().getLog()
-				.log(new Status(Status.INFO, ExpressUIActivator.PLUGIN_ID, message));
+		ExpressUIActivator.getDefault().getLog().log(new Status(Status.INFO, ExpressUIActivator.PLUGIN_ID, message));
 	}
 
 	/**
@@ -111,9 +108,9 @@ public final class Logger {
 	 */
 	public static void debug(final String message) {
 		String debugOption = Platform.getDebugOption(DEBUG);
-		if( ExpressUIActivator.getDefault() == null )
+		if (ExpressUIActivator.getDefault() == null)
 			return;
-		
+
 		if (ExpressUIActivator.getDefault().isDebugging() && "true".equalsIgnoreCase(debugOption)) {
 			System.out.println("[" + Thread.currentThread().getName() + "] " + message);
 		}

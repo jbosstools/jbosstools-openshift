@@ -18,29 +18,28 @@ import org.junit.Test;
 
 public class URLValidatorTest {
 
-	private URLValidator validator = new URLValidator("", true); 
-	
+	private URLValidator validator = new URLValidator("", true);
+
 	@Test
 	public void testHttpsPassValidURL() {
 		assertEquals(ValidationStatus.ok(), validator.validate("https://foobar"));
 	}
-	
+
 	@Test
 	public void testCdkDomainValidURL() {
-		assertEquals(ValidationStatus.ok(), 
-				validator.validate("https://openshift.cdk"));
+		assertEquals(ValidationStatus.ok(), validator.validate("https://openshift.cdk"));
 	}
-	
+
 	@Test
 	public void testHttpPassValidURL() {
 		assertEquals(ValidationStatus.ok(), validator.validate("http://foobar"));
 	}
-	
+
 	@Test
 	public void testFailInvalidURL() {
 		assertNotEquals(ValidationStatus.ok(), validator.validate("htt://foobar"));
 	}
-	
+
 	@Test
 	public void testAllowBlankURL() {
 		validator = new URLValidator("", true);

@@ -48,48 +48,42 @@ public class RestoreSnapshotWizard extends AbstractOpenShiftWizard<RestoreSnapsh
 		final String applicationName = application.getName();
 		try {
 			final RestoreJob restoreJob = new RestoreJob(application);
-			Job jobChain = new JobChainBuilder(restoreJob)
-					.runWhenDone(
-							new UIJob(NLS.bind(
-									"Show Snapshot Restore/Deploy Output for application {0}...",
-									applicationName)) {
+			Job jobChain = new JobChainBuilder(restoreJob).runWhenDone(
+					new UIJob(NLS.bind("Show Snapshot Restore/Deploy Output for application {0}...", applicationName)) {
 
-								@Override
-								public IStatus runInUIThread(IProgressMonitor monitor) {
-									MessageConsole console = ConsoleUtils.displayConsoleView(application);
-									if (console == null) {
-										return ExpressUIActivator.createCancelStatus(NLS.bind(
-												"Cound not open console for application {0}", applicationName));
-									}
-									printResponse(restoreJob.getResponse(), console);
-									return Status.OK_STATUS;
-								}
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
+							MessageConsole console = ConsoleUtils.displayConsoleView(application);
+							if (console == null) {
+								return ExpressUIActivator.createCancelStatus(
+										NLS.bind("Cound not open console for application {0}", applicationName));
+							}
+							printResponse(restoreJob.getResponse(), console);
+							return Status.OK_STATUS;
+						}
 
-								private void printResponse(String response, MessageConsole console) {
-									MessageConsoleStream messageStream = console.newMessageStream();
-									if (StringUtils.isEmpty(response)) {
-										messageStream.print("Done");
-									} else {
-										messageStream.print(response);
-									}
-								}
-							})
-					.build();
+						private void printResponse(String response, MessageConsole console) {
+							MessageConsoleStream messageStream = console.newMessageStream();
+							if (StringUtils.isEmpty(response)) {
+								messageStream.print("Done");
+							} else {
+								messageStream.print(response);
+							}
+						}
+					}).build();
 			WizardUtils.runInWizard(jobChain, getContainer());
 			return restoreJob.getResult().isOK();
 		} catch (InvocationTargetException e) {
 			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
-					NLS.bind("Could not restore snapshot for application {0}", applicationName),
-					status, IStatus.ERROR)
-					.open();
+					NLS.bind("Could not restore snapshot for application {0}", applicationName), status, IStatus.ERROR)
+							.open();
 			return false;
 		} catch (InterruptedException e) {
 			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
-					NLS.bind("Could not restore snapshot for application {0}", applicationName),
-					status, IStatus.ERROR)
-					.open();
+					NLS.bind("Could not restore snapshot for application {0}", applicationName), status, IStatus.ERROR)
+							.open();
 			return false;
 		}
 	}
@@ -118,7 +112,8 @@ public class RestoreSnapshotWizard extends AbstractOpenShiftWizard<RestoreSnapsh
 			try {
 				if (getModel().isDeploymentSnapshot()) {
 					// set binary deployment type for deployment snapshots
-					monitor.subTask(NLS.bind("Setting binary deployment type for application {0}...", application.getName()));
+					monitor.subTask(
+							NLS.bind("Setting binary deployment type for application {0}...", application.getName()));
 					application.setDeploymentType(DeploymentTypes.binary());
 				}
 				monitor.subTask("Restoring snapshot...");
@@ -130,7 +125,8 @@ public class RestoreSnapshotWizard extends AbstractOpenShiftWizard<RestoreSnapsh
 			} finally {
 				if (getModel().isDeploymentSnapshot()) {
 					// restore
-					monitor.subTask(NLS.bind("Restoring deployment type {0} for application {1}", deploymentType, application.getName()));
+					monitor.subTask(NLS.bind("Restoring deployment type {0} for application {1}", deploymentType,
+							application.getName()));
 					application.setDeploymentType(deploymentType);
 				}
 			}

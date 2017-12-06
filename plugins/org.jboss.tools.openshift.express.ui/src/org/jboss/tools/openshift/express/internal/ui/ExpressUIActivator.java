@@ -107,7 +107,7 @@ public class ExpressUIActivator extends AbstractUIPlugin {
 	public static IStatus createErrorStatus(String message, Throwable throwable, Object... arguments) {
 		return createErrorStatus(NLS.bind(message, arguments), throwable);
 	}
-	
+
 	public static MultiStatus createMultiStatus(String message, Throwable t, Object... arguments) {
 		MultiStatus multiStatus = new MultiStatus(PLUGIN_ID, IStatus.ERROR, NLS.bind(message, arguments), t);
 		addStatuses(t, multiStatus);
@@ -121,7 +121,7 @@ public class ExpressUIActivator extends AbstractUIPlugin {
 			addStatuses(wrapped, multiStatus);
 		}
 	}
-	
+
 	private static Throwable getWrappedThrowable(Throwable t) {
 		if (t instanceof InvocationTargetException) {
 			return ((InvocationTargetException) t).getTargetException();
@@ -131,13 +131,14 @@ public class ExpressUIActivator extends AbstractUIPlugin {
 		return null;
 	}
 
-    public IPreferenceStore getCorePreferenceStore() {
-        // Create the preference store lazily.
-        if (corePreferenceStore == null) {
-        	this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, ExpressCoreActivator.PLUGIN_ID);
+	public IPreferenceStore getCorePreferenceStore() {
+		// Create the preference store lazily.
+		if (corePreferenceStore == null) {
+			this.corePreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE,
+					ExpressCoreActivator.PLUGIN_ID);
 
-        }
-        return corePreferenceStore;
-    }
+		}
+		return corePreferenceStore;
+	}
 
 }

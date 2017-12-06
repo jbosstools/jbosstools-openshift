@@ -13,7 +13,6 @@ import java.util.Map;
 
 import com.openshift.client.IDomain;
 
-
 /**
  * Wizard that lists the environment variables and edit, add, remove them.
  * 
@@ -24,7 +23,7 @@ public class NewEnvironmentVariablesWizardModel extends AbstractEnvironmentVaria
 
 	private Map<String, String> environmentVariables;
 	private IDomain domain;
-	
+
 	public NewEnvironmentVariablesWizardModel(Map<String, String> environmentVariables, IDomain domain) {
 		this.environmentVariables = environmentVariables;
 		this.domain = domain;
@@ -38,8 +37,7 @@ public class NewEnvironmentVariablesWizardModel extends AbstractEnvironmentVaria
 	@Override
 	public void loadEnvironmentVariables() {
 		clear();
-		if (environmentVariables == null
-				|| environmentVariables.isEmpty()) {
+		if (environmentVariables == null || environmentVariables.isEmpty()) {
 			return;
 		}
 
@@ -54,14 +52,12 @@ public class NewEnvironmentVariablesWizardModel extends AbstractEnvironmentVaria
 
 	@Override
 	public boolean isSupported() {
-		return domain != null
-				&& domain.canCreateApplicationWithEnvironmentVariables();
+		return domain != null && domain.canCreateApplicationWithEnvironmentVariables();
 	}
-	
+
 	@Override
 	public String getHost() {
-		if (domain == null
-				|| domain.getUser() == null) {
+		if (domain == null || domain.getUser() == null) {
 			return null;
 		}
 		return domain.getUser().getServer();

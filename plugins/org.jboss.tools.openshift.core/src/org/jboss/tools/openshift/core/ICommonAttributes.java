@@ -27,20 +27,18 @@ public interface ICommonAttributes {
 	static final String COMMON_NAMESPACE = "openshift";
 
 	/**
-     * The property key for saving the cluster namespace
-     */
-    static final String CLUSTER_NAMESPACE_KEY = "org.jbosstools.openshift.core.connection.ext.cluster.namespace";
+	 * The property key for saving the cluster namespace
+	 */
+	static final String CLUSTER_NAMESPACE_KEY = "org.jbosstools.openshift.core.connection.ext.cluster.namespace";
 
 	/**
 	 * The property key for saving the image registry url
 	 */
 	static final String IMAGE_REGISTRY_URL_KEY = "org.jbosstools.openshift.core.connection.ext.registry.url";
 
-	
 	static final String OC_LOCATION_KEY = "org.jbosstools.openshift.core.connection.ext.oc.location";
 	static final String OC_OVERRIDE_KEY = "org.jbosstools.openshift.core.connection.ext.oc.override";
-	
-	
+
 	/**
 	 * Human readable labels for extended properties
 	 */

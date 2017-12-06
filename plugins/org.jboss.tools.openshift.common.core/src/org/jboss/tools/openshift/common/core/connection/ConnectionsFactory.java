@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
-
 /**
  * @author Andre Dietisheim
  */
@@ -41,7 +40,7 @@ public class ConnectionsFactory implements IConnectionsFactory {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public IConnectionFactory getFactory(String host) throws IOException {
 		for (IConnectionFactory factory : connectionFactories) {
@@ -52,7 +51,7 @@ public class ConnectionsFactory implements IConnectionsFactory {
 		}
 		return null;
 	}
-	
+
 	public void addConnectionFactory(IConnectionFactory factory) {
 		connectionFactories.add(factory);
 	}
@@ -66,7 +65,7 @@ public class ConnectionsFactory implements IConnectionsFactory {
 		if (StringUtils.isEmpty(id)) {
 			return null;
 		}
-		
+
 		IConnectionFactory matchingFactory = null;
 		for (IConnectionFactory factory : connectionFactories) {
 			if (id.equals(factory.getId())) {
@@ -76,17 +75,16 @@ public class ConnectionsFactory implements IConnectionsFactory {
 		}
 		return matchingFactory;
 	}
-	
+
 	@Override
 	public <T extends IConnection> IConnectionFactory getByConnection(Class<T> clazz) {
 		if (clazz == null) {
 			return null;
 		}
-		
+
 		IConnectionFactory matchingFactory = null;
 		for (IConnectionFactory factory : connectionFactories) {
-			if (factory != null
-					&& factory.canCreate(clazz)) {
+			if (factory != null && factory.canCreate(clazz)) {
 				matchingFactory = factory;
 				break;
 			}
@@ -101,8 +99,7 @@ public class ConnectionsFactory implements IConnectionsFactory {
 
 	@Override
 	public <T extends IConnection> Collection<IConnectionFactory> getAll(Class<T> clazz) {
-		return connectionFactories.stream()
-				.filter(factory -> clazz == null || factory.canCreate(clazz))
+		return connectionFactories.stream().filter(factory -> clazz == null || factory.canCreate(clazz))
 				.collect(Collectors.toList());
 	}
 }

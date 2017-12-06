@@ -47,7 +47,8 @@ public class HostCertificateTest {
 	@Test
 	public void shouldEqualIdenticalCertificateThatDiffersInAcceptance() throws CertificateException {
 		// given
-		HostCertificate identicalCertificate = new HostCertificate(false, createX509Certificate(CERTIFICATE_REDHAT_COM));
+		HostCertificate identicalCertificate = new HostCertificate(false,
+				createX509Certificate(CERTIFICATE_REDHAT_COM));
 		// when
 		boolean equal = certificate.equals(identicalCertificate);
 		// then
@@ -57,7 +58,8 @@ public class HostCertificateTest {
 	@Test
 	public void shouldNotEqualOtherCertificate() throws CertificateException {
 		// given
-		HostCertificate identicalCertificate = new HostCertificate(false, createX509Certificate(CERTIFICATE_OPENSHIFT_REDHAT_COM));
+		HostCertificate identicalCertificate = new HostCertificate(false,
+				createX509Certificate(CERTIFICATE_OPENSHIFT_REDHAT_COM));
 		// when
 		boolean equal = certificate.equals(identicalCertificate);
 		// then
@@ -92,4 +94,4 @@ public class HostCertificateTest {
 		assertThat(valid).isTrue();
 	}
 
-}	
+}

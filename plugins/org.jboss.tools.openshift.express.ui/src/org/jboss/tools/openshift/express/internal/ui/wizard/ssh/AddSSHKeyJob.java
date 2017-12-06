@@ -35,8 +35,8 @@ public class AddSSHKeyJob extends Job {
 			model.addSSHKey();
 			return Status.OK_STATUS;
 		} catch (Exception e) {
-			return ExpressUIActivator.createErrorStatus(
-					NLS.bind("Could not add SSH key {0} to OpenShift", model.getName()), e);
+			return ExpressUIActivator
+					.createErrorStatus(NLS.bind("Could not add SSH key {0} to OpenShift", model.getName()), e);
 		}
 	}
 }

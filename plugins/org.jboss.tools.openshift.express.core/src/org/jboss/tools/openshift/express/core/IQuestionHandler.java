@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.express.core;
 
 /**
@@ -21,7 +21,7 @@ package org.jboss.tools.openshift.express.core;
  * in the {@link ExpressCoreUIIntegration} class. 
  */
 public interface IQuestionHandler {
-	
+
 	/**
 	 * Present a simple yes or no question to the user
 	 * @param title
@@ -30,6 +30,5 @@ public interface IQuestionHandler {
 	 * @return  true if the user responded in the affirmative, false otherwise
 	 */
 	public boolean openQuestion(final String title, final String message, final boolean defaultAnswer);
-	
-	
+
 }

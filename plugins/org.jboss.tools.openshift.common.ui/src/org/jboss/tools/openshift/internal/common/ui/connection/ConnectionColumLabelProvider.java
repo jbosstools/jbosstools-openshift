@@ -26,7 +26,7 @@ public class ConnectionColumLabelProvider extends ColumnLabelProvider {
 		if (!(element instanceof IConnection)) {
 			return element.toString();
 		}
-		
+
 		return createLabel((IConnection) element);
 	}
 

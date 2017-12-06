@@ -50,15 +50,15 @@ public class UrlUtils {
 	public static final String SCHEME_HTTP = HTTP + SCHEME_SEPARATOR;
 	public static final char CREDENTIALS_HOST_SEPARATOR = '@';
 	public static final char PORT_DELIMITER = ':';
-	
-	private static final Pattern SIMPLE_URL_PATTERN =
-			Pattern.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
+
+	private static final Pattern SIMPLE_URL_PATTERN = Pattern
+			.compile("(\\w+://)(.+@)*([\\w\\d\\.]+)(:[\\d]+){0,1}/*(.*)");
 
 	private static final Pattern SIMPLE_QUASI_URL_PATTERN = Pattern.compile("^((\\w+:/)?(/*)?(.*@)?)([^:|/]*)(.*)?$");
 
 	private static final String PROPERTY_BASIC = "Basic";
 	private static final String PROPERTY_AUTHORIZATION = "Authorization";
-	
+
 	private UrlUtils() {
 		// inhibit instantiation
 	}
@@ -110,7 +110,7 @@ public class UrlUtils {
 		public String getScheme() {
 			return protocol + SCHEME_SEPARATOR;
 		}
-		
+
 		public int getPort() {
 			return port;
 		}
@@ -190,7 +190,7 @@ public class UrlUtils {
 		}
 		return host;
 	}
-	
+
 	private static int getHostIndex(String url) {
 		int schemeSeparatorIndex = url.indexOf(SCHEME_SEPARATOR);
 		if (schemeSeparatorIndex == -1) {
@@ -200,8 +200,7 @@ public class UrlUtils {
 	}
 
 	private static boolean isEmpty(String string) {
-		return string == null
-				|| string.isEmpty();
+		return string == null || string.isEmpty();
 	}
 
 	public static String cutPort(String host) {
@@ -242,8 +241,7 @@ public class UrlUtils {
 			builder.append(scheme);
 		}
 		if (!isEmpty(username)) {
-			builder.append(URLEncoder.encode(username, "UTF-8"))
-					.append(UrlUtils.CREDENTIALS_HOST_SEPARATOR);
+			builder.append(URLEncoder.encode(username, "UTF-8")).append(UrlUtils.CREDENTIALS_HOST_SEPARATOR);
 		}
 		host = cutScheme(host);
 		if (!isEmpty(host)) {
@@ -265,8 +263,8 @@ public class UrlUtils {
 	 * @throws IllegalArgumentException
 	 *             if the host has no scheme
 	 */
-	public static String getUrlFor(String username, String host) throws UnsupportedEncodingException,
-			IllegalArgumentException {
+	public static String getUrlFor(String username, String host)
+			throws UnsupportedEncodingException, IllegalArgumentException {
 		String scheme = getScheme(host);
 		Assert.isLegal(!isEmpty(scheme),
 				MessageFormat.format("Could not extract scheme. Host {0} has no scheme", host));
@@ -292,7 +290,7 @@ public class UrlUtils {
 
 	public static boolean isValid(String url) {
 		// Test via regex first. If passes then check via new URL(url) and URI(url) which are slower
-		if(SIMPLE_URL_PATTERN.matcher(url).matches()) {
+		if (SIMPLE_URL_PATTERN.matcher(url).matches()) {
 			try {
 				new URI(url);
 				new URL(url);
@@ -303,7 +301,7 @@ public class UrlUtils {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Sets blindly accepting trustmanager and hostname verifiers to the given
 	 * connection.
@@ -314,7 +312,8 @@ public class UrlUtils {
 	 * @throws KeyManagementException
 	 * @throws NoSuchAlgorithmException
 	 */
-	public static void setupPermissiveSSLHandlers(HttpsURLConnection connection) throws KeyManagementException, NoSuchAlgorithmException {
+	public static void setupPermissiveSSLHandlers(HttpsURLConnection connection)
+			throws KeyManagementException, NoSuchAlgorithmException {
 		SSLContext sslContext = SSLContext.getInstance("SSL");
 		sslContext.init(null, new TrustManager[] { new PermissiveTrustManager() }, null);
 		SSLSocketFactory socketFactory = sslContext.getSocketFactory();
@@ -335,30 +334,30 @@ public class UrlUtils {
 
 		@Override
 		public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-		}		
+		}
 	}
-	
+
 	private static class PermissiveHostnameVerifier implements HostnameVerifier {
 
 		@Override
 		public boolean verify(String hostname, SSLSession session) {
 			return true;
-		}		
+		}
 	}
-	
+
 	public static void addBasicAuthorization(String username, String password, HttpURLConnection connection) {
 		String credentials = toBase64Encoded(
 				new StringBuilder().append(username).append(':').append(password).toString());
 		connection.setRequestProperty(PROPERTY_AUTHORIZATION,
 				new StringBuilder().append(PROPERTY_BASIC).append(' ').append(credentials).toString());
 	}
-	
+
 	public static String toBase64Encoded(String unencoded) {
-			if (unencoded == null) {
-				return null;
-			} else if (unencoded.getBytes().length == 0) {
-				return new String();
-			}
-			return DatatypeConverter.printBase64Binary(unencoded.getBytes());
+		if (unencoded == null) {
+			return null;
+		} else if (unencoded.getBytes().length == 0) {
+			return new String();
+		}
+		return DatatypeConverter.printBase64Binary(unencoded.getBytes());
 	}
 }

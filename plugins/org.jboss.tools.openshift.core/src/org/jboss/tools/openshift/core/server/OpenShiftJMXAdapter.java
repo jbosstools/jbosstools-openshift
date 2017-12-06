@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.core.server;
 
 import org.eclipse.core.runtime.IAdapterFactory;
@@ -15,14 +15,15 @@ import org.jboss.tools.jmx.core.ExtensionManager;
 import org.jboss.tools.jmx.core.IConnectionWrapper;
 
 public class OpenShiftJMXAdapter implements IAdapterFactory {
-	private static final Class<?>[] ADAPTERS = new Class[]{IConnectionWrapper.class};
+	private static final Class<?>[] ADAPTERS = new Class[] { IConnectionWrapper.class };
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (adapterType == IConnectionWrapper.class) {
-			OpenShiftServer server= (OpenShiftServer) adaptableObject;
-			OpenshiftJMXConnectionProvider provider = (OpenshiftJMXConnectionProvider) ExtensionManager.getProvider(OpenshiftJMXConnectionProvider.PROVIDER_ID);
+			OpenShiftServer server = (OpenShiftServer) adaptableObject;
+			OpenshiftJMXConnectionProvider provider = (OpenshiftJMXConnectionProvider) ExtensionManager
+					.getProvider(OpenshiftJMXConnectionProvider.PROVIDER_ID);
 			return (T) provider.findConnection(server.getServer());
 		}
 		return null;
@@ -33,4 +34,3 @@ public class OpenShiftJMXAdapter implements IAdapterFactory {
 		return ADAPTERS;
 	}
 }
-

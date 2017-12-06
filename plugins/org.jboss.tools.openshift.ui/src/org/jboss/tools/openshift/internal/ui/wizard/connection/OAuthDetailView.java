@@ -89,33 +89,34 @@ import com.openshift.restclient.authorization.IAuthorizationDetails;
 public class OAuthDetailView extends BaseDetailsView implements IConnectionEditorDetailView {
 
 	private static final String MSG_TOKEN = "Enter a token or <a>retrieve</a> a new one.";
-	
+
 	/**
 	 * Helper class to handle Openshift token authentication response
 	 * 
 	 */
 	public static class TokenExtractor {
-	    /**
-	     * Regular expression used to check if browser page is page that displays the OAuth token
-	     */
-	    public static final Pattern TOKEN_PAGE_PATTERN = Pattern.compile(".*<h2>Your API token is<\\/h2>.*<code>(.*)<\\/code>.*", Pattern.DOTALL);
-	    
-	    private Matcher matcher;
-	    
-	    public TokenExtractor(String content) {
-	        matcher = TOKEN_PAGE_PATTERN.matcher(content);
-	    }
-	    
-	    public boolean isTokenPage() {
-	        return matcher.matches();
-	    }
-	    
-	    public String getToken() {
-	        return matcher.group(1);
-	    }
+		/**
+		 * Regular expression used to check if browser page is page that displays the OAuth token
+		 */
+		public static final Pattern TOKEN_PAGE_PATTERN = Pattern
+				.compile(".*<h2>Your API token is<\\/h2>.*<code>(.*)<\\/code>.*", Pattern.DOTALL);
+
+		private Matcher matcher;
+
+		public TokenExtractor(String content) {
+			matcher = TOKEN_PAGE_PATTERN.matcher(content);
+		}
+
+		public boolean isTokenPage() {
+			return matcher.matches();
+		}
+
+		public String getToken() {
+			return matcher.group(1);
+		}
 	}
 
-    private IObservableValue<String> tokenObservable;
+	private IObservableValue<String> tokenObservable;
 	private Binding tokenBinding;
 	private Text tokenText;
 	private IValueChangeListener<?> changeListener;
@@ -131,15 +132,15 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 
 	private IWizard wizard;
 
-	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener<?> changeListener, Object context, 
-			IObservableValue<String> authSchemeObservable) {
+	public OAuthDetailView(IWizard wizard, ConnectionWizardPageModel pageModel, IValueChangeListener<?> changeListener,
+			Object context, IObservableValue<String> authSchemeObservable) {
 		this.wizard = wizard;
 		this.pageModel = pageModel;
 		this.urlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_HOST).observe(pageModel);
 		this.tokenObservable = new WritableValue<String>(null, String.class);
 		this.rememberTokenObservable = new WritableValue<Boolean>(Boolean.FALSE, Boolean.class);
-		this.connectionValidator = ConnectionValidatorFactory.
-				createOAuthAuthenticationValidator(pageModel, tokenObservable, urlObservable);
+		this.connectionValidator = ConnectionValidatorFactory.createOAuthAuthenticationValidator(pageModel,
+				tokenObservable, urlObservable);
 		this.authSchemeObservable = authSchemeObservable;
 		this.changeListener = changeListener;
 		if (context instanceof IAuthorizationDetails) {
@@ -154,51 +155,45 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	public final Text getTokenTextControl() {
 		return tokenText;
 	}
-	
+
 	@Override
 	public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 		Composite composite = setControl(new Composite(parent, SWT.None));
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).spacing(10, 10).applyTo(composite);
+		GridLayoutFactory.fillDefaults().numColumns(2).spacing(10, 10).applyTo(composite);
 
 		StyledText tokenRequestLink = StyledTextUtils.emulateLinkWidget(MSG_TOKEN, new StyledText(composite, SWT.WRAP));
-		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(tokenRequestLink);
-		if(authDetails != null) {
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(tokenRequestLink);
+		if (authDetails != null) {
 			authDetails.getRequestTokenLink();
 		}
-		StyledTextUtils.emulateLinkAction(tokenRequestLink, r->onRetrieveLinkClicked(tokenRequestLink.getShell(), dbc));
+		StyledTextUtils.emulateLinkAction(tokenRequestLink,
+				r -> onRetrieveLinkClicked(tokenRequestLink.getShell(), dbc));
 		tokenRequestLink.setCursor(new Cursor(tokenRequestLink.getShell().getDisplay(), SWT.CURSOR_HAND));
 
 		//token
 		Label authTypeLabel = new Label(composite, SWT.NONE);
 		authTypeLabel.setText("Token");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(authTypeLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(authTypeLabel);
 		this.tokenText = new Text(composite, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(tokenText);
-		ControlDecorationSupport.create(
-				connectionValidator, SWT.LEFT | SWT.TOP, null, new ControlDecorationUpdater());
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(tokenText);
+		ControlDecorationSupport.create(connectionValidator, SWT.LEFT | SWT.TOP, null, new ControlDecorationUpdater());
 
 		this.rememberTokenCheckbox = new Button(composite, SWT.CHECK);
 		rememberTokenCheckbox.setText("&Save token (could trigger secure storage login)");
-		GridDataFactory.fillDefaults()
-		.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberTokenCheckbox);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false)
+				.applyTo(rememberTokenCheckbox);
 
 		return composite;
 	}
-	
+
 	@Override
 	public void onVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		dbc.addValidationStatusProvider(connectionValidator);
 		bindWidgetsToInternalModel(dbc);
 		this.rememberTokenBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(rememberTokenCheckbox))
-				.to(rememberTokenObservable)
-				.in(dbc);
+				.bind(WidgetProperties.selection().observe(rememberTokenCheckbox)).to(rememberTokenObservable).in(dbc);
 	}
-	
+
 	@Override
 	public void onInVisible(IObservableValue detailsViewModel, DataBindingContext dbc) {
 		dispose();
@@ -212,20 +207,15 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 	}
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
-	    IValidator validator = new RequiredStringValidator("token");
-		this.tokenBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(tokenText))
-				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(validator)
-				.to(tokenObservable)
-				.validatingBeforeSet(validator)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				tokenBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		org.jboss.tools.common.ui.databinding.DataBindingUtils
-			.addDisposableValueChangeListener(changeListener, tokenObservable, tokenText);
+		IValidator validator = new RequiredStringValidator("token");
+		this.tokenBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(tokenText))
+				.converting(new TrimmingStringConverter()).validatingAfterConvert(validator).to(tokenObservable)
+				.validatingBeforeSet(validator).in(dbc);
+		ControlDecorationSupport.create(tokenBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		org.jboss.tools.common.ui.databinding.DataBindingUtils.addDisposableValueChangeListener(changeListener,
+				tokenObservable, tokenText);
 	}
-	
+
 	@Override
 	public void setSelectedConnection(IConnection selectedConnection) {
 		if (selectedConnection instanceof Connection) {
@@ -263,29 +253,30 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			showErrorDialog(shell, ex);
 		}
 	}
-	
+
 	protected Job createAuthDetailsJob(Shell shell) {
 		Job job = new AuthDetailsJob(pageModel.getHost());
 		job.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(final IJobChangeEvent event) {
-				if(event.getJob() instanceof AuthDetailsJob) {
+				if (event.getJob() instanceof AuthDetailsJob) {
 					shell.getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
-							AuthDetailsJob job = (AuthDetailsJob)event.getJob();
+							AuthDetailsJob job = (AuthDetailsJob) event.getJob();
 							final IAuthorizationDetails details = job.getDetails();
-							if(details != null) {
+							if (details != null) {
 								//TODO fix this to handle other authschemes
-								if(IAuthorizationContext.AUTHSCHEME_BASIC.equals(details.getScheme())) {
-									MessageDialog.openError(shell, "Authorization Information", NLS.bind("This server utilizes {0} authorization protocol", details.getScheme()));
+								if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(details.getScheme())) {
+									MessageDialog.openError(shell, "Authorization Information", NLS.bind(
+											"This server utilizes {0} authorization protocol", details.getScheme()));
 									authSchemeObservable.setValue(details.getScheme());
 								} else {
 									OAuthDialog dialog = new OAuthDialog(shell, details.getRequestTokenLink());
 									dialog.open();
 									String token = dialog.getToken();
 									if (StringUtils.isNotBlank(token)) {
-									    tokenObservable.setValue(token);
+										tokenObservable.setValue(token);
 									}
 								}
 							}
@@ -296,25 +287,24 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		});
 		return job;
 	}
-	
+
 	private void showErrorDialog(final Shell shell, final Throwable e) {
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
 			public void run() {
-				ErrorDialog.openError(shell, 
-						"Request Authentication Details Error", 
-						"Unable to retrieve authentication details", ValidationStatus.error(e.getMessage(),e));
-				
+				ErrorDialog.openError(shell, "Request Authentication Details Error",
+						"Unable to retrieve authentication details", ValidationStatus.error(e.getMessage(), e));
+
 			}
 		});
 	}
-	
+
 	private class AuthDetailsJob extends Job {
-		
+
 		private IAuthorizationDetails details;
 		private String host;
-		
+
 		public AuthDetailsJob(String host) {
 			super(NLS.bind("Retrieve authorization details from {0}...", host));
 			this.host = host;
@@ -327,22 +317,25 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-				IClient client = new ClientBuilder(host).sslCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback()).build();
+				IClient client = new ClientBuilder(host)
+						.sslCertificateCallback(OpenShiftCoreUIIntegration.getInstance().getSSLCertificateCallback())
+						.build();
 				details = client.getAuthorizationContext().getAuthorizationDetails();
 				return ValidationStatus.OK_STATUS;
-			} catch(Exception e) {
+			} catch (Exception e) {
 				if (e.getCause() instanceof ConnectTimeoutException) {
-					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, 
-							"Timed out waiting for a response for authorization details.\nThis server might be unavailable or may not support OAuth.", e);
+					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+							"Timed out waiting for a response for authorization details.\nThis server might be unavailable or may not support OAuth.",
+							e);
 				} else {
-					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, 
-						"Unable to retrieve the authentication details", e);
+					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+							"Unable to retrieve the authentication details", e);
 				}
 			}
 		}
-		
+
 	}
-	
+
 	private class BearTokenAuthenticationProvider implements IConnectionAuthenticationProvider {
 
 		@Override
@@ -352,7 +345,7 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			final Connection connection = (Connection) conn;
 			// might be called from job, switch to display thread to access observables
 			Display.getDefault().syncExec(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					connection.setAuthScheme(IAuthorizationContext.AUTHSCHEME_OAUTH);
@@ -362,20 +355,20 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			});
 			return connection;
 		}
-		
+
 	}
-	
+
 	/*
 	 * Leaving for now as we may need this if we are ever able
 	 * to progammatically get the token
 	 */
 	private class OAuthDialog extends Dialog {
-		
+
 		private String loadingHtml;
 		private String url;
 		private Browser browser;
 		private String token;
-		
+
 		OAuthDialog(Shell parentShell, String url) {
 			super(parentShell);
 			this.url = url;
@@ -396,7 +389,6 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 			return true;
 		}
 
-
 		@Override
 		protected Point getInitialSize() {
 			return new Point(500, 700);
@@ -406,22 +398,20 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 		protected Control createDialogArea(Composite parent) {
 			Composite container = (Composite) super.createDialogArea(parent);
 			container.setLayout(new GridLayout());
-			GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
-			
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
+
 			browser = new Browser(container, SWT.BORDER);
 			browser.setText(loadingHtml);
-			GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(browser);
-			
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(browser);
+
 			final ProgressBar progressBar = new ProgressBar(container, SWT.NONE);
-			GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(progressBar);
-			
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(progressBar);
+
 			ProgressListener progressListener = new ProgressListener() {
 				@Override
 				public void changed(ProgressEvent event) {
-					if (event.total <= 0) return;
+					if (event.total <= 0)
+						return;
 					int ratio = event.current * 100 / event.total;
 					progressBar.setSelection(ratio);
 				}
@@ -431,28 +421,28 @@ public class OAuthDetailView extends BaseDetailsView implements IConnectionEdito
 					progressBar.setSelection(0);
 					TokenExtractor extractor = new TokenExtractor(browser.getText());
 					if (extractor.isTokenPage()) {
-					    token = extractor.getToken();
-				    }
+						token = extractor.getToken();
+					}
 				}
 			};
 			browser.addProgressListener(progressListener);
-    		setURL(url);
+			setURL(url);
 			return container;
 		}
-		
+
 		public void setURL(String url) {
-			if(StringUtils.isNotBlank(url)) {
+			if (StringUtils.isNotBlank(url)) {
 				this.url = url;
 				browser.setUrl(url);
 			}
 		}
 
 		/**
-         * @return the token
-         */
-        public String getToken() {
-            return token;
-        }
+		 * @return the token
+		 */
+		public String getToken() {
+			return token;
+		}
 	}
-	
+
 }

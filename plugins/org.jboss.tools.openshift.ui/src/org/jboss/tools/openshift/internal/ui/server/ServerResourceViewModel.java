@@ -57,7 +57,8 @@ public class ServerResourceViewModel extends ObservablePojo {
 		this.resource = resource;
 	}
 
-	protected void update(Connection connection, List<Connection> connections, IResource resource, List<ObservableTreeItem> resourceItems) {
+	protected void update(Connection connection, List<Connection> connections, IResource resource,
+			List<ObservableTreeItem> resourceItems) {
 		updateConnections(connections);
 		updateConnection(connection);
 		updateResourceItems(resourceItems);
@@ -109,13 +110,13 @@ public class ServerResourceViewModel extends ObservablePojo {
 	public Connection getConnection() {
 		return connection;
 	}
-	
+
 	public List<Connection> getConnections() {
 		return this.connections;
 	}
 
 	public void setConnection(Connection connection) {
-		if(this.connection != connection) {
+		if (this.connection != connection) {
 			update(connection, this.connections, null, Collections.emptyList());
 		}
 	}
@@ -135,29 +136,28 @@ public class ServerResourceViewModel extends ObservablePojo {
 		// reveal selected resource only once model is loaded
 		return resource;
 	}
-	
+
 	public void setResource(IResource resource) {
 		update(this.connection, this.connections, resource, this.resourceItems);
 	}
-	
+
 	protected IProject getOpenShiftProject(IResource resource) {
-	    return resource.getProject();
+		return resource.getProject();
 	}
 
-    protected IResource getResourceOrDefault(IResource resource, List<ObservableTreeItem> items) {
-        if (resource == null
-                || !ObservableTreeItemUtils.contains(resource, items)) {
-            IResource newResource = ObservableTreeItemUtils.getFirstModel(IService.class, items);
-            if (newResource == null) {
-                newResource = ObservableTreeItemUtils.getFirstModel(IDeploymentConfig.class, items);
-                if (newResource == null) {
-                    newResource = ObservableTreeItemUtils.getFirstModel(IReplicationController.class, items);
-                }
-            }
-            return newResource;
-        }
-        return resource;
-    }
+	protected IResource getResourceOrDefault(IResource resource, List<ObservableTreeItem> items) {
+		if (resource == null || !ObservableTreeItemUtils.contains(resource, items)) {
+			IResource newResource = ObservableTreeItemUtils.getFirstModel(IService.class, items);
+			if (newResource == null) {
+				newResource = ObservableTreeItemUtils.getFirstModel(IDeploymentConfig.class, items);
+				if (newResource == null) {
+					newResource = ObservableTreeItemUtils.getFirstModel(IReplicationController.class, items);
+				}
+			}
+			return newResource;
+		}
+		return resource;
+	}
 
 	/**
 	 * @param serviceName
@@ -167,14 +167,14 @@ public class ServerResourceViewModel extends ObservablePojo {
 	 *         not match was found.
 	 */
 	public IService getService(final String serviceName) {
-		if(this.resourceItems != null) {
+		if (this.resourceItems != null) {
 			return this.resourceItems.stream().flatMap(ObservableTreeItemUtils::flatten)
 					.filter(item -> item.getModel() instanceof IService).map(item -> (IService) item.getModel())
 					.filter(service -> service.getName().equals(serviceName)).findFirst().orElseGet(() -> null);
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Loads the resource from the current {@link Connection}.
 	 */
@@ -215,7 +215,7 @@ public class ServerResourceViewModel extends ObservablePojo {
 	static class ResourceTreeItemsFactory implements IModelFactory {
 
 		private static final ResourceTreeItemsFactory INSTANCE = new ResourceTreeItemsFactory();
-			
+
 		/**
 		 * Creates a resource items tree with the following structure:
 		 * connection
@@ -237,42 +237,40 @@ public class ServerResourceViewModel extends ObservablePojo {
 		}
 
 		private List<IResource> getProjectResources(IProject project) {
-		    List<IService> services = project.getResources(ResourceKind.SERVICE);
-		    List<IDeploymentConfig> dcConfigs = project.getResources(ResourceKind.DEPLOYMENT_CONFIG);
-		    List<IResource> resources = new ArrayList<>(services);	
-		    resources.addAll(getNonLinkedDcs(services, dcConfigs, project));
-		    resources.addAll(getNonLinkeRcs(dcConfigs, project));
-		    return resources;
-        }
+			List<IService> services = project.getResources(ResourceKind.SERVICE);
+			List<IDeploymentConfig> dcConfigs = project.getResources(ResourceKind.DEPLOYMENT_CONFIG);
+			List<IResource> resources = new ArrayList<>(services);
+			resources.addAll(getNonLinkedDcs(services, dcConfigs, project));
+			resources.addAll(getNonLinkeRcs(dcConfigs, project));
+			return resources;
+		}
 
-	    /**
-	     * Returns the DeploymentConfig resources not linked to the services
-	     */
-		private List<IDeploymentConfig> getNonLinkedDcs(List<? extends IResource> services, List<IDeploymentConfig> dcConfigs, IProject project) {
+		/**
+		 * Returns the DeploymentConfig resources not linked to the services
+		 */
+		private List<IDeploymentConfig> getNonLinkedDcs(List<? extends IResource> services,
+				List<IDeploymentConfig> dcConfigs, IProject project) {
 			List<IDeploymentConfig> nonLinkedDcConfigs = new ArrayList<>();
-		    List<IPod> allPods = project.getResources(ResourceKind.POD);
-		    dcConfigs.stream()
-		    		.filter(dc -> 
-		    			!services.stream()
-		    				.anyMatch(service -> ResourceUtils.areRelated((IService) service, dc, allPods)))
-		    		.forEach(dc -> nonLinkedDcConfigs.add(dc));
+			List<IPod> allPods = project.getResources(ResourceKind.POD);
+			dcConfigs.stream()
+					.filter(dc -> !services.stream()
+							.anyMatch(service -> ResourceUtils.areRelated((IService) service, dc, allPods)))
+					.forEach(dc -> nonLinkedDcConfigs.add(dc));
 			return nonLinkedDcConfigs;
 		}
 
 		/**
-	     * Returns the ReplicationController resources not linked to DeploymentConfig
-	     */
+		 * Returns the ReplicationController resources not linked to DeploymentConfig
+		 */
 		private List<IReplicationController> getNonLinkeRcs(List<IDeploymentConfig> dcConfigs, IProject project) {
 			List<IReplicationController> allRcs = project.getResources(ResourceKind.REPLICATION_CONTROLLER);
-			List<IReplicationController> nonLinkedReplicationControllers = 
-					allRcs.stream()
-						.filter(rc -> !dcConfigs.stream()
-								.anyMatch(dc -> ResourceUtils.areRelated(rc, dc)))
-						.collect(Collectors.toList());
+			List<IReplicationController> nonLinkedReplicationControllers = allRcs.stream()
+					.filter(rc -> !dcConfigs.stream().anyMatch(dc -> ResourceUtils.areRelated(rc, dc)))
+					.collect(Collectors.toList());
 			return nonLinkedReplicationControllers;
 		}
 
-        @Override
+		@Override
 		public ObservableTreeItem create(Object object) {
 			return new ObservableTreeItem(object, this);
 		}

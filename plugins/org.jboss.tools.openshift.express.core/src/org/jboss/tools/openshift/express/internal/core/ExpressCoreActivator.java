@@ -30,16 +30,16 @@ import org.osgi.framework.BundleContext;
 public class ExpressCoreActivator extends BaseCorePlugin {
 
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.express.core"; //$NON-NLS-1$
-	
+
 	private static ExpressCoreActivator instance;
-	
+
 	public ExpressCoreActivator() {
 		super();
 		instance = this;
 	}
 
 	public static ExpressCoreActivator getDefault() {
-	    return instance;
+		return instance;
 	}
 
 	public static BundleContext getBundleContext() {
@@ -49,45 +49,45 @@ public class ExpressCoreActivator extends BaseCorePlugin {
 		return instance.getBundleContext();
 	}
 
-    @Override
+	@Override
 	public void start(BundleContext context) throws Exception {
-        super.start(context);
+		super.start(context);
 
-        ConnectionsRegistrySingleton.getInstance().addAll(
-        		new ExpressConnectionPersistency().load());
+		ConnectionsRegistrySingleton.getInstance().addAll(new ExpressConnectionPersistency().load());
 
-       ConnectionsRegistrySingleton.getInstance().addListener(new ConnectionsRegistryAdapter() {
+		ConnectionsRegistrySingleton.getInstance().addListener(new ConnectionsRegistryAdapter() {
 			@Override
 			public void connectionRemoved(IConnection connection) {
-				if(connection instanceof ExpressConnection) {
-					((ExpressConnection)connection).removeSecureStoreData();
+				if (connection instanceof ExpressConnection) {
+					((ExpressConnection) connection).removeSecureStoreData();
 					saveAllConnections();
 				}
 			}
 
 			@Override
 			public void connectionAdded(IConnection connection) {
-				if(connection instanceof ExpressConnection){
+				if (connection instanceof ExpressConnection) {
 					saveAllConnections();
 				}
 			}
 
 			@Override
 			public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-				if(connection instanceof ExpressConnection && (oldValue instanceof ExpressConnection || newValue instanceof ExpressConnection) ){
+				if (connection instanceof ExpressConnection
+						&& (oldValue instanceof ExpressConnection || newValue instanceof ExpressConnection)) {
 					saveAllConnections();
 				}
 			}
 
-        });
-    }
+		});
+	}
 
 	/**
 	 * Gets message from plugin.properties
 	 * @param key
 	 * @return
 	 */
-	public static String getMessage(String key)	{
+	public static String getMessage(String key) {
 		return Platform.getResourceString(instance.getBundle(), key);
 	}
 
@@ -113,15 +113,16 @@ public class ExpressCoreActivator extends BaseCorePlugin {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		new ExpressConnectionPersistency().save(
-				ConnectionsRegistrySingleton.getInstance().getAll(ExpressConnection.class));
-		
+		new ExpressConnectionPersistency()
+				.save(ConnectionsRegistrySingleton.getInstance().getAll(ExpressConnection.class));
+
 		super.stop(context);
 		context = null;
 	}
 
 	protected void saveAllConnections() {
-		Collection<ExpressConnection> connections = ConnectionsRegistrySingleton.getInstance().getAll(ExpressConnection.class);
+		Collection<ExpressConnection> connections = ConnectionsRegistrySingleton.getInstance()
+				.getAll(ExpressConnection.class);
 		new ExpressConnectionPersistency().save(connections);
 	}
 }

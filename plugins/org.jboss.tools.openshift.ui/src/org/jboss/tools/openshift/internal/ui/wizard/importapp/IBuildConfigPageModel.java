@@ -23,14 +23,14 @@ import com.openshift.restclient.model.IProject;
  * @author Andre Dietisheim
  */
 public interface IBuildConfigPageModel extends IConnectionAware<Connection> {
-	
+
 	public static final String PROPERTY_SELECTED_ITEM = "selectedItem";
 	public static final String PROPERTY_BUILDCONFIGS = "buildConfigs";
 
 	public Object getSelectedItem();
 
 	public void setSelectedItem(Object selectedItem);
-	
+
 	public IBuildConfig getSelectedBuildConfig();
 
 	public void loadBuildConfigs();

@@ -8,11 +8,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.property;
 
-public class PrefixPropertySourceKey{
-    private final String key;
-    private final String prefix;
+public class PrefixPropertySourceKey {
+	private final String key;
+	private final String prefix;
 
-    public String getKey() {
+	public String getKey() {
 		return key;
 	}
 
@@ -20,12 +20,12 @@ public class PrefixPropertySourceKey{
 		return prefix;
 	}
 
-	public PrefixPropertySourceKey(String prefix, String key){
-        this.key = key;
-        this.prefix = prefix;
-    }
+	public PrefixPropertySourceKey(String prefix, String key) {
+		this.key = key;
+		this.prefix = prefix;
+	}
 
-    @Override
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -34,7 +34,7 @@ public class PrefixPropertySourceKey{
 		return result;
 	}
 
-    @Override
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

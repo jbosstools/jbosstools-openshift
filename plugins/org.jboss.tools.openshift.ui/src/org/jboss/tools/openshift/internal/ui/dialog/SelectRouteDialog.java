@@ -52,24 +52,21 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 	public SelectRouteDialog(List<IRoute> routes, Shell shell, boolean initialRememberChoice, IRoute initialSelection) {
 		this(routes, shell);
 		rememberChoice = initialRememberChoice;
-		if(initialSelection != null) {
-			setInitialSelections(new Object[]{initialSelection});
+		if (initialSelection != null) {
+			setInitialSelections(new Object[] { initialSelection });
 		}
 	}
 
 	private String createMessage(List<IRoute> routes) {
 		StringBuilder message = new StringBuilder();
-		if(!routes.isEmpty()) {
+		if (!routes.isEmpty()) {
 			IRoute route = routes.get(0);
 			IConnection connection = ConnectionsRegistryUtil.safeGetConnectionFor(route);
-			if(connection != null) {
-				message.append("Server: ")
-				.append(connection.getUsername()).append(" ").append(connection.getHost())
-				.append(StringUtils.getLineSeparator());
+			if (connection != null) {
+				message.append("Server: ").append(connection.getUsername()).append(" ").append(connection.getHost())
+						.append(StringUtils.getLineSeparator());
 			}
-			message.append("Project: ")
-				.append(route.getNamespace())
-				.append(StringUtils.getLineSeparator());
+			message.append("Project: ").append(route.getNamespace()).append(StringUtils.getLineSeparator());
 			//Add more space between server/project info and instruction.
 			message.append(StringUtils.getLineSeparator());
 		}
@@ -79,8 +76,7 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 
 	public IRoute getSelectedRoute() {
 		Object[] results = getResult();
-		if (results == null 
-				|| results.length < 1) {
+		if (results == null || results.length < 1) {
 			return null;
 		} else {
 			return (IRoute) results[0];
@@ -94,7 +90,7 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 		rememberChoiceButton = new Button(contents, SWT.CHECK);
 		rememberChoiceButton.setText("Remember selected route");
 		rememberChoiceButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		if(rememberChoice) {
+		if (rememberChoice) {
 			rememberChoiceButton.setSelection(rememberChoice);
 		}
 		rememberChoiceButton.addSelectionListener(new SelectionListener() {
@@ -130,13 +126,8 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 			}
 
 			IRoute route = (IRoute) element;
-			return new StringBuilder()
-						.append(route.getName())
-						.append(" (")
-						.append(route.getHost())
-						.append(route.getPath())
-						.append(")")
-						.toString();
+			return new StringBuilder().append(route.getName()).append(" (").append(route.getHost())
+					.append(route.getPath()).append(")").toString();
 		}
 
 	}

@@ -29,7 +29,6 @@ public class RefreshResponse {
 		return loginResponse;
 	}
 
-
 	@JsonAnySetter
 	public void setOther(String name, Object value) {
 	}

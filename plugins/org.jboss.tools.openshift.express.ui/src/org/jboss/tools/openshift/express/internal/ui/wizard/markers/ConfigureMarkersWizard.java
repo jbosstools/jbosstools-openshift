@@ -77,8 +77,8 @@ public class ConfigureMarkersWizard extends Wizard {
 
 		@Override
 		protected IStatus doRun(IProgressMonitor monitor) {
-			MultiStatus multiStatus = 
-					new MultiStatus(ExpressUIActivator.PLUGIN_ID, 0, "Error(s) occurred while adding/removing marker(s)",null);
+			MultiStatus multiStatus = new MultiStatus(ExpressUIActivator.PLUGIN_ID, 0,
+					"Error(s) occurred while adding/removing marker(s)", null);
 			Repository repository = EGitUtils.getRepository(project);
 			removeMarkers(markersToRemove, project, monitor, multiStatus);
 			addMarkers(markersToAdd, project, repository, monitor, multiStatus);
@@ -94,15 +94,15 @@ public class ConfigureMarkersWizard extends Wizard {
 					monitor.internalWorked(1);
 					marker.removeFrom(project, monitor);
 				} catch (CoreException e) {
-					multiStatus.add(ExpressUIActivator.createErrorStatus(
-							NLS.bind("Could not remove marker {0}", marker.getName()), e));
+					multiStatus.add(ExpressUIActivator
+							.createErrorStatus(NLS.bind("Could not remove marker {0}", marker.getName()), e));
 				}
 			}
 			return multiStatus;
 		}
 
-		private IStatus addMarkers(Collection<IOpenShiftMarker> markersToAdd, IProject project,
-				Repository repository, IProgressMonitor monitor, MultiStatus multiStatus) {
+		private IStatus addMarkers(Collection<IOpenShiftMarker> markersToAdd, IProject project, Repository repository,
+				IProgressMonitor monitor, MultiStatus multiStatus) {
 			monitor.beginTask(NLS.bind("Adding markers to project {0}", project.getName()), markersToAdd.size());
 			for (IOpenShiftMarker marker : markersToAdd) {
 				try {
@@ -112,10 +112,10 @@ public class ConfigureMarkersWizard extends Wizard {
 					if (repository != null) {
 						EGitUtils.addToRepository(Collections.singletonList(markerFile), monitor);
 					}
-					
+
 				} catch (CoreException e) {
-					multiStatus.add(ExpressUIActivator.createErrorStatus(
-							NLS.bind("Could not add marker {0}", marker.getName()), e));
+					multiStatus.add(ExpressUIActivator
+							.createErrorStatus(NLS.bind("Could not add marker {0}", marker.getName()), e));
 				}
 			}
 			return multiStatus;

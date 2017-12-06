@@ -19,33 +19,33 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IKeyValueItem;
 public interface IResourceLabelsPageModel {
 	String PROPERTY_SELECTED_LABEL = "selectedLabel";
 	String PROPERTY_LABELS = "labels";
-	
+
 	List<Label> getLabels();
-	
+
 	void setLabels(List<Label> labels);
-	
+
 	Collection<String> getReadOnlyLabels();
-	
+
 	void setSelectedLabel(Label label);
-	
+
 	Label getSelectedLabel();
-	
+
 	void removeLabel(Label label);
-	
+
 	void updateLabel(Label label, String key, String value);
 
 	void addLabel(String key, String value);
-	
+
 	/**
 	 * Adapter to labels on an IResource
 	 * @author jeff.cantrill
 	 *
 	 */
-	static final class Label implements IKeyValueItem{
+	static final class Label implements IKeyValueItem {
 		private String name;
 		private String value;
 
-		public Label(String name, String value){
+		public Label(String name, String value) {
 			this.name = name;
 			this.value = value;
 		}
@@ -58,7 +58,7 @@ public interface IResourceLabelsPageModel {
 		public String getName() {
 			return this.name;
 		}
-		
+
 		@Override
 		public String getKey() {
 			return getName();
@@ -109,6 +109,5 @@ public interface IResourceLabelsPageModel {
 			return true;
 		}
 	}
-
 
 }

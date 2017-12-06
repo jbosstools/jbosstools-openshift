@@ -21,7 +21,7 @@ import org.eclipse.jface.wizard.Wizard;
 public class KeyValueWizard<T extends IKeyValueItem> extends Wizard {
 
 	private IKeyValueWizardModel<T> model;
-	
+
 	/**
 	 * Used to create a new key/value pairs
 	 * 
@@ -30,7 +30,7 @@ public class KeyValueWizard<T extends IKeyValueItem> extends Wizard {
 	public KeyValueWizard(IKeyValueWizardModel<T> model) {
 		this(null, model);
 	}
-	
+
 	/**
 	 * Used to edit an existing key value pair
 	 * 

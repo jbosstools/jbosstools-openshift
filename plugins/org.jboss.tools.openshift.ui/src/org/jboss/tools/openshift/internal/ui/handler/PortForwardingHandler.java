@@ -33,18 +33,20 @@ import com.openshift.restclient.model.IPod;
 public class PortForwardingHandler extends AbstractOpenShiftCliHandler {
 
 	@Override
-	protected void handleEvent(ExecutionEvent event){
+	protected void handleEvent(ExecutionEvent event) {
 		ISelection selection = UIUtils.getCurrentSelection(event);
 		final IPod pod = UIUtils.getFirstElement(selection, IPod.class);
-		if(pod == null) {
-			MessageDialog.openError(HandlerUtil.getActiveShell(event), "No pod selection", "No pod was selected for port forwarding.");
+		if (pod == null) {
+			MessageDialog.openError(HandlerUtil.getActiveShell(event), "No pod selection",
+					"No pod was selected for port forwarding.");
 		}
 		openDialog(pod);
 	}
 
 	private void openDialog(final IPod pod) {
 		Shell shell = PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
-		WizardDialog dialog = new OkButtonWizardDialog(shell, new PortForwardingWizard(new PortForwardingWizardModel(pod)));
+		WizardDialog dialog = new OkButtonWizardDialog(shell,
+				new PortForwardingWizard(new PortForwardingWizardModel(pod)));
 		dialog.setMinimumPageSize(700, 400);
 		dialog.create();
 		dialog.open();
@@ -55,7 +57,7 @@ public class PortForwardingHandler extends AbstractOpenShiftCliHandler {
 		ISelection selection = UIUtils.getCurrentSelection(event);
 		final IPod pod = UIUtils.getFirstElement(selection, IPod.class);
 		Connection connection = null;
-		if( pod != null ) {
+		if (pod != null) {
 			connection = ConnectionsRegistryUtil.safeGetConnectionFor(pod);
 		}
 		return connection;

@@ -18,13 +18,13 @@ import org.jboss.tools.foundation.core.ecf.URLTransportUtility;
  *
  */
 public final class OpenshiftUIConstants {
-    /*
-     * An UrlValidator that recognize strings as urls with http, https, ftp and file schemes.
-     */
-    public static final UrlValidator URL_VALIDATOR = new UrlValidator(new String[] {"http", "https", "ftp", "file"});
-    
-    /**
-     * A bundle common transport utility for easier ECF use for downloads.
-     */
-    public static final URLTransportUtility TRANSPORT_UTILITY = new URLTransportUtility();
+	/*
+	 * An UrlValidator that recognize strings as urls with http, https, ftp and file schemes.
+	 */
+	public static final UrlValidator URL_VALIDATOR = new UrlValidator(new String[] { "http", "https", "ftp", "file" });
+
+	/**
+	 * A bundle common transport utility for easier ECF use for downloads.
+	 */
+	public static final URLTransportUtility TRANSPORT_UTILITY = new URLTransportUtility();
 }

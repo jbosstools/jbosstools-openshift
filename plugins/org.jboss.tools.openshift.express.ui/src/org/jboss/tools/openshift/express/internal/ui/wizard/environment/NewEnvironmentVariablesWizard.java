@@ -21,13 +21,13 @@ import com.openshift.client.IDomain;
  * @author Martes G Wigglesworth
  * @author Andre Dietisheim
  */
-public class NewEnvironmentVariablesWizard extends AbstractEnvironmentVariablesWizard<NewEnvironmentVariablesWizardModel> {
+public class NewEnvironmentVariablesWizard
+		extends AbstractEnvironmentVariablesWizard<NewEnvironmentVariablesWizardModel> {
 
 	private Map<String, String> environmentVarriableValueByKey;
 
 	public NewEnvironmentVariablesWizard(Map<String, String> environmentVariables, IDomain domain) {
-		super("Create Environment Variable(s)",
-				new NewEnvironmentVariablesWizardModel(environmentVariables, domain));
+		super("Create Environment Variable(s)", new NewEnvironmentVariablesWizardModel(environmentVariables, domain));
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class NewEnvironmentVariablesWizard extends AbstractEnvironmentVariablesW
 		}
 		return environmentVariables;
 	}
-	
+
 	@Override
 	public Map<String, String> getEnvironmentVariables() {
 		return environmentVarriableValueByKey;

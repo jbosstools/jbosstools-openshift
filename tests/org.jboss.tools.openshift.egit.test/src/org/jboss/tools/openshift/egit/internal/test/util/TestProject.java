@@ -74,7 +74,7 @@ public class TestProject {
 		folder.create(true, true, null);
 
 		IFile keep = project.getFile(name + "/keep");
-		keep.create(new ByteArrayInputStream(new byte[] {0}), true, null);
+		keep.create(new ByteArrayInputStream(new byte[] { 0 }), true, null);
 
 		return folder;
 	}
@@ -92,7 +92,7 @@ public class TestProject {
 	public IFile getFile(String filepath) throws Exception {
 		return project.getFile(filepath);
 	}
-	
+
 	public String getFileContent(String filepath) throws Exception {
 		IFile file = project.getFile(filepath);
 		InputStream stream = file.getContents();

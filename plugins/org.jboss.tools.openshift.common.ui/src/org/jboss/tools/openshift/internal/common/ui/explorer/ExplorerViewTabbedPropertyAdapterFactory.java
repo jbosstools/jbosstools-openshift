@@ -28,7 +28,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
  *
  */
 public class ExplorerViewTabbedPropertyAdapterFactory implements IAdapterFactory {
-	
+
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object getAdapter(Object adaptableObject, Class adapterType) {

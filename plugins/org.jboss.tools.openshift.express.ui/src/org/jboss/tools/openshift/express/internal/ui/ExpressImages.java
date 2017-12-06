@@ -21,9 +21,8 @@ public class ExpressImages {
 
 	private static final String ICONS_FOLDER = "icons/";
 
-	private static final ImageRepository repo =
-			new ImageRepository(
-					ICONS_FOLDER, ExpressUIActivator.getDefault(), ExpressUIActivator.getDefault().getImageRegistry());
+	private static final ImageRepository repo = new ImageRepository(ICONS_FOLDER, ExpressUIActivator.getDefault(),
+			ExpressUIActivator.getDefault().getImageRegistry());
 
 	public static final ImageDescriptor OPENSHIFT_LOGO_DARK = repo.create("openshift-logo-dark.png"); //$NON-NLS-1$ 
 	public static final ImageDescriptor OPENSHIFT_LOGO_WHITE_ICON = repo.create("openshift-logo-white-icon.png"); //$NON-NLS-1$ 

@@ -22,21 +22,20 @@ import org.junit.Test;
 import com.openshift.restclient.model.IResource;
 
 public class ConnectionsRegistryUtilTest {
-	
+
 	@Test
 	public void testConnectionNotFound() {
-		String kind= "foo";
+		String kind = "foo";
 		String name = "bar";
 		try {
 			IResource resource = mock(IResource.class);
 			when(resource.getKind()).thenReturn(kind);
 			when(resource.getName()).thenReturn(name);
-			ConnectionsRegistryUtil.getConnectionFor(resource );
+			ConnectionsRegistryUtil.getConnectionFor(resource);
 			fail();
 		} catch (ConnectionNotFoundException e) {
-			assertEquals("Unable to find the connection for a "+kind+" named "+name, e.getMessage());
+			assertEquals("Unable to find the connection for a " + kind + " named " + name, e.getMessage());
 		}
-		
+
 	}
 }
-

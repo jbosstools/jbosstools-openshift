@@ -23,10 +23,11 @@ import org.jboss.tools.openshift.io.internal.core.OpenShiftIOCoreActivator;
  */
 public interface LoginProvider {
 	LoginResponse login(ICluster cluster, IAccount account);
-	
+
 	static LoginProvider get() {
-		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(OSIOCoreConstants.LOGIN_PROVIDER_EXTENSION_POINT);
-		for(IConfigurationElement element : elements) {
+		IConfigurationElement[] elements = Platform.getExtensionRegistry()
+				.getConfigurationElementsFor(OSIOCoreConstants.LOGIN_PROVIDER_EXTENSION_POINT);
+		for (IConfigurationElement element : elements) {
 			try {
 				return (LoginProvider) element.createExecutableExtension("class");
 			} catch (CoreException e) {

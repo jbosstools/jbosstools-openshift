@@ -12,11 +12,9 @@ public class OpenShiftEapPublishController extends OpenShiftPublishController im
 	public OpenShiftEapPublishController() {
 		super();
 	}
-	
+
 	@Override
-	public int publishModule(int kind,
-			int deltaKind, IModule[] module, IProgressMonitor monitor)
-			throws CoreException {
+	public int publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor) throws CoreException {
 		return super.publishModule(IServer.PUBLISH_CLEAN, deltaKind, module, monitor);
 	}
 

@@ -35,7 +35,7 @@ public class OpenShiftSecureStorageKeyTest {
 	public void testGetKeyForHostWithSceme() {
 		assertEquals(EXP_KEY, new OpenShiftSecureStorageKey(BASE, "https://ahost", USERNAME).getKey());
 	}
-	
+
 	@Test
 	public void testGetKeyForHostWithTrailingSlash() {
 		assertEquals(EXP_KEY, new OpenShiftSecureStorageKey(BASE, "https://ahost/", USERNAME).getKey());

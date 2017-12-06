@@ -63,7 +63,7 @@ import com.openshift.client.OpenShiftException;
  */
 @SuppressWarnings("restriction")
 public class ExpressServerUtils {
-	
+
 	/* Project settings always had .ui qualifier, so this cannot be changed */
 	public static final String NODE_QUALIFIER = "org.jboss.tools.openshift.express.ui"; //$NON-NLS-1$
 
@@ -127,7 +127,7 @@ public class ExpressServerUtils {
 	public static IProject getDeployProject(IServerAttributes attributes) {
 		return getProject(getDeployProjectName(attributes));
 	}
-	
+
 	/**
 	 * Look-up the OpenShift application associated with the given server. This
 	 * operation can be time-consuming since it may need to perform a request on
@@ -157,8 +157,9 @@ public class ExpressServerUtils {
 		try {
 			connection = ConnectionsRegistrySingleton.getInstance().getByUrl(connectionUrl, ExpressConnection.class);
 			if (connection != null) {
-				if(!connection.connect()) {
-					throw new GetApplicationException(NLS.bind("Connection {0} is not authenticated.", connectionUrl.toString()));
+				if (!connection.connect()) {
+					throw new GetApplicationException(
+							NLS.bind("Connection {0} is not authenticated.", connectionUrl.toString()));
 				}
 			} else {
 				throw new GetApplicationException(expectedConnectionProblem);
@@ -168,11 +169,11 @@ public class ExpressServerUtils {
 		}
 		try {
 			String domainId = getDomainName(server);
-			if(domainId == null) {
+			if (domainId == null) {
 				throw new GetApplicationException(NLS.bind("Failed to find domain id in server {0}", server.getName()));
 			}
 			IDomain domain = connection.getDomain(domainId);
-			if(domain == null) {
+			if (domain == null) {
 				throw new GetApplicationException(NLS.bind("Failed to find domain {0}", domainId));
 			}
 			return connection.getApplication(appName, domain);
@@ -197,27 +198,22 @@ public class ExpressServerUtils {
 
 	/* Settings stored only in the project */
 	public static String getApplicationName(IServerAttributes attributes) {
-		return getProjectAttribute(
-				SETTING_APPLICATION_NAME,
-				attributes.getAttribute(ATTRIBUTE_APPLICATION_NAME, (String) null),
-				getDeployProject(attributes));
+		return getProjectAttribute(SETTING_APPLICATION_NAME,
+				attributes.getAttribute(ATTRIBUTE_APPLICATION_NAME, (String) null), getDeployProject(attributes));
 	}
 
 	public static String getApplicationId(IServerAttributes attributes) {
-		return getProjectAttribute(SETTING_APPLICATION_ID, 
-				attributes.getAttribute(ATTRIBUTE_APPLICATION_ID, (String) null),
-				getDeployProject(attributes));
+		return getProjectAttribute(SETTING_APPLICATION_ID,
+				attributes.getAttribute(ATTRIBUTE_APPLICATION_ID, (String) null), getDeployProject(attributes));
 	}
 
 	public static String getDomainName(IServerAttributes attributes) {
-		return getProjectAttribute(SETTING_DOMAIN_ID,
-				attributes.getAttribute(ATTRIBUTE_DOMAIN, (String) null),
+		return getProjectAttribute(SETTING_DOMAIN_ID, attributes.getAttribute(ATTRIBUTE_DOMAIN, (String) null),
 				getDeployProject(attributes));
 	}
 
 	private static String getUsername(IServerAttributes attributes) {
-		return getProjectAttribute(SETTING_USERNAME, 
-				attributes.getAttribute(ATTRIBUTE_USERNAME, (String) null),
+		return getProjectAttribute(SETTING_USERNAME, attributes.getAttribute(ATTRIBUTE_USERNAME, (String) null),
 				getDeployProject(attributes));
 	}
 
@@ -226,34 +222,33 @@ public class ExpressServerUtils {
 			return null;
 		}
 		try {
-			String connectionUrlString = getProjectAttribute(
-					SETTING_CONNECTIONURL, 
-					null,
-					getDeployProject(attributes));
+			String connectionUrlString = getProjectAttribute(SETTING_CONNECTIONURL, null, getDeployProject(attributes));
 			if (!StringUtils.isEmpty(connectionUrlString)) {
 				return ConnectionURL.forURL(connectionUrlString);
 			}
-			
+
 			String username = getUsername(attributes);
 			if (!StringUtils.isEmpty(username)) {
 				return ConnectionURL.forUsername(username);
 			}
 		} catch (UnsupportedEncodingException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
+			ExpressCoreActivator.pluginLog()
+					.logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
 		} catch (MalformedURLException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
+			ExpressCoreActivator.pluginLog()
+					.logError(NLS.bind("Could not get connection url for user {0}", attributes.getName()), e);
 		}
 
 		return null;
 	}
-		
+
 	public static String getDeployFolder(IServerAttributes attributes) {
 		IApplication application = null;
 		try {
 			application = getApplication(attributes);
 		} catch (GetApplicationException e) {
 			Throwable cause = e.getCause();
-			if(cause != null) {
+			if (cause != null) {
 				ExpressCoreActivator.pluginLog().logError(e.getMessage(), e);
 			}
 			//TODO Consider if this method should throw GetApplicationException.
@@ -265,13 +260,13 @@ public class ExpressServerUtils {
 	public static String getDeployFolder(IServerAttributes attributes, IApplication application) {
 		return getDeployFolder(attributes, getDefaultDeployFolder(application));
 	}
-		
+
 	/* Settings stored in the project, maybe over-ridden in the server */
 	private static String getDeployFolder(IServerAttributes attributes, String defaultDeployFolder) {
 		if (isOverridesProject(attributes)) {
 			return attributes.getAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, defaultDeployFolder);
 		}
-		
+
 		return getProjectAttribute(SETTING_DEPLOY_FOLDER_NAME, defaultDeployFolder, getDeployProject(attributes));
 	}
 
@@ -281,7 +276,7 @@ public class ExpressServerUtils {
 			application = getApplication(server);
 		} catch (GetApplicationException e) {
 			Throwable cause = e.getCause();
-			if(cause != null) {
+			if (cause != null) {
 				ExpressCoreActivator.pluginLog().logError(e.getMessage(), e);
 			}
 			//TODO Consider if this method should throw GetApplicationException.
@@ -289,7 +284,7 @@ public class ExpressServerUtils {
 		}
 		return getDefaultDeployFolder(application);
 	}
-	
+
 	public static String getDefaultDeployFolder(IApplication application) {
 		if (application == null) {
 			return null;
@@ -307,7 +302,7 @@ public class ExpressServerUtils {
 			return attributes.getAttribute(ATTRIBUTE_REMOTE_NAME, ATTRIBUTE_REMOTE_NAME_DEFAULT);
 		} else {
 			return getProjectAttribute(SETTING_REMOTE_NAME, ATTRIBUTE_REMOTE_NAME_DEFAULT,
-				getDeployProject(attributes));
+					getDeployProject(attributes));
 		}
 	}
 
@@ -316,8 +311,7 @@ public class ExpressServerUtils {
 		if (fromWhere == SETTING_FROM_SERVER) {
 			return fromServer;
 		}
-		String fromProject = getProjectAttribute(SETTING_DEPLOY_FOLDER_NAME, null, 
-				getDeployProject(attributes));
+		String fromProject = getProjectAttribute(SETTING_DEPLOY_FOLDER_NAME, null, getDeployProject(attributes));
 		if (fromWhere == SETTING_FROM_PROJECT) {
 			return fromProject;
 		}
@@ -368,19 +362,20 @@ public class ExpressServerUtils {
 		String host = getHost(application);
 		String applicationName = getApplicationName(application);
 		String domainId = getDomainId(domain);
-		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, serverName,
-				host, deployProject, deployFolder, remote, applicationName, domainId);
+		fillServerWithOpenShiftDetails((IServerWorkingCopy) wc, serverName, host, deployProject, deployFolder, remote,
+				applicationName, domainId);
 		IServer saved = wc.save(true, new NullProgressMonitor());
 		return saved;
 	}
 
-	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String serverName,  
-			IProject deployProject, String deployFolder, String remote, IApplication application, IDomain domain) {
+	public static void fillServerWithOpenShiftDetails(IServerWorkingCopy wc, String serverName, IProject deployProject,
+			String deployFolder, String remote, IApplication application, IDomain domain) {
 		String host = getHost(application);
 		String deployProjectName = ProjectUtils.getName(deployProject);
 		String applicationName = getApplicationName(application);
 		String domainId = getDomainId(domain);
-		fillServerWithOpenShiftDetails(wc, serverName, host, deployProjectName, deployFolder, remote, applicationName, domainId);
+		fillServerWithOpenShiftDetails(wc, serverName, host, deployProjectName, deployFolder, remote, applicationName,
+				domainId);
 	}
 
 	private static String getHost(IApplication application) {
@@ -437,7 +432,7 @@ public class ExpressServerUtils {
 		wc.setAttribute(ATTRIBUTE_DOMAIN, domainName);
 		wc.setAttribute(ATTRIBUTE_APPLICATION_NAME, applicationName);
 		// wc.setAttribute(ATTRIBUTE_APPLICATION_ID, appId);
-		 wc.setAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, deployFolder);
+		wc.setAttribute(ATTRIBUTE_DEPLOY_FOLDER_NAME, deployFolder);
 		// wc.setAttribute(ATTRIBUTE_EXPRESS_MODE, mode);
 		wc.setAttribute(ATTRIBUTE_REMOTE_NAME, remote);
 		((ServerWorkingCopy) wc).setAutoPublishSetting(Server.AUTO_PUBLISH_DISABLE);
@@ -448,7 +443,7 @@ public class ExpressServerUtils {
 		wc.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
 		wc.setName(serverName);
 	}
-	
+
 	public static String getDefaultServerName(IApplication application) {
 		if (application == null) {
 			return null;
@@ -460,10 +455,8 @@ public class ExpressServerUtils {
 		return createServer(ServerCore.findServerType(serverID), serverID);
 	}
 
-	public static IServer createServer(IServerType serverType, String serverName)
-			throws CoreException {
-		IServerWorkingCopy serverWC = serverType.createServer(null, null,
-				new NullProgressMonitor());
+	public static IServer createServer(IServerType serverType, String serverName) throws CoreException {
+		IServerWorkingCopy serverWC = serverType.createServer(null, null, new NullProgressMonitor());
 		serverWC.setRuntime(null);
 		serverWC.setName(serverName);
 		serverWC.setServerConfiguration(null);
@@ -491,7 +484,7 @@ public class ExpressServerUtils {
 	 * @return true or false
 	 */
 	public static boolean isInOpenshiftBehaviourMode(IServer server) {
-		String mode = server.getAttribute(IDeployableServer.SERVER_MODE, (String)null);
+		String mode = server.getAttribute(IDeployableServer.SERVER_MODE, (String) null);
 		if (ExpressServer.OPENSHIFT_MODE_ID.equals(mode))
 			return true;
 		return false;
@@ -530,9 +523,9 @@ public class ExpressServerUtils {
 		final String gitUri = application.getGitUrl();
 		final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
-				if (hasRemoteGitUri(gitUri, projects[i])) {
-					results.add(projects[i]);
-				}
+			if (hasRemoteGitUri(gitUri, projects[i])) {
+				results.add(projects[i]);
+			}
 		}
 		return results.toArray(new IProject[results.size()]);
 	}
@@ -542,7 +535,8 @@ public class ExpressServerUtils {
 		try {
 			return EGitUtils.hasGitUri(gitURI, remote, project);
 		} catch (CoreException e) {
-			ExpressCoreActivator.pluginLog().logError(NLS.bind("Could not look up remotes for project {0}", project.getName()), e);
+			ExpressCoreActivator.pluginLog()
+					.logError(NLS.bind("Could not look up remotes for project {0}", project.getName()), e);
 			return false;
 		}
 	}
@@ -557,8 +551,7 @@ public class ExpressServerUtils {
 		final ArrayList<IProject> results = new ArrayList<>();
 		final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
-			if (EGitUtils.getRepository(projects[i]) != null
-					&& hasOpenShiftSettings(projects[i])) {
+			if (EGitUtils.getRepository(projects[i]) != null && hasOpenShiftSettings(projects[i])) {
 				results.add(projects[i]);
 			}
 		}
@@ -571,10 +564,7 @@ public class ExpressServerUtils {
 		String domain = getProjectAttribute(SETTING_DOMAIN_ID, null, project);
 		String connectionUrl = getProjectAttribute(SETTING_CONNECTIONURL, null, project);
 		String username = getProjectAttribute(SETTING_USERNAME, null, project);
-		return appName != null
-				&& appId != null
-				&& domain != null
-				&& (connectionUrl != null || username != null);
+		return appName != null && appId != null && domain != null && (connectionUrl != null || username != null);
 	}
 
 	public static IProject findProjectForApplication(IApplication application) {
@@ -582,8 +572,8 @@ public class ExpressServerUtils {
 		return p == null ? null : p.length == 0 ? null : p[0];
 	}
 
-	public static void updateOpenshiftProjectSettings(IProject project, IApplication app,
-			IDomain domain, ExpressConnection connection, String remoteName, String deployFolder) {
+	public static void updateOpenshiftProjectSettings(IProject project, IApplication app, IDomain domain,
+			ExpressConnection connection, String remoteName, String deployFolder) {
 		String qualifier = NODE_QUALIFIER;
 		IScopeContext context = new ProjectScope(project);
 		IEclipsePreferences node = context.getNode(qualifier);

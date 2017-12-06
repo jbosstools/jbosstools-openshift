@@ -51,18 +51,21 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		syncDownFailed = false;
 		IServer server = getServer();
 		final IProject deployProject = OpenShiftServerUtils.getDeployProject(server);
-		
+
 		if (!ProjectUtils.isAccessible(deployProject)) {
-			throw new CoreException(new Status(IStatus.ERROR,
-					OpenShiftCoreActivator.PLUGIN_ID,
-					NLS.bind("Server adapter {0} cannot publish. Required project {1} is missing or inaccessible.", 
-							getServer().getName(), OpenShiftServerUtils.getDeployProjectName(getServer()))));
+			throw new CoreException(
+					new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
+							NLS.bind(
+									"Server adapter {0} cannot publish. Required project {1} is missing or inaccessible.",
+									getServer().getName(), OpenShiftServerUtils.getDeployProjectName(getServer()))));
 		}
-		
+
 		this.rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0, 
-				NLS.bind("Error while publishing server {0}.  Could not sync all pods to folder {1}", getServer().getName(), localDeploymentDirectory.getAbsolutePath()), null);
+		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
+				NLS.bind("Error while publishing server {0}.  Could not sync all pods to folder {1}",
+						getServer().getName(), localDeploymentDirectory.getAbsolutePath()),
+				null);
 		rsync.syncPodsToDirectory(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		if (!status.isOK()) {
 			syncDownFailed = true;
@@ -70,24 +73,25 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 				this.rsync = null;
 				throw new CoreException(status);
 			}
-			OpenShiftCoreActivator.pluginLog().logWarning("Ignoring initial sync down error.", new CoreException(status));
+			OpenShiftCoreActivator.pluginLog().logWarning("Ignoring initial sync down error.",
+					new CoreException(status));
 		}
-		
+
 		// If the magic project is *also* a module on the server, do nothing
-		if( !modulesIncludesMagicProject(getServer(), deployProject)) {
+		if (!modulesIncludesMagicProject(getServer(), deployProject)) {
 			// The project not also a module, so let's see if there exists a module at all
 			IModule projectModule = OpenShiftServerUtils.findProjectModule(deployProject);
-			if( projectModule == null ) { 
+			if (projectModule == null) {
 				// This project is not a module, so we'll do a simple copy
 				publishMagicProjectSimpleCopy(getServer(), localDeploymentDirectory);
 			} else {
 				// This is a project-module which must be assembled and published (ie dynamic web, ear project, etc)
-				publishModule(IServer.PUBLISH_FULL, ServerBehaviourDelegate.ADDED, 
-						new IModule[]{projectModule}, monitor);
+				publishModule(IServer.PUBLISH_FULL, ServerBehaviourDelegate.ADDED, new IModule[] { projectModule },
+						monitor);
 			}
 		}
 	}
-	
+
 	protected boolean isSyncDownFailureCritical() {
 		return !isEapProfile();
 	}
@@ -96,11 +100,11 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	protected boolean supportsJBoss7Markers() {
 		return isEapProfile();
 	}
-	
+
 	protected boolean isEapProfile() {
 		// quick and dirty
 		String profile = ServerProfileModel.getProfile(getServer());
-		if( "openshift3.eap".equals(profile)) {
+		if ("openshift3.eap".equals(profile)) {
 			return true;
 		}
 		return false;
@@ -111,8 +115,8 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		// dynamic web project, we need to package it, not simply copy. 
 		String sourcePath = OpenShiftServerUtils.getSourcePath(server);
 		if (StringUtils.isEmpty(sourcePath)) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Server {0} could not determine the source to publish.", server.getName())));
+			throw new CoreException(OpenShiftCoreActivator.statusFactory()
+					.errorStatus(NLS.bind("Server {0} could not determine the source to publish.", server.getName())));
 		}
 		File source = new File(sourcePath);
 		FileUtils.copyDir(source, localDeploymentDirectory, true, true, true, new FileFilter() {
@@ -120,11 +124,8 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 			@Override
 			public boolean accept(File file) {
 				String filename = file.getName();
-				return !filename.endsWith(".git")
-						&& !filename.endsWith(".gitignore")
-						&& !filename.endsWith(".svn")
-						&& !filename.endsWith(".settings")
-						&& !filename.endsWith(".project")
+				return !filename.endsWith(".git") && !filename.endsWith(".gitignore") && !filename.endsWith(".svn")
+						&& !filename.endsWith(".settings") && !filename.endsWith(".project")
 						&& !filename.endsWith(".classpath");
 			}
 		});
@@ -134,9 +135,9 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		// If we have no modules, OR the module list doesn't include magic project, 
 		// we need to initiate a publish for the magic project
 		IModule[] all = server.getModules();
-		if( all != null ) {
-			for( int i = 0; i < all.length; i++ ) {
-				if( all[i].getProject().equals(deployProject))
+		if (all != null) {
+			for (int i = 0; i < all.length; i++) {
+				if (all[i].getProject().equals(deployProject))
 					return true;
 			}
 		}
@@ -181,7 +182,8 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 
 	private void deleteDoDeployMarkers(final File deployFolder) {
 		// Remove all *.dodeploy files from this folder.
-		Stream.of(deployFolder.listFiles()).filter(p -> p.getName().endsWith(DeploymentMarkerUtils.DO_DEPLOY)).forEach(p -> p.delete());
+		Stream.of(deployFolder.listFiles()).filter(p -> p.getName().endsWith(DeploymentMarkerUtils.DO_DEPLOY))
+				.forEach(p -> p.delete());
 	}
 
 	private void fireUpdatePodPath(final IServer server, final String podPath) {
@@ -193,26 +195,24 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 				wc.setAttribute(OpenShiftServerUtils.ATTR_POD_PATH, podPath);
 				try {
 					wc.save(true, new NullProgressMonitor());
-				} catch(CoreException ce) {
+				} catch (CoreException ce) {
 					return ce.getStatus();
 				}
 				return Status.OK_STATUS;
 			}
 		}.schedule();
 	}
-	
+
 	@Override
 	@SuppressWarnings("restriction")
-	public int publishModule(int kind,
-			int deltaKind, IModule[] module, IProgressMonitor monitor)
-			throws CoreException {
+	public int publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor) throws CoreException {
 		if (syncDownFailed) {
 			return super.publishModule(IServer.PUBLISH_CLEAN, deltaKind, module, monitor);
 		} else {
 			return super.publishModule(kind, deltaKind, module, monitor);
 		}
 	}
-	
+
 	@Override
 	protected void launchUpdateModuleStateJob() throws CoreException {
 		// No-op for now, until other problems are fixed

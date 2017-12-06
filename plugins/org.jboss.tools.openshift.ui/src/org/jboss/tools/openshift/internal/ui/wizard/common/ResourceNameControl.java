@@ -31,56 +31,47 @@ import org.jboss.tools.openshift.internal.ui.validator.ResourceNameValidator;
  *
  */
 public class ResourceNameControl {
-	
+
 	public static final String PROPERTY_RESOURCE_NAME = "resourceName";
 	private static final String DEFAULT_LABEL = "Resource Name: ";
 	private final String label;
-	
+
 	public ResourceNameControl() {
 		this(DEFAULT_LABEL);
 	}
-	
+
 	public ResourceNameControl(String label) {
 		this.label = label;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void doCreateControl(Composite parent, DataBindingContext dbc, Object model) {
-		
+
 		//Resource Name
 		final Label resourceNameLabel = new Label(parent, SWT.NONE);
 		resourceNameLabel.setText(label);
-		resourceNameLabel.setToolTipText("The name used to identify the resources that will support the deployed image.");
+		resourceNameLabel
+				.setToolTipText("The name used to identify the resources that will support the deployed image.");
 		layoutLabel(resourceNameLabel);
 
-		
 		final Text resourceNameText = new Text(parent, SWT.BORDER);
 		layoutText(resourceNameText);
-		final IObservableValue resourceNameTextObservable = 
-				WidgetProperties.text(SWT.Modify).observe(resourceNameText);
+		final IObservableValue resourceNameTextObservable = WidgetProperties.text(SWT.Modify).observe(resourceNameText);
 		ResourceNameValidator validator = new ResourceNameValidator(resourceNameTextObservable);
-		final Binding nameBinding = ValueBindingBuilder
-				.bind(resourceNameTextObservable)
-				.validatingAfterConvert(validator)
-				.to(BeanProperties.value(PROPERTY_RESOURCE_NAME).observe(model))
+		final Binding nameBinding = ValueBindingBuilder.bind(resourceNameTextObservable)
+				.validatingAfterConvert(validator).to(BeanProperties.value(PROPERTY_RESOURCE_NAME).observe(model))
 				.in(dbc);
 		dbc.addValidationStatusProvider(validator);
-		ControlDecorationSupport.create(
-				nameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		ControlDecorationSupport.create(nameBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
 	}
-	
+
 	protected void layoutText(final Text resourceNameText) {
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.span(2, 1)
-			.applyTo(resourceNameText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(2, 1)
+				.applyTo(resourceNameText);
 	}
-	
+
 	protected void layoutLabel(final Label resourceNameLabel) {
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(false, false)
-			.applyTo(resourceNameLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(resourceNameLabel);
 	}
 }

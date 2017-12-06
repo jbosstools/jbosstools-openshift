@@ -90,15 +90,15 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		String currentVal = wc.getAttribute(ATTR_ARGS, defaultArgs);
 		wc.setAttribute(ATTR_ARGS, currentVal);
 	}
-	
+
 	static String getProfileString(IServer server) {
 		String profiles = String.join(" ", CDK32Server.getArgsWithProfile(server, new String[] {}));
-		if( !profiles.isEmpty()) {
+		if (!profiles.isEmpty()) {
 			profiles = profiles + " ";
 		}
 		return profiles;
 	}
-	
+
 	protected IServer getServerFromLaunch(ILaunchConfigurationWorkingCopy wc) throws CoreException {
 		return ServerUtil.getServer(wc);
 	}
@@ -110,17 +110,18 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		final CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		performOverrides(workingCopy, s, cdkServer);
 	}
-	
+
 	/*
 	 * Not expected to be extended. 
 	 */
-	protected void performOverrides(ILaunchConfigurationWorkingCopy workingCopy, IServer s, CDKServer cdkServer) throws CoreException {
+	protected void performOverrides(ILaunchConfigurationWorkingCopy workingCopy, IServer s, CDKServer cdkServer)
+			throws CoreException {
 		String workingDir = JBossServerCorePlugin.getServerStateLocation(s).toOSString();
 		workingCopy.setAttribute(ATTR_WORKING_DIR, workingDir);
 
 		Map<String, String> env = workingCopy.getAttribute(ENVIRONMENT_VARS_KEY, (Map<String, String>) null);
 		env = (env == null ? new HashMap<>() : new HashMap<>(env));
-		
+
 		String msHome = getMinishiftHome(s);
 		env.put("MINISHIFT_HOME", msHome);
 
@@ -140,26 +141,25 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		workingCopy.setAttribute(ENVIRONMENT_VARS_KEY, env);
 
 		// override vm-driver args
-		String targetedHypervisor = s.getAttribute(CDK3Server.PROP_HYPERVISOR,
-				CDK3Server.getHypervisors()[0]);
-		
+		String targetedHypervisor = s.getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
+
 		String profiles = getProfileString(s);
-		String profileName = s.getAttribute(CDK32Server.PROFILE_ID, (String)null);
-		
+		String profileName = s.getAttribute(CDK32Server.PROFILE_ID, (String) null);
+
 		String defaultArgs = profiles + "start --vm-driver=" + targetedHypervisor;
 		String currentVal = workingCopy.getAttribute(ATTR_ARGS, defaultArgs);
 		String replaced = ArgsUtil.setArg(currentVal, null, "--vm-driver", targetedHypervisor);
-		if( !StringUtils.isEmpty(profileName)) {
+		if (!StringUtils.isEmpty(profileName)) {
 			replaced = ArgsUtil.setArg(replaced, "--profile", null, profileName);
 		}
 		workingCopy.setAttribute(ATTR_ARGS, replaced);
-		
+
 		// This is a bit of a hack for JBIDE-25350   - The launch config will APPEAR to be renamed, but, 
 		// the official renaming will only occur if the user makes changes to the launch config and saves it.
 		// Otherwise this is simply cosmetic. 
 		String wcName = workingCopy.getName();
 		String serverName = s.getName();
-		if( !wcName.equals(serverName))
+		if (!wcName.equals(serverName))
 			workingCopy.rename(serverName);
 
 	}
@@ -168,11 +168,11 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		String home = System.getProperty("user.home");
 		String defaultMinishiftHome = new File(home, CDKConstants.CDK_RESOURCE_DOTMINISHIFT).getAbsolutePath();
 		String msHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, defaultMinishiftHome);
-		if( StringUtils.isEmpty(msHome))
+		if (StringUtils.isEmpty(msHome))
 			msHome = defaultMinishiftHome;
 		return msHome;
 	}
-	
+
 	private void setMinishiftLocationOnLaunchConfig(IServer s, ILaunchConfigurationWorkingCopy workingCopy,
 			Map<String, String> env) throws CoreException {
 
@@ -207,7 +207,8 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
 						"Unable to locate minishift command. Please set a correct value in the server editor."));
 			throw new CoreException(CDKCoreActivator.statusFactory()
-					.errorStatus("Expected location of minishift command does not exist: " + minishiftLoc + "\nPlease set a correct value in the server editor."));
+					.errorStatus("Expected location of minishift command does not exist: " + minishiftLoc
+							+ "\nPlease set a correct value in the server editor."));
 		}
 
 		CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
@@ -234,7 +235,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		Process p = null;
 		try {
 			p = new CDKLaunchUtility().callMinishiftConsole(s, args, getStartupLaunchName(s));
-		} catch(IOException ioe) {
+		} catch (IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(ioe);
 			beh.setServerStopped();
 			DebugPlugin.getDefault().removeDebugEventListener(debug);
@@ -298,7 +299,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 
 	@Override
 	protected AbstractCDKPoller getCDKPoller(IServer server) {
-		if( server.getServerType().getId().equals(CDK3Server.CDK_V3_SERVER_TYPE)) {
+		if (server.getServerType().getId().equals(CDK3Server.CDK_V3_SERVER_TYPE)) {
 			return new MinishiftPoller();
 		}
 		return new CDK32Poller();

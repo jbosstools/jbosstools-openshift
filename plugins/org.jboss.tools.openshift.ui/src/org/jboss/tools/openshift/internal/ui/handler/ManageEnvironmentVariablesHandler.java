@@ -48,12 +48,12 @@ import com.openshift.restclient.model.IReplicationController;
  * @author Viacheslav Kabanovich
  *
  */
-public class ManageEnvironmentVariablesHandler extends AbstractHandler{
+public class ManageEnvironmentVariablesHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IReplicationController rc = findReplicationController(event);
-		if(rc != null) {
+		if (rc != null) {
 			ManageEnvironmentVariablesWizard wizard = new ManageEnvironmentVariablesWizard(rc);
 			WizardUtils.openWizardDialog(wizard, HandlerUtil.getActiveShell(event));
 		}
@@ -70,18 +70,18 @@ public class ManageEnvironmentVariablesHandler extends AbstractHandler{
 	IReplicationController findReplicationController(ExecutionEvent event) {
 		ISelection selection = UIUtils.getCurrentSelection(event);
 		IDeploymentConfig dc = UIUtils.getFirstElement(selection, IDeploymentConfig.class);
-		if(dc != null) {
+		if (dc != null) {
 			return dc;
 		}
 		IReplicationController rc = UIUtils.getFirstElement(selection, IReplicationController.class);
-		if(rc != null) {
+		if (rc != null) {
 			return rc;
 		}
 		IServiceWrapper deployment = UIUtils.getFirstElement(selection, IServiceWrapper.class);
 		Collection<IResourceWrapper<?, ?>> dcs = deployment.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG);
-		if(!dcs.isEmpty()) {
-			dc = (IDeploymentConfig)dcs.iterator().next().getWrapped();
-			if(dc != null) {
+		if (!dcs.isEmpty()) {
+			dc = (IDeploymentConfig) dcs.iterator().next().getWrapped();
+			if (dc != null) {
 				return dc;
 			}
 		}
@@ -95,9 +95,8 @@ class ManageEnvironmentVariablesWizard extends Wizard {
 
 	public ManageEnvironmentVariablesWizard(IReplicationController dc) {
 		this.dc = dc;
-		List<EnvironmentVariable> vars = dc.getEnvironmentVariables().stream().map(var -> 
-			new EnvironmentVariable(var.getName(), var.getValue()))
-			.collect(Collectors.toList());
+		List<EnvironmentVariable> vars = dc.getEnvironmentVariables().stream()
+				.map(var -> new EnvironmentVariable(var.getName(), var.getValue())).collect(Collectors.toList());
 		model.setEnvironmentVariables(vars);
 		setWindowTitle("Manage Environment Variables");
 	}
@@ -105,35 +104,35 @@ class ManageEnvironmentVariablesWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		new Job("Updating environment variables for deployment config " + dc.getName()) {
-			
+
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					List<EnvironmentVariable> vars = model.getEnvironmentVariables();
 					boolean modified = false;
-					for (EnvironmentVariable var: vars) {
-						if(model.isEnvironmentVariableModified(var)) {
+					for (EnvironmentVariable var : vars) {
+						if (model.isEnvironmentVariableModified(var)) {
 							modified = true;
 							String value = var.getValue();
-							if(IEnvironmentVariablesPageModel.DELETED.equals(value)) {
+							if (IEnvironmentVariablesPageModel.DELETED.equals(value)) {
 								dc.removeEnvironmentVariable(var.getKey());
 							} else {
 								dc.setEnvironmentVariable(var.getKey(), var.getValue());
 							}
 						}
 					}
-					if(modified) {
+					if (modified) {
 						Connection conn = ConnectionsRegistryUtil.getConnectionFor(dc);
 						conn.updateResource(dc);
 					}
-				} catch(Exception e) {
+				} catch (Exception e) {
 					String message = "Unable to update environment variables for deployment config " + dc.getName();
-					OpenShiftUIActivator.getDefault().getLogger().logError(message,e);
+					OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
 					return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, message, e);
 				}
 				return Status.OK_STATUS;
 			}
-			
+
 		}.schedule();
 		return true;
 	}
@@ -146,9 +145,8 @@ class ManageEnvironmentVariablesWizard extends Wizard {
 
 	class EnvironmentVariablePageImpl extends EnvironmentVariablePage {
 		public EnvironmentVariablePageImpl() {
-			super("Environment Variables", 
-				"Edit environment variables of deployment config " + dc.getName(), 
-				"EnvVars", ManageEnvironmentVariablesWizard.this, model);
+			super("Environment Variables", "Edit environment variables of deployment config " + dc.getName(), "EnvVars",
+					ManageEnvironmentVariablesWizard.this, model);
 			canDeleteAnyVar = true;
 		}
 
@@ -160,4 +158,3 @@ class ManageEnvironmentVariablesWizard extends Wizard {
 		}
 	}
 }
-

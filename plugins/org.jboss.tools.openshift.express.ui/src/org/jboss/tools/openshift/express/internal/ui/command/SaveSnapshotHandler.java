@@ -42,8 +42,7 @@ public class SaveSnapshotHandler extends AbstractHandler {
 			openSaveSnapshotWizard(application, HandlerUtil.getActiveShell(event));
 		} else {
 			// servers view
-			IServer server = (IServer)
-					UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
+			IServer server = (IServer) UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IServer.class);
 			if (server == null) {
 				return ExpressUIActivator.createErrorStatus("Could not find application to snapshot");
 			}
@@ -62,16 +61,14 @@ public class SaveSnapshotHandler extends AbstractHandler {
 									HandlerUtil.getActiveShell(event));
 							return Status.OK_STATUS;
 						}
-					})
-					.schedule();
+					}).schedule();
 			return Status.OK_STATUS;
 		}
 		return Status.OK_STATUS;
 	}
 
 	private void openSaveSnapshotWizard(IApplication application, Shell shell) {
-		WizardUtils.openWizardDialog(
-				new SaveSnapshotWizard(application), shell);
+		WizardUtils.openWizardDialog(new SaveSnapshotWizard(application), shell);
 	}
 
 }

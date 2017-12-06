@@ -15,12 +15,16 @@ import java.util.List;
 public interface IAccountModel {
 
 	void addCluster(ICluster cluster);
+
 	List<ICluster> getClusters();
+
 	void removeCluster(ICluster cluster);
+
 	ICluster createCluster(String id);
 
 	void save();
-	
+
 	void addListener(IAccountModelListener listener);
+
 	void removeListener(IAccountModelListener listener);
 }

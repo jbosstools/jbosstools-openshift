@@ -25,19 +25,18 @@ public class OpenShiftResourceUniqueId {
 	private static final char UNIQUE_ID_PROJECT_NAME_DELIMITER = '@';
 
 	public static String get(IResource resource) {
-		if (resource == null 
-				|| StringUtils.isEmpty(resource.getName())
+		if (resource == null || StringUtils.isEmpty(resource.getName())
 				|| StringUtils.isEmpty(resource.getNamespace())) {
 			return null;
 		}
 
 		if (ResourceKind.SERVICE.equals(resource.getKind())) {
-	        return new StringBuilder().append(resource.getNamespace()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
-                    .append(resource.getName()).toString();   
+			return new StringBuilder().append(resource.getNamespace()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+					.append(resource.getName()).toString();
 		} else {
-	        return new StringBuilder().append(resource.getNamespace()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
-                    .append(resource.getKind()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
-                    .append(resource.getName()).toString();   
+			return new StringBuilder().append(resource.getNamespace()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER)
+					.append(resource.getKind()).append(UNIQUE_ID_PROJECT_NAME_DELIMITER).append(resource.getName())
+					.toString();
 		}
 	}
 
@@ -69,12 +68,12 @@ public class OpenShiftResourceUniqueId {
 		if (StringUtils.isEmpty(uniqueId)) {
 			return null;
 		}
-        String[] comps = uniqueId.split(String.valueOf(UNIQUE_ID_PROJECT_NAME_DELIMITER));
-        if (comps.length > 0) {
-            return comps[comps.length - 1];
-        } else {
-            return null;
-        }
+		String[] comps = uniqueId.split(String.valueOf(UNIQUE_ID_PROJECT_NAME_DELIMITER));
+		if (comps.length > 0) {
+			return comps[comps.length - 1];
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -84,20 +83,20 @@ public class OpenShiftResourceUniqueId {
 	 * @param uniqueId the OpenShift resource id
 	 * @return the kind of the OpenShift resource
 	 */
-    public static String getKind(String uniqueId) {
-        if (StringUtils.isEmpty(uniqueId)) {
-            return null;
-        }
-        String[] comps = uniqueId.split(String.valueOf(UNIQUE_ID_PROJECT_NAME_DELIMITER));
-        if (comps.length == 2) {
-            return ResourceKind.SERVICE;
-        } else if (comps.length == 3) {
-            return comps[1];
-        } else {
-            return null;
-        }
-    }
-    
+	public static String getKind(String uniqueId) {
+		if (StringUtils.isEmpty(uniqueId)) {
+			return null;
+		}
+		String[] comps = uniqueId.split(String.valueOf(UNIQUE_ID_PROJECT_NAME_DELIMITER));
+		if (comps.length == 2) {
+			return ResourceKind.SERVICE;
+		} else if (comps.length == 3) {
+			return comps[1];
+		} else {
+			return null;
+		}
+	}
+
 	/**
 	 * Returns the resource within the given collection of resources that match
 	 * the given uniqueId. Returns {@code null} otherwise

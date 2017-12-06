@@ -61,12 +61,12 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 		}
 		return document;
 	}
-	
+
 	@Override
 	protected ElementInfo createElementInfo(Object element) throws CoreException {
 		OpenShiftResourceInput input = getInput(element);
-		if(input != null) {
-			synchronized(inputToListeners) {
+		if (input != null) {
+			synchronized (inputToListeners) {
 				ConnectionListener listener = new ConnectionListener(input, this);
 				addElementStateListener(listener);
 				ConnectionsRegistrySingleton.getInstance().addListener(listener);
@@ -79,10 +79,10 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 	@Override
 	protected void disposeElementInfo(Object element, ElementInfo info) {
 		OpenShiftResourceInput input = getInput(element);
-		if(input != null) {
-			synchronized(inputToListeners) {
+		if (input != null) {
+			synchronized (inputToListeners) {
 				ConnectionListener listener = inputToListeners.remove(input);
-				if(listener != null) {
+				if (listener != null) {
 					ConnectionsRegistrySingleton.getInstance().removeListener(listener);
 					removeElementStateListener(listener);
 				}
@@ -113,7 +113,7 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 
 		final Exception[] exceptions = new Exception[1];
 
-		Job updateResourceJob = new Job("Update "+resourceName) {
+		Job updateResourceJob = new Job("Update " + resourceName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -123,25 +123,26 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 					Display.getDefault().asyncExec(() -> setDirty(element));
 					String problem = e.getMessage();
 					if (e instanceof OpenShiftException) {
-						OpenShiftException oe = (OpenShiftException)e;
-						if (oe.getStatus()!=null) {
+						OpenShiftException oe = (OpenShiftException) e;
+						if (oe.getStatus() != null) {
 							problem = oe.getStatus().getMessage();
 						}
 					}
-					IStatus error =	OpenShiftUIActivator.statusFactory().errorStatus(
-							NLS.bind("Could not update \"{0}\" for project \"{1}\" : {2}", new String[]{resourceName, resource.getNamespace(), problem}), e);
+					IStatus error = OpenShiftUIActivator.statusFactory()
+							.errorStatus(NLS.bind("Could not update \"{0}\" for project \"{1}\" : {2}",
+									new String[] { resourceName, resource.getNamespace(), problem }), e);
 					return error;
 				}
 				return Status.OK_STATUS;
 			}
 		};
-		
+
 		updateResourceJob.schedule();
 		Shell shell = Display.getCurrent().getActiveShell();
 		service.showInDialog(shell, updateResourceJob);
 		// In the really really unlikely event the jobs finished before the end of this method call,
 		// we need to ensure the dirty flag stays set to true
-		if(exceptions[0] != null) {
+		if (exceptions[0] != null) {
 			throw new CoreException(OpenShiftUIActivator.statusFactory().errorStatus(exceptions[0]));
 		}
 	}
@@ -177,7 +178,7 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 			fireElementDirtyStateChanged(element, true);
 		}
 	}
-	
+
 	private static class ConnectionListener extends ConnectionsRegistryAdapter implements IElementStateListener {
 
 		private final OpenShiftResourceInput input;
@@ -187,14 +188,15 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 		private static final String NAG_MESSAGE = "The resource {0} has been changed on the server.  Do you want to replace the editor contents with these changes.";
 		private DismissableNagDialog dialog;
 		private AtomicReference<IResource> resource = new AtomicReference<>();
-		
-		ConnectionListener(OpenShiftResourceInput input, OpenShiftResourceDocumentProvider provider){
+
+		ConnectionListener(OpenShiftResourceInput input, OpenShiftResourceDocumentProvider provider) {
 			this.input = input;
 			this.provider = provider;
-			dialog = new DismissableNagDialog(UIUtils.getShell(), "File Changed", NLS.bind(NAG_MESSAGE, input.getResource().getName()));
+			dialog = new DismissableNagDialog(UIUtils.getShell(), "File Changed",
+					NLS.bind(NAG_MESSAGE, input.getResource().getName()));
 			resource.set(input.getResource());
 		}
-		
+
 		@Override
 		public void elementDirtyStateChanged(Object element, boolean isDirty) {
 			dirty.set(isDirty);
@@ -205,13 +207,11 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 			if (!ConnectionProperties.PROPERTY_RESOURCE.equals(property)) {
 				return;
 			}
-			if (input.getConnection() == null 
-					|| !input.getConnection().equals(connection)) {
+			if (input.getConnection() == null || !input.getConnection().equals(connection)) {
 				return;
-			} 
-			
-			if (!(oldValue != null 
-					&& newValue != null)) {
+			}
+
+			if (!(oldValue != null && newValue != null)) {
 				return;
 			}
 
@@ -248,7 +248,7 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 				updateEditor(this.resource.get());
 			});
 		}
-		
+
 		private void updateEditor(IResource resource) {
 			input.setResource(resource);
 			try {

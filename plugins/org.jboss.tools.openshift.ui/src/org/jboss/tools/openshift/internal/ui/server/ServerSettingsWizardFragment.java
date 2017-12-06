@@ -50,17 +50,17 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			final IWizardContainer wizardContainer = getWizardContainer();
-			if(serverSettingsWizardPage == null 
-					|| serverSettingsWizardPage.getModel() == null 
+			if (serverSettingsWizardPage == null || serverSettingsWizardPage.getModel() == null
 					|| wizardContainer == null) {
 				//nothing to update;
 				return;
 			}
 
-			if(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION.equals(evt.getPropertyName())) {
-				if(evt.getNewValue() == null || evt.getNewValue() instanceof Connection)  {
-					Connection newConnection = (Connection)evt.getNewValue();
-					if(newConnection != serverSettingsWizardPage.getModel().getConnection() && wizardContainer != null) {
+			if (ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION.equals(evt.getPropertyName())) {
+				if (evt.getNewValue() == null || evt.getNewValue() instanceof Connection) {
+					Connection newConnection = (Connection) evt.getNewValue();
+					if (newConnection != serverSettingsWizardPage.getModel().getConnection()
+							&& wizardContainer != null) {
 						serverSettingsWizardPage.needsLoadingResources = true;
 						serverSettingsWizardPage.getModel().setConnection(newConnection);
 						serverSettingsWizardPage.getModel().setResourceItems(new ArrayList<>());
@@ -70,7 +70,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 				} else {
 					//do nothing
 				}
-			} else if(ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS.equals(evt.getPropertyName())) {
+			} else if (ConnectionWizardPageModel.PROPERTY_CONNECTED_STATUS.equals(evt.getPropertyName())) {
 				serverSettingsWizardPage.needsLoadingResources = true;
 				serverSettingsWizardPage.getModel().setResourceItems(new ArrayList<>());
 				serverSettingsWizardPage.setComplete(false);
@@ -105,7 +105,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
-		if(serverSettingsWizardPage != null) {
+		if (serverSettingsWizardPage != null) {
 			serverSettingsWizardPage.updateServer();
 			serverSettingsWizardPage.unhook();
 		}
@@ -114,7 +114,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	@Override
 	public void performCancel(IProgressMonitor monitor) throws CoreException {
-		if(serverSettingsWizardPage != null) {
+		if (serverSettingsWizardPage != null) {
 			serverSettingsWizardPage.unhook();
 		}
 		super.performCancel(monitor);
@@ -130,13 +130,12 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	@Override
 	public boolean isComplete() {
-		return this.serverSettingsWizardPage != null 
-				&& !this.serverSettingsWizardPage.isLoadingResources() 
-				&& !this.serverSettingsWizardPage.isNeedsLoadingResources() 
+		return this.serverSettingsWizardPage != null && !this.serverSettingsWizardPage.isLoadingResources()
+				&& !this.serverSettingsWizardPage.isNeedsLoadingResources()
 				&& this.serverSettingsWizardPage.getModel().getResource() != null
 				&& serverSettingsWizardPage.isPageComplete();
 	}
-	
+
 	@Override
 	public Composite createComposite(final Composite parent, final IWizardHandle handle) {
 		setHandle(handle);
@@ -145,15 +144,18 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		WizardFragmentUtils.getWizardDialog(handle).addPageChangingListener(onPageChanging());
 		return (Composite) this.serverSettingsWizardPage.getControl();
 	}
-	
-	private ServerSettingsWizardPageWrapper createServerSettingsWizardPage(final Composite parent, final IWizardHandle handle) {
-		final ServerSettingsWizardPageWrapper serverSettingsWizardPage = new ServerSettingsWizardPageWrapper(handle, getTaskModel());
+
+	private ServerSettingsWizardPageWrapper createServerSettingsWizardPage(final Composite parent,
+			final IWizardHandle handle) {
+		final ServerSettingsWizardPageWrapper serverSettingsWizardPage = new ServerSettingsWizardPageWrapper(handle,
+				getTaskModel());
 		serverSettingsWizardPage.getModel().addPropertyChangeListener(connectionChangeListener);
 		serverSettingsWizardPage.createControl(parent);
 		return serverSettingsWizardPage;
 	}
 
-	private void updateWizardHandle(final IWizardHandle handle, final ServerSettingsWizardPageWrapper serverSettingsWizardPage) {
+	private void updateWizardHandle(final IWizardHandle handle,
+			final ServerSettingsWizardPageWrapper serverSettingsWizardPage) {
 		handle.setTitle(serverSettingsWizardPage.getTitle());
 		handle.setDescription(serverSettingsWizardPage.getDescription());
 		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
@@ -163,7 +165,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		return new IPageChangingListener() {
 			@Override
 			public void handlePageChanging(PageChangingEvent event) {
-				if(serverSettingsWizardPage != null) {
+				if (serverSettingsWizardPage != null) {
 					serverSettingsWizardPage.reloadServices();
 				}
 			}
@@ -172,7 +174,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 	protected ModifyListener onFilterTextModified(final TreeViewer applicationTemplatesViewer) {
 		return new ModifyListener() {
-			
+
 			@Override
 			public void modifyText(ModifyEvent e) {
 				applicationTemplatesViewer.refresh();
@@ -181,42 +183,39 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		};
 	}
 
-	
 	class ServerSettingsWizardPageWrapper extends ServerSettingsWizardPage {
 		private IWizardHandle wizardHandle;
 
 		private ServerSettingsWizardPageWrapper(final IWizardHandle wizardHandle, final TaskModel taskModel) {
-			super(((IWizardPage) wizardHandle).getWizard(), 
-					OpenShiftServerTaskModelAccessor.getServer(taskModel), 
+			super(((IWizardPage) wizardHandle).getWizard(), OpenShiftServerTaskModelAccessor.getServer(taskModel),
 					OpenShiftServerTaskModelAccessor.getConnection(taskModel),
 					UIUtils.getFirstSelectedWorkbenchProject());
 			this.wizardHandle = wizardHandle;
 		}
 
 		boolean isWizardDisposed() {
-			return getContainer() == null
-					|| getContainer().getShell() == null
+			return getContainer() == null || getContainer().getShell() == null
 					|| getContainer().getShell().isDisposed();
 		}
-		
+
 		@Override
 		public void setPageComplete(boolean complete) {
 			super.setPageComplete(complete);
-			if(!isWizardDisposed()) {
+			if (!isWizardDisposed()) {
 				wizardHandle.update();
 			}
 		}
 
 		@Override
 		public void setErrorMessage(String newMessage) {
-			if(!isWizardDisposed()) {
+			if (!isWizardDisposed()) {
 				((WizardPage) wizardHandle).setErrorMessage(newMessage);
 			}
 		}
 
 		@Override
 		public void setMessage(String newMessage, int newType) {
-			if(!isWizardDisposed()) {
+			if (!isWizardDisposed()) {
 				wizardHandle.setMessage(newMessage, newType);
 			}
 		}
@@ -227,7 +226,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 
 		void reloadServices() {
 			final IWizardContainer container = getContainer();
-			if(!needsLoadingResources || container == null) {
+			if (!needsLoadingResources || container == null) {
 				return;
 			}
 
@@ -240,7 +239,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						//only reload services.
-						if(!isWizardDisposed()) {
+						if (!isWizardDisposed()) {
 							ServerSettingsWizardPageWrapper.this.model.loadResources();
 							ServerSettingsWizardPageWrapper.this.needsLoadingResources = false;
 						}
@@ -253,12 +252,12 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 				this.needsLoadingResources = false;
 				this.isLoadingResources = false;
 				getTaskModel().putObject(IS_LOADING_SERVICES, isLoadingResources);
-				if(!isWizardDisposed()) {
+				if (!isWizardDisposed()) {
 					container.updateButtons();
 				}
 			}
 		}
-	
+
 		void unhook() {
 			uiHook = null;
 			model = null;

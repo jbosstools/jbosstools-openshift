@@ -37,6 +37,39 @@
 			<url>${jbosstools-base-site}</url>
 		</repository>
 	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+		        <groupId>net.revelc.code.formatter</groupId>
+		        <artifactId>formatter-maven-plugin</artifactId>
+		        <version>2.0.1</version>
+		        <executions>
+		          <execution>
+		            <goals>
+		              <goal>validate</goal>
+					  <!-- <goal>format</goal> -->
+		            </goals>
+		          </execution>
+		        </executions>
+		        <configuration>
+		        	<encoding>UTF-8</encoding>
+		        	<configFile>../../eclipse-formatter.xml</configFile>
+		        	<!-- skipFormatting disables both format and validate goals, 
+		        	think of it as a switch for the whole plugin;
+		        	To apply from terminal use -Dformatter.skip=false -->
+		        	<!-- <skipFormatting>true</skipFormatting> --> 
+					<directories>
+						<directory>src</directory>
+					</directories>
+					<excludes>
+						<exclude>**/reddeer/**/*</exclude>
+						<exclude>**/ui/bot/test/**/*</exclude>
+					</excludes>
+		        </configuration>
+		      </plugin>
+		</plugins>
+	</build>
 	
 	<profiles>
 		<profile>

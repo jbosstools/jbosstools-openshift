@@ -27,14 +27,14 @@ public class OpenShiftCommonUIActivator extends BaseUIPlugin {
 	private static OpenShiftCommonUIActivator plugin;
 
 	ConnectionsRegistryAdapter connectionsRegistryListener;
-	
+
 	public OpenShiftCommonUIActivator() {
 	}
-	
-	public IPluginLog getLogger(){
+
+	public IPluginLog getLogger() {
 		return pluginLogInternal();
 	}
-	
+
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
@@ -67,6 +67,7 @@ public class OpenShiftCommonUIActivator extends BaseUIPlugin {
 		}
 		super.stop(context);
 	}
+
 	public static OpenShiftCommonUIActivator getDefault() {
 		return plugin;
 	}
@@ -78,7 +79,7 @@ public class OpenShiftCommonUIActivator extends BaseUIPlugin {
 	public static void log(String message, Throwable t) {
 		log(StatusFactory.errorStatus(PLUGIN_ID, message, t));
 	}
-	
+
 	public static void log(IStatus status) {
 		plugin.getLog().log(status);
 	}

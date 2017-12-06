@@ -21,11 +21,11 @@ import org.eclipse.ui.IActionFilter;
  *
  * @author Jeff Cantrill
  */
-public class ActionFilterAdapterFactory implements IAdapterFactory{
+public class ActionFilterAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Object getAdapter(Object adaptableObject, @SuppressWarnings("rawtypes") Class adapterType) {
-		if(adapterType != IActionFilter.class){
+		if (adapterType != IActionFilter.class) {
 			return null;
 		}
 		return new SimplePropertyActionFilter();
@@ -33,7 +33,7 @@ public class ActionFilterAdapterFactory implements IAdapterFactory{
 
 	@Override
 	public Class<?>[] getAdapterList() {
-		return new Class [] {IActionFilter.class};
+		return new Class[] { IActionFilter.class };
 	}
 
 }

@@ -18,7 +18,6 @@ import org.jboss.tools.openshift.core.connection.Connection;
 
 import com.openshift.restclient.model.IProject;
 
-
 /**
  * @author jeff.cantrill
  */
@@ -41,12 +40,13 @@ public class ManageProjectsWizard extends AbstractOpenShiftWizard<ManageProjects
 	public boolean performFinish() {
 		return true;
 	}
-	
+
 	@Override
 	public void addPages() {
-		addPage(this.manageProjectsWizardPage = new ManageProjectsWizardPage(getWindowTitle(), description, getModel(), this));
+		addPage(this.manageProjectsWizardPage = new ManageProjectsWizardPage(getWindowTitle(), description, getModel(),
+				this));
 	}
-	
+
 	public IProject getSelectedProject() {
 		if (manageProjectsWizardPage == null) {
 			return null;

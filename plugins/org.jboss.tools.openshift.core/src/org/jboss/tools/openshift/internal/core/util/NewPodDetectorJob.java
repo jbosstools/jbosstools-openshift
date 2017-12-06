@@ -48,7 +48,7 @@ public class NewPodDetectorJob extends Job {
 	public static final int TIMEOUT = Integer.getInteger(DEPLOYMENT_CONFIG_LISTENER_JOB_TIMEOUT_KEY, 600_000);
 	private static final int SLEEP_DELAY = 100;
 	private static final String POD_STATE_RUNNING = "Running";
-	
+
 	private IDeploymentConfig dc;
 	private IPod pod;
 	private Collection<String> oldPods = Collections.emptySet();
@@ -61,8 +61,7 @@ public class NewPodDetectorJob extends Job {
 				return;
 			}
 
-			if (newValue instanceof IDeploymentConfig 
-					&& !dc.equals(oldValue)) {
+			if (newValue instanceof IDeploymentConfig && !dc.equals(oldValue)) {
 				dc = (IDeploymentConfig) newValue;
 				return;
 			}
@@ -72,15 +71,13 @@ public class NewPodDetectorJob extends Job {
 				if (isNewRunningRuntimePod(notifiedPod)) {
 					// store new & running runtime pod for job to stop waiting
 					pod = notifiedPod;
-			    }
+				}
 			}
 		}
 
 		private boolean isNewRunningRuntimePod(IPod pod) {
-			return ResourceUtils.isRuntimePod(pod)
-					&& !oldPods.contains(pod.getName())
-					&& POD_STATE_RUNNING.equals(pod.getStatus()) 
-					&& ResourceUtils.areRelated(pod, dc);
+			return ResourceUtils.isRuntimePod(pod) && !oldPods.contains(pod.getName())
+					&& POD_STATE_RUNNING.equals(pod.getStatus()) && ResourceUtils.areRelated(pod, dc);
 		}
 	};
 
@@ -104,17 +101,13 @@ public class NewPodDetectorJob extends Job {
 	private Collection<String> getOldPods(IReplicationController rc) {
 		Connection connection = ConnectionsRegistryUtil.getConnectionFor(rc);
 		List<IPod> allPods = connection.getResources(ResourceKind.POD, rc.getNamespace());
-		return ResourceUtils.getPodsFor(rc, allPods).stream()
-			.filter(pod -> ResourceUtils.isRuntimePod(pod))
-			.map(p -> p.getName())
-			.collect(Collectors.toList());
+		return ResourceUtils.getPodsFor(rc, allPods).stream().filter(pod -> ResourceUtils.isRuntimePod(pod))
+				.map(p -> p.getName()).collect(Collectors.toList());
 	}
 
 	private void waitForNewPod(IProgressMonitor monitor) {
 		long elapsed = 0;
-		while (pod == null
-				&& !monitor.isCanceled() 
-				&& elapsed < TIMEOUT) {
+		while (pod == null && !monitor.isCanceled() && elapsed < TIMEOUT) {
 			try {
 				Thread.sleep(SLEEP_DELAY);
 				monitor.worked(1);
@@ -126,10 +119,10 @@ public class NewPodDetectorJob extends Job {
 	}
 
 	public IStatus getTimeOutStatus() {
-		return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, 
+		return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
 				"Failed to detect new deployed Pod for " + dc.getName());
 	}
-	
+
 	public IPod getPod() {
 		return pod;
 	}

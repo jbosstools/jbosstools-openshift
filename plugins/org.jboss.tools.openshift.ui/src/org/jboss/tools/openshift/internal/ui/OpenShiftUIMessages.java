@@ -23,10 +23,10 @@ public class OpenShiftUIMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, OpenShiftUIMessages.class);
 	}
-	
+
 	private OpenShiftUIMessages() {
 	}
-	
+
 	public static String Name;
 	public static String DisplayName;
 	public static String Description;
@@ -36,14 +36,14 @@ public class OpenShiftUIMessages extends NLS {
 	public static String ResourceDeletionConfirmationN;
 	public static String ResourceDeletionDialogTitle;
 	public static String ProjectDeletionDialogTitle;
-	
+
 	public static String OCBinaryErrorMessage;
 	public static String OCBinaryWarningMessage;
-	
+
 	public static String InvalidHostNameErrorMessage;
 	public static String EmptyHostNameErrorMessage;
 	public static String RoundRobinRoutingMessage;
-	
+
 	public static String EditResourceLimitsPageTitle;
 	public static String EditResourceLimitsPageDescription;
 	public static String EditResourceLimitsJobTitle;
@@ -52,5 +52,5 @@ public class OpenShiftUIMessages extends NLS {
 	public static String MemoryLabel;
 	public static String RequestLabel;
 	public static String LimitLabel;
-	
+
 }

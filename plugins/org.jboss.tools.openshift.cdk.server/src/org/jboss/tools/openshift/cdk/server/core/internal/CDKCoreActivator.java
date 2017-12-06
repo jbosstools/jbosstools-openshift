@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal;
 
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
@@ -26,26 +26,25 @@ public class CDKCoreActivator extends BaseUIPlugin {
 
 	// The shared instance
 	private static CDKCoreActivator plugin;
-	
+
 	/**
 	 * The constructor
 	 */
 	public CDKCoreActivator() {
 	}
 
-	
 	private UnitedServerListener configureDependentFrameworksListener;
-	
+
 	/*
 	 * NOT API, public only for testing
 	 */
 	public UnitedServerListener getConfigureDependentFrameworksListener() {
-		if( configureDependentFrameworksListener == null ) {
+		if (configureDependentFrameworksListener == null) {
 			configureDependentFrameworksListener = new ConfigureDependentFrameworksListener();
 		}
 		return configureDependentFrameworksListener;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
@@ -76,6 +75,7 @@ public class CDKCoreActivator extends BaseUIPlugin {
 	public static CDKCoreActivator getDefault() {
 		return plugin;
 	}
+
 	/**
 	 * Get the IPluginLog for this plugin. This method 
 	 * helps to make logging easier, for example:
@@ -95,7 +95,6 @@ public class CDKCoreActivator extends BaseUIPlugin {
 	public static StatusFactory statusFactory() {
 		return getDefault().statusFactoryInternal();
 	}
-	
 
 	/**
 	 * Create your shared images instance. Clients are expected to override this
@@ -106,6 +105,7 @@ public class CDKCoreActivator extends BaseUIPlugin {
 	}
 
 	public static final String CDK_WIZBAN = "icons/cdk_box_130x65.png";
+
 	private static class CDKSharedImages extends BaseUISharedImages {
 		public CDKSharedImages(Bundle pluginBundle) {
 			super(pluginBundle);

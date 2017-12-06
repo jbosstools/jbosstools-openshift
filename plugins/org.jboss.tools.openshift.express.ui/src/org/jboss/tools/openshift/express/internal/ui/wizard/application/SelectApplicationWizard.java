@@ -19,7 +19,6 @@ import com.openshift.client.IApplication;
  */
 public class SelectApplicationWizard extends AbstractOpenShiftWizard<OpenShiftApplicationWizardModel> {
 
-
 	private SelectApplicationWizardPage selectApplicationPage;
 
 	public SelectApplicationWizard(OpenShiftApplicationWizardModel wizardModel) {
@@ -30,12 +29,12 @@ public class SelectApplicationWizard extends AbstractOpenShiftWizard<OpenShiftAp
 	public boolean performFinish() {
 		return true;
 	}
-	
+
 	@Override
 	public void addPages() {
 		addPage(this.selectApplicationPage = new SelectApplicationWizardPage(getModel(), this));
 	}
-	
+
 	public IApplication getSelectedApplication() {
 		return selectApplicationPage.getSelectedApplication();
 	}

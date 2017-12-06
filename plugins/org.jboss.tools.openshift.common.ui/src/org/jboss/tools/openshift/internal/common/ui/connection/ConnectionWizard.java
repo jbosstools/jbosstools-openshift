@@ -20,20 +20,19 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 public class ConnectionWizard extends Wizard {
 
 	private final ConnectionWizardPage page;
-	
+
 	public static final String NEW_CONNECTION_TITLE = "New OpenShift Connection";
 	public static final String EDIT_CONNECTION_TITLE = "Edit OpenShift Connection";
-	
+
 	/**
 	 * Constructor to use when connecting with the default connection.
 	 * New connection title is used as default wizard title.
 	 * 
 	 */
 	public ConnectionWizard() {
-		this(ConnectionsRegistrySingleton.getInstance().getRecentConnection(), 
-				NEW_CONNECTION_TITLE);
+		this(ConnectionsRegistrySingleton.getInstance().getRecentConnection(), NEW_CONNECTION_TITLE);
 	}
-	
+
 	/**
 	 * Constructor to use when connecting with the default connection.
 	 * 
@@ -42,11 +41,11 @@ public class ConnectionWizard extends Wizard {
 	public ConnectionWizard(String title) {
 		this(ConnectionsRegistrySingleton.getInstance().getRecentConnection(), title);
 	}
-	
+
 	public ConnectionWizard(final IConnection connection) {
 		this(connection, NEW_CONNECTION_TITLE);
 	}
-	
+
 	public ConnectionWizard(final IConnection connection, String title) {
 		this(connection, null, title);
 	}
@@ -59,7 +58,7 @@ public class ConnectionWizard extends Wizard {
 	public ConnectionWizard(final IConnection connection, Object context) {
 		this(connection, context, NEW_CONNECTION_TITLE);
 	}
-	
+
 	/**
 	 * Constructor to use when connection to use is known.
 	 * @param context  A context that is useful to ConnectionEditors
@@ -71,11 +70,11 @@ public class ConnectionWizard extends Wizard {
 			setWindowTitle(title);
 		}
 	}
-	
+
 	public IConnection getConnection() {
 		return page.getConnection();
 	}
-	
+
 	@Override
 	public boolean performFinish() {
 		return page.connect();

@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
 public interface IExternalLaunchConstants {
@@ -17,6 +17,5 @@ public interface IExternalLaunchConstants {
 	public static final String ATTR_ARGS = "org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS";
 	public static final String ATTR_WORKING_DIR = "org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY";
 	public static final String ENVIRONMENT_VARS_KEY = "org.eclipse.debug.core.environmentVariables";
-
 
 }

@@ -23,7 +23,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 public class SSLCertificateUIHelper {
 
 	public final static SSLCertificateUIHelper INSTANCE = new SSLCertificateUIHelper();
-	
+
 	private SSLCertificateUIHelper() {
 	}
 
@@ -48,8 +48,7 @@ public class SSLCertificateUIHelper {
 			return;
 		}
 		HumanReadableX509Certificate cert = new HumanReadableX509Certificate(certificate);
-		appendLabel(cert.getIssuedTo(HumanReadableX509Certificate.PRINCIPAL_COMMON_NAME) + "\n\n",
-				builder, styles);
+		appendLabel(cert.getIssuedTo(HumanReadableX509Certificate.PRINCIPAL_COMMON_NAME) + "\n\n", builder, styles);
 		appendLabeledValue("Issued To:\n", cert.getIssuedTo(), builder, styles);
 		appendLabeledValue("\nIssued By:\n", cert.getIssuedBy(), builder, styles);
 		appendLabeledValue("\nValidity:\n", cert.getValidity(), builder, styles);
@@ -62,9 +61,7 @@ public class SSLCertificateUIHelper {
 	}
 
 	private void appendValue(String value, StringBuilder builder) {
-		builder
-				.append(value)
-				.append(StringUtils.getLineSeparator());
+		builder.append(value).append(StringUtils.getLineSeparator());
 	}
 
 	private void appendLabel(String label, StringBuilder builder, List<StyleRange> styles) {

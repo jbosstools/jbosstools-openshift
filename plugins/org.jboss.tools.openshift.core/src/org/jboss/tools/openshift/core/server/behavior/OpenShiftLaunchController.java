@@ -70,18 +70,20 @@ import com.openshift.restclient.model.IResource;
  * @author Jeff Maury
  * @author Andre Dietisheim
  */
-public class OpenShiftLaunchController extends AbstractSubsystemController implements ISubsystemController, ILaunchServerController {
+public class OpenShiftLaunchController extends AbstractSubsystemController
+		implements ISubsystemController, ILaunchServerController {
 
 	private static final String LAUNCH_DEBUG_PORT_PROP = "LOCAL_DEBUG_PORT";
 	private static final int RECHECK_DELAY = 1000;
 	private static final int PUBLISH_DELAY = 3000;
-	private static final int DEBUGGER_LAUNCHED_TIMEOUT =  60_000; //TODO Get from server settings?
+	private static final int DEBUGGER_LAUNCHED_TIMEOUT = 60_000; //TODO Get from server settings?
 	private static final long WAIT_FOR_DEPLOYMENTCONFIG_TIMEOUT = 3 * 60 * 1024;
 	private static final long WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT = 3 * 60 * 1024;
 	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
-	
+
 	@Override
-	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
+	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
+			throws CoreException {
 		OpenShiftServerBehaviour beh = OpenShiftServerUtils.getOpenShiftServerBehaviour(configuration);
 		String currentMode = beh.getServer().getMode();
 		beh.setServerStarting();
@@ -106,27 +108,26 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		}
 	}
 
-	protected void launchServerProcess(OpenShiftServerBehaviour beh, ILaunch launch,
-			IProgressMonitor monitor) {
+	protected void launchServerProcess(OpenShiftServerBehaviour beh, ILaunch launch, IProgressMonitor monitor) {
 		launch.addProcess(new ServerProcess(launch, beh.getServer(), getLabel(launch.getLaunchMode())));
 		beh.setServerStarting();
 	}
 
 	private String getLabel(String mode) {
-	    String label = null;
-	    
-	    switch (mode) {
-	    case ILaunchManager.DEBUG_MODE:
-	        label = OpenShiftCoreMessages.DebugOnOpenshift;
-	        break;
-	    case ILaunchManager.PROFILE_MODE:
-	        label = OpenShiftCoreMessages.ProfileOnOpenshift;
-	        break;
-	    default:
-	        label = OpenShiftCoreMessages.RunOnOpenshift;
-	        break;
-	    }
-	    return label;
+		String label = null;
+
+		switch (mode) {
+		case ILaunchManager.DEBUG_MODE:
+			label = OpenShiftCoreMessages.DebugOnOpenshift;
+			break;
+		case ILaunchManager.PROFILE_MODE:
+			label = OpenShiftCoreMessages.ProfileOnOpenshift;
+			break;
+		default:
+			label = OpenShiftCoreMessages.RunOnOpenshift;
+			break;
+		}
+		return label;
 	}
 
 	protected boolean waitForDeploymentConfigReady(IServer server, IProgressMonitor monitor) throws CoreException {
@@ -154,9 +155,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 	}
 
 	private boolean sleep(int sleep, long timeout, IProgressMonitor monitor) {
-		return sleep(sleep)
-				&& System.currentTimeMillis() < timeout
-				&& !monitor.isCanceled();
+		return sleep(sleep) && System.currentTimeMillis() < timeout && !monitor.isCanceled();
 	}
 
 	private boolean sleep(int sleep) {
@@ -168,7 +167,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		}
 	}
 
-	protected void toggleDebugging(String mode, OpenShiftServerBehaviour beh, DebugContext context, IProgressMonitor monitor) {
+	protected void toggleDebugging(String mode, OpenShiftServerBehaviour beh, DebugContext context,
+			IProgressMonitor monitor) {
 		boolean enableDebugging = isDebugMode(mode);
 		if (enableDebugging) {
 			startDebugging(beh, context, monitor);
@@ -190,12 +190,12 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 
 		DockerImageLabels imageLabels = getDockerImageLabels(beh, monitor);
 		IServer server = beh.getServer();
-		String devmodeKey = StringUtils.defaultIfBlank(
-				OpenShiftServerUtils.getDevmodeKey(server), imageLabels.getDevmodeKey());
-		String debugPortKey = StringUtils.defaultIfBlank(
-				OpenShiftServerUtils.getDebugPortKey(server), imageLabels.getDevmodePortKey());
-		String debugPort = StringUtils.defaultIfBlank(
-				OpenShiftServerUtils.getDebugPort(server), imageLabels.getDevmodePortValue());
+		String devmodeKey = StringUtils.defaultIfBlank(OpenShiftServerUtils.getDevmodeKey(server),
+				imageLabels.getDevmodeKey());
+		String debugPortKey = StringUtils.defaultIfBlank(OpenShiftServerUtils.getDebugPortKey(server),
+				imageLabels.getDevmodePortKey());
+		String debugPort = StringUtils.defaultIfBlank(OpenShiftServerUtils.getDebugPort(server),
+				imageLabels.getDevmodePortValue());
 		return new DebugContext(beh.getServer(), devmodeKey, debugPortKey, debugPort);
 	}
 
@@ -212,8 +212,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 
 		if (!Objects.equals(currentMode, mode)) {
 			setModulesPublishing();
-			if (state == IServer.STATE_STARTED
-					&& beh.isRestarting()) {
+			if (state == IServer.STATE_STARTED && beh.isRestarting()) {
 				publishServer();
 				beh.setRestarting(false);
 			}
@@ -243,7 +242,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 	protected boolean isDebugMode() {
 		return isDebugMode(getServer().getMode());
 	}
-	
+
 	protected boolean isDebugMode(String mode) {
 		return DEBUG_MODE.equals(mode);
 	}
@@ -251,11 +250,10 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 	private void setModulesPublishing() {
 		IModule[] modules = getServer().getModules();
 		for (int i = 0; i < modules.length; i++) {
-			((Server) getServer()).setModulePublishState(
-					new IModule[] { modules[i] }, IServer.PUBLISH_STATE_FULL);
+			((Server) getServer()).setModulePublishState(new IModule[] { modules[i] }, IServer.PUBLISH_STATE_FULL);
 		}
 	}
-	
+
 	private void publishServer() {
 		new Job("Publishing server " + getServer().getName()) {
 			@Override
@@ -265,13 +263,11 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		}.schedule(PUBLISH_DELAY);
 	}
 
-	protected void startDebugging(OpenShiftServerBehaviour behaviour, DebugContext context,
-			IProgressMonitor monitor) {
+	protected void startDebugging(OpenShiftServerBehaviour behaviour, DebugContext context, IProgressMonitor monitor) {
 		IDebugListener listener = new IDebugListener() {
 
 			@Override
-			public void onDebugChange(DebugContext context, IProgressMonitor monitor)
-					throws CoreException {
+			public void onDebugChange(DebugContext context, IProgressMonitor monitor) throws CoreException {
 				int localPort = mapPortForwarding(context, monitor);
 				ILaunch debuggerLaunch = attachRemoteDebugger(behaviour.getServer(), localPort, monitor);
 				if (debuggerLaunch != null) {
@@ -280,8 +276,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 			}
 
 			@Override
-			public void onPodRestart(DebugContext debuggingContext, IProgressMonitor monitor)
-					throws CoreException {
+			public void onPodRestart(DebugContext debuggingContext, IProgressMonitor monitor) throws CoreException {
 				onDebugChange(debuggingContext, monitor);
 			}
 		};
@@ -291,17 +286,15 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 
 	private void stopDebugging(DebugContext context, IProgressMonitor monitor) {
 		IDebugListener listener = new IDebugListener() {
-			
+
 			@Override
-			public void onDebugChange(DebugContext context, IProgressMonitor monitor)
-					throws CoreException {
+			public void onDebugChange(DebugContext context, IProgressMonitor monitor) throws CoreException {
 				DebugLaunchConfigs.get().terminateRemoteDebugger(getServer());
 				unMapPortForwarding(context.getPod());
 			}
 
 			@Override
-			public void onPodRestart(DebugContext debuggingContext, IProgressMonitor monitor)
-					throws CoreException {
+			public void onPodRestart(DebugContext debuggingContext, IProgressMonitor monitor) throws CoreException {
 			}
 		};
 		context.setDebugListener(listener);
@@ -314,12 +307,11 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 	}
 
 	@Override
-	public void setupLaunchConfiguration(
-			ILaunchConfigurationWorkingCopy workingCopy,
-			IProgressMonitor monitor) throws CoreException {
+	public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy, IProgressMonitor monitor)
+			throws CoreException {
 		// Do Nothing
 	}
-	
+
 	/**
 	 * Unmap the port forwarding. 
 	 * @throws CoreException 
@@ -333,7 +325,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 			}
 		}
 	}
-	
+
 	/**
 	 * Map the remote port to a local port. 
 	 * Return the local port in use, or -1 if failed
@@ -347,38 +339,38 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 
 		IPod pod = context.getPod();
 		if (pod == null) {
-			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-					NLS.bind("Could not find running pod to forward to in server adapter \"{0}\"", getServer().getName())));
+			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, NLS.bind(
+					"Could not find running pod to forward to in server adapter \"{0}\"", getServer().getName())));
 		}
 		Set<PortPair> podPorts = PortForwardingUtils.getForwardablePorts(pod);
 
 		int remotePort = context.getDebugPort();
 		if (remotePort == DebugContext.NO_DEBUG_PORT) {
-			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
+			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
 					NLS.bind("No pod port to forward to specified in server adapter \"{0}\"", getServer().getName())));
 		}
 
-		Optional<PortPair> debugPort = podPorts.stream()
-				.filter(p -> remotePort == p.getRemotePort())
-				.findFirst();
+		Optional<PortPair> debugPort = podPorts.stream().filter(p -> remotePort == p.getRemotePort()).findFirst();
 		if (!debugPort.isPresent()) {
-			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-					NLS.bind("Pod port specified in server adapter \"{0}\" is not present in pod \"{1}\"", getServer().getName(), pod.getName())));
+			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
+					NLS.bind("Pod port specified in server adapter \"{0}\" is not present in pod \"{1}\"",
+							getServer().getName(), pod.getName())));
 		}
 
 		if (PortForwardingUtils.isPortForwardingStarted(pod)) {
 			return debugPort.get().getLocalPort();
-		} 
+		}
 
-		if (mapPorts(podPorts, monitor)) {		
-			PortForwardingUtils.startPortForwarding(pod, podPorts, OpenShiftBinaryOption.SKIP_TLS_VERIFY);			
+		if (mapPorts(podPorts, monitor)) {
+			PortForwardingUtils.startPortForwarding(pod, podPorts, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
 			if (PortForwardingUtils.isPortForwardingStarted(pod)) {
 				return debugPort.get().getLocalPort();
 			}
 		}
 
-		throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-				NLS.bind("Could not setup port forwarding to pod \"{0}\" in server adapter \"{1}\"", pod.getName(), getServer().getName())));
+		throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
+				NLS.bind("Could not setup port forwarding to pod \"{0}\" in server adapter \"{1}\"", pod.getName(),
+						getServer().getName())));
 	}
 
 	private boolean mapPorts(Set<PortPair> podPorts, final IProgressMonitor monitor) {
@@ -391,27 +383,30 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		}
 		return true;
 	}
-	
-	private ILaunch attachRemoteDebugger(IServer server, int localDebugPort, IProgressMonitor monitor) throws CoreException {
+
+	private ILaunch attachRemoteDebugger(IServer server, int localDebugPort, IProgressMonitor monitor)
+			throws CoreException {
 		monitor.subTask("Attaching remote debugger...");
 		ILaunch ret = null;
 		DebugLaunchConfigs launchConfigs = DebugLaunchConfigs.get();
 		ILaunchConfiguration debuggerLaunchConfig = launchConfigs.getRemoteDebuggerLaunchConfiguration(server);
-		ILaunchConfigurationWorkingCopy workingCopy = getLaunchConfigWorkingCopy(server, launchConfigs, debuggerLaunchConfig);
+		ILaunchConfigurationWorkingCopy workingCopy = getLaunchConfigWorkingCopy(server, launchConfigs,
+				debuggerLaunchConfig);
 		if (workingCopy == null) {
 			throw toCoreException(NLS.bind("Could not modify launch config for server {0}", server.getName()));
 		}
 		IProject project = OpenShiftServerUtils.getDeployProject(server);
 		launchConfigs.setupRemoteDebuggerLaunchConfiguration(workingCopy, project, localDebugPort);
 		debuggerLaunchConfig = workingCopy.doSave();
-		
+
 		ret = lauchDebugger(debuggerLaunchConfig, localDebugPort, monitor);
 		if (ret == null) {
-			throw toCoreException(NLS.bind("Could not start remote debugger to (forwarded) port {0} on localhost", localDebugPort));
+			throw toCoreException(
+					NLS.bind("Could not start remote debugger to (forwarded) port {0} on localhost", localDebugPort));
 		}
-		
-	    monitor.worked(10);
-	    return ret;
+
+		monitor.worked(10);
+		return ret;
 	}
 
 	private ILaunch lauchDebugger(ILaunchConfiguration debuggerLaunchConfig, int port, IProgressMonitor monitor) {
@@ -419,8 +414,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 		int elapsed = 0;
 		boolean launched = false;
 		monitor.subTask("Waiting for remote debug port to become available...");
-		while(!launched 
-				&& elapsed < DEBUGGER_LAUNCHED_TIMEOUT) {
+		while (!launched && elapsed < DEBUGGER_LAUNCHED_TIMEOUT) {
 			try {
 				//TODO That's fugly. ideally we should see if socket on debug port is responsive instead
 				launch = debuggerLaunchConfig.launch(DEBUG_MODE, new NullProgressMonitor());
@@ -436,10 +430,10 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 				} catch (InterruptedException ie) {
 				}
 			}
-	    }
+		}
 		return launch;
 	}
-	
+
 	private ILaunchConfigurationWorkingCopy getLaunchConfigWorkingCopy(IServer server, DebugLaunchConfigs launchConfigs,
 			ILaunchConfiguration debuggerLaunchConfig) throws CoreException {
 		ILaunchConfigurationWorkingCopy workingCopy;
@@ -469,37 +463,38 @@ public class OpenShiftLaunchController extends AbstractSubsystemController imple
 
 	protected IJavaHotCodeReplaceListener getHotCodeReplaceListener(final IServer server, final ILaunch launch) {
 		return new ClassCollectingHCRListener(server, launch) {
-	
+
 			protected void prePublish(IJavaDebugTarget target, IModule[] modules) {
 				try {
 					getLaunch().terminate();
-				} catch(DebugException de) {
-					OpenShiftCoreActivator.pluginLog().logError(toCoreException("Unable to terminate debug session", de));
+				} catch (DebugException de) {
+					OpenShiftCoreActivator.pluginLog()
+							.logError(toCoreException("Unable to terminate debug session", de));
 				}
 			}
-			
+
 			@Override
 			protected void postPublish(IJavaDebugTarget target, IModule[] modules) {
 				IServer server = getServer();
 				waitModulesStarted(modules);
 				executeJMXGarbageCollection(server, modules);
-				
+
 				sleep(3000);
-				
+
 				String portAttr = launch.getAttribute(LAUNCH_DEBUG_PORT_PROP);
 				int port = DebugContext.NO_DEBUG_PORT;
 				try {
 					port = Integer.parseInt(portAttr);
-				} catch(NumberFormatException nfe) {
+				} catch (NumberFormatException nfe) {
 					// TODO 
 				}
 				try {
 					ILaunch newLaunch = attachRemoteDebugger(server, port, new NullProgressMonitor());
-					if( newLaunch != null ) {
+					if (newLaunch != null) {
 						overrideHotcodeReplace(server, newLaunch);
 					}
 					setLaunch(newLaunch);
-				} catch(CoreException ce) {
+				} catch (CoreException ce) {
 					OpenShiftCoreActivator.pluginLog().logError(toCoreException("Unable to restart debug session", ce));
 				}
 			}

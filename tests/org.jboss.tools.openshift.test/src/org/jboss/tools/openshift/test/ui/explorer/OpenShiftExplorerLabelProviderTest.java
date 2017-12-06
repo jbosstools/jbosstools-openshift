@@ -59,26 +59,28 @@ import com.openshift.restclient.model.route.IRoute;
 public class OpenShiftExplorerLabelProviderTest {
 
 	private OpenShiftExplorerLabelProvider provider;
-	@Mock IClient client;
-	
+	@Mock
+	IClient client;
+
 	@Before
-	public void setup() throws MalformedURLException{
+	public void setup() throws MalformedURLException {
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));
 		provider = new OpenShiftExplorerLabelProvider();
 	}
-	private <T extends IResource> T givenAResource(Class<T> klass, String kind){
+
+	private <T extends IResource> T givenAResource(Class<T> klass, String kind) {
 		T resource = mock(klass);
 		when(resource.getKind()).thenReturn(kind);
 		when(resource.getName()).thenReturn("someName");
 		return resource;
 	}
 
-	private <T extends IResource> IResourceWrapper<T, ?> givenAResourceUIModel(Class<T> klass, String kind){
+	private <T extends IResource> IResourceWrapper<T, ?> givenAResourceUIModel(Class<T> klass, String kind) {
 		T resource = givenAResource(klass, kind);
 		@SuppressWarnings("unchecked")
 		IResourceWrapper<T, ?> resourceUIModel = mock(IResourceWrapper.class);
 		when(resourceUIModel.getWrapped()).thenReturn(resource);
-		when(resourceUIModel.getAdapter((Class<?>)Mockito.any(Class.class))).then(invocation-> {
+		when(resourceUIModel.getAdapter((Class<?>) Mockito.any(Class.class))).then(invocation -> {
 			if (invocation.getArguments()[0] == IResource.class) {
 				return resource;
 			}
@@ -88,30 +90,30 @@ public class OpenShiftExplorerLabelProviderTest {
 	}
 
 	@Test
-	public void getStyledTextForABuild(){
+	public void getStyledTextForABuild() {
 		IBuild build = givenAResource(IBuild.class, ResourceKind.BUILD);
 		when(build.getStatus()).thenReturn("Running");
-		
+
 		assertEquals(String.format("%s Build Running", build.getName()), provider.getStyledText(build).getString());
 	}
 
 	@Test
-	public void getStyledTextForAnApplicationSource(){
+	public void getStyledTextForAnApplicationSource() {
 		IApplicationSource source = mock(IApplicationSource.class);
-		when(source.getTags()).thenReturn(Arrays.asList("foo","bar"));
+		when(source.getTags()).thenReturn(Arrays.asList("foo", "bar"));
 		when(source.getNamespace()).thenReturn("aNamespace");
 		when(source.getName()).thenReturn("aname");
-		
+
 		assertEquals("", "aname (foo, bar) - aNamespace", provider.getStyledText(source).getString());
 	}
 
 	@Test
-	public void getStyledTextForAnApplicationSourceWithoutTags(){
+	public void getStyledTextForAnApplicationSourceWithoutTags() {
 		IApplicationSource source = mock(IApplicationSource.class);
 		when(source.getTags()).thenReturn(Collections.emptyList());
 		when(source.getNamespace()).thenReturn("aNamespace");
 		when(source.getName()).thenReturn("aname");
-	
+
 		assertEquals("", "aname () - aNamespace", provider.getStyledText(source).getString());
 	}
 
@@ -123,26 +125,27 @@ public class OpenShiftExplorerLabelProviderTest {
 		assertEquals(String.format("%s www.example.com", route.getName()), provider.getStyledText(route).getString());
 
 		when(route.getPath()).thenReturn("/foo");
-		assertEquals(String.format("%s www.example.com/foo", route.getName()), provider.getStyledText(route).getString());
+		assertEquals(String.format("%s www.example.com/foo", route.getName()),
+				provider.getStyledText(route).getString());
 		//test description
 		assertEquals(String.format("%s www.example.com/foo", route.getName()), provider.getDescription(route));
 	}
-	
+
 	@Test
-	public void getStyledTextForAReplicationController(){
+	public void getStyledTextForAReplicationController() {
 		IReplicationController rc = givenAResource(IReplicationController.class, ResourceKind.REPLICATION_CONTROLLER);
 		Map<String, String> selector = new HashMap<>();
 		selector.put("foo", "bar");
 		when(rc.getReplicaSelector()).thenReturn(selector);
-		
+
 		assertEquals(String.format("%s selector: foo=bar", rc.getName()), provider.getStyledText(rc).getString());
 	}
 
 	@Test
-	public void getStyledTextForAPod(){
+	public void getStyledTextForAPod() {
 		IPod pod = givenAResource(IPod.class, ResourceKind.POD);
 		assertEquals(String.format("%s Pod", pod.getName()), provider.getStyledText(pod).getString());
-		
+
 		String status = "Chilling";
 		when(pod.getStatus()).thenReturn(status);
 		String exp = String.format("%s Pod %s", pod.getName(), status);
@@ -161,19 +164,19 @@ public class OpenShiftExplorerLabelProviderTest {
 		//test description
 		assertEquals("someName Pod Chilling", provider.getDescription(pod));
 	}
-	
+
 	@Test
-	public void getStyledTextForAPodWithoutLabels(){
+	public void getStyledTextForAPodWithoutLabels() {
 		IPod pod = givenAResource(IPod.class, ResourceKind.POD);
 		when(pod.getIP()).thenReturn("172.17.2.226");
 		Map<String, String> labels = new HashMap<>();
 		when(pod.getLabels()).thenReturn(labels);
-		
+
 		assertEquals(String.format("%s Pod", pod.getName()), provider.getStyledText(pod).getString());
 	}
-	
+
 	@Test
-	public void getStyledTextForAService(){
+	public void getStyledTextForAService() {
 		IService service = givenAResource(IService.class, ResourceKind.SERVICE);
 		when(service.getPortalIP()).thenReturn("172.17.2.226");
 		when(service.getPort()).thenReturn(5432);
@@ -181,31 +184,32 @@ public class OpenShiftExplorerLabelProviderTest {
 		Map<String, String> labels = new HashMap<>();
 		labels.put("foo", "bar");
 		when(service.getSelector()).thenReturn(labels);
-		
+
 		String exp = String.format("%s selector: foo=bar", service.getName());
 		assertEquals(exp, provider.getStyledText(service).getString());
 	}
+
 	@Test
-	public void getStyledTextForAnImageRepository(){
+	public void getStyledTextForAnImageRepository() {
 		IImageStream repo = givenAResource(IImageStream.class, ResourceKind.IMAGE_STREAM);
-		when(repo.getDockerImageRepository())
-			.thenReturn(new DockerImageURI("127.0.0.1", "foo", "bar"));
-		assertEquals(repo.getName() +" " + repo.getDockerImageRepository(), provider.getStyledText(repo).getString());
+		when(repo.getDockerImageRepository()).thenReturn(new DockerImageURI("127.0.0.1", "foo", "bar"));
+		assertEquals(repo.getName() + " " + repo.getDockerImageRepository(), provider.getStyledText(repo).getString());
 	}
-	
+
 	@Test
-	public void getStyledTextForADeploymentConfig(){
+	public void getStyledTextForADeploymentConfig() {
 		IDeploymentConfig config = givenAResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
 		Map<String, String> selector = new HashMap<>();
 		selector.put("name", "foo");
 		selector.put("deployment", "bar");
-		when(config.getReplicaSelector()).thenReturn(selector );
-		
-		assertEquals(config.getName() + " selector: deployment=bar,name=foo", provider.getStyledText(config).getString());
+		when(config.getReplicaSelector()).thenReturn(selector);
+
+		assertEquals(config.getName() + " selector: deployment=bar,name=foo",
+				provider.getStyledText(config).getString());
 	}
-	
+
 	@Test
-	public void getStyledTextForADeploymentConfigWithLongNames(){
+	public void getStyledTextForADeploymentConfigWithLongNames() {
 		provider.setLabelLimit(120);
 		IDeploymentConfig config = givenAResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
 		Map<String, String> selector = new HashMap<>();
@@ -213,26 +217,28 @@ public class OpenShiftExplorerLabelProviderTest {
 		selector.put("name", name);
 		String deployment = "bar01234567890123456789012345678901234567890123456789";
 		selector.put("deployment", deployment);
-		when(config.getReplicaSelector()).thenReturn(selector );
-		assertEquals("someName selector: deployment=bar0123456789012345678901234567890...=foo01234567890123456789012345678901234567890123456789", provider.getStyledText(config).getString());
+		when(config.getReplicaSelector()).thenReturn(selector);
+		assertEquals(
+				"someName selector: deployment=bar0123456789012345678901234567890...=foo01234567890123456789012345678901234567890123456789",
+				provider.getStyledText(config).getString());
 		//test description
 		assertEquals("someName selector: deployment=" + deployment + ",name=" + name, provider.getDescription(config));
 	}
-	
+
 	@Test
-	public void getStyledTextForABuildConfig(){
+	public void getStyledTextForABuildConfig() {
 		IBuildConfig buildConfig = givenAResource(IBuildConfig.class, ResourceKind.BUILD_CONFIG);
 		when(buildConfig.getSourceURI()).thenReturn("git://somplace.com/foo/bar.git");
-		
+
 		StyledString actual = provider.getStyledText(buildConfig);
 		assertEquals(buildConfig.getName() + " git://somplace.com/foo/bar.git", actual.getString());
 	}
-	
+
 	@Test
-	public void getStyledTextForAProjectWithoutDisplayName(){
+	public void getStyledTextForAProjectWithoutDisplayName() {
 		String displayName = "The Display Name";
 		String namespace = "anamespace";
-		
+
 		IProject project = givenAResource(IProject.class, ResourceKind.PROJECT);
 		when(project.getName()).thenReturn(displayName);
 		when(project.getNamespace()).thenReturn(namespace);
@@ -241,33 +247,35 @@ public class OpenShiftExplorerLabelProviderTest {
 	}
 
 	@Test
-	public void getStyledTextForAProject(){
+	public void getStyledTextForAProject() {
 		String displayName = "The Display Name";
 		String namespace = "anamespace";
-		
+
 		IProject project = givenAResource(IProject.class, ResourceKind.PROJECT);
 		when(project.getDisplayName()).thenReturn(displayName);
 		when(project.getNamespace()).thenReturn(namespace);
-		
+
 		assertEquals(project.getDisplayName() + " " + project.getName(), provider.getStyledText(project).getString());
 	}
-	
+
 	@Test
-	public void getStyledTextForAConnection() throws Exception{
-		Connection connection = ConnectionTestUtils.createConnection("username", "token", client.getBaseURL().toString());
+	public void getStyledTextForAConnection() throws Exception {
+		Connection connection = ConnectionTestUtils.createConnection("username", "token",
+				client.getBaseURL().toString());
 		connection.setUsername("foo@bar.com");
 		String exp = String.format("foo@bar.com %s", client.getBaseURL().toString());
 		assertEquals("Exp. a connection to display its base URL", exp, provider.getStyledText(connection).getString());
 	}
+
 	@Test
-	public void getStyledTextForAConnectionWithoutUserName() throws Exception{
+	public void getStyledTextForAConnectionWithoutUserName() throws Exception {
 		Connection connection = ConnectionTestUtils.createConnection(null, "token", client.getBaseURL().toString());
 		String exp = String.format("<unknown user> %s", client.getBaseURL().toString());
 		assertEquals("Exp. a connection to display its base URL", exp, provider.getStyledText(connection).getString());
 	}
 
 	@Test
-	public void getImage(){
+	public void getImage() {
 		testImage(null, null);
 		testImage(null, new Object());
 		testImage(OpenShiftImages.SERVICE_IMG, IService.class, ResourceKind.SERVICE);

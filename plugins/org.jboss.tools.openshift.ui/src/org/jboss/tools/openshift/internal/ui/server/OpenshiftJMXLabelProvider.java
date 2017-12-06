@@ -28,7 +28,7 @@ public class OpenshiftJMXLabelProvider extends LabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		return ((JolokiaConnectionWrapper)element).getName();
+		return ((JolokiaConnectionWrapper) element).getName();
 	}
 
 }

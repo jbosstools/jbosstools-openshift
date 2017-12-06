@@ -52,7 +52,7 @@ public class SSHUserConfig {
 	public File getFile() {
 		return configFile;
 	}
-	
+
 	public boolean hasLibraIdentifyFile() throws OpenShiftException {
 		return getLibraIdentityFile() != null;
 	}
@@ -64,8 +64,7 @@ public class SSHUserConfig {
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
 			for (String data = reader.readLine(); data != null; data = reader.readLine()) {
-				if (!data.startsWith(KEY_CONFIGBLOCK_HOST_START)
-						|| !data.endsWith(VALUE_LIBRA_SSH_HOST)) {
+				if (!data.startsWith(KEY_CONFIGBLOCK_HOST_START) || !data.endsWith(VALUE_LIBRA_SSH_HOST)) {
 					continue;
 				}
 
@@ -75,8 +74,7 @@ public class SSHUserConfig {
 					}
 
 					Matcher matcher = IDENTITYFILE_PATTERN.matcher(data);
-					if (!matcher.find()
-							|| matcher.groupCount() < 1) {
+					if (!matcher.find() || matcher.groupCount() < 1) {
 						continue;
 					}
 

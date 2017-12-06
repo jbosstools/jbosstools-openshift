@@ -59,7 +59,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_USE_INITIAL_GITURL = "useInitialGitUrl";
 	public static final String PROPERTY_INITIAL_GITURL_EDITABLE = "initialGitUrlEditable";
 	public static final String PROPERTY_INITIAL_GITURL_USEREDITABLE = "initialGitUrlUsereditable";
-	
+
 	private final OpenShiftApplicationWizardModel wizardModel;
 
 	private List<IApplication> existingApplications = new ArrayList<>();
@@ -74,23 +74,17 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void setupWizardModelListeners(OpenShiftApplicationWizardModel wizardModel) {
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAIN, wizardModel)
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAIN, wizardModel)
 				.forwardTo(PROPERTY_DOMAIN, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAINS, wizardModel)
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_DOMAINS, wizardModel)
 				.forwardTo(PROPERTY_DOMAINS, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
 				.forwardTo(PROPERTY_APPLICATION_NAME, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
 				.forwardTo(PROPERTY_EMBEDDED_CARTRIDGES, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_EXISTING_APPLICATION, wizardModel)
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_USE_EXISTING_APPLICATION, wizardModel)
 				.forwardTo(PROPERTY_USE_EXISTING_APPLICATION, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_EMBEDDED_CARTRIDGES, wizardModel)
 				.forwardTo(PROPERTY_EMBEDDABLE_CARTRIDGES, this);
 		new PojoEventBridge() {
 
@@ -101,8 +95,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				fireInitialGitUrlUsereditable();
 				firePropertyChange(PROPERTY_SELECTED_APPLICATION_TEMPLATE, event.getOldValue(), event.getNewValue());
 			}
-		}
-		.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_APPLICATION_TEMPLATE, wizardModel);
+		}.listenTo(IOpenShiftApplicationWizardModel.PROP_SELECTED_APPLICATION_TEMPLATE, wizardModel);
 		new PojoEventBridge() {
 
 			@Override
@@ -110,10 +103,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 				fireUseInitialGitUrl();
 				fireInitialGitUrlUsereditable();
 			}
-		}
-		.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_INITIAL_GIT_URL, wizardModel);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_INITIAL_GIT_URL, wizardModel)
+		}.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_INITIAL_GIT_URL, wizardModel);
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_INITIAL_GIT_URL, wizardModel)
 				.forwardTo(PROPERTY_INITIAL_GITURL, this);
 	}
 
@@ -126,9 +117,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setScale(ApplicationScale scale) {
-		firePropertyChange(PROPERTY_APPLICATION_SCALE
-				, wizardModel.getApplicationScale()
-				, wizardModel.setApplicationScale(scale));
+		firePropertyChange(PROPERTY_APPLICATION_SCALE, wizardModel.getApplicationScale(),
+				wizardModel.setApplicationScale(scale));
 	}
 
 	public String getExistingApplicationName() {
@@ -137,9 +127,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 
 	protected IApplication getApplicationByName(String applicationName, IDomain domain) {
 		IApplication application = null;
-		if (domain != null
-				&& !StringUtils.isEmpty(applicationName)
-				&& isExistingApplication(applicationName)) {
+		if (domain != null && !StringUtils.isEmpty(applicationName) && isExistingApplication(applicationName)) {
 			application = domain.getApplicationByName(applicationName);
 		}
 		return application;
@@ -152,9 +140,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 		}
 
 		setResourcesLoaded(false);
-		
+
 		setExistingApplications(domain.getApplications());
-		
+
 		setResourcesLoaded(true);
 	}
 
@@ -171,8 +159,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	private IApplication getExistingApplication(String applicationName, IDomain domain) {
-		if (domain == null
-				|| applicationName == null) {
+		if (domain == null || applicationName == null) {
 			return null;
 		}
 
@@ -180,9 +167,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setExistingApplications(List<IApplication> existingApplications) {
-		firePropertyChange(PROPERTY_EXISTING_APPLICATIONS
-				, this.existingApplications
-				, this.existingApplications = existingApplications);
+		firePropertyChange(PROPERTY_EXISTING_APPLICATIONS, this.existingApplications,
+				this.existingApplications = existingApplications);
 	}
 
 	public List<IApplication> getExistingApplications() {
@@ -227,9 +213,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setSelectedGearProfile(IGearProfile gearProfile) {
-		firePropertyChange(PROPERTY_SELECTED_GEAR_PROFILE
-				, wizardModel.getApplicationGearProfile()
-				, wizardModel.setApplicationGearProfile(gearProfile));
+		firePropertyChange(PROPERTY_SELECTED_GEAR_PROFILE, wizardModel.getApplicationGearProfile(),
+				wizardModel.setApplicationGearProfile(gearProfile));
 	}
 
 	public IGearProfile getGearProfileByName(String name) {
@@ -278,11 +263,11 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void addEmbeddedCartridges(ICartridge cartridge) throws OpenShiftException {
-		wizardModel.addEmbeddedCartridges(Collections.<ICartridge> singletonList(cartridge));
+		wizardModel.addEmbeddedCartridges(Collections.<ICartridge>singletonList(cartridge));
 	}
 
 	public void removeEmbeddedCartridges(ICartridge cartridge) throws OpenShiftException {
-		wizardModel.removeEmbeddedCartridges(Collections.<ICartridge> singletonList(cartridge));
+		wizardModel.removeEmbeddedCartridges(Collections.<ICartridge>singletonList(cartridge));
 	}
 
 	public ICartridge getSelectedCartridge() throws OpenShiftException {
@@ -290,8 +275,8 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setSelectedCartridge(ICartridge selectedEmbeddableCartridge) {
-		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE,
-				this.selectedCartridge, this.selectedCartridge = selectedEmbeddableCartridge);
+		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE, this.selectedCartridge,
+				this.selectedCartridge = selectedEmbeddableCartridge);
 	}
 
 	public void removeSelectedEmbeddableCartridge(IEmbeddableCartridge cartridge) {
@@ -299,8 +284,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void fireCanAddRemoveCartridges() {
-		firePropertyChange(PROPERTY_CAN_ADDREMOVE_CARTRIDGES, 
-				!isCanAddRemoveCartridges(), isCanAddRemoveCartridges());
+		firePropertyChange(PROPERTY_CAN_ADDREMOVE_CARTRIDGES, !isCanAddRemoveCartridges(), isCanAddRemoveCartridges());
 	}
 
 	/**
@@ -315,13 +299,11 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * @see IApplicationTemplate#canAddRemoveCartridges()
 	 */
 	public boolean isCanAddRemoveCartridges() {
-		return getSelectedApplicationTemplate() != null
-				&& getSelectedApplicationTemplate().canAddRemoveCartridges();
+		return getSelectedApplicationTemplate() != null && getSelectedApplicationTemplate().canAddRemoveCartridges();
 	}
 
 	protected void fireInitialGitUrlEditable() {
-		firePropertyChange(PROPERTY_INITIAL_GITURL_EDITABLE,
-				null, isInitialGitUrlEditable());
+		firePropertyChange(PROPERTY_INITIAL_GITURL_EDITABLE, null, isInitialGitUrlEditable());
 	}
 
 	/**
@@ -335,15 +317,13 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * @see #getSelectedApplicationTemplate()
 	 */
 	public boolean isInitialGitUrlEditable() {
-		return getSelectedApplicationTemplate() != null
-				&& getSelectedApplicationTemplate().isInitialGitUrlEditable();
+		return getSelectedApplicationTemplate() != null && getSelectedApplicationTemplate().isInitialGitUrlEditable();
 	}
-	
+
 	protected void fireInitialGitUrlUsereditable() {
-		firePropertyChange(PROPERTY_INITIAL_GITURL_USEREDITABLE,
-				null, isInitialGitUrlUsereditable());
+		firePropertyChange(PROPERTY_INITIAL_GITURL_USEREDITABLE, null, isInitialGitUrlUsereditable());
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if initial git url exists and is editable. This
 	 * is true if the model is set to use initial git url (#isUseInitialGitUrl)
@@ -355,10 +335,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * @see #isInitialGitUrlEditable()
 	 */
 	public boolean isInitialGitUrlUsereditable() {
-		return isUseInitialGitUrl()
-				&& isInitialGitUrlEditable();
+		return isUseInitialGitUrl() && isInitialGitUrlEditable();
 	}
-	
+
 	public boolean hasApplication(String applicationName) throws OpenShiftException {
 		ExpressConnection connection = getConnection();
 		if (wizardModel.isValid(connection)) {
@@ -391,11 +370,11 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	public void setDomains(List<IDomain> domains) throws OpenShiftException {
 		wizardModel.setDomains(domains);
 	}
-	
+
 	public boolean isUseInitialGitUrl() {
 		return wizardModel.isUseInitialGitUrl();
 	}
-	
+
 	/**
 	 * if <code>true</code> is given this model is set to use an initial git
 	 * url. An initial git url wont get used if <code>false</code> is given.
@@ -407,17 +386,15 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void fireUseInitialGitUrl() {
-		firePropertyChange(PROPERTY_USE_INITIAL_GITURL,
-				null, isUseInitialGitUrl());
+		firePropertyChange(PROPERTY_USE_INITIAL_GITURL, null, isUseInitialGitUrl());
 	}
-	
+
 	public String getInitialGitUrl() {
 		return wizardModel.getInitialGitUrl();
 	}
 
 	public void setInitialGitUrl(String initialGitUrl) {
-		firePropertyChange(PROPERTY_INITIAL_GITURL,
-				wizardModel.getInitialGitUrl(),
+		firePropertyChange(PROPERTY_INITIAL_GITURL, wizardModel.getInitialGitUrl(),
 				wizardModel.setInitialGitUrl(initialGitUrl));
 	}
 
@@ -430,8 +407,7 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setEnvironmentVariables(Map<String, String> environmentVariables) {
-		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES,
-				wizardModel.getEnvironmentVariables(),
+		firePropertyChange(PROPERTY_ENVIRONMENT_VARIABLES, wizardModel.getEnvironmentVariables(),
 				wizardModel.setEnvironmentVariables(environmentVariables));
 
 	}
@@ -449,10 +425,9 @@ public class ApplicationConfigurationWizardPageModel extends ObservableUIPojo {
 	 * @see IDomain#canCreateApplicationWithEnvironmentVariables()
 	 */
 	public boolean isEnvironmentVariablesSupported() {
-		return getDomain() != null
-				&& getDomain().canCreateApplicationWithEnvironmentVariables();
+		return getDomain() != null && getDomain().canCreateApplicationWithEnvironmentVariables();
 	}
-	
+
 	public boolean isUseExistingApplication() {
 		return wizardModel.isUseExistingApplication();
 	}

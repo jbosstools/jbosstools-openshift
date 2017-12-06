@@ -47,10 +47,11 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 	private Collection<IResource> resources;
 
 	public CreateApplicationFromTemplateJob(IProject project, ITemplate template) {
-		this(project, template, Collections.emptyList(),Collections.emptyList());
+		this(project, template, Collections.emptyList(), Collections.emptyList());
 	}
 
-	public CreateApplicationFromTemplateJob(IProject project, ITemplate template, Collection<IParameter> parameters, Collection<Label> labels) {
+	public CreateApplicationFromTemplateJob(IProject project, ITemplate template, Collection<IParameter> parameters,
+			Collection<Label> labels) {
 		super("Create Application From Template Job");
 		this.project = project;
 		this.template = template;
@@ -69,30 +70,28 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 
 			@Override
 			public IStatus visit(IProjectTemplateProcessing capability) {
-				
+
 				try {
 					ITemplate processed = capability.process(template);
 					Collection<IResource> existing = findExistingResources(project, processed);
-					if(!existing.isEmpty()) {
+					if (!existing.isEmpty()) {
 						return createErrorStatusForExistingResources(existing);
 					}
 					parameters = processed.getParameters().values();
 					resources = capability.apply(processed);
 					return handleResponse(resources);
-				}catch(OpenShiftException e) {
+				} catch (OpenShiftException e) {
 					String message = e.getMessage();
-					if(e.getStatus() != null) {
+					if (e.getStatus() != null) {
 						message = e.getStatus().getMessage();
 					}
 					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, -1, message, e);
 				}
 			}
 
+		}, new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+				"Template processing is unsupported for this client and server combination.", null));
 
-		},
-		new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Template processing is unsupported for this client and server combination.", null));
-		
-		
 		return status;
 	}
 
@@ -110,7 +109,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 					try {
 						IResource found = client.get(resource.getKind(), resource.getName(), project.getName());
 						existing.add(found);
-					}catch(OpenShiftException e) {
+					} catch (OpenShiftException e) {
 						//this is expected if the resource is not found
 						//@TODO change to NotFoundException of some kind
 					}
@@ -119,7 +118,7 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 			}
 		}, new ArrayList<IResource>());
 	}
-	
+
 	/**
 	 * Get the list of parameters for this Job.  
 	 * The values
@@ -127,25 +126,24 @@ public class CreateApplicationFromTemplateJob extends AbstractDelegatingMonitorJ
 	 * has been processed by the server.
 	 * @return
 	 */
-	public Collection<IParameter> getParameters(){
+	public Collection<IParameter> getParameters() {
 		return parameters;
 	}
-	
-	
+
 	@Override
-	public Collection<IResource> getResources(){
+	public Collection<IResource> getResources() {
 		return resources;
 	}
-	
+
 	private IStatus handleResponse(Collection<IResource> resources) {
 		int severity = IStatus.OK;
 		for (IResource resource : resources) {
-			if(resource.getKind() == ResourceKind.STATUS) {
+			if (resource.getKind() == ResourceKind.STATUS) {
 				severity = IStatus.WARNING;
 				break;
 			}
 		}
-		return new Status(severity, OpenShiftUIActivator.PLUGIN_ID, OK,"Resources created from template.",null);
+		return new Status(severity, OpenShiftUIActivator.PLUGIN_ID, OK, "Resources created from template.", null);
 	}
 
 }

@@ -34,7 +34,7 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 	private IApplicationProperties applicationProperties;
 	private Set<ICartridge> embeddedCartridges;
 
-	public EmbeddedCartridgesWizardModel(Set<ICartridge> embeddedCartidges, List<ICartridge> availableCartridges, 
+	public EmbeddedCartridgesWizardModel(Set<ICartridge> embeddedCartidges, List<ICartridge> availableCartridges,
 			IApplicationProperties applicationProperties, IDomain domain, ExpressConnection connection) {
 		this.embeddedCartridges = embeddedCartidges;
 		this.checkedEmbeddedCartridges = new HashSet<>();
@@ -48,7 +48,7 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 	public List<ICartridge> getEmbeddableCartridges() {
 		return availableCartridges;
 	}
-	
+
 	public Set<ICartridge> getEmbeddedCartridges() {
 		return embeddedCartridges;
 	}
@@ -56,9 +56,9 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 	public boolean isEmbedded(ICartridge cartridge) {
 		return embeddedCartridges.contains(cartridge);
 	}
-	
+
 	public Set<ICartridge> setCheckedEmbeddableCartridges(Set<ICartridge> cartridges) {
-		return	this.checkedEmbeddedCartridges = cartridges;
+		return this.checkedEmbeddedCartridges = cartridges;
 	}
 
 	public Set<ICartridge> getCheckedEmbeddableCartridges() {
@@ -79,7 +79,7 @@ public class EmbeddedCartridgesWizardModel extends ObservablePojo {
 	public String getApplicationName() {
 		return applicationProperties.getApplicationName();
 	}
-	
+
 	public ExpressConnection getConnection() {
 		return connection;
 	}

@@ -25,8 +25,7 @@ import org.eclipse.osgi.util.NLS;
 //TODO Refactor to merge base into ResourceNameValidator
 public class ProjectNameValidator extends LabelValueValidator {
 
-	public static final String projectNameDescription =
-			"A valid project name must be 63 characters or less but at least 2 characters, excluding \"..\".\n"
+	public static final String projectNameDescription = "A valid project name must be 63 characters or less but at least 2 characters, excluding \"..\".\n"
 			+ "It may only contain lower-case letters, numbers, and dashes. It may not start or end with a dash.";
 
 	private Pattern PROJECT_NAME_PATTERN = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
@@ -40,25 +39,27 @@ public class ProjectNameValidator extends LabelValueValidator {
 		this.message = defaultMessage;
 		this.unavailableNames = unavailableNames;
 	}
-	
+
 	@Override
 	public IStatus validate(Object value) {
-		if(!(value instanceof String)) {
+		if (!(value instanceof String)) {
 			return ValidationStatus.error(getValueIsNotAStringMessage());
 		}
 		String param = (String) value;
-		if(StringUtils.isEmpty(param)) {
+		if (StringUtils.isEmpty(param)) {
 			return ValidationStatus.cancel(message);
 		}
-		if("..".equals(param) || ".".equals(param)) {
+		if ("..".equals(param) || ".".equals(param)) {
 			return ValidationStatus.error("Project name cannot be '.' or '..'");
 		}
-		if(param.length() < 2) {
-			return ValidationStatus.error(NLS.bind("Project name length must be between {0} and {1} characters", 2, LABEL_MAXLENGTH));
+		if (param.length() < 2) {
+			return ValidationStatus
+					.error(NLS.bind("Project name length must be between {0} and {1} characters", 2, LABEL_MAXLENGTH));
 		}
 
 		if (!PROJECT_NAME_PATTERN.matcher(param).matches()) {
-			return ValidationStatus.error("Project name may only contain lower-case letters, numbers, and dashes. It may not start or end with a dash");
+			return ValidationStatus.error(
+					"Project name may only contain lower-case letters, numbers, and dashes. It may not start or end with a dash");
 		}
 		if (unavailableNames != null && unavailableNames.contains(param)) {
 			return ValidationStatus.error("A project with the same name already exists");

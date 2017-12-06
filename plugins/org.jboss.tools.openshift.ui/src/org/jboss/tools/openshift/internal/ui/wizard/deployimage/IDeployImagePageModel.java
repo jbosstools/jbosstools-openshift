@@ -25,7 +25,7 @@ import com.openshift.restclient.model.IProject;
  * @author jeff.cantrill
  *
  */
-public interface IDeployImagePageModel extends IConnectionAware<Connection>{
+public interface IDeployImagePageModel extends IConnectionAware<Connection> {
 
 	static final String PROPERTY_CONNECTIONS = "connections";
 	static final String PROPERTY_DOCKER_CONNECTIONS = "dockerConnections";
@@ -38,8 +38,7 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	static final String PROPERTY_TARGET_REGISTRY_LOCATION = "targetRegistryLocation";
 	static final String PROPERTY_TARGET_REGISTRY_USERNAME = "targetRegistryUsername";
 	static final String PROPERTY_TARGET_REGISTRY_PASSWORD = "targetRegistryPassword";
-	
-	
+
 	/**
 	 * 
 	 */
@@ -51,7 +50,7 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return
 	 */
 	boolean isStartedWithActiveConnection();
-	
+
 	/**
 	 * The set of known OpenShift connections
 	 * @return
@@ -59,18 +58,18 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	Collection<Connection> getConnections();
 
 	List<IDockerConnection> getDockerConnections();
-	
+
 	IDockerConnection getDockerConnection();
-	
+
 	void setDockerConnection(IDockerConnection connection);
-	
+
 	/**
 	 * The list of OpenShift projects associated with a the selected
 	 * OpenShift connection
 	 * @return
 	 */
 	List<IProject> getProjects();
-	
+
 	/**
 	 * Adds the given project to the list of projects in this model.
 	 * Does nothing if the project is {@code null}.
@@ -78,7 +77,7 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @param project the project that should be added
 	 */
 	void addProject(IProject project);
-	
+
 	void setProjectsComparator(Comparator<IProject> comparator);
 
 	/**
@@ -86,25 +85,25 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return
 	 */
 	IProject getProject();
-	
+
 	void setProject(IProject project);
-	
+
 	/**
 	 * @return the name to be used for the deployed resources
 	 */
 	String getResourceName();
-	
+
 	/**
 	 * Sets the name to be used for the deployed resources
 	 * @param resourceName the name to be used for the deployed resources
 	 */
 	void setResourceName(String resourceName);
-	
+
 	/**
 	 * @return the name of the Docker Image to use
 	 */
 	String getImageName();
-	
+
 	/**
 	 * Sets the name of the Docker Image to use
 	 * @param imageName the name of the Docker Image to use
@@ -125,7 +124,6 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return the list of names of all images for the current Docker connection.
 	 */
 	List<String> getImageNames();
-	
 
 	/**
 	 * @return flag to indicate if the image should be pushed to the Docker registry on OpenShift
@@ -136,37 +134,37 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @param pushImageToRegistry flag to indicate if the image should be pushed to the Docker registry on OpenShift
 	 */
 	void setPushImageToRegistry(boolean pushImageToRegistry);
-	
+
 	/**
 	 * @return the URL to the target registry where the image will be pushed
 	 */
 	String getTargetRegistryLocation();
-	
+
 	/**
 	 * @param targetRegistryLocation the URL to the target registry where the image will be pushed
 	 */
 	void setTargetRegistryLocation(String targetRegistryLocation);
-	
+
 	/**
 	 * @return the username to connect to the target registry where the image will be pushed
 	 */
 	String getTargetRegistryUsername();
-	
+
 	/**
 	 * @param targetRegistryUsername the username to connect to the target registry where the image will be pushed
 	 */
 	void setTargetRegistryUsername(String targetRegistryUsername);
-	
+
 	/**
 	 * @return the password to connect to the target registry where the image will be pushed
 	 */
 	String getTargetRegistryPassword();
-	
+
 	/**
 	 * @param targetRegistryPassword the password to connect to the target registry where the image will be pushed
 	 */
 	void setTargetRegistryPassword(String targetRegistryPassword);
-	
+
 	/**
 	 * Initializes the container info from the selected Docker Image.
 	 * 
@@ -177,7 +175,7 @@ public interface IDeployImagePageModel extends IConnectionAware<Connection>{
 	 * @return <code>true</code> if the initialization succeeded, <code>false</code> otherwise.
 	 */
 	boolean initializeContainerInfo();
-	
+
 	public void loadResources();
 
 	/**

@@ -33,13 +33,11 @@ public class JobChainBuilder {
 
 		@Override
 		public boolean isFullfilled(Job preceedingJob) {
-			return preceedingJob != null
-					&& preceedingJob.getResult() != null
-					&& preceedingJob.getResult().isOK();
+			return preceedingJob != null && preceedingJob.getResult() != null && preceedingJob.getResult().isOK();
 		}
-		
+
 	}
-	
+
 	private Job job;
 	private IProgressMonitor progressMonitor;
 
@@ -74,13 +72,11 @@ public class JobChainBuilder {
 
 			@Override
 			public void done(IJobChangeEvent event) {
-				if(!progressMonitor.isCanceled()
-						&& (condition == null 
-							|| condition.isFullfilled(job))) {
+				if (!progressMonitor.isCanceled() && (condition == null || condition.isFullfilled(job))) {
 					constrainedJob.schedule();
 				}
 			}
-			
+
 		});
 		return new JobConstraint(constrainedJob, this);
 	}
@@ -118,7 +114,7 @@ public class JobChainBuilder {
 	 * Schedules the whole chain of jobs
 	 */
 	public void schedule() {
-		if(!progressMonitor.isCanceled()) {
+		if (!progressMonitor.isCanceled()) {
 			job.schedule();
 		}
 	}
@@ -138,7 +134,7 @@ public class JobChainBuilder {
 			super(job, builder.progressMonitor);
 			this.builder = builder;
 		}
-		
+
 		/**
 		 * Builds the chain of jobs. Wont schedule anything.
 		 * 
@@ -156,7 +152,7 @@ public class JobChainBuilder {
 		}
 
 	}
-	
+
 	public static interface ISchedulingCondition {
 		public boolean isFullfilled(Job preceedingJob);
 	}

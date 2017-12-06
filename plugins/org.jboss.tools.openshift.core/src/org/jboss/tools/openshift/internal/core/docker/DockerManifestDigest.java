@@ -16,15 +16,14 @@ import java.util.regex.Pattern;
 public class DockerManifestDigest {
 
 	private static final Pattern REGEX_MANIFEST_DIGEST = Pattern.compile("([^:]*:\\/\\/)([^@]*)@(.*)");
-	
+
 	private String prefix;
 	private ContentDigest digest;
 
 	private String repository;
 
 	public DockerManifestDigest(String imageId) {
-		if (imageId == null ||
-				imageId.length() == 0) {
+		if (imageId == null || imageId.length() == 0) {
 			throw new IllegalArgumentException("The imageId is empty.");
 		}
 
@@ -35,7 +34,7 @@ public class DockerManifestDigest {
 
 		this.prefix = matcher.group(1);
 		this.repository = matcher.group(2);
-		
+
 	}
 
 	public String getPrefix() {
@@ -45,7 +44,7 @@ public class DockerManifestDigest {
 	public String getRepository() {
 		return repository;
 	}
-	
+
 	public ContentDigest getDigest() {
 		return digest;
 	}

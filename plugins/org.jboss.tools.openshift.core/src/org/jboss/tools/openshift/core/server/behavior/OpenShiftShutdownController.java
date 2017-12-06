@@ -28,16 +28,17 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 	public IStatus canStop() {
 		return Status.OK_STATUS;
 	}
-	
+
 	protected void log(int status, String message, Exception e) {
-		OpenShiftCoreActivator.getDefault().getLog().log(
-				new Status(status, OpenShiftCoreActivator.PLUGIN_ID, message, e));
+		OpenShiftCoreActivator.getDefault().getLog()
+				.log(new Status(status, OpenShiftCoreActivator.PLUGIN_ID, message, e));
 	}
 
 	public OpenShiftServerBehaviour getBehavior() {
-		return (OpenShiftServerBehaviour)getServer().loadAdapter(OpenShiftServerBehaviour.class, new NullProgressMonitor());
+		return (OpenShiftServerBehaviour) getServer().loadAdapter(OpenShiftServerBehaviour.class,
+				new NullProgressMonitor());
 	}
-	
+
 	@Override
 	public void stop(boolean force) {
 		OpenShiftServerBehaviour behavior = getBehavior();
@@ -45,7 +46,7 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 		try {
 			DebugLaunchConfigs.get().terminateRemoteDebugger(behavior.getServer());
 			behavior.setServerStopped();
-		} catch(CoreException ce) {
+		} catch (CoreException ce) {
 			log(IStatus.ERROR, "Error shutting down server", ce);
 			getBehavior().setServerStarted();
 		}

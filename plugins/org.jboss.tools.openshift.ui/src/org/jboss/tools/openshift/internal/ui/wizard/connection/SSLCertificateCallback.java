@@ -44,11 +44,11 @@ import com.openshift.restclient.ISSLCertificateCallback;
  * @author André Dietisheim
  */
 public class SSLCertificateCallback implements ISSLCertificateCallback {
-	
+
 	private static final boolean REMEMBER_DECISION_DEFAULT = true;
 
 	private static Lock lock = new ReentrantLock();
-	
+
 	private boolean rememberDecision = REMEMBER_DECISION_DEFAULT;
 
 	@Override
@@ -77,8 +77,7 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 
 			@Override
 			public void run() {
-				atomicBoolean.set(
-						new SSLCertificateDialog(UIUtils.getShell(), certificate).open() == Dialog.OK);
+				atomicBoolean.set(new SSLCertificateDialog(UIUtils.getShell(), certificate).open() == Dialog.OK);
 				if (rememberDecision) {
 					// Save the choice as soon as possible
 					SSLCertificatesPreference.getInstance().addOrReplaceCertificate(certificate, atomicBoolean.get());
@@ -127,16 +126,16 @@ public class SSLCertificateCallback implements ISSLCertificateCallback {
 
 			StyledText certificateText = new StyledText(container, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
 			certificateText.setEditable(false);
-			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.FILL).grab(false, true).hint(400, SWT.DEFAULT).applyTo(certificateText);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(false, true).hint(400, SWT.DEFAULT)
+					.applyTo(certificateText);
 			writeCertificate(certificate, certificateText);
 
 			Button rememberCheckbox = new Button(container, SWT.CHECK);
-			rememberCheckbox.setText("Remember decision (it can be changed in preferences 'OpenShift 3/SSL certificates')");
+			rememberCheckbox
+					.setText("Remember decision (it can be changed in preferences 'OpenShift 3/SSL certificates')");
 			rememberCheckbox.setSelection(rememberDecision);
 			rememberCheckbox.addSelectionListener(onRememberCertificate(certificate));
-			GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(rememberCheckbox);
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(rememberCheckbox);
 
 			return container;
 		}

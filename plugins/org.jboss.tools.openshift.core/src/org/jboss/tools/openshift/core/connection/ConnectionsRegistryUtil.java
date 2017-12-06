@@ -24,10 +24,10 @@ import com.openshift.restclient.model.IResource;
  *
  */
 public class ConnectionsRegistryUtil {
-	
+
 	private ConnectionsRegistryUtil() {
 	}
-	
+
 	/**
 	 * Retrieve the connection for the given resource
 	 * 
@@ -40,12 +40,12 @@ public class ConnectionsRegistryUtil {
 			return null;
 		}
 		Connection connection = safeGetConnectionFor(resource);
-		if(connection == null) {
+		if (connection == null) {
 			throw new ConnectionNotFoundException(resource);
 		}
 		return connection;
 	}
-	
+
 	/**
 	 * Retrieve the connection for the given resources
 	 * @param resource
@@ -54,7 +54,7 @@ public class ConnectionsRegistryUtil {
 	public static Connection safeGetConnectionFor(IResource resource) {
 		Collection<Connection> all = ConnectionsRegistrySingleton.getInstance().getAll(Connection.class);
 		for (Connection connection : all) {
-			if(connection.ownsResource(resource)) {
+			if (connection.ownsResource(resource)) {
 				return connection;
 			}
 		}

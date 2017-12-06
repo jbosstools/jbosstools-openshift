@@ -56,9 +56,9 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
 			monitor.worked(IProgressMonitor.UNKNOWN);
-			if(REGISTRY.containsKey(key)) {
+			if (REGISTRY.containsKey(key)) {
 				showConsole();
-			}else {
+			} else {
 				ConsoleStreamPipe pipe = key.pod.accept(new CapabilityVisitor<IPodLogRetrieval, ConsoleStreamPipe>() {
 
 					@Override
@@ -69,33 +69,32 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 					}
 
 				}, null);
-				if(pipe != null) {
+				if (pipe != null) {
 					REGISTRY.put(key, pipe);
 				}
 			}
-		}finally {
+		} finally {
 			monitor.done();
 		}
 		return Status.OK_STATUS;
 	}
-	
+
 	private MessageConsole showConsole() {
 		final MessageConsole console = ConsoleUtils.findMessageConsole(getMessageConsoleName());
 		ConsoleUtils.displayConsoleView(console);
 		return console;
 	}
-	
+
 	private String getMessageConsoleName() {
 		IPod pod = key.pod;
-		return NLS.bind("{0}\\{1}\\{2} log", new Object[] {pod.getNamespace(), pod.getName(), key.container});
-	}	
-	
-	
-	private static class Key{
+		return NLS.bind("{0}\\{1}\\{2} log", new Object[] { pod.getNamespace(), pod.getName(), key.container });
+	}
+
+	private static class Key {
 		final IPod pod;
 		final String container;
-		
-		Key(IPod pod, String containerName){
+
+		Key(IPod pod, String containerName) {
 			this.pod = pod;
 			this.container = containerName;
 		}
@@ -130,23 +129,23 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 				return false;
 			return true;
 		}
-		
+
 	}
-	
+
 	private class ConsoleStreamPipe extends OCBinaryOperation implements Runnable {
-		
+
 		private IPodLogRetrieval capability;
 		private boolean running = true;
-		
-		ConsoleStreamPipe(IPodLogRetrieval capability){
+
+		ConsoleStreamPipe(IPodLogRetrieval capability) {
 			this.capability = capability;
 		}
-		
+
 		public void stop() {
 			this.running = false;
 			capability.stop();
 		}
-		
+
 		@Override
 		public void run() {
 			run(null);
@@ -160,29 +159,30 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 			os.setEncoding("UTF-8");
 			try {
 				final InputStream logs = capability.getLogs(true, key.container, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
-				byte [] data = new byte [256];
+				byte[] data = new byte[256];
 				int read = 0;
-				while(running && (read = readSafely(logs, data)) != -1 && !os.isClosed()){
+				while (running && (read = readSafely(logs, data)) != -1 && !os.isClosed()) {
 					os.write(data, 0, read);
 				}
 			} catch (OpenShiftException e) {
 				OpenShiftUIActivator.getDefault().getLogger().logError(e);
 				try {
-					if(os != null)
+					if (os != null)
 						os.write(e.getMessage().getBytes());
 				} catch (IOException e1) {
 					OpenShiftUIActivator.getDefault().getLogger().logError(e1);
 				}
 			} catch (IOException e) {
-				if(!DOCUMENT_IS_CLOSED.equals(e.getMessage())) {
+				if (!DOCUMENT_IS_CLOSED.equals(e.getMessage())) {
 					OpenShiftUIActivator.getDefault().getLogger().logError("Exception reading pod log inputstream", e);
 				}
 			} finally {
 				try {
-					if(os != null)
+					if (os != null)
 						os.close();
 				} catch (IOException e) {
-					OpenShiftUIActivator.getDefault().getLogger().logError("Exception while closing pod log inputstream", e);
+					OpenShiftUIActivator.getDefault().getLogger()
+							.logError("Exception while closing pod log inputstream", e);
 				}
 			}
 		}
@@ -199,7 +199,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 	 */
 	private int readSafely(InputStream logs, byte[] data) throws IOException {
 		try {
-			if(logs.available() < 0) {
+			if (logs.available() < 0) {
 				return -1;
 			}
 		} catch (IOException e) {
@@ -209,7 +209,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 		try {
 			return logs.read(data);
 		} catch (IOException e) {
-			if("Stream closed".equals(e.getMessage())) {
+			if ("Stream closed".equals(e.getMessage())) {
 				//Closed externally, nothing to read. Now we can only rely on chain of input streams 
 				//having BufferedInputStream in it. Otherwise, we cannot say if stream is closed or failed. 
 				return -1;
@@ -218,31 +218,30 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 		}
 	}
 
-	
-	private class ConsoleListener implements IConsoleListener{
-		
+	private class ConsoleListener implements IConsoleListener {
+
 		private ConsoleStreamPipe pipe;
-		
+
 		protected ConsoleListener(ConsoleStreamPipe pipe) {
 			this.pipe = pipe;
 		}
-		
+
 		@Override
 		public void consolesRemoved(IConsole[] consoles) {
 			final String messageConsoleName = getMessageConsoleName();
 			for (IConsole console : consoles) {
-				if(console.getName().equals(messageConsoleName)) {
+				if (console.getName().equals(messageConsoleName)) {
 					try {
 						pipe.stop();
 						REGISTRY.remove(key);
 						return;
-					}finally {
+					} finally {
 						ConsoleUtils.deregisterConsoleListener(this);
 					}
 				}
 			}
 		}
-		
+
 		@Override
 		public void consolesAdded(IConsole[] consoles) {
 		}

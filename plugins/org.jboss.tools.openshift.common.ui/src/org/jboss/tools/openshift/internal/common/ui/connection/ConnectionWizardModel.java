@@ -18,7 +18,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
  * @author Andre Dietisheim
  */
 public class ConnectionWizardModel implements IConnectionAware<IConnection> {
-	
+
 	protected IConnection connection;
 	private Object context;
 
@@ -35,7 +35,7 @@ public class ConnectionWizardModel implements IConnectionAware<IConnection> {
 	public Object getContext() {
 		return this.context;
 	}
-	
+
 	@Override
 	public IConnection getConnection() {
 		return connection;

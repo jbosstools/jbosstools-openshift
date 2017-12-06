@@ -24,7 +24,7 @@ import com.openshift.restclient.model.IPod;
  * @author Andre Dietisheim
  */
 public class DebugContext {
-	
+
 	public static final String DEFAULT_DEVMODE_KEY = "DEV_MODE";
 	public static final String DEFAULT_DEBUG_PORT_KEY = "DEBUG_PORT";
 	public static final String DEFAULT_DEBUG_PORT = "8787";
@@ -39,7 +39,7 @@ public class DebugContext {
 	private int debugPort = NO_DEBUG_PORT;
 	private IDebugListener listener;
 	private IPod pod;
-	
+
 	public DebugContext(IServer server) {
 		this(server, DEFAULT_DEVMODE_KEY, DEFAULT_DEBUG_PORT_KEY, DEFAULT_DEBUG_PORT);
 	}
@@ -124,10 +124,10 @@ public class DebugContext {
 		if (StringUtils.isBlank(debugPort)) {
 			return NO_DEBUG_PORT;
 		}
-		
+
 		try {
 			return Integer.parseInt(debugPort);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return NO_DEBUG_PORT;
 		}
 	}

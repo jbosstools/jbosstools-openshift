@@ -37,7 +37,7 @@ public class RefreshResourcesJob extends AbstractDelegatingMonitorJob {
 	private boolean resourcesAdded;
 
 	private Collection<IResource> refreshedResources;
-	
+
 	public RefreshResourcesJob(IResourcesModel model, boolean resourcesAdded) {
 		super("Refresh Resources Job");
 		this.model = model;
@@ -45,34 +45,35 @@ public class RefreshResourcesJob extends AbstractDelegatingMonitorJob {
 		refreshedResources = new ArrayList<>();
 	}
 
-
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
 			monitor.beginTask("Refreshing OpenShift resources...", IProgressMonitor.UNKNOWN);
 			refreshedResources.clear();
 			Collection<IResource> resources = model.getResources();
-			if(resources == null || resources.isEmpty()) return Status.OK_STATUS;
+			if (resources == null || resources.isEmpty())
+				return Status.OK_STATUS;
 			for (IResource resource : resources) {
-				if(ResourceKind.STATUS.equals(resource.getKind())) {
+				if (ResourceKind.STATUS.equals(resource.getKind())) {
 					continue;
 				}
 				Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(resource);
-				if(connection != null) {
-					IResource newValue = ((Connection)connection).refresh(resource);
+				if (connection != null) {
+					IResource newValue = ((Connection) connection).refresh(resource);
 					IResource oldValue = resourcesAdded ? null : resource;
 					refreshedResources.add(newValue);
-					ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection, ConnectionProperties.PROPERTY_RESOURCE, oldValue, newValue);
+					ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection,
+							ConnectionProperties.PROPERTY_RESOURCE, oldValue, newValue);
 				}
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Exception refreshing resources", e);
 		} finally {
 			monitor.done();
 		}
 		return Status.OK_STATUS;
 	}
-	
+
 	public Collection<IResource> getRefreshedResources() {
 		return new ArrayList<>(refreshedResources);
 	}

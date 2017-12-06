@@ -68,8 +68,8 @@ public class AccountService {
 				return AccountStatus.NEEDS_REFRESH;
 			}
 		}
-		if (wasRefreshed24HAgo(lastRefreshed, current)
-				|| wasRefreshedMoreThanHalfTheTotalValidPeriod(account.getAccessTokenExpiryTime(), lastRefreshed, current)) {
+		if (wasRefreshed24HAgo(lastRefreshed, current) || wasRefreshedMoreThanHalfTheTotalValidPeriod(
+				account.getAccessTokenExpiryTime(), lastRefreshed, current)) {
 			return AccountStatus.NEEDS_REFRESH;
 		}
 		return AccountStatus.VALID;
@@ -114,8 +114,8 @@ public class AccountService {
 			LoginResponse response = provider.login(cluster, account);
 			if (null != response) {
 				if (null == account) {
-						IAccount newAccount = createAccount(cluster, response);
-						return newAccount.getAccessToken();
+					IAccount newAccount = createAccount(cluster, response);
+					return newAccount.getAccessToken();
 				} else {
 					updateAccount(response, account);
 				}

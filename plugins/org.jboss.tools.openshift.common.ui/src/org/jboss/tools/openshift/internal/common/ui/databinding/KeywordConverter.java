@@ -20,34 +20,34 @@ import org.eclipse.core.databinding.conversion.Converter;
  */
 public class KeywordConverter extends Converter {
 
-    private String[] values;
-    private boolean remove;
+	private String[] values;
+	private boolean remove;
 
-    /**
-     * Constructor.
-     * 
-     * @param values the allowed end values
-     * @param remove if true extract remove the matched keyword (beginning of value) if false extract it
-     */
-    public KeywordConverter(String[] values, boolean remove) {
-        super(String.class, String.class);
-        this.values = values;
-        this.remove = remove;
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param values the allowed end values
+	 * @param remove if true extract remove the matched keyword (beginning of value) if false extract it
+	 */
+	public KeywordConverter(String[] values, boolean remove) {
+		super(String.class, String.class);
+		this.values = values;
+		this.remove = remove;
+	}
 
-    @Override
-    public Object convert(Object fromObject) {
-        String str = (String) fromObject;
-        for(String s : values) {
-            if (str.endsWith(s)) {
-                if (remove) {
-                    str = str.substring(0, str.length() - s.length());
-                } else {
-                    str = s;
-                }
-                break;
-            }
-        }
-        return str;
-    }
+	@Override
+	public Object convert(Object fromObject) {
+		String str = (String) fromObject;
+		for (String s : values) {
+			if (str.endsWith(s)) {
+				if (remove) {
+					str = str.substring(0, str.length() - s.length());
+				} else {
+					str = s;
+				}
+				break;
+			}
+		}
+		return str;
+	}
 }

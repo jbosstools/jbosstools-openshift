@@ -44,7 +44,7 @@ public class ImportJob extends WorkspaceJob {
 	private boolean checkoutBranch;
 	private boolean reuseGitRepository;
 	private List<IProject> importedProjects = Collections.emptyList();
-	
+
 	/**
 	 * Creates an import job that will import a project from an eixisting git
 	 * repo at given repo location and will checkout the branch (provided in
@@ -69,7 +69,8 @@ public class ImportJob extends WorkspaceJob {
 		this(gitUrl, gitRef, cloneDestination, false, false);
 	}
 
-	protected ImportJob(String gitUrl, String gitRef, File cloneDestination, boolean checkoutBranch, boolean reuseGitRepository) {
+	protected ImportJob(String gitUrl, String gitRef, File cloneDestination, boolean checkoutBranch,
+			boolean reuseGitRepository) {
 		super("Importing project to workspace...");
 		setRule(ResourcesPlugin.getWorkspace().getRoot());
 		this.gitUrl = gitUrl;
@@ -83,39 +84,45 @@ public class ImportJob extends WorkspaceJob {
 	public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 		try {
 			if (reuseGitRepository) {
-				this.importedProjects = new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters, checkoutBranch).execute(monitor);
+				this.importedProjects = new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters,
+						checkoutBranch).execute(monitor);
 			} else {
-				this.importedProjects = new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters).execute(monitor);
+				this.importedProjects = new ImportProjectOperation(gitUrl, gitRef, cloneDestination, filters)
+						.execute(monitor);
 			}
 			return Status.OK_STATUS;
 		} catch (final WontOverwriteException e) {
 			openError("Project already present", e.getMessage());
 			return Status.CANCEL_STATUS;
 		} catch (final ImportFailedException e) {
-			return OpenShiftUIActivator.statusFactory().errorStatus(
-					NLS.bind("Could not import project from {0}.", e, gitUrl));
+			return OpenShiftUIActivator.statusFactory()
+					.errorStatus(NLS.bind("Could not import project from {0}.", e, gitUrl));
 		} catch (IOException e) {
-			return OpenShiftUIActivator.statusFactory().errorStatus(
-					NLS.bind("Could not import project from {0}.", e, gitUrl));
+			return OpenShiftUIActivator.statusFactory()
+					.errorStatus(NLS.bind("Could not import project from {0}.", e, gitUrl));
 		} catch (OpenShiftException e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus("Could not import project to the workspace.", e);
 		} catch (URISyntaxException e) {
-			return OpenShiftUIActivator.statusFactory().errorStatus("The url of the remote git repository is not valid", e);
+			return OpenShiftUIActivator.statusFactory().errorStatus("The url of the remote git repository is not valid",
+					e);
 		} catch (InvocationTargetException e) {
 			TransportException te = getTransportException(e);
 			if (te != null) {
-				return OpenShiftUIActivator.statusFactory().errorStatus(
-						"Could not clone the repository. Authentication failed.\n"
-								+ " Please make sure that you added your private key to the ssh preferences.", te);
+				return OpenShiftUIActivator.statusFactory()
+						.errorStatus(
+								"Could not clone the repository. Authentication failed.\n"
+										+ " Please make sure that you added your private key to the ssh preferences.",
+								te);
 			} else {
-				return OpenShiftUIActivator.statusFactory().errorStatus(
-						"An exception occurred while creating local git repository.", e);
+				return OpenShiftUIActivator.statusFactory()
+						.errorStatus("An exception occurred while creating local git repository.", e);
 			}
 		} catch (CoreException e) {
-			return StatusFactory.getMultiStatusInstance(
-					0, OpenShiftUIActivator.PLUGIN_ID, "Could not import project to the workspace.", null, e.getStatus() );
+			return StatusFactory.getMultiStatusInstance(0, OpenShiftUIActivator.PLUGIN_ID,
+					"Could not import project to the workspace.", null, e.getStatus());
 		} catch (InterruptedException e) {
-			if(monitor.isCanceled()) return Status.CANCEL_STATUS;
+			if (monitor.isCanceled())
+				return Status.CANCEL_STATUS;
 			return OpenShiftUIActivator.statusFactory().errorStatus("Could not import project to the workspace.", e);
 		} catch (Exception e) {
 			return OpenShiftUIActivator.statusFactory().errorStatus("Could not import project to the workspace.", e);
@@ -134,15 +141,14 @@ public class ImportJob extends WorkspaceJob {
 		}
 		return null;
 	}
-	
+
 	protected void openError(final String title, final String message) {
 		final Shell shell = UIUtils.getShell();
-		if (shell == null
-				|| shell.isDisposed()) {
+		if (shell == null || shell.isDisposed()) {
 			OpenShiftUIActivator.getDefault().getLogger().logError(message);
 		} else {
 			UIUtils.getShell().getDisplay().syncExec(new Runnable() {
-	
+
 				@Override
 				public void run() {
 					MessageDialog.openError(shell, title, message);

@@ -20,21 +20,20 @@ import org.junit.Test;
 public class AccountServiceTest {
 
 	private AccountService service = AccountService.getDefault();
-	
+
 	private ICluster cluster = service.getModel().getClusters().get(0);
-	
+
 	@Test
 	public void checkModelIsAvailable() {
 		assertNotNull(cluster);
 	}
-	
+
 	@Test
 	public void checkLoginIsRequiredIfNoAccessToken() {
 		IAccount account = cluster.createAccount("myid");
 		AccountStatus status = service.getStatus(account);
 		assertEquals(AccountStatus.NEEDS_LOGIN, status);
 	}
-
 
 	@Test
 	public void checkRefreshIsRequiredIfAccessTokenExpired() {
@@ -45,7 +44,7 @@ public class AccountServiceTest {
 		AccountStatus status = service.getStatus(account);
 		assertEquals(AccountStatus.NEEDS_REFRESH, status);
 	}
-	
+
 	@Test
 	public void checkRefreshIsRequiredIfLastAccessed2DaysAgo() {
 		IAccount account = cluster.createAccount("myid");
@@ -55,7 +54,7 @@ public class AccountServiceTest {
 		AccountStatus status = service.getStatus(account);
 		assertEquals(AccountStatus.NEEDS_REFRESH, status);
 	}
-	
+
 	@Test
 	public void checkValidIfAccessedRecentry() {
 		IAccount account = cluster.createAccount("myid");

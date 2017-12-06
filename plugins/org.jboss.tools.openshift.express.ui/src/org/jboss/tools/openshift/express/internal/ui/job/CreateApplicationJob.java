@@ -54,18 +54,18 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 	private String initialGitUrl;
 	private Map<String, String> environmentVariables;
 	private Collection<ICartridge> cartridges;
-	
-	public CreateApplicationJob(final String name,final ApplicationScale scale, final IGearProfile gear, ICartridge cartridge, IDomain domain) {
-		this(name, scale, gear, null, new LinkedHashMap<String, String>(), Collections.<ICartridge>singletonList(cartridge), domain);
+
+	public CreateApplicationJob(final String name, final ApplicationScale scale, final IGearProfile gear,
+			ICartridge cartridge, IDomain domain) {
+		this(name, scale, gear, null, new LinkedHashMap<String, String>(),
+				Collections.<ICartridge>singletonList(cartridge), domain);
 	}
 
-	public CreateApplicationJob(final String name, final ApplicationScale scale,
-			final IGearProfile gear, String initialGitUrl, Map<String, String> environmentVariables, Collection<ICartridge> cartridges, IDomain domain) {
-		super(NLS.bind(
-				(cartridges == null ?
-						ExpressUIMessages.CREATING_APPLICATION
-						: ExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED)
-				, name));
+	public CreateApplicationJob(final String name, final ApplicationScale scale, final IGearProfile gear,
+			String initialGitUrl, Map<String, String> environmentVariables, Collection<ICartridge> cartridges,
+			IDomain domain) {
+		super(NLS.bind((cartridges == null ? ExpressUIMessages.CREATING_APPLICATION
+				: ExpressUIMessages.CREATING_APPLICATION_WITH_EMBEDDED), name));
 		this.name = name;
 		this.scale = scale;
 		this.gear = gear;
@@ -80,17 +80,11 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 		try {
 			Assert.isLegal(!StringUtils.isEmpty(name), "No application name provided.");
 			Assert.isLegal(domain != null, "No domain provided.");
-			Assert.isLegal(cartridges != null 
-					&& cartridges.size() >= 1, "No application type provided.");
+			Assert.isLegal(cartridges != null && cartridges.size() >= 1, "No application type provided.");
 			try {
-				this.application = new ApplicationBuilder(domain)
-					.setName(name)
-					.setCartridges(cartridges)
-					.setGearProfile(gear)
-					.setApplicationScale(scale)
-					.setEnvironmentVariables(environmentVariables)
-					.setInitialGitUrl(initialGitUrl)
-					.build();
+				this.application = new ApplicationBuilder(domain).setName(name).setCartridges(cartridges)
+						.setGearProfile(gear).setApplicationScale(scale).setEnvironmentVariables(environmentVariables)
+						.setInitialGitUrl(initialGitUrl).build();
 				return new Status(IStatus.OK, ExpressUIActivator.PLUGIN_ID, OK, "timeouted", null);
 			} catch (OpenShiftTimeoutException e) {
 				this.application = refreshAndCreateApplication(monitor);
@@ -103,12 +97,10 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 			}
 		} catch (Exception e) {
 			safeRefreshDomain();
-			return ExpressUIActivator.createErrorStatus(
-					ExpressUIMessages.COULD_NOT_CREATE_APPLICATION, e, StringUtils.nullToEmptyString(name));
+			return ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_CREATE_APPLICATION, e,
+					StringUtils.nullToEmptyString(name));
 		}
 	}
-
-
 
 	private IApplication refreshAndCreateApplication(IProgressMonitor monitor) throws OpenShiftException {
 		if (monitor.isCanceled()) {
@@ -121,20 +113,14 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 				application = domain.getApplicationByName(name);
 				if (application == null) {
 					// app is not created yet, try again
-					application = new ApplicationBuilder(domain)
-						.setName(name)
-						.setCartridges(cartridges)
-						.setGearProfile(gear)
-						.setInitialGitUrl(initialGitUrl)
-						.setEnvironmentVariables(environmentVariables)
-						.build();
+					application = new ApplicationBuilder(domain).setName(name).setCartridges(cartridges)
+							.setGearProfile(gear).setInitialGitUrl(initialGitUrl)
+							.setEnvironmentVariables(environmentVariables).build();
 				}
 			} catch (OpenShiftTimeoutException ex) {
 				// ignore
 			}
-		} while (application == null
-				&& openKeepTryingDialog()
-				&& !monitor.isCanceled());
+		} while (application == null && openKeepTryingDialog() && !monitor.isCanceled());
 		return application;
 	}
 
@@ -145,11 +131,11 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 			ExpressUIActivator.log(e);
 		}
 	}
-	
+
 	public IApplication getApplication() {
 		return application;
 	}
-	
+
 	public List<IEmbeddedCartridge> getAddedCartridges() {
 		return application.getEmbeddedCartridges();
 	}
@@ -161,16 +147,12 @@ public class CreateApplicationJob extends AbstractDelegatingMonitorJob {
 
 			@Override
 			public void run() {
-				MessageDialog dialog =
-						new MessageDialog(display.getActiveShell()
-								, NLS.bind("Creating {0}", name)
-								, display.getSystemImage(SWT.ICON_QUESTION)
-								, NLS.bind("Could not create application {0}. ExpressConnection timed out.\n\nKeep trying?",
-										name)
-								, MessageDialog.QUESTION
-								, new String[] { "Keep trying",
-										ExpressUIMessages.BTN_CLOSE_WIZARD }
-								, MessageDialog.QUESTION);
+				MessageDialog dialog = new MessageDialog(display.getActiveShell(), NLS.bind("Creating {0}", name),
+						display.getSystemImage(SWT.ICON_QUESTION),
+						NLS.bind("Could not create application {0}. ExpressConnection timed out.\n\nKeep trying?",
+								name),
+						MessageDialog.QUESTION, new String[] { "Keep trying", ExpressUIMessages.BTN_CLOSE_WIZARD },
+						MessageDialog.QUESTION);
 				// style &= SWT.SHEET;
 				// dialog.setShellStyle(dialog.getShellStyle() | style);
 				keepTrying.set(dialog.open() == IDialogConstants.OK_ID);

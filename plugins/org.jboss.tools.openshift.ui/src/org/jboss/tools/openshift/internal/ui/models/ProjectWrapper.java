@@ -59,22 +59,23 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 							.computeRelatedResources(service.getWrapped(), resources);
 					service.updateWithResources(relatedResources);
 				} else if (wrapper instanceof ReplicationControllerWrapper) {
-				    ReplicationControllerWrapper dcWrapper = (ReplicationControllerWrapper) wrapper;
-				    Collection<IResource> relatedresources = getRelatedResources(resources, wrapper);
-				    dcWrapper.updateWithResources(relatedresources);
+					ReplicationControllerWrapper dcWrapper = (ReplicationControllerWrapper) wrapper;
+					Collection<IResource> relatedresources = getRelatedResources(resources, wrapper);
+					dcWrapper.updateWithResources(relatedresources);
 				}
 			});
 		}
 	}
 
-    private Collection<IResource> getRelatedResources(Collection<IResource> resources, IResourceWrapper<?, ?> wrapper) {
-        Collection<IResource> relatedresources =
-                (ResourceKind.DEPLOYMENT_CONFIG.equals(wrapper.getWrapped().getKind()))?ServiceResourceMapper.computeRelatedResources((IDeploymentConfig) wrapper.getWrapped(), resources)
-                                                                                       :ServiceResourceMapper.computeRelatedResources((IReplicationController) wrapper.getWrapped(), resources);
-        return relatedresources;
-    }
+	private Collection<IResource> getRelatedResources(Collection<IResource> resources, IResourceWrapper<?, ?> wrapper) {
+		Collection<IResource> relatedresources = (ResourceKind.DEPLOYMENT_CONFIG.equals(wrapper.getWrapped().getKind()))
+				? ServiceResourceMapper.computeRelatedResources((IDeploymentConfig) wrapper.getWrapped(), resources)
+				: ServiceResourceMapper.computeRelatedResources((IReplicationController) wrapper.getWrapped(),
+						resources);
+		return relatedresources;
+	}
 
-    @Override
+	@Override
 	protected AbstractResourceWrapper<?, ?> createNewWrapper(Collection<IResource> resources, IResource r) {
 		AbstractResourceWrapper<?, ?> newWrapper;
 		if (r instanceof IService) {
@@ -83,20 +84,21 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 					resources);
 			newService.initWithResources(relatedResources);
 			newWrapper = newService;
-		} else if ((ResourceKind.DEPLOYMENT_CONFIG.equals(r.getKind()) ||
-		           (ResourceKind.REPLICATION_CONTROLLER.equals(r.getKind()) && !r.isAnnotatedWith(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME))) &&
-		           ServiceResourceMapper.getServices((IReplicationController) r, resources).isEmpty()) {
-		        ReplicationControllerWrapper dcWrapper = new ReplicationControllerWrapper(this, (IReplicationController) r);
-		        Collection<IResource> relatedResource = getRelatedResources(resources, dcWrapper);
-		        dcWrapper.initWithResources(relatedResource);
-		        newWrapper = dcWrapper;
+		} else if ((ResourceKind.DEPLOYMENT_CONFIG.equals(r.getKind())
+				|| (ResourceKind.REPLICATION_CONTROLLER.equals(r.getKind())
+						&& !r.isAnnotatedWith(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME)))
+				&& ServiceResourceMapper.getServices((IReplicationController) r, resources).isEmpty()) {
+			ReplicationControllerWrapper dcWrapper = new ReplicationControllerWrapper(this, (IReplicationController) r);
+			Collection<IResource> relatedResource = getRelatedResources(resources, dcWrapper);
+			dcWrapper.initWithResources(relatedResource);
+			newWrapper = dcWrapper;
 		} else {
 			newWrapper = new ResourceWrapper(ProjectWrapper.this, r);
 		}
 		return newWrapper;
 	}
 
-    @Override
+	@Override
 	void initWithResources(Collection<IResource> resources) {
 		super.initWithResources(resources);
 		state.set(LoadingState.LOADED);
@@ -109,9 +111,9 @@ public class ProjectWrapper extends ResourceContainer<IProject, ConnectionWrappe
 		fireChanged();
 	}
 
-    @Override
-    public Collection<IResourceWrapper<?, ?>> getResources() {
-        load(IExceptionHandler.NULL_HANDLER);
-        return super.getResources();
-    }
+	@Override
+	public Collection<IResourceWrapper<?, ?>> getResources() {
+		load(IExceptionHandler.NULL_HANDLER);
+		return super.getResources();
+	}
 }

@@ -36,7 +36,8 @@ public class ExpressConnectionAdapterFactory implements IAdapterFactory {
 			connection = (ExpressConnection) adaptableObject;
 		} else if (adaptableObject instanceof IDomain) {
 			IDomain domain = (IDomain) adaptableObject;
-			connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
+			connection = ExpressConnectionUtils.getByResource(domain.getUser(),
+					ConnectionsRegistrySingleton.getInstance());
 		} else if (adaptableObject instanceof IUser) {
 			IUser user = (IUser) adaptableObject;
 			connection = ExpressConnectionUtils.getByResource(user, ConnectionsRegistrySingleton.getInstance());
@@ -46,7 +47,7 @@ public class ExpressConnectionAdapterFactory implements IAdapterFactory {
 		} else if (adaptableObject instanceof IEmbeddedCartridge) {
 			IEmbeddedCartridge embeddedCartridge = (IEmbeddedCartridge) adaptableObject;
 			IApplication application = embeddedCartridge.getApplication();
-			if (application != null) {				
+			if (application != null) {
 				connection = getConnection(application);
 			}
 		}

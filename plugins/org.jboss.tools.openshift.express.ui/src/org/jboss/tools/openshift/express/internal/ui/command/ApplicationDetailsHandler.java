@@ -53,19 +53,20 @@ public class ApplicationDetailsHandler extends AbstractHandler {
 		}
 		final LoadApplicationJob applicationJob = new LoadApplicationJob(server);
 		new JobChainBuilder(applicationJob)
-			.runWhenSuccessfullyDone(new UIJob(NLS.bind("Displaying application details", server.getName())) {
-				
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					IApplication application = applicationJob.getApplication();
-					if (application == null) {
-						return ExpressUIActivator.createCancelStatus("Could not display details for application {0}. Application not found.", server.getName());
+				.runWhenSuccessfullyDone(new UIJob(NLS.bind("Displaying application details", server.getName())) {
+
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						IApplication application = applicationJob.getApplication();
+						if (application == null) {
+							return ExpressUIActivator.createCancelStatus(
+									"Could not display details for application {0}. Application not found.",
+									server.getName());
+						}
+						openApplicationDetailsDialog(application, shell);
+						return Status.OK_STATUS;
 					}
-					openApplicationDetailsDialog(application, shell);
-					return Status.OK_STATUS;
-				}
-			})
-			.schedule();
+				}).schedule();
 	}
 
 	protected void openApplicationDetailsDialog(IApplication application, Shell shell) {

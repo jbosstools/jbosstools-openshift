@@ -25,17 +25,15 @@ public class ImageStreamPropertySource extends ResourcePropertySource<IImageStre
 
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new UneditablePropertyDescriptor(REGISTRY, "Registry")
-		};
+		return new IPropertyDescriptor[] { new UneditablePropertyDescriptor(REGISTRY, "Registry") };
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		if(REGISTRY.equals(id)){
+		if (REGISTRY.equals(id)) {
 			return getResource().getDockerImageRepository();
 		}
 		return super.getPropertyValue(id);
 	}
-	
+
 }

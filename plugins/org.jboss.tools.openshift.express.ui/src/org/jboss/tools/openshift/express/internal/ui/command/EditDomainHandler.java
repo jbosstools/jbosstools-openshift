@@ -34,5 +34,5 @@ public class EditDomainHandler extends AbstractDomainHandler {
 		WizardUtils.openWizardDialog(new EditDomainWizard(domain), HandlerUtil.getActiveShell(event));
 		return null;
 	}
-	
+
 }

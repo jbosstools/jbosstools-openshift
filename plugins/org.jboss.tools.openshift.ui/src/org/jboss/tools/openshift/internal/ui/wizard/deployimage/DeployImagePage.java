@@ -92,7 +92,7 @@ import com.openshift.restclient.model.IProject;
  * @author jeff.cantrill
  */
 public class DeployImagePage extends AbstractOpenShiftWizardPage {
-	
+
 	private static final String MISSING_DOCKER_CONNECTION_MSG = "You must select a Docker connection.";
 
 	static String DEPLOY_IMAGE_PAGE_NAME = "Deployment Config Settings Page";
@@ -100,7 +100,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	private static final String PAGE_DESCRIPTION = "This page allows you to choose an image and the name to be used for the deployed resources.";
 
 	private static final int NUM_COLUMS = 4;
-	
+
 	private final IDeployImagePageModel model;
 
 	ContentProposalAdapter imageNameProposalAdapter;
@@ -109,10 +109,10 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		super("Deploy an Image", PAGE_DESCRIPTION, DEPLOY_IMAGE_PAGE_NAME, wizard);
 		this.model = model;
 	}
-	
+
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(IStatus.ERROR |  IStatus.CANCEL, this, dbc);
+		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
 	}
 
 	/**
@@ -131,15 +131,16 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	 *            the current data binding context
 	 */
 	@Override
-	protected void onPageWillGetDeactivated(final Direction progress, final PageChangingEvent event, final DataBindingContext dbc) {
-		if(imageNameProposalAdapter != null) {
+	protected void onPageWillGetDeactivated(final Direction progress, final PageChangingEvent event,
+			final DataBindingContext dbc) {
+		if (imageNameProposalAdapter != null) {
 			imageNameProposalAdapter.setEnabled(false);
 		}
-		if(progress == Direction.BACKWARDS) {
+		if (progress == Direction.BACKWARDS) {
 			//Do not block return to change connection.
 			return;
 		}
-		
+
 		/**
 		 * Inner class to perform the image search in the selected Docker daemon cache or on the remote registry. 
 		 */
@@ -151,31 +152,34 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				if(model.initializeContainerInfo()) {
+				if (model.initializeContainerInfo()) {
 					return Status.OK_STATUS;
 				}
 				return Status.CANCEL_STATUS;
 			}
 		}
-		
+
 		final ImageValidatorJob imageValidator = new ImageValidatorJob("Looking-up the selected Docker image...");
 		try {
-			final IStatus validatorJobStatus = WizardUtils.runInWizard(imageValidator, getContainer(), getDataBindingContext());
+			final IStatus validatorJobStatus = WizardUtils.runInWizard(imageValidator, getContainer(),
+					getDataBindingContext());
 			if (!validatorJobStatus.isOK()) {
 				MessageDialog.openError(getShell(), "Error",
 						NLS.bind("No Docker image named {0} could be found.", model.getImageName()));
 				event.doit = false;
 			}
 		} catch (InvocationTargetException | InterruptedException e) {
-			final String message = NLS.bind("Failed to look-up metadata for a Docker image named {0}.", model.getImageName());
+			final String message = NLS.bind("Failed to look-up metadata for a Docker image named {0}.",
+					model.getImageName());
 			MessageDialog.openError(getShell(), "Error", message);
 			OpenShiftUIActivator.getDefault().getLogger().logError(message, e);
 		}
 	}
 
 	@Override
-	protected void onPageWillGetActivated(final Direction progress, final PageChangingEvent event, final DataBindingContext dbc) {
-		if(imageNameProposalAdapter != null) {
+	protected void onPageWillGetActivated(final Direction progress, final PageChangingEvent event,
+			final DataBindingContext dbc) {
+		if (imageNameProposalAdapter != null) {
 			imageNameProposalAdapter.setEnabled(true);
 		}
 	}
@@ -188,17 +192,17 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 
 	private void loadResources(DataBindingContext dbc) {
 		Job job = new AbstractDelegatingMonitorJob("Loading projects...") {
-			 	
-				@Override
-				protected IStatus doRun(IProgressMonitor monitor) {
-					try {
-						model.loadResources();
-						return Status.OK_STATUS;
-					} catch(Exception e) {
-						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,
-								NLS.bind("Unable to load the OpenShift projects from connection {0}.", model.getConnection()), e);
-					}
+
+			@Override
+			protected IStatus doRun(IProgressMonitor monitor) {
+				try {
+					model.loadResources();
+					return Status.OK_STATUS;
+				} catch (Exception e) {
+					return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind(
+							"Unable to load the OpenShift projects from connection {0}.", model.getConnection()), e);
 				}
+			}
 		};
 		try {
 			WizardUtils.runInWizard(job, getContainer(), dbc);
@@ -206,12 +210,10 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			// swallowed on purpose
 		}
 	}
-	
+
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults().numColumns(NUM_COLUMS)
-				.margins(10, 10)
-				.applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(NUM_COLUMS).margins(10, 10).applyTo(parent);
 		createOpenShiftConnectionControl(parent, dbc);
 		createProjectControl(parent, dbc);
 		createSeparator(parent);
@@ -224,11 +226,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		new ResourceNameControl() {
 			@Override
 			protected void layoutText(Text resourceNameText) {
-				GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.grab(true, false)
-				.span(NUM_COLUMS -1, 1)
-				.applyTo(resourceNameText);
+				GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(NUM_COLUMS - 1, 1)
+						.applyTo(resourceNameText);
 			}
 		}.doCreateControl(parent, dbc, model);
 		createSeparator(parent);
@@ -236,12 +235,8 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	}
 
 	private void createSeparator(Composite parent) {
-		GridDataFactory
-			.fillDefaults()
-			.align(SWT.FILL, SWT.BEGINNING)
-			.grab(true, false)
-			.span(NUM_COLUMS, 1)
-			.applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.BEGINNING).grab(true, false).span(NUM_COLUMS, 1)
+				.applyTo(new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL));
 	}
 
 	private SelectionAdapter onBrowseImage() {
@@ -249,85 +244,81 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (model.getDockerConnection() == null) {
-					MessageDialog.openError(getShell(), "A Docker connection must be selected", MISSING_DOCKER_CONNECTION_MSG);
+					MessageDialog.openError(getShell(), "A Docker connection must be selected",
+							MISSING_DOCKER_CONNECTION_MSG);
 					return;
 				}
-				final ListDockerImagesWizard wizard = new ListDockerImagesWizard(model.getDockerConnection(), model.getImageName());
+				final ListDockerImagesWizard wizard = new ListDockerImagesWizard(model.getDockerConnection(),
+						model.getImageName());
 				final OkCancelButtonWizardDialog wizardDialog = new OkCancelButtonWizardDialog(getShell(), wizard);
 				wizardDialog.setPageSize(500, 400);
-				if(Window.OK == wizardDialog.open()){
+				if (Window.OK == wizardDialog.open()) {
 					//this bypasses validation
 					model.setImageName(wizard.getSelectedImageName());
 				}
 			}
 		};
 	}
-	
+
 	private SelectionAdapter onSearchImage(final Text txtImage) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (model.getDockerConnection() == null) {
-					MessageDialog.openError(getShell(), "A Docker connection must be selected", MISSING_DOCKER_CONNECTION_MSG);
+					MessageDialog.openError(getShell(), "A Docker connection must be selected",
+							MISSING_DOCKER_CONNECTION_MSG);
 					return;
 				}
 				// FIXME: may need to revisit the call to the constructor once https://bugs.eclipse.org/bugs/show_bug.cgi?id=495285 is addressed
 				// there may be no need to to specify the registry info if we want to search on Docker Hub.
-				ImageSearch wizard = new ImageSearch(
-						model.getDockerConnection(), txtImage.getText(), new RegistryInfo(AbstractRegistry.DOCKERHUB_REGISTRY, true));
-				if(Window.OK == new OkCancelButtonWizardDialog(getShell(), wizard).open()){
+				ImageSearch wizard = new ImageSearch(model.getDockerConnection(), txtImage.getText(),
+						new RegistryInfo(AbstractRegistry.DOCKERHUB_REGISTRY, true));
+				if (Window.OK == new OkCancelButtonWizardDialog(getShell(), wizard).open()) {
 					//this bypasses validation
 					model.setImageName(wizard.getSelectedImage(), true);
 				}
 			}
 		};
 	}
-	
+
 	private void createDockerConnectionControl(Composite parent, DataBindingContext dbc) {
 		createDockerConnectionLabel(parent);
-		
+
 		StructuredViewer connectionViewer = new ComboViewer(parent);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.span(NUM_COLUMS - 2, 1)
-			.applyTo(connectionViewer.getControl());
-		
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(NUM_COLUMS - 2, 1)
+				.applyTo(connectionViewer.getControl());
+
 		connectionViewer.setContentProvider(new ObservableListContentProvider());
 		connectionViewer.setLabelProvider(new ObservableTreeItemLabelProvider() {
 
 			@Override
 			public String getText(Object element) {
-				return (element instanceof IDockerConnection) ? dockerConnectionToString((IDockerConnection) element) : "";
+				return (element instanceof IDockerConnection) ? dockerConnectionToString((IDockerConnection) element)
+						: "";
 			}
-			
+
 		});
-		connectionViewer.setInput(
-				BeanProperties.list(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTIONS).observe(model));
-		
-		IObservableValue<IDockerConnection> dockerConnectionObservable = 
-				BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
+		connectionViewer
+				.setInput(BeanProperties.list(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTIONS).observe(model));
+
+		IObservableValue<IDockerConnection> dockerConnectionObservable = BeanProperties
+				.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
 		DockerConnectionStatusProvider validator = new DockerConnectionStatusProvider(dockerConnectionObservable);
 		IObservableValue<?> selectedConnectionObservable = ViewerProperties.singleSelection().observe(connectionViewer);
-		Binding selectedConnectionBinding = 
-			ValueBindingBuilder.bind(selectedConnectionObservable)
-			.converting(new ObservableTreeItem2ModelConverter(IDockerConnection.class))
-			.validatingAfterConvert(validator)
-			.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION)
-			.observe(model))
-			.in(dbc);
-		ControlDecorationSupport.create(
-			selectedConnectionBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		
+		Binding selectedConnectionBinding = ValueBindingBuilder.bind(selectedConnectionObservable)
+				.converting(new ObservableTreeItem2ModelConverter(IDockerConnection.class))
+				.validatingAfterConvert(validator)
+				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model)).in(dbc);
+		ControlDecorationSupport.create(selectedConnectionBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
+
 		Button newDockerConnectionButton = new Button(parent, SWT.PUSH);
 		newDockerConnectionButton.setText("New...");
-        GridDataFactory.fillDefaults()
-            .align(SWT.LEFT, SWT.CENTER)
-            .applyTo(newDockerConnectionButton);
-        UIUtils.setDefaultButtonWidth(newDockerConnectionButton);
-        newDockerConnectionButton.addSelectionListener(onNewDockerConnectionClicked());
-     		
-        dbc.addValidationStatusProvider(validator);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(newDockerConnectionButton);
+		UIUtils.setDefaultButtonWidth(newDockerConnectionButton);
+		newDockerConnectionButton.addSelectionListener(onNewDockerConnectionClicked());
+
+		dbc.addValidationStatusProvider(validator);
 	}
 
 	private String dockerConnectionToString(IDockerConnection conn) {
@@ -337,9 +328,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	private Label createDockerConnectionLabel(Composite parent) {
 		Label lblConnection = new Label(parent, SWT.NONE);
 		lblConnection.setText("Docker Connection: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(lblConnection);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(lblConnection);
 		return lblConnection;
 	}
 
@@ -369,102 +358,86 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		Label lblConnection = createDockerConnectionLabel(parent);
 		final Text connectionText = new Text(parent, SWT.READ_ONLY | SWT.NO_FOCUS);
 		connectionText.setBackground(lblConnection.getBackground());
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.span(NUM_COLUMS - 1, 1)
-			.grab(true, false)
-			.applyTo(connectionText);
-		final IObservableValue<String> connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
-		final IObservableValue<IDockerConnection> connnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
-		ValueBindingBuilder.bind(connnectionTextObservable)
-			.notUpdatingParticipant()
-			.to(connnectionObservable)
-			.converting(new ObjectToStringConverter(IDockerConnection.class) {
-				ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
-				@Override
-				public Object convert(Object source) {
-					return (source instanceof IDockerConnection) ? dockerConnectionToString((IDockerConnection) source) : "";
-				}
-			})
-			.in(dbc);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(NUM_COLUMS - 1, 1).grab(true, false)
+				.applyTo(connectionText);
+		final IObservableValue<String> connnectionTextObservable = WidgetProperties.text(SWT.None)
+				.observe(connectionText);
+		final IObservableValue<IDockerConnection> connnectionObservable = BeanProperties
+				.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model);
+		ValueBindingBuilder.bind(connnectionTextObservable).notUpdatingParticipant().to(connnectionObservable)
+				.converting(new ObjectToStringConverter(IDockerConnection.class) {
+					ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
+
+					@Override
+					public Object convert(Object source) {
+						return (source instanceof IDockerConnection)
+								? dockerConnectionToString((IDockerConnection) source) : "";
+					}
+				}).in(dbc);
 	}
 
 	private void createOpenShiftConnectionControl(Composite parent, DataBindingContext dbc) {
 		Label lblConnection = new Label(parent, SWT.NONE);
 		lblConnection.setText("OpenShift Connection: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(lblConnection);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(lblConnection);
 		final Text connectionText = new Text(parent, SWT.READ_ONLY | SWT.NO_FOCUS);
 		connectionText.setBackground(lblConnection.getBackground());
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.span(NUM_COLUMS - 1, 1)
-			.grab(true, false)
-			.applyTo(connectionText);
-		final IObservableValue<String> connnectionTextObservable = WidgetProperties.text(SWT.None).observe(connectionText);
-		final IObservableValue<IConnection> connnectionObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_CONNECTION).observe(model);
-		ValueBindingBuilder.bind(connnectionTextObservable)
-			.notUpdatingParticipant()
-			.to(connnectionObservable)
-			.converting(new ObjectToStringConverter(Connection.class) {
-				ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
-				@Override
-				public Object convert(Object source) {
-					return source == null ? "" : labelProvider.getText(source);
-				}
-			})
-			.in(dbc);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(NUM_COLUMS - 1, 1).grab(true, false)
+				.applyTo(connectionText);
+		final IObservableValue<String> connnectionTextObservable = WidgetProperties.text(SWT.None)
+				.observe(connectionText);
+		final IObservableValue<IConnection> connnectionObservable = BeanProperties
+				.value(IDeployImagePageModel.PROPERTY_CONNECTION).observe(model);
+		ValueBindingBuilder.bind(connnectionTextObservable).notUpdatingParticipant().to(connnectionObservable)
+				.converting(new ObjectToStringConverter(Connection.class) {
+					ConnectionColumLabelProvider labelProvider = new ConnectionColumLabelProvider();
+
+					@Override
+					public Object convert(Object source) {
+						return source == null ? "" : labelProvider.getText(source);
+					}
+				}).in(dbc);
 	}
 
 	private void createProjectControl(Composite parent, DataBindingContext dbc) {
 		Label lblProject = new Label(parent, SWT.NONE);
 		lblProject.setText("OpenShift Project: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(lblProject);
-		
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(lblProject);
+
 		StructuredViewer cmboProject = new ComboViewer(parent);
 		GridDataFactory.fillDefaults()
-//			.align(SWT.FILL, SWT.CENTER)
-//			.grab(true, false)
-//			.hint(SWT.DEFAULT, 30)
-			.span(NUM_COLUMS - 2, 1)
-			.applyTo(cmboProject.getControl());
-		
+				//			.align(SWT.FILL, SWT.CENTER)
+				//			.grab(true, false)
+				//			.hint(SWT.DEFAULT, 30)
+				.span(NUM_COLUMS - 2, 1).applyTo(cmboProject.getControl());
+
 		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();
 		cmboProject.setContentProvider(new ObservableListContentProvider());
 		cmboProject.setLabelProvider(labelProvider);
-		cmboProject.setInput(
-				BeanProperties.list(IDeployImagePageModel.PROPERTY_PROJECTS).observe(model));
+		cmboProject.setInput(BeanProperties.list(IDeployImagePageModel.PROPERTY_PROJECTS).observe(model));
 		ProjectViewerComparator comparator = new ProjectViewerComparator(labelProvider);
 		cmboProject.setComparator(comparator);
 		model.setProjectsComparator(comparator.asProjectComparator());
 
-		IObservableValue<IProject> projectObservable = 
-				BeanProperties.value(IDeployImagePageModel.PROPERTY_PROJECT).observe(model);
+		IObservableValue<IProject> projectObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_PROJECT)
+				.observe(model);
 		ProjectStatusProvider validator = new ProjectStatusProvider(projectObservable);
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(cmboProject);
-		Binding selectedProjectBinding = 
-			ValueBindingBuilder.bind(selectedProjectObservable)
-			.converting(new ObservableTreeItem2ModelConverter(IProject.class))
-			.validatingAfterConvert(validator)
-			.to(projectObservable)
-			.in(dbc);
-		ControlDecorationSupport.create(
-				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
-		
+		Binding selectedProjectBinding = ValueBindingBuilder.bind(selectedProjectObservable)
+				.converting(new ObservableTreeItem2ModelConverter(IProject.class)).validatingAfterConvert(validator)
+				.to(projectObservable).in(dbc);
+		ControlDecorationSupport.create(selectedProjectBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
+
 		Button newProjectButton = new Button(parent, SWT.PUSH);
 		newProjectButton.setText("New...");
-		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.CENTER)
-			.applyTo(newProjectButton);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(newProjectButton);
 		UIUtils.setDefaultButtonWidth(newProjectButton);
 		newProjectButton.addSelectionListener(onNewProjectClicked());
-		
-        dbc.addValidationStatusProvider(validator);
 
-        cmboProject.getControl().forceFocus();
+		dbc.addValidationStatusProvider(validator);
+
+		cmboProject.getControl().forceFocus();
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -493,31 +466,25 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		//Image
 		final Label imageNameLabel = new Label(parent, SWT.NONE);
 		imageNameLabel.setText("Image Name: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(imageNameLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(imageNameLabel);
 		final Text imageNameText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.grab(true, false)
-			.applyTo(imageNameText);
-		final IObservableValue<String> imageNameTextObservable = 
-				WidgetProperties.text(SWT.Modify).observeDelayed(500, imageNameText);
-		final IObservableValue<String> imageNameObservable = BeanProperties.value(IDeployImagePageModel.PROPERTY_IMAGE_NAME).observe(model);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(imageNameText);
+		final IObservableValue<String> imageNameTextObservable = WidgetProperties.text(SWT.Modify).observeDelayed(500,
+				imageNameText);
+		final IObservableValue<String> imageNameObservable = BeanProperties
+				.value(IDeployImagePageModel.PROPERTY_IMAGE_NAME).observe(model);
 		Binding imageBinding = ValueBindingBuilder.bind(imageNameTextObservable)
-		        .converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new DockerImageValidator())
+				.converting(new TrimmingStringConverter()).validatingAfterConvert(new DockerImageValidator())
 				.to(imageNameObservable).in(dbc);
-		ControlDecorationSupport.create(
-				imageBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		ControlDecorationSupport.create(imageBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
 
 		imageNameProposalAdapter = new ContentProposalAdapter(imageNameText,
 				// override the text value before content assist was invoked and
 				// move the cursor to the end of the selected value
 				new TextContentAdapter() {
 					@Override
-					public void insertControlContents(Control control,
-							String text, int cursorPosition) {
+					public void insertControlContents(Control control, String text, int cursorPosition) {
 						final Text imageNameText = (Text) control;
 						final Point selection = imageNameText.getSelection();
 						imageNameText.setText(text);
@@ -525,21 +492,17 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 						selection.y = selection.x;
 						imageNameText.setSelection(selection);
 					}
-				}, getImageNameContentProposalProvider(imageNameText),
-				null, null);
-		
+				}, getImageNameContentProposalProvider(imageNameText), null, null);
+
 		// List local Docker images
 		Button btnDockerBrowse = new Button(parent, SWT.NONE);
 		btnDockerBrowse.setText("Browse...");
 		btnDockerBrowse.setToolTipText("Look-up an image by browsing the Docker daemon");
 		btnDockerBrowse.addSelectionListener(onBrowseImage());
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(btnDockerBrowse);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(btnDockerBrowse))
-				.notUpdatingParticipant()
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(btnDockerBrowse)).notUpdatingParticipant()
 				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model))
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+				.converting(new IsNotNull2BooleanConverter()).in(dbc);
 
 		// search on Docker registry (Docker Hub)
 		Button btnDockerSearch = new Button(parent, SWT.NONE);
@@ -547,20 +510,18 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 		btnDockerSearch.setToolTipText("Search an image on the Docker registry");
 		btnDockerSearch.addSelectionListener(onSearchImage(imageNameText));
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(btnDockerSearch);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(btnDockerSearch))
-				.notUpdatingParticipant()
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(btnDockerSearch)).notUpdatingParticipant()
 				.to(BeanProperties.value(IDeployImagePageModel.PROPERTY_DOCKER_CONNECTION).observe(model))
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+				.converting(new IsNotNull2BooleanConverter()).in(dbc);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void createPushToRegistrySettings(final Composite parent, final DataBindingContext dbc) {
 		// checkbox
 		final Button pushImageToRegistryButton = new Button(parent, SWT.CHECK);
 		pushImageToRegistryButton.setText("Push Image to Registry");
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(NUM_COLUMS, 1).applyTo(pushImageToRegistryButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(NUM_COLUMS, 1)
+				.applyTo(pushImageToRegistryButton);
 		final IObservableValue<Boolean> pushImageToRegistryButtonObservable = BeanProperties
 				.value(IDeployImagePageModel.PROPERTY_PUSH_IMAGE_TO_REGISTRY).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(pushImageToRegistryButton))
@@ -610,7 +571,7 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 				.to(registryPasswordObservable).in(dbc);
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(registryPasswordText))
 				.to(pushImageToRegistryButtonObservable).in(dbc);
-		
+
 		// validation
 		final PushImageToRegistryStatusProvider validator = new PushImageToRegistryStatusProvider(
 				pushImageToRegistryButtonObservable, registryLocationObservable, registryUsernameObservable,
@@ -620,14 +581,15 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	}
 
 	class PushImageToRegistryStatusProvider extends MultiValidator {
-		
+
 		private final IObservableValue<Boolean> pushImageToRegistryObservable;
 		private final IObservableValue<String> targetRegistryLocationObservable;
 		private final IObservableValue<String> targetRegistryUsernameObservable;
 		private final IObservableValue<String> targetRegistryPasswordObservable;
 
 		PushImageToRegistryStatusProvider(final IObservableValue<Boolean> pushImageToRegistryObservable,
-				final IObservableValue<String> targetRegistryLocationObservable, final IObservableValue<String> targetRegistryUsernameObservable,
+				final IObservableValue<String> targetRegistryLocationObservable,
+				final IObservableValue<String> targetRegistryUsernameObservable,
 				final IObservableValue<String> targetRegistryPasswordObservable) {
 			this.pushImageToRegistryObservable = pushImageToRegistryObservable;
 			this.targetRegistryLocationObservable = targetRegistryLocationObservable;
@@ -644,20 +606,22 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 			if (pushImageToRegistry) {
 				if (targetRegistryLocation == null || targetRegistryLocation.isEmpty()) {
 					return ValidationStatus.error("Please specify location of the Docker registry to push the image");
-				} else if(!UrlUtils.hasScheme(targetRegistryLocation)) {
+				} else if (!UrlUtils.hasScheme(targetRegistryLocation)) {
 					return ValidationStatus.error("Please provide a valid image registry (HTTP/S) URL.");
 				}
 				if (targetRegistryUsername == null || targetRegistryUsername.isEmpty()) {
-					return ValidationStatus.info("The username to authenticate to the target registry is missing. Authentication may fail.");
+					return ValidationStatus.info(
+							"The username to authenticate to the target registry is missing. Authentication may fail.");
 				}
 				if (targetRegistryPassword == null || targetRegistryPassword.isEmpty()) {
-					return ValidationStatus.info("The password to authenticate to the target registry is missing. Authentication may fail.");
+					return ValidationStatus.info(
+							"The password to authenticate to the target registry is missing. Authentication may fail.");
 				}
 			}
 			return Status.OK_STATUS;
 		}
 	}
-	
+
 	/**
 	 * Creates an {@link IContentProposalProvider} to propose
 	 * {@link IDockerImage} names based on the current text.
@@ -665,88 +629,86 @@ public class DeployImagePage extends AbstractOpenShiftWizardPage {
 	 * @param items
 	 * @return
 	 */
-	private IContentProposalProvider getImageNameContentProposalProvider(
-			final Text imageNameText) {
+	private IContentProposalProvider getImageNameContentProposalProvider(final Text imageNameText) {
 		return new IContentProposalProvider() {
 
 			@Override
-			public IContentProposal[] getProposals(final String input,
-					final int position) {
+			public IContentProposal[] getProposals(final String input, final int position) {
 				return model.getImageNames().stream().filter(name -> name.contains(input))
 						.map(n -> new ContentProposal(n, n, null, position))
 						.toArray(size -> new IContentProposal[size]);
 			}
 		};
 	}
-	
-	private SelectionAdapter onNewProjectClicked() {
-	    return new SelectionAdapter() {
 
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                try {
-                    // run in job to enforce busy cursor which doesnt work otherwise
-                    WizardUtils.runInWizard(new UIJob("Opening projects wizard...") {
+	private SelectionAdapter onNewProjectClicked() {
+		return new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					// run in job to enforce busy cursor which doesnt work otherwise
+					WizardUtils.runInWizard(new UIJob("Opening projects wizard...") {
 
 						@Override
 						public IStatus runInUIThread(IProgressMonitor monitor) {
-                            NewProjectWizard newProjectWizard = new NewProjectWizard(model.getConnection(), (List<IProject>) model.getProjects());
-                            int result = new OkCancelButtonWizardDialog(getShell(), newProjectWizard).open();
-                            // reload projects to reflect changes that happened in
-                            // projects wizard
-                            if (newProjectWizard.getProject() != null) {
-                                model.addProject(newProjectWizard.getProject());
-                            }
-                            if (Dialog.OK == result) {
-                                IProject selectedProject = newProjectWizard.getProject();
-                                if (selectedProject != null) {
-                                    model.setProject(selectedProject);
-                                }
-                            }
-                            return Status.OK_STATUS;
+							NewProjectWizard newProjectWizard = new NewProjectWizard(model.getConnection(),
+									(List<IProject>) model.getProjects());
+							int result = new OkCancelButtonWizardDialog(getShell(), newProjectWizard).open();
+							// reload projects to reflect changes that happened in
+							// projects wizard
+							if (newProjectWizard.getProject() != null) {
+								model.addProject(newProjectWizard.getProject());
+							}
+							if (Dialog.OK == result) {
+								IProject selectedProject = newProjectWizard.getProject();
+								if (selectedProject != null) {
+									model.setProject(selectedProject);
+								}
+							}
+							return Status.OK_STATUS;
 						}
-                    }, getContainer(), getDataBindingContext());
-                } catch (InvocationTargetException | InterruptedException ex) {
-                    // swallow intentionnally
-                }
-            }
-	    };
+					}, getContainer(), getDataBindingContext());
+				} catch (InvocationTargetException | InterruptedException ex) {
+					// swallow intentionnally
+				}
+			}
+		};
 	}
-	
-    private SelectionAdapter onNewDockerConnectionClicked() {
-        return new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                try {
-                    // run in job to enforce busy cursor which doesnt work otherwise
-                    WizardUtils.runInWizard(new UIUpdatingJob("Opening new Docker connection wizard...") {
 
-                        @Override
-                        protected IStatus run(IProgressMonitor monitor) {
-                            return Status.OK_STATUS;
-                        }
+	private SelectionAdapter onNewDockerConnectionClicked() {
+		return new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					// run in job to enforce busy cursor which doesnt work otherwise
+					WizardUtils.runInWizard(new UIUpdatingJob("Opening new Docker connection wizard...") {
 
-                        @Override
-                        protected IStatus updateUI(IProgressMonitor monitor) {
-                            NewDockerConnection newDockerConnectionWizard = new NewDockerConnection();
-                            int result = new OkCancelButtonWizardDialog(getShell(), newDockerConnectionWizard).open();
-                            // set docker connection to reflect changes that happened in
-                            // docker connection wizard
-                            if (Dialog.OK == result) {
-                                IDockerConnection dockerConnection = newDockerConnectionWizard.getDockerConnection();
-                                if(dockerConnection != null) {
-                                    model.setDockerConnection(dockerConnection);
-                                }
-                            }
-                            return Status.OK_STATUS;
-                        }
-                    }, getContainer(), getDatabindingContext());
-                } catch (InvocationTargetException | InterruptedException ex) {
-                    OpenShiftUIActivator.getDefault().getLogger().logError(ex);
-                }
-            }
-        };
-    }
-    
-    
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							return Status.OK_STATUS;
+						}
+
+						@Override
+						protected IStatus updateUI(IProgressMonitor monitor) {
+							NewDockerConnection newDockerConnectionWizard = new NewDockerConnection();
+							int result = new OkCancelButtonWizardDialog(getShell(), newDockerConnectionWizard).open();
+							// set docker connection to reflect changes that happened in
+							// docker connection wizard
+							if (Dialog.OK == result) {
+								IDockerConnection dockerConnection = newDockerConnectionWizard.getDockerConnection();
+								if (dockerConnection != null) {
+									model.setDockerConnection(dockerConnection);
+								}
+							}
+							return Status.OK_STATUS;
+						}
+					}, getContainer(), getDatabindingContext());
+				} catch (InvocationTargetException | InterruptedException ex) {
+					OpenShiftUIActivator.getDefault().getLogger().logError(ex);
+				}
+			}
+		};
+	}
+
 }

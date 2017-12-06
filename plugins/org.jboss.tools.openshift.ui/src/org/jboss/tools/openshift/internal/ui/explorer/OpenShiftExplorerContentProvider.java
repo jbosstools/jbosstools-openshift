@@ -56,7 +56,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	public OpenShiftExplorerContentProvider() {
 		this(OpenshiftUIModel.getInstance());
 	}
-	
+
 	/**
 	 * Constructor for testing purposes to inject mocked OpenshiftUIModel
 	 */
@@ -128,7 +128,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			return stub;
 		}
 	}
-	
+
 	private LoadingStub removeStub(Object parentElement) {
 		synchronized (stubs) {
 			return stubs.remove(parentElement);
@@ -147,15 +147,15 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 		} else if (parentElement instanceof IServiceWrapper) {
 			return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>) parentElement);
 		} else if (parentElement instanceof IReplicationControllerWrapper) {
-		    return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>) parentElement);
+			return getContainerChildren((IResourceContainer<?, IOpenshiftUIElement<?, ?>>) parentElement);
 		} else if (parentElement instanceof LoadingStub) {
 			return ((LoadingStub) parentElement).getChildren();
 		}
 		return new Object[0];
 	}
-	
+
 	protected Object[] getConnectionChildren(IConnectionWrapper connection) {
-		switch(connection.getState()) {
+		switch (connection.getState()) {
 		case LOADED:
 			removeStub(connection);
 			Object[] result = connection.getResources().toArray();
@@ -175,13 +175,14 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			return new Object[] { makeStub(connection) };
 		}
 	}
-	
+
 	protected Object[] getProjectChildren(IProjectWrapper project) {
-		switch(project.getState()) {
+		switch (project.getState()) {
 		case LOADED:
 			removeStub(project);
 			Collection<IResourceWrapper<?, ?>> services = project.getResourcesOfKind(ResourceKind.SERVICE);
-			Collection<IReplicationControllerWrapper> dcs = project.getResourcesOfType(IReplicationControllerWrapper.class);
+			Collection<IReplicationControllerWrapper> dcs = project
+					.getResourcesOfType(IReplicationControllerWrapper.class);
 			services.addAll(dcs);
 			return services.toArray();
 		case LOAD_STOPPED:
@@ -196,17 +197,17 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			return new Object[] { makeStub(project) };
 		}
 	}
-	
-	protected Object[] getContainerChildren(IResourceContainer<?, IOpenshiftUIElement<?,?>> service) {
+
+	protected Object[] getContainerChildren(IResourceContainer<?, IOpenshiftUIElement<?, ?>> service) {
 		ArrayList<Object> result = new ArrayList<>();
-		service.getResourcesOfKind(ResourceKind.BUILD).stream()
-				.filter(b -> !isTerminatedBuild((IBuild) b.getWrapped())).forEach(r -> result.add(r));
+		service.getResourcesOfKind(ResourceKind.BUILD).stream().filter(b -> !isTerminatedBuild((IBuild) b.getWrapped()))
+				.forEach(r -> result.add(r));
 		service.getResourcesOfKind(ResourceKind.POD).stream()
 				.filter(p -> !ResourceUtils.isBuildPod((IPod) p.getWrapped())).forEach(r -> result.add(r));
 		return result.toArray();
 	}
 
-    @Override
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		// non-structured viewer would be a configuration problem. Crash!
 		this.viewer = (StructuredViewer) viewer;

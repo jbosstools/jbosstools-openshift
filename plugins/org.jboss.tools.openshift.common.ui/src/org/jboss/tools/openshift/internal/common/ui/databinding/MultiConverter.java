@@ -43,10 +43,9 @@ public class MultiConverter implements IConverter {
 							NLS.bind("Converter {0} is not set to convert from a class (type).", converter.getClass()));
 				}
 				if (!fromType.isAssignableFrom((Class<?>) converter.getFromType())) {
-					throw new IllegalArgumentException(
-							NLS.bind(
-									"Converter {0} does not match preceeding converter. It expects {1} and precedessor converts to {2}",
-									new Object[] { converter.getClass(), converter.getFromType(), fromType }));
+					throw new IllegalArgumentException(NLS.bind(
+							"Converter {0} does not match preceeding converter. It expects {1} and precedessor converts to {2}",
+							new Object[] { converter.getClass(), converter.getFromType(), fromType }));
 				}
 				fromType = (Class<?>) converter.getToType();
 			}
@@ -83,8 +82,7 @@ public class MultiConverter implements IConverter {
 	}
 
 	private boolean hasConverters(IConverter[] converters) {
-		return converters != null
-				&& converters.length > 0;
+		return converters != null && converters.length > 0;
 	}
 
 }

@@ -45,10 +45,10 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 	public void update(ViewerCell cell) {
 		final Object element = cell.getElement();
 		StyledString text = getStyledText(element);
-		if(text != null) {
+		if (text != null) {
 			cell.setText(text.getString());
 			cell.setStyleRanges(text.getStyleRanges());
-		}		
+		}
 		super.update(cell);
 	}
 
@@ -108,6 +108,5 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 	public Image getImage(Object paramObject) {
 		return null;
 	}
-	
-	
+
 }

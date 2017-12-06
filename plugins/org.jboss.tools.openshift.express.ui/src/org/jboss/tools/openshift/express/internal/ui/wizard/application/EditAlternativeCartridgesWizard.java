@@ -35,14 +35,12 @@ public class EditAlternativeCartridgesWizard extends AbstractOpenShiftWizard<Emb
 
 	private EmbeddedCartridgesWizardPage editAlternativeCartridgesWizardPage;
 
-	public EditAlternativeCartridgesWizard(ICartridge selectedAlternative, List<ICartridge> alternativeCartridges, IOpenShiftApplicationWizardModel wizardModel) {
-		super("Add Embedded Cartridges", 
-				new EmbeddedCartridgesWizardModel(
-						Collections.<ICartridge> singleton(selectedAlternative)
-						, alternativeCartridges
-						, new NewApplicationProperties(wizardModel)
-						, wizardModel.getDomain()
-						, wizardModel.getConnection()));
+	public EditAlternativeCartridgesWizard(ICartridge selectedAlternative, List<ICartridge> alternativeCartridges,
+			IOpenShiftApplicationWizardModel wizardModel) {
+		super("Add Embedded Cartridges",
+				new EmbeddedCartridgesWizardModel(Collections.<ICartridge>singleton(selectedAlternative),
+						alternativeCartridges, new NewApplicationProperties(wizardModel), wizardModel.getDomain(),
+						wizardModel.getConnection()));
 	}
 
 	@Override
@@ -62,17 +60,17 @@ public class EditAlternativeCartridgesWizard extends AbstractOpenShiftWizard<Emb
 		}
 		return it.next();
 	}
-	
+
 	protected static class EditAlternativeCartridgesWizardPage extends EmbeddedCartridgesWizardPage {
 
 		EditAlternativeCartridgesWizardPage(EmbeddedCartridgesWizardModel wizardModel, IWizard wizard) {
-			super("Select your cartridge",
-					"Please select the cartridge that you want to add to your application.",
+			super("Select your cartridge", "Please select the cartridge that you want to add to your application.",
 					wizardModel, wizard);
 		}
-		
+
 		@Override
-		protected ICheckStateListener onCartridgeChecked(EmbeddedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
+		protected ICheckStateListener onCartridgeChecked(EmbeddedCartridgesWizardPageModel pageModel,
+				IWizardPage wizardPage) {
 			return new SelectAlternativeStrategy(pageModel, wizardPage);
 		}
 
@@ -81,7 +79,7 @@ public class EditAlternativeCartridgesWizard extends AbstractOpenShiftWizard<Emb
 			// no buttons
 		}
 	}
-	
+
 	private static class SelectAlternativeStrategy extends AbstractCheckEmbeddableCartridgeStrategy {
 
 		SelectAlternativeStrategy(EmbeddedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
@@ -97,9 +95,9 @@ public class EditAlternativeCartridgesWizard extends AbstractOpenShiftWizard<Emb
 			getPageModel().uncheckAll();
 			getPageModel().checkEmbeddedCartridge(cartridge);
 		}
-		
+
 		@Override
-		protected void remove(ICartridge cartridge, CheckStateChangedEvent event) {			
+		protected void remove(ICartridge cartridge, CheckStateChangedEvent event) {
 			// undo visual change only
 			event.getCheckable().setChecked(cartridge, true);
 		}

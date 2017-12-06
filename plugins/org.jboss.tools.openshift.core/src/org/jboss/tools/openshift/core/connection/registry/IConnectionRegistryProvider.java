@@ -5,7 +5,6 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 
 public interface IConnectionRegistryProvider {
 
-	
 	/**
 	 * Get the registry url, or null if unable
 	 * @param connection

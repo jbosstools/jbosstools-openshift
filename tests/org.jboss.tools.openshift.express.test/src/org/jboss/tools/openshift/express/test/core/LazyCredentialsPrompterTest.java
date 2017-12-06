@@ -34,33 +34,35 @@ public class LazyCredentialsPrompterTest {
 	private ICredentialsPrompter altPrompter;
 	private LazyCredentialsPrompter lazyPrompter;
 	private ExpressConnection connection;
-	
+
 	@Before
-	public void setup(){
+	public void setup() {
 		ExpressCoreUIIntegration.getDefault().setCredentialPrompter(null);
 		connection = new ExpressConnection((String) null, (String) null);
 		when(defaultPrompter.promptAndAuthenticate(any(ExpressConnection.class), any())).thenReturn(true);
 		when(altPrompter.promptAndAuthenticate(any(ExpressConnection.class), any())).thenReturn(true);
 	}
-	
+
 	@After
-	public void teardown(){
+	public void teardown() {
 		ExpressCoreUIIntegration.getDefault().setCredentialPrompter(null);
 	}
+
 	@Test
-	public void testConstructionOfPrompterThrowsWhenInitializedWithSelf(){
+	public void testConstructionOfPrompterThrowsWhenInitializedWithSelf() {
 		boolean exception = false;
-		try{
+		try {
 			new LazyCredentialsPrompter(new LazyCredentialsPrompter(null));
-		}catch(IllegalArgumentException e){
+		} catch (IllegalArgumentException e) {
 			exception = true;
 		}
 		assertTrue("Expected an exception when trying to initialize with a lazy cred prompter", exception);
 	}
+
 	@Test
 	public void testPromptAndAuthenticateWhenInitializedWithAPrompter() {
 		lazyPrompter = new LazyCredentialsPrompter(defaultPrompter);
-		
+
 		assertTrue("Exp. to prompt for creds", lazyPrompter.promptAndAuthenticate(connection, null));
 		verify(defaultPrompter).promptAndAuthenticate(any(ExpressConnection.class), any());
 		verify(altPrompter, never()).promptAndAuthenticate(any(ExpressConnection.class), any());
@@ -70,7 +72,7 @@ public class LazyCredentialsPrompterTest {
 	public void testPromptAndAuthenticateDeferredLoadsAndPromptsWhenInitializedWithNull() {
 		ExpressCoreUIIntegration.getDefault().setCredentialPrompter(altPrompter);
 		lazyPrompter = new LazyCredentialsPrompter(null);
-		
+
 		assertTrue("Exp. to prompt for creds", lazyPrompter.promptAndAuthenticate(connection, null));
 		verify(altPrompter).promptAndAuthenticate(any(ExpressConnection.class), any());
 		verify(defaultPrompter, never()).promptAndAuthenticate(any(ExpressConnection.class), any());
@@ -79,12 +81,10 @@ public class LazyCredentialsPrompterTest {
 	@Test
 	public void testPromptAndAuthenticateReturnsFalseWhenItCantGetAPrompter() {
 		lazyPrompter = new LazyCredentialsPrompter(null);
-		
-		assertFalse("Exp. to not prompt for creds", lazyPrompter.promptAndAuthenticate(connection,null));
+
+		assertFalse("Exp. to not prompt for creds", lazyPrompter.promptAndAuthenticate(connection, null));
 		verify(altPrompter, never()).promptAndAuthenticate(any(ExpressConnection.class), any());
 		verify(defaultPrompter, never()).promptAndAuthenticate(any(ExpressConnection.class), any());
 	}
-	
-	
 
 }

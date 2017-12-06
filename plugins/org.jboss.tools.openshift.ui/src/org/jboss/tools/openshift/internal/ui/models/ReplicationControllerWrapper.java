@@ -16,7 +16,8 @@ import java.util.Map;
 import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 
-class ReplicationControllerWrapper extends ResourceContainer<IReplicationController, ProjectWrapper> implements IReplicationControllerWrapper {
+class ReplicationControllerWrapper extends ResourceContainer<IReplicationController, ProjectWrapper>
+		implements IReplicationControllerWrapper {
 	public ReplicationControllerWrapper(ProjectWrapper parent, IReplicationController resource) {
 		super(parent, resource);
 	}
@@ -24,7 +25,7 @@ class ReplicationControllerWrapper extends ResourceContainer<IReplicationControl
 	protected void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated,
 			boolean changed) {
 		// do nothing
-		
+
 	}
 
 	protected ResourceWrapper createNewWrapper(Collection<IResource> resources, IResource r) {

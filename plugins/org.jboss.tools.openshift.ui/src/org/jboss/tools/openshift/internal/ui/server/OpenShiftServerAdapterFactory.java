@@ -27,8 +27,9 @@ public class OpenShiftServerAdapterFactory implements IAdapterFactory {
 	@Override
 	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (adaptableObject instanceof IServer && IServerModule.class.equals(adapterType)) {
-			IServer server = (IServer)adaptableObject;
-			OpenShiftServer oss = (OpenShiftServer)server.loadAdapter(OpenShiftServer.class, new NullProgressMonitor());
+			IServer server = (IServer) adaptableObject;
+			OpenShiftServer oss = (OpenShiftServer) server.loadAdapter(OpenShiftServer.class,
+					new NullProgressMonitor());
 			if (oss != null) {
 				return (T) new OpenShiftServerModuleAdapter(server);
 			}
@@ -38,7 +39,7 @@ public class OpenShiftServerAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Class<?>[] getAdapterList() {
-		return new Class<?>[] {IServerModule.class};
+		return new Class<?>[] { IServerModule.class };
 	}
 
 	private static class OpenShiftServerModuleAdapter implements IServerModule {
@@ -58,7 +59,7 @@ public class OpenShiftServerAdapterFactory implements IAdapterFactory {
 
 		@Override
 		public IModule[] getModule() {
-			return new IModule[]{module};
+			return new IModule[] { module };
 		}
 
 	}
@@ -104,7 +105,7 @@ public class OpenShiftServerAdapterFactory implements IAdapterFactory {
 
 		@Override
 		public Object getAdapter(Class adapter) {
-			if(adapter == IWebModule.class) {
+			if (adapter == IWebModule.class) {
 				return new RootWebModule();
 			}
 			return null;
@@ -116,7 +117,7 @@ public class OpenShiftServerAdapterFactory implements IAdapterFactory {
 		}
 
 	}
-	
+
 	private static class RootWebModule implements IWebModule {
 
 		@Override
@@ -153,7 +154,7 @@ public class OpenShiftServerAdapterFactory implements IAdapterFactory {
 		public String getURI(IModule module) {
 			return null;
 		}
-		
+
 	}
 
 }

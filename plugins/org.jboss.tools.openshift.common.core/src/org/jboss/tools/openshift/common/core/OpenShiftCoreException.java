@@ -24,10 +24,10 @@ public class OpenShiftCoreException extends RuntimeException {
 	}
 
 	public OpenShiftCoreException(Throwable cause, String message, Object... arguments) {
-		super(MessageFormat.format(message, arguments), cause);	
+		super(MessageFormat.format(message, arguments), cause);
 	}
-	
+
 	public OpenShiftCoreException(Throwable cause) {
-		super(cause);	
+		super(cause);
 	}
 }

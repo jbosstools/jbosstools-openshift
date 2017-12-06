@@ -40,11 +40,11 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 	public EmbeddedCartridgesWizardPageModel(EmbeddedCartridgesWizardModel applicationCartridges) {
 		this.applicationCartridges = applicationCartridges;
 	}
-	
+
 	public void loadOpenShiftResources() throws OpenShiftException {
 		loadEmbeddableCartridges();
 	}
-	
+
 	private void loadEmbeddableCartridges() throws OpenShiftException {
 		List<ICartridge> cartridges = applicationCartridges.getEmbeddableCartridges();
 		setEmbeddableCartridges(cartridges);
@@ -52,8 +52,8 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 	}
 
 	public void setEmbeddableCartridges(List<ICartridge> cartridges) {
-		firePropertyChange(
-				PROPERTY_EMBEDDABLE_CARTRIDGES, this.embeddableCartridges, this.embeddableCartridges = cartridges);
+		firePropertyChange(PROPERTY_EMBEDDABLE_CARTRIDGES, this.embeddableCartridges,
+				this.embeddableCartridges = cartridges);
 	}
 
 	public List<ICartridge> getEmbeddableCartridges() {
@@ -72,9 +72,10 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 	}
 
 	public void setCheckedCartridges(Set<ICartridge> cartridges) throws OpenShiftException {
-		firePropertyChange(PROPERTY_CHECKED_CARTRIDGES, null, applicationCartridges.setCheckedEmbeddableCartridges(cartridges));
+		firePropertyChange(PROPERTY_CHECKED_CARTRIDGES, null,
+				applicationCartridges.setCheckedEmbeddableCartridges(cartridges));
 	}
-	
+
 	public void uncheckAll() throws OpenShiftException {
 		setCheckedCartridges(new HashSet<ICartridge>());
 	}
@@ -82,7 +83,7 @@ public class EmbeddedCartridgesWizardPageModel extends ObservableUIPojo implemen
 	public void setSelectedCartridge(ICartridge cartridge) {
 		firePropertyChange(PROPERTY_SELECTED_CARTRIDGE, selectedCartridge, this.selectedCartridge = cartridge);
 	}
-	
+
 	public ICartridge getSelectedCartridge() {
 		return selectedCartridge;
 	}

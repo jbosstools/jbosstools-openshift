@@ -35,8 +35,8 @@ public class RouteChooser implements IRouteChooser {
 	public IRoute chooseRoute(List<IRoute> routes) {
 		final IRoute[] selectedRoute = new IRoute[1];
 		Display.getDefault().syncExec(() -> {
-			SelectRouteDialog routeDialog = 
-					new SelectRouteDialog(routes, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+			SelectRouteDialog routeDialog = new SelectRouteDialog(routes,
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 			if (Dialog.OK == routeDialog.open()) {
 				selectedRoute[0] = routeDialog.getSelectedRoute();
 				rememberChoice = routeDialog.isRememberChoice();
@@ -53,8 +53,7 @@ public class RouteChooser implements IRouteChooser {
 	@Override
 	public void noRouteErrorDialog() {
 		Display.getDefault().syncExec(() -> {
-			MessageDialog.openWarning(
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 
+			MessageDialog.openWarning(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 					"No route to open", NO_ROUTE_MSG);
 		});
 	}

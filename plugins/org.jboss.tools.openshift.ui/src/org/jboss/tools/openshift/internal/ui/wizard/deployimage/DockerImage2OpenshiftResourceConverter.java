@@ -25,30 +25,28 @@ import static org.jboss.tools.openshift.internal.ui.validator.ServiceNameValidat
  */
 public class DockerImage2OpenshiftResourceConverter {
 
-    public String convert(DockerImageURI dockerImage) {
-        String name = dockerImage.getName();
-        StringBuilder builder = new StringBuilder(name.length());
-        boolean lastSpecialChar = true;
-        for(int i=0; i < name.length() && builder.length() < MAXLENGTH;++i) {
-            char c = name.charAt(i);
-            if (((c >= '0') && (c <= '9')) ||
-                ((c >= 'a') && (c <= 'z')) ||
-                ((c >= 'A') && (c <= 'Z'))) {
-                if ((c >= '0') && (c <= '9') && (builder.length() == 0)) {
-                    /*Openshift does not allow resource beginning with numeric*/
-                    builder.append('a');
-                }
-                builder.append(c);
-                lastSpecialChar = false;
-            } else if (((c == '_') || (c == '-')) && !lastSpecialChar) {
-                builder.append('-');
-                lastSpecialChar = true;
-            }
-        }
-        if ((builder.length() > 0) && lastSpecialChar) {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-        return builder.toString();
-    }
- 
+	public String convert(DockerImageURI dockerImage) {
+		String name = dockerImage.getName();
+		StringBuilder builder = new StringBuilder(name.length());
+		boolean lastSpecialChar = true;
+		for (int i = 0; i < name.length() && builder.length() < MAXLENGTH; ++i) {
+			char c = name.charAt(i);
+			if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {
+				if ((c >= '0') && (c <= '9') && (builder.length() == 0)) {
+					/*Openshift does not allow resource beginning with numeric*/
+					builder.append('a');
+				}
+				builder.append(c);
+				lastSpecialChar = false;
+			} else if (((c == '_') || (c == '-')) && !lastSpecialChar) {
+				builder.append('-');
+				lastSpecialChar = true;
+			}
+		}
+		if ((builder.length() > 0) && lastSpecialChar) {
+			builder.deleteCharAt(builder.length() - 1);
+		}
+		return builder.toString();
+	}
+
 }

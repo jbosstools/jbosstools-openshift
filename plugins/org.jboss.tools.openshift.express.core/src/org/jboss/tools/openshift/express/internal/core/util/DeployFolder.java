@@ -17,10 +17,8 @@ import com.openshift.client.cartridge.IStandaloneCartridge;
  */
 public enum DeployFolder {
 
-	JBOSSAS(IStandaloneCartridge.NAME_JBOSSAS, "deployments"), 
-	JBOSSEAP(IStandaloneCartridge.NAME_JBOSSEAP, "deployments"), 
-	WILDFLY8("wildfly", "deployments"),
-	JBOSSEWS(IStandaloneCartridge.NAME_JBOSSEWS, "webapps");
+	JBOSSAS(IStandaloneCartridge.NAME_JBOSSAS, "deployments"), JBOSSEAP(IStandaloneCartridge.NAME_JBOSSEAP,
+			"deployments"), WILDFLY8("wildfly", "deployments"), JBOSSEWS(IStandaloneCartridge.NAME_JBOSSEWS, "webapps");
 
 	private String cartridgeName;
 	private String deployFolder;
@@ -29,16 +27,16 @@ public enum DeployFolder {
 		this.cartridgeName = cartridgeName;
 		this.deployFolder = deployFolder;
 	}
-	
+
 	public String getDeployFolder() {
 		return deployFolder;
 	}
-	
+
 	public static DeployFolder getByCartridgeName(String cartridgeName) {
 		if (cartridgeName == null) {
 			return null;
 		}
-		
+
 		for (DeployFolder deployFolder : values()) {
 			if (cartridgeName.startsWith(deployFolder.cartridgeName)) {
 				return deployFolder;

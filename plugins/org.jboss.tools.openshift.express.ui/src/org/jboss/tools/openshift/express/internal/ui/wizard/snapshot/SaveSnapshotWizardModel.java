@@ -47,10 +47,10 @@ public class SaveSnapshotWizardModel extends ObservablePojo {
 		return application;
 	}
 
-	public void setProject(IProject project){
+	public void setProject(IProject project) {
 		this.project = project;
 	}
-	
+
 	public String setFilepath(String filename) {
 		return this.filepath = filename;
 	}
@@ -92,7 +92,7 @@ public class SaveSnapshotWizardModel extends ObservablePojo {
 			ExpressCorePreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);
 		}
 	}
-	
+
 	private String getSnapshotFromPreferences(IApplication application, boolean deploymentSnapshot) {
 		if (deploymentSnapshot) {
 			return ExpressCorePreferences.INSTANCE.getDeploymentSnapshot(application);

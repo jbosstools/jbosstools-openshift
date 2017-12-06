@@ -47,8 +47,7 @@ public class Trace {
 		BundleContext context = bundle.getBundleContext();
 		if (context == null)
 			return null;
-		this.tracker = 
-				new ServiceTracker<>(context, DebugOptions.class.getName(), null);
+		this.tracker = new ServiceTracker<>(context, DebugOptions.class.getName(), null);
 		tracker.open();
 		return tracker.getService();
 	}
@@ -58,30 +57,30 @@ public class Trace {
 		if (bundle == null) {
 			return DEFAULT_DEBUG;
 		}
-		
+
 		DebugOptions debugOptions = getDebugOptions();
 		if (debugOptions == null) {
 			return DEFAULT_DEBUG;
 		}
-		
-		if(!debugOptions.isDebugEnabled()) {
+
+		if (!debugOptions.isDebugEnabled()) {
 			return false;
 		}
-		
+
 		if (!debugOptions.getBooleanOption(pluginId + GLOBAL_DEBUG_KEY, DEFAULT_DEBUG)) {
 			return false;
 		}
 
 		return debugOptions.getBooleanOption(pluginId + CLIENT_DEBUG_KEY, DEFAULT_DEBUG);
 	}
-	
+
 	private DebugTrace getDebugTrace() {
 		if (trace == null) {
 			this.trace = getDebugOptions().newDebugTrace(pluginId);
 		}
 		return trace;
 	}
-	
+
 	public void trace(String option, String message) {
 		getDebugTrace().trace(GLOBAL_DEBUG_KEY + option, message);
 	}

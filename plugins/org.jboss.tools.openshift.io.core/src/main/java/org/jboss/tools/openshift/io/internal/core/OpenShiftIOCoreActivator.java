@@ -15,9 +15,9 @@ import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 public class OpenShiftIOCoreActivator extends BaseCorePlugin {
 
 	private static OpenShiftIOCoreActivator INSTANCE = null;
-	
+
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.io.core";
-	
+
 	public OpenShiftIOCoreActivator() {
 		super();
 		INSTANCE = this;
@@ -26,7 +26,7 @@ public class OpenShiftIOCoreActivator extends BaseCorePlugin {
 	public static OpenShiftIOCoreActivator getDefault() {
 		return INSTANCE;
 	}
-	
+
 	public static void logError(String message, Throwable t) {
 		getDefault().pluginLogInternal().logError(message, t);
 	}

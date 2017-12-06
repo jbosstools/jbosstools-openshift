@@ -20,7 +20,8 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * @author Andre Dietisheim
  */
-public class ConnectionsFactoryTracker extends ServiceTracker<IConnectionsFactory, IConnectionsFactory> implements IConnectionsFactory {
+public class ConnectionsFactoryTracker extends ServiceTracker<IConnectionsFactory, IConnectionsFactory>
+		implements IConnectionsFactory {
 
 	public ConnectionsFactoryTracker() {
 		super(OpenShiftCommonCoreActivator.getBundleContext(), IConnectionsFactory.class, null);
@@ -63,7 +64,7 @@ public class ConnectionsFactoryTracker extends ServiceTracker<IConnectionsFactor
 			return null;
 		}
 
-		return service.getAll(); 
+		return service.getAll();
 	}
 
 	@Override
@@ -82,7 +83,7 @@ public class ConnectionsFactoryTracker extends ServiceTracker<IConnectionsFactor
 			return null;
 		}
 
-		return service.getByConnection(clazz);	
+		return service.getByConnection(clazz);
 	}
 
 }

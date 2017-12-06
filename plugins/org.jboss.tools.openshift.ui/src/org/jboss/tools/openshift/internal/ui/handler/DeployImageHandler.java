@@ -38,7 +38,6 @@ import org.jboss.tools.openshift.internal.ui.wizard.deployimage.DeployImageWizar
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
-
 /**
  * @author jeff.cantrill
  */
@@ -50,31 +49,30 @@ public class DeployImageHandler extends AbstractHandler {
 		IProject project = null;
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		final IDockerImage image = UIUtils.getFirstElement(selection, IDockerImage.class);
-		if (image == null
-				|| OpenShiftUIUtils.hasOpenShiftExplorerSelection()) {
+		if (image == null || OpenShiftUIUtils.hasOpenShiftExplorerSelection()) {
 			selection = OpenShiftUIUtils.getOpenShiftExplorerSelection();
 			project = ResourceUtils.getProject(UIUtils.getFirstElement(selection, IResource.class));
-			if(project != null) {
+			if (project != null) {
 				connection = ConnectionsRegistryUtil.getConnectionFor(project);
 			} else {
 				connection = UIUtils.getFirstElement(selection, Connection.class);
 			}
 		}
 
-		if(connection == null) {
+		if (connection == null) {
 			connection = OpenShiftUIUtils.getExplorerDefaultConnection(Connection.class);
 		}
-		
+
 		IDockerConnection dockerConnection = null;
-		if(image != null) {
+		if (image != null) {
 			dockerConnection = image.getConnection();
-		} else if(OpenShiftUIUtils.hasDockerExplorerSelection()) {
+		} else if (OpenShiftUIUtils.hasDockerExplorerSelection()) {
 			ISelection dockerSelection = OpenShiftUIUtils.getDockerExplorerSelection();
-			dockerConnection =  UIUtils.getFirstElement(dockerSelection, IDockerConnection.class);
-			if(dockerConnection == null) {
+			dockerConnection = UIUtils.getFirstElement(dockerSelection, IDockerConnection.class);
+			if (dockerConnection == null) {
 				//Action is originated from OpenShift Explorer, do the best to pick up Docker connection from the current selection in Docker Explorer.
 				IDockerImage selectedImage = UIUtils.getFirstElement(dockerSelection, IDockerImage.class);
-				if(selectedImage != null) {
+				if (selectedImage != null) {
 					dockerConnection = selectedImage.getConnection();
 				}
 			}
@@ -85,14 +83,15 @@ public class DeployImageHandler extends AbstractHandler {
 		return null;
 	}
 
-	public void runWizard(final Shell shell, final IDockerConnection dockerConnection, final IDockerImage image, final IProject project, final Connection connection) {
-		if(connection != null) {
+	public void runWizard(final Shell shell, final IDockerConnection dockerConnection, final IDockerImage image,
+			final IProject project, final Connection connection) {
+		if (connection != null) {
 			final boolean[] authorized = new boolean[1];
 			Job job = new AbstractDelegatingMonitorJob("Checking connection...") {
 				@Override
 				protected IStatus doRun(IProgressMonitor monitor) {
 					try {
-						authorized [0] = connection.isAuthorized(new NullProgressMonitor());
+						authorized[0] = connection.isAuthorized(new NullProgressMonitor());
 						return Status.OK_STATUS;
 					} catch (Exception e) {
 						return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,
@@ -106,7 +105,8 @@ public class DeployImageHandler extends AbstractHandler {
 					shell.getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
-							DeployImageWizard wizard = new DeployImageWizard(dockerConnection, image, connection, project, authorized[0]);
+							DeployImageWizard wizard = new DeployImageWizard(dockerConnection, image, connection,
+									project, authorized[0]);
 							WizardUtils.openWizardDialog(500, 500, wizard, shell);
 						}
 					});

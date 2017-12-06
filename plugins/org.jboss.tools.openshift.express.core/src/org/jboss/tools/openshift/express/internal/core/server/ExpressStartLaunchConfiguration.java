@@ -28,14 +28,15 @@ import org.jboss.ide.eclipse.as.core.util.LaunchCommandPreferences;
 /**
  * @author Andre Dietisheim
  */
-public class ExpressStartLaunchConfiguration 
-	extends AbstractJavaLaunchConfigurationDelegate implements ILaunchConfigurationDelegate {
+public class ExpressStartLaunchConfiguration extends AbstractJavaLaunchConfigurationDelegate
+		implements ILaunchConfigurationDelegate {
 
 	@Override
-	public void launch(ILaunchConfiguration configuration, String mode,
-			ILaunch launch, IProgressMonitor monitor) throws CoreException {
+	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
+			throws CoreException {
 		IServer server = ServerUtil.getServer(configuration);
-		ServerBehaviourDelegate del = (ServerBehaviourDelegate) server.loadAdapter(ServerBehaviourDelegate.class, new NullProgressMonitor());
+		ServerBehaviourDelegate del = (ServerBehaviourDelegate) server.loadAdapter(ServerBehaviourDelegate.class,
+				new NullProgressMonitor());
 		IStatus s = del.canStart(mode);
 
 		Trace.trace(Trace.STRING_FINEST, "Ensuring Server can start: " + s.getMessage()); //$NON-NLS-1$
@@ -43,8 +44,8 @@ public class ExpressStartLaunchConfiguration
 			throw new CoreException(s);
 		if (LaunchCommandPreferences.isIgnoreLaunchCommand(server)) {
 			Trace.trace(Trace.STRING_FINEST, "Server is marked as ignore Launch. Marking as started."); //$NON-NLS-1$
-			((Server)server).setServerState(IServer.STATE_STARTING);
-			((Server)server).setServerState(IServer.STATE_STARTED);
+			((Server) server).setServerState(IServer.STATE_STARTING);
+			((Server) server).setServerState(IServer.STATE_STARTED);
 		}
 	}
 

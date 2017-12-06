@@ -160,17 +160,16 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	 * @see AbstractImportApplicationOperation#getApplication()
 	 * @see #getRepositoryPath()
 	 */
-	protected File cloneRepository(IApplication application, String remoteName, File destination,
-			boolean addToRepoView, IProgressMonitor monitor)
+	protected File cloneRepository(IApplication application, String remoteName, File destination, boolean addToRepoView,
+			IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		monitor.subTask(NLS.bind("Cloning repository for application {0}...", application.getName()));
 		EGitUIUtils.ensureEgitUIIsStarted();
 		if (addToRepoView) {
-			EGitUtils.cloneRepository(
-					application.getGitUrl(), remoteName, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
+			EGitUtils.cloneRepository(application.getGitUrl(), remoteName, destination,
+					EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
 		} else {
-			EGitUtils.cloneRepository(
-					application.getGitUrl(), remoteName, destination, monitor);
+			EGitUtils.cloneRepository(application.getGitUrl(), remoteName, destination, monitor);
 		}
 		return destination;
 	}
@@ -190,11 +189,11 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	 * @throws NoWorkTreeException
 	 * 
 	 * @see #addToModified(Collection<IResource>)
- 	 * @see #addToModified(IResource)
- 	 * 
+	 * @see #addToModified(IResource)
+	 * 
 	 */
-	protected void addAndCommitModifiedResource(IProject project, IProgressMonitor monitor) throws CoreException,
-			OpenShiftException, NoWorkTreeException, IOException, GitAPIException {
+	protected void addAndCommitModifiedResource(IProject project, IProgressMonitor monitor)
+			throws CoreException, OpenShiftException, NoWorkTreeException, IOException, GitAPIException {
 		EGitUtils.checkedGetRepository(project);
 		new AddToIndexOperation(modifiedResources).execute(monitor);
 		if (EGitUtils.isDirty(project, monitor)) {
@@ -214,11 +213,8 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	 */
 	protected IFile setupGitIgnore(IProject project, IProgressMonitor monitor) throws IOException, CoreException {
 		GitIgnore gitIgnore = new GitIgnore(project);
-		gitIgnore.add("target")
-				.add(".settings/*")
-				.add("!.settings/.jsdtscope")//To prevent nasty JSDT bugs
-				.add(".project")
-				.add(".classpath");
+		gitIgnore.add("target").add(".settings/*").add("!.settings/.jsdtscope")//To prevent nasty JSDT bugs
+				.add(".project").add(".classpath");
 		return gitIgnore.write(monitor);
 	}
 
@@ -227,8 +223,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		Repository repository = EGitUtils.getRepository(project);
 		RemoteConfig config = EGitUtils.getRemoteByName(remoteName, repository);
 		if (config != null) {
-			if (EGitUtils.hasRemoteUrl(
-					Pattern.compile(RegExUtils.escapeRegex(gitUrl)), config)) {
+			if (EGitUtils.hasRemoteUrl(Pattern.compile(RegExUtils.escapeRegex(gitUrl)), config)) {
 				return;
 			}
 			// we shouldn't get here, the UI should validate the remote name and
@@ -240,8 +235,9 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 
 		EGitUtils.addRemoteTo(getRemoteName(), getApplication().getGitUrl(), repository);
 	}
-	
-	protected IResource setupOpenShiftMavenProfile(IApplication application, IProject project, IProgressMonitor monitor) throws CoreException {
+
+	protected IResource setupOpenShiftMavenProfile(IApplication application, IProject project, IProgressMonitor monitor)
+			throws CoreException {
 		if (!OpenShiftMavenProfile.isMavenProject(project)) {
 			return null;
 		}
@@ -250,7 +246,7 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		if (profile.existsInPom()) {
 			return null;
 		}
-		
+
 		profile.addToPom(project.getName(), getDeployFolder(application));
 		return profile.savePom(monitor);
 	}
@@ -264,8 +260,8 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 	}
 
 	protected List<IResource> setupMarkers(IProject project, IProgressMonitor monitor) throws CoreException {
-		List<IResource> newMarkers = new ArrayList<>(); 
-		for(IOpenShiftMarker marker : markers) {
+		List<IResource> newMarkers = new ArrayList<>();
+		for (IOpenShiftMarker marker : markers) {
 			IFile file = marker.addTo(project, monitor);
 			if (file != null) {
 				newMarkers.add(file);
@@ -279,8 +275,8 @@ abstract class AbstractImportApplicationOperation implements IImportApplicationS
 		// This is our project
 		IApplication app = getApplication();
 		// Add the settings here!
-		ExpressServerUtils.updateOpenshiftProjectSettings(
-				project, app, app.getDomain(), getUser(), getRemoteName(), ExpressServerUtils.getDefaultDeployFolder(app));
+		ExpressServerUtils.updateOpenshiftProjectSettings(project, app, app.getDomain(), getUser(), getRemoteName(),
+				ExpressServerUtils.getDefaultDeployFolder(app));
 		return (IResource) project.getFolder(".settings");
 	}
 

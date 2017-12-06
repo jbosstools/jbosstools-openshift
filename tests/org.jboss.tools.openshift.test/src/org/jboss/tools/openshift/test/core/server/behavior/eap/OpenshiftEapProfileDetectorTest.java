@@ -20,7 +20,7 @@ import com.openshift.restclient.model.build.ISTIBuildStrategy;
 import com.openshift.restclient.model.build.ISourceBuildStrategy;
 
 public class OpenshiftEapProfileDetectorTest {
-	
+
 	private static final String FOO_BAR = "foo.bar";
 
 	@Test
@@ -38,7 +38,7 @@ public class OpenshiftEapProfileDetectorTest {
 		//deprecated STI
 		assertIsNotEapStyle(createBuildConfig(ISTIBuildStrategy.class, FOO_BAR));
 		assertIsEapStyle(createBuildConfig(ISTIBuildStrategy.class, "wildflyyy"));
-		
+
 		//fallback on template name check
 		assertIsNotEapStyle(createBuildConfig(null, FOO_BAR));
 		assertIsEapStyle(createBuildConfig(IBuildStrategy.class, "wildflyyy"));
@@ -73,19 +73,19 @@ public class OpenshiftEapProfileDetectorTest {
 			ISTIBuildStrategy sts = mock(ISTIBuildStrategy.class);
 			when(sts.getImage()).thenReturn(image);
 			strategy = sts;
-		}  else if (ISourceBuildStrategy.class.isAssignableFrom(clazz)) {
+		} else if (ISourceBuildStrategy.class.isAssignableFrom(clazz)) {
 			ISourceBuildStrategy sbs = mock(ISourceBuildStrategy.class);
 			when(sbs.getImage()).thenReturn(image);
 			strategy = sbs;
 		}
 		when(bc.getBuildStrategy()).thenReturn(strategy);
-		
-		Map<String,String> labels = Collections.singletonMap("template", name);
+
+		Map<String, String> labels = Collections.singletonMap("template", name);
 		when(bc.getLabels()).thenReturn(labels);
-		
+
 		return bc;
 	}
-	
+
 	private void assertIsEapStyle(IBuildConfig buildConfig) {
 		assertTrue(new OpenshiftEapProfileDetector().isEapStyle(buildConfig));
 	}
@@ -93,11 +93,11 @@ public class OpenshiftEapProfileDetectorTest {
 	private void assertIsNotEapStyle(IBuildConfig buildConfig) {
 		assertFalse(new OpenshiftEapProfileDetector().isEapStyle(buildConfig));
 	}
-	
+
 	private void assertContainsEapLikeKeywords(String text) {
 		assertTrue(new OpenshiftEapProfileDetector().containsEapLikeKeywords(text));
 	}
-	
+
 	private void assertNotContainsEapLikeKeywords(String text) {
 		assertFalse(new OpenshiftEapProfileDetector().containsEapLikeKeywords(text));
 	}

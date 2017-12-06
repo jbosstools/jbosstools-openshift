@@ -28,7 +28,7 @@ public class CollectionUtils {
 		collection.add(element);
 		return collection;
 	}
-	
+
 	/**
 	 * Adds all elements withing the given collection to the given other collection
 	 * 
@@ -54,11 +54,10 @@ public class CollectionUtils {
 	}
 
 	public static <T> T getFirstElement(Collection<T> collection) {
-		if (collection == null
-				|| collection.isEmpty()) {
+		if (collection == null || collection.isEmpty()) {
 			return null;
 		}
-		
+
 		return collection.iterator().next();
 	}
 }

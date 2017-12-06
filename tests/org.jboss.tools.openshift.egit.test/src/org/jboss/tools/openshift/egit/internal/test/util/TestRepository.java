@@ -100,7 +100,7 @@ public class TestRepository {
 		tmpRepository.create();
 		tmpRepository.close();
 	}
-	
+
 	/**
 	 * Creates the initial branches etc.
 	 * 
@@ -111,14 +111,10 @@ public class TestRepository {
 	 * @throws WrongRepositoryStateException
 	 * @throws GitAPIException
 	 */
-	public void initialCommit() throws NoHeadException, NoMessageException,
-			UnmergedPathsException, ConcurrentRefUpdateException,
-			WrongRepositoryStateException, GitAPIException {
-		new Git(repository).commit()
-				.setAll(true)
-				.setAuthor(RawParseUtils.parsePersonIdent(DEFAULT_USER))
-				.setCommitter(RawParseUtils.parsePersonIdent(DEFAULT_USER))
-				.setMessage("initial commit").call();
+	public void initialCommit() throws NoHeadException, NoMessageException, UnmergedPathsException,
+			ConcurrentRefUpdateException, WrongRepositoryStateException, GitAPIException {
+		new Git(repository).commit().setAll(true).setAuthor(RawParseUtils.parsePersonIdent(DEFAULT_USER))
+				.setCommitter(RawParseUtils.parsePersonIdent(DEFAULT_USER)).setMessage("initial commit").call();
 	}
 
 	private String getWorkdirPrefix(Repository repository) {
@@ -169,8 +165,7 @@ public class TestRepository {
 	 * @throws JGitInternalException
 	 * @throws GitAPIException 
 	 */
-	public RevCommit createInitialCommit(String message) throws IOException,
-			JGitInternalException, GitAPIException {
+	public RevCommit createInitialCommit(String message) throws IOException, JGitInternalException, GitAPIException {
 		String repoPath = repository.getWorkTree().getAbsolutePath();
 		File file = new File(repoPath, "dummy");
 		if (!file.exists())
@@ -189,11 +184,9 @@ public class TestRepository {
 	 * @return
 	 * @throws CoreException
 	 */
-	public IFile createFile(IProject project, String name, String content)
-			throws CoreException {
+	public IFile createFile(IProject project, String name, String content) throws CoreException {
 		IFile file = project.getFile(name);
-		file.create(new ByteArrayInputStream(content.getBytes()), true,
-				new NullProgressMonitor());
+		file.create(new ByteArrayInputStream(content.getBytes()), true, new NullProgressMonitor());
 		return file;
 	}
 
@@ -222,14 +215,12 @@ public class TestRepository {
 	 * @return commit object
 	 * @throws Exception
 	 */
-	public RevCommit addAndCommit(IProject project, File file, String commitMessage)
-			throws Exception {
+	public RevCommit addAndCommit(IProject project, File file, String commitMessage) throws Exception {
 		add(file);
 		return commit(commitMessage);
 	}
 
-	public RevCommit addAndCommit(File file, String commitMessage)
-			throws Exception {
+	public RevCommit addAndCommit(File file, String commitMessage) throws Exception {
 		add(file);
 		return commit(commitMessage);
 	}
@@ -245,10 +236,9 @@ public class TestRepository {
 	 * @return commit object
 	 * @throws Exception
 	 */
-	public RevCommit appendContentAndCommit(IProject project, File file,
-			byte[] content, String commitMessage) throws Exception {
-		return appendContentAndCommit(project, file, new String(content),
-				commitMessage);
+	public RevCommit appendContentAndCommit(IProject project, File file, byte[] content, String commitMessage)
+			throws Exception {
+		return appendContentAndCommit(project, file, new String(content), commitMessage);
 	}
 
 	/**
@@ -262,8 +252,8 @@ public class TestRepository {
 	 * @return commit object
 	 * @throws Exception
 	 */
-	public RevCommit appendContentAndCommit(IProject project, File file,
-			String content, String commitMessage) throws Exception {
+	public RevCommit appendContentAndCommit(IProject project, File file, String content, String commitMessage)
+			throws Exception {
 		appendFileContent(file, content);
 		add(file);
 		add(project, file);
@@ -283,9 +273,8 @@ public class TestRepository {
 	 * @throws GitAPIException 
 	 * @throws UnmergedPathsException 
 	 */
-	public RevCommit commit(String message) throws UnmergedPathException,
-			JGitInternalException,
-			UnmergedPathsException, GitAPIException {
+	public RevCommit commit(String message)
+			throws UnmergedPathException, JGitInternalException, UnmergedPathsException, GitAPIException {
 		Git git = new Git(repository);
 		CommitCommand commitCommand = git.commit();
 		commitCommand.setAuthor("J. Git", "j.git@egit.org");
@@ -306,8 +295,7 @@ public class TestRepository {
 	 * @throws GitAPIException 
 	 */
 	public void add(File file) throws IOException, GitAPIException {
-		String repoPath =
-				getRepoRelativePath(file.getAbsolutePath());
+		String repoPath = getRepoRelativePath(file.getAbsolutePath());
 		try {
 			new Git(repository).add().addFilepattern(repoPath).call();
 		} catch (NoFilepatternException e) {
@@ -340,14 +328,10 @@ public class TestRepository {
 	 * @throws RefNotFoundException 
 	 * @throws RefAlreadyExistsException 
 	 */
-	public void createBranch(String refName, String newRefName)
-			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, GitAPIException {
+	public void createBranch(String refName, String newRefName) throws IOException, RefAlreadyExistsException,
+			RefNotFoundException, InvalidRefNameException, GitAPIException {
 		try (Git git = new Git(repository)) {
-			git
-				.branchCreate()
-				.setName(newRefName)
-				.setStartPoint(refName)
-				.call();
+			git.branchCreate().setName(newRefName).setStartPoint(refName).call();
 		}
 	}
 
@@ -368,8 +352,7 @@ public class TestRepository {
 		if (ref == null) {
 			return false;
 		}
-		return Repository.shortenRefName(ref.getName()).equals(
-				getCurrentBranch());
+		return Repository.shortenRefName(ref.getName()).equals(getCurrentBranch());
 	}
 
 	/**
@@ -384,12 +367,10 @@ public class TestRepository {
 	 * @throws RefNotFoundException 
 	 * @throws RefAlreadyExistsException 
 	 */
-	public void checkoutBranch(String refName) throws CoreException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, GitAPIException {
+	public void checkoutBranch(String refName) throws CoreException, RefAlreadyExistsException, RefNotFoundException,
+			InvalidRefNameException, CheckoutConflictException, GitAPIException {
 		try (Git git = new Git(repository)) {
-			git
-				.checkout()
-				.setName(refName)
-				.call();
+			git.checkout().setName(refName).call();
 		}
 	}
 
@@ -437,8 +418,7 @@ public class TestRepository {
 	 *            rather than the beginning
 	 * @throws IOException
 	 */
-	public void appendFileContent(File file, byte[] content, boolean append)
-			throws IOException {
+	public void appendFileContent(File file, byte[] content, boolean append) throws IOException {
 		appendFileContent(file, new String(content), append);
 	}
 
@@ -452,8 +432,7 @@ public class TestRepository {
 	 *            rather than the beginning
 	 * @throws IOException
 	 */
-	public void appendFileContent(File file, String content, boolean append)
-			throws IOException {
+	public void appendFileContent(File file, String content, boolean append) throws IOException {
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter(file, append);
@@ -559,8 +538,7 @@ public class TestRepository {
 	 * @throws CoreException
 	 */
 	public void connect(IProject project) throws CoreException {
-		ConnectProviderOperation op = new ConnectProviderOperation(project,
-				this.getRepository().getDirectory());
+		ConnectProviderOperation op = new ConnectProviderOperation(project, this.getRepository().getDirectory());
 		op.execute(null);
 	}
 
@@ -571,10 +549,8 @@ public class TestRepository {
 	 * @throws CoreException
 	 */
 	public void disconnect(IProject project) throws CoreException {
-		Collection<IProject> projects = Collections.singleton(project
-				.getProject());
-		DisconnectProviderOperation disconnect = new DisconnectProviderOperation(
-				projects);
+		Collection<IProject> projects = Collections.singleton(project.getProject());
+		DisconnectProviderOperation disconnect = new DisconnectProviderOperation(projects);
 		disconnect.execute(null);
 	}
 
@@ -585,25 +561,21 @@ public class TestRepository {
 		return dc.getEntry(repoPath);
 	}
 
-	public TestRepository cloneRepository(File path) throws URISyntaxException, InvocationTargetException,
-			InterruptedException, IOException {
+	public TestRepository cloneRepository(File path)
+			throws URISyntaxException, InvocationTargetException, InterruptedException, IOException {
 		URIish uri = new URIish("file:///" + repository.getDirectory().toString());
-		CloneOperation clop =
-				new CloneOperation(uri, true, null, path, Constants.R_HEADS + Constants.MASTER,
-						Constants.DEFAULT_REMOTE_NAME, 0);
+		CloneOperation clop = new CloneOperation(uri, true, null, path, Constants.R_HEADS + Constants.MASTER,
+				Constants.DEFAULT_REMOTE_NAME, 0);
 		clop.run(null);
 		RepositoryCache repositoryCache = Activator.getDefault().getRepositoryCache();
-		Repository clonedRepository = repositoryCache
-				.lookupRepository(new File(path, Constants.DOT_GIT));
+		Repository clonedRepository = repositoryCache.lookupRepository(new File(path, Constants.DOT_GIT));
 		return new TestRepository(clonedRepository);
 	}
 
 	public void setUserAndEmail(String user, String email) {
 		StoredConfig config = repository.getConfig();
-		config.setString(
-				ConfigConstants.CONFIG_USER_SECTION, null, ConfigConstants.CONFIG_KEY_NAME, user);
-		config.setString(
-				ConfigConstants.CONFIG_USER_SECTION, null, ConfigConstants.CONFIG_KEY_EMAIL, email);
+		config.setString(ConfigConstants.CONFIG_USER_SECTION, null, ConfigConstants.CONFIG_KEY_NAME, user);
+		config.setString(ConfigConstants.CONFIG_USER_SECTION, null, ConfigConstants.CONFIG_KEY_EMAIL, email);
 	}
 
 	public void createMockSystemReader(IPath ceilingPath) {
@@ -617,19 +589,16 @@ public class TestRepository {
 	}
 
 	public void addRemoteTo(String remoteName, Repository remoteRepository)
-			throws URISyntaxException, MalformedURLException,
-			IOException {
+			throws URISyntaxException, MalformedURLException, IOException {
 		URIish uri = new URIish(remoteRepository.getDirectory().toURI().toURL());
 		addRemoteTo(remoteName, uri);
 	}
-	
-	public void addRemoteTo(String remoteName, String remoteUri)
-			throws URISyntaxException, IOException {
+
+	public void addRemoteTo(String remoteName, String remoteUri) throws URISyntaxException, IOException {
 		addRemoteTo(remoteName, new URIish(remoteUri));
 	}
-	
-	public void addRemoteTo(String remoteName, URIish remoteUri)
-			throws URISyntaxException, IOException {
+
+	public void addRemoteTo(String remoteName, URIish remoteUri) throws URISyntaxException, IOException {
 		StoredConfig config = repository.getConfig();
 		RemoteConfig remoteConfig = new RemoteConfig(config, remoteName);
 		remoteConfig.addURI(remoteUri);

@@ -21,8 +21,7 @@ import com.openshift.client.cartridge.IEmbeddableCartridge;
 public class EmbeddableCartridgeViewerSorter extends ViewerComparator {
 	@Override
 	public int compare(Viewer viewer, Object thisCartridge, Object thatCartridge) {
-		if (thisCartridge instanceof IEmbeddableCartridge
-				&& thatCartridge instanceof IEmbeddableCartridge) {
+		if (thisCartridge instanceof IEmbeddableCartridge && thatCartridge instanceof IEmbeddableCartridge) {
 			String thisDisplayName = ((IEmbeddableCartridge) thisCartridge).getDisplayName();
 			String thatDisplayName = ((IEmbeddableCartridge) thatCartridge).getDisplayName();
 			if (thisDisplayName == null) {

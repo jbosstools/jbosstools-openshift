@@ -38,31 +38,31 @@ import com.openshift.restclient.model.route.IRoute;
  * 
  * @author jeff.cantrill
  */
-public class ResourceDetailsContentProvider implements ITreeContentProvider{
+public class ResourceDetailsContentProvider implements ITreeContentProvider {
 
 	public static final String LABEL_STRATEGY = "strategy";
 
 	@Override
 	public Object[] getChildren(Object node) {
-		if(node instanceof IResource) {
+		if (node instanceof IResource) {
 			IResource resource = (IResource) node;
 			Collection<ResourceProperty> properties = new ArrayList<>();
 			properties.add(new ResourceProperty("labels", resource.getLabels()));
-			switch(resource.getKind()) {
+			switch (resource.getKind()) {
 			case ResourceKind.BUILD_CONFIG:
-				addBuildConfigProperties(properties, (IBuildConfig) resource); 
+				addBuildConfigProperties(properties, (IBuildConfig) resource);
 				break;
 			case ResourceKind.DEPLOYMENT_CONFIG:
-				addDeploymentConfigProperties(properties, (IDeploymentConfig) resource); 
+				addDeploymentConfigProperties(properties, (IDeploymentConfig) resource);
 				break;
 			case ResourceKind.SERVICE:
-				addServiceProperties(properties, (IService) resource); 
+				addServiceProperties(properties, (IService) resource);
 				break;
 			case ResourceKind.ROUTE:
-				addRouteProperties(properties, (IRoute) resource); 
+				addRouteProperties(properties, (IRoute) resource);
 				break;
 			case ResourceKind.IMAGE_STREAM:
-				addImageStreamProperties(properties, (IImageStream) resource); 
+				addImageStreamProperties(properties, (IImageStream) resource);
 				break;
 			default:
 			}
@@ -70,7 +70,7 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		}
 		return new Object[] {};
 	}
-	
+
 	private void addRouteProperties(Collection<ResourceProperty> properties, IRoute resource) {
 		properties.add(new ResourceProperty("host", resource.getHost()));
 		properties.add(new ResourceProperty("path", resource.getPath()));
@@ -97,21 +97,19 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		addStrategyTypeProperties(properties, buildStrategy);
 		properties.add(new ResourceProperty("source URL", config.getSourceURI()));
 		properties.add(new ResourceProperty("output to", config.getOutputRepositoryName()));
-		List<String> triggers = config.getBuildTriggers().stream()
-				.map(trigger -> trigger.getType().toString())
+		List<String> triggers = config.getBuildTriggers().stream().map(trigger -> trigger.getType().toString())
 				.collect(Collectors.toList());
 		properties.add(new ResourceProperty("build triggers", triggers));
 	}
 
 	private void addStrategyTypeProperties(Collection<ResourceProperty> properties, IBuildStrategy buildStrategy) {
-		if (buildStrategy == null
-				|| buildStrategy.getType() == null) {
+		if (buildStrategy == null || buildStrategy.getType() == null) {
 			properties.add(new UnknownResourceProperty(LABEL_STRATEGY));
 			return;
 		}
 
 		properties.add(new ResourceProperty(LABEL_STRATEGY, buildStrategy.getType().toString()));
-		switch(buildStrategy.getType()) {
+		switch (buildStrategy.getType()) {
 		case BuildStrategyType.SOURCE:
 			ISourceBuildStrategy sti = (ISourceBuildStrategy) buildStrategy;
 			properties.add(new ResourceProperty("builder image", StringUtils.toStringOrNull(sti.getImage())));
@@ -126,8 +124,10 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 			break;
 		case BuildStrategyType.JENKINS_PIPELINE:
 			IJenkinsPipelineStrategy jenkins = (IJenkinsPipelineStrategy) buildStrategy;
-			properties.add(new ResourceProperty("jenkins file", StringUtils.removeAll(StringUtils.getLineSeparator(), jenkins.getJenkinsfile())));
-			properties.add(new ResourceProperty("jenkins file path", StringUtils.toStringOrNull(jenkins.getJenkinsfilePath())));
+			properties.add(new ResourceProperty("jenkins file",
+					StringUtils.removeAll(StringUtils.getLineSeparator(), jenkins.getJenkinsfile())));
+			properties.add(new ResourceProperty("jenkins file path",
+					StringUtils.toStringOrNull(jenkins.getJenkinsfilePath())));
 			break;
 		default:
 		}
@@ -136,10 +136,10 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object[] getElements(Object rootElements) {
-		if(!(rootElements instanceof Collection)) {
+		if (!(rootElements instanceof Collection)) {
 			return new Object[] {};
 		}
-	
+
 		List<IResource> resources = new ArrayList<>((Collection<IResource>) rootElements);
 		Collections.sort(resources, new ResourceKindAndNameComparator());
 		return resources.toArray();
@@ -167,19 +167,19 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 	 * A wrapper for a resource properties
 	 */
 	public static class ResourceProperty {
-		
+
 		private Object value;
 		private String property;
 
-		ResourceProperty(String property, Object value){
+		ResourceProperty(String property, Object value) {
 			this.property = property;
 			this.value = value;
 		}
-		
+
 		public String getProperty() {
 			return property;
 		}
-		
+
 		public Object getValue() {
 			return value;
 		}
@@ -187,7 +187,7 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 		public boolean isUnknownValue() {
 			return false;
 		}
-		
+
 	}
 
 	public static class UnknownResourceProperty extends ResourceProperty {
@@ -201,7 +201,7 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider{
 			return true;
 		}
 	}
-	
+
 	private static class ResourceKindAndNameComparator implements Comparator<IResource> {
 		@Override
 		public int compare(IResource first, IResource second) {

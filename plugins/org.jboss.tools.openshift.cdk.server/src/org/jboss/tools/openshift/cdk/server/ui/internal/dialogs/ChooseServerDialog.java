@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal.dialogs;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import org.eclipse.wst.server.ui.internal.ImageResource;
 public class ChooseServerDialog extends Dialog {
 	private ArrayList<IServer> valid;
 	private IServer selected;
-	
+
 	public ChooseServerDialog(Shell parentShell, ArrayList<IServer> valid) {
 		super(parentShell);
 		this.valid = valid;
@@ -74,35 +74,34 @@ public class ChooseServerDialog extends Dialog {
 				return null;
 			}
 		});
-		tv.setLabelProvider(new LabelProvider(){
+		tv.setLabelProvider(new LabelProvider() {
 			@Override
 			public Image getImage(Object element) {
-				if( element instanceof IServer ) 
-					return ImageResource.getImage(((IServer)element).getServerType().getId());
+				if (element instanceof IServer)
+					return ImageResource.getImage(((IServer) element).getServerType().getId());
 				return super.getImage(element);
 			}
+
 			@Override
 			public String getText(Object element) {
-				if( element instanceof IServer ) 
-					return ((IServer)element).getName();
+				if (element instanceof IServer)
+					return ((IServer) element).getName();
 				return super.getText(element);
 			}
 		});
-		
-		
-		
+
 		tv.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				selected = null;
 				ISelection sel = tv.getSelection();
-				if( sel instanceof IStructuredSelection) {
-					Object first = ((IStructuredSelection)sel).getFirstElement();
-					if( first instanceof IServer) {
-						selected = (IServer)first;
+				if (sel instanceof IStructuredSelection) {
+					Object first = ((IStructuredSelection) sel).getFirstElement();
+					if (first instanceof IServer) {
+						selected = (IServer) first;
 					}
 				}
-				getButton( IDialogConstants.OK_ID).setEnabled(selected != null);
+				getButton(IDialogConstants.OK_ID).setEnabled(selected != null);
 			}
 		});
 		tv.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -113,10 +112,10 @@ public class ChooseServerDialog extends Dialog {
 	@Override
 	protected Control createButtonBar(Composite parent) {
 		Control c = super.createButtonBar(parent);
-		getButton( IDialogConstants.OK_ID).setEnabled(false);
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		return c;
 	}
-	
+
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);

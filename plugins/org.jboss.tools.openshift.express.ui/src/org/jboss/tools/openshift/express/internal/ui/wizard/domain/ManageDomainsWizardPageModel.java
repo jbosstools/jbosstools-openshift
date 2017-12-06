@@ -43,32 +43,32 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 	public ManageDomainsWizardPageModel(ExpressConnection connection) {
 		this.connection = connection;
 		this.connectionChangeListener = onConnectionsChanged();
-		ConnectionsRegistrySingleton.getInstance().addListener(connectionChangeListener );
+		ConnectionsRegistrySingleton.getInstance().addListener(connectionChangeListener);
 	}
 
 	private IConnectionsRegistryListener onConnectionsChanged() {
 		return new IConnectionsRegistryListener() {
-			
+
 			@Override
 			public void connectionRemoved(IConnection connection) {
-				if(ConnectionType.Express == connection.getType()){
+				if (ConnectionType.Express == connection.getType()) {
 					ManageDomainsWizardPageModel.this.connection = null;
 					loadDomains();
 				}
 			}
-			
+
 			@Override
 			public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
 
-				if(ConnectionType.Express == connection.getType()){
+				if (ConnectionType.Express == connection.getType()) {
 					setDomains(Collections.<IDomain>emptyList()); // Workaround: force list update
 					loadDomains();
 				}
 			}
-			
+
 			@Override
 			public void connectionAdded(IConnection connection) {
-				if(ConnectionType.Express == connection.getType()){
+				if (ConnectionType.Express == connection.getType()) {
 					loadDomains();
 				}
 			}
@@ -107,7 +107,7 @@ public class ManageDomainsWizardPageModel extends ObservableUIPojo {
 	public ExpressConnection getConnection() {
 		return connection;
 	}
-	
+
 	@Override
 	public void dispose() {
 		ConnectionsRegistrySingleton.getInstance().removeListener(connectionChangeListener);

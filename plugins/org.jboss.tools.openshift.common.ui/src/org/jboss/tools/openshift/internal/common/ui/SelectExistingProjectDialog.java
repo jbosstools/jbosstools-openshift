@@ -35,7 +35,7 @@ public class SelectExistingProjectDialog extends SelectProjectDialog {
 
 	StringPreferenceValue showAllPreferences;
 	private boolean showAll;
-	
+
 	public SelectExistingProjectDialog(String message, Shell shell) {
 		super(shell);
 		setMessage(NLS.bind("{0}.\nOnly non-shared projects or Git projects allowed.", message));
@@ -43,18 +43,19 @@ public class SelectExistingProjectDialog extends SelectProjectDialog {
 
 	@Override
 	protected void initRestrictions() {
-		showAllPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS", OpenShiftCommonUIActivator.PLUGIN_ID);
+		showAllPreferences = new StringPreferenceValue("FILTER_ACCEPTABLE_PROJECTS",
+				OpenShiftCommonUIActivator.PLUGIN_ID);
 		this.showAll = getShowAllPreferences();
 	}
 
 	private boolean getShowAllPreferences() {
 		boolean showAll = false;
-		if(!StringUtils.isEmpty(showAllPreferences.get())) {
+		if (!StringUtils.isEmpty(showAllPreferences.get())) {
 			showAll = Boolean.valueOf(showAllPreferences.get());
 		}
 		return showAll;
 	}
-	
+
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite dialogArea = (Composite) super.createDialogArea(parent);
@@ -78,10 +79,10 @@ public class SelectExistingProjectDialog extends SelectProjectDialog {
 					Object[] currentlySelected = getSelectedElements();
 					Object[] newProjects = getProjects();
 					setListElements(newProjects);
-					if(currentlySelected != null && currentlySelected.length == 1 && newProjects.length > 0) {
+					if (currentlySelected != null && currentlySelected.length == 1 && newProjects.length > 0) {
 						//this is a single selection dialog
-						for (Object project: newProjects) {
-							if(project.equals(currentlySelected[0])) {
+						for (Object project : newProjects) {
+							if (project.equals(currentlySelected[0])) {
 								restoreSelection(currentlySelected);
 								break;
 							}
@@ -107,16 +108,16 @@ public class SelectExistingProjectDialog extends SelectProjectDialog {
 		if (showAll) {
 			return true;
 		}
-		
+
 		if (!project.isAccessible()) {
 			return false;
 		}
-		
-		if(ProjectUtils.isInternalRSE(project.getName())) {
+
+		if (ProjectUtils.isInternalRSE(project.getName())) {
 			return false;
 		}
-			
-		if(isNonGitShared(project)) {
+
+		if (isNonGitShared(project)) {
 			return false;
 		}
 

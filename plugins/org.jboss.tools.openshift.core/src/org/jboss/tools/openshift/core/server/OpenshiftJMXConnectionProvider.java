@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.core.server;
 
 import java.net.MalformedURLException;
@@ -36,21 +36,20 @@ import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 
 public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionProvider {
-	
+
 	private static final String AUTHORIZATION_HEADER_KEY = "Authorization"; //$NON-NLS-1$
 	private static final String AUTHORIZATION_HEADER_VALUE_PREFIX = "Bearer "; //$NON-NLS-1$
-	
+
 	public static final String PROVIDER_ID = "org.jboss.tools.openshift.core.server.OpenshiftJMXConnection"; //$NON-NLS-1$
 
-	@Override 
+	@Override
 	protected boolean getConnectionPersistenceBehavior() {
 		return ON_START;
 	}
-	
+
 	@Override
 	protected boolean belongsHere(IServer server) {
-		return server != null
-				&& OpenShiftServer.SERVER_TYPE_ID.equals(server.getServerType().getId())
+		return server != null && OpenShiftServer.SERVER_TYPE_ID.equals(server.getServerType().getId())
 				&& OpenShiftServerUtils.isJavaProject(server);
 	}
 
@@ -63,20 +62,21 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 	protected IConnectionWrapper createConnection(IServer server) {
 		IConnection openshiftCon = OpenShiftServerUtils.getConnection(server);
 		String url = computeJolokiaURL(server);
-		if(url != null) {
+		if (url != null) {
 			JolokiaConnectionWrapper cw = new JolokiaConnectionWrapper() {
 				@Override
 				public IConnectionProvider getProvider() {
 					return ExtensionManager.getProvider(PROVIDER_ID);
 				}
-				
+
 			};
 			cw.setId(server.getName());
 			cw.setUrl(url);
 			cw.setType("POST");
 			cw.setIgnoreSSLErrors(true);
 			Map<String, String> headers = new HashMap<>();
-			headers.put(AUTHORIZATION_HEADER_KEY, AUTHORIZATION_HEADER_VALUE_PREFIX + ((Connection)openshiftCon).getToken());
+			headers.put(AUTHORIZATION_HEADER_KEY,
+					AUTHORIZATION_HEADER_VALUE_PREFIX + ((Connection) openshiftCon).getToken());
 			cw.setHeaders(headers);
 			return cw;
 		} else {
@@ -86,15 +86,16 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 
 	protected String computeJolokiaURL(IServer server) {
 		IResource resource = OpenShiftServerUtils.getResource(server, new NullProgressMonitor());
-		if (resource != null) {		
-			String projName =  resource.getNamespace();
+		if (resource != null) {
+			String projName = resource.getNamespace();
 			List<IPod> pods = ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD));
-			if( !pods.isEmpty() ) {
-				String podName =  pods.get(0).getName();
+			if (!pods.isEmpty()) {
+				String podName = pods.get(0).getName();
 				String host = server.getHost();
 				String portUrlPart = getOpenShiftPort(server);
 				String jolokiaPort = getJolokiaPort(pods.get(0));
-				return "https://" + host + portUrlPart + "/api/v1/namespaces/" + projName + "/pods/https:" + podName + ":" + jolokiaPort +"/proxy/jolokia/";
+				return "https://" + host + portUrlPart + "/api/v1/namespaces/" + projName + "/pods/https:" + podName
+						+ ":" + jolokiaPort + "/proxy/jolokia/";
 			}
 		}
 		return null;
@@ -104,7 +105,8 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 		String port = "8778";
 		IReplicationController rc = ResourceUtils.getDeploymentConfigOrReplicationControllerFor(pod);
 		if (rc != null) {
-			Optional<IEnvironmentVariable> envPort = rc.getEnvironmentVariables().stream().filter(env -> env.getName().equals("AB_JOLOKIA_PORT")).findFirst();
+			Optional<IEnvironmentVariable> envPort = rc.getEnvironmentVariables().stream()
+					.filter(env -> env.getName().equals("AB_JOLOKIA_PORT")).findFirst();
 			if (envPort.isPresent()) {
 				port = envPort.get().getValue();
 			}
@@ -118,13 +120,14 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 			URL connectionUrl = new URL(server.getAttribute(OpenShiftServerUtils.ATTR_CONNECTIONURL, ""));
 			port = connectionUrl.getPort();
 		} catch (MalformedURLException e) {
-			OpenShiftCoreActivator.logError("Cannot determine port for JMX Connection from OpenShift connection URL", e); //$NON-NLS-1$
+			OpenShiftCoreActivator.logError("Cannot determine port for JMX Connection from OpenShift connection URL", //$NON-NLS-1$
+					e);
 		}
 		return port != -1 ? ":" + port : "";
 	}
 
 	@Override
 	public String getName(IConnectionWrapper wrapper) {
-		return ((JolokiaConnectionWrapper)wrapper).getId();
+		return ((JolokiaConnectionWrapper) wrapper).getId();
 	}
 }

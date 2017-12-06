@@ -25,9 +25,9 @@ import org.jboss.tools.openshift.io.internal.ui.OpenShiftIOUIActivator;
 public class DefaultRequestProcessor implements RequestProcessor {
 
 	private static final String SCRIPT = "return location.search;";
-	
+
 	private String landingURL;
-			
+
 	public DefaultRequestProcessor(String landingURL) {
 		this.landingURL = landingURL;
 	}
@@ -44,8 +44,7 @@ public class DefaultRequestProcessor implements RequestProcessor {
 					response = OSIOUtils.decodeLoginResponse(json);
 				}
 			}
-		}
-		catch (RuntimeException | IOException | URISyntaxException e) {
+		} catch (RuntimeException | IOException | URISyntaxException e) {
 			OpenShiftIOUIActivator.logError(e.getLocalizedMessage(), e);
 		}
 		return response;
@@ -53,7 +52,9 @@ public class DefaultRequestProcessor implements RequestProcessor {
 
 	private String getJSON(URI uri) {
 		String[] query = uri.getQuery().split("&");
-		Map<String, String> parameters = Arrays.stream(query).map(parameter -> new String[] { parameter.split("=")[0], parameter.split("=")[1]}).collect(Collectors.toMap(element -> element[0], element -> element[1]));
+		Map<String, String> parameters = Arrays.stream(query)
+				.map(parameter -> new String[] { parameter.split("=")[0], parameter.split("=")[1] })
+				.collect(Collectors.toMap(element -> element[0], element -> element[1]));
 		if (parameters.containsKey("token_json")) {
 			return parameters.get("token_json");
 		} else if (parameters.containsKey("api_token")) {

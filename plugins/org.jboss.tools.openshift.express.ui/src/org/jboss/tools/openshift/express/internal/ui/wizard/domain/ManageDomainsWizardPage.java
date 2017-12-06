@@ -57,7 +57,8 @@ public class ManageDomainsWizardPage extends AbstractOpenShiftWizardPage {
 	private ManageDomainsWizardPageModel pageModel;
 	private TableViewer viewer;
 
-	public ManageDomainsWizardPage(String title, String description, ManageDomainsWizardPageModel pageModel, IWizard wizard) {
+	public ManageDomainsWizardPage(String title, String description, ManageDomainsWizardPageModel pageModel,
+			IWizard wizard) {
 		super(title, description, title, wizard);
 		this.pageModel = pageModel;
 	}
@@ -68,19 +69,15 @@ public class ManageDomainsWizardPage extends AbstractOpenShiftWizardPage {
 
 		Group domainsGroup = new Group(parent, SWT.NONE);
 		domainsGroup.setText("Domains");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(domainsGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(domainsGroup);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(domainsGroup);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(domainsGroup);
 
 		// domains table
 		Composite tableContainer = new Composite(domainsGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults()
-				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		viewer.setContentProvider(new ObservableListContentProvider());
-		viewer.setInput(BeanProperties.list(
-				ManageDomainsWizardPageModel.PROPERTY_DOMAINS).observe(pageModel));
+		viewer.setInput(BeanProperties.list(ManageDomainsWizardPageModel.PROPERTY_DOMAINS).observe(pageModel));
 		loadDomains(dbc);
 		IObservableValue viewerSingleSelection = ViewerProperties.singleSelection().observe(viewer);
 		ValueBindingBuilder.bind(viewerSingleSelection)
@@ -89,60 +86,46 @@ public class ManageDomainsWizardPage extends AbstractOpenShiftWizardPage {
 
 		// new domain
 		Button newButton = new Button(domainsGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(newButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(newButton);
 		newButton.setText("New...");
 		newButton.addSelectionListener(onNew(dbc));
 
 		// edit domain
 		Button editButton = new Button(domainsGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(editButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(editButton);
 		editButton.setText("Edit...");
 		editButton.addSelectionListener(onEdit(dbc));
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(editButton))
-				.notUpdatingParticipant()
-				.to(viewerSingleSelection)
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(editButton)).notUpdatingParticipant()
+				.to(viewerSingleSelection).converting(new IsNotNull2BooleanConverter()).in(dbc);
 
 		// remove
 		Button removeButton = new Button(domainsGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText("Remove...");
 		removeButton.addSelectionListener(onRemove(dbc));
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
-				.notUpdatingParticipant()
-				.to(viewerSingleSelection)
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(removeButton)).notUpdatingParticipant()
+				.to(viewerSingleSelection).converting(new IsNotNull2BooleanConverter()).in(dbc);
 
 		Composite filler = new Composite(domainsGroup, SWT.None);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(filler);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(filler);
 
 		// refresh
 		Button refreshButton = new Button(domainsGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.END).applyTo(refreshButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.END).applyTo(refreshButton);
 		refreshButton.setText("Refresh...");
 		refreshButton.addSelectionListener(onRefresh(dbc));
 	}
 
 	private void loadDomains(DataBindingContext dbc) {
 		try {
-			org.jboss.tools.common.ui.WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob("Loading domains...") {
+			org.jboss.tools.common.ui.WizardUtils.runInWizard(new AbstractDelegatingMonitorJob("Loading domains...") {
 
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							pageModel.loadDomains();
-							return Status.OK_STATUS;
-						}
-					}, new DelegatingProgressMonitor(), getContainer(), dbc);
+				@Override
+				protected IStatus doRun(IProgressMonitor monitor) {
+					pageModel.loadDomains();
+					return Status.OK_STATUS;
+				}
+			}, new DelegatingProgressMonitor(), getContainer(), dbc);
 		} catch (InvocationTargetException e) {
 			Logger.error(NLS.bind("Could not load domains for connection {0}", pageModel.getConnection().getId()), e);
 		} catch (InterruptedException e) {
@@ -187,8 +170,8 @@ public class ManageDomainsWizardPage extends AbstractOpenShiftWizardPage {
 
 				AbstractDelegatingMonitorJob deleteDomainJob = new DestroyDomainJob(domain, dialog.isForceDelete());
 				try {
-					org.jboss.tools.common.ui.WizardUtils.runInWizard(
-							deleteDomainJob, deleteDomainJob.getDelegatingProgressMonitor(), getContainer(), dbc);
+					org.jboss.tools.common.ui.WizardUtils.runInWizard(deleteDomainJob,
+							deleteDomainJob.getDelegatingProgressMonitor(), getContainer(), dbc);
 				} catch (InvocationTargetException ex) {
 					Logger.error(NLS.bind("Could not destroy domain {0}", domain.getId()), ex);
 				} catch (InterruptedException ex) {
@@ -214,45 +197,39 @@ public class ManageDomainsWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
-		this.viewer = new TableViewerBuilder(table, tableContainer)
-				.contentProvider(new ArrayContentProvider())
+		this.viewer = new TableViewerBuilder(table, tableContainer).contentProvider(new ArrayContentProvider())
 				.column(new IColumnLabelProvider<IDomain>() {
 
 					@Override
 					public String getValue(IDomain domain) {
 						return domain.getId();
 					}
-				})
-				.name("ID").align(SWT.LEFT).weight(1).minWidth(50).buildColumn()
+				}).name("ID").align(SWT.LEFT).weight(1).minWidth(50).buildColumn()
 				.column(new IColumnLabelProvider<IDomain>() {
 
 					@Override
 					public String getValue(IDomain domain) {
 						return domain.getSuffix();
 					}
-				})
-				.name("Suffix").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
-				.buildViewer();
+				}).name("Suffix").align(SWT.LEFT).weight(2).minWidth(100).buildColumn().buildViewer();
 
 		return viewer;
 	}
 
 	private void refreshModel(final DataBindingContext dbc) {
 		try {
-			org.jboss.tools.common.ui.WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob("Refreshing domains...") {
+			org.jboss.tools.common.ui.WizardUtils
+					.runInWizard(new AbstractDelegatingMonitorJob("Refreshing domains...") {
 
 						@Override
 						protected IStatus doRun(IProgressMonitor monitor) {
 							pageModel.refresh();
 							return Status.OK_STATUS;
 						}
-					}
-					, new DelegatingProgressMonitor(), getContainer(), dbc);
+					}, new DelegatingProgressMonitor(), getContainer(), dbc);
 		} catch (InvocationTargetException ex) {
 			Logger.error(NLS.bind("Could not refresh connection {0}", pageModel.getConnection().getId()), ex);
 		} catch (InterruptedException ex) {
@@ -269,6 +246,5 @@ public class ManageDomainsWizardPage extends AbstractOpenShiftWizardPage {
 		pageModel.dispose();
 		super.dispose();
 	}
-	
-	
+
 }

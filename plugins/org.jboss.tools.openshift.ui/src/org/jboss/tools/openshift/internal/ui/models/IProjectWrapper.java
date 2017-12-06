@@ -17,7 +17,8 @@ import com.openshift.restclient.model.IProject;
  * @author Thomas Mäder
  *
  */
-public interface IProjectWrapper extends IResourceWrapper<IProject, ConnectionWrapper>, IResourceContainer<IProject, ConnectionWrapper> {
+public interface IProjectWrapper
+		extends IResourceWrapper<IProject, ConnectionWrapper>, IResourceContainer<IProject, ConnectionWrapper> {
 	/**
 	 * @return the state the project is in.
 	 */

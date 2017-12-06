@@ -20,54 +20,54 @@ import com.openshift.restclient.model.IServicePort;
  * @author jeff.cantrill
  *
  */
-public class ServicePortAdapter extends ObservablePojo implements IServicePort{
-	
-    /**
-     * Name property
-     */
-    public static final String NAME = "name";
-    
-    /**
-     * Port property
-     */
-    public static final String PORT = "port";
+public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 
-    /**
-     * Target port property
-     */
-    public static final String TARGET_PORT = "targetPort";
+	/**
+	 * Name property
+	 */
+	public static final String NAME = "name";
 
-    /**
-     * Route port property
-     */
-    public static final String ROUTE_PORT = "routePort";
-	
+	/**
+	 * Port property
+	 */
+	public static final String PORT = "port";
+
+	/**
+	 * Target port property
+	 */
+	public static final String TARGET_PORT = "targetPort";
+
+	/**
+	 * Route port property
+	 */
+	public static final String ROUTE_PORT = "routePort";
+
 	private String name;
 	private int port;
 	private String containerPort;
 	private String protocol;
 	private boolean routePort;
 
-	public ServicePortAdapter(IPort port){
+	public ServicePortAdapter(IPort port) {
 		name = port.getName();
 		this.port = port.getContainerPort();
 		containerPort = String.valueOf(port.getContainerPort());
 		protocol = port.getProtocol();
 	}
-	
+
 	public ServicePortAdapter(ServicePortAdapter port) {
-	    this((IServicePort) port);
+		this((IServicePort) port);
 		this.routePort = port.isRoutePort();
 	}
 
-    public ServicePortAdapter(IServicePort port) {
-        this.name = port.getName();
-        this.port = port.getPort();
-        this.containerPort = "0".equals(port.getTargetPort()) ? String.valueOf(this.port) : port.getTargetPort();
-        this.protocol = port.getProtocol();
-    }
+	public ServicePortAdapter(IServicePort port) {
+		this.name = port.getName();
+		this.port = port.getPort();
+		this.containerPort = "0".equals(port.getTargetPort()) ? String.valueOf(this.port) : port.getTargetPort();
+		this.protocol = port.getProtocol();
+	}
 
-    public ServicePortAdapter() {
+	public ServicePortAdapter() {
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 	public void setTargetPort(int port) {
 		firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(port));
 	}
-	
+
 	@Override
 	public void setTargetPort(String intOrString) {
 		firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(intOrString));
@@ -116,20 +116,20 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 	}
 
 	/**
-     * @return the routePort
-     */
-    public boolean isRoutePort() {
-        return routePort;
-    }
+	 * @return the routePort
+	 */
+	public boolean isRoutePort() {
+		return routePort;
+	}
 
-    /**
-     * @param routePort the routePort to set
-     */
-    public void setRoutePort(boolean routePort) {
-        firePropertyChange(ROUTE_PORT, this.routePort, this.routePort = routePort);
-    }
+	/**
+	 * @param routePort the routePort to set
+	 */
+	public void setRoutePort(boolean routePort) {
+		firePropertyChange(ROUTE_PORT, this.routePort, this.routePort = routePort);
+	}
 
-    @Override
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -168,18 +168,17 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort{
 		} else if (!protocol.equals(other.protocol))
 			return false;
 		else if (routePort != other.routePort)
-		        return false;
+			return false;
 		return true;
 	}
 
-    /**
-     * For better test reporting
-     */
-    @Override
-    public String toString() {
-        return "ServicePortAdapter [name=" + name + ", port=" + port + ", containerPort=" + containerPort
-                + ", protocol=" + protocol + ", routePort=" + routePort + "]";
-    }
-	
-	
+	/**
+	 * For better test reporting
+	 */
+	@Override
+	public String toString() {
+		return "ServicePortAdapter [name=" + name + ", port=" + port + ", containerPort=" + containerPort
+				+ ", protocol=" + protocol + ", routePort=" + routePort + "]";
+	}
+
 }

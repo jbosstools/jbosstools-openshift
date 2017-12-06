@@ -52,11 +52,11 @@ public class WizardHandleAwareFragment extends WizardFragment {
 	 * @return
 	 */
 	protected IWizardContainer getWizardContainer() {
-		if(!(handle instanceof WizardPage)) {
+		if (!(handle instanceof WizardPage)) {
 			return null;
 		}
-		WizardPage page = (WizardPage)handle;
-		if(page.getShell() == null || page.getShell().isDisposed()) {
+		WizardPage page = (WizardPage) handle;
+		if (page.getShell() == null || page.getShell().isDisposed()) {
 			return null;
 		}
 		IWizard wizard = page.getWizard();

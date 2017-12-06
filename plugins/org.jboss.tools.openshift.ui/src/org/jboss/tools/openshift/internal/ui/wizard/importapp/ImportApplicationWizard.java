@@ -57,21 +57,19 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	public ImportApplicationWizard() {
 		setWindowTitle("Import OpenShift Application");
 		setNeedsProgressMonitor(true);
-		setDialogSettings(
-				DialogSettings.getOrCreateSection(
-						OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
+		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(),
+				IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
 		this.model = new ImportApplicationWizardModel();
 		String repoPath = loadRepoPath();
 		if (StringUtils.isNotBlank(repoPath)) {
-		    model.setCloneDestination(repoPath);
-		    model.setUseDefaultCloneDestination(false);
+			model.setCloneDestination(repoPath);
+			model.setUseDefaultCloneDestination(false);
 		}
 	}
 
 	public ImportApplicationWizard(Map<IProject, Collection<IBuildConfig>> projectsAndBuildConfigs) {
 		this();
-		if (projectsAndBuildConfigs != null
-				&& projectsAndBuildConfigs.size() == 1) {
+		if (projectsAndBuildConfigs != null && projectsAndBuildConfigs.size() == 1) {
 			Map.Entry<IProject, Collection<IBuildConfig>> entry = projectsAndBuildConfigs.entrySet().iterator().next();
 			IProject project = entry.getKey();
 			setConnection(project);
@@ -88,15 +86,15 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	 * @return the found default git path
 	 */
 	private String loadRepoPath() {
-	    String path = getDialogSettings().get(REPO_PATH_KEY);
-	    if (path == null) {
-	        IDialogSettings settings = DialogSettings.getOrCreateSection(
-	        		OpenShiftUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
-	        path = settings.get(REPO_PATH_KEY);
-	    }
-	    return path;
+		String path = getDialogSettings().get(REPO_PATH_KEY);
+		if (path == null) {
+			IDialogSettings settings = DialogSettings.getOrCreateSection(
+					OpenShiftUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
+			path = settings.get(REPO_PATH_KEY);
+		}
+		return path;
 	}
-	
+
 	private void setConnection(IProject project) {
 		Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(project);
 		setModelConnection(connection);
@@ -104,22 +102,20 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 
 	private void setSelectedItem(Map.Entry<IProject, Collection<IBuildConfig>> entry, IProject project) {
 		Collection<IBuildConfig> buildConfigs = entry.getValue();
-		if (buildConfigs != null 
-				&& buildConfigs.size() == 1) {
+		if (buildConfigs != null && buildConfigs.size() == 1) {
 			model.setSelectedItem(buildConfigs.iterator().next());
 		} else {
 			model.setSelectedItem(project);
 		}
 	}
-	
+
 	public ImportApplicationWizardModel getModel() {
-	    return model;
+		return model;
 	}
-	
+
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		if (model.getConnection() != null 
-				&& model.getSelectedItem() != null) {
+		if (model.getConnection() != null && model.getSelectedItem() != null) {
 			return;
 		}
 		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
@@ -177,20 +173,21 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 					saveRepoPath();
 				}
 				UsageStats.getInstance().importV3Application(model.getConnection().getHost(), success);
-			}});
-		for (IJobChangeListener importJobChangeListener: importJobChangeListenersList) {
+			}
+		});
+		for (IJobChangeListener importJobChangeListener : importJobChangeListenersList) {
 			importJob.addJobChangeListener(importJobChangeListener);
 		}
 	}
 
 	private void saveRepoPath() {
-		if(!model.isUseDefaultCloneDestination()) {
+		if (!model.isUseDefaultCloneDestination()) {
 			getDialogSettings().put(REPO_PATH_KEY, model.getCloneDestination());
 		} else {
 			getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
 		}
 	}
-	
+
 	public void addImportJobChangeListener(IJobChangeListener importJobChangeListener) {
 		importJobChangeListenersList.add(importJobChangeListener);
 	}
@@ -224,11 +221,11 @@ public class ImportApplicationWizard extends Wizard implements IWorkbenchWizard,
 	public ImportJob getImportJob() {
 		return importJob;
 	}
-	
+
 	@Override
 	public void dispose() {
 		importJobChangeListenersList.clear();
 		super.dispose();
 	}
-	
+
 }

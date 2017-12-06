@@ -58,7 +58,7 @@ public class EGitUtilsTest {
 	private static final String GIT_EMAIL = "dummyUser@redhat.com";
 	private static final String GIT_USER = "dummyUser";
 	private static final String REPO2_REMOTE_NAME = "openshift";
-	
+
 	protected final TestUtils testUtils = new TestUtils();
 
 	private TestProject testProject;
@@ -75,7 +75,7 @@ public class EGitUtilsTest {
 		this.testRepository = createTestRepository(testProject);
 
 		this.testRepositoryClone = cloneRepository(testRepository);
-		
+
 		this.testProject2 = new TestProject(true);
 		this.testRepository2 = createTestRepository(testProject2);
 	}
@@ -90,15 +90,16 @@ public class EGitUtilsTest {
 		return testRepository;
 	}
 
-	private TestRepository cloneRepository(TestRepository repository) throws URISyntaxException,
-			InvocationTargetException, InterruptedException, IOException {
+	private TestRepository cloneRepository(TestRepository repository)
+			throws URISyntaxException, InvocationTargetException, InterruptedException, IOException {
 		File workspaceDir = ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile();
-		File clonedRepositoryFile =
-				new File(workspaceDir, "clonedRepository-" + String.valueOf(System.currentTimeMillis()));
+		File clonedRepositoryFile = new File(workspaceDir,
+				"clonedRepository-" + String.valueOf(System.currentTimeMillis()));
 		return repository.cloneRepository(clonedRepositoryFile);
 	}
 
-	private IFile commitFile(String fileName, String fileContent, TestProject project, TestRepository repository) throws Exception {
+	private IFile commitFile(String fileName, String fileContent, TestProject project, TestRepository repository)
+			throws Exception {
 		Assert.assertNotNull(fileName);
 		Assert.assertNotNull(fileContent);
 		Assert.assertNotNull(repository);
@@ -114,11 +115,11 @@ public class EGitUtilsTest {
 	public void tearDown() throws Exception {
 		testProject.dispose();
 		testProject2.dispose();
-		
+
 		testRepository.dispose();
 		testRepositoryClone.dispose();
 		testRepository2.dispose();
-		Activator.getDefault().getRepositoryCache().clear();		
+		Activator.getDefault().getRepositoryCache().clear();
 	}
 
 	@Test
@@ -130,11 +131,11 @@ public class EGitUtilsTest {
 		// then
 		assertTrue(exists);
 	}
-	
+
 	@Test
 	public void shouldReturnRepositoryDoesntExists() {
 		// given
-		File repositoryDir =  new File(System.getProperty("java.io.tmpdir"));
+		File repositoryDir = new File(System.getProperty("java.io.tmpdir"));
 		// when
 		boolean exists = EGitUtils.isRepository(repositoryDir);
 		// then
@@ -168,7 +169,8 @@ public class EGitUtilsTest {
 		Set<String> subsections = config.getSubsections(ConfigConstants.CONFIG_REMOTE_SECTION);
 		assertEquals(1, subsections.size());
 		assertTrue(subsections.contains(remoteName));
-		assertEquals(gitUri, config.getString(ConfigConstants.CONFIG_REMOTE_SECTION, remoteName, ConfigConstants.CONFIG_KEY_URL));
+		assertEquals(gitUri,
+				config.getString(ConfigConstants.CONFIG_REMOTE_SECTION, remoteName, ConfigConstants.CONFIG_KEY_URL));
 	}
 
 	@Test
@@ -176,19 +178,15 @@ public class EGitUtilsTest {
 		String fileName = "a.txt";
 		String fileContent = "adietish@redhat.com";
 
-		IFile file = testUtils.addFileToProject(
-				testProject.getProject(),
-				fileName,
-				fileContent);
+		IFile file = testUtils.addFileToProject(testProject.getProject(), fileName, fileContent);
 		testRepository.add(file);
 
 		EGitUtils.commit(testProject.getProject(), null);
 
-		testUtils.assertRepositoryContainsFilesWithContent(
-				testRepository.getRepository(),
+		testUtils.assertRepositoryContainsFilesWithContent(testRepository.getRepository(),
 				new String[] { testUtils.getPathInRepository(file), fileContent });
 	}
-	
+
 	@Test
 	public void fileAddedToCloneIsInOriginAfterPush() throws Exception {
 		String fileName = "b.txt";
@@ -200,10 +198,7 @@ public class EGitUtilsTest {
 		EGitUtils.push(testRepositoryClone.getRepository(), null);
 
 		// does origin contain file added to clone?
-		testUtils.assertRepositoryContainsFilesWithContent(
-				testRepository.getRepository(),
-				fileName,
-				fileContent);
+		testUtils.assertRepositoryContainsFilesWithContent(testRepository.getRepository(), fileName, fileContent);
 	}
 
 	@Test
@@ -217,10 +212,7 @@ public class EGitUtilsTest {
 		EGitUtils.pushForce(REPO2_REMOTE_NAME, testRepositoryClone.getRepository(), null);
 
 		// repo2 must contain file added to clone
-		testUtils.assertRepositoryContainsFilesWithContent(
-				testRepository2.getRepository(),
-				fileName,
-				fileContent);
+		testUtils.assertRepositoryContainsFilesWithContent(testRepository2.getRepository(), fileName, fileContent);
 	}
 
 	@Test
@@ -232,22 +224,17 @@ public class EGitUtilsTest {
 
 		File file2 = testRepository2.createFile("b.txt", "bingobongo");
 		testRepository2.addAndCommit(file2, "adding a file");
-		
+
 		testRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
 		EGitUtils.pushForce(REPO2_REMOTE_NAME, testRepository.getRepository(), null);
 
 		// repo2 mustn't contain "b.txt"
-		testUtils.assertRepositoryMisses(
-				testRepository2.getRepository(),
-				file2.getName());
+		testUtils.assertRepositoryMisses(testRepository2.getRepository(), file2.getName());
 		// repo2 must contain "a.txt"
-		testUtils.assertRepositoryContainsFilesWithContent(
-				testRepository2.getRepository(),
-				fileName,
-				fileContent);
+		testUtils.assertRepositoryContainsFilesWithContent(testRepository2.getRepository(), fileName, fileContent);
 	}
-	
-	@Test(expected=CoreException.class)
+
+	@Test(expected = CoreException.class)
 	public void pushFailsOnNonFastForward() throws Exception {
 		String fileName = "a.txt";
 		String fileContent = "adietish@redhat.com";
@@ -256,7 +243,7 @@ public class EGitUtilsTest {
 
 		File file2 = testRepository2.createFile("b.txt", "bingobongo");
 		testRepository2.addAndCommit(file2, "adding a file");
-		
+
 		testRepository.addRemoteTo(REPO2_REMOTE_NAME, testRepository2.getRepository());
 		EGitUtils.push(REPO2_REMOTE_NAME, testRepository.getRepository(), null);
 	}
@@ -269,10 +256,10 @@ public class EGitUtilsTest {
 		String fileContent = "adietish@redhat.com";
 		File file = testRepositoryClone.createFile(fileName, fileContent);
 		testRepositoryClone.addAndCommit(file, "adding a file");
-		
+
 		assertTrue(EGitUtils.isAhead(testRepositoryClone.getRepository(), Constants.DEFAULT_REMOTE_NAME, null));
 	}
-	
+
 	@Test
 	public void shouldReturnThatRemoteIsAhead() throws Exception {
 		String fileName = "a.txt";
@@ -295,8 +282,8 @@ public class EGitUtilsTest {
 		assertTrue(EGitUtils.isAhead(testRepository.getRepository(), REPO2_REMOTE_NAME, null));
 
 		EGitUtils.pushForce(REPO2_REMOTE_NAME, testRepository.getRepository(), null);
-		
-		assertFalse(EGitUtils.isAhead(testRepository.getRepository(), REPO2_REMOTE_NAME, null));	
+
+		assertFalse(EGitUtils.isAhead(testRepository.getRepository(), REPO2_REMOTE_NAME, null));
 	}
 
 	@Test
@@ -310,7 +297,7 @@ public class EGitUtilsTest {
 		File file = testRepositoryClone.createFile(fileName, fileContent);
 		testRepositoryClone.addAndCommit(file, "adding a file");
 		assertTrue(EGitUtils.isAhead(testRepositoryClone.getRepository(), REPO2_REMOTE_NAME, null));
-		
+
 		new Git(testRepositoryClone.getRepository()).push().setForce(true).call();
 		assertTrue(EGitUtils.isAhead(testRepositoryClone.getRepository(), REPO2_REMOTE_NAME, null));
 	}
@@ -322,7 +309,7 @@ public class EGitUtilsTest {
 		// add custom fetch-spec in config (fetch = refs/heads/master:refs/remotes/bingo/master)
 		StoredConfig config = testRepository.getRepository().getConfig();
 		config.getString(ConfigConstants.CONFIG_KEY_REMOTE, REPO2_REMOTE_NAME, "fetch");
-		String remoteTrackingBranchRef = "refs/remotes/bingo/master"; 
+		String remoteTrackingBranchRef = "refs/remotes/bingo/master";
 		String fetchSpec = "refs/heads/master:" + remoteTrackingBranchRef;
 		config.setString(ConfigConstants.CONFIG_KEY_REMOTE, REPO2_REMOTE_NAME, "fetch", fetchSpec);
 		config.save();
@@ -342,8 +329,7 @@ public class EGitUtilsTest {
 		String fileName = "a.txt";
 		String fileContent = "adietish@redhat.com";
 		IFile file = commitFile(fileName, fileContent, testProject, testRepository);
-		testUtils.assertRepositoryContainsFilesWithContent(
-				testRepository.getRepository(),
+		testUtils.assertRepositoryContainsFilesWithContent(testRepository.getRepository(),
 				new String[] { testUtils.getPathInRepository(file), fileContent });
 
 		testRepository.checkoutBranch(branch);
@@ -355,25 +341,24 @@ public class EGitUtilsTest {
 		// then file should be present
 		assertTrue(result.getStatus() == CheckoutResult.Status.OK);
 		assertTrue(testRepository.isCurrentBranch(REPO_BRANCH));
-		testUtils.assertRepositoryContainsFilesWithContent(
-				testRepository.getRepository(),
+		testUtils.assertRepositoryContainsFilesWithContent(testRepository.getRepository(),
 				new String[] { testUtils.getPathInRepository(file), fileContent });
 	}
-	
+
 	@Test
 	public void untrackedWhileDontIncludeUntrackedIsNotDirty() throws Exception {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		testRepository.createFile("a.txt", "protoculture");
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), false, new NullProgressMonitor()));
 	}
-	
+
 	@Test
 	public void untrackedWhileIncludeUntrackedIsDirty() throws Exception {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 		testRepository.createFile(testProject.getProject(), "a.txt", "42");
 		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), true, new NullProgressMonitor()));
 	}
-	
+
 	@Test
 	public void addedButNotCommittedIsDirty() throws Exception {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
@@ -381,7 +366,7 @@ public class EGitUtilsTest {
 		testRepository.add(file);
 		assertTrue(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
 	}
-	
+
 	@Test
 	public void modifiedButNotCommittedIsDirty() throws Exception {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
@@ -411,7 +396,7 @@ public class EGitUtilsTest {
 		int numOfChanges = EGitUtils.countChanges(testRepository.getRepository(), true, new NullProgressMonitor());
 		assertEquals(2, numOfChanges);
 	}
-	
+
 	@Test
 	public void newUntrackedFileIsNotCountedIfIgnoreUntracked() throws Exception {
 		assertFalse(EGitUtils.isDirty(testRepository.getRepository(), new NullProgressMonitor()));
@@ -419,11 +404,12 @@ public class EGitUtilsTest {
 		int numOfChanges = EGitUtils.countChanges(testRepository.getRepository(), false, new NullProgressMonitor());
 		assertEquals(0, numOfChanges);
 	}
-	
+
 	@Test
-	public void canGetSingleRemoteConfig() throws CoreException, MalformedURLException, URISyntaxException, IOException {
+	public void canGetSingleRemoteConfig()
+			throws CoreException, MalformedURLException, URISyntaxException, IOException {
 		String remoteName = "repo2";
-		
+
 		testRepository.addRemoteTo(remoteName, testRepository2.getRepository());
 		List<RemoteConfig> allRemoteConfigs = EGitUtils.getAllRemoteConfigs(testRepository.getRepository());
 		assertNotNull(allRemoteConfigs);
@@ -433,9 +419,10 @@ public class EGitUtilsTest {
 	}
 
 	@Test
-	public void canGetFromSeveralRemoteConfig() throws CoreException, MalformedURLException, URISyntaxException, IOException {
+	public void canGetFromSeveralRemoteConfig()
+			throws CoreException, MalformedURLException, URISyntaxException, IOException {
 		String repo2RemoteName = "repo2";
-		
+
 		testRepositoryClone.addRemoteTo(repo2RemoteName, testRepository2.getRepository());
 		List<RemoteConfig> allRemoteConfigs = EGitUtils.getAllRemoteConfigs(testRepositoryClone.getRepository());
 		assertNotNull(allRemoteConfigs);
@@ -448,17 +435,18 @@ public class EGitUtilsTest {
 	@Test
 	public void canCheckIfHasRemote() throws CoreException, MalformedURLException, URISyntaxException, IOException {
 		String repo2RemoteName = "repo2";
-		
+
 		testRepositoryClone.addRemoteTo(repo2RemoteName, testRepository2.getRepository());
-		assertTrue(
-				EGitUtils.hasRemote(repo2RemoteName, testRepository2.getUri().toString(), testRepositoryClone.getRepository()));
+		assertTrue(EGitUtils.hasRemote(repo2RemoteName, testRepository2.getUri().toString(),
+				testRepositoryClone.getRepository()));
 	}
-	
+
 	@Test
 	public void shouldReturnHostFromFullGitUrl() {
 		//pre-conditions
 		//operation
-		String host = EGitUtils.getGitHost("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
+		String host = EGitUtils
+				.getGitHost("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
 		// verification
 		assertNotNull(host);
 		assertEquals("eap2-honkabonka2.rhcloud.com", host);
@@ -494,7 +482,8 @@ public class EGitUtilsTest {
 	public void shouldReturnUserFromFullGitUrl() {
 		//pre-conditions
 		//operation
-		String user = EGitUtils.getGitUsername("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
+		String user = EGitUtils
+				.getGitUsername("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/");
 		// verification
 		assertNotNull(user);
 		assertEquals("516e82ca4382ec2174000098", user);
@@ -504,10 +493,11 @@ public class EGitUtilsTest {
 	public void shouldConsiderSSHGitUrlValid() {
 		//pre-conditions
 		//operation
-		assertTrue(EGitUtils.isValidGitUrl("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/"));
+		assertTrue(
+				EGitUtils.isValidGitUrl("ssh://516e82ca4382ec2174000098@eap2-honkabonka2.rhcloud.com/~/git/eap2.git/"));
 		// verification
 	}
-	
+
 	@Test
 	public void shouldConsiderSCPGitUrlValid() {
 		//pre-conditions
@@ -515,14 +505,14 @@ public class EGitUtilsTest {
 		assertTrue(EGitUtils.isValidGitUrl("git@eap2-honkabonka2.rhcloud.com:openshift/eap2.git/"));
 		// verification
 	}
-	
+
 	@Test
 	public void originShouldBeDefaultRemoteRepo() throws Exception {
 		//pre-conditions
 		testRepository.addRemoteTo("git", "git://git.stuff/");
 		testRepository.addRemoteTo("foo", "https://foo.bar/");
 		testRepository.addRemoteTo("bar", "http://bar.foo/");
-		
+
 		//Get 1st remote after remotes were ordered alphabetically
 		//operation
 		String defaultRepo = EGitUtils.getDefaultRemoteRepo(testProject.getProject());
@@ -536,7 +526,7 @@ public class EGitUtilsTest {
 		// verification
 		assertEquals("http://origin/", defaultRepo);
 	}
-	
+
 	@Test
 	public void getRemoteHttpRepos() throws Exception {
 		//pre-conditions
@@ -544,13 +534,13 @@ public class EGitUtilsTest {
 		testRepository.addRemoteTo("foo", "https://foo.bar/");
 		testRepository.addRemoteTo("bar", "http://bar.foo/");
 		testRepository.addRemoteTo("origin", "http://origin/");
-		
+
 		//operation
 		List<String> repos = EGitUtils.getRemoteGitRepos(testProject.getProject());
-		
+
 		// verification
 		assertEquals(3, repos.size());
-		assertEquals("http://origin/", 	repos.get(0));
+		assertEquals("http://origin/", repos.get(0));
 		assertEquals("http://bar.foo/", repos.get(1));
 		assertEquals("https://foo.bar/", repos.get(2));
 	}
@@ -575,7 +565,7 @@ public class EGitUtilsTest {
 		// then
 		assertThat(fullBranchName, equalTo("refs/heads/" + branchName));
 	}
-	
+
 	@Test
 	public void shouldReturnHEADAsIs() {
 		// given
@@ -619,7 +609,8 @@ public class EGitUtilsTest {
 		RemoteConfig remoteConfig = EGitUtils.getRemoteByName("origin", testRepositoryClone.getRepository());
 		EGitUtils.fetch(remoteConfig, testRepositoryClone.getRepository(), new NullProgressMonitor());
 		// when
-		RevCommit latestCommit = EGitUtils.getLatestCommit(currentBranch, "origin", testRepositoryClone.getRepository());
+		RevCommit latestCommit = EGitUtils.getLatestCommit(currentBranch, "origin",
+				testRepositoryClone.getRepository());
 		// then
 		assertThat(latestCommit, equalTo(commit));
 	}

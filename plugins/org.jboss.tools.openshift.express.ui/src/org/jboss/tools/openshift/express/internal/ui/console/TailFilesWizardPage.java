@@ -59,8 +59,8 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 	private CheckboxTableViewer viewer;
 
 	public TailFilesWizardPage(final TailFilesWizardPageModel pageModel, final IWizard wizard) {
-		super("Tail Log Files", "This will run tail on your OpenShift application '" + pageModel.getApplication().getName() +
-				"'.\nYou can use the defaults or change the tail options.",
+		super("Tail Log Files", "This will run tail on your OpenShift application '"
+				+ pageModel.getApplication().getName() + "'.\nYou can use the defaults or change the tail options.",
 				"TailFilePage", wizard);
 		this.pageModel = pageModel;
 	}
@@ -75,58 +75,53 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 		// label
 		final Label filePatternLabel = new Label(container, SWT.NONE);
 		filePatternLabel.setText("Tail options:");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false)
-				.applyTo(filePatternLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).applyTo(filePatternLabel);
 		// input text field
 		final Text filePatternText = new Text(container, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false).applyTo(filePatternText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(1, 1).grab(true, false)
+				.applyTo(filePatternText);
 		final IObservableValue filePatternTextObservable = WidgetProperties.text(SWT.Modify).observe(filePatternText);
-		final IObservableValue filePatternModelObservable = BeanProperties.value(
-				TailFilesWizardPageModel.PROPERTY_FILE_PATTERN).observe(pageModel);
+		final IObservableValue filePatternModelObservable = BeanProperties
+				.value(TailFilesWizardPageModel.PROPERTY_FILE_PATTERN).observe(pageModel);
 		ValueBindingBuilder.bind(filePatternTextObservable).to(filePatternModelObservable).in(dbc);
 		// reset button (in case user inputs something and wants/needs to revert)
 		final Button resetButton = new Button(container, SWT.PUSH);
 		resetButton.setText("Reset");
-		GridDataFactory.fillDefaults()
-				.hint(100, SWT.DEFAULT).span(1, 1).align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(resetButton);
+		GridDataFactory.fillDefaults().hint(100, SWT.DEFAULT).span(1, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
+				.applyTo(resetButton);
 		resetButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				pageModel.resetFilePattern();
 			}
 		});
-		
+
 		// gears selection container
 		final Composite gearsSelectionContainer = new Composite(container, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).span(3, 1)
-			.applyTo(gearsSelectionContainer);
+				.applyTo(gearsSelectionContainer);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(gearsSelectionContainer);
 		// enable tail logs on all gears at the same time
 		final Label selectGearsLabel = new Label(gearsSelectionContainer, SWT.NONE);
 		selectGearsLabel.setText("Please, select the gears on which you want to tail files:");
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).span(2, 1)
 				.applyTo(selectGearsLabel);
-		
+
 		final Composite tableContainer = new Composite(gearsSelectionContainer, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2)
-			.applyTo(tableContainer);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(1, 2).applyTo(tableContainer);
 		this.viewer = createTable(tableContainer);
-		dbc.bindSet(
-				ViewerProperties.checkedElements(IGearGroup.class).observe(viewer),
-				BeanProperties.set(
-						TailFilesWizardPageModel.PROPERTY_SELECTED_GEAR_GROUPS)
-						.observe(pageModel));
+		dbc.bindSet(ViewerProperties.checkedElements(IGearGroup.class).observe(viewer),
+				BeanProperties.set(TailFilesWizardPageModel.PROPERTY_SELECTED_GEAR_GROUPS).observe(pageModel));
 		final Button selectAllButton = new Button(gearsSelectionContainer, SWT.PUSH);
 		selectAllButton.setText("Select all");
 		selectAllButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				pageModel.selectAllGears(); 
+				pageModel.selectAllGears();
 			}
 		});
-		GridDataFactory.fillDefaults()
-				.hint(100, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).grab(false, false).applyTo(selectAllButton);
+		GridDataFactory.fillDefaults().hint(100, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).grab(false, false)
+				.applyTo(selectAllButton);
 		final Button deselectAllButton = new Button(gearsSelectionContainer, SWT.PUSH);
 		deselectAllButton.setText("Deselect all");
 		deselectAllButton.addSelectionListener(new SelectionAdapter() {
@@ -136,14 +131,14 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		});
 
-		GridDataFactory.fillDefaults()
-				.hint(100, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).grab(false, false).applyTo(deselectAllButton);		
+		GridDataFactory.fillDefaults().hint(100, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).grab(false, false)
+				.applyTo(deselectAllButton);
 
 	}
-	
+
 	private CheckboxTableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
+		Table table = new Table(tableContainer,
+				SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		TableColumnLayout tableLayout = new TableColumnLayout();
@@ -165,20 +160,20 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 				cell.setText(Integer.toString(gearGroup.getGears().size()));
 			}
 		}, viewer, tableLayout);
-		createTableColumn("", 1, SWT.RIGHT, new CellLabelProvider(){
+		createTableColumn("", 1, SWT.RIGHT, new CellLabelProvider() {
 			@Override
 			public void update(ViewerCell cell) {
 			}
 		}, viewer, tableLayout);
 		return viewer;
 	}
-	
-	private void createTableColumn(String name, int weight, int alignment, CellLabelProvider cellLabelProvider, TableViewer viewer,
-			TableColumnLayout layout) {
+
+	private void createTableColumn(String name, int weight, int alignment, CellLabelProvider cellLabelProvider,
+			TableViewer viewer, TableColumnLayout layout) {
 		TableViewerColumn column = new TableViewerColumn(viewer, SWT.LEFT);
 		column.getColumn().setText(name);
 		column.getColumn().setAlignment(alignment);
-		if(cellLabelProvider != null) {
+		if (cellLabelProvider != null) {
 			column.setLabelProvider(cellLabelProvider);
 		}
 		layout.setColumnData(column.getColumn(), new ColumnWeightData(weight, true));
@@ -224,26 +219,27 @@ public class TailFilesWizardPage extends AbstractOpenShiftWizardPage {
 
 	private void loadApplicationGearGroups(final DataBindingContext dbc) {
 		try {
-			WizardUtils.runInWizard(new Job("Loading gear groups for application '" + pageModel.getApplication().getName() + "'...") {
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						pageModel.loadGearGroups();
-						setViewerInput(pageModel.getGearGroups());
-						return Status.OK_STATUS;
-					} catch (NotFoundOpenShiftException e) {
-						return Status.OK_STATUS;
-					} catch (Exception e) {
-						return ExpressUIActivator.createErrorStatus(
-								"Could not load application's gear list", e);
-					}
-				}
-			}, getContainer(), dbc);
+			WizardUtils.runInWizard(
+					new Job("Loading gear groups for application '" + pageModel.getApplication().getName() + "'...") {
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								pageModel.loadGearGroups();
+								setViewerInput(pageModel.getGearGroups());
+								return Status.OK_STATUS;
+							} catch (NotFoundOpenShiftException e) {
+								return Status.OK_STATUS;
+							} catch (Exception e) {
+								return ExpressUIActivator.createErrorStatus("Could not load application's gear list",
+										e);
+							}
+						}
+					}, getContainer(), dbc);
 		} catch (Exception ex) {
 			// ignore
 		}
 	}
-	
+
 	private void setViewerInput(final Collection<IGearGroup> gearGroups) {
 		getShell().getDisplay().syncExec(new Runnable() {
 			@Override

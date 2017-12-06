@@ -49,8 +49,7 @@ public class EditDomainWizardPage extends NewDomainWizardPage {
 		// edit domain members
 		Link editMembersLink = new Link(parent, SWT.NONE);
 		editMembersLink.setText("<a>Edit domain members</a>");
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.LEFT, SWT.CENTER).applyTo(editMembersLink);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.LEFT, SWT.CENTER).applyTo(editMembersLink);
 		editMembersLink.addSelectionListener(onEditMembers());
 	}
 
@@ -70,12 +69,12 @@ public class EditDomainWizardPage extends NewDomainWizardPage {
 									new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPage,
 											ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
 								} else {
-									new WebUIDomainPageNotFoundDialog(getShell(), getModel().getOriginWebUIDomainPageUrl()).open();
+									new WebUIDomainPageNotFoundDialog(getShell(),
+											getModel().getOriginWebUIDomainPageUrl()).open();
 								}
 								return Status.OK_STATUS;
 							}
-						})
-						.schedule();
+						}).schedule();
 			}
 		};
 	}
@@ -104,15 +103,11 @@ public class EditDomainWizardPage extends NewDomainWizardPage {
 		private String webUIDomainPageUrl;
 
 		public WebUIDomainPageNotFoundDialog(Shell parentShell, String webUIDomainPageUrl) {
-			super(
-					parentShell,
-					"Could not find web console",
-					null,
+			super(parentShell, "Could not find web console", null,
 					"Could not find the web page in the web console where you can edit your domain members.\n"
 							+ "To get there manually, please log into the web console and open the page that shows the details of your domain.\n"
 							+ (webUIDomainPageUrl != null ? "The url normally looks as follows:" : ""),
-					MessageDialog.ERROR,
-					new String[] { IDialogConstants.OK_LABEL }, 0);
+					MessageDialog.ERROR, new String[] { IDialogConstants.OK_LABEL }, 0);
 			this.webUIDomainPageUrl = webUIDomainPageUrl;
 		}
 
@@ -134,8 +129,8 @@ public class EditDomainWizardPage extends NewDomainWizardPage {
 
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPageUrl,
-							ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
+					new BrowserUtility().checkedCreateExternalBrowser(webUIDomainPageUrl, ExpressUIActivator.PLUGIN_ID,
+							ExpressUIActivator.getDefault().getLog());
 				}
 
 			};

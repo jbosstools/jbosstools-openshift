@@ -52,76 +52,68 @@ public class SelectProjectComponentBuilder {
 
 	ISWTObservableValue projectNameTextObservable;
 
-	public SelectProjectComponentBuilder() {}
+	public SelectProjectComponentBuilder() {
+	}
 
 	public void build(Composite container, DataBindingContext dbc) {
 		Label existingProjectLabel = new Label(container, SWT.NONE);
 		existingProjectLabel.setText("Eclipse Project: ");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.applyTo(existingProjectLabel);
-		
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(existingProjectLabel);
+
 		final Text existingProjectNameText = new Text(container, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.span(hSpan, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.applyTo(existingProjectNameText);
-		
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(hSpan, 1).align(SWT.FILL, SWT.CENTER)
+				.grab(true, false).applyTo(existingProjectNameText);
+
 		projectNameTextObservable = WidgetProperties.text(SWT.Modify).observe(existingProjectNameText);
 
-		Binding eclipseProjectBinding = ValueBindingBuilder
-			.bind(projectNameTextObservable)
-			.validatingAfterConvert(new IValidator() {
-				@Override
-				public IStatus validate(Object value) {
-					if(value instanceof String) {
-						return ValidationStatus.ok();
-					} else if(value == null) {
-						if(required) {
-							return ValidationStatus.error("Select an existing project");
-						} else if(!StringUtils.isEmpty(existingProjectNameText.getText())) {
-							return ValidationStatus.error(NLS.bind("Project {0} does not exist", existingProjectNameText.getText()));
+		Binding eclipseProjectBinding = ValueBindingBuilder.bind(projectNameTextObservable)
+				.validatingAfterConvert(new IValidator() {
+					@Override
+					public IStatus validate(Object value) {
+						if (value instanceof String) {
+							return ValidationStatus.ok();
+						} else if (value == null) {
+							if (required) {
+								return ValidationStatus.error("Select an existing project");
+							} else if (!StringUtils.isEmpty(existingProjectNameText.getText())) {
+								return ValidationStatus.error(
+										NLS.bind("Project {0} does not exist", existingProjectNameText.getText()));
+							}
 						}
+						return ValidationStatus.ok();
 					}
-					return ValidationStatus.ok();
-				}
-			})
-			.converting(new Converter(String.class, IProject.class) {
-				@Override
-				public Object convert(Object fromObject) {
-					String name = (String)fromObject;
-					return ProjectUtils.getProject(name);
-				}
-			})
-			.to(eclipseProjectObservable)
-			.converting(new Converter(IProject.class, String.class) {
+				}).converting(new Converter(String.class, IProject.class) {
+					@Override
+					public Object convert(Object fromObject) {
+						String name = (String) fromObject;
+						return ProjectUtils.getProject(name);
+					}
+				}).to(eclipseProjectObservable).converting(new Converter(IProject.class, String.class) {
 
-				@Override
-				public Object convert(Object fromObject) {
-					return fromObject == null ? "" : ((IProject)fromObject).getName();
-				}
-			})
-			.in(dbc);
-		ControlDecorationSupport.create(
-				eclipseProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+					@Override
+					public Object convert(Object fromObject) {
+						return fromObject == null ? "" : ((IProject) fromObject).getName();
+					}
+				}).in(dbc);
+		ControlDecorationSupport.create(eclipseProjectBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
 
 		// project name content assist
 		ControlDecoration dec = new ControlDecoration(existingProjectNameText, SWT.TOP | SWT.RIGHT);
 
-		FieldDecoration contentProposalFieldIndicator =
-				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
+		FieldDecoration contentProposalFieldIndicator = FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL);
 		dec.setImage(contentProposalFieldIndicator.getImage());
 		dec.setDescriptionText("Auto-completion is enabled when you start typing a project name.");
 		dec.setShowOnlyOnFocus(true);
 
-		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(), ProjectUtils.getAllAccessibleProjectNames());
+		new AutoCompleteField(existingProjectNameText, new TextContentAdapter(),
+				ProjectUtils.getAllAccessibleProjectNames());
 
 		// browse projects
 		Button browseProjectsButton = new Button(container, SWT.NONE);
 		browseProjectsButton.setText("Browse...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER)
-				.indent(10, SWT.DEFAULT)
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).indent(10, SWT.DEFAULT)
 				.applyTo(browseProjectsButton);
 		UIUtils.setDefaultButtonWidth(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(selectionListener);
@@ -195,5 +187,5 @@ public class SelectProjectComponentBuilder {
 	public ISWTObservableValue getProjectNameTextObservable() {
 		return projectNameTextObservable;
 	}
-	
+
 }

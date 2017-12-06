@@ -20,7 +20,7 @@ import org.eclipse.core.databinding.conversion.Converter;
  * @author Andre Dietisheim
  */
 public class ObservableTreeItem2ModelConverter extends Converter {
-	
+
 	public ObservableTreeItem2ModelConverter() {
 		this(Object.class);
 	}
@@ -40,8 +40,7 @@ public class ObservableTreeItem2ModelConverter extends Converter {
 
 	@SuppressWarnings("unchecked")
 	public <T> List<T> convert(List<ObservableTreeItem> items) {
-		if (items == null
-				|| items.size() == 0) {
+		if (items == null || items.size() == 0) {
 			return Collections.emptyList();
 		}
 		ArrayList<T> models = new ArrayList<>();

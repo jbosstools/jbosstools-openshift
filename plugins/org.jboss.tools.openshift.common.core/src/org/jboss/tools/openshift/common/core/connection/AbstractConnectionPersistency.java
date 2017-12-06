@@ -25,14 +25,13 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
  */
 public abstract class AbstractConnectionPersistency<C extends IConnection> {
 
-
 	public Collection<C> load() {
 		Map<String, C> connections = new HashMap<>();
 		String[] persistedConnections = loadPersisted();
-        for (String connectionUrl : persistedConnections) {
-        	addConnection(connectionUrl, connections);
+		for (String connectionUrl : persistedConnections) {
+			addConnection(connectionUrl, connections);
 		}
-        return new ArrayList<>(connections.values());
+		return new ArrayList<>(connections.values());
 	}
 
 	private void addConnection(String connectionUrl, Map<String, C> connections) {
@@ -50,7 +49,8 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 		}
 	}
 
-	private ConnectionURL createConnectionURL(String connectionUrl) throws UnsupportedEncodingException, MalformedURLException {
+	private ConnectionURL createConnectionURL(String connectionUrl)
+			throws UnsupportedEncodingException, MalformedURLException {
 		if (UrlUtils.hasScheme(connectionUrl)) {
 			// full url with username and host 
 			return ConnectionURL.forURL(connectionUrl);
@@ -77,14 +77,16 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 			ConnectionURL connectionURL = ConnectionURL.forConnection(connection);
 			serializedConnections.put(connectionURL.toString(), connection);
 		} catch (MalformedURLException e) {
-			logError(NLS.bind("Could not add connection for {0}@{1}.", connection.getUsername(), connection.getHost()), e);
+			logError(NLS.bind("Could not add connection for {0}@{1}.", connection.getUsername(), connection.getHost()),
+					e);
 		} catch (UnsupportedEncodingException e) {
-			logError(NLS.bind("Could not add connection for {0}@{1}.", connection.getUsername(), connection.getHost()), e);
+			logError(NLS.bind("Could not add connection for {0}@{1}.", connection.getUsername(), connection.getHost()),
+					e);
 		}
 	}
 
 	protected abstract String[] loadPersisted();
-	
+
 	/**
 	 * Persist the connections using the given key as the
 	 * connectionURL for the connection
@@ -92,8 +94,8 @@ public abstract class AbstractConnectionPersistency<C extends IConnection> {
 	 * @param connections    a map of connctionURL to connection
 	 */
 	protected abstract void persist(Map<String, C> connections);
-	
+
 	protected abstract void logError(String message, Exception e);
-	
+
 	protected abstract C createConnection(ConnectionURL connectionURL);
 }

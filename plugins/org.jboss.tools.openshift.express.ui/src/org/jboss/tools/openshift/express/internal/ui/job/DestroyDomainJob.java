@@ -42,12 +42,13 @@ public class DestroyDomainJob extends AbstractDelegatingMonitorJob {
 	protected IStatus doRun(IProgressMonitor monitor) {
 		try {
 			domain.destroy(force);
-			ExpressConnection connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
+			ExpressConnection connection = ExpressConnectionUtils.getByResource(domain.getUser(),
+					ConnectionsRegistrySingleton.getInstance());
 			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
 			return Status.OK_STATUS;
 		} catch (OpenShiftException e) {
-			return new Status(Status.ERROR, ExpressUIActivator.PLUGIN_ID, NLS.bind(
-					"Failed to destroy domain \"{0}\"", domain.getId()), e);
+			return new Status(Status.ERROR, ExpressUIActivator.PLUGIN_ID,
+					NLS.bind("Failed to destroy domain \"{0}\"", domain.getId()), e);
 		} finally {
 			monitor.done();
 		}

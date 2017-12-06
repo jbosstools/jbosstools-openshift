@@ -22,17 +22,17 @@ import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
  * @author jeff.cantrill
  *
  */
-public class CreationTimestampComparator implements Comparator<IResourceWrapper<?, ?>>{
+public class CreationTimestampComparator implements Comparator<IResourceWrapper<?, ?>> {
 
 	@Override
 	public int compare(IResourceWrapper<?, ?> o1, IResourceWrapper<?, ?> o2) {
 		Date date1 = getDate(o1);
 		Date date2 = getDate(o2);
-		if(date1 == null || date2 == null) {
+		if (date1 == null || date2 == null) {
 			//invalid date goes to the end of list.
-			if(date1 != null) {
+			if (date1 != null) {
 				return -1;
-			} else if(date2 != null) {
+			} else if (date2 != null) {
 				return 1;
 			} else {
 				return 0;

@@ -31,17 +31,17 @@ abstract class ResourceContainer<R extends IResource, P extends AbstractOpenshif
 		return getResources().stream().filter(wrapper -> wrapper.getWrapped().getKind().equals(kind))
 				.collect(Collectors.toSet());
 	}
-	
+
 	public Collection<IResourceWrapper<?, ?>> getResources() {
 		synchronized (childrenLock) {
-			return new ArrayList<IResourceWrapper<?,?>>(containedResources.values());
+			return new ArrayList<IResourceWrapper<?, ?>>(containedResources.values());
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IResourceWrapper<?, ?>> Collection<T> getResourcesOfType(Class<T> clazz) {
-		ArrayList<T> result= new ArrayList<>();
+		ArrayList<T> result = new ArrayList<>();
 		for (IResourceWrapper<?, ?> r : getResources()) {
 			if (clazz.isInstance(r)) {
 				result.add((T) r);
@@ -49,7 +49,7 @@ abstract class ResourceContainer<R extends IResource, P extends AbstractOpenshif
 		}
 		return result;
 	}
-	
+
 	void updateWithResources(Collection<IResource> resources) {
 		Map<IResource, AbstractResourceWrapper<?, ?>> updated = new HashMap<>();
 		boolean changed = false;
@@ -81,7 +81,7 @@ abstract class ResourceContainer<R extends IResource, P extends AbstractOpenshif
 		});
 		postUpdate(resources, updated, changed);
 	}
-	
+
 	void initWithResources(Collection<IResource> resources) {
 		synchronized (childrenLock) {
 			resources.forEach(r -> {
@@ -90,6 +90,8 @@ abstract class ResourceContainer<R extends IResource, P extends AbstractOpenshif
 		}
 	}
 
-	protected abstract void postUpdate(Collection<IResource> resources, Map<IResource, AbstractResourceWrapper<?, ?>> updated, boolean changed);
+	protected abstract void postUpdate(Collection<IResource> resources,
+			Map<IResource, AbstractResourceWrapper<?, ?>> updated, boolean changed);
+
 	protected abstract AbstractResourceWrapper<?, ?> createNewWrapper(Collection<IResource> resources, IResource r);
 }

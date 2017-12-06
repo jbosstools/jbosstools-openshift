@@ -217,15 +217,15 @@ public class CDKLaunchUtility {
 			throws CoreException, IOException {
 		return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
 	}
-	
-	public Process callMinishiftConsole(IServer s, String args, String launchConfigName) throws CoreException, IOException {
-		Map<String,String> env = getEnvironment(s, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+
+	public Process callMinishiftConsole(IServer s, String args, String launchConfigName)
+			throws CoreException, IOException {
+		Map<String, String> env = getEnvironment(s, s.getLaunchConfiguration(true, new NullProgressMonitor()));
 		String minishift = MinishiftBinaryUtility.getMinishiftLocation(s);
-		File wd =  CDKServerUtility.getWorkingDirectory(s);
+		File wd = CDKServerUtility.getWorkingDirectory(s);
 		Process p = callProcess(minishift, ArgsUtil.parse(args), wd, env, false);
 		return p;
 	}
-
 
 	public Process callMinishiftInteractive(IServer s, String args, String launchConfigName,
 			ILaunchConfiguration startupConfig) throws CoreException, IOException {

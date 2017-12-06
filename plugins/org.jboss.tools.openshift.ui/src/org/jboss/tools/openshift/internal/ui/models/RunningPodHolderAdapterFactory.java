@@ -24,12 +24,13 @@ public class RunningPodHolderAdapterFactory implements IAdapterFactory {
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (adapterType == IRunningPodHolder.class) {
-			final IResourceWrapper<?, IOpenshiftUIElement<?,?>> wrapper = Adapters.adapt(adaptableObject, IResourceWrapper.class);
-			if(wrapper != null && wrapper.getWrapped() instanceof IPod 
-					&& !ResourceUtils.isBuildPod((IPod)wrapper.getWrapped())) {
-				return (T)new IRunningPodHolder() {
+			final IResourceWrapper<?, IOpenshiftUIElement<?, ?>> wrapper = Adapters.adapt(adaptableObject,
+					IResourceWrapper.class);
+			if (wrapper != null && wrapper.getWrapped() instanceof IPod
+					&& !ResourceUtils.isBuildPod((IPod) wrapper.getWrapped())) {
+				return (T) new IRunningPodHolder() {
 					@Override
-					public IOpenshiftUIElement<?, IOpenshiftUIElement<?,?>> getPodUIElement() {
+					public IOpenshiftUIElement<?, IOpenshiftUIElement<?, ?>> getPodUIElement() {
 						return wrapper;
 					}
 				};
@@ -40,7 +41,7 @@ public class RunningPodHolderAdapterFactory implements IAdapterFactory {
 
 	@Override
 	public Class<?>[] getAdapterList() {
-		return new Class[]{IRunningPodHolder.class};
+		return new Class[] { IRunningPodHolder.class };
 	}
 
 }

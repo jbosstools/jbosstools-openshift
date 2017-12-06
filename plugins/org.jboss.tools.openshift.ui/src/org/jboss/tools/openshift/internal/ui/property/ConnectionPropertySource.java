@@ -25,7 +25,7 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 
 public class ConnectionPropertySource implements IPropertySource {
-	
+
 	private static final String HOST = "host";
 	private static final String USERNAME = "username";
 	private static final String OPENSHIFT_MASTER_VERSION = "openshift-version";
@@ -46,12 +46,13 @@ public class ConnectionPropertySource implements IPropertySource {
 
 		@Override
 		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-			if(connection.equals(ConnectionPropertySource.this.connection) && IOpenShiftConnection.PROPERTY_EXTENDED_PROPERTIES.equals(property)) {
+			if (connection.equals(ConnectionPropertySource.this.connection)
+					&& IOpenShiftConnection.PROPERTY_EXTENDED_PROPERTIES.equals(property)) {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						PropertySheet sh = OpenShiftUIUtils.getPropertySheet();
-						if(sh != null) {
+						if (sh != null) {
 							OpenShiftUIUtils.refreshPropertySheetPage(sh);
 						}
 					}
@@ -73,14 +74,14 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		List<IPropertyDescriptor>  descriptors = new ArrayList<>();
+		List<IPropertyDescriptor> descriptors = new ArrayList<>();
 		descriptors.add(new UneditablePropertyDescriptor(HOST, "Host"));
 		descriptors.add(new UneditablePropertyDescriptor(USERNAME, "User Name"));
 		descriptors.add(new UneditablePropertyDescriptor(OPENSHIFT_MASTER_VERSION, "OpenShift Master Version"));
 		descriptors.add(new UneditablePropertyDescriptor(KUBERNETES_MASTER_VERSION, "Kubernetes Master Version"));
-		if(connection instanceof IOpenShiftConnection) {
-			Set<String> set = new TreeSet<>(((IOpenShiftConnection)connection).getExtendedProperties().keySet());
-			for (String name: set) {
+		if (connection instanceof IOpenShiftConnection) {
+			Set<String> set = new TreeSet<>(((IOpenShiftConnection) connection).getExtendedProperties().keySet());
+			for (String name : set) {
 				descriptors.add(new UneditablePropertyDescriptor(name, toVisualPropertyName(name)));
 			}
 		}
@@ -89,10 +90,10 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	private String toVisualPropertyName(String name) {
 		String label = ICommonAttributes.EXTENDED_PROPERTY_LABELS.get(name);
-		if(label != null) {
+		if (label != null) {
 			return label;
 		}
-		if(name.length() > 1) {
+		if (name.length() > 1) {
 			return name.substring(0, 1).toUpperCase() + name.substring(1);
 		}
 		return name;
@@ -103,18 +104,18 @@ public class ConnectionPropertySource implements IPropertySource {
 		if (id == null) {
 			return null;
 		}
-		if (HOST.equals(id)){
+		if (HOST.equals(id)) {
 			return this.connection.toString();
 		}
 		if (USERNAME.equals(id)) {
 			return this.connection.getUsername();
 		}
-		if(connection instanceof IOpenShiftConnection) {
-			IOpenShiftConnection openshiftConnection = (IOpenShiftConnection)this.connection;
-			if(OPENSHIFT_MASTER_VERSION.equals(id)) {
+		if (connection instanceof IOpenShiftConnection) {
+			IOpenShiftConnection openshiftConnection = (IOpenShiftConnection) this.connection;
+			if (OPENSHIFT_MASTER_VERSION.equals(id)) {
 				return openshiftConnection.getOpenShiftMasterVersion();
 			}
-			if(KUBERNETES_MASTER_VERSION.equals(id)) {
+			if (KUBERNETES_MASTER_VERSION.equals(id)) {
 				return openshiftConnection.getKubernetesMasterVersion();
 			}
 			Object result = openshiftConnection.getExtendedProperties().get(id);
@@ -133,8 +134,8 @@ public class ConnectionPropertySource implements IPropertySource {
 	}
 
 	@Override
-	public void setPropertyValue(Object id	, Object value) {
-		
+	public void setPropertyValue(Object id, Object value) {
+
 	}
 
 	public void dispose() {

@@ -46,10 +46,8 @@ public class SSHUtils {
 	}
 
 	public static String[] getPrivateKeysFromPreferences() {
-		String privateKeys =
-				JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_PRIVATEKEY);
-		if (privateKeys != null
-				&& privateKeys.trim().length() > 0) {
+		String privateKeys = JSchCorePlugin.getPlugin().getPluginPreferences().getString(IConstants.KEY_PRIVATEKEY);
+		if (privateKeys != null && privateKeys.trim().length() > 0) {
 			return privateKeys.split(KEYS_SEPARATOR);
 		} else {
 			return new String[0];
@@ -63,8 +61,7 @@ public class SSHUtils {
 		for (String preferencesKey : getPrivateKeysFromPreferences()) {
 			try {
 				File privateKey = getKeyFile(preferencesKey);
-				if (privateKey == null
-						|| !FileUtils.canRead(privateKey)) {
+				if (privateKey == null || !FileUtils.canRead(privateKey)) {
 					continue;
 				}
 				if (publicKeyPath.startsWith(privateKey.getAbsolutePath() + ".")
@@ -82,9 +79,8 @@ public class SSHUtils {
 		Preferences preferences = JSchCorePlugin.getPlugin().getPluginPreferences();
 		String privateKeys = preferences.getString(IConstants.KEY_PRIVATEKEY);
 		String privateKeyPath = getKeyPath(privateKey);
-		
-		if (privateKeys != null
-				&& privateKeys.trim().length() > 0) {
+
+		if (privateKeys != null && privateKeys.trim().length() > 0) {
 			privateKeys = privateKeys + "," + privateKeyPath;
 		} else {
 			privateKeys = privateKeyPath;
@@ -96,21 +92,19 @@ public class SSHUtils {
 
 	private static String getKeyPath(File privateKey) {
 		String ssh2Home = getSSH2Home();
-		if (ssh2Home == null
-				|| ssh2Home.isEmpty()) {
+		if (ssh2Home == null || ssh2Home.isEmpty()) {
 			return privateKey.getAbsolutePath();
 		}
-		
+
 		if (!privateKey.getAbsolutePath().startsWith(ssh2Home)) {
-			return privateKey.getAbsolutePath(); 
+			return privateKey.getAbsolutePath();
 		}
-		
+
 		return privateKey.getName();
 	}
 
 	public static int openPreferencesPage(Shell shell) {
-		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(
-				shell, SSH_PREFERENCE_PAGE_ID, null, null);
+		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(shell, SSH_PREFERENCE_PAGE_ID, null, null);
 		return dialog.open();
 	}
 
@@ -157,10 +151,9 @@ public class SSHUtils {
 	}
 
 	private static boolean isEmpty(String string) {
-		return string == null
-				|| string.isEmpty();
+		return string == null || string.isEmpty();
 	}
-	
+
 	/**
 	 * Returns the key file for the given (absolute or relative) key path.
 	 * This methods prepends the ssh directory to the path if the given it's a

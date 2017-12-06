@@ -48,13 +48,15 @@ public class StartBuildJob extends AbstractDelegatingMonitorJob {
 					return triggerable.trigger();
 				}
 			}, null);
-			if(build == null) {
-				return new Status(Status.INFO, OpenShiftUIActivator.PLUGIN_ID, "Manually triggering builds is unsupported");
+			if (build == null) {
+				return new Status(Status.INFO, OpenShiftUIActivator.PLUGIN_ID,
+						"Manually triggering builds is unsupported");
 			}
 			return Status.OK_STATUS;
-		}catch(OpenShiftException e) {
-			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID, NLS.bind("Error starting build {0}.", buildsource.getName()), e);
-		}finally {
+		} catch (OpenShiftException e) {
+			return new Status(Status.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+					NLS.bind("Error starting build {0}.", buildsource.getName()), e);
+		} finally {
 			monitor.done();
 		}
 	}

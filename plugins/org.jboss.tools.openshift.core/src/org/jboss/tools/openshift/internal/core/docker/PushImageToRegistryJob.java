@@ -35,11 +35,11 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 	private final IDockerConnection dockerConnection;
 
 	private final IRegistryAccount registryAccount;
-	
+
 	private final String imageName;
-	
+
 	private final String openshiftProject;
-	
+
 	/**
 	 * Constructor
 	 * @param dockerConnection the Docker connection to use
@@ -47,7 +47,8 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 	 * @param openshiftProject the name of the OpenShift project, because the image has to be into the same namespace
 	 * @param imageName the name of the image
 	 */
-	public PushImageToRegistryJob(final IDockerConnection dockerConnection, final IRegistryAccount registryAccount, final String openshiftProject, final String imageName) {
+	public PushImageToRegistryJob(final IDockerConnection dockerConnection, final IRegistryAccount registryAccount,
+			final String openshiftProject, final String imageName) {
 		super("Pushing Docker image to OpenShift registry...");
 		this.dockerConnection = dockerConnection;
 		this.registryAccount = registryAccount;
@@ -64,11 +65,10 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 			// project
 			this.dockerConnection.tagImage(imageName, tmpImageName);
 			// then we can push that image with the new name
-			this.dockerConnection.pushImage(tmpImageName, registryAccount,
-					getPushProgressHandler(tmpImageName));
-		// FIXME: needs more fined tuned error handling once Neon.0 is no longer supported:
-		// catch (DockerException | InterruptedException e) {
-		// see https://issues.jboss.org/browse/JBIDE-22764
+			this.dockerConnection.pushImage(tmpImageName, registryAccount, getPushProgressHandler(tmpImageName));
+			// FIXME: needs more fined tuned error handling once Neon.0 is no longer supported:
+			// catch (DockerException | InterruptedException e) {
+			// see https://issues.jboss.org/browse/JBIDE-22764
 		} catch (Exception e) {
 			return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
 					"Failed to push the selected Docker image into OpenShift registry", e);
@@ -97,19 +97,18 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 	 */
 	public String getPushToRegistryImageName() {
 		try {
-		    final URL registryURL = new URL(this.registryAccount.getServerAddress());
-			final String registryHostname = (registryURL.getPort() == (-1)) ?
-					registryURL.getHost()
+			final URL registryURL = new URL(this.registryAccount.getServerAddress());
+			final String registryHostname = (registryURL.getPort() == (-1)) ? registryURL.getHost()
 					: registryURL.getHost() + ':' + registryURL.getPort();
-			final String tmpImageName = registryHostname + '/' + this.openshiftProject + '/' + DockerImageUtils.extractImageNameAndTag(this.imageName);
+			final String tmpImageName = registryHostname + '/' + this.openshiftProject + '/'
+					+ DockerImageUtils.extractImageNameAndTag(this.imageName);
 			return tmpImageName;
 		} catch (MalformedURLException e) {
-			OpenShiftCoreActivator.getDefault().getLog().log(
-					new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
-							"Failed to push the selected Docker image into OpenShift registry", e));
+			OpenShiftCoreActivator.getDefault().getLog().log(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
+					"Failed to push the selected Docker image into OpenShift registry", e));
 			return null;
 		}
-		
+
 	}
 
 }

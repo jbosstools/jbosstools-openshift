@@ -26,6 +26,7 @@ public interface IOpenshiftUIElement<R, P extends IOpenshiftUIElement<?, ?>> ext
 	 * @return
 	 */
 	public P getParent();
+
 	public R getWrapped();
 
 	@SuppressWarnings("unchecked")

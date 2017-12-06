@@ -74,16 +74,16 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 	public boolean performFinish() {
 		return true;
 	}
-	
+
 	@Override
 	public void addPages() {
 		addPage(new SelectResourceWizardPage());
 	}
-	
+
 	public IResource getResource() {
 		return getModel().getResource();
 	}
-	
+
 	public class SelectResourceWizardPage extends AbstractOpenShiftWizardPage {
 
 		public SelectResourceWizardPage() {
@@ -92,22 +92,15 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 
 		@Override
 		protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-			GridLayoutFactory.fillDefaults()
-				.margins(10, 10)
-				.applyTo(parent);
+			GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
 
 			Composite container = new Composite(parent, SWT.None);
-			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.FILL).grab(true, true)
-					.applyTo(container);
-			GridLayoutFactory.fillDefaults()
-					.applyTo(container);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
+			GridLayoutFactory.fillDefaults().applyTo(container);
 
 			// services
 			Composite serviceComposite = createServiceControls(container, dbc);
-			GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true)
-				.applyTo(serviceComposite);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(serviceComposite);
 
 			loadResources();
 		}
@@ -115,64 +108,55 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 		private Composite createServiceControls(Composite container, DataBindingContext dbc) {
 			Group servicesGroup = new Group(container, SWT.NONE);
 			servicesGroup.setText("Services");
-			GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(10,10)
-				.applyTo(servicesGroup);
+			GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).applyTo(servicesGroup);
 
 			Label selectorLabel = new Label(servicesGroup, SWT.NONE);
 			selectorLabel.setText("Selector:");
 			Text selectorText = UIUtils.createSearchText(servicesGroup);
-			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.CENTER)
-					.applyTo(selectorText);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(selectorText);
 
 			final TreeViewer resourcesViewer = createServicesTreeViewer(servicesGroup, selectorText);
 			resourcesViewer.addDoubleClickListener(onDoubleClickService());
-			IObservableList resourceItemsObservable = BeanProperties.list(ServerResourceViewModel.PROPERTY_RESOURCE_ITEMS).observe(getModel());
-			DataBindingUtils.addDisposableListChangeListener(
-					onServiceItemsChanged(resourcesViewer), resourceItemsObservable, resourcesViewer.getTree());
-			GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 160).grab(true, true)
-				.applyTo(resourcesViewer.getControl());
+			IObservableList resourceItemsObservable = BeanProperties
+					.list(ServerResourceViewModel.PROPERTY_RESOURCE_ITEMS).observe(getModel());
+			DataBindingUtils.addDisposableListChangeListener(onServiceItemsChanged(resourcesViewer),
+					resourceItemsObservable, resourcesViewer.getTree());
+			GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 160).grab(true, true)
+					.applyTo(resourcesViewer.getControl());
 			selectorText.addModifyListener(onFilterTextModified(resourcesViewer));
-			IViewerObservableValue selectedResourceTreeItem = ViewerProperties.singleSelection().observe(resourcesViewer);
-			ValueBindingBuilder
-					.bind(selectedResourceTreeItem)
+			IViewerObservableValue selectedResourceTreeItem = ViewerProperties.singleSelection()
+					.observe(resourcesViewer);
+			ValueBindingBuilder.bind(selectedResourceTreeItem)
 					.converting(new ObservableTreeItem2ModelConverter(IResource.class))
 					.validatingAfterConvert(new IValidator() {
-						
+
 						@Override
 						public IStatus validate(Object value) {
-							if ((value instanceof IResource) && OpenShiftServerUtils.isAllowedForServerAdapter((IResource) value)) {
-                                return ValidationStatus.ok();
+							if ((value instanceof IResource)
+									&& OpenShiftServerUtils.isAllowedForServerAdapter((IResource) value)) {
+								return ValidationStatus.ok();
 							} else {
-                                return ValidationStatus.cancel("Please select a resource that your adapter will publish to.");
+								return ValidationStatus
+										.cancel("Please select a resource that your adapter will publish to.");
 							}
-							
+
 						}
-					})
-					.to(BeanProperties.value(ServerResourceViewModel.PROPERTY_RESOURCE).observe(getModel()))
-					.converting(new Model2ObservableTreeItemConverter(new ServerSettingsWizardPageModel.ResourceTreeItemsFactory()))
+					}).to(BeanProperties.value(ServerResourceViewModel.PROPERTY_RESOURCE).observe(getModel()))
+					.converting(new Model2ObservableTreeItemConverter(
+							new ServerSettingsWizardPageModel.ResourceTreeItemsFactory()))
 					.in(dbc);
 
 			// details
 			Label detailsLabel = new Label(servicesGroup, SWT.NONE);
 			detailsLabel.setText("Resource Details:");
-			GridDataFactory.fillDefaults()
-					.span(2, 1).align(SWT.FILL, SWT.FILL)
-					.applyTo(detailsLabel);
+			GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).applyTo(detailsLabel);
 
 			Composite detailsContainer = new Composite(servicesGroup, SWT.NONE);
-			GridDataFactory.fillDefaults()
-					.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
+			GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 150)
 					.applyTo(detailsContainer);
 			IObservableValue<? extends IResource> selectedResource = new WritableValue<>();
-			ValueBindingBuilder
-				.bind(selectedResourceTreeItem)
-				.converting(new ObservableTreeItem2ModelConverter())
-				.to(selectedResource)
-				.notUpdatingParticipant()
-				.in(dbc);
+			ValueBindingBuilder.bind(selectedResourceTreeItem).converting(new ObservableTreeItem2ModelConverter())
+					.to(selectedResource).notUpdatingParticipant().in(dbc);
 			new ResourceDetailViews(selectedResource, detailsContainer, dbc).createControls();
 
 			return servicesGroup;
@@ -193,7 +177,7 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 
 		private IListChangeListener<Object> onServiceItemsChanged(final TreeViewer servicesViewer) {
 			return new IListChangeListener<Object>() {
-				
+
 				@Override
 				public void handleListChange(ListChangeEvent<? extends Object> event) {
 					servicesViewer.expandAll();
@@ -202,14 +186,13 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 		}
 
 		private TreeViewer createServicesTreeViewer(Composite parent, Text selectorText) {
-			TreeViewer applicationTemplatesViewer =
-					new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
+			TreeViewer applicationTemplatesViewer = new TreeViewer(parent,
+					SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 			IListProperty childrenProperty = new MultiListProperty(
-					new IListProperty[] {
-							BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_RESOURCE_ITEMS),
+					new IListProperty[] { BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_RESOURCE_ITEMS),
 							BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
-			ObservableListTreeContentProvider contentProvider =
-					new ObservableListTreeContentProvider(childrenProperty.listFactory(), null);
+			ObservableListTreeContentProvider contentProvider = new ObservableListTreeContentProvider(
+					childrenProperty.listFactory(), null);
 			applicationTemplatesViewer.setContentProvider(contentProvider);
 			applicationTemplatesViewer.setLabelProvider(new ResourcesViewLabelProvider());
 			applicationTemplatesViewer.addFilter(new ServiceViewerFilter(selectorText));
@@ -217,11 +200,11 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 			applicationTemplatesViewer.setAutoExpandLevel(TreeViewer.ALL_LEVELS);
 			applicationTemplatesViewer.setInput(getModel());
 			return applicationTemplatesViewer;
-		}	
+		}
 
 		protected ModifyListener onFilterTextModified(final TreeViewer applicationTemplatesViewer) {
 			return new ModifyListener() {
-				
+
 				@Override
 				public void modifyText(ModifyEvent e) {
 					applicationTemplatesViewer.refresh();
@@ -237,14 +220,15 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 			final IStatus[] stats = new IStatus[1];
 			try {
 				WizardUtils.runInWizard(new Job("Loading services...") {
-					
+
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
 							getModel().loadResources();
 							stats[0] = Status.OK_STATUS;
-						} catch(OpenShiftException ose) {
-							stats[0] = OpenShiftUIActivator.statusFactory().errorStatus("Unable to load services from the given connection", ose);
+						} catch (OpenShiftException ose) {
+							stats[0] = OpenShiftUIActivator.statusFactory()
+									.errorStatus("Unable to load services from the given connection", ose);
 						}
 						//initializing the project combo with the project selected in the workspace
 						return Status.OK_STATUS;
@@ -253,7 +237,7 @@ public class SelectResourceWizard extends AbstractOpenShiftWizard<ServerResource
 			} catch (InvocationTargetException | InterruptedException e) {
 				// swallow intentionally
 			}
-			if( !stats[0].isOK()) {
+			if (!stats[0].isOK()) {
 				setErrorMessage(stats[0].getMessage());
 			}
 		}

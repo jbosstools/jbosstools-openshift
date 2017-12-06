@@ -29,7 +29,7 @@ public class CDKShutdownController extends AbstractCDKShutdownController {
 		String cmd = CDKConstants.VAGRANT_CMD_HALT + " " + CDKConstants.VAGRANT_FLAG_NO_COLOR;
 		return cmd;
 	}
-	
+
 	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
 		return new CDKLaunchUtility().callInteractive(getServer(), cmd, getServer().getName());
 	}
@@ -38,7 +38,7 @@ public class CDKShutdownController extends AbstractCDKShutdownController {
 	protected boolean useTerminal() {
 		return true;
 	}
-	
+
 	@Override
 	protected String getCommandLocation() {
 		return VagrantBinaryUtility.getVagrantLocation();

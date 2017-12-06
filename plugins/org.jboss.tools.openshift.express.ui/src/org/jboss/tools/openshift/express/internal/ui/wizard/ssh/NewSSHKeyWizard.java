@@ -23,7 +23,7 @@ public class NewSSHKeyWizard extends Wizard {
 
 	private ExpressConnection user;
 	private NewSSHKeyWizardPage newSSHKeyWizardPage;
-	
+
 	public NewSSHKeyWizard(ExpressConnection user) {
 		this.user = user;
 		setWindowTitle("New SSH Key");
@@ -40,7 +40,7 @@ public class NewSSHKeyWizard extends Wizard {
 	public void addPages() {
 		addPage(this.newSSHKeyWizardPage = new NewSSHKeyWizardPage(user, this));
 	}
-	
+
 	public IOpenShiftSSHKey getSSHKey() {
 		return newSSHKeyWizardPage.getSSHKey();
 	}

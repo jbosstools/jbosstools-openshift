@@ -30,25 +30,26 @@ import com.openshift.client.IApplication;
 public class ActionFilterAdapterFactoryTest {
 
 	private ActionFilterAdapterFactory factory = new ActionFilterAdapterFactory();
-	private IApplication app; 
-	
+	private IApplication app;
+
 	@Before
-	public void Setup()	{
-		app = new ApplicationDetailsFake(); 
+	public void Setup() {
+		app = new ApplicationDetailsFake();
 	}
-			
+
 	@Test
 	public void testGetAdapterList() {
-		assertArrayEquals("Ext. the factory to support IActionFilter",new Class[] {IActionFilter.class},factory.getAdapterList());
+		assertArrayEquals("Ext. the factory to support IActionFilter", new Class[] { IActionFilter.class },
+				factory.getAdapterList());
 	}
-	
+
 	@Test
 	public void shouldOnlySupportIActionFilterAdapters() {
 		assertNull(factory.getAdapter(app, String.class));
 	}
-	
+
 	@Test
-	public void testGetAdapterListForIApplication(){
+	public void testGetAdapterListForIApplication() {
 		Object adapter = factory.getAdapter(app, IActionFilter.class);
 		assertNotNull("Exp. to receive an adapter", adapter);
 		assertTrue("Exp. an IActionFilter", adapter instanceof IActionFilter);

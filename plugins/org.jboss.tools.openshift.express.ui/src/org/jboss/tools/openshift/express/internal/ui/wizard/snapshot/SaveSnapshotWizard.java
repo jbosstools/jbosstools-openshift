@@ -39,36 +39,34 @@ public class SaveSnapshotWizard extends AbstractOpenShiftWizard<SaveSnapshotWiza
 	public boolean performFinish() {
 		final String applicationName = getModel().getApplication().getName();
 		try {
-			IStatus status = WizardUtils.runInWizard(
-					new AbstractDelegatingMonitorJob(NLS.bind("Saving snapshot for application {0}...",
-							applicationName)) {
+			IStatus status = WizardUtils.runInWizard(new AbstractDelegatingMonitorJob(
+					NLS.bind("Saving snapshot for application {0}...", applicationName)) {
 
-						@Override
-						protected IStatus doRun(IProgressMonitor monitor) {
-							try {
-								getModel().saveSnapshot(monitor);
-								return Status.OK_STATUS;
-							} catch (IOException e) {
-								return ExpressUIActivator.createErrorStatus(NLS.bind("Could not save snapshot for application {0}", applicationName), e);
-							} catch (CoreException e) {
-								return e.getStatus();
-							}						
-						}
-					}, getContainer());
+				@Override
+				protected IStatus doRun(IProgressMonitor monitor) {
+					try {
+						getModel().saveSnapshot(monitor);
+						return Status.OK_STATUS;
+					} catch (IOException e) {
+						return ExpressUIActivator.createErrorStatus(
+								NLS.bind("Could not save snapshot for application {0}", applicationName), e);
+					} catch (CoreException e) {
+						return e.getStatus();
+					}
+				}
+			}, getContainer());
 			return status.isOK();
 		} catch (InvocationTargetException e) {
 			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
-					NLS.bind("Could not save snapshot for application {0}", applicationName),
-					status, IStatus.ERROR)
-					.open();
+					NLS.bind("Could not save snapshot for application {0}", applicationName), status, IStatus.ERROR)
+							.open();
 			return false;
 		} catch (InterruptedException e) {
 			IStatus status = ExpressUIActivator.createErrorStatus(e.getMessage(), e);
 			new ErrorDialog(getShell(), "Error",
-					NLS.bind("Could not save snapshot for application {0}", applicationName),
-					status, IStatus.ERROR)
-					.open();
+					NLS.bind("Could not save snapshot for application {0}", applicationName), status, IStatus.ERROR)
+							.open();
 			return false;
 		}
 	}

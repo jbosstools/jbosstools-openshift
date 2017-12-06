@@ -31,13 +31,13 @@ import com.openshift.restclient.model.probe.IProbe;
 public class LivenessProbe {
 
 	public static final int INITIAL_DELAY = 1 * 60 * 60; // 1h
-	
+
 	private IDeploymentConfig dc;
 
 	LivenessProbe(IDeploymentConfig dc) {
 		this.dc = dc;
 	}
-	
+
 	/**
 	 * Sets the initial delay of the liveness probe for the given deployment config.
 	 * No action is taken if there's no such probe. Returns {@code true} if the
@@ -83,10 +83,11 @@ public class LivenessProbe {
 		if (probe == null) {
 			return false;
 		}
-		
+
 		monitor.subTask("Resetting liveness probe initial delay...");
 		probe.setInitialDelaySeconds(delay);
-		OpenShiftServerUtils.setLivenessProbeInitialDelay(OpenShiftServerUtils.VALUE_LIVENESSPROBE_NODELAY, context.getServer());
+		OpenShiftServerUtils.setLivenessProbeInitialDelay(OpenShiftServerUtils.VALUE_LIVENESSPROBE_NODELAY,
+				context.getServer());
 		return true;
 	}
 

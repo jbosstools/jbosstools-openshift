@@ -52,23 +52,23 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 		setNeedsProgressMonitor(true);
 		this.model = model;
 	}
-	
+
 	public NewResourceWizard() {
-        this(new NewResourceWizardModel());
-    }
+		this(new NewResourceWizardModel());
+	}
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-        Connection connection = UIUtils.getFirstElement(selection, Connection.class);
-        if (connection == null) {
-            IProject project = UIUtils.getFirstElement(selection, IProject.class);
-            if (project != null) {
-                model.setConnection(ConnectionsRegistryUtil.getConnectionFor(project));
-                model.setProject(project);                   
-            }
-        } else {
-            model.setConnection(connection);
-        }
+		Connection connection = UIUtils.getFirstElement(selection, Connection.class);
+		if (connection == null) {
+			IProject project = UIUtils.getFirstElement(selection, IProject.class);
+			if (project != null) {
+				model.setConnection(ConnectionsRegistryUtil.getConnectionFor(project));
+				model.setProject(project);
+			}
+		} else {
+			model.setConnection(connection);
+		}
 	}
 
 	@Override
@@ -78,41 +78,40 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 
 	@Override
 	public boolean performFinish() {
-        boolean success = false;
-        try (InputStream is = (OpenshiftUIConstants.URL_VALIDATOR.isValid(model.getSource()))?new URL(model.getSource()).openStream()
-                                                                                                  :new FileInputStream(VariablesHelper.replaceVariables(model.getSource()))) {
-            final CreateResourceJob createJob = new CreateResourceJob(model.getProject(), is);
+		boolean success = false;
+		try (InputStream is = (OpenshiftUIConstants.URL_VALIDATOR.isValid(model.getSource()))
+				? new URL(model.getSource()).openStream()
+				: new FileInputStream(VariablesHelper.replaceVariables(model.getSource()))) {
+			final CreateResourceJob createJob = new CreateResourceJob(model.getProject(), is);
 
-            createJob.addJobChangeListener(new JobChangeAdapter() {
+			createJob.addJobChangeListener(new JobChangeAdapter() {
 
-                @Override
-                public void done(IJobChangeEvent event) {
-                    IStatus status = event.getResult();
-                    if (JobUtils.isOk(status) || JobUtils.isWarning(status)) {
-                        Display.getDefault().syncExec(new Runnable() {
-                            @Override
-                            public void run() {
-                                new ResourceSummaryDialog(getShell(),
-                                        createJob.getResource(), "Create Resource Summary",
-                                        "Results of creating the resource(s)").open();
-                            }
-                        });
-                        OpenShiftUIUtils.showOpenShiftExplorer();
-                    }
-                }
-            });
+				@Override
+				public void done(IJobChangeEvent event) {
+					IStatus status = event.getResult();
+					if (JobUtils.isOk(status) || JobUtils.isWarning(status)) {
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								new ResourceSummaryDialog(getShell(), createJob.getResource(),
+										"Create Resource Summary", "Results of creating the resource(s)").open();
+							}
+						});
+						OpenShiftUIUtils.showOpenShiftExplorer();
+					}
+				}
+			});
 
-            IStatus status = runInWizard(createJob, createJob.getDelegatingProgressMonitor(), getContainer());
-            success = isSuccess(status);
-        } catch (InvocationTargetException | InterruptedException | IOException e) {
-            OpenShiftUIActivator.getDefault().getLogger().logError(e);
-            success = false;
-        }
-        return success;
-    }
+			IStatus status = runInWizard(createJob, createJob.getDelegatingProgressMonitor(), getContainer());
+			success = isSuccess(status);
+		} catch (InvocationTargetException | InterruptedException | IOException e) {
+			OpenShiftUIActivator.getDefault().getLogger().logError(e);
+			success = false;
+		}
+		return success;
+	}
 
 	private boolean isSuccess(IStatus status) {
-		return JobUtils.isOk(status) 
-				|| JobUtils.isWarning(status);
+		return JobUtils.isOk(status) || JobUtils.isWarning(status);
 	}
 }

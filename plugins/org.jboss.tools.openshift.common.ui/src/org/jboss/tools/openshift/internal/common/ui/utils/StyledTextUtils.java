@@ -55,7 +55,7 @@ public class StyledTextUtils {
 		setTransparent(styledText);
 		styledText.setEditable(false);
 		styledText.setCursor(new Cursor(styledText.getShell().getDisplay(), SWT.CURSOR_HAND));
-		
+
 		//emulate disablement
 		styledText.setCaret(null);
 		styledText.setSelectionBackground(styledText.getBackground()); //even with selection listener, prevent 'shimmering'
@@ -64,10 +64,11 @@ public class StyledTextUtils {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Point s = styledText.getSelection();
-				if(s != null && s.x != s.y) {
+				if (s != null && s.x != s.y) {
 					styledText.setSelection(s.x, s.x);
 				}
 			}
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
@@ -81,16 +82,16 @@ public class StyledTextUtils {
 			@Override
 			public void handleEvent(Event event) {
 				int offset = getOffsetAtEvent(styledText, event);
-				if(offset < 0) {
+				if (offset < 0) {
 					return;
 				}
 				StyleRange r = styledText.getStyleRangeAtOffset(offset);
-				if(event.type == SWT.MouseUp) {
-					if(r != null) {
+				if (event.type == SWT.MouseUp) {
+					if (r != null) {
 						listener.handleClick(r);
 					}
-				} else if(event.type == SWT.MouseMove) {
-					if(r != null) {
+				} else if (event.type == SWT.MouseMove) {
+					if (r != null) {
 						styledText.setCursor(styledText.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 					} else {
 						styledText.setCursor(styledText.getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
@@ -111,7 +112,7 @@ public class StyledTextUtils {
 		} catch (IllegalArgumentException e) {
 			//ignore
 		}
-		if(offset < 0 || offset >= styledText.getCharCount()) {
+		if (offset < 0 || offset >= styledText.getCharCount()) {
 			return -1;
 		}
 		return offset;
@@ -142,8 +143,7 @@ public class StyledTextUtils {
 			return;
 		}
 
-		if (StringUtils.isEmpty(matcher.group(2))
-				&& StringUtils.isEmpty(matcher.group(4))) {
+		if (StringUtils.isEmpty(matcher.group(2)) && StringUtils.isEmpty(matcher.group(4))) {
 			styledText.setText(text);
 		} else {
 			styledText.setText(removeLinkMarkers(matcher));

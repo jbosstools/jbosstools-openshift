@@ -37,5 +37,5 @@ public class WizardFragmentUtils {
 		}
 		return (WizardDialog) wizard.getContainer();
 	}
-	
+
 }

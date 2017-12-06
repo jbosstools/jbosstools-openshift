@@ -32,10 +32,10 @@ public class OpenShiftServerAdapterFactoryTest {
 		when(server.loadAdapter(eq(OpenShiftServer.class), isA(IProgressMonitor.class))).thenReturn(realServer);
 		IServerModule serverModule = factory.getAdapter(server, IServerModule.class);
 		assertNotNull(serverModule);
-		
+
 		IModule[] module = serverModule.getModule();
 		assertNotNull(module);
-		
+
 		assertNotNull(module[0].loadAdapter(IWebModule.class, null));
 	}
 }

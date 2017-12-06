@@ -28,7 +28,8 @@ public class ConnectionEditorsStackedView extends AbstractStackedDetailViews {
 
 	private Collection<IConnectionEditor> connectionEditors;
 
-	ConnectionEditorsStackedView(IObservableValue<?> detailViewModel, ConnectionWizardPage wizardPage, Composite parent, DataBindingContext dbc) {
+	ConnectionEditorsStackedView(IObservableValue<?> detailViewModel, ConnectionWizardPage wizardPage, Composite parent,
+			DataBindingContext dbc) {
 		super(detailViewModel, wizardPage, parent, dbc);
 		this.connectionEditors = getConnectionEditors();
 	}
@@ -37,7 +38,7 @@ public class ConnectionEditorsStackedView extends AbstractStackedDetailViews {
 	protected IDetailView[] getDetailViews() {
 		return connectionEditors.toArray(new IConnectionEditor[connectionEditors.size()]);
 	}
-	
+
 	private Collection<IConnectionEditor> getConnectionEditors() {
 		return ExtensionUtils.getExtensions(CONNECTION_EDITORS_EXTENSION, ATTRIBUTE_CLASS);
 	}

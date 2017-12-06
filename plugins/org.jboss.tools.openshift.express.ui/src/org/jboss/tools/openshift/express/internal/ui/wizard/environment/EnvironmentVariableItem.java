@@ -77,10 +77,7 @@ public class EnvironmentVariableItem {
 
 	@Override
 	public String toString() {
-		return "EnvironmentVariableItem ["
-				+ "name=" + name
-				+ ", value=" + value
-				+ "]";
+		return "EnvironmentVariableItem [" + "name=" + name + ", value=" + value + "]";
 	}
 
 }

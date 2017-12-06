@@ -17,9 +17,9 @@ import org.jboss.tools.foundation.core.plugin.BaseCorePlugin;
 public class OpenShiftIOUIActivator extends BaseCorePlugin {
 
 	private static OpenShiftIOUIActivator INSTANCE = null;
-	
+
 	public static final String PLUGIN_ID = "org.jboss.tools.openshift.io.ui";
-	
+
 	public OpenShiftIOUIActivator() {
 		super();
 		INSTANCE = this;
@@ -28,7 +28,7 @@ public class OpenShiftIOUIActivator extends BaseCorePlugin {
 	public static OpenShiftIOUIActivator getDefault() {
 		return INSTANCE;
 	}
-	
+
 	public static void logError(String message, Throwable t) {
 		getDefault().pluginLogInternal().logError(message, t);
 	}

@@ -18,6 +18,8 @@ import java.util.Collection;
  */
 public interface IResourceContainer<R, P extends IOpenshiftUIElement<?, ?>> extends IOpenshiftUIElement<R, P> {
 	Collection<IResourceWrapper<?, ?>> getResourcesOfKind(String kind);
+
 	<T extends IResourceWrapper<?, ?>> Collection<T> getResourcesOfType(Class<T> clazz);
+
 	Collection<IResourceWrapper<?, ?>> getResources();
 }

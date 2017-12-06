@@ -48,20 +48,17 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 
 	public EditEmbeddedCartridgesWizard(IApplication application, ExpressConnection connection) {
 		Assert.isLegal(application != null);
-		
+
 		this.wizardModel = new EmbeddedCartridgesWizardModel(
-				new HashSet<ICartridge>(application.getEmbeddedCartridges())
-				, CollectionUtils.addTo(
+				new HashSet<ICartridge>(application.getEmbeddedCartridges()),
+				CollectionUtils.addTo(
 						// add code anything cartridge
 						(ICartridge) new CodeAnythingCartridge(),
-						new ArrayList<>(
-								CollectionUtils.addAllTo(
-										// add downloadable cartridges embedded to application
-										new ArrayList<ICartridge>(application.getEmbeddedCartridges()),
-										new HashSet<ICartridge>(connection.getEmbeddableCartridges()))))
-				, new ExistingApplicationProperties(application)
-				, application.getDomain()
-				, connection);
+						new ArrayList<>(CollectionUtils.addAllTo(
+								// add downloadable cartridges embedded to application
+								new ArrayList<ICartridge>(application.getEmbeddedCartridges()),
+								new HashSet<ICartridge>(connection.getEmbeddableCartridges())))),
+				new ExistingApplicationProperties(application), application.getDomain(), connection);
 		this.application = application;
 		setNeedsProgressMonitor(true);
 		setWindowTitle("Edit Embedded Cartridges");
@@ -74,10 +71,8 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 
 	public boolean processCartridges() {
 		try {
-			EmbedCartridgesJob job = 
-					new EmbedCartridgesJob(
-							new ArrayList<>(wizardModel.getCheckedEmbeddableCartridges()),
-							application);
+			EmbedCartridgesJob job = new EmbedCartridgesJob(
+					new ArrayList<>(wizardModel.getCheckedEmbeddableCartridges()), application);
 			IStatus result = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
 			if (!result.isOK()) {
 				safeRefreshSelectedEmbeddedCartridges();
@@ -127,9 +122,9 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 	public void addPages() {
 		addPage(this.embeddedCartridgesWizardPage = new EmbeddedCartridgesWizardPage(wizardModel, this));
 	}
-	
+
 	private static class ExistingApplicationProperties implements IApplicationProperties {
-		
+
 		private IApplication application;
 
 		ExistingApplicationProperties(IApplication application) {
@@ -140,12 +135,12 @@ public class EditEmbeddedCartridgesWizard extends Wizard {
 		public IStandaloneCartridge getStandaloneCartridge() {
 			return application.getCartridge();
 		}
-		
+
 		@Override
 		public ApplicationScale getApplicationScale() {
 			return application.getApplicationScale();
 		}
-		
+
 		@Override
 		public String getApplicationName() {
 			return application.getName();

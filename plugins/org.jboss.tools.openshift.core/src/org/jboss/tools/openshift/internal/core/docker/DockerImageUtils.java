@@ -35,7 +35,7 @@ import com.openshift.restclient.model.image.IImageStreamImport;
  * Utility class for {@link IDockerImage}s
  */
 public class DockerImageUtils {
-	
+
 	private DockerImageUtils() {
 	}
 
@@ -105,7 +105,7 @@ public class DockerImageUtils {
 	 */
 	public static String extractImageNameAndTag(final String imageName) {
 		final int lastIndexOfSlash = imageName.lastIndexOf('/');
-		if(lastIndexOfSlash == -1) {
+		if (lastIndexOfSlash == -1) {
 			return imageName;
 		}
 		return imageName.substring(lastIndexOfSlash + 1);
@@ -119,22 +119,23 @@ public class DockerImageUtils {
 	 * @return
 	 */
 	public static IDockerImageMetadata lookupImageMetadata(IProject project, DockerImageURI imageURI) {
-		if (project != null 
-				&& project.supports(IImageStreamImportCapability.class)) {
+		if (project != null && project.supports(IImageStreamImportCapability.class)) {
 			final IImageStreamImportCapability cap = project.getCapability(IImageStreamImportCapability.class);
 			try {
 				final IImageStreamImport streamImport = cap.importImageMetadata(imageURI);
 				if (ResourceUtils.isSuccessful(streamImport)) {
 					String json = streamImport.getImageJsonFor(imageURI.getTag());
-					if(StringUtils.isBlank(json)) {
-						OpenShiftCoreActivator.logError("Did not find metadata during ImportImageStream for " + imageURI.getAbsoluteUri(), null);
+					if (StringUtils.isBlank(json)) {
+						OpenShiftCoreActivator.logError(
+								"Did not find metadata during ImportImageStream for " + imageURI.getAbsoluteUri(),
+								null);
 						return null;
 					}
 					return new ImageStreamTagMetaData(json);
 				}
 			} catch (OpenShiftException e) {
-				OpenShiftCoreActivator.logError(NLS.bind(
-						"Could not retrieve metadata for docker image {0}", imageURI),e);
+				OpenShiftCoreActivator.logError(NLS.bind("Could not retrieve metadata for docker image {0}", imageURI),
+						e);
 			}
 		}
 		return null;

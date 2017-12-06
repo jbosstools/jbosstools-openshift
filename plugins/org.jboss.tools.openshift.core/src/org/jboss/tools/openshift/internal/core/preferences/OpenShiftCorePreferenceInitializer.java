@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.core.preferences;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
@@ -22,10 +22,11 @@ public class OpenShiftCorePreferenceInitializer extends AbstractPreferenceInitia
 
 	@Override
 	public void initializeDefaultPreferences() {
-		IEclipsePreferences defaultPreferences = ((IScopeContext)DefaultScope.INSTANCE).getNode(OpenShiftCoreActivator.PLUGIN_ID);
+		IEclipsePreferences defaultPreferences = ((IScopeContext) DefaultScope.INSTANCE)
+				.getNode(OpenShiftCoreActivator.PLUGIN_ID);
 
 		String location = OCBinary.getInstance().getSystemPathLocation();
-		if(!StringUtils.isEmpty(location)) {
+		if (!StringUtils.isEmpty(location)) {
 			defaultPreferences.put(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC, location);
 		}
 	}

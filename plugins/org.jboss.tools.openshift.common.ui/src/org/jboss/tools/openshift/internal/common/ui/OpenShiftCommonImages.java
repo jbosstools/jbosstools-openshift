@@ -22,14 +22,15 @@ public class OpenShiftCommonImages {
 
 	private static final String ICONS_FOLDER = "icons/";
 
-	private static final ImageRepository repo =
-			new ImageRepository(
-					ICONS_FOLDER, OpenShiftCommonUIActivator.getDefault(), OpenShiftCommonUIActivator.getDefault().getImageRegistry());
+	private static final ImageRepository repo = new ImageRepository(ICONS_FOLDER,
+			OpenShiftCommonUIActivator.getDefault(), OpenShiftCommonUIActivator.getDefault().getImageRegistry());
 
-	public static final Image FOLDER = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
+	public static final Image FOLDER = PlatformUI.getWorkbench().getSharedImages()
+			.getImage(ISharedImages.IMG_OBJ_FOLDER);
 	public static final Image FILE = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
-	
-	public static final Image ERROR = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+
+	public static final Image ERROR = PlatformUI.getWorkbench().getSharedImages()
+			.getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
 
 	public static final ImageDescriptor OPENSHIFT_LOGO_DARK = repo.create("openshift-logo-dark.png"); //$NON-NLS-1$ 
 	public static final ImageDescriptor OPENSHIFT_LOGO_WHITE_ICON = repo.create("openshift-logo-white-icon.png"); //$NON-NLS-1$ 
@@ -47,5 +48,4 @@ public class OpenShiftCommonImages {
 	public static final ImageDescriptor TRANSPARENT_PIXEL = repo.create("transparent_pixel.png"); //$NON-NLS-1$ 
 	public static final Image TRANSPARENT_PIXEL_IMG = repo.getImage("transparent_pixel.png"); //$NON-NLS-1$}
 
-	
 }

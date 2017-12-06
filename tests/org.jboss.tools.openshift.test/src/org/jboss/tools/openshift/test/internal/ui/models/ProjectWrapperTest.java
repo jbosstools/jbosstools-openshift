@@ -22,28 +22,27 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.openshift.restclient.model.IProject;
 
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ WatchManager.class })
 public class ProjectWrapperTest {
-	
+
 	private WatchManager watchManager;
-	
+
 	private IOpenShiftConnection connection;
 	private ConnectionWrapper connectionWrapper;
-	
+
 	private IProject project;
 	private ProjectWrapper projectWrapper;
-	
+
 	@Before
 	public void initilize() {
 		watchManager = mock(WatchManager.class);
 		PowerMockito.mockStatic(WatchManager.class);
 		PowerMockito.when(WatchManager.getInstance()).thenReturn(watchManager);
-		
+
 		this.connection = mock(IOpenShiftConnection.class);
 		this.connectionWrapper = new ConnectionWrapper(mock(OpenshiftUIModel.class), connection);
-		
+
 		this.project = mock(IProject.class);
 		when(project.getNamespace()).thenReturn("namespace");
 		this.projectWrapper = new ProjectWrapper(connectionWrapper, project);
@@ -57,7 +56,7 @@ public class ProjectWrapperTest {
 		verify(watchManager, times(1)).startWatch(eq(project), eq(connection));
 		verify(watchManager, times(1)).stopWatch(eq(project), eq(connection));
 	}
-	
+
 	@Test
 	public void startWatchManagerOnProjectLoad() {
 		// when
@@ -65,5 +64,5 @@ public class ProjectWrapperTest {
 		// then
 		verify(watchManager, timeout(200).times(1)).startWatch(eq(project), eq(connection));
 	}
-	
+
 }

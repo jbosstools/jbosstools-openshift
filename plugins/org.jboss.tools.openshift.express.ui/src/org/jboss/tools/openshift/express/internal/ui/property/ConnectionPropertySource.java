@@ -54,12 +54,10 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new PropertyDescriptor(PROPERTY_DOMAINS, PROPERTY_DOMAINS),
+		return new IPropertyDescriptor[] { new PropertyDescriptor(PROPERTY_DOMAINS, PROPERTY_DOMAINS),
 				new PropertyDescriptor(PROPERTY_USERNAME, PROPERTY_USERNAME),
 				new PropertyDescriptor(PROPERTY_HOST, PROPERTY_HOST),
-				new PropertyDescriptor(PROPERTY_KEY, PROPERTY_KEY)
-		};
+				new PropertyDescriptor(PROPERTY_KEY, PROPERTY_KEY) };
 	}
 
 	@Override
@@ -122,8 +120,7 @@ public class ConnectionPropertySource implements IPropertySource {
 			public void run(IProgressMonitor monitor) throws InterruptedException {
 				monitor.beginTask("Loading OpenShift 2 connection details", 200);
 				try {
-					if (!connection.isConnected()
-							&& connection.canPromptForPassword()) {
+					if (!connection.isConnected() && connection.canPromptForPassword()) {
 						connection.connect();
 					}
 					monitor.worked(100);
@@ -142,8 +139,8 @@ public class ConnectionPropertySource implements IPropertySource {
 			if (cause instanceof OpenShiftException) {
 				throw (OpenShiftException) cause;
 			} else {
-				new OpenShiftException(cause,
-						"Could not load details for user {0} on {1}", connection.getUsername(), connection.getHost());
+				new OpenShiftException(cause, "Could not load details for user {0} on {1}", connection.getUsername(),
+						connection.getHost());
 			}
 		} catch (InterruptedException ie) {
 		}
@@ -161,9 +158,7 @@ public class ConnectionPropertySource implements IPropertySource {
 
 	@Override
 	public boolean isPropertySet(Object id) {
-		return PROPERTY_USERNAME.equals(id)
-				|| PROPERTY_DOMAINS.equals(id)
-				|| PROPERTY_KEY.equals(id);
+		return PROPERTY_USERNAME.equals(id) || PROPERTY_DOMAINS.equals(id) || PROPERTY_KEY.equals(id);
 	}
 
 }

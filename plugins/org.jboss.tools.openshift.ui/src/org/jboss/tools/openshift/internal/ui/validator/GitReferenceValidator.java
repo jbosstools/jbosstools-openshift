@@ -34,24 +34,27 @@ public class GitReferenceValidator extends MultiValidator implements IValidator 
 		twoCharacterSequences.put('.', '.');
 
 		//Rule 4. Reference cannot have ASCII control characters (i.e. bytes whose values
-        //are lower than \040, or \177 DEL), space, tilde ~, caret ^, or colon : anywhere
-		for (int i = 0; i < 040; i++) charactersToExclusionRule.put((char)i, 4);
-		String rule4chars = "" + (char)177 + " ~^:";
-		for (int i = 0; i < rule4chars.length(); i++) charactersToExclusionRule.put(rule4chars.charAt(i), 4);
+		//are lower than \040, or \177 DEL), space, tilde ~, caret ^, or colon : anywhere
+		for (int i = 0; i < 040; i++)
+			charactersToExclusionRule.put((char) i, 4);
+		String rule4chars = "" + (char) 177 + " ~^:";
+		for (int i = 0; i < rule4chars.length(); i++)
+			charactersToExclusionRule.put(rule4chars.charAt(i), 4);
 
 		//Rule 5. Reference cannot have question-mark ?, asterisk *, or open bracket [ anywhere
 		String rule5chars = "?*[";
-		for (int i = 0; i < rule5chars.length(); i++) charactersToExclusionRule.put(rule5chars.charAt(i), 5);
+		for (int i = 0; i < rule5chars.length(); i++)
+			charactersToExclusionRule.put(rule5chars.charAt(i), 5);
 
 		//Rule 6.b. Reference cannot contain multiple consecutive slashes
-		twoCharacterSequences.put('/', '/'); 
+		twoCharacterSequences.put('/', '/');
 
 		//Rule 8. Reference cannot contain a sequence @{
 		twoCharacterSequences.put('@', '{');
 
 		//Rule 10. Reference cannot contain a \
 		charactersToExclusionRule.put('\\', 10);
-		
+
 	}
 
 	private IObservableValue<String> observable;
@@ -65,11 +68,11 @@ public class GitReferenceValidator extends MultiValidator implements IValidator 
 
 	@Override
 	public IStatus validate(Object value) {
-		if(!(value instanceof String)) {
+		if (!(value instanceof String)) {
 			return ValidationStatus.OK_STATUS;
 		}
-		String ref = (String)value;
-		if(StringUtils.isBlank(ref)) {
+		String ref = (String) value;
+		if (StringUtils.isBlank(ref)) {
 			return ValidationStatus.OK_STATUS;
 		}
 
@@ -79,46 +82,46 @@ public class GitReferenceValidator extends MultiValidator implements IValidator 
 		for (int i = 0; i < ref.length(); i++) {
 			char c = ref.charAt(i);
 			Integer rule = charactersToExclusionRule.get(c);
-			if(rule != null) {
+			if (rule != null) {
 				return ValidationStatus.error("Reference cannot contain character '" + c + "'");
 			}
-			
+
 			Character next = twoCharacterSequences.get(c);
-			if(next != null && i + 1 < ref.length() && next.charValue() == ref.charAt(i + 1)) {
+			if (next != null && i + 1 < ref.length() && next.charValue() == ref.charAt(i + 1)) {
 				return ValidationStatus.error("Reference cannot contain sequence '" + c + next + "'");
 			}
 		}
 
 		//Rule 6.a. Reference cannot begin or end with a slash /
-		if(ref.startsWith("/") || ref.endsWith("/")) {
+		if (ref.startsWith("/") || ref.endsWith("/")) {
 			return ValidationStatus.error("Reference cannot begin or end with '/'");
 		}
 
 		//Rule 7. Reference cannot end with a dot
-		if(ref.endsWith(".")) {
+		if (ref.endsWith(".")) {
 			return ValidationStatus.error("Reference cannot end with a dot");
 		}
 
 		//Rule 9. Reference cannot be a single character '@'
-		if(ref.equals("@")) {
+		if (ref.equals("@")) {
 			return ValidationStatus.error("Reference cannot be a single character '@'");
 		}
 
 		//Rule 1. Reference or its slash-separated component cannot begin with a dot or end with the sequence .lock
-		for (String part: ref.split("/")) {
-			if(part.startsWith(".")) {
+		for (String part : ref.split("/")) {
+			if (part.startsWith(".")) {
 				return ValidationStatus.error("Reference or its slash-separated component cannot start with a dot");
-			} else if(part.endsWith(".lock")) {
+			} else if (part.endsWith(".lock")) {
 				return ValidationStatus.error("Reference or its slash-separated component cannot end with '.lock'");
 			}
 		}
-		
+
 		return ValidationStatus.OK_STATUS;
 	}
 
 	@Override
 	protected IStatus validate() {
-		if(observable == null) {
+		if (observable == null) {
 			return ValidationStatus.OK_STATUS;
 		}
 		return validate(observable.getValue());

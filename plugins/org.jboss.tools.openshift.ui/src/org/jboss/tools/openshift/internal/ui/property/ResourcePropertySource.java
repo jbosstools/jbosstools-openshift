@@ -23,9 +23,9 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 	private static final String BASIC = "Basic";
 	private static final String ANNOTATIONS = "Annotations";
 	private static final String LABELS = "Labels";
-	
-	private T  resource;
-	
+
+	private T resource;
+
 	public ResourcePropertySource(T resource) {
 		this.resource = resource;
 	}
@@ -50,48 +50,53 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		List<IPropertyDescriptor> common = new ArrayList<>(Arrays.<IPropertyDescriptor> asList(
-				new ExtTextPropertyDescriptor(Ids.KIND, "Kind", BASIC),
-				new ExtTextPropertyDescriptor(Ids.NAME, "Name", BASIC),
-				new ExtTextPropertyDescriptor(Ids.NAMESPACE, "Namespace", BASIC),
-				new ExtTextPropertyDescriptor(Ids.CREATED, "Creation Timestamp", BASIC),
-				new ExtTextPropertyDescriptor(Ids.RESOURCE_VERSION, "Resource Version", BASIC)
-		));
-		 common.addAll(buildPropertyDescriptors(ANNOTATIONS, resource.getAnnotations()));
-		 common.addAll(buildPropertyDescriptors(LABELS, resource.getLabels()));
-		 common.addAll(Arrays.asList(getResourcePropertyDescriptors()));
+		List<IPropertyDescriptor> common = new ArrayList<>(
+				Arrays.<IPropertyDescriptor>asList(new ExtTextPropertyDescriptor(Ids.KIND, "Kind", BASIC),
+						new ExtTextPropertyDescriptor(Ids.NAME, "Name", BASIC),
+						new ExtTextPropertyDescriptor(Ids.NAMESPACE, "Namespace", BASIC),
+						new ExtTextPropertyDescriptor(Ids.CREATED, "Creation Timestamp", BASIC),
+						new ExtTextPropertyDescriptor(Ids.RESOURCE_VERSION, "Resource Version", BASIC)));
+		common.addAll(buildPropertyDescriptors(ANNOTATIONS, resource.getAnnotations()));
+		common.addAll(buildPropertyDescriptors(LABELS, resource.getLabels()));
+		common.addAll(Arrays.asList(getResourcePropertyDescriptors()));
 
-		 return common.toArray(new IPropertyDescriptor[common.size()]);
+		return common.toArray(new IPropertyDescriptor[common.size()]);
 	}
-	
+
 	private List<IPropertyDescriptor> buildPropertyDescriptors(String prefix, Map<String, String> values) {
-		 List<IPropertyDescriptor> descriptors = new ArrayList<>(values.size()); 
-		 for (Map.Entry<String, String> entry : values.entrySet()) {
-			descriptors.add(new ExtTextPropertyDescriptor(new PrefixPropertySourceKey(prefix, entry.getKey()), entry.getKey(), prefix));
+		List<IPropertyDescriptor> descriptors = new ArrayList<>(values.size());
+		for (Map.Entry<String, String> entry : values.entrySet()) {
+			descriptors.add(new ExtTextPropertyDescriptor(new PrefixPropertySourceKey(prefix, entry.getKey()),
+					entry.getKey(), prefix));
 		}
 		return descriptors;
 	}
-	
+
 	@Override
 	public Object getPropertyValue(Object id) {
 		if (id instanceof Ids) {
 			Ids e = (Ids) id;
 			switch (e) {
-			case KIND: return resource.getKind();
-			case NAME: return resource.getName();
-			case NAMESPACE: return resource.getNamespace();
-			case CREATED: return resource.getCreationTimeStamp();
-			case RESOURCE_VERSION: return resource.getResourceVersion();
+			case KIND:
+				return resource.getKind();
+			case NAME:
+				return resource.getName();
+			case NAMESPACE:
+				return resource.getNamespace();
+			case CREATED:
+				return resource.getCreationTimeStamp();
+			case RESOURCE_VERSION:
+				return resource.getResourceVersion();
 			default:
 			}
 		}
 		if (id instanceof PrefixPropertySourceKey) {
 			PrefixPropertySourceKey key = (PrefixPropertySourceKey) id;
 			String prefix = key.getPrefix();
-			if(ANNOTATIONS.equals(prefix)){
+			if (ANNOTATIONS.equals(prefix)) {
 				return resource.getAnnotation(key.getKey());
 			}
-			if(LABELS.equals(prefix)){
+			if (LABELS.equals(prefix)) {
 				return resource.getLabels().get(key.getKey());
 			}
 		}
@@ -110,12 +115,8 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 	@Override
 	public void setPropertyValue(Object id, Object value) {
 	}
-	
+
 	public static enum Ids {
-		KIND,
-		NAME,
-		NAMESPACE,
-		CREATED,
-		RESOURCE_VERSION
+		KIND, NAME, NAMESPACE, CREATED, RESOURCE_VERSION
 	}
 }

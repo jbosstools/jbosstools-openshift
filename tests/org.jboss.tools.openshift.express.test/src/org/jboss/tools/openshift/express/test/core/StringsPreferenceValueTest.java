@@ -28,8 +28,8 @@ public class StringsPreferenceValueTest {
 
 	@Before
 	public void setUp() {
-		this.stringsPreferenceValue =
-				new StringsPreferenceValue('|', 4, "test", "org.jboss.tools.openshift.express.test.core");
+		this.stringsPreferenceValue = new StringsPreferenceValue('|', 4, "test",
+				"org.jboss.tools.openshift.express.test.core");
 	}
 
 	@After
@@ -73,7 +73,7 @@ public class StringsPreferenceValueTest {
 		stringsPreferenceValue.add("128");
 		stringsPreferenceValue.add("1024");
 		stringsPreferenceValue.add("4096");
-		
+
 		// operation
 		stringsPreferenceValue.add("512");
 
@@ -81,7 +81,7 @@ public class StringsPreferenceValueTest {
 		assertEquals(4, stringsPreferenceValue.size());
 		assertArrayEquals(new String[] { "128", "1024", "4096", "512" }, stringsPreferenceValue.get());
 	}
-	
+
 	@Test
 	public void shouldRemove1Value() {
 		// pre-condition
@@ -106,7 +106,7 @@ public class StringsPreferenceValueTest {
 		stringsPreferenceValue.add("128");
 		stringsPreferenceValue.add("1024");
 		stringsPreferenceValue.add("4096");
-		
+
 		// operation
 		stringsPreferenceValue.remove("128", "1024");
 
@@ -114,5 +114,5 @@ public class StringsPreferenceValueTest {
 		assertEquals(2, stringsPreferenceValue.size());
 		assertArrayEquals(new String[] { "42", "4096" }, stringsPreferenceValue.get());
 	}
-	
+
 }

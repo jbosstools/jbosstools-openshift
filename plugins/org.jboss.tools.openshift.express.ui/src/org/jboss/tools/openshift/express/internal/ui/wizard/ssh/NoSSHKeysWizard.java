@@ -51,17 +51,14 @@ public class NoSSHKeysWizard extends Wizard {
 	private class NoSSHKeysWizardPage extends ManageSSHKeysWizardPage {
 
 		NoSSHKeysWizardPage(ExpressConnection connection, IWizard wizard) {
-			super("Add SSH Keys",
-					"Please make sure you have an SSH public key uploaded to your OpenShift account " + connection.getUsername(),
-					"NoSSHKeysPage", connection, wizard);
+			super("Add SSH Keys", "Please make sure you have an SSH public key uploaded to your OpenShift account "
+					+ connection.getUsername(), "NoSSHKeysPage", connection, wizard);
 		}
 
 		@Override
 		protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 			Label dummyLabel = new Label(parent, SWT.None);
-			ValueBindingBuilder
-					.bind(WidgetProperties.enabled().observe(dummyLabel))
-					.notUpdatingParticipant()
+			ValueBindingBuilder.bind(WidgetProperties.enabled().observe(dummyLabel)).notUpdatingParticipant()
 					.to(BeanProperties.value(SSHKeysWizardPageModel.PROPERTY_HAS_KEY).observe(getPageModel()))
 					.validatingAfterGet(new IValidator() {
 
@@ -70,14 +67,13 @@ public class NoSSHKeysWizard extends Wizard {
 							if (Boolean.TRUE.equals(value)) {
 								return ValidationStatus.ok();
 							} else {
-								return ValidationStatus.cancel(
-										NLS.bind("You have no SSH public keys in your OpenShift account\n"
-												+ "{0} yet, please add your key(s) or\n"
-												+ "create new one(s)", getPageModel().getConnection().getUsername()));
+								return ValidationStatus.cancel(NLS.bind(
+										"You have no SSH public keys in your OpenShift account\n"
+												+ "{0} yet, please add your key(s) or\n" + "create new one(s)",
+										getPageModel().getConnection().getUsername()));
 							}
 						}
-					})
-					.in(dbc);
+					}).in(dbc);
 			super.doCreateControls(parent, dbc);
 		}
 	}

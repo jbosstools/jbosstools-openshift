@@ -24,10 +24,10 @@ import com.openshift.restclient.model.template.IParameter;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class TemplateParameterViewerUtilsTest {
-	
+
 	@Mock
 	private IParameter param;
-	
+
 	@Test
 	public void parametersWithBlankValueAndNoGeneratorShouldReturnBlank() {
 		assertEquals("", TemplateParameterViewerUtils.getValueLabel(param));
@@ -44,7 +44,7 @@ public class TemplateParameterViewerUtilsTest {
 		when(param.getValue()).thenReturn("abc123");
 		assertEquals("abc123", TemplateParameterViewerUtils.getValueLabel(param));
 	}
-	
+
 	@Test
 	public void parametersWithAValueAndAGeneratorShouldReturnTheValue() {
 		when(param.getGeneratorName()).thenReturn("expression");

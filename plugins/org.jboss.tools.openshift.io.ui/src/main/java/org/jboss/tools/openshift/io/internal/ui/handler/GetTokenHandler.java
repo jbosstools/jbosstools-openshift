@@ -28,10 +28,12 @@ public class GetTokenHandler extends AbstractHandler {
 		try {
 			TokenProvider provider = TokenProvider.get();
 			String token = provider.getToken(null);
-			MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "OpenShift.io", "Token retrieved is:" + token.substring(0, 16));
+			MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "OpenShift.io",
+					"Token retrieved is:" + token.substring(0, 16));
 		} catch (Exception e) {
 			IStatus status = new Status(IStatus.ERROR, OpenShiftIOUIActivator.PLUGIN_ID, e.getLocalizedMessage(), e);
-			ErrorDialog dialog = new ErrorDialog(HandlerUtil.getActiveShell(event), "OpenShift.io", e.getLocalizedMessage(), status, IStatus.ERROR);
+			ErrorDialog dialog = new ErrorDialog(HandlerUtil.getActiveShell(event), "OpenShift.io",
+					e.getLocalizedMessage(), status, IStatus.ERROR);
 			dialog.open();
 		}
 		return null;

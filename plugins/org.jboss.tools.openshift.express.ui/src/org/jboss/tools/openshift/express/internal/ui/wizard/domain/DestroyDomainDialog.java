@@ -23,13 +23,13 @@ import com.openshift.client.IDomain;
 public class DestroyDomainDialog extends CheckboxMessageDialog {
 
 	private int returnCode = Dialog.CANCEL;
-	
+
 	public DestroyDomainDialog(IDomain domain, Shell parentShell) {
-		super(parentShell, "Domain deletion"
-				, NLS.bind("You are about to delete the \"{0}\" domain.\nDo you want to continue?", domain.getId())
-				, "Force applications deletion (data will be lost and operation cannot be undone)");
+		super(parentShell, "Domain deletion",
+				NLS.bind("You are about to delete the \"{0}\" domain.\nDo you want to continue?", domain.getId()),
+				"Force applications deletion (data will be lost and operation cannot be undone)");
 	}
-	
+
 	public boolean isCancel() {
 		return (returnCode & CANCEL) != 0;
 	}
@@ -43,6 +43,4 @@ public class DestroyDomainDialog extends CheckboxMessageDialog {
 		return returnCode = super.open();
 	}
 
-	
-	
 }

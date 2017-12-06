@@ -24,10 +24,10 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
  * @author "Ilya Buziuk (ibuziuk)"
  */
 public final class NodeDebuggerUtil {
-	
+
 	private NodeDebuggerUtil() {
 	}
-	
+
 	public static final String CHROMIUM_LAUNCH_CONFIGURATION_TYPE_ID = "org.eclipse.wst.jsdt.chromium.debug.ui.LaunchType$StandaloneV8"; //$NON-NLS-1$
 	public static final String LOCALHOST = "localhost"; //$NON-NLS-1$
 	public static final String PACKAGE_JSON = "package.json"; //$NON-NLS-1$
@@ -53,7 +53,7 @@ public final class NodeDebuggerUtil {
 		}
 		return output.toString();
 	}
-	
+
 	public static boolean isNodeJsProject(IServer server) {
 		IProject p = OpenShiftServerUtils.getDeployProject(server);
 		return (p != null && p.isAccessible() && hasPackageJson(p));

@@ -54,8 +54,7 @@ import com.openshift.restclient.model.IServicePort;
  * @author Andre Dietisheim
  *
  */
-public class DeployImageWizardModel 
-		extends ResourceLabelsPageModel 
+public class DeployImageWizardModel extends ResourceLabelsPageModel
 		implements IDeployImageParameters, IDockerConnectionManagerListener, PropertyChangeListener {
 
 	private static final int DEFAULT_REPLICA_COUNT = 1;
@@ -83,12 +82,13 @@ public class DeployImageWizardModel
 	private String targetRegistryLocation;
 	private String targetRegistryUsername;
 	private String targetRegistryPassword;
-    private IServicePort routingPort;
+	private IServicePort routingPort;
 
 	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
 	private final List<String> imageNames = new ArrayList<>();
-    private List<IDockerConnection> dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections());
-    private Comparator<IProject> projectsComparator;
+	private List<IDockerConnection> dockerConnections = Arrays
+			.asList(DockerConnectionManager.getInstance().getConnections());
+	private Comparator<IProject> projectsComparator;
 	protected boolean resourcesLoaded = false;
 
 	public DeployImageWizardModel() {
@@ -96,27 +96,27 @@ public class DeployImageWizardModel
 		envModel.addPropertyChangeListener(PROPERTY_SELECTED_ENVIRONMENT_VARIABLE, this);
 		DockerConnectionManager.getInstance().addConnectionManagerListener(this);
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
-	    DockerConnectionManager.getInstance().removeConnectionManagerListener(this);
+		DockerConnectionManager.getInstance().removeConnectionManagerListener(this);
 		((EnvironmentVariablesPageModel) envModel).dispose();
-	    this.connection = null;
-	    this.project = null;
-	    this.dockerConnection = null;
-	    this.projects.clear();
-	    this.volumes.clear();
-	    this.portSpecs.clear();
-	    if(imagePorts != null) {
-	    	imagePorts.clear();
-	    	this.imagePorts = null;
-	    }
+		this.connection = null;
+		this.project = null;
+		this.dockerConnection = null;
+		this.projects.clear();
+		this.volumes.clear();
+		this.portSpecs.clear();
+		if (imagePorts != null) {
+			imagePorts.clear();
+			this.imagePorts = null;
+		}
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		if(evt != null) {
+		if (evt != null) {
 			firePropertyChange(evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
 		}
 	}
@@ -173,11 +173,11 @@ public class DeployImageWizardModel
 	}
 
 	private void initImageRegistry(Connection connection) {
-		if(connection == null) {
+		if (connection == null) {
 			return;
 		}
 		setTargetRegistryLocation(
-			(String) connection.getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY));
+				(String) connection.getExtendedProperties().get(ICommonAttributes.IMAGE_REGISTRY_URL_KEY));
 		setTargetRegistryUsername(connection.getUsername());
 		setTargetRegistryPassword(connection.getToken());
 	}
@@ -202,9 +202,9 @@ public class DeployImageWizardModel
 
 		this.resourcesLoaded = true;
 	}
-	
+
 	protected void setProjects(List<IProject> projects) {
-		if(projects == null) {
+		if (projects == null) {
 			projects = Collections.emptyList();
 		}
 		firePropertyChange(PROPERTY_PROJECTS, this.projects, this.projects = projects);
@@ -240,8 +240,7 @@ public class DeployImageWizardModel
 			return;
 		}
 
-		if (project != null
-				&& projects.contains(project)) {
+		if (project != null && projects.contains(project)) {
 			setProject(project);
 		} else if (!projects.isEmpty()) {
 			project = getDefaultProject();
@@ -264,7 +263,7 @@ public class DeployImageWizardModel
 	public void setProjectsComparator(Comparator<IProject> comparator) {
 		this.projectsComparator = comparator;
 	}
-	
+
 	@Override
 	public String getResourceName() {
 		return this.resourceName;
@@ -282,10 +281,10 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setImageName(final String imageName) {
-		if(StringUtils.isBlank(imageName)) {
+		if (StringUtils.isBlank(imageName)) {
 			return;
 		}
-		if(this.imageName != null && !this.imageName.equals(imageName) && this.imageMeta != null) {
+		if (this.imageName != null && !this.imageName.equals(imageName) && this.imageMeta != null) {
 			//Clean container info loaded for old image name.
 			this.imageMeta = null;
 			setEnvironmentVariables(new ArrayList<>());
@@ -299,7 +298,7 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setImageName(String imageName, boolean forceUpdate) {
-		if(forceUpdate && this.imageName != null && this.imageName.equals(imageName)) {
+		if (forceUpdate && this.imageName != null && this.imageName.equals(imageName)) {
 			firePropertyChange(PROPERTY_IMAGE_NAME, this.imageName, this.imageName = null);
 		}
 		setImageName(imageName);
@@ -315,40 +314,40 @@ public class DeployImageWizardModel
 		firePropertyChange(PROPERTY_PUSH_IMAGE_TO_REGISTRY, this.pushImageToRegistry,
 				this.pushImageToRegistry = pushImageToRegistry);
 	}
-	
+
 	@Override
 	public String getTargetRegistryLocation() {
 		return this.targetRegistryLocation;
 	}
-	
+
 	@Override
 	public void setTargetRegistryLocation(final String targetRegistryLocation) {
 		firePropertyChange(PROPERTY_TARGET_REGISTRY_LOCATION, this.targetRegistryLocation,
 				this.targetRegistryLocation = targetRegistryLocation);
 	}
-	
+
 	@Override
 	public String getTargetRegistryUsername() {
 		return this.targetRegistryUsername;
 	}
-	
+
 	@Override
 	public void setTargetRegistryUsername(final String targetRegistryUsername) {
 		firePropertyChange(PROPERTY_TARGET_REGISTRY_USERNAME, this.targetRegistryUsername,
 				this.targetRegistryUsername = targetRegistryUsername);
 	}
-	
+
 	@Override
 	public String getTargetRegistryPassword() {
 		return this.targetRegistryPassword;
 	}
-	
+
 	@Override
 	public void setTargetRegistryPassword(final String targetRegistryPassword) {
 		firePropertyChange(PROPERTY_TARGET_REGISTRY_PASSWORD, this.targetRegistryPassword,
 				this.targetRegistryPassword = targetRegistryPassword);
 	}
-	
+
 	@Override
 	public boolean initializeContainerInfo() {
 		this.imageMeta = lookupImageMetadata();
@@ -364,10 +363,8 @@ public class DeployImageWizardModel
 
 	private void initExposedPorts() {
 		List<IPort> portSpecs = Collections.emptyList();
-		if (imageMeta != null
-				&& !CollectionUtils.isEmpty(imageMeta.exposedPorts())) {
-			portSpecs = imageMeta.exposedPorts().stream()
-					.map(spec -> new PortSpecAdapter(spec))
+		if (imageMeta != null && !CollectionUtils.isEmpty(imageMeta.exposedPorts())) {
+			portSpecs = imageMeta.exposedPorts().stream().map(spec -> new PortSpecAdapter(spec))
 					.collect(Collectors.toList());
 		}
 		setPortSpecs(portSpecs);
@@ -375,13 +372,10 @@ public class DeployImageWizardModel
 
 	private void initEnvVariables() {
 		List<EnvironmentVariable> envVars = Collections.emptyList();
-		if (imageMeta != null
-				&& !CollectionUtils.isEmpty(imageMeta.env())) {
-			envVars = imageMeta.env().stream()
-					.filter(env -> env != null && env.indexOf('=') != -1)
-					.map(env -> env.split("="))
-					.map(splittedEnv -> 
-						new EnvironmentVariable(splittedEnv[0], splittedEnv.length > 1 ? splittedEnv[1] : StringUtils.EMPTY))
+		if (imageMeta != null && !CollectionUtils.isEmpty(imageMeta.env())) {
+			envVars = imageMeta.env().stream().filter(env -> env != null && env.indexOf('=') != -1)
+					.map(env -> env.split("=")).map(splittedEnv -> new EnvironmentVariable(splittedEnv[0],
+							splittedEnv.length > 1 ? splittedEnv[1] : StringUtils.EMPTY))
 					.collect(Collectors.toList());
 		}
 		setEnvironmentVariables(envVars);
@@ -389,8 +383,7 @@ public class DeployImageWizardModel
 
 	private void initVolumes() {
 		List<String> volumes = Collections.emptyList();
-		if (imageMeta != null
-				&& !CollectionUtils.isEmpty(imageMeta.volumes())) {
+		if (imageMeta != null && !CollectionUtils.isEmpty(imageMeta.volumes())) {
 			volumes = new ArrayList<>(imageMeta.volumes());
 		}
 		setVolumes(volumes);
@@ -405,7 +398,7 @@ public class DeployImageWizardModel
 	public boolean isEnvironmentVariableModified(EnvironmentVariable envVar) {
 		return envModel.isEnvironmentVariableModified(envVar);
 	}
-	
+
 	@Override
 	public void setEnvironmentVariables(List<EnvironmentVariable> envVars) {
 		envModel.setEnvironmentVariables(envVars);
@@ -418,23 +411,19 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setVolumes(List<String> volumes) {
-		firePropertyChange(PROPERTY_VOLUMES, 
-				this.volumes, 
-				this.volumes = volumes);
+		firePropertyChange(PROPERTY_VOLUMES, this.volumes, this.volumes = volumes);
 	}
 
 	@Override
 	public List<String> getVolumes() {
 		return volumes;
 	}
-	
+
 	private void setPortSpecs(List<IPort> portSpecs) {
-		firePropertyChange(PROPERTY_PORT_SPECS, 
-				this.portSpecs, 
-				this.portSpecs = portSpecs);
+		firePropertyChange(PROPERTY_PORT_SPECS, this.portSpecs, this.portSpecs = portSpecs);
 		setServicePortsFromPorts(portSpecs);
 	}
-	
+
 	private void setServicePortsFromPorts(List<IPort> portSpecs) {
 		this.imagePorts = new ArrayList<>(portSpecs.size());
 		List<IServicePort> servicePorts = new ArrayList<>(portSpecs.size());
@@ -444,17 +433,16 @@ public class DeployImageWizardModel
 		}
 		setServicePorts(servicePorts);
 	}
-	
+
 	private void setServicePorts(List<IServicePort> servicePorts) {
-        if (servicePorts.size() > 0) {
-            ServicePortAdapter adapterPort = (ServicePortAdapter) servicePorts.get(0);
-            adapterPort.setRoutePort(true);
-            setRoutingPort(adapterPort);
-        } else {
-            setRoutingPort(null);
-        }
-		firePropertyChange(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS, 
-				this.servicePorts, 
+		if (servicePorts.size() > 0) {
+			ServicePortAdapter adapterPort = (ServicePortAdapter) servicePorts.get(0);
+			adapterPort.setRoutePort(true);
+			setRoutingPort(adapterPort);
+		} else {
+			setRoutingPort(null);
+		}
+		firePropertyChange(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS, this.servicePorts,
 				this.servicePorts = servicePorts);
 	}
 
@@ -470,9 +458,7 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setReplicas(int replicas) {
-		firePropertyChange(PROPERTY_REPLICAS, 
-				this.replicas, 
-				this.replicas = replicas);
+		firePropertyChange(PROPERTY_REPLICAS, this.replicas, this.replicas = replicas);
 	}
 
 	@Override
@@ -492,22 +478,20 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setAddRoute(boolean addRoute) {
-		firePropertyChange(PROPERTY_ADD_ROUTE, 
-				this.addRoute, 
-				this.addRoute = addRoute);
+		firePropertyChange(PROPERTY_ADD_ROUTE, this.addRoute, this.addRoute = addRoute);
 	}
 
-    @Override
-    public String getRouteHostname() {
-        return routeHostname;
-    }
+	@Override
+	public String getRouteHostname() {
+		return routeHostname;
+	}
 
-    @Override
-    public void setRouteHostname(String routeHostname) {
-        firePropertyChange(PROPERTY_ROUTE_HOSTNAME, this.routeHostname, this.routeHostname = routeHostname);
-    }
+	@Override
+	public void setRouteHostname(String routeHostname) {
+		firePropertyChange(PROPERTY_ROUTE_HOSTNAME, this.routeHostname, this.routeHostname = routeHostname);
+	}
 
-    @Override
+	@Override
 	public List<IServicePort> getServicePorts() {
 		return servicePorts;
 	}
@@ -530,38 +514,35 @@ public class DeployImageWizardModel
 	@Override
 	public void updateEnvironmentVariable(EnvironmentVariable envVar, String key, String value) {
 		envModel.updateEnvironmentVariable(envVar, key, value);
-	}	
+	}
 
 	@Override
 	public void resetEnvironmentVariable(EnvironmentVariable envVar) {
 		envModel.resetEnvironmentVariable(envVar);
 	}
 
-
 	@Override
 	public void addEnvironmentVariable(String key, String value) {
 		envModel.addEnvironmentVariable(key, value);
 	}
-	
-	
 
 	@Override
 	public void addServicePort(IServicePort port) {
-		if(this.servicePorts.contains(port)) {
+		if (this.servicePorts.contains(port)) {
 			return;
 		}
 		List<IServicePort> old = new ArrayList<>(this.servicePorts);
 		this.servicePorts.add(port);
 		firePropertyChange(PROPERTY_SERVICE_PORTS, old, Collections.unmodifiableList(servicePorts));
-		if (port instanceof ServicePortAdapter && ((ServicePortAdapter)port).isRoutePort()) {
-		    setRoutingPort(port);
+		if (port instanceof ServicePortAdapter && ((ServicePortAdapter) port).isRoutePort()) {
+			setRoutingPort(port);
 		}
 	}
-	
+
 	@Override
-	public void updateServicePort(IServicePort source, IServicePort target){
+	public void updateServicePort(IServicePort source, IServicePort target) {
 		final int pos = this.servicePorts.indexOf(source);
-		if(pos > -1) {
+		if (pos > -1) {
 			List<IServicePort> old = new ArrayList<>(this.servicePorts);
 			this.servicePorts.set(pos, target);
 			/**
@@ -575,10 +556,10 @@ public class DeployImageWizardModel
 			String p = target.getTargetPort();
 			target.setTargetPort("dummy");
 			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, pos, old, Collections.unmodifiableList(servicePorts));
-			if (((ServicePortAdapter)target).isRoutePort()) {
-			    setRoutingPort(target);
-			} else if (((ServicePortAdapter)source).isRoutePort() && !((ServicePortAdapter)target).isRoutePort()) {
-			    setRoutingPort(null);
+			if (((ServicePortAdapter) target).isRoutePort()) {
+				setRoutingPort(target);
+			} else if (((ServicePortAdapter) source).isRoutePort() && !((ServicePortAdapter) target).isRoutePort()) {
+				setRoutingPort(null);
 			}
 			target.setTargetPort(p);
 		}
@@ -586,9 +567,7 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setSelectedVolume(String volume) {
-		firePropertyChange(PROPERTY_SELECTED_VOLUME, 
-				this.selectedVolume, 
-				this.selectedVolume = volume);
+		firePropertyChange(PROPERTY_SELECTED_VOLUME, this.selectedVolume, this.selectedVolume = volume);
 	}
 
 	@Override
@@ -606,8 +585,7 @@ public class DeployImageWizardModel
 
 	@Override
 	public void setSelectedServicePort(IServicePort servicePort) {
-		firePropertyChange(PROPERTY_SELECTED_SERVICE_PORT, 
-				this.selectedServicePort, 
+		firePropertyChange(PROPERTY_SELECTED_SERVICE_PORT, this.selectedServicePort,
 				this.selectedServicePort = servicePort);
 	}
 
@@ -619,7 +597,7 @@ public class DeployImageWizardModel
 	@Override
 	public void removeServicePort(IServicePort port) {
 		int index = servicePorts.indexOf(port);
-		if(index > -1) {
+		if (index > -1) {
 			List<IServicePort> old = new ArrayList<>(servicePorts);
 			this.servicePorts.remove(port);
 			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, index, old, Collections.unmodifiableList(servicePorts));
@@ -630,19 +608,17 @@ public class DeployImageWizardModel
 	public void setDockerConnection(IDockerConnection dockerConnection) {
 		firePropertyChange(PROPERTY_DOCKER_CONNECTION, this.dockerConnection, this.dockerConnection = dockerConnection);
 		this.imageNames.clear();
-		if(dockerConnection == null) {
+		if (dockerConnection == null) {
 			return;
 		}
 		final List<IDockerImage> images = dockerConnection.getImages();
-		if(images != null) {
+		if (images != null) {
 			this.imageNames.addAll(dockerConnection.getImages().stream()
 					.filter(image -> !image.isDangling() && !image.isIntermediateImage())
 					.flatMap(image -> image.repoTags().stream()).sorted().collect(Collectors.toList()));
 		}
 	}
 
-	
-	
 	protected IDockerImageMetadata lookupImageMetadata() {
 		if (StringUtils.isBlank(this.imageName)) {
 			return null;
@@ -650,7 +626,7 @@ public class DeployImageWizardModel
 		final DockerImageURI imageURI = new DockerImageURI(this.imageName);
 		final String repo = imageURI.getUriWithoutTag();
 		final String tag = StringUtils.defaultIfBlank(imageURI.getTag(), "latest");
-		
+
 		if (dockerConnection != null && DockerImageUtils.hasImage(dockerConnection, repo, tag)) {
 			final IDockerImageInfo info = dockerConnection.getImageInfo(this.imageName);
 			if (info == null) {
@@ -662,7 +638,7 @@ public class DeployImageWizardModel
 		}
 		return null;
 	}
-	
+
 	@Override
 	public List<String> getImageNames() {
 		return this.imageNames;
@@ -670,35 +646,34 @@ public class DeployImageWizardModel
 
 	@Override
 	public void resetServicePorts() {
-		List<IServicePort> ports = imagePorts.stream().map(sp -> new ServicePortAdapter(sp)).collect(Collectors.toList());
+		List<IServicePort> ports = imagePorts.stream().map(sp -> new ServicePortAdapter(sp))
+				.collect(Collectors.toList());
 		setServicePorts(ports);
 	}
 
-    @Override
-    public void setRoutingPort(IServicePort port) {
-        if (routingPort != null) {
-            ((ServicePortAdapter)routingPort).setRoutePort(false);
-        }
-        firePropertyChange(PROPERTY_ROUTING_PORT, routingPort, this.routingPort = port);
-    }
+	@Override
+	public void setRoutingPort(IServicePort port) {
+		if (routingPort != null) {
+			((ServicePortAdapter) routingPort).setRoutePort(false);
+		}
+		firePropertyChange(PROPERTY_ROUTING_PORT, routingPort, this.routingPort = port);
+	}
 
-    @Override
-    public IServicePort getRoutingPort() {
-        return routingPort;
-    }
+	@Override
+	public IServicePort getRoutingPort() {
+		return routingPort;
+	}
 
-    @Override
+	@Override
 	public Map<String, String> getImageEnvVars() {
 		return envModel.getImageEnvVars();
 	}
 
-    @Override
-    public void changeEvent(IDockerConnection connection, int event) {
-        if ((event == ADD_EVENT) 
-        		|| (event == REMOVE_EVENT)) {
-            firePropertyChange(PROPERTY_DOCKER_CONNECTIONS, 
-            		dockerConnections, 
-            		dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections()));
-        }
-    }
+	@Override
+	public void changeEvent(IDockerConnection connection, int event) {
+		if ((event == ADD_EVENT) || (event == REMOVE_EVENT)) {
+			firePropertyChange(PROPERTY_DOCKER_CONNECTIONS, dockerConnections,
+					dockerConnections = Arrays.asList(DockerConnectionManager.getInstance().getConnections()));
+		}
+	}
 }

@@ -65,10 +65,11 @@ public class OpenShiftProjectCacheTest {
 		registry.clear();
 		registry.add(conn);
 
-		this.model = new OpenshiftUIModel(registry) {};
+		this.model = new OpenshiftUIModel(registry) {
+		};
 		this.connectionWrapper = model.getConnections().iterator().next();
 	}
-	
+
 	@Test
 	public void testGetProjectForOnlyMakesInitialCallToServer() throws InterruptedException, TimeoutException {
 		IOpenShiftConnection connection = connectionWrapper.getWrapped();
@@ -128,7 +129,7 @@ public class OpenShiftProjectCacheTest {
 
 	private void assertAdapters(Collection<IResourceWrapper<?, ?>> adapters) {
 		assertEquals(1, adapters.size());
-		IResourceWrapper<?, ?> r= adapters.iterator().next();
+		IResourceWrapper<?, ?> r = adapters.iterator().next();
 		assertEquals(project, r.getWrapped());
 		assertEquals(conn, r.getParent().getWrapped());
 	}

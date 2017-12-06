@@ -44,7 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DebugLaunchConfigsTest {
-	
+
 	private ILaunchManager launchManager;
 	private DebugLaunchConfigs debugLaunchConfigs;
 
@@ -71,7 +71,7 @@ public class DebugLaunchConfigsTest {
 		debugLaunchConfigs.setupRemoteDebuggerLaunchConfiguration(workingCopy, project, 1234);
 
 		//pretty stoopid test
-		verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,name);
+		verify(workingCopy).setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, name);
 		Map<String, String> connectMap = new HashMap<>();
 		connectMap.put("port", "1234"); //$NON-NLS-1$
 		connectMap.put("hostname", "localhost"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -84,7 +84,7 @@ public class DebugLaunchConfigsTest {
 		ILaunchConfiguration good = mock(ILaunchConfiguration.class);
 		when(good.getName()).thenReturn(name);
 		ILaunchConfiguration bad = mock(ILaunchConfiguration.class);
-		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{bad, good});
+		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[] { bad, good });
 
 		IServer server = mockServer("foo");
 		assertSame(good, debugLaunchConfigs.getRemoteDebuggerLaunchConfiguration(server));
@@ -110,7 +110,7 @@ public class DebugLaunchConfigsTest {
 
 		String name = "foo";
 		IServer server = mockServer(name);
-		when(launchConfig.getName()).thenReturn("Remote debugger to "+ name);
+		when(launchConfig.getName()).thenReturn("Remote debugger to " + name);
 
 		ILaunch matchingLaunch1 = mock(ILaunch.class);
 		when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
@@ -122,9 +122,10 @@ public class DebugLaunchConfigsTest {
 		ILaunch otherLaunch1 = mock(ILaunch.class);
 		ILaunch otherLaunch2 = mock(ILaunch.class);
 
-		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{launchConfig});
+		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[] { launchConfig });
 
-		when(launchManager.getLaunches()).thenReturn(new ILaunch[]{otherLaunch1, matchingLaunch1, matchingLaunch2, otherLaunch2});
+		when(launchManager.getLaunches())
+				.thenReturn(new ILaunch[] { otherLaunch1, matchingLaunch1, matchingLaunch2, otherLaunch2 });
 
 		debugLaunchConfigs.terminateRemoteDebugger(server);
 
@@ -140,7 +141,7 @@ public class DebugLaunchConfigsTest {
 		IServer server = mockServer(name);
 
 		ILaunchConfiguration launchConfig = mock(ILaunchConfiguration.class);
-		when(launchConfig.getName()).thenReturn("Remote debugger to "+ name);
+		when(launchConfig.getName()).thenReturn("Remote debugger to " + name);
 
 		ILaunch matchingLaunch1 = mock(ILaunch.class);
 		when(matchingLaunch1.getLaunchConfiguration()).thenReturn(launchConfig);
@@ -152,9 +153,9 @@ public class DebugLaunchConfigsTest {
 		when(matchingLaunch2.canTerminate()).thenReturn(true);
 		when(matchingLaunch2.getLaunchConfiguration()).thenReturn(launchConfig);
 
-		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[]{launchConfig});
+		when(launchManager.getLaunchConfigurations(any())).thenReturn(new ILaunchConfiguration[] { launchConfig });
 
-		when(launchManager.getLaunches()).thenReturn(new ILaunch[]{matchingLaunch1, matchingLaunch2});
+		when(launchManager.getLaunches()).thenReturn(new ILaunch[] { matchingLaunch1, matchingLaunch2 });
 
 		try {
 			debugLaunchConfigs.terminateRemoteDebugger(server);

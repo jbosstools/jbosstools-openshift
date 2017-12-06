@@ -172,11 +172,9 @@ public class ServerResourceViewModelWithServiceTest {
 
 		Connection connection = ResourceMocks.createConnection("http://localhost:8080", "dev@42.org");
 		IProject project = ResourceMocks.createResource(IProject.class, ResourceKind.PROJECT);
-		when(connection.getResources(ResourceKind.PROJECT))
-				.thenReturn(Collections.singletonList(project));
+		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Collections.singletonList(project));
 		IService service = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE);
-		when(project.getResources(ResourceKind.SERVICE))
-				.thenReturn(Collections.singletonList(service));
+		when(project.getResources(ResourceKind.SERVICE)).thenReturn(Collections.singletonList(service));
 
 		// when
 		model.loadResources(connection);
@@ -196,11 +194,9 @@ public class ServerResourceViewModelWithServiceTest {
 
 		try {
 			IProject project = ResourceMocks.createResource(IProject.class, ResourceKind.PROJECT);
-			when(connection.getResources(ResourceKind.PROJECT))
-					.thenReturn(Collections.singletonList(project));
+			when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Collections.singletonList(project));
 			IService service = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE);
-			when(project.getResources(ResourceKind.SERVICE))
-					.thenReturn(Collections.singletonList(service));
+			when(project.getResources(ResourceKind.SERVICE)).thenReturn(Collections.singletonList(service));
 
 			// when
 			model.loadResources(connection);

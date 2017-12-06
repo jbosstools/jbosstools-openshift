@@ -40,8 +40,8 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 
 	private File cloneDestination;
 
-	public ImportNewProject(String projectName, IApplication application, String remoteName,
-			File cloneDestination, List<IOpenShiftMarker> markers, ExpressConnection connection) {
+	public ImportNewProject(String projectName, IApplication application, String remoteName, File cloneDestination,
+			List<IOpenShiftMarker> markers, ExpressConnection connection) {
 		super(projectName, application, remoteName, markers, connection);
 		this.cloneDestination = cloneDestination;
 	}
@@ -61,18 +61,16 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	 * @throws NoWorkTreeException 
 	 */
 	@Override
-	public IProject execute(IProgressMonitor monitor)
-			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
-			InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
+	public IProject execute(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
+			URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
 		if (cloneDestinationExists()) {
-			throw new WontOverwriteException(
-					NLS.bind("There's already a folder at {0}. The new OpenShift project would overwrite it. " +
-							"Please choose another destination to clone to.",
-							getCloneDestination().getAbsolutePath()));
+			throw new WontOverwriteException(NLS.bind(
+					"There's already a folder at {0}. The new OpenShift project would overwrite it. "
+							+ "Please choose another destination to clone to.",
+					getCloneDestination().getAbsolutePath()));
 		}
 
-		File repositoryFolder =
-				cloneRepository(getApplication(), getRemoteName(), cloneDestination, true, monitor);
+		File repositoryFolder = cloneRepository(getApplication(), getRemoteName(), cloneDestination, true, monitor);
 		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, monitor);
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
 		// TODO: handle multiple projects (is this really possible?)
@@ -84,7 +82,7 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 		//addAndCommitModifiedResource(project, monitor);
 		return getSettingsProject(importedProjects);
 	}
-	
+
 	/**
 	 * Imports the projects that are within the given folder. Supports maven and
 	 * general projects
@@ -123,7 +121,6 @@ public class ImportNewProject extends AbstractImportApplicationOperation {
 	}
 
 	protected boolean cloneDestinationExists() {
-		return cloneDestination != null
-				&& cloneDestination.exists();
+		return cloneDestination != null && cloneDestination.exists();
 	}
 }

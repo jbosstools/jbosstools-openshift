@@ -115,8 +115,7 @@ public class TestUtils {
 	 * @throws Exception
 	 *             if the file can not be created
 	 */
-	public IFile addFileToProject(IProject project, String path, String content)
-			throws Exception {
+	public IFile addFileToProject(IProject project, String path, String content) throws Exception {
 		IPath filePath = new Path(path);
 		IFolder folder = null;
 		for (int i = 0; i < filePath.segmentCount() - 1; i++) {
@@ -129,8 +128,7 @@ public class TestUtils {
 				folder.create(false, true, null);
 		}
 		IFile file = project.getFile(filePath);
-		file.create(new ByteArrayInputStream(content.getBytes(project
-				.getDefaultCharset())), true, null);
+		file.create(new ByteArrayInputStream(content.getBytes(project.getDefaultCharset())), true, null);
 		return file;
 	}
 
@@ -143,10 +141,8 @@ public class TestUtils {
 	 * @return the file
 	 * @throws Exception
 	 */
-	public IFile changeContentOfFile(IProject project, IFile file, String newContent)
-			throws Exception {
-		file.setContents(new ByteArrayInputStream(newContent.getBytes(project
-				.getDefaultCharset())), 0, null);
+	public IFile changeContentOfFile(IProject project, IFile file, String newContent) throws Exception {
+		file.setContents(new ByteArrayInputStream(newContent.getBytes(project.getDefaultCharset())), 0, null);
 		return file;
 	}
 
@@ -160,10 +156,8 @@ public class TestUtils {
 	 * @return the project with a location pointing to the local file system
 	 * @throws Exception
 	 */
-	public IProject createProjectInLocalFileSystem(File parentFile,
-			String projectName) throws Exception {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot()
-				.getProject(projectName);
+	public IProject createProjectInLocalFileSystem(File parentFile, String projectName) throws Exception {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		if (project.exists()) {
 			project.delete(true, null);
 		}
@@ -171,8 +165,7 @@ public class TestUtils {
 		if (testFile.exists())
 			FileUtils.delete(testFile, FileUtils.RECURSIVE | FileUtils.RETRY);
 
-		IProjectDescription desc = ResourcesPlugin.getWorkspace()
-				.newProjectDescription(projectName);
+		IProjectDescription desc = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
 		desc.setLocation(new Path(new File(parentFile, projectName).getPath()));
 		project.create(desc, null);
 		project.open(null);
@@ -294,16 +287,16 @@ public class TestUtils {
 	 * 
 	 * @see #assertRepositoryContainsExactlyFilesWithContent
 	 */
-	public void assertRepositoryContainsFilesWithContent(Repository repository,
-			String... fileContentToubles) throws Exception {
+	public void assertRepositoryContainsFilesWithContent(Repository repository, String... fileContentToubles)
+			throws Exception {
 		HashMap<String, String> expectedfiles = mkmap(fileContentToubles);
-				visitRepository(new Expectation(expectedfiles), repository);
+		visitRepository(new Expectation(expectedfiles), repository);
 	}
-	
+
 	private static class ExactExpectation implements GitRepoVisitor {
-		
+
 		private Map<String, String> expectedFiles;
-		
+
 		ExactExpectation(Map<String, String> expectedFiles) {
 			this.expectedFiles = expectedFiles;
 		}
@@ -314,22 +307,19 @@ public class TestUtils {
 			assertTrue(expectedFiles.containsKey(path));
 			ObjectId objectId = treeWalk.getObjectId(0);
 			byte[] expectedContent = expectedFiles.get(path).getBytes();
-			byte[] repoContent = treeWalk.getObjectReader().open(objectId)
-					.getBytes();
+			byte[] repoContent = treeWalk.getObjectReader().open(objectId).getBytes();
 			if (!Arrays.equals(repoContent, expectedContent)) {
-				fail("File " + path + " has repository content "
-						+ new String(repoContent)
-						+ " instead of expected content "
-						+ new String(expectedContent));
+				fail("File " + path + " has repository content " + new String(repoContent)
+						+ " instead of expected content " + new String(expectedContent));
 			}
-			expectedFiles.remove(path);			
+			expectedFiles.remove(path);
 		}
 	}
-	
+
 	private static class Expectation implements GitRepoVisitor {
-		
+
 		private Map<String, String> expectedFiles;
-		
+
 		Expectation(Map<String, String> expectedFiles) {
 			this.expectedFiles = expectedFiles;
 		}
@@ -340,18 +330,15 @@ public class TestUtils {
 			if (!expectedFiles.containsKey(path)) {
 				return;
 			}
-			
+
 			byte[] expectedContent = expectedFiles.get(path).getBytes();
 			ObjectId objectId = treeWalk.getObjectId(0);
-			byte[] repoContent = 
-					treeWalk.getObjectReader().open(objectId).getBytes();
+			byte[] repoContent = treeWalk.getObjectReader().open(objectId).getBytes();
 			if (!Arrays.equals(repoContent, expectedContent)) {
-				fail("File " + path + " has repository content "
-						+ new String(repoContent)
-						+ " instead of expected content "
-						+ new String(expectedContent));
+				fail("File " + path + " has repository content " + new String(repoContent)
+						+ " instead of expected content " + new String(expectedContent));
 			}
-			expectedFiles.remove(path);			
+			expectedFiles.remove(path);
 		}
 	}
 
@@ -367,7 +354,7 @@ public class TestUtils {
 			visitor.visit(treeWalk);
 		}
 	}
-	
+
 	private static HashMap<String, String> mkmap(String... args) {
 		if ((args.length % 2) > 0)
 			throw new IllegalArgumentException("needs to be filepath/content pairs");

@@ -24,5 +24,5 @@ public class OpenShiftLaunchConfigurationTabGroup extends AbstractLaunchConfigur
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[0];
 		setTabs(tabs);
 	}
-	
+
 }

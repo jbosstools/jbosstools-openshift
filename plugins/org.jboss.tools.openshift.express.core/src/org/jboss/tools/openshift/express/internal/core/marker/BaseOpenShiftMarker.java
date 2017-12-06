@@ -80,12 +80,12 @@ public class BaseOpenShiftMarker implements IOpenShiftMarker {
 
 	private void assertProjectIsOpen(IProject project) throws CoreException {
 		if (!project.exists()) {
-			throw new CoreException(ExpressCoreActivator.statusFactory().errorStatus(NLS.bind("Project {0} does not exist",
-					project.getName())));
+			throw new CoreException(ExpressCoreActivator.statusFactory()
+					.errorStatus(NLS.bind("Project {0} does not exist", project.getName())));
 		}
 		if (!project.isOpen()) {
-			throw new CoreException(ExpressCoreActivator.statusFactory().errorStatus(NLS.bind("Project {0} is not opened",
-					project.getName())));
+			throw new CoreException(ExpressCoreActivator.statusFactory()
+					.errorStatus(NLS.bind("Project {0} is not opened", project.getName())));
 		}
 	}
 
@@ -106,10 +106,7 @@ public class BaseOpenShiftMarker implements IOpenShiftMarker {
 
 	@Override
 	public String toString() {
-		return "BaseOpenShiftMarker ["
-				+ "name=" + name
-				+ ", fileName=" + fileName
-				+ "]";
+		return "BaseOpenShiftMarker [" + "name=" + name + ", fileName=" + fileName + "]";
 	}
 
 	@Override

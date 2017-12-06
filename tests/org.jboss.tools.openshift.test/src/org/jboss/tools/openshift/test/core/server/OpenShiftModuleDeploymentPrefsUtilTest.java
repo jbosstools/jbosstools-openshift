@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.test.core.server;
 
 import static org.mockito.Mockito.when;
@@ -37,8 +37,9 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 	@Test
 	public void testOutputName() throws Exception {
 		// Create server
-		IServer s1 =  OpenShiftServerTestUtils.createOpenshift3Server("example", OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
-		
+		IServer s1 = OpenShiftServerTestUtils.createOpenshift3Server("example",
+				OpenShiftServerBehaviour.PROFILE_OPENSHIFT3);
+
 		// Make a web module 
 		when(module1.getName()).thenReturn("webProject");
 		when(module1.getModuleType()).thenReturn(getWebModuleType());
@@ -46,7 +47,7 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 		OpenShiftModuleDeploymentPrefsUtil2 module1Util = getUtilForModule(module1);
 		String outputNameMatched = module1Util.getOutputNameFromSettings2(s1, module1);
 		assertEquals("ROOT.war", outputNameMatched);
-		
+
 		// Make an ejb module
 		when(module2.getName()).thenReturn("ejbProject");
 		when(module2.getModuleType()).thenReturn(getEjbModuleType());
@@ -63,7 +64,6 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 	private IModuleType getEjbModuleType() {
 		return getModuleType("3.0", "jst.ejb");
 	}
-	
 
 	private IModuleType getModuleType(final String version, final String id) {
 		return new IModuleType() {
@@ -71,19 +71,19 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 			public String getVersion() {
 				return version;
 			}
-			
+
 			@Override
 			public String getName() {
 				return id;
 			}
-			
+
 			@Override
 			public String getId() {
 				return id;
 			}
 		};
 	}
-	
+
 	// Create a utility that 'finds' the module for the project listed on the server
 	private OpenShiftModuleDeploymentPrefsUtil2 getUtilForModule(final IModule m) {
 		OpenShiftModuleDeploymentPrefsUtil2 util = new OpenShiftModuleDeploymentPrefsUtil2() {
@@ -94,7 +94,7 @@ public class OpenShiftModuleDeploymentPrefsUtilTest extends TestCase {
 		};
 		return util;
 	}
-	
+
 	// Just expose the getOutputNameFromSettings method 
 	private static class OpenShiftModuleDeploymentPrefsUtil2 extends OpenShiftModuleDeploymentPrefsUtil {
 		public String getOutputNameFromSettings2(IServerAttributes server, IModule module) {

@@ -17,13 +17,13 @@ import com.openshift.restclient.OpenShiftException;
  * Custom {@link OpenShiftException} raised when the Docker Registry that is accessed is not compatible with the Docker Registry v1 API.
  */
 public class InvalidDockerRegistryException extends OpenShiftException {
-	
+
 	/** Generated Serial Version UID */
 	private static final long serialVersionUID = -3167694006460745225L;
-	
+
 	/** The URI of the Registry that was accessed. */
 	private final String registryURI;
-	
+
 	/**
 	 * Constructor
 	 * @param registryURI the URI of the Registry that was accessed.
@@ -32,7 +32,7 @@ public class InvalidDockerRegistryException extends OpenShiftException {
 		super("Docker Registry at '{}' is incompatible with API v1", registryURI);
 		this.registryURI = registryURI;
 	}
-	
+
 	/**
 	 * @return the URI of the Registry that was accessed.
 	 */

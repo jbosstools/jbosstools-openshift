@@ -34,21 +34,23 @@ import com.openshift.restclient.model.IResource;
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceUtilsIsMatchingTest {
 
-	@Mock private IResource resource;
-	@Mock private ITags capability;
-	
+	@Mock
+	private IResource resource;
+	@Mock
+	private ITags capability;
+
 	@Before
 	public void setUp() throws Exception {
 		when(resource.getName()).thenReturn("the-resource-name-mongo");
 		whenResourceDoesNotSupportITagCapability();
 	}
-	
+
 	@Test
 	public void elementsThatMatchTheNameShouldReturnTrue() {
 		whenResourceSupportsITagCapability();
 		assertTrue(ResourceUtils.isMatching("resource", resource));
 	}
-	
+
 	@Test
 	public void resourcesThatAreNotAnnotatedShouldReturnFalseWhenTheFilterIsNotEmpty() {
 		whenResourceDoesNotSupportITagCapability();
@@ -63,15 +65,15 @@ public class ResourceUtilsIsMatchingTest {
 
 	@Test
 	public void resourcesThatAreAnnotatedWithTheIncludedTagShouldReturnTrue() {
-		when(capability.getTags()).thenReturn(Arrays.asList(new String [] {"foo","foobar","bar"}));
+		when(capability.getTags()).thenReturn(Arrays.asList(new String[] { "foo", "foobar", "bar" }));
 		whenResourceSupportsITagCapability();
-		
+
 		assertTrue(ResourceUtils.isMatching("foobar", resource));
 	}
-	
+
 	@Test
 	public void resourcesThatAreAnnotatedWithTheIncludedTagShouldReturnFalseWhenNotMatched() {
-		when(capability.getTags()).thenReturn(Arrays.asList(new String [] {"foo","foobar","bar"}));
+		when(capability.getTags()).thenReturn(Arrays.asList(new String[] { "foo", "foobar", "bar" }));
 		whenResourceSupportsITagCapability();
 		assertFalse(ResourceUtils.isMatching("abcxyz", resource));
 	}
@@ -89,7 +91,7 @@ public class ResourceUtilsIsMatchingTest {
 
 	@Test
 	public void tagsThatMatchAllElementsShouldReturnTrue() {
-		when(capability.getTags()).thenReturn(Arrays.asList(new String [] {"foo","foobar","bar"}));
+		when(capability.getTags()).thenReturn(Arrays.asList(new String[] { "foo", "foobar", "bar" }));
 		whenResourceSupportsITagCapability();
 
 		assertTrue(ResourceUtils.isMatching("foobar foo", resource));
@@ -97,7 +99,7 @@ public class ResourceUtilsIsMatchingTest {
 
 	@Test
 	public void tagsThatPartiallyMatchAllElementsShouldReturnFalse() {
-		when(capability.getTags()).thenReturn(Arrays.asList(new String [] {"foo","foobar","bar"}));
+		when(capability.getTags()).thenReturn(Arrays.asList(new String[] { "foo", "foobar", "bar" }));
 		whenResourceSupportsITagCapability();
 
 		assertFalse(ResourceUtils.isMatching("foobar baz", resource));
@@ -110,18 +112,19 @@ public class ResourceUtilsIsMatchingTest {
 			@Override
 			public Boolean answer(InvocationOnMock arg0) throws Throwable {
 				@SuppressWarnings("unchecked")
-				CapabilityVisitor<ITags, Boolean> visitor = (CapabilityVisitor<ITags, Boolean>)arg0.getArguments()[0];
+				CapabilityVisitor<ITags, Boolean> visitor = (CapabilityVisitor<ITags, Boolean>) arg0.getArguments()[0];
 				return visitor.visit(capability);
 			}
 		});
 	}
+
 	private void whenResourceDoesNotSupportITagCapability() {
 		@SuppressWarnings("unchecked")
 		CapabilityVisitor<ITags, Boolean> visitor = any(CapabilityVisitor.class);
 		when(resource.accept(visitor, any(Boolean.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock arg0) throws Throwable {
-				Boolean result = (Boolean)arg0.getArguments()[1];
+				Boolean result = (Boolean) arg0.getArguments()[1];
 				return result;
 			}
 		});

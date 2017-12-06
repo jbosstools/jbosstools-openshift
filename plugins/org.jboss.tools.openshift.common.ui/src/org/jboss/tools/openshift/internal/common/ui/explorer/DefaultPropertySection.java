@@ -31,12 +31,10 @@ public class DefaultPropertySection extends AbstractPropertySection {
 		page.createControl(parent);
 	}
 
-	
 	@Override
 	public boolean shouldUseExtraSpace() {
 		return true;
 	}
-	
 
 	@Override
 	public void dispose() {
@@ -51,9 +49,9 @@ public class DefaultPropertySection extends AbstractPropertySection {
 
 	@Override
 	public void refresh() {
-		if(!DisposeUtils.isDisposed(page.getControl())){
+		if (!DisposeUtils.isDisposed(page.getControl())) {
 			page.refresh();
 		}
 	}
-	
+
 }

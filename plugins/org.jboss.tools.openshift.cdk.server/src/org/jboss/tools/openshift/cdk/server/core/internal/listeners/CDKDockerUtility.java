@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
 import org.eclipse.linuxtools.docker.core.DockerConnectionManager;
@@ -24,32 +24,31 @@ public class CDKDockerUtility {
 	public CDKDockerUtility(DockerConnectionManager mgr) {
 		this.mgr = mgr;
 	}
-	
+
 	public CDKDockerUtility() {
 		this(org.eclipse.linuxtools.docker.core.DockerConnectionManager.getInstance());
 	}
-	
+
 	public String getName(IServer server) {
 		return server.getName();
 	}
-	
+
 	public IDockerConnection findDockerConnection(String name) {
 		IDockerConnection[] cons = mgr.getConnections();
-		for( int i = 0; i < cons.length; i++ ) {
-			if( cons[i] != null && cons[i].getName() != null && cons[i].getName().equals(name)) {
+		for (int i = 0; i < cons.length; i++) {
+			if (cons[i] != null && cons[i].getName() != null && cons[i].getName().equals(name)) {
 				return cons[i];
 			}
 		}
 		return null;
 	}
-	
+
 	public boolean dockerConnectionExists(String name) {
 		return findDockerConnection(name) != null;
 	}
-	
+
 	public IDockerConnection buildDockerConnection(String name, ServiceManagerEnvironment adb) throws DockerException {
-		return new DockerConnection.Builder()
-				.name(name).tcpConnection(getSettings(adb));
+		return new DockerConnection.Builder().name(name).tcpConnection(getSettings(adb));
 	}
 
 	private TCPConnectionSettings getSettings(ServiceManagerEnvironment adb) throws DockerException {
@@ -58,7 +57,7 @@ public class CDKDockerUtility {
 		TCPConnectionSettings set = new TCPConnectionSettings(dockerHost, tlsCertPath);
 		return set;
 	}
-	
+
 	/**
 	 * Looks-up the host name and port to connect to Docker.
 	 * @param env the {@link ServiceManagerEnvironment}
@@ -67,7 +66,7 @@ public class CDKDockerUtility {
 	private String getDockerHost(ServiceManagerEnvironment env) {
 		return env.getDockerHost();
 	}
-	
+
 	/**
 	 * Looks-up the path to the client certificates to connect to Docker
 	 * @param env the {@link ServiceManagerEnvironment}
@@ -78,24 +77,26 @@ public class CDKDockerUtility {
 	private String getTlsCertPath(final ServiceManagerEnvironment env) {
 		final String tlsVerifyString = env.getDockerTLSVerify();
 		boolean tlsVerify = tlsVerifyString == null ? false : (Integer.parseInt(tlsVerifyString) != 0);
-		if( tlsVerify ) {
+		if (tlsVerify) {
 			String tlsCertPath = env.getDockerCertPath();
-			if( tlsCertPath != null ) {
+			if (tlsCertPath != null) {
 				tlsCertPath = tlsCertPath.trim();
-				if( tlsCertPath.startsWith("\'") && tlsCertPath.endsWith("\'") && tlsCertPath.length() > 1) {
-					tlsCertPath = tlsCertPath.substring(1, tlsCertPath.length()-1);
+				if (tlsCertPath.startsWith("\'") && tlsCertPath.endsWith("\'") && tlsCertPath.length() > 1) {
+					tlsCertPath = tlsCertPath.substring(1, tlsCertPath.length() - 1);
 				}
 			}
 			return tlsCertPath;
-		}		
+		}
 		return null;
 	}
 
-	public void updateConnection(IDockerConnection dc, String name, ServiceManagerEnvironment adb) throws DockerException {
+	public void updateConnection(IDockerConnection dc, String name, ServiceManagerEnvironment adb)
+			throws DockerException {
 		mgr.updateConnection(dc, name, getSettings(adb));
 	}
-	
-	public IDockerConnection createDockerConnection(IServer server, ServiceManagerEnvironment adb) throws DockerException {
+
+	public IDockerConnection createDockerConnection(IServer server, ServiceManagerEnvironment adb)
+			throws DockerException {
 		IDockerConnection con = buildDockerConnection(server.getName(), adb);
 		mgr.addConnection(con);
 		return con;

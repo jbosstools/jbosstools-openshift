@@ -55,35 +55,23 @@ public class OpenShiftMavenProfile {
 	private static final String ELEMENT_PROFILES = "profiles";
 	private static final String ELEMENT_PROFILE = "profile";
 	private static final String ELEMENT_ID = "id";
-	
-	private static final String OPENSHIFT_WAR_PROFILE =
-			"<profile>\n"
-					+ "<!-- When built in OpenShift the 'openshift' profile will be used when invoking mvn. -->\n"
-					+ "<!-- Use this profile for any OpenShift specific customization your app will need. -->\n"
-					+ "<!-- By default that is to put the resulting archive into the 'deployments' folder. -->\n"
-					+ "<!-- http://maven.apache.org/guides/mini/guide-building-for-different-environments.html -->\n"
-					+ "	<id>openshift</id>\n"
-					+ "	<build>\n"
-					+ "		<finalName>{0}</finalName>\n"
-					+ "		<plugins>\n"
-					+ "			{1}\n"
-					+ "		</plugins>\n"
-					+ "	</build>\n"
-					+ "</profile>\n";
 
-	private static final String MAVEN_WAR_PLUGIN = 
-			"<plugin>\n"
-					+ "       <artifactId>maven-war-plugin</artifactId>\n"
-					+ "       <version>2.4</version>\n"
-					+ "       <configuration>\n"
-					+ "         <outputDirectory>{0}</outputDirectory>\n"
-					+ "         <warName>ROOT</warName>\n"
-					+ "       </configuration>\n"
-					+ "     </plugin>\n";
-	
+	private static final String OPENSHIFT_WAR_PROFILE = "<profile>\n"
+			+ "<!-- When built in OpenShift the 'openshift' profile will be used when invoking mvn. -->\n"
+			+ "<!-- Use this profile for any OpenShift specific customization your app will need. -->\n"
+			+ "<!-- By default that is to put the resulting archive into the 'deployments' folder. -->\n"
+			+ "<!-- http://maven.apache.org/guides/mini/guide-building-for-different-environments.html -->\n"
+			+ "	<id>openshift</id>\n" + "	<build>\n" + "		<finalName>{0}</finalName>\n" + "		<plugins>\n"
+			+ "			{1}\n" + "		</plugins>\n" + "	</build>\n" + "</profile>\n";
+
+	private static final String MAVEN_WAR_PLUGIN = "<plugin>\n" + "       <artifactId>maven-war-plugin</artifactId>\n"
+			+ "       <version>2.4</version>\n" + "       <configuration>\n"
+			+ "         <outputDirectory>{0}</outputDirectory>\n" + "         <warName>ROOT</warName>\n"
+			+ "       </configuration>\n" + "     </plugin>\n";
+
 	private static final String COMMENT_START = "<!--\n ";
 	private static final String COMMENT_STOP = " -->";
-	
+
 	private IFile pomFile;
 	private String pluginId;
 	private Document document;
@@ -153,7 +141,8 @@ public class OpenShiftMavenProfile {
 
 	private Node createOpenShiftProfile(String finalName, String outputDirectory)
 			throws ParserConfigurationException, SAXException, IOException {
-		String openShiftProfile = MessageFormat.format(OPENSHIFT_WAR_PROFILE, finalName, getWarPluginFragment(outputDirectory));
+		String openShiftProfile = MessageFormat.format(OPENSHIFT_WAR_PROFILE, finalName,
+				getWarPluginFragment(outputDirectory));
 		Document document = getDocumentBuilder().parse(new ByteArrayInputStream(openShiftProfile.getBytes()));
 		return document.getDocumentElement();
 	}
@@ -162,11 +151,9 @@ public class OpenShiftMavenProfile {
 		if (!StringUtils.isEmpty(outputDirectory)) {
 			return MessageFormat.format(MAVEN_WAR_PLUGIN, outputDirectory);
 		} else {
-			return new StringBuilder()
-				.append(COMMENT_START)
-				.append(MessageFormat.format(MAVEN_WAR_PLUGIN, "YOUR WAR DESTINATION"))
-				.append(COMMENT_STOP)
-				.toString();
+			return new StringBuilder().append(COMMENT_START)
+					.append(MessageFormat.format(MAVEN_WAR_PLUGIN, "YOUR WAR DESTINATION")).append(COMMENT_STOP)
+					.toString();
 		}
 	}
 
@@ -190,8 +177,7 @@ public class OpenShiftMavenProfile {
 	}
 
 	private boolean exists(IFile file) {
-		return file != null
-				&& file.exists();
+		return file != null && file.exists();
 	}
 
 	private Element getProfilesElement(Document document) {
@@ -230,8 +216,7 @@ public class OpenShiftMavenProfile {
 
 	private Element getFirstElement(String elementName, Document document) {
 		NodeList elements = document.getElementsByTagName(elementName);
-		if (elements != null
-				&& elements.getLength() > 0) {
+		if (elements != null && elements.getLength() > 0) {
 			return (Element) elements.item(0);
 		}
 		return null;
@@ -239,8 +224,7 @@ public class OpenShiftMavenProfile {
 
 	protected Element getFirstElement(String elementName, Element element) {
 		NodeList children = element.getElementsByTagName(elementName);
-		if (children == null
-				|| children.getLength() == 0) {
+		if (children == null || children.getLength() == 0) {
 			return null;
 		}
 		return (Element) children.item(0);
@@ -252,8 +236,7 @@ public class OpenShiftMavenProfile {
 		}
 
 		NodeList children = element.getElementsByTagName(elementName);
-		if (children == null
-				|| children.getLength() == 0) {
+		if (children == null || children.getLength() == 0) {
 			return null;
 		}
 		for (int i = 0; i < children.getLength(); i++) {
@@ -286,7 +269,7 @@ public class OpenShiftMavenProfile {
 		}
 		return documentBuilder;
 	}
-	
+
 	private interface IMatcher {
 		public boolean isMatch(Element element);
 	}
@@ -304,8 +287,7 @@ public class OpenShiftMavenProfile {
 		try {
 			writer = new StringWriter();
 			createTransformer().transform(new DOMSource(getDocument()), new StreamResult(writer));
-			pomFile.setContents(
-					new ByteArrayInputStream(writer.toString().getBytes()), IResource.FORCE, monitor);
+			pomFile.setContents(new ByteArrayInputStream(writer.toString().getBytes()), IResource.FORCE, monitor);
 			return pomFile;
 		} catch (TransformerConfigurationException e) {
 			throw new CoreException(createStatus(e));

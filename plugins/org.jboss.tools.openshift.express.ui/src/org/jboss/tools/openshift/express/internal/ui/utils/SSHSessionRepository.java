@@ -74,8 +74,7 @@ public class SSHSessionRepository extends JschConfigSessionFactory {
 		try {
 			final URIish uri = getSshUri(application);
 			final Session session = cache.get(uri);
-			if (session == null 
-					|| !session.isConnected()) {
+			if (session == null || !session.isConnected()) {
 				final FS fs = FS.DETECTED;
 				if (config == null) {
 					config = OpenSshConfig.get(fs);
@@ -88,12 +87,14 @@ public class SSHSessionRepository extends JschConfigSessionFactory {
 				try {
 					cache.put(uri, createSession(hc, user, host, port, fs));
 				} catch (JSchException e) {
-					throw new OpenShiftSSHOperationException(e, "Could not create SSH session for application ''{0}''", application.getName());
+					throw new OpenShiftSSHOperationException(e, "Could not create SSH session for application ''{0}''",
+							application.getName());
 				}
 			}
 			return cache.get(uri);
 		} catch (URISyntaxException e1) {
-			throw new OpenShiftSSHOperationException(e1, "Could not create SSH Session for application ''{0}''", application.getName());
+			throw new OpenShiftSSHOperationException(e1, "Could not create SSH Session for application ''{0}''",
+					application.getName());
 		}
 	}
 
@@ -104,7 +105,7 @@ public class SSHSessionRepository extends JschConfigSessionFactory {
 		final URIish uri = new URIish().setHost(host).setPort(22).setUser(user);
 		return uri;
 	}
-	
+
 	@Override
 	protected Session createSession(final OpenSshConfig.Host hc, final String user, final String host, final int port,
 			FS fs) throws JSchException {

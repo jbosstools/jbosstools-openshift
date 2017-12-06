@@ -50,13 +50,14 @@ public class EditDefaultRouteHandler extends AbstractHandler {
 			new RouteOpenerJob(service.getWrapped().getNamespace(), shell) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					this.routes = service.getResourcesOfKind(ResourceKind.ROUTE).stream().map(r -> (IRoute)r.getWrapped()).collect(Collectors.toList());
+					this.routes = service.getResourcesOfKind(ResourceKind.ROUTE).stream()
+							.map(r -> (IRoute) r.getWrapped()).collect(Collectors.toList());
 					return Status.OK_STATUS;
 				}
 			}.schedule();
 			return Status.OK_STATUS;
 		}
-		
+
 		final IProject project = UIUtils.getFirstElement(currentSelection, IProject.class);
 		if (project != null) {
 			new RouteOpenerJob(project.getName(), shell) {
@@ -67,10 +68,10 @@ public class EditDefaultRouteHandler extends AbstractHandler {
 				}
 			}.schedule();
 			return Status.OK_STATUS;
-		}		
+		}
 		return Status.OK_STATUS;
 	}
-	
+
 	private abstract class RouteOpenerJob extends UIUpdatingJob {
 		protected List<IRoute> routes;
 		private Shell shell;
@@ -91,7 +92,7 @@ public class EditDefaultRouteHandler extends AbstractHandler {
 			SelectRouteDialog routeDialog = new SelectRouteDialog(routes, shell, selectedRoute != null, selectedRoute);
 			if (routeDialog.open() == Dialog.OK) {
 				selectedRoute = routeDialog.getSelectedRoute();
-				if(routeDialog.isRememberChoice()) {
+				if (routeDialog.isRememberChoice()) {
 					SelectedRoutePreference.instance.setSelectedRoute(routes, selectedRoute);
 				} else {
 					SelectedRoutePreference.instance.removeSelectedRoute(routes);

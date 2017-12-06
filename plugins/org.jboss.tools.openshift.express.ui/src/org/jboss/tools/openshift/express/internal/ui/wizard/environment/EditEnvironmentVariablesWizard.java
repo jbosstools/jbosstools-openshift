@@ -30,7 +30,8 @@ import com.openshift.client.IEnvironmentVariable;
  * @author Martes G Wigglesworth
  * @author Andre Dietisheim
  */
-public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariablesWizard<EditEnvironmentVariablesWizardModel> {
+public class EditEnvironmentVariablesWizard
+		extends AbstractEnvironmentVariablesWizard<EditEnvironmentVariablesWizardModel> {
 
 	public EditEnvironmentVariablesWizard(IApplication application) {
 		super(NLS.bind("Manage Application Environment Variable(s) for application {0}", application.getName()),
@@ -42,20 +43,17 @@ public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariables
 		if (!isSupported()) {
 			return true;
 		}
-		
+
 		IApplication application = getModel().getApplication();
 		try {
-			WizardUtils.runInWizard(new UpdateEnvironmentVariableJob(application, getModel().getVariables()), getContainer());
+			WizardUtils.runInWizard(new UpdateEnvironmentVariableJob(application, getModel().getVariables()),
+					getContainer());
 		} catch (InvocationTargetException e) {
-			Logger.error((application == null ?
-					"Could not edit environment variables"
-					: NLS.bind("Could not edit environment variables for application {0}", application.getName())),
-					e);
+			Logger.error((application == null ? "Could not edit environment variables"
+					: NLS.bind("Could not edit environment variables for application {0}", application.getName())), e);
 		} catch (InterruptedException e) {
-			Logger.error((application == null ?
-					"Could not edit environment variables"
-					: NLS.bind("Could not edit environment variables for application {0}", application.getName())),
-					e);
+			Logger.error((application == null ? "Could not edit environment variables"
+					: NLS.bind("Could not edit environment variables for application {0}", application.getName())), e);
 		}
 		return true;
 	}
@@ -73,7 +71,8 @@ public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariables
 
 		@Override
 		protected IStatus doRun(IProgressMonitor monitor) {
-			EnvironmentVariablesDiff diff = new EnvironmentVariablesDiff(variables, application.getEnvironmentVariables());
+			EnvironmentVariablesDiff diff = new EnvironmentVariablesDiff(variables,
+					application.getEnvironmentVariables());
 			remove(diff.getRemovals(), application);
 			add(diff.getAdditions(), application);
 			update(diff.getUpdates(), application);
@@ -106,23 +105,25 @@ public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariables
 		private List<String> removals = new ArrayList<>();
 		private List<EnvironmentVariableItem> additions = new ArrayList<>();
 		private List<EnvironmentVariableItem> updates = new ArrayList<>();
-		
-		public EnvironmentVariablesDiff(List<EnvironmentVariableItem> editedVariables, Map<String, IEnvironmentVariable> existingVariables) {
+
+		public EnvironmentVariablesDiff(List<EnvironmentVariableItem> editedVariables,
+				Map<String, IEnvironmentVariable> existingVariables) {
 			init(editedVariables, existingVariables);
 		}
 
-		private void init(List<EnvironmentVariableItem> editedVariables, Map<String, IEnvironmentVariable> existingVariables) {
+		private void init(List<EnvironmentVariableItem> editedVariables,
+				Map<String, IEnvironmentVariable> existingVariables) {
 			processAdditionsAndUpdates(editedVariables, existingVariables);
 			processRemovals(editedVariables, existingVariables);
 		}
-		
+
 		private void processAdditionsAndUpdates(List<EnvironmentVariableItem> editedVariables,
 				Map<String, IEnvironmentVariable> existingVariables) {
 			for (EnvironmentVariableItem variable : editedVariables) {
 				IEnvironmentVariable existingVariable = existingVariables.get(variable.getName());
 				if (existingVariable == null) {
 					additions.add(variable);
-				} else if(!equals(existingVariable.getValue(), variable.getValue())) {
+				} else if (!equals(existingVariable.getValue(), variable.getValue())) {
 					updates.add(variable);
 				}
 			}
@@ -153,18 +154,18 @@ public class EditEnvironmentVariablesWizard extends AbstractEnvironmentVariables
 			}
 			return false;
 		}
-		
+
 		public List<EnvironmentVariableItem> getUpdates() {
 			return updates;
 		}
-		
+
 		public List<EnvironmentVariableItem> getAdditions() {
 			return additions;
 		}
-		
+
 		public List<String> getRemovals() {
 			return removals;
 		}
 	}
-	
+
 }

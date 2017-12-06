@@ -28,14 +28,15 @@ public class ConnectionUtils {
 	private ConnectionUtils() {
 		// inhibit instantiation
 	}
-	
-	public static Connection getConnectionByUrl(ConnectionURL connectionUrl, Map<ConnectionURL, Connection> connectionsByUrl) {
+
+	public static Connection getConnectionByUrl(ConnectionURL connectionUrl,
+			Map<ConnectionURL, Connection> connectionsByUrl) {
 		if (connectionUrl == null) {
 			return null;
 		}
 		return connectionsByUrl.get(connectionUrl);
 	}
-	
+
 	/**
 	 * Returns the connection for the given username if it exists. The
 	 * connection must use the default host to match the query by username.
@@ -55,5 +56,5 @@ public class ConnectionUtils {
 			throw new OpenShiftCoreException(NLS.bind("Could not get url for connection {0}", username), e);
 		}
 	}
-	
+
 }

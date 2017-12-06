@@ -25,7 +25,7 @@ import com.openshift.restclient.model.IProject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectViewerComparatorTest {
-	
+
 	private static final int LAST = 1;
 	private static final int FIRST = -1;
 	private static final int EQUAL = 0;
@@ -41,12 +41,12 @@ public class ProjectViewerComparatorTest {
 		when(projectOne.getName()).thenReturn("mmmm");
 		when(projectTwo.getName()).thenReturn("gggg");
 	}
-	
+
 	@Test
 	public void testDefaultProjectShouldAppearFirst() {
 		when(projectOne.getName()).thenReturn("openshift-infra");
 		when(projectTwo.getName()).thenReturn("default");
-		assertTrue(0  < comparator.compare(null, projectOne, projectTwo));
+		assertTrue(0 < comparator.compare(null, projectOne, projectTwo));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class ProjectViewerComparatorTest {
 		assertTrue(0 < comparator.compare(null, projectOne, projectTwo));
 		assertTrue(0 > comparator.compare(null, projectTwo, projectOne));
 	}
-	
+
 	@Test
 	public void testWhenInstanceAreNotProjects() {
 		assertEquals(EQUAL, comparator.compare(null, "first", null));

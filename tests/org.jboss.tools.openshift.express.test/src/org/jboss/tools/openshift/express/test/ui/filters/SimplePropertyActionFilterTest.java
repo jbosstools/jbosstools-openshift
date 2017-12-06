@@ -22,46 +22,45 @@ public class SimplePropertyActionFilterTest {
 
 	private SimplePropertyActionFilter filter = new SimplePropertyActionFilter();
 	private TestType aType = new TestType();
-	
+
 	@Test
 	public void nullTargetShouldReturnFalse() {
 		assertFalse(filter.testAttribute(null, "", ""));
 	}
-	
+
 	@Test
-	public void targetWithoutPropertyShouldReturnFalse(){
+	public void targetWithoutPropertyShouldReturnFalse() {
 		assertFalse(filter.testAttribute(aType, "missingProperty", "anyValue"));
 	}
-	
+
 	@Test
-	public void targetWithMatchingStringPropertyShouldReturnTrue(){
+	public void targetWithMatchingStringPropertyShouldReturnTrue() {
 		assertTrue(filter.testAttribute(aType, "stringType", "aStringType"));
 	}
 
 	@Test
-	public void targetWithNonMatchingStringPropertyShouldReturnFalse(){
+	public void targetWithNonMatchingStringPropertyShouldReturnFalse() {
 		assertFalse(filter.testAttribute(aType, "stringType", "someOtherValue"));
 	}
-	
+
 	@Test
-	public void targetWithMachingEnumPropertyShouldReturnTrue(){
+	public void targetWithMachingEnumPropertyShouldReturnTrue() {
 		assertTrue(filter.testAttribute(aType, "anEnum", "START"));
 	}
 
 	@SuppressWarnings("unused")
 	public class TestType {
-		
-		public String getStringType(){
+
+		public String getStringType() {
 			return "aStringType";
 		}
-		
-		public State getAnEnum(){
+
+		public State getAnEnum() {
 			return State.START;
 		}
 	}
-	
-	public enum State{
-		START,
-		STOP
+
+	public enum State {
+		START, STOP
 	}
 }

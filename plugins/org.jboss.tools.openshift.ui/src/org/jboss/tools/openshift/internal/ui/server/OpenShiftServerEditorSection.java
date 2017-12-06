@@ -94,7 +94,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	private SelectionListener debugPortKeyValSelectionListener;
 	private SelectionAdapter useImageDevmodeKeyListener;
 	private Button useImageDevmodeKeyButton;
-	
+
 	@Override
 	public void init(IEditorSite site, IEditorInput input) {
 		super.init(site, input);
@@ -133,7 +133,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	private Composite createControls(FormToolkit toolkit, Composite parent, DataBindingContext dbc) {
 		Composite container = new Composite(parent, SWT.NONE);
 		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(container);
-		
+
 		createConnectionContols(container, dbc);
 		createEclipseProjectControls(toolkit, container, dbc);
 		createOpenShiftApplicationControls(toolkit, container, dbc);
@@ -146,10 +146,10 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 	private void createConnectionContols(Composite parent, DataBindingContext dbc) {
 		Label connectionLabel = new Label(parent, SWT.NONE);
 		connectionLabel.setText("Connection:");
-		
+
 		Composite comboHolder = new Composite(parent, SWT.NONE);
 		comboHolder.setLayout(new FillLayout());
-		GridData holderData = GridDataFactory.fillDefaults().grab(true,  false).create();
+		GridData holderData = GridDataFactory.fillDefaults().grab(true, false).create();
 		holderData.widthHint = 300;
 		comboHolder.setLayoutData(holderData);
 		currentConnectionText = new Text(comboHolder, SWT.SINGLE | SWT.BORDER);
@@ -157,12 +157,11 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		currentConnectionText.setEditable(false);
 	}
 
-
 	protected void createEclipseProjectControls(FormToolkit toolkit, Composite parent, DataBindingContext dbc) {
 		Composite container = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().span(3,1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(container);
+		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(container);
-		
+
 		FormText title = toolkit.createFormText(container, false);
 		title.setText("<b>Eclipse Project Source (From)</b>", true, false);
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(title);
@@ -179,7 +178,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(projectLabel);
 
 		projectText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, true).applyTo(projectText);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, true).applyTo(projectText);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -189,15 +188,15 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(sourcePathLabel);
 
 		sourcePathText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().span(2,1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(sourcePathText);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(sourcePathText);
 		new Label(parent, SWT.NONE);
 	}
 
 	private void createOpenShiftApplicationControls(FormToolkit toolkit, Composite parent, DataBindingContext dbc) {
 		Composite container = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().span(3,1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(container);
+		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(container);
-		
+
 		FormText title = toolkit.createFormText(container, false);
 		title.setText("<b>OpenShift Application Destination (To)</b>", true, false);
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(title);
@@ -205,7 +204,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		createResourceControls(container, dbc);
 		createPodPathControls(container, dbc);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void createPodPathControls(Composite parent, DataBindingContext dbc) {
 		Label deployPathLabel = new Label(parent, SWT.NONE);
@@ -213,27 +212,26 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(deployPathLabel);
 
 		deployPathText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults().span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(deployPathText);
-		
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(deployPathText);
+
 		deployPathModifyListener = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				execute(new ServerWorkingCopyPropertyTextCommand(input.getServer(), "Set Deploy Path", deployPathText, 
+				execute(new ServerWorkingCopyPropertyTextCommand(input.getServer(), "Set Deploy Path", deployPathText,
 						deployPathText.getText(), OpenShiftServerUtils.ATTR_POD_PATH, (ModifyListener) this));
 			}
 		};
-		
-		ModifyListener deployPathDecoration = new TextboxDecoratorSupport(deployPathText, 
-				value -> {
-					// TODO validate 
-					if (!(value instanceof String) || StringUtils.isEmpty(value)) {
-						return ValidationStatus.cancel("Please provide a path to deploy to on the pod.");
-					}
-					if (!Path.isValidPosixPath((String)value)) {
-						return ValidationStatus.error("Please provide a valid path to deploy to on the pod");
-					}
-					return Status.OK_STATUS;
-			});
+
+		ModifyListener deployPathDecoration = new TextboxDecoratorSupport(deployPathText, value -> {
+			// TODO validate 
+			if (!(value instanceof String) || StringUtils.isEmpty(value)) {
+				return ValidationStatus.cancel("Please provide a path to deploy to on the pod.");
+			}
+			if (!Path.isValidPosixPath((String) value)) {
+				return ValidationStatus.error("Please provide a valid path to deploy to on the pod");
+			}
+			return Status.OK_STATUS;
+		});
 
 		deployPathText.addModifyListener(deployPathDecoration);
 	}
@@ -243,14 +241,14 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		resourceKindLabel = new Label(parent, SWT.None);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(resourceKindLabel);
 		resourceText = new Text(parent, SWT.BORDER | SWT.READ_ONLY);
-		GridDataFactory.fillDefaults().span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(resourceText);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(resourceText);
 	}
 
 	private void createDebuggingControls(FormToolkit toolkit, Composite parent, DataBindingContext dbc) {
 		Composite container = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults().span(3,1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(container);
+		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(5).applyTo(container);
-		
+
 		FormText title = toolkit.createFormText(container, false);
 		title.setText("<b>Debugging Settings</b>", true, false);
 		GridDataFactory.fillDefaults().span(5, 1).applyTo(title);
@@ -258,8 +256,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		createEnableDebuggingControls(toolkit, container, dbc);
 		createDebuggingPortControls(toolkit, container, dbc);
 	}
-	
-	
+
 	@SuppressWarnings("unchecked")
 	private void createEnableDebuggingControls(FormToolkit toolkit, Composite container, DataBindingContext dbc) {
 		Label enableDevmodeLabel = new Label(container, SWT.None);
@@ -274,32 +271,32 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(keyLabel);
 		devmodeKeyText = new Text(container, SWT.BORDER);
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.CENTER).applyTo(devmodeKeyText);
-		
+
 		devmodeKeyModifyListener = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				execute(new ServerWorkingCopyPropertyTextCommand(input.getServer(), "SetDevmodeKey", devmodeKeyText, 
+				execute(new ServerWorkingCopyPropertyTextCommand(input.getServer(), "SetDevmodeKey", devmodeKeyText,
 						devmodeKeyText.getText(), OpenShiftServerUtils.ATTR_DEVMODE_KEY, (ModifyListener) this));
 			}
 		};
-		
-		ModifyListener devmodeKeyModifyDecoration = new TextboxDecoratorSupport(devmodeKeyText, 
-				value -> {
-					if( !useImageDevmodeKeyButton.getSelection()) {
-						return new OpenShiftIdentifierValidator().validate(devmodeKeyText.getText());
-					}
-					return Status.OK_STATUS;
+
+		ModifyListener devmodeKeyModifyDecoration = new TextboxDecoratorSupport(devmodeKeyText, value -> {
+			if (!useImageDevmodeKeyButton.getSelection()) {
+				return new OpenShiftIdentifierValidator().validate(devmodeKeyText.getText());
+			}
+			return Status.OK_STATUS;
 		});
 		devmodeKeyText.addModifyListener(devmodeKeyModifyDecoration);
-		
+
 		useImageDevmodeKeyListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				execute(new ToggleDebuggingCommand(input.getServer(), useImageDevmodeKeyButton, devmodeKeyText, this, devmodeKeyModifyListener));
+				execute(new ToggleDebuggingCommand(input.getServer(), useImageDevmodeKeyButton, devmodeKeyText, this,
+						devmodeKeyModifyListener));
 			}
 		};
 	}
-	
+
 	private static class ToggleDebuggingCommand extends ServerCommand {
 		private IServerWorkingCopy wc;
 		private Button useImageDevmodeKeyButton;
@@ -308,7 +305,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		private ModifyListener textListener;
 		private boolean preSelected;
 		private String preText;
-		
+
 		public ToggleDebuggingCommand(IServerWorkingCopy server, Button useImageDevmodeKeyButton, Text devmodeKeyText,
 				SelectionListener toggleListener, ModifyListener textListener) {
 			super(server, "Enable Debugging");
@@ -325,15 +322,15 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		public void execute() {
 			useImageDevmodeKeyButton.removeSelectionListener(toggleListener);
 			devmodeKeyText.removeModifyListener(textListener);
-			
-			if( useImageDevmodeKeyButton.getSelection() ) 
-				wc.setAttribute(OpenShiftServerUtils.ATTR_DEVMODE_KEY, (String)null);
+
+			if (useImageDevmodeKeyButton.getSelection())
+				wc.setAttribute(OpenShiftServerUtils.ATTR_DEVMODE_KEY, (String) null);
 			else
 				wc.setAttribute(OpenShiftServerUtils.ATTR_DEVMODE_KEY, "");
-			
+
 			devmodeKeyText.setEnabled(preSelected);
 			devmodeKeyText.setText("");
-			
+
 			useImageDevmodeKeyButton.addSelectionListener(toggleListener);
 			devmodeKeyText.addModifyListener(textListener);
 		}
@@ -349,7 +346,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			useImageDevmodeKeyButton.addSelectionListener(toggleListener);
 			devmodeKeyText.addModifyListener(textListener);
 		}
-		
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -373,21 +370,19 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		debugPortKeyListener = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				execute(new ServerWorkingCopyPropertyTextCommand(input.getServer(), "SetDebugPortKey", debugPortKeyText, 
+				execute(new ServerWorkingCopyPropertyTextCommand(input.getServer(), "SetDebugPortKey", debugPortKeyText,
 						debugPortKeyText.getText(), OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY, (ModifyListener) this));
 			}
 		};
 
-		ModifyListener debugPortKeyDecoration = new TextboxDecoratorSupport(debugPortKeyText, 
-				value -> {
-					if( !useImageDebugPortKeyButton.getSelection()) {
-						return new OpenShiftIdentifierValidator().validate(debugPortKeyText.getText());
-					}
-					return Status.OK_STATUS;
+		ModifyListener debugPortKeyDecoration = new TextboxDecoratorSupport(debugPortKeyText, value -> {
+			if (!useImageDebugPortKeyButton.getSelection()) {
+				return new OpenShiftIdentifierValidator().validate(debugPortKeyText.getText());
+			}
+			return Status.OK_STATUS;
 		});
 		debugPortKeyText.addModifyListener(debugPortKeyDecoration);
 
-		
 		// port value field
 		Label portLabel = new Label(container, SWT.NONE);
 		portLabel.setText("Port:");
@@ -396,27 +391,24 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(debugPortText);
 		debugPortValListener = new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				execute(new ServerWorkingCopyPropertyTextCommand(input.getServer(), "SetDebugPortValue", debugPortText, 
+				execute(new ServerWorkingCopyPropertyTextCommand(input.getServer(), "SetDebugPortValue", debugPortText,
 						debugPortText.getText(), OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE, this));
 			}
-		}; 
-		
-		
-		ModifyListener debugPortValDecoration = new TextboxDecoratorSupport(debugPortText, 
-				value -> {
-					if( !useImageDebugPortKeyButton.getSelection()) {
-						return new NumericValidator("integer", Integer::parseInt, true).validate(debugPortText.getText());
-					}
-					return Status.OK_STATUS;
+		};
+
+		ModifyListener debugPortValDecoration = new TextboxDecoratorSupport(debugPortText, value -> {
+			if (!useImageDebugPortKeyButton.getSelection()) {
+				return new NumericValidator("integer", Integer::parseInt, true).validate(debugPortText.getText());
+			}
+			return Status.OK_STATUS;
 		});
 		debugPortText.addModifyListener(debugPortValDecoration);
 
-		
 		debugPortKeyValSelectionListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				execute(new ToggleDebugKeyValueCommand(server, useImageDebugPortKeyButton, 
-						this, debugPortKeyText, debugPortKeyListener, debugPortText, debugPortValListener));
+				execute(new ToggleDebugKeyValueCommand(server, useImageDebugPortKeyButton, this, debugPortKeyText,
+						debugPortKeyListener, debugPortText, debugPortValListener));
 			}
 		};
 	}
@@ -461,29 +453,29 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		private IServerWorkingCopy wc;
 		private Button useImageDebugPortKeyButton;
 		private SelectionListener toggleListener;
-		
+
 		private Text debugPortKeyText, debugPortText;
 		private ModifyListener keyModifier, valModifier;
-		
+
 		private boolean preSelected;
 		private String preKey, preVal;
-		
-		public ToggleDebugKeyValueCommand(IServerWorkingCopy server, Button useImageDebugPortKeyButton, SelectionListener toggleListener,  
-				Text debugPortKeyText, ModifyListener keyModifier,
-				Text debugPortText, ModifyListener valModifier) {
+
+		public ToggleDebugKeyValueCommand(IServerWorkingCopy server, Button useImageDebugPortKeyButton,
+				SelectionListener toggleListener, Text debugPortKeyText, ModifyListener keyModifier, Text debugPortText,
+				ModifyListener valModifier) {
 			super(server, "Enable Debugging");
 			this.wc = server;
 			this.useImageDebugPortKeyButton = useImageDebugPortKeyButton;
 			this.toggleListener = toggleListener;
-			
+
 			this.debugPortKeyText = debugPortKeyText;
 			this.debugPortText = debugPortText;
 			this.keyModifier = keyModifier;
 			this.valModifier = valModifier;
-			
+
 			this.preSelected = !useImageDebugPortKeyButton.getSelection();
 			this.preKey = debugPortKeyText.getText();
-			this.preVal = debugPortText.getText(); 
+			this.preVal = debugPortText.getText();
 		}
 
 		@Override
@@ -491,20 +483,20 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			useImageDebugPortKeyButton.removeSelectionListener(toggleListener);
 			debugPortKeyText.removeModifyListener(keyModifier);
 			debugPortText.removeModifyListener(valModifier);
-			
-			if( useImageDebugPortKeyButton.getSelection() ) {
-				wc.setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY, (String)null);
-				wc.setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE, (String)null);
+
+			if (useImageDebugPortKeyButton.getSelection()) {
+				wc.setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY, (String) null);
+				wc.setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE, (String) null);
 			} else {
 				wc.setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY, "");
 				wc.setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE, "");
 			}
-			
+
 			debugPortKeyText.setEnabled(preSelected);
 			debugPortText.setEnabled(preSelected);
 			debugPortKeyText.setText("");
 			debugPortText.setText("");
-			
+
 			useImageDebugPortKeyButton.addSelectionListener(toggleListener);
 			debugPortKeyText.addModifyListener(keyModifier);
 			debugPortText.addModifyListener(valModifier);
@@ -515,7 +507,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			useImageDebugPortKeyButton.removeSelectionListener(toggleListener);
 			debugPortKeyText.removeModifyListener(keyModifier);
 			debugPortText.removeModifyListener(valModifier);
-			
+
 			wc.setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY, preKey);
 			wc.setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE, preVal);
 
@@ -524,14 +516,14 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			useImageDebugPortKeyButton.setSelection(preSelected);
 			debugPortKeyText.setText(preKey);
 			debugPortText.setText(preVal);
-			
+
 			useImageDebugPortKeyButton.addSelectionListener(toggleListener);
 			debugPortKeyText.addModifyListener(keyModifier);
 			debugPortText.addModifyListener(valModifier);
 		}
-		
+
 	}
-	
+
 	private class InitialModel {
 		private Connection con;
 		private IProject deployProj;
@@ -539,7 +531,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		private String podPath;
 		private IResource openshiftResource;
 
-		public InitialModel(Connection con, IProject deployProj, String sourcePath, String podPath, IResource openshiftResource) {
+		public InitialModel(Connection con, IProject deployProj, String sourcePath, String podPath,
+				IResource openshiftResource) {
 			this.con = con;
 			this.deployProj = deployProj;
 			this.sourcePath = sourcePath;
@@ -547,9 +540,10 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			this.openshiftResource = openshiftResource;
 		}
 	}
-	
+
 	private class LoadResourcesJob extends Job {
 		private IServerWorkingCopy server;
+
 		public LoadResourcesJob(IServerWorkingCopy server) {
 			super("Loading OpenShift Server Resources...");
 			this.server = server;
@@ -570,12 +564,11 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			return Status.OK_STATUS;
 		}
 	}
-	
-	
+
 	private void setInitialModel(final InitialModel im) {
 		this.initialModel = im;
 	}
-	
+
 	private void loadResources(final Composite container, DataBindingContext dbc) {
 		IServerWorkingCopy server = input.getServer();
 		Cursor busyCursor = new Cursor(container.getDisplay(), SWT.CURSOR_WAIT);
@@ -585,16 +578,14 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				return container.isDisposed();
 			}
 		};
-		new JobChainBuilder(
-				new DisableAllWidgetsJobFixed(true, container, busyCursor, dbc), chainProgressMonitor)
-			.runWhenDone(new LoadResourcesJob(server))
-			.runWhenDone(new DisableAllWidgetsJobFixed(false, container, false, busyCursor, dbc))
-			.runWhenDone(new InitializeWidgetsJob())
-			.schedule();
+		new JobChainBuilder(new DisableAllWidgetsJobFixed(true, container, busyCursor, dbc), chainProgressMonitor)
+				.runWhenDone(new LoadResourcesJob(server))
+				.runWhenDone(new DisableAllWidgetsJobFixed(false, container, false, busyCursor, dbc))
+				.runWhenDone(new InitializeWidgetsJob()).schedule();
 	}
 
 	private class InitializeWidgetsJob extends UIJob {
-		
+
 		public InitializeWidgetsJob() {
 			super(getServerEditor().getEditorSite().getShell().getDisplay(), "Initialize Controls");
 		}
@@ -620,33 +611,35 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		private String nullSafe(String s) {
 			return s == null ? "" : s;
 		}
+
 		private void initializeWidgetValues() {
-			if( initialModel.con != null )
+			if (initialModel.con != null)
 				currentConnectionText.setText(nullSafe(initialModel.con.toString()));
-			
-			if( initialModel.deployProj != null )
+
+			if (initialModel.deployProj != null)
 				projectText.setText(nullSafe(initialModel.deployProj.getName()));
-			
-			if( initialModel.sourcePath != null ) 
+
+			if (initialModel.sourcePath != null)
 				sourcePathText.setText(initialModel.sourcePath);
-			
-			if( initialModel.openshiftResource != null ) {
+
+			if (initialModel.openshiftResource != null) {
 				String kind = nullSafe(initialModel.openshiftResource.getKind()) + ":";
 				resourceKindLabel.setText(kind);
-				String namespaceAndName = nullSafe(initialModel.openshiftResource.getNamespace()) + "/" + 
-										  nullSafe(initialModel.openshiftResource.getName());
+				String namespaceAndName = nullSafe(initialModel.openshiftResource.getNamespace()) + "/"
+						+ nullSafe(initialModel.openshiftResource.getName());
 				resourceText.setText(namespaceAndName);
 			} else {
 				resourceKindLabel.setText("Resource: ");
 				resourceText.setText("<not found>");
 			}
-			
-			if( initialModel.podPath != null )
+
+			if (initialModel.podPath != null)
 				deployPathText.setText(initialModel.podPath);
 
-			String currentKey = input.getServer().getAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY, (String)null);
-			String currentVal = input.getServer().getAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE, (String)null);
-			if( StringUtils.isEmpty(currentKey) && StringUtils.isEmpty(currentVal)) {
+			String currentKey = input.getServer().getAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY, (String) null);
+			String currentVal = input.getServer().getAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE,
+					(String) null);
+			if (StringUtils.isEmpty(currentKey) && StringUtils.isEmpty(currentVal)) {
 				useImageDebugPortKeyButton.setSelection(true);
 				debugPortKeyText.setText("");
 				debugPortText.setText("");
@@ -660,7 +653,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				debugPortText.setEnabled(true);
 			}
 
-			String devModeCurrentVal = input.getServer().getAttribute(OpenShiftServerUtils.ATTR_DEVMODE_KEY, (String) null);
+			String devModeCurrentVal = input.getServer().getAttribute(OpenShiftServerUtils.ATTR_DEVMODE_KEY,
+					(String) null);
 			if (StringUtils.isEmpty(devModeCurrentVal)) {
 				useImageDevmodeKeyButton.setSelection(true);
 			} else {
@@ -670,7 +664,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			devmodeKeyText.setEnabled(!useImageDevmodeKeyButton.getSelection());
 		}
 	}
-	
+
 	private void setupWarningToRestartAdapter(IEditorPart editor) {
 		if (editor == null) {
 			return;
@@ -710,7 +704,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 		}
 		return Status.OK_STATUS;
 	}
-	
+
 	/**
 	 * Replaces WARNING status by an OK Status. This is useful when the given status
 	 * is used to report the save state. warnings upon saving dont prevent saving
@@ -754,9 +748,9 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 
 		@Override
 		public void run() {
-			if(container != null && !container.isDisposed()) {
+			if (container != null && !container.isDisposed()) {
 				super.run();
-				if (dbc != null ) {
+				if (dbc != null) {
 					dbc.updateTargets();
 				}
 			}

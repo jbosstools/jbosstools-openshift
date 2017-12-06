@@ -47,8 +47,7 @@ public class EditResourceLimitsHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IResource resource = UIUtils.getFirstElement(UIUtils.getCurrentSelection(event), IResource.class);
 		RetrieveDCOrRCJob job = new RetrieveDCOrRCJob(resource);
-		new JobChainBuilder(job)
-		.runWhenSuccessfullyDone(new UIJob("Launching Edit Resource Limits Wizard...") {
+		new JobChainBuilder(job).runWhenSuccessfullyDone(new UIJob("Launching Edit Resource Limits Wizard...") {
 
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -59,8 +58,7 @@ public class EditResourceLimitsHandler extends AbstractHandler {
 				editResources(HandlerUtil.getActiveShell(event), dcOrRc, dcOrRc.getName());
 				return Status.OK_STATUS;
 			}
-		})
-		.schedule();
+		}).schedule();
 		return null;
 	}
 
@@ -123,9 +121,10 @@ public class EditResourceLimitsHandler extends AbstractHandler {
 		protected IStatus run(IProgressMonitor monitor) {
 			this.deploymentConfOrReplController = getDeploymentConfigOrReplicationController(resource);
 			if (deploymentConfOrReplController == null) {
-				return OpenShiftUIActivator.statusFactory().errorStatus(NLS.bind(
-						"Could not edit resources {0}: Could not find deployment config or replication controller",
-						resource == null ? "" : resource.getName()));
+				return OpenShiftUIActivator.statusFactory()
+						.errorStatus(NLS.bind(
+								"Could not edit resources {0}: Could not find deployment config or replication controller",
+								resource == null ? "" : resource.getName()));
 			}
 			return Status.OK_STATUS;
 		}
@@ -161,7 +160,7 @@ public class EditResourceLimitsHandler extends AbstractHandler {
 		IReplicationController getDeplConfigOrReplController() {
 			return deploymentConfOrReplController;
 		}
-		
+
 	}
 
 }

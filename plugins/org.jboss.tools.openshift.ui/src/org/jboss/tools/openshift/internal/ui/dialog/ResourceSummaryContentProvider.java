@@ -36,10 +36,10 @@ public class ResourceSummaryContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object[] getElements(Object input) {
-		if(input instanceof Collection<?>) {
+		if (input instanceof Collection<?>) {
 			return ((Collection<?>) input).toArray();
 		}
-		return new Object[] {input};
+		return new Object[] { input };
 	}
 
 	@Override
@@ -51,6 +51,5 @@ public class ResourceSummaryContentProvider implements ITreeContentProvider {
 	public boolean hasChildren(Object node) {
 		return false;
 	}
-
 
 }

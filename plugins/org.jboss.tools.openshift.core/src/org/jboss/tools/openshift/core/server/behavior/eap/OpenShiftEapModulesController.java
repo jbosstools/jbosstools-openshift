@@ -31,13 +31,13 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier implements ISubsystemController {
 
 	@Override
-	protected int getRootModuleState(IServer server, IModule root,
-			String deploymentName, IProgressMonitor monitor) throws Exception {
+	protected int getRootModuleState(IServer server, IModule root, String deploymentName, IProgressMonitor monitor)
+			throws Exception {
 		// do rsync, remote to local, then...
 		syncDown(monitor);
 		return super.getRootModuleState(server, root, deploymentName, monitor);
 	}
-	
+
 	@Override
 	public int changeModuleStateTo(IModule[] module, int state, IProgressMonitor monitor) throws CoreException {
 		syncDown(monitor);
@@ -46,18 +46,17 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 		deleteMarkers(DeploymentMarkerUtils.DO_DEPLOY);
 		return state;
 	}
-	
+
 	private void deleteMarkers(String suffix) throws CoreException {
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		Stream.of(localDeploymentDirectory.listFiles())
-			.filter(p->p.getName().endsWith(suffix))
-			.forEach(p->p.delete());
+		Stream.of(localDeploymentDirectory.listFiles()).filter(p -> p.getName().endsWith(suffix))
+				.forEach(p -> p.delete());
 	}
-	
+
 	private MultiStatus syncDown(IProgressMonitor monitor) throws CoreException {
 		final RSync rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK, 
+		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK,
 				NLS.bind("Could not sync all pods to folder {0}.", localDeploymentDirectory.getAbsolutePath()), null);
 		rsync.syncPodsToDirectory(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		return status;
@@ -67,10 +66,10 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 		// do rsync local to remote
 		final RSync rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK, 
+		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK,
 				NLS.bind("Could not sync folder {0} to all pods.", localDeploymentDirectory.getAbsolutePath()), null);
 		rsync.syncDirectoryToPods(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		return status;
 	}
-	
+
 }

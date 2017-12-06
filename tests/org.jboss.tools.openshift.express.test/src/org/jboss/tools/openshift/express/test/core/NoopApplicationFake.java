@@ -91,15 +91,14 @@ public class NoopApplicationFake implements IApplication {
 	public List<IEmbeddedCartridge> addEmbeddableCartridges(ICartridge... cartridges) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public List<IEmbeddedCartridge> getEmbeddedCartridges() throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean hasEmbeddedCartridge(IEmbeddableCartridge cartridge)
-			throws OpenShiftException {
+	public boolean hasEmbeddedCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -109,14 +108,12 @@ public class NoopApplicationFake implements IApplication {
 	}
 
 	@Override
-	public IEmbeddedCartridge getEmbeddedCartridge(String cartridgeName)
-			throws OpenShiftException {
+	public IEmbeddedCartridge getEmbeddedCartridge(String cartridgeName) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IEmbeddedCartridge getEmbeddedCartridge(IEmbeddableCartridge cartridge) 
-			throws OpenShiftException {
+	public IEmbeddedCartridge getEmbeddedCartridge(IEmbeddableCartridge cartridge) throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -339,7 +336,7 @@ public class NoopApplicationFake implements IApplication {
 
 	@Override
 	public String getDeploymentType() {
-		throw new UnsupportedOperationException();	
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

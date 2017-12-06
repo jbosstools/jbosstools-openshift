@@ -30,20 +30,21 @@ public abstract class UIUpdatingJob extends Job {
 			@Override
 			public void done(IJobChangeEvent event) {
 				new UIJob(getName()) {
-					
+
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						return updateUI(monitor);
 					}
 				}.schedule();
-			}});
+			}
+		});
 	}
-	
+
 	@Override
 	protected abstract IStatus run(IProgressMonitor monitor);
 
 	protected IStatus updateUI(IProgressMonitor monitor) {
 		return Status.OK_STATUS;
 	}
-	
+
 }

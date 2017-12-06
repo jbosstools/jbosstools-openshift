@@ -25,7 +25,7 @@ public class DomainPropertySource implements IPropertySource {
 	private static final String PROPERTY_ID = "ID";
 	private static final String PROPERTY_SUFFIX = "SUFFIX";
 	private static final String PROPERTY_FULLNAME = "FULLNAME";
-	
+
 	private final IDomain domain;
 
 	public DomainPropertySource(IDomain domain) {
@@ -39,8 +39,7 @@ public class DomainPropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] { 
-				new PropertyDescriptor(PROPERTY_ID, "Id"),
+		return new IPropertyDescriptor[] { new PropertyDescriptor(PROPERTY_ID, "Id"),
 				new PropertyDescriptor(PROPERTY_SUFFIX, "Suffix"),
 				new PropertyDescriptor(PROPERTY_FULLNAME, "Full Name") };
 	}

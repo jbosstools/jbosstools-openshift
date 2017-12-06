@@ -18,7 +18,8 @@ import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
  * @author Martes G Wigglesworth
  * @author Andre Dietisheim
  */
-public abstract class AbstractEnvironmentVariablesWizard<MODEL extends AbstractEnvironmentVariablesWizardModel> extends AbstractOpenShiftWizard<MODEL> {
+public abstract class AbstractEnvironmentVariablesWizard<MODEL extends AbstractEnvironmentVariablesWizardModel>
+		extends AbstractOpenShiftWizard<MODEL> {
 
 	private Map<String, String> environmentVarriableValueByKey;
 
@@ -34,7 +35,7 @@ public abstract class AbstractEnvironmentVariablesWizard<MODEL extends AbstractE
 	protected boolean isSupported() {
 		return getModel().isSupported();
 	}
-	
+
 	public Map<String, String> getEnvironmentVariables() {
 		return environmentVarriableValueByKey;
 	}

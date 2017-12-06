@@ -30,10 +30,10 @@ import com.openshift.restclient.model.IResource;
  *
  */
 public class ResourceCreationJobUtils {
-	
+
 	private ResourceCreationJobUtils() {
 	}
-	
+
 	@SuppressWarnings("serial")
 	public static IStatus createErrorStatusForExistingResources(Collection<IResource> resources) {
 		final StringBuilder b = new StringBuilder("\nThe following resource names already exist:\n");
@@ -48,10 +48,10 @@ public class ResourceCreationJobUtils {
 			public String getMessage() {
 				return b.toString();
 			}
-			
+
 		});
 	}
-	
+
 	/*
 	 * MAYBE this should be part of Connection in an exists method?
 	 */
@@ -61,7 +61,7 @@ public class ResourceCreationJobUtils {
 			try {
 				IResource found = connection.refresh(resource);
 				existing.add(found);
-			}catch(OpenShiftException e) {
+			} catch (OpenShiftException e) {
 				//this is expected if the resource is not found
 				//@TODO change to NotFoundException of some kind
 			}

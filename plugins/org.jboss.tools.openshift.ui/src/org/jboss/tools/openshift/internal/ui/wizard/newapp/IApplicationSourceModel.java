@@ -21,7 +21,7 @@ import org.jboss.tools.openshift.internal.ui.job.IResourcesModelJob;
  * @author jeff.cantrill
  *
  */
-public interface IApplicationSourceModel extends PropertyChangeListener{
+public interface IApplicationSourceModel extends PropertyChangeListener {
 
 	IResourcesModelJob createFinishJob();
 }

@@ -19,12 +19,12 @@ import com.openshift.restclient.model.build.IBuildTrigger;
 import com.openshift.restclient.model.build.IImageChangeTrigger;
 
 public class ImageChangePropertySource implements IPropertySource {
-	
+
 	private IImageChangeTrigger trigger;
-	
+
 	public ImageChangePropertySource(List<IBuildTrigger> buildTriggers) {
 		for (IBuildTrigger trigger : buildTriggers) {
-			if(trigger.getType() == BuildTriggerType.imageChange){
+			if (trigger.getType() == BuildTriggerType.imageChange) {
 				this.trigger = (IImageChangeTrigger) trigger;
 				break;
 			}
@@ -38,19 +38,20 @@ public class ImageChangePropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new UneditablePropertyDescriptor("image", "Image"),
-				new UneditablePropertyDescriptor("from", "From"),
-				new UneditablePropertyDescriptor("tag", "Tag")
-		};
+		return new IPropertyDescriptor[] { new UneditablePropertyDescriptor("image", "Image"),
+				new UneditablePropertyDescriptor("from", "From"), new UneditablePropertyDescriptor("tag", "Tag") };
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		if(trigger == null) return null;
-		if("image".equals(id)) return trigger.getImage();
-		if("from".equals(id)) return trigger.getFrom();
-		if("tag".equals(id)) return trigger.getTag();
+		if (trigger == null)
+			return null;
+		if ("image".equals(id))
+			return trigger.getImage();
+		if ("from".equals(id))
+			return trigger.getFrom();
+		if ("tag".equals(id))
+			return trigger.getTag();
 		return null;
 	}
 

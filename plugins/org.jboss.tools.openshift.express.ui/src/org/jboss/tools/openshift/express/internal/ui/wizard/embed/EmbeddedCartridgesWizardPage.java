@@ -59,14 +59,13 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 	private EmbeddedCartridgesWizardPageModel pageModel;
 
 	public EmbeddedCartridgesWizardPage(EmbeddedCartridgesWizardModel wizardModel, IWizard wizard) {
-		this("Embed Cartridges", 
-				NLS.bind("Please select the cartridges to embed into your application {0}",
-						StringUtils.null2emptyString(wizardModel.getApplicationName())),
-				wizardModel, wizard);
+		this("Embed Cartridges", NLS.bind("Please select the cartridges to embed into your application {0}",
+				StringUtils.null2emptyString(wizardModel.getApplicationName())), wizardModel, wizard);
 	}
 
-	protected EmbeddedCartridgesWizardPage(String title, String description, EmbeddedCartridgesWizardModel wizardModel, IWizard wizard) {
-		super(title, description,  "EmbedCartridgePage", wizard);
+	protected EmbeddedCartridgesWizardPage(String title, String description, EmbeddedCartridgesWizardModel wizardModel,
+			IWizard wizard) {
+		super(title, description, "EmbedCartridgePage", wizard);
 		this.pageModel = new EmbeddedCartridgesWizardPageModel(wizardModel);
 	}
 
@@ -76,84 +75,66 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(10, 10).applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).applyTo(parent);
 
 		Composite tableContainer = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 400).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 400)
+				.applyTo(tableContainer);
 		CheckboxTableViewer viewer = createCartridgesTableViewer(tableContainer);
-		
-		viewer.setInput(
-				BeanProperties.list(EmbeddedCartridgesWizardPageModel.PROPERTY_EMBEDDABLE_CARTRIDGES)
-						.observe(pageModel));
+
+		viewer.setInput(BeanProperties.list(EmbeddedCartridgesWizardPageModel.PROPERTY_EMBEDDABLE_CARTRIDGES)
+				.observe(pageModel));
 		// directly bind UI to model so that UI/model are synced (we'd have to update UI with strategy results otherwise)
-		dbc.bindSet(
-				ViewerProperties.checkedElements(ICartridge.class).observe(viewer),
-				BeanProperties.set(
-						EmbeddedCartridgesWizardPageModel.PROPERTY_CHECKED_CARTRIDGES)
-						.observe(pageModel));
+		dbc.bindSet(ViewerProperties.checkedElements(ICartridge.class).observe(viewer),
+				BeanProperties.set(EmbeddedCartridgesWizardPageModel.PROPERTY_CHECKED_CARTRIDGES).observe(pageModel));
 		// strategy has to be attached after the binding, so that the binding
 		// can still add the checked cartridge and the strategy can correct
 		viewer.addCheckStateListener(onCartridgeChecked(pageModel, this));
 
-		IObservableValue selectedCartridgeObservable =
-				BeanProperties.value(EmbeddedCartridgesWizardPageModel.PROPERTY_SELECTED_CARTRIDGE)
-						.observe(pageModel);
-		ValueBindingBuilder
-			.bind(ViewerProperties.singlePostSelection().observe(viewer))
-			.to(selectedCartridgeObservable)
-			.in(dbc);
-		
+		IObservableValue selectedCartridgeObservable = BeanProperties
+				.value(EmbeddedCartridgesWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel);
+		ValueBindingBuilder.bind(ViewerProperties.singlePostSelection().observe(viewer)).to(selectedCartridgeObservable)
+				.in(dbc);
+
 		createButtons(parent, dbc);
 
 		// selected cartridge details
 		Group cartridgeDetailsGroup = new Group(parent, SWT.NONE);
 		cartridgeDetailsGroup.setText(" Selected Cartridge: ");
-		GridDataFactory.fillDefaults()
-				.span(2,1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 140).applyTo(cartridgeDetailsGroup);
-		new CartridgeDetailViews(
-				selectedCartridgeObservable,
-				BeanProperties
-						.value(ApplicationConfigurationWizardPageModel.PROPERTY_CAN_ADDREMOVE_CARTRIDGES)
-						.observe(pageModel),
-				cartridgeDetailsGroup, dbc)
-				.createControls();
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).hint(SWT.DEFAULT, 140)
+				.applyTo(cartridgeDetailsGroup);
+		new CartridgeDetailViews(selectedCartridgeObservable, BeanProperties
+				.value(ApplicationConfigurationWizardPageModel.PROPERTY_CAN_ADDREMOVE_CARTRIDGES).observe(pageModel),
+				cartridgeDetailsGroup, dbc).createControls();
 	}
 
 	protected void createButtons(Composite parent, DataBindingContext dbc) {
 		// uncheck all 
 		Button deselectAllButton = new Button(parent, SWT.PUSH);
 		deselectAllButton.setText("&Deselect All");
-		GridDataFactory.fillDefaults()
-				.hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(deselectAllButton);
+		GridDataFactory.fillDefaults().hint(110, SWT.DEFAULT).align(SWT.FILL, SWT.TOP).applyTo(deselectAllButton);
 		deselectAllButton.addSelectionListener(onDeselectAll());
 	}
 
-	protected ICheckStateListener onCartridgeChecked(EmbeddedCartridgesWizardPageModel pageModel, IWizardPage wizardPage) {
+	protected ICheckStateListener onCartridgeChecked(EmbeddedCartridgesWizardPageModel pageModel,
+			IWizardPage wizardPage) {
 		return new FullfillRequirementsCheckStrategy(pageModel, wizardPage);
 	}
 
 	protected CheckboxTableViewer createCartridgesTableViewer(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
+		Table table = new Table(tableContainer,
+				SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
 		table.setLinesVisible(true);
 		CheckboxTableViewer tableViewer = new CheckboxTableViewer(table);
-		new TableViewerBuilder(tableViewer, tableContainer)
-				.sorter(new EmbeddableCartridgeViewerSorter())
-				.comparer(new EqualityComparer())
-				.contentProvider(new ObservableListContentProvider())
-				.<ICartridge> column("Embeddable Cartridge")
-				.labelProvider(new IColumnLabelProvider<ICartridge>() {
+		new TableViewerBuilder(tableViewer, tableContainer).sorter(new EmbeddableCartridgeViewerSorter())
+				.comparer(new EqualityComparer()).contentProvider(new ObservableListContentProvider())
+				.<ICartridge>column("Embeddable Cartridge").labelProvider(new IColumnLabelProvider<ICartridge>() {
 
 					@Override
 					public String getValue(ICartridge cartridge) {
 						return ExpressResourceLabelUtils.toString(cartridge);
 					}
-				})
-				.weight(1)
-				.buildColumn()
-				.buildViewer();
+				}).weight(1).buildColumn().buildViewer();
 		return tableViewer;
 	}
 
@@ -183,10 +164,8 @@ public class EmbeddedCartridgesWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if(MessageDialog.openQuestion(getShell(), 
-						Messages.DESELECT_ALL_CARTRIDGES_TITLE,
-						Messages.DESELECT_ALL_CARTRIDGES_DESCRIPTION
-					)) {
+				if (MessageDialog.openQuestion(getShell(), Messages.DESELECT_ALL_CARTRIDGES_TITLE,
+						Messages.DESELECT_ALL_CARTRIDGES_DESCRIPTION)) {
 					pageModel.uncheckAll();
 				}
 			}

@@ -70,7 +70,8 @@ public class RestoreSnapshotWizardModel extends ObservablePojo {
 		FileInputStream snapshotFileInputStream = new FileInputStream(new File(getFilepath()));
 		InputStream saveResponse = null;
 		if (isDeploymentSnapshot()) {
-			saveResponse = new ApplicationSSHSession(application, session).restoreDeploymentSnapshot(snapshotFileInputStream, hotDeploy);
+			saveResponse = new ApplicationSSHSession(application, session)
+					.restoreDeploymentSnapshot(snapshotFileInputStream, hotDeploy);
 		} else {
 			saveResponse = new ApplicationSSHSession(application, session).restoreFullSnapshot(snapshotFileInputStream);
 		}
@@ -86,15 +87,15 @@ public class RestoreSnapshotWizardModel extends ObservablePojo {
 	public boolean setHotDeploy(boolean hotDeploy) {
 		return this.hotDeploy = hotDeploy;
 	}
-	
+
 	private void storeSnapshotToPreferences(String filepath, boolean deploymentSnapshot) {
 		if (deploymentSnapshot) {
 			ExpressCorePreferences.INSTANCE.saveDeploymentSnapshot(getApplication(), filepath);
 		} else {
-			ExpressCorePreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);	
+			ExpressCorePreferences.INSTANCE.saveFullSnapshot(getApplication(), filepath);
 		}
 	}
-	
+
 	private String getSnapshotFromPreferences(IApplication application, boolean deploymentSnapshot) {
 		if (deploymentSnapshot) {
 			return ExpressCorePreferences.INSTANCE.getDeploymentSnapshot(application);

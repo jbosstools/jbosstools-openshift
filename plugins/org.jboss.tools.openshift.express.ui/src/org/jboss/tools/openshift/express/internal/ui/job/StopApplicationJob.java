@@ -24,7 +24,8 @@ public class StopApplicationJob extends AbstratApplicationJob {
 	}
 
 	public StopApplicationJob(LoadApplicationJob applicationJob) {
-		super(new ApplicationProvider(applicationJob), NLS.bind("Stopping application {0}", applicationJob.getApplicationName()));
+		super(new ApplicationProvider(applicationJob),
+				NLS.bind("Stopping application {0}", applicationJob.getApplicationName()));
 	}
 
 	@Override
