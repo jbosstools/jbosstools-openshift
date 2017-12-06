@@ -152,7 +152,8 @@ public class NoopDomainFake implements IDomain {
 
 	@Override
 	public IApplication createApplication(String name, IStandaloneCartridge standaloneCartridge, ApplicationScale scale,
-			IGearProfile profile, String initialGitUrl, int timeout, IEmbeddableCartridge... embeddableCartridges) throws OpenShiftException {
+			IGearProfile profile, String initialGitUrl, int timeout, IEmbeddableCartridge... embeddableCartridges)
+			throws OpenShiftException {
 		throw new UnsupportedOperationException();
 	}
 

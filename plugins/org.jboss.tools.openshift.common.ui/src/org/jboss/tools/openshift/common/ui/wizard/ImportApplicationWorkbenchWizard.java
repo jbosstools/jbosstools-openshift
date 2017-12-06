@@ -19,7 +19,7 @@ import org.eclipse.ui.IImportWizard;
  * 
  */
 public class ImportApplicationWorkbenchWizard extends AbstractApplicationWorkbenchWizard implements IImportWizard {
-	
+
 	public ImportApplicationWorkbenchWizard() {
 		super("Import OpenShift Application");
 	}

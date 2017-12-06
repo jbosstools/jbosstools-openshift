@@ -35,7 +35,7 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_GEAR_GROUPS = "gearGroups";
 
 	public static final String PROPERTY_SELECTED_GEAR_GROUPS = "selectedGearGroups";
-	
+
 	private final IApplication application;
 
 	private String filePattern = DEFAULT_FILE_PATTERN;
@@ -50,8 +50,7 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setFilePattern(final String filePattern) {
-		firePropertyChange(
-				PROPERTY_FILE_PATTERN, this.filePattern, this.filePattern = filePattern);
+		firePropertyChange(PROPERTY_FILE_PATTERN, this.filePattern, this.filePattern = filePattern);
 		ExpressCorePreferences.INSTANCE.saveTailFileOptions(application, filePattern);
 	}
 
@@ -87,18 +86,17 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 	public Collection<IGearGroup> getGearGroups() {
 		return gearGroups;
 	}
-	
+
 	/**
 	 * @param gearGroups the gearGroups to set
 	 */
 	public void setGearGroups(final Collection<IGearGroup> gearGroups) {
-		firePropertyChange(
-				PROPERTY_GEAR_GROUPS, this.gearGroups, this.gearGroups = gearGroups);
+		firePropertyChange(PROPERTY_GEAR_GROUPS, this.gearGroups, this.gearGroups = gearGroups);
 		// pre-select gear groups that contain the main (Standalone cartridge)
 		Set<IGearGroup> selectedGearGroups = new HashSet<>();
-		for(IGearGroup gearGroup : gearGroups) {
-			for(ICartridge cartridge : gearGroup.getCartridges()) {
-				if(cartridge instanceof IStandaloneCartridge) {
+		for (IGearGroup gearGroup : gearGroups) {
+			for (ICartridge cartridge : gearGroup.getCartridges()) {
+				if (cartridge instanceof IStandaloneCartridge) {
 					selectedGearGroups.add(gearGroup);
 					continue;
 				}
@@ -113,10 +111,10 @@ public class TailFilesWizardPageModel extends ObservableUIPojo {
 	public Collection<IGearGroup> getSelectedGearGroups() {
 		return this.selectedGearGroups;
 	}
-	
+
 	public void setSelectedGearGroups(final Collection<IGearGroup> selectedGearGroups) {
-		firePropertyChange(
-				PROPERTY_SELECTED_GEAR_GROUPS, this.selectedGearGroups, this.selectedGearGroups = selectedGearGroups);
+		firePropertyChange(PROPERTY_SELECTED_GEAR_GROUPS, this.selectedGearGroups,
+				this.selectedGearGroups = selectedGearGroups);
 	}
 
 	public void selectAllGears() {

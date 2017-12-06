@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.core.preferences;
 
 import java.io.BufferedReader;
@@ -24,7 +24,7 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.osgi.framework.Version;
 
 public class OCBinaryVersionValidator {
-	
+
 	/**
 	 * The regular expression use to match line with version of the oc executable.
 	 * So should be either:
@@ -50,18 +50,17 @@ public class OCBinaryVersionValidator {
 	 *   <li>oc v3.4.0.40</li>
 	 *   </ul>
 	 */
-	private static final Pattern OC_VERSION_LINE_PATTERN = 
-			Pattern.compile("oc[^v]*v(([0-9]{1,2})(\\.[0-9]{1,2})?(\\.[0-9]{1,2})?)([-\\.]([^+]*))?.*");
+	private static final Pattern OC_VERSION_LINE_PATTERN = Pattern
+			.compile("oc[^v]*v(([0-9]{1,2})(\\.[0-9]{1,2})?(\\.[0-9]{1,2})?)([-\\.]([^+]*))?.*");
 
 	private static final Version OC_MINIMUM_VERSION_FOR_RSYNC = Version.parseVersion("1.1.1");
 
 	private String path;
-	
+
 	public OCBinaryVersionValidator(String path) {
 		this.path = path;
 	}
 
-	
 	/**
 	 * Returns the version of the OC binary by running the version command.
 	 * 
@@ -83,47 +82,41 @@ public class OCBinaryVersionValidator {
 		return version.orElse(Version.emptyVersion);
 	}
 
-
-	private Optional<Version> parseVersion(Process process, IProgressMonitor monitor)
-			throws IOException {
-        Optional<Version> version = Optional.empty();
+	private Optional<Version> parseVersion(Process process, IProgressMonitor monitor) throws IOException {
+		Optional<Version> version = Optional.empty();
 		String line = null;
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-		    while (!monitor.isCanceled() && (!version.isPresent()) && ((line = reader.readLine()) != null)) {
-		        version = parseVersion(line);
-		    }
+			while (!monitor.isCanceled() && (!version.isPresent()) && ((line = reader.readLine()) != null)) {
+				version = parseVersion(line);
+			}
 		}
 		return version;
 	}
-	
+
 	public static Optional<Version> parseVersion(String line) {
-		if  (StringUtils.isBlank(line)) {
+		if (StringUtils.isBlank(line)) {
 			return Optional.empty();
 		}
-        Matcher matcher = OC_VERSION_LINE_PATTERN.matcher(line);
-        Version version = null;
-        if (matcher.matches()) {
-        	try {
-        		version = Version.parseVersion(matcher.group(1));
-        		if ((matcher.groupCount() > 1) && version.getQualifier().isEmpty()) {
-        			// Since we are using the OSGi Version class to assist, 
-        			// and an OSGi qualifier must fit (alpha|numeric|-|_)+ format,  
-        			// remove all invalid characters in group6? alpha.1.dumb -> alpha1dumb
-        			String group6 = matcher.group(6);
-        			if( group6 != null ) {
-	        			group6 = group6.replaceAll("[^a-zA-Z0-9_-]", "_");
-	        			version = new Version(
-	        					version.getMajor(),
-	        					version.getMinor(),
-	        					version.getMicro(),
-	        					group6);
-        			}
-        		}
-        	} catch (IllegalArgumentException e) {
-        		OpenShiftCoreActivator.logError(NLS.bind("Could not parse oc version {0}.",line), e);
-        	}
-        }
-        return Optional.ofNullable(version);
+		Matcher matcher = OC_VERSION_LINE_PATTERN.matcher(line);
+		Version version = null;
+		if (matcher.matches()) {
+			try {
+				version = Version.parseVersion(matcher.group(1));
+				if ((matcher.groupCount() > 1) && version.getQualifier().isEmpty()) {
+					// Since we are using the OSGi Version class to assist, 
+					// and an OSGi qualifier must fit (alpha|numeric|-|_)+ format,  
+					// remove all invalid characters in group6? alpha.1.dumb -> alpha1dumb
+					String group6 = matcher.group(6);
+					if (group6 != null) {
+						group6 = group6.replaceAll("[^a-zA-Z0-9_-]", "_");
+						version = new Version(version.getMajor(), version.getMinor(), version.getMicro(), group6);
+					}
+				}
+			} catch (IllegalArgumentException e) {
+				OpenShiftCoreActivator.logError(NLS.bind("Could not parse oc version {0}.", line), e);
+			}
+		}
+		return Optional.ofNullable(version);
 	}
 
 	/**
@@ -136,10 +129,10 @@ public class OCBinaryVersionValidator {
 	 * @see https://github.com/openshift/origin/issues/6109
 	 */
 	public boolean isCompatibleForPublishing(IProgressMonitor monitor) {
-	    return isCompatibleForPublishing(getVersion(monitor));
+		return isCompatibleForPublishing(getVersion(monitor));
 	}
 
 	public static boolean isCompatibleForPublishing(Version version) {
-        return version != null && version.compareTo(OC_MINIMUM_VERSION_FOR_RSYNC) >= 0;
+		return version != null && version.compareTo(OC_MINIMUM_VERSION_FOR_RSYNC) >= 0;
 	}
 }

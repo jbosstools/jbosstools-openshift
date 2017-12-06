@@ -33,7 +33,7 @@ import com.openshift.client.IUser;
 public class FireExpressConnectionsChangedJob extends FireConnectionsChangedJob {
 
 	private LoadApplicationJob job;
-	
+
 	public FireExpressConnectionsChangedJob(LoadApplicationJob job) {
 		super(NLS.bind("Refreshing connection for application {0}", job.getApplicationName()));
 		this.job = job;
@@ -48,7 +48,7 @@ public class FireExpressConnectionsChangedJob extends FireConnectionsChangedJob 
 		super(NLS.bind("Refreshing {0} connections", users.size()));
 		add(createConnections(users));
 	}
-	
+
 	public FireExpressConnectionsChangedJob(ExpressConnection connection) {
 		super(NLS.bind("Refreshing connection {0}", ExpressResourceLabelUtils.toString(connection)));
 		add(connection);
@@ -81,7 +81,7 @@ public class FireExpressConnectionsChangedJob extends FireConnectionsChangedJob 
 		if (users == null) {
 			return connections;
 		}
-		
+
 		for (IUser user : users) {
 			connections.add(createConnection(user));
 		}
@@ -93,8 +93,7 @@ public class FireExpressConnectionsChangedJob extends FireConnectionsChangedJob 
 	}
 
 	private IConnection createConnection(IApplication application) {
-		if (application == null
-				|| application.getDomain() == null) {
+		if (application == null || application.getDomain() == null) {
 			return null;
 		}
 		return createConnection(application.getDomain().getUser());

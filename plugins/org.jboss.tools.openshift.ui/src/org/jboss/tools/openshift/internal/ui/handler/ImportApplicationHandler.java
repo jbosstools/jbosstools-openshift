@@ -51,7 +51,7 @@ public class ImportApplicationHandler extends AbstractHandler {
 		if (buildConfig == null) {
 			IResource resource = UIUtils.getFirstElement(currentSelection, IResource.class);
 			if (resource != null) {
-				project= resource.getProject();
+				project = resource.getProject();
 			}
 			if (project != null) {
 				buildConfigs = project.getResources(ResourceKind.BUILD_CONFIG);
@@ -62,21 +62,20 @@ public class ImportApplicationHandler extends AbstractHandler {
 		}
 		if (project != null) {
 			if (buildConfigs == null || buildConfigs.isEmpty()) {
-				MessageDialog.openWarning(HandlerUtil.getActiveShell(event),NO_BUILD_CONFIG_MSG, NO_BUILD_CONFIG_MSG);
+				MessageDialog.openWarning(HandlerUtil.getActiveShell(event), NO_BUILD_CONFIG_MSG, NO_BUILD_CONFIG_MSG);
 				return OpenShiftUIActivator.statusFactory().cancelStatus(NO_BUILD_CONFIG_MSG);
 			}
 			projectsAndBuildConfigs = Collections.singletonMap(project, buildConfigs);
 		}
-		
-		if(projectsAndBuildConfigs == null) {
+
+		if (projectsAndBuildConfigs == null) {
 			ImportApplicationWizard wizard = new ImportApplicationWizard();
 			Connection connection = UIUtils.getFirstElement(currentSelection, Connection.class);
 			wizard.setConnection(connection);
 			WizardUtils.openWizardDialog(wizard, HandlerUtil.getActiveShell(event));
 		} else {
-			WizardUtils.openWizardDialog(
-				new ImportApplicationWizard(projectsAndBuildConfigs),
-				HandlerUtil.getActiveShell(event));
+			WizardUtils.openWizardDialog(new ImportApplicationWizard(projectsAndBuildConfigs),
+					HandlerUtil.getActiveShell(event));
 		}
 		return Status.OK_STATUS;
 	}

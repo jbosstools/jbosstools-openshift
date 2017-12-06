@@ -20,9 +20,9 @@ import org.eclipse.linuxtools.docker.core.IDockerConnection;
 public class ListDockerImagesWizard extends Wizard {
 
 	private final ListDockerImagesWizardModel model;
-	
+
 	private final ListDockerImagesWizardPage dockerImagesWizardPage;
-	
+
 	/**
 	 * Constructor.
 	 * @param dockerConnection the Docker connection
@@ -39,19 +39,17 @@ public class ListDockerImagesWizard extends Wizard {
 		addPage(this.dockerImagesWizardPage);
 		super.addPages();
 	}
-	
+
 	@Override
 	public boolean performFinish() {
 		return true;
 	}
 
 	public String getSelectedImageName() {
-		if(this.model.getSelectedDockerImage() == null) {
+		if (this.model.getSelectedDockerImage() == null) {
 			return null;
 		}
 		return this.model.getSelectedDockerImage().getRepoName() + ':' + this.model.getSelectedDockerImage().getTag();
 	}
-	
-	
 
 }

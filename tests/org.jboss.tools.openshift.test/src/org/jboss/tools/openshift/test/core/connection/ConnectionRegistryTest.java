@@ -25,7 +25,6 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.junit.Before;
 import org.junit.Test;
 
-
 /**
  * @author Andre Dietisheim
  * @author Jeff Cantrill
@@ -35,42 +34,40 @@ public class ConnectionRegistryTest {
 	private ConnectionsRegistry registry;
 	private IConnection connection;
 	private ConnectionsChange change;
-	
+
 	@Before
 	public void setUp() {
 		this.registry = new ConnectionsRegistry();
 		this.change = new ConnectionsChange(registry);
 		this.connection = new OneConnectionImpl("http://localhost:8081");
 	}
-	
+
 	@Test
-	public void getForAConnectionTypeShouldReturnACollectionOfTheRightType(){
+	public void getForAConnectionTypeShouldReturnACollectionOfTheRightType() {
 		// pre-condition
-		OneConnectionImpl [] ones = new OneConnectionImpl[] { 
-				new OneConnectionImpl("http://localhost:8080"), 
-				new OneConnectionImpl("http://localhost:8081")};
+		OneConnectionImpl[] ones = new OneConnectionImpl[] { new OneConnectionImpl("http://localhost:8080"),
+				new OneConnectionImpl("http://localhost:8081") };
 		registry.addAll(Arrays.asList(ones));
 		registry.add(ones[1]);
-		OtherConnectionImpl [] others = new OtherConnectionImpl[]{ 
-				new OtherConnectionImpl("http://localhost:9080"), 
-				new OtherConnectionImpl("http://localhost:9081")};
+		OtherConnectionImpl[] others = new OtherConnectionImpl[] { new OtherConnectionImpl("http://localhost:9080"),
+				new OtherConnectionImpl("http://localhost:9081") };
 		registry.addAll(Arrays.asList(others));
-		
+
 		// operation
 		Collection<OneConnectionImpl> allOneConnections = registry.getAll(OneConnectionImpl.class);
-		
+
 		// verification
 		assertEqualsNoOrdering(Arrays.<OneConnectionImpl>asList(ones), allOneConnections);
 	}
 
 	private <T extends IConnection> void assertEqualsNoOrdering(Collection<T> allExpected, Collection<T> allActual) {
 		assertEquals(allExpected.size(), allExpected.size());
-		
+
 		for (IConnection expected : allExpected) {
 			assertTrue(allActual.contains(expected));
 		}
 	}
-	
+
 	static class OneConnectionImpl extends ConnectionFake {
 
 		OneConnectionImpl(String host) {
@@ -119,9 +116,9 @@ public class ConnectionRegistryTest {
 
 		// operations
 		registry.add(connection);
-		
+
 		change.waitForNotification();
-		
+
 		// verifications
 		assertTrue(change.isAdditionNotified());
 		assertEquals(connection, change.getConnection());
@@ -135,9 +132,9 @@ public class ConnectionRegistryTest {
 
 		// operations
 		connection.setUsername("foo");
-		
+
 		change.waitForNotification();
-		
+
 		// verifications
 		assertTrue("Exp. a notification to the listener and there was none", change.isChangeNotified());
 		assertEquals(connection, change.getConnection());
@@ -152,7 +149,7 @@ public class ConnectionRegistryTest {
 		change.setCountDown(2);
 		registry.add(connection);
 		registry.remove(connection);
-		
+
 		change.waitForNotification();
 		change.reset();
 
@@ -173,8 +170,7 @@ public class ConnectionRegistryTest {
 		registry.add(connection);
 
 		// verifications
-		assertTrue(recentConnection == null
-				|| !recentConnection.equals(connection));
+		assertTrue(recentConnection == null || !recentConnection.equals(connection));
 		assertEquals(connection, registry.getRecentConnection());
 	}
 
@@ -226,7 +222,7 @@ public class ConnectionRegistryTest {
 
 		// operations
 		registry.remove(connection);
-		
+
 		change.waitForNotification();
 		// verifications
 		assertTrue("Exp. a notification to the listener and there was none", change.isRemovalNotified());

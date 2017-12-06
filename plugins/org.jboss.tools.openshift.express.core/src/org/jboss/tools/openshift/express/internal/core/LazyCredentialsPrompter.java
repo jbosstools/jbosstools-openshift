@@ -17,24 +17,26 @@ import org.jboss.tools.openshift.express.core.ExpressCoreUIIntegration;
  * be initialized after the class that depends upon this on
  */
 public final class LazyCredentialsPrompter implements ICredentialsPrompter {
-	
+
 	private ICredentialsPrompter prompter;
-	
+
 	public LazyCredentialsPrompter(ICredentialsPrompter prompter) {
-		if(prompter instanceof LazyCredentialsPrompter){
-			throw new IllegalArgumentException("Unable to initialize a LazyCredentialsPrompter with instance of the same type");
+		if (prompter instanceof LazyCredentialsPrompter) {
+			throw new IllegalArgumentException(
+					"Unable to initialize a LazyCredentialsPrompter with instance of the same type");
 		}
 		this.prompter = prompter;
 	}
-	
+
 	/**
 	 * Prompt for authentication.
 	 */
 	@Override
 	public final boolean promptAndAuthenticate(IConnection connection, Object context) {
-		if(prompter == null){
+		if (prompter == null) {
 			prompter = ExpressCoreUIIntegration.getDefault().getCredentialPrompter();
-			if(prompter == null) return false;
+			if (prompter == null)
+				return false;
 		}
 		return prompter.promptAndAuthenticate(connection, context);
 	}

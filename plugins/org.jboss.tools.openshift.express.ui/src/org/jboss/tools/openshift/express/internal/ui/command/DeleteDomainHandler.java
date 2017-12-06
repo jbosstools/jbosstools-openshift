@@ -41,7 +41,7 @@ public class DeleteDomainHandler extends AbstractHandler {
 		}
 
 		new DestroyDomainJob(domain, dialog.isForceDelete()).schedule();
-		
+
 		return Status.OK_STATUS;
 	}
 }

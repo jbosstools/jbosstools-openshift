@@ -29,7 +29,8 @@ public class AdvancedConnectionEditorsStackedView extends AbstractStackedDetailV
 	private Collection<IAdvancedConnectionPropertiesEditor> editors;
 
 	@SuppressWarnings("rawtypes")
-	protected AdvancedConnectionEditorsStackedView(IObservableValue detailViewModel, ConnectionWizardPageModel model, Composite parent, DataBindingContext dbc) {
+	protected AdvancedConnectionEditorsStackedView(IObservableValue detailViewModel, ConnectionWizardPageModel model,
+			Composite parent, DataBindingContext dbc) {
 		super(detailViewModel, model, parent, dbc);
 		this.editors = getEditors();
 	}
@@ -38,18 +39,17 @@ public class AdvancedConnectionEditorsStackedView extends AbstractStackedDetailV
 	protected IDetailView[] getDetailViews() {
 		return editors.toArray(new IAdvancedConnectionPropertiesEditor[editors.size()]);
 	}
-	
+
 	private Collection<IAdvancedConnectionPropertiesEditor> getEditors() {
 		return ExtensionUtils.getExtensions(EXTENSION, ATTRIBUTE_CLASS);
 	}
 
 	public void saveChanges(ConnectionWizardPageModel pageModel) {
-		IAdvancedConnectionPropertiesEditor[] ed = editors.toArray(new IAdvancedConnectionPropertiesEditor[editors.size()]);
-		for( int i = 0; i < ed.length; i++ ) {
+		IAdvancedConnectionPropertiesEditor[] ed = editors
+				.toArray(new IAdvancedConnectionPropertiesEditor[editors.size()]);
+		for (int i = 0; i < ed.length; i++) {
 			ed[i].saveChanges(pageModel);
 		}
 	}
-	
-	
 
 }

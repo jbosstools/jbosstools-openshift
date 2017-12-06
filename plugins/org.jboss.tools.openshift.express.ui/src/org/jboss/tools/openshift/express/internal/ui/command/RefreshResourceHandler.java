@@ -64,10 +64,10 @@ public class RefreshResourceHandler extends AbstractHandler {
 			protected IStatus doRun(IProgressMonitor monitor) {
 				try {
 					monitor.beginTask("Loading OpenShift informations...", IProgressMonitor.UNKNOWN);
-					if(element instanceof IConnection) {
-						((IConnection)element).refresh();
+					if (element instanceof IConnection) {
+						((IConnection) element).refresh();
 					} else if (element instanceof IOpenShiftResource) {
-						((IOpenShiftResource)element).refresh();
+						((IOpenShiftResource) element).refresh();
 					}
 				} catch (OpenShiftException e) {
 					ExpressUIActivator.log("Failed to refresh element", e);
@@ -80,8 +80,7 @@ public class RefreshResourceHandler extends AbstractHandler {
 
 		IConnection connection = getConnection(element);
 		if (connection != null) {
-			new JobChainBuilder(job)
-			.runWhenSuccessfullyDone(new FireConnectionsChangedJob(connection)).schedule();
+			new JobChainBuilder(job).runWhenSuccessfullyDone(new FireConnectionsChangedJob(connection)).schedule();
 		} else {
 			job.schedule();
 		}
@@ -90,10 +89,11 @@ public class RefreshResourceHandler extends AbstractHandler {
 	private IConnection getConnection(final Object resource) {
 		IConnection connection = null;
 		if (resource instanceof IConnection) {
-			connection = (IConnection) resource; 
+			connection = (IConnection) resource;
 		} else if (resource instanceof IDomain) {
 			IDomain domain = (IDomain) resource;
-			connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
+			connection = ExpressConnectionUtils.getByResource(domain.getUser(),
+					ConnectionsRegistrySingleton.getInstance());
 		} else if (resource instanceof IApplication) {
 			IApplication application = (IApplication) resource;
 			connection = ExpressConnectionUtils.getByResource(application, ConnectionsRegistrySingleton.getInstance());

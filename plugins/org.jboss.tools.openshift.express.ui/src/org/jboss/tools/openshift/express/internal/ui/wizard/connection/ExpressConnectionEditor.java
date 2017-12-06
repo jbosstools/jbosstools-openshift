@@ -53,86 +53,76 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 	private IObservableValue rememberPasswordObservable;
 	private Button rememberPasswordCheckBox;
 	private Binding rememberPasswordBinding;
-	
+
 	public ExpressConnectionEditor() {
 	}
 
 	@Override
 	public Composite createControls(Composite parent, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
 		Composite composite = setControl(new Composite(parent, SWT.None));
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).spacing(10, 10).applyTo(composite);
 
 		// username
 		Label rhLoginLabel = new Label(composite, SWT.NONE);
 		rhLoginLabel.setText("&Username:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(rhLoginLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(rhLoginLabel);
 		this.usernameText = new Text(composite, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(usernameText);
 		this.usernameObservable = new WritableValue(null, String.class);
 		usernameObservable.addValueChangeListener(changeListener);
-		
+
 		// password
 		Label passwordLabel = new Label(composite, SWT.NONE);
 		passwordLabel.setText("&Password:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(passwordLabel);
 		this.passwordText = new Text(composite, SWT.BORDER | SWT.PASSWORD);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(passwordText);
 		this.passwordObservable = new WritableValue(null, String.class);
 		passwordObservable.addValueChangeListener(changeListener);
-		
+
 		this.rememberPasswordCheckBox = new Button(composite, SWT.CHECK);
 		rememberPasswordCheckBox.setText("&Save password (could trigger secure storage login)");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false).applyTo(rememberPasswordCheckBox);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(2, 1).grab(true, false)
+				.applyTo(rememberPasswordCheckBox);
 		this.rememberPasswordObservable = new WritableValue(null, Boolean.class);
 		rememberPasswordObservable.addValueChangeListener(changeListener);
-		
+
 		return composite;
 	}
 
 	@Override
-	public void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+	public void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel,
+			DataBindingContext dbc) {
 		updateFrom(selectedConnection);
 		bindWidgetsToInternalModel(dbc);
 	}
 
 	private void bindWidgetsToInternalModel(DataBindingContext dbc) {
 		// username
-		this.usernameBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
+		this.usernameBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(usernameText))
 				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("username"))
-				.to(usernameObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				usernameBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+				.validatingAfterConvert(new RequiredStringValidator("username")).to(usernameObservable).in(dbc);
+		ControlDecorationSupport.create(usernameBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
 
 		// password
-		this.passwordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
+		this.passwordBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(passwordText))
 				.converting(new TrimmingStringConverter())
-				.validatingAfterConvert(new RequiredStringValidator("password"))
-				.to(passwordObservable)
-				.in(dbc);
-		ControlDecorationSupport.create(
-				passwordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
-		
+				.validatingAfterConvert(new RequiredStringValidator("password")).to(passwordObservable).in(dbc);
+		ControlDecorationSupport.create(passwordBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
+
 		// remember password
 		this.rememberPasswordBinding = ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox))
-				.to(rememberPasswordObservable)
+				.bind(WidgetProperties.selection().observe(rememberPasswordCheckBox)).to(rememberPasswordObservable)
 				.in(dbc);
-		ControlDecorationSupport.create(
-				rememberPasswordBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		ControlDecorationSupport.create(rememberPasswordBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
 	}
-	
+
 	@Override
-	public void onInVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc) {
+	public void onInVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel,
+			DataBindingContext dbc) {
 		disposeBindings();
 	}
 
@@ -140,7 +130,7 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
 		updateFrom(selectedConnection);
 	}
-	
+
 	private void updateFrom(IObservableValue selectedConnectionObservable) {
 		Object value = selectedConnectionObservable.getValue();
 		if (value instanceof ExpressConnection) {
@@ -172,16 +162,17 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 	}
 
 	@Override
-	protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(ConnectionWizardPageModel pageModel) {
+	protected IConnectionAuthenticationProvider createConnectionAuthenticationProvider(
+			ConnectionWizardPageModel pageModel) {
 		return new ExpressConnectionAuthenticationProvider();
 	}
-	
+
 	private class ExpressConnectionAuthenticationProvider implements IConnectionAuthenticationProvider {
 
 		@Override
 		public IConnection update(IConnection connection) {
 			Assert.isLegal(connection instanceof ExpressConnection);
-			
+
 			final ExpressConnection expressConnection = (ExpressConnection) connection;
 			// might be called from job, switch to display thread to access observables
 			Display.getDefault().syncExec(new Runnable() {
@@ -197,6 +188,6 @@ public class ExpressConnectionEditor extends BaseConnectionEditor {
 
 			return expressConnection;
 		}
-		
+
 	}
 }

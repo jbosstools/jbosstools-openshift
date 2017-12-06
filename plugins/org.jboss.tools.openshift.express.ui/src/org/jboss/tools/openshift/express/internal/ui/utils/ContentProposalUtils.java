@@ -32,8 +32,7 @@ public class ContentProposalUtils {
 	public static ContentProposalAdapter createPreferencesBacked(final Text text, String preferencesKey,
 			String pluginId) {
 		final ControlDecoration decoration = createContenProposalDecoration("History available", text);
-		final StringsPreferenceValue preferencesValues =
-				new StringsPreferenceValue(',', preferencesKey, pluginId);
+		final StringsPreferenceValue preferencesValues = new StringsPreferenceValue(',', preferencesKey, pluginId);
 		ContentProposalAdapter proposalAdapter = createContentProposal(text, preferencesValues.get());
 		text.addFocusListener(new FocusAdapter() {
 
@@ -59,22 +58,20 @@ public class ContentProposalUtils {
 		SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(proposedValues);
 		proposalProvider.setFiltering(true);
 		KeyStroke keyStroke = KeyStroke.getInstance(SWT.CONTROL, ' ');
-		ContentProposalAdapter proposalAdapter =
-				new ContentProposalAdapter(text, new TextContentAdapter(), proposalProvider, keyStroke, null);
+		ContentProposalAdapter proposalAdapter = new ContentProposalAdapter(text, new TextContentAdapter(),
+				proposalProvider, keyStroke, null);
 		proposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
 		return proposalAdapter;
 	}
 
 	public static ControlDecoration createContenProposalDecoration(String tooltip, Control control) {
-		return createDecoration(tooltip, FieldDecorationRegistry.DEC_CONTENT_PROPOSAL, SWT.RIGHT | SWT.TOP,
-				control);
+		return createDecoration(tooltip, FieldDecorationRegistry.DEC_CONTENT_PROPOSAL, SWT.RIGHT | SWT.TOP, control);
 	}
 
 	private static ControlDecoration createDecoration(String text, String fieldDecorationImageKey, int position,
 			Control control) {
 		ControlDecoration decoration = new ControlDecoration(control, position);
-		Image icon = FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(fieldDecorationImageKey).getImage();
+		Image icon = FieldDecorationRegistry.getDefault().getFieldDecoration(fieldDecorationImageKey).getImage();
 		decoration.setImage(icon);
 		decoration.setDescriptionText(text);
 		decoration.setShowHover(true);

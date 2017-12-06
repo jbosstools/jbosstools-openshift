@@ -26,7 +26,6 @@ import org.junit.Test;
 
 import com.openshift.client.IUser;
 
-
 /**
  * @author Andre Dietisheim
  * @author Jeff Cantrill
@@ -35,7 +34,7 @@ public class ExpressConnectionsRegistryTest {
 
 	private ConnectionsRegistry registry;
 	private IConnection connection;
-	
+
 	@Before
 	public void setUp() {
 		this.registry = new ConnectionsRegistry();
@@ -47,8 +46,8 @@ public class ExpressConnectionsRegistryTest {
 		/* connection explicitly using default host */
 		IConnection defaultHostConnection = new ExpressConnectionFake("fakeUser", null);
 		/* connection pointing to default host */
-		IConnection connectionToDefaultHost = 
-				new ExpressConnectionFake("fakeUser", ExpressConnectionUtils.getDefaultHostUrl());
+		IConnection connectionToDefaultHost = new ExpressConnectionFake("fakeUser",
+				ExpressConnectionUtils.getDefaultHostUrl());
 		int numberOfConnections = registry.size();
 
 		// operations
@@ -144,125 +143,125 @@ public class ExpressConnectionsRegistryTest {
 		// verifications
 		assertEquals(connection, queriedConnection);
 	}
-	
-//	@Test
-//	public void shouldLoadDefaultHostConnectionsByUsername()
-//			throws UnsupportedEncodingException {
-//		// pre-conditions
-//		ConnectionsRegistry registry = new ConnectionsRegistry() {
-//
-//			@Override
-//			protected String[] loadPersistedDefaultHosts() {
-//				return new String[] { "adietish@redhat.com" };
-//			}
-//
-//			@Override
-//			protected String[] loadPersistedCustomHosts() {
-//				return new String[] {};
-//			}
-//		};
-//
-//		// operations
-//
-//		// verifications
-//		assertEquals(1, registry.getAll(ExpressConnection.class).size());
-//		ExpressConnection connection = registry.getAll(ExpressConnection.class).iterator().next();
-//		assertTrue(connection.isDefaultHost());
-//		assertEquals(ExpressConnectionUtils.getDefaultHostUrl(), connection.getHost());
-//		assertEquals("adietish@redhat.com", connection.getUsername());
-//	}
-//
-//	@Test
-//	public void shouldSaveDefaultHostConnectionsByUsername()
-//			throws UnsupportedEncodingException {
-//		// pre-conditions
-//		ConnectionsRegistry registry = new ConnectionsRegistry();
-//
-//		// operations
-//		/* custom host */
-//		registry.add(new ExpressConnectionFake("toolsjboss@gmail.com", "http://openshift.local"));
-//		/* default host */
-//		registry.add(new ExpressConnectionFake("adietish@redhat.com"));
-//
-//		// verifications
-//		registry.save();
-//		List<String> defaultHosts = registry.getSavedDefaultHosts();
-//		assertEquals(1, defaultHosts.size());
-//		assertEquals("adietish@redhat.com", defaultHosts.get(0));
-//	}
-//
-//	@Test
-//	public void shouldLoadCustomHostConnectionsByUrl()
-//			throws UnsupportedEncodingException {
-//		// pre-conditions
-//		ConnectionsRegistry registry = new ConnectionsRegistry() {
-//
-//			@Override
-//			protected String[] loadPersistedDefaultHosts() {
-//				return new String[] {};
-//			}
-//
-//			@Override
-//			protected String[] loadPersistedCustomHosts() {
-//				return new String[] { "http://adietish%40redhat.com@openshift.local" };
-//			}
-//		};
-//
-//		// operations
-//
-//		// verifications
-//		assertEquals(1, registry.getAll(ExpressConnection.class).size());
-//		ExpressConnection connection = registry.getAll(ExpressConnection.class).iterator().next();
-//		assertFalse(connection.isDefaultHost());
-//		assertEquals("http://openshift.local", connection.getHost());
-//		assertEquals("adietish@redhat.com", connection.getUsername());
-//	}
-//
-//	@Test
-//	public void shouldSaveCustomHostConnectionsByUrl()
-//			throws UnsupportedEncodingException {
-//		// pre-conditions
-//		ConnectionsRegistry registry = new ConnectionsRegistry();
-//
-//		// operations
-//		/* custom host */
-//		registry.add(new ExpressConnectionFake("toolsjboss@gmail.com",
-//				"http://openshift.local"));
-//		/* default host */
-//		registry.add(new ExpressConnectionFake("adietish@redhat.com"));
-//
-//		// verifications
-//		registry.save();
-//		List<String> customHosts = registry.getSavedCustomHosts();
-//		assertEquals(1, customHosts.size());
-//		assertEquals("http://toolsjboss%40gmail.com@openshift.local", customHosts.get(0));
-//	}
-//
-//	@Test
-//	public void shouldGetConnectionByResource()	throws UnsupportedEncodingException {
-//		// pre-conditions
-//		final String username = "adietisheim";
-//		final String hostUrl = "http://fakeHost";
-//		IUser user = new NoopUserFake() {
-//
-//			@Override
-//			public String getServer() {
-//				return hostUrl;
-//			}
-//
-//			@Override
-//			public String getRhlogin() {
-//				return username;
-//			}
-//
-//		};
-//		ExpressConnection connection = new ExpressConnectionFake(username, hostUrl);
-//		registry.add(connection);
-//
-//		// operations
-//		ExpressConnection queriedConnection = ExpressConnectionUtils.getByResource(user, registry);
-//
-//		// verifications
-//		assertEquals(connection, queriedConnection);
-//	}
+
+	//	@Test
+	//	public void shouldLoadDefaultHostConnectionsByUsername()
+	//			throws UnsupportedEncodingException {
+	//		// pre-conditions
+	//		ConnectionsRegistry registry = new ConnectionsRegistry() {
+	//
+	//			@Override
+	//			protected String[] loadPersistedDefaultHosts() {
+	//				return new String[] { "adietish@redhat.com" };
+	//			}
+	//
+	//			@Override
+	//			protected String[] loadPersistedCustomHosts() {
+	//				return new String[] {};
+	//			}
+	//		};
+	//
+	//		// operations
+	//
+	//		// verifications
+	//		assertEquals(1, registry.getAll(ExpressConnection.class).size());
+	//		ExpressConnection connection = registry.getAll(ExpressConnection.class).iterator().next();
+	//		assertTrue(connection.isDefaultHost());
+	//		assertEquals(ExpressConnectionUtils.getDefaultHostUrl(), connection.getHost());
+	//		assertEquals("adietish@redhat.com", connection.getUsername());
+	//	}
+	//
+	//	@Test
+	//	public void shouldSaveDefaultHostConnectionsByUsername()
+	//			throws UnsupportedEncodingException {
+	//		// pre-conditions
+	//		ConnectionsRegistry registry = new ConnectionsRegistry();
+	//
+	//		// operations
+	//		/* custom host */
+	//		registry.add(new ExpressConnectionFake("toolsjboss@gmail.com", "http://openshift.local"));
+	//		/* default host */
+	//		registry.add(new ExpressConnectionFake("adietish@redhat.com"));
+	//
+	//		// verifications
+	//		registry.save();
+	//		List<String> defaultHosts = registry.getSavedDefaultHosts();
+	//		assertEquals(1, defaultHosts.size());
+	//		assertEquals("adietish@redhat.com", defaultHosts.get(0));
+	//	}
+	//
+	//	@Test
+	//	public void shouldLoadCustomHostConnectionsByUrl()
+	//			throws UnsupportedEncodingException {
+	//		// pre-conditions
+	//		ConnectionsRegistry registry = new ConnectionsRegistry() {
+	//
+	//			@Override
+	//			protected String[] loadPersistedDefaultHosts() {
+	//				return new String[] {};
+	//			}
+	//
+	//			@Override
+	//			protected String[] loadPersistedCustomHosts() {
+	//				return new String[] { "http://adietish%40redhat.com@openshift.local" };
+	//			}
+	//		};
+	//
+	//		// operations
+	//
+	//		// verifications
+	//		assertEquals(1, registry.getAll(ExpressConnection.class).size());
+	//		ExpressConnection connection = registry.getAll(ExpressConnection.class).iterator().next();
+	//		assertFalse(connection.isDefaultHost());
+	//		assertEquals("http://openshift.local", connection.getHost());
+	//		assertEquals("adietish@redhat.com", connection.getUsername());
+	//	}
+	//
+	//	@Test
+	//	public void shouldSaveCustomHostConnectionsByUrl()
+	//			throws UnsupportedEncodingException {
+	//		// pre-conditions
+	//		ConnectionsRegistry registry = new ConnectionsRegistry();
+	//
+	//		// operations
+	//		/* custom host */
+	//		registry.add(new ExpressConnectionFake("toolsjboss@gmail.com",
+	//				"http://openshift.local"));
+	//		/* default host */
+	//		registry.add(new ExpressConnectionFake("adietish@redhat.com"));
+	//
+	//		// verifications
+	//		registry.save();
+	//		List<String> customHosts = registry.getSavedCustomHosts();
+	//		assertEquals(1, customHosts.size());
+	//		assertEquals("http://toolsjboss%40gmail.com@openshift.local", customHosts.get(0));
+	//	}
+	//
+	//	@Test
+	//	public void shouldGetConnectionByResource()	throws UnsupportedEncodingException {
+	//		// pre-conditions
+	//		final String username = "adietisheim";
+	//		final String hostUrl = "http://fakeHost";
+	//		IUser user = new NoopUserFake() {
+	//
+	//			@Override
+	//			public String getServer() {
+	//				return hostUrl;
+	//			}
+	//
+	//			@Override
+	//			public String getRhlogin() {
+	//				return username;
+	//			}
+	//
+	//		};
+	//		ExpressConnection connection = new ExpressConnectionFake(username, hostUrl);
+	//		registry.add(connection);
+	//
+	//		// operations
+	//		ExpressConnection queriedConnection = ExpressConnectionUtils.getByResource(user, registry);
+	//
+	//		// verifications
+	//		assertEquals(connection, queriedConnection);
+	//	}
 }

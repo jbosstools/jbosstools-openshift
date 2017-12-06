@@ -18,5 +18,6 @@ import com.openshift.restclient.model.IResource;
 public interface IOpenshiftServerAdapterProfileDetector {
 
 	String getProfile();
+
 	boolean detect(IConnection connection, IResource resource, IProject eclipseProject);
 }

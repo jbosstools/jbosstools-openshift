@@ -64,46 +64,45 @@ public class ListDockerImagesWizardModel extends ObservablePojo {
 	public List<DockerImageTag> getDockerImages() {
 		return this.dockerImages;
 	}
-	
+
 	public void setDockerImages(final List<IDockerImage> dockerImages) {
 		final List<IDockerImage> topLevelImages = dockerImages.stream()
 				.filter(image -> !image.isDangling() && !image.isIntermediateImage()).collect(Collectors.toList());
 		final List<DockerImageTag> imageTags = new ArrayList<>();
-		for(IDockerImage topLevelImage : topLevelImages) {
+		for (IDockerImage topLevelImage : topLevelImages) {
 			final Map<String, List<String>> repoTags = DockerImageUtils.extractTagsByRepo(topLevelImage.repoTags());
-			for(Entry<String, List<String>> entry : repoTags.entrySet()) {
+			for (Entry<String, List<String>> entry : repoTags.entrySet()) {
 				final String repo = entry.getKey();
 				final List<String> tags = entry.getValue();
-				for(String tag : tags) {
+				for (String tag : tags) {
 					imageTags.add(new DockerImageTag(topLevelImage.id(), repo, tag));
 				}
 			}
 		}
-				
+
 		Collections.sort(imageTags, new Comparator<DockerImageTag>() {
 			@Override
 			public int compare(DockerImageTag image1, DockerImageTag image2) {
 				return image1.getRepoName().compareTo(image2.getRepoName());
 			}
 		});
-		firePropertyChange(DOCKER_IMAGES, this.dockerImages,
-				this.dockerImages = imageTags);
+		firePropertyChange(DOCKER_IMAGES, this.dockerImages, this.dockerImages = imageTags);
 	}
 
 	public DockerImageTag getSelectedDockerImage() {
 		return this.selectedDockerImage;
 	}
-	
+
 	public void setSelectedDockerImage(final DockerImageTag selectedDockerImage) {
 		firePropertyChange(SELECTED_DOCKER_IMAGE, this.selectedDockerImage,
 				this.selectedDockerImage = selectedDockerImage);
 	}
-	
+
 	static class DockerImageTag {
 
 		/** the corresponding image id. */
 		private final String id;
-		
+
 		/** repository name of the image. */
 		private final String repoName;
 
@@ -111,7 +110,8 @@ public class ListDockerImagesWizardModel extends ObservablePojo {
 		private final String tag;
 
 		public DockerImageTag(final String id, final String repoName, final String tag) {
-			this.id = id.startsWith("sha256:") ? id.substring("sha256:".length(), "sha256:".length() + 12) : id.substring(0,  12);
+			this.id = id.startsWith("sha256:") ? id.substring("sha256:".length(), "sha256:".length() + 12)
+					: id.substring(0, 12);
 			this.repoName = repoName;
 			this.tag = tag;
 		}
@@ -136,7 +136,7 @@ public class ListDockerImagesWizardModel extends ObservablePojo {
 		public String getTag() {
 			return tag;
 		}
-		
+
 	}
-	
+
 }

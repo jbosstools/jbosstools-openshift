@@ -15,13 +15,13 @@ package org.jboss.tools.openshift.internal.common.ui;
  *
  */
 public final class OpenShiftCommonUIConstants {
-    /**
-     * Name of the section storing info related to application import
-     */
-    public static final String IMPORT_APPLICATION_DIALOG_SETTINGS_KEY = "ImportApplicationWizard";
-    
-    /**
-     * Name of the key used to stored custom Git repo path
-     */
-    public static final String REPO_PATH_KEY = "repoPath";
+	/**
+	 * Name of the section storing info related to application import
+	 */
+	public static final String IMPORT_APPLICATION_DIALOG_SETTINGS_KEY = "ImportApplicationWizard";
+
+	/**
+	 * Name of the key used to stored custom Git repo path
+	 */
+	public static final String REPO_PATH_KEY = "repoPath";
 }

@@ -12,8 +12,8 @@ import org.jboss.tools.openshift.internal.ui.validator.LabelKeyValidator;
 import org.jboss.tools.openshift.internal.ui.validator.LabelValueValidator;
 import org.junit.Test;
 
-public class LabelValueValidatorTest extends AbstractValidatorTest{
-	
+public class LabelValueValidatorTest extends AbstractValidatorTest {
+
 	public LabelValueValidatorTest() {
 		super(new LabelValueValidator());
 	}
@@ -36,7 +36,7 @@ public class LabelValueValidatorTest extends AbstractValidatorTest{
 	@Test
 	public void valueWithoutSubDomainThatExceedsTheMaxValueShouldBeInvalid() {
 		StringBuilder b = new StringBuilder();
-		for(int i=0; i < LabelKeyValidator.LABEL_MAXLENGTH + 1; i++)
+		for (int i = 0; i < LabelKeyValidator.LABEL_MAXLENGTH + 1; i++)
 			b.append("a");
 		assertFailure(b.toString());
 	}
@@ -50,7 +50,7 @@ public class LabelValueValidatorTest extends AbstractValidatorTest{
 	public void valueWithSlashesShouldBeInValid() {
 		assertFailure("abcd.efg/a23");
 	}
-	
+
 	@Test
 	public void valueWithDotsDashesAndUnderScoresShouldBeValid() {
 		assertPass("abcd.efg_k-123");

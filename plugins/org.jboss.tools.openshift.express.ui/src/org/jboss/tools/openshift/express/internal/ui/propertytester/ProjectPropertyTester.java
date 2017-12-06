@@ -38,8 +38,7 @@ public class ProjectPropertyTester extends PropertyTester {
 	}
 
 	private boolean isIfSharedIsEGit(Object receiver, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof IProject)
-				|| !(expectedValue instanceof Boolean)) {
+		if (!(receiver instanceof IProject) || !(expectedValue instanceof Boolean)) {
 			return false;
 		}
 
@@ -53,8 +52,7 @@ public class ProjectPropertyTester extends PropertyTester {
 	}
 
 	private boolean isInternalRSE(Object receiver, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof IProject)
-				|| !(expectedValue instanceof Boolean)) {
+		if (!(receiver instanceof IProject) || !(expectedValue instanceof Boolean)) {
 			return false;
 		}
 		return ((Boolean) expectedValue).equals(ProjectUtils.isInternalRSE(((IProject) receiver).getName()));

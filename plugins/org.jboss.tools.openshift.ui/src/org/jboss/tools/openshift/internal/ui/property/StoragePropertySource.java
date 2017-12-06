@@ -20,20 +20,18 @@ public class StoragePropertySource extends ResourcePropertySource<IPersistentVol
 	public StoragePropertySource(IPersistentVolumeClaim resource) {
 		super(resource);
 	}
-	
+
 	@Override
 	public IPropertyDescriptor[] getResourcePropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new UneditablePropertyDescriptor(StorageIds.Modes, "Access Modes"),
+		return new IPropertyDescriptor[] { new UneditablePropertyDescriptor(StorageIds.Modes, "Access Modes"),
 				new UneditablePropertyDescriptor(StorageIds.Requested, "Requested Capacity"),
-				new UneditablePropertyDescriptor(StorageIds.Status, "Status")
-		};
+				new UneditablePropertyDescriptor(StorageIds.Status, "Status") };
 	}
-	
+
 	@Override
 	public Object getPropertyValue(Object id) {
 		if (id instanceof StorageIds) {
-			StorageIds stId = (StorageIds)id;
+			StorageIds stId = (StorageIds) id;
 			switch (stId) {
 			case Modes:
 				return String.join(", ", getResource().getAccessModes());
@@ -45,7 +43,7 @@ public class StoragePropertySource extends ResourcePropertySource<IPersistentVol
 		}
 		return super.getPropertyValue(id);
 	}
-	
+
 	private String getStatus() {
 		IPersistentVolumeClaim pvc = getResource();
 		String status = pvc.getStatus();
@@ -55,10 +53,8 @@ public class StoragePropertySource extends ResourcePropertySource<IPersistentVol
 		return status;
 	}
 
-	public static enum StorageIds{
-		Modes,
-		Requested,
-		Status
+	public static enum StorageIds {
+		Modes, Requested, Status
 	}
-	
+
 }

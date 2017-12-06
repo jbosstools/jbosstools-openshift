@@ -56,14 +56,12 @@ public class TableCellMouseAdapter implements MouseListener {
 			return false;
 		}
 		TableItem item = ((Table) event.widget).getItem(pt);
-		return item != null 
-				&& item.getBounds(column) != null
-				&& item.getBounds(column).contains(pt);
+		return item != null && item.getBounds(column) != null && item.getBounds(column).contains(pt);
 	}
 
 	public void mouseUpCell(MouseEvent event) { //intended to be overriden by the extensions
 	}
-	
+
 	public void mouseDownCell(MouseEvent event) { //intended to be overriden by the extensions
 	}
 

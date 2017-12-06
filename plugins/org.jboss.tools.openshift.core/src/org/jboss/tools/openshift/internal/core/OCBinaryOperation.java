@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.internal.core;
 
 import org.eclipse.core.runtime.MultiStatus;
@@ -33,6 +33,7 @@ public abstract class OCBinaryOperation {
 	public void run(final MultiStatus status) {
 		run(null, status);
 	}
+
 	public void run(IConnection connection, final MultiStatus status) {
 		String oldLocation = OpenShiftContext.get().get(IBinaryCapability.OPENSHIFT_BINARY_LOCATION);
 		String location = OCBinary.getInstance().getLocation(connection);
@@ -45,7 +46,7 @@ public abstract class OCBinaryOperation {
 			}
 		}
 	}
-	
+
 	protected abstract void runOCBinary(MultiStatus multiStatus);
 
 }

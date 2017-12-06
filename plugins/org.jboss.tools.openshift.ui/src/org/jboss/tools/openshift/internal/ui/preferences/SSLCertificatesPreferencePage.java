@@ -48,14 +48,14 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 	private CheckboxTableViewer listViewer;
 	private Button remove;
 	private StyledText details;
-	
+
 	public SSLCertificatesPreferencePage() {
 		super(GRID);
 	}
 
 	@Override
 	public void init(IWorkbench workbench) {
-		setPreferenceStore(SSLCertificatesPreference.getInstance().getPreferenceStore());		
+		setPreferenceStore(SSLCertificatesPreference.getInstance().getPreferenceStore());
 		items.addAll(SSLCertificatesPreference.getInstance().getSavedCertificates());
 	}
 
@@ -68,7 +68,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 		GridData dl = new GridData();
 		dl.horizontalSpan = 3;
 		label.setLayoutData(dl);
-		label.setText("Decisions on untrusted SSL certificates, checked ones are accepted.");		
+		label.setText("Decisions on untrusted SSL certificates, checked ones are accepted.");
 
 		this.listViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
@@ -93,14 +93,14 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 		UIUtils.setDefaultButtonWidth(remove);
 		listViewer.addSelectionChangedListener(onListItemSelected());
 		updateRemoveButton();
-		
+
 		Label detailsLabel = new Label(composite, SWT.NONE);
 		GridData d1 = new GridData(GridData.FILL_HORIZONTAL);
 		d1.horizontalIndent = 15;
 		d1.horizontalSpan = 3;
 		detailsLabel.setLayoutData(d1);
 		detailsLabel.setText("Certificate details:");
-		
+
 		this.details = new StyledText(composite, SWT.BORDER | SWT.V_SCROLL | SWT.WRAP);
 		details.setEditable(false);
 		GridData d2 = new GridData(GridData.FILL_HORIZONTAL);
@@ -156,11 +156,12 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 
 	private void updateDetails() {
 		if (!DisposeUtils.isDisposed(listViewer)) {
-			if(listViewer.getSelection().isEmpty()) {
+			if (listViewer.getSelection().isEmpty()) {
 				SSLCertificateUIHelper.INSTANCE.clean(details);
 			} else {
 				IStructuredSelection s = listViewer.getStructuredSelection();
-				SSLCertificateUIHelper.INSTANCE.setTextAndStyle(((HostCertificate) s.getFirstElement()).getCertificate(), details);
+				SSLCertificateUIHelper.INSTANCE
+						.setTextAndStyle(((HostCertificate) s.getFirstElement()).getCertificate(), details);
 			}
 		}
 	}
@@ -174,7 +175,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 	void deleteSelection() {
 		IStructuredSelection s = listViewer.getStructuredSelection();
 		if (!s.isEmpty()) {
-			for (Object item: s.toArray()) {
+			for (Object item : s.toArray()) {
 				items.remove(item);
 			}
 			listViewer.setInput(items);
@@ -211,9 +212,8 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 				return StringUtils.EMPTY;
 			}
 			if (columnIndex == 0) {
-				String issuedToCommonName = 
-						new HumanReadableX509Certificate(certificate.getCertificate())
-							.getIssuedTo(HumanReadableX509Certificate.PRINCIPAL_COMMON_NAME);
+				String issuedToCommonName = new HumanReadableX509Certificate(certificate.getCertificate())
+						.getIssuedTo(HumanReadableX509Certificate.PRINCIPAL_COMMON_NAME);
 				return StringUtils.chomp(issuedToCommonName);
 			} else if (columnIndex == 1) {
 				String issuedBy = new HumanReadableX509Certificate(certificate.getCertificate()).getIssuedTo();
@@ -230,7 +230,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 
 	@Override
 	public boolean performOk() {
-		for (HostCertificate i: items) {
+		for (HostCertificate i : items) {
 			i.setAccepted(listViewer.getChecked(i));
 		}
 		SSLCertificatesPreference.getInstance().save(items);
@@ -239,7 +239,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 
 	@Override
 	protected void performDefaults() {
-		if(listViewer == null || listViewer.getTable() == null || listViewer.getTable().isDisposed()) {
+		if (listViewer == null || listViewer.getTable() == null || listViewer.getTable().isDisposed()) {
 			return;
 		}
 		items.clear();
@@ -250,7 +250,7 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 
 	private void updateChecked() {
 		if (!DisposeUtils.isDisposed(listViewer)) {
-			for (HostCertificate i: items) {
+			for (HostCertificate i : items) {
 				listViewer.setChecked(i, i.isAccepted());
 			}
 		}
@@ -259,10 +259,10 @@ public class SSLCertificatesPreferencePage extends FieldEditorPreferencePage imp
 	@Override
 	public void dispose() {
 		super.dispose();
-		if(listViewer != null) {
+		if (listViewer != null) {
 			listViewer = null;
 		}
-		if(remove != null) {
+		if (remove != null) {
 			remove = null;
 		}
 	}

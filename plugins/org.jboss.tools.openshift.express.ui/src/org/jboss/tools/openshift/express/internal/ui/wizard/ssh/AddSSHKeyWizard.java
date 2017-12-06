@@ -23,7 +23,7 @@ public class AddSSHKeyWizard extends Wizard {
 
 	private ExpressConnection user;
 	private AddSSHKeyWizardPage addSSHKeyWizardPage;
-	
+
 	public AddSSHKeyWizard(ExpressConnection user) {
 		this.user = user;
 		setWindowTitle("Add SSH Key");

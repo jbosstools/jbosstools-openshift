@@ -20,11 +20,11 @@ package org.jboss.tools.openshift.common.core.connection;
 public class NewConnectionMarker extends AbstractConnection {
 
 	private static final NewConnectionMarker INSTANCE = new NewConnectionMarker();
-	
+
 	public static final NewConnectionMarker getInstance() {
 		return INSTANCE;
 	}
-	
+
 	private NewConnectionMarker() {
 		super(null);
 	}
@@ -72,7 +72,7 @@ public class NewConnectionMarker extends AbstractConnection {
 	public String getScheme() {
 		return null;
 	}
-	
+
 	@Override
 	public boolean canConnect() {
 		return false;
@@ -108,7 +108,7 @@ public class NewConnectionMarker extends AbstractConnection {
 	@Override
 	public void enablePromptCredentials(boolean enable) {
 	}
-	
+
 	@Override
 	public boolean isEnablePromptCredentials() {
 		return false;
@@ -118,7 +118,7 @@ public class NewConnectionMarker extends AbstractConnection {
 	public IConnection clone() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void update(IConnection connection) {
 	}

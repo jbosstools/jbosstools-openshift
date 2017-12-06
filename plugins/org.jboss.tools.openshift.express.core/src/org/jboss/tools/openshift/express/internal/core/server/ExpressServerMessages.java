@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.core.server;
 
 import org.eclipse.osgi.util.NLS;
@@ -17,7 +17,7 @@ public class ExpressServerMessages extends NLS {
 
 	static {
 		// load message values from bundle file
-		NLS.initializeMessages(BUNDLE_NAME, ExpressServerMessages.class);		
+		NLS.initializeMessages(BUNDLE_NAME, ExpressServerMessages.class);
 	}
 	public static String publishTitle;
 	public static String commitAndPushMsg;
@@ -25,7 +25,7 @@ public class ExpressServerMessages extends NLS {
 	public static String committedChangesNotPushedYet;
 	public static String cannotModifyModules;
 	public static String shareProjectTitle;
-	public static String shareProjectMessage;	
+	public static String shareProjectMessage;
 	public static String additionNotRequiredModule;
 	public static String publishFailMissingProject;
 	public static String publishFailMissingFolder;

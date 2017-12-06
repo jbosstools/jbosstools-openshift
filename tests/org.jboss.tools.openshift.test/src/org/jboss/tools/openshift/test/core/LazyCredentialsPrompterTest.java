@@ -46,7 +46,6 @@ public class LazyCredentialsPrompterTest {
 	@Mock
 	private ICredentialsPrompter denyingExtensionPrompter;
 
-
 	@Before
 	public void setup() throws MalformedURLException {
 		when(client.getBaseURL()).thenReturn(new URL("https://localhost:8443"));

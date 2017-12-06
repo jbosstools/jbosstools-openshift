@@ -17,7 +17,6 @@ import java.io.InputStreamReader;
 import org.eclipse.jgit.transport.RemoteSession;
 import org.eclipse.ui.console.MessageConsole;
 
-
 /**
  * The underlying 'Tail' worker, that uses an established RemoteSession (with
  * the help of JGit), runs in a dedicated process and displays the outputstream
@@ -63,9 +62,10 @@ public class TailServerLogWorker implements Runnable {
 				console.newMessageStream().println(line);
 			}
 		} catch (Throwable e) {
-			org.jboss.tools.openshift.express.internal.ui.utils.Logger.error(
-					"Error while receiving the remote server adapter log", e);
-			console.newMessageStream().println("Error while receiving the remote server adapter log: " + e.getMessage());
+			org.jboss.tools.openshift.express.internal.ui.utils.Logger
+					.error("Error while receiving the remote server adapter log", e);
+			console.newMessageStream()
+					.println("Error while receiving the remote server adapter log: " + e.getMessage());
 		} finally {
 
 		}

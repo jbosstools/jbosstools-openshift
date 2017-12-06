@@ -48,7 +48,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 
 	private IObservableValue canModifyCartridges;
 
-	public CartridgeDetailViews(IObservableValue detailViewModel, IObservableValue canModifyCartridges, 	
+	public CartridgeDetailViews(IObservableValue detailViewModel, IObservableValue canModifyCartridges,
 			Composite parent, DataBindingContext dbc) {
 		super(detailViewModel, null, parent, dbc);
 		this.canModifyCartridges = canModifyCartridges;
@@ -62,38 +62,34 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 	protected IDetailView[] getDetailViews() {
 		return new IDetailView[] { codeAnythingCartridgeView, downloadableCartridgeView, cartridgeView };
 	}
-	
+
 	private class CartridgeDetailsView extends EmptyView {
 
 		private StyledText nameLabel;
 		private StyledText description;
 
 		@Override
-		public Composite createControls(Composite parent, Object context,DataBindingContext dbc) {
+		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(super.createControls(parent, context, dbc));
-			GridLayoutFactory.fillDefaults()
-					.margins(10, 10).spacing(10, 10).applyTo(container);
+			GridLayoutFactory.fillDefaults().margins(10, 10).spacing(10, 10).applyTo(container);
 
 			// nameLabel			
 			this.nameLabel = new StyledText(container, SWT.READ_ONLY);
 			StyledTextUtils.setTransparent(nameLabel);
-			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameLabel);
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(nameLabel);
 
 			// description
 			this.description = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			description.setAlwaysShowScrollBars(false);
 			StyledTextUtils.setTransparent(description);
-			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(description);
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).grab(true, true).applyTo(description);
 			return container;
 		}
 
 		@Override
 		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
 			Object value = selectedCartridgeObservable.getValue();
-			if (!(value instanceof ICartridge)
-					|| DisposeUtils.isDisposed(nameLabel)) {
+			if (!(value instanceof ICartridge) || DisposeUtils.isDisposed(nameLabel)) {
 				return;
 			}
 			ICartridge embeddableCartridge = (ICartridge) value;
@@ -108,7 +104,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 		public boolean isViewFor(Object object) {
 			return object instanceof ICartridge;
 		}
-		
+
 	}
 
 	private class DownloadableCartridgeView extends CartridgeDetailsView {
@@ -119,20 +115,17 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 		@Override
 		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
-			GridLayoutFactory.fillDefaults()
-					.margins(10, 10).spacing(10, 10).applyTo(container);
+			GridLayoutFactory.fillDefaults().margins(10, 10).spacing(10, 10).applyTo(container);
 
 			// name
 			this.name = new StyledText(container, SWT.READ_ONLY);
 			StyledTextUtils.setTransparent(name);
-			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
 
 			// url
 			this.url = new StyledText(container, SWT.WRAP | SWT.READ_ONLY);
 			StyledTextUtils.setTransparent(url);
-			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(url);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(url);
 
 			return container;
 		}
@@ -140,11 +133,10 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 		@Override
 		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
 			Object value = selectedCartridgeObservable.getValue();
-			if (!(value instanceof ICartridge)
-					|| DisposeUtils.isDisposed(name)) {
+			if (!(value instanceof ICartridge) || DisposeUtils.isDisposed(name)) {
 				return;
 			}
-			
+
 			ICartridge cartridge = (ICartridge) value;
 			String cartridgeLabel = ExpressResourceLabelUtils.toString(cartridge);
 			this.name.setText(cartridgeLabel);
@@ -156,8 +148,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 
 		@Override
 		public boolean isViewFor(Object object) {
-			return object instanceof ICartridge
-					&& ((ICartridge) object).isDownloadable();
+			return object instanceof ICartridge && ((ICartridge) object).isDownloadable();
 		}
 	}
 
@@ -167,38 +158,31 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 		private StyledText description;
 		private Text urlText;
 		private Binding binding;
-		
+
 		@Override
 		public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 			Composite container = setControl(new Composite(parent, SWT.None));
-			GridLayoutFactory.fillDefaults()
-					.numColumns(2).margins(10, 10).spacing(10, 10).applyTo(container);
+			GridLayoutFactory.fillDefaults().numColumns(2).margins(10, 10).spacing(10, 10).applyTo(container);
 
 			// name
 			this.name = new StyledText(container, SWT.READ_ONLY);
 			StyledTextUtils.setTransparent(name);
-			GridDataFactory.fillDefaults()
-					.span(2,1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
+			GridDataFactory.fillDefaults().span(2, 1).align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(name);
 
 			// description
 			this.description = new StyledText(container, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 			description.setAlwaysShowScrollBars(false);
 			StyledTextUtils.setTransparent(description);
-			GridDataFactory.fillDefaults()
-					.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(description);
+			GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(description);
 
 			// url
 			Label urlLabel = new Label(container, SWT.None);
 			urlLabel.setText("Cartridge URL:");
-			GridDataFactory.fillDefaults()
-					.align(SWT.LEFT, SWT.CENTER).applyTo(urlLabel);
+			GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(urlLabel);
 			this.urlText = new Text(container, SWT.BORDER);
-			GridDataFactory.fillDefaults()
-					.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(urlText);
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(urlText);
 
-			ValueBindingBuilder
-					.bind(WidgetProperties.enabled().observe(urlText))
-					.notUpdatingParticipant()
+			ValueBindingBuilder.bind(WidgetProperties.enabled().observe(urlText)).notUpdatingParticipant()
 					.to(canModifyCartridges);
 
 			return container;
@@ -207,8 +191,7 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 		@Override
 		public void onVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
 			Object value = selectedCartridgeObservable.getValue();
-			if (!(value instanceof CodeAnythingCartridge)
-					|| DisposeUtils.isDisposed(name)) {
+			if (!(value instanceof CodeAnythingCartridge) || DisposeUtils.isDisposed(name)) {
 				return;
 			}
 			CodeAnythingCartridge cartridge = (CodeAnythingCartridge) value;
@@ -218,18 +201,17 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 			this.description.setText(cartridge.getDescription());
 
 			IObservableValue urlTextObservable = WidgetProperties.text(SWT.Modify).observeDelayed(100, urlText);
-			this.binding = ValueBindingBuilder
-					.bind(urlTextObservable)
+			this.binding = ValueBindingBuilder.bind(urlTextObservable)
 					.to(BeanProperties.value(CodeAnythingCartridge.PROPERTY_URL_STRING, String.class)
 							.observeDetail(selectedCartridgeObservable))
 					.in(dbc);
-			CodeAnythingUrlValidator codeAnythingUrlValidator =
-					new CodeAnythingUrlValidator(urlTextObservable, selectedCartridgeObservable);
+			CodeAnythingUrlValidator codeAnythingUrlValidator = new CodeAnythingUrlValidator(urlTextObservable,
+					selectedCartridgeObservable);
 			dbc.addValidationStatusProvider(codeAnythingUrlValidator);
-			ControlDecorationSupport.create(codeAnythingUrlValidator,
-					SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+			ControlDecorationSupport.create(codeAnythingUrlValidator, SWT.LEFT | SWT.TOP, null,
+					new RequiredControlDecorationUpdater());
 		}
-		
+
 		class CodeAnythingUrlValidator extends MultiValidator {
 
 			private IObservableValue url;
@@ -244,29 +226,27 @@ public class CartridgeDetailViews extends AbstractStackedDetailViews {
 			protected IStatus validate() {
 				String url = (String) this.url.getValue();
 				ICartridge cartridge = (ICartridge) this.selectedCartridge.getValue();
-				
+
 				if (!(cartridge instanceof CodeAnythingCartridge)) {
 					return ValidationStatus.ok();
 				}
-				
+
 				if (StringUtils.isEmpty(url)) {
-					return ValidationStatus
-							.cancel("Please provide an url for your cartridge.");
+					return ValidationStatus.cancel("Please provide an url for your cartridge.");
 				}
-				if (!UrlUtils.isValid(url)
-						&& !EGitUtils.isValidGitUrl(url)) {
+				if (!UrlUtils.isValid(url) && !EGitUtils.isValidGitUrl(url)) {
 					return ValidationStatus.error(NLS.bind("{0} is not a valid url.", url));
 				}
 				return ValidationStatus.ok();
 			}
-			
+
 		}
 
 		@Override
 		public void onInVisible(IObservableValue selectedCartridgeObservable, DataBindingContext dbc) {
 			DataBindingUtils.dispose(binding);
 		}
-		
+
 		@Override
 		public boolean isViewFor(Object object) {
 			return object instanceof CodeAnythingCartridge;

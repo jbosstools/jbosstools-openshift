@@ -28,14 +28,13 @@ public class ExpressConnectionPersistency extends AbstractConnectionPersistency<
 
 	@Override
 	protected String[] loadPersisted() {
-		return (String[]) ArrayUtils.addAll(
-				ExpressCorePreferences.INSTANCE.loadConnections(), 
+		return (String[]) ArrayUtils.addAll(ExpressCorePreferences.INSTANCE.loadConnections(),
 				ExpressCorePreferences.INSTANCE.loadLegacyConnections());
 	}
 
 	@Override
 	protected void persist(Map<String, ExpressConnection> connections) {
-		ExpressCorePreferences.INSTANCE.saveConnections(connections.keySet().toArray(new String [] {}));
+		ExpressCorePreferences.INSTANCE.saveConnections(connections.keySet().toArray(new String[] {}));
 	}
 
 	@Override
@@ -45,12 +44,8 @@ public class ExpressConnectionPersistency extends AbstractConnectionPersistency<
 
 	@Override
 	protected ExpressConnection createConnection(ConnectionURL connectionURL) {
-		return new ExpressConnection(
-				connectionURL.getUsername(),
-				connectionURL.getHostWithScheme(),
-				new LazyCredentialsPrompter(
-						ExpressCoreUIIntegration.getDefault().getCredentialPrompter()),
-				new LazySSLCertificateCallback(
-						ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback()));
+		return new ExpressConnection(connectionURL.getUsername(), connectionURL.getHostWithScheme(),
+				new LazyCredentialsPrompter(ExpressCoreUIIntegration.getDefault().getCredentialPrompter()),
+				new LazySSLCertificateCallback(ExpressCoreUIIntegration.getDefault().getSSLCertificateCallback()));
 	}
 }

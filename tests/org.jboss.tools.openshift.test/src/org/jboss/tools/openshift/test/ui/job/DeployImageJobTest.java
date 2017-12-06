@@ -76,7 +76,8 @@ public class DeployImageJobTest {
 	private static final String RESOURCE_NAME = "myapplication";
 	private static final DockerImageURI DOCKER_TAG = new DockerImageURI("repo/mynamespace/myimagename:latest");
 	private static final DockerImageURI DOCKER_NEW_TAG = new DockerImageURI("repo/mynamespace/myimagename:v1");
-	private static final DockerImageURI DOCKER_TAG_DIFF_REPO = new DockerImageURI("alt-repo/mynamespace/myimagename:latest");
+	private static final DockerImageURI DOCKER_TAG_DIFF_REPO = new DockerImageURI(
+			"alt-repo/mynamespace/myimagename:latest");
 	private TestDeployImageJob job;
 	@Mock
 	private IClient client;
@@ -99,34 +100,33 @@ public class DeployImageJobTest {
 		factory = new ResourceFactory(client);
 		job = spy(new TestDeployImageJob(parameters));
 	}
-	
+
 	@Test
-	public void shouldUpdateImageTagIfItDifferesFromExisting () {
+	public void shouldUpdateImageTagIfItDifferesFromExisting() {
 		givenAConnection();
 		givenTheImageStreamExistsTo("myimagename");
 		givenTheDeploymentConfigExistFor("myimagename", "v0", NAMESPACE, ResourceKind.IMAGE_STREAM_TAG);
 		doReturn(DOCKER_NEW_TAG).when(job).getSourceImage();
-		
-		IResource resource = connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, 
-				project.getName(), parameters.getResourceName());
-		IDeploymentImageChangeTrigger trigger = (IDeploymentImageChangeTrigger)((IDeploymentConfig)resource).getTriggers().toArray()[0];
+
+		IResource resource = connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, project.getName(),
+				parameters.getResourceName());
+		IDeploymentImageChangeTrigger trigger = (IDeploymentImageChangeTrigger) ((IDeploymentConfig) resource)
+				.getTriggers().toArray()[0];
 		assertThat(job.doRun(monitor)).isEqualTo(Status.OK_STATUS);
 		verify(trigger, times(1)).setFrom(new DockerImageURI(null, null, "myimagename", "v1"));
 	}
-	
+
 	@Test
 	public void shouldNotUpdateIfNoImageChangeTrigger() {
 		givenAConnection();
 		givenTheImageStreamExistsTo("myimagename");
 		IDeploymentConfig dc = createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
 		when(dc.getTriggers()).thenReturn(Collections.EMPTY_LIST);
-		when(connection.getResource(
-				ResourceKind.DEPLOYMENT_CONFIG, 
-				project.getName(), 
-				parameters.getResourceName())).thenReturn(dc);
+		when(connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, project.getName(), parameters.getResourceName()))
+				.thenReturn(dc);
 		assertFalse(job.updateTriggerIfUpdate(connection, project.getName(), parameters.getResourceName()));
 	}
-	
+
 	@Test
 	public void shouldNotUpdateIfImageChangeTriggerHasWrongKind() {
 		givenAConnection();
@@ -134,7 +134,7 @@ public class DeployImageJobTest {
 		givenTheDeploymentConfigExistFor("myimagename", "v0", NAMESPACE, "any-not-IMAGE_STREAM_TAG-kind");
 		assertFalse(job.updateTriggerIfUpdate(connection, project.getName(), parameters.getResourceName()));
 	}
-	
+
 	@Test
 	public void shouldNotUpdateIfImageChangeTriggerNameSpaceIsBlank() {
 		givenAConnection();
@@ -142,14 +142,14 @@ public class DeployImageJobTest {
 		givenTheDeploymentConfigExistFor("myimagename", "v0", "", ResourceKind.IMAGE_STREAM_TAG);
 		assertFalse(job.updateTriggerIfUpdate(connection, project.getName(), parameters.getResourceName()));
 	}
-	
+
 	@Test
 	public void shouldNotUpdateIfNoImageStreamForTrigger() {
 		givenAConnection();
 		givenTheDeploymentConfigExistFor("myimagename", "v0", NAMESPACE, ResourceKind.IMAGE_STREAM_TAG);
 		assertFalse(job.updateTriggerIfUpdate(connection, project.getName(), parameters.getResourceName()));
 	}
-	
+
 	@Test
 	public void shouldSkipGeneratingResourcesWhenTheImageIsBeingUpdated() {
 		givenAConnection();
@@ -158,33 +158,36 @@ public class DeployImageJobTest {
 		doReturn(DOCKER_TAG).when(job).getSourceImage();
 		assertThat(job.doRun(monitor)).isEqualTo(Status.OK_STATUS);
 		verify(connection, times(0)).createResource(any());
-	}	
-	
+	}
+
 	private void givenAConnection() {
 		connection = createConnection("https://somehost", "somedevuser");
 		when(parameters.getConnection()).thenReturn(connection);
 	}
-	
+
 	private void givenTheImageStreamExistsTo(String name) {
 		IImageStream is = createResource(IImageStream.class, ResourceKind.IMAGE_STREAM);
 		when(connection.getResource(ResourceKind.IMAGE_STREAM, project.getName(), name)).thenReturn(is);
 	}
 
-	private void givenTheDeploymentConfigExistFor(String name, String tag, String triggerNamespace, String triggerKind) {
+	private void givenTheDeploymentConfigExistFor(String name, String tag, String triggerNamespace,
+			String triggerKind) {
 		IDeploymentImageChangeTrigger trigger = mock(IDeploymentImageChangeTrigger.class);
 		when(trigger.getType()).thenReturn(DeploymentTriggerType.IMAGE_CHANGE);
 		when(trigger.getNamespace()).thenReturn(triggerNamespace);
 		when(trigger.getKind()).thenReturn(triggerKind);
 		when(trigger.getFrom()).thenReturn(new DockerImageURI(null, null, name, tag));
-		IDeploymentConfig dc = createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG, new IResourceVisitor<IDeploymentConfig>() {
-			@Override
-			public void visit(IDeploymentConfig resource) {
-				Collection<IDeploymentTrigger> triggers = new ArrayList<IDeploymentTrigger>();
-				triggers.add(trigger);
-				when(resource.getTriggers()).thenReturn(triggers);
-			}
-		});
-		when(connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, project.getName(), parameters.getResourceName())).thenReturn(dc);
+		IDeploymentConfig dc = createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG,
+				new IResourceVisitor<IDeploymentConfig>() {
+					@Override
+					public void visit(IDeploymentConfig resource) {
+						Collection<IDeploymentTrigger> triggers = new ArrayList<IDeploymentTrigger>();
+						triggers.add(trigger);
+						when(resource.getTriggers()).thenReturn(triggers);
+					}
+				});
+		when(connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, project.getName(), parameters.getResourceName()))
+				.thenReturn(dc);
 	}
 
 	@Test
@@ -225,14 +228,14 @@ public class DeployImageJobTest {
 
 		givenAnImageStreamTo("foo", null);
 		givenTheImageIsVisible(false);
-		
+
 		assertNull(whenStubbingTheImageStream());
 	}
-	
+
 	private void givenTheImageIsVisible(boolean visible) {
 		doReturn(visible).when(job).isImageVisibleByOpenShift(any(), any());
 	}
-	
+
 	private IImageStream givenAnImageStreamTo(String namespace, DockerImageURI uri) {
 		IImageStream is = mock(IImageStream.class);
 		when(is.getNamespace()).thenReturn(namespace);
@@ -247,51 +250,56 @@ public class DeployImageJobTest {
 		when(parameters.getConnection()).thenReturn(conn);
 		return is;
 	}
-	
+
 	private IImageStream whenStubbingTheImageStream() {
 		return whenStubbingTheImageStream(DOCKER_TAG);
 	}
+
 	private IImageStream whenStubbingTheImageStream(DockerImageURI uri) {
 		return (IImageStream) job.stubImageStream(factory, RESOURCE_NAME, project, uri);
 	}
-	
+
 	@Test
 	public void testStubDeploymentConfig() {
-		IImageStream is  = givenAnImageStreamTo(project.getName(), DOCKER_TAG);
-		
+		IImageStream is = givenAnImageStreamTo(project.getName(), DOCKER_TAG);
+
 		IResource resource = job.stubDeploymentConfig(factory, RESOURCE_NAME, DOCKER_TAG, is);
 		assertTrue(resource instanceof IDeploymentConfig);
 		IDeploymentConfig dc = (IDeploymentConfig) resource;
 
-		assertEquals("Exp. replicas to match incoming params",parameters.getReplicas(), dc.getReplicas());
-		assertEquals("Exp. the selector key to be the resourceName", RESOURCE_NAME, dc.getReplicaSelector().get(DeployImageJob.SELECTOR_KEY));
-		
+		assertEquals("Exp. replicas to match incoming params", parameters.getReplicas(), dc.getReplicas());
+		assertEquals("Exp. the selector key to be the resourceName", RESOURCE_NAME,
+				dc.getReplicaSelector().get(DeployImageJob.SELECTOR_KEY));
+
 		IContainer container = dc.getContainer(RESOURCE_NAME);
 		assertNotNull("Exp. to find a container with the resource name", container);
 		Collection<IDeploymentTrigger> triggers = dc.getTriggers();
-		assertTrue("Exp. a config change trigger", triggers
-					.stream().filter(t->DeploymentTriggerType.CONFIG_CHANGE.equals(t.getType())).findFirst().isPresent());
-		
+		assertTrue("Exp. a config change trigger", triggers.stream()
+				.filter(t -> DeploymentTriggerType.CONFIG_CHANGE.equals(t.getType())).findFirst().isPresent());
+
 		//assert ict matches container spec
-		Optional<IDeploymentTrigger> icTrigger = triggers.stream().filter(t->DeploymentTriggerType.IMAGE_CHANGE.equals(t.getType())).findFirst();
+		Optional<IDeploymentTrigger> icTrigger = triggers.stream()
+				.filter(t -> DeploymentTriggerType.IMAGE_CHANGE.equals(t.getType())).findFirst();
 		assertTrue(icTrigger.isPresent());
-		
-		IDeploymentImageChangeTrigger imageChangeTrigger = (IDeploymentImageChangeTrigger)icTrigger.get();
+
+		IDeploymentImageChangeTrigger imageChangeTrigger = (IDeploymentImageChangeTrigger) icTrigger.get();
 		Collection<String> names = imageChangeTrigger.getContainerNames();
 		assertEquals(1, names.size());
 		assertEquals("Exp. the container and trigger names to match", container.getName(), names.iterator().next());
 		assertTrue(imageChangeTrigger.isAutomatic());
 		assertEquals(ResourceKind.IMAGE_STREAM_TAG, imageChangeTrigger.getKind());
-		assertEquals("Exp. the trigger to point to the imagestream name", new DockerImageURI(null, null, is.getName(), DOCKER_TAG.getTag()), imageChangeTrigger.getFrom());
-		assertEquals("Exp. the trigger to point to the imagestream name", is.getNamespace(), imageChangeTrigger.getNamespace());
+		assertEquals("Exp. the trigger to point to the imagestream name",
+				new DockerImageURI(null, null, is.getName(), DOCKER_TAG.getTag()), imageChangeTrigger.getFrom());
+		assertEquals("Exp. the trigger to point to the imagestream name", is.getNamespace(),
+				imageChangeTrigger.getNamespace());
 	}
-	
-	public static class TestDeployImageJob extends DeployImageJob{
+
+	public static class TestDeployImageJob extends DeployImageJob {
 
 		public TestDeployImageJob(IDeployImageParameters parameters) {
 			super(parameters);
 		}
-		
+
 		@Override
 		protected DockerImageURI getSourceImage() {
 			return super.getSourceImage();
@@ -301,7 +309,7 @@ public class DeployImageJobTest {
 		protected IStatus doRun(IProgressMonitor monitor) {
 			return super.doRun(monitor);
 		}
-		
+
 		@Override
 		protected boolean updateTriggerIfUpdate(Connection connection, String project, String name) {
 			return super.updateTriggerIfUpdate(connection, project, name);
@@ -314,7 +322,8 @@ public class DeployImageJobTest {
 		}
 
 		@Override
-		public IResource stubDeploymentConfig(IResourceFactory factory, String name, DockerImageURI imageUri, IImageStream is) {
+		public IResource stubDeploymentConfig(IResourceFactory factory, String name, DockerImageURI imageUri,
+				IImageStream is) {
 			return super.stubDeploymentConfig(factory, name, imageUri, is);
 		}
 
@@ -322,7 +331,6 @@ public class DeployImageJobTest {
 		public boolean isImageVisibleByOpenShift(IProject project, DockerImageURI uri) {
 			return super.isImageVisibleByOpenShift(project, uri);
 		}
-		
-		
+
 	}
 }

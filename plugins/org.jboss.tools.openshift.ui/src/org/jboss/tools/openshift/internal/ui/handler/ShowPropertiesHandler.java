@@ -35,9 +35,7 @@ public class ShowPropertiesHandler extends AbstractHandler {
 			@Override
 			public void run() {
 				try {
-					IWorkbenchPage page = PlatformUI.getWorkbench()
-							.getActiveWorkbenchWindow()
-							.getActivePage();
+					IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 					IWorkbenchPart active = page.getActivePart();
 					IWorkbenchPart part = page.showView("org.eclipse.ui.views.PropertySheet");
 					page.activate(active);
@@ -49,6 +47,5 @@ public class ShowPropertiesHandler extends AbstractHandler {
 		});
 		return null;
 	}
-
 
 }

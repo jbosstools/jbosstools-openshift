@@ -36,9 +36,8 @@ public class ManageDomainsHandler extends AbstractHandler {
 			return Status.OK_STATUS;
 		}
 
-		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), 
-				new ManageDomainsWizard("Domains", 
-						NLS.bind("Manage your domains for connection {0}", connection.getId()), connection)).open();
+		new OkButtonWizardDialog(HandlerUtil.getActiveShell(event), new ManageDomainsWizard("Domains",
+				NLS.bind("Manage your domains for connection {0}", connection.getId()), connection)).open();
 		new FireExpressConnectionsChangedJob(connection).schedule();
 		return Status.OK_STATUS;
 	}

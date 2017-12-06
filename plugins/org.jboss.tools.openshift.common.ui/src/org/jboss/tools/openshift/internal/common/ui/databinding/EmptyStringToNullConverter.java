@@ -27,8 +27,7 @@ public class EmptyStringToNullConverter extends Converter {
 
 	@Override
 	public Object convert(Object fromObject) {
-		if (!(fromObject instanceof String)
-				|| StringUtils.isEmpty((String) fromObject)) {
+		if (!(fromObject instanceof String) || StringUtils.isEmpty((String) fromObject)) {
 			return null;
 		} else {
 			return fromObject;

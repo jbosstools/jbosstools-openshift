@@ -44,15 +44,14 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	}
 
 	private void setupWizardModelListeners(IOpenShiftApplicationWizardModel wizardModel) {
-		new PojoEventBridge()
-			.listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
-			.forwardTo(PROPERTY_APPLICATION_NAME, this);
-		
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION_NAME, wizardModel)
+				.forwardTo(PROPERTY_APPLICATION_NAME, this);
+
 	}
 
 	public void setNewProject(boolean newProject) {
 		firePropertyChange(PROPERTY_IS_NEW_PROJECT, wizardModel.isNewProject(), wizardModel.setNewProject(newProject));
-		if(wizardModel.isNewProject()) {
+		if (wizardModel.isNewProject()) {
 			setProjectName(null);
 		}
 	}
@@ -62,7 +61,8 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	}
 
 	public void setProjectName(String projectName) {
-		firePropertyChange(PROPERTY_PROJECT_NAME, wizardModel.getProjectName(), wizardModel.setProjectName(projectName));
+		firePropertyChange(PROPERTY_PROJECT_NAME, wizardModel.getProjectName(),
+				wizardModel.setProjectName(projectName));
 	}
 
 	public String getProjectName() {
@@ -70,9 +70,8 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	}
 
 	public void setCreateServerAdapter(boolean createServerAdapter) {
-		firePropertyChange(
-				PROPERTY_CREATE_SERVER_ADAPTER,
-				wizardModel.isCreateServerAdapter(), wizardModel.setCreateServerAdapter(createServerAdapter));
+		firePropertyChange(PROPERTY_CREATE_SERVER_ADAPTER, wizardModel.isCreateServerAdapter(),
+				wizardModel.setCreateServerAdapter(createServerAdapter));
 	}
 
 	public boolean isCreateServerAdapter() {
@@ -80,9 +79,8 @@ public class ProjectAndServerAdapterSettingsWizardPageModel extends ObservableUI
 	}
 
 	public void setSkipMavenBuild(boolean skipMavenBuild) {
-		firePropertyChange(
-				PROPERTY_SKIP_MAVEN_BUILD,
-				wizardModel.isSkipMavenBuild(), wizardModel.setSkipMavenBuild(skipMavenBuild));
+		firePropertyChange(PROPERTY_SKIP_MAVEN_BUILD, wizardModel.isSkipMavenBuild(),
+				wizardModel.setSkipMavenBuild(skipMavenBuild));
 	}
 
 	public boolean isSkipMavenBuild() {

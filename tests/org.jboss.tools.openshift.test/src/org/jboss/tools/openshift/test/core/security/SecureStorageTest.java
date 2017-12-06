@@ -44,7 +44,7 @@ public class SecureStorageTest {
 	public void tearDown() throws SecureStoreException {
 		store.clear();
 	}
-	
+
 	@Test
 	public void shouldRetrieveValue() throws SecureStoreException {
 		// pre-condition
@@ -53,7 +53,7 @@ public class SecureStorageTest {
 
 		// operation
 		store.put("password", "gingerbred");
-		
+
 		// verification
 		assertEquals("gingerbred", store.get("password"));
 	}
@@ -65,7 +65,7 @@ public class SecureStorageTest {
 
 		// operation
 		store.remove("password");
-		
+
 		// verification
 		assertTrue(store.get("password") == null);
 	}
@@ -87,14 +87,14 @@ public class SecureStorageTest {
 	public void shouldStoreDistinctValues() throws SecureStoreException {
 		// pre-condition
 		store.put("password", "chocolate");
-		
+
 		// operation
 		store.put("nonsense", "foobar");
-		
+
 		// verification
 		assertEquals("foobar", store.get("nonsense"));
 	}
-	
+
 	@Test
 	public void shouldRemoveNode() throws SecureStoreException {
 		// pre-condition
@@ -102,10 +102,10 @@ public class SecureStorageTest {
 		SecureStore store = new SecureStore(key);
 		store.put("password", "chocolate");
 		assertTrue(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
-		
+
 		// operation
 		store.removeNode();
-		
+
 		// verification
 		assertFalse(SecurePreferencesFactory.getDefault().nodeExists(key.getKey()));
 	}

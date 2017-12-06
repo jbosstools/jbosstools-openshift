@@ -58,7 +58,7 @@ public class ServiceResourceMapper {
 					result.addAll(getRelated(resources, (IDeploymentConfig) resource));
 				}
 			} else if (resource instanceof IRoute) {
-				if (ResourceUtils.areRelated((IRoute)resource, s)) {
+				if (ResourceUtils.areRelated((IRoute) resource, s)) {
 					result.add(resource);
 				}
 			}
@@ -66,17 +66,19 @@ public class ServiceResourceMapper {
 		return result;
 	}
 
-    public static final Collection<IResource> computeRelatedResources(IDeploymentConfig dc, Collection<IResource> resources) {
-        return getRelated(resources, dc);
-    }
-    
-    public static final Collection<IResource> computeRelatedResources(IReplicationController rc, Collection<IResource> resources) {
-        Collection<IResource> pods = new ArrayList<>();
-        pods.addAll(getRelatedPods(resources, rc));
-        return pods;
-    }
+	public static final Collection<IResource> computeRelatedResources(IDeploymentConfig dc,
+			Collection<IResource> resources) {
+		return getRelated(resources, dc);
+	}
 
-    private static Collection<IResource> getRelated(Collection<IResource> resources, IPod resource) {
+	public static final Collection<IResource> computeRelatedResources(IReplicationController rc,
+			Collection<IResource> resources) {
+		Collection<IResource> pods = new ArrayList<>();
+		pods.addAll(getRelatedPods(resources, rc));
+		return pods;
+	}
+
+	private static Collection<IResource> getRelated(Collection<IResource> resources, IPod resource) {
 		return getRelatedReplicationControllers(resources, Collections.singleton(resource));
 	}
 
@@ -97,9 +99,10 @@ public class ServiceResourceMapper {
 		return result;
 	}
 
-	private static Collection<IResource> getRelatedReplicationControllers(Collection<IResource> resources, IDeploymentConfig dc) {
-		return resources.stream().filter(r-> {
-			 return dc.getName().equals(r.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME));
+	private static Collection<IResource> getRelatedReplicationControllers(Collection<IResource> resources,
+			IDeploymentConfig dc) {
+		return resources.stream().filter(r -> {
+			return dc.getName().equals(r.getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME));
 		}).collect(Collectors.toList());
 	}
 
@@ -130,15 +133,15 @@ public class ServiceResourceMapper {
 
 	}
 
-    private static Collection<IPod> getRelatedPods(Collection<IResource> resources, IReplicationController rc) {
+	private static Collection<IPod> getRelatedPods(Collection<IResource> resources, IReplicationController rc) {
 
-        return resources.stream().filter(r -> {
-            return r instanceof IPod && ResourceUtils.areRelated((IPod) r, rc);
-        }).map(r -> (IPod) r).collect(Collectors.toSet());
+		return resources.stream().filter(r -> {
+			return r instanceof IPod && ResourceUtils.areRelated((IPod) r, rc);
+		}).map(r -> (IPod) r).collect(Collectors.toSet());
 
-    }
+	}
 
-    private static Collection<IBuild> getRelatedBuilds(Collection<IResource> resources, Collection<String> dcImageRefs,
+	private static Collection<IBuild> getRelatedBuilds(Collection<IResource> resources, Collection<String> dcImageRefs,
 			Collection<IBuildConfig> buildConfigs) {
 
 		Collection<IBuild> result = new HashSet<>();
@@ -146,7 +149,8 @@ public class ServiceResourceMapper {
 		resources.forEach(r -> {
 			if (r instanceof IBuild) {
 				IBuild build = (IBuild) r;
-				if (bcNames.contains(r.getLabels().get(OpenShiftAPIAnnotations.BUILD_CONFIG_NAME)) || dcImageRefs.contains(imageRef(build))) {
+				if (bcNames.contains(r.getLabels().get(OpenShiftAPIAnnotations.BUILD_CONFIG_NAME))
+						|| dcImageRefs.contains(imageRef(build))) {
 					result.add((IBuild) r);
 				}
 			}
@@ -187,10 +191,9 @@ public class ServiceResourceMapper {
 		return imageRefs;
 	}
 
-    public static Collection<IResource> getServices(IReplicationController rc, Collection<IResource> resources) {
-        return resources.stream().filter(r -> ResourceKind.SERVICE.equals(r.getKind()))
-                          .filter(s -> ResourceUtils.areRelated(rc, (IService) s))
-                          .collect(Collectors.toList());
-    }
+	public static Collection<IResource> getServices(IReplicationController rc, Collection<IResource> resources) {
+		return resources.stream().filter(r -> ResourceKind.SERVICE.equals(r.getKind()))
+				.filter(s -> ResourceUtils.areRelated(rc, (IService) s)).collect(Collectors.toList());
+	}
 
 }

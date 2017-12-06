@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal.commands;
 
 import java.util.ArrayList;
@@ -43,10 +43,10 @@ public class LaunchCDKServerHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IServer s = findCDKServer();
-		if( s != null ) {
+		if (s != null) {
 			try {
 				s.start("run", new NullProgressMonitor());
-			} catch(CoreException ce) {
+			} catch (CoreException ce) {
 				CDKCoreActivator.getDefault().getLog().log(ce.getStatus());
 			}
 		}
@@ -56,27 +56,27 @@ public class LaunchCDKServerHandler extends AbstractHandler {
 	private void trimNotStopped(ArrayList<IServer> servers) {
 		// Find ones that are not running
 		Iterator<IServer> i = servers.iterator();
-		while(i.hasNext()) {
+		while (i.hasNext()) {
 			IServer next = i.next();
-			if( next.getServerState() != IServer.STATE_STOPPED) {
+			if (next.getServerState() != IServer.STATE_STOPPED) {
 				i.remove();
 			}
 		}
 	}
-	
+
 	private IServer findCDKServer() {
-		ArrayList<IServer> allCDK  = findCDKServers();
-		if( allCDK.size() == 0 ) {
+		ArrayList<IServer> allCDK = findCDKServers();
+		if (allCDK.size() == 0) {
 			// find a new one
 			return showCreateNewServerDialog();
 		} else {
 			trimNotStopped(allCDK);
 			// Now we have only stopped ones
-			if( allCDK.size() == 0 ) {
+			if (allCDK.size() == 0) {
 				// There exist cdk servers, but all are already started or starting or stopping
 				showAllRunningError();
 			} else {
-				if( allCDK.size() > 1 ) {
+				if (allCDK.size() > 1) {
 					// More than 1 possible cdk server to launch
 					return showSelectServerDialog(allCDK);
 				}
@@ -85,42 +85,39 @@ public class LaunchCDKServerHandler extends AbstractHandler {
 		}
 		return null;
 	}
-	
+
 	private IServer showSelectServerDialog(ArrayList<IServer> valid) {
 		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		ChooseServerDialog dialog = new ChooseServerDialog(shell, valid);
 		int ret = dialog.open();
-		if( ret == Window.OK) {
+		if (ret == Window.OK) {
 			return dialog.getServer();
 		}
 		return null;
 	}
-	
+
 	private void showAllRunningError() {
 		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		String msg = "All available CDK servers are already running";
 		MessageDialog.openError(shell, msg, msg);
 	}
-	
+
 	private IServer showCreateNewServerDialog() {
 		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		IServer created = showNewServerWizard(shell, "org.jboss.tools.openshift.cdk.server.type");
-		return created; 
+		return created;
 	}
-	
+
 	private ArrayList<IServer> findCDKServers() {
 		ArrayList<IServer> cdk = new ArrayList<>();
 		IServer[] all = ServerCore.getServers();
-		for( int i = 0; i < all.length; i++ ) {
-			if( all[i].getServerType().getId().equals("org.jboss.tools.openshift.cdk.server.type")) {
+		for (int i = 0; i < all.length; i++) {
+			if (all[i].getServerType().getId().equals("org.jboss.tools.openshift.cdk.server.type")) {
 				cdk.add(all[i]);
 			}
 		}
 		return cdk;
 	}
-	
-	
-	
 
 	/**
 	 * Open the new server wizard.
@@ -135,25 +132,25 @@ public class LaunchCDKServerHandler extends AbstractHandler {
 			@Override
 			protected void createChildFragments(List<WizardFragment> list) {
 				list.add(new NewServerWizardFragment(null, serverTypeId));
-				
+
 				list.add(WizardTaskUtil.TempSaveRuntimeFragment);
 				list.add(WizardTaskUtil.TempSaveServerFragment);
-				
+
 				list.add(new ModifyModulesWizardFragment());
 				list.add(new TasksWizardFragment());
-				
+
 				list.add(WizardTaskUtil.SaveRuntimeFragment);
 				list.add(WizardTaskUtil.SaveServerFragment);
 				list.add(WizardTaskUtil.SaveHostnameFragment);
 			}
 		};
-		
+
 		TaskWizard wizard = new TaskWizard(Messages.wizNewServerWizardTitle, fragment);
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(shell, wizard);
 		int ret = (dialog.open());
-		if( ret ==  IDialogConstants.OK_ID) {
-			IServer server = (IServer)wizard.getTaskModel().getObject(TaskModel.TASK_SERVER);
+		if (ret == IDialogConstants.OK_ID) {
+			IServer server = (IServer) wizard.getTaskModel().getObject(TaskModel.TASK_SERVER);
 			return server;
 		}
 		return null;

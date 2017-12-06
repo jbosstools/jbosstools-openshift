@@ -65,11 +65,12 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
 	ManageSSHKeysWizardPage(ExpressConnection connection, IWizard wizard) {
 		this(ExpressUIMessages.MANAGE_SSH_KEYS_WIZARD_PAGE,
-				NLS.bind(ExpressUIMessages.MANAGE_SSH_KEYS_WIZARD_PAGE_DESCRIPTION ,connection.getUsername()),
+				NLS.bind(ExpressUIMessages.MANAGE_SSH_KEYS_WIZARD_PAGE_DESCRIPTION, connection.getUsername()),
 				"ManageSSHKeysPage", connection, wizard);
 	}
-	
-	ManageSSHKeysWizardPage(String title, String description, String pageName, ExpressConnection connection, IWizard wizard) {
+
+	ManageSSHKeysWizardPage(String title, String description, String pageName, ExpressConnection connection,
+			IWizard wizard) {
 		super(title, description, pageName, wizard);
 		this.pageModel = new SSHKeysWizardPageModel(connection);
 	}
@@ -80,57 +81,44 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
 		Group sshKeysGroup = new Group(parent, SWT.NONE);
 		sshKeysGroup.setText(ExpressUIMessages.SSH_PUBLIC_KEYS_GROUP);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(sshKeysGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(sshKeysGroup);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(sshKeysGroup);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(sshKeysGroup);
 
 		Composite tableContainer = new Composite(sshKeysGroup, SWT.NONE);
 		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults()
-				.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
 		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(BeanProperties.value(SSHKeysWizardPageModel.PROPERTY_SELECTED_KEY).observe(pageModel))
-				.in(dbc);
+				.to(BeanProperties.value(SSHKeysWizardPageModel.PROPERTY_SELECTED_KEY).observe(pageModel)).in(dbc);
 
 		Button addExistingButton = new Button(sshKeysGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(addExistingButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(addExistingButton);
 		addExistingButton.setText(ExpressUIMessages.ADD_EXISTING_BUTTON);
 		addExistingButton.addSelectionListener(onAddExisting());
 
 		Button addNewButton = new Button(sshKeysGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(addNewButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(addNewButton);
 		addNewButton.setText(ExpressUIMessages.NEW_BUTTON);
 		addNewButton.addSelectionListener(onAddNew());
-		
+
 		Button removeButton = new Button(sshKeysGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(removeButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(removeButton);
 		removeButton.setText(ExpressUIMessages.REMOVE_BUTTON);
 		removeButton.addSelectionListener(onRemove());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
-				.to(ViewerProperties.singleSelection().observe(viewer))
-				.converting(new IsNotNull2BooleanConverter())
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(removeButton))
+				.to(ViewerProperties.singleSelection().observe(viewer)).converting(new IsNotNull2BooleanConverter())
 				.in(dbc);
-		
+
 		Composite filler = new Composite(sshKeysGroup, SWT.None);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(filler);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(filler);
 
 		Button refreshButton = new Button(sshKeysGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.END).applyTo(refreshButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.END).applyTo(refreshButton);
 		refreshButton.setText(ExpressUIMessages.REFRESH_BUTTON);
 		refreshButton.addSelectionListener(onRefresh());
-		
+
 		Link sshPrefsLink = new Link(parent, SWT.NONE);
-		sshPrefsLink
-				.setText(ExpressUIMessages.SSH_PREFS_LINK);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
+		sshPrefsLink.setText(ExpressUIMessages.SSH_PREFS_LINK);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(sshPrefsLink);
 		sshPrefsLink.addSelectionListener(onSshPrefs());
 	}
 
@@ -140,26 +128,23 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String keyName = pageModel.getSelectedSSHKey().getName();
-				if (MessageDialog.openConfirm(getShell(),
-						ExpressUIMessages.REMOVE_SSH_KEY_DIALOG_TITLE,
-						NLS.bind(
-								ExpressUIMessages.REMOVE_SSH_KEY_QUESTION,
-								keyName)))
+				if (MessageDialog.openConfirm(getShell(), ExpressUIMessages.REMOVE_SSH_KEY_DIALOG_TITLE,
+						NLS.bind(ExpressUIMessages.REMOVE_SSH_KEY_QUESTION, keyName)))
 					try {
 						IStatus status = WizardUtils.runInWizard(
-								new JobChainBuilder(
-										new RemoveKeyJob()).runWhenDone(new RefreshViewerJob()).build()
-								, getContainer(), getDatabindingContext() );
-						if(status.equals(Status.ERROR)){
+								new JobChainBuilder(new RemoveKeyJob()).runWhenDone(new RefreshViewerJob()).build(),
+								getContainer(), getDatabindingContext());
+						if (status.equals(Status.ERROR)) {
 							setErrorMessage(status.getMessage());
-						}else{
+						} else {
 							setErrorMessage(null);
 						}
 					} catch (Exception ex) {
 						setErrorMessage(ex.getMessage());
-						StatusManager.getManager().handle(
-								ExpressUIActivator.createErrorStatus(NLS.bind(ExpressUIMessages.COULD_NOT_REMOVE_SSH_KEY, keyName), ex),
-								StatusManager.LOG);
+						StatusManager.getManager()
+								.handle(ExpressUIActivator.createErrorStatus(
+										NLS.bind(ExpressUIMessages.COULD_NOT_REMOVE_SSH_KEY, keyName), ex),
+										StatusManager.LOG);
 					}
 			}
 		};
@@ -176,13 +161,13 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				}
 
 				try {
-					WizardUtils.runInWizard(
-							new RefreshViewerJob(), getContainer(), getDatabindingContext());
+					WizardUtils.runInWizard(new RefreshViewerJob(), getContainer(), getDatabindingContext());
 					pageModel.setSelectedSSHKey(wizard.getSSHKey());
 				} catch (Exception ex) {
 					setErrorMessage(ex.getMessage());
 					StatusManager.getManager().handle(
-							ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex), StatusManager.LOG);
+							ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex),
+							StatusManager.LOG);
 				}
 			}
 		};
@@ -199,50 +184,44 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				}
 
 				try {
-					WizardUtils.runInWizard(
-							new RefreshViewerJob(),	getContainer(), getDatabindingContext());
+					WizardUtils.runInWizard(new RefreshViewerJob(), getContainer(), getDatabindingContext());
 					pageModel.setSelectedSSHKey(wizard.getSSHKey());
 				} catch (Exception ex) {
 					setErrorMessage(ex.getMessage());
 					StatusManager.getManager().handle(
-							ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex), StatusManager.LOG);
+							ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex),
+							StatusManager.LOG);
 				}
 			}
 		};
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
-		this.viewer = new TableViewerBuilder(table, tableContainer)
-				.contentProvider(new ArrayContentProvider())
+		this.viewer = new TableViewerBuilder(table, tableContainer).contentProvider(new ArrayContentProvider())
 				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
 
 					@Override
 					public String getValue(IOpenShiftSSHKey key) {
 						return key.getName();
 					}
-				})
-				.name("Name").align(SWT.LEFT).weight(2).minWidth(200).buildColumn()
+				}).name("Name").align(SWT.LEFT).weight(2).minWidth(200).buildColumn()
 				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
 
 					@Override
 					public String getValue(IOpenShiftSSHKey key) {
 						return key.getKeyType().getTypeId();
 					}
-				})
-				.name("Type").align(SWT.LEFT).weight(1).minWidth(50).buildColumn()
+				}).name("Type").align(SWT.LEFT).weight(1).minWidth(50).buildColumn()
 				.column(new IColumnLabelProvider<IOpenShiftSSHKey>() {
 
 					@Override
 					public String getValue(IOpenShiftSSHKey key) {
 						return StringUtils.shorten(key.getPublicKey(), 24);
 					}
-				})
-				.name("Content").align(SWT.LEFT).weight(4).minWidth(100).buildColumn()
-				.buildViewer();
+				}).name("Content").align(SWT.LEFT).weight(4).minWidth(100).buildColumn().buildViewer();
 
 		return viewer;
 	}
@@ -256,7 +235,8 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 		} catch (Exception e) {
 			setErrorMessage(e.getMessage());
 			StatusManager.getManager().handle(
-					ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, e), StatusManager.LOG);
+					ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_LOAD_SSH_KEYS, e),
+					StatusManager.LOG);
 
 		}
 	}
@@ -270,15 +250,16 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 					Job refreshKeysJob = new RefreshKeysJob();
 					new JobChainBuilder(refreshKeysJob).runWhenDone(new RefreshViewerJob());
 					IStatus status = WizardUtils.runInWizard(refreshKeysJob, getContainer(), getDatabindingContext());
-					if(status.equals(Status.ERROR)){
+					if (status.equals(Status.ERROR)) {
 						setErrorMessage(status.getMessage());
-					}else{
+					} else {
 						setErrorMessage(null);
 					}
 				} catch (Exception ex) {
 					setErrorMessage(ex.getMessage());
 					StatusManager.getManager().handle(
-							ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_REFRESH_SSH_KEYS, ex), StatusManager.LOG);
+							ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_REFRESH_SSH_KEYS, ex),
+							StatusManager.LOG);
 				}
 			}
 		};
@@ -297,7 +278,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 	protected SSHKeysWizardPageModel getPageModel() {
 		return pageModel;
 	}
-	
+
 	private class RemoveKeyJob extends Job {
 
 		private RemoveKeyJob() {
@@ -306,11 +287,13 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			try{
+			try {
 				pageModel.removeKey();
 				return Status.OK_STATUS;
-			}catch(OpenShiftException ex){
-				return ExpressUIActivator.createErrorStatus(NLS.bind(ExpressUIMessages.COULD_NOT_REMOVE_SSH_KEY, pageModel.getSelectedSSHKey().getName()), ex);
+			} catch (OpenShiftException ex) {
+				return ExpressUIActivator.createErrorStatus(
+						NLS.bind(ExpressUIMessages.COULD_NOT_REMOVE_SSH_KEY, pageModel.getSelectedSSHKey().getName()),
+						ex);
 			}
 		}
 	}
@@ -323,10 +306,10 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			try{
+			try {
 				pageModel.refresh();
 				return Status.OK_STATUS;
-			}catch(OpenShiftException ex){
+			} catch (OpenShiftException ex) {
 				return ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_REFRESH_SSH_KEYS, ex);
 			}
 		}
@@ -340,7 +323,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 
 		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor) {
-			try{
+			try {
 				IOpenShiftSSHKey key = pageModel.getSelectedSSHKey();
 				viewer.setInput(pageModel.getSSHKeys());
 				if (key != null) {
@@ -348,7 +331,7 @@ class ManageSSHKeysWizardPage extends AbstractOpenShiftWizardPage {
 				}
 				setErrorMessage(null);
 				return Status.OK_STATUS;
-			}catch(OpenShiftException ex){
+			} catch (OpenShiftException ex) {
 				setErrorMessage(ex.getMessage());
 				return ExpressUIActivator.createErrorStatus(ExpressUIMessages.COULD_NOT_REFRESH_VIEWER, ex);
 			}

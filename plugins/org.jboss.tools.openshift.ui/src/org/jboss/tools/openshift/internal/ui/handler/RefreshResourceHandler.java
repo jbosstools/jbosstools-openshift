@@ -43,7 +43,6 @@ public class RefreshResourceHandler extends AbstractHandler {
 		return null;
 	}
 
-
 	private void refresh(IOpenshiftUIElement<?, ?> element) {
 		Job job = null;
 		job = createRefreshJob(element);

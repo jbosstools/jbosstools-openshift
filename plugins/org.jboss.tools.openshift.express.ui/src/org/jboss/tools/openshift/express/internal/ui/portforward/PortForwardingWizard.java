@@ -14,7 +14,6 @@ import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 
 import com.openshift.client.IApplication;
 
-
 /**
  * @author Xavier Coulon
  *

@@ -27,10 +27,9 @@ public class OpenShiftImages {
 
 	private static final String ICONS_FOLDER = "icons/";
 	private static final String ICON_NAME_PREFIX = "icon-";
-	
-	private static final ImageRepository repo =
-			new ImageRepository(
-					ICONS_FOLDER, OpenShiftUIActivator.getDefault(), OpenShiftUIActivator.getDefault().getImageRegistry());
+
+	private static final ImageRepository repo = new ImageRepository(ICONS_FOLDER, OpenShiftUIActivator.getDefault(),
+			OpenShiftUIActivator.getDefault().getImageRegistry());
 
 	public static final ImageDescriptor BLOCKS = repo.create("blocks.png"); //$NON-NLS-1$ 
 	public static final Image BLOCKS_IMG = repo.getImage("blocks.png"); //$NON-NLS-1$ 
@@ -52,21 +51,19 @@ public class OpenShiftImages {
 	public static final Image ROUTE_IMG = repo.getImage("route.png"); //$NON-NLS-1$
 	public static final ImageDescriptor TEMPLATE = repo.create("template.png"); //$NON-NLS-1$
 	public static final Image TEMPLATE_IMG = repo.getImage("template.png"); //$NON-NLS-1$
-    public static final ImageDescriptor REPLICATION_CONTROLLER = repo.create("replicator.png"); //$NON-NLS-1$
-    public static final Image REPLICATION_CONTROLLER_IMG = repo.getImage("replicator.png"); //$NON-NLS-1$
+	public static final ImageDescriptor REPLICATION_CONTROLLER = repo.create("replicator.png"); //$NON-NLS-1$
+	public static final Image REPLICATION_CONTROLLER_IMG = repo.getImage("replicator.png"); //$NON-NLS-1$
 	public static final ImageDescriptor PROJECT_NEW = PROJECT;
 	public static final Image PROJECT_NEW_IMG = PROJECT_IMG;
-    public static final ImageDescriptor CHECKED = repo.create("checked.png"); //$NON-NLS-1$
-    public static final Image CHECKED_IMG = repo.getImage("checked.png"); //$NON-NLS-1$
-    public static final ImageDescriptor UNCHECKED = repo.create("unchecked.png"); //$NON-NLS-1$
-    public static final Image UNCHECKED_IMG = repo.getImage("unchecked.png"); //$NON-NLS-1$
+	public static final ImageDescriptor CHECKED = repo.create("checked.png"); //$NON-NLS-1$
+	public static final Image CHECKED_IMG = repo.getImage("checked.png"); //$NON-NLS-1$
+	public static final ImageDescriptor UNCHECKED = repo.create("unchecked.png"); //$NON-NLS-1$
+	public static final Image UNCHECKED_IMG = repo.getImage("unchecked.png"); //$NON-NLS-1$
 	public static final ImageDescriptor TREND_UP = repo.create("trend-up.png"); //$NON-NLS-1$ 
 	public static final ImageDescriptor TREND_DOWN = repo.create("trend-down.png"); //$NON-NLS-1$ 
 
-    public static final ImageDescriptor OPENSHIFT_LOGO_DESC = repo.create("openshift-logo-white-icon.png"); //$NON-NLS-1$
-    public static final Image OPENSHIFT_LOGO_IMG = repo.getImage("openshift-logo-white-icon.png"); //$NON-NLS-1$
-    
-    
+	public static final ImageDescriptor OPENSHIFT_LOGO_DESC = repo.create("openshift-logo-white-icon.png"); //$NON-NLS-1$
+	public static final Image OPENSHIFT_LOGO_IMG = repo.getImage("openshift-logo-white-icon.png"); //$NON-NLS-1$
 
 	private static Map<String, ImageDescriptor> descriptorsByName = new HashMap<>();
 
@@ -76,14 +73,14 @@ public class OpenShiftImages {
 	 * @return the image
 	 */
 	public static final Image getAppImage(String name) {
-		if(name.startsWith(ICON_NAME_PREFIX)) {
+		if (name.startsWith(ICON_NAME_PREFIX)) {
 			name = name.substring(ICON_NAME_PREFIX.length());
 		}
 		final String imagePath = NLS.bind("apps/{0}.png", name);
-		if(!descriptorsByName.containsKey(name)) {
+		if (!descriptorsByName.containsKey(name)) {
 			descriptorsByName.put(name, repo.create(imagePath));
 		}
 		return (Image) ObjectUtils.defaultIfNull(repo.getImage(imagePath), BLOCKS_IMG);
 	}
-	
+
 }

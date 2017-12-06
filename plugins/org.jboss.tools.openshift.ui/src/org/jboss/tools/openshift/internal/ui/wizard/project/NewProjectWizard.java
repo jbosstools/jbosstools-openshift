@@ -26,7 +26,6 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.model.IProject;
 
-
 /**
  * @author jeff.cantrill
  */
@@ -40,21 +39,21 @@ public class NewProjectWizard extends AbstractOpenShiftWizard<NewProjectWizardMo
 
 	@Override
 	public boolean performFinish() {
-		AbstractDelegatingMonitorJob job = 
-				new AbstractDelegatingMonitorJob(NLS.bind("Creating project {0}...", getModel().getProjectName())) {
+		AbstractDelegatingMonitorJob job = new AbstractDelegatingMonitorJob(
+				NLS.bind("Creating project {0}...", getModel().getProjectName())) {
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
 				try {
 					getModel().createProject();
 					return Status.OK_STATUS;
 				} catch (OpenShiftException e) {
-					String problem = e.getStatus()==null?e.getMessage():e.getStatus().getMessage();
-					return	OpenShiftUIActivator.statusFactory().errorStatus(
+					String problem = e.getStatus() == null ? e.getMessage() : e.getStatus().getMessage();
+					return OpenShiftUIActivator.statusFactory().errorStatus(
 							NLS.bind("Could not create project \"{0}\": {1}", getModel().getProjectName(), problem), e);
 				}
 			}
 		};
-		
+
 		try {
 			WizardUtils.runInWizard(job, getContainer());
 		} catch (InvocationTargetException | InterruptedException e) {
@@ -67,7 +66,7 @@ public class NewProjectWizard extends AbstractOpenShiftWizard<NewProjectWizardMo
 	public void addPages() {
 		addPage(this.newProjectWizardPage = new NewProjectWizardPage(getModel(), this));
 	}
-	
+
 	public IProject getProject() {
 		return newProjectWizardPage.getProject();
 	}

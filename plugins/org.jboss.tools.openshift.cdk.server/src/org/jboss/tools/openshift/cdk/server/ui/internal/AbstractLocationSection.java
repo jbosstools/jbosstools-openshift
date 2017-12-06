@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import java.io.File;
@@ -44,30 +44,29 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 
 	protected static final boolean FILE = true;
 	protected static final boolean FOLDER = false;
-	
-	
+
 	private Text location;
 	private Button browse;
 
-	protected ServerAttributeHelper helper; 
+	protected ServerAttributeHelper helper;
 	private SelectionListener browseListener;
 	private ModifyListener locationListener;
-	
-	
+
 	private String commandName;
 	private String locationAttribute;
 	private String sectionTitle;
 	private String labelString;
-	
+
 	protected ControlDecoration txtDecorator;
-	
-	public AbstractLocationSection(String sectionTitle, String labelString, 
-			String commandName, String locationAttribute) {
+
+	public AbstractLocationSection(String sectionTitle, String labelString, String commandName,
+			String locationAttribute) {
 		this.sectionTitle = sectionTitle;
 		this.labelString = labelString;
 		this.commandName = commandName;
 		this.locationAttribute = locationAttribute;
 	}
+
 	@Override
 	public void init(IEditorSite site, IEditorInput input) {
 		super.init(site, input);
@@ -82,51 +81,52 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		addListeners();
 		validate();
 	}
-	
+
 	protected void createUI(Composite parent) {
-		
+
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
-		Section section = toolkit.createSection(parent, ExpandableComposite.TWISTIE|ExpandableComposite.TITLE_BAR|ExpandableComposite.EXPANDED);
+		Section section = toolkit.createSection(parent,
+				ExpandableComposite.TWISTIE | ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
 		section.setText(sectionTitle);
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
-		
+
 		Composite composite = toolkit.createComposite(section);
 		composite.setLayout(new GridLayout(5, false));
 
 		fillUI(toolkit, composite);
-		
+
 		section.setClient(composite);
 
 	}
-	
+
 	protected void fillUI(FormToolkit toolkit, Composite composite) {
 		createLocationWidgets(toolkit, composite);
 	}
-	
+
 	protected void createLocationWidgets(FormToolkit toolkit, Composite composite) {
 		Label l = toolkit.createLabel(composite, labelString);
 		location = toolkit.createText(composite, "", SWT.SINGLE | SWT.BORDER);
 		browse = toolkit.createButton(composite, "Browse...", SWT.PUSH);
-		
-		location.setLayoutData(GridDataFactory.defaultsFor(location).span(3,1).minSize(150, SWT.DEFAULT).create());
-		
-		txtDecorator = new ControlDecoration(location, SWT.TOP|SWT.LEFT);
-		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry .DEC_ERROR);
+
+		location.setLayoutData(GridDataFactory.defaultsFor(location).span(3, 1).minSize(150, SWT.DEFAULT).create());
+
+		txtDecorator = new ControlDecoration(location, SWT.TOP | SWT.LEFT);
+		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
 		Image img = fieldDecoration.getImage();
 		txtDecorator.setImage(img);
 		txtDecorator.hide(); // hiding it initially
 	}
-	
+
 	protected Text getLocationText() {
 		return location;
 	}
-	
+
 	protected void setDefaultValues() {
 		// set initial values
-		String s = server.getAttribute(locationAttribute, (String)null);
+		String s = server.getAttribute(locationAttribute, (String) null);
 		location.setText(s == null ? "" : s);
 	}
-	
 
 	protected void addListeners() {
 		browseListener = new SelectionListener() {
@@ -135,6 +135,7 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 				locationBrowseClicked();
 				validate();
 			}
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
@@ -154,41 +155,40 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 			}
 		});
 	}
-	
+
 	protected void validate() {
 		// Subclass override
 	}
-	
+
 	protected abstract void locationBrowseClicked();
-	
-	
+
 	protected void browseClicked(Text text, boolean type) {
-		if( text == null )
+		if (text == null)
 			return;
 
-		File file = text.getText() == null ? null : new File( text.getText());
+		File file = text.getText() == null ? null : new File(text.getText());
 		if (file != null && !file.exists()) {
 			file = null;
 		}
 
 		File f2 = null;
-		if( type == FILE )
-			f2 = chooseFile(file,  text.getShell());
-		else if( type == FOLDER)
-			f2 = chooseDirectory(file,  text.getShell());
-		
+		if (type == FILE)
+			f2 = chooseFile(file, text.getShell());
+		else if (type == FOLDER)
+			f2 = chooseDirectory(file, text.getShell());
+
 		if (f2 != null) {
 			String newVal = f2.getAbsolutePath();
-			if( newVal != null && !newVal.equals(text.getText())) {
+			if (newVal != null && !newVal.equals(text.getText())) {
 				text.setText(newVal);
 			}
 		}
 	}
-	
+
 	protected static File chooseFile(File startingDirectory, Shell shell) {
 		FileDialog fileDialog = new FileDialog(shell, SWT.OPEN);
 		if (startingDirectory != null) {
-			if( startingDirectory.isFile())
+			if (startingDirectory.isFile())
 				fileDialog.setFilterPath(startingDirectory.getParentFile().getPath());
 			else
 				fileDialog.setFilterPath(startingDirectory.getPath());
@@ -203,7 +203,7 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		}
 		return null;
 	}
-	
+
 	protected static File chooseDirectory(File startingDirectory, Shell shell) {
 		DirectoryDialog fileDialog = new DirectoryDialog(shell, SWT.OPEN);
 		if (startingDirectory != null) {
@@ -220,11 +220,11 @@ public abstract class AbstractLocationSection extends ServerEditorSection {
 		return null;
 	}
 
-	
-	public class SetLocationPropertyCommand extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyTextCommand {
+	public class SetLocationPropertyCommand
+			extends org.jboss.ide.eclipse.as.wtp.ui.editor.ServerWorkingCopyPropertyTextCommand {
 		public SetLocationPropertyCommand(IServerWorkingCopy server) {
 			super(server, commandName, location, location.getText(), locationAttribute, locationListener);
 		}
 	}
-	
+
 }

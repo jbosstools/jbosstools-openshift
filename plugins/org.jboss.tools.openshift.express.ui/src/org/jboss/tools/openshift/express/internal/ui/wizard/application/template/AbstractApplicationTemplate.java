@@ -24,7 +24,7 @@ import com.openshift.client.cartridge.ICartridge;
 public abstract class AbstractApplicationTemplate extends ObservablePojo implements IApplicationTemplate {
 
 	private String name;
-	private String description; 
+	private String description;
 
 	protected AbstractApplicationTemplate(String name, String description, IApplicationTemplate... children) {
 		this.name = name;
@@ -40,12 +40,12 @@ public abstract class AbstractApplicationTemplate extends ObservablePojo impleme
 	public void setName(String name) {
 		firePropertyChange(PROPERTY_NAME, this.name, this.name = name);
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return description;
 	}
-	
+
 	@Override
 	public Set<ICartridge> getAllCartridges() {
 		return Collections.emptySet();
@@ -73,16 +73,16 @@ public abstract class AbstractApplicationTemplate extends ObservablePojo impleme
 		}
 
 		String lowerCaseExpression = StringUtils.toLowerCase(expression);
-		
+
 		return isMatching(lowerCaseExpression, StringUtils.toLowerCase(getName()))
 				|| isMatching(lowerCaseExpression, StringUtils.toLowerCase(getDescription()));
 	}
-	
+
 	protected boolean isMatching(String expression, String toMatch) {
 		if (StringUtils.isEmpty(toMatch)) {
 			return false;
 		}
-		
+
 		return toMatch.indexOf(expression) >= 0;
 	}
 

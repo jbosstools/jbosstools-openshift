@@ -36,8 +36,7 @@ public class SimplePropertyActionFilter implements IActionFilter {
 			return false;
 		}
 		Method accessor = findAttribute(target, name);
-		if (accessor == null)
-		{
+		if (accessor == null) {
 			return false;
 		}
 		try {

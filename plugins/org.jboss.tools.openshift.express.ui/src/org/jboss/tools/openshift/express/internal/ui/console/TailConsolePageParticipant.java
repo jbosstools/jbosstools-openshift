@@ -37,7 +37,8 @@ public class TailConsolePageParticipant implements IConsolePageParticipant {
 	@Override
 	public void init(IPageBookViewPage page, IConsole console) {
 		this.closeConsoleAction = new CloseConsoleAction(console);
-		this.closeConsoleAction.setImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_ELCL_REMOVE));
+		this.closeConsoleAction
+				.setImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_ELCL_REMOVE));
 		this.closeConsoleAction.setToolTipText(ExpressUIMessages.CloseConsole);
 		IActionBars bars = page.getSite().getActionBars();
 		bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, closeConsoleAction);

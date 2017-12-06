@@ -51,7 +51,7 @@ public class WebhookUtilTest {
 
 	private IBuildConfig givenBuildConfigWithTriggers(IBuildTrigger... buildTriggers) {
 		IBuildConfig buildConfig = mock(IBuildConfig.class);
-		List<IBuildTrigger> triggers = (buildTriggers == null) ? Collections.<IBuildTrigger> emptyList()
+		List<IBuildTrigger> triggers = (buildTriggers == null) ? Collections.<IBuildTrigger>emptyList()
 				: Arrays.asList(buildTriggers);
 		when(buildConfig.getBuildTriggers()).thenReturn(triggers);
 		return buildConfig;

@@ -23,16 +23,14 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 public class OpenShiftIdentifierValidator implements IValidator {
 
 	private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
-	
+
 	@Override
 	public IStatus validate(Object value) {
-		if (!(value instanceof String)
-				|| StringUtils.isEmpty((String) value)) {
+		if (!(value instanceof String) || StringUtils.isEmpty((String) value)) {
 			return ValidationStatus.error("Please provide an alphanumeric identifier.");
 		}
 		if (!IDENTIFIER_PATTERN.matcher((String) value).matches()) {
-			return ValidationStatus.error(
-					"Please provide an identier that starts with alphabetic character or '_', "
+			return ValidationStatus.error("Please provide an identier that starts with alphabetic character or '_', "
 					+ "followed by a string of alphanumeric characters or '_'");
 		}
 		return ValidationStatus.ok();

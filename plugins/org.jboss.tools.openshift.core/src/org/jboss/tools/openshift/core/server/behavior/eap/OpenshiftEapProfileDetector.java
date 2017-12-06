@@ -34,10 +34,9 @@ import com.openshift.restclient.model.build.ISourceBuildStrategy;
 public class OpenshiftEapProfileDetector implements IOpenshiftServerAdapterProfileDetector {
 
 	public static final String PROFILE = "openshift3.eap";
-	
-	private static final Collection<String> EAP_LIKE_KEYWORDS = 
-			Collections.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
-	
+
+	private static final Collection<String> EAP_LIKE_KEYWORDS = Collections
+			.unmodifiableCollection(Arrays.asList("eap", "wildfly"));
 
 	public OpenshiftEapProfileDetector() {
 		super();
@@ -63,8 +62,8 @@ public class OpenshiftEapProfileDetector implements IOpenshiftServerAdapterProfi
 			return null;
 		}
 		Connection connectionInstance = (Connection) connection;
-		List<IBuildConfig> buildConfigs = 
-				connectionInstance.getResources(ResourceKind.BUILD_CONFIG, resource.getProject().getName());
+		List<IBuildConfig> buildConfigs = connectionInstance.getResources(ResourceKind.BUILD_CONFIG,
+				resource.getProject().getName());
 		if (buildConfigs == null) {
 			return null;
 		}

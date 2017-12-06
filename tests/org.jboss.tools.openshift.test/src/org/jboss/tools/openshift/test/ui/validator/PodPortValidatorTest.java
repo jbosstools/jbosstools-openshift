@@ -28,21 +28,22 @@ import com.openshift.restclient.model.IServicePort;
 @RunWith(MockitoJUnitRunner.class)
 public class PodPortValidatorTest extends AbstractValidatorTest {
 	static final String CURRENT_VALUE = "999";
-	
+
 	static PodPortValidator createPodPortValidator() {
 		IServicePort port1 = Mockito.mock(IServicePort.class);
 		Mockito.when(port1.getPort()).thenReturn(1000);
 		Mockito.when(port1.getTargetPort()).thenReturn("3000");
-		
+
 		IServicePort port2 = Mockito.mock(IServicePort.class);
 		Mockito.when(port2.getPort()).thenReturn(2000);
 		Mockito.when(port2.getTargetPort()).thenReturn("home");
 		return new PodPortValidator(CURRENT_VALUE, Arrays.asList(port1, port2));
 	}
+
 	public PodPortValidatorTest() {
 		super(createPodPortValidator());
 	}
-	
+
 	@Test
 	public void testShouldReturnPassIfSameValue() {
 		assertPass(CURRENT_VALUE);

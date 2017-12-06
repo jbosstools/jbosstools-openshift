@@ -53,7 +53,7 @@ import com.openshift.restclient.OpenShiftException;
 public class ImportProjectOperation {
 
 	private static final String PLATFORM_SEPARATOR = Matcher.quoteReplacement(File.separator);
-	
+
 	private File cloneDestination;
 	private String gitUrl;
 	private String gitRef;
@@ -67,7 +67,8 @@ public class ImportProjectOperation {
 	 * @param cloneDestination the destination to clone to
 	 * @param filters the project to import
 	 */
-	public ImportProjectOperation(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters, boolean checkoutBranch) {
+	public ImportProjectOperation(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters,
+			boolean checkoutBranch) {
 		this(gitUrl, gitRef, cloneDestination, filters, checkoutBranch, true);
 	}
 
@@ -82,7 +83,7 @@ public class ImportProjectOperation {
 		this(gitUrl, gitRef, cloneDestination, filters, true, false);
 	}
 
-	protected ImportProjectOperation(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters, 
+	protected ImportProjectOperation(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters,
 			boolean checkoutBranch, boolean reuseGitRepo) {
 		this.gitUrl = gitUrl;
 		this.gitRef = gitRef;
@@ -116,8 +117,9 @@ public class ImportProjectOperation {
 		}
 	}
 
-	private List<IProject> importCloning(String gitUrl, String gitRef, File cloneDestination, Collection<String> filters, IProgressMonitor monitor) 
-			throws CoreException, OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
+	private List<IProject> importCloning(String gitUrl, String gitRef, File cloneDestination,
+			Collection<String> filters, IProgressMonitor monitor) throws CoreException, OpenShiftException,
+			InvocationTargetException, InterruptedException, URISyntaxException {
 		if (cloneDestinationExists()) {
 			throw new WontOverwriteException(NLS.bind(
 					"There's already a folder at {0}. The new OpenShift project would overwrite it. "
@@ -129,9 +131,10 @@ public class ImportProjectOperation {
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
 		return importedProjects;
 	}
-	
-	private List<IProject>  importReusingExistingRepo(String gitUrl, String gitRef, File repositoryFolder, Collection<String> filters, boolean checkoutBranch, 
-			IProgressMonitor monitor) throws CoreException, InterruptedException {
+
+	private List<IProject> importReusingExistingRepo(String gitUrl, String gitRef, File repositoryFolder,
+			Collection<String> filters, boolean checkoutBranch, IProgressMonitor monitor)
+			throws CoreException, InterruptedException {
 		List<IProject> importedProjects = importProjectsFrom(repositoryFolder, filters, monitor);
 		connectToGitRepo(importedProjects, repositoryFolder, monitor);
 		if (checkoutBranch) {
@@ -139,10 +142,10 @@ public class ImportProjectOperation {
 		}
 		return importedProjects;
 	}
-	
-	protected void checkoutBranch(String gitRef, String gitUrl, List<IProject> importedProjects, File repositoryFolder, IProgressMonitor monitor) throws CoreException {
-		if (!StringUtils.isEmpty(gitRef)
-				&& !CollectionUtils.isEmpty(importedProjects)) {
+
+	protected void checkoutBranch(String gitRef, String gitUrl, List<IProject> importedProjects, File repositoryFolder,
+			IProgressMonitor monitor) throws CoreException {
+		if (!StringUtils.isEmpty(gitRef) && !CollectionUtils.isEmpty(importedProjects)) {
 			// all projects are in the same repo
 			IProject project = importedProjects.get(0);
 			Repository repository = EGitUtils.getRepository(project);
@@ -153,23 +156,28 @@ public class ImportProjectOperation {
 					fetchBranch(gitRef, remote, repository, monitor);
 				}
 				CheckoutResult result = EGitUtils.checkoutBranch(gitRef, repository, monitor);
-				switch(result.getStatus()) {
-					case CONFLICTS:
-					case ERROR:
-						throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-							NLS.bind("Could not check out the branch {0} of the (reused) local repository at {1} because of {2}."
+				switch (result.getStatus()) {
+				case CONFLICTS:
+				case ERROR:
+					throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, NLS.bind(
+							"Could not check out the branch {0} of the (reused) local repository at {1} because of {2}."
 									+ " Please resolve the problem and check out the branch manually so that it matches the code that's used in your OpenShift application.",
-									new Object[] { gitRef, repositoryFolder, result.getStatus().toString().toLowerCase() })));
-					default:
+							new Object[] { gitRef, repositoryFolder, result.getStatus().toString().toLowerCase() })));
+				default:
 				}
 			} catch (IOException e) {
-				throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-						NLS.bind("Could check that branch {0} exists within the (reused) local repository at {1}.",
-								gitRef, repositoryFolder), e));
+				throw new CoreException(
+						StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
+								NLS.bind(
+										"Could check that branch {0} exists within the (reused) local repository at {1}.",
+										gitRef, repositoryFolder),
+								e));
 			} catch (InvocationTargetException e) {
-				throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-						NLS.bind("Could not fetch branch {0} from check that branch {0} exists within the (reused) local repository at {1}.",
-								gitRef, repositoryFolder), e));
+				throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
+						NLS.bind(
+								"Could not fetch branch {0} from check that branch {0} exists within the (reused) local repository at {1}.",
+								gitRef, repositoryFolder),
+						e));
 			}
 		}
 	}
@@ -184,20 +192,22 @@ public class ImportProjectOperation {
 	 * @throws InvocationTargetException
 	 * @throws IOException
 	 */
-	private void fetchBranch(String gitRef, RemoteConfig remote, Repository repository, IProgressMonitor monitor) 
+	private void fetchBranch(String gitRef, RemoteConfig remote, Repository repository, IProgressMonitor monitor)
 			throws CoreException, InvocationTargetException, IOException {
 		if (remote == null) {
-			throw new CoreException(StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID, 
-					NLS.bind("Could not fetch determine the remote for the repo at {0} that we should fetch branch {1} from.", 
+			throw new CoreException(StatusFactory.errorStatus(OpenShiftUIActivator.PLUGIN_ID,
+					NLS.bind(
+							"Could not fetch determine the remote for the repo at {0} that we should fetch branch {1} from.",
 							repository.getDirectory(), gitRef)));
-		} 
-		EGitUtils.fetch(remote, 
-				Arrays.asList(new RefSpec(Constants.R_HEADS + gitRef + ":" + Constants.R_REMOTES + remote.getName() + "/" + gitRef)), 
+		}
+		EGitUtils.fetch(remote,
+				Arrays.asList(new RefSpec(
+						Constants.R_HEADS + gitRef + ":" + Constants.R_REMOTES + remote.getName() + "/" + gitRef)),
 				repository, monitor);
 		RevCommit commit = EGitUtils.getLatestCommit(gitRef, remote.getName(), repository);
 		EGitUtils.createBranch(gitRef, commit, repository, monitor);
 	}
-	
+
 	/**
 	 * Imports the projects that are within the given folder. Supports maven and
 	 * general projects
@@ -264,8 +274,8 @@ public class ImportProjectOperation {
 			throws OpenShiftException, InvocationTargetException, InterruptedException, URISyntaxException {
 		monitor.subTask(NLS.bind("Cloning  {0}...", gitUrl));
 		EGitUIUtils.ensureEgitUIIsStarted();
-		EGitUtils.cloneRepository(
-					gitUrl, Constants.DEFAULT_REMOTE_NAME, gitRef, destination, EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
+		EGitUtils.cloneRepository(gitUrl, Constants.DEFAULT_REMOTE_NAME, gitRef, destination,
+				EGitUIUtils.ADD_TO_REPOVIEW_TASK, monitor);
 		return destination;
 	}
 
@@ -274,8 +284,7 @@ public class ImportProjectOperation {
 	}
 
 	protected boolean cloneDestinationExists() {
-		return cloneDestination != null
-				&& cloneDestination.exists();
+		return cloneDestination != null && cloneDestination.exists();
 	}
 
 	private static Collection<String> sanitize(Collection<String> filters) {
@@ -292,7 +301,6 @@ public class ImportProjectOperation {
 	}
 
 	private static String makePlatformDependent(String path) {
-		return path.replaceAll("/", PLATFORM_SEPARATOR)
-				   .replaceAll("\\\\", PLATFORM_SEPARATOR);
+		return path.replaceAll("/", PLATFORM_SEPARATOR).replaceAll("\\\\", PLATFORM_SEPARATOR);
 	}
 }

@@ -27,13 +27,13 @@ import com.openshift.restclient.model.route.IRoute;
  * Explorer view.
  */
 public class ServerSettingsWizard extends Wizard {
-	
+
 	private static final String WIZARD_TITLE = "OpenShift Server Adapter Settings";
 
 	private final ServerSettingsWizardPage serverSettingsWizardPage;
-	
+
 	private IServer createdServer = null;
-	
+
 	/**
 	 * Invoked when launched from explorer
 	 * 
@@ -41,13 +41,12 @@ public class ServerSettingsWizard extends Wizard {
 	 * @param connection the current OpenShift {@link Connection}
 	 * @param resource the selected resource
 	 */
-	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, 
-			final IResource resource, final IRoute route) {
+	public ServerSettingsWizard(final IServerWorkingCopy server, final Connection connection, final IResource resource,
+			final IRoute route) {
 		setWindowTitle(WIZARD_TITLE);
-		this.serverSettingsWizardPage = 
-				new ServerSettingsWizardPage(this, server, connection, resource, route);
+		this.serverSettingsWizardPage = new ServerSettingsWizardPage(this, server, connection, resource, route);
 	}
-	
+
 	@Override
 	public void addPages() {
 		addPage(this.serverSettingsWizardPage);

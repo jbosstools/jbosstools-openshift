@@ -25,26 +25,26 @@ public class PojoEventBridge implements PropertyChangeListener {
 	public PojoEventBridge() {
 	}
 
-	public PojoEventBridge(String sourceProperty, ObservablePojo source, String destinationProperty, ObservablePojo destination) {
+	public PojoEventBridge(String sourceProperty, ObservablePojo source, String destinationProperty,
+			ObservablePojo destination) {
 		listenTo(sourceProperty, source);
 		forwardTo(destinationProperty, destination);
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		if (destination == null 
-				|| destinationProperty == null) {
+		if (destination == null || destinationProperty == null) {
 			return;
 		}
-		
+
 		destination.firePropertyChange(destinationProperty, event.getOldValue(), event.getNewValue());
 	}
-	
+
 	public PojoEventBridge listenTo(String sourceProperty, IObservablePojo source) {
 		source.addPropertyChangeListener(sourceProperty, this);
 		return this;
 	}
-		
+
 	public PojoEventBridge forwardTo(String destinationProperty, ObservablePojo destination) {
 		this.destinationProperty = destinationProperty;
 		this.destination = destination;

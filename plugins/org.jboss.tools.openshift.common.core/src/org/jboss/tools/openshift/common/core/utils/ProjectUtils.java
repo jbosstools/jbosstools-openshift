@@ -24,46 +24,39 @@ public class ProjectUtils {
 
 	private static final String RSE_INTERNAL_PROJECTS = "RemoteSystems";
 	private static final String EXTERNAL_PLUGIN_LIBRARIES = "External Plug-in Libraries"; // "External Plug-in Libraries" 
-	
+
 	public static boolean exists(IProject project) {
-		return project != null
-				&& project.exists();
+		return project != null && project.exists();
 	}
 
 	public static boolean exists(String name) {
 		return exists(ResourcesPlugin.getWorkspace().getRoot().getProject(name));
 	}
 
-	
 	public static IProject getProject(String name) {
 		if (StringUtils.isEmptyOrNull(name)) {
 			return null;
 		}
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(name);
-		return exists(project)?project:null;
+		return exists(project) ? project : null;
 	}
-	
+
 	public static boolean isAccessible(IProject project) {
-		return project != null
-				&& project.isAccessible();
+		return project != null && project.isAccessible();
 	}
 
 	public static List<IProject> getAllAccessibleProjects(boolean excludeInternalProjects) {
-		return Arrays.stream(ResourcesPlugin.getWorkspace().getRoot().getProjects())
-					 .filter((IProject project) -> { 
-							if (isAccessible(project)) {
-								if (!excludeInternalProjects) {
-									return true;
-								} else {
-									return !(isInternalRSE(project.getName())
-											|| isInternalPde(project.getName()));
+		return Arrays.stream(ResourcesPlugin.getWorkspace().getRoot().getProjects()).filter((IProject project) -> {
+			if (isAccessible(project)) {
+				if (!excludeInternalProjects) {
+					return true;
+				} else {
+					return !(isInternalRSE(project.getName()) || isInternalPde(project.getName()));
 
-								}
-							}
-							return false;
-						 }
-					 )
-					 .collect(Collectors.toList());
+				}
+			}
+			return false;
+		}).collect(Collectors.toList());
 	}
 
 	public static String[] getAllAccessibleProjectNames() {
@@ -71,16 +64,13 @@ public class ProjectUtils {
 	}
 
 	public static String[] getAllAccessibleProjectNames(boolean excludeInternalProjects) {
-		return getAllAccessibleProjects(excludeInternalProjects)
-				.stream()
-				.map(IProject::getName)
-				.toArray(String[]::new);
+		return getAllAccessibleProjects(excludeInternalProjects).stream().map(IProject::getName).toArray(String[]::new);
 	}
 
 	public static List<IProject> getAllAccessibleProjects() {
 		return getAllAccessibleProjects(true);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the given project name matches the name used
 	 * for internal rse projects.
@@ -89,8 +79,7 @@ public class ProjectUtils {
 	 * @return
 	 */
 	public static boolean isInternalRSE(String projectName) {
-		return projectName != null
-				&& projectName.startsWith(RSE_INTERNAL_PROJECTS);
+		return projectName != null && projectName.startsWith(RSE_INTERNAL_PROJECTS);
 	}
 
 	/**
@@ -101,8 +90,7 @@ public class ProjectUtils {
 	 * @return
 	 */
 	public static boolean isInternalPde(String projectName) {
-		return projectName != null
-				&& projectName.startsWith(EXTERNAL_PLUGIN_LIBRARIES);
+		return projectName != null && projectName.startsWith(EXTERNAL_PLUGIN_LIBRARIES);
 	}
 
 	public static String getName(IProject project) {

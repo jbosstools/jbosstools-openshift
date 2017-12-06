@@ -33,7 +33,7 @@ public class EditConnectionHandler extends AbstractHandler {
 	}
 
 	protected Object openConnectionWizard(IConnection connection, ExecutionEvent event) {
-		final IWizard connectToOpenShiftWizard = new ConnectionWizard(connection, 
+		final IWizard connectToOpenShiftWizard = new ConnectionWizard(connection,
 				ConnectionWizard.EDIT_CONNECTION_TITLE);
 		WizardUtils.openWizardDialog(connectToOpenShiftWizard, HandlerUtil.getActiveShell(event));
 		return Status.OK_STATUS;

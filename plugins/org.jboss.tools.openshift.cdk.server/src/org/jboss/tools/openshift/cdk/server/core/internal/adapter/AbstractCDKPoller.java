@@ -14,7 +14,7 @@ import org.jboss.ide.eclipse.as.core.server.IServerStatePollerType;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 
 public abstract class AbstractCDKPoller implements IServerStatePoller2 {
-	
+
 	protected IServer server;
 	protected boolean canceled, done;
 	protected boolean state;
@@ -26,7 +26,6 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 		return server;
 	}
 
-
 	@Override
 	public void beginPolling(IServer server, boolean expectedState) throws PollingException {
 		this.server = server;
@@ -35,11 +34,11 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 		this.state = !expectedState;
 		launchThread();
 	}
-	
+
 	protected abstract void launchThread();
-	
+
 	protected void launchThread(String name) {
-		Thread t = new Thread(new Runnable(){
+		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				pollerRun();
@@ -47,64 +46,63 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 		}, "CDK Poller"); //$NON-NLS-1$
 		t.start();
 	}
-	
-	
+
 	protected void pollerRun() {
 		setStateInternal(false, state);
-    	Map<String,String> env = createEnvironment(server);
-		while(aborted == null && !canceled && !done) {
+		Map<String, String> env = createEnvironment(server);
+		while (aborted == null && !canceled && !done) {
 			IStatus stat = onePingSafe(server, env);
 			int status = stat.getSeverity();
-			boolean completeUp = ( status == IStatus.OK && expectedState);
+			boolean completeUp = (status == IStatus.OK && expectedState);
 			boolean completeDown = (status == IStatus.ERROR && !expectedState);
-			if( completeUp || completeDown) {
+			if (completeUp || completeDown) {
 				setStateInternal(true, expectedState);
 			}
 			try {
 				Thread.sleep(700);
-			} catch(InterruptedException ie) {} // ignore
+			} catch (InterruptedException ie) {
+			} // ignore
 		}
 	}
-	
+
 	protected abstract Map<String, String> createEnvironment(IServer server);
-	
+
 	protected synchronized void setStateInternal(boolean done, boolean state) {
 		this.done = done;
 		this.state = state;
 	}
-	
-
 
 	@Override
 	public IStatus getCurrentStateSynchronous(IServer server) {
 		Map<String, String> env = createEnvironment(server);
-    	int severity = onePingSafe(server, env).getSeverity();
-		if( severity == IStatus.OK ) {
+		int severity = onePingSafe(server, env).getSeverity();
+		if (severity == IStatus.OK) {
 			return new Status(IStatus.OK, CDKCoreActivator.PLUGIN_ID, "CDK Instance is Up");
-		} else if( severity == IStatus.ERROR){
+		} else if (severity == IStatus.ERROR) {
 			return new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "CDK Instance is shutoff");
 		} else {
 			return new Status(IStatus.INFO, CDKCoreActivator.PLUGIN_ID, "CDK Instance is indeterminate");
 		}
 	}
-	
-	protected IStatus onePingSafe(IServer server, Map<String,String> env) {
-	    try {
-	    	IStatus ret = onePing(server, env);
-	    	return ret;
-    	} catch(PollingException pe) {
-    		aborted = pe;
+
+	protected IStatus onePingSafe(IServer server, Map<String, String> env) {
+		try {
+			IStatus ret = onePing(server, env);
+			return ret;
+		} catch (PollingException pe) {
+			aborted = pe;
 		} catch (TimeoutException te) {
 			aborted = new PollingException(te.getMessage(), te);
 		} catch (IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(ioe.getMessage(), ioe);
 		}
-		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID, "Response status indicates the CDK is starting.");
+		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID,
+				"Response status indicates the CDK is starting.");
 	}
-	
+
 	protected abstract IStatus onePing(IServer server, Map<String, String> env)
 			throws PollingException, IOException, TimeoutException;
-	
+
 	@Override
 	public synchronized boolean isComplete() throws PollingException, RequiresInfoException {
 		return done;
@@ -132,13 +130,13 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 	public PollingException getPollingException() {
 		return aborted;
 	}
-	
+
 	@Override
 	public void provideCredentials(Properties credentials) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public IServerStatePollerType getPollerType() {
 		// TODO Auto-generated method stub
@@ -148,8 +146,8 @@ public abstract class AbstractCDKPoller implements IServerStatePoller2 {
 	@Override
 	public void setPollerType(IServerStatePollerType type) {
 		// TODO Auto-generated method stub
-		
-	}	
+
+	}
 
 	@Override
 	public List<String> getRequiredProperties() {

@@ -52,12 +52,10 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 		}
 
 		try {
-			removeEmbeddedCartridges(
-					getRemovedCartridges(selectedCartridges, application.getEmbeddedCartridges()),
+			removeEmbeddedCartridges(getRemovedCartridges(selectedCartridges, application.getEmbeddedCartridges()),
 					application, monitor);
 			this.addedCartridges = addEmbeddedCartridges(
-					getAddedCartridges(selectedCartridges, application.getEmbeddedCartridges()), 
-					application, monitor);
+					getAddedCartridges(selectedCartridges, application.getEmbeddedCartridges()), application, monitor);
 			return Status.OK_STATUS;
 		} catch (OpenShiftException e) {
 			return ExpressUIActivator.createErrorStatus("Could not embed cartridges for application {0}", e,
@@ -69,8 +67,8 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 		return addedCartridges;
 	}
 
-	private void removeEmbeddedCartridges(List<ICartridge> cartridgesToRemove,
-			final IApplication application, IProgressMonitor monitor) throws OpenShiftException {
+	private void removeEmbeddedCartridges(List<ICartridge> cartridgesToRemove, final IApplication application,
+			IProgressMonitor monitor) throws OpenShiftException {
 		if (cartridgesToRemove.isEmpty()) {
 			return;
 		}
@@ -88,8 +86,7 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 
 	private List<IEmbeddedCartridge> addEmbeddedCartridges(List<ICartridge> cartridgesToAdd,
 			final IApplication application, IProgressMonitor monitor) throws OpenShiftException {
-		if (cartridgesToAdd.isEmpty()
-				|| monitor.isCanceled()) {
+		if (cartridgesToAdd.isEmpty() || monitor.isCanceled()) {
 			return Collections.emptyList();
 		}
 		Collections.sort(cartridgesToAdd, new CartridgeAddRemovePriorityComparator());
@@ -122,9 +119,10 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 	private static class CartridgeAddRemovePriorityComparator implements Comparator<ICartridge> {
 
 		private static final ICartridgeQuery mySqlMatcher = new CartridgeNameQuery(IEmbeddedCartridge.NAME_MYSQL);
-		private static final ICartridgeQuery postgresqlMatcher = new CartridgeNameQuery(IEmbeddedCartridge.NAME_POSTGRESQL);
+		private static final ICartridgeQuery postgresqlMatcher = new CartridgeNameQuery(
+				IEmbeddedCartridge.NAME_POSTGRESQL);
 		private static final ICartridgeQuery mongodbMatcher = new CartridgeNameQuery(IEmbeddedCartridge.NAME_MONGODB);
-		
+
 		@Override
 		public int compare(ICartridge thisCartridge, ICartridge thatCartridge) {
 			// mysql has to be added/removed before phpmyadmin
@@ -144,7 +142,5 @@ public class EmbedCartridgesJob extends AbstractDelegatingMonitorJob {
 			return 0;
 		}
 
-		
-	
 	}
 }

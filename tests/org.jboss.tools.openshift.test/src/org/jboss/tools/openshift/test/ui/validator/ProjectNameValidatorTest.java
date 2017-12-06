@@ -21,7 +21,7 @@ import org.junit.Test;
 public class ProjectNameValidatorTest extends AbstractValidatorTest {
 
 	public ProjectNameValidatorTest() {
-		super(new ProjectNameValidator("default message", Arrays.asList("nope","back off")));
+		super(new ProjectNameValidator("default message", Arrays.asList("nope", "back off")));
 	}
 
 	@Test

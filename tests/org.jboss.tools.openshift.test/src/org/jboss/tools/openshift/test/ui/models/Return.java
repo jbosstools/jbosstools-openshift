@@ -7,7 +7,7 @@ public class Return<T> implements InvocationHandler {
 	private T value;
 
 	public Return(T value) {
-		this.value= value;
+		this.value = value;
 	}
 
 	@Override

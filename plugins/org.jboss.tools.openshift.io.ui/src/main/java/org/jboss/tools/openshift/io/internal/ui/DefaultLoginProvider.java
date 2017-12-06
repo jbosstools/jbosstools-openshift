@@ -39,7 +39,7 @@ public class DefaultLoginProvider implements LoginProvider {
 		private ICluster cluster;
 		private IAccount account;
 		private LoginResponse response;
-		
+
 		public LoginJob(ICluster cluster, IAccount account) {
 			super("Logging to OpenShift.io");
 			this.cluster = cluster;
@@ -59,7 +59,7 @@ public class DefaultLoginProvider implements LoginProvider {
 		public boolean isRunninginUI() {
 			return runninginUI;
 		}
-		
+
 		public void setShouldRun(boolean shouldRun) {
 			this.shouldRun = shouldRun;
 		}
@@ -68,7 +68,7 @@ public class DefaultLoginProvider implements LoginProvider {
 			return response;
 		}
 	}
-	
+
 	@Override
 	public LoginResponse login(ICluster cluster, IAccount account) {
 		if (null == Display.getCurrent()) {

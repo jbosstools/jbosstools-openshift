@@ -24,7 +24,7 @@ public class TabFolderSelectionProperty extends WidgetValueProperty {
 	public TabFolderSelectionProperty() {
 		super(SWT.Selection);
 	}
-	
+
 	@Override
 	public Object getValueType() {
 		return Integer.TYPE;
@@ -32,12 +32,12 @@ public class TabFolderSelectionProperty extends WidgetValueProperty {
 
 	@Override
 	protected Object doGetValue(Object source) {
-		return Integer.valueOf(((TabFolder)source).getSelectionIndex());
+		return Integer.valueOf(((TabFolder) source).getSelectionIndex());
 	}
 
 	@Override
 	protected void doSetValue(Object source, Object value) {
-		((TabFolder)source).setSelection((Integer) value);
+		((TabFolder) source).setSelection((Integer) value);
 	}
 
 }

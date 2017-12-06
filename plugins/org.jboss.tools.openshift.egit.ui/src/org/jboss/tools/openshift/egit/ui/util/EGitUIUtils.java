@@ -40,7 +40,7 @@ public class EGitUIUtils {
 			repositoryUtil.addConfiguredRepository(repository.getDirectory());
 		}
 	};
-	
+
 	public static String getEGitDefaultRepositoryPath() {
 		return RepositoryUtil.getDefaultRepositoryDir();
 	}
@@ -65,7 +65,7 @@ public class EGitUIUtils {
 	public static void ensureEgitUIIsStarted() {
 		Activator.getDefault();
 	}
-	
+
 	@SuppressWarnings("restriction")
 	public static void openGitSharingWizard(Shell shell, IProject project) {
 		if (project == null) {

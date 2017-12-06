@@ -19,7 +19,7 @@ public class UsageStats {
 	private static final int SUCCESS = 1;
 	private static final int FAILURE = 0;
 	private static final String HOSTTYPE_OTHER = "other";
-	
+
 	private static UsageStats INSTANCE = null;
 
 	private UsageEventType newConnectionV2;
@@ -37,82 +37,67 @@ public class UsageStats {
 	}
 
 	private UsageStats() {
-		this.newConnectionV2 = createEventType(
-				"new_connection_v2", // actionName
+		this.newConnectionV2 = createEventType("new_connection_v2", // actionName
 				"host type: redhat/other", // labelDescription
 				null);
-		this.newApplicationV2 = createEventType(
-				"new_app_v2", // actionName
+		this.newApplicationV2 = createEventType("new_app_v2", // actionName
 				"host type: redhat/other", // labelDescription
 				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.importApplicationV2 = createEventType(
-				"import_app_v2", // actionName
+		this.importApplicationV2 = createEventType("import_app_v2", // actionName
 				"host type: redhat/other", // labelDescription
 				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.newConnectionV3 = createEventType(
-				"new_connection_v3", // actionName
+		this.newConnectionV3 = createEventType("new_connection_v3", // actionName
 				"host type: redhat/other", // labelDescription
 				null);
-		this.newApplicationV3 = createEventType(
-				"new_app_v3", // actionName
+		this.newApplicationV3 = createEventType("new_app_v3", // actionName
 				"host type: redhat/other", // labelDescription
 				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
-		this.importApplicationV3 = createEventType(
-				"import_app_v3", // actionName
+		this.importApplicationV3 = createEventType("import_app_v3", // actionName
 				"host type: redhat/other", // labelDescription
 				UsageEventType.SUCCESFULL_FAILED_VALUE_DESCRIPTION);
 	}
 
 	private UsageEventType createEventType(String actionName, String labelDescription, String valueDescription) {
-		UsageEventType eventType = new UsageEventType(
-				OPENSHIFT_COMPONENT,
-				UsageEventType.getVersion(OpenShiftCommonCoreActivator.getDefault()),
-				null,
-				actionName,
-				labelDescription,
-				valueDescription);
+		UsageEventType eventType = new UsageEventType(OPENSHIFT_COMPONENT,
+				UsageEventType.getVersion(OpenShiftCommonCoreActivator.getDefault()), null, actionName,
+				labelDescription, valueDescription);
 		UsageReporter.getInstance().registerEvent(eventType);
 		return eventType;
 	}
 
 	public void newV2Connection(String host) {
-		UsageReporter.getInstance().trackEvent(
-				newConnectionV2.event(getHostType(host)));
+		UsageReporter.getInstance().trackEvent(newConnectionV2.event(getHostType(host)));
 	}
 
 	public void newV2Application(String host, boolean success) {
-		UsageReporter.getInstance().trackEvent(
-				newApplicationV2.event(getHostType(host), success ? SUCCESS : FAILURE));
+		UsageReporter.getInstance().trackEvent(newApplicationV2.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
 
 	public void importV2Application(String host, boolean success) {
-		UsageReporter.getInstance().trackEvent(
-				importApplicationV2.event(getHostType(host), success ? SUCCESS : FAILURE));
+		UsageReporter.getInstance()
+				.trackEvent(importApplicationV2.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
 
 	public void newV3Connection(String host) {
-		UsageReporter.getInstance().trackEvent(
-				newConnectionV3.event(getHostType(host)));
+		UsageReporter.getInstance().trackEvent(newConnectionV3.event(getHostType(host)));
 	}
 
 	public void newV3Application(String host, boolean success) {
-		UsageReporter.getInstance().trackEvent(
-				newApplicationV3.event(getHostType(host), success ? SUCCESS : FAILURE));
+		UsageReporter.getInstance().trackEvent(newApplicationV3.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
 
 	public void importV3Application(String host, boolean success) {
-		UsageReporter.getInstance().trackEvent(
-				importApplicationV3.event(getHostType(host), success ? SUCCESS : FAILURE));
+		UsageReporter.getInstance()
+				.trackEvent(importApplicationV3.event(getHostType(host), success ? SUCCESS : FAILURE));
 	}
 
 	private static String getHostType(String host) {
 		if (host == null) {
 			return HOSTTYPE_OTHER;
-		} 
-		
+		}
+
 		String lowercaseHost = host.toLowerCase();
-		if (lowercaseHost.contains("redhat")
-				|| lowercaseHost.endsWith("openshift.com")) {
+		if (lowercaseHost.contains("redhat") || lowercaseHost.endsWith("openshift.com")) {
 			return host;
 		} else {
 			return HOSTTYPE_OTHER;

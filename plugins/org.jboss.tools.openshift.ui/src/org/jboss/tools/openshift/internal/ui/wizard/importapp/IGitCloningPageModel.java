@@ -30,9 +30,11 @@ public interface IGitCloningPageModel {
 	public static final String PROPERTY_GIT_CONTEXT_DIR = "gitContextDir";
 
 	public void setCloneDestination(String path);
+
 	public String getCloneDestination();
 
 	public void setUseDefaultCloneDestination(boolean useDefault);
+
 	public boolean isUseDefaultCloneDestination();
 
 	public String getApplicationName();
@@ -48,18 +50,21 @@ public interface IGitCloningPageModel {
 	 * @see File
 	 */
 	public File getRepoPath();
+
 	public Repository getRepository();
 
 	public boolean isReuseGitRepository();
+
 	public void setReuseGitRepository(boolean reuseGitRepository);
 
 	public void setGitContextDir(String contextDir);
+
 	public String getGitContextDir();
-	
+
 	public String getGitRef();
-	
+
 	public String getGitUrl();
-	
+
 	/**
 	 * Returns {@code true} if this model is set to checkout the branch
 	 * {@link #getGitRef()} in the git repo located at
@@ -68,6 +73,7 @@ public interface IGitCloningPageModel {
 	 * @return
 	 */
 	public boolean isCheckoutBranchReusedRepo();
+
 	public void setCheckoutBranchReusedRepo(boolean checkout);
 
 	/**

@@ -15,5 +15,5 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedD
 public interface IAdvancedConnectionPropertiesEditor extends IDetailView {
 
 	void saveChanges(ConnectionWizardPageModel pageModel);
-	
+
 }

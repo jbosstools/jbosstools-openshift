@@ -65,13 +65,11 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 	private CheckboxTableViewer viewer;
 
 	public ConfigureMarkersWizardPage(IProject project, IWizard wizard) {
-		super(
-				"Configure OpenShift Markers",
-				NLS.bind("Add or remove markers to enable OpenShift features in the application {0}. "
-						+ "\nThe markers will be created/deleted directly in {1}", 
-						ExpressServerUtils.getProjectAttribute(ExpressServerUtils.SETTING_APPLICATION_NAME, "unknown", project),
-						OpenShiftProjectUtils.getMarkersFolder(project).getFullPath()),
-				"ConfigureMarkers", wizard);
+		super("Configure OpenShift Markers", NLS.bind(
+				"Add or remove markers to enable OpenShift features in the application {0}. "
+						+ "\nThe markers will be created/deleted directly in {1}",
+				ExpressServerUtils.getProjectAttribute(ExpressServerUtils.SETTING_APPLICATION_NAME, "unknown", project),
+				OpenShiftProjectUtils.getMarkersFolder(project).getFullPath()), "ConfigureMarkers", wizard);
 		this.pageModel = new ConfigureMarkersWizardPageModel(project);
 	}
 
@@ -82,38 +80,29 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 		// markers table
 		Composite tableContainer = new Composite(parent, SWT.NONE);
 		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 250).grab(true, true).applyTo(tableContainer);
-		dbc.bindSet(
-				ViewerProperties.checkedElements(IOpenShiftMarker.class).observe(viewer),
-				BeanProperties.set(
-						ConfigureMarkersWizardPageModel.PROPERTY_CHECKED_MARKERS)
-						.observe(pageModel));
-		ValueBindingBuilder
-				.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(BeanProperties.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER)
-						.observe(pageModel))
+		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).hint(SWT.DEFAULT, 250).grab(true, true)
+				.applyTo(tableContainer);
+		dbc.bindSet(ViewerProperties.checkedElements(IOpenShiftMarker.class).observe(viewer),
+				BeanProperties.set(ConfigureMarkersWizardPageModel.PROPERTY_CHECKED_MARKERS).observe(pageModel));
+		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
+				.to(BeanProperties.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER).observe(pageModel))
 				.in(dbc);
 
 		// marker description
 		Group descriptionGroup = new Group(parent, SWT.NONE);
 		descriptionGroup.setText("Marker Description");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionGroup);
-		GridLayoutFactory.fillDefaults()
-				.margins(6, 6).applyTo(descriptionGroup);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionGroup);
+		GridLayoutFactory.fillDefaults().margins(6, 6).applyTo(descriptionGroup);
 		StyledText descriptionText = new StyledText(descriptionGroup, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
 		descriptionText.setAlwaysShowScrollBars(false);
 		StyledTextUtils.setTransparent(descriptionText);
-		GridDataFactory.fillDefaults()
-				.hint(SWT.DEFAULT, 80).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(descriptionText);
-		dbc.bindSet(
-				ViewersObservables.observeCheckedElements(viewer, IOpenShiftMarker.class),
+		GridDataFactory.fillDefaults().hint(SWT.DEFAULT, 80).align(SWT.FILL, SWT.FILL).grab(true, false)
+				.applyTo(descriptionText);
+		dbc.bindSet(ViewersObservables.observeCheckedElements(viewer, IOpenShiftMarker.class),
 				BeanProperties.set(ConfigureMarkersWizardPageModel.PROPERTY_CHECKED_MARKERS).observe(pageModel));
 		ValueBindingBuilder
-				.bind(WidgetProperties.text().observe(descriptionText))
-				.notUpdating(BeanProperties.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER)
-						.observe(pageModel))
+				.bind(WidgetProperties.text().observe(descriptionText)).notUpdating(BeanProperties
+						.value(ConfigureMarkersWizardPageModel.PROPERTY_SELECTED_MARKER).observe(pageModel))
 				.converting(new Converter(IOpenShiftMarker.class, String.class) {
 
 					@Override
@@ -124,13 +113,12 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 						return ((IOpenShiftMarker) fromObject).getDescription();
 					}
 
-				})
-				.in(dbc);
+				}).in(dbc);
 	}
 
 	protected CheckboxTableViewer createTable(Composite tableContainer) {
-		Table table =
-				new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
+		Table table = new Table(tableContainer,
+				SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.CHECK);
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		TableColumnLayout tableLayout = new TableColumnLayout();
@@ -144,8 +132,8 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				if (e1 instanceof IEmbeddableCartridge && e2 instanceof IEmbeddableCartridge) {
-					return ((IEmbeddableCartridge) e1).getDisplayName().compareTo(
-							((IEmbeddableCartridge) e2).getDisplayName());
+					return ((IEmbeddableCartridge) e1).getDisplayName()
+							.compareTo(((IEmbeddableCartridge) e2).getDisplayName());
 				}
 				return super.compare(viewer, e1, e2);
 			}
@@ -186,7 +174,7 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 			// ignore
 		}
 	}
-	
+
 	private void setViewerCheckedElements(final Collection<IOpenShiftMarker> markers) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
@@ -206,7 +194,7 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		});
 	}
-	
+
 	/**
 	 * Returns the markers that the user has removed.
 	 * 
@@ -215,7 +203,7 @@ public class ConfigureMarkersWizardPage extends AbstractOpenShiftWizardPage {
 	public Collection<IOpenShiftMarker> getRemovedMarkers() {
 		return pageModel.getRemovedMarkers();
 	}
-	
+
 	/**
 	 * Returns the markers that the user has added.
 	 * 

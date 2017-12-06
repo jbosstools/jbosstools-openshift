@@ -68,7 +68,7 @@ public class ExpressConnection extends AbstractConnection {
 	 * Hard-code the openshift UI activator id, due to backwards compatability issues
 	 */
 	private static final String SECURE_STORAGE_BASEKEY = "org.jboss.tools.openshift.express.ui";
-	
+
 	private String username;
 	private String password;
 	private IUser user;
@@ -83,21 +83,25 @@ public class ExpressConnection extends AbstractConnection {
 	public ExpressConnection(String host, ISSLCertificateCallback callback) {
 		this(null, null, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), false, null, callback);
 	}
-	
+
 	public ExpressConnection(String username, String host) {
 		this(username, null, host, false, null);
 	}
 
-	public ExpressConnection(String username, String host, ICredentialsPrompter prompter, ISSLCertificateCallback sslCallback) {
+	public ExpressConnection(String username, String host, ICredentialsPrompter prompter,
+			ISSLCertificateCallback sslCallback) {
 		this(username, null, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), false, null, sslCallback);
 		this.passwordPrompter = prompter;
 	}
 
-	public ExpressConnection(String username, String password, String host, boolean rememberPassword, ISSLCertificateCallback sslCallback) {
-		this(username, password, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), rememberPassword, null, sslCallback);
+	public ExpressConnection(String username, String password, String host, boolean rememberPassword,
+			ISSLCertificateCallback sslCallback) {
+		this(username, password, UrlUtils.getScheme(host), UrlUtils.cutScheme(host), rememberPassword, null,
+				sslCallback);
 	}
 
-	protected ExpressConnection(String username, String password, String scheme, String host, boolean rememberPassword, IUser user, ISSLCertificateCallback sslCallback) {
+	protected ExpressConnection(String username, String password, String scheme, String host, boolean rememberPassword,
+			IUser user, ISSLCertificateCallback sslCallback) {
 		super(scheme, host);
 		this.username = username;
 		this.password = password;
@@ -141,7 +145,7 @@ public class ExpressConnection extends AbstractConnection {
 		}
 		return super.getHost();
 	}
-	
+
 	@Override
 	public String getScheme() {
 		if (isDefaultHost()) {
@@ -157,10 +161,9 @@ public class ExpressConnection extends AbstractConnection {
 	}
 
 	private boolean isDefaultHost(String host) {
-		return host == null
-				|| UrlUtils.cutScheme(host).isEmpty();
+		return host == null || UrlUtils.cutScheme(host).isEmpty();
 	}
-	
+
 	@Override
 	public boolean isRememberPassword() {
 		return rememberPassword;
@@ -172,24 +175,23 @@ public class ExpressConnection extends AbstractConnection {
 	}
 
 	public boolean canPromptForPassword() {
-		return this.didPromptForPassword == false
-				&& promptPasswordEnabled;
+		return this.didPromptForPassword == false && promptPasswordEnabled;
 	}
 
 	@Override
 	public void enablePromptCredentials(boolean enable) {
 		this.promptPasswordEnabled = enable;
 	}
-	
+
 	@Override
 	public boolean isEnablePromptCredentials() {
 		return promptPasswordEnabled;
 	}
-	
+
 	public void setSSLCertificateCallback(ISSLCertificateCallback callback) {
 		this.sslCallback = callback;
 	}
-	
+
 	/**
 	 * Connects to OpenShift. Will do nothing if this user is already
 	 * connected.
@@ -232,17 +234,14 @@ public class ExpressConnection extends AbstractConnection {
 			return true;
 		}
 	}
-	
+
 	protected IUser doCreateUser() {
-		final String userId = ExpressCoreActivator.PLUGIN_ID + " " + ExpressCoreActivator.getDefault().getBundle().getVersion();
+		final String userId = ExpressCoreActivator.PLUGIN_ID + " "
+				+ ExpressCoreActivator.getDefault().getBundle().getVersion();
 
 		try {
-			return new ConnectionBuilder(getHost())
-				.credentials(username, password)
-				.clientId(userId)
-				.sslCertificateCallback(sslCallback)
-				.create()
-				.getUser();
+			return new ConnectionBuilder(getHost()).credentials(username, password).clientId(userId)
+					.sslCertificateCallback(sslCallback).create().getUser();
 		} catch (IOException e) {
 			throw new OpenShiftException("Could not connect for user {0} - {1}", username, getHost());
 		}
@@ -253,14 +252,13 @@ public class ExpressConnection extends AbstractConnection {
 				.getClientReadTimeout(ClientSystemProperties.getReadTimeoutSeconds());
 		ClientSystemProperties.setReadTimeoutSeconds(timeout);
 	}
-	
+
 	/**
 	 * Attempts to load the password from the secure storage, only at first time
 	 * it is called.
 	 */
 	private void loadPassword() {
-		if (StringUtils.isEmpty(password)
-				&& !passwordLoaded) {
+		if (StringUtils.isEmpty(password) && !passwordLoaded) {
 			this.password = getPassword(getSecureStore(getHost(), getUsername()));
 			this.passwordLoaded = true;
 			this.rememberPassword = (password != null);
@@ -277,14 +275,13 @@ public class ExpressConnection extends AbstractConnection {
 
 	private String updateUsername(IUser user) {
 		if (!user.getRhlogin().equals(username)) {
-			ExpressCoreActivator.getDefault().getLog().log(
-					new Status(Status.WARNING, ExpressCoreActivator.PLUGIN_ID, 
-							NLS.bind("User {0} was logged in as {1}", username, user.getRhlogin())));
+			ExpressCoreActivator.getDefault().getLog().log(new Status(Status.WARNING, ExpressCoreActivator.PLUGIN_ID,
+					NLS.bind("User {0} was logged in as {1}", username, user.getRhlogin())));
 		}
 		this.username = user.getRhlogin();
 		return username;
 	}
-	
+
 	private boolean promptForCredentials() {
 		if (passwordPrompter == null) {
 			return false;
@@ -332,7 +329,7 @@ public class ExpressConnection extends AbstractConnection {
 			return null;
 		}
 	}
-	
+
 	public List<IEmbeddableCartridge> getEmbeddableCartridges() throws OpenShiftException {
 		if (connect()) {
 			return user.getConnection().getEmbeddableCartridges();
@@ -348,7 +345,7 @@ public class ExpressConnection extends AbstractConnection {
 			return null;
 		}
 	}
-	
+
 	public List<IQuickstart> getQuickstarts() throws OpenShiftException {
 		if (connect()) {
 			return user.getConnection().getQuickstarts();
@@ -356,7 +353,6 @@ public class ExpressConnection extends AbstractConnection {
 			return null;
 		}
 	}
-
 
 	public void load() {
 		getDomains();
@@ -368,7 +364,7 @@ public class ExpressConnection extends AbstractConnection {
 		}
 		return domain.getApplicationByName(name);
 	}
-	
+
 	public boolean hasApplication(String name, IDomain domain) throws OpenShiftException {
 		return getApplication(name, domain) != null;
 	}
@@ -388,7 +384,7 @@ public class ExpressConnection extends AbstractConnection {
 		// trigger authentication, domain loading
 		getDomains();
 		//if authentication failed, user is null
-		if(!isConnected()) {
+		if (!isConnected()) {
 			return null;
 		}
 		return user.getDomain(id);
@@ -399,14 +395,13 @@ public class ExpressConnection extends AbstractConnection {
 			return null;
 		} else {
 			List<IDomain> domains = getDomains();
-			if (domains == null
-					|| domains.isEmpty()) {
+			if (domains == null || domains.isEmpty()) {
 				return null;
 			}
 			return domains.get(0);
 		}
 	}
-	
+
 	public List<IDomain> getDomains() throws OpenShiftException {
 		if (!connect()) {
 			return Collections.emptyList();
@@ -422,7 +417,7 @@ public class ExpressConnection extends AbstractConnection {
 			domain.destroy(force);
 		}
 	}
-	
+
 	public boolean isLoaded() throws OpenShiftException {
 		return isDomainLoaded;
 	}
@@ -471,8 +466,8 @@ public class ExpressConnection extends AbstractConnection {
 		}
 	}
 
-	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey) throws OpenShiftUnknonwSSHKeyTypeException,
-			OpenShiftException {
+	public IOpenShiftSSHKey getSSHKeyByPublicKey(String publicKey)
+			throws OpenShiftUnknonwSSHKeyTypeException, OpenShiftException {
 		if (connect()) {
 			return user.getSSHKeyByPublicKey(publicKey);
 		} else {
@@ -514,11 +509,9 @@ public class ExpressConnection extends AbstractConnection {
 
 	private void saveOrClearPassword(String username, String host, String password) {
 		SecureStore store = getSecureStore(host, username);
-		if (store != null
-				&& !StringUtils.isEmpty(username)) {
+		if (store != null && !StringUtils.isEmpty(username)) {
 			try {
-				if (isRememberPassword()
-						&& !StringUtils.isEmpty(password)) {
+				if (isRememberPassword() && !StringUtils.isEmpty(password)) {
 					store.put(SECURE_STORAGE_PASSWORD, password);
 				} else {
 					store.remove(SECURE_STORAGE_PASSWORD);
@@ -532,8 +525,7 @@ public class ExpressConnection extends AbstractConnection {
 
 	private String getPassword(SecureStore store) {
 		String password = null;
-		if (store != null
-				&& !StringUtils.isEmpty(getUsername())) {
+		if (store != null && !StringUtils.isEmpty(getUsername())) {
 			try {
 				password = store.get(SECURE_STORAGE_PASSWORD);
 			} catch (SecureStoreException e) {
@@ -549,7 +541,7 @@ public class ExpressConnection extends AbstractConnection {
 	private SecureStore getSecureStore(final String host, final String username) {
 		return new SecureStore(new OpenShiftSecureStorageKey(SECURE_STORAGE_BASEKEY, host, username));
 	}
-	
+
 	public void removeSecureStoreData() {
 		SecureStore store = getSecureStore(getHost(), getUsername());
 		if (store != null) {
@@ -564,9 +556,7 @@ public class ExpressConnection extends AbstractConnection {
 
 	public String getId() {
 		StringBuilder builder = new StringBuilder(username);
-		builder
-			.append(" at ")
-			.append(getHost());
+		builder.append(" at ").append(getHost());
 		if (isDefaultHost()) {
 			builder.append(" (default)");
 		}
@@ -606,26 +596,27 @@ public class ExpressConnection extends AbstractConnection {
 
 	@Override
 	public IConnection clone() {
-		return new ExpressConnection(getUsername(), getPassword(), getScheme(), getHost(), isRememberPassword(), null, sslCallback);
+		return new ExpressConnection(getUsername(), getPassword(), getScheme(), getHost(), isRememberPassword(), null,
+				sslCallback);
 	}
 
 	@Override
 	public void update(IConnection connection) {
 		Assert.isLegal(connection instanceof ExpressConnection);
-		
-		ExpressConnection otherConnection = (ExpressConnection) connection; 
+
+		ExpressConnection otherConnection = (ExpressConnection) connection;
 		setUsername(otherConnection.getUsername());
 		setPassword(otherConnection.getPassword());
 		setRememberPassword(otherConnection.isRememberPassword());
 		setUser(otherConnection.user);
 		this.sslCallback = otherConnection.sslCallback;
 	}
-	
+
 	@Override
 	public ConnectionType getType() {
 		return ConnectionType.Express;
 	}
-	
+
 	@Override
 	public void notifyUsage() {
 		UsageStats.getInstance().newV2Connection(getHost());

@@ -25,32 +25,37 @@ import com.openshift.restclient.model.IServicePort;
  * Validates the input Pod port
  */
 public class PodPortValidator implements IValidator {
-	
+
 	private static final int POD_PORT_MAXLENGTH = 63;
-	
+
 	private static final Pattern POD_PORT_REGEXP = Pattern.compile("[a-z0-9]([a-z0-9-]*[a-z0-9])*");
 
-	private static final IStatus  POD_PORT_FORMAT_ERROR_STATUS = ValidationStatus.error("The Pod port must be a unique integer\nor a name matching [a-z0-9]([a-z0-9-]*[a-z0-9])*");
+	private static final IStatus POD_PORT_FORMAT_ERROR_STATUS = ValidationStatus
+			.error("The Pod port must be a unique integer\nor a name matching [a-z0-9]([a-z0-9-]*[a-z0-9])*");
 
-	private static final IStatus CANCEL_STATUS = ValidationStatus.cancel("The Pod port must be a unique integer\nor the name of a port in the backend pods.");
-	
-	private static final IStatus POD_PORT_UNIQUE_ERROR_STATUS = ValidationStatus.error(NLS.bind(ServicePortDialog.UNIQUE_ERROR, "pod"));
-	private static final IStatus POD_PORT_LENGTH_ERROR_STATUS = ValidationStatus.error("Pod port name exceeds the maximum length " + POD_PORT_MAXLENGTH);
-	private static final IStatus POD_PORT_INTERVAL_ERROR_STATUS = ValidationStatus.error("Pod port number is out of valid interval from 0 to 65535");
+	private static final IStatus CANCEL_STATUS = ValidationStatus
+			.cancel("The Pod port must be a unique integer\nor the name of a port in the backend pods.");
+
+	private static final IStatus POD_PORT_UNIQUE_ERROR_STATUS = ValidationStatus
+			.error(NLS.bind(ServicePortDialog.UNIQUE_ERROR, "pod"));
+	private static final IStatus POD_PORT_LENGTH_ERROR_STATUS = ValidationStatus
+			.error("Pod port name exceeds the maximum length " + POD_PORT_MAXLENGTH);
+	private static final IStatus POD_PORT_INTERVAL_ERROR_STATUS = ValidationStatus
+			.error("Pod port number is out of valid interval from 0 to 65535");
 
 	private final String podPort;
-	
+
 	private final List<IServicePort> ports;
-	
+
 	public PodPortValidator(final String podPort, final List<IServicePort> ports) {
 		this.podPort = podPort;
 		this.ports = ports;
 	}
-	
+
 	@Override
 	public IStatus validate(final Object value) {
 		// port cannot be empty
-		if(StringUtils.isEmpty(value)) {
+		if (StringUtils.isEmpty(value)) {
 			return CANCEL_STATUS;
 		}
 		final String newPodPort = (String) value;
@@ -79,5 +84,5 @@ public class PodPortValidator implements IValidator {
 		}
 		return ValidationStatus.OK_STATUS;
 	}
-	
+
 }

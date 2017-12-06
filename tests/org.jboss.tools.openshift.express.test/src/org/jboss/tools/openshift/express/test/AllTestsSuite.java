@@ -30,23 +30,12 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({
-		ActionFilterAdapterFactoryTest.class,
-		ApplicationDetailsContentProviderTest.class,
-		ApplicationPropertySourceTest.class,
-		OpenShiftMavenProfileTests.class,
-		EmbedCartridgeStrategyTest.class,
-		ExpressExplorerContentProviderTest.class,
-		LazyCredentialsPrompterTest.class,
-		LazySSLCertificateCallbackTest.class,
-		SSHUserConfigTest.class,
-		ExpressConnectionsRegistryTest.class,
-		ExpressConnectionTest.class,
-		ExpressConnectionPersistencyTest.class,
-		OpenShiftMarkerTest.class,
-		SimplePropertyActionFilterTest.class,
-		StringsPreferenceValueTest.class
-})
+@SuiteClasses({ ActionFilterAdapterFactoryTest.class, ApplicationDetailsContentProviderTest.class,
+		ApplicationPropertySourceTest.class, OpenShiftMavenProfileTests.class, EmbedCartridgeStrategyTest.class,
+		ExpressExplorerContentProviderTest.class, LazyCredentialsPrompterTest.class,
+		LazySSLCertificateCallbackTest.class, SSHUserConfigTest.class, ExpressConnectionsRegistryTest.class,
+		ExpressConnectionTest.class, ExpressConnectionPersistencyTest.class, OpenShiftMarkerTest.class,
+		SimplePropertyActionFilterTest.class, StringsPreferenceValueTest.class })
 /**
  * @author Andre Dietisheim
  */

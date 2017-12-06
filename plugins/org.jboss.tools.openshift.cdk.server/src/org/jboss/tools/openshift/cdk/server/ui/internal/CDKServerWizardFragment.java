@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import java.io.File;
@@ -53,13 +53,11 @@ public class CDKServerWizardFragment extends WizardFragment {
 	protected Button browseButton;
 	protected String selectedUser = null;
 	protected ChooseCredentialComponent credentials;
-	
-	
+
 	@Override
 	public boolean hasComposite() {
 		return true;
 	}
-	
 
 	@Override
 	public boolean isComplete() {
@@ -67,7 +65,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		boolean b = browseButton != null && !browseButton.isDisposed() && findError() == null && super.isComplete();
 		return b;
 	}
-	
+
 	public ImageDescriptor getImageDescriptor() {
 		return CDKCoreActivator.getDefault().getSharedImages().descriptor(CDKCoreActivator.CDK_WIZBAN);
 	}
@@ -79,10 +77,8 @@ public class CDKServerWizardFragment extends WizardFragment {
 		String label = "Folder: ";
 		return createComposite(parent, handle, title, desc, label);
 	}
-	
-	
-	protected Composite setupComposite(Composite parent,  IWizardHandle handle, 
-										String title, String desc) {
+
+	protected Composite setupComposite(Composite parent, IWizardHandle handle, String title, String desc) {
 		// boilerplate
 		this.handle = handle;
 		Composite main = new Composite(parent, SWT.NONE);
@@ -92,11 +88,11 @@ public class CDKServerWizardFragment extends WizardFragment {
 		main.setLayout(new GridLayout(3, false));
 		return main;
 	}
-	
+
 	protected void createCredentialWidgets(Composite main) {
 		// create credentials row
 		selectedUser = null;
-		credentials = new ChooseCredentialComponent(new String[]{CredentialService.REDHAT_ACCESS});
+		credentials = new ChooseCredentialComponent(new String[] { CredentialService.REDHAT_ACCESS });
 		credentials.addCredentialListener(new ICredentialCompositeListener() {
 			@Override
 			public void credentialsChanged() {
@@ -108,7 +104,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		credentials.gridLayout(3);
 		selectedUser = credentials.getUser();
 	}
-	
+
 	protected void createLocationWidgets(Composite main, String homeLabel) {
 
 		// Point to file / folder to run
@@ -121,27 +117,28 @@ public class CDKServerWizardFragment extends WizardFragment {
 		homeText.setLayoutData(homeData);
 		browseButton = new Button(main, SWT.PUSH);
 		browseButton.setText("Browse...");
-		
+
 		homeText.addModifyListener(createHomeModifyListener());
 		browseButton.addSelectionListener(createBrowseListener());
-		
-		homeDecorator = new ControlDecoration(homeText, SWT.TOP|SWT.LEFT);
-		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry .DEC_ERROR);
+
+		homeDecorator = new ControlDecoration(homeText, SWT.TOP | SWT.LEFT);
+		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
 		Image img = fieldDecoration.getImage();
 		homeDecorator.setImage(img);
 		homeDecorator.hide(); // hiding it initially
-		
+
 		fillTextField();
 	}
 
 	protected SelectionListener createBrowseListener() {
 		return new BrowseListener();
 	}
-	
+
 	protected ModifyListener createHomeModifyListener() {
 		return new HomeModifyListener();
 	}
-	
+
 	protected class BrowseListener implements SelectionListener {
 		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
@@ -162,7 +159,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 			validate();
 		}
 	}
-	
+
 	protected void validateAndPack(Composite main) {
 		String err = findError();
 		setComplete(err == null);
@@ -170,8 +167,9 @@ public class CDKServerWizardFragment extends WizardFragment {
 		main.pack(true);
 		homeDecorator.hide();
 	}
-	protected Composite createComposite(Composite parent, IWizardHandle handle,
-			String title, String desc, String homeLabel) {
+
+	protected Composite createComposite(Composite parent, IWizardHandle handle, String title, String desc,
+			String homeLabel) {
 		// boilerplate
 		Composite main = setupComposite(parent, handle, title, desc);
 		createCredentialWidgets(main);
@@ -179,21 +177,22 @@ public class CDKServerWizardFragment extends WizardFragment {
 		validateAndPack(main);
 		return main;
 	}
-	
+
 	protected void fillTextField() {
-		if( homeDir != null ) {
+		if (homeDir != null) {
 			homeText.setText(homeDir);
 		}
 	}
+
 	protected void validate() {
 		String err = findError();
-		if( err != null ) {
+		if (err != null) {
 			handle.setMessage(err, IMessageProvider.ERROR);
 			setComplete(false);
 		} else {
 			setComplete(true);
 			String warn = findWarning();
-			if( warn != null ) {
+			if (warn != null) {
 				handle.setMessage(warn, IMessageProvider.WARNING);
 			} else {
 				handle.setMessage(null, IMessageProvider.NONE);
@@ -205,21 +204,22 @@ public class CDKServerWizardFragment extends WizardFragment {
 	protected String findWarning() {
 		return null;
 	}
-	
+
 	protected void toggleHomeDecorator(String message) {
-		if( message == null ) {
+		if (message == null) {
 			homeDecorator.hide();
 		} else {
 			homeDecorator.setDescriptionText(message);
 			homeDecorator.show();
 		}
 	}
+
 	protected String findError() {
-		if( credentials.getDomain() == null || credentials.getUser() == null) {
+		if (credentials.getDomain() == null || credentials.getUser() == null) {
 			return "The Container Development Environment Server Adapter requires Red Hat Access credentials.";
 		}
 		String retString = validateHomeDirectory();
-		if( retString != null )
+		if (retString != null)
 			return retString;
 
 		return retString;
@@ -227,9 +227,9 @@ public class CDKServerWizardFragment extends WizardFragment {
 
 	protected String validateHomeDirectory() {
 		String retString = null;
-		if( homeDir == null || !(new File(homeDir)).exists()) {
+		if (homeDir == null || !(new File(homeDir)).exists()) {
 			retString = "The selected folder does not exist.";
-		} else if( !(new File(homeDir, "Vagrantfile").exists())) {
+		} else if (!(new File(homeDir, "Vagrantfile").exists())) {
 			retString = "The selected folder does not have a Vagrantfile";
 		}
 		toggleHomeDecorator(retString);
@@ -239,6 +239,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 	protected void browseHomeDirClicked() {
 		browseHomeDirClicked(true);
 	}
+
 	protected void browseHomeDirClicked(boolean folder) {
 		File file = homeDir == null ? null : new File(homeDir);
 		if (file != null && !file.exists()) {
@@ -246,17 +247,16 @@ public class CDKServerWizardFragment extends WizardFragment {
 		}
 
 		File f = null;
-		if( folder ) 
+		if (folder)
 			f = getDirectory(file, homeText.getShell());
 		else
 			f = getFile(file, homeText.getShell());
-		
+
 		if (f != null) {
 			homeDir = f.getAbsolutePath();
 			homeText.setText(homeDir);
 		}
 	}
-	
 
 	protected static File getDirectory(File startingDirectory, Shell shell) {
 		DirectoryDialog fileDialog = new DirectoryDialog(shell, SWT.OPEN);
@@ -290,23 +290,20 @@ public class CDKServerWizardFragment extends WizardFragment {
 		return null;
 	}
 
-
 	protected IServer getServerFromTaskModel() {
 		IServer wc = (IServer) getTaskModel().getObject(TaskModel.TASK_SERVER);
 		return wc;
 	}
-	
 
 	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		exit();
 		IServer s = getServerFromTaskModel();
-		if( s instanceof IServerWorkingCopy ) {
+		if (s instanceof IServerWorkingCopy) {
 			IServerWorkingCopy swc = (IServerWorkingCopy) s;
 			swc.setAttribute(CDKServer.PROP_FOLDER, homeDir);
 			swc.setAttribute(CDKServer.PROP_USERNAME, selectedUser);
 		}
 	}
-	
-	
+
 }

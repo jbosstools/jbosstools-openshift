@@ -26,7 +26,7 @@ public class RequiredStringMultiValidator extends MultiValidator {
 	private IObservableValue<String> observableValue;
 	private String name;
 	private String errorMessage;
-	
+
 	public RequiredStringMultiValidator(IObservableValue<String> value, String name) {
 		this(value, name, null);
 	}
@@ -65,5 +65,5 @@ public class RequiredStringMultiValidator extends MultiValidator {
 			return "Please provide a value for " + name;
 		}
 	}
-	
-}		
+
+}

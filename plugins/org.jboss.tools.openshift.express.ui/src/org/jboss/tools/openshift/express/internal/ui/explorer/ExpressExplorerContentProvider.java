@@ -33,59 +33,62 @@ public class ExpressExplorerContentProvider extends BaseExplorerContentProvider 
 	private ConnectionsRegistry input;
 	private IConnectionsRegistryListener connectionListener = new ConnectionsRegistryListener();
 	private static final Collection<String> PROPERTY_BLACKLIST = Collections.unmodifiableList(Arrays.asList("token"));
-	private class ConnectionsRegistryListener implements IConnectionsRegistryListener{
+
+	private class ConnectionsRegistryListener implements IConnectionsRegistryListener {
 		@Override
 		public void connectionAdded(IConnection connection) {
 			refreshViewer(null);
 		}
-		
+
 		@Override
 		public void connectionRemoved(IConnection connection) {
 			refreshViewer(null);
 		}
-		
+
 		@Override
 		public void connectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-			if(!PROPERTY_BLACKLIST.contains(property)) {
+			if (!PROPERTY_BLACKLIST.contains(property)) {
 				handleConnectionChanged(connection, property, oldValue, newValue);
 			}
 		}
 	}
-	
+
 	@Override
 	public void dispose() {
-		if(input != null) {
+		if (input != null) {
 			input.removeListener(connectionListener);
 		}
 	}
-	
+
 	@Override
 	protected void handleConnectionChanged(IConnection connection, String property, Object oldValue, Object newValue) {
-		if(!(connection instanceof ExpressConnection)) return;
+		if (!(connection instanceof ExpressConnection))
+			return;
 		super.handleConnectionChanged(connection, property, oldValue, newValue);
 	}
-	
+
 	@Override
 	protected void handleConnectionRemoved(IConnection connection) {
-		if(!(connection instanceof ExpressConnection)) return;
+		if (!(connection instanceof ExpressConnection))
+			return;
 		super.handleConnectionRemoved(connection);
 	}
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, newInput);
-		if(input != null && connectionListener != null) {
+		if (input != null && connectionListener != null) {
 			input.removeListener(connectionListener);
 		}
-		if(newInput instanceof ConnectionsRegistry) {
+		if (newInput instanceof ConnectionsRegistry) {
 			input = (ConnectionsRegistry) newInput;
-			if(connectionListener != null) {
+			if (connectionListener != null) {
 				input.addListener(connectionListener);
 			}
 		}
 
 	}
-	
+
 	/**
 	 * Called to obtain the root elements of the tree viewer, the connections
 	 */
@@ -110,8 +113,7 @@ public class ExpressExplorerContentProvider extends BaseExplorerContentProvider 
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof ExpressConnection) {
 			ExpressConnection connection = (ExpressConnection) parentElement;
-			if (!connection.isConnected()
-					&& !connection.canPromptForPassword()) {
+			if (!connection.isConnected() && !connection.canPromptForPassword()) {
 				return new Object[] { new NotConnectedUserStub() };
 			}
 			return loadChildren(parentElement);
@@ -149,9 +151,7 @@ public class ExpressExplorerContentProvider extends BaseExplorerContentProvider 
 
 	@Override
 	public boolean hasChildren(Object element) {
-		return element instanceof ConnectionsRegistry
-				|| element instanceof IConnection
-				|| element instanceof IDomain
+		return element instanceof ConnectionsRegistry || element instanceof IConnection || element instanceof IDomain
 				|| element instanceof IApplication;
 	}
 }

@@ -17,7 +17,7 @@ import java.util.Set;
 public interface IDockerImageMetadata {
 
 	Set<String> exposedPorts();
-	
+
 	List<String> env();
 
 	/**

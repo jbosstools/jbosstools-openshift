@@ -58,8 +58,7 @@ public class OpenShiftMarkers {
 		final List<IOpenShiftMarker> allMarkers = new ArrayList<>();
 		allMarkers.addAll(getAllKnownMarkers());
 		final IFolder folder = OpenShiftProjectUtils.getMarkersFolder(project);
-		if (folder != null
-				&& folder.isAccessible()) {
+		if (folder != null && folder.isAccessible()) {
 			folder.accept(new IResourceVisitor() {
 
 				@Override
@@ -115,7 +114,7 @@ public class OpenShiftMarkers {
 					// exclude dot-files (.gitignore etc.)
 					if (startsWithDot(resource)) {
 						return false;
-					} 
+					}
 					// exclude README
 					if (isReadme(resource)) {
 						return false;
@@ -135,14 +134,14 @@ public class OpenShiftMarkers {
 		}
 		return resource.getName().startsWith(".");
 	}
-	
+
 	private boolean isReadme(IResource resource) {
 		if (!ResourceUtils.exists(resource)) {
 			return false;
 		}
 		return "README.MD".equalsIgnoreCase(resource.getName());
 	}
-	
+
 	private IOpenShiftMarker getMarker(IResource resource) {
 		IOpenShiftMarker marker = getKnownMarker(resource.getName());
 		if (marker == null) {

@@ -35,7 +35,7 @@ public class DockerConfigMetaData implements IDockerImageMetadata {
 		// TODO: throw illegal arg exception if info is null?
 		this.info = info;
 	}
-	
+
 	/**
 	 * Select info from either config or container config and provides a
 	 * default non null value if nothing is found.
@@ -46,31 +46,34 @@ public class DockerConfigMetaData implements IDockerImageMetadata {
 	 * @param defaultFactory the factory for the default value
 	 * @return the mapped value
 	 */
-	private <C extends Collection<String>> C select(IDockerContainerConfig config, IDockerContainerConfig containerConfig, Function<IDockerContainerConfig, C> accessor, Supplier<C> defaultFactory) {
-	    C result = null;
-	    if (config != null) {
-	        result = accessor.apply(config);
-	    }
-	    if (((result == null) || result.isEmpty()) && (containerConfig != null)) {
-	        result = accessor.apply(containerConfig);
-	    }
-	    if (result == null) {
-	        result = defaultFactory.get();
-	    }
-	    return result;
+	private <C extends Collection<String>> C select(IDockerContainerConfig config,
+			IDockerContainerConfig containerConfig, Function<IDockerContainerConfig, C> accessor,
+			Supplier<C> defaultFactory) {
+		C result = null;
+		if (config != null) {
+			result = accessor.apply(config);
+		}
+		if (((result == null) || result.isEmpty()) && (containerConfig != null)) {
+			result = accessor.apply(containerConfig);
+		}
+		if (result == null) {
+			result = defaultFactory.get();
+		}
+		return result;
 	}
-	
+
 	@Override
 	public Set<String> exposedPorts() {
-		if (info == null ) {
+		if (info == null) {
 			return Collections.emptySet();
 		}
-		return select(info.config(), info.containerConfig(), IDockerContainerConfig::exposedPorts, Collections::emptySet);
+		return select(info.config(), info.containerConfig(), IDockerContainerConfig::exposedPorts,
+				Collections::emptySet);
 	}
 
 	@Override
 	public List<String> env() {
-		if (info == null ) {
+		if (info == null) {
 			return Collections.emptyList();
 		}
 		return select(info.config(), info.containerConfig(), IDockerContainerConfig::env, Collections::emptyList);
@@ -78,10 +81,10 @@ public class DockerConfigMetaData implements IDockerImageMetadata {
 
 	@Override
 	public Set<String> volumes() {
-		if (info == null ) {
+		if (info == null) {
 			return Collections.emptySet();
 		}
-        return select(info.config(), info.containerConfig(), IDockerContainerConfig::volumes, Collections::emptySet);
+		return select(info.config(), info.containerConfig(), IDockerContainerConfig::volumes, Collections::emptySet);
 	}
 
 	@Override

@@ -57,53 +57,53 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	private Composite ocMessageComposite;
 	private Label ocMessageLabel;
 	private UIUpdatingJob versionVerificationJob;
-	
+
 	public OpenShiftPreferencePage() {
 		super(GRID);
 		this.ocBinary = OCBinary.getInstance();
 	}
-	
+
 	@Override
 	public void createFieldEditors() {
 		Link link = new Link(getFieldEditorParent(), SWT.WRAP);
-		link.setText("The OpenShift client binary (oc) is required for features such as Port Forwarding or Log Streaming. "
-				+ "You can find more information about how to install it from <a>here</a>.");
-		GridDataFactory.fillDefaults().span(3, 1).hint(1,60).grab(true, false).applyTo(link);
+		link.setText(
+				"The OpenShift client binary (oc) is required for features such as Port Forwarding or Log Streaming. "
+						+ "You can find more information about how to install it from <a>here</a>.");
+		GridDataFactory.fillDefaults().span(3, 1).hint(1, 60).grab(true, false).applyTo(link);
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL, 
-																  OpenShiftUIActivator.PLUGIN_ID, 
-																  OpenShiftUIActivator.getDefault().getLog());
+				new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL,
+						OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 			}
 		});
 		this.cliLocationEditor = new CliFileEditor();
 		cliLocationEditor.setFilterPath(SystemUtils.getUserHome());
-		
+
 		String[] suffixes = ocBinary.getExtensions();
 		String[] filters = new String[suffixes.length];
-		for( int i = 0; i < filters.length; i++ ) {
+		for (int i = 0; i < filters.length; i++) {
 			filters[i] = "*" + suffixes[i];
 		}
-		
+
 		cliLocationEditor.setFileExtensions(filters);
 		cliLocationEditor.setValidateStrategy(FileFieldEditor.VALIDATE_ON_KEY_STROKE);
 		addField(cliLocationEditor);
-		
-        ocVersionLabel = new Label(getFieldEditorParent(), SWT.WRAP);
-        ocVersionLabel.setFont(JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT));
-        GridDataFactory.fillDefaults().span(3, 1).applyTo(ocVersionLabel);
+
+		ocVersionLabel = new Label(getFieldEditorParent(), SWT.WRAP);
+		ocVersionLabel.setFont(JFaceResources.getFontRegistry().getItalic(JFaceResources.DEFAULT_FONT));
+		GridDataFactory.fillDefaults().span(3, 1).applyTo(ocVersionLabel);
 		ocMessageComposite = new Composite(getFieldEditorParent(), SWT.NONE);
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(ocMessageComposite);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(ocMessageComposite);
-        Label label = new Label(ocMessageComposite, SWT.NONE);
-        label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
-        GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(label);
-        ocMessageLabel = new Label(ocMessageComposite, SWT.NONE);
-        GridDataFactory.fillDefaults().grab(true, false).applyTo(ocMessageLabel);
-        ocMessageComposite.setVisible(false);
-    }
-	
+		Label label = new Label(ocMessageComposite, SWT.NONE);
+		label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.TOP).applyTo(label);
+		ocMessageLabel = new Label(ocMessageComposite, SWT.NONE);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(ocMessageLabel);
+		ocMessageComposite.setVisible(false);
+	}
+
 	@Override
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(OpenShiftUIActivator.getDefault().getCorePreferenceStore());
@@ -119,8 +119,9 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		getPreferenceStore().setDefault(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC, location);
 
 		if (StringUtils.isBlank(location)) {
-			String message = NLS.bind("Could not find the OpenShift client executable \"{0}\" on your path.", ocBinary.getName());
-			OpenShiftUIActivator.getDefault().getLogger().logWarning(message);				
+			String message = NLS.bind("Could not find the OpenShift client executable \"{0}\" on your path.",
+					ocBinary.getName());
+			OpenShiftUIActivator.getDefault().getLogger().logWarning(message);
 			MessageDialog.openWarning(getShell(), "No OpenShift client executable", message);
 			return;
 		}
@@ -165,23 +166,23 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		setValid(false);
 		ocVersionLabel.setText("Checking OpenShift client version...");
 		this.versionVerificationJob = new UIUpdatingJob("Checking oc binary...") {
- 
-		    private Version version;
-		    
-            @Override
-            protected IStatus run(IProgressMonitor monitor) {
-                version = new OCBinaryVersionValidator(location).getVersion(monitor);
-                if (monitor.isCanceled()) {
-                	return Status.CANCEL_STATUS;
-                }
-                return Status.OK_STATUS;
-            }
 
-            @Override
-            protected IStatus updateUI(IProgressMonitor monitor) {
-            	if (!getResult().isOK()) {
-            		return getResult();
-            	}
+			private Version version;
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				version = new OCBinaryVersionValidator(location).getVersion(monitor);
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				return Status.OK_STATUS;
+			}
+
+			@Override
+			protected IStatus updateUI(IProgressMonitor monitor) {
+				if (!getResult().isOK()) {
+					return getResult();
+				}
 				if (!ocMessageComposite.isDisposed() && !monitor.isCanceled()) {
 					setValid(true);
 					if (Version.emptyVersion.equals(version)) {
@@ -193,23 +194,23 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 					ocMessageLabel.setText(NLS.bind(
 							"OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
 					ocMessageComposite.setVisible(!OCBinaryVersionValidator.isCompatibleForPublishing(version));
-                }
-                return super.updateUI(monitor);
-            }
-        };
-        versionVerificationJob.schedule();
+				}
+				return super.updateUI(monitor);
+			}
+		};
+		versionVerificationJob.schedule();
 		return true;
 	}
 
 	class CliFileEditor extends FileFieldEditor {
-		
+
 		private String lastCheckedValue = null;
-		
+
 		public CliFileEditor() {
 			//Validation strategy should be set in constructor, later setting it has no effect.
 			super(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC,
-					NLS.bind("''{0}'' executable location", ocBinary.getName()), 
-					false, StringFieldEditor.VALIDATE_ON_KEY_STROKE, getFieldEditorParent());
+					NLS.bind("''{0}'' executable location", ocBinary.getName()), false,
+					StringFieldEditor.VALIDATE_ON_KEY_STROKE, getFieldEditorParent());
 		}
 
 		@Override
@@ -221,7 +222,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 				setErrorMessage(JFaceResources.getString("FileFieldEditor.errorMessage"));
 				ocVersionLabel.setText("");
 				ocMessageComposite.setVisible(false);
-				if (versionVerificationJob != null){
+				if (versionVerificationJob != null) {
 					versionVerificationJob.cancel();
 				}
 			}

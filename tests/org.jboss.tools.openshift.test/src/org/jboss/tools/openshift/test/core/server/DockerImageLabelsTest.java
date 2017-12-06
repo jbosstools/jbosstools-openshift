@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.test.core.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,24 +45,27 @@ import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 public class DockerImageLabelsTest {
 
 	private static final String NODEJS_IMAGESTREAM_TAG_URL = "/imageStreamTag_nodejs_latest.json";
-	
+
 	private Connection connection;
 	private IDeploymentConfig dc;
 	private TestableDockerImageLabels labels;
 	private TestableDockerImageLabels labelsThatFailsToLoad;
 
 	@Before
-	public void setup() throws IOException {		
+	public void setup() throws IOException {
 		this.connection = createConnection("https://localhost:8181", "aUser");
 
 		this.labelsThatFailsToLoad = spy(new TestableDockerImageLabels(null, connection));
 
-		this.dc = ResourceMocks.createDeploymentConfig("aDeploymentConfig", ResourceMocks.createProject("aProject"), null, null);		
-		IDeploymentImageChangeTrigger trigger = ResourceMocks.createDeploymentImageChangeTrigger(DeploymentTriggerType.IMAGE_CHANGE, "nodejs:latest");
+		this.dc = ResourceMocks.createDeploymentConfig("aDeploymentConfig", ResourceMocks.createProject("aProject"),
+				null, null);
+		IDeploymentImageChangeTrigger trigger = ResourceMocks
+				.createDeploymentImageChangeTrigger(DeploymentTriggerType.IMAGE_CHANGE, "nodejs:latest");
 		ResourceMocks.mockGetTriggers(Collections.singletonList(trigger), dc);
 
 		IResource imageStreamTag = mockImageStreamTag(NODEJS_IMAGESTREAM_TAG_URL);
-		doReturn(imageStreamTag).when(connection).getResource(eq(ResourceKind.IMAGE_STREAM_TAG), anyString(), anyString());
+		doReturn(imageStreamTag).when(connection).getResource(eq(ResourceKind.IMAGE_STREAM_TAG), anyString(),
+				anyString());
 
 		this.labels = spy(new TestableDockerImageLabels(dc, connection));
 	}
@@ -72,7 +75,6 @@ public class DockerImageLabelsTest {
 		doReturn(IOUtils.toString(DockerImageLabelsTest.class.getResourceAsStream(url))).when(imageStreamTag).toJson();
 		return imageStreamTag;
 	}
-
 
 	@Test
 	public void shouldNotBeAvailableGivenItIsNotLoaded() throws CoreException {
@@ -173,6 +175,6 @@ public class DockerImageLabelsTest {
 		protected String load(IResource resource) {
 			return super.load(resource);
 		}
-		
+
 	}
 }

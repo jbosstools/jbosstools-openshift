@@ -88,12 +88,10 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 		Section section = toolkit.createSection(parent,
 				ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED | ExpandableComposite.TITLE_BAR);
 		section.setText("OpenShift Server Adapter");
-		section.setLayoutData(new GridData(
-				GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL
-						| GridData.GRAB_VERTICAL));
+		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL
+				| GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL));
 		Composite c = toolkit.createComposite(section, SWT.NONE);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).equalWidth(true).applyTo(c);
+		GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(true).applyTo(c);
 		createWidgets(c, toolkit);
 		toolkit.paintBordersFor(c);
 		toolkit.adapt(c);
@@ -126,8 +124,8 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 		remoteText.setText(StringUtils.null2emptyString(remote));
 
 		deployProjectCombo.setItems(getSuitableProjects());
-		int index = getProjectIndex(
-				ExpressServerUtils.getDeployProjectName(server), Arrays.asList(deployProjectCombo.getItems()));
+		int index = getProjectIndex(ExpressServerUtils.getDeployProjectName(server),
+				Arrays.asList(deployProjectCombo.getItems()));
 		if (index > -1) {
 			deployProjectCombo.select(index);
 		}
@@ -150,8 +148,8 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 		String connectionLabel = "";
 		if (connectionUrl != null) {
 			ExpressConnection connection = new ExpressConnection(connectionUrl.getUsername(), connectionUrl.getHost());
-			StringBuilder builder =
-					new StringBuilder(connection.getUsername()).append(" - ").append(connection.getHost());
+			StringBuilder builder = new StringBuilder(connection.getUsername()).append(" - ")
+					.append(connection.getHost());
 			if (connectionUrl.isDefaultHost()) {
 				builder.append(DEFAULT_HOST_MARKER);
 			}
@@ -175,11 +173,10 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 	}
 
 	private void createWidgets(Composite composite, FormToolkit toolkit) {
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).equalWidth(false).applyTo(composite);
+		GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(false).applyTo(composite);
 
-		Label deployLocationLabel =
-				toolkit.createLabel(composite, ExpressUIMessages.EditorSectionDeployLocLabel, SWT.NONE);
+		Label deployLocationLabel = toolkit.createLabel(composite, ExpressUIMessages.EditorSectionDeployLocLabel,
+				SWT.NONE);
 		deployProjectCombo = new Combo(composite, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectCombo);
 
@@ -191,47 +188,44 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 
 		overrideProjectSettings = toolkit.createButton(projectSettingGroup,
 				ExpressUIMessages.EditorSectionOverrideProjectSettings, SWT.CHECK);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1).applyTo(overrideProjectSettings);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(2, 1)
+				.applyTo(overrideProjectSettings);
 
 		// connection
-		Label connectionLabel = toolkit
-				.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionConnectionLabel, SWT.NONE);
+		Label connectionLabel = toolkit.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionConnectionLabel,
+				SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(connectionLabel);
 		connectionText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionText);
 
 		// domain name
-		Label domainNameLabel = toolkit.createLabel(
-				projectSettingGroup, ExpressUIMessages.EditorSectionDomainNameLabel, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(domainNameLabel);
+		Label domainNameLabel = toolkit.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionDomainNameLabel,
+				SWT.NONE);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(domainNameLabel);
 		domainNameText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(domainNameText);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(domainNameText);
 
 		// application name
-		Label appNameLabel = toolkit.createLabel(
-				projectSettingGroup, ExpressUIMessages.EditorSectionAppNameLabel,SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
+		Label appNameLabel = toolkit.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionAppNameLabel,
+				SWT.NONE);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
 		appNameText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(appNameText);
 
-		Label outputDestLabel = 
-				toolkit.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionOutputDestLabel, SWT.NONE);
+		Label outputDestLabel = toolkit.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionOutputDestLabel,
+				SWT.NONE);
 		Composite outputDestComposite = toolkit.createComposite(projectSettingGroup, SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(outputDestComposite);
 		outputDestComposite.setLayout(new FormLayout());
 
-		browseDestButton = toolkit.createButton(
-				outputDestComposite, ExpressUIMessages.EditorSectionBrowseDestButton, SWT.PUSH);
+		browseDestButton = toolkit.createButton(outputDestComposite, ExpressUIMessages.EditorSectionBrowseDestButton,
+				SWT.PUSH);
 		browseDestButton.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, null, 0, 100, 0));
 		deployFolderText = toolkit.createText(outputDestComposite, "", SWT.SINGLE | SWT.BORDER);
 		deployFolderText.setLayoutData(UIUtil.createFormData2(0, 5, 100, -5, 0, 0, browseDestButton, -5));
 
-		Label remoteLabel = toolkit.createLabel(
-				projectSettingGroup, ExpressUIMessages.EditorSectionRemoteLabel, SWT.NONE);
+		Label remoteLabel = toolkit.createLabel(projectSettingGroup, ExpressUIMessages.EditorSectionRemoteLabel,
+				SWT.NONE);
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
 		remoteText = toolkit.createText(projectSettingGroup, "", SWT.SINGLE | SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
@@ -246,8 +240,8 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 			public void modifyText(ModifyEvent e) {
 				int ind = deployProjectCombo.getSelectionIndex();
 				String newVal = ind == -1 ? null : deployProjectCombo.getItem(ind);
-				((ServerEditorPartInput) input).getServerCommandManager().execute(
-						new SetProjectCommand(server, newVal));
+				((ServerEditorPartInput) input).getServerCommandManager()
+						.execute(new SetProjectCommand(server, newVal));
 			}
 		};
 		deployProjectCombo.addModifyListener(deployProjectListener);
@@ -295,16 +289,15 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 
 		IProject p = ResourcesPlugin.getWorkspace().getRoot().getProject(depProject);
 
-		ElementTreeSelectionDialog dialog = 
-				new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), 
-						new WorkbenchLabelProvider(), new WorkbenchContentProvider());
+		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(),
+				new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setTitle("Deploy Location");
 		dialog.setMessage("Please choose a location to put zipped projects");
 		dialog.setInput(p);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 
-		IResource res = p.findMember(new Path(
-				StringUtils.null2emptyString(ExpressServerUtils.getDeployFolder(server))));
+		IResource res = p
+				.findMember(new Path(StringUtils.null2emptyString(ExpressServerUtils.getDeployFolder(server))));
 		if (res != null)
 			dialog.setInitialSelection(res);
 
@@ -343,9 +336,9 @@ public class ExpressServerEditorSection extends ServerEditorSection {
 
 	public class SetOverrideCommand extends ServerWorkingCopyPropertyButtonCommand {
 		public SetOverrideCommand(IServerWorkingCopy wc) {
-			super(wc, "Override OpenShift Project Settings Command",
-					overrideProjectSettings, overrideProjectSettings.getSelection(),
-					ExpressServerUtils.ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS, overrideListener);
+			super(wc, "Override OpenShift Project Settings Command", overrideProjectSettings,
+					overrideProjectSettings.getSelection(), ExpressServerUtils.ATTRIBUTE_OVERRIDE_PROJECT_SETTINGS,
+					overrideListener);
 		}
 
 		@Override

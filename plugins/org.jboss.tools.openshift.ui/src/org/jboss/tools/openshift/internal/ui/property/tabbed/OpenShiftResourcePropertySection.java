@@ -65,7 +65,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	private String resourceKind;
 
 	public OpenShiftResourcePropertySection(String menuContributionId, String kind) {
-		this.resourceKind= kind;
+		this.resourceKind = kind;
 		this.menuContributionId = menuContributionId;
 	}
 
@@ -243,6 +243,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 			}
 		};
 	}
+
 	protected ViewerComparator createCreationTimestampSorter(boolean descending) {
 		return new ViewerComparator() {
 			@Override
@@ -253,8 +254,9 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 					Date d1 = DateTimeUtils.parse(r1.getCreationTimeStamp());
 					Date d2 = DateTimeUtils.parse(r2.getCreationTimeStamp());
 					return descending ? d2.compareTo(d1) : d1.compareTo(d2);
-				}catch(ParseException e) {
-					OpenShiftUIActivator.log(IStatus.ERROR, "Unable to parse dates in OpenShift Resource Property Tab Section", e);
+				} catch (ParseException e) {
+					OpenShiftUIActivator.log(IStatus.ERROR,
+							"Unable to parse dates in OpenShift Resource Property Tab Section", e);
 				}
 				return 0;
 			}

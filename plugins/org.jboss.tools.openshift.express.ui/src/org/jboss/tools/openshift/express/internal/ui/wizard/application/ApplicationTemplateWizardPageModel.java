@@ -58,12 +58,10 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	private List<IApplication> existingApplications = new ArrayList<>();
 	private boolean resourcesLoaded = false;
 	private List<IApplicationTemplate> applicationTemplates;
-	private IApplicationTemplateCategory basicCartridgesCathegory = 
-			new ApplicationTemplateCategory("Basic Cartridges", 
-					"Web programming cartridges provided by OpenShift");
-	private IApplicationTemplateCategory quickstartsCathegory = 
-			new ApplicationTemplateCategory("Quickstarts", 
-					"A quick way to try out a new technology with code and libraries preconfigured. "
+	private IApplicationTemplateCategory basicCartridgesCathegory = new ApplicationTemplateCategory("Basic Cartridges",
+			"Web programming cartridges provided by OpenShift");
+	private IApplicationTemplateCategory quickstartsCathegory = new ApplicationTemplateCategory("Quickstarts",
+			"A quick way to try out a new technology with code and libraries preconfigured. "
 					+ "You are responsible for updating core libraries for security updates");
 
 	protected ApplicationTemplateWizardPageModel(OpenShiftApplicationWizardModel wizardModel) {
@@ -97,11 +95,9 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 					}
 				});
 
-		new PojoEventBridge()
-			.listenTo(IOpenShiftApplicationWizardModel.PROP_USE_EXISTING_APPLICATION, wizardModel)
-			.forwardTo(PROPERTY_USE_EXISTING_APPLICATION, this);
-		new PojoEventBridge()
-				.listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION, wizardModel)
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_USE_EXISTING_APPLICATION, wizardModel)
+				.forwardTo(PROPERTY_USE_EXISTING_APPLICATION, this);
+		new PojoEventBridge().listenTo(IOpenShiftApplicationWizardModel.PROP_APPLICATION, wizardModel)
 				.forwardTo(PROPERTY_EXISTING_APPLICATION, this);
 	}
 
@@ -125,7 +121,8 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 
 	public List<IApplicationTemplate> getApplicationTemplates() {
 		if (applicationTemplates == null) {
-			this.applicationTemplates = createApplicationTemplates(createCartridgeApplicationTemplates(getStandaloneCartridges()));
+			this.applicationTemplates = createApplicationTemplates(
+					createCartridgeApplicationTemplates(getStandaloneCartridges()));
 		}
 		return applicationTemplates;
 	}
@@ -156,9 +153,8 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setUseExistingApplication(boolean useExistingApplication) {
-		firePropertyChange(PROPERTY_USE_EXISTING_APPLICATION
-				, wizardModel.isUseExistingApplication()
-				, wizardModel.setUseExistingApplication(useExistingApplication));
+		firePropertyChange(PROPERTY_USE_EXISTING_APPLICATION, wizardModel.isUseExistingApplication(),
+				wizardModel.setUseExistingApplication(useExistingApplication));
 	}
 
 	public String getExistingApplicationName() {
@@ -181,8 +177,7 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 
 	protected IApplication getApplicationByName(String applicationName, List<IDomain> domains) {
 		IApplication matchingApplication = null;
-		if (domains != null
-				&& !StringUtils.isEmpty(applicationName)) {
+		if (domains != null && !StringUtils.isEmpty(applicationName)) {
 			for (IDomain domain : domains) {
 				IApplication application = domain.getApplicationByName(applicationName);
 				if (application != null) {
@@ -205,8 +200,8 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	protected void doSetExistingApplicationName(String name) {
-		firePropertyChange(PROPERTY_EXISTING_APPLICATION_NAME,
-				this.existingApplicationName, this.existingApplicationName = name);
+		firePropertyChange(PROPERTY_EXISTING_APPLICATION_NAME, this.existingApplicationName,
+				this.existingApplicationName = name);
 	}
 
 	public IApplication getExistingApplication() {
@@ -281,9 +276,8 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setSelectedApplicationTemplate(IApplicationTemplate template) {
-		firePropertyChange(PROPERTY_SELECTED_APPLICATION_TEMPLATE
-				, wizardModel.getSelectedApplicationTemplate()
-				, wizardModel.setSelectedApplicationTemplate(template));
+		firePropertyChange(PROPERTY_SELECTED_APPLICATION_TEMPLATE, wizardModel.getSelectedApplicationTemplate(),
+				wizardModel.setSelectedApplicationTemplate(template));
 		setExistingApplicationName(null);
 	}
 
@@ -303,8 +297,8 @@ public class ApplicationTemplateWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setExistingApplications(List<IApplication> applications) throws OpenShiftException {
-		firePropertyChange(PROPERTY_EXISTING_APPLICATIONS,
-				this.existingApplications, this.existingApplications = applications);
+		firePropertyChange(PROPERTY_EXISTING_APPLICATIONS, this.existingApplications,
+				this.existingApplications = applications);
 	}
 
 	public List<IApplication> getExistingApplications() throws OpenShiftException {

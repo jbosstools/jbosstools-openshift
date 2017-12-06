@@ -14,17 +14,24 @@ import java.util.List;
 
 public interface ICluster {
 	String getId();
-	
+
 	String getEndpointURL();
+
 	void setEndpointURL(String endpointURL);
+
 	String getLoginURL();
+
 	String getLandingURL();
+
 	String getRefreshURL();
-	
+
 	void addAccount(IAccount account);
+
 	List<IAccount> getAccounts();
+
 	void removeAccount(IAccount account);
+
 	IAccount createAccount(String id);
-	
+
 	void save();
 }

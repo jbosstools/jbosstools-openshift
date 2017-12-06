@@ -12,7 +12,10 @@ package org.jboss.tools.openshift.io.core.model;
 
 public interface IAccountModelListener {
 	void accountAdded(IAccountModel source, IAccount account);
+
 	void accountRemoved(IAccountModel source, IAccount account);
+
 	void clusterAdded(IAccountModel source, ICluster cluster);
+
 	void clusterRemoved(IAccountModel source, ICluster cluster);
 }

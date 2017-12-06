@@ -38,6 +38,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
+
 /**
  * @author Fred Bricon
  * @author Andre Dietisheim
@@ -47,15 +48,21 @@ public class ImportApplicationWizardModelTest {
 
 	private ImportApplicationWizardModel model;
 
-	@Mock private Connection connection;
+	@Mock
+	private Connection connection;
 
-	@Mock private IProject p1;
-	@Mock private IProject p2;
+	@Mock
+	private IProject p1;
+	@Mock
+	private IProject p2;
 
-	@Mock private IBuildConfig p1_bc1;
-	@Mock private IBuildConfig p1_bc2;
-	@Mock private IBuildConfig p2_bc1;
-	
+	@Mock
+	private IBuildConfig p1_bc1;
+	@Mock
+	private IBuildConfig p1_bc2;
+	@Mock
+	private IBuildConfig p2_bc1;
+
 	@Before
 	public void setUp() {
 		when(p1.getResources(ResourceKind.BUILD_CONFIG)).thenReturn(Arrays.asList(p1_bc1, p1_bc2));
@@ -79,7 +86,7 @@ public class ImportApplicationWizardModelTest {
 		// then
 		assertThat(appName).isEqualTo(bcName);
 	}
-	
+
 	@Test
 	public void shouldReturnNullWhenNoBuildConfigIsSelected() {
 		// given
@@ -106,7 +113,7 @@ public class ImportApplicationWizardModelTest {
 		assertEquals(p1, results.get(0).getModel());
 		assertEquals(p2, results.get(1).getModel());
 	}
-	
+
 	@Test
 	public void shouldReturnProject2BuildConfigWhenProject2IsSelected() {
 		// p2 selected -> 1 build config returned
@@ -174,17 +181,17 @@ public class ImportApplicationWizardModelTest {
 	}
 
 	@Test
-    public void shouldHaveCustomRepoPathWhenUseDefaultPathSetToFalse() {
+	public void shouldHaveCustomRepoPathWhenUseDefaultPathSetToFalse() {
 		// given
 		model.setUseDefaultCloneDestination(true);
 		String repoPath = FileUtils.getTempDirectoryPath();
 		// when
 		model.setUseDefaultCloneDestination(false);
-    	model.setCloneDestination(repoPath);
-    	// then
-    	assertFalse(model.isUseDefaultCloneDestination());
-        assertEquals(repoPath, model.getCloneDestination());
-    }
+		model.setCloneDestination(repoPath);
+		// then
+		assertFalse(model.isUseDefaultCloneDestination());
+		assertEquals(repoPath, model.getCloneDestination());
+	}
 
 	@Test
 	public void shouldHaveCloneDestinationOutOfRepoPathAndRepoName() {
@@ -201,8 +208,7 @@ public class ImportApplicationWizardModelTest {
 		model.setSelectedItem(p1_bc2);
 		model.setCloneDestination(repoPath);
 		// then
-		assertThat(model.getRepoPath())
-			.isEqualTo(new Path(repoPath).append(repoName).toFile());
+		assertThat(model.getRepoPath()).isEqualTo(new Path(repoPath).append(repoName).toFile());
 	}
 
 	@Test
@@ -213,7 +219,7 @@ public class ImportApplicationWizardModelTest {
 		doReturn(repoURI).when(p1_bc2).getSourceURI();
 		String repoPath = FileUtils.getTempDirectoryPath();
 		new File(repoPath, repoName).createNewFile();
-		
+
 		model.setProject(p1);
 		model.loadBuildConfigs();
 		model.setSelectedItem(p1_bc2);
@@ -222,7 +228,7 @@ public class ImportApplicationWizardModelTest {
 		assertThat(model.isReuseGitRepository()).isTrue();
 		File newRepoPath = FileUtils.getUserDirectory();
 		// when
-		model.setCloneDestination(newRepoPath.getAbsolutePath());		
+		model.setCloneDestination(newRepoPath.getAbsolutePath());
 		// then
 		assertThat(model.isReuseGitRepository()).isFalse();
 	}
@@ -246,7 +252,7 @@ public class ImportApplicationWizardModelTest {
 		// then
 		assertThat(bc).isEqualTo(p2_bc1);
 	}
-	
+
 	@Test
 	public void shouldReturnSourceURIFromSelectedBuildConfigWhenCalledGetGitURL() {
 		// given
@@ -270,7 +276,7 @@ public class ImportApplicationWizardModelTest {
 		// then
 		assertThat(gitUrl).isNull();
 	}
-	
+
 	@Test
 	public void shouldReturnGitRefFromSelectedBuildConfig() {
 		// given

@@ -52,28 +52,37 @@ import com.openshift.restclient.model.IService;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ScaleDeploymentHandlerTest {
-	
+
 	private static final String SCALE_DOWN_1 = "-1";
 	private static final String SCALE_UP_1 = "1";
 	private static final String SCALE_REQUEST_USERINPUT = null;
 
 	private static final int DESIRED_REPLICA_COUNT = 2;
 	private static final int CURRENT_REPLICA_COUNT = 1;
-	
+
 	private static final String DEPLOYMENT_CONFIG_NAME = "aDeploymentConfig";
-	
-	@Mock private IReplicationController rc;
-	@Mock private IDeploymentConfig dc;
-	@Mock private IService service;
-	@Mock private IProjectWrapper project;
-	@Mock private IResourceWrapper<IReplicationController, ?> rcWrapper;
-	@Mock private IResourceWrapper<IDeploymentConfig, ?> dcWrapper;
-	@Mock private IPod pod;
-	@Mock private IServiceWrapper serviceWrapper;
-	@Mock private IResourceWrapper<IPod, IServiceWrapper> podWrapper;
-	
+
+	@Mock
+	private IReplicationController rc;
+	@Mock
+	private IDeploymentConfig dc;
+	@Mock
+	private IService service;
+	@Mock
+	private IProjectWrapper project;
+	@Mock
+	private IResourceWrapper<IReplicationController, ?> rcWrapper;
+	@Mock
+	private IResourceWrapper<IDeploymentConfig, ?> dcWrapper;
+	@Mock
+	private IPod pod;
+	@Mock
+	private IServiceWrapper serviceWrapper;
+	@Mock
+	private IResourceWrapper<IPod, IServiceWrapper> podWrapper;
+
 	private TestScaleDeploymentHandler handler;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		this.handler = spy(new TestScaleDeploymentHandler());
@@ -90,13 +99,14 @@ public class ScaleDeploymentHandlerTest {
 		doReturn(DESIRED_REPLICA_COUNT).when(dc).getDesiredReplicaCount();
 		doReturn(CURRENT_REPLICA_COUNT).when(dc).getCurrentReplicaCount();
 		doReturn(DEPLOYMENT_CONFIG_NAME).when(dc).getName();
-		
+
 		doReturn(serviceWrapper).when(rcWrapper).getParent();
 		doReturn(rc).when(rcWrapper).getWrapped();
 		doReturn(DESIRED_REPLICA_COUNT).when(rc).getDesiredReplicaCount();
 		doReturn(CURRENT_REPLICA_COUNT).when(rc).getCurrentReplicaCount();
 		doReturn(DEPLOYMENT_CONFIG_NAME).when(rc).getAnnotation(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME);
-		doReturn(Collections.singletonMap(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME, DEPLOYMENT_CONFIG_NAME)).when(rc).getAnnotations();
+		doReturn(Collections.singletonMap(OpenShiftAPIAnnotations.DEPLOYMENT_CONFIG_NAME, DEPLOYMENT_CONFIG_NAME))
+				.when(rc).getAnnotations();
 
 		doReturn(serviceWrapper).when(podWrapper).getParent();
 		doReturn(pod).when(podWrapper).getWrapped();
@@ -218,7 +228,7 @@ public class ScaleDeploymentHandlerTest {
 
 		thenTheReplicasShouldBeUpdated(4);
 	}
-	
+
 	@Test
 	public void shouldNotScaleWhenNothingIsSelected() throws Exception {
 		givenNothingIsSelected();
@@ -234,7 +244,8 @@ public class ScaleDeploymentHandlerTest {
 	}
 
 	private void givenAServiceIsSelected() {
-		doReturn(serviceWrapper).when(handler).getSelectedElement(any(ExecutionEvent.class), eq(IResourceWrapper.class));
+		doReturn(serviceWrapper).when(handler).getSelectedElement(any(ExecutionEvent.class),
+				eq(IResourceWrapper.class));
 	}
 
 	private void givenAReplicationControllerIsSelected() {
@@ -266,8 +277,7 @@ public class ScaleDeploymentHandlerTest {
 	}
 
 	private void givenNoDeploymentConfigExist() {
-		when(serviceWrapper.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG))
-				.thenReturn(Collections.emptyList());
+		when(serviceWrapper.getResourcesOfKind(ResourceKind.DEPLOYMENT_CONFIG)).thenReturn(Collections.emptyList());
 	}
 
 	private void thenTheReplicasShouldNotBeUpdated() {

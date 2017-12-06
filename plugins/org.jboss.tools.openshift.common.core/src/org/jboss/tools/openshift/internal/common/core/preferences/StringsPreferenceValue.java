@@ -15,7 +15,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-
 /**
  * A class that offers access to a collection of values that is stored in the
  * preferences under a single key.
@@ -32,7 +31,7 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 	public StringsPreferenceValue(char delimiter, String prefsKey, String pluginId) {
 		this(delimiter, NO_MAXSIZE, prefsKey, pluginId);
 	}
-	
+
 	public StringsPreferenceValue(char delimiter, int maxSize, String prefsKey, String pluginId) {
 		super(prefsKey, pluginId);
 		this.delimiter = String.valueOf(delimiter);
@@ -74,8 +73,7 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 			StringBuilder builder = new StringBuilder(currentValues);
 			if (!isEmpty(currentValues)) {
 				String[] values = split(currentValues);
-				if (maxSize != NO_MAXSIZE
-						&& values.length >= maxSize) {
+				if (maxSize != NO_MAXSIZE && values.length >= maxSize) {
 					values = shiftLeft(value, values);
 					values[maxSize - 1] = value;
 					builder = new StringBuilder(concatenate(values));
@@ -126,14 +124,11 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 	}
 
 	protected boolean isContained(String value, String currentValues) {
-		return currentValues != null
-				&& currentValues.length() > 0
-				&& currentValues.indexOf(value) >= 0;
+		return currentValues != null && currentValues.length() > 0 && currentValues.indexOf(value) >= 0;
 	}
 
 	protected boolean isEmpty(String currentValues) {
-		return currentValues == null 
-					|| currentValues.length() == 0;
+		return currentValues == null || currentValues.length() == 0;
 	}
 
 	/**
@@ -173,12 +168,12 @@ public class StringsPreferenceValue extends AbstractPreferenceValue<String[]> {
 		}
 		return builder.toString();
 	}
-	
+
 	@Override
 	public void set(String[] values) {
 		doStore(concatenate(values));
 	}
-	
+
 	public int size() {
 		return get().length;
 	}

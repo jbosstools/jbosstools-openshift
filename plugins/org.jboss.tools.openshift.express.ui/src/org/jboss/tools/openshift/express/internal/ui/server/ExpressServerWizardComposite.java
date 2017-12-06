@@ -143,11 +143,12 @@ public class ExpressServerWizardComposite {
 		IDomain domain = ExpressServerWizardTaskModelUtil.getDomain(callback);
 		updateModel(ExpressServerWizardTaskModelUtil.getConnection(callback), domain, application);
 	}
-	
+
 	protected String getDeployFolder(IApplication application, IProject deployProject) {
 		if (application == null) {
 			return null;
-		} if (!ProjectUtils.isAccessible(deployProject)) {
+		}
+		if (!ProjectUtils.isAccessible(deployProject)) {
 			return null;
 		}
 		return ExpressServerUtils.getDefaultDeployFolder(application);
@@ -171,47 +172,42 @@ public class ExpressServerWizardComposite {
 		// connection
 		Label connectionLabel = new Label(composite, SWT.NONE);
 		connectionLabel.setText(ExpressUIMessages.OpenShiftServerWizardConnection);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(connectionLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(connectionLabel);
 
 		Combo connectionCombo = new Combo(composite, SWT.DEFAULT);
 		this.connectionComboViewer = new ComboViewer(connectionCombo);
 		connectionComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		connectionComboViewer.setLabelProvider(new ConnectionColumLabelProvider());
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionCombo);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(connectionCombo);
 		connectionComboViewer.addSelectionChangedListener(onSelectConnection());
 
 		Button newConnectionButton = new Button(composite, SWT.PUSH);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(newConnectionButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(newConnectionButton);
 		newConnectionButton.setText(ExpressUIMessages.OpenShiftServerWizardNew);
 		newConnectionButton.addSelectionListener(onNewConnection());
 
 		// domain
 		Label domainNameLabel = new Label(composite, SWT.NONE);
 		domainNameLabel.setText(ExpressUIMessages.OpenShiftServerWizardDomainName);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(domainNameLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(domainNameLabel);
 
 		this.domainComboViewer = new ComboViewer(new Combo(composite, SWT.DEFAULT));
 		domainComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		domainComboViewer.setLabelProvider(new DomainColumnLabelProvider());
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(domainComboViewer.getControl());
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false)
+				.applyTo(domainComboViewer.getControl());
 		domainComboViewer.addSelectionChangedListener(onSelectDomain());
 
 		// application
 		Label appNameLabel = new Label(composite, SWT.NONE);
 		appNameLabel.setText(ExpressUIMessages.OpenShiftServerWizardApplicationName);
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(appNameLabel);
 
 		this.applicationComboViewer = new ComboViewer(new Combo(composite, SWT.DEFAULT));
 		applicationComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		applicationComboViewer.setLabelProvider(new ApplicationColumnLabelProvider());
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(applicationComboViewer.getControl());
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false)
+				.applyTo(applicationComboViewer.getControl());
 		applicationComboViewer.addSelectionChangedListener(onSelectApplication());
 
 		// deploy project
@@ -228,16 +224,15 @@ public class ExpressServerWizardComposite {
 				return ((IProject) element).getName();
 			}
 		});
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(deployProjectComboViewer.getControl());
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false)
+				.applyTo(deployProjectComboViewer.getControl());
 		deployLocationLabel.setText(ExpressUIMessages.OpenShiftServerWizardDeployProject);
 		deployProjectComboViewer.addSelectionChangedListener(onSelectDeployProject());
 
 		// import
 		importLink = new Link(composite, SWT.None);
 		importLink.setText(ExpressUIMessages.OpenShiftServerWizardImportLink); //$NON-NLS-1$
-		GridDataFactory.fillDefaults()
-				.span(3, 1).applyTo(importLink);
+		GridDataFactory.fillDefaults().span(3, 1).applyTo(importLink);
 		importLink.addSelectionListener(onClickCreateOrImport());
 
 		// remote
@@ -246,14 +241,12 @@ public class ExpressServerWizardComposite {
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(remoteLabel);
 		remoteText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		remoteText.setEditable(false);
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(remoteText);
 		remoteText.addModifyListener(onModifyRemote());
 
 		Group projectSettings = new Group(composite, SWT.NONE);
 		projectSettings.setText(ExpressUIMessages.OpenShiftServerWizardProjectSettings);
-		GridDataFactory.fillDefaults()
-				.span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(projectSettings);
+		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(projectSettings);
 		projectSettings.setLayout(new GridLayout(2, false));
 
 		Label zipDestLabel = new Label(projectSettings, SWT.NONE);
@@ -277,14 +270,14 @@ public class ExpressServerWizardComposite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ExpressConnection connection = UIUtils.getFirstElement(connectionComboViewer.getSelection(), ExpressConnection.class);
+				ExpressConnection connection = UIUtils.getFirstElement(connectionComboViewer.getSelection(),
+						ExpressConnection.class);
 				ConnectionWizard wizard = new ConnectionWizard(connection);
-				if (WizardUtils.openWizardDialog(
-						wizard, connectionComboViewer.getControl().getShell()) == Window.OK) {
+				if (WizardUtils.openWizardDialog(wizard, connectionComboViewer.getControl().getShell()) == Window.OK) {
 					connectionComboViewer.getControl().setEnabled(true);
 					connectionComboViewer.setInput(ConnectionsRegistrySingleton.getInstance().getAll());
-					final ExpressConnection selectedConnection =
-							ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class);
+					final ExpressConnection selectedConnection = ConnectionsRegistrySingleton.getInstance()
+							.getRecentConnection(ExpressConnection.class);
 					selectConnectionCombo(selectedConnection);
 				}
 			}
@@ -296,13 +289,14 @@ public class ExpressServerWizardComposite {
 
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				final ExpressConnection selectedConnection = UIUtils.getFirstElement(event.getSelection(), ExpressConnection.class);
-				if (selectedConnection == null ||
-						(selectedConnection.equals(connection))) {
+				final ExpressConnection selectedConnection = UIUtils.getFirstElement(event.getSelection(),
+						ExpressConnection.class);
+				if (selectedConnection == null || (selectedConnection.equals(connection))) {
 					return;
 				}
-				
-				callback.executeLongRunning(new UpdateModelJob(selectedConnection, domain, getFirstApplication(applications)));
+
+				callback.executeLongRunning(
+						new UpdateModelJob(selectedConnection, domain, getFirstApplication(applications)));
 				updateWidgets();
 			}
 		};
@@ -331,16 +325,15 @@ public class ExpressServerWizardComposite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ExpressApplicationWizard wizard = null;
-				if(application != null){
+				if (application != null) {
 					wizard = new ImportExpressApplicationWizard(connection, application);
-				}else{
+				} else {
 					wizard = new NewExpressApplicationWizard(connection);
 				}
 				WizardDialog dialog = new WizardDialog(Display.getCurrent().getActiveShell(), wizard);
 				dialog.create();
 				int success = dialog.open();
-				if (success == Dialog.OK
-						&& wizard.isCreateServerAdapter()) {
+				if (success == Dialog.OK && wizard.isCreateServerAdapter()) {
 					// Cancel this wizard, a server has already been created
 					// This is really ugly
 					closeWizard(callback);
@@ -384,11 +377,10 @@ public class ExpressServerWizardComposite {
 
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				IDomain selectedDomain = UIUtils.getFirstElement(event.getSelection(), IDomain.class);				
-				if (selectedDomain == null
-						|| selectedDomain.equals(domain)) {
+				IDomain selectedDomain = UIUtils.getFirstElement(event.getSelection(), IDomain.class);
+				if (selectedDomain == null || selectedDomain.equals(domain)) {
 					return;
-				}	
+				}
 				callback.executeLongRunning(new UpdateModelJob(connection, selectedDomain, application));
 				updateWidgets();
 			}
@@ -411,9 +403,7 @@ public class ExpressServerWizardComposite {
 	}
 
 	private String getRemote(IApplication application, IProject project) {
-		if (application == null
-				|| project == null
-				|| !ProjectUtils.isAccessible(project)) {
+		if (application == null || project == null || !ProjectUtils.isAccessible(project)) {
 			return null;
 		}
 		try {
@@ -428,9 +418,8 @@ public class ExpressServerWizardComposite {
 			}
 			return remoteConfig.getName();
 		} catch (CoreException e) {
-			ExpressUIActivator.log(
-					NLS.bind(ExpressUIMessages.OpenShiftServerWizardCouldNotGetRemotePointing,
-							application.getGitUrl(), project.getName()), e);
+			ExpressUIActivator.log(NLS.bind(ExpressUIMessages.OpenShiftServerWizardCouldNotGetRemotePointing,
+					application.getGitUrl(), project.getName()), e);
 			return null;
 		}
 	}
@@ -456,8 +445,8 @@ public class ExpressServerWizardComposite {
 		ILabelProvider lp = new WorkbenchLabelProvider();
 		ITreeContentProvider cp = new WorkbenchContentProvider();
 
-		ElementTreeSelectionDialog dialog =
-				new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), lp, cp);
+		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(Display.getDefault().getActiveShell(), lp,
+				cp);
 		dialog.setTitle(ExpressUIMessages.OpenShiftServerWizardDeployLocation);
 		dialog.setMessage(ExpressUIMessages.OpenShiftServerWizardPleaseChooseLocation);
 		dialog.setInput(deployProject);
@@ -488,8 +477,7 @@ public class ExpressServerWizardComposite {
 	}
 
 	protected void setRemoteText(IApplication application, IProject deployProject) {
-		if (application == null
-				|| !ProjectUtils.isAccessible(deployProject)) {
+		if (application == null || !ProjectUtils.isAccessible(deployProject)) {
 			remoteText.setEnabled(false);
 			return;
 		}
@@ -498,10 +486,9 @@ public class ExpressServerWizardComposite {
 		remoteText.setText(remoteName);
 		remoteText.setEnabled(!StringUtils.isEmpty(remoteName));
 	}
-	
+
 	protected void setDeploymentFolderText(IApplication application, IProject deployProject) {
-		if (application == null
-				|| !ProjectUtils.isAccessible(deployProject)) {
+		if (application == null || !ProjectUtils.isAccessible(deployProject)) {
 			deployFolderText.setEnabled(false);
 			browseDeployFolderButton.setEnabled(false);
 			return;
@@ -510,7 +497,7 @@ public class ExpressServerWizardComposite {
 		deployFolder = getDeployFolder(application, deployProject);
 		deployFolderText.setText(StringUtils.null2emptyString(deployFolder));
 		deployFolderText.setEnabled(!StringUtils.isEmpty(deployFolder));
-		browseDeployFolderButton.setEnabled(true);		
+		browseDeployFolderButton.setEnabled(true);
 	}
 
 	private void setDomainComboInput(List<IDomain> domains) {
@@ -531,11 +518,11 @@ public class ExpressServerWizardComposite {
 
 	private void updateCreateOrImportLink() {
 		boolean enabled = true;
-		if(application != null){
+		if (application != null) {
 			IProject[] p = ExpressServerUtils.getProjectsForApplication(application);
 			enabled = p == null || p.length == 0;
 			importLink.setText(ExpressUIMessages.OpenShiftServerWizardImportLink);
-		}else{
+		} else {
 			importLink.setText(ExpressUIMessages.OpenShiftServerWizardCreateLink);
 		}
 		importLink.setEnabled(enabled);
@@ -548,7 +535,7 @@ public class ExpressServerWizardComposite {
 	public String createErrorMessage() {
 		return createErrorMessage(null);
 	}
-	
+
 	public String createErrorMessage(String message) {
 		String error = null;
 		if (message != null) {
@@ -557,17 +544,15 @@ public class ExpressServerWizardComposite {
 			error = ExpressUIMessages.OpenShiftServerWizardPleaseSelectConnection;
 		} else if (domains == null) {
 			error = NLS.bind(ExpressUIMessages.OpenShiftServerWizardPleaseCreateDomain, connection.getId());
-		} else if (applications == null
-				|| applications.isEmpty()) {
+		} else if (applications == null || applications.isEmpty()) {
 			error = ExpressUIMessages.OpenShiftServerWizardPleaseCreateApplication;
 		} else if (application == null) {
 			error = ExpressUIMessages.OpenShiftServerWizardPleaseSelectApplication;
 		} else {
 			IProject[] p = ExpressServerUtils.getProjectsForApplication(application);
 			if (p == null || p.length == 0) {
-				error = NLS.bind(
-					ExpressUIMessages.OpenShiftServerWizardYourWorkspaceDoesNotHaveProject,
-					application.getName());
+				error = NLS.bind(ExpressUIMessages.OpenShiftServerWizardYourWorkspaceDoesNotHaveProject,
+						application.getName());
 			}
 		}
 		return error;
@@ -583,14 +568,14 @@ public class ExpressServerWizardComposite {
 		this.deployProject = getDeployProject(this.application);
 		this.deployFolder = getDeployFolder(this.application, deployProject);
 		this.remote = getRemote(this.application, deployProject);
-		updateServer(this.application, this.domain, this.remote, this.deployProject, this.deployFolder, callback.getServer());
+		updateServer(this.application, this.domain, this.remote, this.deployProject, this.deployFolder,
+				callback.getServer());
 	}
 
 	protected IDomain getDomain(final IDomain domain, final List<IDomain> domains) {
 		if (domain == null) {
 			return getFirstDomain(domains);
-		} else if (domains != null
-				&& domains.indexOf(domain) == -1) {
+		} else if (domains != null && domains.indexOf(domain) == -1) {
 			// domain switched, current domain not contained within new list
 			return getFirstDomain(domains);
 		} else {
@@ -599,8 +584,7 @@ public class ExpressServerWizardComposite {
 	}
 
 	private IDomain getFirstDomain(final List<IDomain> domains) {
-		if (domains != null
-				&& domains.size() > 0) {
+		if (domains != null && domains.size() > 0) {
 			return domains.get(0);
 		}
 		return null;
@@ -609,8 +593,7 @@ public class ExpressServerWizardComposite {
 	protected IApplication getApplication(final IApplication application, final List<IApplication> applications) {
 		if (application == null) {
 			return getFirstApplication(applications);
-		} else if (applications != null
-				&& applications.indexOf(application) == -1){ 
+		} else if (applications != null && applications.indexOf(application) == -1) {
 			// domain changed, application not within list of applications of new domain
 			return getFirstApplication(applications);
 		} else {
@@ -623,11 +606,10 @@ public class ExpressServerWizardComposite {
 			return null;
 		}
 		IProject[] projects = ExpressServerUtils.getProjectsForApplication(application);
-		if (projects == null
-				|| projects.length < 1) {
+		if (projects == null || projects.length < 1) {
 			return null;
 		}
-		
+
 		return projects[0];
 	}
 
@@ -654,20 +636,20 @@ public class ExpressServerWizardComposite {
 			return Collections.emptyList();
 		} catch (OpenShiftException e) {
 			// Credentials work, but no domain, so no applications either
-			updateErrorMessage(NLS.bind(ExpressUIMessages.OpenShiftServerWizardCouldNotLoadDomains, connection.getId(), e.getMessage()));
+			updateErrorMessage(NLS.bind(ExpressUIMessages.OpenShiftServerWizardCouldNotLoadDomains, connection.getId(),
+					e.getMessage()));
 			return null;
 		}
 	}
 
 	private IApplication getFirstApplication(List<IApplication> applications) {
-		IApplication application = null; 
-		if (applications != null
-				&& applications.size() > 0) {
+		IApplication application = null;
+		if (applications != null && applications.size() > 0) {
 			application = applications.get(0);
 		}
 		return application;
 	}
-	
+
 	private Map<IApplication, IProject[]> createProjectsByApplication(List<IApplication> applications) {
 		Map<IApplication, IProject[]> projectsByApplication = new HashMap<>();
 		if (applications != null) {
@@ -684,22 +666,22 @@ public class ExpressServerWizardComposite {
 		updateProjectSettings(application, domain, remote, deployProject, deployFolder, connection);
 	}
 
-	private void updateServer(IApplication application, IDomain domain, String remote, IProject deployProject, String deployFolder,
-			IServerWorkingCopy server) throws OpenShiftException {
+	private void updateServer(IApplication application, IDomain domain, String remote, IProject deployProject,
+			String deployFolder, IServerWorkingCopy server) throws OpenShiftException {
 		String serverName = ExpressServerUtils.getDefaultServerName(application);
-		ExpressServerUtils.fillServerWithOpenShiftDetails(
-				server, serverName, deployProject, deployFolder, remote, application, domain);
+		ExpressServerUtils.fillServerWithOpenShiftDetails(server, serverName, deployProject, deployFolder, remote,
+				application, domain);
 	}
 
-	private void updateProjectSettings(IApplication application, IDomain domain, String remote, IProject deployProject, String deployFolder, ExpressConnection connection) {
-		String projRemote = 
-				ExpressServerUtils.getProjectAttribute(ExpressServerUtils.SETTING_REMOTE_NAME, null, deployProject);
-		String projDepFolder = 
-				ExpressServerUtils.getProjectAttribute(ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME, null, deployProject);
-		if (projRemote == null 
-				&& projDepFolder == null) {
-			ExpressServerUtils.updateOpenshiftProjectSettings(
-					deployProject, application, domain, connection, remote, deployFolder);
+	private void updateProjectSettings(IApplication application, IDomain domain, String remote, IProject deployProject,
+			String deployFolder, ExpressConnection connection) {
+		String projRemote = ExpressServerUtils.getProjectAttribute(ExpressServerUtils.SETTING_REMOTE_NAME, null,
+				deployProject);
+		String projDepFolder = ExpressServerUtils.getProjectAttribute(ExpressServerUtils.SETTING_DEPLOY_FOLDER_NAME,
+				null, deployProject);
+		if (projRemote == null && projDepFolder == null) {
+			ExpressServerUtils.updateOpenshiftProjectSettings(deployProject, application, domain, connection, remote,
+					deployFolder);
 		}
 	}
 
@@ -735,36 +717,37 @@ public class ExpressServerWizardComposite {
 	private void setDeployProjectCombo(IApplication application, Map<IApplication, IProject[]> projectsByApplication) {
 		setDeployProjectCombo(getImportedProjects(application, projectsByApplication));
 	}
-	
-	private IProject[] getImportedProjects(IApplication application, Map<IApplication, IProject[]> projectsByApplication) {
+
+	private IProject[] getImportedProjects(IApplication application,
+			Map<IApplication, IProject[]> projectsByApplication) {
 		IProject[] importedProjects = new IProject[0];
 		if (application != null) {
-			importedProjects = projectsByApplication.get(application);	
+			importedProjects = projectsByApplication.get(application);
 		}
 		return importedProjects;
 	}
 
 	private void selectDeployProjectCombo(final IProject[] importedProjects) {
 		IStructuredSelection selection = new StructuredSelection();
-		if (importedProjects != null
-				&& importedProjects.length > 0) {
+		if (importedProjects != null && importedProjects.length > 0) {
 			selection = new StructuredSelection(importedProjects[0]);
 		}
 		deployProjectComboViewer.setSelection(selection);
-	}	
+	}
 
 	private class UpdateModelJob extends Job {
-		
+
 		private ExpressConnection connection;
 		private IDomain domain;
 		private IApplication application;
 
 		private UpdateModelJob(ExpressConnection connection, IDomain domain, IApplication application) {
-			super(NLS.bind(ExpressUIMessages.OpenShiftServerWizardFetchingDomainsAndApplications, connection.getUsername()));
+			super(NLS.bind(ExpressUIMessages.OpenShiftServerWizardFetchingDomainsAndApplications,
+					connection.getUsername()));
 			this.connection = connection;
 			this.domain = domain;
 			this.application = application;
-			
+
 		}
 
 		@Override

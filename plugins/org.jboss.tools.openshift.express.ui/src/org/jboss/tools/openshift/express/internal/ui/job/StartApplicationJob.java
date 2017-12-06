@@ -24,7 +24,8 @@ public class StartApplicationJob extends AbstratApplicationJob {
 	}
 
 	public StartApplicationJob(LoadApplicationJob applicationJob) {
-		super(new ApplicationProvider(applicationJob), NLS.bind("Starting application {0}", applicationJob.getApplicationName()));
+		super(new ApplicationProvider(applicationJob),
+				NLS.bind("Starting application {0}", applicationJob.getApplicationName()));
 	}
 
 	@Override

@@ -18,7 +18,7 @@ public class StringElement extends ContainerElement {
 	public StringElement(String property, String value) {
 		this(property, value, false, null);
 	}
-	
+
 	public StringElement(String property, String value, ContainerElement parent) {
 		this(property, value, false, parent);
 	}

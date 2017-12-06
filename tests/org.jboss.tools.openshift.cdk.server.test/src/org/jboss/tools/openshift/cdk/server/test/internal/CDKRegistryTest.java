@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.test.internal;
 
 import java.io.BufferedWriter;
@@ -49,7 +49,6 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 
-
 /**
  * Test that the registry locator works as expected
  * 
@@ -60,18 +59,17 @@ import junit.framework.TestCase;
 public class CDKRegistryTest extends TestCase {
 	@Test
 	public void testRegistryURL() throws Exception {
-		ConfigureDependentFrameworksListener configureListener = 
-				(ConfigureDependentFrameworksListener)CDKCoreActivator.getDefault().getConfigureDependentFrameworksListener();
+		ConfigureDependentFrameworksListener configureListener = (ConfigureDependentFrameworksListener) CDKCoreActivator
+				.getDefault().getConfigureDependentFrameworksListener();
 		configureListener.disable();
-		
-		
-		
+
 		CredentialService.getCredentialModel().addDomain("redhat.com", "redhat.com", true);
-		CredentialService.getCredentialModel().addCredentials(CredentialService.getCredentialModel().getDomain("redhat.com"), "user", "password");
+		CredentialService.getCredentialModel()
+				.addCredentials(CredentialService.getCredentialModel().getDomain("redhat.com"), "user", "password");
 		CDKOpenshiftUtility util = new CDKOpenshiftUtility();
 		createCDKFile("Basic", null, null);
 		IServer cdkServer = createServer("openshift33");
-		
+
 		ServiceManagerEnvironment adb = createLoader(cdkServer);
 		IConnection con = util.createOpenshiftConnection(adb, ConnectionsRegistrySingleton.getInstance());
 		assertNotNull(con);
@@ -80,7 +78,7 @@ public class CDKRegistryTest extends TestCase {
 			protected ServiceManagerEnvironment getServiceManagerEnvironment(IServer server) {
 				try {
 					return createLoader(server);
-				} catch(Exception e) {
+				} catch (Exception e) {
 					fail(e.getMessage());
 				}
 				return null;
@@ -89,71 +87,73 @@ public class CDKRegistryTest extends TestCase {
 		IStatus reg = prov.getRegistryURL(con);
 		assertNotNull(reg);
 		assertFalse(reg.isOK());
-		
-		ControllableServerBehavior beh = (ControllableServerBehavior) cdkServer.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
+
+		ControllableServerBehavior beh = (ControllableServerBehavior) cdkServer
+				.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
 		beh.setServerStarted();
 		reg = prov.getRegistryURL(con);
 		assertNotNull(reg);
 		assertTrue(reg.isOK());
-		
+
 		configureListener.enable();
 		beh.setServerStopped();
 	}
 
-	@After 
+	@After
 	public void cleanup() {
-		CredentialService.getCredentialModel().removeCredentials(CredentialService.getCredentialModel().getDomain("redhat.com"), "user");
+		CredentialService.getCredentialModel()
+				.removeCredentials(CredentialService.getCredentialModel().getDomain("redhat.com"), "user");
 
 		ArrayList<IConnection> cons = new ArrayList(ConnectionsRegistrySingleton.getInstance().getAll());
 		Iterator<IConnection> con = cons.iterator();
-		while(con.hasNext()) {
+		while (con.hasNext()) {
 			ConnectionsRegistrySingleton.getInstance().remove(con.next());
 		}
 		IServer[] all = ServerCore.getServers();
-		for( int i = 0; i < all.length; i++ ) {
+		for (int i = 0; i < all.length; i++) {
 			try {
 				all[i].delete();
-			} catch(CoreException ce) {
+			} catch (CoreException ce) {
 				ce.printStackTrace();
 			}
 		}
 	}
-	
-	private void createCDKFile(String authType, String user, String pass ) {
+
+	private void createCDKFile(String authType, String user, String pass) {
 		File f = new File(getDotCDKFile());
-		if( f.exists()) {
+		if (f.exists()) {
 			f.delete();
 		}
-		if( !f.getParentFile().exists()) {
+		if (!f.getParentFile().exists()) {
 			f.getParentFile().mkdirs();
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
-		if( authType != null ) {
+		if (authType != null) {
 			sb.append("openshift.auth.scheme=");
 			sb.append(authType);
 			sb.append("\n");
 		}
-		if( user != null ) {
+		if (user != null) {
 			sb.append("openshift.auth.username=");
 			sb.append(user);
 			sb.append("\n");
 		}
-		if( pass != null ) {
+		if (pass != null) {
 			sb.append("openshift.auth.password=");
 			sb.append(pass);
 			sb.append("\n");
 		}
-		
+
 		Path path = Paths.get(getDotCDKFile());
 		try (BufferedWriter writer = Files.newBufferedWriter(path)) {
-		    writer.write(sb.toString());
+			writer.write(sb.toString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	private IServer createServer(String name) {
 		try {
 			IServerType stt = getServerType(CDKServer.CDK_V3_SERVER_TYPE);
@@ -163,50 +163,52 @@ public class CDKRegistryTest extends TestCase {
 				File f = File.createTempFile("minishift", System.currentTimeMillis() + "");
 				swc.setAttribute(CDK3Server.MINISHIFT_FILE, f.getAbsolutePath());
 				f.createNewFile();
-			} catch(IOException ioe) {
+			} catch (IOException ioe) {
 				swc.setAttribute(CDK3Server.MINISHIFT_FILE, "/home/user/minishift_folder/minishift");
 			}
 			swc.setAttribute(CDKServer.PROP_USERNAME, "user");
 			swc.setAttribute(CDK3Server.PROP_HYPERVISOR, "virtualbox");
 			return swc.save(true, new NullProgressMonitor());
-		} catch(CoreException ce) {
+		} catch (CoreException ce) {
 			fail(ce.getMessage());
 		}
 		return null;
 	}
-	
+
 	private IServerType getServerType(String id) {
 		IServerType[] allTypes = ServerCore.getServerTypes();
-		for( int i = 0; i < allTypes.length; i++ ) {
-			if( allTypes[i].getId().equals(id)) 
+		for (int i = 0; i < allTypes.length; i++) {
+			if (allTypes[i].getId().equals(id))
 				return allTypes[i];
 		}
 		return null;
 	}
-	
+
 	private String getDotCDKFolder() {
-		IPath stateLoc = ((Plugin)CDKCoreActivator.getDefault()).getStateLocation();
+		IPath stateLoc = ((Plugin) CDKCoreActivator.getDefault()).getStateLocation();
 		IPath folder = stateLoc.append("testFolder");
 		return folder.toOSString();
 	}
+
 	private String getDotCDKFile() {
-		IPath stateLoc = ((Plugin)CDKCoreActivator.getDefault()).getStateLocation();
+		IPath stateLoc = ((Plugin) CDKCoreActivator.getDefault()).getStateLocation();
 		IPath folder = stateLoc.append("testFolder").append(".cdk");
 		return folder.toOSString();
 	}
 
-	
-	
 	private static class MinishiftServiceManagerEnvironmentLoaderMock extends MinishiftServiceManagerEnvironmentLoader {
 		private Map<String, String> dockerMap;
 		private String registry;
+
 		public MinishiftServiceManagerEnvironmentLoaderMock(Map<String, String> dockerMap, String registry) {
 			this.dockerMap = dockerMap;
 			this.registry = registry;
 		}
+
 		protected Map<String, String> loadDockerEnv(IServer server) {
 			return dockerMap;
 		}
+
 		@Override
 		protected Properties loadOpenshiftConsoleDetails(IServer server, boolean suppressError) {
 			Properties p = new Properties();
@@ -215,12 +217,13 @@ public class CDKRegistryTest extends TestCase {
 			p.put("CONSOLE_URL", "https://192.168.99.100:8443");
 			return p;
 		}
+
 		@Override
 		protected String getOpenshiftRegistry(IServer server, boolean suppressErrors) {
 			return registry;
 		}
 	}
-	
+
 	private ServiceManagerEnvironment createLoader(IServer server) throws URISyntaxException {
 		return createLoader(server, "192.168.99.100");
 	}
@@ -229,13 +232,15 @@ public class CDKRegistryTest extends TestCase {
 		return createLoader(server, host, "2376", "172.30.1.1:5000");
 	}
 
-	private ServiceManagerEnvironment createLoader(IServer server, String host, String port, String registry) throws URISyntaxException {
-		HashMap<String,String> env = new HashMap<>();
-		env.put("DOCKER_HOST","tcp://" + host + ":" + port);
-		env.put("DOCKER_CERT_PATH","/cert/path/.docker");
-		env.put("DOCKER_TLS_VERIFY","1");
-		env.put("DOCKER_MACHINE_NAME","e5d7d0a");
-		return new MinishiftServiceManagerEnvironmentLoaderMock(env, registry).loadServiceManagerEnvironment(server, true);
+	private ServiceManagerEnvironment createLoader(IServer server, String host, String port, String registry)
+			throws URISyntaxException {
+		HashMap<String, String> env = new HashMap<>();
+		env.put("DOCKER_HOST", "tcp://" + host + ":" + port);
+		env.put("DOCKER_CERT_PATH", "/cert/path/.docker");
+		env.put("DOCKER_TLS_VERIFY", "1");
+		env.put("DOCKER_MACHINE_NAME", "e5d7d0a");
+		return new MinishiftServiceManagerEnvironmentLoaderMock(env, registry).loadServiceManagerEnvironment(server,
+				true);
 	}
 
 }

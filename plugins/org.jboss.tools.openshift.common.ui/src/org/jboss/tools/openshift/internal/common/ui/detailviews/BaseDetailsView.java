@@ -40,7 +40,7 @@ public abstract class BaseDetailsView implements IDetailView {
 
 	@Override
 	public abstract boolean isViewFor(Object object);
-	
+
 	@Override
 	public void dispose() {
 	}

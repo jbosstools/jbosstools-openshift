@@ -44,15 +44,16 @@ public class ExpressConnectionPersistencyTest {
 			@Override
 			protected void persist(Map<String, ExpressConnection> connections) {
 				// verification
-				assertArrayEquals(new String[] {	"https://foo@localhost:8442", "https://bar@localhost:8443" }, connections.keySet().toArray(new String[] {}));
+				assertArrayEquals(new String[] { "https://foo@localhost:8442", "https://bar@localhost:8443" },
+						connections.keySet().toArray(new String[] {}));
 			}
-			
+
 		};
 		// pre-condition
 		List<ExpressConnection> connections = new ArrayList<>();
 		connections.add(connection1);
 		connections.add(connection2);
-		
+
 		// operations
 		persistency.save(connections);
 	}
@@ -64,10 +65,8 @@ public class ExpressConnectionPersistencyTest {
 
 			@Override
 			protected String[] loadPersisted() {
-				return new String[] {
-						"https://foo@localhost:8442",
-						"https://bar@localhost:8443" };
-				}
+				return new String[] { "https://foo@localhost:8442", "https://bar@localhost:8443" };
+			}
 		};
 		// operations
 		Collection<ExpressConnection> connections = persistency.load();
@@ -79,19 +78,16 @@ public class ExpressConnectionPersistencyTest {
 	}
 
 	@Test
-	public void shouldNotLoadMalformedUrl() {	
+	public void shouldNotLoadMalformedUrl() {
 		// pre-condition
 		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
 
 			@Override
 			protected String[] loadPersisted() {
-				return new String[] {
-						"https://foo@localhost:8442",
-						"htp://bingobongo",
-						"https://bar@localhost:8443" };
-				}
+				return new String[] { "https://foo@localhost:8442", "htp://bingobongo", "https://bar@localhost:8443" };
+			}
 		};
-		
+
 		// operations
 		Collection<ExpressConnection> connections = persistency.load();
 
@@ -100,19 +96,18 @@ public class ExpressConnectionPersistencyTest {
 		assertContainsConnection(connection1, connections);
 		assertContainsConnection(connection2, connections);
 	}
-	
+
 	@Test
-	public void shouldLoadUsernamesAsDefaultHostConnection() {	
+	public void shouldLoadUsernamesAsDefaultHostConnection() {
 		// pre-condition
 		ExpressConnectionPersistency persistency = new ExpressConnectionPersistency() {
 
 			@Override
 			protected String[] loadPersisted() {
-				return new String[] {
-						"bingobongo@redhat.com" };
-				}
+				return new String[] { "bingobongo@redhat.com" };
+			}
 		};
-		
+
 		// operations
 		Collection<ExpressConnection> connections = persistency.load();
 

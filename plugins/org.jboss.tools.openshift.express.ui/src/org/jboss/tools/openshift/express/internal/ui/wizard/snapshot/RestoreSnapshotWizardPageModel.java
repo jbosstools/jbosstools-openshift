@@ -20,16 +20,15 @@ public class RestoreSnapshotWizardPageModel extends ObservableUIPojo {
 	public static final String PROPERTY_FILEPATH = "filepath";
 	public static final String PROPERTY_DEPLOYMENT_SNAPSHOT = "deploymentSnapshot";
 	public static final String PROPERTY_HOT_DEPLOY = "hotDeploy";
-	
+
 	private RestoreSnapshotWizardModel wizardModel;
 
 	public RestoreSnapshotWizardPageModel(RestoreSnapshotWizardModel wizardModel) {
 		this.wizardModel = wizardModel;
 	}
 
-	public void setFilepath(String filepath) {		
-		firePropertyChange(
-				PROPERTY_FILEPATH, this.wizardModel.getFilepath(), this.wizardModel.setFilepath(filepath));
+	public void setFilepath(String filepath) {
+		firePropertyChange(PROPERTY_FILEPATH, this.wizardModel.getFilepath(), this.wizardModel.setFilepath(filepath));
 	}
 
 	public String getFilepath() {
@@ -37,8 +36,7 @@ public class RestoreSnapshotWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setDeploymentSnapshot(boolean deploymentSnapshot) {
-		firePropertyChange(
-				PROPERTY_DEPLOYMENT_SNAPSHOT, this.wizardModel.isDeploymentSnapshot(),
+		firePropertyChange(PROPERTY_DEPLOYMENT_SNAPSHOT, this.wizardModel.isDeploymentSnapshot(),
 				this.wizardModel.setDeploymentSnapshot(deploymentSnapshot));
 	}
 
@@ -47,8 +45,8 @@ public class RestoreSnapshotWizardPageModel extends ObservableUIPojo {
 	}
 
 	public void setHotDeploy(boolean hotDeploy) {
-		firePropertyChange(
-				PROPERTY_HOT_DEPLOY, this.wizardModel.isHotDeploy(), this.wizardModel.setHotDeploy(hotDeploy));
+		firePropertyChange(PROPERTY_HOT_DEPLOY, this.wizardModel.isHotDeploy(),
+				this.wizardModel.setHotDeploy(hotDeploy));
 	}
 
 	public boolean isHotDeploy() {

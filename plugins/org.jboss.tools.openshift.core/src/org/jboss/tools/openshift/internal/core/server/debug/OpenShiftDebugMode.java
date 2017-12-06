@@ -49,7 +49,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  */
 public class OpenShiftDebugMode {
-	
+
 	private static final String DEBUG_PORT_PROTOCOL = "TCP";
 	private static final String DEBUG_PORT_NAME = "debug";
 
@@ -96,8 +96,9 @@ public class OpenShiftDebugMode {
 
 		return this;
 	}
-	
-	private boolean isDebugEnabled(IDeploymentConfig dc, String devmodeKey, String debugPortKey, int requestedDebugPort, boolean enableRequested) {
+
+	private boolean isDebugEnabled(IDeploymentConfig dc, String devmodeKey, String debugPortKey, int requestedDebugPort,
+			boolean enableRequested) {
 		boolean debugEnabled = false;
 		EnvironmentVariables env = new EnvironmentVariables(dc);
 		boolean devmodeEnabled = env.getBoolean(devmodeKey);
@@ -106,8 +107,7 @@ public class OpenShiftDebugMode {
 			String debugPort = env.getString(debugPortKey);
 			if (enableRequested) {
 				// if we should enable, compare current port to requested one
-				debugEnabled = !StringUtils.isBlank(debugPort) 
-						&& context.getDebugPort(debugPort) == requestedDebugPort;
+				debugEnabled = !StringUtils.isBlank(debugPort) && context.getDebugPort(debugPort) == requestedDebugPort;
 			} else {
 				// if we should disable, simply check if debug port exists
 				debugEnabled = !StringUtils.isBlank(debugPort);
@@ -126,10 +126,10 @@ public class OpenShiftDebugMode {
 	 */
 	public OpenShiftDebugMode enableDevmode() {
 		context.setDevmodeEnabled(true);
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Disables devmode in given context.  No change is
 	 * executed in OpenShift, the change is only in the given local context. To have
@@ -159,11 +159,12 @@ public class OpenShiftDebugMode {
 		IResource resource = OpenShiftServerUtils.getResource(context.getServer(), monitor);
 		IDeploymentConfig dc = getDeploymentConfig(resource, connection, monitor);
 		if (dc == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-		            NLS.bind("Could not find deployment config for resource {0}. "
-		                    + "Your build might be still running and pods not created yet or "
-		                    + "there might be no labels on your pods pointing to the wanted deployment config.", 
-							resource != null? resource.getName() : "")));
+			throw new CoreException(OpenShiftCoreActivator.statusFactory()
+					.errorStatus(NLS.bind(
+							"Could not find deployment config for resource {0}. "
+									+ "Your build might be still running and pods not created yet or "
+									+ "there might be no labels on your pods pointing to the wanted deployment config.",
+							resource != null ? resource.getName() : "")));
 		}
 
 		boolean dcUpdated = updateDc(dc, connection, monitor);
@@ -172,12 +173,12 @@ public class OpenShiftDebugMode {
 
 		toggleRouteTimeout(resource, connection, context, monitor);
 		toggleDebugger(context, monitor);
-		
+
 		return this;
 	}
 
-	private void toggleRouteTimeout(IResource resource, Connection connection, DebugContext context, IProgressMonitor monitor)
-			throws CoreException {
+	private void toggleRouteTimeout(IResource resource, Connection connection, DebugContext context,
+			IProgressMonitor monitor) throws CoreException {
 		if (context.isDebugEnabled()) {
 			setRouteTimeout(resource, connection, monitor);
 		} else {
@@ -185,7 +186,8 @@ public class OpenShiftDebugMode {
 		}
 	}
 
-	private void setRouteTimeout(IResource resource, Connection connection, IProgressMonitor monitor) throws CoreException {
+	private void setRouteTimeout(IResource resource, Connection connection, IProgressMonitor monitor)
+			throws CoreException {
 		monitor.subTask("Increasing route timeout while debugging...");
 
 		IRoute route = new RouteTimeout(resource, connection).set(context, monitor);
@@ -194,8 +196,8 @@ public class OpenShiftDebugMode {
 		}
 	}
 
-	private void resetRouteTimeout(IResource resource, Connection connection, IProgressMonitor monitor) 
-		throws CoreException {
+	private void resetRouteTimeout(IResource resource, Connection connection, IProgressMonitor monitor)
+			throws CoreException {
 		monitor.subTask("Clearing/restoring route timeout after debugging...");
 
 		IRoute route = new RouteTimeout(resource, connection).reset(context, monitor);
@@ -206,8 +208,7 @@ public class OpenShiftDebugMode {
 
 	private boolean updateDc(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor)
 			throws CoreException {
-		boolean dcUpdated = updateDebugmode(dc, context, monitor) 
-				| updateDevmode(dc, context, monitor) 
+		boolean dcUpdated = updateDebugmode(dc, context, monitor) | updateDevmode(dc, context, monitor)
 				| updateLifenessProbe(dc, context, monitor);
 
 		if (dcUpdated) {
@@ -245,28 +246,27 @@ public class OpenShiftDebugMode {
 
 		List<IPod> allPods = connection.getResources(ResourceKind.POD, dc.getNamespace());
 		// TODO: support multiple pods
-		return ResourceUtils.getPodsFor(dc, allPods).stream()
-				.findFirst()
-				.orElse(null);
-		
+		return ResourceUtils.getPodsFor(dc, allPods).stream().findFirst().orElse(null);
+
 	}
 
 	private boolean updateDebugmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
-		monitor.subTask(NLS.bind(context.isDebugEnabled()? "Enabling" : "Disabling" 
-			+ " debugging for deployment config {0}", dc.getName()));
+		monitor.subTask(
+				NLS.bind(context.isDebugEnabled() ? "Enabling" : "Disabling" + " debugging for deployment config {0}",
+						dc.getName()));
 
 		boolean needsUpdate = needsDebugUpdate(dc, context);
 		if (needsUpdate) {
 			updateContainerDebugPort(dc, context);
 			updateDebugEnvVariables(dc, context);
 		}
-		
+
 		return needsUpdate;
 	}
 
 	private boolean needsDebugUpdate(IDeploymentConfig dc, DebugContext context) {
-		boolean debugEnabled = isDebugEnabled(dc, 
-				context.getDevmodeKey(), context.getDebugPortKey(), context.getDebugPort(), context.isDebugEnabled());
+		boolean debugEnabled = isDebugEnabled(dc, context.getDevmodeKey(), context.getDebugPortKey(),
+				context.getDebugPort(), context.isDebugEnabled());
 		return debugEnabled != context.isDebugEnabled();
 	}
 
@@ -299,17 +299,14 @@ public class OpenShiftDebugMode {
 		}
 
 		if (modified) {
-			firstContainer.setPorts(ports); 
+			firstContainer.setPorts(ports);
 		}
 	}
 
 	private IPort getCurrentContainerPort(Set<IPort> ports) {
-		return ports.stream()
-				.filter(p -> 
-					// find by name
-					DEBUG_PORT_NAME.equals(p.getName()))
-				.findFirst()
-				.orElse(null);
+		return ports.stream().filter(p ->
+		// find by name
+		DEBUG_PORT_NAME.equals(p.getName())).findFirst().orElse(null);
 	}
 
 	private boolean addReplaceDebugPort(int debugPort, IPort existing, Set<IPort> ports) {
@@ -325,8 +322,7 @@ public class OpenShiftDebugMode {
 	}
 
 	private boolean matchesPort(int debugPort, IPort currentContainerPort) {
-		return currentContainerPort != null 
-				&& currentContainerPort.getContainerPort() != debugPort;
+		return currentContainerPort != null && currentContainerPort.getContainerPort() != debugPort;
 	}
 
 	private boolean removeDebugPort(IPort currentContainerPort, Set<IPort> ports) {
@@ -360,7 +356,8 @@ public class OpenShiftDebugMode {
 		}
 	}
 
-	private boolean updateLifenessProbe(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) throws CoreException {
+	private boolean updateLifenessProbe(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor)
+			throws CoreException {
 		if (context.isDebugEnabled()) {
 			return new LivenessProbe(dc).setInitialDelay(context, monitor);
 		} else {
@@ -371,7 +368,7 @@ public class OpenShiftDebugMode {
 	protected void safeSend(IResource resource, Connection connection, IProgressMonitor monitor) {
 		try {
 			send(resource, connection, monitor);
-		} catch(CoreException e) {
+		} catch (CoreException e) {
 			OpenShiftCoreActivator.pluginLog().logError(e.getMessage());
 		}
 	}
@@ -382,9 +379,8 @@ public class OpenShiftDebugMode {
 		try {
 			connection.updateResource(resource);
 		} catch (OpenShiftException e) {
-			throw new CoreException(
-					StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-							NLS.bind("Could update resource {0}.", resource.getName()), e));
+			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
+					NLS.bind("Could update resource {0}.", resource.getName()), e));
 		}
 	}
 

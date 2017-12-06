@@ -17,8 +17,8 @@ import org.eclipse.core.databinding.conversion.Converter;
  */
 public class Boolean2EnumConverter extends Converter {
 
-    private Enum trueValue;
-    
+	private Enum trueValue;
+
 	public Boolean2EnumConverter(Enum trueValue) {
 		super(Boolean.class, trueValue.getClass());
 		this.trueValue = trueValue;
@@ -29,7 +29,7 @@ public class Boolean2EnumConverter extends Converter {
 		if (!(fromObject instanceof Boolean)) {
 			return fromObject;
 		}
-		return ((Boolean)fromObject)?trueValue:null;
+		return ((Boolean) fromObject) ? trueValue : null;
 	}
 
 }

@@ -81,8 +81,7 @@ public class ListAllEnvironmentVariablesHandler extends AbstractHandler {
 		job.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
-				if (event.getResult().isOK() 
-						&& job.isValidSession()) {
+				if (event.getResult().isOK() && job.isValidSession()) {
 					showEnvironmentProperties(application);
 				}
 			}

@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.express.internal.ui.server;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -28,65 +28,57 @@ import org.jboss.tools.openshift.express.internal.ui.ExpressUIMessages;
 public class CommitAndPushDialog extends MessageDialog {
 
 	private static String[] labels = new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL };
-	
+
 	/*
 	 * Show the dialog in the display thread and return the proper data array
 	 */
 	public static Object[] showCommitAndPushDialog(final String title, final String message) {
 		final CommitAndPushDialog[] dialog = new CommitAndPushDialog[1];
 		Display.getDefault().syncExec(new Runnable() {
-		      @Override
+			@Override
 			public void run() {
-		    	  dialog[0] = new CommitAndPushDialog(title, message);
-		    	  dialog[0].open();
-		      }
+				dialog[0] = new CommitAndPushDialog(title, message);
+				dialog[0].open();
+			}
 		});
 		return dialog[0].getReturnDataArray();
 	}
 
-	
-	
 	private String customizeMessageText;
 	private int openVal = -1;
-	
-	
+
 	public CommitAndPushDialog(String title, String message) {
-		super(Display.getDefault().getActiveShell(), 
-				title, null, message, 
-				MessageDialog.QUESTION, labels,0);
+		super(Display.getDefault().getActiveShell(), title, null, message, MessageDialog.QUESTION, labels, 0);
 	}
-	
+
 	@Override
 	public int open() {
 		int ret = super.open();
 		openVal = ret;
 		return ret;
 	}
-	
+
 	private Object[] getReturnDataArray() {
-		return new Object[] { 
-				new Boolean(openVal == 0), 
-				customizeMessageText
-		};
+		return new Object[] { new Boolean(openVal == 0), customizeMessageText };
 	}
-	
-    @Override
+
+	@Override
 	protected Control createCustomArea(Composite parent) {
-    	Composite c = new Composite(parent, SWT.NONE);
-    	c.setLayoutData(new GridData(GridData.FILL_BOTH));
-    	c.setLayout(new GridLayout(1,true));
-    	Label commitMsgLabel = new Label(c, SWT.CHECK);
-    	commitMsgLabel.setText(ExpressUIMessages.PublishDialogCustomizeGitCommitMsg);
-    	final Text t = new Text(c, SWT.MULTI | SWT.BORDER | SWT.WRAP);
-    	t.setText(ExpressUIMessages.PublishDialogDefaultGitCommitMsg);
-    	t.addModifyListener(new ModifyListener() {
+		Composite c = new Composite(parent, SWT.NONE);
+		c.setLayoutData(new GridData(GridData.FILL_BOTH));
+		c.setLayout(new GridLayout(1, true));
+		Label commitMsgLabel = new Label(c, SWT.CHECK);
+		commitMsgLabel.setText(ExpressUIMessages.PublishDialogCustomizeGitCommitMsg);
+		final Text t = new Text(c, SWT.MULTI | SWT.BORDER | SWT.WRAP);
+		t.setText(ExpressUIMessages.PublishDialogDefaultGitCommitMsg);
+		t.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				customizeMessageText = t.getText();
 			}
 		});
-    	GridDataFactory.fillDefaults().span(1,3).hint(SWT.DEFAULT, 150).grab(true,  true).applyTo(t);
-    	
-        return c;
-    }
+		GridDataFactory.fillDefaults().span(1, 3).hint(SWT.DEFAULT, 150).grab(true, true).applyTo(t);
+
+		return c;
+	}
 }

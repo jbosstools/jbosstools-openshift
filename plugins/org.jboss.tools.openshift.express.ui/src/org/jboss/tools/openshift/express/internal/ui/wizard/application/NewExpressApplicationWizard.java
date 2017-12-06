@@ -29,8 +29,8 @@ public class NewExpressApplicationWizard extends ExpressApplicationWizard {
 	 * Constructor invoked via File->Import
 	 */
 	public NewExpressApplicationWizard() {
-		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class),
-				null, null, null, false, "New OpenShift Application");
+		super(ConnectionsRegistrySingleton.getInstance().getRecentConnection(ExpressConnection.class), null, null, null,
+				false, "New OpenShift Application");
 	}
 
 	/**

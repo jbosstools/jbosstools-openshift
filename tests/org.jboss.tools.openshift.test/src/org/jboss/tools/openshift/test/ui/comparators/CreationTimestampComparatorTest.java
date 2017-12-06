@@ -25,7 +25,7 @@ import com.openshift.restclient.model.IResource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreationTimestampComparatorTest {
-	
+
 	private static final int AFTER = 1;
 	private static final int EQUAL = 0;
 	private CreationTimestampComparator comparator;
@@ -46,7 +46,7 @@ public class CreationTimestampComparatorTest {
 		when(two.getWrapped()).thenReturn(projectTwo);
 		when(projectTwo.getCreationTimeStamp()).thenReturn("2016-02-15T20:24:18Z");
 	}
-	
+
 	@Test
 	public void testResourcesAreSortedFromNewestToOldest() {
 		assertEquals(AFTER, comparator.compare(one, two));
@@ -58,12 +58,11 @@ public class CreationTimestampComparatorTest {
 		when(projectOne.getCreationTimeStamp()).thenReturn("");
 		assertEquals(EQUAL, comparator.compare(one, two));
 	}
-	
+
 	@Test
 	public void testResourcesAreSortedFromCorrectToInvalid() {
 		when(projectOne.getCreationTimeStamp()).thenReturn("abc");
 		assertEquals(AFTER, comparator.compare(one, two));
 	}
-
 
 }

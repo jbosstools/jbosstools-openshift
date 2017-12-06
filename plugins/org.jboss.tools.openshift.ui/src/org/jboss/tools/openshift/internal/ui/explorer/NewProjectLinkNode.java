@@ -32,6 +32,7 @@ public class NewProjectLinkNode implements ILink {
 
 	@Override
 	public void execute() {
-		NewProjectHandler.openNewProjectDialog(connection, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());		
+		NewProjectHandler.openNewProjectDialog(connection,
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 	}
 }

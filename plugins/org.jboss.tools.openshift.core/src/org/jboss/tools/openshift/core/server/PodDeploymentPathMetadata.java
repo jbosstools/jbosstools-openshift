@@ -30,7 +30,7 @@ public class PodDeploymentPathMetadata {
 			.compile("\"org\\.jboss\\.deployments-dir\"[^\"]*\"([^\"]*)\",");
 	// "image->"dockerImageMetadata"->"Config"->"WorkginDir"
 	private static final Pattern PATTERN_WOKRING_DIR = Pattern.compile("\"WorkingDir\"[^\"]*\"([^\"]*)\",");
-	
+
 	private String metadata;
 
 	public PodDeploymentPathMetadata(String metadata) {
@@ -51,18 +51,18 @@ public class PodDeploymentPathMetadata {
 		return podPath;
 	}
 
-    private String getPodPath(String imageMetaData) {
-        String podPath = null;
-        if ((podPath = matchFirstGroup(imageMetaData, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
-            if ((podPath = matchFirstGroup(imageMetaData, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
-                podPath = matchFirstGroup(imageMetaData, PATTERN_WOKRING_DIR);
-            }
-        }
+	private String getPodPath(String imageMetaData) {
+		String podPath = null;
+		if ((podPath = matchFirstGroup(imageMetaData, PATTERN_REDHAT_DEPLOYMENTS_DIR)) == null) {
+			if ((podPath = matchFirstGroup(imageMetaData, PATTERN_JBOSS_DEPLOYMENTS_DIR)) == null) {
+				podPath = matchFirstGroup(imageMetaData, PATTERN_WOKRING_DIR);
+			}
+		}
 
-        return podPath;
-    }
+		return podPath;
+	}
 
-    private String matchFirstGroup(String imageStreamTag, Pattern pattern) {
+	private String matchFirstGroup(String imageStreamTag, Pattern pattern) {
 		Matcher matcher = pattern.matcher(imageStreamTag);
 		if (matcher.find() && matcher.groupCount() == 1) {
 			return matcher.group(1);

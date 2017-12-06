@@ -81,7 +81,6 @@ public final class NodeDebugLauncher {
 			}
 		});
 	}
-	
 
 	public static void terminate(IServer server) throws DebugException {
 		ILaunchConfiguration v8debugLaunch = SessionStorage.get().get(server);

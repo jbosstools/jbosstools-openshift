@@ -20,7 +20,7 @@ import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
  * 
  * @param <T>  An IKeyValueItem type
  */
-public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPojo implements IKeyValueWizardModel<T>{
+public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPojo implements IKeyValueWizardModel<T> {
 
 	private String key;
 	private String value;
@@ -36,10 +36,9 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 	private String windowTitle;
 	private boolean keyEditable;
 
-	public KeyValueWizardModel(String windowTitle, 
-			String title, String keyLabel, String valueLabel, String description, String groupLabel, 
-			IValidator keyAfterConvertValidator, 
-			IValidator valueAfterConvertValidator, boolean keyEditable) {
+	public KeyValueWizardModel(String windowTitle, String title, String keyLabel, String valueLabel, String description,
+			String groupLabel, IValidator keyAfterConvertValidator, IValidator valueAfterConvertValidator,
+			boolean keyEditable) {
 		this.windowTitle = windowTitle;
 		this.title = title;
 		this.keyLabel = keyLabel;
@@ -56,13 +55,11 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 		return windowTitle;
 	}
 
-
-
 	@Override
 	public String getTitle() {
 		return title;
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return description;
@@ -81,7 +78,7 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 	public String getValueDescription() {
 		return valueDescription;
 	}
-	
+
 	public void setValueDescription(String s) {
 		valueDescription = s;
 	}
@@ -90,7 +87,7 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 	public String getGroupLabel() {
 		return groupLabel;
 	}
-	
+
 	@Override
 	public IValidator getKeyAfterConvertValidator() {
 		return keyAfterConvertValidator;
@@ -110,12 +107,12 @@ public class KeyValueWizardModel<T extends IKeyValueItem> extends ObservableUIPo
 	public String getValueLabel() {
 		return valueLabel;
 	}
-	
+
 	@Override
 	public String getKey() {
 		return this.key;
 	}
-	
+
 	@Override
 	public void setKey(String key) {
 		firePropertyChange(PROPERTY_KEY, this.key, this.key = key);

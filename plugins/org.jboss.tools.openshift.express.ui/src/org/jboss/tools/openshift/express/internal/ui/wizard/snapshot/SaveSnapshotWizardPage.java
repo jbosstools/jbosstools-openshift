@@ -68,76 +68,62 @@ public class SaveSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		// snapshot type
-		GridLayoutFactory.fillDefaults()
-				.numColumns(5).margins(10, 10).applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(5).margins(10, 10).applyTo(parent);
 
 		Label snapshotTypeLabel = new Label(parent, SWT.None);
 		snapshotTypeLabel.setText("Snapshot Type:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(snapshotTypeLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(snapshotTypeLabel);
 
 		Button fullSnapshotButton = new Button(parent, SWT.RADIO);
 		fullSnapshotButton.setText("Full");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(fullSnapshotButton);
-		ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(fullSnapshotButton))
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(fullSnapshotButton);
+		ValueBindingBuilder.bind(WidgetProperties.selection().observe(fullSnapshotButton))
 				.converting(new InvertingBooleanConverter())
 				.to(BeanProperties.value(SaveSnapshotWizardPageModel.PROPERTY_DEPLOYMENT_SNAPSHOT).observe(pageModel))
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
+				.converting(new InvertingBooleanConverter()).in(dbc);
 
 		Button deploymentSnapshotButton = new Button(parent, SWT.RADIO);
 		deploymentSnapshotButton.setText("Deployment");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(deploymentSnapshotButton);
-		ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(deploymentSnapshotButton))
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(deploymentSnapshotButton);
+		ValueBindingBuilder.bind(WidgetProperties.selection().observe(deploymentSnapshotButton))
 				.to(BeanProperties.value(SaveSnapshotWizardPageModel.PROPERTY_DEPLOYMENT_SNAPSHOT).observe(pageModel))
 				.in(dbc);
 
 		// horizontal fillers
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(new Composite(parent, SWT.None));
 
 		// destination
 		Label filepathLabel = new Label(parent, SWT.None);
 		filepathLabel.setText("Destination:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.LEFT, SWT.CENTER).applyTo(filepathLabel);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(filepathLabel);
 
 		Text filepathText = new Text(parent, SWT.BORDER);
 		filepathText.setEditable(false);
-		GridDataFactory.fillDefaults()
-				.span(2, 1).align(SWT.FILL, SWT.CENTER).hint(200, SWT.DEFAULT).grab(true, false).applyTo(filepathText);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).hint(200, SWT.DEFAULT).grab(true, false)
+				.applyTo(filepathText);
 		ISWTObservableValue filenameObservable = WidgetProperties.text(SWT.Modify).observe(filepathText);
-		ValueBindingBuilder
-				.bind(filenameObservable)
-				.to(BeanProperties.value(SaveSnapshotWizardPageModel.PROPERTY_FILEPATH).observe(pageModel))
-				.in(dbc);
+		ValueBindingBuilder.bind(filenameObservable)
+				.to(BeanProperties.value(SaveSnapshotWizardPageModel.PROPERTY_FILEPATH).observe(pageModel)).in(dbc);
 
 		Button workspaceButton = new Button(parent, SWT.PUSH);
 		workspaceButton.setText("Workspace...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.CENTER, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(workspaceButton);
+		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(workspaceButton);
 		workspaceButton.addSelectionListener(onWorkspace());
 
 		Button browseButton = new Button(parent, SWT.PUSH);
 		browseButton.setText("Browse...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).hint(100, SWT.DEFAULT).applyTo(browseButton);
 		browseButton.addSelectionListener(onBrowse());
 
 		MultiValidator filenameValidator = new FilenameValidator(filenameObservable);
 		dbc.addValidationStatusProvider(filenameValidator);
-		ControlDecorationSupport.create(
-				filenameValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		ControlDecorationSupport.create(filenameValidator, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
 
 		// vertical filler
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).span(3, 1).grab(true, true).applyTo(new Composite(parent, SWT.None));
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(3, 1).grab(true, true)
+				.applyTo(new Composite(parent, SWT.None));
 	}
 
 	private SelectionAdapter onBrowse() {
@@ -171,7 +157,7 @@ public class SaveSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		};
 	}
-	
+
 	static class FilenameValidator extends MultiValidator {
 
 		private IObservableValue filenameObservable;
@@ -189,10 +175,11 @@ public class SaveSnapshotWizardPage extends AbstractOpenShiftWizardPage {
 			} else {
 				File snapshotFile = new File(filename);
 				if (snapshotFile.exists()) {
-					return ValidationStatus.warning(NLS.bind("File {0} already exists. Saving to it may overwrite it.", filename));
-				} else if (snapshotFile.isDirectory() 
-						&& !snapshotFile.canWrite()) {
-					return ValidationStatus.error(NLS.bind("Cannot write to file {0}. Please check your permissions.", filename));
+					return ValidationStatus
+							.warning(NLS.bind("File {0} already exists. Saving to it may overwrite it.", filename));
+				} else if (snapshotFile.isDirectory() && !snapshotFile.canWrite()) {
+					return ValidationStatus
+							.error(NLS.bind("Cannot write to file {0}. Please check your permissions.", filename));
 				}
 			}
 			return ValidationStatus.ok();

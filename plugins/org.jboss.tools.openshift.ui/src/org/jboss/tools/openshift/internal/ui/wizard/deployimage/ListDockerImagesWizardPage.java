@@ -75,7 +75,7 @@ public class ListDockerImagesWizardPage extends AbstractOpenShiftWizardPage {
 		// can finish if a Docker image was selected
 		return this.model.getSelectedDockerImage() != null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void doCreateControls(final Composite parent, final DataBindingContext dbc) {
@@ -88,7 +88,7 @@ public class ListDockerImagesWizardPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(false, false).applyTo(filterByNameLabel);
 		final Text filterByNameText = new Text(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(filterByNameText);
-		
+
 		// table with all images
 		final Table dockerImagesTable = new Table(parent,
 				SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -127,26 +127,26 @@ public class ListDockerImagesWizardPage extends AbstractOpenShiftWizardPage {
 
 		// filter by name
 		final ViewerFilter imageNameFilter = new ViewerFilter() {
-			
+
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				return ((DockerImageTag)element).getRepoName().contains(filterByNameText.getText());
+				return ((DockerImageTag) element).getRepoName().contains(filterByNameText.getText());
 			}
-		}; 
+		};
 		dockerImagesTableViewer.addFilter(imageNameFilter);
 		filterByNameText.addModifyListener(onFilterImages(dockerImagesTableViewer));
 
 		// bind selection
 		dbc.bindValue(ViewerProperties.singleSelection().observe(dockerImagesTableViewer),
 				BeanProperties.value(ListDockerImagesWizardModel.SELECTED_DOCKER_IMAGE).observe(model));
-		
+
 		dockerImagesTableViewer.addDoubleClickListener(new IDoubleClickListener() {
 
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				IWizardContainer container = getWizard().getContainer();
-				if(container instanceof OkCancelButtonWizardDialog) {
-					((OkCancelButtonWizardDialog)container).autoFinish();
+				if (container instanceof OkCancelButtonWizardDialog) {
+					((OkCancelButtonWizardDialog) container).autoFinish();
 				}
 			}
 		});
@@ -168,10 +168,10 @@ public class ListDockerImagesWizardPage extends AbstractOpenShiftWizardPage {
 
 	private static ModifyListener onFilterImages(final TableViewer dockerImagesTableViewer) {
 		return new ModifyListener() {
-			
+
 			@Override
 			public void modifyText(ModifyEvent e) {
-				dockerImagesTableViewer.refresh();			
+				dockerImagesTableViewer.refresh();
 			}
 		};
 	}

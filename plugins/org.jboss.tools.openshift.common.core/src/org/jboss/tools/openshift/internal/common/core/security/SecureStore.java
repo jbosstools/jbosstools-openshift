@@ -84,7 +84,7 @@ public class SecureStore {
 			throw new SecureStoreException(NLS.bind("Could not clear storage node {0}", storeKey.getKey()), e);
 		}
 	}
-	
+
 	public void removeNode() throws SecureStoreException {
 		try {
 			getNode(storeKey).removeNode();
@@ -92,10 +92,10 @@ public class SecureStore {
 			throw new SecureStoreException(NLS.bind("Could not remove storage node {0}", storeKey.getKey()), e);
 		}
 	}
-	
-	private String get(String id, IStoreKey key) throws StorageException, UnsupportedEncodingException, SecureStoreException {
-		if (StringUtils.isEmpty(id)
-				|| key == null) {
+
+	private String get(String id, IStoreKey key)
+			throws StorageException, UnsupportedEncodingException, SecureStoreException {
+		if (StringUtils.isEmpty(id) || key == null) {
 			return null;
 		}
 		String value = getNode(key).get(id, null); //$NON-NLS-1$

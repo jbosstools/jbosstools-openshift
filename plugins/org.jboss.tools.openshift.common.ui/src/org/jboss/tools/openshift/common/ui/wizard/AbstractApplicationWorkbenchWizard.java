@@ -42,9 +42,9 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizar
  * 
  */
 public abstract class AbstractApplicationWorkbenchWizard extends Wizard implements IWorkbenchWizard {
-	
+
 	protected class DelegatingConnectionWizardPage extends ConnectionWizardPage {
-		
+
 		private IConnectionAwareWizard<IConnection> wizard;
 
 		private DelegatingConnectionWizardPage(IWizard wizard, IConnectionAware<IConnection> wizardModel) {
@@ -58,8 +58,7 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 
 		@Override
 		public boolean canFlipToNextPage() {
-			return DataBindingUtils.isValid(getDatabindingContext())
-					&& hasWizard(getModel().getConnectionFactory());
+			return DataBindingUtils.isValid(getDatabindingContext()) && hasWizard(getModel().getConnectionFactory());
 		}
 
 		@Override
@@ -85,7 +84,8 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 				return null;
 			}
 
-			IConnectionAwareWizard<IConnection> wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
+			IConnectionAwareWizard<IConnection> wizard = AbstractApplicationWorkbenchWizard.this
+					.getWizard(connection.getClass());
 			if (wizard == null) {
 				return null;
 			}
@@ -111,8 +111,8 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 				return false;
 			}
 			String host = getModel().getHost();
-			if (StringUtils.isEmpty(host)){
-			    return false;
+			if (StringUtils.isEmpty(host)) {
+				return false;
 			}
 			IConnection connection = factory.create(host);
 			if (connection == null) {
@@ -120,7 +120,8 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 			}
 			IWizard wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
 			if (wizard == null) {
-				setErrorMessage(NLS.bind("No wizard for {0} connections present.", getModel().getConnectionFactory().getName()));
+				setErrorMessage(NLS.bind("No wizard for {0} connections present.",
+						getModel().getConnectionFactory().getName()));
 			}
 			return wizard != null;
 		}
@@ -147,39 +148,34 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 		if (wizardsByConnection == null) {
 			this.wizardsByConnection = createWizards(getWizardsExtensionId());
 		}
-		
+
 		return wizardsByConnection;
 	}
-	
+
 	protected Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> createWizards(String extensionId) {
 		HashMap<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection = new HashMap<>();
- 		for (IConfigurationElement configuration : ExtensionUtils.getExtensionConfigurations(extensionId)) {
+		for (IConfigurationElement configuration : ExtensionUtils.getExtensionConfigurations(extensionId)) {
 			createWizard(wizardsByConnection, configuration);
 		}
 		return wizardsByConnection;
 	}
 
-	private void createWizard(Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection, 
+	private void createWizard(Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection,
 			IConfigurationElement configuration) {
 		try {
-			IConnectionAwareWizard<IConnection> wizard = 
-					ExtensionUtils.createExtension(ATTRIBUTE_CLASS, configuration);
+			IConnectionAwareWizard<IConnection> wizard = ExtensionUtils.createExtension(ATTRIBUTE_CLASS, configuration);
 			if (wizard != null) {
-				Class<IConnection> connectionClass = 
-						ExtensionUtils.getClass(configuration.getAttribute(ATTRIBUTE_CONNECTION), configuration);
+				Class<IConnection> connectionClass = ExtensionUtils
+						.getClass(configuration.getAttribute(ATTRIBUTE_CONNECTION), configuration);
 				if (connectionClass != null) {
 					wizardsByConnection.put(connectionClass, wizard);
 				}
 			}
-		} catch (InvalidRegistryObjectException 
-				| IllegalStateException 
-				| IllegalArgumentException 
+		} catch (InvalidRegistryObjectException | IllegalStateException | IllegalArgumentException
 				| ClassNotFoundException e) {
-			OpenShiftCommonUIActivator.log(
-					NLS.bind("Could not create application wizard in bundle {0} for extension {1}", // $NON-NLS-1$
-							ExtensionUtils.getBundleNameFor(configuration),
-							configuration.getName()),
-					e); 
+			OpenShiftCommonUIActivator
+					.log(NLS.bind("Could not create application wizard in bundle {0} for extension {1}", // $NON-NLS-1$
+							ExtensionUtils.getBundleNameFor(configuration), configuration.getName()), e);
 		}
 	}
 
@@ -190,7 +186,8 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 
 	@Override
 	public void addPages() {
-		addPage(new DelegatingConnectionWizardPage(this, new ConnectionWizardModel(ConnectionsRegistrySingleton.getInstance().getRecentConnection(), null)));
+		addPage(new DelegatingConnectionWizardPage(this,
+				new ConnectionWizardModel(ConnectionsRegistrySingleton.getInstance().getRecentConnection(), null)));
 	}
 
 	protected abstract String getWizardsExtensionId();

@@ -25,11 +25,12 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 
 public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegistry, OpenshiftUIModel> {
-	
+
 	protected static class OpenshiftUIModelSingletonHolder {
-		public static final OpenshiftUIModel INSTANCE = new OpenshiftUIModel(ConnectionsRegistrySingleton.getInstance());
+		public static final OpenshiftUIModel INSTANCE = new OpenshiftUIModel(
+				ConnectionsRegistrySingleton.getInstance());
 	}
-	
+
 	public static OpenshiftUIModel getInstance() {
 		return OpenshiftUIModelSingletonHolder.INSTANCE;
 	}
@@ -147,7 +148,7 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 			return new ArrayList<ConnectionWrapper>(connections.values());
 		}
 	}
-	
+
 	public ConnectionWrapper getConnectionWrapperForConnection(IConnection connection) {
 		synchronized (connections) {
 			return connections.get(connection);
@@ -156,41 +157,42 @@ public class OpenshiftUIModel extends AbstractOpenshiftUIElement<ConnectionsRegi
 
 	@Override
 	public void refresh() {
-			Map<IOpenShiftConnection, ConnectionWrapper> updated = new HashMap<>();
-			boolean changed = false;
-			synchronized (connections) {
-				HashMap<IOpenShiftConnection, ConnectionWrapper> oldWrappers = new HashMap<>(connections);
-				connections.clear();
-				for (IOpenShiftConnection connection : ConnectionsRegistrySingleton.getInstance().getAll(IOpenShiftConnection.class)) {
-					ConnectionWrapper existingWrapper = oldWrappers.remove(connection);
+		Map<IOpenShiftConnection, ConnectionWrapper> updated = new HashMap<>();
+		boolean changed = false;
+		synchronized (connections) {
+			HashMap<IOpenShiftConnection, ConnectionWrapper> oldWrappers = new HashMap<>(connections);
+			connections.clear();
+			for (IOpenShiftConnection connection : ConnectionsRegistrySingleton.getInstance()
+					.getAll(IOpenShiftConnection.class)) {
+				ConnectionWrapper existingWrapper = oldWrappers.remove(connection);
 
-					if (existingWrapper == null) {
-						ConnectionWrapper newWrapper = new ConnectionWrapper(this, connection);
-						connections.put(connection, newWrapper);
-						changed = true;
-					} else {
-						connections.put(connection, existingWrapper);
-						updated.put(connection, existingWrapper);
-					}
-				}
-				if (!oldWrappers.isEmpty()) {
+				if (existingWrapper == null) {
+					ConnectionWrapper newWrapper = new ConnectionWrapper(this, connection);
+					connections.put(connection, newWrapper);
 					changed = true;
+				} else {
+					connections.put(connection, existingWrapper);
+					updated.put(connection, existingWrapper);
 				}
 			}
-
-			if (changed) {
-				fireChanged(this);
+			if (!oldWrappers.isEmpty()) {
+				changed = true;
 			}
+		}
 
-			updated.keySet().forEach(r -> {
-				ConnectionWrapper wrapper = updated.get(r);
-				wrapper.updateWith(r);
-			});
+		if (changed) {
+			fireChanged(this);
+		}
+
+		updated.keySet().forEach(r -> {
+			ConnectionWrapper wrapper = updated.get(r);
+			wrapper.updateWith(r);
+		});
 		for (ConnectionWrapper connection : getConnections()) {
 			connection.refresh();
 		}
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		// TODO Auto-generated method stub

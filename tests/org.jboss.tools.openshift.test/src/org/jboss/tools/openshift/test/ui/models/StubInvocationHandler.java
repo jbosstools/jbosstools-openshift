@@ -19,7 +19,7 @@ public class StubInvocationHandler implements InvocationHandler {
 			lastMethod = method;
 			return stubReturn(method);
 		}
-		InvocationHandler handler= handlers.get(method);
+		InvocationHandler handler = handlers.get(method);
 		if (handler != null) {
 			return handler.invoke(proxy, method, args);
 		}
@@ -29,17 +29,26 @@ public class StubInvocationHandler implements InvocationHandler {
 	private Object stubReturn(Method method) {
 		if (!method.getReturnType().isPrimitive()) {
 			return null;
-		};
+		}
+		;
 		String typeName = method.getReturnType().getTypeName();
-		switch (typeName)  {
-		case "boolean": return false;
-		case "byte": return (byte)0;
-		case "char": return (char)0;
-		case "short": return (short)0;
-		case "int": return 0;
-		case "long": return 0;
-		case "float": return 0f;
-		case "double": return 0.0;
+		switch (typeName) {
+		case "boolean":
+			return false;
+		case "byte":
+			return (byte) 0;
+		case "char":
+			return (char) 0;
+		case "short":
+			return (short) 0;
+		case "int":
+			return 0;
+		case "long":
+			return 0;
+		case "float":
+			return 0f;
+		case "double":
+			return 0.0;
 		}
 		return null;
 	}

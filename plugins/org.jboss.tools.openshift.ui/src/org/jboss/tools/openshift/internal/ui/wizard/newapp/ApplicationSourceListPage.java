@@ -119,8 +119,8 @@ import com.openshift.restclient.model.template.ITemplate;
  * @author Jeff Maury
  *
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
-public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationSourceListPageModel> { 
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationSourceListPageModel> {
 
 	private static final int LOCAL_TEMPLATE_TAB_INDEX = 1;
 	public static final String PAGE_NAME = "appSourceList";
@@ -128,31 +128,24 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	private TreeViewer templatesViewer;
 
 	public ApplicationSourceListPage(IWizard wizard, IApplicationSourceListPageModel model) {
-		super(wizard, model, "Select template", 
-				"Server template choices may be filtered by typing the name of a tag in the text field.", 
+		super(wizard, model, "Select template",
+				"Server template choices may be filtered by typing the name of a tag in the text field.",
 				"templateList");
 	}
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-	    super.doCreateControls(parent, dbc);
+		super.doCreateControls(parent, dbc);
 
 		IObservableValue selectedEclipseProject = createEclipseProjectControls(parent, dbc);
 
 		SashForm listAndDetailsContainer = new SashForm(parent, SWT.VERTICAL);
-		GridDataFactory.fillDefaults()
-			.span(3, 1)
-			.align(SWT.FILL, SWT.FILL)
-			.grab(true, true)
-			.applyTo(listAndDetailsContainer);
-		GridLayoutFactory.fillDefaults()
-			.applyTo(listAndDetailsContainer);
-		
-		TabFolder tabContainer= new TabFolder(listAndDetailsContainer, SWT.NONE);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL)
-			.grab(true, false)
-			.applyTo(tabContainer);
+		GridDataFactory.fillDefaults().span(3, 1).align(SWT.FILL, SWT.FILL).grab(true, true)
+				.applyTo(listAndDetailsContainer);
+		GridLayoutFactory.fillDefaults().applyTo(listAndDetailsContainer);
+
+		TabFolder tabContainer = new TabFolder(listAndDetailsContainer, SWT.NONE);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(tabContainer);
 		tabContainer.addListener(SWT.Selection, new Listener() {
 
 			@Override
@@ -162,84 +155,78 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			}
 		});
 
-
-		IObservableValue useLocalTemplateObservable = 
-				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_USE_LOCAL_APP_SOURCE).observe(model);
-		ValueBindingBuilder
-			.bind(new TabFolderSelectionProperty().observe(tabContainer))
-			.converting(new Converter(Integer.class, Boolean.class) {
-				@Override
-				public Object convert(Object fromObject) {
-					return Integer.valueOf(LOCAL_TEMPLATE_TAB_INDEX).equals(fromObject);
-				}
-			})
-			.to(useLocalTemplateObservable).converting(new Converter(Boolean.class, Integer.class) {
-				@Override
-				public Object convert(Object fromObject) {
-					return (fromObject != null && (Boolean) fromObject) ? LOCAL_TEMPLATE_TAB_INDEX : 0;
-				}
-			})
-			.in(dbc);
+		IObservableValue useLocalTemplateObservable = BeanProperties
+				.value(IApplicationSourceListPageModel.PROPERTY_USE_LOCAL_APP_SOURCE).observe(model);
+		ValueBindingBuilder.bind(new TabFolderSelectionProperty().observe(tabContainer))
+				.converting(new Converter(Integer.class, Boolean.class) {
+					@Override
+					public Object convert(Object fromObject) {
+						return Integer.valueOf(LOCAL_TEMPLATE_TAB_INDEX).equals(fromObject);
+					}
+				}).to(useLocalTemplateObservable).converting(new Converter(Boolean.class, Integer.class) {
+					@Override
+					public Object convert(Object fromObject) {
+						return (fromObject != null && (Boolean) fromObject) ? LOCAL_TEMPLATE_TAB_INDEX : 0;
+					}
+				}).in(dbc);
 		model.setUseLocalAppSource(false);
 
 		TabFolderTraverseListener tabFolderTraverseListener = new TabFolderTraverseListener(tabContainer);
 
-		IObservableValue serverTemplate = 
-				createServerTemplateControls(tabContainer, tabFolderTraverseListener, useLocalTemplateObservable, dbc);
-		IObservableValue localTemplateFilename = 
-				createLocalTemplateControls(tabContainer, tabFolderTraverseListener, useLocalTemplateObservable, dbc);
-        dbc.addValidationStatusProvider(new MultiValidator() {
-            @Override
-            protected IStatus validate() {
-				return (IStatus) BeanProperties.value(
-						IApplicationSourceListPageModel.PROPERTY_APP_SOURCE_STATUS, IStatus.class).observe(model).getValue();
+		IObservableValue serverTemplate = createServerTemplateControls(tabContainer, tabFolderTraverseListener,
+				useLocalTemplateObservable, dbc);
+		IObservableValue localTemplateFilename = createLocalTemplateControls(tabContainer, tabFolderTraverseListener,
+				useLocalTemplateObservable, dbc);
+		dbc.addValidationStatusProvider(new MultiValidator() {
+			@Override
+			protected IStatus validate() {
+				return (IStatus) BeanProperties
+						.value(IApplicationSourceListPageModel.PROPERTY_APP_SOURCE_STATUS, IStatus.class).observe(model)
+						.getValue();
 			}
-        });
+		});
 
 		createDetailsGroup(listAndDetailsContainer, dbc);
 		// template list initially takes twice the height of the details pane
 		listAndDetailsContainer.setWeights(new int[] { 2, 1 });
 
 		// validate required template
-		IObservableValue selectedTemplate = 
-				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model);
-		TemplateListPageValidator pageValidator = 
-				new TemplateListPageValidator(useLocalTemplateObservable, localTemplateFilename, serverTemplate, selectedTemplate, 
-						selectedEclipseProject, parent);
-		dbc.addValidationStatusProvider(pageValidator );
-		ControlDecorationSupport.create(pageValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		IObservableValue selectedTemplate = BeanProperties
+				.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model);
+		TemplateListPageValidator pageValidator = new TemplateListPageValidator(useLocalTemplateObservable,
+				localTemplateFilename, serverTemplate, selectedTemplate, selectedEclipseProject, parent);
+		dbc.addValidationStatusProvider(pageValidator);
+		ControlDecorationSupport.create(pageValidator, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
 		ProjectNameValidator projectNameValidator = new ProjectNameValidator(selectedEclipseProject, parent);
 		dbc.addValidationStatusProvider(projectNameValidator);
-		ControlDecorationSupport.create(projectNameValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+		ControlDecorationSupport.create(projectNameValidator, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
 	}
 
 	private IObservableValue createEclipseProjectControls(Composite parent, DataBindingContext dbc) {
-		IObservableValue eclipseProjectObservable = 
-				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
+		IObservableValue eclipseProjectObservable = BeanProperties
+				.value(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
 		SelectProjectComponentBuilder builder = new SelectProjectComponentBuilder();
-		builder
-			.setTextLabel("Use existing workspace project:")
-			.setHorisontalSpan(1)
-			.setRequired(false)
-			.setEclipseProjectObservable(eclipseProjectObservable)
-			.setSelectionListener(onBrowseProjects())
-			.build(parent, dbc);
-		
+		builder.setTextLabel("Use existing workspace project:").setHorisontalSpan(1).setRequired(false)
+				.setEclipseProjectObservable(eclipseProjectObservable).setSelectionListener(onBrowseProjects())
+				.build(parent, dbc);
+
 		Link gitLabel = new Link(parent, SWT.NONE);
-		gitLabel.setText("The project needs to be <a>shared with Git</a> and have a remote repository accessible by OpenShift");
+		gitLabel.setText(
+				"The project needs to be <a>shared with Git</a> and have a remote repository accessible by OpenShift");
 		gitLabel.addSelectionListener(onClickEGitLink());
 		GridDataFactory.fillDefaults().span(3, 1).applyTo(gitLabel);
-		
-		DataBindingUtils.addDisposableValueChangeListener(
-				new IValueChangeListener() {
 
-					@Override
-					public void handleValueChange(ValueChangeEvent event) {
-						org.eclipse.core.resources.IProject p = 
-								(org.eclipse.core.resources.IProject) event.getObservableValue().getValue();
-						toggleEgitLink(gitLabel, p);
-					}
-				}, eclipseProjectObservable, gitLabel);
+		DataBindingUtils.addDisposableValueChangeListener(new IValueChangeListener() {
+
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				org.eclipse.core.resources.IProject p = (org.eclipse.core.resources.IProject) event.getObservableValue()
+						.getValue();
+				toggleEgitLink(gitLabel, p);
+			}
+		}, eclipseProjectObservable, gitLabel);
 		toggleEgitLink(gitLabel, model.getEclipseProject());
 		return builder.getProjectNameTextObservable();
 	}
@@ -270,14 +257,14 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SelectExistingProjectDialog dialog = 
-					new SelectExistingProjectDialog(model.getEclipseProject() == null? 
-							"Select an existing workspace project from the list below."
-							: NLS.bind("Currently project {0} is selected, you may pick a different one from the list below.", 
-									model.getEclipseProject().getName())
-						, getShell());
+				SelectExistingProjectDialog dialog = new SelectExistingProjectDialog(
+						model.getEclipseProject() == null ? "Select an existing workspace project from the list below."
+								: NLS.bind(
+										"Currently project {0} is selected, you may pick a different one from the list below.",
+										model.getEclipseProject().getName()),
+						getShell());
 				if (model.getEclipseProject() != null) {
-					dialog.setInitialSelections(new Object[]{model.getEclipseProject()});
+					dialog.setInitialSelections(new Object[] { model.getEclipseProject() });
 				}
 				if (dialog.open() == Dialog.OK) {
 					Object selectedProject = dialog.getFirstResult();
@@ -287,25 +274,23 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		};
 	}
 
-	private IObservableValue createLocalTemplateControls(TabFolder tabContainer, TabFolderTraverseListener tabFolderTraverseListener, IObservableValue useLocalTemplate, DataBindingContext dbc) {
+	private IObservableValue createLocalTemplateControls(TabFolder tabContainer,
+			TabFolderTraverseListener tabFolderTraverseListener, IObservableValue useLocalTemplate,
+			DataBindingContext dbc) {
 
 		TabItem localTemplatesTab = new TabItem(tabContainer, SWT.NONE);
 		localTemplatesTab.setText("Custom template");
 
 		final Composite parent = new Composite(tabContainer, SWT.NONE);
-		GridLayoutFactory.fillDefaults()
-			.numColumns(3).margins(10, 10).spacing(6, 2)
-			.applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(10, 10).spacing(6, 2).applyTo(parent);
 
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText("Select a local template file or a full URL:");
-		GridDataFactory.fillDefaults().span(3,1).applyTo(lbl);
-		
+		GridDataFactory.fillDefaults().span(3, 1).applyTo(lbl);
+
 		// local template file name
 		Text txtLocalTemplateFileName = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false)
-				.span(3, 1)
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1)
 				.applyTo(txtLocalTemplateFileName);
 		IObservableValue localTemplateFilename = WidgetProperties.text(SWT.Modify).observe(txtLocalTemplateFileName);
 		IValidator validator = (o -> {
@@ -319,34 +304,27 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			asyncRedraw(parent);
 			return status;
 		});
-		ValueBindingBuilder
-				.bind(localTemplateFilename)
-				.validatingBeforeSet(validator)
-				.to(BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_LOCAL_APP_SOURCE_FILENAME).observe(model))
+		ValueBindingBuilder.bind(localTemplateFilename)
+				.validatingBeforeSet(validator).to(BeanProperties
+						.value(IApplicationSourceListPageModel.PROPERTY_LOCAL_APP_SOURCE_FILENAME).observe(model))
 				.in(dbc);
 
 		// browse button
 		Button btnBrowseFiles = new Button(parent, SWT.NONE);
 		btnBrowseFiles.setText("Browse File System...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.END, SWT.CENTER)
-				.span(2,1)
-				.grab(true, false)
-				.applyTo(btnBrowseFiles);
+		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).span(2, 1).grab(true, false).applyTo(btnBrowseFiles);
 
 		btnBrowseFiles.addSelectionListener(onFileSystemBrowseClicked());
-		
+
 		// browse button
 		Button btnBrowseWorkspaceFiles = new Button(parent, SWT.NONE);
 		btnBrowseWorkspaceFiles.setText("Browse Workspace...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.END, SWT.CENTER)
-				.applyTo(btnBrowseWorkspaceFiles);
+		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(btnBrowseWorkspaceFiles);
 		btnBrowseWorkspaceFiles.addSelectionListener(onBrowseWorkspaceClicked());
 		UIUtils.setEqualButtonWidth(btnBrowseFiles, btnBrowseWorkspaceFiles);
 		localTemplatesTab.setControl(parent);
-		tabFolderTraverseListener.bindTabControls(tabContainer.getItemCount() - 1,
-				txtLocalTemplateFileName, btnBrowseFiles, btnBrowseWorkspaceFiles);
+		tabFolderTraverseListener.bindTabControls(tabContainer.getItemCount() - 1, txtLocalTemplateFileName,
+				btnBrowseFiles, btnBrowseWorkspaceFiles);
 		return localTemplateFilename;
 	}
 
@@ -359,26 +337,23 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			}
 		});
 	}
-	
+
 	private SelectionListener onBrowseWorkspaceClicked() {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ElementTreeSelectionDialog dialog = UIUtils.createFileDialog(model.getLocalAppSourceFileName(),
-				                                                             "Select an OpenShift template",
-				                                                             "Select an OpenShift template (*.json)",
-				                                                             "json",
-				                                                             model.getEclipseProject());
+						"Select an OpenShift template", "Select an OpenShift template (*.json)", "json",
+						model.getEclipseProject());
 				if (dialog.open() == IDialogConstants.OK_ID && dialog.getFirstResult() instanceof IFile) {
-					String path = ((IFile)dialog.getFirstResult()).getFullPath().toString();
+					String path = ((IFile) dialog.getFirstResult()).getFullPath().toString();
 					String file = VariablesHelper.addWorkspacePrefix(path);
 					setLocalTemplate(file);
 				}
 			}
 		};
 	}
-
 
 	private void setLocalTemplate(String file) {
 		if (file == null || !isFile(file)) {
@@ -389,79 +364,71 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			return;
 		} catch (NotATemplateException ex) {
 			MessageDialog.openWarning(getShell(), "Template Error",
-					NLS.bind("The file \"{0}\" is not an OpenShift template. It contains a resource of type {1} instead.",
+					NLS.bind(
+							"The file \"{0}\" is not an OpenShift template. It contains a resource of type {1} instead.",
 							file, ex.getResourceKind()));
 		} catch (ClassCastException ex) {
 			//should not happen due to NotATemplateException.
 			IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
 			ErrorDialog.openError(getShell(), "Template Error",
-					NLS.bind("The file \"{0}\" is not an OpenShift template.", 
-							file),
-					status);
+					NLS.bind("The file \"{0}\" is not an OpenShift template.", file), status);
 		} catch (UnsupportedVersionException ex) {
 			IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
-			ErrorDialog.openError(getShell(), "Template Error", 
-					NLS.bind("The file \"{0}\" is a template in a version that we do not support.", file),
-					status);
+			ErrorDialog.openError(getShell(), "Template Error",
+					NLS.bind("The file \"{0}\" is a template in a version that we do not support.", file), status);
 		} catch (OpenShiftException ex) {
 			IStatus status = ValidationStatus.error(ex.getMessage(), ex);
 			OpenShiftUIActivator.getDefault().getLogger().logStatus(status);
 			ErrorDialog.openError(getShell(), "Template Error",
-					NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.", file),
-					status);
+					NLS.bind("Unable to read and/or parse the file \"{0}\" as a template.", file), status);
 		}
 	}
-	
-	private IObservableValue createServerTemplateControls(TabFolder tabFolder, TabFolderTraverseListener tabFolderTraverseListener, IObservableValue uploadTemplate, DataBindingContext dbc) {
+
+	private IObservableValue createServerTemplateControls(TabFolder tabFolder,
+			TabFolderTraverseListener tabFolderTraverseListener, IObservableValue uploadTemplate,
+			DataBindingContext dbc) {
 		TabItem serverTemplatesTab = new TabItem(tabFolder, SWT.NONE);
 		serverTemplatesTab.setText("Server application source");
 
 		Composite parent = new Composite(tabFolder, SWT.NONE);
-		GridLayoutFactory.fillDefaults()
-				.margins(10, 6).spacing(2, 2)
-				.applyTo(parent);
+		GridLayoutFactory.fillDefaults().margins(10, 6).spacing(2, 2).applyTo(parent);
 
 		serverTemplatesTab.setControl(parent);
 
 		// filter text
 		final Text txtTemplateFilter = UIUtils.createSearchText(parent);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER)
-				.applyTo(txtTemplateFilter);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(txtTemplateFilter);
 
-		IObservableValue eclipseProjectObservable = 
-				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
+		IObservableValue eclipseProjectObservable = BeanProperties
+				.value(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
 		DataBindingUtils.addDisposableValueChangeListener(new IValueChangeListener() {
 
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
-				filterTemplates(txtTemplateFilter, (org.eclipse.core.resources.IProject) event.getObservableValue().getValue());
+				filterTemplates(txtTemplateFilter,
+						(org.eclipse.core.resources.IProject) event.getObservableValue().getValue());
 			}
 		}, eclipseProjectObservable, txtTemplateFilter);
-		
+
 		filterTemplates(txtTemplateFilter, model.getEclipseProject());
-		
+
 		// the list of templates
 		this.templatesViewer = createServerTemplatesViewer(parent, txtTemplateFilter);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(400, 180)
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(400, 180)
 				.applyTo(templatesViewer.getControl());
-		
-		IObservableValue selectedViewerServerTemplate = 
-				ViewerProperties.singleSelection().observe(templatesViewer);
-		ValueBindingBuilder
-			.bind(selectedViewerServerTemplate)
-			.converting(new ObservableTreeItem2ModelConverter(IApplicationSource.class))
-			.to(BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SERVER_APP_SOURCE).observe(model))
-			.converting(new Model2ObservableTreeItemConverter(ApplicationSourceTreeItems.INSTANCE))
-			.in(dbc);
+
+		IObservableValue selectedViewerServerTemplate = ViewerProperties.singleSelection().observe(templatesViewer);
+		ValueBindingBuilder.bind(selectedViewerServerTemplate)
+				.converting(new ObservableTreeItem2ModelConverter(IApplicationSource.class))
+				.to(BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SERVER_APP_SOURCE).observe(model))
+				.converting(new Model2ObservableTreeItemConverter(ApplicationSourceTreeItems.INSTANCE)).in(dbc);
 
 		templatesViewer.addDoubleClickListener(onServerTemplateDoubleClicked());
 		txtTemplateFilter.addModifyListener(onFilterTextTyped(templatesViewer));
-		tabFolderTraverseListener.bindTabControls(
-				tabFolder.getItemCount() - 1, txtTemplateFilter, templatesViewer.getTree());
+		tabFolderTraverseListener.bindTabControls(tabFolder.getItemCount() - 1, txtTemplateFilter,
+				templatesViewer.getTree());
 		return selectedViewerServerTemplate;
 	}
 
@@ -474,66 +441,53 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		Group detailsGroup = new Group(parent, SWT.NONE);
 		detailsGroup.setText("Details");
 
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true)
-			.applyTo(detailsGroup);
-		GridLayoutFactory.fillDefaults()
-			.margins(10, 6).spacing(2, 2) //TODO fix margins
-			.applyTo(detailsGroup);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(detailsGroup);
+		GridLayoutFactory.fillDefaults().margins(10, 6).spacing(2, 2) //TODO fix margins
+				.applyTo(detailsGroup);
 
 		Composite detailsContainer = new Composite(detailsGroup, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true)
-				.applyTo(detailsContainer);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(detailsContainer);
 
 		new ApplicationSourceDetailViews(
-			BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model), null, detailsContainer, dbc)
-			.createControls();
+				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model), null,
+				detailsContainer, dbc).createControls();
 
 		// detail resources button
 		Button btnDetails = new Button(detailsGroup, SWT.NONE);
 		btnDetails.setText("Defined Resources...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.RIGHT, SWT.CENTER)
-				.applyTo(btnDetails);
+		GridDataFactory.fillDefaults().align(SWT.RIGHT, SWT.CENTER).applyTo(btnDetails);
 
-		IObservableValue selectedTemplate =
-				BeanProperties.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model);
-		ValueBindingBuilder
-				.bind(WidgetProperties.visible().observe(btnDetails))
-				.notUpdatingParticipant()
-				.to(selectedTemplate)
-				.converting(new Converter(Object.class, Boolean.class) {
+		IObservableValue selectedTemplate = BeanProperties
+				.value(IApplicationSourceListPageModel.PROPERTY_SELECTED_APP_SOURCE).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.visible().observe(btnDetails)).notUpdatingParticipant()
+				.to(selectedTemplate).converting(new Converter(Object.class, Boolean.class) {
 
 					@Override
 					public Object convert(Object fromObject) {
-						return fromObject != null 
-								&& ResourceKind.TEMPLATE.equals(((IApplicationSource)fromObject).getSource().getKind());
+						return fromObject != null && ResourceKind.TEMPLATE
+								.equals(((IApplicationSource) fromObject).getSource().getKind());
 					}
-					
-				})
-				.in(dbc);
+
+				}).in(dbc);
 		btnDetails.addSelectionListener(onDefinedResourcesClicked());
 	}
 
 	private IDoubleClickListener onServerTemplateDoubleClicked() {
 		return new IDoubleClickListener() {
-	        @Override
-	        public void doubleClick(DoubleClickEvent event) {
-	            IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-	            if (hasApplicationSource(selection.getFirstElement())
-	            		&& canFlipToNextPage()) {
-	            	getContainer().showPage(getNextPage());
-	            }
-	        }
-	    };
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+				if (hasApplicationSource(selection.getFirstElement()) && canFlipToNextPage()) {
+					getContainer().showPage(getNextPage());
+				}
+			}
+		};
 	}
 
 	private TreeViewer createServerTemplatesViewer(Composite parent, final Text templateFilterText) {
 		TreeViewer viewer = new TreeViewer(parent, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		IListProperty childrenProperty = new MultiListProperty(
-				new IListProperty[] {
-						BeanProperties.list(IApplicationSourceListPageModel.PROPERTY_APP_SOURCES),
+				new IListProperty[] { BeanProperties.list(IApplicationSourceListPageModel.PROPERTY_APP_SOURCES),
 						BeanProperties.list(ObservableTreeItem.PROPERTY_CHILDREN) });
 		ObservableListTreeContentProvider contentProvider = new ObservableListTreeContentProvider(
 				childrenProperty.listFactory(), null);
@@ -580,7 +534,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			private FileDialog createFileDialog(String selectedFile) {
 				FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
 				dialog.setText("Select an OpenShift template");
-				if(isFile(selectedFile)) {
+				if (isFile(selectedFile)) {
 					File file = new File(selectedFile);
 					dialog.setFilterPath(file.getParentFile().getAbsolutePath());
 				}
@@ -595,10 +549,9 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ITemplate template = (ITemplate) model.getSelectedAppSource().getSource();
-				new ResourceSummaryDialog(getShell(),
-						template.getObjects(),
-						"Template Details",
-						NLS.bind("The following resources will be created by using template\n\"{0}\":", template.getName()),
+				new ResourceSummaryDialog(getShell(), template.getObjects(), "Template Details",
+						NLS.bind("The following resources will be created by using template\n\"{0}\":",
+								template.getName()),
 						new ResourceDetailsLabelProvider(), new ResourceDetailsContentProvider()).open();
 			}
 		};
@@ -626,14 +579,13 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.ARROW_DOWN || e.keyCode == SWT.ARROW_UP) {
 					TreeItem[] items = viewer.getTree().getItems();
-					if (items == null 
-							|| items.length == 0) {
+					if (items == null || items.length == 0) {
 						return;
 					}
 					TreeItem[] s = viewer.getTree().getSelection();
 					TreeItem next = null;
-					if (s == null							|| s.length == 0) {
-						next = (e.keyCode == SWT.ARROW_DOWN)? items[0] : items[items.length - 1];
+					if (s == null || s.length == 0) {
+						next = (e.keyCode == SWT.ARROW_DOWN) ? items[0] : items[items.length - 1];
 					} else {
 						for (int i = 0; i < items.length && next == null; i++) {
 							if (items[i] == s[0]) {
@@ -659,25 +611,25 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	}
 
 	@Override
-    protected JobChainBuilder getLoadResourcesJobBuilder(boolean[] closeAfter, boolean closeOnCancel) {
-        JobChainBuilder builder = super.getLoadResourcesJobBuilder(closeAfter, closeOnCancel);
-        builder.runWhenSuccessfullyDone(new UIJob("Expanding resource tree...") {
-            @Override
-            public IStatus runInUIThread(IProgressMonitor monitor) {
-                templatesViewer.expandAll();
-                return Status.OK_STATUS;
-            }
-        });
-        return builder;
-    }
+	protected JobChainBuilder getLoadResourcesJobBuilder(boolean[] closeAfter, boolean closeOnCancel) {
+		JobChainBuilder builder = super.getLoadResourcesJobBuilder(closeAfter, closeOnCancel);
+		builder.runWhenSuccessfullyDone(new UIJob("Expanding resource tree...") {
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				templatesViewer.expandAll();
+				return Status.OK_STATUS;
+			}
+		});
+		return builder;
+	}
 
 	public static class ApplicationSourceComparator extends ViewerComparator {
 
 		@Override
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			if (hasApplicationSource(e1) && hasApplicationSource(e2)) {
-				String t1 = ((IApplicationSource)((ObservableTreeItem)e1).getModel()).getName();
-				String t2 = ((IApplicationSource)((ObservableTreeItem)e2).getModel()).getName();
+				String t1 = ((IApplicationSource) ((ObservableTreeItem) e1).getModel()).getName();
+				String t2 = ((IApplicationSource) ((ObservableTreeItem) e2).getModel()).getName();
 				return t1.compareTo(t2);
 			}
 			return super.compare(viewer, e1, e2);
@@ -685,9 +637,8 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 	}
 
 	private static boolean hasApplicationSource(Object item) {
-		return item instanceof IApplicationSource 
-				|| item instanceof ObservableTreeItem 
-				&& ((ObservableTreeItem)item).getModel() instanceof IApplicationSource;
+		return item instanceof IApplicationSource || item instanceof ObservableTreeItem
+				&& ((ObservableTreeItem) item).getModel() instanceof IApplicationSource;
 	}
 
 	/**
@@ -704,9 +655,10 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 
 		private IObservableList mutableTargets = new WritableList<>();
 		private Composite composite;
-		
-		public TemplateListPageValidator(IObservableValue useLocalTemplate, IObservableValue localTemplateFilename, 
-				IObservableValue serverTemplate, IObservableValue selectedTemplate, IObservableValue projectNameObservable, Composite composite) {
+
+		public TemplateListPageValidator(IObservableValue useLocalTemplate, IObservableValue localTemplateFilename,
+				IObservableValue serverTemplate, IObservableValue selectedTemplate,
+				IObservableValue projectNameObservable, Composite composite) {
 			this.useLocalTemplateObservable = useLocalTemplate;
 			useLocalTemplate.getValue();
 			this.localTemplateFilenameObservable = localTemplateFilename;
@@ -720,16 +672,16 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		protected IStatus validate() {
 			IStatus status = ValidationStatus.ok();
 			mutableTargets.clear();
-			
+
 			projectNameObservable.getValue();
 			Object useLocalTemplate = useLocalTemplateObservable.getValue();
 			Object localTemplateFilename = localTemplateFilenameObservable.getValue();
 			serverTemplateObservable.getValue();
 			Object selectedTemplate = selectedTemplateObservable.getValue();
 
-			if(status.getSeverity() < IStatus.ERROR) {
+			if (status.getSeverity() < IStatus.ERROR) {
 				if (Boolean.TRUE.equals(useLocalTemplate)) {
-					String localTemplate = (String)localTemplateFilename;
+					String localTemplate = (String) localTemplateFilename;
 					if (StringUtils.isNotBlank(localTemplate)) {
 						if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(localTemplate) && !isFile(localTemplate)) {
 							status = ValidationStatus.error(NLS.bind("{0} is not a valid file.", localTemplate));
@@ -740,7 +692,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 						mutableTargets.add(localTemplateFilenameObservable);
 					}
 				} else {
-					if (selectedTemplate == null){
+					if (selectedTemplate == null) {
 						status = ValidationStatus.cancel("Please select an image or template.");
 						mutableTargets.add(serverTemplateObservable);
 					}
@@ -773,27 +725,27 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			IStatus status = ValidationStatus.ok();
 			final String projectName = (String) projectNameObservable.getValue();
 			if (!StringUtils.isEmpty(projectName)) {
-				final org.eclipse.core.resources.IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+				final org.eclipse.core.resources.IProject project = ResourcesPlugin.getWorkspace().getRoot()
+						.getProject(projectName);
 				if (!ProjectUtils.exists(project)) {
-					status = ValidationStatus.error(
-							NLS.bind("The project {0} does not exist in your workspace.", projectName));
+					status = ValidationStatus
+							.error(NLS.bind("The project {0} does not exist in your workspace.", projectName));
 				} else if (!ProjectUtils.isAccessible(project)) {
-					status = ValidationStatus.error(
-							NLS.bind("The project {0} is not open.", projectName));
-				} else if (EGitUtils.isSharedWithGit(project)){
+					status = ValidationStatus.error(NLS.bind("The project {0} is not open.", projectName));
+				} else if (EGitUtils.isSharedWithGit(project)) {
 					try {
 						List<String> repos = EGitUtils.getRemoteGitRepos(project);
 						if (repos == null || repos.isEmpty()) {
-							status = ValidationStatus.warning(
-									NLS.bind("A remote Git repository using the HTTP(S) protocol must be defined on project {0}", projectName));
+							status = ValidationStatus.warning(NLS.bind(
+									"A remote Git repository using the HTTP(S) protocol must be defined on project {0}",
+									projectName));
 						}
 					} catch (CoreException e) {
 						status = ValidationStatus.error(
 								NLS.bind("Can not read Git config on project {0} : {1}", projectName, e.getMessage()));
 					}
 				} else {
-					status = ValidationStatus.error(
-							NLS.bind("The project {0} is not shared with Git.", projectName));
+					status = ValidationStatus.error(NLS.bind("The project {0} is not shared with Git.", projectName));
 				}
 			}
 			if (!status.isOK()) {
@@ -844,11 +796,9 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 			}
 		}
 	}
-	
+
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(
-				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
-				dbc);
+		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this, dbc);
 	}
 }

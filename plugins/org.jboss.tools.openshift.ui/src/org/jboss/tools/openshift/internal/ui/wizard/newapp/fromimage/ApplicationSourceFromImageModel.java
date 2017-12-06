@@ -52,10 +52,9 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public class ApplicationSourceFromImageModel 
-	extends DeployImageWizardModel	
-	implements IApplicationSourceModel, IBuildConfigPageModel {
-	
+public class ApplicationSourceFromImageModel extends DeployImageWizardModel
+		implements IApplicationSourceModel, IBuildConfigPageModel {
+
 	private static final String ANNOTATION_SAMPLE_CONTEXT_DIR = "sampleContextDir";
 	private static final String ANNOTATION_SAMPLE_REPO = "sampleRepo";
 	private static final String ANNOTATION_SAMPLE_REF = "sampleRef";
@@ -72,19 +71,19 @@ public class ApplicationSourceFromImageModel
 	private boolean configChangeTrigger = true;
 	private boolean configWebHook = true;
 	private AtomicBoolean staleRepoInfo = new AtomicBoolean(true);
-	
+
 	@Override
 	public IResourcesModelJob createFinishJob() {
 		return new CreateApplicationFromImageJob(this, this);
 	}
-	
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		if(evt == null) return;
+		if (evt == null)
+			return;
 		super.propertyChange(evt);
-		switch(evt.getPropertyName()) {
+		switch (evt.getPropertyName()) {
 		case IResourceLabelsPageModel.PROPERTY_LABELS:
 			setLabels((List<Label>) evt.getNewValue());
 			break;
@@ -99,7 +98,7 @@ public class ApplicationSourceFromImageModel
 			break;
 		}
 	}
-	
+
 	private void handleEclipseProject(PropertyChangeEvent evt) {
 		this.eclipseProject = (org.eclipse.core.resources.IProject) evt.getNewValue();
 		if (this.eclipseProject != null) {
@@ -109,7 +108,8 @@ public class ApplicationSourceFromImageModel
 				setContextDir(StringUtils.EMPTY);
 				return;
 			} catch (CoreException e) {
-				OpenShiftUIActivator.getDefault().getLogger().logWarning("Unable to retrieve the remote git repo from " + this.eclipseProject.getName(), e);
+				OpenShiftUIActivator.getDefault().getLogger()
+						.logWarning("Unable to retrieve the remote git repo from " + this.eclipseProject.getName(), e);
 			}
 		}
 		setGitRepositoryUrl(null);
@@ -118,22 +118,22 @@ public class ApplicationSourceFromImageModel
 	}
 
 	private void handleSelectedAppSource(PropertyChangeEvent evt) {
-		if(evt.getNewValue() instanceof ImageStreamApplicationSource
+		if (evt.getNewValue() instanceof ImageStreamApplicationSource
 				&& ResourceKind.IMAGE_STREAM.equals(((IApplicationSource) evt.getNewValue()).getKind())) {
 			this.source = (ImageStreamApplicationSource) evt.getNewValue();
 			staleRepoInfo.set(true);
 			if (this.eclipseProject == null) {
-			    setGitRepositoryUrl(null);
-		        setGitReference(null);
-		        setContextDir(null);
+				setGitRepositoryUrl(null);
+				setGitReference(null);
+				setContextDir(null);
 			}
 			setResourceName(null);
 		}
 	}
-	
+
 	@Override
-	public void init() { 
-		if(staleRepoInfo.compareAndSet(true, false)) {
+	public void init() {
+		if (staleRepoInfo.compareAndSet(true, false)) {
 			loadBuilderImageMetadata();
 			if ((this.source != null) && (this.getGitRepositoryUrl() == null)) {
 				setGitRepositoryUrl(this.source.getAnnotation(ANNOTATION_SAMPLE_REPO));
@@ -142,20 +142,20 @@ public class ApplicationSourceFromImageModel
 			}
 		}
 	}
-	
+
 	private void loadBuilderImageMetadata() {
-		if(source != null && container != null) {
+		if (source != null && container != null) {
 			setImageName(NLS.bind("{0}/{1}", source.getNamespace(), source.getName()));
 			Job loadImageJob = new Job("Load builder image metadata...") {
-				
+
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					if(initializeContainerInfo()) {
+					if (initializeContainerInfo()) {
 						return Status.OK_STATUS;
 					}
 					return Status.CANCEL_STATUS;
 				}
-				
+
 			};
 			try {
 				final IStatus status = WizardUtils.runInWizard(loadImageJob, container);
@@ -170,7 +170,7 @@ public class ApplicationSourceFromImageModel
 			}
 		}
 	}
-	
+
 	@Override
 	protected IDockerImageMetadata lookupImageMetadata() {
 		if (source == null) {
@@ -180,28 +180,27 @@ public class ApplicationSourceFromImageModel
 			Connection conn = ConnectionsRegistryUtil.getConnectionFor(getProject());
 			IResource istag = conn.getResource(ResourceKind.IMAGE_STREAM_TAG, source.getNamespace(), source.getName());
 			return new ImageStreamTagMetaData(istag.toJson(true));
-		}catch(Exception e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(NLS.bind("Unable to retrieve imagestream tag for {0}", getImageName()), e);
+		} catch (Exception e) {
+			OpenShiftUIActivator.getDefault().getLogger()
+					.logError(NLS.bind("Unable to retrieve imagestream tag for {0}", getImageName()), e);
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String getBuilderImageName() {
 		return source.getName();
 	}
-
 
 	@Override
 	public String getBuilderImageNamespace() {
 		return source.getNamespace();
 	}
 
-
 	public void setContainer(IWizardContainer container) {
 		this.container = container;
 	}
-	
+
 	@Override
 	public IEnvironmentVariablesPageModel getEnvVariablesModel() {
 		return envModel;
@@ -266,13 +265,13 @@ public class ApplicationSourceFromImageModel
 	public void setContextDir(String contextDir) {
 		firePropertyChange(PROPERTY_CONTEXT_DIR, this.contextDir, this.contextDir = contextDir);
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
 		source = null;
 		container = null;
-		((EnvironmentVariablesPageModel)envModel).dispose();
+		((EnvironmentVariablesPageModel) envModel).dispose();
 	}
 
 }

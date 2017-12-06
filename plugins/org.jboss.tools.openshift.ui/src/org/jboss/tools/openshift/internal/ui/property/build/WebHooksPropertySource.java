@@ -23,17 +23,17 @@ import com.openshift.restclient.model.build.IWebhookTrigger;
 /**
  * Property source to display a BuildConfig's webhook triggers.
  */
-public class WebHooksPropertySource implements IPropertySource{
+public class WebHooksPropertySource implements IPropertySource {
 
 	private static final String GITHUB = "GitHub";
 	private static final String GENERIC = "Generic";
-	
+
 	private IWebhookTrigger genericTrigger;
 	private IWebhookTrigger gitTrigger;
 
-	public WebHooksPropertySource(Collection<IBuildTrigger> triggers ){
+	public WebHooksPropertySource(Collection<IBuildTrigger> triggers) {
 		for (IBuildTrigger trigger : triggers) {
-			switch(trigger.getType()){
+			switch (trigger.getType()) {
 			case BuildTriggerType.generic:
 			case BuildTriggerType.GENERIC:
 				genericTrigger = (IWebhookTrigger) trigger;
@@ -55,16 +55,18 @@ public class WebHooksPropertySource implements IPropertySource{
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		List<IPropertyDescriptor> descriptors = new ArrayList<>(2);
-		if(genericTrigger != null) descriptors.add(new PropertyDescriptor(GENERIC, "Generic URL"));
-		if(gitTrigger != null) descriptors.add(new PropertyDescriptor(GITHUB, "Github URL"));
-		return descriptors.toArray(new IPropertyDescriptor[]{});
+		if (genericTrigger != null)
+			descriptors.add(new PropertyDescriptor(GENERIC, "Generic URL"));
+		if (gitTrigger != null)
+			descriptors.add(new PropertyDescriptor(GITHUB, "Github URL"));
+		return descriptors.toArray(new IPropertyDescriptor[] {});
 	}
 
 	@Override
 	public Object getPropertyValue(Object id) {
-		if(GENERIC.equals(id))
+		if (GENERIC.equals(id))
 			return genericTrigger.getWebhookURL();
-		if(GITHUB.equals(id))
+		if (GITHUB.equals(id))
 			return gitTrigger.getWebhookURL();
 		return null;
 	}
@@ -81,5 +83,5 @@ public class WebHooksPropertySource implements IPropertySource{
 	@Override
 	public void setPropertyValue(Object arg0, Object arg1) {
 	}
-	
+
 }

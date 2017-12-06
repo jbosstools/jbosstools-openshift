@@ -63,8 +63,8 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 		this(connection, domain, null, null, false);
 	}
 
-	public OpenShiftApplicationWizardModel(ExpressConnection connection, IDomain domain, IApplication application, IProject project, 
-			boolean useExistingApplication) {
+	public OpenShiftApplicationWizardModel(ExpressConnection connection, IDomain domain, IApplication application,
+			IProject project, boolean useExistingApplication) {
 		setProject(project);
 		setApplicationName(project);
 		setDomain(domain);
@@ -90,20 +90,15 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 	 * @throws NoWorkTreeException 
 	 */
 	@Override
-	public IProject importProject(IProgressMonitor monitor) throws OpenShiftException, CoreException, InterruptedException,
-			URISyntaxException, InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
-		IProject project = new ImportNewProject(
-				getProjectName()
-				, getApplication()
-				, getRemoteName()
-				, getRepositoryFile()
-				, getMarkers()
-				, getConnection())
-				.execute(monitor);
+	public IProject importProject(IProgressMonitor monitor)
+			throws OpenShiftException, CoreException, InterruptedException, URISyntaxException,
+			InvocationTargetException, IOException, NoWorkTreeException, GitAPIException {
+		IProject project = new ImportNewProject(getProjectName(), getApplication(), getRemoteName(),
+				getRepositoryFile(), getMarkers(), getConnection()).execute(monitor);
 		setProject(project);
 		return project;
 	}
-	
+
 	@Override
 	public Object getContext() {
 		// TODO Auto-generated method stub
@@ -137,16 +132,10 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 	 *             The user project could not be shared with the git
 	 */
 	@Override
-	public IProject mergeIntoUnsharedProject(IProgressMonitor monitor)
-			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
-			URISyntaxException {
-		IProject project = new MergeIntoUnsharedProject(
-				getProjectName()
-				, getApplication()
-				, getRemoteName()
-				, getMarkers()
-				, (ExpressConnection) getConnection())
-				.execute(monitor);
+	public IProject mergeIntoUnsharedProject(IProgressMonitor monitor) throws OpenShiftException,
+			InvocationTargetException, InterruptedException, IOException, CoreException, URISyntaxException {
+		IProject project = new MergeIntoUnsharedProject(getProjectName(), getApplication(), getRemoteName(),
+				getMarkers(), (ExpressConnection) getConnection()).execute(monitor);
 		setProject(project);
 		return project;
 	}
@@ -182,13 +171,8 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 	public IProject mergeIntoGitSharedProject(IProgressMonitor monitor)
 			throws OpenShiftException, InvocationTargetException, InterruptedException, IOException, CoreException,
 			URISyntaxException, NoWorkTreeException, GitAPIException {
-		IProject project = new MergeIntoGitSharedProject(
-				getProjectName()
-				, getApplication()
-				, getRemoteName()
-				, getMarkers()
-				, getConnection())
-				.execute(monitor);
+		IProject project = new MergeIntoGitSharedProject(getProjectName(), getApplication(), getRemoteName(),
+				getMarkers(), getConnection()).execute(monitor);
 		setProject(project);
 		return project;
 	}
@@ -222,7 +206,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 	public boolean hasDomain() {
 		return getDomain() != null;
 	}
-	
+
 	@Override
 	public IDomain setDomain(IDomain domain) {
 		return setProperty(PROP_DOMAIN, domain);
@@ -232,7 +216,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 	public IDomain getDomain() {
 		return getProperty(PROP_DOMAIN);
 	}
-	
+
 	@Override
 	public void setDefaultDomainIfRequired() {
 		Assert.isNotNull(getConnection());
@@ -310,7 +294,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 
 	@Override
 	public IProject setProject(IProject project) {
-		if (project != null) { 
+		if (project != null) {
 			setProjectName(project.getName());
 		} else {
 			setProjectName(null);
@@ -359,7 +343,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 		}
 		return markers;
 	}
-	
+
 	@Override
 	public String getProjectName() {
 		return getProperty(PROP_PROJECT_NAME);
@@ -423,20 +407,20 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 
 	@Override
 	public Set<ICartridge> getEmbeddedCartridges() {
-		Set<ICartridge> selectedEmbeddableCartridges =
-				getProperty(PROP_EMBEDDED_CARTRIDGES, Collections.<ICartridge> emptySet());
+		Set<ICartridge> selectedEmbeddableCartridges = getProperty(PROP_EMBEDDED_CARTRIDGES,
+				Collections.<ICartridge>emptySet());
 		return selectedEmbeddableCartridges;
 	}
-	
+
 	@Override
 	public Set<ICartridge> setEmbeddedCartridges(Set<ICartridge> cartridges) {
 		return setProperty(PROP_EMBEDDED_CARTRIDGES, cartridges);
 	}
-	
+
 	@Override
 	public void addEmbeddedCartridges(List<ICartridge> addedCartridges) {
 		Set<ICartridge> cartridges = getEmbeddedCartridges();
-		cartridges .addAll(addedCartridges);
+		cartridges.addAll(addedCartridges);
 		firePropertyChange(PROP_EMBEDDED_CARTRIDGES, null, cartridges);
 	}
 
@@ -446,17 +430,17 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 		cartridges.remove(removedCartridge);
 		firePropertyChange(PROP_EMBEDDED_CARTRIDGES, null, cartridges);
 	}
-	
+
 	@Override
 	public void removeEmbeddedCartridges(List<ICartridge> removedCartridges) {
 		Set<ICartridge> cartridges = getEmbeddedCartridges();
-		cartridges .removeAll(removedCartridges);
+		cartridges.removeAll(removedCartridges);
 		firePropertyChange(PROP_EMBEDDED_CARTRIDGES, null, cartridges);
 	}
 
 	@Override
 	public List<ICartridge> getAvailableEmbeddableCartridges() {
-		return getProperty(PROP_AVAILABLE_EMBEDDABLE_CARTRIDGES, Collections.<ICartridge> emptyList());
+		return getProperty(PROP_AVAILABLE_EMBEDDABLE_CARTRIDGES, Collections.<ICartridge>emptyList());
 	}
 
 	@Override
@@ -468,7 +452,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 		IDomain domain = null;
 		if (application != null) {
 			domain = application.getDomain();
-		} 
+		}
 		setDomain(domain);
 	}
 
@@ -499,7 +483,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 	public List<IStandaloneCartridge> getAvailableStandaloneCartridges() {
 		return getProperty(PROP_AVAILABLE_STANDALONE_CARTRIDGES);
 	}
-	
+
 	@Override
 	public String setApplicationName(String applicationName) {
 		return (String) setProperty(PROP_APPLICATION_NAME, applicationName);
@@ -526,7 +510,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 	public String getInitialGitUrl() {
 		return getProperty(PROP_INITIAL_GIT_URL);
 	}
-	
+
 	@Override
 	public String setInitialGitUrl(String initialGitUrl) {
 		return setProperty(PROP_INITIAL_GIT_URL, initialGitUrl);
@@ -555,7 +539,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 	public void setConnection(ExpressConnection connection) {
 		setProperty(PROP_CONNECTION, connection);
 	}
-	
+
 	@Override
 	public ExpressConnection getConnection() {
 		return getProperty(PROP_CONNECTION);
@@ -568,11 +552,11 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 	protected IServer getServerAdapter() {
 		return getProperty(PROP_SERVER_ADAPTER);
 	}
-	
+
 	protected boolean hasServerAdapter() {
 		return getServerAdapter() != null;
 	}
-	
+
 	/**
 	 * Updates this wizard model for the given connection. All settings are
 	 * either used as is (if still valid for the given connection) or resetted.
@@ -583,14 +567,14 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 		if (!isValid(connection)) {
 			return;
 		}
-		
+
 		if (!connection.hasDomain()) {
 			IDomain domain = getDomain();
 			domain = connection.getFirstDomain();
 			setDomain(domain);
 		}
-	}			
-	
+	}
+
 	@Override
 	public IApplicationTemplate getSelectedApplicationTemplate() {
 		return getProperty(PROP_SELECTED_APPLICATION_TEMPLATE);
@@ -616,10 +600,8 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 		return (Map<String, String>) setProperty(PROP_ENVIRONMENT_VARIABLES, environmentVariables);
 	}
 
-
 	public boolean isValid(ExpressConnection connection) {
-		return connection != null
-				&& connection.isConnected();
+		return connection != null && connection.isConnected();
 	}
 
 	private <V> V setProperty(String key, V value) {
@@ -644,8 +626,7 @@ public class OpenShiftApplicationWizardModel extends ObservablePojo implements I
 
 	private boolean getBooleanProperty(String name) {
 		Boolean binaryValue = (Boolean) getProperty(name);
-		return binaryValue != null 
-				&& binaryValue.booleanValue();
+		return binaryValue != null && binaryValue.booleanValue();
 	}
 
 }

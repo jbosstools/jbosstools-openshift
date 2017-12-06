@@ -36,35 +36,34 @@ public class OpenShiftCommonUIActivatorTest {
 		if (intro != null) {
 			introManager.closeIntro(intro);
 		}
-	}	
-	
+	}
+
 	@Before
 	public void setup() {
 		hideOpenShiftExplorer();
 	}
-	
+
 	@After
 	public void tearDown() {
 		hideOpenShiftExplorer();
 		ConnectionsRegistrySingleton.getInstance().clear();
 	}
-	
-	
+
 	@Test
 	public void testShowExplorerOnNewConnections() throws Exception {
 		//Ensure OpenShift Explorer is hidden
 		assertThat(isOpenShiftExplorerVisible()).isFalse();
-		
+
 		//Come up with a dummy connection
 		Connection connection = mock(Connection.class);
 		when(connection.getHost()).thenReturn("foo");
 		when(connection.getUsername()).thenReturn("bar");
-		
+
 		//adding a new connection should open the OpenShift explorer
 		ConnectionsRegistrySingleton.getInstance().add(connection);
-		
+
 		UITestUtils.waitForDeferredEvents();
-		
+
 		//check OpenShift explorer is visible now
 		assertThat(isOpenShiftExplorerVisible()).isTrue();
 	}

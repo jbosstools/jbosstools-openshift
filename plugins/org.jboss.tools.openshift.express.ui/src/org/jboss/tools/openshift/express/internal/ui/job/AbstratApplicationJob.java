@@ -49,12 +49,12 @@ public abstract class AbstratApplicationJob extends AbstractDelegatingMonitorJob
 	}
 
 	protected abstract void doRun(IApplication application);
-	
+
 	public static class ApplicationProvider {
-		
+
 		private IApplication application;
 		private LoadApplicationJob applicationJob;
-		
+
 		public ApplicationProvider(IApplication application) {
 			this.application = application;
 		}

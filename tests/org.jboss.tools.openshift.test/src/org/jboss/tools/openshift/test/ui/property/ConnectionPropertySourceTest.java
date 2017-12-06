@@ -19,31 +19,29 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ConnectionPropertySourceTest {
-	
+
 	private Connection connection;
 	private ConnectionPropertySource source;
-	
+
 	@Before
-	public void setup() throws Exception{
+	public void setup() throws Exception {
 		connection = new Connection("http://localhost:8080", null, null);
 		connection.setUsername("foo");
 		source = new ConnectionPropertySource(connection);
 	}
-	
+
 	@Test
-	public void getPropertyValue(){
+	public void getPropertyValue() {
 		assertEquals("http://localhost:8080", source.getPropertyValue("host"));
 		assertEquals("foo", source.getPropertyValue("username"));
 	}
-	
+
 	@Test
 	public void getPropertyDescriptor() {
-		IPropertyDescriptor [] exp = new IPropertyDescriptor[] {
-				new TextPropertyDescriptor("host", "Host"), 
+		IPropertyDescriptor[] exp = new IPropertyDescriptor[] { new TextPropertyDescriptor("host", "Host"),
 				new TextPropertyDescriptor("username", "User Name"),
 				new TextPropertyDescriptor("openshift-version", "OpenShift Master Version"),
-				new TextPropertyDescriptor("kubernetes-version", "Kubernetes Master Version")
-		};
+				new TextPropertyDescriptor("kubernetes-version", "Kubernetes Master Version") };
 		assertPropertyDescriptorsEquals(exp, source.getPropertyDescriptors());
 	}
 }

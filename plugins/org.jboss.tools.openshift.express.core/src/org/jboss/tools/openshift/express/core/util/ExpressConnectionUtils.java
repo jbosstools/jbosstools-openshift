@@ -39,7 +39,7 @@ public class ExpressConnectionUtils {
 	private ExpressConnectionUtils() {
 		// inhibit instantiation
 	}
-	
+
 	/**
 	 * Returns the connection for a given application (OpenShift REST resource).
 	 * 
@@ -52,7 +52,7 @@ public class ExpressConnectionUtils {
 		if (application == null) {
 			return null;
 		}
-		
+
 		return getByResource(application.getDomain().getUser(), connectionsRegistry);
 	}
 
@@ -73,21 +73,16 @@ public class ExpressConnectionUtils {
 			ConnectionURL connectionUrl = ConnectionURL.forUsernameAndHost(user.getRhlogin(), user.getServer());
 			ExpressConnection connection = connectionsRegistry.getByUrl(connectionUrl, ExpressConnection.class);
 			String defaultHost = ExpressConnectionUtils.getDefaultHostUrl();
-			if (connection == null 
-					&& defaultHost.equals(user.getServer())) {
+			if (connection == null && defaultHost.equals(user.getServer())) {
 				connectionUrl = ConnectionURL.forUsername(user.getRhlogin());
 				connection = connectionsRegistry.getByUrl(connectionUrl, ExpressConnection.class);
 			}
 			return connection;
 		} catch (UnsupportedEncodingException e) {
-			throw new OpenShiftCoreException(e, 
-					NLS.bind(
-					"Could not get connection for user resource {0} - {1}",
+			throw new OpenShiftCoreException(e, NLS.bind("Could not get connection for user resource {0} - {1}",
 					user.getRhlogin(), user.getServer()));
 		} catch (MalformedURLException e) {
-			throw new OpenShiftCoreException(e, 
-					NLS.bind(
-					"Could not get connection for user resource {0} - {1}",
+			throw new OpenShiftCoreException(e, NLS.bind("Could not get connection for user resource {0} - {1}",
 					user.getRhlogin(), user.getServer()));
 		}
 	}
@@ -98,7 +93,7 @@ public class ExpressConnectionUtils {
 		}
 		return connectionsRegistry.getByUrl(connectionUrl, ExpressConnection.class);
 	}
-	
+
 	/**
 	 * Returns the connection for the given username if it exists. The
 	 * connection must use the default host to match the query by username.
@@ -118,7 +113,7 @@ public class ExpressConnectionUtils {
 			throw new OpenShiftCoreException(NLS.bind("Could not get url for connection {0}", username), e);
 		}
 	}
-	
+
 	/**
 	 * Returns the default host from the preferences if present. If it's not it
 	 * will return the host defined in the OpenShift configuration. The host
@@ -157,9 +152,7 @@ public class ExpressConnectionUtils {
 	 */
 	public static boolean isDefaultHost(String host) {
 		return UrlUtils.isEmptyHost(host)
-				|| getDefaultHostUrl().equals(
-						UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS));
+				|| getDefaultHostUrl().equals(UrlUtils.ensureStartsWithScheme(host, UrlUtils.SCHEME_HTTPS));
 	}
-
 
 }

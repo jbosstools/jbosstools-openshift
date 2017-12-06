@@ -52,44 +52,47 @@ public class DockerHubRegistry {
 			final ModelNode tags = ModelNode.fromJSONStream(getTagsResponse.getEntity().getContent());
 			return tags.asList().stream().map(node -> node.get("name").asString()).collect(Collectors.toList());
 		} catch (final IOException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError("Failed to retrieve the tags for image named '" + repoName + "'", e);
+			OpenShiftUIActivator.getDefault().getLogger()
+					.logError("Failed to retrieve the tags for image named '" + repoName + "'", e);
 		}
 		return Collections.emptyList();
 	}
-	
+
 	/**
 	 * URI Builder
 	 */
 	private static class URIBuilder {
-		
-		private final StringBuilder uri; 
+
+		private final StringBuilder uri;
+
 		private URIBuilder(final String target) {
 			this.uri = new StringBuilder(target);
 		}
+
 		public static URIBuilder target(final String target) {
 			return new URIBuilder(target);
 		}
-		
+
 		/**
 		 * Appends the given {@code path} to the current URI. 
 		 * @param path the path to append
 		 * @return this {@link URIBuilder}, for fluent chaining with other paths.
 		 */
 		public URIBuilder path(final String path) {
-			if(path.charAt(0) != '/') {
+			if (path.charAt(0) != '/') {
 				this.uri.append('/');
 			}
 			this.uri.append(path);
 			return this;
 		}
-		
+
 		@Override
 		public String toString() {
 			return this.uri.toString();
 		}
-		
+
 	}
-	
+
 	/**
 	 * Repository tag retrieved from Docker Registry version 0.6.3
 	 *
@@ -134,6 +137,5 @@ public class DockerHubRegistry {
 		}
 
 	}
-
 
 }

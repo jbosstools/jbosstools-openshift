@@ -44,18 +44,17 @@ import org.eclipse.ui.IWorkbench;
  * be accessed directly via the preference store.
  */
 
-public class MainPreferencePage
-	extends org.eclipse.jface.preference.PreferencePage
-	implements IWorkbenchPreferencePage {
+public class MainPreferencePage extends org.eclipse.jface.preference.PreferencePage
+		implements IWorkbenchPreferencePage {
 
 	private boolean removed = false;
-	
+
 	private Label label;
-	
+
 	private Button button;
-	
+
 	private ICluster osioCluster = AccountService.getDefault().getModel().getClusters().get(0);
-	
+
 	public MainPreferencePage() {
 		super();
 	}
@@ -74,10 +73,10 @@ public class MainPreferencePage
 		Composite parent = new Composite(control, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, true).hint(SWT.FILL, SWT.FILL).applyTo(parent);
 		GridLayoutFactory.fillDefaults().applyTo(parent);
-		
+
 		label = new Label(parent, SWT.WRAP);
 		updateLabel();
-		
+
 		button = new Button(parent, SWT.PUSH);
 		button.setText("Remove");
 		button.addSelectionListener(SelectionListener.widgetSelectedAdapter(this::onButton));
@@ -90,15 +89,17 @@ public class MainPreferencePage
 		button.setEnabled(false);
 		removed = true;
 		updateLabel();
-		
+
 	}
+
 	void updateLabel() {
 		String msg;
 		if (removed || osioCluster.getAccounts().isEmpty()) {
 			msg = "No configured accounts";
 		} else {
 			IAccount account = osioCluster.getAccounts().get(0);
-			msg = account.getId() + " account configured valid until " + Date.from(Instant.ofEpochMilli(account.getAccessTokenExpiryTime()));
+			msg = account.getId() + " account configured valid until "
+					+ Date.from(Instant.ofEpochMilli(account.getAccessTokenExpiryTime()));
 		}
 		label.setText(msg);
 	}
@@ -118,8 +119,5 @@ public class MainPreferencePage
 		}
 		return true;
 	}
-
-	
-	
 
 }

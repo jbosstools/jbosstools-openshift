@@ -33,19 +33,20 @@ public class VariablesHelperTest {
 		assertFalse(VariablesHelper.containsVariables("}foo${"));
 		assertTrue(VariablesHelper.containsVariables("${foo}"));
 	}
-	
+
 	@Test
 	public void testAddWorkspacePrefix() {
 		String value = "foo";
-		assertEquals(VariablesHelper.WORKSPACE_PREFIX+value+VariablesHelper.VARIABLE_SUFFIX, VariablesHelper.addWorkspacePrefix(value));
+		assertEquals(VariablesHelper.WORKSPACE_PREFIX + value + VariablesHelper.VARIABLE_SUFFIX,
+				VariablesHelper.addWorkspacePrefix(value));
 		value = null;
 		assertNull(VariablesHelper.addWorkspacePrefix(value));
 		value = " ";
 		assertEquals(value, VariablesHelper.addWorkspacePrefix(value));
-		value = VariablesHelper.WORKSPACE_PREFIX+"bar"+VariablesHelper.VARIABLE_SUFFIX;
+		value = VariablesHelper.WORKSPACE_PREFIX + "bar" + VariablesHelper.VARIABLE_SUFFIX;
 		assertEquals(value, VariablesHelper.addWorkspacePrefix(value));
 	}
-	
+
 	@Test
 	public void testGetWorkspacePath() {
 		String value = "foo";
@@ -53,8 +54,7 @@ public class VariablesHelperTest {
 		String varValue = VariablesHelper.addWorkspacePrefix(value);
 		assertEquals(value, VariablesHelper.getWorkspacePath(varValue));
 	}
-	
-	
+
 	@Test
 	public void testReplaceVariables() throws Exception {
 		String name = "foo";
@@ -68,7 +68,7 @@ public class VariablesHelperTest {
 		IProject bar = getOrcreateProject(name);
 		assertEquals(bar.getLocation().toOSString(), VariablesHelper.replaceVariables(value));
 	}
-	
+
 	private IProject getOrcreateProject(String projectName) throws Exception {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		if (project.exists()) {

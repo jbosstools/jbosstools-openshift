@@ -29,7 +29,7 @@ public class ExpressServerExtendedProperties extends ServerExtendedProperties {
 	public boolean allowConvenienceEnhancements() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean hasWelcomePage() {
 		return true;
@@ -40,7 +40,7 @@ public class ExpressServerExtendedProperties extends ServerExtendedProperties {
 		if (!ExpressServerUtils.isExpressRuntime(server)) {
 			return null;
 		}
-		
+
 		try {
 			final IApplication application = ExpressServerUtils.getApplication(server);
 			if (application != null) {

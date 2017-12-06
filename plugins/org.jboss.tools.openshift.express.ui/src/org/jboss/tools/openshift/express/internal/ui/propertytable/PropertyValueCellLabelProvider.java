@@ -59,7 +59,6 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 		TreeUtils.createTreeEditor(link, property.getValue(), cell);
 	}
 
-
 	private void createStyledText(IProperty property, final ViewerCell cell) {
 		StyledString.Styler style = new StyledString.Styler() {
 			@Override
@@ -79,8 +78,8 @@ public class PropertyValueCellLabelProvider extends AbstractPropertyCellLabelPro
 			@Override
 			public void mouseUp(MouseEvent e) {
 				if (e.button == 1) { // left button only
-					BrowserUtil.checkedCreateExternalBrowser(
-							url, ExpressUIActivator.PLUGIN_ID, ExpressUIActivator.getDefault().getLog());
+					BrowserUtil.checkedCreateExternalBrowser(url, ExpressUIActivator.PLUGIN_ID,
+							ExpressUIActivator.getDefault().getLog());
 				}
 			}
 		};

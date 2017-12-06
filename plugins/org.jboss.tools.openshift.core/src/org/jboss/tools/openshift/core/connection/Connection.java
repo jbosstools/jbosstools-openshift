@@ -72,12 +72,12 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			throws MalformedURLException {
 		this(new ClientBuilder(url).sslCertificateCallback(sslCertCallback).build(), credentialsPrompter);
 	}
-	
+
 	public Connection(IClient client, ICredentialsPrompter credentialsPrompter) {
 		this.client = client;
 		this.credentialsPrompter = credentialsPrompter;
 	}
-	
+
 	@Override
 	public Map<String, Object> getExtendedProperties() {
 		return new HashMap<>(extendedProperties);
@@ -95,12 +95,13 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		firePropertyChange(PROPERTY_EXTENDED_PROPERTIES, this.extendedProperties, this.extendedProperties = ext);
 	}
 
-    @Override
-    public String getClusterNamespace() {
-        return (String) getExtendedProperties().getOrDefault(ICommonAttributes.CLUSTER_NAMESPACE_KEY, ICommonAttributes.COMMON_NAMESPACE);
-    }
+	@Override
+	public String getClusterNamespace() {
+		return (String) getExtendedProperties().getOrDefault(ICommonAttributes.CLUSTER_NAMESPACE_KEY,
+				ICommonAttributes.COMMON_NAMESPACE);
+	}
 
-    /**
+	/**
 	 * Retrieve the resource factory associated with this connection
 	 * for stubbing versioned resources supported by th server
 	 * @return an {@link IResourceFactory}
@@ -108,20 +109,20 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	public IResourceFactory getResourceFactory() {
 		return client.getResourceFactory();
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <B extends IResourceBuilder> B getResourceBuilder(Class<? extends ICapability> klass){
-		if(client.supports(klass)) {
+	public <B extends IResourceBuilder> B getResourceBuilder(Class<? extends ICapability> klass) {
+		if (client.supports(klass)) {
 			ICapability cap = client.getCapability(klass);
-			if(cap instanceof IResourceBuilder) {
+			if (cap instanceof IResourceBuilder) {
 				return (B) cap;
 			}
 		}
 		return null;
 	}
-	
+
 	@Override
-	public String getUsername(){
+	public String getUsername() {
 		return client.getAuthorizationContext().getUserName();
 	}
 
@@ -146,7 +147,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		firePropertyChange(PROPERTY_PASSWORD, old, password);
 		this.passwordLoaded = true;
 	}
-	
+
 	@Override
 	public void setRememberPassword(boolean rememberPassword) {
 		firePropertyChange(PROPERTY_REMEMBER_PASSWORD, this.rememberPassword, this.rememberPassword = rememberPassword);
@@ -160,11 +161,11 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	public boolean isRememberToken() {
 		return rememberToken;
 	}
-	
+
 	public void setRememberToken(boolean rememberToken) {
 		firePropertyChange(PROPERTY_REMEMBER_TOKEN, this.rememberToken, this.rememberToken = rememberToken);
 	}
-	
+
 	@Override
 	public void enablePromptCredentials(boolean enable) {
 		this.promptCredentialsEnabled = enable;
@@ -176,7 +177,8 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	}
 
 	public String getAuthScheme() {
-		return org.apache.commons.lang.StringUtils.defaultIfBlank(this.authScheme, IAuthorizationContext.AUTHSCHEME_OAUTH);
+		return org.apache.commons.lang.StringUtils.defaultIfBlank(this.authScheme,
+				IAuthorizationContext.AUTHSCHEME_OAUTH);
 	}
 
 	protected String load(String id) {
@@ -196,16 +198,16 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		SecureStore store = getSecureStore(getHost(), getUsername());
 		if (store != null) {
 			try {
-				if (saveOrClear
-						&& !StringUtils.isEmpty(value)) {
+				if (saveOrClear && !StringUtils.isEmpty(value)) {
 					store.put(id, value);
 				} else {
 					store.remove(id);
 				}
 			} catch (SecureStoreException e) {
 				firePropertyChange(SecureStoreException.ID, null, e);
-				OpenShiftCoreActivator.logError(NLS.bind("Exception saving {0} for connection to {1}",id, getHost()), e);
-				if(e.getCause() instanceof StorageException) {
+				OpenShiftCoreActivator.logError(NLS.bind("Exception saving {0} for connection to {1}", id, getHost()),
+						e);
+				if (e.getCause() instanceof StorageException) {
 					return false;
 				}
 			}
@@ -222,7 +224,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 
 	@Override
 	public boolean connect() throws OpenShiftException {
-		if(authorize()) {
+		if (authorize()) {
 			savePasswordOrToken();
 			saveAuthSchemePreference();
 			return true;
@@ -233,16 +235,13 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	protected boolean authorize() {
 		try {
 			IAuthorizationContext context = loadAuthorizationContext();
-			if (!context.isAuthorized() 
-					&& credentialsPrompter != null
-					&& promptCredentialsEnabled){
+			if (!context.isAuthorized() && credentialsPrompter != null && promptCredentialsEnabled) {
 				credentialsPrompter.promptAndAuthenticate(this, null);
 			} else {
 				updateCredentials(context);
 			}
 		} catch (UnauthorizedException e) {
-			if (isEnablePromptCredentials()
-					&& credentialsPrompter != null) {
+			if (isEnablePromptCredentials() && credentialsPrompter != null) {
 				credentialsPrompter.promptAndAuthenticate(this, e.getAuthorizationDetails());
 			} else {
 				throw e;
@@ -250,36 +249,37 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		}
 		return getToken() != null;
 	}
-	
+
 	private IAuthorizationContext loadAuthorizationContext() {
 		IAuthorizationContext context = client.getAuthorizationContext();
 		synchronized (context) {
-			if(!passwordLoaded) {
+			if (!passwordLoaded) {
 				setPassword(load(SECURE_STORAGE_PASSWORD_KEY));
 				setRememberPassword(context.getPassword() != null);
 			}
-			if(!tokenLoaded) {
+			if (!tokenLoaded) {
 				setToken(load(SECURE_STORAGE_TOKEN_KEY));
 				setRememberToken(context.getToken() != null); //potential conflict with load password?
 			}
 		}
 		return context;
 	}
-	
+
 	private void savePasswordOrToken() {
 		// not using getters here because for save there should be no reason
 		// to trigger a load from storage.
 		if (IAuthorizationContext.AUTHSCHEME_BASIC.equals(getAuthScheme())) {
-			boolean success = 
-					saveOrClear(SECURE_STORAGE_PASSWORD_KEY, client.getAuthorizationContext().getPassword(), isRememberPassword());
+			boolean success = saveOrClear(SECURE_STORAGE_PASSWORD_KEY, client.getAuthorizationContext().getPassword(),
+					isRememberPassword());
 			if (success) {
 				//Avoid second secure storage prompt.
 				// Password is stored, token should be cleared.
 				clearToken();
 			}
-		} else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(getAuthScheme())){
-			boolean success = saveOrClear(SECURE_STORAGE_TOKEN_KEY, client.getAuthorizationContext().getToken(), isRememberToken());
-			if(success) { 
+		} else if (IAuthorizationContext.AUTHSCHEME_OAUTH.equals(getAuthScheme())) {
+			boolean success = saveOrClear(SECURE_STORAGE_TOKEN_KEY, client.getAuthorizationContext().getToken(),
+					isRememberToken());
+			if (success) {
 				//Avoid second secure storage prompt.
 				//Token is stored, password should be cleared.
 				clearPassword();
@@ -298,7 +298,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		setRememberToken(false);
 		saveOrClear(SECURE_STORAGE_TOKEN_KEY, null, false);
 	}
-	
+
 	public void removeSecureStoreData() {
 		SecureStore store = getSecureStore(getHost(), getUsername());
 		if (store != null) {
@@ -313,7 +313,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 
 	protected void saveAuthSchemePreference() {
 		ConnectionURL url = ConnectionURL.safeForConnection(this);
-		if(!StringUtils.isEmpty(url)) {
+		if (!StringUtils.isEmpty(url)) {
 			OpenShiftCorePreferences.INSTANCE.saveAuthScheme(url.toString(), getAuthScheme());
 		}
 	}
@@ -333,7 +333,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		try {
 			IAuthorizationContext context = client.getAuthorizationContext();
 			boolean result = context.isAuthorized();
-			if(result) {
+			if (result) {
 				//Call connect() to set the correct strategy instance to the client
 				//in the case when no strategy has been set yet, and as we do it,
 				//we can discard the current result, which nevertheless 
@@ -345,7 +345,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			return false;
 		}
 	}
-	
+
 	public void setAuthScheme(String scheme) {
 		firePropertyChange(PROPERTY_AUTHSCHEME, this.authScheme, this.authScheme = scheme);
 	}
@@ -370,9 +370,10 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((client  == null) ? 0 : client.getBaseURL().toString().hashCode());
-		if(client != null) {
-			result = prime * result + ((client.getAuthorizationContext().getUserName() == null) ? 0 : client.getAuthorizationContext().getUserName().hashCode());
+		result = prime * result + ((client == null) ? 0 : client.getBaseURL().toString().hashCode());
+		if (client != null) {
+			result = prime * result + ((client.getAuthorizationContext().getUserName() == null) ? 0
+					: client.getAuthorizationContext().getUserName().hashCode());
 		}
 		return result;
 	}
@@ -388,15 +389,14 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		connection.promptCredentialsEnabled = promptCredentialsEnabled;
 		return connection;
 	}
-	
+
 	@Override
 	public void update(IConnection connection) {
 		Assert.isLegal(connection instanceof Connection);
 
-		
 		Connection otherConnection = (Connection) connection;
 
-		this.client = otherConnection.client; 
+		this.client = otherConnection.client;
 		this.credentialsPrompter = otherConnection.credentialsPrompter;
 		this.rememberToken = otherConnection.rememberToken;
 		this.rememberPassword = otherConnection.rememberPassword;
@@ -462,9 +462,9 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	 */
 	@Override
 	public <T extends IResource> List<T> getResources(String kind) {
-		return getResources(kind,"");
+		return getResources(kind, "");
 	}
-	
+
 	@Override
 	public <T extends IResource> List<T> getResources(String kind, String namespace) {
 		try {
@@ -482,6 +482,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			return retryGet(e, kind, name, namespace);
 		}
 	}
+
 	/**
 	 * Get or refresh a resource
 	 * 
@@ -496,8 +497,8 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 			return retryGet(e, resource.getKind(), resource.getName(), resource.getNamespace());
 		}
 	}
-	
-	private <T extends IResource> T retryGet(OpenShiftException e, String kind, String name, String namespace){
+
+	private <T extends IResource> T retryGet(OpenShiftException e, String kind, String name, String namespace) {
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
@@ -506,7 +507,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		throw e;
 	}
 
-	private <T extends IResource>  T retryCreate(OpenShiftException e, T resource){
+	private <T extends IResource> T retryCreate(OpenShiftException e, T resource) {
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
@@ -515,7 +516,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		throw e;
 	}
 
-	private <T extends IResource>  T retryUpdate(OpenShiftException e, T resource){
+	private <T extends IResource> T retryUpdate(OpenShiftException e, T resource) {
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
@@ -524,7 +525,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		throw e;
 	}
 
-	private <T extends IResource> List<T> retryList(OpenShiftException e, String kind, String namespace){
+	private <T extends IResource> List<T> retryList(OpenShiftException e, String kind, String namespace) {
 		setToken(null);// token must be invalid, make sure not to try with
 		// cache
 		if (connect()) {
@@ -532,7 +533,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		}
 		throw e;
 	}
-	
+
 	/**
 	 * Delete the resource from the namespace it is associated with.  The delete operation 
 	 * return silently regardless if successful or not
@@ -558,7 +559,6 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		return loadAuthorizationContext().getToken();
 	}
 
-	
 	public void setToken(String token) {
 		IAuthorizationContext context = client.getAuthorizationContext();
 		String old = context.getToken();
@@ -571,7 +571,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	public void notifyUsage() {
 		UsageStats.getInstance().newV3Connection(getHost());
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -584,29 +584,31 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		if (client == null) {
 			if (other.client != null)
 				return false;
-		} else if (other.client == null
-				|| !client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
+		} else if (other.client == null || !client.getBaseURL().toString().equals(other.client.getBaseURL().toString()))
 			return false;
 		if (client.getAuthorizationContext().getUserName() == null) {
 			if (other.client.getAuthorizationContext().getUserName() != null)
 				return false;
-		} else if (!client.getAuthorizationContext().getUserName().equals(other.client.getAuthorizationContext().getUserName()))
+		} else if (!client.getAuthorizationContext().getUserName()
+				.equals(other.client.getAuthorizationContext().getUserName()))
 			return false;
 		return true;
 	}
 
 	@Override
 	public boolean credentialsEqual(IConnection connection) {
-		if(!equals(connection)) {
+		if (!equals(connection)) {
 			return false;
 		}
 		//It is safe to cast now.
-		Connection other = (Connection)connection;
+		Connection other = (Connection) connection;
 		//User name is already compared
-		if(!Objects.equals(client.getAuthorizationContext().getPassword(), other.client.getAuthorizationContext().getPassword())) {
+		if (!Objects.equals(client.getAuthorizationContext().getPassword(),
+				other.client.getAuthorizationContext().getPassword())) {
 			return false;
 		}
-		if(!Objects.equals(client.getAuthorizationContext().getToken(), other.client.getAuthorizationContext().getToken())) {
+		if (!Objects.equals(client.getAuthorizationContext().getToken(),
+				other.client.getAuthorizationContext().getToken())) {
 			return false;
 		}
 		return true;
@@ -618,12 +620,12 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		}
 		return ObjectUtils.equals(this.client, ResourceUtils.getClient(resource));
 	}
-	
+
 	@Override
 	public String getOpenShiftMasterVersion() {
 		return client.getOpenshiftMasterVersion();
 	}
-	
+
 	@Override
 	public String getKubernetesMasterVersion() {
 		return client.getKubernetesMasterVersion();

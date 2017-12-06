@@ -19,7 +19,7 @@ import org.eclipse.ui.INewWizard;
  * 
  */
 public class NewApplicationWorkbenchWizard extends AbstractApplicationWorkbenchWizard implements INewWizard {
-	
+
 	public NewApplicationWorkbenchWizard() {
 		super("New OpenShift Application");
 	}

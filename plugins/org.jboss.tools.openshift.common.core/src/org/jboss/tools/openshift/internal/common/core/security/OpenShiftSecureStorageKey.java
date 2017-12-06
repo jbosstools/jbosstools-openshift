@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 
 import org.jboss.tools.openshift.internal.common.core.security.SecureStore.IStoreKey;
 
-
 /**
  * Implements a key to be used to store values in the preferences store.
  * 
@@ -25,8 +24,8 @@ import org.jboss.tools.openshift.internal.common.core.security.SecureStore.IStor
 public class OpenShiftSecureStorageKey implements IStoreKey {
 
 	private static final String SEPARATOR = "/";
-	private static final Pattern SCHEME_PATTERN = Pattern.compile(".+://(.*)"); 
-	
+	private static final Pattern SCHEME_PATTERN = Pattern.compile(".+://(.*)");
+
 	private String baseKey;
 	private String host;
 	private String userName;
@@ -39,36 +38,30 @@ public class OpenShiftSecureStorageKey implements IStoreKey {
 
 	@Override
 	public String getKey() {
-		return new StringBuilder(baseKey)
-				.append(SEPARATOR)
-				.append(host)
-				.append(SEPARATOR)
-				.append(userName)
-				.toString();
+		return new StringBuilder(baseKey).append(SEPARATOR).append(host).append(SEPARATOR).append(userName).toString();
 	}
 
 	private String sanitizeHost(String value) {
 		Matcher matcher = SCHEME_PATTERN.matcher(value);
 		String host;
-		if (matcher.find()
-			&& matcher.groupCount() == 1) {
+		if (matcher.find() && matcher.groupCount() == 1) {
 			host = matcher.group(1);
 		} else {
 			host = value;
 		}
-		if(host.endsWith(SEPARATOR)) {
-			host = host.substring(0, host.length()-1);
+		if (host.endsWith(SEPARATOR)) {
+			host = host.substring(0, host.length() - 1);
 		}
 		return host;
 	}
-	
+
 	@Override
 	public boolean equals(Object key) {
 		if (!key.getClass().isAssignableFrom(OpenShiftSecureStorageKey.class)) {
 			return false;
 		}
 		OpenShiftSecureStorageKey openshiftKey = (OpenShiftSecureStorageKey) key;
-		return (userName != null && openshiftKey.userName != null && userName.equals(openshiftKey.userName)) 
+		return (userName != null && openshiftKey.userName != null && userName.equals(openshiftKey.userName))
 				&& (host != null && openshiftKey.host != null && host.equals(openshiftKey.host));
 	}
 }

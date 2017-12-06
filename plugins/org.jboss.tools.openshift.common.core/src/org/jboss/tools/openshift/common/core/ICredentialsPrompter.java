@@ -33,5 +33,5 @@ public interface ICredentialsPrompter {
 	 * @return true if prompted for password; false otherwise
 	 */
 	public boolean promptAndAuthenticate(IConnection connection, Object context);
-	
+
 }

@@ -26,13 +26,13 @@ import org.eclipse.core.runtime.IStatus;
  * @author Andre Dietisheim
  */
 public class DisableableMultiValitdator<T> extends MultiValidator {
-	
+
 	private final IObservableValue<Boolean> enablementObservable;
 	private final IObservableValue<T> valueObservable;
 	private IValidator validator;
 	private final IObservableList<IObservableValue<?>> targets;
 
-	public DisableableMultiValitdator(IObservableValue<Boolean> enablementObservable, 
+	public DisableableMultiValitdator(IObservableValue<Boolean> enablementObservable,
 			IObservableValue<T> valueObservable, IValidator validator) {
 		this.enablementObservable = enablementObservable;
 		this.valueObservable = valueObservable;
@@ -52,7 +52,7 @@ public class DisableableMultiValitdator<T> extends MultiValidator {
 				return valueValidity;
 			}
 		}
-		
+
 		return ValidationStatus.ok();
 	}
 

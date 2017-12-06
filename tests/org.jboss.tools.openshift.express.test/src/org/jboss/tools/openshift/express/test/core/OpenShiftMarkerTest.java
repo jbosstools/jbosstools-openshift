@@ -62,7 +62,7 @@ public class OpenShiftMarkerTest {
 	public void shouldReturnAllKnownMarkersAnd1Present() throws CoreException {
 		// prerequisites
 		createMarker(IOpenShiftMarker.SKIP_MAVEN_BUILD.getFileName());
-		
+
 		// operations
 		List<IOpenShiftMarker> all = markers.getAll();
 		List<IOpenShiftMarker> present = markers.getPresent();
@@ -76,7 +76,7 @@ public class OpenShiftMarkerTest {
 	public void shouldReturnAllKnownMarkersAnd1Custom() throws CoreException {
 		// prerequisites
 		createMarker("adietish");
-		
+
 		// operations
 		List<IOpenShiftMarker> all = markers.getAll();
 		List<IOpenShiftMarker> present = markers.getPresent();
@@ -84,12 +84,12 @@ public class OpenShiftMarkerTest {
 		assertEquals(6 + 1, all.size());
 		assertEquals(1, present.size());
 	}
-	
+
 	@Test
 	public void shouldIgnoreDotFileInMarkers() throws CoreException {
 		// prerequisites
 		createMarker(".gitignore");
-		
+
 		// operations
 		List<IOpenShiftMarker> all = markers.getAll();
 		List<IOpenShiftMarker> present = markers.getPresent();
@@ -102,10 +102,10 @@ public class OpenShiftMarkerTest {
 	@Test
 	public void shouldCreateMarkerWhenMissingMarkersFolder() throws CoreException {
 		// prerequisites
-		
+
 		// operations
 		IOpenShiftMarker.SKIP_MAVEN_BUILD.addTo(project, new NullProgressMonitor());
-		
+
 		// verification
 		assertEquals(1, markers.getPresent().size());
 	}
@@ -114,17 +114,17 @@ public class OpenShiftMarkerTest {
 	public void shouldRemoveMarker() throws CoreException {
 		// prerequisites
 		IOpenShiftMarker.SKIP_MAVEN_BUILD.addTo(project, new NullProgressMonitor());
-		
+
 		// operations
 		IOpenShiftMarker.SKIP_MAVEN_BUILD.removeFrom(project, new NullProgressMonitor());
-		
+
 		// verification
 		assertEquals(0, markers.getPresent().size());
 	}
 
 	private void createMarker(String filename) throws CoreException {
 		IFolder markersFolder = OpenShiftProjectUtils.ensureMarkersFolderExists(project, new NullProgressMonitor());
-		markersFolder.getFile(filename)
-				.create(new ByteArrayInputStream(new byte[] {}), false, new NullProgressMonitor());
+		markersFolder.getFile(filename).create(new ByteArrayInputStream(new byte[] {}), false,
+				new NullProgressMonitor());
 	}
 }

@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -37,7 +36,7 @@ public class JobChainBuilderTest {
 
 	private JobCounter counter;
 	private JobChainBuilder builder;
-	
+
 	@Before
 	public void setUp() {
 		this.counter = new JobCounter(4);
@@ -45,7 +44,7 @@ public class JobChainBuilderTest {
 		createJobs(3, null, builder, counter);
 		counter.setBuilder(builder);
 	}
-	
+
 	@Test
 	public void should_cancel_after_2_jobs() {
 		// given
@@ -71,17 +70,14 @@ public class JobChainBuilderTest {
 		JobCounter counter = new JobCounter(4);
 		JobChainBuilder builder = new JobChainBuilder(createJob("Job 1", counter));
 		counter.setBuilder(builder);
-		createJobs(3, 
-				new ISchedulingCondition[] { 
-						new JobChainBuilder.NullCondition(),
-						new JobChainBuilder.ISchedulingCondition() {
+		createJobs(3, new ISchedulingCondition[] { new JobChainBuilder.NullCondition(),
+				new JobChainBuilder.ISchedulingCondition() {
 
-							@Override
-							public boolean isFullfilled(Job preceedingJob) {
-								return false;
-							}},
-						new JobChainBuilder.NullCondition() },
-				builder, counter);
+					@Override
+					public boolean isFullfilled(Job preceedingJob) {
+						return false;
+					}
+				}, new JobChainBuilder.NullCondition() }, builder, counter);
 		// when
 		builder.schedule();
 		// then
@@ -94,9 +90,7 @@ public class JobChainBuilderTest {
 		JobCounter counter = new JobCounter(4);
 		JobChainBuilder builder = new JobChainBuilder(createJob("Job 1", counter));
 		counter.setBuilder(builder);
-		createJobs(3, 
-				new ISchedulingCondition[] { null, null, null },
-				builder, counter);
+		createJobs(3, new ISchedulingCondition[] { null, null, null }, builder, counter);
 		// when
 		builder.schedule();
 		// then
@@ -109,8 +103,7 @@ public class JobChainBuilderTest {
 		JobCounter counter = new JobCounter(3);
 		JobChainBuilder builder = new JobChainBuilder(createJob("Job 1", counter));
 		counter.setBuilder(builder);
-		createJobs(3, 
-				new ISchedulingCondition[] { null, null, new JobChainBuilder.SuccessfullyDoneCondition() },
+		createJobs(3, new ISchedulingCondition[] { null, null, new JobChainBuilder.SuccessfullyDoneCondition() },
 				builder, counter);
 		// when
 		builder.schedule();
@@ -124,13 +117,13 @@ public class JobChainBuilderTest {
 		private int cancelAt;
 		private int numOfJobs;
 		private JobChainBuilder builder;
-		
+
 		JobCounter(int numOfJobs) {
 			this.numOfJobs = numOfJobs;
 			this.cancelAt = -1;
-			this.countDown =  new CountDownLatch(numOfJobs);
+			this.countDown = new CountDownLatch(numOfJobs);
 		}
-		
+
 		void jobDone() {
 			assertThat(builder).isNotNull();
 
@@ -139,11 +132,11 @@ public class JobChainBuilderTest {
 				builder.cancel();
 			}
 		}
-		
+
 		void setBuilder(JobChainBuilder builder) {
 			this.builder = builder;
 		}
-		
+
 		void setCancelAt(int cancelAt) {
 			this.cancelAt = cancelAt;
 		}
@@ -159,19 +152,18 @@ public class JobChainBuilderTest {
 		}
 	}
 
-	private void createJobs(final int numOfJobs, ISchedulingCondition[] conditions, JobChainBuilder builder, JobCounter counter) {
+	private void createJobs(final int numOfJobs, ISchedulingCondition[] conditions, JobChainBuilder builder,
+			JobCounter counter) {
 		IStatus[] doneStatus = new IStatus[numOfJobs];
 		Arrays.fill(doneStatus, Status.OK_STATUS);
 		createJobs(numOfJobs, conditions, doneStatus, builder, counter);
 	}
 
-	private void createJobs(final int numOfJobs, ISchedulingCondition[] conditions, IStatus[] doneStatus, JobChainBuilder builder, JobCounter counter) {
+	private void createJobs(final int numOfJobs, ISchedulingCondition[] conditions, IStatus[] doneStatus,
+			JobChainBuilder builder, JobCounter counter) {
 		if (conditions == null) {
-			conditions = new ISchedulingCondition[] { 
-					new JobChainBuilder.NullCondition(),
-					new JobChainBuilder.NullCondition(),
-					new JobChainBuilder.NullCondition()
-			};
+			conditions = new ISchedulingCondition[] { new JobChainBuilder.NullCondition(),
+					new JobChainBuilder.NullCondition(), new JobChainBuilder.NullCondition() };
 		}
 
 		assertThat(conditions.length).isEqualTo(numOfJobs);

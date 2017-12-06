@@ -35,22 +35,12 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 
-public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel> implements IConnectionWrapper {
-	public static final String[] RESOURCE_KINDS = { 
-			ResourceKind.BUILD, 
-			ResourceKind.BUILD_CONFIG,
-			ResourceKind.DEPLOYMENT_CONFIG, 
-			ResourceKind.EVENT, 
-			ResourceKind.IMAGE_STREAM, 
-			ResourceKind.IMAGE_STREAM_TAG, 
-			ResourceKind.POD,
-			ResourceKind.ROUTE, 
-			ResourceKind.REPLICATION_CONTROLLER, 
-			ResourceKind.SERVICE, 
-			ResourceKind.TEMPLATE,
-			ResourceKind.PVC,
-			ResourceKind.PROJECT
-		};
+public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConnection, OpenshiftUIModel>
+		implements IConnectionWrapper {
+	public static final String[] RESOURCE_KINDS = { ResourceKind.BUILD, ResourceKind.BUILD_CONFIG,
+			ResourceKind.DEPLOYMENT_CONFIG, ResourceKind.EVENT, ResourceKind.IMAGE_STREAM,
+			ResourceKind.IMAGE_STREAM_TAG, ResourceKind.POD, ResourceKind.ROUTE, ResourceKind.REPLICATION_CONTROLLER,
+			ResourceKind.SERVICE, ResourceKind.TEMPLATE, ResourceKind.PVC, ResourceKind.PROJECT };
 
 	private AtomicReference<LoadingState> state = new AtomicReference<LoadingState>(LoadingState.INIT);
 	private Map<String, ProjectWrapper> projects = new HashMap<>();
@@ -73,11 +63,11 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 		}
 		return getResources();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IResourceWrapper<?, ?>> Collection<T> getResourcesOfType(Class<T> clazz) {
-		ArrayList<T> result= new ArrayList<>();
+		ArrayList<T> result = new ArrayList<>();
 		for (IResourceWrapper<?, ?> r : getResources()) {
 			if (clazz.isInstance(r)) {
 				result.add((T) r);
@@ -85,11 +75,11 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 		}
 		return result;
 	}
-	
+
 	public LoadingState getState() {
 		return state.get();
 	}
-	
+
 	void initWith(List<IProject> resources) {
 		synchronized (projects) {
 			resources.forEach(project -> {
@@ -174,9 +164,9 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 							handleUpdate(projectWrapper, newResource);
 						}
 					}
-				} else if (oldValue != null) { 
+				} else if (oldValue != null) {
 					// for Pods, which were marked for deletion and whose projects are already deleted
-					resourceCache.remove((IResource)oldValue);
+					resourceCache.remove((IResource) oldValue);
 				}
 			} else if (oldValue != null) {
 				IResource oldResource = resourceCache.getCachedVersion((IResource) oldValue);
@@ -191,7 +181,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 						new RuntimeException("Warning origing"));
 			}
 		} else if (ConnectionProperties.PROPERTY_PROJECTS.equals(property) && (newValue instanceof List)) {
-			updateWithResources((List<IProject>)newValue);
+			updateWithResources((List<IProject>) newValue);
 		}
 	}
 
@@ -226,7 +216,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 		updated.keySet().forEach(r -> {
 			ProjectWrapper wrapper = updated.get(r);
 			wrapper.updateWith(r);
-		});		
+		});
 
 		if (changed) {
 			fireChanged();
@@ -243,7 +233,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 	protected void handleRemove(ProjectWrapper projectWrapper, IResource oldResource) {
 		resourceCache.remove(oldResource);
 		if (oldResource instanceof IProject) {
-			synchronized(projects) {
+			synchronized (projects) {
 				projects.remove(oldResource.getName());
 				resourceCache.flush(oldResource.getName());
 				fireChanged();

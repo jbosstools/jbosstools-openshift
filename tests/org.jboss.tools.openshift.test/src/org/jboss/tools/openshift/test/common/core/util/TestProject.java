@@ -76,7 +76,7 @@ public class TestProject {
 		folder.create(true, true, null);
 
 		IFile keep = project.getFile(name + "/keep");
-		keep.create(new ByteArrayInputStream(new byte[] {0}), true, null);
+		keep.create(new ByteArrayInputStream(new byte[] { 0 }), true, null);
 
 		return folder;
 	}
@@ -95,15 +95,14 @@ public class TestProject {
 		try {
 			dispose();
 		} catch (CoreException | IOException e) {
-			OpenShiftTestActivator.logError(
-					NLS.bind("Error removing project {0}", getProject().getName()), e);
+			OpenShiftTestActivator.logError(NLS.bind("Error removing project {0}", getProject().getName()), e);
 		}
 	}
 
 	public IFile getFile(String filepath) throws Exception {
 		return project.getFile(filepath);
 	}
-	
+
 	public String getFileContent(String filepath) throws Exception {
 		IFile file = project.getFile(filepath);
 		try (InputStream stream = file.getContents()) {

@@ -22,22 +22,17 @@ public class StoragePropertySection extends OpenShiftResourcePropertySection {
 	public StoragePropertySection() {
 		super("popup:org.jboss.tools.openshift.ui.properties.tab.StorageTab", ResourceKind.PVC);
 	}
-	
+
 	@Override
 	protected void addColumns(TableViewerBuilder tableViewerBuilder) {
 		addNameColumn(tableViewerBuilder);
-		tableViewerBuilder
-			.column(model -> getStatus(model))
-				.name("Status")
-				.align(SWT.LEFT)
-				.weight(1)
-				.minWidth(25)
-			.buildColumn();
+		tableViewerBuilder.column(model -> getStatus(model)).name("Status").align(SWT.LEFT).weight(1).minWidth(25)
+				.buildColumn();
 		addCreatedColumn(tableViewerBuilder);
 	}
-	
+
 	private String getStatus(Object model) {
-		IPersistentVolumeClaim pvc = (IPersistentVolumeClaim)getResource(model);
+		IPersistentVolumeClaim pvc = (IPersistentVolumeClaim) getResource(model);
 		String status = pvc.getStatus();
 		if (StringUtils.isNotBlank(pvc.getVolumeName())) {
 			return String.join(" ", status, "to volume", pvc.getVolumeName());

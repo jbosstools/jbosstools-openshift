@@ -29,28 +29,28 @@ public class CDK3ShutdownController extends AbstractCDKShutdownController {
 	@Override
 	public void stop(boolean force) {
 		getBehavior().setServerStopping();
-		CDK3Server cdk3 = (CDK3Server)getServer().loadAdapter(CDK3Server.class, new NullProgressMonitor());
+		CDK3Server cdk3 = (CDK3Server) getServer().loadAdapter(CDK3Server.class, new NullProgressMonitor());
 		String msHome = cdk3.getMinishiftHome();
-		if( !(new File(msHome).exists())) {
+		if (!(new File(msHome).exists())) {
 			// The minishift home doesn't exist. We need to mark server as stopped and log an error
-			String msg = "The minishift-home for server \"" + getServer().getName() + "\" does not exist: " + msHome +
-			"\n\nPlease make sure that the virtual machine associated with this server has been properly shutdown.";
+			String msg = "The minishift-home for server \"" + getServer().getName() + "\" does not exist: " + msHome
+					+ "\n\nPlease make sure that the virtual machine associated with this server has been properly shutdown.";
 			IStatus err = new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, msg, new Exception(msg));
 			CDKCoreActivator.pluginLog().logStatus(err);
 			getBehavior().setServerStopped();
 			return;
 		}
-		
+
 		pollState();
-		if( getServer().getServerState() == IServer.STATE_STOPPED) {
+		if (getServer().getServerState() == IServer.STATE_STOPPED) {
 			return;
 		}
 		issueShutdownCommand();
 	}
-	
+
 	@Override
 	protected AbstractCDKPoller getCDKPoller(IServer server) {
-		if( server.getServerType().getId().equals(CDK3Server.CDK_V3_SERVER_TYPE)) {
+		if (server.getServerType().getId().equals(CDK3Server.CDK_V3_SERVER_TYPE)) {
 			return new MinishiftPoller();
 		}
 		return new CDK32Poller();
@@ -61,7 +61,6 @@ public class CDK3ShutdownController extends AbstractCDKShutdownController {
 		String cmd = profiles + "stop";
 		return cmd;
 	}
-	
 
 	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
 		return new CDKLaunchUtility().callMinishiftInteractive(getServer(), cmd, getServer().getName());

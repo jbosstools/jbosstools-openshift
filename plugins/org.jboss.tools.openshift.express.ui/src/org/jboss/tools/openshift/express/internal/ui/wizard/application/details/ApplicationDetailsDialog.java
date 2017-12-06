@@ -60,19 +60,16 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Label titleSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleSeparator);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(titleSeparator);
 
 		Composite dialogArea = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(dialogArea);
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(dialogArea);
 		TreeViewer viewer = createApplicationDetailsTable(dialogArea);
 		fillApplicationDetailsTable(viewer);
 
 		Label buttonsSeparator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).grab(true, false).applyTo(buttonsSeparator);
 
 		return dialogArea;
 	}
@@ -95,8 +92,8 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 		Tree tree = new Tree(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		tree.setLinesVisible(true);
 		tree.setHeaderVisible(true);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).hint(500, 300)
+				.applyTo(tableContainer);
 
 		final TreeViewer viewer = new TreeViewer(tree);
 		createContextMenu(viewer);
@@ -127,6 +124,5 @@ public class ApplicationDetailsDialog extends TitleAreaDialog {
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 	}
-
 
 }

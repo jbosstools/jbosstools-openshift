@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.portforwading;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +47,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	private final IPod pod;
 	private final ConsoleListener consoleListener = new ConsoleListener();
 	private final Set<IPortForwardable.PortPair> ports;
-	
+
 	private boolean isPortForwardingAllowed = false;
 
 	public PortForwardingWizardModel(final IPod pod) {
@@ -62,7 +61,6 @@ public class PortForwardingWizardModel extends ObservablePojo {
 		return pod.getNamespace() + "\\" + pod.getName();
 	}
 
-	
 	public boolean getPortForwarding() {
 		return PortForwardingUtils.isPortForwardingStarted(pod);
 	}
@@ -88,15 +86,17 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	}
 
 	private void updatePortForwardingAllowed() {
-		boolean newValue = !getForwardablePorts().isEmpty() && !PortForwardingUtils.isPortForwardingStarted(pod) && !PortForwardingUtils.hasPortInUse(this.ports);
-		firePropertyChange(PROPERTY_PORT_FORWARDING_ALLOWED, this.isPortForwardingAllowed, this.isPortForwardingAllowed = newValue);
+		boolean newValue = !getForwardablePorts().isEmpty() && !PortForwardingUtils.isPortForwardingStarted(pod)
+				&& !PortForwardingUtils.hasPortInUse(this.ports);
+		firePropertyChange(PROPERTY_PORT_FORWARDING_ALLOWED, this.isPortForwardingAllowed,
+				this.isPortForwardingAllowed = newValue);
 	}
 
 	public boolean isFreePortSearchAllowed() {
 		return !getForwardablePorts().isEmpty() && !PortForwardingUtils.isPortForwardingStarted(pod);
 	}
 
-	public Collection<IPortForwardable.PortPair> getForwardablePorts(){
+	public Collection<IPortForwardable.PortPair> getForwardablePorts() {
 		return ports;
 	}
 
@@ -109,7 +109,8 @@ public class PortForwardingWizardModel extends ObservablePojo {
 			ConsoleUtils.registerConsoleListener(consoleListener);
 			ConsoleUtils.displayConsoleView(console);
 			stream.println("Starting port-forwarding...");
-			final IPortForwardable portForwardable = PortForwardingUtils.startPortForwarding(this.pod, this.ports, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
+			final IPortForwardable portForwardable = PortForwardingUtils.startPortForwarding(this.pod, this.ports,
+					OpenShiftBinaryOption.SKIP_TLS_VERIFY);
 			portForwardable.getPortPairs().stream().forEach(port -> stream.println(NLS.bind("{0} {1} -> {2}",
 					new Object[] { port.getName(), port.getLocalPort(), port.getRemotePort() })));
 			stream.println("done.");
@@ -119,10 +120,9 @@ public class PortForwardingWizardModel extends ObservablePojo {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Error while closing the console inputstream", e);
 		}
 	}
-	
-	
-	private class ConsoleListener implements IConsoleListener{
-		
+
+	private class ConsoleListener implements IConsoleListener {
+
 		/**
 		 * Stops the port-forwarding is the port-forwarding console was removed, does nothing otherwise.
 		 *
@@ -143,9 +143,9 @@ public class PortForwardingWizardModel extends ObservablePojo {
 				} finally {
 					ConsoleUtils.deregisterConsoleListener(this);
 				}
-			}			
+			}
 		}
-		
+
 		@Override
 		public void consolesAdded(IConsole[] consoles) {
 		}
@@ -187,9 +187,8 @@ public class PortForwardingWizardModel extends ObservablePojo {
 
 	boolean waitForPortsToGetFree(int timeSeconds) {
 		try {
-			boolean result = (timeSeconds == 0) 
-				? !PortForwardingUtils.hasPortInUse(ports)
-				: PortForwardingUtils.waitForPortsToGetFree(ports, timeSeconds, System.out);
+			boolean result = (timeSeconds == 0) ? !PortForwardingUtils.hasPortInUse(ports)
+					: PortForwardingUtils.waitForPortsToGetFree(ports, timeSeconds, System.out);
 			updatePortForwardingAllowed();
 			return result;
 		} catch (IOException e) {
@@ -204,7 +203,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 
 	public void setUseFreePorts(Boolean useFreePorts) {
 		// do not change the current bindings if port forwarding is already started.
-		if (!getPortForwarding()) { 
+		if (!getPortForwarding()) {
 			updateLocalPortBindings(useFreePorts);
 		}
 		firePropertyChange(PROPERTY_USE_FREE_PORTS, this.useFreePorts, this.useFreePorts = useFreePorts);
@@ -241,11 +240,11 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	 * A slim chance that some free port coincided with the default one is neglected.
 	 */
 	private boolean computeUsingFreePorts() {
-		if(ports.isEmpty() || !PortForwardingUtils.isPortForwardingStarted(pod)) {
+		if (ports.isEmpty() || !PortForwardingUtils.isPortForwardingStarted(pod)) {
 			return false;
 		}
 		for (IPortForwardable.PortPair port : ports) {
-			if(port.getLocalPort() == port.getRemotePort()) {
+			if (port.getLocalPort() == port.getRemotePort()) {
 				return false;
 			}
 		}

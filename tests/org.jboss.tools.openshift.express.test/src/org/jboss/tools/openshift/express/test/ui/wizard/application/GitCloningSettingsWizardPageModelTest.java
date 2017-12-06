@@ -33,38 +33,38 @@ import com.openshift.client.IDomain;
 public class GitCloningSettingsWizardPageModelTest {
 
 	private GitCloningSettingsWizardPageModel model;
-	
+
 	@Mock
 	private ExpressConnection connection;
-	
+
 	@Mock
 	private IDomain domain;
-	
+
 	@Before
 	public void setup() {
 		OpenShiftApplicationWizardModel parentModel = new OpenShiftApplicationWizardModel(connection, domain);
 		model = new GitCloningSettingsWizardPageModel(parentModel);
 	}
-	
+
 	@Test
 	public void testDefaultGitRepositoryPath() {
 		assertTrue(model.isUseDefaultRepoPath());
 		assertEquals(EGitUIUtils.getEGitDefaultRepositoryPath(), model.getRepositoryPath());
 	}
-	
-    @Test
-    public void testGitRepositoryPath() {
-    	model.setUseDefaultRepoPath(false);
-        assertFalse(model.isUseDefaultRepoPath());
-        assertEquals(EGitUIUtils.getEGitDefaultRepositoryPath(), model.getRepositoryPath());
-    }
-    
-    @Test
-    public void testGitRepositoryPathAndValue() {
-        model.setUseDefaultRepoPath(false);
-        String path = new File(".").getAbsolutePath();
-        model.setRepositoryPath(path);
-        assertFalse(model.isUseDefaultRepoPath());
-        assertEquals(path, model.getRepositoryPath());
-    }
+
+	@Test
+	public void testGitRepositoryPath() {
+		model.setUseDefaultRepoPath(false);
+		assertFalse(model.isUseDefaultRepoPath());
+		assertEquals(EGitUIUtils.getEGitDefaultRepositoryPath(), model.getRepositoryPath());
+	}
+
+	@Test
+	public void testGitRepositoryPathAndValue() {
+		model.setUseDefaultRepoPath(false);
+		String path = new File(".").getAbsolutePath();
+		model.setRepositoryPath(path);
+		assertFalse(model.isUseDefaultRepoPath());
+		assertEquals(path, model.getRepositoryPath());
+	}
 }

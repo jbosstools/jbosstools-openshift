@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
 import org.eclipse.core.runtime.IStatus;
@@ -18,21 +18,23 @@ public class CDK32Poller extends MinishiftPoller {
 
 	protected void launchThread() {
 		launchThread("CDK Minishift 3.2+ Poller");
-	}	
+	}
 
 	protected IStatus parseOutput(String[] lines) {
-		for( int i = 0; i < lines.length; i++ ) {
-			if( lines[i] != null && lines[i].startsWith("Minishift:")) {
+		for (int i = 0; i < lines.length; i++) {
+			if (lines[i] != null && lines[i].startsWith("Minishift:")) {
 				String stat = lines[i].substring("Minishift:".length()).trim();
-				if("Running".equals(stat)) {
+				if ("Running".equals(stat)) {
 					// throws OpenShiftNotReadyPollingException on failure
 					return Status.OK_STATUS;
 				}
-				if("Stopped".equals(stat) || "Does Not Exist".equals(stat)) {
-					return CDKCoreActivator.statusFactory().errorStatus("minishift status indicates the CDK is stopped.");
+				if ("Stopped".equals(stat) || "Does Not Exist".equals(stat)) {
+					return CDKCoreActivator.statusFactory()
+							.errorStatus("minishift status indicates the CDK is stopped.");
 				}
 			}
 		}
-		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID, "minishift status indicates the CDK is starting.");
+		return CDKCoreActivator.statusFactory().infoStatus(CDKCoreActivator.PLUGIN_ID,
+				"minishift status indicates the CDK is starting.");
 	}
 }

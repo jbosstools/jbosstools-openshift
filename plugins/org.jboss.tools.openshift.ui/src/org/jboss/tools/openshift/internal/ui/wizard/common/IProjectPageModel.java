@@ -15,5 +15,5 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
  * @author Jeff Maury
  */
 public interface IProjectPageModel<C extends IConnection> extends IConnectionAware<C>, IProjectAware {
-    void loadResources();
+	void loadResources();
 }

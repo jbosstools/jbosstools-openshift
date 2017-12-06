@@ -17,6 +17,7 @@ import com.openshift.restclient.model.IService;
  * @author Thomas Mäder
  *
  */
-public interface IServiceWrapper extends IResourceWrapper<IService, ProjectWrapper>, IResourceContainer<IService, ProjectWrapper> {
+public interface IServiceWrapper
+		extends IResourceWrapper<IService, ProjectWrapper>, IResourceContainer<IService, ProjectWrapper> {
 
 }

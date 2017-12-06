@@ -106,7 +106,7 @@ import com.openshift.client.cartridge.ICartridge;
  * @author Xavier Coulon
  */
 public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardPage {
-	
+
 	public static final int RESULT_CANCEL = 0;
 	public static final int RESULT_APPLY = 1;
 	public static final int RESULT_IGNORE = 2;
@@ -139,10 +139,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void doCreateControls(Composite container, DataBindingContext dbc) {
-		GridDataFactory.fillDefaults()
-				.grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(container);
-		GridLayoutFactory.fillDefaults()
-				.margins(10, 10).numColumns(3).applyTo(container);
+		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).applyTo(container);
+		GridLayoutFactory.fillDefaults().margins(10, 10).numColumns(3).applyTo(container);
 
 		createDomainControls(container, dbc);
 		createApplicationControls(container, dbc);
@@ -152,8 +150,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		// domain
 		final Label domainLabel = new Label(parent, SWT.NONE);
 		domainLabel.setText("Domain:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(domainLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(domainLabel);
 		ComboViewer domainViewer = new ComboViewer(parent);
 		domainViewer.setContentProvider(new ObservableListContentProvider());
 		domainViewer.setLabelProvider(new AbstractLabelProvider() {
@@ -168,53 +165,50 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		});
 		domainViewer.setInput(
 				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_DOMAINS).observe(pageModel));
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(domainViewer.getControl());		
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(domainViewer.getControl());
 
 		IObservableValue selectedDomainObservable = ViewerProperties.singlePostSelection().observe(domainViewer);
 		ValueBindingBuilder
-			.bind(selectedDomainObservable)
-			.notUpdating(BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_DOMAIN).observe(pageModel))
-			.validatingAfterGet(new IValidator() {
-				
-				@Override
-				public IStatus validate(Object value) {
-					if (!(value instanceof IDomain)) {
-						return ValidationStatus.error("Please choose a domain.");
+				.bind(selectedDomainObservable).notUpdating(BeanProperties
+						.value(ApplicationConfigurationWizardPageModel.PROPERTY_DOMAIN).observe(pageModel))
+				.validatingAfterGet(new IValidator() {
+
+					@Override
+					public IStatus validate(Object value) {
+						if (!(value instanceof IDomain)) {
+							return ValidationStatus.error("Please choose a domain.");
+						}
+						return ValidationStatus.ok();
 					}
-					return ValidationStatus.ok();
-				}
-			})
-			.in(dbc);
-		
+				}).in(dbc);
+
 		selectedDomainObservable.addValueChangeListener(onDomainChanged(dbc));
-		
+
 		// manage domain
 		Link manageDomainsLink = new Link(parent, SWT.NONE);
-		manageDomainsLink
-				.setText("<a>Manage Domains</a>");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(manageDomainsLink);
+		manageDomainsLink.setText("<a>Manage Domains</a>");
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(manageDomainsLink);
 		manageDomainsLink.addSelectionListener(onManageDomains());
 	}
 
 	private IValueChangeListener onDomainChanged(final DataBindingContext dbc) {
 		return new IValueChangeListener() {
-			
+
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
 				Object value = event.getObservableValue().getValue();
 				if (!(value instanceof IDomain)) {
 					return;
 				}
-				
+
 				final IDomain domain = (IDomain) value;
 				if (pageModel.isCurrentDomain(domain)) {
 					return;
 				}
-				
+
 				try {
-					WizardUtils.runInWizard(new AbstractDelegatingMonitorJob(NLS.bind("Loading applications for domain {0}...", domain.getId())) {
+					WizardUtils.runInWizard(new AbstractDelegatingMonitorJob(
+							NLS.bind("Loading applications for domain {0}...", domain.getId())) {
 
 						@Override
 						protected IStatus doRun(IProgressMonitor monitor) {
@@ -224,13 +218,11 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						}
 					}, getContainer(), dbc);
 				} catch (InvocationTargetException e) {
-					ExpressUIActivator.log(ExpressUIActivator.createErrorStatus(NLS.bind(
-							"Could not load applications for domain {0}.",
-							domain), e));
+					ExpressUIActivator.log(ExpressUIActivator
+							.createErrorStatus(NLS.bind("Could not load applications for domain {0}.", domain), e));
 				} catch (InterruptedException e) {
-					ExpressUIActivator.log(ExpressUIActivator.createErrorStatus(NLS.bind(
-							"Could not load applications for domain {0}.",
-							domain), e));
+					ExpressUIActivator.log(ExpressUIActivator
+							.createErrorStatus(NLS.bind("Could not load applications for domain {0}.", domain), e));
 				}
 			}
 		};
@@ -243,61 +235,56 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(newAppNameLabel);
 
 		this.applicationNameText = new Text(parent, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.grab(true, false).span(2, 1).align(SWT.FILL, SWT.FILL).applyTo(applicationNameText);
+		GridDataFactory.fillDefaults().grab(true, false).span(2, 1).align(SWT.FILL, SWT.FILL)
+				.applyTo(applicationNameText);
 		UIUtils.selectAllOnFocus(applicationNameText);
-		final IObservableValue applicationNameTextObservable =
-				WidgetProperties.text(SWT.Modify).observe(applicationNameText);
-		final IObservableValue applicationNameModelObservable =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
-		ValueBindingBuilder
-				.bind(applicationNameTextObservable).
-				to(applicationNameModelObservable)
-				.in(dbc);
+		final IObservableValue applicationNameTextObservable = WidgetProperties.text(SWT.Modify)
+				.observe(applicationNameText);
+		final IObservableValue applicationNameModelObservable = BeanProperties
+				.value(ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_NAME).observe(pageModel);
+		ValueBindingBuilder.bind(applicationNameTextObservable).to(applicationNameModelObservable).in(dbc);
 
-		final NewApplicationNameValidator newApplicationNameValidator =
-				new NewApplicationNameValidator(
-						BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION).observe(pageModel),
-						BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_RESOURCES_LOADED).observe(pageModel), 
-						applicationNameTextObservable);
+		final NewApplicationNameValidator newApplicationNameValidator = new NewApplicationNameValidator(
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_USE_EXISTING_APPLICATION)
+						.observe(pageModel),
+				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_RESOURCES_LOADED)
+						.observe(pageModel),
+				applicationNameTextObservable);
 		dbc.addValidationStatusProvider(newApplicationNameValidator);
-		ControlDecorationSupport.create(
-				newApplicationNameValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		ControlDecorationSupport.create(newApplicationNameValidator, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
 
 		// application type
 		final Label applicationTypeLabel = new Label(parent, SWT.NONE);
 		applicationTypeLabel.setText("Type:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(applicationTypeLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(applicationTypeLabel);
 
 		Label selectedApplicationTemplateLabel = new Label(parent, SWT.None);
-		GridDataFactory.fillDefaults()
-				.span(2,1).align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(selectedApplicationTemplateLabel);
-		IObservableValue selectedApplicationTemplate =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_APPLICATION_TEMPLATE).observe(pageModel);
+		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(true, false)
+				.applyTo(selectedApplicationTemplateLabel);
+		IObservableValue selectedApplicationTemplate = BeanProperties
+				.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_APPLICATION_TEMPLATE)
+				.observe(pageModel);
 		ValueBindingBuilder
-				.bind(BeanProperties.value(
-						IApplicationTemplate.PROPERTY_NAME).observeDetail(selectedApplicationTemplate))
-						.converting(new Converter(String.class, String.class) {
+				.bind(BeanProperties.value(IApplicationTemplate.PROPERTY_NAME)
+						.observeDetail(selectedApplicationTemplate))
+				.converting(new Converter(String.class, String.class) {
 
-							@Override
-							public Object convert(Object fromObject) {
-								if (!(fromObject instanceof String)) {
-									return fromObject;
-								}
-								return StringUtils.shorten((String) fromObject, 50) ;
-							}
-							
-						})
-				.to(WidgetProperties.text().observe(selectedApplicationTemplateLabel))
-				.notUpdatingParticipant()
+					@Override
+					public Object convert(Object fromObject) {
+						if (!(fromObject instanceof String)) {
+							return fromObject;
+						}
+						return StringUtils.shorten((String) fromObject, 50);
+					}
+
+				}).to(WidgetProperties.text().observe(selectedApplicationTemplateLabel)).notUpdatingParticipant()
 				.in(dbc);
-						
+
 		// gear profile
 		final Label gearProfileLabel = new Label(parent, SWT.NONE);
 		gearProfileLabel.setText("Gear profile:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).applyTo(gearProfileLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(gearProfileLabel);
 
 		ComboViewer gearViewer = new ComboViewer(parent);
 		gearViewer.setContentProvider(new ObservableListContentProvider());
@@ -305,57 +292,46 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public String getText(Object element) {
-				return ExpressResourceLabelUtils.toString((IGearProfile) element);			
+				return ExpressResourceLabelUtils.toString((IGearProfile) element);
 			}
 		});
 		gearViewer.setInput(
-				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES)
-						.observe(pageModel));
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(gearViewer.getControl());
-		ValueBindingBuilder
-			.bind(ViewerProperties.singlePostSelection().observe(gearViewer))
-			.to(BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_GEAR_PROFILE)
-					.observe(pageModel))
-			.in(dbc);
+				BeanProperties.list(ApplicationConfigurationWizardPageModel.PROPERTY_GEAR_PROFILES).observe(pageModel));
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(gearViewer.getControl());
+		ValueBindingBuilder.bind(ViewerProperties.singlePostSelection().observe(gearViewer)).to(BeanProperties
+				.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_GEAR_PROFILE).observe(pageModel))
+				.in(dbc);
 
 		// scaling
 		Button enableScalingButton = new Button(parent, SWT.CHECK);
 		enableScalingButton.setText("Enable scaling");
-		ValueBindingBuilder
-				.bind(WidgetProperties.selection().observe(enableScalingButton))
-				.converting(new BooleanToApplicationScaleConverter())
-				.to(BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_SCALE)
-						.observe(pageModel))
-				.converting(new ApplicationScaleToBooleanConverter())
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.selection().observe(enableScalingButton))
+				.converting(new BooleanToApplicationScaleConverter()).to(BeanProperties
+						.value(ApplicationConfigurationWizardPageModel.PROPERTY_APPLICATION_SCALE).observe(pageModel))
+				.converting(new ApplicationScaleToBooleanConverter()).in(dbc);
 
 		// embeddable cartridges
 		Group embeddableCartridgesGroup = new Group(parent, SWT.NONE);
 		embeddableCartridgesGroup.setText(getCartridgesListLabel(pageModel.getSelectedApplicationTemplate()));
-		BeanProperties
-				.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_APPLICATION_TEMPLATE)
-				.observe(pageModel)
-				.addValueChangeListener(onApplicationTemplateChanged(embeddableCartridgesGroup));
-		GridDataFactory.fillDefaults()
-				.grab(true, true).align(SWT.FILL, SWT.FILL).span(3, 1).applyTo(embeddableCartridgesGroup);
+		BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_APPLICATION_TEMPLATE)
+				.observe(pageModel).addValueChangeListener(onApplicationTemplateChanged(embeddableCartridgesGroup));
+		GridDataFactory.fillDefaults().grab(true, true).align(SWT.FILL, SWT.FILL).span(3, 1)
+				.applyTo(embeddableCartridgesGroup);
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(embeddableCartridgesGroup);
 
 		Composite tableContainer = new Composite(embeddableCartridgesGroup, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).hint(400, SWT.DEFAULT).grab(true, true).span(1,2).applyTo(tableContainer);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(400, SWT.DEFAULT).grab(true, true).span(1, 2)
+				.applyTo(tableContainer);
 		TableViewer embeddableCartridgesTableViewer = createEmbeddableCartridgesViewer(tableContainer);
-		embeddableCartridgesTableViewer.setInput(
-				BeanProperties.set(
-						ApplicationConfigurationWizardPageModel.PROPERTY_EMBEDDED_CARTRIDGES).observe(pageModel));
+		embeddableCartridgesTableViewer.setInput(BeanProperties
+				.set(ApplicationConfigurationWizardPageModel.PROPERTY_EMBEDDED_CARTRIDGES).observe(pageModel));
 		ValueBindingBuilder
-			.bind(ViewerProperties.singlePostSelection().observe(embeddableCartridgesTableViewer))
-			.to(BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel))
-			.in(dbc);
-		
+				.bind(ViewerProperties.singlePostSelection().observe(embeddableCartridgesTableViewer)).to(BeanProperties
+						.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel))
+				.in(dbc);
+
 		Composite buttonsComposite = createAddRemoveEditButtons(embeddableCartridgesGroup, dbc);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).applyTo(buttonsComposite);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(buttonsComposite);
 
 		// advanced configurations
 		createAdvancedGroup(parent, dbc);
@@ -363,7 +339,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	private IValueChangeListener onApplicationTemplateChanged(final Group cartridgesGroup) {
 		return new IValueChangeListener() {
-			
+
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
 				if (event.diff.getNewValue() instanceof IApplicationTemplate) {
@@ -387,7 +363,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			return "Embedded Cartridges";
 		}
 	}
-	
+
 	/**
 	 * Creates a stack layout with 2 different panels:
 	 * <ul>
@@ -403,28 +379,20 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		// add, remove
 		Composite addRemoveButtons = new Composite(buttonsContainer, SWT.None);
 		GridLayoutFactory.fillDefaults().applyTo(addRemoveButtons);
-		
+
 		Button addButton = new Button(addRemoveButtons, SWT.PUSH);
 		addButton.setText("&Add...");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).hint(110, SWT.DEFAULT).applyTo(addButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(110, SWT.DEFAULT).applyTo(addButton);
 		addButton.addSelectionListener(onAdd());
 
 		Button removeButton = new Button(addRemoveButtons, SWT.PUSH);
 		removeButton.setText("&Remove");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).hint(110, SWT.DEFAULT).applyTo(removeButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(110, SWT.DEFAULT).applyTo(removeButton);
 		removeButton.addSelectionListener(onRemove());
-		IObservableValue selectedEmbeddableCartridge =
-				BeanProperties
-						.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE)
-						.observe(pageModel);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(removeButton))
-				.notUpdatingParticipant()
-				.to(selectedEmbeddableCartridge )
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+		IObservableValue selectedEmbeddableCartridge = BeanProperties
+				.value(ApplicationConfigurationWizardPageModel.PROPERTY_SELECTED_CARTRIDGE).observe(pageModel);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(removeButton)).notUpdatingParticipant()
+				.to(selectedEmbeddableCartridge).converting(new IsNotNull2BooleanConverter()).in(dbc);
 
 		// edit
 		Composite editButtons = new Composite(buttonsContainer, SWT.None);
@@ -432,23 +400,18 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		Button editButton = new Button(editButtons, SWT.PUSH);
 		editButton.setText("&Edit...");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).hint(110, SWT.DEFAULT).applyTo(editButton);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).hint(110, SWT.DEFAULT).applyTo(editButton);
 		editButton.addSelectionListener(onEdit());
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(editButton))
-				.notUpdatingParticipant()
-				.to(selectedEmbeddableCartridge)
-				.converting(new IsNotNull2BooleanConverter())
-				.in(dbc);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(editButton)).notUpdatingParticipant()
+				.to(selectedEmbeddableCartridge).converting(new IsNotNull2BooleanConverter()).in(dbc);
 
-		stackLayout.topControl = getEmbeddableCartridgesButtons(
-				pageModel.isCanAddRemoveCartridges(), addRemoveButtons, editButtons);
+		stackLayout.topControl = getEmbeddableCartridgesButtons(pageModel.isCanAddRemoveCartridges(), addRemoveButtons,
+				editButtons);
 
 		BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_CAN_ADDREMOVE_CARTRIDGES)
-				.observe(pageModel)
-				.addValueChangeListener(onCanAddRemoveChanged(addRemoveButtons, editButtons, buttonsContainer, stackLayout));
-		
+				.observe(pageModel).addValueChangeListener(
+						onCanAddRemoveChanged(addRemoveButtons, editButtons, buttonsContainer, stackLayout));
+
 		return buttonsContainer;
 	}
 
@@ -457,8 +420,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 	 * {@link ApplicationConfigurationWizardPageModel#PROPERTY_CAN_ADDREMOVE_CARTRIDGES}
 	 * and shows the edit- or the add- & remove-buttons.
 	 */
-	private IValueChangeListener onCanAddRemoveChanged(
-			final Composite addRemoveButtons, final Composite editButtons, final Composite parent, final StackLayout stackLayout) {
+	private IValueChangeListener onCanAddRemoveChanged(final Composite addRemoveButtons, final Composite editButtons,
+			final Composite parent, final StackLayout stackLayout) {
 		return new IValueChangeListener() {
 
 			@Override
@@ -467,104 +430,83 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					return;
 				}
 
-				stackLayout.topControl = getEmbeddableCartridgesButtons(
-						(Boolean) event.diff.getNewValue(), addRemoveButtons, editButtons);
+				stackLayout.topControl = getEmbeddableCartridgesButtons((Boolean) event.diff.getNewValue(),
+						addRemoveButtons, editButtons);
 				parent.layout(true);
-				
+
 			}
 		};
 	}
 
-	private Composite getEmbeddableCartridgesButtons(
-			boolean canAddRemoveEmbeddableCartridges, Composite addRemoveButtons, Composite editButtons) {
+	private Composite getEmbeddableCartridgesButtons(boolean canAddRemoveEmbeddableCartridges,
+			Composite addRemoveButtons, Composite editButtons) {
 		if (canAddRemoveEmbeddableCartridges) {
 			return addRemoveButtons;
 		} else {
 			return editButtons;
 		}
 	}
-	
+
 	private void createAdvancedGroup(Composite parent, DataBindingContext dbc) {
 		// advanced part
 		advancedPart = new DialogAdvancedPart() {
-			
+
 			@Override
 			protected void createAdvancedContent(Composite advancedComposite) {
 				doCreateAdvancedContent(advancedComposite, dbc);
 			}
 		};
-		
+
 		advancedPart.createAdvancedGroup(parent, 3);
 	}
-	
+
 	private void doCreateAdvancedContent(Composite advancedComposite, DataBindingContext dbc) {
 
 		// source group
 		Group sourceGroup = new Group(advancedComposite, SWT.NONE);
 		sourceGroup.setText("Source Code");
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(sourceGroup);
-		GridLayoutFactory.fillDefaults()
-				.numColumns(2).margins(6, 6).applyTo(sourceGroup);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(sourceGroup);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(6, 6).applyTo(sourceGroup);
 
 		// use default source checkbox
 		Button useDefaultSourceButton = new Button(sourceGroup, SWT.CHECK);
 		useDefaultSourceButton.setText("Use default source code");
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).span(2, 1).applyTo(useDefaultSourceButton);
-		IObservableValue useDefaultSourceButtonObservable = WidgetProperties.selection().observe(useDefaultSourceButton);
-		IObservableValue useInitialGitUrlModelObservable =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL)
-						.observe(pageModel);
-		ValueBindingBuilder
-				.bind(useDefaultSourceButtonObservable)
-				.converting(new InvertingBooleanConverter())
-				.to(useInitialGitUrlModelObservable)
-				.converting(new InvertingBooleanConverter())
-				.in(dbc);
-		IObservableValue initialGitUrlEditable =
-				BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL_EDITABLE).observe(pageModel);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(useDefaultSourceButton))
-				.notUpdatingParticipant()
-				.to(initialGitUrlEditable)
-				.in(dbc);
+		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).span(2, 1).applyTo(useDefaultSourceButton);
+		IObservableValue useDefaultSourceButtonObservable = WidgetProperties.selection()
+				.observe(useDefaultSourceButton);
+		IObservableValue useInitialGitUrlModelObservable = BeanProperties
+				.value(ApplicationConfigurationWizardPageModel.PROPERTY_USE_INITIAL_GITURL).observe(pageModel);
+		ValueBindingBuilder.bind(useDefaultSourceButtonObservable).converting(new InvertingBooleanConverter())
+				.to(useInitialGitUrlModelObservable).converting(new InvertingBooleanConverter()).in(dbc);
+		IObservableValue initialGitUrlEditable = BeanProperties
+				.value(ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL_EDITABLE).observe(pageModel);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(useDefaultSourceButton)).notUpdatingParticipant()
+				.to(initialGitUrlEditable).in(dbc);
 
 		// source code text
 		Label sourceUrlLabel = new Label(sourceGroup, SWT.NONE);
 		sourceUrlLabel.setText("Source code:");
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceUrlLabel);
-		final IObservableValue sourceUrlWidgetsEnablement =
-				BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL_USEREDITABLE)
-						.observe(pageModel);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(sourceUrlLabel))
-				.notUpdatingParticipant()
-				.to(sourceUrlWidgetsEnablement)
-				.in(dbc);
+		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(sourceUrlLabel);
+		final IObservableValue sourceUrlWidgetsEnablement = BeanProperties
+				.value(ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL_USEREDITABLE).observe(pageModel);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(sourceUrlLabel)).notUpdatingParticipant()
+				.to(sourceUrlWidgetsEnablement).in(dbc);
 		Text sourceUrlText = new Text(sourceGroup, SWT.BORDER);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(sourceUrlText))
-				.notUpdatingParticipant()
-				.to(sourceUrlWidgetsEnablement)
-				.in(dbc);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(sourceUrlText);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(sourceUrlText)).notUpdatingParticipant()
+				.to(sourceUrlWidgetsEnablement).in(dbc);
 		IObservableValue sourcecodeUrlObservable = WidgetProperties.text(SWT.Modify).observe(sourceUrlText);
-		ValueBindingBuilder
-				.bind(sourcecodeUrlObservable)
+		ValueBindingBuilder.bind(sourcecodeUrlObservable)
 				.converting(new MultiConverter(new TrimmingStringConverter(), new EmptyStringToNullConverter()))
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL).observe(pageModel))
+				.to(BeanProperties.value(ApplicationConfigurationWizardPageModel.PROPERTY_INITIAL_GITURL)
+						.observe(pageModel))
 				.in(dbc);
 
 		MultiValidator sourceCodeUrlValidator = new SourceCodeUrlValidator(useDefaultSourceButtonObservable,
 				sourcecodeUrlObservable);
 		dbc.addValidationStatusProvider(sourceCodeUrlValidator);
-		ControlDecorationSupport.create(
-				sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
+		ControlDecorationSupport.create(sourceCodeUrlValidator, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater());
 
 		// explanation
 		StyledText sourceCodeExplanationText = new StyledText(sourceGroup, SWT.WRAP | SWT.V_SCROLL | SWT.READ_ONLY);
@@ -574,25 +516,20 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 						+ "provided in this Git repository instead of the default application.");
 		sourceCodeExplanationText.setEnabled(false);
 		StyledTextUtils.setTransparent(sourceCodeExplanationText);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1).applyTo(sourceCodeExplanationText);
-		ValueBindingBuilder
-				.bind(WidgetProperties.enabled().observe(sourceCodeExplanationText))
-				.notUpdatingParticipant()
-				.to(sourceUrlWidgetsEnablement)
-				.in(dbc);
-		
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, true).span(2, 1)
+				.applyTo(sourceCodeExplanationText);
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(sourceCodeExplanationText)).notUpdatingParticipant()
+				.to(sourceUrlWidgetsEnablement).in(dbc);
+
 		// environment variables
 		Button environmentVariablesButton = new Button(advancedComposite, SWT.NONE);
 		environmentVariablesButton.setText("Environment Variables... ");
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).applyTo(environmentVariablesButton);
+		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).applyTo(environmentVariablesButton);
 		environmentVariablesButton.addSelectionListener(onBrowseEnvironmentVariables(dbc));
-		ValueBindingBuilder
-				.bind(WidgetProperties.visible().observe(environmentVariablesButton))
+		ValueBindingBuilder.bind(WidgetProperties.visible().observe(environmentVariablesButton))
 				.notUpdatingParticipant()
-				.to(BeanProperties.value(
-						ApplicationConfigurationWizardPageModel.PROPERTY_ENVIRONMENT_VARIABLES_SUPPORTED)
+				.to(BeanProperties
+						.value(ApplicationConfigurationWizardPageModel.PROPERTY_ENVIRONMENT_VARIABLES_SUPPORTED)
 						.observe(pageModel))
 				.in(dbc);
 	}
@@ -606,9 +543,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if (connection == null) {
 					return;
 				}
-				ManageDomainsWizard domainWizard =
-						new ManageDomainsWizard("Choose domain", "Please choose the domain for your new application"
-								, pageModel.getDomain(), connection);
+				ManageDomainsWizard domainWizard = new ManageDomainsWizard("Choose domain",
+						"Please choose the domain for your new application", pageModel.getDomain(), connection);
 				if (new OkButtonWizardDialog(getShell(), domainWizard).open() == Dialog.OK) {
 					pageModel.setDomains(domainWizard.getDomains());
 					pageModel.setDomain(domainWizard.getDomain());
@@ -616,24 +552,19 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			}
 		};
 	}
-	
+
 	private TableViewer createEmbeddableCartridgesViewer(Composite tableContainer) {
 		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
 		table.setLinesVisible(true);
-		TableViewer viewer = new TableViewerBuilder(table, tableContainer)
-				.sorter(new EmbeddableCartridgeViewerSorter())
-				.comparer(new EqualityComparer())
-				.contentProvider(new ObservableSetContentProvider())
-				.<ICartridge> column("Name")
-					.weight(1)
-					.labelProvider(new IColumnLabelProvider<ICartridge>() {
-	
-						@Override
-						public String getValue(ICartridge cartridge) {
-							return ExpressResourceLabelUtils.toString(cartridge);
-						}
-					}).buildColumn()
-				.buildViewer();
+		TableViewer viewer = new TableViewerBuilder(table, tableContainer).sorter(new EmbeddableCartridgeViewerSorter())
+				.comparer(new EqualityComparer()).contentProvider(new ObservableSetContentProvider())
+				.<ICartridge>column("Name").weight(1).labelProvider(new IColumnLabelProvider<ICartridge>() {
+
+					@Override
+					public String getValue(ICartridge cartridge) {
+						return ExpressResourceLabelUtils.toString(cartridge);
+					}
+				}).buildColumn().buildViewer();
 		return viewer;
 	}
 
@@ -643,8 +574,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				AddEmbeddableCartridgesWizard cartridgesWizard = new AddEmbeddableCartridgesWizard(wizardModel);
-				if (new OkCancelButtonWizardDialog(getShell(), cartridgesWizard).open()
-						== IDialogConstants.OK_ID) {
+				if (new OkCancelButtonWizardDialog(getShell(), cartridgesWizard).open() == IDialogConstants.OK_ID) {
 					pageModel.setEmbeddedCartridges(cartridgesWizard.getCheckedCartridges());
 				}
 			}
@@ -662,24 +592,22 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			private void remove(ICartridge cartridge) {
 				EmbedCartridgeStrategy embedCartridgeStrategy = createEmbedCartridgeStrategy(pageModel.getDomain());
-				EmbeddableCartridgeDiff additionalOperations =
-						embedCartridgeStrategy.remove(cartridge, pageModel.getEmbeddedCartridges());
+				EmbeddableCartridgeDiff additionalOperations = embedCartridgeStrategy.remove(cartridge,
+						pageModel.getEmbeddedCartridges());
 				int result = RESULT_APPLY;
 				if (additionalOperations.hasChanges()) {
 					result = executeAdditionalOperations(cartridge, additionalOperations);
 				}
-				if(result != RESULT_CANCEL){
+				if (result != RESULT_CANCEL) {
 					wizardModel.removeEmbeddedCartridge(cartridge);
 				}
 			}
 
 			private EmbedCartridgeStrategy createEmbedCartridgeStrategy(IDomain domain) {
 				IOpenShiftConnection connection = domain.getUser().getConnection();
-				EmbedCartridgeStrategy embedCartridgeStrategy =
-						new EmbedCartridgeStrategy(
-								new ArrayList<ICartridge>(connection.getEmbeddableCartridges()),
-								new ArrayList<ICartridge>(connection.getStandaloneCartridges()), 
-								domain.getApplications());
+				EmbedCartridgeStrategy embedCartridgeStrategy = new EmbedCartridgeStrategy(
+						new ArrayList<ICartridge>(connection.getEmbeddableCartridges()),
+						new ArrayList<ICartridge>(connection.getStandaloneCartridges()), domain.getApplications());
 				return embedCartridgeStrategy;
 			}
 
@@ -688,11 +616,9 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				int result = openAdditionalOperationsDialog("Remove Cartridges",
 						new StringBuilder()
 								.append(NLS.bind("If you want to remove {0}, it is suggested you:\n",
-										new CartridgeToStringConverter()
-												.toString(additionalOperations.getCartridge())))
+										new CartridgeToStringConverter().toString(additionalOperations.getCartridge())))
 								.append(additionalOperations.toString())
-								.append("\n\nDo you want to Apply or Ignore these suggestions??")
-								.toString());
+								.append("\n\nDo you want to Apply or Ignore these suggestions??").toString());
 				switch (result) {
 				case RESULT_APPLY:
 					wizardModel.removeEmbeddedCartridges(additionalOperations.getRemovals());
@@ -703,10 +629,10 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				}
 				return result;
 			}
-			
+
 			public int openAdditionalOperationsDialog(String title, String message) {
-				MessageDialog dialog = new MessageDialog(getShell(),
-						title, null, message, MessageDialog.QUESTION, new String[] { "Cancel", "Apply", "Ignore" }, RESULT_APPLY);
+				MessageDialog dialog = new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION,
+						new String[] { "Cancel", "Apply", "Ignore" }, RESULT_APPLY);
 				return dialog.open();
 			}
 		};
@@ -722,17 +648,13 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					return;
 				}
 				IApplicationTemplate selectedTemplate = pageModel.getSelectedApplicationTemplate();
-				if (selectedTemplate == null
-						|| selectedTemplate.canAddRemoveCartridges()) {
+				if (selectedTemplate == null || selectedTemplate.canAddRemoveCartridges()) {
 					return;
 				}
 				IQuickstartApplicationTemplate selectedQuickstart = (IQuickstartApplicationTemplate) selectedTemplate;
-				EditAlternativeCartridgesWizard cartridgesWizard =
-						new EditAlternativeCartridgesWizard(
-								selectedCartridge, selectedQuickstart.getAlternativesFor(selectedCartridge),
-								wizardModel);
-				if (new OkCancelButtonWizardDialog(getShell(), cartridgesWizard).open()
-						== IDialogConstants.OK_ID) {
+				EditAlternativeCartridgesWizard cartridgesWizard = new EditAlternativeCartridgesWizard(
+						selectedCartridge, selectedQuickstart.getAlternativesFor(selectedCartridge), wizardModel);
+				if (new OkCancelButtonWizardDialog(getShell(), cartridgesWizard).open() == IDialogConstants.OK_ID) {
 					ICartridge checkedCartridge = cartridgesWizard.getCheckedCartridge();
 					replaceSelectedCartridge(selectedCartridge, checkedCartridge);
 				}
@@ -752,8 +674,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				NewEnvironmentVariablesWizard environmentVariablesWizard = 
-						new NewEnvironmentVariablesWizard(pageModel.getEnvironmentVariables(), pageModel.getDomain());
+				NewEnvironmentVariablesWizard environmentVariablesWizard = new NewEnvironmentVariablesWizard(
+						pageModel.getEnvironmentVariables(), pageModel.getDomain());
 				if (new OkButtonWizardDialog(getShell(), environmentVariablesWizard).open() == Dialog.OK) {
 					pageModel.setEnvironmentVariables(environmentVariablesWizard.getEnvironmentVariables());
 				}
@@ -818,14 +740,14 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 		UIUtils.ensureGTK3CombosAreCorrectSize((Composite) getControl());
 	}
-	
+
 	protected void loadOpenshiftResources(final DataBindingContext dbc) {
 		try {
 
 			if (pageModel.isResourcesLoaded()) {
 				return;
 			}
-			
+
 			WizardUtils.runInWizard(new AbstractDelegatingMonitorJob("Loading applications, cartridges and gears...") {
 
 				@Override
@@ -836,8 +758,8 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 					} catch (NotFoundOpenShiftException e) {
 						return Status.OK_STATUS;
 					} catch (Exception e) {
-						return ExpressUIActivator.createErrorStatus(
-								"Could not load applications, cartridges and gears", e);
+						return ExpressUIActivator.createErrorStatus("Could not load applications, cartridges and gears",
+								e);
 					}
 				}
 			}, getContainer(), dbc);
@@ -855,7 +777,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 		NewApplicationNameValidator(IObservableValue useExistingApplication,
 				IObservableValue existingApplicationsLoaded, IObservableValue applicationName) {
 			this.useExistingApplicationObservable = useExistingApplication;
-			this.existingApplicationsLoadedObservable = existingApplicationsLoaded; 
+			this.existingApplicationsLoadedObservable = existingApplicationsLoaded;
 			this.applicationNameObservable = applicationName;
 		}
 
@@ -864,21 +786,17 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 			final boolean useExistingApplication = (Boolean) useExistingApplicationObservable.getValue();
 			final String applicationName = (String) applicationNameObservable.getValue();
 			final Boolean existingApplicationsLoaded = (Boolean) existingApplicationsLoadedObservable.getValue();
-			
+
 			if (useExistingApplication) {
 				return ValidationStatus.ok();
 			} else if (applicationName.isEmpty()) {
-				return ValidationStatus.cancel(
-						"Please choose a name for your new application.");
+				return ValidationStatus.cancel("Please choose a name for your new application.");
 			} else if (!StringUtils.isAlphaNumeric(applicationName)) {
-				return ValidationStatus.error(
-						"The name may only contain letters and digits.");
-			} else if (existingApplicationsLoaded != null
-					&& !existingApplicationsLoaded) {
+				return ValidationStatus.error("The name may only contain letters and digits.");
+			} else if (existingApplicationsLoaded != null && !existingApplicationsLoaded) {
 				return ValidationStatus.cancel("Existing applications are not loaded yet.");
 			} else if (pageModel.isExistingApplication(applicationName)) {
-				return ValidationStatus.error(
-						"An application with the same name already exists on OpenShift.");
+				return ValidationStatus.error("An application with the same name already exists on OpenShift.");
 			}
 			return ValidationStatus.ok();
 		}
@@ -915,8 +833,7 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 				if (StringUtils.isEmpty(gitUri)) {
 					return ValidationStatus.cancel("Please provide a git url for your source code");
 				}
-				if (UrlUtils.isValid(gitUri)
-						|| EGitUtils.isValidGitUrl(gitUri)) {
+				if (UrlUtils.isValid(gitUri) || EGitUtils.isValidGitUrl(gitUri)) {
 					return ValidationStatus.ok();
 				}
 			}
@@ -933,8 +850,6 @@ public class ApplicationConfigurationWizardPage extends AbstractOpenShiftWizardP
 
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(
-				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
-				dbc);
+		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this, dbc);
 	}
 }

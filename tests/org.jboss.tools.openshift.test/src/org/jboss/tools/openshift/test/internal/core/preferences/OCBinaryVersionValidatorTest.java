@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.test.internal.core.preferences;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +32,7 @@ public class OCBinaryVersionValidatorTest {
 		assertTrue(OCBinaryVersionValidator.parseVersion("oc v1.0-foo+fdf5432").isPresent());
 		assertTrue(OCBinaryVersionValidator.parseVersion("oc v1.2.0-foo+fdf5432").isPresent());
 	}
-	
+
 	@Test
 	public void shouldParseOCGithubVersion() {
 		assertSameVersion("1.2.3.foo", "oc v1.2.3-foo");
@@ -49,22 +49,22 @@ public class OCBinaryVersionValidatorTest {
 
 	@Test
 	public void testIsCompatibleForPublishing() {
-		assertFalse(OCBinaryVersionValidator.isCompatibleForPublishing((Version)null));
+		assertFalse(OCBinaryVersionValidator.isCompatibleForPublishing((Version) null));
 		assertFalse(OCBinaryVersionValidator.isCompatibleForPublishing(Version.parseVersion("1.1.0")));
 		assertTrue(OCBinaryVersionValidator.isCompatibleForPublishing(Version.parseVersion("1.1.1")));
 		assertTrue(OCBinaryVersionValidator.isCompatibleForPublishing(Version.parseVersion("1.1.2")));
 		assertTrue(OCBinaryVersionValidator.isCompatibleForPublishing(Version.parseVersion("1.4.0.rc1")));
 	}
-	
+
 	private void assertSameVersion(String expectedVersion, String input) {
 		Optional<Version> version = OCBinaryVersionValidator.parseVersion(input);
-		assertTrue("Couldn't parse "+input, version.isPresent());
+		assertTrue("Couldn't parse " + input, version.isPresent());
 		assertEquals(expectedVersion, version.get().toString());
 	}
-	
+
 	@Test
 	public void testValidatorWithDefault() {
-	    OCBinaryVersionValidator validator = new OCBinaryVersionValidator(null);
-	    assertEquals(Version.emptyVersion, validator.getVersion(new NullProgressMonitor()));
+		OCBinaryVersionValidator validator = new OCBinaryVersionValidator(null);
+		assertEquals(Version.emptyVersion, validator.getVersion(new NullProgressMonitor()));
 	}
 }

@@ -14,5 +14,6 @@ import java.util.List;
 
 public interface IModelFactory {
 	public <T> List<T> createChildren(Object model);
+
 	public ObservableTreeItem create(Object model);
 }

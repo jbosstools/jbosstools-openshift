@@ -27,8 +27,8 @@ public class ConnectionsChange {
 	private boolean removalNotified;
 	private boolean changeNotified;
 	private String property;
-	private CountDownLatch latch; 
-	
+	private CountDownLatch latch;
+
 	public String getProperty() {
 		return property;
 	}
@@ -47,11 +47,11 @@ public class ConnectionsChange {
 	public ConnectionsChange(ConnectionsRegistry registry) {
 		registry.addListener(new Listener());
 	}
-	
+
 	public void setCountDown(int totCallbacks) {
 		this.latch = new CountDownLatch(totCallbacks);
 	}
-	
+
 	public boolean isAdditionNotified() {
 		return additionNotified;
 	}
@@ -67,7 +67,7 @@ public class ConnectionsChange {
 	public IConnection getConnection() {
 		return notifiedConnection;
 	}
-	
+
 	public void reset() {
 		this.additionNotified = false;
 		this.removalNotified = false;
@@ -75,19 +75,19 @@ public class ConnectionsChange {
 		this.notifiedConnection = null;
 		this.latch = null;
 	}
-	
+
 	private void bumpCountdown() {
-		if(latch != null) {
+		if (latch != null) {
 			latch.countDown();
 		}
 	}
-	
+
 	public void waitForNotification() {
-		if(latch == null) {
+		if (latch == null) {
 			return;
 		}
 		try {
-			if(!latch.await(MAX_TIMEOUT_SEC, TimeUnit.SECONDS)) {
+			if (!latch.await(MAX_TIMEOUT_SEC, TimeUnit.SECONDS)) {
 				throw new RuntimeException("ConnectionsChange timed out before receiving any notifications");
 			}
 		} catch (InterruptedException e) {
@@ -112,7 +112,8 @@ public class ConnectionsChange {
 		}
 
 		@Override
-		public void connectionChanged(IConnection connection, String eventProperty, Object eventOldValue, Object eventNewValue) {
+		public void connectionChanged(IConnection connection, String eventProperty, Object eventOldValue,
+				Object eventNewValue) {
 			changeNotified = true;
 			notifiedConnection = connection;
 			property = eventProperty;

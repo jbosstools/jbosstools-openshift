@@ -78,32 +78,31 @@ public class ServerAdapterHandler extends AbstractHandler {
 		if (resource == null) {
 			return null;
 		}
-		
+
 		IResource source = null;
 		IRoute route = null;
-		
+
 		if (resource instanceof IService) {
 			source = (IService) resource;
 		} else if (resource instanceof IRoute) {
 			route = (IRoute) resource;
 			final IRoute localRoute = route;
 			source = (IService) route.getProject().getResources(ResourceKind.SERVICE).stream()
-					.filter(s -> ResourceUtils.areRelated(localRoute, (IService) s))
-					.findFirst()
-					.orElseGet(() -> null);
-       } else if (resource instanceof IReplicationController) {
-		    source = resource;
+					.filter(s -> ResourceUtils.areRelated(localRoute, (IService) s)).findFirst().orElseGet(() -> null);
+		} else if (resource instanceof IReplicationController) {
+			source = resource;
 		} else if (resource instanceof IPod) {
-		    final Collection<IService> services = ResourceUtils.getServicesFor((IPod) resource, resource.getProject().getResources(ResourceKind.SERVICE));
-		    if (!services.isEmpty()) {
-                source = services.iterator().next();
-		    } else {
-                source = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod) resource);
-            }
+			final Collection<IService> services = ResourceUtils.getServicesFor((IPod) resource,
+					resource.getProject().getResources(ResourceKind.SERVICE));
+			if (!services.isEmpty()) {
+				source = services.iterator().next();
+			} else {
+				source = ResourceUtils.getDeploymentConfigOrReplicationControllerFor((IPod) resource);
+			}
 		}
-		if (source != null)  {
-	        final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(source);
-	        return openOrCreateServerAdapter(source, route, connection);
+		if (source != null) {
+			final Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(source);
+			return openOrCreateServerAdapter(source, route, connection);
 		}
 		return null;
 	}
@@ -129,25 +128,27 @@ public class ServerAdapterHandler extends AbstractHandler {
 		return server;
 	}
 
-	private IServer createServer(final String resourceName, final IResource resource, IRoute route, final Connection connection) {
+	private IServer createServer(final String resourceName, final IResource resource, IRoute route,
+			final Connection connection) {
 		IServer server = null;
 		try {
 			IServerWorkingCopy serverWorkingCopy = OpenShiftServerUtils.create(resourceName);
-			final ServerSettingsWizard serverSettingsWizard = 
-					new ServerSettingsWizard(serverWorkingCopy, connection, resource, route);
+			final ServerSettingsWizard serverSettingsWizard = new ServerSettingsWizard(serverWorkingCopy, connection,
+					resource, route);
 			if (WizardUtils.openWizardDialog(600, 650, serverSettingsWizard, Display.getDefault().getActiveShell())) {
 				server = serverSettingsWizard.getCreatedServer();
 			}
 		} catch (CoreException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(
-					NLS.bind("Failed to create OpenShift Server Adapter for resource {0}", resourceName), e);
+			OpenShiftUIActivator.getDefault().getLogger()
+					.logError(NLS.bind("Failed to create OpenShift Server Adapter for resource {0}", resourceName), e);
 		}
 		return server;
 	}
-	
+
 	private void openServersView(final IServer openShiftServer, final IWorkbenchWindow workbenchWindow) {
 		try {
-			final CommonNavigator serversViewPart = (CommonNavigator) workbenchWindow.getActivePage().showView(SERVERS_VIEW_ID);
+			final CommonNavigator serversViewPart = (CommonNavigator) workbenchWindow.getActivePage()
+					.showView(SERVERS_VIEW_ID);
 			serversViewPart.setFocus();
 			serversViewPart.getCommonViewer().refresh();
 			serversViewPart.getCommonViewer().setSelection(new StructuredSelection(openShiftServer));
@@ -155,6 +156,5 @@ public class ServerAdapterHandler extends AbstractHandler {
 			OpenShiftUIActivator.getDefault().getLogger().logError("Failed to open Servers View", e);
 		}
 	}
-
 
 }

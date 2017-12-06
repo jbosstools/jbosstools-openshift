@@ -64,8 +64,8 @@ public class OpenShiftServerUtilsPowerMockTest {
 	private IServerWorkingCopy createServer(IService serverService)
 			throws UnsupportedEncodingException, MalformedURLException {
 		IServerWorkingCopy server = mock(IServerWorkingCopy.class);
-		doReturn(OpenShiftResourceUniqueId.get(serverService))
-				.when(server).getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
+		doReturn(OpenShiftResourceUniqueId.get(serverService)).when(server)
+				.getAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
 		return server;
 	}
 

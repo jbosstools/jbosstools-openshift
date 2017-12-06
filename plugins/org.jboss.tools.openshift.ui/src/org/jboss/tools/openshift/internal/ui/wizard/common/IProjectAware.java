@@ -20,20 +20,19 @@ import com.openshift.restclient.model.IProject;
 /**
  * @author Jeff Maury
  */
-public interface IProjectAware
-{
+public interface IProjectAware {
 
 	public static final String PROPERTY_PROJECT = "project";
-	
+
 	public static final String PROPERTY_PROJECT_ITEMS = "projectItems";
 
 	IProject getProject();
 
 	void setProject(IProject project);
-	
+
 	List<ObservableTreeItem> getProjectItems();
 
 	boolean hasProjects();
-	
+
 	void setProjectsComparator(Comparator<ObservableTreeItem> comparator);
 }

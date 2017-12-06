@@ -37,5 +37,4 @@ public class SecureStoreException extends Exception {
 		super(message);
 	}
 
-
 }

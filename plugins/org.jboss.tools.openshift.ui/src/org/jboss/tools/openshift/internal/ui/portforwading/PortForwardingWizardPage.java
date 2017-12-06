@@ -61,12 +61,11 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.capability.resources.IPortForwardable;
 
-
 /**
  * @author jeff.cantrill
  */
 public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
-	
+
 	private static final IPluginLog LOG = OpenShiftUIActivator.getDefault().getLogger();
 	private final PortForwardingWizardModel wizardModel;
 
@@ -75,9 +74,9 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 	 * @param wizardModel the wizard model
 	 * @param portForwardingWizard the parent wizard
 	 */
-	public PortForwardingWizardPage(final PortForwardingWizardModel wizardModel, final PortForwardingWizard portForwardingWizard) {
-		super("Port forwarding", null,
-				"PortForwardingWizardPage", portForwardingWizard);
+	public PortForwardingWizardPage(final PortForwardingWizardModel wizardModel,
+			final PortForwardingWizard portForwardingWizard) {
+		super("Port forwarding", null, "PortForwardingWizardPage", portForwardingWizard);
 		this.wizardModel = wizardModel;
 		setDescription(NLS.bind("Port forwarding for the {0} pod.", wizardModel.getPodName()));
 	}
@@ -107,46 +106,43 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		findFreesPortButton.setText("Find free local ports for remote ports");
 		GridDataFactory.fillDefaults().span(2, 1).align(SWT.FILL, SWT.CENTER).grab(false, false)
 				.applyTo(findFreesPortButton);
-		final IObservableValue findFreePortsButtonObservable = BeanProperties.value(
-				PortForwardingWizardModel.PROPERTY_USE_FREE_PORTS).observe(wizardModel);
+		final IObservableValue findFreePortsButtonObservable = BeanProperties
+				.value(PortForwardingWizardModel.PROPERTY_USE_FREE_PORTS).observe(wizardModel);
 		final IObservableValue findFreePortsButtonSelection = WidgetProperties.selection().observe(findFreesPortButton);
 		dbc.bindValue(findFreePortsButtonSelection, findFreePortsButtonObservable);
-		DataBindingUtils.addDisposableValueChangeListener(
-				new IValueChangeListener() {
-					@Override
-					public void handleValueChange(ValueChangeEvent event) {
-						refreshViewerInput(viewer);
-					}
-				}, findFreePortsButtonObservable, viewer.getTable());
+		DataBindingUtils.addDisposableValueChangeListener(new IValueChangeListener() {
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				refreshViewerInput(viewer);
+			}
+		}, findFreePortsButtonObservable, viewer.getTable());
 
 		// enabling/disabling controls
-		IObservableValue portForwardingStartedObservable = BeanProperties.value(
-				PortForwardingWizardModel.PROPERTY_PORT_FORWARDING).observe(wizardModel);
+		IObservableValue portForwardingStartedObservable = BeanProperties
+				.value(PortForwardingWizardModel.PROPERTY_PORT_FORWARDING).observe(wizardModel);
 
-		IObservableValue portForwardingAllowedObservable = BeanProperties.value(
-				PortForwardingWizardModel.PROPERTY_PORT_FORWARDING_ALLOWED).observe(wizardModel);
+		IObservableValue portForwardingAllowedObservable = BeanProperties
+				.value(PortForwardingWizardModel.PROPERTY_PORT_FORWARDING_ALLOWED).observe(wizardModel);
 
-		IObservableValue freePortSearchAllowedObservable = BeanProperties.value(
-				PortForwardingWizardModel.PROPERTY_FREE_PORT_SEARCH_ALLOWED).observe(wizardModel);
+		IObservableValue freePortSearchAllowedObservable = BeanProperties
+				.value(PortForwardingWizardModel.PROPERTY_FREE_PORT_SEARCH_ALLOWED).observe(wizardModel);
 
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(startButton))
-			.notUpdating(portForwardingAllowedObservable).in(dbc);
+				.notUpdating(portForwardingAllowedObservable).in(dbc);
 
-		
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(stopButton))
 				.notUpdating(portForwardingStartedObservable).in(dbc);
-		
+
 		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(findFreesPortButton))
 				.notUpdating(freePortSearchAllowedObservable).in(dbc);
 
 	}
 
-
 	private SelectionListener onStartPortForwarding(final TableViewer viewer) {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if(!wizardModel.checkPortForwardingAllowed()) {
+				if (!wizardModel.checkPortForwardingAllowed()) {
 					//This is rather a testing case, it is not very probable at normal usage.
 					viewer.refresh(true);
 					MessageDialog.openWarning(getShell(), "Warning", "Some ports are in use now.");
@@ -188,7 +184,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 										"Failed to close console inputstream while stopping port-forwarding", e);
 							}
 							refreshViewerInput(viewer);
-							if(!wizardModel.isPortForwardingAllowed()) {
+							if (!wizardModel.isPortForwardingAllowed()) {
 								//Ports remain in use after a reasonable wait. 
 								//Lets give UI a break and then repeat waiting.
 								Display.getDefault().asyncExec(new Runnable() {
@@ -211,17 +207,17 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 
 	private void waitForPortsToGetFree(final TableViewer viewer) {
 		//Try, if ports got free while this task was in wait, one poll is fast.
-		if(wizardModel.waitForPortsToGetFree(0)) {
+		if (wizardModel.waitForPortsToGetFree(0)) {
 			return;
 		}
 		try {
 			WizardUtils.runInWizard(new Job("Waiting for ports to get free...") {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					if(!wizardModel.waitForPortsToGetFree(5)) {
+					if (!wizardModel.waitForPortsToGetFree(5)) {
 						Display.getDefault()
-							.asyncExec(() -> MessageDialog.openWarning(Display.getDefault().getActiveShell(),
-									"Warning", "Ports remain in use. Try free ports."));
+								.asyncExec(() -> MessageDialog.openWarning(Display.getDefault().getActiveShell(),
+										"Warning", "Ports remain in use. Try free ports."));
 					}
 					refreshViewerInput(viewer);
 					return Status.OK_STATUS;
@@ -256,7 +252,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 			public void update(ViewerCell cell) {
 				IPortForwardable.PortPair port = (IPortForwardable.PortPair) cell.getElement();
 				int local = port.getLocalPort();
-				if(wizardModel.getPortForwarding() || !PortForwardingUtils.isPortInUse(local)) {
+				if (wizardModel.getPortForwarding() || !PortForwardingUtils.isPortInUse(local)) {
 					cell.setText(Integer.toString(local));
 					cell.setStyleRanges(new StyleRange[0]);
 				} else {
@@ -282,20 +278,20 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void update(ViewerCell cell) {
-					final boolean started = wizardModel.getPortForwarding();
-					cell.setText(started ? "Started" : "Stopped");
+				final boolean started = wizardModel.getPortForwarding();
+				cell.setText(started ? "Started" : "Stopped");
 			}
 		}, viewer, tableLayout);
 
-		IObservableValue forwardablePortsModelObservable =
-				BeanProperties.value(PortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS).observe(wizardModel);
+		IObservableValue forwardablePortsModelObservable = BeanProperties
+				.value(PortForwardingWizardModel.PROPERTY_FORWARDABLE_PORTS).observe(wizardModel);
 
-		final ForwardablePortListValidator validator =
-				new ForwardablePortListValidator(forwardablePortsModelObservable);
+		final ForwardablePortListValidator validator = new ForwardablePortListValidator(
+				forwardablePortsModelObservable);
 		dbc.addValidationStatusProvider(validator);
-		
+
 		viewer.setInput(wizardModel.getForwardablePorts());
-//		
+		//		
 		return viewer;
 	}
 
@@ -326,11 +322,11 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 			}
 		});
 	}
-	
+
 	class ForwardablePortListValidator extends MultiValidator {
 
 		private final IObservableValue viewerObservable;
-		
+
 		public ForwardablePortListValidator(IObservableValue viewerObservable) {
 			this.viewerObservable = viewerObservable;
 		}
@@ -338,15 +334,16 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 		@Override
 		protected IStatus validate() {
 			@SuppressWarnings("unchecked")
-			final Collection<IPortForwardable.PortPair> ports = (Collection<IPortForwardable.PortPair>) viewerObservable.getValue();
-			if(ports == null || ports.isEmpty()) {
-				return ValidationStatus.error(
-						NLS.bind("There are no available ports to forward to {0}.\nYour pod may not be running or does not expose any ports.", 
-								wizardModel.getPodName()));
+			final Collection<IPortForwardable.PortPair> ports = (Collection<IPortForwardable.PortPair>) viewerObservable
+					.getValue();
+			if (ports == null || ports.isEmpty()) {
+				return ValidationStatus.error(NLS.bind(
+						"There are no available ports to forward to {0}.\nYour pod may not be running or does not expose any ports.",
+						wizardModel.getPodName()));
 			}
 			return Status.OK_STATUS;
 		}
-		
+
 	}
 
 	@Override
@@ -357,7 +354,7 @@ public class PortForwardingWizardPage extends AbstractOpenShiftWizardPage {
 
 	@Override
 	public void dispose() {
-		if(!wizardModel.getPortForwarding()) {
+		if (!wizardModel.getPortForwarding()) {
 			wizardModel.setUseFreePorts(false);
 		}
 		super.dispose();

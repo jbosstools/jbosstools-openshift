@@ -22,13 +22,13 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
  * @author Andre Dietisheim
  */
 public abstract class AbstractConnection extends ObservablePojo implements IConnection {
-	
+
 	private String host;
 
 	protected AbstractConnection(String host) {
 		this(null, host);
 	}
-	
+
 	protected AbstractConnection(String scheme, String host) {
 		this.host = getHost(scheme, host);
 	}
@@ -38,7 +38,7 @@ public abstract class AbstractConnection extends ObservablePojo implements IConn
 			// empty host == default host
 			return host;
 		}
-		
+
 		if (StringUtils.isEmpty(scheme)) {
 			scheme = UrlUtils.SCHEME_HTTPS;
 		}
@@ -57,9 +57,9 @@ public abstract class AbstractConnection extends ObservablePojo implements IConn
 
 	@Override
 	public abstract boolean connect();
-	
+
 	public abstract boolean isConnected();
-	
+
 	@Override
 	public abstract IConnection clone();
 
@@ -83,10 +83,10 @@ public abstract class AbstractConnection extends ObservablePojo implements IConn
 			return false;
 		}
 		AbstractConnection other = (AbstractConnection) obj;
-		if(!Objects.equals(host, other.host)) {
+		if (!Objects.equals(host, other.host)) {
 			return false;
 		}
-		if(!Objects.equals(getUsername(), other.getUsername())) {
+		if (!Objects.equals(getUsername(), other.getUsername())) {
 			return false;
 		}
 		return true;
@@ -94,12 +94,12 @@ public abstract class AbstractConnection extends ObservablePojo implements IConn
 
 	@Override
 	public boolean credentialsEqual(IConnection connection) {
-		if(!equals(connection)) {
+		if (!equals(connection)) {
 			return false;
 		}
 		//It is safe to cast now.
-		AbstractConnection other = (AbstractConnection)connection;
-		if(!Objects.equals(getPassword(), other.getPassword())) {
+		AbstractConnection other = (AbstractConnection) connection;
+		if (!Objects.equals(getPassword(), other.getPassword())) {
 			return false;
 		}
 		return true;

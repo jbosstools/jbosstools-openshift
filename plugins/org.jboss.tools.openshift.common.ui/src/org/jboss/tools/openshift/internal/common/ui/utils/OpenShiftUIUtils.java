@@ -39,22 +39,22 @@ public class OpenShiftUIUtils {
 	private OpenShiftUIUtils() {
 		//Contains only static methods
 	}
-	
+
 	public static final String OPENSHIFT_EXPLORER_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
 	public static final String DOCKER_EXPLORER_VIEW_ID = "org.eclipse.linuxtools.docker.ui.dockerExplorerView";
-	
+
 	public static void showOpenShiftExplorer() {
 		showViewAsync(OPENSHIFT_EXPLORER_VIEW_ID);
 	}
-	
+
 	public static void hideOpenShiftExplorer() {
 		hideViewAsync(OPENSHIFT_EXPLORER_VIEW_ID);
 	}
-	
+
 	public static boolean isOpenShiftExplorerVisible() {
 		return isViewVisibleSync(OPENSHIFT_EXPLORER_VIEW_ID);
 	}
-	
+
 	public static void showViewAsync(String viewId) {
 		if (Display.getCurrent() == null) {
 			Display.getDefault().asyncExec(() -> {
@@ -65,7 +65,7 @@ public class OpenShiftUIUtils {
 			showView(viewId);
 		}
 	}
-	
+
 	public static void showView(String viewId) {
 		try {
 			IWorkbenchPage page = getActivePage();
@@ -73,11 +73,10 @@ public class OpenShiftUIUtils {
 				page.showView(viewId);
 			}
 		} catch (PartInitException e) {
-			OpenShiftCommonUIActivator.getDefault().getLogger().logError("Failed to show the view "+viewId, e);
+			OpenShiftCommonUIActivator.getDefault().getLogger().logError("Failed to show the view " + viewId, e);
 		}
 	}
 
-	
 	public static boolean isViewVisibleSync(String viewId) {
 		boolean[] visible = new boolean[1];
 		if (Display.getCurrent() == null) {
@@ -90,7 +89,7 @@ public class OpenShiftUIUtils {
 		}
 		return visible[0];
 	}
-	
+
 	public static boolean isViewVisible(String viewId) {
 		IWorkbenchPage page = getActivePage();
 		if (page != null) {
@@ -99,7 +98,7 @@ public class OpenShiftUIUtils {
 		}
 		return false;
 	}
-	
+
 	public static void hideViewAsync(String viewId) {
 		if (Display.getCurrent() == null) {
 			Display.getDefault().asyncExec(() -> {
@@ -110,7 +109,7 @@ public class OpenShiftUIUtils {
 			hideView(viewId);
 		}
 	}
-	
+
 	public static void hideView(String viewId) {
 		IWorkbenchPage page = getActivePage();
 		if (page != null) {
@@ -120,7 +119,7 @@ public class OpenShiftUIUtils {
 			}
 		}
 	}
-	
+
 	private static IWorkbenchPage getActivePage() {
 		IWorkbenchWindow aww = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (aww != null) {
@@ -143,7 +142,7 @@ public class OpenShiftUIUtils {
 	 */
 	public static <T extends IConnection> T getExplorerDefaultConnection(Class<T> klass) {
 		Collection<T> available = ConnectionsRegistrySingleton.getInstance().getAll(klass);
-		if(available.size() == 1) {
+		if (available.size() == 1) {
 			//There is only one connection, we do not need it to be selected to pick it.
 			return available.iterator().next();
 		}
@@ -157,7 +156,7 @@ public class OpenShiftUIUtils {
 	 */
 	public static IViewPart getOpenShiftExplorer() {
 		IWorkbenchPage activePage = getActivePage();
-		if(activePage != null) {
+		if (activePage != null) {
 			return activePage.findView(OpenShiftUIUtils.OPENSHIFT_EXPLORER_VIEW_ID);
 		}
 		return null;
@@ -188,7 +187,7 @@ public class OpenShiftUIUtils {
 	 */
 	public static IViewPart getDockerExplorer() {
 		IWorkbenchPage activePage = getActivePage();
-		if(activePage != null) {
+		if (activePage != null) {
 			return activePage.findView(OpenShiftUIUtils.DOCKER_EXPLORER_VIEW_ID);
 		}
 		return null;
@@ -220,13 +219,10 @@ public class OpenShiftUIUtils {
 	 */
 	public static <T extends IConnection> T getConnectionForExplorerSelection(Class<T> klass) {
 		ISelection selection = getOpenShiftExplorerSelection();
-		if (selection != null
-				&& !selection.isEmpty()) {
+		if (selection != null && !selection.isEmpty()) {
 			T result = UIUtils.getFirstElement(selection, klass);
 			IViewPart part = getOpenShiftExplorer();
-			if (result == null
-					&& selection instanceof IStructuredSelection
-					&& part instanceof CommonNavigator) {
+			if (result == null && selection instanceof IStructuredSelection && part instanceof CommonNavigator) {
 				Object selected = ((IStructuredSelection) selection).getFirstElement();
 				IContentProvider provider = ((CommonNavigator) part).getCommonViewer().getContentProvider();
 				if (provider instanceof ITreeContentProvider) {
@@ -249,8 +245,8 @@ public class OpenShiftUIUtils {
 	 */
 	public static PropertySheet getPropertySheet() {
 		IWorkbenchPage activePage = getActivePage();
-		if(activePage != null) {
-			return (PropertySheet)activePage.findView("org.eclipse.ui.views.PropertySheet"); //$NON-NLS-1$
+		if (activePage != null) {
+			return (PropertySheet) activePage.findView("org.eclipse.ui.views.PropertySheet"); //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -260,15 +256,18 @@ public class OpenShiftUIUtils {
 	 * @param sh
 	 */
 	public static void refreshPropertySheetPage(PropertySheet propertySheet) {
-		if(propertySheet == null) return;
+		if (propertySheet == null)
+			return;
 		IPage page = propertySheet.getCurrentPage();
-		if(page instanceof TabbedPropertySheetPage) {
-			TabbedPropertySheetPage p = (TabbedPropertySheetPage)page;
-			if(p == null || p.getControl() == null || p.getControl().isDisposed()) return;
+		if (page instanceof TabbedPropertySheetPage) {
+			TabbedPropertySheetPage p = (TabbedPropertySheetPage) page;
+			if (p == null || p.getControl() == null || p.getControl().isDisposed())
+				return;
 			p.refresh();
-		} else if(page instanceof PropertySheetPage) {
-			PropertySheetPage p = (PropertySheetPage)page;
-			if(p == null || p.getControl() == null || p.getControl().isDisposed()) return;
+		} else if (page instanceof PropertySheetPage) {
+			PropertySheetPage p = (PropertySheetPage) page;
+			if (p == null || p.getControl() == null || p.getControl().isDisposed())
+				return;
 			p.refresh();
 		}
 	}

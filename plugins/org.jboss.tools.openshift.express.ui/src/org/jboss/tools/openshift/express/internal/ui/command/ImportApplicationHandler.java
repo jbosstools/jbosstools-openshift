@@ -33,8 +33,7 @@ public class ImportApplicationHandler extends AbstractHandler {
 		if (application == null) {
 			return ExpressUIActivator.createCancelStatus("Could not find the application to import");
 		}
-		WizardUtils.openWizardDialog(
-				new ImportExpressApplicationWizard(application),
+		WizardUtils.openWizardDialog(new ImportExpressApplicationWizard(application),
 				HandlerUtil.getActiveShell(event));
 		return Status.OK_STATUS;
 	}

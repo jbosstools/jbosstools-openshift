@@ -12,14 +12,14 @@ import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
 public class OpenShiftClientActivator extends Plugin {
-	
+
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		//Eclipse finds multiple SLF4J bindings in its classpath and we can't control the Jetty logging behavior then.
 		//Particularly, WebSockets pollutes the Eclipse log really badly (JBIDE-21596)
 		//Until we find a proper way to fix the problem, we take the fugly approach.
-		ClassLoader orig=Thread.currentThread().getContextClassLoader();
+		ClassLoader orig = Thread.currentThread().getContextClassLoader();
 		try {
 			ClassLoader cl = getClass().getClassLoader();
 			//Change class loader to make jetty-logging.properties available and 

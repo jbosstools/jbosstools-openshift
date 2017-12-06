@@ -36,16 +36,16 @@ public class ValidationStatusControlDecoration {
 	public void showFor(Control control, int position) {
 		ControlDecoration decoration = createDecoration(control, position);
 		IValueChangeListener validationStatusListener = onValidationStatusChanged(decoration);
-		
+
 		validationStatus.addValueChangeListener(validationStatusListener);
 		control.addDisposeListener(onControlDisposed(validationStatusListener));
 
 	}
-	
+
 	private ControlDecoration createDecoration(Control control, int position) {
 		ControlDecoration controlDecoration = new ControlDecoration(control, position);
-		FieldDecoration fieldDecoration =
-				FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
+		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
 		controlDecoration.setImage(fieldDecoration.getImage());
 		if (validationStatus.getValue() instanceof IStatus) {
 			showDecoration(controlDecoration, (IStatus) validationStatus.getValue());
@@ -55,7 +55,7 @@ public class ValidationStatusControlDecoration {
 
 	private DisposeListener onControlDisposed(final IValueChangeListener validationStatusListener) {
 		return new DisposeListener() {
-			
+
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				validationStatus.removeValueChangeListener(validationStatusListener);

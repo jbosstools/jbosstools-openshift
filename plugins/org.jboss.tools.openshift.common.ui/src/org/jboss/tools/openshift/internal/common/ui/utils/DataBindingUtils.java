@@ -40,7 +40,7 @@ public class DataBindingUtils {
 			observable.dispose();
 		}
 	}
-	
+
 	/**
 	 * Adds the given status providers to the given data binding context.
 	 * 
@@ -50,8 +50,9 @@ public class DataBindingUtils {
 	 * @see ValidationStatusProvider
 	 * @see DataBindingContext
 	 */
-	public static void addValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
-		for (ValidationStatusProvider provider: new ArrayList<>(providers)) {
+	public static void addValidationStatusProviders(Collection<ValidationStatusProvider> providers,
+			DataBindingContext dbc) {
+		for (ValidationStatusProvider provider : new ArrayList<>(providers)) {
 			dbc.addValidationStatusProvider(provider);
 		}
 	}
@@ -65,12 +66,13 @@ public class DataBindingUtils {
 	 * @see ValidationStatusProvider
 	 * @see DataBindingContext
 	 */
-	public static void removeValidationStatusProviders(Collection<ValidationStatusProvider> providers, DataBindingContext dbc) {
-		for (ValidationStatusProvider provider: new ArrayList<>(providers)) {
+	public static void removeValidationStatusProviders(Collection<ValidationStatusProvider> providers,
+			DataBindingContext dbc) {
+		for (ValidationStatusProvider provider : new ArrayList<>(providers)) {
 			dbc.removeValidationStatusProvider(provider);
 		}
 	}
-	
+
 	/**
 	 * Triggers (model to target) validation of all bindings within the given databinding context. 
 	 * 
@@ -80,12 +82,12 @@ public class DataBindingUtils {
 	 * @see Binding#validateTargetToModel()
 	 */
 	public static void validateTargetsToModels(DataBindingContext dbc) {
-		for (Iterator<?> iterator = dbc.getBindings().iterator(); iterator.hasNext(); ) {
+		for (Iterator<?> iterator = dbc.getBindings().iterator(); iterator.hasNext();) {
 			Binding binding = (Binding) iterator.next();
 			binding.validateTargetToModel();
 		}
 	}
-	
+
 	public static void dispose(List<ValidationStatusProvider> providers) {
 		for (ValidationStatusProvider provider : providers) {
 			dispose(provider);
@@ -93,18 +95,17 @@ public class DataBindingUtils {
 	}
 
 	public static boolean isDisposed(ValidationStatusProvider provider) {
-		return provider == null
-				|| provider.isDisposed();
+		return provider == null || provider.isDisposed();
 	}
 
 	public static void dispose(ValidationStatusProvider provider) {
 		if (isDisposed(provider)) {
 			return;
 		}
-		
+
 		provider.dispose();
 	}
-	
+
 	public static void dispose(DataBindingContext dbc) {
 		if (dbc != null) {
 			dbc.dispose();
@@ -119,8 +120,7 @@ public class DataBindingUtils {
 		for (Object element : dbc.getValidationStatusProviders()) {
 			ValidationStatusProvider validationProvider = (ValidationStatusProvider) element;
 			IStatus validationStatus = (IStatus) validationProvider.getValidationStatus().getValue();
-			if (!isDisposed(validationProvider)
-					&& !validationStatus.isOK()) {
+			if (!isDisposed(validationProvider) && !validationStatus.isOK()) {
 				return false;
 			}
 		}
@@ -138,12 +138,12 @@ public class DataBindingUtils {
 	 * @param control
 	 *            the control that triggers removal once it's disposed
 	 */
-	public static void addDisposableListChangeListener(
-			final IListChangeListener listener, final IObservableList observable, Control control) {
+	public static void addDisposableListChangeListener(final IListChangeListener listener,
+			final IObservableList observable, Control control) {
 		Assert.isNotNull(listener);
 		Assert.isNotNull(observable);
 		Assert.isNotNull(control);
-		
+
 		if (control.isDisposed()) {
 			return;
 		}
@@ -157,7 +157,7 @@ public class DataBindingUtils {
 			}
 		});
 	}
-	
+
 	/**
 	 * Returns an observable value that holds the dirty status of the given editor.
 	 * 
@@ -169,7 +169,7 @@ public class DataBindingUtils {
 	 */
 	public static IObservableValue<Boolean> createDirtyStatusObservable(final IEditorPart editor) {
 		Assert.isNotNull(editor);
-		
+
 		IObservableValue<Boolean> dirtyStatus = new WritableValue<>(false, Boolean.class);
 		editor.addPropertyListener((source, propertyId) -> {
 			if (IEditorPart.PROP_DIRTY == propertyId) {

@@ -41,7 +41,7 @@ public class ServiceViewerFilter extends ViewerFilter {
 		if (!(((ObservableTreeItem) element).getModel() instanceof IResource)) {
 			return false;
 		}
-		
+
 		IResource resource = (IResource) ((ObservableTreeItem) element).getModel();
 		if (resource instanceof IService) {
 			return isMatching(filterText.getText(), (IService) resource);
@@ -52,8 +52,7 @@ public class ServiceViewerFilter extends ViewerFilter {
 
 	private boolean isMatching(String filter, IService service) {
 		for (String label : service.getSelector().values()) {
-			if (!StringUtils.isEmpty(label) 
-					&& label.contains(filter)) {
+			if (!StringUtils.isEmpty(label) && label.contains(filter)) {
 				return true;
 			}
 		}

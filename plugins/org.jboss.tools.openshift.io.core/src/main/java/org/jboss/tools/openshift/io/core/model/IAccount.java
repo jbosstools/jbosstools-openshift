@@ -19,57 +19,57 @@ public interface IAccount {
 	 * 
 	 * @return the account id
 	 */
-  String getId();
-  
-  ICluster getCluster();
-  
-  /**
-   * The access token used to access OSIO services.
-   * 
-   * @return the access token
-   */
-  String getAccessToken();
-  
-  void setAccessToken(String accessToken);
-  
-  /**
-   * The refresh token used to renew tokens.
-   * 
-   * @return the refresh token
-   */
-  String getRefreshToken();
+	String getId();
 
-  void setRefreshToken(String refreshToken);
-  
-  /**
-   * The expiry time for the access token.
-   * 
-   * @return the access token expiry time
-   */
-  long getAccessTokenExpiryTime();
-  
-  void setAccessTokenExpiryTime(long accessTokenExpiryTime);
-  
-  /**
-   * The expiry time for the refresh token.
-   * 
-   * @return the access token refresh time
-   */
-  long getRefreshTokenExpiryTime();
-  
-  void setRefreshTokenExpiryTime(long refreshTokenExpiryTime);
-  
-  /**
-   * The time the tokens have been refreshed.
-   * 
-   * @return the refresh time
-   */
-  long getLastRefreshedTime();
-  
-  void setLastRefreshedTime(long lastRefreshTime);
-  
-  /**
-   * Save the account in secure storage
-   */
-  void save();
+	ICluster getCluster();
+
+	/**
+	 * The access token used to access OSIO services.
+	 * 
+	 * @return the access token
+	 */
+	String getAccessToken();
+
+	void setAccessToken(String accessToken);
+
+	/**
+	 * The refresh token used to renew tokens.
+	 * 
+	 * @return the refresh token
+	 */
+	String getRefreshToken();
+
+	void setRefreshToken(String refreshToken);
+
+	/**
+	 * The expiry time for the access token.
+	 * 
+	 * @return the access token expiry time
+	 */
+	long getAccessTokenExpiryTime();
+
+	void setAccessTokenExpiryTime(long accessTokenExpiryTime);
+
+	/**
+	 * The expiry time for the refresh token.
+	 * 
+	 * @return the access token refresh time
+	 */
+	long getRefreshTokenExpiryTime();
+
+	void setRefreshTokenExpiryTime(long refreshTokenExpiryTime);
+
+	/**
+	 * The time the tokens have been refreshed.
+	 * 
+	 * @return the refresh time
+	 */
+	long getLastRefreshedTime();
+
+	void setLastRefreshedTime(long lastRefreshTime);
+
+	/**
+	 * Save the account in secure storage
+	 */
+	void save();
 }

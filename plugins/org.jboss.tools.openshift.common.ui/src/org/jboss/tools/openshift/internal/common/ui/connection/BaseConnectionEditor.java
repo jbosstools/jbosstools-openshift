@@ -33,7 +33,7 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 	protected IConnectionAuthenticationProvider connectionAuthenticationProvider;
 	protected boolean visible;
 	private IValueChangeListener connectionChangedListener;
-	
+
 	public BaseConnectionEditor() {
 	}
 
@@ -41,16 +41,19 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 	public Composite createControls(Composite parent, Object context, DataBindingContext dbc) {
 		this.wizardPage = (ConnectionWizardPage) context;
 		this.pageModel = wizardPage.getModel();
-		this.selectedConnection = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION).observe(pageModel);
+		this.selectedConnection = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION)
+				.observe(pageModel);
 		this.changeListener = createDetailViewChangedListener(pageModel);
 		this.connectionAuthenticationProvider = createConnectionAuthenticationProvider(pageModel);
 
 		return createControls(parent, pageModel, dbc);
 	}
 
-	protected abstract IConnectionAuthenticationProvider createConnectionAuthenticationProvider(ConnectionWizardPageModel pageModel);
+	protected abstract IConnectionAuthenticationProvider createConnectionAuthenticationProvider(
+			ConnectionWizardPageModel pageModel);
 
-	protected abstract Composite createControls(Composite parent, ConnectionWizardPageModel pageModel, DataBindingContext dbc);
+	protected abstract Composite createControls(Composite parent, ConnectionWizardPageModel pageModel,
+			DataBindingContext dbc);
 
 	@Override
 	public void onVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
@@ -60,8 +63,9 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 		onVisible(detailViewModel, pageModel, dbc);
 	}
 
-	protected abstract void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc);
-	
+	protected abstract void onVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel,
+			DataBindingContext dbc);
+
 	@Override
 	public void onInVisible(IObservableValue detailViewModel, DataBindingContext dbc) {
 		this.visible = false;
@@ -71,13 +75,15 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 		onInVisible(detailViewModel, pageModel, dbc);
 	}
 
-	protected abstract void onInVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel, DataBindingContext dbc);
+	protected abstract void onInVisible(IObservableValue detailViewModel, ConnectionWizardPageModel pageModel,
+			DataBindingContext dbc);
 
 	protected abstract void onSelectedConnectionChanged(IObservableValue selectedConnection);
 
-	private IValueChangeListener addSelectedConnectionChangedListener(final IObservableValue selectedConnection, final DataBindingContext dbc) {
+	private IValueChangeListener addSelectedConnectionChangedListener(final IObservableValue selectedConnection,
+			final DataBindingContext dbc) {
 		IValueChangeListener listener = new IValueChangeListener() {
-			
+
 			@Override
 			public void handleValueChange(ValueChangeEvent event) {
 				onSelectedConnectionChanged(selectedConnection);
@@ -87,17 +93,16 @@ public abstract class BaseConnectionEditor extends BaseDetailsView implements IC
 		selectedConnection.addValueChangeListener(listener);
 		return listener;
 	}
-	
-	private void removeConnectionChangedListener(final IValueChangeListener connectionChangedListener, final IObservableValue selectedConnection) {
-		if (selectedConnection == null 
-				|| selectedConnection.isDisposed()
-				|| connectionChangedListener == null) {
+
+	private void removeConnectionChangedListener(final IValueChangeListener connectionChangedListener,
+			final IObservableValue selectedConnection) {
+		if (selectedConnection == null || selectedConnection.isDisposed() || connectionChangedListener == null) {
 			return;
 		}
-		
+
 		selectedConnection.removeValueChangeListener(connectionChangedListener);
 	}
-	
+
 	protected IValueChangeListener createDetailViewChangedListener(final ConnectionWizardPageModel pageModel) {
 		return new IValueChangeListener() {
 

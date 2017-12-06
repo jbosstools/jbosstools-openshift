@@ -48,28 +48,27 @@ public class CreateResourceJob extends AbstractDelegatingMonitorJob {
 
 			@Override
 			public IStatus visit(IClientCapability capability) {
-				
+
 				try {
-				    IClient client = capability.getClient();
-				    IResource resourceIn = client.getResourceFactory().create(input);
-				    if (resourceIn instanceof IList) {
-				        resource = client.create((IList)resourceIn, project.getNamespace());
-				    } else {
-	                    resource = Collections.singletonList(client.create(resourceIn, project.getNamespace()));
-				    }
-				    return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, "Resource created");
-				} catch(OpenShiftException e) {
+					IClient client = capability.getClient();
+					IResource resourceIn = client.getResourceFactory().create(input);
+					if (resourceIn instanceof IList) {
+						resource = client.create((IList) resourceIn, project.getNamespace());
+					} else {
+						resource = Collections.singletonList(client.create(resourceIn, project.getNamespace()));
+					}
+					return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, "Resource created");
+				} catch (OpenShiftException e) {
 					String message = e.getMessage();
-					if(e.getStatus() != null) {
+					if (e.getStatus() != null) {
 						message = e.getStatus().getMessage();
 					}
 					return new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, -1, message, e);
 				}
 			}
 
-
-		},
-		new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Client processing is unsupported for this client and server combination.", null));
+		}, new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
+				"Client processing is unsupported for this client and server combination.", null));
 		return status;
 	}
 
@@ -78,7 +77,7 @@ public class CreateResourceJob extends AbstractDelegatingMonitorJob {
 	 * 
 	 * @return the created resource(s)
 	 */
-    public Collection<IResource> getResource() {
-        return resource;
-    }
+	public Collection<IResource> getResource() {
+		return resource;
+	}
 }

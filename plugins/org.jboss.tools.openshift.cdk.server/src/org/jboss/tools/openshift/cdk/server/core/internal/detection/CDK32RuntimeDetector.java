@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.detection;
 
 import java.io.File;
@@ -19,12 +19,11 @@ public class CDK32RuntimeDetector extends CDK3RuntimeDetector {
 	protected boolean matchesExpectedVersion(String version) {
 		return CDK32Server.matchesCDK32(version);
 	}
-	
+
 	@Override
 	protected String getServerType() {
 		return CDKServer.CDK_V32_SERVER_TYPE;
 	}
-	
 
 	@Override
 	protected String getDefinitionName(File root) {

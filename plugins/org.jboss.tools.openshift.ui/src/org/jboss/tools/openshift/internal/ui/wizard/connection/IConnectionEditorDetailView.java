@@ -17,9 +17,9 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedD
 /**
  * @author jeff.cantrill
  */
- interface IConnectionEditorDetailView extends IDetailView {
-	 
-	 void setSelectedConnection(IConnection selectedConnection);
-	 
-	 IConnectionAuthenticationProvider  getConnectionAuthenticationProvider();
+interface IConnectionEditorDetailView extends IDetailView {
+
+	void setSelectedConnection(IConnection selectedConnection);
+
+	IConnectionAuthenticationProvider getConnectionAuthenticationProvider();
 }

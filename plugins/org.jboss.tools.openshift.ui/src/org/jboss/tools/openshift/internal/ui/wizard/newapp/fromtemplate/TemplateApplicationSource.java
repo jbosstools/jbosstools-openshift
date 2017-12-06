@@ -31,7 +31,9 @@ public class TemplateApplicationSource implements IApplicationSource {
 	private final ITemplate template;
 
 	public TemplateApplicationSource(ITemplate template) {
-		if(template == null) throw new OpenShiftException("ITemplate instance was null while trying to Instantiate a %s", TemplateApplicationSource.class);
+		if (template == null)
+			throw new OpenShiftException("ITemplate instance was null while trying to Instantiate a %s",
+					TemplateApplicationSource.class);
 		this.template = template;
 	}
 
@@ -50,7 +52,7 @@ public class TemplateApplicationSource implements IApplicationSource {
 	public ITemplate getSource() {
 		return this.template;
 	}
-	
+
 	@Override
 	public String getKind() {
 		return template.getKind();
@@ -80,7 +82,5 @@ public class TemplateApplicationSource implements IApplicationSource {
 	public Map<String, String> getAnnotations() {
 		return this.template.getAnnotations();
 	}
-	
-	
 
 }

@@ -36,18 +36,17 @@ public abstract class DialogAdvancedPart {
 		// advanced button
 		this.advancedButton = new Button(parent, SWT.NONE);
 		advancedButton.setText(getAdvancedButtonLabel(false));
-		GridDataFactory.fillDefaults()
-				.align(SWT.BEGINNING, SWT.CENTER).span(numColumns, 1).applyTo(advancedButton);
+		GridDataFactory.fillDefaults().align(SWT.BEGINNING, SWT.CENTER).span(numColumns, 1).applyTo(advancedButton);
 
 		// advanced composite
 		Composite advancedComposite = new Composite(parent, SWT.NONE);
-		GridDataFactory.fillDefaults()
-				.align(SWT.FILL, SWT.FILL).grab(true, false).span(numColumns, 1).applyTo(advancedComposite);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).span(numColumns, 1)
+				.applyTo(advancedComposite);
 		adjustAdvancedCompositeLayout(GridLayoutFactory.fillDefaults()).applyTo(advancedComposite);
-		
+
 		this.advancedSectionVisibilityAdapter = new DialogChildVisibilityAdapter(advancedComposite, false);
 		advancedButton.addSelectionListener(onAdvancedClicked());
-		
+
 		createAdvancedContent(advancedComposite);
 	}
 

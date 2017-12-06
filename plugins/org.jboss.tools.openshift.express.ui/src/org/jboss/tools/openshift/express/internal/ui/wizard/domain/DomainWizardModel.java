@@ -41,7 +41,7 @@ import com.openshift.client.OpenShiftException;
 public class DomainWizardModel extends ObservableUIPojo {
 
 	public static final String PROPERTY_DOMAIN_ID = "domainId";
-	
+
 	private static final String OPENSHIFT_ENTERPRISE_WEBUI_DOMAINPAGE = "{0}/console/domain/{1}";
 	private static final String OPENSHIFT_ORIGIN_WEBUI_DOMAINPAGE = "{0}/app/console/domain/{1}";
 
@@ -71,8 +71,7 @@ public class DomainWizardModel extends ObservableUIPojo {
 	}
 
 	public void setDomainId(String domainId) {
-		firePropertyChange(PROPERTY_DOMAIN_ID,
-				this.domainId, this.domainId = domainId);
+		firePropertyChange(PROPERTY_DOMAIN_ID, this.domainId, this.domainId = domainId);
 	}
 
 	public void renameDomain() throws OpenShiftException, SocketTimeoutException {
@@ -86,7 +85,8 @@ public class DomainWizardModel extends ObservableUIPojo {
 
 	private void fireConnectionChanged(IDomain domain, ExpressConnection connection) {
 		if (connection == null) {
-			connection = ExpressConnectionUtils.getByResource(domain.getUser(), ConnectionsRegistrySingleton.getInstance());
+			connection = ExpressConnectionUtils.getByResource(domain.getUser(),
+					ConnectionsRegistrySingleton.getInstance());
 		}
 		ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
 	}
@@ -106,14 +106,13 @@ public class DomainWizardModel extends ObservableUIPojo {
 	public IDomain getDomain() {
 		return domain;
 	}
-	
+
 	public ExpressConnection getConnection() {
 		return connection;
 	}
 
 	public String getWebUIDomainPageUrl() {
-		if (getDomain() == null
-				|| getDomain().getUser() == null) {
+		if (getDomain() == null || getDomain().getUser() == null) {
 			return null;
 		}
 
@@ -125,9 +124,9 @@ public class DomainWizardModel extends ObservableUIPojo {
 		if (isUrlAvailable(domainWebUIUrl)) {
 			return domainWebUIUrl;
 		}
-		return null;	
+		return null;
 	}
-	
+
 	public String getOriginWebUIDomainPageUrl() {
 		if (getDomain() == null) {
 			return null;
@@ -135,7 +134,7 @@ public class DomainWizardModel extends ObservableUIPojo {
 		String host = getDomain().getUser().getServer();
 		return MessageFormat.format(OPENSHIFT_ORIGIN_WEBUI_DOMAINPAGE, host, domainId);
 	}
-	
+
 	public String getEnterpsiseWebUIDomainPageUrl() {
 		if (getDomain() == null) {
 			return null;
@@ -143,7 +142,7 @@ public class DomainWizardModel extends ObservableUIPojo {
 		String host = getDomain().getUser().getServer();
 		return MessageFormat.format(OPENSHIFT_ENTERPRISE_WEBUI_DOMAINPAGE, host, domainId);
 	}
-	
+
 	private boolean isUrlAvailable(String domainWebUIUrl) {
 		try {
 			URL url = new URL(domainWebUIUrl);
@@ -172,5 +171,5 @@ public class DomainWizardModel extends ObservableUIPojo {
 			return false;
 		}
 	}
-	
+
 }

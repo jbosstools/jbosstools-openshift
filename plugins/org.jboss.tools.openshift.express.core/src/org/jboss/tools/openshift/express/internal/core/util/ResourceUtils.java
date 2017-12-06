@@ -32,13 +32,11 @@ import org.jboss.tools.openshift.common.core.utils.FileUtils;
 public class ResourceUtils {
 
 	public static boolean exists(IResource resource) {
-		return resource != null
-				&& resource.isAccessible();
+		return resource != null && resource.isAccessible();
 	}
 
 	public static boolean isDirectory(IResource resource) {
-		return resource != null
-				&& resource.getType() == IResource.FOLDER;
+		return resource != null && resource.getType() == IResource.FOLDER;
 	}
 
 	/**
@@ -57,8 +55,7 @@ public class ResourceUtils {
 	 */
 	public static void copy(IResource source, IResource destination, boolean overwrite, IProgressMonitor monitor)
 			throws CoreException {
-		if (!exists(source)
-				|| destination == null) {
+		if (!exists(source) || destination == null) {
 			return;
 		}
 
@@ -109,8 +106,7 @@ public class ResourceUtils {
 
 		destination = getDestination(source, destination);
 
-		if (exists(destination)
-				&& !overwrite) {
+		if (exists(destination) && !overwrite) {
 			return;
 		}
 

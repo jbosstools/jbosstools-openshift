@@ -80,16 +80,19 @@ import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUICons
  * @see NewApplicationWorkbenchWizard
  * @see ImportExpressApplicationWizard
  */
-public abstract class ExpressApplicationWizard extends Wizard implements IWorkbenchWizard, IConnectionAwareWizard<ExpressConnection> {
+public abstract class ExpressApplicationWizard extends Wizard
+		implements IWorkbenchWizard, IConnectionAwareWizard<ExpressConnection> {
 
 	private final OpenShiftApplicationWizardModel model;
 
-	ExpressApplicationWizard(ExpressConnection connection, IDomain domain, IApplication application, IProject project, 
+	ExpressApplicationWizard(ExpressConnection connection, IDomain domain, IApplication application, IProject project,
 			boolean useExistingApplication, String wizardTitle) {
 		setWindowTitle(wizardTitle);
 		setNeedsProgressMonitor(true);
-		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
-		this.model = new OpenShiftApplicationWizardModel(connection, domain, application, project, useExistingApplication);
+		setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(),
+				IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
+		this.model = new OpenShiftApplicationWizardModel(connection, domain, application, project,
+				useExistingApplication);
 		String repoPath = getDialogSettings().get(REPO_PATH_KEY);
 		if (isNotBlank(repoPath)) {
 			model.setUseDefaultRepoPath(false);
@@ -98,12 +101,12 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 			model.setUseDefaultRepoPath(true);
 		}
 	}
-	
+
 	@Override
 	public Object getContext() {
 		return null;
 	}
-	
+
 	protected void openError(final String title, final String message) {
 		getShell().getDisplay().syncExec(new Runnable() {
 
@@ -137,34 +140,34 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 
 	@Override
 	public boolean performFinish() {
-			boolean success = createImportApplication();
-			if (!model.isUseExistingApplication()) {
-				UsageStats.getInstance().newV2Application(model.getConnection().getHost(), success);
+		boolean success = createImportApplication();
+		if (!model.isUseExistingApplication()) {
+			UsageStats.getInstance().newV2Application(model.getConnection().getHost(), success);
+		} else {
+			UsageStats.getInstance().importV2Application(model.getConnection().getHost(), success);
+		}
+		if (success) {
+			if (!model.isUseDefaultRepoPath()) {
+				getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
 			} else {
-				UsageStats.getInstance().importV2Application(model.getConnection().getHost(), success);
+				getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
 			}
-			if (success) {
-				if(!model.isUseDefaultRepoPath()) {
-					getDialogSettings().put(REPO_PATH_KEY, model.getRepositoryPath());
-				} else {
-					getDialogSettings().put(REPO_PATH_KEY, ""); //clear the value
-				}
-			}
-			return success;
+		}
+		return success;
 	}
 
 	private boolean createImportApplication() {
 		if (!model.isUseExistingApplication()) {
 			IStatus status = createApplication();
 			if (!handleOpenShiftError(
-					NLS.bind("create application {0}", StringUtils.null2emptyString(model.getApplicationName())), status)) {
+					NLS.bind("create application {0}", StringUtils.null2emptyString(model.getApplicationName())),
+					status)) {
 				return false;
 			}
 
 			status = waitForApplication(model.getApplication());
-			if (!handleOpenShiftError(
-					NLS.bind("wait for application {0} to become reachable", StringUtils.null2emptyString(model.getApplicationName())),
-					status)) {
+			if (!handleOpenShiftError(NLS.bind("wait for application {0} to become reachable",
+					StringUtils.null2emptyString(model.getApplicationName())), status)) {
 				return false;
 			}
 
@@ -194,12 +197,11 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 			// ErrorDialog.openError(getShell(), "Error", "Could not " + operation, status);
 			if (model.getConnection() != null) {
 				new JobChainBuilder(new RefreshConnectionJob(model.getConnection()))
-					.runWhenDone(new FireExpressConnectionsChangedJob(model.getConnection()))
-					.schedule();
+						.runWhenDone(new FireExpressConnectionsChangedJob(model.getConnection())).schedule();
 			}
 			abort = true;
 		}
-		
+
 		return !abort;
 	}
 
@@ -213,8 +215,7 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 	private IStatus waitForApplication(IApplication application) {
 		try {
 			AbstractDelegatingMonitorJob job = new WaitForApplicationJob(application, getShell());
-			IStatus status = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer());
+			IStatus status = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
 			return status;
 		} catch (Exception e) {
 			return ExpressUIActivator.createErrorStatus(
@@ -225,8 +226,8 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 	private boolean importProject() {
 		try {
 			final DelegatingProgressMonitor delegatingMonitor = new DelegatingProgressMonitor();
-			IStatus jobResult = WizardUtils.runInWizard(
-					new ImportJob(delegatingMonitor), delegatingMonitor, getContainer());
+			IStatus jobResult = WizardUtils.runInWizard(new ImportJob(delegatingMonitor), delegatingMonitor,
+					getContainer());
 			return JobUtils.isOk(jobResult);
 		} catch (Exception e) {
 			ErrorDialog.openError(getShell(), "Error", "Could not create local git repository.", ExpressUIActivator
@@ -240,11 +241,11 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 		if (!(template instanceof ICodeAnythingApplicationTemplate)) {
 			return;
 		}
-		
+
 		String url = ((ICodeAnythingApplicationTemplate) template).getUrl();
 		ExpressCorePreferences.INSTANCE.addDownloadableStandaloneCartUrl(url);
 	}
-	
+
 	private boolean createServerAdapter() {
 		try {
 			if (!model.isCreateServerAdapter()) {
@@ -253,8 +254,8 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 			IServer server = model.createServerAdapter(new DelegatingProgressMonitor());
 			return server != null;
 		} catch (Exception e) {
-			ErrorDialog.openError(getShell(), "Error", NLS.bind("Could not create server adapter for new project {0}.",
-					model.getProjectName()),
+			ErrorDialog.openError(getShell(), "Error",
+					NLS.bind("Could not create server adapter for new project {0}.", model.getProjectName()),
 					ExpressUIActivator.createErrorStatus(e.getMessage(), e));
 			return false;
 		}
@@ -262,16 +263,10 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 
 	private IStatus createApplication() {
 		try {
-			CreateApplicationJob job = new CreateApplicationJob(
-					model.getApplicationName()
-					, model.getApplicationScale()
-					, model.getApplicationGearProfile()
-					, model.getInitialGitUrl()
-					, model.getEnvironmentVariables()
-					, model.getCartridges()
-					, model.getDomain());
-			IStatus status = WizardUtils.runInWizard(
-					job, job.getDelegatingProgressMonitor(), getContainer());
+			CreateApplicationJob job = new CreateApplicationJob(model.getApplicationName(), model.getApplicationScale(),
+					model.getApplicationGearProfile(), model.getInitialGitUrl(), model.getEnvironmentVariables(),
+					model.getCartridges(), model.getDomain());
+			IStatus status = WizardUtils.runInWizard(job, job.getDelegatingProgressMonitor(), getContainer());
 			IApplication application = job.getApplication();
 			model.setApplication(application);
 			if (status.isOK()) {
@@ -280,8 +275,8 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 			}
 			return status;
 		} catch (Exception e) {
-			return ExpressUIActivator.createErrorStatus(
-					NLS.bind("Could not create application {0}", model.getApplicationName()), e);
+			return ExpressUIActivator
+					.createErrorStatus(NLS.bind("Could not create application {0}", model.getApplicationName()), e);
 		}
 	}
 
@@ -298,11 +293,10 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 			}
 		});
 	}
-	
+
 	private void openLogDialog(final List<IEmbeddedCartridge> embeddableCartridges, final boolean isTimeouted) {
 		final LogEntry[] logEntries = LogEntryFactory.create(embeddableCartridges, isTimeouted);
-		if (logEntries == null
-				|| logEntries.length == 0) {
+		if (logEntries == null || logEntries.length == 0) {
 			return;
 		}
 
@@ -318,7 +312,7 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 	OpenShiftApplicationWizardModel getModel() {
 		return model;
 	}
-	
+
 	@Override
 	public void dispose() {
 		model.dispose();
@@ -327,7 +321,7 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 	public boolean isCreateServerAdapter() {
 		return model.isCreateServerAdapter();
 	}
-	
+
 	/**
 	 * A workspace job that will create a new project or enable the selected
 	 * project to be used with OpenShift.
@@ -349,28 +343,24 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 				if (model.isNewProject()) {
 					model.importProject(delegatingMonitor);
 				} else if (!model.isGitSharedProject()) {
-					if (!askForConfirmation(
-							NLS.bind(
-									"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration " +
-									"from server to local project and connecting local project to OpenShift Git repository.\n" +
-									"The local project will be committed to local Git repository upon confirmation and further publishing will " +
-									"eventually override existing remote content.\n\n" +
-									"This cannot be undone. Do you wish to continue?",
-									model.getApplicationName(), model.getProjectName()),
-							model.getApplicationName())) {
+					if (!askForConfirmation(NLS.bind(
+							"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration "
+									+ "from server to local project and connecting local project to OpenShift Git repository.\n"
+									+ "The local project will be committed to local Git repository upon confirmation and further publishing will "
+									+ "eventually override existing remote content.\n\n"
+									+ "This cannot be undone. Do you wish to continue?",
+							model.getApplicationName(), model.getProjectName()), model.getApplicationName())) {
 						return Status.CANCEL_STATUS;
 					}
 					model.mergeIntoUnsharedProject(delegatingMonitor);
 				} else {
-					if (!askForConfirmation(
-							NLS.bind(
-									"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration " +
-									"from server to local project and connecting local project to OpenShift Git repository.\n" +
-									"The local project will be committed to local Git repository upon confirmation and further publishing will " +
-									"eventually override existing remote content.\n\n" +
-									"This cannot be undone. Do you wish to continue?",
-									model.getApplicationName(), model.getProjectName()),
-							model.getApplicationName())) {
+					if (!askForConfirmation(NLS.bind(
+							"OpenShift application {0} will be enabled on project {1} by copying OpenShift configuration "
+									+ "from server to local project and connecting local project to OpenShift Git repository.\n"
+									+ "The local project will be committed to local Git repository upon confirmation and further publishing will "
+									+ "eventually override existing remote content.\n\n"
+									+ "This cannot be undone. Do you wish to continue?",
+							model.getApplicationName(), model.getProjectName()), model.getApplicationName())) {
 						return Status.CANCEL_STATUS;
 					}
 					model.mergeIntoGitSharedProject(delegatingMonitor);
@@ -380,12 +370,11 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 				openError("Project already present", e.getMessage());
 				return Status.CANCEL_STATUS;
 			} catch (final ImportFailedException e) {
-				return ExpressUIActivator.createErrorStatus(
-						"Could not import project from application {0}.", e, model.getApplicationName());
+				return ExpressUIActivator.createErrorStatus("Could not import project from application {0}.", e,
+						model.getApplicationName());
 			} catch (IOException e) {
 				return ExpressUIActivator.createErrorStatus(
-						"Could not copy openshift configuration files to project {0}", e, model
-								.getProjectName());
+						"Could not copy openshift configuration files to project {0}", e, model.getProjectName());
 			} catch (OpenShiftException e) {
 				return ExpressUIActivator.createErrorStatus("Could not import project to the workspace.", e);
 			} catch (URISyntaxException e) {
@@ -393,12 +382,14 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 			} catch (InvocationTargetException e) {
 				TransportException te = getTransportException(e);
 				if (te != null) {
-					return ExpressUIActivator.createErrorStatus(
-							"Could not clone the repository. Authentication failed.\n"
-									+ " Please make sure that you added your private key to the ssh preferences.", te);
+					return ExpressUIActivator
+							.createErrorStatus(
+									"Could not clone the repository. Authentication failed.\n"
+											+ " Please make sure that you added your private key to the ssh preferences.",
+									te);
 				} else {
-					return ExpressUIActivator.createErrorStatus(
-							"An exception occurred while creating local git repository.", e);
+					return ExpressUIActivator
+							.createErrorStatus("An exception occurred while creating local git repository.", e);
 				}
 			} catch (Exception e) {
 				return ExpressUIActivator.createErrorStatus("Could not import project to the workspace.", e);
@@ -438,7 +429,7 @@ public abstract class ExpressApplicationWizard extends Wizard implements IWorkbe
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		updateModel(selection, getModel());
-		if(getModel().getConnection() != null) {
+		if (getModel().getConnection() != null) {
 			ConnectionsRegistrySingleton.getInstance().setRecent(getModel().getConnection());
 		}
 	}

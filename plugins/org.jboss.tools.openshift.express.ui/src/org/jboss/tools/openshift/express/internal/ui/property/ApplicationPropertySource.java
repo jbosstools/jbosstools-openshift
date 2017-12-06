@@ -40,16 +40,12 @@ public class ApplicationPropertySource implements IPropertySource {
 
 	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		return new IPropertyDescriptor[] {
-				new PropertyDescriptor("3.URL", "Public URL"),
-				new PropertyDescriptor("1.Name", "Name"),
-				new PropertyDescriptor("6.UUID", "UUID"),
-				new PropertyDescriptor("5.Git URL", "Git URL"),
-				new PropertyDescriptor("2.Type", "Type"),
+		return new IPropertyDescriptor[] { new PropertyDescriptor("3.URL", "Public URL"),
+				new PropertyDescriptor("1.Name", "Name"), new PropertyDescriptor("6.UUID", "UUID"),
+				new PropertyDescriptor("5.Git URL", "Git URL"), new PropertyDescriptor("2.Type", "Type"),
 				new PropertyDescriptor("4.Created on", "Created on"),
 				new PropertyDescriptor("7.Port Forwarding", "Port Forwarding"),
-				new PropertyDescriptor("8.Scalable", "Scalable")
-		};
+				new PropertyDescriptor("8.Scalable", "Scalable") };
 	}
 
 	@Override

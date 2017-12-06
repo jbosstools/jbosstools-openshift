@@ -34,21 +34,20 @@ public class NewDomainWizard extends AbstractOpenShiftWizard<NewDomainWizardMode
 
 	@Override
 	public boolean performFinish() {
-		AbstractDelegatingMonitorJob newDomainJob = 
-				new AbstractDelegatingMonitorJob(NLS.bind("Creating domain {0}...", getModel().getDomainId())) {
+		AbstractDelegatingMonitorJob newDomainJob = new AbstractDelegatingMonitorJob(
+				NLS.bind("Creating domain {0}...", getModel().getDomainId())) {
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
 				try {
 					getModel().createDomain();
 					return Status.OK_STATUS;
 				} catch (OpenShiftEndpointException e) {
-					return ExpressUIActivator.createErrorStatus(
-							NLS.bind("Could not create domain \"{0}\": {1}",
-									getModel().getDomainId(), e.getRestResponseMessages()), e);
+					return ExpressUIActivator.createErrorStatus(NLS.bind("Could not create domain \"{0}\": {1}",
+							getModel().getDomainId(), e.getRestResponseMessages()), e);
 				}
 			}
 		};
-		
+
 		try {
 			WizardUtils.runInWizard(newDomainJob, getContainer());
 		} catch (Exception e) {

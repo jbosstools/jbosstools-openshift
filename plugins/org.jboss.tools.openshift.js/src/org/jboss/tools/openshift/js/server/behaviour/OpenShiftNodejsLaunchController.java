@@ -22,7 +22,7 @@ import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
 import org.jboss.tools.openshift.js.launcher.NodeDebugLauncher;
 
 public class OpenShiftNodejsLaunchController extends OpenShiftLaunchController implements ISubsystemController {
-	
+
 	public OpenShiftNodejsLaunchController() {
 		super();
 	}
@@ -30,17 +30,15 @@ public class OpenShiftNodejsLaunchController extends OpenShiftLaunchController i
 	@Override
 	protected void startDebugging(OpenShiftServerBehaviour beh, DebugContext context, IProgressMonitor monitor) {
 		IDebugListener listener = new IDebugListener() {
-			
+
 			@Override
-			public void onDebugChange(DebugContext debuggingContext, IProgressMonitor monitor)
-					throws CoreException {
+			public void onDebugChange(DebugContext debuggingContext, IProgressMonitor monitor) throws CoreException {
 				int localPort = mapPortForwarding(debuggingContext, monitor);
 				NodeDebugLauncher.launch(beh.getServer(), localPort);
 			}
 
 			@Override
-			public void onPodRestart(DebugContext debuggingContext, IProgressMonitor monitor)
-					throws CoreException {
+			public void onPodRestart(DebugContext debuggingContext, IProgressMonitor monitor) throws CoreException {
 				onDebugChange(debuggingContext, monitor);
 			}
 		};

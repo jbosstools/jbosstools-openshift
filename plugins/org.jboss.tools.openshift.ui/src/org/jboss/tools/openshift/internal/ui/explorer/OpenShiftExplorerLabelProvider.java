@@ -48,7 +48,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Andre Dietisheim
  * @author Jeff Maury
  */
-public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider implements IDescriptionProvider { 
+public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider implements IDescriptionProvider {
 	//Limit for label length = baseText.length + qualifiedText.length
 	private static final int DEFAULT_LABEL_LIMIT = 60;
 
@@ -63,19 +63,19 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 	 * @param limit
 	 */
 	public void setLabelLimit(int limit) {
-		if(limit <= 0) {
+		if (limit <= 0) {
 			throw new IllegalArgumentException("Label limit cannot be less than 1: " + limit);
 		}
 		labelLimit = limit;
 	}
-	
+
 	@Override
 	public String getText(Object element) {
-		if(element instanceof IProject) {
+		if (element instanceof IProject) {
 			IProject project = (IProject) element;
 			String name = project.getName();
-			if(org.apache.commons.lang.StringUtils.isNotEmpty(project.getDisplayName())) {
-				String[] parts = new String[]{project.getDisplayName(), name};
+			if (org.apache.commons.lang.StringUtils.isNotEmpty(project.getDisplayName())) {
+				String[] parts = new String[] { project.getDisplayName(), name };
 				applyEllipses(parts);
 				name = parts[0] + " (" + parts[1] + ")";
 			}
@@ -87,10 +87,10 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 	@Override
 	public Image getImage(Object element) {
 		element = getAdaptedElement(element);
-		if(element instanceof NewProjectLinkNode) {
+		if (element instanceof NewProjectLinkNode) {
 			return OpenShiftImages.PROJECT_NEW_IMG;
 		} else if (element instanceof IResource) {
-			IResource resource= (IResource) element;
+			IResource resource = (IResource) element;
 			switch (resource.getKind()) {
 			case ResourceKind.BUILD:
 				return OpenShiftImages.BUILD_IMG;
@@ -108,7 +108,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 				return OpenShiftImages.SERVICE_IMG;
 			case ResourceKind.REPLICATION_CONTROLLER:
 			case ResourceKind.DEPLOYMENT_CONFIG:
-			    return OpenShiftImages.REPLICATION_CONTROLLER_IMG;
+				return OpenShiftImages.REPLICATION_CONTROLLER_IMG;
 			default:
 				return OpenShiftCommonImages.FILE;
 			}
@@ -126,11 +126,11 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 			IAdaptable adaptable = (IAdaptable) element;
 			IResource resource = adaptable.getAdapter(IResource.class);
 			if (resource != null) {
-				element= resource;
+				element = resource;
 			}
 			Connection connection = adaptable.getAdapter(Connection.class);
 			if (connection != null) {
-				element= connection;
+				element = connection;
 			}
 		}
 		return element;
@@ -143,9 +143,9 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 			return style(d.getWrapped().getName(), formatRoute(d.getResourcesOfKind(ResourceKind.ROUTE)));
 		}
 		element = getAdaptedElement(element);
-		if(element instanceof NewProjectLinkNode) {
-			return getStyledText((NewProjectLinkNode)element);
-		} else if(element instanceof IApplicationSource) {
+		if (element instanceof NewProjectLinkNode) {
+			return getStyledText((NewProjectLinkNode) element);
+		} else if (element instanceof IApplicationSource) {
 			return getStyledText((IApplicationSource) element);
 		}
 		if (element instanceof IResource) {
@@ -174,17 +174,17 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 				break;
 			}
 		}
-		 if (element instanceof Connection) {
+		if (element instanceof Connection) {
 			return getStyledText((Connection) element);
 		}
 		return super.getStyledText(element);
 	}
 
 	private String formatRoute(Collection<IResourceWrapper<?, ?>> routes) {
-		if(routes.size() > 0) {
-			IRoute route = (IRoute)routes.iterator().next().getWrapped();
+		if (routes.size() > 0) {
+			IRoute route = (IRoute) routes.iterator().next().getWrapped();
 			return route.getURL();
-			
+
 		}
 		return "";
 	}
@@ -195,7 +195,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 	}
 
 	private StyledString getStyledText(IReplicationController replicationController) {
-		return style(replicationController.getName(), 
+		return style(replicationController.getName(),
 				String.format("selector: %s", StringUtils.serialize(replicationController.getReplicaSelector())));
 	}
 
@@ -204,20 +204,21 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 	}
 
 	private StyledString getStyledText(IBuild build) {
-		return style(build.getName(), build.getStatus() == null?"Build":String.format("%s %s","Build",build.getStatus()));
+		return style(build.getName(),
+				build.getStatus() == null ? "Build" : String.format("%s %s", "Build", build.getStatus()));
 	}
 
 	private StyledString getStyledText(IBuildConfig config) {
 		return style(config.getName(), config.getSourceURI());
 	}
-	
-	
+
 	private StyledString getStyledText(IDeploymentConfig config) {
-		return style(config.getName(), String.format("selector: %s", StringUtils.serialize(config.getReplicaSelector())));
+		return style(config.getName(),
+				String.format("selector: %s", StringUtils.serialize(config.getReplicaSelector())));
 	}
 
 	private StyledString getStyledText(IPod pod) {
-		return style(pod.getName(), pod.getStatus() == null?"Pod":String.format("%s %s","Pod",pod.getStatus()));
+		return style(pod.getName(), pod.getStatus() == null ? "Pod" : String.format("%s %s", "Pod", pod.getStatus()));
 	}
 
 	private StyledString getStyledText(IImageStream repo) {
@@ -226,7 +227,7 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 
 	private StyledString getStyledText(Connection conn) {
 		String prefix = org.apache.commons.lang.StringUtils.defaultIfBlank(conn.getUsername(), "<unknown user>");
-		if(prefix == null) {
+		if (prefix == null) {
 			prefix = "<unknown user>";
 		}
 		return style(prefix, conn.toString());
@@ -235,32 +236,31 @@ public class OpenShiftExplorerLabelProvider extends BaseExplorerLabelProvider im
 	private StyledString getStyledText(IApplicationSource source) {
 		String tags = NLS.bind("({0})", org.apache.commons.lang.StringUtils.join(source.getTags(), ", "));
 		StringBuilder qualifier = new StringBuilder();
-		if(!StringUtils.isEmpty(tags)) {
+		if (!StringUtils.isEmpty(tags)) {
 			qualifier.append(tags);
 		}
-		if(!StringUtils.isEmpty(source.getNamespace())) {
+		if (!StringUtils.isEmpty(source.getNamespace())) {
 			qualifier.append(" - ").append(source.getNamespace());
 		}
 		return style(source.getName(), qualifier.toString());
 	}
 
 	private StyledString getStyledText(IProject project) {
-		if(org.apache.commons.lang.StringUtils.isNotBlank(project.getDisplayName())) {
+		if (org.apache.commons.lang.StringUtils.isNotBlank(project.getDisplayName())) {
 			return style(project.getDisplayName(), project.getName());
 		}
 		return style(project.getName(), "");
 	}
 
 	private StyledString style(String baseText, String qualifiedText) {
-		String[] parts = new String[]{baseText, qualifiedText};
+		String[] parts = new String[] { baseText, qualifiedText };
 		applyEllipses(parts);
 		baseText = parts[0];
 		qualifiedText = parts[1];
 		StyledString value = new StyledString(baseText);
-		if(org.apache.commons.lang.StringUtils.isNotBlank(qualifiedText)) {
-			value.append(" ")
-				.append(qualifiedText, StyledString.QUALIFIER_STYLER);
-			
+		if (org.apache.commons.lang.StringUtils.isNotBlank(qualifiedText)) {
+			value.append(" ").append(qualifiedText, StyledString.QUALIFIER_STYLER);
+
 		}
 		return value;
 	}

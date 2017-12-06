@@ -29,7 +29,7 @@ public class CDKLaunchEnvironmentUtil {
 		CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		boolean passCredentials = cdkServer.passCredentials();
 		String pass = null;
-		if( passCredentials) {
+		if (passCredentials) {
 			try {
 				pass = cdkServer.getPassword();
 			} catch (UsernameChangedException uce) {
@@ -48,7 +48,7 @@ public class CDKLaunchEnvironmentUtil {
 		Map<String, String> launchEnv = null;
 		try {
 			ILaunchConfiguration wc = server.getLaunchConfiguration(false, new NullProgressMonitor());
-			if( wc != null )
+			if (wc != null)
 				launchEnv = wc.getAttribute(IExternalLaunchConstants.ENVIRONMENT_VARS_KEY, (Map<String, String>) null);
 		} catch (CoreException ce) {
 			CDKCoreActivator.pluginLog().logWarning(

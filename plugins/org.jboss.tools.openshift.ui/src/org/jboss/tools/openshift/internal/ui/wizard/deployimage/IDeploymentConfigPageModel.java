@@ -27,34 +27,34 @@ public interface IDeploymentConfigPageModel extends IEnvironmentVariablesPageMod
 	static final String PROPERTY_SELECTED_VOLUME = "selectedVolume";
 	static final String PROPERTY_PORT_SPECS = "portSpecs";
 	static final String PROPERTY_REPLICAS = "replicas";
-	
+
 	String getResourceName();
 
-
 	void setVolumes(List<String> volumes);
+
 	List<String> getVolumes();
+
 	void setSelectedVolume(String volume);
+
 	String getSelectedVolume();
+
 	void updateVolume(String volume, String value);
-	
+
 	List<IPort> getPortSpecs();
-	
+
 	/**
 	 * The number of replicas to define in the deployment config.
 	 * This is scalability factor;
 	 * @return
 	 */
 	int getReplicas();
-	
+
 	/**
 	 * The number of replicas to define in the deployment config.
 	 * This is scalability factor;
-
+	
 	 * @param replicas  a number of 1 or more replicas
 	 */
 	void setReplicas(int replicas);
-
-
-
 
 }

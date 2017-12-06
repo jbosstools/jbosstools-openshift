@@ -32,11 +32,12 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 /**
  * @author Andre Dietisheim
  */
-public class OpenShiftServer extends DeployableServer implements IURLProvider, IExtendedPropertiesProvider, IConnectionFacade {
+public class OpenShiftServer extends DeployableServer
+		implements IURLProvider, IExtendedPropertiesProvider, IConnectionFacade {
 
 	/** The Server Type ID (as defined in plugin.xml) */
 	public static final String SERVER_TYPE_ID = "org.jboss.tools.openshift.server.type";
-	
+
 	public static final String OPENSHIFT3_MODE_ID = "openshift3";
 
 	@Override
@@ -44,17 +45,17 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 		super.setDefaults(monitor);
 		setAttribute(Server.PROP_AUTO_PUBLISH_SETTING, Server.AUTO_PUBLISH_RESOURCE);
 	}
-	
+
 	@Override
-    public IModule[] getRootModules(IModule module) throws CoreException {
-        IStatus status = canModifyModules(new IModule[] { module }, null);
-        if (status != null && !status.isOK())
-            throw  new CoreException(status);
-        IModule[] parents = ServerModelUtilities.getParentModules(getServer(), module);
-        if(parents.length>0)
-        	return parents;
-        return new IModule[] { module };
-    }
+	public IModule[] getRootModules(IModule module) throws CoreException {
+		IStatus status = canModifyModules(new IModule[] { module }, null);
+		if (status != null && !status.isOK())
+			throw new CoreException(status);
+		IModule[] parents = ServerModelUtilities.getParentModules(getServer(), module);
+		if (parents.length > 0)
+			return parents;
+		return new IModule[] { module };
+	}
 
 	@Override
 	public URL getModuleRootURL(IModule module) {
@@ -67,15 +68,14 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 
 	private String getContextRoot(IProject moduleProject, IProject deployProject) {
 		String contextRoot = null;
-		if (OpenShiftServerUtils.isIgnoresContextRoot(getServer()) 
-				&& (moduleProject == null // case of the fake RootModule whose project is null
+		if (OpenShiftServerUtils.isIgnoresContextRoot(getServer()) && (moduleProject == null // case of the fake RootModule whose project is null
 				|| moduleProject.equals(deployProject))) {
 			contextRoot = "";
 		}
-		
+
 		return contextRoot;
 	}
-	
+
 	@Override
 	public ServerExtendedProperties getExtendedProperties() {
 		return new OpenShiftServerExtendedProperties(getServer());
@@ -89,6 +89,7 @@ public class OpenShiftServer extends DeployableServer implements IURLProvider, I
 
 	@Override
 	public IConnectionWrapper getJMXConnection() {
-		return (IConnectionWrapper) Platform.getAdapterManager().loadAdapter((OpenShiftServer)this, IConnectionWrapper.class.getName());
+		return (IConnectionWrapper) Platform.getAdapterManager().loadAdapter((OpenShiftServer) this,
+				IConnectionWrapper.class.getName());
 	}
 }

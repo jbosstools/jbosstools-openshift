@@ -20,32 +20,32 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
  */
 public class AggregatingConverter extends Converter {
 
-    private IObservableValue peer;
-    private boolean append;
+	private IObservableValue peer;
+	private boolean append;
 
-    /**
-     * Constructor.
-     * 
-     * @param peer the associated observable value (UI element)
-     * @param append if true append the associated otherwhise insert in from
-     */
-    public AggregatingConverter(IObservableValue peer, boolean append) {
-        super(String.class, String.class);
-        this.peer = peer;
-        this.append = append;
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param peer the associated observable value (UI element)
+	 * @param append if true append the associated otherwhise insert in from
+	 */
+	public AggregatingConverter(IObservableValue peer, boolean append) {
+		super(String.class, String.class);
+		this.peer = peer;
+		this.append = append;
+	}
 
-    @Override
-    public Object convert(Object fromObject) {
-        String str = (String) fromObject;
-        String peerValue = (String) peer.getValue();
-        if (append) {
-            if (StringUtils.isNotBlank(str)) {
-                str = str + peerValue;
-            }
-        } else if (StringUtils.isNotBlank(peerValue)) {
-            str = peerValue + str;
-        }
-        return str;
-    }
+	@Override
+	public Object convert(Object fromObject) {
+		String str = (String) fromObject;
+		String peerValue = (String) peer.getValue();
+		if (append) {
+			if (StringUtils.isNotBlank(str)) {
+				str = str + peerValue;
+			}
+		} else if (StringUtils.isNotBlank(peerValue)) {
+			str = peerValue + str;
+		}
+		return str;
+	}
 }

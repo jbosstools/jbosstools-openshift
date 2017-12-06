@@ -22,7 +22,6 @@ import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
 import com.openshift.restclient.OpenShiftException;
 
-
 /**
  * @author Andre Dietisheim
  */
@@ -43,7 +42,7 @@ public class ConnectionFactory implements IConnectionFactory {
 	public String getId() {
 		return "org.jboss.tools.openshift.core.ConnectionFactory";
 	}
-	
+
 	@Override
 	public Connection create(String url) {
 		if (StringUtils.isEmpty(url)) {
@@ -51,14 +50,13 @@ public class ConnectionFactory implements IConnectionFactory {
 		}
 		try {
 			LazySSLCertificateCallback sslCertCallback = new LazySSLCertificateCallback();
-			IClient client = new ClientBuilder(url)
-					.sslCertificateCallback(sslCertCallback)
+			IClient client = new ClientBuilder(url).sslCertificateCallback(sslCertCallback)
 					.withMaxRequests(ConnectionProperties.MAX_REQUESTS)
-					.withMaxRequestsPerHost(ConnectionProperties.MAX_REQUESTS)
-					.build();
+					.withMaxRequestsPerHost(ConnectionProperties.MAX_REQUESTS).build();
 			return new Connection(client, new LazyCredentialsPrompter());
 		} catch (OpenShiftException e) {
-			OpenShiftCoreActivator.pluginLog().logInfo(NLS.bind("Could not create OpenShift connection: Malformed url {0}", url), e);
+			OpenShiftCoreActivator.pluginLog()
+					.logInfo(NLS.bind("Could not create OpenShift connection: Malformed url {0}", url), e);
 			return null;
 		}
 	}
@@ -85,7 +83,7 @@ public class ConnectionFactory implements IConnectionFactory {
 
 	private String getSignupUrl() {
 		return SIGNUP_URL;
-	}	
+	}
 
 	@Override
 	public String getUserDocText() {

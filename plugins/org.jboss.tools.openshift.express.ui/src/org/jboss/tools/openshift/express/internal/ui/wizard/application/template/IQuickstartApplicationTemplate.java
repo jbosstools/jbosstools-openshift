@@ -23,15 +23,15 @@ public interface IQuickstartApplicationTemplate extends IApplicationTemplate {
 	public IQuickstart getQuickstart();
 
 	public String getLanguage();
-	
+
 	public String getPageUrl();
 
 	public boolean hasPageUrl();
-	
+
 	public List<ICartridge> getAlternativesFor(ICartridge cartridge);
-	
+
 	public boolean isOpenShiftMaintained();
-	
+
 	public boolean isAutomaticSecurityUpdates();
 
 	public List<String> getTags();

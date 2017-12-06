@@ -19,11 +19,11 @@ import org.junit.Test;
  *
  */
 public class ServiceNameValidatorTest extends AbstractValidatorTest {
-	
+
 	public ServiceNameValidatorTest() {
 		super(new ServiceNameValidator());
 	}
-	
+
 	@Test
 	public void testShouldReturnPassIfConforms() {
 		assertPass("spring");
@@ -58,7 +58,7 @@ public class ServiceNameValidatorTest extends AbstractValidatorTest {
 	public void testShouldReturnPForEqualToMax() {
 		assertPass("spring-boot-helloworld-u");
 	}
-	
+
 	@Test
 	public void testShouldReturnFalseForNonString() {
 		assertCancel(Boolean.FALSE);

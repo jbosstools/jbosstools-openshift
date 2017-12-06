@@ -23,18 +23,18 @@ public class StringUtilsTest {
 	public void testHumanize() {
 		assertEquals("Build Configs", StringUtils.humanize("buildConfigs"));
 	}
-	
+
 	@Test
-	public void testSerialize(){
+	public void testSerialize() {
 		Map<String, String> map = new HashMap<>();
 		map.put("first", "avalue");
 		map.put("second", "secondvalue");
-		
+
 		assertEquals("first=avalue,second=secondvalue", StringUtils.serialize(map));
 	}
 
 	@Test
-	public void testRemoveTrailingSlashes(){
+	public void testRemoveTrailingSlashes() {
 		assertNull(StringUtils.removeTrailingSlashes(null));
 		assertEquals("", StringUtils.removeTrailingSlashes(""));
 		assertEquals("", StringUtils.removeTrailingSlashes("/"));
@@ -45,8 +45,8 @@ public class StringUtilsTest {
 	}
 
 	@Test
-	public void testShortenParts(){
-		String[] parts = new String[]{"I am 18 chars long", "7 chars", "?"};
+	public void testShortenParts() {
+		String[] parts = new String[] { "I am 18 chars long", "7 chars", "?" };
 		StringUtils.shorten(parts, 12);
 		assertEquals("I a...ng", parts[0]);
 		assertEquals("...", parts[1]);
@@ -54,8 +54,8 @@ public class StringUtilsTest {
 	}
 
 	@Test
-	public void testShortenPartsWithNull(){
-		String[] parts = new String[]{"I am 18 chars long", null, "7 chars"};
+	public void testShortenPartsWithNull() {
+		String[] parts = new String[] { "I am 18 chars long", null, "7 chars" };
 		StringUtils.shorten(parts, 12);
 		assertEquals("I a...ng", parts[0]);
 		assertEquals("7...", parts[2]);

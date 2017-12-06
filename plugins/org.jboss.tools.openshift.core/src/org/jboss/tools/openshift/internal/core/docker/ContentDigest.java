@@ -21,8 +21,7 @@ public class ContentDigest {
 	private String hex;
 
 	public ContentDigest(String digest) {
-		if (digest == null
-				|| digest.length() == 0) {
+		if (digest == null || digest.length() == 0) {
 			throw new IllegalStateException("Empty digest not allowed");
 		}
 		String[] portions = digest.split(SEPARATOR);
@@ -73,9 +72,7 @@ public class ContentDigest {
 
 	@Override
 	public String toString() {
-		return ((algorithm != null)?  algorithm + SEPARATOR : "") 
-				+ hex;
+		return ((algorithm != null) ? algorithm + SEPARATOR : "") + hex;
 	}
 
 }
-

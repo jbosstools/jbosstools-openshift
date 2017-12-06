@@ -82,198 +82,184 @@ import com.openshift.restclient.model.IProject;
  * @param <C> the page model
  *
  */
-public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extends AbstractOpenShiftWizardPage  {
+public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extends AbstractOpenShiftWizardPage {
 
-    protected M model;
+	protected M model;
 
-	public AbstractProjectPage(IWizard wizard, M model, String title, String description,
-	                           String pageName) {
+	public AbstractProjectPage(IWizard wizard, M model, String title, String description, String pageName) {
 		super(title, description, pageName, wizard);
 		this.model = model;
 	}
 
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
-		GridLayoutFactory.fillDefaults()
-			.numColumns(3)
-			.applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(parent);
 		createProjectControls(parent, dbc);
 	}
 
 	private void createProjectControls(Composite parent, DataBindingContext dbc) {
 		Label projectLabel = new Label(parent, SWT.NONE);
 		projectLabel.setText("OpenShift project: ");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.CENTER)
-			.applyTo(projectLabel);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(projectLabel);
 
 		StructuredViewer projectsViewer = new ComboViewer(parent);
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, false)
-			.applyTo(projectsViewer.getControl());
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(projectsViewer.getControl());
 
 		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();
 		projectsViewer.setContentProvider(new ObservableListContentProvider());
 		projectsViewer.setLabelProvider(new ObservableTreeItemLabelProvider());
-		projectsViewer.setInput(
-				BeanProperties.list(IProjectPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
+		projectsViewer.setInput(BeanProperties.list(IProjectPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
 		projectsViewer.setComparator(ProjectViewerComparator.createProjectTreeSorter(labelProvider));
 		model.setProjectsComparator(new ProjectViewerComparator(labelProvider).asItemComparator());
-		
+
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
-		Binding selectedProjectBinding =
-				ValueBindingBuilder.bind(selectedProjectObservable)
-					.converting(new ObservableTreeItem2ModelConverter(IProject.class))
-					.validatingAfterConvert(new IValidator() {
+		Binding selectedProjectBinding = ValueBindingBuilder.bind(selectedProjectObservable)
+				.converting(new ObservableTreeItem2ModelConverter(IProject.class))
+				.validatingAfterConvert(new IValidator() {
 
-						@Override
-						public IStatus validate(Object value) {
-							if (value instanceof IProject) {
-								return ValidationStatus.ok();
-							}
-							return ValidationStatus.cancel("Please choose an OpenShift project.");
+					@Override
+					public IStatus validate(Object value) {
+						if (value instanceof IProject) {
+							return ValidationStatus.ok();
 						}
-					})
-					.to(BeanProperties.value(IProjectPageModel.PROPERTY_PROJECT)
-					.observe(model))
-					.converting(new Model2ObservableTreeItemConverter(null))
-					.in(dbc);
-		ControlDecorationSupport.create(
-				selectedProjectBinding, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater(true));
+						return ValidationStatus.cancel("Please choose an OpenShift project.");
+					}
+				}).to(BeanProperties.value(IProjectPageModel.PROPERTY_PROJECT).observe(model))
+				.converting(new Model2ObservableTreeItemConverter(null)).in(dbc);
+		ControlDecorationSupport.create(selectedProjectBinding, SWT.LEFT | SWT.TOP, null,
+				new RequiredControlDecorationUpdater(true));
 
-		IObservableValue connectionObservable = BeanProperties.value(IProjectPageModel.PROPERTY_CONNECTION).observe(model);
-		DataBindingUtils.addDisposableValueChangeListener(
-				onConnectionChanged(), connectionObservable, projectsViewer.getControl());
+		IObservableValue connectionObservable = BeanProperties.value(IProjectPageModel.PROPERTY_CONNECTION)
+				.observe(model);
+		DataBindingUtils.addDisposableValueChangeListener(onConnectionChanged(), connectionObservable,
+				projectsViewer.getControl());
 
 		Button newProjectButton = new Button(parent, SWT.PUSH);
 		newProjectButton.setText("New...");
-		GridDataFactory.fillDefaults()
-			.align(SWT.LEFT, SWT.FILL)
-			.applyTo(newProjectButton);
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).applyTo(newProjectButton);
 		UIUtils.setDefaultButtonWidth(newProjectButton);
 		newProjectButton.addSelectionListener(onNewProjectClicked());
 	}
-	
-    private IValueChangeListener onConnectionChanged() {
-        return new IValueChangeListener() {
 
-            @Override
-            public void handleValueChange(ValueChangeEvent event) {
-                loadResources(getPreviousPage() == null);
-            }
-        };
-    }
+	private IValueChangeListener onConnectionChanged() {
+		return new IValueChangeListener() {
 
-    private SelectionAdapter onNewProjectClicked() {
-        return new SelectionAdapter() {
+			@Override
+			public void handleValueChange(ValueChangeEvent event) {
+				loadResources(getPreviousPage() == null);
+			}
+		};
+	}
 
-            /* (non-Javadoc)
-             * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-             */
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                try {
-                    // run in job to enforce busy cursor which doesnt work otherwise
-                    WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
+	private SelectionAdapter onNewProjectClicked() {
+		return new SelectionAdapter() {
 
-                        @Override
-                        protected IStatus run(IProgressMonitor monitor) {
-                            return Status.OK_STATUS;
-                        }
+			/* (non-Javadoc)
+			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+			 */
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					// run in job to enforce busy cursor which doesnt work otherwise
+					WizardUtils.runInWizard(new UIUpdatingJob("Opening projects wizard...") {
 
-                        @Override
-                        protected IStatus updateUI(IProgressMonitor monitor) {
-                            NewProjectWizard newProjectWizard = new NewProjectWizard(
-                                    (Connection) model.getConnection(), model.getProjectItems().stream().map(it->(IProject)it.getModel()).collect(Collectors.toList()));
-                            int result = new OkCancelButtonWizardDialog(getShell(), newProjectWizard).open();
-                            // reload projects to reflect changes that happened in
-                            // projects wizard
-                            if (newProjectWizard.getProject() != null) {
-                                loadResources(false);
-                            }
-                            if (Dialog.OK == result) {
-                                IProject selectedProject = newProjectWizard.getProject();
-                                if (selectedProject != null) {
-                                    model.setProject(selectedProject);
-                                }
-                            }
-                            return Status.OK_STATUS;
-                        }
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							return Status.OK_STATUS;
+						}
 
-                    }, getContainer());
-                } catch (InvocationTargetException | InterruptedException ex) {
-                    // swallow intentionnally
-                }
-            }
-            
-        };
-    }
-    
-    /**
-     * Create and configure the list of jobs that need to be performed during resource loading.
-     * The base behavior is to load the projects and force project creation if no project exists.
-     * 
-     * @param closeAfter return parameter if wizard needs to be closed (may be updated)
-     * @param closeOnCancel true if the wizard need to be closed
-     * @return the job builder
-     */
-    protected JobChainBuilder getLoadResourcesJobBuilder(final boolean closeAfter[], final boolean closeOnCancel) {
-        JobChainBuilder builder = new JobChainBuilder(
-                new AbstractDelegatingMonitorJob("Loading projects...") {
+						@Override
+						protected IStatus updateUI(IProgressMonitor monitor) {
+							NewProjectWizard newProjectWizard = new NewProjectWizard((Connection) model.getConnection(),
+									model.getProjectItems().stream().map(it -> (IProject) it.getModel())
+											.collect(Collectors.toList()));
+							int result = new OkCancelButtonWizardDialog(getShell(), newProjectWizard).open();
+							// reload projects to reflect changes that happened in
+							// projects wizard
+							if (newProjectWizard.getProject() != null) {
+								loadResources(false);
+							}
+							if (Dialog.OK == result) {
+								IProject selectedProject = newProjectWizard.getProject();
+								if (selectedProject != null) {
+									model.setProject(selectedProject);
+								}
+							}
+							return Status.OK_STATUS;
+						}
 
-                    @Override
-                    protected IStatus doRun(IProgressMonitor monitor) {
-                        try {
-                            model.loadResources();
-                        } catch (OpenShiftException e) {
-                            closeAfter[0] = closeOnCancel;
-                            String problem = e.getStatus() == null ? e.getMessage() : e.getStatus().getMessage();
-                            return  OpenShiftUIActivator.statusFactory().errorStatus(problem, e);
-                        }
-                        return Status.OK_STATUS;
-                    }
-                });
-        builder.runWhenSuccessfullyDone(new UIJob("Verifying required project...") {
+					}, getContainer());
+				} catch (InvocationTargetException | InterruptedException ex) {
+					// swallow intentionnally
+				}
+			}
 
-                    @Override
-                    public IStatus runInUIThread(IProgressMonitor monitor) {
-                        if(!model.hasProjects()) {
-                            List<IProject> projects = new ObservableTreeItem2ModelConverter().convert(model.getProjectItems());
-                            Connection connection = model.getConnection();
-                            NewProjectWizard newProjectWizard = new NewProjectWizard(connection, projects);
-                            if (Dialog.CANCEL ==
-                                    WizardUtils.openWizardDialog(newProjectWizard, getShell())) {
-                                closeAfter[0] = closeOnCancel;
-                                return Status.CANCEL_STATUS;
-                            } else {
-                                model.loadResources();
-                                model.setProject(newProjectWizard.getProject());
-                            }
-                        }
-                        return Status.OK_STATUS;
-                    }
-                });
-        return builder;
-    }
+		};
+	}
+
+	/**
+	 * Create and configure the list of jobs that need to be performed during resource loading.
+	 * The base behavior is to load the projects and force project creation if no project exists.
+	 * 
+	 * @param closeAfter return parameter if wizard needs to be closed (may be updated)
+	 * @param closeOnCancel true if the wizard need to be closed
+	 * @return the job builder
+	 */
+	protected JobChainBuilder getLoadResourcesJobBuilder(final boolean closeAfter[], final boolean closeOnCancel) {
+		JobChainBuilder builder = new JobChainBuilder(new AbstractDelegatingMonitorJob("Loading projects...") {
+
+			@Override
+			protected IStatus doRun(IProgressMonitor monitor) {
+				try {
+					model.loadResources();
+				} catch (OpenShiftException e) {
+					closeAfter[0] = closeOnCancel;
+					String problem = e.getStatus() == null ? e.getMessage() : e.getStatus().getMessage();
+					return OpenShiftUIActivator.statusFactory().errorStatus(problem, e);
+				}
+				return Status.OK_STATUS;
+			}
+		});
+		builder.runWhenSuccessfullyDone(new UIJob("Verifying required project...") {
+
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				if (!model.hasProjects()) {
+					List<IProject> projects = new ObservableTreeItem2ModelConverter().convert(model.getProjectItems());
+					Connection connection = model.getConnection();
+					NewProjectWizard newProjectWizard = new NewProjectWizard(connection, projects);
+					if (Dialog.CANCEL == WizardUtils.openWizardDialog(newProjectWizard, getShell())) {
+						closeAfter[0] = closeOnCancel;
+						return Status.CANCEL_STATUS;
+					} else {
+						model.loadResources();
+						model.setProject(newProjectWizard.getProject());
+					}
+				}
+				return Status.OK_STATUS;
+			}
+		});
+		return builder;
+	}
 
 	protected void loadResources(final boolean closeOnCancel) {
 		if (!model.hasConnection()) {
 			return;
 		}
 		try {
-			final boolean[] closeAfter = new boolean[]{false}; 
+			final boolean[] closeAfter = new boolean[] { false };
 			Job jobs = getLoadResourcesJobBuilder(closeAfter, closeOnCancel).build();
 			WizardUtils.runInWizard(jobs, getContainer(), getDataBindingContext());
-			if(closeAfter[0]) {
-				if(Display.getCurrent() != null) {
+			if (closeAfter[0]) {
+				if (Display.getCurrent() != null) {
 					WizardUtils.close(getWizard());
 				} else {
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						WizardUtils.close(getWizard());
-					}
-				});
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							WizardUtils.close(getWizard());
+						}
+					});
 				}
 			}
 		} catch (InvocationTargetException | InterruptedException e) {
@@ -302,20 +288,19 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
-		ParametrizableWizardPageSupport.create(
-				IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this,
-				dbc);
+		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.INFO | IStatus.CANCEL, this, dbc);
 	}
-	
-    protected static boolean isFile(String path) {
-        try {
-            return StringUtils.isNotBlank(path) && Files.isRegularFile(Paths.get(VariablesHelper.replaceVariables(path)));
-        } catch (InvalidPathException e) {
-            return false;
-        }
-    }
-    
-    protected static boolean exists(String path) {
-        return StringUtils.isNotBlank(path) && Files.exists(Paths.get(VariablesHelper.replaceVariables(path)));
-    }
+
+	protected static boolean isFile(String path) {
+		try {
+			return StringUtils.isNotBlank(path)
+					&& Files.isRegularFile(Paths.get(VariablesHelper.replaceVariables(path)));
+		} catch (InvalidPathException e) {
+			return false;
+		}
+	}
+
+	protected static boolean exists(String path) {
+		return StringUtils.isNotBlank(path) && Files.exists(Paths.get(VariablesHelper.replaceVariables(path)));
+	}
 }

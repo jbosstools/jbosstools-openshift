@@ -70,7 +70,7 @@ public class ExpressResourceLabelUtils {
 		if (cartridge == null) {
 			return null;
 		}
-		
+
 		if (cartridge instanceof CodeAnythingCartridge) {
 			return toCodeAnythingLabel(cartridge.getName(), cartridge.getDisplayName(), cartridge.getUrl());
 		} else if (cartridge.isDownloadable()) {
@@ -87,7 +87,7 @@ public class ExpressResourceLabelUtils {
 		} else {
 			builder.append(name);
 		}
-		
+
 		if (isObsolete) {
 			builder.append("[obsolete]");
 		}
@@ -101,7 +101,7 @@ public class ExpressResourceLabelUtils {
 		} else {
 			builder.append(displayName);
 		}
-		
+
 		return builder.append(" (Downloadable Cartridge)").toString();
 	}
 
@@ -112,7 +112,7 @@ public class ExpressResourceLabelUtils {
 				cartridgeName = StringUtils.shorten(url.toString(), 50);
 			}
 		}
-		
+
 		StringBuilder builder = new StringBuilder();
 		if (cartridgeName != null) {
 			builder.append(cartridgeName);
@@ -129,7 +129,7 @@ public class ExpressResourceLabelUtils {
 		String cartridgeName = null;
 		if (!StringUtils.isEmpty(displayName)) {
 			cartridgeName = displayName;
-		} else if (!StringUtils.isEmpty(name)){
+		} else if (!StringUtils.isEmpty(name)) {
 			cartridgeName = name;
 		}
 		return cartridgeName;
@@ -137,8 +137,7 @@ public class ExpressResourceLabelUtils {
 
 	public static String toString(List<IDomain> domains) {
 		StringBuilder builder = new StringBuilder();
-		if (domains == null
-				|| domains.isEmpty()) {
+		if (domains == null || domains.isEmpty()) {
 			return builder.toString();
 		}
 		for (IDomain domain : domains) {
@@ -158,11 +157,7 @@ public class ExpressResourceLabelUtils {
 			return null;
 		}
 
-		return new StringBuilder(
-				domain.getId())
-				.append('.')
-				.append(domain.getSuffix())
-				.toString();
+		return new StringBuilder(domain.getId()).append('.').append(domain.getSuffix()).toString();
 	}
 
 	public static String toString(IGearProfile gear) {

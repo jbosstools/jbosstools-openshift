@@ -30,8 +30,10 @@ import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
  * @author Jeff Cantrill
  */
 public class ConnectionsRegistry {
-	
-	private enum EventType { ADDED, REMOVED, CHANGED }
+
+	private enum EventType {
+		ADDED, REMOVED, CHANGED
+	}
 
 	/** The most recent user connected on OpenShift. */
 	private IConnection recentConnection = null;
@@ -138,7 +140,8 @@ public class ConnectionsRegistry {
 		fireChange(connection, eventType, null, null, null);
 	}
 
-	private void fireChange(IConnection connection, EventType eventType, String property, Object oldValue, Object newValue) {
+	private void fireChange(IConnection connection, EventType eventType, String property, Object oldValue,
+			Object newValue) {
 		if (connection == null) {
 			return;
 		}
@@ -280,7 +283,8 @@ public class ConnectionsRegistry {
 		} else if (credentialsChange) {
 			// Property is defined in
 			// org.jboss.tools.openshift.core.connection.ConnectionProperties
-			fireChange(currentConnection, EventType.CHANGED, "openshift.resource.refresh", currentConnection, currentConnection);
+			fireChange(currentConnection, EventType.CHANGED, "openshift.resource.refresh", currentConnection,
+					currentConnection);
 		}
 		this.recentConnection = currentConnection;
 	}

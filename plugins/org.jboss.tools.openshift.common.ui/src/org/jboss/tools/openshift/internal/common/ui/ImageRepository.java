@@ -44,9 +44,8 @@ public class ImageRepository {
 			}
 			return baseUrl;
 		} catch (MalformedURLException e) {
-			plugin.getLog().log(
-					new Status(IStatus.ERROR, plugin.getBundle().getSymbolicName(),
-							NLS.bind("Could not find image folder at {0}", imageFolder), e));
+			plugin.getLog().log(new Status(IStatus.ERROR, plugin.getBundle().getSymbolicName(),
+					NLS.bind("Could not find image folder at {0}", imageFolder), e));
 			return null;
 		}
 	}
@@ -55,7 +54,7 @@ public class ImageRepository {
 		return create(imageRegistry, name);
 	}
 
-	private ImageDescriptor create(ImageRegistry registry,String name) {
+	private ImageDescriptor create(ImageRegistry registry, String name) {
 		return create(registry, name, getBaseUrl());
 	}
 
@@ -63,9 +62,8 @@ public class ImageRepository {
 		if (baseUrl == null) {
 			return null;
 		}
-		
-		ImageDescriptor imageDescriptor =
-				ImageDescriptor.createFromURL(createFileURL(name, baseUrl));
+
+		ImageDescriptor imageDescriptor = ImageDescriptor.createFromURL(createFileURL(name, baseUrl));
 		registry.put(name, imageDescriptor);
 		return imageDescriptor;
 	}
@@ -74,9 +72,8 @@ public class ImageRepository {
 		try {
 			return new URL(baseUrl, name);
 		} catch (MalformedURLException e) {
-			plugin.getLog().log(
-					new Status(IStatus.ERROR, plugin.getBundle().getSymbolicName(), NLS.bind(
-							"Could not create URL for image {0}", name), e));
+			plugin.getLog().log(new Status(IStatus.ERROR, plugin.getBundle().getSymbolicName(),
+					NLS.bind("Could not create URL for image {0}", name), e));
 			return null;
 		}
 	}

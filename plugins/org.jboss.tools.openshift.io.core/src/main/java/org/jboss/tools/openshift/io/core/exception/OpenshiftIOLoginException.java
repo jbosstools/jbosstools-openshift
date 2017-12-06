@@ -16,14 +16,14 @@ import org.jboss.tools.openshift.io.core.model.IAccount;
 public class OpenshiftIOLoginException extends OpenshiftIOException {
 
 	private final ICluster cluster;
-	
+
 	private final IAccount account;
-	
+
 	public OpenshiftIOLoginException(ICluster cluster, IAccount account) {
 		super("Error login to cluster " + cluster.getId());
 		this.cluster = cluster;
 		this.account = account;
-		
+
 	}
 
 	/**

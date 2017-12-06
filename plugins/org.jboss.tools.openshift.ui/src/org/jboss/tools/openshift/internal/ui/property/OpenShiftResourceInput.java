@@ -45,15 +45,14 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 				try {
 					return IOUtils.toBufferedInputStream(IOUtils.toInputStream(input.toJson(), "UTF-8"));
 				} catch (Exception e) {
-					throw new CoreException(new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to edit input", e));
+					throw new CoreException(
+							new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID, "Unable to edit input", e));
 				}
 			}
 
 			@Override
 			public IPath getFullPath() {
-				return new Path(input.getNamespace())
-						.append(input.getKind())
-						.append(input.getName()+".json");
+				return new Path(input.getNamespace()).append(input.getKind()).append(input.getName() + ".json");
 			}
 
 			@Override
@@ -64,11 +63,8 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 
 			@Override
 			public String getName() {
-				StringBuilder sb = new StringBuilder()
-						.append("[").append(input.getNamespace()).append("] ")
-						.append(StringUtils.humanize(input.getKind()))
-						.append(" : ")
-						.append(input.getName())
+				StringBuilder sb = new StringBuilder().append("[").append(input.getNamespace()).append("] ")
+						.append(StringUtils.humanize(input.getKind())).append(" : ").append(input.getName())
 						.append(".json");
 				return sb.toString();
 			}
@@ -115,15 +111,15 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 	public Object getAdapter(Class adapter) {
 		return null;
 	}
-	
+
 	public Connection getConnection() {
 		return connection;
 	}
-	
+
 	public IResource getResource() {
 		return input;
 	}
-	
+
 	public void setResource(IResource newResource) {
 		input = newResource;
 	}

@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
 import org.eclipse.core.resources.IFile;
@@ -35,19 +35,17 @@ public class CDKServer extends ServerDelegate {
 	public static final String CDK_SERVER_TYPE = "org.jboss.tools.openshift.cdk.server.type";
 	public static final String CDK_V3_SERVER_TYPE = "org.jboss.tools.openshift.cdk.server.type.v3";
 	public static final String CDK_V32_SERVER_TYPE = "org.jboss.tools.openshift.cdk.server.type.v32";
-	
-	public static final String PROP_FOLDER = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.FOLDER";
-	
-	
-	public static final String PROP_PASS_CREDENTIALS = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.passCredentials"; 
-	public static final String PROP_USERNAME = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.username"; 
-	public static final String PROP_USER_ENV_VAR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.env.user"; 
-	public static final String PROP_PASS_ENV_VAR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.env.pass"; 
 
+	public static final String PROP_FOLDER = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.FOLDER";
+
+	public static final String PROP_PASS_CREDENTIALS = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.passCredentials";
+	public static final String PROP_USERNAME = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.username";
+	public static final String PROP_USER_ENV_VAR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.env.user";
+	public static final String PROP_PASS_ENV_VAR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.env.pass";
 
 	public CDKServer() {
 	}
-	
+
 	@Override
 	public void setDefaults(IProgressMonitor monitor) {
 		getServerWorkingCopy().setHost("localhost"); //$NON-NLS-1$
@@ -69,15 +67,15 @@ public class CDKServer extends ServerDelegate {
 	public void setDefaultServerName(IProgressMonitor monitor) {
 		getServerWorkingCopy().setName(ServerNamingUtility.getDefaultServerName(getBaseName()));
 	}
-	
+
 	protected String getBaseName() {
 		return CDKServer.getServerTypeBaseName();
 	}
-	
+
 	public static String getServerTypeBaseName() {
 		return "Container Development Environment";
 	}
-	
+
 	@Override
 	public IStatus canModifyModules(IModule[] add, IModule[] remove) {
 		return Status.CANCEL_STATUS;
@@ -96,36 +94,40 @@ public class CDKServer extends ServerDelegate {
 	@Override
 	public void modifyModules(IModule[] add, IModule[] remove, IProgressMonitor monitor) throws CoreException {
 	}
-	
+
 	public String getUsername() {
-		ControllableServerBehavior beh = (ControllableServerBehavior)getServer().loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
+		ControllableServerBehavior beh = (ControllableServerBehavior) getServer()
+				.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
 		Object user2 = beh.getSharedData(CDKServerBehaviour.PROP_CACHED_USER);
-		if( user2 instanceof String )
-			return (String)user2;
-		
-		String user = getServer().getAttribute(PROP_USERNAME, (String)null);
-		if( user == null ) {
-			ICredentialDomain domain = CredentialService.getCredentialModel().getDomain(CredentialService.REDHAT_ACCESS);
+		if (user2 instanceof String)
+			return (String) user2;
+
+		String user = getServer().getAttribute(PROP_USERNAME, (String) null);
+		if (user == null) {
+			ICredentialDomain domain = CredentialService.getCredentialModel()
+					.getDomain(CredentialService.REDHAT_ACCESS);
 			user = domain.getDefaultUsername();
 		}
 		return user;
 	}
-	
+
 	public String getPassword() throws UsernameChangedException {
-		ControllableServerBehavior beh = (ControllableServerBehavior)getServer().loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
+		ControllableServerBehavior beh = (ControllableServerBehavior) getServer()
+				.loadAdapter(ControllableServerBehavior.class, new NullProgressMonitor());
 		Object pw = beh.getSharedData(CDKServerBehaviour.PROP_CACHED_PASSWORD);
-		if( pw instanceof String )
-			return (String)pw;
-		
+		if (pw instanceof String)
+			return (String) pw;
+
 		ICredentialDomain domain = CredentialService.getCredentialModel().getDomain(CredentialService.REDHAT_ACCESS);
 		String user = getUsername();
-		if( user != null && domain != null) {
+		if (user != null && domain != null) {
 			try {
 				return domain.getCredentials(user);
-			} catch(StorageException se) {
-				CDKCoreActivator.getDefault().getLog().log(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, se.getMessage(), se));
-			} catch(UsernameChangedException uce) {
-				if( uce.getSaveCredentials()) {
+			} catch (StorageException se) {
+				CDKCoreActivator.getDefault().getLog()
+						.log(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, se.getMessage(), se));
+			} catch (UsernameChangedException uce) {
+				if (uce.getSaveCredentials()) {
 					saveChangedCredentials(uce);
 				}
 				throw uce;
@@ -133,21 +135,20 @@ public class CDKServer extends ServerDelegate {
 		}
 		return null;
 	}
-	
-	
+
 	private void saveChangedCredentials(UsernameChangedException uce) {
 		// The user has changed the username and is now requesting we save the changes
 		IServerWorkingCopy wc = getServerWorkingCopy();
-		if( wc == null ) {
+		if (wc == null) {
 			wc = getServer().createWorkingCopy();
-			
+
 			// a server stored in metadata will have a null file. 
-			IFile f = ((Server)getServer()).getFile();
+			IFile f = ((Server) getServer()).getFile();
 			wc.setAttribute(PROP_USERNAME, uce.getUser());
-			if( f == null ) {
+			if (f == null) {
 				try {
 					wc.save(true, new NullProgressMonitor());
-				} catch(CoreException ce) {
+				} catch (CoreException ce) {
 					CDKCoreActivator.pluginLog().logError("Error persisting changed username", ce);
 				}
 			} else {
@@ -166,7 +167,7 @@ public class CDKServer extends ServerDelegate {
 			}
 		}
 	}
-	
+
 	public boolean passCredentials() {
 		boolean passCredentials = getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false);
 		return passCredentials;
@@ -175,10 +176,9 @@ public class CDKServer extends ServerDelegate {
 	public String getUserEnvironmentKey() {
 		return getServer().getAttribute(CDKServer.PROP_USER_ENV_VAR, CDKConstants.CDK_ENV_SUB_USERNAME);
 	}
-	
+
 	public String getPasswordEnvironmentKey() {
 		return getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
 	}
-	
-	
+
 }

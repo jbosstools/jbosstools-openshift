@@ -19,11 +19,11 @@ import com.openshift.client.cartridge.ICartridge;
  */
 public class CartridgeToStringConverter implements StringUtils.ToStringConverter<ICartridge> {
 
-		@Override
-		public String toString(ICartridge cartridge) {
-			if (cartridge == null) {
-				return null;
-			}
-			return cartridge.getName();
+	@Override
+	public String toString(ICartridge cartridge) {
+		if (cartridge == null) {
+			return null;
 		}
+		return cartridge.getName();
 	}
+}

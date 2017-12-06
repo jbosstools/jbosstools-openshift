@@ -27,24 +27,22 @@ public class CredentialsPrompter implements ICredentialsPrompter {
 	public CredentialsPrompter() {
 		// Do nothing
 	}
-	
+
 	@Override
 	public boolean promptAndAuthenticate(final IConnection connection, final Object context) {
-		Display.getDefault().syncExec(
-				new Runnable() {
-					@Override
-					public void run() {
-						Shell shell = UIUtils.getShell();
-						if (shell == null) {
-							OpenShiftCommonUIActivator.log("Could not open Credentials wizard: no shell available", null);
-							return;
-						}
-						
-						final ConnectionWizard connectToOpenShiftWizard =
-								new ConnectionWizard(connection, context);
-						WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
-					}
-				});
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				Shell shell = UIUtils.getShell();
+				if (shell == null) {
+					OpenShiftCommonUIActivator.log("Could not open Credentials wizard: no shell available", null);
+					return;
+				}
+
+				final ConnectionWizard connectToOpenShiftWizard = new ConnectionWizard(connection, context);
+				WizardUtils.openWizardDialog(connectToOpenShiftWizard, shell);
+			}
+		});
 		return true;
 	}
 

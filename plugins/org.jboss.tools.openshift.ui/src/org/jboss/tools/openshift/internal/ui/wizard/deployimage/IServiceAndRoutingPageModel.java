@@ -28,11 +28,11 @@ public interface IServiceAndRoutingPageModel {
 	String PROPERTY_SELECTED_SERVICE_PORT = "selectedServicePort";
 	static final String PROPERTY_ROUTE_HOSTNAME = "routeHostname";
 	String PROPERTY_ROUTING_PORT = "routingPort";
-	
+
 	boolean isAddRoute();
-	
+
 	void setAddRoute(boolean addRoute);
-	
+
 	List<IServicePort> getServicePorts();
 
 	void setSelectedServicePort(IServicePort servicePort);
@@ -47,18 +47,18 @@ public interface IServiceAndRoutingPageModel {
 	 * image;
 	 */
 	void resetServicePorts();
-	
+
 	void addServicePort(IServicePort port);
-	
+
 	void updateServicePort(IServicePort source, IServicePort target);
-	
+
 	/**
 	 * Return the host name used assigned to route.
 	 * 
 	 * @return the host name assigned to route
 	 */
 	String getRouteHostname();
-	
+
 	/**
 	 * Set the host name used by route.
 	 * 
@@ -66,13 +66,13 @@ public interface IServiceAndRoutingPageModel {
 	 */
 	void setRouteHostname(String routeHostname);
 
-        /**
-	 * Set the port to be used for routing
-	 *  
-	 * @param port the port to use
-	 */
+	/**
+	* Set the port to be used for routing
+	*  
+	* @param port the port to use
+	*/
 	void setRoutingPort(IServicePort port);
-	
+
 	/**
 	 * Return the port used for routing. May be null (round robin)
 	 * 

@@ -84,7 +84,7 @@ public class EnvironmentVariableWizardModel extends ObservableUIPojo {
 	public boolean isEditing() {
 		return allVariablesModel.contains(variable);
 	}
-	
+
 	public void updateVariable() {
 		variable.setName(name);
 		variable.setValue(value);

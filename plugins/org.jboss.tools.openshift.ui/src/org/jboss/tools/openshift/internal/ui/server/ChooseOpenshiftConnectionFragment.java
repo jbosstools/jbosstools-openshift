@@ -39,7 +39,7 @@ public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 	private ChooseOpenshiftConnectionComposite chooseConnectionComposite;
 	private PropertyChangeListener externalConnectionListener;
 	private IConnection selectedConnection;
-	
+
 	protected void initWizardHandle() {
 		// make modifications to parent
 		handle.setTitle("Choose an OpenShift Connection");
@@ -56,20 +56,20 @@ public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 	public boolean isComplete() {
 		return chooseConnectionComposite != null && !chooseConnectionComposite.isDisposed() && super.isComplete();
 	}
-	
+
 	@Override
 	public void performFinish(IProgressMonitor monitor) throws CoreException {
 		// do nothing
 	}
-	
+
 	@Override
 	public Composite createComposite(Composite parent, final IWizardHandle handle) {
 		this.handle = handle;
 		initWizardHandle();
-		
+
 		chooseConnectionComposite = new ChooseOpenshiftConnectionComposite(parent);
 		chooseConnectionComposite.setConnectionChangeListener(new IConnectionChangedListener() {
-			
+
 			@Override
 			public void connectionChanged(IConnection newVal) {
 				selectedConnectionChanged(newVal);
@@ -79,7 +79,7 @@ public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 		selectedConnectionChanged(chooseConnectionComposite.getConnection());
 		return chooseConnectionComposite;
 	}
-	
+
 	private void selectedConnectionChanged(IConnection newVal) {
 		IConnection oldCon = selectedConnection;
 		selectedConnection = newVal;
@@ -87,16 +87,16 @@ public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 		handle.update();
 		if (externalConnectionListener != null) {
 			// re-fire event to external listener
-			PropertyChangeEvent event = new PropertyChangeEvent(this, ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION, oldCon, selectedConnection);
+			PropertyChangeEvent event = new PropertyChangeEvent(this,
+					ConnectionWizardPageModel.PROPERTY_SELECTED_CONNECTION, oldCon, selectedConnection);
 			externalConnectionListener.propertyChange(event);
 		}
 	}
 
-	
 	private IWizardPage getPage(IWizardHandle wizardHandle) {
 		return (IWizardPage) wizardHandle;
 	}
-	
+
 	private WizardDialog getContainer(IWizardPage wizardPage) {
 		return (WizardDialog) wizardPage.getWizard().getContainer();
 	}
@@ -104,21 +104,24 @@ public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 	public void addConnectionChangeListener(PropertyChangeListener connectionChangeListener) {
 		this.externalConnectionListener = connectionChangeListener;
 	}
-	
+
 	private IPageChangingListener onPageChanging(IWizardHandle wizardHandle) {
 		return new IPageChangingListener() {
 			@Override
 			public void handlePageChanging(PageChangingEvent event) {
-				if (event.getCurrentPage() == getPage(wizardHandle)){
-					if (event.getTargetPage() == null || event.getTargetPage().equals(getPage(wizardHandle).getNextPage())) {
+				if (event.getCurrentPage() == getPage(wizardHandle)) {
+					if (event.getTargetPage() == null
+							|| event.getTargetPage().equals(getPage(wizardHandle).getNextPage())) {
 						String blockedMsg = null;
 						try {
 							blockedMsg = runConnectionJob();
-						} catch(Exception e) {
-							blockedMsg = "Error while checking if we can connect to OpenShift Connection: " + e.getMessage();
+						} catch (Exception e) {
+							blockedMsg = "Error while checking if we can connect to OpenShift Connection: "
+									+ e.getMessage();
 						}
 						event.doit = (blockedMsg == null);
-						handle.setMessage(blockedMsg, (blockedMsg == null ? IMessageProvider.NONE : IMessageProvider.ERROR));
+						handle.setMessage(blockedMsg,
+								(blockedMsg == null ? IMessageProvider.NONE : IMessageProvider.ERROR));
 					}
 					if (selectedConnection instanceof Connection) {
 						OpenShiftServerTaskModelAccessor.set((Connection) selectedConnection, getTaskModel());
@@ -127,15 +130,14 @@ public class ChooseOpenshiftConnectionFragment extends WizardFragment {
 			}
 		};
 	}
-	
+
 	private String runConnectionJob() throws Exception {
 		String blockedMsg = null;
-		if( selectedConnection != null && selectedConnection.canConnect()) {
+		if (selectedConnection != null && selectedConnection.canConnect()) {
 			Job connectJob = chooseConnectionComposite.getConnectJob();
-			WizardUtils.runInWizard(
-					connectJob, new DelegatingProgressMonitor(), getContainer(((WizardPage)handle)));
+			WizardUtils.runInWizard(connectJob, new DelegatingProgressMonitor(), getContainer(((WizardPage) handle)));
 			boolean connected = JobUtils.isOk(connectJob.getResult());
-			if( !connected ) {
+			if (!connected) {
 				blockedMsg = connectJob.getResult().getMessage();
 			}
 			return blockedMsg;

@@ -30,7 +30,8 @@ public class NewDomainHandler extends AbstractDomainHandler {
 		if (connection == null) {
 			return null;
 		}
-		if (WizardUtils.openWizardDialog(new NewDomainWizard(connection), HandlerUtil.getActiveShell(event)) == Window.OK) {
+		if (WizardUtils.openWizardDialog(new NewDomainWizard(connection),
+				HandlerUtil.getActiveShell(event)) == Window.OK) {
 			ConnectionsRegistrySingleton.getInstance().fireConnectionChanged(connection);
 		}
 		return null;

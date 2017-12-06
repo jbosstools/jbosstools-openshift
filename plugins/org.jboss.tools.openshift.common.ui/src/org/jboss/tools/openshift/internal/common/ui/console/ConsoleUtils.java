@@ -51,7 +51,7 @@ public class ConsoleUtils {
 		IConsoleManager consoleManager = plugin.getConsoleManager();
 		consoleManager.removeConsoleListener(consoleListener);
 	}
-	
+
 	/**
 	 * Constant key set into the created message console attributes to mark the
 	 * given console as an 'openshift' one.
@@ -90,7 +90,7 @@ public class ConsoleUtils {
 		consoleManager.addConsoles(new IConsole[] { console });
 		return console;
 	}
-	
+
 	/**
 	 * Displays the given console in the consoles view which becomes visible if
 	 * it was not the case before.
@@ -106,7 +106,8 @@ public class ConsoleUtils {
 				try {
 					part = UIUtil.bringViewToFront(IConsoleConstants.ID_CONSOLE_VIEW);
 					if (part == null) {
-						OpenShiftCommonUIActivator.getDefault().getLogger().logWarning("Could not open console, " + IConsoleConstants.ID_CONSOLE_VIEW + " was not found");
+						OpenShiftCommonUIActivator.getDefault().getLogger().logWarning(
+								"Could not open console, " + IConsoleConstants.ID_CONSOLE_VIEW + " was not found");
 						return;
 					}
 					final IConsoleView view = (IConsoleView) part.getAdapter(IConsoleView.class);
@@ -118,9 +119,8 @@ public class ConsoleUtils {
 					OpenShiftCommonUIActivator.getDefault().getLogger().logWarning("Could not open console view", e);
 				}
 
-				
 			}
-			
+
 		});
 	}
 }

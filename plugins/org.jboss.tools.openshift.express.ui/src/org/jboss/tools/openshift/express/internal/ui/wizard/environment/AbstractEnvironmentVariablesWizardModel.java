@@ -15,7 +15,6 @@ import java.util.List;
 import org.jboss.tools.common.ui.databinding.ObservableUIPojo;
 import org.jboss.tools.openshift.express.internal.ui.ExpressException;
 
-
 /**
  * Wizard that lists the environment variables and edit, add, remove them.
  * 
@@ -27,10 +26,10 @@ public abstract class AbstractEnvironmentVariablesWizardModel extends Observable
 	public static final String PROPERTY_SELECTED = "selected";
 	public static final String PROPERTY_VARIABLES = "variables";
 	public static final String PROPERTY_SUPPORTED = "supported";
-	
+
 	private List<EnvironmentVariableItem> variables = new ArrayList<>();
 	private EnvironmentVariableItem selected;
-	
+
 	public abstract void refreshEnvironmentVariables();
 
 	public abstract void loadEnvironmentVariables();
@@ -38,7 +37,7 @@ public abstract class AbstractEnvironmentVariablesWizardModel extends Observable
 	public List<EnvironmentVariableItem> getVariables() {
 		return variables;
 	}
-	
+
 	public EnvironmentVariableItem getSelected() {
 		return selected;
 	}
@@ -54,7 +53,7 @@ public abstract class AbstractEnvironmentVariablesWizardModel extends Observable
 		variables.add(variable);
 		firePropertyChange(PROPERTY_VARIABLES, null, variables);
 	}
-	
+
 	protected void remove(EnvironmentVariableItem variable) {
 		variables.remove(variable);
 		firePropertyChange(PROPERTY_VARIABLES, null, variables);
@@ -76,11 +75,11 @@ public abstract class AbstractEnvironmentVariablesWizardModel extends Observable
 	public boolean contains(String name) {
 		return getVariable(name) != null;
 	}
-	
+
 	public abstract boolean isSupported();
-	
+
 	public abstract String getHost();
-	
+
 	protected void clear() {
 		variables.clear();
 		firePropertyChange(PROPERTY_VARIABLES, null, variables);

@@ -50,7 +50,8 @@ public class ServerResourceViewModelWithDeploymentConfigTest {
 	public void setUp() {
 		this.connection = ResourceMocks.create3ProjectsConnection();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
-		this.model = new ServerResourceViewModel(this.selectedDeploymentConfig = ResourceMocks.PROJECT4_DEPLOYMENTCONFIGS[0], connection);
+		this.model = new ServerResourceViewModel(
+				this.selectedDeploymentConfig = ResourceMocks.PROJECT4_DEPLOYMENTCONFIGS[0], connection);
 		model.loadResources();
 	}
 
@@ -136,7 +137,8 @@ public class ServerResourceViewModelWithDeploymentConfigTest {
 	@Test
 	public void shouldReturn1stServiceInListIfInitializedServiceIsNotInListOfAllDeploymentConfigs() {
 		// given
-		IDeploymentConfig otherDeploymentConfig = ResourceMocks.createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
+		IDeploymentConfig otherDeploymentConfig = ResourceMocks.createResource(IDeploymentConfig.class,
+				ResourceKind.DEPLOYMENT_CONFIG);
 		ServerResourceViewModel model = new ServerResourceViewModel(otherDeploymentConfig, connection);
 		model.loadResources();
 		// when
@@ -164,9 +166,9 @@ public class ServerResourceViewModelWithDeploymentConfigTest {
 
 		Connection connection = ResourceMocks.createConnection("http://localhost:8080", "dev@42.org");
 		IProject project = ResourceMocks.createResource(IProject.class, ResourceKind.PROJECT);
-		when(connection.getResources(ResourceKind.PROJECT))
-				.thenReturn(Collections.singletonList(project));
-		IDeploymentConfig deploymentConfig = ResourceMocks.createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
+		when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Collections.singletonList(project));
+		IDeploymentConfig deploymentConfig = ResourceMocks.createResource(IDeploymentConfig.class,
+				ResourceKind.DEPLOYMENT_CONFIG);
 		when(project.getResources(ResourceKind.DEPLOYMENT_CONFIG))
 				.thenReturn(Collections.singletonList(deploymentConfig));
 
@@ -188,9 +190,9 @@ public class ServerResourceViewModelWithDeploymentConfigTest {
 
 		try {
 			IProject project = ResourceMocks.createResource(IProject.class, ResourceKind.PROJECT);
-			when(connection.getResources(ResourceKind.PROJECT))
-					.thenReturn(Collections.singletonList(project));
-			IDeploymentConfig deploymentConfig = ResourceMocks.createResource(IDeploymentConfig.class, ResourceKind.DEPLOYMENT_CONFIG);
+			when(connection.getResources(ResourceKind.PROJECT)).thenReturn(Collections.singletonList(project));
+			IDeploymentConfig deploymentConfig = ResourceMocks.createResource(IDeploymentConfig.class,
+					ResourceKind.DEPLOYMENT_CONFIG);
 			when(project.getResources(ResourceKind.DEPLOYMENT_CONFIG))
 					.thenReturn(Collections.singletonList(deploymentConfig));
 

@@ -26,12 +26,11 @@ public class HttpsPrefixingAdapter {
 
 	private static final String HTTP_SCHEME = "http://";
 	private static final String HTTPS_SCHEME = "https://";
-	
+
 	@SuppressWarnings("rawtypes")
-	private static final Collection CHARACTERS = 
-			Arrays.asList(SWT.CR, SWT.TAB, SWT.DEL, SWT.BS, SWT.ALT, SWT.CTRL, SWT.SHIFT,
-					SWT.ESC, SWT.HOME, SWT.END, SWT.PAGE_DOWN, SWT.PAGE_UP, SWT.INSERT, SWT.CURSOR_ARROW);
-			
+	private static final Collection CHARACTERS = Arrays.asList(SWT.CR, SWT.TAB, SWT.DEL, SWT.BS, SWT.ALT, SWT.CTRL,
+			SWT.SHIFT, SWT.ESC, SWT.HOME, SWT.END, SWT.PAGE_DOWN, SWT.PAGE_UP, SWT.INSERT, SWT.CURSOR_ARROW);
+
 	public void addTo(final Text text) {
 		text.addKeyListener(new SchemePrefixingKeyAdapter() {
 
@@ -43,7 +42,7 @@ public class HttpsPrefixingAdapter {
 			@Override
 			protected void setCursorPosition(int pos) {
 				text.setSelection(pos);
-				
+
 			}
 
 			@Override
@@ -54,36 +53,38 @@ public class HttpsPrefixingAdapter {
 			@Override
 			protected void setText(String string) {
 				text.setText(string);
-			}});
+			}
+		});
 	}
 
 	public void addTo(final Combo combo) {
 		combo.addKeyListener(new SchemePrefixingKeyAdapter() {
 
-				@Override
-				protected int getCursorPosition() {
-					return combo.getCaretPosition();
-				}
+			@Override
+			protected int getCursorPosition() {
+				return combo.getCaretPosition();
+			}
 
-				@Override
-				protected void setCursorPosition(int pos) {
-					combo.setSelection(new Point(pos, pos));
-					
-				}
+			@Override
+			protected void setCursorPosition(int pos) {
+				combo.setSelection(new Point(pos, pos));
 
-				@Override
-				protected String getText() {
-					return combo.getText();
-				}
+			}
 
-				@Override
-				protected void setText(String string) {
-					combo.setText(string);
-				}});
+			@Override
+			protected String getText() {
+				return combo.getText();
+			}
+
+			@Override
+			protected void setText(String string) {
+				combo.setText(string);
+			}
+		});
 	}
 
 	protected abstract class SchemePrefixingKeyAdapter extends KeyAdapter {
-		
+
 		@Override
 		public void keyReleased(KeyEvent e) {
 			if (!isCharacter(e.character)) {
@@ -97,26 +98,26 @@ public class HttpsPrefixingAdapter {
 				return;
 			}
 
-			serverUrl = new StringBuilder()
-					.append(HTTPS_SCHEME)
-					.append(serverUrl)
-					.toString();
+			serverUrl = new StringBuilder().append(HTTPS_SCHEME).append(serverUrl).toString();
 			setText(serverUrl);
 			setCursorPosition(serverUrl.length());
 		}
-
 
 		private boolean isCharacter(char character) {
 			return !CHARACTERS.contains(character);
 		}
 
 		protected boolean matchesAllOrSubstring(String inspected, String requiredBeginning) {
-			return inspected.startsWith(requiredBeginning.substring(0, Math.min(requiredBeginning.length(), inspected.length())));
+			return inspected.startsWith(
+					requiredBeginning.substring(0, Math.min(requiredBeginning.length(), inspected.length())));
 		}
 
 		protected abstract int getCursorPosition();
+
 		protected abstract void setCursorPosition(int pos);
+
 		protected abstract String getText();
+
 		protected abstract void setText(String text);
 	}
 }

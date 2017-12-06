@@ -25,31 +25,34 @@ public abstract class AbstractValidatorTest {
 
 	private static final IStatus PASS = ValidationStatus.ok();
 	private IValidator validator;
-	
+
 	protected AbstractValidatorTest(IValidator validator) {
 		this.validator = validator;
 	}
+
 	protected IValidator getValidator() {
 		return this.validator;
 	}
-	
+
 	protected void assertFailure(Object value) {
 		IStatus act = getValidator().validate(value);
-		assertEquals(String.format("Exp. to receive ERROR status but got %s", getStatus(act.getSeverity())),IStatus.ERROR, act.getSeverity());
+		assertEquals(String.format("Exp. to receive ERROR status but got %s", getStatus(act.getSeverity())),
+				IStatus.ERROR, act.getSeverity());
 	}
 
 	protected void assertCancel(Object value) {
 		IStatus act = getValidator().validate(value);
-		assertEquals(String.format("Exp. to receive CANCEL status but got %s", getStatus(act.getSeverity())),IStatus.CANCEL, act.getSeverity());
+		assertEquals(String.format("Exp. to receive CANCEL status but got %s", getStatus(act.getSeverity())),
+				IStatus.CANCEL, act.getSeverity());
 	}
 
 	protected void assertPass(Object value) {
 		assertEquals(PASS, getValidator().validate(value));
 	}
-	
+
 	protected String getStatus(int severity) {
 		String status = null;
-		switch(severity) {
+		switch (severity) {
 		case IStatus.OK:
 			status = "OK";
 			break;

@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.TabFolder;
  * 
  * @author Viacheslav Kabanovich
  */
-public class TabFolderTraverseListener  implements Listener {
+public class TabFolderTraverseListener implements Listener {
 	TabFolder tabFolder;
 	List<Control> firstControls = new ArrayList<>();
 
@@ -33,11 +33,12 @@ public class TabFolderTraverseListener  implements Listener {
 		this.tabFolder = tabFolder;
 		tabFolder.addListener(SWT.Traverse, this);
 	}
+
 	@Override
 	public void handleEvent(Event event) {
-		if(event.detail == SWT.TRAVERSE_ARROW_NEXT || event.detail == SWT.TRAVERSE_TAB_NEXT) {
+		if (event.detail == SWT.TRAVERSE_ARROW_NEXT || event.detail == SWT.TRAVERSE_TAB_NEXT) {
 			int i = tabFolder.getSelectionIndex();
-			if(i >= 0 && i < firstControls.size() && firstControls.get(i) != null) {
+			if (i >= 0 && i < firstControls.size() && firstControls.get(i) != null) {
 				setFocus(firstControls.get(i));
 				event.doit = false;
 			}
@@ -51,20 +52,20 @@ public class TabFolderTraverseListener  implements Listener {
 	 * @param controls
 	 */
 	public void bindTabControls(int i, final Control... controls) {
-		while(firstControls.size() < i) {
+		while (firstControls.size() < i) {
 			firstControls.add(null);
 		}
-		if(firstControls.size() == i) {
+		if (firstControls.size() == i) {
 			firstControls.add(controls[0]);
 		} else {
 			firstControls.set(i, controls[0]);
 		}
-		for (Control c: controls) {
+		for (Control c : controls) {
 			c.addListener(SWT.Traverse, new Listener() {
 				@Override
 				public void handleEvent(Event event) {
-					if(event.detail == SWT.TRAVERSE_TAB_NEXT) {
-						if(c != controls[controls.length - 1]) {
+					if (event.detail == SWT.TRAVERSE_TAB_NEXT) {
+						if (c != controls[controls.length - 1]) {
 							setFocusToNextSibling(c);
 						} else {
 							setFocusToNextSibling(tabFolder);
@@ -84,8 +85,7 @@ public class TabFolderTraverseListener  implements Listener {
 			if (child == c) {
 				for (int j = i + 1; j < children.length; j++) {
 					Control nc = children[j];
-					if (nc.isEnabled() && nc.isVisible() && ((nc.getStyle() & SWT.NO_FOCUS) == 0) 
-							&& setFocus(nc)) {
+					if (nc.isEnabled() && nc.isVisible() && ((nc.getStyle() & SWT.NO_FOCUS) == 0) && setFocus(nc)) {
 						return;
 					}
 				}

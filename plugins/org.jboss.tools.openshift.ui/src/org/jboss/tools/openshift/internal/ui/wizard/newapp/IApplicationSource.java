@@ -29,35 +29,35 @@ public interface IApplicationSource {
 	 * @return
 	 */
 	String getName();
-	
+
 	/**
 	 * Convenience method to the resource namespace
 	 * @return
 	 */
 	String getNamespace();
-	
+
 	/**
 	 * The source resource (e.g. template, imagestream)
 	 * @return 
 	 */
 	<T extends IResource> T getSource();
-	
+
 	/**
 	 * Get the kind of resource for this
 	 * application source
 	 * @return
 	 */
 	String getKind();
-	
+
 	/**
 	 * The list of tags associated with a source
 	 * @return
 	 */
 	Collection<String> getTags();
-	
+
 	boolean isAnnotatedWith(String key);
-	
+
 	String getAnnotation(String key);
-	
+
 	Map<String, String> getAnnotations();
 }

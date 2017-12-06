@@ -14,11 +14,10 @@ public interface IOpenShiftMarker {
 	public static final IOpenShiftMarker ENABLE_JPA = new BaseOpenShiftMarker("enable_jpda", "Enable JPDA",
 			"Will enable the JPDA socket based transport on the java virtual "
 					+ "machine running the JBoss AS 7 application server. This enables "
-					+ "you to remotely debug code running inside the JBoss AS 7 "
-					+ "application server.");
+					+ "you to remotely debug code running inside the JBoss AS 7 " + "application server.");
 
-	public static final IOpenShiftMarker SKIP_MAVEN_BUILD = new BaseOpenShiftMarker("skip_maven_build", "Skip Maven Build",
-			"Maven build step will be skipped");
+	public static final IOpenShiftMarker SKIP_MAVEN_BUILD = new BaseOpenShiftMarker("skip_maven_build",
+			"Skip Maven Build", "Maven build step will be skipped");
 
 	public static final IOpenShiftMarker FORCE_CLEAN_BUILD = new BaseOpenShiftMarker("force_clean_build",
 			"Force Clean Build",
@@ -28,13 +27,12 @@ public interface IOpenShiftMarker {
 
 	public static final IOpenShiftMarker HOT_DEPLOY = new BaseOpenShiftMarker("hot_deploy", "Hot Deploy",
 			"Will prevent a JBoss container restart during build/deployment. "
-					+ "Newly build archives will be re-deployed automatically by the "
-					+ "JBoss HDScanner component");
+					+ "Newly build archives will be re-deployed automatically by the " + "JBoss HDScanner component");
 
 	public static final IOpenShiftMarker JAVA_7 = new BaseOpenShiftMarker("java7", "Java 7",
 			"Will run JBoss AS7 with Java7 if present. If no marker is present then the "
 					+ "baseline Java version will be used (currently Java6)");
-			
+
 	/**
 	 * Adds this marker to the given project. Returns the new marker if it was
 	 * created, <code>null</code> otherwise.

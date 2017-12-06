@@ -7,7 +7,7 @@
  * 
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
- ******************************************************************************/ 
+ ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal.util;
 
 import java.util.HashMap;
@@ -32,56 +32,55 @@ public class TerminalUtility {
 
 	public static void openConsole(Map<String, Object> props, ITerminalService.Done d) {
 		IViewPart vp = ViewUtils.openTerminalView();
-	   	ITerminalService terminal = TerminalServiceFactory.getService();
+		ITerminalService terminal = TerminalServiceFactory.getService();
 		// If not available, we cannot fulfill this request
 		if (terminal != null) {
 			terminal.openConsole(props, d);
 		}
 	}
-	
+
 	public static Map<String, Object> getPropertiesForServer(IServer s) {
 
 		final Map<String, Object> props = new HashMap<>();
-		String workingDir = s.getAttribute(CDKServer.PROP_FOLDER, (String)null);
+		String workingDir = s.getAttribute(CDKServer.PROP_FOLDER, (String) null);
 		props.put(ITerminalsConnectorConstants.PROP_PROCESS_WORKING_DIR, workingDir);
-		props.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID, "org.eclipse.tm.terminal.connector.local.LocalConnector"); //$NON-NLS-1$
+		props.put(ITerminalsConnectorConstants.PROP_TERMINAL_CONNECTOR_ID,
+				"org.eclipse.tm.terminal.connector.local.LocalConnector"); //$NON-NLS-1$
 		props.put(ITerminalsConnectorConstants.PROP_IP_HOST, "localhost");
 		props.put(ITerminalsConnectorConstants.PROP_TIMEOUT, Integer.valueOf(0));
 		props.put(ITerminalsConnectorConstants.PROP_SSH_KEEP_ALIVE, Integer.valueOf(300));
 		props.put(ITerminalsConnectorConstants.PROP_ENCODING, null);
-		props.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID, "org.eclipse.tm.terminal.connector.local.launcher.local");
+		props.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID,
+				"org.eclipse.tm.terminal.connector.local.launcher.local");
 		props.put(ITerminalsConnectorConstants.PROP_TITLE, s.getName());
-		
+
 		return props;
 	}
-	
-	
+
 	public static ITerminalControlForText findTerminalControl(Map<String, Object> props) {
 		// Do the rest
-		String id = (String)props.get(ITerminalsConnectorConstants.PROP_ID);
-		id =  id != null ? id : IUIConstants.ID;
-		String secondaryId = (String)props.get(ITerminalsConnectorConstants.PROP_SECONDARY_ID);
-		String title = (String)props.get(ITerminalsConnectorConstants.PROP_TITLE);
+		String id = (String) props.get(ITerminalsConnectorConstants.PROP_ID);
+		id = id != null ? id : IUIConstants.ID;
+		String secondaryId = (String) props.get(ITerminalsConnectorConstants.PROP_SECONDARY_ID);
+		String title = (String) props.get(ITerminalsConnectorConstants.PROP_TITLE);
 		Object data = props.get(ITerminalsConnectorConstants.PROP_DATA);
 		final ITerminalConnector connector = createTerminalConnector(props);
-		CTabItem item = ConsoleManager.getInstance().findConsole(id,  secondaryId, title, connector, data);
-		if( item != null ) {
+		CTabItem item = ConsoleManager.getInstance().findConsole(id, secondaryId, title, connector, data);
+		if (item != null) {
 			Object data22 = item.getData();
-			if( data22 instanceof ITerminalControlForText) {
-				return (ITerminalControlForText)data22;
+			if (data22 instanceof ITerminalControlForText) {
+				return (ITerminalControlForText) data22;
 			}
 		}
 		return null;
 	}
-	
-	
 
 	private static ITerminalConnector createTerminalConnector(Map<String, Object> properties) {
 		Assert.isNotNull(properties);
 		// The terminal connector result object
 		ITerminalConnector connector = null;
 		// Get the launcher delegate id from the properties
-		String delegateId = (String)properties.get(ITerminalsConnectorConstants.PROP_DELEGATE_ID);
+		String delegateId = (String) properties.get(ITerminalsConnectorConstants.PROP_DELEGATE_ID);
 		if (delegateId != null) {
 			// Get the launcher delegate
 			ILauncherDelegate delegate = LauncherDelegateManager.getInstance().getLauncherDelegate(delegateId, false);
@@ -92,5 +91,5 @@ public class TerminalUtility {
 		}
 		return connector;
 	}
-	
+
 }

@@ -27,14 +27,15 @@ import com.openshift.restclient.model.IResource;
  * @author jeff.cantrill
  *
  */
-public class StartBuildHandler extends AbstractHandler{
-	
+public class StartBuildHandler extends AbstractHandler {
+
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException { 
+	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = UIUtils.getCurrentSelection(event);
 		IResource buildAble = UIUtils.getFirstElement(selection, IResource.class);
-		if(buildAble == null || buildAble.getCapability(IBuildTriggerable.class) == null) {
-			MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Trigger Build", "A build or build config must be selected in order to trigger a build.");
+		if (buildAble == null || buildAble.getCapability(IBuildTriggerable.class) == null) {
+			MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Trigger Build",
+					"A build or build config must be selected in order to trigger a build.");
 			return null;
 		}
 		new StartBuildJob(buildAble).schedule();
