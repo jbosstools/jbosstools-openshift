@@ -660,8 +660,8 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 				debugPortText.setEnabled(true);
 			}
 
-			String devModeCurrentVal = input.getServer().getAttribute(OpenShiftServerUtils.ATTR_DEVMODE_KEY, (String)null);
-			if( currentVal == null ) {
+			String devModeCurrentVal = input.getServer().getAttribute(OpenShiftServerUtils.ATTR_DEVMODE_KEY, (String) null);
+			if (StringUtils.isEmpty(devModeCurrentVal)) {
 				useImageDevmodeKeyButton.setSelection(true);
 			} else {
 				useImageDevmodeKeyButton.setSelection(false);
