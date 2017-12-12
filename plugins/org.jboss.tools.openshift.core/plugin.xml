@@ -258,8 +258,7 @@
                serverTypes="org.jboss.tools.openshift.server.type">
          </subsystemMapping>
    	</extension>
-   	
-   	
+
    	<extension
           point="org.jboss.ide.eclipse.as.wtp.core.serverProfile">
        <serverProfile id="openshift3" serverTypes="org.jboss.tools.openshift.server.type">
@@ -283,8 +282,7 @@
              class="org.jboss.tools.openshift.core.server.OpenshiftJMXConnectionProvider">
        </connectionProvider>
     </extension>
-    
-    
+
 	<extension
           point="org.eclipse.core.runtime.adapters">
        <factory
@@ -295,11 +293,11 @@
           </adapter>
        </factory>
     </extension>
- <extension
-       point="org.jboss.tools.openshift.core.serverAdapterProfileDetector">
-    <detector
-          class="org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector">
-    </detector>
- </extension>
+	<extension
+		point="org.jboss.tools.openshift.core.serverAdapterProfileDetector">
+		<detector
+			class="org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector">
+		</detector>
+	</extension>
     
 </plugin>

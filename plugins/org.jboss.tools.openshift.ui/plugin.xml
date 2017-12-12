@@ -1910,14 +1910,45 @@
       </providerUI>
    </extension>
    <extension
-         point="org.eclipse.core.expressions.propertyTesters">
-      <propertyTester
-            class="org.jboss.tools.openshift.ui.internal.propertytester.ServerAdapterPropertyTester"
-            id="org.jboss.tools.openshift.ui.serverAdapterPropertyTester"
-            namespace="org.jboss.tools.openshift.ui"
-            properties="isServerAdapterAllowed"
-            type="com.openshift.restclient.model.IResource">
-      </propertyTester>
-   </extension>
+		point="org.eclipse.core.expressions.propertyTesters">
+		<propertyTester
+			class="org.jboss.tools.openshift.ui.internal.propertytester.ServerAdapterPropertyTester"
+			id="org.jboss.tools.openshift.ui.serverAdapterPropertyTester"
+			namespace="org.jboss.tools.openshift.ui"
+			properties="isServerAdapterAllowed"
+			type="com.openshift.restclient.model.IResource">
+		</propertyTester>
+	</extension>
+   
+	<!-- Kubernetes editor -->
+	<extension
+		point="org.eclipse.core.contenttype.contentTypes">
+		<content-type
+			file-extensions="json,yml"
+			id="org.jboss.tools.openshift.kubernetesContentType"
+			base-type="org.eclipse.core.runtime.text"
+			name="Kubernetes"
+			priority="normal">
+		</content-type>
+	</extension>
+	<extension
+		point="org.eclipse.lsp4e.languageServer">
+		<server
+			class="org.jboss.tools.openshift.ui.kubernetes.YamlLanguageServerStreamConnectionProvider"
+			id="org.jboss.tools.openshift.ui.kubernetes.server"
+			label="Yaml Language Server">
+		</server>
+		<contentTypeMapping
+			contentType="org.jboss.tools.openshift.kubernetesContentType"
+			id="org.jboss.tools.openshift.ui.kubernetes.server">
+		</contentTypeMapping>
+    	</extension>
+	<extension
+		point="org.eclipse.ui.editors">
+		<editorContentTypeBinding
+			contentTypeId="org.jboss.tools.openshift.kubernetesContentType"
+			editorId="org.eclipse.ui.genericeditor.GenericEditor">
+		</editorContentTypeBinding>
+	</extension>
 
 </plugin>

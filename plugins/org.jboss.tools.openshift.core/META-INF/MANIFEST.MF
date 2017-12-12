@@ -34,7 +34,8 @@ Require-Bundle: org.jboss.tools.openshift.client;bundle-version="[3.0.0,4.0.0)",
  org.jboss.tools.jmx.jolokia;bundle-version="1.8.2",
  org.jboss.ide.eclipse.as.jmx.integration,
  org.eclipse.linuxtools.docker.core,
- org.apache.commons.collections
+ org.apache.commons.collections,
+ org.eclipse.lsp4e;bundle-version="0.4.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.openshift.core,
