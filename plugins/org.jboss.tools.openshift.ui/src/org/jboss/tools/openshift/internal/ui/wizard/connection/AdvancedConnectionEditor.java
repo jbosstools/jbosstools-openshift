@@ -172,32 +172,14 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				overrideOCObservable.addValueChangeListener(new IValueChangeListener<Boolean>() {
 					@Override
 					public void handleValueChange(ValueChangeEvent<? extends Boolean> event) {
-						if (!overrideOCObservable.getValue()) {
-							ocLocationObservable.setValue(OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation());
-						}
+						updateOcObservables();
 					}
 				});
 
 				ocLocationBinding.getValidationStatus().addValueChangeListener(new IValueChangeListener<IStatus>() {
-
 					@Override
 					public void handleValueChange(ValueChangeEvent<? extends IStatus> event) {
-						String location = model.getOcOverrideLocation();
-						IStatus ocLocationStatus = validateOCLocation(location);
-						ocLocationValidity.setValue(ocLocationStatus);
-						if (ocLocationStatus.isOK()) {
-							ocVersionValidity.setValue(ValidationStatus.cancel("Verifying oc version..."));
-							OCVersionValidationJob job = new OCVersionValidationJob(model.getOcOverrideLocation());
-							job.addJobChangeListener(new JobChangeAdapter() {
-
-								@Override
-								public void done(IJobChangeEvent event) {
-									ocVersionValidity.getRealm()
-											.exec(() -> ocVersionValidity.setValue(job.getOCVersionValidity()));
-								}
-							});
-							job.schedule();
-						}
+						updateOcObservables();
 					}
 				});
 				ValueBindingBuilder.bind(overrideOCObservable).to(WidgetProperties.enabled().observe(ocText))
@@ -243,18 +225,14 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 					@Override
 					protected IStatus validate() {
 						// access all observables that the framework should listen to
-						Boolean overrideOC = overrideOCObservable.getValue();
-						String ocLocation = ocLocationObservable.getValue();
 						IStatus ocLocationStatus = ocLocationValidity.getValue();
 						IStatus ocVersionStatus = ocVersionValidity.getValue();
 
 						IStatus status = Status.OK_STATUS;
-						if (Boolean.TRUE.equals(overrideOC)) {
-							if (!ocLocationStatus.isOK()) {
-								status = ocLocationStatus;
-							} else {
-								status = ocVersionStatus;
-							}
+						if (!ocLocationStatus.isOK()) {
+							status = ocLocationStatus;
+						} else {
+							status = ocVersionStatus;
 						}
 						return status;
 					}
@@ -271,10 +249,39 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		};
 		part.createAdvancedGroup(composite, 1);
 		this.connectionAdvancedPropertiesProvider = new ConnectionAdvancedPropertiesProvider();
-
+		updateOcObservables();
 		return composite;
 	}
 
+	private void updateOcObservables() {
+		boolean override = model.getOcOverride();
+		String location;
+		if( override ) {
+			location = model.getOcOverrideLocation();
+		} else {
+			location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
+		}
+		updateOcObservables(location, override);
+	}
+
+	private void updateOcObservables(String location, boolean override) {
+		IStatus ocLocationStatus = validateOCLocation(location, override);
+		ocLocationValidity.setValue(ocLocationStatus);
+		if (ocLocationStatus.isOK()) {
+			ocVersionValidity.setValue(ValidationStatus.cancel("Verifying oc version..."));
+			OCVersionValidationJob job = new OCVersionValidationJob(model.getOcOverrideLocation());
+			job.addJobChangeListener(new JobChangeAdapter() {
+
+				@Override
+				public void done(IJobChangeEvent event) {
+					ocVersionValidity.getRealm().exec(() ->							
+						ocVersionValidity.setValue(job.getOCVersionValidity()));
+				}});
+			job.schedule();
+		}
+	}
+	
+	
 	private void discoverRegistryPressed(Shell shell) {
 		IConnection tmp = pageModel.createConnection();
 		IStatus ret = RegistryProviderModel.getDefault().getRegistryURL(tmp);
@@ -310,21 +317,35 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 			return false;
 		return s1.equals(s2);
 	}
-
-	private IStatus validateOCLocation(String location) {
+	
+	private IStatus validateOCLocation(String location, boolean override) {
 		IStatus validity = ValidationStatus.ok();
 		if (StringUtils.isBlank(location)) {
-			validity = ValidationStatus.error("Please provide a location for the OC binary.");
+			if( override )
+				validity = ValidationStatus.error("Please provide a location for the OC binary.");
+			else {
+				validity = ValidationStatus.error("The workspace setting for the OC binary is not set. Please update the workspace setting or override the location here in the 'Advanced' section.");
+			}
 		} else {
 			File file = new File(location);
 			// Error messages have to be set to field editor, not directly to
 			// the page.
-			if (!file.exists()) {
-				validity = ValidationStatus.error((NLS.bind("{0} was not found.", file)));
-			} else if (file.isDirectory()) {
-				validity = ValidationStatus.error((NLS.bind("OC Location must be a file.", file)));
-			} else if (!file.canExecute()) {
-				validity = ValidationStatus.error(NLS.bind("{0} does not have execute permissions.", file));
+			if( override ) {
+				if (!file.exists()) {
+					validity = ValidationStatus.error((NLS.bind("{0} was not found.", file)));
+				} else if (file.isDirectory()) {
+					validity = ValidationStatus.error((NLS.bind("OC Location must be a file.", file)));
+				} else if (!file.canExecute()) {
+					validity = ValidationStatus.error(NLS.bind("{0} does not have execute permissions.", file));
+				}
+			} else {
+				if (!file.exists()) {
+					validity = ValidationStatus.error((NLS.bind("Workspace setting for OC binary location was not found: {0}", file)));
+				} else if (file.isDirectory()) {
+					validity = ValidationStatus.error((NLS.bind("Workspace setting for OC binary location is not a file: {0}", file)));
+				} else if (!file.canExecute()) {
+					validity = ValidationStatus.error(NLS.bind("Workspace setting for OC binary location does not have execute permissions: {0}", file));
+				}
 			}
 		}
 		return validity;
