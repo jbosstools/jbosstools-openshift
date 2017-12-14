@@ -384,7 +384,7 @@ public class OpenShiftDebugMode {
 		} catch (OpenShiftException e) {
 			throw new CoreException(
 					StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-							NLS.bind("Could update resource {0}.", resource.getName()), e));
+							NLS.bind("Could not update resource {0}.", resource.getName()), e));
 		}
 	}
 
