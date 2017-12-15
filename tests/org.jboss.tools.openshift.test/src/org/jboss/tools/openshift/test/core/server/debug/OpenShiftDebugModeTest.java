@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -485,6 +486,24 @@ public class OpenShiftDebugModeTest {
 		verify(debugMode, atLeastOnce()).send(eq(route), eq(connection), any(IProgressMonitor.class));
 		// backup stored
 		verify(serverWorkingCopy).setAttribute(OpenShiftServerUtils.ATTR_DEBUG_ROUTE_TIMEOUT, "4242");
+	}
+
+	@Test
+	public void shouldNotCreateLivenessProbeIfDoesntExistYet() throws CoreException {
+		// given
+		IContainer container = createContainer(
+				"someDc-container1", 
+				Collections.singleton(createPort(NumberUtils.toInt(VALUE_DEBUGPORT))), 
+				null, // no lifeness probe
+				createProbe(20, 21, 22, 23, 24));
+		mockGetContainers(
+				Arrays.asList(container),
+				dc);
+		// when
+		context.setDebugEnabled(true);
+		debugMode.execute(new NullProgressMonitor());
+		// then
+		assertThat(container.getLivenessProbe()).isNull();
 	}
 
 	@Test
