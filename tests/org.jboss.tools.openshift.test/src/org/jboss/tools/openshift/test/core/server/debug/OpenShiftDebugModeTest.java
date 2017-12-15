@@ -458,14 +458,10 @@ public class OpenShiftDebugModeTest {
 	@Test
 	public void shouldNotCreateLivenessProbeIfDoesntExistYet() throws CoreException {
 		// given
-		IContainer container = createContainer(
-				"someDc-container1", 
-				Collections.singleton(createPort(NumberUtils.toInt(VALUE_DEBUGPORT))), 
-				null, // no lifeness probe
+		IContainer container = createContainer("someDc-container1",
+				Collections.singleton(createPort(NumberUtils.toInt(VALUE_DEBUGPORT))), null, // no lifeness probe
 				createProbe(20, 21, 22, 23, 24));
-		mockGetContainers(
-				Arrays.asList(container),
-				dc);
+		mockGetContainers(Arrays.asList(container), dc);
 		// when
 		context.setDebugEnabled(true);
 		debugMode.execute(new NullProgressMonitor());

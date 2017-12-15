@@ -62,8 +62,7 @@ public class OpenShiftDebugMode {
 
 	/**
 	 * Enables debugging in given context. Debugging implies devmode being enabled,
-	 * too. 
-	 * No change is executed in OpenShift, the change is only in the given
+	 * too. No change is executed in OpenShift, the change is only in the given
 	 * local context. To have the changes set to OpenShift one has to call
 	 * {@link #send(DebugContext, IProgressMonitor)}
 	 * 
@@ -117,9 +116,9 @@ public class OpenShiftDebugMode {
 	}
 
 	/**
-	 * Enables devmode in given context.  No change is
-	 * executed in OpenShift, the change is only in the given local context. To have
-	 * the changes set to OpenShift one has to call
+	 * Enables devmode in given context. No change is executed in OpenShift, the
+	 * change is only in the given local context. To have the changes set to
+	 * OpenShift one has to call
 	 * {@link #sendChanges(DebugContext, IProgressMonitor)}
 	 * 
 	 * @param context
@@ -131,9 +130,9 @@ public class OpenShiftDebugMode {
 	}
 
 	/**
-	 * Disables devmode in given context.  No change is
-	 * executed in OpenShift, the change is only in the given local context. To have
-	 * the changes set to OpenShift one has to call
+	 * Disables devmode in given context. No change is executed in OpenShift, the
+	 * change is only in the given local context. To have the changes set to
+	 * OpenShift one has to call
 	 * {@link #sendChanges(DebugContext, IProgressMonitor)}
 	 * 
 	 * @param context
@@ -379,9 +378,8 @@ public class OpenShiftDebugMode {
 		try {
 			connection.updateResource(resource);
 		} catch (OpenShiftException e) {
-			throw new CoreException(
-					StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-							NLS.bind("Could not update resource {0}.", resource.getName()), e));
+			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
+					NLS.bind("Could not update resource {0}.", resource.getName()), e));
 		}
 	}
 
@@ -401,7 +399,7 @@ public class OpenShiftDebugMode {
 		try {
 			podDetector.join(NewPodDetectorJob.TIMEOUT, monitor);
 			IStatus result = podDetector.getResult();
-			if (result == null) {//timed out!
+			if (result == null) {// timed out!
 				throw new CoreException(podDetector.getTimeOutStatus());
 			} else if (!result.isOK()) {
 				throw new CoreException(result);

@@ -552,7 +552,7 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 				new ResourceSummaryDialog(getShell(), template.getObjects(), "Template Details",
 						NLS.bind("The following resources will be created by using template\n\"{0}\":",
 								template.getName()),
-						new ResourceDetailsLabelProvider(template.getParameters()), 
+						new ResourceDetailsLabelProvider(template.getParameters()),
 						new ResourceDetailsContentProvider()).open();
 			}
 		};

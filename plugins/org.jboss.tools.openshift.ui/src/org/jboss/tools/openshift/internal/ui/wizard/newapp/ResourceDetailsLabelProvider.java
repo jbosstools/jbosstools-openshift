@@ -33,12 +33,12 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 	private static final String LABEL_NOT_PROVIDED = "(Not Provided)";
 	private static final String LABEL_UNKNOWN = "(Unknown)";
 	private static final String LABEL_UNKNOWN_PARAMETER = "(Unknown parameter {0})";
-	
+
 	private Map<String, IParameter> templateParameters;
-	
+
 	public ResourceDetailsLabelProvider(Map<String, IParameter> templateParameters) {
-	    super();
-	    this.templateParameters = templateParameters;
+		super();
+		this.templateParameters = templateParameters;
 	}
 
 	@Override
@@ -86,22 +86,22 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 		}
 		return null;
 	}
-	
+
 	private String replaceParameters(String str) {
-	    StringBuffer result = new StringBuffer();
-	    Pattern p = Pattern.compile("\\$\\{[^}]+\\}");
-	    Matcher m = p.matcher(str);
-	    while (m.find()) {
-	        String parameterVariable = m.group();
-	        String parameterName = parameterVariable.substring(2, parameterVariable.length() - 1);
-	        if (this.templateParameters.containsKey(parameterName)) {
-	            m.appendReplacement(result, this.templateParameters.get(parameterName).getValue());
-	        } else {
-	            m.appendReplacement(result, NLS.bind(LABEL_UNKNOWN_PARAMETER, parameterName));
-	        }
-	    }
-	    m.appendTail(result);
-	    return result.toString();
+		StringBuffer result = new StringBuffer();
+		Pattern p = Pattern.compile("\\$\\{[^}]+\\}");
+		Matcher m = p.matcher(str);
+		while (m.find()) {
+			String parameterVariable = m.group();
+			String parameterName = parameterVariable.substring(2, parameterVariable.length() - 1);
+			if (this.templateParameters.containsKey(parameterName)) {
+				m.appendReplacement(result, this.templateParameters.get(parameterName).getValue());
+			} else {
+				m.appendReplacement(result, NLS.bind(LABEL_UNKNOWN_PARAMETER, parameterName));
+			}
+		}
+		m.appendTail(result);
+		return result.toString();
 	}
 
 	@Override
