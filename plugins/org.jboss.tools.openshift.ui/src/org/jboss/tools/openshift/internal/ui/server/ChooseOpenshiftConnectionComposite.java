@@ -188,7 +188,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 	private void validateOCLocation() {
 		if (selectedConnection != null) {
 			String ocValString = OCBinary.getInstance().getLocation(selectedConnection);
-			if (ocValString == null || ocValString.isEmpty()) {
+			if (StringUtils.isEmpty(ocValString)) {
 				ocLocationDecorator.show();
 				ocLocationDecorator.setImage(FieldDecorationRegistry.getDefault()
 						.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
