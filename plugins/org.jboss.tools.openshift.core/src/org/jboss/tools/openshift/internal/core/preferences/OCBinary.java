@@ -112,12 +112,12 @@ public enum OCBinary {
 	}
 
 	public String getLocation(IConnection connection) {
-		if( connection instanceof IOpenShiftConnection ) {
-			IOpenShiftConnection c = (IOpenShiftConnection)connection;
-			Boolean override = (Boolean)c.getExtendedProperties().get(ICommonAttributes.OC_OVERRIDE_KEY);
-			if( override.booleanValue()) {
-				String loc = (String)c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
-				if( loc != null && !loc.isEmpty())
+		if (connection instanceof IOpenShiftConnection) {
+			IOpenShiftConnection c = (IOpenShiftConnection) connection;
+			Boolean override = (Boolean) c.getExtendedProperties().get(ICommonAttributes.OC_OVERRIDE_KEY);
+			if (override.booleanValue()) {
+				String loc = (String) c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
+				if (loc != null && !loc.isEmpty())
 					return loc;
 			}
 		}

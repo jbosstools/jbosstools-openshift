@@ -64,7 +64,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 	private List<IConnection> connections;
 	private IConnection selectedConnection;
 	private ControlDecoration ocLocationDecorator;
-	
+
 	public ChooseOpenshiftConnectionComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		createComposite(this);
@@ -186,18 +186,20 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 	}
 
 	private void validateOCLocation() {
-		if( selectedConnection != null ) {
+		if (selectedConnection != null) {
 			String ocValString = OCBinary.getInstance().getLocation(selectedConnection);
-			if( ocValString == null || ocValString.isEmpty()) {
+			if (ocValString == null || ocValString.isEmpty()) {
 				ocLocationDecorator.show();
-				ocLocationDecorator.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
-				ocLocationDecorator.setDescriptionText("The selected connection does not have an 'oc' command associated with it. Please edit the connection or modify your workspace settings to add one.");
+				ocLocationDecorator.setImage(FieldDecorationRegistry.getDefault()
+						.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+				ocLocationDecorator.setDescriptionText(
+						"The selected connection does not have an 'oc' command associated with it. Please edit the connection or modify your workspace settings to add one.");
 			} else {
 				ocLocationDecorator.hide();
 			}
 		}
 	}
-	
+
 	private void refreshConnections() {
 		String selectedName = selectedConnection == null ? null : createLabel(selectedConnection);
 
@@ -240,7 +242,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 				clusterNamespaceValLbl.setText("");
 			}
 			String ocValString = OCBinary.getInstance().getLocation(con);
-			if( ocValString == null )
+			if (ocValString == null)
 				ocValString = "";
 			ocLocationValLbl.setText(ocValString);
 			validateOCLocation();

@@ -256,7 +256,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	private void updateOcObservables() {
 		boolean override = model.getOcOverride();
 		String location;
-		if( override ) {
+		if (override) {
 			location = model.getOcOverrideLocation();
 		} else {
 			location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
@@ -274,14 +274,13 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 
 				@Override
 				public void done(IJobChangeEvent event) {
-					ocVersionValidity.getRealm().exec(() ->							
-						ocVersionValidity.setValue(job.getOCVersionValidity()));
-				}});
+					ocVersionValidity.getRealm().exec(() -> ocVersionValidity.setValue(job.getOCVersionValidity()));
+				}
+			});
 			job.schedule();
 		}
 	}
-	
-	
+
 	private void discoverRegistryPressed(Shell shell) {
 		IConnection tmp = pageModel.createConnection();
 		IStatus ret = RegistryProviderModel.getDefault().getRegistryURL(tmp);
@@ -317,20 +316,21 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 			return false;
 		return s1.equals(s2);
 	}
-	
+
 	private IStatus validateOCLocation(String location, boolean override) {
 		IStatus validity = ValidationStatus.ok();
 		if (StringUtils.isBlank(location)) {
-			if( override )
+			if (override)
 				validity = ValidationStatus.error("Please provide a location for the OC binary.");
 			else {
-				validity = ValidationStatus.error("The workspace setting for the OC binary is not set. Please update the workspace setting or override the location here in the 'Advanced' section.");
+				validity = ValidationStatus.error(
+						"The workspace setting for the OC binary is not set. Please update the workspace setting or override the location here in the 'Advanced' section.");
 			}
 		} else {
 			File file = new File(location);
 			// Error messages have to be set to field editor, not directly to
 			// the page.
-			if( override ) {
+			if (override) {
 				if (!file.exists()) {
 					validity = ValidationStatus.error((NLS.bind("{0} was not found.", file)));
 				} else if (file.isDirectory()) {
@@ -340,11 +340,14 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				}
 			} else {
 				if (!file.exists()) {
-					validity = ValidationStatus.error((NLS.bind("Workspace setting for OC binary location was not found: {0}", file)));
+					validity = ValidationStatus
+							.error((NLS.bind("Workspace setting for OC binary location was not found: {0}", file)));
 				} else if (file.isDirectory()) {
-					validity = ValidationStatus.error((NLS.bind("Workspace setting for OC binary location is not a file: {0}", file)));
+					validity = ValidationStatus
+							.error((NLS.bind("Workspace setting for OC binary location is not a file: {0}", file)));
 				} else if (!file.canExecute()) {
-					validity = ValidationStatus.error(NLS.bind("Workspace setting for OC binary location does not have execute permissions: {0}", file));
+					validity = ValidationStatus.error(NLS.bind(
+							"Workspace setting for OC binary location does not have execute permissions: {0}", file));
 				}
 			}
 		}
