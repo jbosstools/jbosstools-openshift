@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
@@ -114,9 +115,12 @@ public enum OCBinary {
 	public String getLocation(IConnection connection) {
 		if (connection instanceof IOpenShiftConnection) {
 			IOpenShiftConnection c = (IOpenShiftConnection) connection;
-			String loc = (String) c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
-			if (loc != null && !loc.isEmpty())
-				return loc;
+			Boolean override = (Boolean) c.getExtendedProperties().get(ICommonAttributes.OC_OVERRIDE_KEY);
+			if (Boolean.TRUE.equals(override)) {
+				String loc = (String) c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
+				if (StringUtils.isEmpty(loc))
+					return loc;
+			}
 		}
 
 		return getWorkspaceLocation();

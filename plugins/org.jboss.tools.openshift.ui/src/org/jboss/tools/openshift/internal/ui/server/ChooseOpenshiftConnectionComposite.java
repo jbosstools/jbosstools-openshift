@@ -21,6 +21,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -61,6 +63,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 
 	private List<IConnection> connections;
 	private IConnection selectedConnection;
+	private ControlDecoration ocLocationDecorator;
 
 	public ChooseOpenshiftConnectionComposite(Composite parent) {
 		super(parent, SWT.NONE);
@@ -68,7 +71,6 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 	}
 
 	public Composite createComposite(Composite main) {
-
 		main.setLayout(new GridLayout(5, true));
 		GridData gd = new GridData();
 		gd.grabExcessHorizontalSpace = true;
@@ -115,8 +117,8 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 				int ind = connections.indexOf(c);
 				if (ind != -1) {
 					connectionCombo.select(ind);
+					setSelectedConnection(c);
 				}
-
 			}
 		});
 
@@ -158,6 +160,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 		Label ocLocationLbl = new Label(advancedGroup, SWT.NONE);
 		ocLocationLbl.setText("OC Binary Location: ");
 		ocLocationValLbl = new Label(advancedGroup, SWT.NONE);
+		ocLocationDecorator = new ControlDecoration(ocLocationValLbl, SWT.TOP | SWT.LEFT);
 		GridDataFactory.fillDefaults().span(5, 1).applyTo(ocLocationValLbl);
 
 		// Load the model
@@ -180,6 +183,21 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 		int selIndex = connectionCombo.getSelectionIndex();
 		editConBtn.setEnabled(selIndex != -1);
 		return main;
+	}
+
+	private void validateOCLocation() {
+		if (selectedConnection != null) {
+			String ocValString = OCBinary.getInstance().getLocation(selectedConnection);
+			if (StringUtils.isEmpty(ocValString)) {
+				ocLocationDecorator.show();
+				ocLocationDecorator.setImage(FieldDecorationRegistry.getDefault()
+						.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+				ocLocationDecorator.setDescriptionText(
+						"The selected connection does not have an 'oc' command associated with it. Please edit the connection or modify your workspace settings to add one.");
+			} else {
+				ocLocationDecorator.hide();
+			}
+		}
 	}
 
 	private void refreshConnections() {
@@ -223,7 +241,11 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 				imageRegistryValLbl.setText("");
 				clusterNamespaceValLbl.setText("");
 			}
-			ocLocationValLbl.setText(OCBinary.getInstance().getLocation(con));
+			String ocValString = OCBinary.getInstance().getLocation(con);
+			if (ocValString == null)
+				ocValString = "";
+			ocLocationValLbl.setText(ocValString);
+			validateOCLocation();
 		} else {
 			serverValueLbl.setText("");
 			protocolValLbl.setText("");
