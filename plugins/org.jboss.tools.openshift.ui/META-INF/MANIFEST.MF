@@ -85,5 +85,5 @@ Export-Package: org.jboss.tools.openshift.internal.ui;x-friends:="org.jboss.tool
  org.jboss.tools.openshift.internal.ui.wizard.project;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.ui.wizard.resource;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.ui.internal.propertytester;x-friends:="org.jboss.tools.openshift.test,org.jboss.tools.openshift.reddeer"
-Bundle-ClassPath: lib/commons-validator-1.5.1.jar,
+Bundle-ClassPath: lib/commons-validator-1.6.jar,
  .
