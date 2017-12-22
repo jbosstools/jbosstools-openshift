@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -8,15 +8,12 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Iterator;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.ListChangeEvent;
 import org.eclipse.core.databinding.observable.map.ObservableMap;
 import org.eclipse.core.databinding.observable.map.WritableMap;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -32,9 +29,7 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -65,8 +60,8 @@ import org.jboss.tools.openshift.internal.ui.wizard.newapp.EditValueDialog;
 import com.openshift.restclient.model.template.IParameter;
 
 /**
- * The template parameter page that allows viewing
- * and editing of a template's input parameters
+ * The template parameter page that allows viewing and editing of a template's
+ * input parameters
  * 
  * @author jeff.cantrill
  * @author Andre Dietisheim
@@ -156,37 +151,27 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(2, 1).hint(SWT.DEFAULT, 106)
 				.applyTo(detailsContainer);
 		new TemplateParameterDetailViews(selectedParameter, detailsContainer, dbc).createControls();
-		((ApplicationSourceFromTemplateModel) model).addPropertyChangeListener(new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if (ApplicationSourceFromTemplateModel.PROPERTY_MODIFIED_PARAMETER.equals(evt.getPropertyName())) {
-					viewer.refresh(evt.getNewValue());
-				}
+		((ApplicationSourceFromTemplateModel) model).addPropertyChangeListener(evt -> {
+			if (ApplicationSourceFromTemplateModel.PROPERTY_MODIFIED_PARAMETER.equals(evt.getPropertyName())) {
+				viewer.refresh(evt.getNewValue());
 			}
 		});
 	}
 
 	private IListChangeListener<IParameter> onParametersChanged(final TableViewerCellDecorationManager cellDecorations,
 			final ObservableMap<String, IStatus> validationStatusByParameter) {
-		return new IListChangeListener<IParameter>() {
-
-			@Override
-			public void handleListChange(ListChangeEvent<? extends IParameter> event) {
-				// new list of parameters, clear current validation status
-				validationStatusByParameter.clear();
-				cellDecorations.hideAll();
-			}
+		return event -> {
+			// new list of parameters, clear current validation status
+			validationStatusByParameter.clear();
+			cellDecorations.hideAll();
 		};
 	}
 
 	private IDoubleClickListener onDoubleClick() {
-		return new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-				IParameter param = (IParameter) selection.getFirstElement();
-				openEditDialog(param);
-			}
+		return event -> {
+			IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+			IParameter param = (IParameter) selection.getFirstElement();
+			openEditDialog(param);
 		};
 	}
 
@@ -203,9 +188,7 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 				table);
 		DataBindingUtils.addDisposableListChangeListener(
 				onParametersChanged(decorations, cellsValidationStatusObservable), parametersObservable, table);
-		TableViewer viewer = buildTableViewer(table, tableContainer, cellsValidationStatusObservable, decorations);
-		viewer.setComparator(new TemplateParameterViewerUtils.ParameterNameViewerComparator());
-		viewer.setContentProvider(new ObservableListContentProvider());
+		TableViewer tableViewer = buildTableViewer(table, tableContainer, cellsValidationStatusObservable, decorations);
 
 		// cells validity
 		dbc.addValidationStatusProvider(new MultiValidator() {
@@ -222,89 +205,90 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 				return ValidationStatus.ok();
 			}
 		});
-		return viewer;
+		return tableViewer;
 	}
 
 	private TableViewer buildTableViewer(Table table, Composite tableContainer,
 			ObservableMap<String, IStatus> cellsValidationStatusObservable,
 			TableViewerCellDecorationManager decorations) {
 		final TableViewerBuilder builder = new TableViewerBuilder(table, tableContainer);
-		TableViewer viewer = builder.contentProvider(new ArrayContentProvider()).column(new CellLabelProvider() {
 
-			@Override
-			public void update(ViewerCell cell) {
-				Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+		TableViewer tableViewer = builder.contentProvider(new ObservableListContentProvider())
+				.column(new CellLabelProvider() {
 
-				IParameter parameter = (IParameter) cell.getElement();
-				String label = parameter.getName();
-				if (parameter.isRequired()) {
-					label = markRequired(label);
-				}
-				cell.setText(label);
-			}
+					@Override
+					public void update(ViewerCell cell) {
+						Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
 
-			private String markRequired(String label) {
-				return label += " *";
-			}
-
-			@Override
-			public String getToolTipText(Object object) {
-				Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
-
-				return ((IParameter) object).getDescription();
-			}
-
-			@Override
-			public int getToolTipDisplayDelayTime(Object object) {
-				return 0;
-			}
-		}).name("Name").align(SWT.LEFT).weight(1).minWidth(180).buildColumn().column(new CellLabelProvider() {
-
-			@Override
-			public void update(ViewerCell cell) {
-				Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
-
-				final IParameter parameter = (IParameter) cell.getElement();
-				String label = TemplateParameterViewerUtils.getValueLabel(parameter);
-				cell.setText(label);
-
-				boolean italic = ((ApplicationSourceFromTemplateModel) model).isParameterModified(parameter);
-				builder.applyFont(cell, italic);
-
-				IStatus validationStatus = validate(parameter);
-				cellsValidationStatusObservable.put(parameter.getName(), validationStatus);
-				decorations.toggle(!validationStatus.isOK(), cell);
-			}
-
-			private IStatus validate(IParameter parameter) {
-				if (parameter.isRequired()) {
-					if (StringUtils.isEmpty(parameter.getValue())
-							&& StringUtils.isEmpty(parameter.getGeneratorName())) {
-						return ValidationStatus.error(
-								NLS.bind("Parameter {0} is required, please provide a value.", parameter.getName()));
+						IParameter parameter = (IParameter) cell.getElement();
+						String label = parameter.getName();
+						if (parameter.isRequired()) {
+							label = markRequired(label);
+						}
+						cell.setText(label);
 					}
-				}
-				IStatus status = gitSourceValidator.validate(parameter);
-				if (!status.isOK()) {
-					return status;
-				}
-				return ValidationStatus.ok();
-			}
 
-			@Override
-			public String getToolTipText(Object object) {
-				Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+					private String markRequired(String label) {
+						return label += " *";
+					}
 
-				return ((IParameter) object).getDescription();
-			}
+					@Override
+					public String getToolTipText(Object object) {
+						Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
 
-			@Override
-			public int getToolTipDisplayDelayTime(Object object) {
-				return 0;
-			}
+						return ((IParameter) object).getDescription();
+					}
 
-		}).name("Value").align(SWT.LEFT).weight(1).buildColumn().buildViewer();
-		return viewer;
+					@Override
+					public int getToolTipDisplayDelayTime(Object object) {
+						return 0;
+					}
+				}).name("Name").align(SWT.LEFT).weight(1).minWidth(180).buildColumn().column(new CellLabelProvider() {
+
+					@Override
+					public void update(ViewerCell cell) {
+						Assert.isLegal(cell.getElement() instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+
+						final IParameter parameter = (IParameter) cell.getElement();
+						String label = TemplateParameterViewerUtils.getValueLabel(parameter);
+						cell.setText(label);
+
+						boolean italic = ((ApplicationSourceFromTemplateModel) model).isParameterModified(parameter);
+						builder.applyFont(cell, italic);
+
+						IStatus validationStatus = validate(parameter);
+						cellsValidationStatusObservable.put(parameter.getName(), validationStatus);
+						decorations.toggle(!validationStatus.isOK(), cell);
+					}
+
+					private IStatus validate(IParameter parameter) {
+						if (parameter.isRequired() && StringUtils.isEmpty(parameter.getValue())
+								&& StringUtils.isEmpty(parameter.getGeneratorName())) {
+							return ValidationStatus.error(NLS.bind("Parameter {0} is required, please provide a value.",
+									parameter.getName()));
+						}
+						IStatus status = gitSourceValidator.validate(parameter);
+						if (!status.isOK()) {
+							return status;
+						}
+						return ValidationStatus.ok();
+					}
+
+					@Override
+					public String getToolTipText(Object object) {
+						Assert.isLegal(object instanceof IParameter, CELL_NOT_PARAMETER_ERROR);
+
+						return ((IParameter) object).getDescription();
+					}
+
+					@Override
+					public int getToolTipDisplayDelayTime(Object object) {
+						return 0;
+					}
+
+				}).name("Value").align(SWT.LEFT).weight(1).buildColumn().buildViewer();
+		tableViewer.setComparator(new TemplateParameterViewerUtils.ParameterNameViewerComparator());
+		return tableViewer;
 	}
 
 	private static boolean isGitSourceParameterName(String name) {
@@ -315,8 +299,8 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 	GitSourceValidator gitSourceValidator = new GitSourceValidator();
 
 	/**
-	 * Validates only non-empty value and if it is not valid, then returns 
-	 * error status for a required parameter and warning status for an optional parameter.
+	 * Validates only non-empty value and if it is not valid, then returns error
+	 * status for a required parameter and warning status for an optional parameter.
 	 */
 	class GitSourceValidator implements IValidator {
 		private IParameter parameter;
@@ -330,11 +314,11 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 			IParameter parameter = null;
 			String paramaterValue = null;
 			if (value instanceof IParameter) {
-				//The case in cell editor
+				// The case in cell editor
 				parameter = (IParameter) value;
 				paramaterValue = parameter.getValue();
 			} else if (value instanceof String) {
-				//The case in edit dialog
+				// The case in edit dialog
 				parameter = this.parameter;
 				paramaterValue = (String) value;
 			}
@@ -344,8 +328,8 @@ public class TemplateParametersPage extends AbstractOpenShiftWizardPage {
 					if (parameter.isRequired()) {
 						return ValidationStatus.error(message);
 					} else {
-						//Normally, git source url parameter should be marked as required,
-						//but if by some reason it is not, let's return a warning.
+						// Normally, git source url parameter should be marked as required,
+						// but if by some reason it is not, let's return a warning.
 						return ValidationStatus.warning(message);
 					}
 				}

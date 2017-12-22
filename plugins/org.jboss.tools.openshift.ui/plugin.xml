@@ -153,6 +153,35 @@
             </command>
         </menuContribution>
 
+        <!-- menu: delete resources -->
+        <menuContribution
+                          locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
+            <command commandId="org.jboss.tools.openshift.ui.command.resource.deleteResources"
+                     style="push"
+                     tooltip="Delete resources"
+                     icon="icons/delete.png">
+                <visibleWhen>
+                    <or>
+                        <with variable="activePartId">
+                            <equals  value="org.eclipse.ui.views.PropertySheet" />
+                        </with>
+                        <with
+                              variable="selection">
+                            <or>
+                                <iterate>
+                                    <adapt type="com.openshift.restclient.model.IResource" />
+                                </iterate>
+                            </or>
+                        </with>
+                    </or>
+                </visibleWhen>
+            </command>
+            <separator
+                       name="org.jboss.tools.openshift.ui.delete.separator"
+                       visible="true">
+            </separator>
+        </menuContribution>
+
         <!-- menu: delete resource -->
         <menuContribution
                           locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
@@ -980,7 +1009,6 @@
         <menuContribution
                           allPopups="false"
                           locationURI="popup:org.jboss.tools.openshift.ui.properties.tab.RoutesTab">
-
             <command
                      commandId="org.jboss.tools.openshift.ui.command.resource.refresh"
                      icon="icons/refresh.gif"
@@ -1132,6 +1160,25 @@
         <handler
                  class="org.jboss.tools.openshift.internal.ui.handler.DeleteResourceHandler"
                  commandId="org.eclipse.ui.edit.delete">
+            <activeWhen>
+                <or>
+                    <with variable="activePartId">
+                        <equals  value="org.eclipse.ui.views.PropertySheet" />
+                    </with>
+                    <with
+                          variable="selection">
+                        <iterate>
+                            <and>
+                                <adapt	type="com.openshift.restclient.model.IResource" />
+                            </and>
+                        </iterate>
+                    </with>
+                </or>
+            </activeWhen>
+        </handler>
+        <handler
+                 class="org.jboss.tools.openshift.internal.ui.handler.DeleteResourcesHandler"
+                 commandId="org.jboss.tools.openshift.ui.command.resource.deleteResources">
             <activeWhen>
                 <or>
                     <with variable="activePartId">
@@ -1319,6 +1366,11 @@
                  description="Delete the Resource"
                  id="org.jboss.tools.openshift.ui.command.resource.delete"
                  name="Delete Resource...">
+        </command>
+        <command
+                 description="Delete Resources"
+                 id="org.jboss.tools.openshift.ui.command.resource.deleteResources"
+                 name="Delete Resources...">
         </command>
         <command
                  description="Manage Projects"

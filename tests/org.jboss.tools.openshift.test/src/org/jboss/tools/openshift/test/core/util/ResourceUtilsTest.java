@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016-2017 Red Hat, Inc.
+ * Copyright (c) 2016-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -22,7 +22,7 @@ import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getRout
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.getServicesFor;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.imageRef;
 import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isBuildPod;
-import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isMatching;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.isMatchingNameOrTag;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -69,6 +69,11 @@ import com.openshift.restclient.model.IService;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.route.IRoute;
 
+/**
+ * @author jeff.cantrill
+ * @author Andre Dietisheim
+ * @author Dmitrii Bocharov
+ */
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("serial")
 public class ResourceUtilsTest {
@@ -145,64 +150,64 @@ public class ResourceUtilsTest {
 
 	@Test
 	public void testIsMatchingWhenFilterIsBlank() {
-		assertTrue("Exp. a match on blank string", isMatching("   ", "something", Collections.emptyList()));
+		assertTrue("Exp. a match on blank string", isMatchingNameOrTag("   ", "something", Collections.emptyList()));
 	}
 
 	@Test
 	public void testIsMatchingResourceWhenFilterIsBlank() {
-		assertTrue("Exp. a match on blank string", isMatching("   ", build));
+		assertTrue("Exp. a match on blank string", isMatchingNameOrTag("   ", build));
 	}
 
 	@Test
 	public void testIsMatchingWhenNameIsInFilterTextThatIsDelimited() {
 		assertTrue("Exp. a match on delimited filter",
-				isMatching("java,jruby", "torque-java-jruby", Collections.emptyList()));
+				isMatchingNameOrTag("java,jruby", "torque-java-jruby", Collections.emptyList()));
 	}
 
 	@Test
 	public void testIsMatchingResourceWhenNameIsInFilterTextThatIsDelimited() {
 		when(build.getName()).thenReturn("torque-java-jruby");
-		assertTrue("Exp. a match on delimited filter", isMatching("java,jruby", build));
+		assertTrue("Exp. a match on delimited filter", isMatchingNameOrTag("java,jruby", build));
 	}
 
 	@Test
 	public void testIsMatchingWhenNameIsInFilterTextThatIsNotDelimited() {
-		assertTrue("Exp. a match on undelimited filter", isMatching(" bar ", "bar", Collections.emptyList()));
+		assertTrue("Exp. a match on undelimited filter", isMatchingNameOrTag(" bar ", "bar", Collections.emptyList()));
 	}
 
 	@Test
 	public void testIsMatchingResourceWhenNameIsInFilterTextThatIsNotDelimited() {
 		when(build.getName()).thenReturn("bar");
-		assertTrue("Exp. a match on undelimited filter", isMatching(" bar ", build));
+		assertTrue("Exp. a match on undelimited filter", isMatchingNameOrTag(" bar ", build));
 	}
 
 	@Test
 	public void testIsMatchingWhenNameMatchesTags() {
-		assertTrue("Exp. a match on a tag", isMatching("bar", "barrr", Arrays.asList("xyz", "bar")));
+		assertTrue("Exp. a match on a tag", isMatchingNameOrTag("bar", "barrr", Arrays.asList("xyz", "bar")));
 	}
 
 	@Test
 	public void testIsMatchingResourceWhenNameMatchesTags() {
 		when(build.getName()).thenReturn("barrr");
 		when(tagsCap.getTags()).thenReturn(Arrays.asList("xyz", "bar"));
-		assertTrue("Exp. a match on a tag", isMatching("bar", build));
+		assertTrue("Exp. a match on a tag", isMatchingNameOrTag("bar", build));
 	}
 
 	@Test
 	public void testIsNotMatchingWhenNameIsInFilterTextIsNotNameOrInTag() {
-		assertFalse("Exp. no match", isMatching("foo", "bar", Arrays.asList("xyz", "123")));
+		assertFalse("Exp. no match", isMatchingNameOrTag("foo", "bar", Arrays.asList("xyz", "123")));
 	}
 
 	@Test
 	public void testIsNotMatchingResourceWhenNameIsInFilterTextIsNotNameOrInTag() {
 		when(build.getName()).thenReturn("bar");
 		when(tagsCap.getTags()).thenReturn(Arrays.asList("xyz", "123"));
-		assertFalse("Exp. no match", isMatching("foo", "bar", Arrays.asList("xyz", "123")));
+		assertFalse("Exp. no match", isMatchingNameOrTag("foo", "bar", Arrays.asList("xyz", "123")));
 	}
 
 	@Test
 	public void testIsMatchingForNullResourceIsFalse() {
-		assertTrue(isMatching("text", null));
+		assertTrue(isMatchingNameOrTag("text", null));
 	}
 
 	@Test
@@ -633,7 +638,7 @@ public class ResourceUtilsTest {
 
 	@Test
 	public void podListWithDeploymentConfigKeyShouldReturnDeploymentConfigName() {
-		// given 
+		// given
 		final HashMap<String, String> podLabels = new HashMap<>();
 		podLabels.put("foo", "booh");
 		podLabels.put("bar", "car");
@@ -699,7 +704,7 @@ public class ResourceUtilsTest {
 		IService service = ResourceMocks.PROJECT2_SERVICES[0];
 		// when
 		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(service, connection);
-		// then 
+		// then
 		assertThat(dc).isNull();
 	}
 
