@@ -1,4 +1,4 @@
-# The OpenShift Tools project
+# The OpenShift Tools project 
 
 ## Summary
 
