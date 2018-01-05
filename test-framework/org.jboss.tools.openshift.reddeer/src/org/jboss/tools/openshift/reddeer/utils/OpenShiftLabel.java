@@ -283,7 +283,7 @@ public class OpenShiftLabel {
 		
 		// Labels
 		public static final String LABEL = "Label:";
-		public static final String OC_LOCATION = "'oc' executable location";
+		public static final String OC_LOCATION = "'oc" + (TestUtils.getOS().contains("windows") ? ".exe" : "") + "' executable location";
 		public static final String VALUE = "Value:";
 		public static final String REMOTE_REQUEST_TIMEOUT = "Remote requests timeout (in seconds):";
 		public static final String FIND_FREE_PORTS = "Find free local ports for remote ports";
