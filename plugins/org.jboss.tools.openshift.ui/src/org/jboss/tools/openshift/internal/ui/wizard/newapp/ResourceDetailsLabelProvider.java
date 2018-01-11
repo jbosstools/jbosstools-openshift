@@ -10,16 +10,14 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
+import org.jboss.tools.openshift.internal.ui.utils.ResourceParametersUtils;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.ResourceDetailsContentProvider.ResourceProperty;
 
 import com.openshift.restclient.model.IResource;
@@ -32,7 +30,6 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 
 	private static final String LABEL_NOT_PROVIDED = "(Not Provided)";
 	private static final String LABEL_UNKNOWN = "(Unknown)";
-	private static final String LABEL_UNKNOWN_PARAMETER = "(Unknown parameter {0})";
 
 	private Map<String, IParameter> templateParameters;
 
@@ -58,7 +55,7 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 		if (element instanceof IResource) {
 			IResource resource = (IResource) element;
 			StyledString text = new StyledString(StringUtils.capitalize(resource.getKind()));
-			text.append(" ").append(replaceParameters(resource.getName()), StyledString.QUALIFIER_STYLER);
+			text.append(" ").append(ResourceParametersUtils.replaceParametersInString(this.templateParameters, resource.getName()), StyledString.QUALIFIER_STYLER);
 			return text;
 		}
 		if (element instanceof ResourceProperty) {
@@ -81,27 +78,10 @@ public class ResourceDetailsLabelProvider extends StyledCellLabelProvider implem
 					value = LABEL_NOT_PROVIDED;
 				}
 			}
-			text.append(replaceParameters(value), StyledString.QUALIFIER_STYLER);
+			text.append(ResourceParametersUtils.replaceParametersInString(this.templateParameters, value), StyledString.QUALIFIER_STYLER);
 			return text;
 		}
 		return null;
-	}
-
-	private String replaceParameters(String str) {
-		StringBuffer result = new StringBuffer();
-		Pattern p = Pattern.compile("\\$\\{[^}]+\\}");
-		Matcher m = p.matcher(str);
-		while (m.find()) {
-			String parameterVariable = m.group();
-			String parameterName = parameterVariable.substring(2, parameterVariable.length() - 1);
-			if (this.templateParameters.containsKey(parameterName)) {
-				m.appendReplacement(result, this.templateParameters.get(parameterName).getValue());
-			} else {
-				m.appendReplacement(result, NLS.bind(LABEL_UNKNOWN_PARAMETER, parameterName));
-			}
-		}
-		m.appendTail(result);
-		return result.toString();
 	}
 
 	@Override

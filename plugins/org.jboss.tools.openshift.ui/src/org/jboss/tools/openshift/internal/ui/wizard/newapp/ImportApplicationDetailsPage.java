@@ -11,8 +11,12 @@
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.REPO_PATH_KEY;
+
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +28,8 @@ import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.DialogSettings;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -39,12 +45,14 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.GitCloningWizardPage;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.ImportApplicationWizardModel;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IResource;
+import com.openshift.restclient.model.template.IParameter;
 import com.openshift.restclient.model.template.ITemplate;
 
 public class ImportApplicationDetailsPage extends GitCloningWizardPage {
@@ -52,6 +60,8 @@ public class ImportApplicationDetailsPage extends GitCloningWizardPage {
     private NewApplicationWizardModel applicationSourceModel;
     private ImportApplicationWizardModel importApplicationWizardModel;
     private BuildConfigSelectedValidator buildConfigSelectedValidator;
+    
+    private ResourceDetailsLabelProvider buildConfigTreeLabelProvider;
     
     public static final String PAGE_NAME = "Import application details";
 
@@ -61,6 +71,20 @@ public class ImportApplicationDetailsPage extends GitCloningWizardPage {
         this.importApplicationWizardModel = (ImportApplicationWizardModel)model;
         
         this.importApplicationWizardModel.setConnection(applicationSourceModel.getConnection());
+        String repoPath = loadRepoPath();
+        if (StringUtils.isNotBlank(repoPath)) {
+            importApplicationWizardModel.setCloneDestination(repoPath);
+            importApplicationWizardModel.setUseDefaultCloneDestination(false);
+        }
+    }
+    
+    private String loadRepoPath() {
+        if (getDialogSettings() == null || getDialogSettings().get(REPO_PATH_KEY) == null) {
+            IDialogSettings settings = DialogSettings.getOrCreateSection(
+                    OpenShiftUIActivator.getDefault().getDialogSettings(), IMPORT_APPLICATION_DIALOG_SETTINGS_KEY);
+            return settings.get(REPO_PATH_KEY);
+        }
+        return getDialogSettings().get(REPO_PATH_KEY);
     }
 
     @SuppressWarnings("unchecked")
@@ -94,13 +118,20 @@ public class ImportApplicationDetailsPage extends GitCloningWizardPage {
 
             @Override
             public void handleValueChange(ValueChangeEvent<? extends IApplicationSource> event) {
-                Collection<IResource> buildConfigs = getBuildConfigsFromApplicationSource(event.getObservableValue().getValue());
+                IApplicationSource appSource = event.getObservableValue().getValue();
+                Collection<IResource> buildConfigs = getBuildConfigsFromApplicationSource(appSource);
                 buildConfigsTreeViewer.setInput(buildConfigs);
                 UIUtils.enableAllChildren(!buildConfigs.isEmpty(), parent);
                 isImportApplicationButton.setSelection(!buildConfigs.isEmpty());
                 if (buildConfigs.isEmpty()) {
                     setMessage("No build configs were found in your template, so you can't import application right now.", IMessageProvider.WARNING);
                 }
+                
+                Map<String, IParameter> templateParameters = ((ITemplate)appSource.getSource()).getParameters();
+                importApplicationWizardModel.setTemplateParameters(templateParameters);
+                
+                buildConfigTreeLabelProvider = new ResourceDetailsLabelProvider(templateParameters);
+                buildConfigsTreeViewer.setLabelProvider(buildConfigTreeLabelProvider);
             }
 
         });
@@ -127,7 +158,6 @@ public class ImportApplicationDetailsPage extends GitCloningWizardPage {
         tableContainer.setLayout(treeLayout);
         TreeViewer viewer = new TreeViewer(tableContainer, SWT.BORDER  | SWT.V_SCROLL | SWT.H_SCROLL);
         viewer.setContentProvider(new ResourceDetailsContentProvider());
-        viewer.setLabelProvider(new ResourceDetailsLabelProvider());
         
         viewer.addSelectionChangedListener(new ISelectionChangedListener() {
             
@@ -137,7 +167,7 @@ public class ImportApplicationDetailsPage extends GitCloningWizardPage {
                         && ((ITreeSelection)event.getStructuredSelection()).getPaths() != null
                         && ((ITreeSelection)event.getStructuredSelection()).getPaths().length > 0) {
                     importApplicationWizardModel.setSelectedItem(
-                            ((IBuildConfig)((ITreeSelection)event.getStructuredSelection()).getPaths()[0].getFirstSegment()).getName());
+                            ((ITreeSelection)event.getStructuredSelection()).getPaths()[0].getFirstSegment());
                 }
                 buildConfigSelectedValidator.forceRevalidate();
             }

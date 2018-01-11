@@ -12,7 +12,10 @@ package org.jboss.tools.openshift.internal.ui.wizard.importapp;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -29,11 +32,14 @@ import org.jboss.tools.openshift.egit.core.EGitUtils;
 import org.jboss.tools.openshift.egit.ui.util.EGitUIUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
+import org.jboss.tools.openshift.internal.ui.utils.ResourceParametersUtils;
 import org.jboss.tools.openshift.internal.ui.wizard.importapp.BuildConfigTreeItems.ConnectionTreeItem;
 
 import com.openshift.restclient.model.IBuildConfig;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.build.IGitBuildSource;
+import com.openshift.restclient.model.template.IParameter;
+import com.openshift.restclient.model.template.ITemplate;
 
 /**
  * @author Andre Dietisheim
@@ -59,7 +65,9 @@ public class ImportApplicationWizardModel extends ObservableUIPojo
 
 	private List<ObservableTreeItem> buildConfigs = new ArrayList<>();
 	private boolean isRepositoryBranchGitRef;
-
+	
+	private Map<String, IParameter> templateParameters = Collections.emptyMap();
+	
 	public ImportApplicationWizardModel() {
 		this.useDefaultCloneDestination = true;
 		this.cloneDestination = getDefaultCloneDestination();
@@ -73,6 +81,8 @@ public class ImportApplicationWizardModel extends ObservableUIPojo
 		Object oldSelectedItem = this.selectedItem;
 		updateSelectedItem(selectedItem);
 		updateUseDefaultCloneDestination(useDefaultCloneDestination);
+		
+		cloneDestination = getParametrisedTemplateValue(cloneDestination);
 		updateCloneDestination(cloneDestination);
 		IBuildConfig buildConfig = getBuildConfig(selectedItem);
 		String repoName = updateRepoName(buildConfig);
@@ -104,10 +114,10 @@ public class ImportApplicationWizardModel extends ObservableUIPojo
 		return name;
 	}
 
-	private static String getRepoName(IBuildConfig config) {
+	private String getRepoName(IBuildConfig config) {
 		String repoName = null;
 		if (config != null) {
-			repoName = ResourceUtils.getProjectNameForURI(config.getSourceURI());
+			repoName = ResourceUtils.getProjectNameForURI(getParametrisedTemplateValue(config.getSourceURI()));
 		}
 		return repoName;
 	}
@@ -184,7 +194,7 @@ public class ImportApplicationWizardModel extends ObservableUIPojo
 				return;
 			}
 		} else {
-			newGitContextDir = getGitContextDir(newBuildConfig);
+			newGitContextDir = getParametrisedTemplateValue(getGitContextDir(newBuildConfig));
 		}
 
 		firePropertyChange(PROPERTY_GIT_CONTEXT_DIR, this.gitContextDir, this.gitContextDir = newGitContextDir);
@@ -213,7 +223,7 @@ public class ImportApplicationWizardModel extends ObservableUIPojo
 		if (config == null) {
 			return null;
 		} else {
-			return config.getSourceURI();
+			return getParametrisedTemplateValue(config.getSourceURI());
 		}
 	}
 
@@ -227,7 +237,7 @@ public class ImportApplicationWizardModel extends ObservableUIPojo
 		if (config != null && config.getBuildSource() instanceof IGitBuildSource) {
 			gitRef = ((IGitBuildSource) config.getBuildSource()).getRef();
 		}
-		return gitRef;
+		return getParametrisedTemplateValue(gitRef);
 	}
 
 	@Override
@@ -417,5 +427,13 @@ public class ImportApplicationWizardModel extends ObservableUIPojo
 	public void setCheckoutBranchReusedRepo(boolean checkout) {
 		update(this.connection, this.selectedItem, this.cloneDestination, this.useDefaultCloneDestination, this.project,
 				this.reuseGitRepo, checkout, this.gitContextDir);
+	}
+	
+	private String getParametrisedTemplateValue(String parameter) {
+	    return ResourceParametersUtils.replaceParametersInString(this.templateParameters, parameter);
+	}
+	
+	public void setTemplateParameters(Map<String, IParameter> templateParameters) {
+	    this.templateParameters = templateParameters;
 	}
 }

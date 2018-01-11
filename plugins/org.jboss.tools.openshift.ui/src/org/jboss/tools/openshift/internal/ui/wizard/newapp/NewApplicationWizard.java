@@ -9,6 +9,7 @@
 package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 
 import static org.jboss.tools.common.ui.WizardUtils.runInWizard;
+import static org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIConstants.IMPORT_APPLICATION_DIALOG_SETTINGS_KEY;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -27,6 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -45,6 +47,7 @@ import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
+import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
@@ -207,11 +210,13 @@ public class NewApplicationWizard
 		addPage(servicesPage);
 		addPage(labelsPage);
 		
-		if (isTemplateFlow()) {
-		    this.importApplicationWizard = new ImportApplicationWizard();
+		if (isTemplateFlow()) {	    
+		    //this.importApplicationWizard = new ImportApplicationWizard();
+		    setDialogSettings(DialogSettings.getOrCreateSection(OpenShiftCommonUIActivator.getDefault().getDialogSettings(),
+	                IMPORT_APPLICATION_DIALOG_SETTINGS_KEY));
 		    ImportApplicationDetailsPage importApplicationDetailsPage = new ImportApplicationDetailsPage(this, model);
-	        this.importApplicationWizard.addPage(importApplicationDetailsPage);
-	        addPage(this.importApplicationWizard.getPage(ImportApplicationDetailsPage.PAGE_NAME));
+	        //this.importApplicationWizard.addPage(importApplicationDetailsPage);
+	        addPage(importApplicationDetailsPage/*this.importApplicationWizard.getPage(ImportApplicationDetailsPage.PAGE_NAME)*/);
 		}
 	}
 
