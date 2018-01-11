@@ -19,9 +19,6 @@
 	<modules>
 		<module>org.jboss.tools.openshift.egit.core</module>
 		<module>org.jboss.tools.openshift.egit.ui</module>
-		<module>org.jboss.tools.openshift.express.client</module>
-		<module>org.jboss.tools.openshift.express.core</module>
-		<module>org.jboss.tools.openshift.express.ui</module>
 		<module>org.jboss.tools.openshift.client</module>
 		<module>org.jboss.tools.openshift.common.core</module>
 		<module>org.jboss.tools.openshift.common.ui</module>
