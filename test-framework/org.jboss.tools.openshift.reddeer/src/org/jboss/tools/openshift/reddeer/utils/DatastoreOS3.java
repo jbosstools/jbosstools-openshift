@@ -35,6 +35,12 @@ public class DatastoreOS3 {
 	private static final String KEY_TOKEN = "openshift.token";
 	public static final String KEY_PASSWORD = "openshift.password";
 	public static final String KEY_NEXUS_MIRROR = "openshift.nexus.mirror";
+	public static final String KEY_OC_LINUX_1_1_64 = "oc.linux.1.1.64";
+	public static final String KEY_OC_WINDOWS_1_1_64 = "oc.windows.1.1.64";
+	public static final String KEY_OC_MAC_1_1_64 = "oc.mac.1.1.64";
+	public static final String KEY_OC_LINUX_LATEST = "oc.linux.latest";
+	public static final String KEY_OC_WINDOWS_LATEST = "oc.windows.latest";
+	public static final String KEY_OC_MAC_LATEST = "oc.mac.latest";
 	
 	static {
 		AuthenticationMethod authMethod = AuthenticationMethod.safeValueOf(

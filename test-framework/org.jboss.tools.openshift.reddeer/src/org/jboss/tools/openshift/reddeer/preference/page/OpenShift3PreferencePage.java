@@ -36,7 +36,7 @@ public class OpenShift3PreferencePage extends PreferencePage {
 	 * @param path path to oc binary
 	 */
 	public void setOCLocation(String path) {
-		new LabeledText(OpenShiftLabel.TextLabels.OC_LOCATION).setText(path);
+		getOCLocation().setText(path);
 	}
 	
 	/**
@@ -44,6 +44,10 @@ public class OpenShift3PreferencePage extends PreferencePage {
 	 */
 	public void clearOCLocation() {
 		setOCLocation("");
+	}
+	
+	public LabeledText getOCLocation() {
+		return new LabeledText(OpenShiftLabel.TextLabels.OC_LOCATION);
 	}
 }
 

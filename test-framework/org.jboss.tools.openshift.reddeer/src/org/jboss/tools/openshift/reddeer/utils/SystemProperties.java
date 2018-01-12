@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.reddeer.common.logging.Logger;
 
 /**
  * @author adietish@redhat.com
@@ -29,19 +30,38 @@ public class SystemProperties {
 	private static final String KEY_SECURE_STORAGE_PASSWORD = "securestorage.password";
 	public static final String KEY_OPENSHIFT_IO_USERNAME = "openshift.io.username";
 	public static final String KEY_OPENSHIFT_IO_PASSWORD = "openshift.io.password";
+	
+	private static final Logger log = Logger.getLogger(SystemProperties.class);
 
 	// secure storage
 	public static final String SECURE_STORAGE_PASSWORD = getRequiredProperty(KEY_SECURE_STORAGE_PASSWORD, 
 			"Please add '-D" + KEY_SECURE_STORAGE_PASSWORD + "=[Eclipse secure storage password]' to your launch arguments");
 
 	public static String getRequiredProperty(String key, String errorMessage) {
-		return getRequiredProperty(key, null, errorMessage);
+		return getRequiredProperty(key, null, null, errorMessage);
+	}
+	
+	public static String getRequiredProperty(String key, String defaultValue, String errorMessage) {
+		return getRequiredProperty(key, defaultValue, null, errorMessage);
+	}
+	
+	public static String getRequiredProperty(String key, String[] validValues, String errorMessage) {
+		return getRequiredProperty(key, null, validValues, errorMessage);
 	}
 
-	public static String getRequiredProperty(String key, String[] validValues, String errorMessage) {
+	public static String getRequiredProperty(String key, String defaultValue, String[] validValues, String errorMessage) {
 		assertTrue(StringUtils.isNotBlank(key));
 		String value = System.getProperty(key);
-		assertTrue(errorMessage, StringUtils.isNotBlank(value));
+		if (StringUtils.isBlank(value)) {
+			if (defaultValue != null && !StringUtils.isBlank(defaultValue)) {
+				log.info("Required property " + key + " is not defined, will use default value: " + defaultValue);
+				value = defaultValue;
+			} else {
+				throw new AssertionError(errorMessage);
+			}
+		} else {
+			log.info("System property defined: " + key + "=" + value);
+		}
 		if (validValues != null && validValues.length > 0) {
 			assertThat(Arrays.asList(validValues), hasItem(value));
 		}
