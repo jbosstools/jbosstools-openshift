@@ -15,8 +15,6 @@ import java.io.InputStream;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
@@ -76,7 +74,6 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 		@Override
 		public IStatus validate(Object value) {
 			String svalue = (String) value;
-			System.out.println("light validator called for " + svalue);
 			if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(svalue) && isFile(svalue)) {
 				Job job = new Job("Checking OpenShift resource content") {
 					@Override
@@ -150,7 +147,6 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 			@Override
 			protected IStatus validate() {
 				source.getValue();
-				System.out.println("Multi validator called from " + Thread.currentThread().getName());
 				return sourceStatus.getValue();
 			}
 		});
