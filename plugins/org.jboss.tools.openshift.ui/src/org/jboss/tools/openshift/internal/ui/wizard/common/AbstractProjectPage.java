@@ -79,7 +79,8 @@ import com.openshift.restclient.model.IProject;
  * @author jeff.cantrill
  * @author Andre Dietisheim
  * @author Jeff Maury
- * @param <C> the page model
+ * @param <C>
+ *            the page model
  *
  */
 public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extends AbstractOpenShiftWizardPage {
@@ -154,8 +155,12 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 	private SelectionAdapter onNewProjectClicked() {
 		return new SelectionAdapter() {
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see
+			 * org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events
+			 * .SelectionEvent)
 			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -198,11 +203,14 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 	}
 
 	/**
-	 * Create and configure the list of jobs that need to be performed during resource loading.
-	 * The base behavior is to load the projects and force project creation if no project exists.
+	 * Create and configure the list of jobs that need to be performed during
+	 * resource loading. The base behavior is to load the projects and force project
+	 * creation if no project exists.
 	 * 
-	 * @param closeAfter return parameter if wizard needs to be closed (may be updated)
-	 * @param closeOnCancel true if the wizard need to be closed
+	 * @param closeAfter
+	 *            return parameter if wizard needs to be closed (may be updated)
+	 * @param closeOnCancel
+	 *            true if the wizard need to be closed
 	 * @return the job builder
 	 */
 	protected JobChainBuilder getLoadResourcesJobBuilder(final boolean closeAfter[], final boolean closeOnCancel) {
@@ -293,14 +301,13 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 
 	protected static boolean isFile(String path) {
 		try {
-			return StringUtils.isNotBlank(path)
-					&& Files.isRegularFile(Paths.get(VariablesHelper.replaceVariables(path)));
+			return StringUtils.isNotBlank(path) && Paths.get(VariablesHelper.replaceVariables(path)).toFile().isFile();
 		} catch (InvalidPathException e) {
 			return false;
 		}
 	}
 
 	protected static boolean exists(String path) {
-		return StringUtils.isNotBlank(path) && Files.exists(Paths.get(VariablesHelper.replaceVariables(path)));
+		return StringUtils.isNotBlank(path) && Paths.get(VariablesHelper.replaceVariables(path)).toFile().exists();
 	}
 }

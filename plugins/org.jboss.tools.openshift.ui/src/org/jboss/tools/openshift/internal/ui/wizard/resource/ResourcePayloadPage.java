@@ -9,14 +9,24 @@
 package org.jboss.tools.openshift.internal.ui.wizard.resource;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -45,6 +55,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.FileValidator;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
+import org.jboss.tools.openshift.internal.ui.job.CreateResourceJob;
 import org.jboss.tools.openshift.internal.ui.wizard.common.AbstractProjectPage;
 
 import com.openshift.restclient.OpenShiftException;
@@ -54,6 +65,39 @@ import com.openshift.restclient.OpenShiftException;
  *
  */
 public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPageModel> {
+	class ResourceContentValidator implements IValidator {
+
+		private final WritableValue<IStatus> source;
+
+		ResourceContentValidator(WritableValue<IStatus> source) {
+			this.source = source;
+		}
+
+		@Override
+		public IStatus validate(Object value) {
+			String svalue = (String) value;
+			System.out.println("light validator called for " + svalue);
+			if (!OpenshiftUIConstants.URL_VALIDATOR.isValid(svalue) && isFile(svalue)) {
+				Job job = new Job("Checking OpenShift resource content") {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						IStatus status;
+						try (InputStream s = new FileInputStream(VariablesHelper.replaceVariables(svalue))) {
+							status = CreateResourceJob.loadResource(ResourcePayloadPage.this.model.getProject(), s,
+									null);
+						} catch (IOException e) {
+							status = ValidationStatus.error(e.getLocalizedMessage());
+						}
+						final IStatus fstatus = status;
+						source.getRealm().asyncExec(() -> source.setValue(fstatus));
+						return ValidationStatus.OK_STATUS;
+					}
+				};
+				job.schedule();
+			}
+			return ValidationStatus.ok();
+		}
+	}
 
 	public ResourcePayloadPage(IWizard wizard, IResourcePayloadPageModel model) {
 		super(wizard, model, "Select resource payload",
@@ -84,8 +128,11 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 		Text sourceText = new Text(sourceGroup, SWT.BORDER);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).span(3, 1).applyTo(sourceText);
 		final IObservableValue source = WidgetProperties.text(SWT.Modify).observe(sourceText);
-		ValueBindingBuilder.bind(source)
-				.to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE).observe(model)).in(dbc);
+		final WritableValue<IStatus> sourceStatus = new WritableValue<IStatus>(Status.OK_STATUS, IStatus.class);
+		final ResourceContentValidator contentValidator = new ResourceContentValidator(sourceStatus);
+		ValueBindingBuilder.bind(source).validatingBeforeSet(contentValidator)
+				.to(BeanProperties.value(IResourcePayloadPageModel.PROPERTY_SOURCE).observe(model))
+				.validatingBeforeSet(contentValidator).in(dbc);
 		MultiValidator validator = new MultiValidator() {
 
 			@Override
@@ -95,10 +142,19 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 					return ValidationStatus.cancel("You need to provide a file path or an URL");
 				}
 				return !OpenshiftUIConstants.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)
-						? ValidationStatus.error(sourceValue + " is not a file") : ValidationStatus.ok();
+						? ValidationStatus.error(sourceValue + " is not a file")
+						: ValidationStatus.ok();
 			}
 		};
 		dbc.addValidationStatusProvider(validator);
+		dbc.addValidationStatusProvider(new MultiValidator() {
+			@Override
+			protected IStatus validate() {
+				source.getValue();
+				System.out.println("Multi validator called from " + Thread.currentThread().getName());
+				return sourceStatus.getValue();
+			}
+		});
 		ControlDecorationSupport.create(validator, SWT.LEFT | SWT.TOP, null, new RequiredControlDecorationUpdater());
 
 		// browse button

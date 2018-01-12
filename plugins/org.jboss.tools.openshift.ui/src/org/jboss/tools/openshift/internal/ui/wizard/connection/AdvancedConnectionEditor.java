@@ -228,7 +228,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 						IStatus ocLocationStatus = ocLocationValidity.getValue();
 						IStatus ocVersionStatus = ocVersionValidity.getValue();
 
-						IStatus status = Status.OK_STATUS;
+						IStatus status;
 						if (!ocLocationStatus.isOK()) {
 							status = ocLocationStatus;
 						} else {
