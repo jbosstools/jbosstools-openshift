@@ -142,8 +142,7 @@ public class ResourcePayloadPage extends AbstractProjectPage<IResourcePayloadPag
 					return ValidationStatus.cancel("You need to provide a file path or an URL");
 				}
 				return !OpenshiftUIConstants.URL_VALIDATOR.isValid(sourceValue) && !isFile(sourceValue)
-						? ValidationStatus.error(sourceValue + " is not a file")
-						: ValidationStatus.ok();
+						? ValidationStatus.error(sourceValue + " is not a file") : ValidationStatus.ok();
 			}
 		};
 		dbc.addValidationStatusProvider(validator);
