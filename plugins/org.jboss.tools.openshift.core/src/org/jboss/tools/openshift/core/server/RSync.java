@@ -68,20 +68,20 @@ public class RSync {
 		return path + slash; //$NON-NLS-1$
 	}
 
-	public void syncPodsToDirectory(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter) {
+	public void syncPodsToDirectory(File localFolder, MultiStatus status, final IServerConsoleWriter consoleWriter) {
 		IConnection con = OpenShiftServerUtils.getConnection(server);
 		new OCBinaryOperation() {
 			@Override
 			protected void runOCBinary(MultiStatus multiStatus) {
-				// If our deploy folder is empty, sync all pods to this directory
+				// If our local (deploy) folder is empty, sync all pods to this directory
 				boolean shouldSync = true;
-				//boolean shouldSync = !deployFolder.exists() || deployFolder.listFiles().length == 0; 
+				//boolean shouldSync = !localFolder.exists() || localFolder.listFiles().length == 0; 
 				if (shouldSync) {
 					for (IPod pod : ResourceUtils.getPodsFor(resource,
 							resource.getProject().getResources(ResourceKind.POD))) {
 						try {
 							if ("Running".equals(pod.getStatus())) {
-								syncPodToDirectory(pod, podPath, deployFolder, consoleWriter);
+								syncPodToDirectory(pod, podPath, localFolder, consoleWriter);
 							}
 						} catch (IOException | OpenShiftException e) {
 							status.add(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, e.getMessage()));
@@ -93,7 +93,7 @@ public class RSync {
 	}
 
 	// Sync the directory back to all pods
-	public void syncDirectoryToPods(File deployFolder, MultiStatus status, final IServerConsoleWriter consoleWriter,
+	public void syncDirectoryToPods(File localFolder, MultiStatus status, final IServerConsoleWriter consoleWriter,
 			final OpenShiftBinaryOption... options) {
 		IConnection con = OpenShiftServerUtils.getConnection(server);
 		new OCBinaryOperation() {
@@ -104,7 +104,7 @@ public class RSync {
 						resource.getProject().getResources(ResourceKind.POD))) {
 					try {
 						if ("Running".equals(pod.getStatus())) {
-							syncDirectoryToPod(pod, deployFolder, podPath, consoleWriter);
+							syncDirectoryToPod(pod, localFolder, podPath, consoleWriter);
 						}
 					} catch (IOException | OpenShiftException e) {
 						status.add(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, e.getMessage()));

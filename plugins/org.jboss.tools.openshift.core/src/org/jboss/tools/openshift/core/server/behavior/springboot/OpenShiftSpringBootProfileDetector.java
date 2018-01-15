@@ -51,7 +51,6 @@ public class OpenShiftSpringBootProfileDetector implements IOpenshiftServerAdapt
 				IClasspathEntry[] classpath = javaProject.getResolvedClasspath(true);
 				hasSpringBootDependency = Stream.of(classpath).anyMatch(
 						classpathEntry -> classpathEntry.getPath().lastSegment().contains(COMPONENT_OF_SPRINGBOOT_APP));
-
 			}
 		} catch (CoreException e) {
 			OpenShiftCoreActivator.logError(NLS.bind("Cannot determine if the project {0} is a SpringBoot starter one.",

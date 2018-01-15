@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaCore;
 import org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootProfileDetector;
+import org.jboss.tools.test.util.JobUtils;
 import org.jboss.tools.test.util.TestProjectProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -46,7 +47,9 @@ public class OpenshiftSpringBootProfileDetectorTest {
 				true);
 		IProject project = projectProvider.getProject();
 		project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+		JobUtils.waitForIdle();
 		JavaCore.create(project);
+		JobUtils.waitForIdle();
 		return project;
 	}
 

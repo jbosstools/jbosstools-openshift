@@ -24,7 +24,9 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.core.JavaCore;
@@ -286,6 +288,22 @@ public class OpenShiftServerUtils {
 		return ProjectUtils.getProject(getDeployProjectName(server));
 	}
 
+	public static IProject checkedGetDeployProject(IServerAttributes server) throws CoreException {
+		assertLegal(server != null, "Could not determine what server to get the deploy project for.");
+
+		IProject project = getDeployProject(server);
+		if (!ProjectUtils.isAccessible(project)) {
+			throw new CoreException(
+					new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
+							NLS.bind(
+									"Server adapter {0} cannot publish. Required project {1} is missing or inaccessible.",
+									server.getName(), OpenShiftServerUtils.getDeployProjectName(server))));
+		}
+
+		return project;
+
+	}
+
 	public static String getDeployProjectName(IServerAttributes server) {
 		if (server == null) {
 			return null;
@@ -373,33 +391,6 @@ public class OpenShiftServerUtils {
 		return getAttribute(ATTR_CONNECTIONURL, server);
 	}
 
-	public static IResource getResource(IServerAttributes attributes, IProgressMonitor monitor) {
-		return getResource(attributes, getConnection(attributes), monitor);
-	}
-
-	/**
-	 * Returns the {@link IResource} that's stored in the given server. Throws a
-	 * {@link CoreException} if none was found.
-	 * 
-	 * @param server
-	 * @param connection
-	 * @param monitor
-	 * @return
-	 * @throws CoreException
-	 */
-	public static IResource getResourceChecked(IServerAttributes server, Connection connection,
-			IProgressMonitor monitor) throws CoreException {
-		IResource resource = getResource(server, connection, monitor);
-		if (resource == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory()
-					.errorStatus(NLS.bind(
-							"Could not find the resource for server {0}."
-									+ " Your server adapter might refer to an inexistant resource.",
-							server == null ? "" : server.getName())));
-		}
-		return resource;
-	}
-
 	/**
 	 * Returns the OpenShift resource (service, replication controller) for the
 	 * given server. Returns {@code null} if none was found. 
@@ -429,6 +420,42 @@ public class OpenShiftServerUtils {
 		IResource resource = OpenShiftResourceUniqueId.getByUniqueId(uniqueId, resources);
 		if (resource != null) {
 			WatchManager.getInstance().startWatch(resource.getProject(), connection);
+		}
+		return resource;
+	}
+
+	public static IResource getResource(IServerAttributes attributes, IProgressMonitor monitor) {
+		return getResource(attributes, getConnection(attributes), monitor);
+	}
+
+	public static IResource checkedGetResource(final IServer server, IProgressMonitor monitor) throws CoreException {
+		final IResource resource = getResource(server, monitor);
+		if (resource == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Server {0} could not determine the service to publish to.", server.getName())));
+		}
+		return resource;
+	}
+
+	/**
+	 * Returns the {@link IResource} that's stored in the given server. Throws a
+	 * {@link CoreException} if none was found.
+	 * 
+	 * @param server
+	 * @param connection
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 */
+	public static IResource getResourceChecked(IServerAttributes server, Connection connection,
+			IProgressMonitor monitor) throws CoreException {
+		IResource resource = getResource(server, connection, monitor);
+		if (resource == null) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory()
+					.errorStatus(NLS.bind(
+							"Could not find the resource for server {0}."
+									+ " Your server adapter might refer to an inexistant resource.",
+							server == null ? "" : server.getName())));
 		}
 		return resource;
 	}
@@ -520,31 +547,42 @@ public class OpenShiftServerUtils {
 
 	/**
 	 * Creates an {@link RSync}
+	 * 
 	 * @param server the {@link IServer} on which the {@code rsync} operation will be performed
 	 * @return the {@link RSync} to be used to execute the command.
 	 * @throws CoreException
 	 */
 	public static RSync createRSync(final IServer server, IProgressMonitor monitor) throws CoreException {
-		assertServerNotNull(server);
+		final IResource resource = checkedGetResource(server, monitor);
+		String podPath = getOrLoadPodPath(server, resource);
 
-		final String location = OCBinary.getInstance().getLocation();
-		if (location == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					"Binary for oc-tools could not be found. Please open the OpenShift 3 Preference Page and set the location of the oc binary."));
-		}
+		return createRSync(resource, podPath, server);
+	}
 
-		final IResource resource = getResource(server, monitor);
-		if (resource == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Server {0} could not determine the service to publish to.", server.getName())));
-		}
-
-		String podPath = loadPodPathIfEmpty(server, resource);
+	public static RSync createRSync(IResource resource, String podPath, IServer server) throws CoreException {
+		assertLegal(resource != null, "Could not determine to what OpenShift resource to rsync to.");
+		assertLegal(!StringUtils.isEmpty(podPath), "Could not determine to what pod destination path to rsync to");
+		assertLegal(server != null, "Could not determine the server to use.");
+		assertLegal(OCBinary.getInstance() != null && !StringUtils.isBlank(OCBinary.getInstance().getWorkspaceLocation()),
+				"Binary for oc-tools could not be found."
+						+ " Please open the OpenShift 3 Preference Page and set the location of the oc binary.");
 
 		return new RSync(resource, podPath, server);
 	}
 
-	private static String loadPodPathIfEmpty(final IServer server, final IResource resource) throws CoreException {
+	/**
+	 * Returns the pod path for the given server and resource. Either the path is
+	 * present in the server or it's being loaded from the docker image metadata.
+	 * 
+	 * @param server
+	 * @param resource
+	 * @return
+	 * @throws CoreException
+	 * 
+	 * @see #getPodPath(IServerAttributes)
+	 * @see DockerImageLabels#getPodPath()
+	 */
+	public static String getOrLoadPodPath(final IServer server, final IResource resource) throws CoreException {
 		String podPath = getPodPath(server);
 		if (StringUtils.isEmpty(podPath)) {
 			podPath = loadPodPath(resource, server);
@@ -559,7 +597,7 @@ public class OpenShiftServerUtils {
 	public static String getSourcePath(IServerAttributes server) {
 		// TODO: implement override project settings with server settings
 		String rawSourcePath = getAttribute(ATTR_SOURCE_PATH, server);
-		if (org.apache.commons.lang.StringUtils.isBlank(rawSourcePath)) {
+		if (StringUtils.isEmpty(rawSourcePath)) {
 			return rawSourcePath;
 		}
 		return VariablesHelper.replaceVariables(rawSourcePath);
@@ -620,10 +658,9 @@ public class OpenShiftServerUtils {
 		return false;
 	}
 
-	private static void assertServerNotNull(IServerAttributes server) throws CoreException {
-		if (server == null) {
-			throw new CoreException(
-					OpenShiftCoreActivator.statusFactory().errorStatus("Could not determine the server to use."));
+	private static void assertLegal(boolean legal, String message) throws CoreException {
+		if (!legal) {
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(message));
 		}
 	}
 
