@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2016 Red Hat, Inc.
+ * Copyright (c) 2014-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,10 +24,12 @@ import org.jboss.tools.openshift.test.core.connection.ConnectionURLTest;
 import org.jboss.tools.openshift.test.core.security.OpenShiftSecureStorageKeyTest;
 import org.jboss.tools.openshift.test.core.server.OpenShiftModuleDeploymentPrefsUtilTest;
 import org.jboss.tools.openshift.test.core.server.OpenShiftSubsystemTest;
+import org.jboss.tools.openshift.test.core.util.ResourceUtilsIsMatchingLabelsTest;
 import org.jboss.tools.openshift.test.core.util.ResourceUtilsIsMatchingTest;
 import org.jboss.tools.openshift.test.core.util.ResourceUtilsTest;
 import org.jboss.tools.openshift.test.handler.PodLogsHandlerTest;
 import org.jboss.tools.openshift.test.handler.ScaleDeploymentHandlerTest;
+import org.jboss.tools.openshift.test.internal.common.core.util.KeyValueFilterFactoryTest;
 import org.jboss.tools.openshift.test.internal.core.preferences.OpenShiftCorePreferencesTest;
 import org.jboss.tools.openshift.test.ui.comparators.CreationTimestampComparatorTest;
 import org.jboss.tools.openshift.test.ui.comparators.ProjectTreeSorterTest;
@@ -56,21 +58,22 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ ResourceUtilsIsMatchingTest.class, BuildConfigPropertySourceTest.class,
-		ConnectionPropertySourceTest.class, ConnectionRegistryTest.class, ConnectionPersistencyTest.class,
-		ConnectionTest.class, ConnectionURLTest.class, CreateApplicationFromTemplateJobTest.class,
-		CreationTimestampComparatorTest.class, DataBindingUtilsTest.class, DeployImageJobTest.class,
-		ExtTextPropertyDescriptorTest.class, LabelKeyValidatorTest.class, LabelValueValidatorTest.class,
-		ProjectNameValidatorTest.class, ProjectViewerComparatorTest.class, ProjectTreeSorterTest.class,
-		LazySSLCertificateCallbackTest.class, NewApplicationWizardModelTest.class, OpenShiftCorePreferencesTest.class,
-		OpenShiftExplorerContentProviderTest.class, OpenShiftExplorerLabelProviderTest.class,
-		OpenShiftProjectCacheTest.class, OpenShiftSecureStorageKeyTest.class, PortForwardingWizardModelTest.class,
-		PortSpecAdapterTest.class, ResourcePropertySourceTest.class, ResourceUtilsTest.class,
+@SuiteClasses({ BuildConfigPropertySourceTest.class, ConnectionPropertySourceTest.class, ConnectionRegistryTest.class,
+		ConnectionPersistencyTest.class, ConnectionTest.class, ConnectionURLTest.class,
+		CreateApplicationFromTemplateJobTest.class, CreationTimestampComparatorTest.class, DataBindingUtilsTest.class,
+		DeployImageJobTest.class, ExtTextPropertyDescriptorTest.class, LabelKeyValidatorTest.class,
+		LabelValueValidatorTest.class, ProjectNameValidatorTest.class, ProjectViewerComparatorTest.class,
+		ProjectTreeSorterTest.class, LazySSLCertificateCallbackTest.class, NewApplicationWizardModelTest.class,
+		OpenShiftCorePreferencesTest.class, OpenShiftExplorerContentProviderTest.class,
+		OpenShiftExplorerLabelProviderTest.class, OpenShiftProjectCacheTest.class, OpenShiftSecureStorageKeyTest.class,
+		PortForwardingWizardModelTest.class, PortSpecAdapterTest.class, ResourcePropertySourceTest.class,
+		ResourceUtilsTest.class, ResourceUtilsIsMatchingTest.class, ResourceUtilsIsMatchingLabelsTest.class,
 		ScaleDeploymentHandlerTest.class, PodLogsHandlerTest.class, SmartTooltipTest.class, StringUtilsTest.class,
 		TemplateParameterViewerUtilsTest.class, URIUtilsTest.class, URLValidatorTest.class,
 		WebhooksPropertySourceTest.class, ConnectionWizardPageModelTest.class, ConnectionsFactoryTest.class,
+		KeyValueFilterFactoryTest.class,
 		// triggers secure storage prompt
-		//SecureStorageTest.class
+		// SecureStorageTest.class
 
 		OpenShiftSubsystemTest.class, OpenShiftModuleDeploymentPrefsUtilTest.class,
 

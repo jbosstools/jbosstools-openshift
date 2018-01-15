@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -36,6 +36,8 @@ import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.OpenShiftResourceSelectors;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.egit.core.EGitUtils;
+import org.jboss.tools.openshift.internal.common.core.util.KeyValueFilterFactory;
+import org.jboss.tools.openshift.internal.common.core.util.KeyValueFilterFactory.KeyValueFilter;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.IClient;
@@ -62,6 +64,9 @@ public class ResourceUtils {
 	public static final String IMAGE_STREAM_IMAGE_KIND = "ImageStreamImage";
 	public static final String DEPLOYMENT_CONFIG = "deploymentconfig";
 
+	private ResourceUtils() {
+	}
+
 	public static IClient getClient(IResource resource) {
 		return resource.accept(new CapabilityVisitor<IClientCapability, IClient>() {
 			@Override
@@ -81,8 +86,8 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns {@code true} if the given route points to the given service and
-	 * the given service is the service that the given route points to.
+	 * Returns {@code true} if the given route points to the given service and the
+	 * given service is the service that the given route points to.
 	 * 
 	 * @param route
 	 * @param service
@@ -99,8 +104,8 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns {@code true} if the given build config matches the name of the
-	 * given service.
+	 * Returns {@code true} if the given build config matches the name of the given
+	 * service.
 	 * 
 	 * @param config
 	 * @param service
@@ -128,6 +133,16 @@ public class ResourceUtils {
 		return StringUtils.equals(dc.getName(), getDeploymentConfigNameFor(rc));
 	}
 
+	public static boolean hasRelatedPods(IPod pod, List<IResource> resources) {
+		return resources.stream().anyMatch(r -> ResourceKind.REPLICATION_CONTROLLER.equals(r.getKind())
+				&& areRelated(pod, (IReplicationController) r));
+	}
+
+	public static boolean hasRelatedDc(IReplicationController rc, List<IResource> resources) {
+		return resources.stream().anyMatch(
+				r -> ResourceKind.DEPLOYMENT_CONFIG.equals(r.getKind()) && areRelated(rc, (IDeploymentConfig) r));
+	}
+
 	public static boolean areRelated(IPod pod, IService s) {
 		return containsAll(s.getSelector(), pod.getLabels());
 	}
@@ -137,14 +152,61 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given resource contains the given text
-	 * in name or tags.
+	 * Returns the resource labels, that match the given filter. A {@code null}
+	 * filter matches any label. A {@code null} filter returns an empty map if the
+	 * given resource has no labels.
+	 * 
+	 * @param filter
+	 * @param resource
+	 * @return the labels that match the given filter
+	 * 
+	 * @see KeyValueFilterFactory
+	 * @see KeyValueFilterFactory.KeyValueFilter
+	 * @see IResource#getLabels()
+	 */
+	public static Map<String, String> getMatchingLabels(KeyValueFilter filter, IResource resource) {
+		Map<String, String> labels = resource.getLabels();
+
+		return labels.entrySet().stream().filter(entry -> {
+			if (filter == null) {
+				return true;
+			}
+			return filter.matchesKey(entry.getKey()) && filter.matchesValue(entry.getValue());
+		}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+	/**
+	 * Returns {@code true} any label of the given resource is matching the given
+	 * filter. A {@code null} filter matches any label and also matches a resource
+	 * that has no labels at all.
+	 * 
+	 * @param filter
+	 * @param resource
+	 * @return true if the given filter is matching any label in the given resource.
+	 * 
+	 * @see KeyValueFilterFactory
+	 * @see KeyValueFilterFactory.KeyValueFilter
+	 * @see IResource#getLabels()
+	 */
+	public static boolean hasMatchingLabels(KeyValueFilter filter, IResource resource) {
+		Map<String, String> labels = resource.getLabels();
+
+		if (filter == null && (labels == null || labels.isEmpty())) {
+			return true;
+		}
+
+		return !getMatchingLabels(filter, resource).isEmpty();
+	}
+
+	/**
+	 * Returns <code>true</code> if the given resource contains the given text in
+	 * name or tags.
 	 * 
 	 * @param filterText
 	 * @param resource
 	 * @return
 	 */
-	public static boolean isMatching(final String filterText, IResource resource) {
+	public static boolean isMatchingNameOrTag(final String filterText, IResource resource) {
 		if (resource == null || StringUtils.isBlank(filterText)) {
 			return true;
 		}
@@ -152,12 +214,12 @@ public class ResourceUtils {
 		return resource.accept(new CapabilityVisitor<ITags, Boolean>() {
 			@Override
 			public Boolean visit(ITags capability) {
-				return isMatching(filterText, resource.getName(), capability.getTags());
+				return isMatchingNameOrTag(filterText, resource.getName(), capability.getTags());
 			}
 		}, Boolean.FALSE);
 	}
 
-	public static boolean isMatching(final String filterText, String name, Collection<String> tags) {
+	public static boolean isMatchingNameOrTag(final String filterText, String name, Collection<String> tags) {
 		if (StringUtils.isBlank(filterText)) {
 			return true;
 		}
@@ -182,16 +244,14 @@ public class ResourceUtils {
 	}
 
 	private static boolean inCollection(String item, final Collection<String> texts) {
-		final String _item = item.toLowerCase();
-		return texts.stream().anyMatch((String txt) -> {
-			return txt.toLowerCase().contains(_item);
-		});
+		final String lowerCaseItem = item.toLowerCase();
+		return texts.stream().anyMatch(text -> text.toLowerCase().contains(lowerCaseItem));
 	}
 
 	/**
-	 * Determine if the source map overlaps the target map (i.e. Matching a service to a pod). There
-	 * is  match if the target includes all the the keys from the source and those keys have
-	 * matching values
+	 * Determine if the source map overlaps the target map (i.e. Matching a service
+	 * to a pod). There is match if the target includes all the the keys from the
+	 * source and those keys have matching values
 	 * 
 	 * @param source
 	 * @param target
@@ -229,6 +289,7 @@ public class ResourceUtils {
 
 	/**
 	 * Find the collection of services whos selectors match the given pod
+	 * 
 	 * @param pod
 	 * @param services
 	 * @return
@@ -243,6 +304,7 @@ public class ResourceUtils {
 
 	/**
 	 * Find the collection of pods that match the selector of the given service
+	 * 
 	 * @param service
 	 * @param pods
 	 * @return
@@ -254,8 +316,11 @@ public class ResourceUtils {
 
 	/**
 	 * Find the collection of pods that match the deployment name annotation
-	 * @param replicationController the replication controller to match
-	 * @param pods the list of pods to search for
+	 * 
+	 * @param replicationController
+	 *            the replication controller to match
+	 * @param pods
+	 *            the list of pods to search for
 	 * @return the matched pods
 	 */
 	public static List<IPod> getPodsFor(IDeploymentConfig deploymentConfig, List<IPod> pods) {
@@ -267,8 +332,11 @@ public class ResourceUtils {
 
 	/**
 	 * Find the collection of pods that match the selector of the given resource
-	 * @param resource the OpenShift resource to start from
-	 * @param pods the list of pods to search
+	 * 
+	 * @param resource
+	 *            the OpenShift resource to start from
+	 * @param pods
+	 *            the list of pods to search
 	 * @return the list of linked pods
 	 */
 	public static List<IPod> getPodsFor(IResource resource, List<IPod> pods) {
@@ -284,10 +352,11 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Return the deployment config associated with this pod. Uses
-	 * annotations to do the matching.
+	 * Return the deployment config associated with this pod. Uses annotations to do
+	 * the matching.
 	 * 
-	 * @param pod the pod to look for
+	 * @param pod
+	 *            the pod to look for
 	 * @return the deployment config
 	 */
 	public static Optional<IDeploymentConfig> getDeploymentConfig(IPod pod,
@@ -298,10 +367,11 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Return the deployment config or replication controller associated with this pod. Uses
-	 * annotations to do the matching.
+	 * Return the deployment config or replication controller associated with this
+	 * pod. Uses annotations to do the matching.
 	 * 
-	 * @param pod the pod to look for
+	 * @param pod
+	 *            the pod to look for
 	 * @return the deployment config or replication controller
 	 */
 	public static IReplicationController getDeploymentConfigOrReplicationControllerFor(IPod pod) {
@@ -316,6 +386,7 @@ public class ResourceUtils {
 
 	/**
 	 * Find the collection of pods that match the given selector
+	 * 
 	 * @param selector
 	 * @param pods
 	 * @return
@@ -326,10 +397,9 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns {@code true} if the given pod is a pod running builds. This is
-	 * the case if the pod is annotated with the build name. Returns
-	 * {@code false} if the given pod is a pod running an application or is
-	 * null.
+	 * Returns {@code true} if the given pod is a pod running builds. This is the
+	 * case if the pod is annotated with the build name. Returns {@code false} if
+	 * the given pod is a pod running an application or is null.
 	 * 
 	 * @param pod
 	 *            the pod that shall be checked whether it's a build pod
@@ -351,8 +421,8 @@ public class ResourceUtils {
 
 	/**
 	 * Returns {@code true} if the given pod is a pod running deployments. This is
-	 * the case if the pod has a label which tells it to be a deployer for some pod. Returns
-	 * {@code false} otherwise.
+	 * the case if the pod has a label which tells it to be a deployer for some pod.
+	 * Returns {@code false} otherwise.
 	 * 
 	 * @param pod
 	 *            the pod that shall be checked whether it's a deployer pod
@@ -371,8 +441,8 @@ public class ResourceUtils {
 	/**
 	 * Returns {@code true} if the given pod is a pod running applications. This is
 	 * the case if the pod is neither a build nor deployer pod. Returns
-	 * {@code false} otherwise.
-	 * example:
+	 * {@code false} otherwise. example:
+	 * 
 	 * <pre>
 	 *  "labels": {
 	 *       "openshift.io/deployer-pod-for.name": "nodejs-5"
@@ -380,7 +450,8 @@ public class ResourceUtils {
 	 * </pre>
 	 * 
 	 * @param pod
-	 *            the pod that shall be checked whether it's a runtime/application pod
+	 *            the pod that shall be checked whether it's a runtime/application
+	 *            pod
 	 * @return true if pod is annotated with the build name; false otherwise;
 	 * 
 	 * @see IPod
@@ -398,9 +469,9 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * The image reference for an image change trigger used to correlate a 
+	 * The image reference for an image change trigger used to correlate a
 	 * deploymentconfig to a buildconfig
-	 *  
+	 * 
 	 * @param trigger
 	 * @return
 	 */
@@ -418,7 +489,9 @@ public class ResourceUtils {
 
 	/**
 	 * Returns all the images for the given build configs.
-	 * @param buildConfigs the build configs to extract the image refs from
+	 * 
+	 * @param buildConfigs
+	 *            the build configs to extract the image refs from
 	 * @return all the image references within the given build configs
 	 * 
 	 * @see #imageRef(IBuildConfig)
@@ -431,9 +504,9 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * The image reference for an image change trigger used to correlate a 
+	 * The image reference for an image change trigger used to correlate a
 	 * buildconfig to a deploymentconfig
-	 *  
+	 * 
 	 * @param trigger
 	 * @return
 	 */
@@ -451,8 +524,9 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns the image referenced by a given build. Returns empty string if none is found.
-	 *  
+	 * Returns the image referenced by a given build. Returns empty string if none
+	 * is found.
+	 * 
 	 * @param build
 	 * @return the image referenced
 	 */
@@ -469,12 +543,15 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns the image stream tag among the given ones that matches the given docker
-	 * image digest. The image stream tag property in "image.metadata.name" is being
-	 * matched against the given digest.
+	 * Returns the image stream tag among the given ones that matches the given
+	 * docker image digest. The image stream tag property in "image.metadata.name"
+	 * is being matched against the given digest.
 	 * 
-	 * @param digest the digest that the image stream tag shall match in the property "image.metadata.name"
-	 * @param imageStreamTags the image stream tags to inspect
+	 * @param digest
+	 *            the digest that the image stream tag shall match in the property
+	 *            "image.metadata.name"
+	 * @param imageStreamTags
+	 *            the image stream tags to inspect
 	 * @return
 	 */
 	public static IResource getImageStreamTagForDigest(String digest, Collection<? extends IResource> imageStreamTags) {
@@ -487,8 +564,11 @@ public class ResourceUtils {
 
 	/**
 	 * Find the collection of pods for the given replication controller
-	 * @param replicationController the replication controller to search pods for
-	 * @param pods the list of pods to search
+	 * 
+	 * @param replicationController
+	 *            the replication controller to search pods for
+	 * @param pods
+	 *            the list of pods to search
 	 * @return the list of matched pods
 	 */
 	public static List<IPod> getPodsFor(IReplicationController replicationController, List<IPod> allPods) {
@@ -528,8 +608,8 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns build configs of the given list of build configs
-	 * that match the given service.
+	 * Returns build configs of the given list of build configs that match the given
+	 * service.
 	 * 
 	 * @param service
 	 * @param buildConfigs
@@ -679,8 +759,8 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns the first build config out of the given list of build configs
-	 * that matches the given service.
+	 * Returns the first build config out of the given list of build configs that
+	 * matches the given service.
 	 * 
 	 * @param service
 	 *            the service that the build configs shall match
@@ -703,8 +783,8 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns the first build config out of the given list of build configs
-	 * that matches the given deployment config.
+	 * Returns the first build config out of the given list of build configs that
+	 * matches the given deployment config.
 	 * 
 	 * @param deploymentConfig
 	 *            the deployment config that the build configs shall match
@@ -727,8 +807,8 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns build configs of the given list of build configs
-	 * that match the given deployment config.
+	 * Returns build configs of the given list of build configs that match the given
+	 * deployment config.
 	 * 
 	 * @param serv
 	 * @param buildConfigs
@@ -748,8 +828,8 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns the first build config out of the given list of build configs
-	 * that matches the given OpenShift resource (service, replication controller,...).
+	 * Returns the first build config out of the given list of build configs that
+	 * matches the given OpenShift resource (service, replication controller,...).
 	 * 
 	 * @param resource
 	 *            the OpenShift resource that the build configs shall match
@@ -775,8 +855,8 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns {@code true} if the given build config matches the name of the
-	 * given service.
+	 * Returns {@code true} if the given build config matches the name of the given
+	 * service.
 	 * 
 	 * @param config
 	 * @param deploymentConfig
@@ -790,9 +870,13 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns {@code true} if the given service and given deployment config are related given the existing pods.
-	 * @param service the service to match
-	 * @param dc the deployment config to match
+	 * Returns {@code true} if the given service and given deployment config are
+	 * related given the existing pods.
+	 * 
+	 * @param service
+	 *            the service to match
+	 * @param dc
+	 *            the deployment config to match
 	 * @return true if they are related
 	 */
 	public static boolean areRelated(final IService service, IDeploymentConfig dc, Collection<IPod> allPods) {
@@ -806,10 +890,13 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns git controlled workspace projects that match the uri of the given build config.
-	 *   
-	 * @param buildConfig the build config whose source git shall be matched
-	 * @param workspaceProjects all workspace projects that shall be inspected
+	 * Returns git controlled workspace projects that match the uri of the given
+	 * build config.
+	 * 
+	 * @param buildConfig
+	 *            the build config whose source git shall be matched
+	 * @param workspaceProjects
+	 *            all workspace projects that shall be inspected
 	 * @return
 	 * 
 	 * @see IBuildConfig#getSourceURI()
@@ -910,8 +997,10 @@ public class ResourceUtils {
 	 * Should <strong>NOT</strong> be called from UI thread since it does remote
 	 * lookups to list and match existing deployment configs.
 	 * 
-	 * @param resource the resource to get the deployment config for
-	 * @param connection the connection to use for further resource queries on server
+	 * @param resource
+	 *            the resource to get the deployment config for
+	 * @param connection
+	 *            the connection to use for further resource queries on server
 	 * @return
 	 */
 	public static IDeploymentConfig getDeploymentConfigFor(IResource resource, Connection connection) {
@@ -996,11 +1085,15 @@ public class ResourceUtils {
 	}
 
 	/**
-	 * Returns the deployment config from the given collection of configs for the given replication controller.
-	 * Returns {@code null} if the given replication controller is {@code null}.
+	 * Returns the deployment config from the given collection of configs for the
+	 * given replication controller. Returns {@code null} if the given replication
+	 * controller is {@code null}.
 	 * 
-	 * @param r the replication controller that is related to the requested deployment config
-	 * @param dcs all the deployments configs to choose from
+	 * @param r
+	 *            the replication controller that is related to the requested
+	 *            deployment config
+	 * @param dcs
+	 *            all the deployments configs to choose from
 	 * @return
 	 */
 	public static IDeploymentConfig getDeploymentConfigFor(IReplicationController rc,
@@ -1014,8 +1107,8 @@ public class ResourceUtils {
 
 	/**
 	 * Returns the latest version of the given collection of deployment configs
-	 * whose name is matching the given name.
-	 * Returns {@code null} if the given name or the collection
+	 * whose name is matching the given name. Returns {@code null} if the given name
+	 * or the collection
 	 * 
 	 * @param dcs
 	 * @param name

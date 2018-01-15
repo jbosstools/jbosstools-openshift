@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -30,6 +30,7 @@ import com.openshift.restclient.model.IResource;
 
 /**
  * @author jeff.cantrill
+ * @author Andre Dietisheim
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceUtilsIsMatchingTest {
@@ -48,19 +49,19 @@ public class ResourceUtilsIsMatchingTest {
 	@Test
 	public void elementsThatMatchTheNameShouldReturnTrue() {
 		whenResourceSupportsITagCapability();
-		assertTrue(ResourceUtils.isMatching("resource", resource));
+		assertTrue(ResourceUtils.isMatchingNameOrTag("resource", resource));
 	}
 
 	@Test
 	public void resourcesThatAreNotAnnotatedShouldReturnFalseWhenTheFilterIsNotEmpty() {
 		whenResourceDoesNotSupportITagCapability();
-		assertFalse(ResourceUtils.isMatching("foobar", resource));
+		assertFalse(ResourceUtils.isMatchingNameOrTag("foobar", resource));
 	}
 
 	@Test
 	public void resourcesThatAreNotAnnotatedShouldReturnTrueWhenTheFilterIsEmpty() {
 		whenResourceDoesNotSupportITagCapability();
-		assertTrue(ResourceUtils.isMatching(" ", resource));
+		assertTrue(ResourceUtils.isMatchingNameOrTag(" ", resource));
 	}
 
 	@Test
@@ -68,25 +69,25 @@ public class ResourceUtilsIsMatchingTest {
 		when(capability.getTags()).thenReturn(Arrays.asList(new String[] { "foo", "foobar", "bar" }));
 		whenResourceSupportsITagCapability();
 
-		assertTrue(ResourceUtils.isMatching("foobar", resource));
+		assertTrue(ResourceUtils.isMatchingNameOrTag("foobar", resource));
 	}
 
 	@Test
 	public void resourcesThatAreAnnotatedWithTheIncludedTagShouldReturnFalseWhenNotMatched() {
 		when(capability.getTags()).thenReturn(Arrays.asList(new String[] { "foo", "foobar", "bar" }));
 		whenResourceSupportsITagCapability();
-		assertFalse(ResourceUtils.isMatching("abcxyz", resource));
+		assertFalse(ResourceUtils.isMatchingNameOrTag("abcxyz", resource));
 	}
 
 	@Test
 	public void nameThatPartiallyMatchesElementsShouldReturnFalse() {
-		assertFalse(ResourceUtils.isMatching("resource mysql", resource));
+		assertFalse(ResourceUtils.isMatchingNameOrTag("resource mysql", resource));
 	}
 
 	@Test
 	public void nameThatMatchesAllElementsShouldReturnTrue() {
 		whenResourceSupportsITagCapability();
-		assertTrue(ResourceUtils.isMatching("mongo resource", resource));
+		assertTrue(ResourceUtils.isMatchingNameOrTag("mongo resource", resource));
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class ResourceUtilsIsMatchingTest {
 		when(capability.getTags()).thenReturn(Arrays.asList(new String[] { "foo", "foobar", "bar" }));
 		whenResourceSupportsITagCapability();
 
-		assertTrue(ResourceUtils.isMatching("foobar foo", resource));
+		assertTrue(ResourceUtils.isMatchingNameOrTag("foobar foo", resource));
 	}
 
 	@Test
@@ -102,7 +103,7 @@ public class ResourceUtilsIsMatchingTest {
 		when(capability.getTags()).thenReturn(Arrays.asList(new String[] { "foo", "foobar", "bar" }));
 		whenResourceSupportsITagCapability();
 
-		assertFalse(ResourceUtils.isMatching("foobar baz", resource));
+		assertFalse(ResourceUtils.isMatchingNameOrTag("foobar baz", resource));
 	}
 
 	private void whenResourceSupportsITagCapability() {

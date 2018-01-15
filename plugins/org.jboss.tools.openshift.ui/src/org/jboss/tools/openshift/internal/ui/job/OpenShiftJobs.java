@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -48,7 +48,8 @@ public class OpenShiftJobs {
 	 */
 	public static DeleteResourceJob createDeleteProjectJob(final IProject project) {
 		Assert.isNotNull(project, "A project must not be null");
-		DeleteResourceJob deleteProjectJob = new DeleteResourceJob(project) {
+
+		return new DeleteResourceJob(project) {
 
 			@Override
 			protected IStatus doRun(IProgressMonitor monitor) {
@@ -90,8 +91,6 @@ public class OpenShiftJobs {
 				return deleted;
 			}
 		};
-
-		return deleteProjectJob;
 	}
 
 	/**

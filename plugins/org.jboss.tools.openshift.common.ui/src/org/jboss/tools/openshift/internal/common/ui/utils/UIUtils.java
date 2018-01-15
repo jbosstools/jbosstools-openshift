@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011-2016 Red Hat, Inc.
+ * Copyright (c) 2011-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -410,8 +410,11 @@ public class UIUtils {
 	 */
 	public static void setDefaultButtonWidth(Button button) {
 		assertCanSetGridData(button);
-		((GridData) button.getLayoutData()).widthHint = convertHorizontalDLUsToPixels(button,
-				IDialogConstants.BUTTON_WIDTH);
+		((GridData) button.getLayoutData()).widthHint = getDefaultButtonWidth(button);
+	}
+
+	public static int getDefaultButtonWidth(Button button) {
+		return convertHorizontalDLUsToPixels(button, IDialogConstants.BUTTON_WIDTH);
 	}
 
 	/**
@@ -452,7 +455,6 @@ public class UIUtils {
 		gc.dispose();
 
 		double horizontalDialogUnitSize = averageWidth * 0.25;
-
 		return (int) Math.round(dlus * horizontalDialogUnitSize);
 	}
 

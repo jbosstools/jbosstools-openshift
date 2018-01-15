@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -204,6 +205,14 @@ public class StyledTextUtils {
 		}
 		styleRange.start = 0;
 		styleRange.length = string.length();
+		return styleRange;
+	}
+
+	public static StyleRange createSelectedStyle(int start, int length) {
+		StyleRange styleRange = new StyleRange();
+		styleRange.start = start;
+		styleRange.length = length;
+		styleRange.background = Display.getCurrent().getSystemColor(SWT.COLOR_LIST_SELECTION);
 		return styleRange;
 	}
 }

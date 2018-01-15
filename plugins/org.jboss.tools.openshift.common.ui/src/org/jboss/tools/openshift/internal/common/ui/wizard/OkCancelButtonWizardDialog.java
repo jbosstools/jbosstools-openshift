@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -25,14 +25,21 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class OkCancelButtonWizardDialog extends WizardDialog {
 
+	private String okButtonText;
+
 	public OkCancelButtonWizardDialog(Shell parentShell, IWizard newWizard) {
+		this(IDialogConstants.OK_LABEL, parentShell, newWizard);
+	}
+
+	public OkCancelButtonWizardDialog(String okButtonText, Shell parentShell, IWizard newWizard) {
 		super(parentShell, newWizard);
+		this.okButtonText = okButtonText;
 	}
 
 	@Override
 	protected Control createButtonBar(Composite parent) {
 		Control control = super.createButtonBar(parent);
-		getButton(IDialogConstants.FINISH_ID).setText(IDialogConstants.OK_LABEL);
+		getButton(IDialogConstants.FINISH_ID).setText(okButtonText);
 		return control;
 	}
 

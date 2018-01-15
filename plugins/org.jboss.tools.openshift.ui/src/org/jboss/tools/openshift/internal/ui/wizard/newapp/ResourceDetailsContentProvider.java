@@ -11,13 +11,13 @@ package org.jboss.tools.openshift.internal.ui.wizard.newapp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
+import org.jboss.tools.openshift.internal.core.util.ResourceKindAndNameComparator;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IBuildConfig;
@@ -199,26 +199,6 @@ public class ResourceDetailsContentProvider implements ITreeContentProvider {
 		@Override
 		public boolean isUnknownValue() {
 			return true;
-		}
-	}
-
-	private static class ResourceKindAndNameComparator implements Comparator<IResource> {
-		@Override
-		public int compare(IResource first, IResource second) {
-			int result = compareKind(first, second);
-			if (result != 0) {
-				return result;
-			}
-			return compareName(first, second);
-		}
-
-		private int compareName(IResource first, IResource second) {
-			return first.getName().compareTo(second.getName());
-		}
-
-		private int compareKind(IResource first, IResource second) {
-			int result = first.getKind().toString().compareTo(second.getKind().toString());
-			return result;
 		}
 	}
 }
