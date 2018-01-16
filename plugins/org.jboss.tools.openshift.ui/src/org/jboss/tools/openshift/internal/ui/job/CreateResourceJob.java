@@ -11,7 +11,7 @@ package org.jboss.tools.openshift.internal.ui.job;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
-
+import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -44,7 +44,12 @@ public class CreateResourceJob extends AbstractDelegatingMonitorJob {
 
 	@Override
 	protected IStatus doRun(IProgressMonitor monitor) {
-		IStatus status = project.accept(new CapabilityVisitor<IClientCapability, IStatus>() {
+		return loadResource(project, input, value -> resource = value);
+	}
+
+	public static IStatus loadResource(IProject project, InputStream input,
+			Consumer<Collection<IResource>> resourceListener) {
+		return project.accept(new CapabilityVisitor<IClientCapability, IStatus>() {
 
 			@Override
 			public IStatus visit(IClientCapability capability) {
@@ -52,10 +57,14 @@ public class CreateResourceJob extends AbstractDelegatingMonitorJob {
 				try {
 					IClient client = capability.getClient();
 					IResource resourceIn = client.getResourceFactory().create(input);
-					if (resourceIn instanceof IList) {
-						resource = client.create((IList) resourceIn, project.getNamespace());
-					} else {
-						resource = Collections.singletonList(client.create(resourceIn, project.getNamespace()));
+					if (resourceListener != null) {
+						Collection<IResource> resources;
+						if (resourceIn instanceof IList) {
+							resources = client.create((IList) resourceIn, project.getNamespace());
+						} else {
+							resources = Collections.singletonList(client.create(resourceIn, project.getNamespace()));
+						}
+						resourceListener.accept(resources);
 					}
 					return new Status(IStatus.OK, OpenShiftUIActivator.PLUGIN_ID, "Resource created");
 				} catch (OpenShiftException e) {
@@ -69,7 +78,6 @@ public class CreateResourceJob extends AbstractDelegatingMonitorJob {
 
 		}, new Status(IStatus.ERROR, OpenShiftUIActivator.PLUGIN_ID,
 				"Client processing is unsupported for this client and server combination.", null));
-		return status;
 	}
 
 	/**
