@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.core.server.behavior.springboot;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -31,7 +33,22 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 	}
 
 	@Override
-	protected RSync createRsync(IServer server, IProgressMonitor monitor) throws CoreException {
+	public void publishFinish(IProgressMonitor monitor) throws CoreException {
+		if (!hasRsync()) {
+			return;
+		}
+
+		super.publishFinish(monitor);
+
+		final File localFolder = getLocalFolder();
+		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
+		syncUp(localFolder, resource);
+
+		loadPodPathIfEmpty(resource);
+	}
+
+	@Override
+	protected RSync createRsync(IServer server, final IProgressMonitor monitor) throws CoreException {
 		final IResource resource = OpenShiftServerUtils.checkedGetResource(server, monitor);
 		IPath podPath = new Path(OpenShiftServerUtils.getOrLoadPodPath(server, resource)).append(POD_BASE_PATH);
 

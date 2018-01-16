@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.test.core.server.behavior.springboot;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class OpenshiftSpringBootProfileDetectorTest {
+public class OpenShiftSpringBootProfileDetectorTest {
 
 	private static final String SPRING_BOOT_PROJECT_NAME = "SpringBootProject";
 	private static final String CONTAINING_PLUGIN = "org.jboss.tools.openshift.test";
@@ -37,9 +37,11 @@ public class OpenshiftSpringBootProfileDetectorTest {
 	}
 
 	@Test
-	public void testDetectSpringBootProject() {
-		assertTrue("Wasn't able to detect the " + SPRING_BOOT_PROJECT_NAME + " project as spring boot project",
-				new OpenShiftSpringBootProfileDetector().detect(null, null, project));
+	public void shouldDetectSpringBootProject() {
+		assertThat(new OpenShiftSpringBootProfileDetector().detect(null, null, project))
+				.describedAs(
+						"Wasn't able to detect the " + SPRING_BOOT_PROJECT_NAME + " project as spring boot project")
+				.isTrue();
 	}
 
 	protected IProject createSpringBootProject() throws CoreException, InterruptedException {

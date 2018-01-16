@@ -24,6 +24,8 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
@@ -41,6 +43,7 @@ import com.openshift.restclient.model.IPod;
  *
  */
 public class PodLogsJob extends AbstractDelegatingMonitorJob {
+
 	private static final String DOCUMENT_IS_CLOSED = "Document is closed";
 
 	private static final Map<Key, ConsoleStreamPipe> REGISTRY = new HashMap<>();
@@ -63,7 +66,8 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 
 					@Override
 					public ConsoleStreamPipe visit(final IPodLogRetrieval capability) {
-						ConsoleStreamPipe consoleStream = new ConsoleStreamPipe(capability);
+						Connection connection = ConnectionsRegistryUtil.getConnectionFor(key.pod);
+						ConsoleStreamPipe consoleStream = new ConsoleStreamPipe(capability, connection);
 						new Thread(consoleStream).start();
 						return consoleStream;
 					}
@@ -136,9 +140,11 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 
 		private IPodLogRetrieval capability;
 		private boolean running = true;
+		private Connection connection;
 
-		ConsoleStreamPipe(IPodLogRetrieval capability) {
+		ConsoleStreamPipe(IPodLogRetrieval capability, Connection connection) {
 			this.capability = capability;
+			this.connection = connection;
 		}
 
 		public void stop() {
@@ -148,7 +154,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 
 		@Override
 		public void run() {
-			run(null);
+			run(connection, null);
 		}
 
 		@Override

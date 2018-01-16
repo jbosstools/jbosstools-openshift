@@ -86,25 +86,11 @@ public enum OCBinary {
 	}
 
 	/**
-	 * Returns the location from preferences or looks it up on the path.
-	 * This method is used to get the global workspace setting for the oc location.
-	 * However, individual connections may override this setting. 
-	 * It is advised to use getLocation(IConnection c) instead. 
-	 * 
-	 * @deprecated
-	 * @return
-	 */
-	@Deprecated
-	public String getLocation() {
-		return getWorkspaceLocation();
-	}
-
-	/**
 	 * Get the location of the workspace preference pointing to an oc install. 
 	 * 
 	 * @return
 	 */
-	public String getWorkspaceLocation() {
+	private String getWorkspaceLocation() {
 		String location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
 		if (location == null || location.trim().isEmpty()) {
 			location = getSystemPathLocation();
@@ -112,14 +98,25 @@ public enum OCBinary {
 		return location;
 	}
 
+	/**
+	 * Returns the location of the oc binary. It gets it from the given connection
+	 * if it holds such a setting and is set to override the global location. As a
+	 * fallback the location is retrieved from preferences or is looked up on the
+	 * path.
+	 * 
+	 * @param connection
+	 * @return returns the location from the given connection, workspace preferences
+	 *         or from the path.
+	 */
 	public String getLocation(IConnection connection) {
 		if (connection instanceof IOpenShiftConnection) {
 			IOpenShiftConnection c = (IOpenShiftConnection) connection;
 			Boolean override = (Boolean) c.getExtendedProperties().get(ICommonAttributes.OC_OVERRIDE_KEY);
 			if (Boolean.TRUE.equals(override)) {
 				String loc = (String) c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
-				if (StringUtils.isEmpty(loc))
+				if (StringUtils.isEmpty(loc)) {
 					return loc;
+				}
 			}
 		}
 
