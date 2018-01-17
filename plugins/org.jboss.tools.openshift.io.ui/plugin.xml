@@ -28,6 +28,18 @@
                   icon="icons/osio-16x16.png"
                   label="%openshiftio.command.gettoken"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <not>
+                     <with
+                           variable="org.eclipse.core.runtime.Platform">
+                        <test
+                              args="com.redhat.fabric8analytics.lsp.eclipse.ui"
+                              property="org.eclipse.core.runtime.isBundleInstalled">
+                        </test>
+                     </with>
+                  </not>
+               </visibleWhen>
             </command>
          </toolbar>
       </menuContribution>
