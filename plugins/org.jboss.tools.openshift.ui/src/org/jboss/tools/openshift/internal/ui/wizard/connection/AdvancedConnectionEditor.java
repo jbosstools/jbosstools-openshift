@@ -157,12 +157,10 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 						.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_CLUSTER_NAMESPACE).observe(model))
 						.in(dbc);
 
-
 				Link ocWorkspace = new Link(advancedComposite, SWT.PUSH);
 				ocWorkspace.setText("<a>Workspace OC Settings</a>");
-				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3,1).applyTo(ocWorkspace);
-				
-				
+				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3, 1).applyTo(ocWorkspace);
+
 				// Override OC location widgets
 				Button overrideOC = new Button(advancedComposite, SWT.CHECK);
 				overrideOC.setText("Override 'oc' location: ");
@@ -204,10 +202,10 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				ocWorkspace.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						PreferenceDialog pd = PreferencesUtil.createPreferenceDialogOn(null, 
+						PreferenceDialog pd = PreferencesUtil.createPreferenceDialogOn(null,
 								IOpenShiftCoreConstants.OPEN_SHIFT_PREFERENCE_PAGE_ID, new String[] {}, null);
 						pd.open();
-						if( !overrideOC.getSelection()) {
+						if (!overrideOC.getSelection()) {
 							String ocLoc = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
 							String nullsafe = ocLoc == null ? "" : ocLoc;
 							ocText.setText(nullsafe);
@@ -216,9 +214,6 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 					}
 				});
 
-				
-				
-				
 				// Validation here is done via a listener rather than dbc validators
 				// because dbc validators will validate in the UI thread, but validation
 				// of this field requires a background job.
