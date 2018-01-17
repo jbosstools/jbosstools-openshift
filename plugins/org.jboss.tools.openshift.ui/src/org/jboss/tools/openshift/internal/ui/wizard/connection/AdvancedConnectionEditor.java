@@ -44,17 +44,21 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -63,6 +67,7 @@ import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionFactory;
 import org.jboss.tools.openshift.core.connection.registry.RegistryProviderModel;
+import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel.IConnectionAdvancedPropertiesProvider;
@@ -152,6 +157,12 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 						.to(BeanProperties.value(AdvancedConnectionEditorModel.PROP_CLUSTER_NAMESPACE).observe(model))
 						.in(dbc);
 
+
+				Link ocWorkspace = new Link(advancedComposite, SWT.PUSH);
+				ocWorkspace.setText("<a>Workspace OC Settings</a>");
+				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).span(3,1).applyTo(ocWorkspace);
+				
+				
 				// Override OC location widgets
 				Button overrideOC = new Button(advancedComposite, SWT.CHECK);
 				overrideOC.setText("Override 'oc' location: ");
@@ -190,6 +201,24 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).applyTo(ocBrowse);
 				UIUtils.setDefaultButtonWidth(ocBrowse);
 
+				ocWorkspace.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						PreferenceDialog pd = PreferencesUtil.createPreferenceDialogOn(null, 
+								IOpenShiftCoreConstants.OPEN_SHIFT_PREFERENCE_PAGE_ID, new String[] {}, null);
+						pd.open();
+						if( !overrideOC.getSelection()) {
+							String ocLoc = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
+							String nullsafe = ocLoc == null ? "" : ocLoc;
+							ocText.setText(nullsafe);
+						}
+						updateOcObservables();
+					}
+				});
+
+				
+				
+				
 				// Validation here is done via a listener rather than dbc validators
 				// because dbc validators will validate in the UI thread, but validation
 				// of this field requires a background job.
