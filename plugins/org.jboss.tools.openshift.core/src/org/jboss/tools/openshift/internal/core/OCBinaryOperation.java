@@ -23,17 +23,6 @@ import com.openshift.restclient.capability.IBinaryCapability;
  */
 public abstract class OCBinaryOperation {
 
-	/**
-	 * Runs the operation
-	 * 
-	 * @deprecated please use run(IConnection, MultiStatus).
-	 * @param status the status to update during the operation
-	 */
-	@Deprecated
-	public void run(final MultiStatus status) {
-		run(null, status);
-	}
-
 	public void run(IConnection connection, final MultiStatus status) {
 		String oldLocation = OpenShiftContext.get().get(IBinaryCapability.OPENSHIFT_BINARY_LOCATION);
 		String location = OCBinary.getInstance().getLocation(connection);

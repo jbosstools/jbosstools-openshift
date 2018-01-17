@@ -33,10 +33,10 @@ import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IPublishController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.as.core.server.controllable.subsystems.internal.StandardFileSystemPublishController;
 import org.jboss.tools.common.util.FileUtils;
-import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.RSync;
+import org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 import com.openshift.restclient.model.IResource;
@@ -48,48 +48,48 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 
 	@Override
 	public void publishStart(final IProgressMonitor monitor) throws CoreException {
-		syncDownFailed = false;
+		this.syncDownFailed = false;
 		IServer server = getServer();
-		final IProject deployProject = OpenShiftServerUtils.getDeployProject(server);
-
-		if (!ProjectUtils.isAccessible(deployProject)) {
-			throw new CoreException(
-					new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID,
-							NLS.bind(
-									"Server adapter {0} cannot publish. Required project {1} is missing or inaccessible.",
-									getServer().getName(), OpenShiftServerUtils.getDeployProjectName(getServer()))));
-		}
-
-		this.rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
-		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
+		this.rsync = createRsync(server, monitor);
+		final File localDirectory = getLocalFolder();
 		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
-				NLS.bind("Error while publishing server {0}.  Could not sync all pods to folder {1}",
-						getServer().getName(), localDeploymentDirectory.getAbsolutePath()),
+				NLS.bind("Error while publishing server {0}.  Could not sync all pods to folder {1}", server.getName(),
+						localDirectory.getAbsolutePath()),
 				null);
-		rsync.syncPodsToDirectory(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
+		rsync.syncPodsToDirectory(localDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		if (!status.isOK()) {
-			syncDownFailed = true;
-			if (isSyncDownFailureCritical()) {
-				this.rsync = null;
-				throw new CoreException(status);
-			}
-			OpenShiftCoreActivator.pluginLog().logWarning("Ignoring initial sync down error.",
-					new CoreException(status));
+			handleSyncDownFailure(status);
 		}
 
+		final IProject deployProject = OpenShiftServerUtils.checkedGetDeployProject(server);
 		// If the magic project is *also* a module on the server, do nothing
 		if (!modulesIncludesMagicProject(getServer(), deployProject)) {
-			// The project not also a module, so let's see if there exists a module at all
-			IModule projectModule = OpenShiftServerUtils.findProjectModule(deployProject);
-			if (projectModule == null) {
-				// This project is not a module, so we'll do a simple copy
-				publishMagicProjectSimpleCopy(getServer(), localDeploymentDirectory);
-			} else {
-				// This is a project-module which must be assembled and published (ie dynamic web, ear project, etc)
-				publishModule(IServer.PUBLISH_FULL, ServerBehaviourDelegate.ADDED, new IModule[] { projectModule },
-						monitor);
-			}
+			publishModule(monitor, deployProject, localDirectory);
 		}
+	}
+
+	private void publishModule(final IProgressMonitor monitor, final IProject deployProject, final File localDirectory)
+			throws CoreException {
+		// The project not also a module, so let's see if there exists a module at all
+		IModule projectModule = OpenShiftServerUtils.findProjectModule(deployProject);
+		if (projectModule == null) {
+			// This project is not a module, so we'll do a simple copy
+			publishMagicProjectSimpleCopy(getServer(), localDirectory);
+		} else {
+			// This is a project-module which must be assembled and published (ie dynamic
+			// web, ear project, etc)
+			publishModule(IServer.PUBLISH_FULL, ServerBehaviourDelegate.ADDED, new IModule[] { projectModule },
+					monitor);
+		}
+	}
+
+	protected void handleSyncDownFailure(final MultiStatus status) throws CoreException {
+		this.syncDownFailed = true;
+		if (isSyncDownFailureCritical()) {
+			clearRsync();
+			throw new CoreException(status);
+		}
+		OpenShiftCoreActivator.pluginLog().logWarning("Ignoring initial sync down error.", new CoreException(status));
 	}
 
 	protected boolean isSyncDownFailureCritical() {
@@ -104,15 +104,12 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	protected boolean isEapProfile() {
 		// quick and dirty
 		String profile = ServerProfileModel.getProfile(getServer());
-		if ("openshift3.eap".equals(profile)) {
-			return true;
-		}
-		return false;
+		return OpenshiftEapProfileDetector.PROFILE.equals(profile);
 	}
 
 	private void publishMagicProjectSimpleCopy(IServer server, File localDeploymentDirectory) throws CoreException {
-		// TODO this is the dumb logic. If the magic project is in fact a 
-		// dynamic web project, we need to package it, not simply copy. 
+		// TODO this is the dumb logic. If the magic project is in fact a
+		// dynamic web project, we need to package it, not simply copy.
 		String sourcePath = OpenShiftServerUtils.getSourcePath(server);
 		if (StringUtils.isEmpty(sourcePath)) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory()
@@ -132,7 +129,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	}
 
 	private boolean modulesIncludesMagicProject(IServer server, IProject deployProject) {
-		// If we have no modules, OR the module list doesn't include magic project, 
+		// If we have no modules, OR the module list doesn't include magic project,
 		// we need to initiate a publish for the magic project
 		IModule[] all = server.getModules();
 		if (all != null) {
@@ -146,29 +143,32 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 
 	@Override
 	public void publishFinish(IProgressMonitor monitor) throws CoreException {
-		if (rsync != null) {
-			super.publishFinish(monitor);
-			final File deployFolder = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-			final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
-			executeRsync(deployFolder, resource);
-
-			deleteDoDeployMarkers(deployFolder);
-			loadPodPathIfEmpty(resource);
+		if (!hasRsync()) {
+			return;
 		}
+
+		super.publishFinish(monitor);
+
+		final File localFolder = getLocalFolder();
+		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
+		syncUp(localFolder, resource);
+
+		deleteDoDeployMarkers(localFolder);
+		loadPodPathIfEmpty(resource);
 	}
 
-	private void executeRsync(final File deployFolder, final IResource resource) throws CoreException {
+	protected void syncUp(final File localFolder, final IResource resource) throws CoreException {
 		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
-				NLS.bind("Could not sync {0} to all pods running the service {1}", deployFolder, resource.getName()),
+				NLS.bind("Could not sync {0} to all pods running the service {1}", localFolder, resource.getName()),
 				null);
-		rsync.syncDirectoryToPods(deployFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
+		rsync.syncDirectoryToPods(localFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		if (!status.isOK()) {
 			throw new CoreException(status);
 		}
 	}
 
-	private void loadPodPathIfEmpty(final IResource resource) throws CoreException {
-		// If the pod path is not set on the project yet, we can do that now 
+	protected void loadPodPathIfEmpty(final IResource resource) throws CoreException {
+		// If the pod path is not set on the project yet, we can do that now
 		// to make future fetches faster
 		String podPath = OpenShiftServerUtils.getPodPath(getServer());
 		if (StringUtils.isEmpty(podPath)) {
@@ -178,12 +178,6 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 				fireUpdatePodPath(getServer(), podPath);
 			}
 		}
-	}
-
-	private void deleteDoDeployMarkers(final File deployFolder) {
-		// Remove all *.dodeploy files from this folder.
-		Stream.of(deployFolder.listFiles()).filter(p -> p.getName().endsWith(DeploymentMarkerUtils.DO_DEPLOY))
-				.forEach(p -> p.delete());
 	}
 
 	private void fireUpdatePodPath(final IServer server, final String podPath) {
@@ -203,6 +197,12 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		}.schedule();
 	}
 
+	protected void deleteDoDeployMarkers(final File localFolder) {
+		// Remove all *.dodeploy files from this folder.
+		Stream.of(localFolder.listFiles()).filter(file -> file.getName().endsWith(DeploymentMarkerUtils.DO_DEPLOY))
+				.forEach(File::delete);
+	}
+
 	@Override
 	@SuppressWarnings("restriction")
 	public int publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor) throws CoreException {
@@ -216,5 +216,21 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	@Override
 	protected void launchUpdateModuleStateJob() throws CoreException {
 		// No-op for now, until other problems are fixed
+	}
+
+	protected File getLocalFolder() throws CoreException {
+		return new File(getDeploymentOptions().getDeploymentsRootFolder(true));
+	}
+
+	protected RSync createRsync(final IServer server, final IProgressMonitor monitor) throws CoreException {
+		return OpenShiftServerUtils.createRSync(server, monitor);
+	}
+
+	protected boolean hasRsync() {
+		return rsync != null;
+	}
+
+	protected void clearRsync() {
+		this.rsync = null;
 	}
 }
