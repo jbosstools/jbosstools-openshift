@@ -17,7 +17,7 @@
 	</properties>
 	<modules>
 		<module>plugins</module>
-	        <module>itests</module>
+		<module>itests</module>
 		<module>tests</module>
 		<module>test-framework</module>
 		<module>features</module>
@@ -30,11 +30,11 @@
 			<layout>p2</layout>
 			<url>${jbosstools-server-site}</url>
 		</repository>
-                <repository>
-                        <id>jbosstools-central</id>
-                        <layout>p2</layout>
-                        <url>${jbosstools-central-site}</url>
-                </repository>
+		<repository>
+			<id>jbosstools-central</id>
+			<layout>p2</layout>
+			<url>${jbosstools-central-site}</url>
+		</repository>
 		<!-- Transitive deps -->
 		<repository>
 			<id>jbosstools-base</id>
@@ -46,24 +46,24 @@
 	<build>
 		<plugins>
 			<plugin>
-		        <groupId>net.revelc.code.formatter</groupId>
-		        <artifactId>formatter-maven-plugin</artifactId>
-		        <version>2.0.1</version>
-		        <executions>
-		          <execution>
-		            <goals>
-		              <goal>validate</goal>
+			<groupId>net.revelc.code.formatter</groupId>
+			<artifactId>formatter-maven-plugin</artifactId>
+			<version>2.0.1</version>
+			<executions>
+			  <execution>
+			    <goals>
+			      <goal>validate</goal>
 					  <!-- <goal>format</goal> -->
-		            </goals>
-		          </execution>
-		        </executions>
-		        <configuration>
-		        	<encoding>UTF-8</encoding>
-		        	<configFile>../../eclipse-formatter.xml</configFile>
-		        	<!-- skipFormatting disables both format and validate goals, 
-		        	think of it as a switch for the whole plugin;
-		        	To apply from terminal use -Dformatter.skip=false -->
-		        	<!-- <skipFormatting>true</skipFormatting> --> 
+			    </goals>
+			  </execution>
+			</executions>
+			<configuration>
+				<encoding>UTF-8</encoding>
+				<configFile>../../eclipse-formatter.xml</configFile>
+				<!-- skipFormatting disables both format and validate goals, 
+				think of it as a switch for the whole plugin;
+				To apply from terminal use -Dformatter.skip=false -->
+				<!-- <skipFormatting>true</skipFormatting> --> 
 					<directories>
 						<directory>src</directory>
 					</directories>
@@ -71,7 +71,7 @@
 						<exclude>**/reddeer/**/*</exclude>
 						<exclude>**/ui/bot/test/**/*</exclude>
 					</excludes>
-		        </configuration>
+			</configuration>
 		      </plugin>
 		</plugins>
 	</build>
