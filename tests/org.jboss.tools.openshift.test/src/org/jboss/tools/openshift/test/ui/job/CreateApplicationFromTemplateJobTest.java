@@ -145,7 +145,7 @@ public class CreateApplicationFromTemplateJobTest {
 
 		public CreateApplicationFromTemplateJobRunner(IProject project, ITemplate template,
 				Collection<IParameter> parameters, Collection<Label> labels) {
-			super(project, template, parameters, labels);
+			super(project, template, "", parameters, labels);
 		}
 
 		public IStatus runMe() {

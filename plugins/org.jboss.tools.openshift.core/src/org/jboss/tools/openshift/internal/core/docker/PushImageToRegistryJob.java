@@ -63,7 +63,7 @@ public class PushImageToRegistryJob extends AbstractDelegatingMonitorJob {
 		try {
 			// first, we need to tag the image with the OpenShift target
 			// project
-			this.dockerConnection.tagImage(imageName, tmpImageName);
+			this.dockerConnection.tagImage(imageName, tmpImageName); // username/fedora:my-tag & 172.30.1.1:5000/myproject/fedora:my-tag
 			// then we can push that image with the new name
 			this.dockerConnection.pushImage(tmpImageName, registryAccount, getPushProgressHandler(tmpImageName));
 			// FIXME: needs more fined tuned error handling once Neon.0 is no longer supported:
