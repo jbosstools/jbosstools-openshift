@@ -47,7 +47,7 @@ public interface CredentialsPart {
 		return new LabeledCombo(getCredentialsSection(), "Domain: ");
 	}
 	
-	public default Button getPassCredentialsCheckBox() {
+	public default CheckBox getPassCredentialsCheckBox() {
 		return new CheckBox(getCredentialsSection(), "Pass credentials to environment");
 	}
 	

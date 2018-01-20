@@ -14,8 +14,15 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.reddeer.common.exception.RedDeerException;
+import org.hamcrest.Matcher;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKHypervisor;
+import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
 public abstract class CDKAbstractTest {
 
@@ -38,6 +45,9 @@ public abstract class CDKAbstractTest {
 	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
 	public static final boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
 	public static final String FOLDER = IS_LINUX ? "linux" : (IS_WINDOWS ? "win" : "mac");
+	
+	public static final String MINISHIFT_VALIDATION_JOB = "Validate minishift location";
+	
 	public static final String separator = System.getProperty("file.separator");
 	
 	// CDK Test suite parameters
@@ -55,34 +65,41 @@ public abstract class CDKAbstractTest {
 		MINISHIFT = CDKTestUtils.getSystemProperty("minishift"); //$NON-NLS-1$
 		CDK_MINISHIFT = CDKTestUtils.getSystemProperty("cdk.minishift"); //$NON-NLS-1$
 		CDK32_MINISHIFT = CDKTestUtils.getSystemProperty("cdk32.minishift"); //$NON-NLS-1$
-		MINISHIFT_HYPERVISOR = CDKTestUtils.getSystemProperty("hypervisor"); //$NON-NLS-1$
+		MINISHIFT_HYPERVISOR = assignMinishiftHypervisor();
 		DEFAULT_MINISHIFT_HOME = System.getProperty("user.home") + separator + ".minishift";
+	}
+	
+	public static Matcher<?> getJobMatcher(String title) {
+		return new JobMatcher(new Job(title) {
+
+			@Override
+			protected IStatus run(IProgressMonitor arg0) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		});
+	}
+	
+	public static String assignMinishiftHypervisor() {
+		String prop = CDKTestUtils.getSystemProperty("hypervisor");
+		return StringUtils.isEmptyOrNull(prop) ? CDKHypervisor.getDefaultHypervisor().toString() : prop;
 	}
 	
 	public static void checkCDKParameters() {
 		Map<String, String> dict = new HashMap<>();
 		dict.put("CDK 3.X path", CDK_MINISHIFT);
 		CDKTestUtils.checkParameterNotNull(dict);
-		checkMinishiftHypervisorParameters();
 	}
 	
 	public static void checkMinishiftParameters() {
 		Map<String, String> dict = new HashMap<>();
 		dict.put("Minishift path", MINISHIFT);
 		CDKTestUtils.checkParameterNotNull(dict);
-		checkMinishiftHypervisorParameters();
 	}
 	
 	public static void checkCDK32Parameters() {
 		Map<String, String> dict = new HashMap<>();
 		dict.put("CDK 3.2+ path", CDK32_MINISHIFT);
-		CDKTestUtils.checkParameterNotNull(dict);
-		checkMinishiftHypervisorParameters();
-	}
-	
-	public static void checkMinishiftHypervisorParameters() {
-		Map<String, String> dict = new HashMap<>();
-		dict.put("Minishift hypervisor", MINISHIFT_HYPERVISOR == null ? "" : MINISHIFT_HYPERVISOR);
 		CDKTestUtils.checkParameterNotNull(dict);
 	}
 	

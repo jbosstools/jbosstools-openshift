@@ -13,16 +13,11 @@ package org.jboss.tools.cdk.reddeer.server.ui.editor;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
-import org.eclipse.reddeer.common.wait.WaitWhile;
-import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.wst.server.ui.editor.ServerEditor;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
-import org.eclipse.reddeer.swt.impl.menu.ShellMenuItem;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.uiforms.impl.hyperlink.DefaultHyperlink;
 import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
-import org.eclipse.reddeer.workbench.condition.EditorIsDirty;
-import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 
 /**
  * Top level representing class of CDK/Minishift server editors
@@ -55,24 +50,6 @@ public class MinishiftServerEditor extends ServerEditor {
 			new WaitUntil(launch, TimePeriod.DEFAULT);
 		} catch (WaitTimeoutExpiredException exc) {
 			log.error("WaitTimeoutExpiredException occured while waiting for Edit Configuration dialog");
-		}
-	}
-	
-	@Override
-	public void save() {
-		activate();
-		log.info("Trying to save editor via File -> Save");
-		try {
-			new ShellMenuItem(new WorkbenchShell(), "File", "Save").select();
-			new WaitWhile(new EditorIsDirty(this));
-		} catch (CoreLayerException coreExc) {
-			if (coreExc.getMessage().equalsIgnoreCase("Menu item is not enabled")) {
-				log.debug("Could not perform File -> Save because option was not enabled");
-			} else {
-				throw coreExc;
-			}
-		} finally {
-			activate();
 		}
 	}
 	

@@ -22,7 +22,7 @@ import org.eclipse.reddeer.junit.screenshot.CaptureScreenshotException;
 import org.eclipse.reddeer.junit.screenshot.ScreenshotCapturer;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.cdk.reddeer.server.adapter.CDKServerAdapterType;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKServerAdapterType;
 
 
 /**

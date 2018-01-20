@@ -20,13 +20,13 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
  */
 public class NewCDK32ServerWizardPage extends NewCDK3ServerWizardPage {
 
-	public LabeledText getMinshiftProfileLabeledText() {
-		new DefaultShell(WIZARD_NAME);
-		return new LabeledText("Minishift Profile:");
+	public void setMinishiftProfile(final String profile) {
+		getMinishiftProfile().setText(profile);
 	}
 	
-	public void setMinishiftProfile(final String profile) {
-		getMinshiftProfileLabeledText().setText(profile);
+	public LabeledText getMinishiftProfile() {
+		new DefaultShell(WIZARD_NAME);
+		return new LabeledText("Minishift Profile:");
 	}
 
 }

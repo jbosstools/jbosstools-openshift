@@ -25,6 +25,7 @@ import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK3ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CredentialsPart;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerWizardPage;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,7 +48,6 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 	
 	@BeforeClass
 	public static void setupCDK3ServerEditorTest() {
-		checkMinishiftHypervisorParameters();
 		if (CDK_MINISHIFT == null) {
 			MINISHIFT_PATH = MOCK_CDK311;
 		} else {
@@ -68,8 +68,12 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 		dialog.next();
 		NewCDK3ServerWizardPage containerPage = new NewCDK3ServerWizardPage();
 		containerPage.setCredentials(USERNAME, PASSWORD);
-		log.info("Setting hypervisor to: " + hypervisor);
-		containerPage.setHypervisor(hypervisor);
+		if ( StringUtils.isEmptyOrNull(hypervisor) ) {
+			log.info("Hypervisor parameter has no value or is null, default value will be kept: " + containerPage.getHypervisorCombo().getText());
+		} else {
+			log.info("Setting hypervisor to: " + hypervisor);
+			containerPage.setHypervisor(hypervisor);
+		}
 		log.info("Setting binary to " + MINISHIFT_PATH);
 		containerPage.setMinishiftBinary(MINISHIFT_PATH);
 		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);

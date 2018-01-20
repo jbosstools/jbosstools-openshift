@@ -37,7 +37,6 @@ public class CDK3ServerWizardTest extends CDKServerWizardAbstractTest {
 	
 	@BeforeClass
 	public static void setupCDK3ServerEditorTest() {
-		checkMinishiftHypervisorParameters();
 		if (CDK_MINISHIFT == null) {
 			MINISHIFT_PATH = MOCK_CDK311;
 		} else {

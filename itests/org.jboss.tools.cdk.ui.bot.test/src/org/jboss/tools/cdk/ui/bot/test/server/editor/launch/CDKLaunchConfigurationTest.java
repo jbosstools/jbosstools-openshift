@@ -55,7 +55,6 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	public static void setUpEnvironment() {
 		log.info("Checking given program arguments"); //$NON-NLS-1$
 		checkDevelopersParameters();
-		checkMinishiftHypervisorParameters();
 		checkCDK32Parameters();
 	}
 	

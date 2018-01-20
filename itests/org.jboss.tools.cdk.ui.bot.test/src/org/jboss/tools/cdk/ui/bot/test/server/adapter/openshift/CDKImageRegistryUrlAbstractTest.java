@@ -17,7 +17,7 @@ import static org.junit.Assert.fail;
 import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.tools.cdk.reddeer.core.CDKRuntimeOS;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKRuntimeOS;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKServerAdapterAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
@@ -68,7 +68,7 @@ public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAb
 
 	@Before
 	public void setupAdapter() {
-		startServerAdapterIfNotRunning(() -> skipRegistration(getCDEServer()), true);
+		startServerAdapterIfNotRunning(() -> skipRegistration(getCDKServer()), true);
 		connection = findOpenShiftConnection(null, OPENSHIFT_USERNAME);
 		wizard = connection.editConnection();
 		assertTrue(wizard.getAuthSection().getMethod().equals(AuthenticationMethod.BASIC));

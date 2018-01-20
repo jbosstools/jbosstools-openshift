@@ -37,7 +37,6 @@ public class MinishiftServerWizardTest extends CDKServerWizardAbstractTest {
 	
 	@BeforeClass
 	public static void setUpEnvironment() {
-		checkMinishiftHypervisorParameters();
 		if (CDK_MINISHIFT == null) {
 			MINISHIFT_PATH = MOCK_MINISHIFT170;
 		} else {
@@ -66,7 +65,7 @@ public class MinishiftServerWizardTest extends CDKServerWizardAbstractTest {
 		NewMinishiftServerWizardPage containerPage = new NewMinishiftServerWizardPage();
 		
 		checkWizardPagewidget("Minishift Binary: ", MINISHIFT_SERVER_NAME);
-		assertTrue(containerPage.getMinshiftProfileLabeledText().getText().contains("minishift"));
+		assertTrue(containerPage.getMinishiftProfile().getText().contains("minishift"));
 		
 		// checking of minishift binary validation
 		// test that existing folder cannot be run

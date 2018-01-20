@@ -4,10 +4,10 @@ This plugin contains CDK tooling integration tests. For execution of a specific 
 ## Requirements
 To be able to run CDK integration tests, couple of pre-requisities must be fulfilled.
 1. You need to have an account on https://developers.redhat.com
-2. Have downloaded and configured Container Development Kit (2.x and 3.x). Instructions to download/setup CDK 2.x/3.x can be found here: https://developers.redhat.com/products/cdk/overview/. Even though, there is always supported latest CDK version (3.2 version), integration tests for CDK tooling are still testing proper UI for CDK 2.x and CDK 3.1 adapters. Please, follow the requirements below, you need to have:
-- downloaded CDK 2.x vagrant file
-- downloaded CDK 3.1 binary
-- downloaded and configured CDK 3.2 binary, and have called setup-cdk on it (which creates ~/.minishift folder, and prepares cdk to be able to start from IDE)
+2. Have downloaded and configured Container Development Kit 3.2 or higher. Instructions to download/setup CDK 3.3 can be found here: https://developers.redhat.com/products/cdk/overview/. Please, follow the requirements below, you need to have:
+- downloaded CDK 2.x vagrant file (optional)
+- downloaded CDK 3.1 binary (optional)
+- downloaded and configured CDK 3.2+ binary, and have called setup-cdk on it (which creates ~/.minishift folder, and prepares cdk to be able to start from IDE)
 3. For successful registration of vm-guest rhel image your account must have signed Terms and Conditions (https://developers.redhat.com/terms-and-conditions/).
 4. For ease of configuration and automation there is a possibility to use cdk configuration scripts (https://github.com/odockal/cdk-scripts), please, see below...
 
@@ -19,17 +19,20 @@ There are three suites for CDK integration tests (full suite (CDKAllTestsSuite),
 1. Install RedDeer to your IDE from update site: http://download.eclipse.org/reddeer/releases/latest (RedDeer is on DevStudio TP, RedDeer project repo URL: https://github.com/eclipse/reddeer)
 2. Select desired java suite (e.g. CDKAllTestsSuite, CDKSmokeTestsSuite, CDK3AllTestsSuite, CDK32AllTestsSuite) and in its context menu select _Run As_ - _Run Configurations..._
 3. In Run Configurations dialog double click on RedDeer Test and a new RedDeer test run configuration for your suite will be created
-4. Select tab Argument and fill in following properties **with credentials** to VM arguments:
+4. Select tab Argument and fill in following properties **with credentials** to VM arguments, following are compulsory:
 ```
 -Dminishift.hypervisor=kvm|virtualbox|hyperv|xhyve
--Dminishift=/path/to/your/cdk-3.1/minishift
 -Dminishift.profile=/path/to/your/cdk-3.2/minishift 
 -Ddevelopers.username=yourusername 
 -Ddevelopers.password=password
--Dvagrantfile=/path/to/vagrantfile
 -Dusage_reporting_enabled=false 
 ``` 
-5. All above Mentioned arguments must be used when CDKSmokeTestsSuite or CDKAllTestsSuitesuite suite is used, if you do not want to test CDK 2.x, you can choose to run CDK3AllTestsSuite or CDK32AllTestsSuite and then you can omit <br />
+or you can pass additional optional arguments:
+```
+-Dminishift=/path/to/your/cdk-3.1/minishift
+-Dvagrantfile=/path/to/vagrantfile
+```
+5. All above mentioned arguments (compulsory) must be used when CDKSmokeTestsSuite or CDKAllTestsSuitesuite suite is used, you can choose to run CDK3AllTestsSuite or CDK32AllTestsSuite and then you can omit <br />
 `-Dvagrantfile=/path/to/your/vagrantfile/folder/`
 
 **NOTE:** In case that you run tests for, ie. CDK 3.2+ (CDKAllTestsSuite) and now you want to test CDK 3.1 (CDK3AllTestsSuite), you need to clean up old CDK (3.2+) configuration. To clean up old configuration, follow https://docs.openshift.org/latest/minishift/getting-started/uninstalling.html.
@@ -49,13 +52,16 @@ To run tests, type this command:
 ```
 mvn clean verify -Dtest.installBase=/path/to/ide/to/run/against -PITests
 -Dminishift.hypervisor=kvm|virtualbox|hyperv|xhyve
--Dminishift=/path/to/your/cdk-3.1/minishift
 -Dminishift.profile=/path/to/your/cdk-3.2/minishift 
--Dvagrantfile=/path/to/your/vagrantfile
 -Ddevelopers.username=yourusername
 -Ddevelopers.password=password
 -DskipTests=false -Dusage_reporting_enabled=false
-
+```
+or add optional
+```
+-Dminishift=/path/to/your/cdk-3.1/minishift
+-Dvagrantfile=/path/to/your/vagrantfile
+-Pcdk3-all-tests
 ```
 
 You can also run a single test class. To utilize all advantages of RedDeer suite, be sure your test class is annotated with RunWith(RedDeerSuite.class) annotation. If you want to run a single test class instead of a test suite, use parameter <br />`-Dtest`, ie.
@@ -66,7 +72,4 @@ or in IDE, write down required class in _Test class_ row of the form that can be
 In case that you want to run test suites that run tests for all CDK versions, you can ease the process of downloading and configuring CDK-3.1.1 and CDK-3.2. Base scenario:
 1. git clone https://github.com/odockal/cdk-scripts
 2. cd cdk-scripts/scripts
-3. ./cdk3-install.sh -u http://download.server.cdk.org/cdk-3.1.1/minishift -p /home/user/cdk-3.1.1
 4. ./cdk3-install.sh -u http://download.server.cdk.org/cdk-3.2/minishift -p /home/user/cdk-3.2.0 --setup "--default-vm-driver kvm"
-
-and one is done with setting up CDK 3.x+ versions for integration tests. You still need to downlaod vagrantfile from CDK 2.x by yourself

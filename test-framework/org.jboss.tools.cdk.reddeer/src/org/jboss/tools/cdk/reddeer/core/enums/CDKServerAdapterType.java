@@ -8,8 +8,13 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.server.adapter;
+package org.jboss.tools.cdk.reddeer.core.enums;
 
+/**
+ * Server adapters types
+ * @author odockal
+ *
+ */
 public enum CDKServerAdapterType {
 
 	CDK2 	("org.jboss.tools.openshift.cdk.server.type"),
