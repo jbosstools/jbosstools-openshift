@@ -208,8 +208,8 @@ public class ApplicationSourceListPage extends AbstractProjectPage<IApplicationS
 		IObservableValue eclipseProjectObservable = BeanProperties
 				.value(IApplicationSourceListPageModel.PROPERTY_ECLIPSE_PROJECT).observe(model);
 		SelectProjectComponentBuilder builder = new SelectProjectComponentBuilder();
-		builder.setTextLabel("Use existing workspace project:").setHorisontalSpan(1).setRequired(false)
-				.setEclipseProjectObservable(eclipseProjectObservable).setSelectionListener(onBrowseProjects())
+		builder.setTextLabel("Use existing workspace project:").setRequired(false)
+				.setEclipseProjectObservable(eclipseProjectObservable).setSelectionListener(onBrowseProjects()).setButtonIndent(0)
 				.build(parent, dbc);
 
 		Link gitLabel = new Link(parent, SWT.NONE);
