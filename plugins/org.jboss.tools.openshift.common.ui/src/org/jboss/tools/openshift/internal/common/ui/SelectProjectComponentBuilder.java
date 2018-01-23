@@ -117,7 +117,7 @@ public class SelectProjectComponentBuilder {
 		// browse projects
 		Button browseProjectsButton = new Button(container, SWT.NONE);
 		browseProjectsButton.setText("Browse...");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).indent(buttonIndent, SWT.DEFAULT)
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).indent(buttonIndent, 0)
 				.applyTo(browseProjectsButton);
 		UIUtils.setDefaultButtonWidth(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(selectionListener);
@@ -162,7 +162,7 @@ public class SelectProjectComponentBuilder {
 		this.buttonIndent = indent;
 		return this;
 	}
-	
+
 	/**
 	 * By default input is required.
 	 * Set to false if selecting a project is not required.
