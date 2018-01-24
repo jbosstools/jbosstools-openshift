@@ -35,6 +35,7 @@ public class CDKServer extends ServerDelegate {
 	public static final String CDK_SERVER_TYPE = "org.jboss.tools.openshift.cdk.server.type";
 	public static final String CDK_V3_SERVER_TYPE = "org.jboss.tools.openshift.cdk.server.type.v3";
 	public static final String CDK_V32_SERVER_TYPE = "org.jboss.tools.openshift.cdk.server.type.v32";
+	public static final String MINISHIFT_1_7_SERVER_TYPE = "org.jboss.tools.openshift.cdk.server.type.minishift.v17";
 
 	public static final String PROP_FOLDER = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.FOLDER";
 

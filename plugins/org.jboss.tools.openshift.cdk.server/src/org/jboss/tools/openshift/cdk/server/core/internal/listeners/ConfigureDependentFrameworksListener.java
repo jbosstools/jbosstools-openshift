@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.core.internal.listeners;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -21,6 +24,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 
@@ -76,13 +80,10 @@ public class ConfigureDependentFrameworksListener extends UnitedServerListener {
 
 	@Override
 	public boolean canHandleServer(IServer server) {
-		if (server.getServerType().getId().equals(CDKServer.CDK_SERVER_TYPE))
-			return true;
-		if (server.getServerType().getId().equals(CDKServer.CDK_V3_SERVER_TYPE))
-			return true;
-		if (server.getServerType().getId().equals(CDKServer.CDK_V32_SERVER_TYPE))
-			return true;
-		return false;
+		String[] ok = new String[] { CDKServer.CDK_SERVER_TYPE, CDKServer.CDK_V3_SERVER_TYPE,
+				CDK32Server.CDK_V32_SERVER_TYPE, CDK32Server.MINISHIFT_1_7_SERVER_TYPE };
+		List<String> valid = Arrays.asList(ok);
+		return valid.contains(server.getServerType().getId());
 	}
 
 	private void configureDocker(IServer server, ServiceManagerEnvironment adb) {

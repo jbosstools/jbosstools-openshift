@@ -89,6 +89,10 @@ public class CDKServerWizardFragment extends WizardFragment {
 		return main;
 	}
 
+	protected boolean shouldCreateCredentialWidgets() {
+		return true;
+	}
+
 	protected void createCredentialWidgets(Composite main) {
 		// create credentials row
 		selectedUser = null;
@@ -113,6 +117,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 		GridData homeData = new GridData();
 		homeData.grabExcessHorizontalSpace = true;
 		homeData.horizontalAlignment = SWT.FILL;
+		homeData.widthHint = 100;
 		homeText = new Text(main, SWT.BORDER);
 		homeText.setLayoutData(homeData);
 		browseButton = new Button(main, SWT.PUSH);
@@ -172,7 +177,8 @@ public class CDKServerWizardFragment extends WizardFragment {
 			String homeLabel) {
 		// boilerplate
 		Composite main = setupComposite(parent, handle, title, desc);
-		createCredentialWidgets(main);
+		if (shouldCreateCredentialWidgets())
+			createCredentialWidgets(main);
 		createLocationWidgets(main, homeLabel);
 		validateAndPack(main);
 		return main;
@@ -215,8 +221,10 @@ public class CDKServerWizardFragment extends WizardFragment {
 	}
 
 	protected String findError() {
-		if (credentials.getDomain() == null || credentials.getUser() == null) {
-			return "The Container Development Environment Server Adapter requires Red Hat Access credentials.";
+		if (shouldCreateCredentialWidgets()) {
+			if (credentials.getDomain() == null || credentials.getUser() == null) {
+				return "The Container Development Environment Server Adapter requires Red Hat Access credentials.";
+			}
 		}
 		String retString = validateHomeDirectory();
 		if (retString != null)
@@ -302,7 +310,8 @@ public class CDKServerWizardFragment extends WizardFragment {
 		if (s instanceof IServerWorkingCopy) {
 			IServerWorkingCopy swc = (IServerWorkingCopy) s;
 			swc.setAttribute(CDKServer.PROP_FOLDER, homeDir);
-			swc.setAttribute(CDKServer.PROP_USERNAME, selectedUser);
+			if (shouldCreateCredentialWidgets())
+				swc.setAttribute(CDKServer.PROP_USERNAME, selectedUser);
 		}
 	}
 

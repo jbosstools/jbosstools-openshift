@@ -42,7 +42,8 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 			String homeLabel) {
 		// boilerplate
 		Composite main = setupComposite(parent, handle, title, desc);
-		createCredentialWidgets(main);
+		if (shouldCreateCredentialWidgets())
+			createCredentialWidgets(main);
 		createHypervisorWidgets(main);
 		createLocationWidgets(main, homeLabel);
 		createProfileWidgets(main);
@@ -74,14 +75,18 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 	}
 
 	protected String isVersionCompatible(MinishiftVersions versions) {
+		return isCDKVersionCompatible(versions);
+	}
+
+	protected String isCDKVersionCompatible(MinishiftVersions versions) {
 		String cdkVers = versions.getCDKVersion();
-		if (cdkVers == null) {
-			return "Cannot determine CDK version.";
+		if (cdkVers != null) {
+			if (CDK32Server.matchesCDK32(cdkVers)) {
+				return null;
+			}
+			return "CDK version " + cdkVers + " is not compatible with this server adapter.";
 		}
-		if (CDK32Server.matchesCDK32(cdkVers)) {
-			return null;
-		}
-		return "CDK version " + cdkVers + " is not compatible with this server adapter.";
+		return "Cannot determine CDK version.";
 	}
 
 	@Override

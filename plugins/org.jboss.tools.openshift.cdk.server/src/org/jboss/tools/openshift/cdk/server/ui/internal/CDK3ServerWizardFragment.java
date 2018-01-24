@@ -98,9 +98,12 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 	@Override
 	protected String findError() {
 		// Validate credentials
-		if (credentials.getDomain() == null || credentials.getUser() == null) {
-			return "The Container Development Environment Server Adapter requires Red Hat Access credentials.";
+		if (shouldCreateCredentialWidgets()) {
+			if (credentials.getDomain() == null || credentials.getUser() == null) {
+				return "The Container Development Environment Server Adapter requires Red Hat Access credentials.";
+			}
 		}
+
 		// Validate hypervisor
 		if (selectedHypervisor == null) {
 			return "You must choose a hypervisor.";
