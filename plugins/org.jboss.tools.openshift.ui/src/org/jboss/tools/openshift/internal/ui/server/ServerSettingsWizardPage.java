@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2017 Red Hat Inc..
+ * Copyright (c) 2015-2018 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,6 +118,8 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.util.RSyncValidator;
+import org.jboss.tools.openshift.internal.core.util.RSyncValidator.RsyncStatus;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
@@ -138,6 +140,7 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
 	private static final String DOWNLOAD_LINK_TEXT = "download";
+	private static final String REFRESH_LINK_TEXT = "refresh";
 	private static final int RESOURCE_PANEL_WIDTH = 800;
 	private static final int RESOURCE_TREE_WIDTH = 400;
 	private static final int RESOURCE_TREE_HEIGHT = 120;
@@ -150,8 +153,10 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	/**
 	 * Invoked from new server wizard (servers view, main menu)
 	 * 
-	 * @param wizard the parent {@link IWizard} 
-	 * @param connection the current OpenShift {@link Connection}
+	 * @param wizard
+	 *            the parent {@link IWizard}
+	 * @param connection
+	 *            the current OpenShift {@link Connection}
 	 */
 	public ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server, final Connection connection,
 			IProject deployProject) {
@@ -161,10 +166,14 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	/**
 	 * Invoked from OpenShift explorer
 	 * 
-	 * @param wizard the parent {@link IWizard} 
-	 * @param server the working copy of the {@link IServer} to create
-	 * @param connection the current OpenShift {@link Connection}
-	 * @param resource the selected resource
+	 * @param wizard
+	 *            the parent {@link IWizard}
+	 * @param server
+	 *            the working copy of the {@link IServer} to create
+	 * @param connection
+	 *            the current OpenShift {@link Connection}
+	 * @param resource
+	 *            the selected resource
 	 */
 	protected ServerSettingsWizardPage(final IWizard wizard, final IServerWorkingCopy server,
 			final Connection connection, final IResource resource, final IRoute route) {
@@ -177,7 +186,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				"Create an OpenShift 3 Server Adapter by selecting the project, resource and folders used for file synchronization.",
 				"Create an OpenShift 3 Server Adapter", wizard);
 		this.model = new ServerSettingsWizardPageModel(resource, route, deployProject, connection, server,
-				OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()));
+				OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()),
+				RSyncValidator.get().getStatus());
 	}
 
 	/**
@@ -192,14 +202,16 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	}
 
 	/**
-	 * @return a boolean flag to indicate if this page needs to load resources from OpenShift.
+	 * @return a boolean flag to indicate if this page needs to load resources from
+	 *         OpenShift.
 	 */
 	public boolean isNeedsLoadingResources() {
 		return needsLoadingResources;
 	}
 
 	/**
-	 * @return a boolean flag to serverSettingsWizardPageindicate if this page is currently loading resources from OpenShift.
+	 * @return a boolean flag to serverSettingsWizardPageindicate if this page is
+	 *         currently loading resources from OpenShift.
 	 */
 	public boolean isLoadingResources() {
 		return isLoadingResources;
@@ -214,7 +226,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	protected void doCreateControls(final Composite parent, final DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().numColumns(3).margins(0, 0).applyTo(parent);
 		createControls(parent, model, dbc);
-		isLoadingResources = false; //Since wizard fragment is cached and reused, this precaution is needed.
+		isLoadingResources = false; // Since wizard fragment is cached and reused, this precaution is needed.
 		new FormPresenterSupport(new IFormPresenter() {
 
 			@Override
@@ -237,15 +249,16 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			}
 		}, dbc);
 
-		// assuming that the wizard may be complete upon initialization 
+		// assuming that the wizard may be complete upon initialization
 		setComplete(true);
 		loadResources(getContainer());
 	}
 
 	/**
 	 * Loads the resources for this view, does it in a blocking way.
+	 * 
 	 * @param model
-	 * @param container 
+	 * @param container
 	 */
 	private void loadResources(final IWizardContainer container) {
 		try {
@@ -264,8 +277,11 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	}
 
 	/**
-	 * Sets the default deployment project in the wizard page, unless it is <code>null</code>
-	 * @param project the project to select
+	 * Sets the default deployment project in the wizard page, unless it is
+	 * <code>null</code>
+	 * 
+	 * @param project
+	 *            the project to select
 	 */
 	void setDeploymentProject(final IProject project) {
 		if (project != null) {
@@ -279,6 +295,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		GridLayoutFactory.fillDefaults().margins(6, 6).applyTo(container);
 
 		createOCWarningControls(container, model, dbc);
+		createRSyncControls(container, model, dbc);
 		createEclipseProjectSourceControls(container, model, dbc);
 		createOpenShiftDestinationControls(container, model, dbc);
 		createAdvancedGroup(container, dbc);
@@ -374,6 +391,96 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			}
 		};
 		dbc.addValidationStatusProvider(validator);
+		BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model)
+				.addValueChangeListener(event -> getShell().pack());
+	}
+
+	private void createRSyncControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
+		final RSyncValidator rsyncValidator = RSyncValidator.get();
+		Composite composite = new Composite(container, SWT.NONE);
+		GridDataFactory.fillDefaults().applyTo(composite);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
+
+		ValueBindingBuilder.bind(WidgetProperties.visible().observe(composite))
+				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model))
+				.converting(new Converter(RsyncStatus.class, Boolean.class) {
+
+					@Override
+					public Object convert(Object fromObject) {
+						return fromObject != RsyncStatus.OK;
+					}
+
+				}).in(dbc);
+
+		Label label = new Label(composite, SWT.NONE);
+		ValueBindingBuilder.bind(WidgetProperties.image().observe(label))
+				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model))
+				.converting(new Converter(RsyncStatus.class, Image.class) {
+
+					@Override
+					public Object convert(Object fromObject) {
+						switch ((RsyncStatus) fromObject) {
+						case OK:
+							return null;
+						default:
+							return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
+						}
+					}
+				}).in(dbc);
+		Link link = new Link(composite, SWT.WRAP);
+		ValueBindingBuilder.bind(WidgetProperties.text().observe(link))
+				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model))
+				.converting(new Converter(RsyncStatus.class, String.class) {
+
+					@Override
+					public Object convert(Object fromObject) {
+						switch ((RsyncStatus) fromObject) {
+						case OK:
+							return null;
+						default:
+							return ((RsyncStatus) fromObject).getDetailedMessage(rsyncValidator.getBasePath());
+						}
+					}
+				}).in(dbc);
+		GridDataFactory.fillDefaults().hint(600, SWT.DEFAULT).applyTo(link);
+		link.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (REFRESH_LINK_TEXT.equals(e.text)) {
+					new Job("Checking rsync environment") {
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							rsyncValidator.refresh();
+							model.setRsyncStatus(rsyncValidator.getStatus());
+							return Status.OK_STATUS;
+						}
+					}.schedule();
+
+				} else {
+					new BrowserUtility().checkedCreateExternalBrowser(e.text, OpenShiftUIActivator.PLUGIN_ID,
+							OpenShiftUIActivator.getDefault().getLog());
+				}
+			}
+		});
+		MultiValidator validator = new MultiValidator() {
+
+			@Override
+			protected IStatus validate() {
+				RsyncStatus status = (RsyncStatus) BeanProperties
+						.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model).getValue();
+
+				switch (status) {
+				case OK:
+					return ValidationStatus.ok();
+				default:
+					return OpenShiftUIActivator.statusFactory().warningStatus(status.getMessage());
+				}
+			}
+		};
+		dbc.addValidationStatusProvider(validator);
+		BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model)
+				.addValueChangeListener(event -> getShell().pack());
+
 	}
 
 	private void createEclipseProjectSourceControls(Composite parent, ServerSettingsWizardPageModel model,
@@ -411,7 +518,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	}
 
 	/**
-	 * Open a dialog box to select an open project when clicking on the 'Browse' button.
+	 * Open a dialog box to select an open project when clicking on the 'Browse'
+	 * button.
 	 * 
 	 * @return
 	 */
@@ -435,7 +543,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	}
 
 	/**
-	 * Open a dialog box to import an Eclipse project when clicking on the 'Import' button.
+	 * Open a dialog box to import an Eclipse project when clicking on the 'Import'
+	 * button.
 	 * 
 	 * @return
 	 */
@@ -811,7 +920,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				.value(OpenShiftServerEditorModel.PROPERTY_USE_IMAGE_DEBUG_PORT_KEY).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.selection().observe(useImageDebugPortKeyButton))
 				.to(useImageDebugPortKey).in(dbc);
-		//filler
+		// filler
 		new Label(parent, SWT.NONE);
 
 		// key text field
@@ -864,7 +973,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, false).applyTo(routeGroup);
 		GridLayoutFactory.fillDefaults().applyTo(routeGroup);
 
-		// additional nesting required because of https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
+		// additional nesting required because of
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=478618
 		Composite routeContainer = new Composite(routeGroup, SWT.None);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(routeContainer);
 		GridLayoutFactory.fillDefaults().margins(10, 10).numColumns(2).applyTo(routeContainer);
@@ -884,39 +994,39 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		routesViewer.setContentProvider(new ObservableListContentProvider());
 		routesViewer.setLabelProvider(new RouteLabelProvider());
 		routesViewer.setInput(BeanProperties.list(ServerSettingsWizardPageModel.PROPERTY_ROUTES).observe(model));
-		//		routesViewer.setComparer(new IElementComparer() {
+		// routesViewer.setComparer(new IElementComparer() {
 		//
-		//			@Override
-		//			public boolean equals(Object object1, Object object2) {
-		//				if (object1 instanceof IRoute) {
-		//					if (!(object2 instanceof IRoute)) {
-		//						return false;
-		//					}
+		// @Override
+		// public boolean equals(Object object1, Object object2) {
+		// if (object1 instanceof IRoute) {
+		// if (!(object2 instanceof IRoute)) {
+		// return false;
+		// }
 		//
-		//					IRoute route1 = (IRoute) object1;
-		//					IRoute route2 = (IRoute) object2;
+		// IRoute route1 = (IRoute) object1;
+		// IRoute route2 = (IRoute) object2;
 		//
-		//					return Objects.equals(route1.getServiceName(), route2.getServiceName()) 
-		//							&& Objects.equals(route1.getURL(), route2.getURL());
-		//				} else if (object2 instanceof IRoute) {
-		//					return false;
-		//				} else {
-		//					return Objects.equals(object1, object2);
-		//				}
-		//			}
+		// return Objects.equals(route1.getServiceName(), route2.getServiceName())
+		// && Objects.equals(route1.getURL(), route2.getURL());
+		// } else if (object2 instanceof IRoute) {
+		// return false;
+		// } else {
+		// return Objects.equals(object1, object2);
+		// }
+		// }
 		//
-		//			@Override
-		//			public int hashCode(Object element) {
-		//				if (element instanceof IRoute) {
-		//					IRoute route = (IRoute) element;
-		//					return new HashCodeBuilder()
-		//							.append(route.getServiceName())
-		//							.append(route.getURL())
-		//							.toHashCode();
-		//				}
-		//				return element.hashCode();
-		//			}
-		//		});
+		// @Override
+		// public int hashCode(Object element) {
+		// if (element instanceof IRoute) {
+		// IRoute route = (IRoute) element;
+		// return new HashCodeBuilder()
+		// .append(route.getServiceName())
+		// .append(route.getURL())
+		// .toHashCode();
+		// }
+		// return element.hashCode();
+		// }
+		// });
 
 		IObservableValue<IResource> selectedRouteObservable = ViewerProperties.singleSelection().observe(routesViewer);
 		ValueBindingBuilder.bind(selectedRouteObservable)

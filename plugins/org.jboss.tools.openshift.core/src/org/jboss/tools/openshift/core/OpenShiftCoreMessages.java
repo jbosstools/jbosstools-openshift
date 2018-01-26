@@ -20,6 +20,11 @@ public class OpenShiftCoreMessages extends NLS {
 	public static String OCBinaryLocationIncompatibleErrorMessage;
 	public static String OCBinaryLocationDontExistsErrorMessage;
 	public static String NoOCBinaryLocationErrorMessage;
+	public static String RsyncNotFoundMessage;
+	public static String RsyncFstabNotFoundMessage;
+	public static String RsyncFstabNotFoundDetailedMessage;
+	public static String RsyncFstabInvalidMessage;
+	public static String RsyncFstabInvalidDetailedMessage;
 
 	static {
 		// initialize resource bundle
