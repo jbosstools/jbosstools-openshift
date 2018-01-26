@@ -11,11 +11,10 @@
 package org.jboss.tools.cdk.reddeer.server.ui.editor.launch.configuration;
 
 import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.jface.dialogs.TitleAreaDialog;
 import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.api.Shell;
-import org.eclipse.reddeer.swt.impl.button.CancelButton;
-import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.ctab.DefaultCTabFolder;
 import org.eclipse.reddeer.swt.impl.ctab.DefaultCTabItem;
@@ -48,17 +47,19 @@ public class CDKLaunchConfigurationDialog extends TitleAreaDialog {
 	
 	public void ok() {
 		logger.info("Pressing OK button...");
-		new OkButton().click();
+		Button ok = new PushButton(this, "OK");
+		ok.click();
 	}
 	
 	public void cancel() {
 		logger.info("Pressing cancel button...");
-		new CancelButton().click();
+		Button cancel = new PushButton(this, "Cancel");
+		cancel.click();
 	}
 	
 	public void apply() {
 		logger.info("Pressing apply button...");
-		Button apply = new PushButton("Apply");
+		Button apply = new PushButton(this, new WithTextMatcher("Apply"));
 		if (apply.isEnabled()) {
 			apply.click();
 		}
@@ -66,7 +67,7 @@ public class CDKLaunchConfigurationDialog extends TitleAreaDialog {
 	
 	public void revert() {
 		logger.info("Pressing revert button...");
-		Button revert = new PushButton("Revert");
+		Button revert = new PushButton(this, new WithTextMatcher("Revert"));
 		if (revert.isEnabled()) {
 			revert.click();
 		}
@@ -112,5 +113,11 @@ public class CDKLaunchConfigurationDialog extends TitleAreaDialog {
 		String actual = getArguments().getText();
 		logger.info("Replacing launch config arguments \"" + actual + "\" with \"" + arguments + "\"");
 		getArguments().setText(arguments);
+	}
+	
+	public void addArguments(String argumentsToAdd) {
+		String actual = getArguments().getText();
+		logger.info("Adding \"" + argumentsToAdd + "\" to launch config arguments \"" + actual);
+		getArguments().setText(actual + " " + argumentsToAdd);
 	}
 }

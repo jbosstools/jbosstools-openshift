@@ -10,27 +10,118 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.editor;
 
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
+import org.eclipse.reddeer.common.wait.TimePeriod;
+import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.eclipse.wst.server.ui.editor.ServerEditor;
 import org.eclipse.reddeer.swt.api.Button;
+import org.eclipse.reddeer.swt.api.Combo;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
+import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
+import org.eclipse.reddeer.swt.impl.menu.ShellMenuItem;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.uiforms.impl.hyperlink.DefaultHyperlink;
+import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
+import org.eclipse.reddeer.workbench.condition.EditorIsDirty;
+import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 
 /**
- * Class representing CDK 2.x Server Editor page
+ * Class representing  general CDK Server Editor
  * @author odockal
  *
  */
-public class CDKServerEditor extends CDEServerEditor {
-
+public class CDKServerEditor extends ServerEditor {
+	
+	private DefaultSection generalSection;
+	
+	private DefaultSection credentialsSection;
+	
+	private DefaultSection cdkSection;
+	
+	public static final String CREDENTIALS = "Credentials";
+	
+	public static final String CDK_DETAILS = "CDK Details";
+	
+	public static final String GENERAL = "General Information";
+	
 	public CDKServerEditor(String title) {
 		super(title);
-	}
-
-	public LabeledText getVagrantfileLocation() {
-		return new LabeledText(getCDKSection(), "Vagrantfile Location: ");
+		this.generalSection = new DefaultSection(GENERAL);
+		this.credentialsSection = new DefaultSection(CREDENTIALS);
+		this.cdkSection = new DefaultSection(CDK_DETAILS);
 	}
 	
-	public Button getVagrantfileBrowse() {
-		return new PushButton(getCDKSection(), "Browse...");
+	public void openLaunchConfigurationFromLink() {
+		log.info("Activate launch configuration via link");
+		getLaunchConfigurationHyperLink().activate();
+		ShellIsAvailable launch = new ShellIsAvailable("Edit Configuration");
+		try {
+			new WaitUntil(launch, TimePeriod.DEFAULT);
+		} catch (WaitTimeoutExpiredException exc) {
+			log.error("WaitTimeoutExpiredException occured while waiting for Edit Configuration dialog");
+		}
+	}
+	
+	@Override
+	public void save() {
+		activate();
+		log.info("Trying to save editor via File -> Save");
+		try {
+			new ShellMenuItem(new WorkbenchShell(), "File", "Save").select();
+			new WaitWhile(new EditorIsDirty(this));
+		} catch (CoreLayerException coreExc) {
+			if (coreExc.getMessage().equalsIgnoreCase("Menu item is not enabled")) {
+				log.debug("Could not perform File -> Save because option was not enabled");
+			} else {
+				throw coreExc;
+			}
+		} finally {
+			activate();
+		}
 	}
 
+	public LabeledText getPasswordLabel() {
+		return new LabeledText(credentialsSection, "Password: ");
+	}
+	
+	public LabeledText getUsernameLabel() {
+		return new LabeledText(credentialsSection, "Username: ");
+	}
+	
+	public Button getAddButton() {
+		return new PushButton(credentialsSection, "Add...");
+	}
+	
+	public Button getEditButton() {
+		return new PushButton(credentialsSection, "Edit...");
+	}
+	
+	public Combo getDomainCombo() {
+		return new LabeledCombo(credentialsSection, "Domain: ");
+	}
+	
+	public Button getPassCredentialsCheckBox() {
+		return new CheckBox(credentialsSection, "Pass credentials to environment");
+	}
+	
+	public LabeledText getHostnameLabel() {
+		return new LabeledText(generalSection,"Host name:");
+	}
+	
+	public LabeledText getServernameLabel() {
+		return new LabeledText(generalSection,"Server name:");
+	}
+	
+	public DefaultHyperlink getLaunchConfigurationHyperLink() {
+		return new DefaultHyperlink(generalSection, "Open launch configuration");
+	}
+	
+	public DefaultSection getCDKSection() {
+		return this.cdkSection;
+	}
+	
 }

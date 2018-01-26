@@ -10,101 +10,34 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.eclipse.reddeer.common.logging.Logger;
-import org.eclipse.reddeer.common.wait.TimePeriod;
-import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
-import org.eclipse.reddeer.swt.impl.button.OkButton;
-import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
-import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
-import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
-import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@CleanOpenShiftExplorer
 @RunWith(RedDeerSuite.class)
 public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstractTest {
 
-	private String openshiftRegistry;
-
 	private static final Logger log = Logger.getLogger(CDKImageRegistryUrlDiscoveryTest.class);
-
-	@Before
-	public void setupRegistry() {
-		log.info("Obtaining URL value of openshift registry");
-		openshiftRegistry = getMinishiftOpenshiftRegistry();
-	}
 
 	@Override
 	protected String getServerAdapter() {
-		// return SERVER_ADAPTER_32;
-		// workaround for https://github.com/eclipse/reddeer/issues/1841
-		return "Container Development Environment 3.2";
+		return SERVER_ADAPTER_32;
 	}
 
 	/**
 	 * Base test for Discover Image Registry URL feature JBIDE-25093
+	 * Covers also JBIDE-25014
 	 */
 	@Test
-	public void testImageRegistryUrlIsAtPlaceAfterCDKStart() {
-		checkImageRegistryUrl(openshiftRegistry);
-		wizard.cancel();
-	}
-
-	/**
-	 * Covers JBIDE-25014
-	 */
-	@Test
-	public void testDiscoveryOfEmptyImageRegistryUrl() {
-		wizard.getImageRegistryUrl().setText("");
-		checkImageRegistryUrl("");
-		wizard.discover();
-		checkImageRegistryUrl(openshiftRegistry);
+	public void testRediscoveryOfUrlAfterValueChanged() {
+		log.info("Checking image registry url after cdk was started");
+		checkImageRegistryUrl(OPENSHIFT_REGISTRY);
+		log.info("Checking overwriting of empty image registry url");
+		checkImageRegistryUrlRediscovered("");
+		log.info("Testing overwriting of proper url value");
+		checkImageRegistryUrlRediscovered("http://localhost:8443");
 		wizard.finish();
-	}
-
-	/**
-	 * Covers JBIDE-25014
-	 */
-	@Test
-	public void testOverwritingOfImageRegistryUrl() {
-		wizard.getImageRegistryUrl().setText("http://localhost:8443");
-		assertFalse(getImageRegistryUrlValue().contains(openshiftRegistry));
-		wizard.discover();
-		checkImageRegistryUrl(openshiftRegistry);
-		wizard.finish();
-	}
-
-	/**
-	 * Covers JBIDE-25049
-	 */
-	@Test
-	public void testRegistryUrlNotFoundDialog() {
-		String shellTitle = OpenShiftLabel.Shell.REGISTRY_URL_NOT_FOUND;
-		wizard.getImageRegistryUrl().setText("");
-		wizard.finish();
-		stopServerAdapter();
-		wizard = connection.editConnection();
-		switchOffPasswordSaving();
-		try {
-			wizard.discover();
-			fail("Expected OpenshiftToolsException was not thrown, possibly no dialog is shown.");
-		} catch (OpenShiftToolsException osExc) {
-			// os exception was thrown with specific message
-			assertTrue("Registry URL not found dialog did not appear.", osExc.getMessage().contains(shellTitle));
-			// error dialog is still there
-			new WaitUntil(new ShellIsAvailable(shellTitle), TimePeriod.SHORT);
-			new DefaultShell(shellTitle);
-			new OkButton().click();
-		}
-		wizard.cancel();
 	}
 
 	/**
@@ -118,13 +51,13 @@ public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstrac
 		wizard.finish();
 		// stop server
 		stopServerAdapter();
-		// start server adapter -> should bring up the value of registr url in existing
+		// start server adapter -> should bring up the value of registry url in existing
 		// connection
-		startServerAdapter();
+		startServerAdapter(() -> skipRegistration(getCDEServer()));
 		connection.refresh();
 		wizard = connection.editConnection();
 		switchOffPasswordSaving();
-		checkImageRegistryUrl(openshiftRegistry);
+		checkImageRegistryUrl(OPENSHIFT_REGISTRY);
 		wizard.finish();
 	}
 
@@ -133,9 +66,9 @@ public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstrac
 	 */
 	public void testAllImageRegistryUrlUpdated() {
 		// set image registry url to "" string in existing connection
-		// crate new connection and have empty IR url
+		// create new connection and have empty image registry url
 		// stop and start server adapter
-		// check that both connections have filled IR url
+		// check that both connections have filled image registry url
 	}
 
 }

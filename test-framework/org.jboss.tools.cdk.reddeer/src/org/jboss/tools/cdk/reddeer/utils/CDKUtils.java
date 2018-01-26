@@ -18,6 +18,8 @@ import org.eclipse.reddeer.common.util.Display;
 import org.eclipse.reddeer.common.util.ResultRunnable;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
+import org.eclipse.reddeer.junit.screenshot.CaptureScreenshotException;
+import org.eclipse.reddeer.junit.screenshot.ScreenshotCapturer;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.cdk.reddeer.server.adapter.CDKServerAdapterType;
@@ -76,6 +78,15 @@ public class CDKUtils {
 		ServersView2 view = new ServersView2();
 		view.open();
 		return view.getServers();
+	}
+	
+	
+	public static void captureScreenshot(String name) {
+		try {
+			ScreenshotCapturer.getInstance().captureScreenshot(name);
+		} catch (CaptureScreenshotException e) {
+			log.error("Could not capture screenshot for " + name);
+		}		
 	}
 	
 }

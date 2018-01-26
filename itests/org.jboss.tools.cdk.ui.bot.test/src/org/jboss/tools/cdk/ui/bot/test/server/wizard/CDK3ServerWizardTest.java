@@ -33,15 +33,21 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 public class CDK3ServerWizardTest extends CDKServerWizardAbstractTest {
 	
+	private static String MINISHIFT_PATH;
+	
+	@BeforeClass
+	public static void setupCDK3ServerEditorTest() {
+		checkMinishiftHypervisorParameters();
+		if (MINISHIFT == null) {
+			MINISHIFT_PATH = MOCK_CDK311;
+		} else {
+			MINISHIFT_PATH = MINISHIFT;
+		}
+	}
+	
 	@Override
 	protected String getServerAdapter() {
 		return SERVER_ADAPTER_3;
-	}
-	
-	@BeforeClass
-	public static void setUpEnvironment() {
-		checkMinishiftParameters();
-		checkMinishiftProfileParameters();
 	}
 	
 	@Test
@@ -84,11 +90,11 @@ public class CDK3ServerWizardTest extends CDKServerWizardAbstractTest {
 		assertSameMessage(dialog, CHECK_MINISHIFT_VERSION);
 		
 		// check compatibility of cdk version with server adapter
-		containerPage.setMinishiftBinary(MINISHIFT_PROFILE);
+		containerPage.setMinishiftBinary(MOCK_CDK320);
 		assertSameMessage(dialog, NOT_COMPATIBLE);
 		
 		// Positive test of proper minishift binary
-		containerPage.setMinishiftBinary(MINISHIFT);
+		containerPage.setMinishiftBinary(MINISHIFT_PATH);
 		assertDiffMessage(dialog, CHECK_MINISHIFT_VERSION);
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.MEDIUM, false);
 		assertTrue("Expected Finish button is not enabled", dialog.isFinishEnabled());

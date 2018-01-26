@@ -11,10 +11,10 @@
 package org.jboss.tools.cdk.ui.bot.test;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterConnectionTest;
-import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterRestartTest;
-import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterStartTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32IntegrationTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryFailureTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlValidatorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK32ServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.launch.CDKLaunchConfigurationTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK32ServerWizardTest;
@@ -26,10 +26,10 @@ import org.junit.runners.Suite;
 	CDK32ServerWizardTest.class,
 	CDK32ServerEditorTest.class,
 	CDKLaunchConfigurationTest.class,
+	CDKImageRegistryUrlValidatorTest.class,
+	CDKImageRegistryUrlDiscoveryFailureTest.class,
 	CDKImageRegistryUrlDiscoveryTest.class,
-	CDK32ServerAdapterStartTest.class,
-	CDK32ServerAdapterRestartTest.class,
-	CDK32ServerAdapterConnectionTest.class
+	CDK32IntegrationTest.class
 })
 /**
  * @author ondrej dockal

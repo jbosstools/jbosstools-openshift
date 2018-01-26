@@ -13,29 +13,22 @@ package org.jboss.tools.cdk.ui.bot.test;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32IntegrationTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryTest;
-import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlValidatorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK32ServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK3ServerEditorTest;
-import org.jboss.tools.cdk.ui.bot.test.server.editor.CDKServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.launch.CDKLaunchConfigurationTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK32ServerWizardTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK3ServerWizardTest;
-import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDKServerWizardTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(RedDeerSuite.class)
 @Suite.SuiteClasses({
-	CDKServerWizardTest.class,
 	CDK3ServerWizardTest.class,
 	CDK32ServerWizardTest.class,
-	CDKServerEditorTest.class,
 	CDK3ServerEditorTest.class,
 	CDK32ServerEditorTest.class,
 	CDKLaunchConfigurationTest.class,
-	CDKImageRegistryUrlValidatorTest.class,
 	CDKImageRegistryUrlDiscoveryTest.class,
-	//CDK3IntegrationTest.class,
 	CDK32IntegrationTest.class
 })
 /**

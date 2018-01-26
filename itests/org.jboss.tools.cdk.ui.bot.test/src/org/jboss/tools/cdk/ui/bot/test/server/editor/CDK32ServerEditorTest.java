@@ -21,7 +21,7 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
-import org.jboss.tools.cdk.reddeer.server.ui.CDEServersView;
+import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerContainerWizardPage;
 import org.junit.Before;
@@ -43,7 +43,6 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 
 	@BeforeClass
 	public static void setUpEnvironment() {
-		checkMinishiftParameters();
 		checkMinishiftProfileParameters();
 	}
 	
@@ -72,13 +71,11 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 	
 	@Override
 	protected String getServerAdapter() {
-		// return SERVER_ADAPTER_32; 
-		// workaround for https://github.com/eclipse/reddeer/issues/1841
-		return "Container Development Environment 3.2";
+		return SERVER_ADAPTER_32; 
 	}
 
 	public void setServerEditor() {
-		serversView = new CDEServersView();
+		serversView = new CDKServersView();
 		serversView.open();
 		serversView.getServer(getServerAdapter()).open();
 		editor = new CDK32ServerEditor(getServerAdapter());
@@ -122,7 +119,7 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 		checkEditorStateAfterSave(NON_EXECUTABLE_FILE, false);
 		checkEditorStateAfterSave(NON_EXISTING_PATH, false);
 		checkEditorStateAfterSave(EXECUTABLE_FILE, false);
-		checkEditorStateAfterSave(MINISHIFT, false);
+		checkEditorStateAfterSave(MOCK_CDK311, false);
 		checkEditorStateAfterSave(MINISHIFT_PROFILE, true);
 	}
 	

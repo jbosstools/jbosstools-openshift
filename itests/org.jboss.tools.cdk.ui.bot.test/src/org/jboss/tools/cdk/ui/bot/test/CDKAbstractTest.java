@@ -49,8 +49,6 @@ public abstract class CDKAbstractTest {
 	
 	public static final String PASSWORD;
 	
-	public static final String VAGRANTFILE;
-	
 	public static final String MINISHIFT_HYPERVISOR;
 	
 	public static final String MINISHIFT;
@@ -62,7 +60,6 @@ public abstract class CDKAbstractTest {
 	static {
 		USERNAME = CDKTestUtils.getSystemProperty("developers.username"); //$NON-NLS-1$
 		PASSWORD = CDKTestUtils.getSystemProperty("developers.password"); //$NON-NLS-1$
-		VAGRANTFILE = CDKTestUtils.getSystemProperty("vagrantfile"); //$NON-NLS-1$
 		MINISHIFT = CDKTestUtils.getSystemProperty("minishift"); //$NON-NLS-1$
 		MINISHIFT_PROFILE = CDKTestUtils.getSystemProperty("minishift.profile"); //$NON-NLS-1$
 		MINISHIFT_HYPERVISOR = CDKTestUtils.getSystemProperty("minishift.hypervisor"); //$NON-NLS-1$
@@ -72,13 +69,19 @@ public abstract class CDKAbstractTest {
 	public static void checkMinishiftParameters() {
 		Map<String, String> dict = new HashMap<>();
 		dict.put("Minishift path", MINISHIFT);
-		dict.put("Minishift hypervisor", MINISHIFT_HYPERVISOR == null ? "" : MINISHIFT_HYPERVISOR);
 		CDKTestUtils.checkParameterNotNull(dict);
+		checkMinishiftHypervisorParameters();
 	}
 	
 	public static void checkMinishiftProfileParameters() {
 		Map<String, String> dict = new HashMap<>();
 		dict.put("Minishift profile path", MINISHIFT_PROFILE);
+		CDKTestUtils.checkParameterNotNull(dict);
+		checkMinishiftHypervisorParameters();
+	}
+	
+	public static void checkMinishiftHypervisorParameters() {
+		Map<String, String> dict = new HashMap<>();
 		dict.put("Minishift hypervisor", MINISHIFT_HYPERVISOR == null ? "" : MINISHIFT_HYPERVISOR);
 		CDKTestUtils.checkParameterNotNull(dict);
 	}
@@ -88,12 +91,6 @@ public abstract class CDKAbstractTest {
 		dict.put("Username", USERNAME);
 		dict.put("Password", PASSWORD);
 		CDKTestUtils.checkParameterNotNull(dict);
-	}
-	
-	public static void checkVagrantfileParameters() {
-		Map<String, String> dict = new HashMap<>();
-		dict.put("Vagrantfile path", VAGRANTFILE);
-		CDKTestUtils.checkParameterNotNull(dict);		
 	}
 	
 	/**

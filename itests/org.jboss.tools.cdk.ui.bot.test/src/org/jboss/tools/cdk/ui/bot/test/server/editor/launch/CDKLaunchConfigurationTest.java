@@ -24,7 +24,7 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
-import org.jboss.tools.cdk.reddeer.server.ui.CDEServersView;
+import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.launch.configuration.CDKLaunchConfigurationDialog;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerContainerWizardPage;
@@ -53,6 +53,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	
 	@BeforeClass
 	public static void setUpEnvironment() {
+		checkMinishiftHypervisorParameters();
 		checkMinishiftProfileParameters();
 	}
 	
@@ -81,7 +82,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 
 	@Override
 	public void setServerEditor() {
-		serversView = new CDEServersView();
+		serversView = new CDKServersView();
 		serversView.open();
 		serversView.getServer(getServerAdapter()).open();
 		editor = new CDK32ServerEditor(getServerAdapter());
