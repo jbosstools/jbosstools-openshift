@@ -41,11 +41,15 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlD
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 
 public class SelectProjectComponentBuilder {
+
+	public static final int DEFAULT_BUTTON_INDENT = 10;
+
 	String textLabel = "Use existing workspace project:";
 	String browseLabel = "Browse...";
 	String errorText = "Select an existing project";
 	int hSpan = 1;
 	boolean required = true;
+	int buttonIndent = DEFAULT_BUTTON_INDENT;
 
 	IObservableValue<?> eclipseProjectObservable;
 	SelectionListener selectionListener;
@@ -113,7 +117,7 @@ public class SelectProjectComponentBuilder {
 		// browse projects
 		Button browseProjectsButton = new Button(container, SWT.NONE);
 		browseProjectsButton.setText("Browse...");
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).indent(10, SWT.DEFAULT)
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).indent(buttonIndent, 0)
 				.applyTo(browseProjectsButton);
 		UIUtils.setDefaultButtonWidth(browseProjectsButton);
 		browseProjectsButton.addSelectionListener(selectionListener);
@@ -151,6 +155,11 @@ public class SelectProjectComponentBuilder {
 	 */
 	public SelectProjectComponentBuilder setHorisontalSpan(int hSpan) {
 		this.hSpan = hSpan;
+		return this;
+	}
+
+	public SelectProjectComponentBuilder setButtonIndent(int indent) {
+		this.buttonIndent = indent;
 		return this;
 	}
 
