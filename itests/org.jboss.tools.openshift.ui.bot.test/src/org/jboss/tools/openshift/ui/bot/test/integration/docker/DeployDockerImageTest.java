@@ -46,7 +46,6 @@ import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.hamcrest.core.StringContains;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
@@ -54,12 +53,14 @@ import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.widget.ShellWithButton;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -72,10 +73,11 @@ import org.junit.runner.RunWith;
  * @contributor jkopriva@redhat.com
  */
 @OpenPerspective(JBossPerspective.class)
+@OCBinary(setOCInPrefs=true)
 @RequiredBasicConnection
 @CleanConnection
 @RunWith(RedDeerSuite.class)
-public class DeployDockerImageTest {
+public class DeployDockerImageTest extends AbstractTest {
 	
 	private static final Logger LOGGER = new Logger(DeployDockerImageTest.class);
 	
@@ -183,7 +185,6 @@ public class DeployDockerImageTest {
 		if (connection.projectExists(PROJECT2)) {
 			connection.getProject(PROJECT2).delete();
 		}
-		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 	}
 	
 	@After

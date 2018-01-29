@@ -39,6 +39,7 @@ import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.widget.ShellWithButton;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -50,7 +51,7 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @CleanConnection
 @RunWith(RedDeerSuite.class)
-public class ConnectionWizardHandlingTest {
+public class ConnectionWizardHandlingTest extends AbstractTest {
 
 	@Before
 	public void openConnectionShell() {

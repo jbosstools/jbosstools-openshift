@@ -37,6 +37,7 @@ import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
 import org.jboss.tools.openshift.reddeer.view.resources.Service;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenshiftTestInFailureException;
 import org.junit.After;
 import org.junit.Before;
@@ -54,7 +55,7 @@ import org.junit.runner.RunWith;
 @CleanConnection
 @RequiredProject
 @RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE)
-public class OSExplorerResourceTest {
+public class OSExplorerResourceTest extends AbstractTest {
 	
 	public static String GIT_FOLDER = "jboss-eap-quickstarts";
 	public static String PROJECT_NAME = "jboss-helloworld";

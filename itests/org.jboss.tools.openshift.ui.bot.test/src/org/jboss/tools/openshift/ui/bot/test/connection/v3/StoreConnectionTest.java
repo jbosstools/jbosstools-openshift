@@ -21,6 +21,8 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.equinox.security.ui.storage.PasswordProvider;
 import org.eclipse.reddeer.eclipse.equinox.security.ui.storage.StoragePreferencePage;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.browser.InternalBrowser;
 import org.eclipse.reddeer.swt.impl.button.BackButton;
@@ -32,20 +34,27 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.CentralIsLoaded;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.SecureStorage;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@OpenPerspective(value=JBossPerspective.class)
 @SuppressWarnings("restriction")
-@RequiredBasicConnection()
+@OCBinary(setOCInPrefs=true)
+@RequiredBasicConnection
 @RequiredProject
-public class StoreConnectionTest {
+@RunWith(RedDeerSuite.class)
+public class StoreConnectionTest extends AbstractTest {
 	
 	@BeforeClass
 	public static void setupClass(){

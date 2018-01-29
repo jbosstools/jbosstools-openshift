@@ -42,6 +42,7 @@ import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.EmulatedLinkStyledText;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,7 +53,7 @@ import org.junit.runner.RunWith;
 @SuppressWarnings("unused")
 @CleanOpenShiftExplorer
 @RunWith(RedDeerSuite.class)
-public class CreateNewConnectionTest {
+public class CreateNewConnectionTest extends AbstractTest {
 
 	private static Logger LOG = new Logger(CreateNewConnectionTest.class);
 	

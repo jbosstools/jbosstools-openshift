@@ -55,7 +55,7 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @RequiredProject(name="builderimagevalidationproject")
 @RunWith(RedDeerSuite.class)
-public class BuilderImageApplicationWizardHandlingTest {
+public class BuilderImageApplicationWizardHandlingTest extends AbstractTest {
 
 	public static final String BUILDER_IMAGE = "httpd:latest (builder, httpd) - openshift";
 	

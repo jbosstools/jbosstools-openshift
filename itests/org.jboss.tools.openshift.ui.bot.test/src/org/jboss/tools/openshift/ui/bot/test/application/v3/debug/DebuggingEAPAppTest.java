@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.ui.bot.test.application.v3.adapter;
+package org.jboss.tools.openshift.ui.bot.test.application.v3.debug;
 
 import static org.junit.Assert.assertTrue;
 
@@ -17,19 +17,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Predicate;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -42,6 +35,7 @@ import org.eclipse.reddeer.eclipse.core.resources.ProjectItem;
 import org.eclipse.reddeer.eclipse.debug.ui.views.breakpoints.BreakpointsView;
 import org.eclipse.reddeer.eclipse.debug.ui.views.launch.LaunchView;
 import org.eclipse.reddeer.eclipse.debug.ui.views.variables.VariablesView;
+import org.eclipse.reddeer.eclipse.jdt.ui.packageview.PackageExplorerPart;
 import org.eclipse.reddeer.eclipse.ui.console.ConsoleView;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.eclipse.ui.perspectives.DebugPerspective;
@@ -53,6 +47,8 @@ import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.junit.screenshot.CaptureScreenshotException;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.TreeItem;
+import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
@@ -66,9 +62,9 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.impl.editor.TextEditor;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
-import org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob;
 import org.jboss.tools.openshift.reddeer.preference.page.JavaDebugPreferencePage;
-import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
@@ -79,6 +75,8 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter.Version;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.condition.SuspendedTreeItemIsReady;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -88,15 +86,16 @@ import org.junit.runner.RunWith;
 
 @OpenPerspective(DebugPerspective.class)
 @RunWith(RedDeerSuite.class)
-@OCBinary
+@CleanOpenShiftExplorer
 @RequiredBasicConnection
+@CleanConnection
 @RequiredProject
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
-public class DebuggingEAPAppTest {
+public class DebuggingEAPAppTest extends AbstractTest {
 
 	private static Logger LOGGER = new Logger(DebuggingEAPAppTest.class);
 
-	private static final String GIT_REPO_URL = "https://github.com/rhopp/jboss-eap-quickstarts";
+	private static final String GIT_REPO_URL = "https://github.com/jboss-developer/jboss-eap-quickstarts";
 
 	private static final String GIT_REPO_DIRECTORY = "target/git_repo";
 
@@ -114,6 +113,8 @@ public class DebuggingEAPAppTest {
 	@BeforeClass
 	public static void setupClass() {
 		cloneGitRepoAndImportProject();
+		
+		rebuildProject();
 
 		doNotSuspendOnUncaughtExceptions();
 
@@ -122,40 +123,40 @@ public class DebuggingEAPAppTest {
 		createServerAdapter();
 
 		disableShowConsoleWhenOutputChanges();
-
+		
 		serverAdapter = new ServerAdapter(Version.OPENSHIFT3, "eap-app", "Service");
-		serverAdapter.select();
-		new ContextMenuItem("Restart in Debug").select();
-		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
-
-		waitForserverAdapterToBeInRightState();
+		try {
+			restartServerInDebug(serverAdapter);
+		} catch (WaitTimeoutExpiredException ex) {
+			//try once again
+			restartServerInDebug(serverAdapter);
+		}
 
 		cleanAndBuildWorkspace();
 	}
+	
+	private static void restartServerInDebug(ServerAdapter serverAdapter) {
+		serverAdapter.select();
+		new ContextMenuItem("Restart in Debug").select();
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		waitForserverAdapterToBeInRightState();
+	}
+
+	private static void rebuildProject() {
+		PackageExplorerPart pexplorer = new PackageExplorerPart();
+		pexplorer.open();
+		pexplorer.getProject(PROJECT_NAME).select();
+		new ContextMenuItem("Maven","Update Project...").select();
+		new WaitUntil(new ShellIsAvailable("Update Maven Project"),TimePeriod.LONG);
+		new CheckBox("Force Update of Snapshots/Releases").toggle(true);
+		new PushButton("OK").click();
+		new WaitWhile(new ShellIsAvailable("Update Maven Project"),TimePeriod.DEFAULT);
+		new WaitWhile(new JobIsRunning(),TimePeriod.VERY_LONG);
+	}
 
 	private static void cloneGitRepoAndImportProject() {
-		cloneGitRepository();
-		importProjectUsingSmartImport();
-	}
-
-	private static void cloneGitRepository() {
-		TestUtils.cleanupGitFolder(new File(GIT_REPO_DIRECTORY));
-		try {
-			Git.cloneRepository().setURI(GIT_REPO_URL).setDirectory(new File(GIT_REPO_DIRECTORY)).call();
-		} catch (GitAPIException e) {
-			throw new RuntimeException("Unable to clone git repository from " + GIT_REPO_URL);
-		}
-	}
-
-	@SuppressWarnings("restriction")
-	private static void importProjectUsingSmartImport() {
-		SmartImportJob job = new SmartImportJob(new File(GIT_REPO_DIRECTORY + File.separator + PROJECT_NAME),
-				Collections.emptySet(), true, true);
-		HashSet<File> directory = new HashSet<File>();
-		directory.add(new File(GIT_REPO_DIRECTORY + File.separator + PROJECT_NAME));
-		job.setDirectoriesToImport(directory);
-		job.run(new NullProgressMonitor());
-		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+		OpenShiftUtils.cloneGitRepository(GIT_REPO_DIRECTORY, GIT_REPO_URL, true);
+		OpenShiftUtils.importProjectUsingSmartImport(GIT_REPO_DIRECTORY, PROJECT_NAME);
 	}
 
 	@AfterClass
@@ -165,14 +166,9 @@ public class DebuggingEAPAppTest {
 	}
 
 	private static void cleanProjectsAndGitRepo() {
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (IProject iProject : projects) {
-			try {
-				iProject.delete(false, new NullProgressMonitor());
-			} catch (CoreException e) {
-				throw new RuntimeException("Unable to delete project " + iProject.getName(), e);
-			}
-		}
+		ProjectExplorer projectExplorer = new ProjectExplorer();
+		projectExplorer.open();
+		projectExplorer.deleteAllProjects(true);
 		try {
 			TestUtils.delete(new File(GIT_REPO_DIRECTORY));
 		} catch (IOException e) {
@@ -256,7 +252,7 @@ public class DebuggingEAPAppTest {
 	}
 
 	private static void waitForserverAdapterToBeInRightState() {
-		new WaitUntil(new ServerHasState(new ServersView2().getServer(serverAdapter.getLabel()), ServerState.DEBUGGING), TimePeriod.LONG);
+		new WaitUntil(new ServerHasState(new ServersView2().getServer(serverAdapter.getLabel()), ServerState.DEBUGGING), TimePeriod.VERY_LONG);
 		new WaitUntil(new ServerHasPublishState(new ServersView2().getServer(serverAdapter.getLabel()),
 				ServerPublishState.SYNCHRONIZED));
 	}
@@ -357,7 +353,7 @@ public class DebuggingEAPAppTest {
 
 		// wait until we can see the suspended thread
 		SuspendedTreeItemIsReady suspendedTreeItemIsReady = new SuspendedTreeItemIsReady(openJDKTreeItem);
-		new WaitUntil(suspendedTreeItemIsReady, TimePeriod.LONG);
+		new WaitUntil(suspendedTreeItemIsReady, TimePeriod.VERY_LONG);
 		return suspendedTreeItemIsReady.getSuspendedTreeItem();
 	}
 
@@ -440,7 +436,8 @@ public class DebuggingEAPAppTest {
 
 	private static void createServerAdapter() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getService("eap-app")
+		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).refresh();
+		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getServicesWithName("eap-app").get(0)
 				.createServerAdapter();
 	}
 
@@ -448,7 +445,7 @@ public class DebuggingEAPAppTest {
 		ConsoleView consoleView = new ConsoleView();
 		consoleView.open();
 
-		new WaitUntil(new ShowConsoleOutputToolItemIsAvailable());
+		new WaitUntil(new ShowConsoleOutputToolItemIsAvailable(), TimePeriod.VERY_LONG);
 
 		DefaultToolItem showConsoleOnChange = new DefaultToolItem(new WorkbenchShell(),
 				"Show Console Output When Standard Out Changes");

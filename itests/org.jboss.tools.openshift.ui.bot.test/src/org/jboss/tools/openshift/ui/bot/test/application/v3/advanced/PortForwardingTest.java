@@ -40,6 +40,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,7 +50,7 @@ import org.junit.Test;
 @CleanConnection
 @RequiredProject
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
-public class PortForwardingTest {
+public class PortForwardingTest extends AbstractTest {
 
 	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;

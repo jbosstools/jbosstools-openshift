@@ -33,6 +33,7 @@ import org.jboss.tools.openshift.reddeer.preference.page.OpenShifIOPreferencePag
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.SecureStorage;
 import org.jboss.tools.openshift.reddeer.utils.SystemProperties;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +43,7 @@ import org.junit.runner.RunWith;
  * @author jkopriva@redhat.com
  */
 @RunWith(RedDeerSuite.class)
-public class GetOpenShiftIOTokenTest {
+public class GetOpenShiftIOTokenTest extends AbstractTest {
 
 	@Test
 	public void testGetToken() {

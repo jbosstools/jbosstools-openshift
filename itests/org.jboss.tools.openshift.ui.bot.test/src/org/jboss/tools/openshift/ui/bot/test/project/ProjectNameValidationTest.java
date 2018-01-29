@@ -25,6 +25,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirem
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ import org.junit.runner.RunWith;
 @OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
 @RunWith(RedDeerSuite.class)
-public class ProjectNameValidationTest {
+public class ProjectNameValidationTest extends AbstractTest {
 	
 	public static final String PROJECT_NAME_FORMAT_ERROR = 
 			" Project name may only contain lower-case letters, numbers, and dashes. "

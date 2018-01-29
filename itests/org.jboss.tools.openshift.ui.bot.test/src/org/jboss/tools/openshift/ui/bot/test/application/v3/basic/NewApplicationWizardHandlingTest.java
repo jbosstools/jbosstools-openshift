@@ -61,7 +61,7 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @CleanConnection
 @RunWith(RedDeerSuite.class)
-public class NewApplicationWizardHandlingTest {
+public class NewApplicationWizardHandlingTest extends AbstractTest {
 
 	@InjectRequirement
 	private OpenShiftConnectionRequirement connectionReq;

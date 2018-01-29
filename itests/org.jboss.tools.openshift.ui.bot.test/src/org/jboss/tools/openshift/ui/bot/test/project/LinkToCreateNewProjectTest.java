@@ -31,6 +31,7 @@ import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionReq
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -40,7 +41,7 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 @CleanConnection
 @RunWith(RedDeerSuite.class)
-public class LinkToCreateNewProjectTest {
+public class LinkToCreateNewProjectTest extends AbstractTest {
 	
 	private String projectName = "os3-integration-test";
 	private boolean projectCreated = false;

@@ -15,23 +15,37 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.matcher.RegexMatcher;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
+import org.eclipse.reddeer.swt.impl.button.NoButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
+import org.jboss.tools.common.reddeer.utils.FileUtils;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
+import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
@@ -122,6 +136,62 @@ public class OpenShiftUtils {
 		return new ServerSettingsWizard();
 	}
 	
+	
+	public static void handleCheatSheetCreateServerAdapter () {
+		try {
+			new WaitUntil(new ShellIsAvailable(new WithTextMatcher(new RegexMatcher(OpenShiftLabel.Shell.CHEATSHEET + "|" + OpenShiftLabel.Shell.CREATE_SERVER_ADAPTER))), TimePeriod.LONG);
+			new NoButton().click();
+			new DefaultShell("Create server adapter");
+			new NoButton().click();
+		} catch (CoreLayerException ex) {
+			// Swallow, shells are not opened
+		} catch (WaitTimeoutExpiredException e) {
+			// Also swallow, shells are not opened
+		}
+	}
+	
+	@SuppressWarnings("restriction")
+	public static void importProjectUsingSmartImport(String gitRepoDirectory, String projectName) {
+		SmartImportJob job = new SmartImportJob(new File(gitRepoDirectory + File.separator + projectName),
+				Collections.emptySet(), true, true);
+		HashSet<File> directory = new HashSet<File>();
+		directory.add(new File(gitRepoDirectory + File.separator + projectName));
+		job.setDirectoriesToImport(directory);
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				job.schedule();
+			}
+		});
+		OpenShiftUtils.handleCheatSheetCreateServerAdapter();
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+	}
+	
+	public static void cloneGitRepository(String gitRepoDirectory, String gitRepoURL) {
+		cloneGitRepository(gitRepoDirectory, gitRepoURL, false);
+	}
+	
+	public static void cloneGitRepository(String gitRepoDirectory, String gitRepoURL, boolean cleanupFolderBefore) {
+		if (cleanupFolderBefore) {
+			TestUtils.cleanupGitFolder(new File(gitRepoDirectory));
+		}
+		try {
+			FileUtils.deleteDirectory(new File(gitRepoDirectory));
+			Git.cloneRepository().setURI(gitRepoURL).setDirectory(new File(gitRepoDirectory)).call();
+		} catch (GitAPIException|IOException e) {
+			throw new RuntimeException("Unable to clone git repository from " + gitRepoURL, e);
+		}
+	}
+
+	public static void cloneGitRepository(String gitRepoDirectory, String gitRepoUrl, String gitRepoName) {
+		TestUtils.cleanupGitFolder(new File(gitRepoDirectory),gitRepoName);
+		try {
+			Git.cloneRepository().setURI(gitRepoUrl).setDirectory(new File(gitRepoDirectory)).call();
+		} catch (GitAPIException e) {
+			throw new RuntimeException("Unable to clone git repository from " + gitRepoUrl);
+		}
+		
+	}
 
 
 }

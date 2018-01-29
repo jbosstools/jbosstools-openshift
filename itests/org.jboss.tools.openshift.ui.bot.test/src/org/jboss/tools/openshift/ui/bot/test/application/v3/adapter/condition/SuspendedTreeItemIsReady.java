@@ -13,7 +13,7 @@ package org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.condition;
 import java.util.List;
 
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
-import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.swt.api.TreeItem;
 
 public class SuspendedTreeItemIsReady extends AbstractWaitCondition {
@@ -39,7 +39,7 @@ public class SuspendedTreeItemIsReady extends AbstractWaitCondition {
 					suspendedTreeItem = frame;
 					return true;
 				}
-			} catch (CoreLayerException e) {
+			} catch (RedDeerException e) {
 				// most likely some widgetIsDisposed. Ignore.
 				return false;
 			}

@@ -32,6 +32,7 @@ import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
 import org.jboss.tools.openshift.reddeer.view.resources.Service;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -51,7 +52,7 @@ import org.junit.runner.RunWith;
 		service = OpenShiftResources.NODEJS_SERVICE, 
 		template = OpenShiftResources.NODEJS_TEMPLATE)
 @RunWith(RedDeerSuite.class)
-public abstract class ImportApplicationBase {
+public abstract class ImportApplicationBase extends AbstractTest {
 	
 	@InjectRequirement
 	protected static OpenShiftProjectRequirement requiredProject;

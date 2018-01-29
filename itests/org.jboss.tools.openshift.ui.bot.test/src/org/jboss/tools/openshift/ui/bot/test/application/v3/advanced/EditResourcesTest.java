@@ -11,9 +11,8 @@
 package org.jboss.tools.openshift.ui.bot.test.application.v3.advanced;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.io.File;
+import static org.junit.Assert.fail;
 
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
@@ -46,21 +45,22 @@ import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@OCBinary
-@OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
+@OCBinary(cleanup=false, setOCInPrefs=true)
+@OpenPerspective(value=JBossPerspective.class)
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject(
 		name = DatastoreOS3.TEST_PROJECT)
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
-public class EditResourcesTest{
+public class EditResourcesTest extends AbstractTest {
 	
 	@InjectRequirement
 	private OpenShiftProjectRequirement requiredProject;
@@ -68,10 +68,7 @@ public class EditResourcesTest{
 	private static String GIT_FOLDER = "jboss-eap-quickstarts";
 	private String customRepo = "https://github.com/rhopp/jboss-eap-quickstarts";
 	private String originalRepo = "https://github.com/jboss-developer/jboss-eap-quickstarts";
-	private static String TEMPLATE_PATH = CreateResourcesTest.RESOURCES_LOCATION +
-			File.separator + "eap64-basic-s2i.json";
 	private static String PROJECT_NAME = "jboss-helloworld";
-	private static String DEFAULT_NEXUS_MIRROR = "https://repository.jboss.org/nexus/content/groups/public-jboss/";
 	private String buildConfig;
 	
 	private static final String BUILD_CONFIG_EDITOR = "[" + DatastoreOS3.TEST_PROJECT + "] Build Config : eap-app.json";
@@ -97,6 +94,7 @@ public class EditResourcesTest{
 			fail("Text editor to modify build config resource has not been opened.");
 		}
 	}
+	
 	
 	@Test
 	public void testEditBuildConfigAndCheckChangesInExplorer() {
@@ -139,36 +137,6 @@ public class EditResourcesTest{
 		} catch (RedDeerException ex) {
 			// sometimes it occures, sometimes not
 		}
-	}
-	
-	/**
-	 * Gets URL of Nexus Mirror. At first look up if user provided 
-	 * nexus mirror URL by property {@link DatastoreOS3.KEY_NEXUS_MIRROR}. If
-	 * none provided, try to use default, which is stored in 
-	 * {@link AbstractCreateApplicationTest.DEFAULT_NEXUS_MIRROR}. If none of 
-	 * the above works, use default, official nexus and this method returns null.
-	 */
-	private static String getNexusMirror() {
-		if (isNexusMirrorProvided()) {
-			return DatastoreOS3.NEXUS_MIRROR_URL;
-		} else {
-			if (isDefaultNexusMirrorWorking()) {
-				return DEFAULT_NEXUS_MIRROR;
-			} else {
-				return null;
-			}
-		}
-	}
-	
-	private static boolean isNexusMirrorProvided() {
-		if (DatastoreOS3.NEXUS_MIRROR_URL == null || DatastoreOS3.NEXUS_MIRROR_URL.equals("")) {
-			return false;
-		}
-		return TestUtils.isURLAccessible(DatastoreOS3.NEXUS_MIRROR_URL);
-	}
-	
-	private static boolean isDefaultNexusMirrorWorking() {
-		return TestUtils.isURLAccessible(DEFAULT_NEXUS_MIRROR);
 	}
 	
 	private OpenShiftResource getBuildConfig() {

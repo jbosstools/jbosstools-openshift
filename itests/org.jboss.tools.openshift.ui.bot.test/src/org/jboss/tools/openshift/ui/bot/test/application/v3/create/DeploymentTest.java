@@ -17,7 +17,10 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.AmountOfResourcesExists;
 import org.jboss.tools.openshift.reddeer.condition.BrowserContainsText;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
@@ -30,13 +33,17 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@OpenPerspective(value=JBossPerspective.class)
+@RunWith(RedDeerSuite.class)
 @OCBinary
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
-public class DeploymentTest {
+public class DeploymentTest extends AbstractTest {
 
 	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;

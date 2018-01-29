@@ -43,6 +43,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftResource;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +56,7 @@ import org.junit.runner.RunWith;
 @CleanConnection
 @RequiredProject()
 @RequiredService(service=OpenShiftResources.EAP_SERVICE, template=OpenShiftResources.EAP_TEMPLATE, waitForBuild=false)
-public class LogsTest {
+public class LogsTest extends AbstractTest {
 
 	private static final int WAIT_CONSOLE_NO_CHANGE = 7;
 	private static final int WAIT_CONSOLE_PUSH_SUCCESS = 600;

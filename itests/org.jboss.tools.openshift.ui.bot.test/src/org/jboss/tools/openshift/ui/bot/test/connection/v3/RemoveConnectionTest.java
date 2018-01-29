@@ -27,6 +27,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirem
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -34,7 +35,7 @@ import org.junit.runner.RunWith;
 @CleanOpenShiftExplorer
 @RequiredBasicConnection
 @RunWith(RedDeerSuite.class)
-public class RemoveConnectionTest {
+public class RemoveConnectionTest extends AbstractTest {
 	
 	private OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 	
