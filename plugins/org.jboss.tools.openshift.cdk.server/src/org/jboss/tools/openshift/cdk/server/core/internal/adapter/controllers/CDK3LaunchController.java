@@ -88,6 +88,14 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 				+ server.getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
 
 		String currentVal = wc.getAttribute(ATTR_ARGS, defaultArgs);
+
+		// Overrides
+		if (cdkServer.skipRegistration()) {
+			currentVal = ArgsUtil.setFlag(currentVal, "--skip-registration");
+		} else {
+			currentVal = ArgsUtil.clearFlag(currentVal, "--skip-registration");
+		}
+
 		wc.setAttribute(ATTR_ARGS, currentVal);
 	}
 

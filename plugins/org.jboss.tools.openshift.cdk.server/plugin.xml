@@ -184,7 +184,13 @@
             id="org.jboss.tools.openshift.cdk.server.ui.internal.CDKCredentialSection"
             insertionId="org.eclipse.wst.server.editor.overview.left"
             order="9"
-            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3,,org.jboss.tools.openshift.cdk.server.type.v32"/>
+            typeIds="org.jboss.tools.openshift.cdk.server.type,org.jboss.tools.openshift.cdk.server.type.v3"/>
+      <section
+            class="org.jboss.tools.openshift.cdk.server.ui.internal.CDK32CredentialSection"
+            id="org.jboss.tools.openshift.cdk.server.ui.internal.CDK32CredentialSection"
+            insertionId="org.eclipse.wst.server.editor.overview.left"
+            order="9"
+            typeIds="org.jboss.tools.openshift.cdk.server.type.v32"/>
    </extension>
    
    
