@@ -11,6 +11,7 @@
 package org.jboss.tools.openshift.ui.bot.test.application.v3.advanced;
 
 import static org.junit.Assert.assertTrue;
+
 import static org.junit.Assert.fail;
 
 import org.eclipse.reddeer.common.exception.RedDeerException;
@@ -51,9 +52,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@OCBinary
-@OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
+@OCBinary(cleanup=false, setOCInPrefs=true)
+@OpenPerspective(value=JBossPerspective.class)
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject(

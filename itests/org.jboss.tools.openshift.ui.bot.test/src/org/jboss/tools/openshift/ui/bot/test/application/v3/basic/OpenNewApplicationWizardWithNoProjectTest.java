@@ -43,6 +43,7 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -57,6 +58,7 @@ import org.junit.runner.RunWith;
 
 @OpenPerspective(JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
+@OCBinary(cleanup=false, setOCInPrefs=true)
 @RequiredBasicConnection
 @CleanConnection
 public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {

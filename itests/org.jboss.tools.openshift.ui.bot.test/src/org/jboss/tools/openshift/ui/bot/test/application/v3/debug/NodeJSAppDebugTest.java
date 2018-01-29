@@ -80,7 +80,7 @@ import org.junit.runner.RunWith;
  */
 @OpenPerspective(DebugPerspective.class)
 @RunWith(RedDeerSuite.class)
-@OCBinary
+@OCBinary(cleanup=false, setOCInPrefs=true)
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = OpenShiftResources.NODEJS_SERVICE, template = OpenShiftResources.NODEJS_TEMPLATE)

@@ -61,7 +61,7 @@ import org.junit.runner.RunWith;
 
 @OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
-@OCBinary
+@OCBinary(cleanup=false, setOCInPrefs=true)
 @RequiredBasicConnection
 @CleanConnection
 public class CreateApplicationOnBuilderImageTest extends AbstractTest {
