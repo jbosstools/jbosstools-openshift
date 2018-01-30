@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -41,6 +41,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
+import org.jboss.tools.openshift.internal.core.util.RSyncValidator;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
@@ -123,12 +124,11 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 	@Override
 	public void addPages() {
 		/*
-		 * list --> template params -------------------------------> labels -> done
-		 *   |                                                    |
-		 *    ----> buildconfig -> deployconfig -> serviceconfig -|
+		 * list --> template params -------------------------------> labels -> done | |
+		 * ----> buildconfig -> deployconfig -> serviceconfig -|
 		 */
 
-		//app from image
+		// app from image
 		BuildConfigPage bcPage = new BuildConfigPage(this, fromImageModel) {
 			@Override
 			public boolean isPageComplete() {
@@ -150,13 +150,13 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 
 		};
 
-		//app from template
+		// app from template
 		TemplateParametersPage paramPage = new TemplateParametersPage(this, fromTemplateModel) {
 
 			@Override
 			public boolean isPageComplete() {
 				return isTemplateFlow() ?
-				//force visiting parameters page
+				// force visiting parameters page
 				getContainer() != null && !(getContainer().getCurrentPage() instanceof ApplicationSourceListPage)
 						&& super.isPageComplete() : true;
 			}
@@ -222,7 +222,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 					Display.getDefault().syncExec(createJob.getSummaryRunnable(getShell()));
 					OpenShiftUIUtils.showOpenShiftExplorer();
 					if (model.getEclipseProject() != null) {
-						//No need to import the project from git, it's already here
+						// No need to import the project from git, it's already here
 						return;
 					}
 					Collection<IResource> resources = createJob.getResources();
@@ -309,7 +309,8 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 					IServerWorkingCopy server = OpenShiftServerUtils.create(OpenShiftResourceUniqueId.get(service));
 					ServerSettingsWizardPageModel serverModel = new ServerSettingsWizardPageModel(service, route,
 							project, connection, server,
-							OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()));
+							OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()),
+							RSyncValidator.get().getStatus());
 					serverModel.loadResources();
 					serverModel.updateServer();
 					server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false);
@@ -355,7 +356,7 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 	public void setConnection(Connection connection) {
 		model.setConnection(connection);
 		if (model == null || fromImageModel == null) {
-			//wizard is disposed by canceling the creation of a required project;
+			// wizard is disposed by canceling the creation of a required project;
 			return;
 		}
 		fromImageModel.setConnection(connection);
