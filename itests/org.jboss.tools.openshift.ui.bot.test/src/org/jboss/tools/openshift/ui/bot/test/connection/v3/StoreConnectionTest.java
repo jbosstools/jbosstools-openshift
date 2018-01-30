@@ -50,7 +50,7 @@ import org.junit.runner.RunWith;
 
 @OpenPerspective(value=JBossPerspective.class)
 @SuppressWarnings("restriction")
-@OCBinary(setOCInPrefs=true)
+@OCBinary(setOCInPrefs=true, cleanup=false)
 @RequiredBasicConnection
 @RequiredProject
 @RunWith(RedDeerSuite.class)

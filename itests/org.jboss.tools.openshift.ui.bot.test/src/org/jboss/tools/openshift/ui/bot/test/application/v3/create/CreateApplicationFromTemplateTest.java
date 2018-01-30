@@ -341,7 +341,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	@AfterClass
 	public static void deleteTestsProjectFromWorkspace() {
-		new ProjectExplorer().deleteAllProjects(true);
+		new ProjectExplorer().deleteAllProjects(false);
 		DatastoreOS3.generateProjectName();
 	}
 }

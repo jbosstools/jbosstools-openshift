@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.application.v3.basic;
 
+import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.AfterClass;
 
 /**
@@ -22,7 +24,12 @@ public abstract class AbstractTest {
 	
 	@AfterClass
 	public static void cleanUpAfterTest() {
+		//Clean up projects from Project Explorer
+		new ProjectExplorer().deleteAllProjects();
+		//Close all shells if test fails (could interfere next tests)
 		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
+		//Kill running jobs if any
+		OpenShiftUtils.killJobs();
 	}
 	
 

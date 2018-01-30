@@ -52,6 +52,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirem
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
@@ -67,6 +68,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @OpenPerspective(value=JBossPerspective.class)
+@OCBinary(cleanup=false, setOCInPrefs=true)
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = OpenShiftResources.EAP_SERVICE, template = OpenShiftResources.EAP_TEMPLATE)
@@ -214,7 +216,7 @@ public class CreateServerAdapterTest extends AbstractTest  {
 	@After
 	public void removeAdapterIfExists() {
 		try {
-			new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+			OpenShiftUtils.killJobs();
 			new ServerAdapter(Version.OPENSHIFT3, "eap-app", "Service").delete();
 		} catch (OpenShiftToolsException ex) {
 			// do nothing, adapter does not exists

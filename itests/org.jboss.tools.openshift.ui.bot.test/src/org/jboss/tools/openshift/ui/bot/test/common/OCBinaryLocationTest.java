@@ -52,7 +52,9 @@ public class OCBinaryLocationTest extends AbstractTest {
 	
 	@Test
 	public void testOClocationSetByRequirement() {
-		assertTrue(page.getOCLocation().getText().contains("binaries/oc"));
+		String location = page.getOCLocation().getText();
+		//First condition is for unix like systems, second for windows systems
+		assertTrue(location.contains("binaries/oc") || location.contains("binaries\\oc"));
 	}
 	
 	@Test
