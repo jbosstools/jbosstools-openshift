@@ -139,6 +139,7 @@ import com.openshift.restclient.model.route.IRoute;
  * @author Jeff Maury
  */
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
+	private static final int LINK_DEFAULT_WIDTH = 600;
 	private static final String DOWNLOAD_LINK_TEXT = "download";
 	private static final String REFRESH_LINK_TEXT = "refresh";
 	private static final int RESOURCE_PANEL_WIDTH = 800;
@@ -372,7 +373,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				}
 			}
 		});
-		GridDataFactory.fillDefaults().hint(600, SWT.DEFAULT).applyTo(link);
+		GridDataFactory.fillDefaults().hint(LINK_DEFAULT_WIDTH, SWT.DEFAULT).applyTo(link);
 		MultiValidator validator = new MultiValidator() {
 
 			@Override
@@ -442,7 +443,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 						}
 					}
 				}).in(dbc);
-		GridDataFactory.fillDefaults().hint(600, SWT.DEFAULT).applyTo(link);
+		GridDataFactory.fillDefaults().hint(LINK_DEFAULT_WIDTH, SWT.DEFAULT).applyTo(link);
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

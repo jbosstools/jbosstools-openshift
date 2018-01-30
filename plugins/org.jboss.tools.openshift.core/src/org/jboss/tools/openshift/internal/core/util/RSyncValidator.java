@@ -29,6 +29,20 @@ import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
  */
 public class RSyncValidator {
 
+	private static final String NOACL_FLAG = "noacl";
+
+	private static final String CYGDRIVE = "cygdrive";
+
+	private static final String COMMENT_PREFIX = "#";
+
+	private static final String RSYNC_EXE_OTHER = "rsync";
+
+	private static final String RSYNC_EXE_WIN32 = "rsync.exe";
+
+	private static final String WHICH_TOOL_OTHER = "which";
+
+	private static final String WHICH_TOOL_WIN32 = "where";
+
 	public enum RsyncStatus {
 		RSYNC_NOT_FOUND(OpenShiftCoreMessages.RsyncNotFoundMessage), ETC_FSTAB_NOT_FOUND(
 				OpenShiftCoreMessages.RsyncFstabNotFoundMessage,
@@ -99,11 +113,7 @@ public class RSyncValidator {
 
 	private String getRSyncPath() throws IOException {
 		ProcessBuilder builder;
-		if (Platform.OS_WIN32.equals(Platform.getOS())) {
-			builder = new ProcessBuilder("where", "rsync.exe");
-		} else {
-			builder = new ProcessBuilder("which", "rsync");
-		}
+		builder = getProcessBuilder();
 		Process process = builder.start();
 		String path;
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
@@ -120,6 +130,21 @@ public class RSyncValidator {
 		}
 	}
 
+	private ProcessBuilder getProcessBuilder() {
+		ProcessBuilder builder;
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			builder = new ProcessBuilder(WHICH_TOOL_WIN32, RSYNC_EXE_WIN32);
+		} else {
+			builder = new ProcessBuilder(WHICH_TOOL_OTHER, RSYNC_EXE_OTHER);
+		}
+		return builder;
+	}
+
+	/**
+	 * Check the fstab content. First checks that the file exists and if satisfied,
+	 * checks that the noacl flag is set. See
+	 * <a>https://tools.jboss.org/blog/rsync-windows-env.html</a>
+	 */
 	private void checkFstab() {
 		File f = new File(getBasePath(), ETC_FSTAB_LOCATION);
 		if (f.exists()) {
@@ -127,10 +152,8 @@ public class RSyncValidator {
 			status = RsyncStatus.ETC_FSTAB_INVALID;
 			try (BufferedReader reader = new BufferedReader(new FileReader(f))) {
 				while ((line = reader.readLine()) != null) {
-					if (!line.startsWith("#")) {
-						if (line.contains("cygdrive") && line.contains("noacl")) {
-							status = RsyncStatus.OK;
-						}
+					if (!line.startsWith(COMMENT_PREFIX) && line.contains(CYGDRIVE) && line.contains(NOACL_FLAG)) {
+						status = RsyncStatus.OK;
 					}
 				}
 			} catch (IOException e) {
