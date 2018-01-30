@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -27,6 +27,7 @@ import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
+import org.jboss.tools.openshift.internal.core.util.RSyncValidator.RsyncStatus;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 
@@ -51,7 +52,7 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 	private IObservableValue<String> debugPortValueObservable;
 
 	public OpenShiftServerEditorModel(IServerWorkingCopy server, ServerEditorSection section, Connection connection) {
-		super(null, null, null, connection, server, Status.OK_STATUS);
+		super(null, null, null, connection, server, Status.OK_STATUS, RsyncStatus.OK);
 		this.section = section;
 
 		initChangelisteners(server, section);
@@ -95,7 +96,8 @@ public class OpenShiftServerEditorModel extends ServerSettingsWizardPageModel {
 			boolean useImageDebugPortKey, String debugPortKey, boolean useImageDebugPortValue, String debugPortValue) {
 		update(connection, connections, deployProject, projects, sourcePath, podPath, isUseInferredPodPath, resource,
 				resourceItems, route, isSelectDefaultRoute, routesByProject, getOCBinaryStatus(), useImageDevmodeKey,
-				devmodeKey, useImageDebugPortKey, debugPortKey, useImageDebugPortValue, debugPortValue);
+				devmodeKey, useImageDebugPortKey, debugPortKey, useImageDebugPortValue, debugPortValue,
+				getRsyncStatus());
 		firePropertyChange(PROPERTY_OVERRIDE_PROJECT, this.overrideProject, this.overrideProject = overrideProject);
 	}
 
