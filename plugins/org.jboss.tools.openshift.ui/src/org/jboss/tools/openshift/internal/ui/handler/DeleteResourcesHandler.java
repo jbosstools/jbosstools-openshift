@@ -28,9 +28,9 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.OkCancelButtonWizardDialog;
+import org.jboss.tools.openshift.internal.core.job.DeleteResourceJob;
+import org.jboss.tools.openshift.internal.core.job.OpenShiftJobs;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
-import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.wizard.resource.DeleteResourcesWizard;
 

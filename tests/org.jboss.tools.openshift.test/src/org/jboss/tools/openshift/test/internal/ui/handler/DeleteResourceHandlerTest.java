@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
-import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.ui.handler.DeleteResourceHandler;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;

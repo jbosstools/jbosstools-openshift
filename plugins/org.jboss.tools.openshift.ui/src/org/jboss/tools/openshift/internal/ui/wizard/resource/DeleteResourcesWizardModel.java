@@ -14,20 +14,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.JobGroup;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.common.databinding.ObservablePojo;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.util.KeyValueFilterFactory.KeyValueFilter;
+import org.jboss.tools.openshift.internal.core.job.DeleteResourcesJob;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
-import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
-import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 
 import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.ResourceKind;
@@ -132,32 +128,11 @@ public class DeleteResourcesWizardModel extends ObservablePojo {
 	}
 
 	protected void deleteResources(List<IResource> resources) {
-
 		if (CollectionUtils.isEmpty(resources)) {
 			return;
 		}
 
-		final JobGroup group = new JobGroup("Deleting OpenShift resources...", 1, resources.size()) {
-
-			/*
-			 * Overridden because job group cancel job at first job error by default
-			 */
-			@Override
-			protected boolean shouldCancel(IStatus lastCompletedJobResult, int numberOfFailedJobs,
-					int numberOfCanceledJobs) {
-				return false;
-			}
-
-		};
-
-		Collection<IResource> toBeDeleted = removeImplicitRemovals(resources);
-		try (Stream<IResource> stream = toBeDeleted.stream()) {
-			stream.forEach(resource -> {
-				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(resource);
-				job.setJobGroup(group);
-				job.schedule();
-			});
-		}
+		new DeleteResourcesJob(removeImplicitRemovals(resources)).schedule();
 	}
 
 	/**
