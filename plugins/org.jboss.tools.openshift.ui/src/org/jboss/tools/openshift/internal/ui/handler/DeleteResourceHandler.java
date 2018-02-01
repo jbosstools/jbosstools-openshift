@@ -23,10 +23,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.core.job.DeleteResourceJob;
+import org.jboss.tools.openshift.internal.core.job.OpenShiftJobs;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
-import org.jboss.tools.openshift.internal.ui.job.DeleteResourceJob;
-import org.jboss.tools.openshift.internal.ui.job.OpenShiftJobs;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 

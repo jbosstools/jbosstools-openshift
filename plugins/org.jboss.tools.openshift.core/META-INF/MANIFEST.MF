@@ -58,6 +58,11 @@ Export-Package: org.jboss.tools.openshift.core,
    org.jboss.tools.openshift.js,
    org.jboss.tools.openshift.test,
    org.jboss.tools.openshift.reddeer",
+ org.jboss.tools.openshift.internal.core.job;
+  x-friends:="org.jboss.tools.openshift.ui,
+   org.jboss.tools.openshift.js,
+   org.jboss.tools.openshift.test,
+   org.jboss.tools.openshift.reddeer",
  org.jboss.tools.openshift.internal.core.models;
   x-friends:="org.jboss.tools.openshift.ui,
    org.jboss.tools.openshift.js,
