@@ -19,7 +19,7 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 
 /**
  * Class represents New Server Wizard, it is required because
- * here it can be overriden finish and cancel that only kills Refreshing Server adapter list job 
+ * here it can be overridden finish and cancel that only kills Refreshing Server adapter list job 
  * when such job has started unlike is implemented in NewServerWizard class
  * @author odockal
  *

@@ -15,12 +15,13 @@
 	<properties>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
 		<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDKAllTestsSuite</suiteClass>
-		<systemProperties>-Dvagrantfile=${vagrantfile} -Ddevelopers.username=${developers.username} -Ddevelopers.password=${developers.password} -Dminishift=${minishift} -Dminishift.profile=${minishift.profile} -Dminishift.hypervisor=${minishift.hypervisor}</systemProperties>
+		<systemProperties>-Dvagrantfile=${vagrantfile} -Ddevelopers.username=${developers.username} -Ddevelopers.password=${developers.password} -Dminishift=${minishift} -Dcdk32.minishift=${cdk32.minishift} -Dcdk.minishift=${cdk.minishift} -Dhypervisor=${hypervisor}</systemProperties>
 		<developers.username></developers.username>
 		<vagrantfile></vagrantfile>
 		<minishift></minishift>
-		<minishift.profile></minishift.profile>
-		<minishift.hypervisor></minishift.hypervisor>
+		<cdk32.minishift></cdk32.minishift>
+		<cdk.minishift></cdk.minishift>
+		<hypervisor></hypervisor>
 	</properties>
 	
 	<profiles>
@@ -37,15 +38,15 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>cdk3-all-tests</id>
-			<properties>
-				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDK3AllTestsSuite</suiteClass>
-			</properties>
-		</profile>
-		<profile>
 			<id>cdk32-all-tests</id>
 			<properties>
 				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDK32AllTestsSuite</suiteClass>
+			</properties>
+		</profile>
+		<profile>
+			<id>minishift-all-tests</id>
+			<properties>
+				<suiteClass>org.jboss.tools.cdk.ui.bot.test.MinishiftAllTestsSuite</suiteClass>
 			</properties>
 		</profile>
 	</profiles>

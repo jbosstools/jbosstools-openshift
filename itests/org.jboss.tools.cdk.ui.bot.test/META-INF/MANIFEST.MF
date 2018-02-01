@@ -46,4 +46,5 @@ Require-Bundle: org.junit,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: jar
 Bundle-Localization: plugin
+Import-Package: org.jboss.tools.common.reddeer.perspectives
 

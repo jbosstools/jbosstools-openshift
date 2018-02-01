@@ -16,6 +16,7 @@ import static org.junit.Assert.fail;
 
 import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.cdk.reddeer.core.CDKRuntimeOS;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKServerAdapterAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
@@ -28,6 +29,7 @@ import org.jboss.tools.openshift.reddeer.wizard.v3.OpenShift3ConnectionWizard;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
 
 /**
  * Abstract test class with sets of configuration to cdk image registry discovery feature
@@ -35,6 +37,7 @@ import org.junit.BeforeClass;
  *
  */
 @CleanOpenShiftExplorer
+@RunWith(RedDeerSuite.class)
 public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAbstractTest {
 
 	public OpenShift3Connection connection;
@@ -50,20 +53,22 @@ public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAb
 	@BeforeClass
 	public static void setupCDKImageRegistryUrlDiscovery() {
 		log.info("Setting up environment, checking test arguments");
-		checkMinishiftProfileParameters();
-		log.info("Setting up oc for workspace");
+		log.info("Checking given program arguments"); //$NON-NLS-1$
+		checkDevelopersParameters();
+		checkCDK32Parameters();
+		log.info("Setting up oc for workspace...");
 		log.info("Find oc on minishift home path");
 		String pathToOC = CDKTestUtils.findFileOnPath(DEFAULT_MINISHIFT_HOME, "oc" + CDKRuntimeOS.get().getSuffix());
 		log.info("Setting oc into preferences on path " + pathToOC);
 		CDKTestUtils.setOCToPreferences(pathToOC);
 		log.info("Adding new CDK 3.2+ server adapter");
-		addNewCDK3Server(CDK32_SERVER_NAME, SERVER_ADAPTER_32, MINISHIFT_HYPERVISOR,
-				MINISHIFT_PROFILE);
+		addNewCDK32Server(SERVER_ADAPTER_32, 
+				MINISHIFT_HYPERVISOR, CDK32_MINISHIFT, "");
 	}
 
 	@Before
 	public void setupAdapter() {
-		startServerAdapterIfNotRunning(() -> skipRegistration(getCDEServer()));
+		startServerAdapterIfNotRunning(() -> skipRegistration(getCDEServer()), true);
 		connection = findOpenShiftConnection(null, OPENSHIFT_USERNAME);
 		wizard = connection.editConnection();
 		assertTrue(wizard.getAuthSection().getMethod().equals(AuthenticationMethod.BASIC));

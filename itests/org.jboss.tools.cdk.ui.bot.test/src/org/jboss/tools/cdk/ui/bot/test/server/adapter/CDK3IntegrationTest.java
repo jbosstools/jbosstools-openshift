@@ -35,21 +35,22 @@ public class CDK3IntegrationTest extends CDKServerAdapterAbstractTest {
 	
 	@BeforeClass
 	public static void setup() {
-		checkMinishiftParameters();
-		addNewCDK3Server(CDK3_SERVER_NAME, SERVER_ADAPTER_3, MINISHIFT_HYPERVISOR, MINISHIFT);
+		checkDevelopersParameters();
+		checkCDKParameters();
+		addNewCDK3Server(SERVER_ADAPTER_3, MINISHIFT_HYPERVISOR, CDK_MINISHIFT);
 	}
 	
 	@Test
 	public void testCDK3ServerAdapter() {
 		// cdk start verification
-		startServerAdapter(() -> skipRegistration(getCDEServer()));
+		startServerAdapter(() -> skipRegistration(getCDEServer()), true);
 		// OS3 and docker connection created verification
-		testOpenshiftConncetion(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
+		testOpenshiftConnection(null, OPENSHIFT_USERNAME);
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
 		// cdk restart check
 		restartServerAdapter();
 		// OS and docker connection should be operational after restart
-		testOpenshiftConncetion(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
+		testOpenshiftConnection(null, OPENSHIFT_USERNAME);
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
 		// cdk stop verification
 		stopServerAdapter();

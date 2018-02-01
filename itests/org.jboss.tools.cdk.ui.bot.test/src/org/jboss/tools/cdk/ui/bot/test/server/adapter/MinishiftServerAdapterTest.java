@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2017 Red Hat, Inc. 
+ * Copyright (c) 2018 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -17,35 +17,31 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Testing of CDK 3.2+ server adapter 
+ * Minishift server adapter's basic functionality test class
  * @author odockal
  *
  */
 @CleanOpenShiftExplorer
 @RunWith(RedDeerSuite.class)
-public class CDK32IntegrationTest extends CDKServerAdapterAbstractTest {
-	
-	private static final String DOCKER_DAEMON_CONNECTION = SERVER_ADAPTER_32;
+public class MinishiftServerAdapterTest extends CDKServerAdapterAbstractTest {
 
+	private static final String DOCKER_DAEMON_CONNECTION = SERVER_ADAPTER_MINISHIFT;
+	
 	@Override
 	protected String getServerAdapter() {
-		return SERVER_ADAPTER_32;
+		return SERVER_ADAPTER_MINISHIFT;
 	}
 	
 	@BeforeClass
-	public static void setup() {
-		checkDevelopersParameters();
-		checkCDK32Parameters();
-		addNewCDK32Server(SERVER_ADAPTER_32, MINISHIFT_HYPERVISOR, CDK32_MINISHIFT, "");
+	public static void setupMinishiftServerAdapterTest() {
+		checkMinishiftParameters();
+		addNewMinishiftServer(SERVER_ADAPTER_MINISHIFT, MINISHIFT_HYPERVISOR, MINISHIFT, "");
 	}
 	
 	@Test
-	public void testCDK32ServerAdapter() {
+	public void testMinishiftServerAdapter() {
 		// cdk start verification
-		startServerAdapter(() -> {}, true);
-		// cdk inner rhel image was registered during starting of server adapter
-		verifyConsoleContainsRegEx("\\bRegistering.*subscription-manager\\b");
-		verifyConsoleContainsRegEx("\\bRegistration in progress.*OK\\b");
+		startServerAdapter(() -> {}, false);
 		// OS3 and docker connection created verification
 		testOpenshiftConnection(null, OPENSHIFT_USERNAME);
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
@@ -56,8 +52,6 @@ public class CDK32IntegrationTest extends CDKServerAdapterAbstractTest {
 		testDockerConnection(DOCKER_DAEMON_CONNECTION);
 		// cdk stop verification
 		stopServerAdapter();
-		// verify unregistering of machine
-		verifyConsoleContainsRegEx("\\bUnregistering machine\\b");
 	}
 
 }

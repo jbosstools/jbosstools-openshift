@@ -27,7 +27,7 @@ import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.launch.configuration.CDKLaunchConfigurationDialog;
-import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerContainerWizardPage;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerWizardPage;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDKServerEditorAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.junit.After;
@@ -53,8 +53,10 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	
 	@BeforeClass
 	public static void setUpEnvironment() {
+		log.info("Checking given program arguments"); //$NON-NLS-1$
+		checkDevelopersParameters();
 		checkMinishiftHypervisorParameters();
-		checkMinishiftProfileParameters();
+		checkCDK32Parameters();
 	}
 	
 	@Before
@@ -96,12 +98,12 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		page.selectType(SERVER_TYPE_GROUP, CDK32_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
-		NewCDK32ServerContainerWizardPage containerPage = new NewCDK32ServerContainerWizardPage();
+		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage();
 		containerPage.setCredentials(USERNAME, PASSWORD);
 		log.info("Setting hypervisor to: " + hypervisor);
 		containerPage.setHypervisor(hypervisor);
-		log.info("Setting binary to " + MINISHIFT_PROFILE);
-		containerPage.setMinishiftBinary(MINISHIFT_PROFILE);
+		log.info("Setting binary to " + CDK32_MINISHIFT);
+		containerPage.setMinishiftBinary(CDK32_MINISHIFT);
 		// here comes possibility to set profile while creating server adapter
 		log.info("Setting profile to: ");
 		containerPage.setMinishiftProfile("");
@@ -111,7 +113,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	@Test
 	public void testLaunchConfiguration() {
 		assertEquals(getServerAdapter(), launchDialog.getName());
-		assertEquals(MINISHIFT_PROFILE, launchDialog.getLocation());
+		assertEquals(CDK32_MINISHIFT, launchDialog.getLocation());
 		assertTrue("Launch config arguments do not contains minishift profile" ,launchDialog.getArguments().getText().contains("--profile minishift"));
 		assertTrue("Launch config arguments do not contains " + hypervisor,launchDialog.getArguments().getText().contains(hypervisor));
 		assertEquals("Launh config env. variable does not have proper MINISHIFT_HOME", DEFAULT_MINISHIFT_HOME, launchDialog.getValueOfEnvVar("MINISHIFT_HOME"));

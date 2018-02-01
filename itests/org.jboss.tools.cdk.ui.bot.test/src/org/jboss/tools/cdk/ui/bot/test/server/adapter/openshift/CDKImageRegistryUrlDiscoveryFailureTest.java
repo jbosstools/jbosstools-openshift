@@ -15,18 +15,21 @@ import static org.junit.Assert.fail;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Testing of not working discovery feature
  * @author odockal
  *
  */
+@RunWith(RedDeerSuite.class)
 public class CDKImageRegistryUrlDiscoveryFailureTest extends CDKImageRegistryUrlAbstractTest {
 
 	@Override

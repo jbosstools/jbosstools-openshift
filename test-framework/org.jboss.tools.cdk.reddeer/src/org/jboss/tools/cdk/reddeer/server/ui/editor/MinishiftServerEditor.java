@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2017 Red Hat, Inc. 
+ * Copyright (c) 2018 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -16,12 +16,7 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.wst.server.ui.editor.ServerEditor;
-import org.eclipse.reddeer.swt.api.Button;
-import org.eclipse.reddeer.swt.api.Combo;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
-import org.eclipse.reddeer.swt.impl.button.CheckBox;
-import org.eclipse.reddeer.swt.impl.button.PushButton;
-import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.menu.ShellMenuItem;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.uiforms.impl.hyperlink.DefaultHyperlink;
@@ -30,28 +25,25 @@ import org.eclipse.reddeer.workbench.condition.EditorIsDirty;
 import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 
 /**
- * Class representing  general CDK Server Editor
+ * Top level representing class of CDK/Minishift server editors
  * @author odockal
  *
  */
-public class CDKServerEditor extends ServerEditor {
-	
+public class MinishiftServerEditor extends ServerEditor {
+
 	private DefaultSection generalSection;
 	
-	private DefaultSection credentialsSection;
-	
 	private DefaultSection cdkSection;
-	
-	public static final String CREDENTIALS = "Credentials";
 	
 	public static final String CDK_DETAILS = "CDK Details";
 	
 	public static final String GENERAL = "General Information";
 	
-	public CDKServerEditor(String title) {
+	public static final String CREDENTIALS = "Credentials";
+	
+	public MinishiftServerEditor(String title) {
 		super(title);
 		this.generalSection = new DefaultSection(GENERAL);
-		this.credentialsSection = new DefaultSection(CREDENTIALS);
 		this.cdkSection = new DefaultSection(CDK_DETAILS);
 	}
 	
@@ -83,30 +75,6 @@ public class CDKServerEditor extends ServerEditor {
 			activate();
 		}
 	}
-
-	public LabeledText getPasswordLabel() {
-		return new LabeledText(credentialsSection, "Password: ");
-	}
-	
-	public LabeledText getUsernameLabel() {
-		return new LabeledText(credentialsSection, "Username: ");
-	}
-	
-	public Button getAddButton() {
-		return new PushButton(credentialsSection, "Add...");
-	}
-	
-	public Button getEditButton() {
-		return new PushButton(credentialsSection, "Edit...");
-	}
-	
-	public Combo getDomainCombo() {
-		return new LabeledCombo(credentialsSection, "Domain: ");
-	}
-	
-	public Button getPassCredentialsCheckBox() {
-		return new CheckBox(credentialsSection, "Pass credentials to environment");
-	}
 	
 	public LabeledText getHostnameLabel() {
 		return new LabeledText(generalSection,"Host name:");
@@ -122,6 +90,10 @@ public class CDKServerEditor extends ServerEditor {
 	
 	public DefaultSection getCDKSection() {
 		return this.cdkSection;
+	}
+	
+	public DefaultSection getGeneralSection() {
+		return this.generalSection;
 	}
 	
 }

@@ -23,7 +23,8 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK3ServerEditor;
-import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerContainerWizardPage;
+import org.jboss.tools.cdk.reddeer.server.ui.editor.CredentialsPart;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerWizardPage;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,10 +48,10 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 	@BeforeClass
 	public static void setupCDK3ServerEditorTest() {
 		checkMinishiftHypervisorParameters();
-		if (MINISHIFT == null) {
+		if (CDK_MINISHIFT == null) {
 			MINISHIFT_PATH = MOCK_CDK311;
 		} else {
-			MINISHIFT_PATH = MINISHIFT;
+			MINISHIFT_PATH = CDK_MINISHIFT;
 		}
 	}
 	
@@ -65,7 +66,7 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 		page.selectType(SERVER_TYPE_GROUP, CDK3_SERVER_NAME);
 		page.setName(SERVER_ADAPTER_3);
 		dialog.next();
-		NewCDK3ServerContainerWizardPage containerPage = new NewCDK3ServerContainerWizardPage();
+		NewCDK3ServerWizardPage containerPage = new NewCDK3ServerWizardPage();
 		containerPage.setCredentials(USERNAME, PASSWORD);
 		log.info("Setting hypervisor to: " + hypervisor);
 		containerPage.setHypervisor(hypervisor);
@@ -93,9 +94,9 @@ public class CDK3ServerEditorTest extends CDKServerEditorAbstractTest {
 		assertCDKServerWizardFinished();
 		setServerEditor();
 
-		assertTrue(editor.getUsernameLabel().getText().equalsIgnoreCase("minishift_username"));
-		assertTrue(editor.getPasswordLabel().getText().equalsIgnoreCase("minishift_password"));
-		assertTrue(editor.getDomainCombo().getSelection().equalsIgnoreCase(CREDENTIALS_DOMAIN));
+		assertTrue(((CredentialsPart) editor).getUsernameLabel().getText().equalsIgnoreCase("minishift_username"));
+		assertTrue(((CredentialsPart) editor).getPasswordLabel().getText().equalsIgnoreCase("minishift_password"));
+		assertTrue(((CredentialsPart) editor).getDomainCombo().getSelection().equalsIgnoreCase(CREDENTIALS_DOMAIN));
 		assertTrue(editor.getHostnameLabel().getText().equalsIgnoreCase(SERVER_HOST));
 		assertTrue(
 				((CDK3ServerEditor) editor).getHypervisorCombo().getSelection().equalsIgnoreCase(MINISHIFT_HYPERVISOR));

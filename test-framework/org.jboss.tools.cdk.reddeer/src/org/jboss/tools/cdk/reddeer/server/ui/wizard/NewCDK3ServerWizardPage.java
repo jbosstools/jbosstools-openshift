@@ -10,14 +10,28 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
+import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 
-public class NewCDKServerContainerWizardPage extends NewServerContainerWizardPage {
+public class NewCDK3ServerWizardPage extends NewServerContainerWizardPage {
 
-	public void setFolder(final String folder) {
+	public LabeledText getMinishiftBinaryLabeledText() {
 		new DefaultShell(WIZARD_NAME);
-		new LabeledText("Folder: ").setText(folder);
+		return new LabeledText("Minishift Binary: ");	
+	}
+	
+	public void setMinishiftBinary(final String binary) {
+		getMinishiftBinaryLabeledText().setText(binary);
+	}
+	
+	public LabeledCombo getHypervisorCombo() {
+		new DefaultShell(WIZARD_NAME);
+		return new LabeledCombo("Hypervisor:");		
+	}
+	
+	public void setHypervisor(final String text) {
+		getHypervisorCombo().setSelection(text);
 	}
 	
 }

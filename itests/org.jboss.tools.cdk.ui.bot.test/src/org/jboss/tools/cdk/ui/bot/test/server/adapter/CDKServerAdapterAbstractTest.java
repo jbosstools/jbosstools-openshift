@@ -20,7 +20,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.linuxtools.docker.reddeer.ui.DockerExplorerView;
 import org.eclipse.linuxtools.docker.reddeer.ui.resources.DockerConnection;
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
-import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.wait.TimePeriod;
@@ -34,6 +33,7 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerStat
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewException;
 import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.jface.exception.JFaceLayerException;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
@@ -47,15 +47,18 @@ import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.Remo
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
-import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKServerEditor;
+import org.jboss.tools.cdk.reddeer.server.ui.editor.MinishiftServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.launch.configuration.CDKLaunchConfigurationDialog;
-import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerContainerWizardPage;
-import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerContainerWizardPage;
-import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerContainerWizardPage;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerWizardPage;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK3ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizardPage;
+import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewMinishiftServerWizardPage;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
+import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
@@ -71,6 +74,7 @@ import org.junit.BeforeClass;
  */
 @DisableSecureStorage
 @RemoveCDKServers
+@OpenPerspective(value=JBossPerspective.class)
 public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 
 	protected ServersView2 serversView;
@@ -104,8 +108,6 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		log.info("Setting AUTOMATED_MODE of ErrorDialog to false, in order to pass some tests");
 		// switch off errordialog.automated_mode to verify error dialog
 		ErrorDialog.AUTOMATED_MODE = false;
-		log.info("Checking given program arguments"); //$NON-NLS-1$
-		checkDevelopersParameters();
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG, false);
 	}
 	
@@ -113,7 +115,9 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	public static void tearDownEnvironment() {
 		CDKUtils.deleteAllCDKServerAdapters();
 		deleteCertificates();
-		CDKTestUtils.removeAccessRedHatCredentials(CREDENTIALS_DOMAIN, USERNAME);
+		if (USERNAME != null) { 
+			CDKTestUtils.removeAccessRedHatCredentials(CREDENTIALS_DOMAIN, USERNAME);
+		}
 		log.info("Setting AUTOMATED_MODE of ErrorDialog back to true");
 		ErrorDialog.AUTOMATED_MODE = true;
 	}
@@ -140,7 +144,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 */
 	protected void addParamsToCDKLaunchConfig(Server server, String paramsToAdd) {
 		server.open();
-		(new CDKServerEditor(server.getLabel().getName())).openLaunchConfigurationFromLink();
+		(new MinishiftServerEditor(server.getLabel().getName())).openLaunchConfigurationFromLink();
 		CDKLaunchConfigurationDialog launchConfig = new CDKLaunchConfigurationDialog();
 		if (!launchConfig.getArguments().getText().contains(paramsToAdd)) {
 			launchConfig.addArguments(paramsToAdd);
@@ -160,10 +164,12 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 * that expects or consumes method to be run before cdk is started.
 	 * Was designed to set up server adapter launching arguments.
 	 */
-	protected void startServerAdapter(ServerOperable cond) {
+	protected void startServerAdapter(ServerOperable cond, boolean wait) {
 		log.info("Starting server adapter"); //$NON-NLS-1$
 		// Workaround for CDK-216
-		new WaitUntil(new NeverFulfilledCondition(), TimePeriod.getCustom(90), false);
+		if (wait) {
+			new WaitUntil(new NeverFulfilledCondition(), TimePeriod.getCustom(90), false);
+		}
 		new ServerOperation(() -> getCDEServer().start(), cond);
 		printCertificates();
 		checkServerIsAvailable();
@@ -173,12 +179,12 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	/**
 	 * Starts server adapter only if not running yet
 	 */
-	public void startServerAdapterIfNotRunning(ServerOperable cond) {
+	public void startServerAdapterIfNotRunning(ServerOperable cond, boolean wait) {
 		if (getCDEServer().getLabel().getState().equals(ServerState.STARTED)) {
 			log.info("Server adapter " + getServerAdapter() + " is already started");
 		} else {
 			log.info("Server adapter " + getServerAdapter() + " is not running, starting");
-			startServerAdapter(cond);
+			startServerAdapter(cond, wait);
 		}
 	}
 	
@@ -263,25 +269,47 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	}
 
 	/**
-	 * Creates new CDK 3.2+ server adapter via ServersView -> New -> Server
+	 * Creates new Minishift server adapter via ServersView -> New -> Server
 	 * 
-	 * @param serverName the name of the Server
 	 * @param serverAdapter server adapter name
 	 * @param hypervisor hypervisor to use
 	 * @param path path to minishift binary file
 	 * @param profile what profile to use
 	 */
-	public static void addNewCDK32Server(String serverName, String serverAdapter, String hypervisor, String path, String profile) {
-		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
-		NewServerWizardPage page = new NewServerWizardPage(dialog);
-		// set first dialog page
-		page.selectType(SERVER_TYPE_GROUP, serverName);
-		page.setHostName(SERVER_HOST);
-		page.setName(serverAdapter);
-		dialog.next();
+	public static void addNewMinishiftServer(String serverAdapter, String hypervisor, String path, String profile) {
+		NewCDKServerWizard dialog = setupFirstNewServerWizardPage(MINISHIFT_SERVER_NAME, serverAdapter);
 		
 		// set second new server dialog page
-		NewCDK32ServerContainerWizardPage containerPage = new NewCDK32ServerContainerWizardPage();
+		NewMinishiftServerWizardPage containerPage = new NewMinishiftServerWizardPage();
+		if (!StringUtils.isEmptyOrNull(hypervisor)) {
+			log.info("Setting hypervisor to " + hypervisor); //$NON-NLS-1$
+			containerPage.setHypervisor(hypervisor);
+		}
+		log.info("Setting minishift binary file folder to " + path); //$NON-NLS-1$
+		containerPage.setMinishiftBinary(path);
+		log.info("Setting minishift profile to " + profile); //$NON-NLS-1$
+		containerPage.setMinishiftProfile(profile);
+		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.DEFAULT);
+		log.info("Finishing Add new server dialog"); //$NON-NLS-1$
+		if (!(new FinishButton().isEnabled())) {
+			log.error("Finish button was not enabled"); //$NON-NLS-1$
+		}
+		dialog.finish(TimePeriod.MEDIUM);
+	}
+	
+	/**
+	 * Creates new CDK 3.2+ server adapter via ServersView -> New -> Server
+	 * 
+	 * @param serverAdapter server adapter name
+	 * @param hypervisor hypervisor to use
+	 * @param path path to minishift binary file
+	 * @param profile what profile to use
+	 */
+	public static void addNewCDK32Server(String serverAdapter, String hypervisor, String path, String profile) {
+		NewCDKServerWizard dialog = setupFirstNewServerWizardPage(CDK32_SERVER_NAME, serverAdapter);
+		
+		// set second new server dialog page
+		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage();
 		containerPage.setCredentials(USERNAME, PASSWORD);
 		if (hypervisor != null && !hypervisor.isEmpty()) {
 			log.info("Setting hypervisor to " + hypervisor); //$NON-NLS-1$
@@ -302,22 +330,15 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	/**
 	 * Creates new CDK 3.x server adapter via ServersView -> New -> Server
 	 * 
-	 * @param serverName the name of the Server
 	 * @param serverAdapter server adapter name
 	 * @param hypervisor hypervisor to use
 	 * @param path path to minishift binary file
 	 */
-	public static void addNewCDK3Server(String serverName, String serverAdapter, String hypervisor, String path) {
-		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
-		NewServerWizardPage page = new NewServerWizardPage(dialog);
-		// set first dialog page
-		page.selectType(SERVER_TYPE_GROUP, serverName);
-		page.setHostName(SERVER_HOST);
-		page.setName(serverAdapter);
-		dialog.next();
+	public static void addNewCDK3Server(String serverAdapter, String hypervisor, String path) {
+		NewCDKServerWizard dialog = setupFirstNewServerWizardPage(CDK3_SERVER_NAME, serverAdapter);
 		
 		// set second new server dialog page
-		NewCDK3ServerContainerWizardPage containerPage = new NewCDK3ServerContainerWizardPage();
+		NewCDK3ServerWizardPage containerPage = new NewCDK3ServerWizardPage();
 		containerPage.setCredentials(USERNAME, PASSWORD);
 		if (hypervisor != null && !hypervisor.isEmpty()) {
 			log.info("Setting hypervisor to " + hypervisor); //$NON-NLS-1$
@@ -336,22 +357,15 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	/**
 	 * Creates new CDK 2.x server adapter via ServersView -> New -> Server
 	 * 
-	 * @param serverName the name of the Server
 	 * @param serverAdapter server adapter name
 	 * @param path path to vagrantfile
 	 */
-	public static void addNewCDKServer(String serverName, String serverAdapter, String path) {
-		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
-		NewServerWizardPage page = new NewServerWizardPage(dialog);
-		// set first dialog page
-		page.selectType(SERVER_TYPE_GROUP, serverName);
-		page.setHostName(SERVER_HOST);
-		page.setName(serverAdapter);
-		dialog.next();
+	public static void addNewCDKServer(String serverAdapter, String path) {
+		NewCDKServerWizard dialog = setupFirstNewServerWizardPage(CDK_SERVER_NAME, serverAdapter);
 		
 		// set second new server dialog page
-		NewCDKServerContainerWizardPage containerPage = new NewCDKServerContainerWizardPage();
-		containerPage.setCredentials(CDKServerAdapterAbstractTest.USERNAME, PASSWORD);
+		NewCDKServerWizardPage containerPage = new NewCDKServerWizardPage();
+		containerPage.setCredentials(USERNAME, PASSWORD);
 		// set cdk 2.x fields
 		log.info("Setting vagrant file folder"); //$NON-NLS-1$
 		containerPage.setFolder(path);
@@ -363,14 +377,31 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		dialog.finish(TimePeriod.MEDIUM);
 	}
 	
+	private static NewCDKServerWizard setupFirstNewServerWizardPage(String serverName, String serverAdapter) {
+		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
+		NewServerWizardPage page = new NewServerWizardPage(dialog);
+		// set first dialog page
+		page.selectType(SERVER_TYPE_GROUP, serverName);
+		page.setHostName(SERVER_HOST);
+		page.setName(serverAdapter);
+		dialog.next();	
+		return dialog;
+	}
+	
 	/**
 	 * Tests Openshift 3 connection and try to refresh it
 	 * 
 	 * @param connection
 	 */
-	public void testOpenshiftConncetion(OpenShift3Connection connection) {
+	public void testOpenshiftConnection(String server, String username) {
+		OpenShift3Connection connection = null;
+		try {
+			connection = findOpenShiftConnection(server, username);
+		} catch (OpenShiftToolsException toolsExc) {
+			fail(toolsExc.getMessage());
+		}
 		// usually, when server adapter is not started, openshift connection after refresh should cause 
-		// problem occured dialog
+		// problem occurred dialog
 		connection.refresh();
 		try {
 			new WaitUntil(new ShellIsAvailable("Problem occurred"), TimePeriod.getCustom(30)); //$NON-NLS-1$
@@ -460,15 +491,13 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 * @return openshift 3 connection object if found
 	 */
 	public OpenShift3Connection findOpenShiftConnection(String server, String username) {
-		try {
-			OpenShiftExplorerView osExplorer = new OpenShiftExplorerView();
-			osExplorer.open();
+		OpenShiftExplorerView osExplorer = new OpenShiftExplorerView();
+		osExplorer.open();
+		if (osExplorer.connectionExists(server, username)) {
 			return osExplorer.getOpenShift3Connection(server, username);
-		} catch (RedDeerException ex) {
-				ex.printStackTrace();
-				throw new OpenShiftToolsException("Could not find OpenShift connection for " +
-						server + " and " + username + //$NON-NLS-1$
-						", ended with exception: " + ex.getMessage()); //$NON-NLS-1$
+		} else {
+			throw new OpenShiftToolsException("Could not find OpenShift connection for " +
+					server + " and " + username); //$NON-NLS-1$;
 		}
 	}
 	
@@ -477,7 +506,6 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 * @author odockal
 	 *
 	 */
-	@SuppressWarnings("unused")
 	private class NeverFulfilledCondition extends AbstractWaitCondition {
 
 		@Override

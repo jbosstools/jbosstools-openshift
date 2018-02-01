@@ -25,6 +25,7 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -43,6 +44,7 @@ import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.CDKAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.junit.After;
 
 /**
@@ -52,6 +54,7 @@ import org.junit.After;
  */
 @DisableSecureStorage
 @RemoveCDKServers
+@OpenPerspective(value=JBossPerspective.class)
 public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	
 	// page description messages
@@ -75,6 +78,10 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	protected static final String MOCK_CDK320 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/cdk-3.2.0-mock" + (IS_WINDOWS ? ".bat" : ""));
 	
 	protected static final String MOCK_CDK311 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/cdk-3.1.1-mock" + (IS_WINDOWS ? ".bat" : ""));
+	
+	protected static final String MOCK_MINISHIFT131 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/minishift-1.3.1-mock" + (IS_WINDOWS ? ".bat" : ""));
+	
+	protected static final String MOCK_MINISHIFT170 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/minishift-1.7.0-mock" + (IS_WINDOWS ? ".bat" : ""));
 	
 	protected static final String NON_EXISTING_PATH = EXISTING_PATH + separator + "some_random_filename";
 	

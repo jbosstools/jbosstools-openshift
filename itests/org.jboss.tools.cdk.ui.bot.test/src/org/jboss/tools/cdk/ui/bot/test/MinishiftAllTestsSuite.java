@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2017 Red Hat, Inc. 
+ * Copyright (c) 2018 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -11,22 +11,18 @@
 package org.jboss.tools.cdk.ui.bot.test;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
-import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK3IntegrationTest;
-import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK3ServerEditorTest;
-import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK3ServerWizardTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.MinishiftServerAdapterTest;
+import org.jboss.tools.cdk.ui.bot.test.server.editor.MinishiftServerEditorTest;
+import org.jboss.tools.cdk.ui.bot.test.server.wizard.MinishiftServerWizardTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-@SuppressWarnings("deprecation")
 @RunWith(RedDeerSuite.class)
 @Suite.SuiteClasses({
-	CDK3ServerWizardTest.class,
-	CDK3ServerEditorTest.class,
-	CDK3IntegrationTest.class
+	MinishiftServerWizardTest.class,
+	MinishiftServerEditorTest.class,
+	MinishiftServerAdapterTest.class
 })
-/**
- * @author ondrej dockal
- */
-public class CDK3AllTestsSuite {
+public class MinishiftAllTestsSuite {
 
 }

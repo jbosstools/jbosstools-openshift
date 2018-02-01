@@ -17,9 +17,11 @@ import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistry
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlValidatorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK32ServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.CDK3ServerEditorTest;
+import org.jboss.tools.cdk.ui.bot.test.server.editor.MinishiftServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.launch.CDKLaunchConfigurationTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK32ServerWizardTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK3ServerWizardTest;
+import org.jboss.tools.cdk.ui.bot.test.server.wizard.MinishiftServerWizardTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -27,8 +29,10 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 	CDK3ServerWizardTest.class,
 	CDK32ServerWizardTest.class,
+	MinishiftServerWizardTest.class,
 	CDK3ServerEditorTest.class,
 	CDK32ServerEditorTest.class,
+	MinishiftServerEditorTest.class,
 	CDKLaunchConfigurationTest.class,
 	CDKImageRegistryUrlDiscoveryTest.class,
 	CDKImageRegistryUrlDiscoveryFailureTest.class,
