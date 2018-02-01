@@ -124,7 +124,7 @@ public class CreateResourcesTest extends AbstractTest  {
 
 		new DefaultShell(OpenShiftLabel.Shell.NEW_RESOURCE);
 
-		assertTrue("Selected project has not been selected for new resource creationg.",
+		assertTrue("Selected project has not been selected for new resource creation.",
 				new LabeledCombo(OpenShiftLabel.TextLabels.PROJECT).getSelection().equals(testProject));
 
 		new LabeledText(OpenShiftLabel.TextLabels.RESOURCE_LOCATION).setText(pathToResource);

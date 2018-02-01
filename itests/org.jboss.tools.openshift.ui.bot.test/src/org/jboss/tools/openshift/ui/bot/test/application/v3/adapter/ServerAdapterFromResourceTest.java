@@ -87,7 +87,7 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 		explorer = new OpenShiftExplorerView();
 		explorer.open();
 		project = explorer.getOpenShift3Connection().getProject(DatastoreOS3.TEST_PROJECT);
-		project.getService(OpenShiftResources.NODEJS_SERVICE).select();
+		project.getServicesWithName(OpenShiftResources.NODEJS_SERVICE).get(0).select();
 		
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
 		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION));
@@ -103,8 +103,14 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 			LOGGER.debug("No existing project found, importing");
 		}
 		
-		appWizard.selectExistingBuildConfiguration(OpenShiftResources.NODEJS_APP_DEPLOYMENT_CONFIG);
-		appWizard.finish();
+		try {
+			appWizard.finish();
+		} catch (WaitTimeoutExpiredException ex) {
+			//When running test in suite, it needs to be selected correct build config(in OpenShift instance could be more build configs)
+			appWizard.selectExistingBuildConfiguration(OpenShiftResources.NODEJS_APP_DEPLOYMENT_CONFIG);
+			appWizard.finish();
+		}
+		
 		new WaitUntil(new OpenShiftResourceExists(Resource.DEPLOYMENT, OpenShiftResources.NODEJS_APP_REPLICATION_CONTROLLER, ResourceState.UNSPECIFIED, DatastoreOS3.TEST_PROJECT), TimePeriod.LONG);
 	}	
 	
