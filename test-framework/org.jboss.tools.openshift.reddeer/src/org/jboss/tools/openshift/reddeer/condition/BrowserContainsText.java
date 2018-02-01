@@ -21,26 +21,40 @@ public class BrowserContainsText extends AbstractWaitCondition {
 	private InternalBrowser browser;
 	private String text;
 	private String url;
-	
+	private boolean refresh;
+
 	public BrowserContainsText(String url, String text) {
 		browser = new InternalBrowser();
 		this.url = url;
 		this.text = text;
+		this.refresh = true;
 	}
-	
+
+	public BrowserContainsText(String url, String text, boolean refresh) {
+		this(url, text);
+		this.refresh = refresh;
+	}
+
 	public BrowserContainsText(String text) {
 		this(null, text);
 	}
-	
+
+	public BrowserContainsText(String text, boolean refresh) {
+		this(null, text, refresh);
+	}
+
 	@Override
 	public boolean test() {
 		browser = new InternalBrowser();
 		if (url != null) {
 			browser.setURL(url);
-			browser.refresh();
+			if (refresh)
+				browser.refresh();
 		} else {
-			browser.refresh();
+			if (refresh)
+				browser.refresh();
 		}
+
 		new WaitUntil(new PageIsLoaded(browser));
 
 		if (Platform.getOS().startsWith(Platform.OS_WIN32)) {
