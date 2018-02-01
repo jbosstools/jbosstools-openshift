@@ -30,7 +30,6 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.job.CreateResourceJob;
