@@ -47,6 +47,8 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 
 	private NewResourceWizardModel model;
 
+	private ResourcePayloadPage page;
+
 	public NewResourceWizard(NewResourceWizardModel model) {
 		setWindowTitle("New OpenShift resource");
 		setNeedsProgressMonitor(true);
@@ -73,7 +75,7 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 
 	@Override
 	public void addPages() {
-		addPage(new ResourcePayloadPage(this, model));
+		addPage(page = new ResourcePayloadPage(this, model));
 	}
 
 	@Override
@@ -105,7 +107,7 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 			IStatus status = runInWizard(createJob, createJob.getDelegatingProgressMonitor(), getContainer());
 			success = isSuccess(status);
 		} catch (InvocationTargetException | InterruptedException | IOException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(e);
+			page.setErrorMessage(e.getClass().getName() + ": " + e.getLocalizedMessage());
 			success = false;
 		}
 		return success;
