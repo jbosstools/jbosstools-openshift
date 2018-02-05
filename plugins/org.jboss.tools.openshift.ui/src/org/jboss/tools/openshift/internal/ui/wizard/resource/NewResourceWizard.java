@@ -30,7 +30,6 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.OpenshiftUIConstants;
 import org.jboss.tools.openshift.internal.ui.dialog.ResourceSummaryDialog;
 import org.jboss.tools.openshift.internal.ui.job.CreateResourceJob;
@@ -46,6 +45,8 @@ import com.openshift.restclient.model.IProject;
 public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 
 	private NewResourceWizardModel model;
+
+	private ResourcePayloadPage page;
 
 	public NewResourceWizard(NewResourceWizardModel model) {
 		setWindowTitle("New OpenShift resource");
@@ -73,7 +74,7 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 
 	@Override
 	public void addPages() {
-		addPage(new ResourcePayloadPage(this, model));
+		addPage(page = new ResourcePayloadPage(this, model));
 	}
 
 	@Override
@@ -105,7 +106,7 @@ public class NewResourceWizard extends Wizard implements IWorkbenchWizard {
 			IStatus status = runInWizard(createJob, createJob.getDelegatingProgressMonitor(), getContainer());
 			success = isSuccess(status);
 		} catch (InvocationTargetException | InterruptedException | IOException e) {
-			OpenShiftUIActivator.getDefault().getLogger().logError(e);
+			page.setErrorMessage(e.getClass().getName() + ": " + e.getLocalizedMessage());
 			success = false;
 		}
 		return success;
