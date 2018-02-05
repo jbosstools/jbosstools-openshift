@@ -63,7 +63,7 @@
 					<!-- skipFormatting disables both format and validate goals, 
 					think of it as a switch for the whole plugin;
 					To apply from terminal use -Dformatter.skip=false -->
-					<!-- <skipFormatting>true</skipFormatting> --> 
+					<skipFormatting>true</skipFormatting>
 						<directories>
 							<directory>src</directory>
 						</directories>
