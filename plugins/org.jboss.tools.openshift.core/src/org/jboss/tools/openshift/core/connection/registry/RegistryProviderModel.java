@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
@@ -35,6 +36,11 @@ public class RegistryProviderModel {
 	 * @return
 	 */
 	public IStatus getRegistryURL(IConnection c) {
+		if( c == null ) {
+			return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, 
+					"Unable to discover a registry URL for connection 'null'", null);
+		}
+		
 		MultiStatus ms = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
 				"Unable to discover a registry URL for connection " + c.toString(), null);
 		IConnectionRegistryProvider[] sorted = getProviders();
