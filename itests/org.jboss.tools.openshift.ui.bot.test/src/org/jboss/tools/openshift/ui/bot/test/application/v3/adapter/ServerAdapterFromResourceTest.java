@@ -42,6 +42,7 @@ import org.jboss.tools.openshift.reddeer.condition.ServerAdapterExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -56,6 +57,7 @@ import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter;
 import org.jboss.tools.openshift.reddeer.view.resources.ServerAdapter.Version;
 import org.jboss.tools.openshift.reddeer.wizard.importapp.ImportApplicationWizard;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenshiftTestInFailureException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -67,8 +69,9 @@ import org.junit.runners.MethodSorters;
 
 @OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
-@OCBinary
+@OCBinary(cleanup=false, setOCInPrefs=true)
 @RequiredBasicConnection
+@CleanConnection
 @RequiredProject
 @RequiredService(project=DatastoreOS3.TEST_PROJECT, service=OpenShiftResources.NODEJS_SERVICE, template=OpenShiftResources.NODEJS_TEMPLATE)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -117,7 +120,7 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 	@After
 	public void removeAdapterIfExists() {
 		try {
-			new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+			OpenShiftUtils.killJobs();
 			adapter.delete();
 		} catch (OpenShiftToolsException | NullPointerException ex) {
 			LOGGER.debug("Server adapter does not exist, cannot delete");

@@ -73,7 +73,7 @@ import org.junit.runner.RunWith;
  * @contributor jkopriva@redhat.com
  */
 @OpenPerspective(JBossPerspective.class)
-@OCBinary(setOCInPrefs=true)
+@OCBinary(setOCInPrefs=true, cleanup=false)
 @RequiredBasicConnection
 @CleanConnection
 @RunWith(RedDeerSuite.class)

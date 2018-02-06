@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
@@ -59,6 +60,7 @@ import org.junit.runner.RunWith;
 
 @OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
+@OCBinary(cleanup=false, setOCInPrefs=true)
 @RequiredBasicConnection
 @RequiredProject
 @RequiredService(service = "eap-app", template = "resources/eap64-basic-s2i.json")

@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
@@ -32,8 +33,10 @@ import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.eclipse.ui.browser.BrowserEditor;
+import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.NoButton;
+import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
@@ -191,6 +194,24 @@ public class OpenShiftUtils {
 			throw new RuntimeException("Unable to clone git repository from " + gitRepoUrl);
 		}
 		
+	}
+
+	public static void killJobs() {
+		Job[] currentJobs;
+		currentJobs = Job.getJobManager().find(null);
+		for (Job job : currentJobs) {
+			job.cancel();
+		}
+	}
+	
+	public static void updateMavenProject(String projectName) {
+		new ProjectExplorer().getProject(projectName);
+		new ContextMenuItem("Maven", "Update Project...").select();
+		new DefaultShell("Update Maven Project");
+		new PushButton("Select All").click();
+		new PushButton("OK").click();
+		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
+
 	}
 
 
