@@ -49,7 +49,8 @@ public abstract class ServiceManagerEnvironmentLoader {
 		String typeId = s.getServerType().getId();
 		if (typeId.equals(CDKServer.CDK_SERVER_TYPE)) {
 			return getVagrantLoader();
-		} else if (typeId.equals(CDKServer.CDK_V3_SERVER_TYPE) || typeId.equals(CDKServer.CDK_V32_SERVER_TYPE)) {
+		} else if (typeId.equals(CDKServer.CDK_V3_SERVER_TYPE) || typeId.equals(CDKServer.CDK_V32_SERVER_TYPE)
+				|| typeId.equals(CDKServer.MINISHIFT_1_7_SERVER_TYPE)) {
 			return getMinishiftLoader();
 		}
 		return new NullEnvironmentLoader();

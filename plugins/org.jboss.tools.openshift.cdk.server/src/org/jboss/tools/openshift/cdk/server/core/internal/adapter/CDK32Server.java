@@ -21,6 +21,7 @@ public class CDK32Server extends CDK3Server {
 	public static final String PROFILE_ID = "minishift.profile";
 	public static final String MINISHIFT_DEFAULT_PROFILE = "minishift";
 
+	@Override
 	protected String getBaseName() {
 		return CDK32Server.getServerTypeBaseName();
 	}
@@ -30,10 +31,9 @@ public class CDK32Server extends CDK3Server {
 	}
 
 	public static boolean supportsProfiles(IServer server) {
-		if (server.getServerType().getId().equals(CDK32Server.CDK_V32_SERVER_TYPE)) {
-			return true;
-		}
-		return false;
+		String[] ok = new String[] { CDK32Server.CDK_V32_SERVER_TYPE, CDK32Server.MINISHIFT_1_7_SERVER_TYPE };
+		List<String> valid = Arrays.asList(ok);
+		return valid.contains(server.getServerType().getId());
 	}
 
 	public static String[] getArgsWithProfile(IServer server, String[] args) {
