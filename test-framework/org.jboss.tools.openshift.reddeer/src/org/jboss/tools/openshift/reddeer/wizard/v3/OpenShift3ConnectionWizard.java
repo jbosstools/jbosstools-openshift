@@ -10,6 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard.v3;
 
+import static org.junit.Assert.fail;
+
+import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.wait.TimePeriod;
@@ -29,6 +32,7 @@ import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
@@ -45,10 +49,18 @@ public class OpenShift3ConnectionWizard {
 	private AuthenticationMethodSection authSection = null;
 
 	private static final Logger log = Logger.getLogger(OpenShift3ConnectionWizard.class);
+	
+	public OpenShift3ConnectionWizard() {
+		new OpenShift3ConnectionWizard(OpenShiftLabel.Shell.NEW_CONNECTION);
+	}
 
 	public OpenShift3ConnectionWizard(String wizardName) {
 		this.shell = new DefaultShell(wizardName);
 		switchAuthenticationSection(getAuthenticationMethod().getText());
+	}
+	
+	public void switchAuthenticationSection(AuthenticationMethod method) {
+		switchAuthenticationSection(method.toString());
 	}
 
 	public void switchAuthenticationSection(String method) {
@@ -177,6 +189,10 @@ public class OpenShift3ConnectionWizard {
 		openAdvancedSection();
 		return new PushButton(OpenShiftLabel.Button.DISCOVER);
 	}
+	
+	public void setServer(String server) {
+		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER).setText(server);
+	}
 
 	/**
 	 * Overwriting of URL requires user confirmation, Message Dialog is shown. If
@@ -215,7 +231,7 @@ public class OpenShift3ConnectionWizard {
 	}
 
 	/**
-	 * Waits and clicks Cancel button .
+	 * Waits and clicks Finish button .
 	 */
 	public void finish() {
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.LONG);
@@ -233,6 +249,21 @@ public class OpenShift3ConnectionWizard {
 			// dialog not shown, continue
 		}
 		waitForShellToClose(getShell());
+	}
+	
+	public void finishAndHandleCertificate() {
+		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.LONG);
+
+		new FinishButton().click();
+		try {
+			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
+			new PushButton("Yes").click();
+		} catch (RedDeerException ex) {
+			fail("Aceptance of SSL certificate failed.");
+		}
+
+		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_CONNECTION), TimePeriod.LONG);
+		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 	}
 
 	public DefaultShell getShell() {

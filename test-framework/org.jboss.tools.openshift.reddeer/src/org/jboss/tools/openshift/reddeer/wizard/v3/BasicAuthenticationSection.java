@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.reddeer.wizard.v3;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
+import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
 /**
  * Represents Basic authentication selection section
@@ -26,16 +27,32 @@ public class BasicAuthenticationSection extends AuthenticationMethodSection {
 	}
 	
 	public LabeledText getUsernameLabel() {
-		return new LabeledText("Username:");
+		return new LabeledText(OpenShiftLabel.TextLabels.USERNAME);
+	}
+	
+	public String getUsername() {
+		return getUsernameLabel().getText();
+	}
+	
+	public void setUsername(String username) {
+		getUsernameLabel().setText(username);
 	}
 	
 	public LabeledText getPasswordLabel() {
-		return new LabeledText("Password:");
+		return new LabeledText(OpenShiftLabel.TextLabels.PASSWORD);
+	}
+	
+	public String getPassword() {
+		return getPasswordLabel().getText();
+	}
+	
+	public void setPassword(String password) {
+		getPasswordLabel().setText(password);
 	}
 	
 	public void setSavePassword(boolean checked) {
 		new CheckBox(getComposite(), 
-				"Save password (could trigger secure storage login)")
+				OpenShiftLabel.TextLabels.STORE_PASSWORD)
 				.toggle(checked);
 	}
 
