@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.cdk.reddeer.core.condition.MultipleWaitConditionHandler;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKServerAdapterType;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
@@ -45,19 +46,13 @@ import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
  */
 public class CDKServer extends DefaultServer {
 	
-	private static final String SSL_DIALOG_NAME = "Untrusted SSL Certificate";
-	
-	private static final String MULTIPLE_PROBLEMS_DIALOG = "Multiple problems have occurred";
-	
-	private static final String PROBLEM_DIALOG = "Problem Occurred";
-	
 	private static Logger log = Logger.getLogger(CDKServer.class);
 	
 	private boolean certificateAccepted = false;
 	
-	private WaitCondition problemDialogWait = new ShellIsAvailable(PROBLEM_DIALOG);
-	private WaitCondition multipleDialogWait = new ShellIsAvailable(MULTIPLE_PROBLEMS_DIALOG);
-	private WaitCondition sslDialogWait = new ShellIsAvailable(SSL_DIALOG_NAME);
+	private WaitCondition problemDialogWait = new ShellIsAvailable(CDKLabel.Shell.PROBLEM_DIALOG);
+	private WaitCondition multipleDialogWait = new ShellIsAvailable(CDKLabel.Shell.MULTIPLE_PROBLEMS_DIALOG);
+	private WaitCondition sslDialogWait = new ShellIsAvailable(CDKLabel.Shell.UNTRUSTED_SSL_DIALOG);
 	
 	private Map<WaitCondition, Consumer<Object>> waitConditionMatrix = new HashMap<WaitCondition, Consumer<Object>>();
 	
@@ -90,12 +85,12 @@ public class CDKServer extends DefaultServer {
 	protected void operateServerState(String menuItem, final ServerState resultState) {
 		ServerState actualState = this.getLabel().getState();
 		MultipleWaitConditionHandler waitConditions = new MultipleWaitConditionHandler(
-				waitConditionMatrix, " one of given wait condition is fulfilled");
+				waitConditionMatrix);
 		TimePeriod timeout = TimePeriod.VERY_LONG;
-		if (menuItem == "Restart") {
+		if (menuItem == CDKLabel.ServerContextMenu.RESTART) { 
 			timeout = TimePeriod.getCustom(480);
 		}
-		log.debug("Operate server's state from: + '" + actualState + "' to '" + menuItem + "'");
+		log.debug("Operate server's state from: + '" + actualState + "' to '" + menuItem + "'");  
 		select();
 		new ContextMenuItem(menuItem).select();
 		// waiting until servers's state has changed from initial state into something else, 
@@ -113,8 +108,8 @@ public class CDKServer extends DefaultServer {
 		}
 		new WaitUntil(new ServerHasState(this, resultState), timeout);
 		waitForProblemDialog(waitConditions, menuItem, TimePeriod.DEFAULT);
-		new WaitWhile(new SystemJobIsRunning(new JobMatcher("Inspecting CDK environment")), TimePeriod.DEFAULT);
-		log.debug("Operate server's state finished, the result server's state is: '" + getLabel().getState() + "'");
+		new WaitWhile(new SystemJobIsRunning(new JobMatcher("Inspecting CDK environment")), TimePeriod.DEFAULT); 
+		log.debug("Operate server's state finished, the result server's state is: '" + getLabel().getState() + "'");  
 	}
 	
 	public String getServerType() {
@@ -122,24 +117,22 @@ public class CDKServer extends DefaultServer {
 	}
 	
 	private void waitForProblemDialog(WaitCondition wait, String menuItem, TimePeriod timeout) {
-		log.info("Waiting for " + wait.description() + " to be fullfiled");
+		log.info("Waiting for " + wait.description() + " to be fullfiled");  
 		try {
 			new WaitUntil(wait, timeout);
-			processProblemDialog((Shell) wait.getResult(), "Problem occured when trying to " 
-								+ menuItem + " CDK server adapter");
 		} catch (WaitTimeoutExpiredException exc) {
-			log.info(wait.description() + " was not fulfilled during CDK server " + menuItem);
+			log.info(wait.description() + " was not fulfilled during CDK server " + menuItem); 
 		}
 	}
 	
-	private void processProblemDialog(Shell shell, String excMessage) {
-		log.info("Processing passed shell dialog " + new DefaultShell(shell).getText());
+	private void processProblemDialog(DefaultShell shell, String excMessage) {
+		log.info("Processing passed shell dialog " + shell.getText()); 
 		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
 		new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT, false);
-		DefaultShell shellDialog = new DefaultShell(shell);
-		log.info("Shell could have changed after getting another error");
-		log.info("Actual shell dialog name is " + shellDialog.getText());
-		CDKUtils.captureScreenshot("CDEServer#ProblemDialog#" + shellDialog.getText());
+		DefaultShell shellDialog = new DefaultShell(shell.getSWTWidget());
+		log.info("Shell could have changed after getting another error"); 
+		log.info("Actual shell dialog name is " + shellDialog.getText()); 
+		CDKUtils.captureScreenshot("CDEServer#ProblemDialog#" + shellDialog.getText()); 
 		new OkButton(shellDialog).click();
 		throw new CDKServerException(excMessage);
 	}
@@ -147,11 +140,11 @@ public class CDKServer extends DefaultServer {
 	private void checkInitialStateChange(ServerState actualState) {
 		try {
 			new WaitUntil(new ServerHasState(this, actualState), TimePeriod.DEFAULT);
-			String message = "Server's state went back to " + actualState;
+			String message = "Server's state went back to " + actualState; 
 			throw new CDKServerException(message);	
 		} catch (WaitTimeoutExpiredException exc) {
-			log.info("Server's state changed to " + this.getLabel().getState() +
-					" and did not go back to " + actualState);
+			log.info("Server's state changed to " + this.getLabel().getState() + 
+					" and did not go back to " + actualState); 
 		}
 	}
 	
@@ -164,13 +157,13 @@ public class CDKServer extends DefaultServer {
 		try {
 			DefaultShell certificateDialog = new DefaultShell(shell);
 			certificateDialog.setFocus();
-			log.info("SSL Certificate Dialog appeared during " + getLabel().getState().toString());
-			new PushButton(certificateDialog, "Yes").click();
+			log.info("SSL Certificate Dialog appeared during " + getLabel().getState().toString()); 
+			new PushButton(certificateDialog, CDKLabel.Buttons.YES).click(); 
 			new WaitWhile(new ShellIsAvailable(certificateDialog));
 			setCertificateAccepted(true);
 		} catch (WaitTimeoutExpiredException ex) {
-			String message ="WaitTimeoutExpiredException occured when handling Certificate dialog. "
-					+ "Dialog has not been shown";
+			String message ="WaitTimeoutExpiredException occured when handling Certificate dialog. " 
+					+ "Dialog has not been shown"; 
 			log.error(message);
 			throw new CDKServerException(message, ex);
 		}
@@ -178,8 +171,9 @@ public class CDKServer extends DefaultServer {
 	
 	
 	private void closeDialogAndThrowException(Shell dialog) {
-		log.error("Problems dialog appeared, throwing an exception");
-		processProblemDialog(dialog, dialog + 
-				" occured during server adapter state was " + getLabel().getState());		
+		log.error("Problems dialog appeared, throwing an exception"); 
+		DefaultShell shell = new DefaultShell(dialog);
+		processProblemDialog(shell, shell.getText() + 
+				" dialog occured during server adapter state was " + getLabel().getState());		 
 	}
 }

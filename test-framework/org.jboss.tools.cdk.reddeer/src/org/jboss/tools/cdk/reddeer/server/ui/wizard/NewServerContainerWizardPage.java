@@ -22,30 +22,27 @@ import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 public class NewServerContainerWizardPage {
-	
-	private static final String SECURE_STORAGE = "Secure Storage Password";
-
-	protected static final String WIZARD_NAME = "New Server";
 	
 	private static Logger log = Logger.getLogger(NewServerContainerWizardPage.class);
 	
 	public String getDomain() {
-		new DefaultShell(WIZARD_NAME);
-		return new LabeledCombo("Domain: ").getSelection();
+		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);
+		return new LabeledCombo(CDKLabel.Labels.DOMAIN).getSelection();
 	}
 	
 	public Button getAddButton() {
-		return new PushButton("Add...");
+		return new PushButton(CDKLabel.Buttons.ADD);
 	}
 	
 	@SuppressWarnings("unused")
 	private static void disposeSecureStoragePassword() {
 		try {
-			new WaitUntil(new ShellIsAvailable(SECURE_STORAGE), TimePeriod.MEDIUM, true);
-			new DefaultShell(SECURE_STORAGE).close();
-			new WaitWhile(new ShellIsAvailable(SECURE_STORAGE));
+			new WaitUntil(new ShellIsAvailable(CDKLabel.Shell.SECURE_STORAGE_DIALOG), TimePeriod.MEDIUM, true);
+			new DefaultShell(CDKLabel.Shell.SECURE_STORAGE_DIALOG).close();
+			new WaitWhile(new ShellIsAvailable(CDKLabel.Shell.SECURE_STORAGE_DIALOG));
 		} catch (WaitTimeoutExpiredException exc) {
 			log.info("WaitTimeoutExpiredException occurred while waiting for Secure Storage Password dialog");
 		}

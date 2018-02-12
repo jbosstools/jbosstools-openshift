@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.editor;
 
+import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
  * CKD 3.2+ server editor class
@@ -24,7 +26,14 @@ public class CDK32ServerEditor extends CDK3ServerEditor {
 	}
 
 	public LabeledText getMinishiftProfile() {
-		return new LabeledText(getCDKSection(), "Minishift Profile:");
+		return new LabeledText(getCDKSection(), CDKLabel.Labels.MINISHIFT_PROFILE);
 	}
 	
+	public CheckBox getAddSkipRegistrationOnStartCheckBox() {
+		return new CheckBox(getCredentialsSection(), CDKLabel.Buttons.SKIP_REGISTRATION_STARTING);
+	}
+	
+	public CheckBox getAddSkipRegistrationOnStopCheckBox() {
+		return new CheckBox(getCredentialsSection(), CDKLabel.Buttons.SKIP_UNREGISTRATION_STOPPING);
+	}
 }

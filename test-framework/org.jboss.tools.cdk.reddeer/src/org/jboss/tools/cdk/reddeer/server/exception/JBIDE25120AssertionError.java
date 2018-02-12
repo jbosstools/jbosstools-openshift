@@ -8,21 +8,18 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.server.ui.wizard;
-
-import org.eclipse.reddeer.common.logging.Logger;
+package org.jboss.tools.cdk.reddeer.server.exception;
 
 /**
- * New minishift server wizard page class rep.
+ * Custom assertion error class for jbide-25120 
  * @author odockal
  *
  */
-public class NewMinishiftServerWizardPage extends NewCDK32ServerWizardPage {
+public class JBIDE25120AssertionError extends AssertionError {
 
-	private static final Logger log = Logger.getLogger(NewMinishiftServerWizardPage.class);
-	
-	@Override
-	public void setCredentials(String username, String password) {
-		log.info("Setting credentials in New Minishift Server wizard page is not possible");
-	}
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6128965679287692667L;
+
 }

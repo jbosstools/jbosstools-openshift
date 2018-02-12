@@ -16,6 +16,7 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
 import org.eclipse.reddeer.workbench.core.condition.JobIsKilled;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
  * Class represents New Server Wizard, it is required because
@@ -26,7 +27,7 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
  */
 public class NewCDKServerWizard extends NewMenuWizard {
 	
-	public static final String TITLE = "New Server";
+	public static final String TITLE = CDKLabel.Shell.NEW_SERVER_WIZARD;
 	
 	/**
 	 * Instantiates a new new server wizard dialog.
@@ -42,7 +43,7 @@ public class NewCDKServerWizard extends NewMenuWizard {
 			// wait for job to start
 			new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM);
 			// job has started - try to kill it
-			new WaitUntil(new JobIsKilled("Refreshing server adapter list"), TimePeriod.LONG, false);
+			new WaitUntil(new JobIsKilled(CDKLabel.Job.REFRESHING_SERVER_ADAPTER_LIST), TimePeriod.LONG, false);
 		} catch (WaitTimeoutExpiredException exc) {
 			// do nothing because job did not start
 		}
@@ -55,7 +56,7 @@ public class NewCDKServerWizard extends NewMenuWizard {
 			// wait for job to start
 			new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM);
 			// job has started - try to kill it
-			new WaitUntil(new JobIsKilled("Refreshing server adapter list"), TimePeriod.LONG, false);
+			new WaitUntil(new JobIsKilled(CDKLabel.Job.REFRESHING_SERVER_ADAPTER_LIST), TimePeriod.LONG, false);
 		} catch (WaitTimeoutExpiredException exc) {
 			// do nothing because job did not start
 		}

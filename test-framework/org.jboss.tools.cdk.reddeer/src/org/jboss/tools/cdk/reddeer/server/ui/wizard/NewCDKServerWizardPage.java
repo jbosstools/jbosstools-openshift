@@ -12,6 +12,7 @@ package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
  * Parenting server wizard class for CDK/Minishift 
@@ -21,8 +22,8 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 public class NewCDKServerWizardPage extends NewServerContainerWizardPage {
 
 	public void setFolder(final String folder) {
-		new DefaultShell(WIZARD_NAME);
-		new LabeledText("Folder: ").setText(folder);
+		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);
+		new LabeledText(CDKLabel.Labels.FOLDER).setText(folder);
 	}
 	
 }

@@ -30,6 +30,15 @@ public class MultipleWaitConditionHandler extends AbstractWaitCondition {
 	
 	private Map<WaitCondition, Consumer<Object>> awaitsConditions = new HashMap<WaitCondition, Consumer<Object>>();
 
+	public MultipleWaitConditionHandler(Map<WaitCondition, Consumer<Object>> conds) {
+		awaitsConditions = conds;
+		StringBuilder descriptionBuilder = new StringBuilder();
+		for (WaitCondition wait : conds.keySet()) {
+			descriptionBuilder.append(wait.description() + " | ");
+		}
+		description = descriptionBuilder.toString();
+	}
+	
 	public MultipleWaitConditionHandler(Map<WaitCondition, Consumer<Object>> conds, String desc) {
 		awaitsConditions = conds;
 		description = desc;

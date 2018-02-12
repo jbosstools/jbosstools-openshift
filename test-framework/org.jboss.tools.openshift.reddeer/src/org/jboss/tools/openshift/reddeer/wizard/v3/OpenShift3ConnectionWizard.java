@@ -15,6 +15,7 @@ import static org.junit.Assert.fail;
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.matcher.WithClassNameMatcher;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
@@ -30,6 +31,7 @@ import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.text.DefaultText;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
@@ -65,14 +67,14 @@ public class OpenShift3ConnectionWizard {
 
 	public void switchAuthenticationSection(String method) {
 		switch (method.toLowerCase()) {
-		case "basic":
+		case "basic": 
 			setAuthMethodToBasic();
 			break;
-		case "oauth":
+		case "oauth": 
 			setAuthMethodToOAuth();
 			break;
 		default:
-			log.info("Unknown auth method...");
+			log.info("Unknown auth method..."); 
 		}
 	}
 	
@@ -166,14 +168,9 @@ public class OpenShift3ConnectionWizard {
 		return new LabeledText(OpenShiftLabel.TextLabels.CLUSTER_NAMESPACE);
 	}
 
-	/**
-	 * TODO make this work
-	 * 
-	 * @return
-	 */
-	public LabeledText getOCLocationLabel() {
+	public DefaultText getOCLocationLabel() {
 		openAdvancedSection();
-		return new LabeledText(OpenShiftLabel.TextLabels.OVERRIDE_OC_LOCATION);
+		return new DefaultText(4, new WithClassNameMatcher("org.eclipse.swt.widgets.Text"));
 	}
 
 	public CheckBox getOverrideOCLocationButton() {
@@ -206,7 +203,7 @@ public class OpenShift3ConnectionWizard {
 		try {
 			new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.REGISTRY_URL_NOT_FOUND), TimePeriod.DEFAULT);
 			// Error dialog appeared, exception will be thrown
-			log.error("Unable to discover a registry URL");
+			log.error("Unable to discover a registry URL"); 
 			throw new OpenShiftToolsException(OpenShiftLabel.Shell.REGISTRY_URL_NOT_FOUND);
 		} catch (WaitTimeoutExpiredException exc) {
 			// Error dialog was not thrown
@@ -216,7 +213,7 @@ public class OpenShift3ConnectionWizard {
 		} catch (WaitTimeoutExpiredException exc) {
 			// Confirmation dialog did not appear, only spotted reason so far is that
 			// it would be replacing the same URL.
-			log.info("Discover action did not invoke any dialog");
+			log.info("Discover action did not invoke any dialog"); 
 		}
 	}
 
@@ -240,9 +237,9 @@ public class OpenShift3ConnectionWizard {
 		new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT, false);
 		// check for Wizard closing dialog
 		try {
-			new WaitUntil(new ShellIsAvailable("Wizard closing"), TimePeriod.MEDIUM);
+			new WaitUntil(new ShellIsAvailable("Wizard closing"), TimePeriod.MEDIUM); 
 			new OkButton().click();
-			new WaitWhile(new ShellIsAvailable("Wizard closing"), TimePeriod.MEDIUM, false);
+			new WaitWhile(new ShellIsAvailable("Wizard closing"), TimePeriod.MEDIUM, false); 
 			new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT, false);
 			new FinishButton().click();
 		} catch (WaitTimeoutExpiredException exc) {
@@ -257,9 +254,9 @@ public class OpenShift3ConnectionWizard {
 		new FinishButton().click();
 		try {
 			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
-			new PushButton("Yes").click();
+			new PushButton("Yes").click(); 
 		} catch (RedDeerException ex) {
-			fail("Aceptance of SSL certificate failed.");
+			fail("Aceptance of SSL certificate failed."); 
 		}
 
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_CONNECTION), TimePeriod.LONG);
@@ -289,12 +286,12 @@ public class OpenShift3ConnectionWizard {
 	}
 
 	private void setAuthMethodToBasic() {
-		log.info("Setting auth method to Basic");
+		log.info("Setting auth method to Basic"); 
 		authSection = new BasicAuthenticationSection();		
 	}
 
 	private void setAuthMethodToOAuth() {
-		log.info("Setting auth method to OAuth");
+		log.info("Setting auth method to OAuth"); 
 		authSection = new OAuthauthenticationSection();		
 	}
 	

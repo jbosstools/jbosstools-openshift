@@ -18,6 +18,7 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerWizardPage;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
@@ -45,7 +46,7 @@ public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 	
 	@Test
 	public void testCDK3ServerType() {
-		assertServerType(CDK32_SERVER_NAME);
+		assertServerType(CDKLabel.Server.CDK32_SERVER_NAME);
 	}
 	
 	@Test
@@ -53,15 +54,15 @@ public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		
-		page.selectType(SERVER_TYPE_GROUP, CDK32_SERVER_NAME);
+		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.CDK32_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
 		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage();
 		
-		checkWizardPagewidget("Minishift Binary: ", CDK32_SERVER_NAME);
+		checkWizardPagewidget("Minishift Binary: ", CDKLabel.Server.CDK32_SERVER_NAME);
 
 		// just check that default domain is choosen correctly
-		assertTrue(containerPage.getDomain().equalsIgnoreCase(CREDENTIALS_DOMAIN));
+		assertTrue(containerPage.getDomain().equalsIgnoreCase(CDKLabel.Others.CREDENTIALS_DOMAIN));
 		assertTrue(containerPage.getMinishiftProfile().getText().equals("minishift"));
 		
 		// needs to activate validator

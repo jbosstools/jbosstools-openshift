@@ -18,6 +18,7 @@ import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.uiforms.impl.hyperlink.DefaultHyperlink;
 import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
  * Top level representing class of CDK/Minishift server editors
@@ -30,11 +31,11 @@ public class MinishiftServerEditor extends ServerEditor {
 	
 	private DefaultSection cdkSection;
 	
-	public static final String CDK_DETAILS = "CDK Details";
+	public static final String CDK_DETAILS = CDKLabel.Sections.CDK_DETAILS;
 	
-	public static final String GENERAL = "General Information";
+	public static final String GENERAL = CDKLabel.Sections.GENERAL;
 	
-	public static final String CREDENTIALS = "Credentials";
+	public static final String CREDENTIALS = CDKLabel.Sections.CREDENTIALS;
 	
 	public MinishiftServerEditor(String title) {
 		super(title);
@@ -45,7 +46,7 @@ public class MinishiftServerEditor extends ServerEditor {
 	public void openLaunchConfigurationFromLink() {
 		log.info("Activate launch configuration via link");
 		getLaunchConfigurationHyperLink().activate();
-		ShellIsAvailable launch = new ShellIsAvailable("Edit Configuration");
+		ShellIsAvailable launch = new ShellIsAvailable(CDKLabel.Shell.LAUNCH_CONFIG_DIALOG);
 		try {
 			new WaitUntil(launch, TimePeriod.DEFAULT);
 		} catch (WaitTimeoutExpiredException exc) {
@@ -54,11 +55,11 @@ public class MinishiftServerEditor extends ServerEditor {
 	}
 	
 	public LabeledText getHostnameLabel() {
-		return new LabeledText(generalSection,"Host name:");
+		return new LabeledText(generalSection, CDKLabel.Labels.HOST_NAME);
 	}
 	
 	public LabeledText getServernameLabel() {
-		return new LabeledText(generalSection,"Server name:");
+		return new LabeledText(generalSection, CDKLabel.Labels.SERVER_NAME);
 	}
 	
 	public DefaultHyperlink getLaunchConfigurationHyperLink() {

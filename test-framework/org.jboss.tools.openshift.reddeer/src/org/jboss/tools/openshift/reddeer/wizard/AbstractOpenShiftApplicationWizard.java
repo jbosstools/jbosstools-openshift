@@ -68,9 +68,9 @@ public abstract class AbstractOpenShiftApplicationWizard {
 		
 		new NewWizard().open();
 		
-		new DefaultShell("New").setFocus();
+		new DefaultShell("New").setFocus(); 
 		
-		new DefaultTreeItem("OpenShift", "OpenShift Application").select();
+		new DefaultTreeItem("OpenShift", "OpenShift Application").select(); 
 		
 		new NextButton().click();
 		
@@ -93,7 +93,7 @@ public abstract class AbstractOpenShiftApplicationWizard {
 
 	private void processUntrustedSSLCertificate() {
 		try{
-			new DefaultShell("Untrusted SSL Certificate");
+			new DefaultShell("Untrusted SSL Certificate"); 
 			new YesButton().click();
 		}catch (CoreLayerException ex){
 			//do nothing SSL Certificate shell did not appear.

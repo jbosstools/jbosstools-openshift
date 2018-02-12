@@ -28,18 +28,36 @@ import org.junit.runners.Suite;
 
 @RunWith(RedDeerSuite.class)
 @Suite.SuiteClasses({
+	
+	// UI integration tests
+	
+	// Wizard tests by server adapter type
 	CDK3ServerWizardTest.class,
 	CDK32ServerWizardTest.class,
 	MinishiftServerWizardTest.class,
+	
+	// Server editor tests by server adapter type
 	CDK3ServerEditorTest.class,
 	CDK32ServerEditorTest.class,
 	MinishiftServerEditorTest.class,
 	CDKLaunchConfigurationTest.class,
+	
+	// Integration tests dependent on CDK start up
+	
+	// Main integration test of devstudio and CDK, is using different profile for clear start
+	// and registers cdk rhel image
+	CDK32IntegrationTest.class,
+	
+	// Testing of Image registry URL discovery in OS connection 
 	CDKImageRegistryUrlDiscoveryTest.class,
 	CDKImageRegistryUrlDiscoveryFailureTest.class,
 	CDKImageRegistryUrlValidatorTest.class,
-	CDK32IntegrationTest.class,
-	CDKWrongCredentialsTest.class
+
+	// Extended test case checking for error during CDK 3.2+ start up 
+	// with no or wrong credentials passed into env.
+	CDKWrongCredentialsTest.class,
+	
+	// Integration test for creating/operating of CDK 3.2+ server adapter with multiple profiles set
 })
 /**
  * @author ondrej dockal
