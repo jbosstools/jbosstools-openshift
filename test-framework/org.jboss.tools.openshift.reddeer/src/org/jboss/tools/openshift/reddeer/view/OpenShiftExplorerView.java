@@ -166,7 +166,7 @@ public class OpenShiftExplorerView extends WorkbenchView {
 
 		if (certificateShown) {
 			try {
-				new DefaultShell("Untrusted SSL Certificate");
+				new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
 				new PushButton("Yes").click();
 			} catch (RedDeerException ex) {
 				fail("Aceptance of SSL certificate failed.");
