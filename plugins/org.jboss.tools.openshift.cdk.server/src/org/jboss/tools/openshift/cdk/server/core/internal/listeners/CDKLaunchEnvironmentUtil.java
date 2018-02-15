@@ -29,7 +29,7 @@ public class CDKLaunchEnvironmentUtil {
 		CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		boolean passCredentials = cdkServer.passCredentials();
 		String pass = null;
-		if (passCredentials) {
+		if (passCredentials && !skipCredentials) {
 			try {
 				pass = cdkServer.getPassword();
 			} catch (UsernameChangedException uce) {
