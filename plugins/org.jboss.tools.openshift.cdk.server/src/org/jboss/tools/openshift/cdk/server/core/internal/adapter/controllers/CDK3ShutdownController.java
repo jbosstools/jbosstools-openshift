@@ -77,7 +77,8 @@ public class CDK3ShutdownController extends AbstractCDKShutdownController {
 	}
 
 	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
-		return new CDKLaunchUtility().callMinishiftInteractive(getServer(), cmd, getServer().getName());
+		CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
+		return new CDKLaunchUtility().callMinishiftInteractive(getServer(), cmd, getServer().getName(), cdk.skipUnregistration());
 	}
 
 	@Override

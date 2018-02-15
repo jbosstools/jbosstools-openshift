@@ -221,7 +221,8 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 
 		CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		boolean passCredentials = cdkServer.passCredentials();
-		if (passCredentials) {
+		boolean skipReg = cdkServer.skipRegistration();
+		if (passCredentials && !skipReg) {
 			handleCredentialsDuringLaunch(s, cdkServer, beh);
 		}
 
@@ -242,7 +243,8 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 
 		Process p = null;
 		try {
-			p = new CDKLaunchUtility().callMinishiftConsole(s, args, getStartupLaunchName(s));
+			CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
+			p = new CDKLaunchUtility().callMinishiftConsole(s, args, getStartupLaunchName(s), cdk.skipRegistration());
 		} catch (IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(ioe);
 			beh.setServerStopped();

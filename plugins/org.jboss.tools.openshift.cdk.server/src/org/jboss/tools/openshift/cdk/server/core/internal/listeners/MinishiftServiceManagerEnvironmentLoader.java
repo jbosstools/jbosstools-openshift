@@ -123,7 +123,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 	}
 
 	protected String getOpenshiftRegistry(IServer server, boolean suppressErrors) {
-		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
+		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, true);
 		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
 		String[] args = new String[] { "openshift", "registry" };
 		args = CDK32Server.getArgsWithProfile(server, args);
@@ -171,7 +171,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 	}
 
 	protected Map<String, String> loadDockerEnv(IServer server) {
-		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
+		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, true);
 		String cmdLoc = MinishiftBinaryUtility.getMinishiftLocation(server);
 		String[] args = new String[] { "docker-env" };
 		args = CDK32Server.getArgsWithProfile(server, args);
@@ -188,7 +188,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 	}
 
 	protected Properties loadOpenshiftConsoleDetails(IServer server, boolean suppressError) {
-		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
+		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, true);
 		String[] args = new String[] { "console", "--machine-readable" };
 		args = CDK32Server.getArgsWithProfile(server, args);
 		File wd = JBossServerCorePlugin.getServerStateLocation(server).toFile();

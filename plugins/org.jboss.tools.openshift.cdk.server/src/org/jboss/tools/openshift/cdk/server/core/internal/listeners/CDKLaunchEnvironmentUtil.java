@@ -25,7 +25,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.IE
 
 public class CDKLaunchEnvironmentUtil {
 
-	public static Map<String, String> createEnvironment(IServer server) {
+	public static Map<String, String> createEnvironment(IServer server, boolean skipCredentials) {
 		CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		boolean passCredentials = cdkServer.passCredentials();
 		String pass = null;

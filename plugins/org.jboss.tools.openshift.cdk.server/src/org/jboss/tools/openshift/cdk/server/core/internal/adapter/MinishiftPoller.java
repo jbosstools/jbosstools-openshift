@@ -49,7 +49,7 @@ public class MinishiftPoller extends AbstractCDKPoller {
 	}
 
 	protected Map<String, String> createEnvironment(IServer server) {
-		return CDKLaunchEnvironmentUtil.createEnvironment(server);
+		return CDKLaunchEnvironmentUtil.createEnvironment(server, true);
 	}
 
 	@Override

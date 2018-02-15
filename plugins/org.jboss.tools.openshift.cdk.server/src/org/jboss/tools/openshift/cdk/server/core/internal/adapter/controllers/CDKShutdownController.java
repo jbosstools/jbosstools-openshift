@@ -13,10 +13,12 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.VagrantBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VagrantPoller;
 
 public class CDKShutdownController extends AbstractCDKShutdownController {
@@ -31,7 +33,8 @@ public class CDKShutdownController extends AbstractCDKShutdownController {
 	}
 
 	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
-		return new CDKLaunchUtility().callInteractive(getServer(), cmd, getServer().getName());
+		CDKServer cdk = (CDKServer)s.loadAdapter(CDKServer.class, new NullProgressMonitor());
+		return new CDKLaunchUtility().callInteractive(getServer(), cmd, getServer().getName(), cdk.skipUnregistration());
 	}
 
 	@Override

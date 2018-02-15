@@ -43,6 +43,7 @@ import org.jboss.ide.eclipse.as.wtp.core.server.launch.AbstractStartJavaServerLa
 import org.jboss.tools.as.core.server.controllable.IDeployableServerBehaviorProperties;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
@@ -162,9 +163,10 @@ public abstract class AbstractCDKShutdownController extends AbstractSubsystemCon
 	private void shutdownViaLaunch() throws CoreException {
 		String args = getShutdownArgs();
 		String cmd = getCommandLocation();
+		CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
 		ILaunchConfiguration lc = getServer().getLaunchConfiguration(true, new NullProgressMonitor());
 		ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(getServer(), args,
-				new Path(cmd).lastSegment(), lc, cmd);
+				new Path(cmd).lastSegment(), lc, cmd, cdk.skipUnregistration());
 		IProcess p = null;
 		ILaunch launch = null;
 		try {
