@@ -53,7 +53,7 @@ public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstrac
 		stopServerAdapter();
 		// start server adapter -> should bring up the value of registry url in existing
 		// connection
-		startServerAdapter(() -> skipRegistration(getCDEServer()));
+		startServerAdapter(() -> skipRegistration(getCDEServer()), true);
 		connection.refresh();
 		wizard = connection.editConnection();
 		switchOffPasswordSaving();

@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2017 Red Hat, Inc. 
+ * Copyright (c) 2018 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -8,29 +8,21 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.server.ui.editor;
+package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
-import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
+import org.eclipse.reddeer.common.logging.Logger;
 
 /**
- * Class representing CDK3 Server Editor part
+ * New minishift server wizard page class rep.
  * @author odockal
  *
  */
-public class CDK3ServerEditor extends MinishiftServerEditor implements CredentialsPart, CDKPart {
-	
-	public CDK3ServerEditor(String title) {
-		super(title);
-	}
+public class NewMinishiftServerWizardPage extends NewCDK32ServerWizardPage {
 
-	@Override
-	public DefaultSection getCDKDefaultSection() {
-		return getCDKSection();
-	}
-
-	@Override
-	public DefaultSection getCredentialsSection() {
-		return new DefaultSection(CREDENTIALS);
-	}
+	private static final Logger log = Logger.getLogger(NewMinishiftServerWizardPage.class);
 	
+	@Override
+	public void setCredentials(String username, String password) {
+		log.info("Setting credentials in New Minishift Server wizard page is no possible");
+	}
 }

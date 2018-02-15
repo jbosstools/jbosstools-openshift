@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2017 Red Hat, Inc. 
+ * Copyright (c) 2016-2017 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -14,15 +14,15 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 
 /**
- * New CDK 3.2+ server container wizard page
+ * Parenting server wizard class for CDK/Minishift 
  * @author odockal
  *
  */
-public class NewCDK32ServerContainerWizardPage extends NewCDK3ServerContainerWizardPage {
+public class NewCDKServerWizardPage extends NewServerContainerWizardPage {
 
-	public void setMinishiftProfile(final String profile) {
+	public void setFolder(final String folder) {
 		new DefaultShell(WIZARD_NAME);
-		new LabeledText("Minishift Profile:").setText(profile);
+		new LabeledText("Folder: ").setText(folder);
 	}
-
+	
 }

@@ -37,8 +37,8 @@ import org.eclipse.reddeer.workbench.handler.EditorHandler;
 import org.eclipse.ui.IEditorPart;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
-import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKServerEditor;
-import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK3ServerEditor;
+import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKPart;
+import org.jboss.tools.cdk.reddeer.server.ui.editor.MinishiftServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDKServerWizardAbstractTest;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
@@ -53,7 +53,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	
 	protected ServersView2 serversView;
 
-	protected CDKServerEditor editor;
+	protected MinishiftServerEditor editor;
 
 	protected static final String ANOTHER_HYPERVISOR = "virtualbox";
 	
@@ -101,13 +101,13 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 		try {
 			addCDKServer();
 		} catch (CDKServerException exc) {
-			exc.printStackTrace();
+			log.error(exc.getMessage());
 			fail("Fails to create " + getServerAdapter() + " Server via New Server Wizard due to " + exc.getMessage());
 		}
 	}
 	
 	protected void checkEditorStateAfterSave(String location, boolean canSave) {
-		LabeledText label = ((CDK3ServerEditor) editor).getMinishiftBinaryLabel();
+		LabeledText label = ((CDKPart) editor).getMinishiftBinaryLabel();
 		label.setText(location);
 		new WaitUntil(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.SHORT, false);
 		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);

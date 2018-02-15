@@ -13,14 +13,15 @@ package org.jboss.tools.cdk.reddeer.server.ui.editor;
 import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
 
 /**
  * Class representing CDK 2.x Server Editor page
  * @author odockal
  *
  */
-public class CDK2ServerEditor extends CDKServerEditor {
-
+public class CDK2ServerEditor extends MinishiftServerEditor implements CredentialsPart {
+	
 	public CDK2ServerEditor(String title) {
 		super(title);
 	}
@@ -31,6 +32,11 @@ public class CDK2ServerEditor extends CDKServerEditor {
 	
 	public Button getVagrantfileBrowse() {
 		return new PushButton(getCDKSection(), "Browse...");
+	}
+
+	@Override
+	public DefaultSection getCredentialsSection() {
+		return new DefaultSection(CREDENTIALS);
 	}
 
 }

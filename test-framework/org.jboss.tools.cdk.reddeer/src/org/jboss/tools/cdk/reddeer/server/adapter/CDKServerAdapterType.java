@@ -15,6 +15,7 @@ public enum CDKServerAdapterType {
 	CDK2 	("org.jboss.tools.openshift.cdk.server.type"),
 	CDK3 	("org.jboss.tools.openshift.cdk.server.type.v3"),
 	CDK32 	("org.jboss.tools.openshift.cdk.server.type.v32"),
+	MINISHIFT17 ("org.jboss.tools.openshift.cdk.server.type.minishift.v17"),
 	NO_CDK  ("");
 	
 	private final String serverType;

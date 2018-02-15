@@ -18,6 +18,11 @@ import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 
+/**
+ * Credentials wizard page for new server
+ * @author odockal
+ *
+ */
 public class CredentialsWizardPage {
 	
 	public void activate() {

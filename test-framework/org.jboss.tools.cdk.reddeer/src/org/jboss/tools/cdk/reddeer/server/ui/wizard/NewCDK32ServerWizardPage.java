@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2016-2017 Red Hat, Inc. 
+ * Copyright (c) 2017 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -10,20 +10,23 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
-import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 
-public class NewCDK3ServerContainerWizardPage extends NewServerContainerWizardPage {
+/**
+ * New CDK 3.2+ server container wizard page
+ * @author odockal
+ *
+ */
+public class NewCDK32ServerWizardPage extends NewCDK3ServerWizardPage {
 
-	public void setMinishiftBinary(final String binary) {
+	public LabeledText getMinshiftProfileLabeledText() {
 		new DefaultShell(WIZARD_NAME);
-		new LabeledText("Minishift Binary: ").setText(binary);
+		return new LabeledText("Minishift Profile:");
 	}
 	
-	public void setHypervisor(final String text) {
-		new DefaultShell(WIZARD_NAME);
-		new LabeledCombo("Hypervisor:").setSelection(text);
+	public void setMinishiftProfile(final String profile) {
+		getMinshiftProfileLabeledText().setText(profile);
 	}
-	
+
 }
