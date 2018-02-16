@@ -10,23 +10,33 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader.MinishiftVersions;
 
 public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
-	protected String profileName;
+	protected String profileName, minishiftHome;
 	protected Text profileText;
 
 	@Override
@@ -46,12 +56,41 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 			createCredentialWidgets(main);
 		createHypervisorWidgets(main);
 		createLocationWidgets(main, homeLabel);
+		createHomeWidgets(main);
 		createProfileWidgets(main);
-
 		validateAndPack(main);
 		return main;
 	}
-
+	protected void createHomeWidgets(Composite main) {
+		Label l = new Label(main, SWT.NONE);
+		l.setText("Minishift Home:");
+		GridData homeData = new GridData();
+		homeData.grabExcessHorizontalSpace = true;
+		homeData.horizontalAlignment = SWT.FILL;
+		homeData.widthHint = 100;
+		Text msHomeText = new Text(main, SWT.SINGLE | SWT.BORDER);
+		msHomeText.setLayoutData(homeData);
+		String defMSHome = new Path(System.getProperty("user.home")).append(".minishift").toOSString();
+		msHomeText.setText(defMSHome);
+		Button msHomeBrowse = new Button(main, SWT.PUSH);
+		msHomeBrowse.setText("Browse...");
+		
+		SelectionAdapter msHomeSelListener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				browseClicked(msHomeText, FOLDER);
+				validate();
+			}
+		};
+		msHomeBrowse.addSelectionListener(msHomeSelListener);
+		ModifyListener msHomeModListener = new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				minishiftHome = msHomeText.getText();
+			}
+		}; 
+		msHomeText.addModifyListener(msHomeModListener);
+	}	
 	protected void createProfileWidgets(Composite main) {
 		// Point to file / folder to run
 		Label l = new Label(main, SWT.NONE);
@@ -97,7 +136,69 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 			IServerWorkingCopy swc = (IServerWorkingCopy) s;
 			if (profileName != null && !profileName.isEmpty()) {
 				swc.setAttribute(CDK32Server.PROFILE_ID, profileName);
+				swc.setAttribute(CDK3Server.MINISHIFT_HOME, minishiftHome);
 			}
 		}
+	}
+	
+	
+	protected static final boolean FILE = true;
+	protected static final boolean FOLDER = false;
+	protected void browseClicked(Text text, boolean type) {
+		if (text == null)
+			return;
+
+		File file = text.getText() == null ? null : new File(text.getText());
+		if (file != null && !file.exists()) {
+			file = null;
+		}
+
+		File f2 = null;
+		if (type == FILE)
+			f2 = chooseFile(file, text.getShell());
+		else if (type == FOLDER)
+			f2 = chooseDirectory(file, text.getShell());
+
+		if (f2 != null) {
+			String newVal = f2.getAbsolutePath();
+			if (newVal != null && !newVal.equals(text.getText())) {
+				text.setText(newVal);
+			}
+		}
+	}
+
+	protected static File chooseFile(File startingDirectory, Shell shell) {
+		FileDialog fileDialog = new FileDialog(shell, SWT.OPEN);
+		if (startingDirectory != null) {
+			if (startingDirectory.isFile())
+				fileDialog.setFilterPath(startingDirectory.getParentFile().getPath());
+			else
+				fileDialog.setFilterPath(startingDirectory.getPath());
+		}
+
+		String dir = fileDialog.open();
+		if (dir != null) {
+			dir = dir.trim();
+			if (dir.length() > 0) {
+				return new File(dir);
+			}
+		}
+		return null;
+	}
+
+	protected static File chooseDirectory(File startingDirectory, Shell shell) {
+		DirectoryDialog fileDialog = new DirectoryDialog(shell, SWT.OPEN);
+		if (startingDirectory != null) {
+			fileDialog.setFilterPath(startingDirectory.getPath());
+		}
+
+		String dir = fileDialog.open();
+		if (dir != null) {
+			dir = dir.trim();
+			if (dir.length() > 0) {
+				return new File(dir);
+			}
+		}
+		return null;
 	}
 }

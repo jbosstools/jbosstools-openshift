@@ -117,15 +117,11 @@ public class MinishiftLocationSection extends AbstractLocationSection {
 		};
 		hypervisorCombo.addSelectionListener(sl);
 
-		msHomeSelListener = new SelectionListener() {
+		msHomeSelListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				browseClicked(msHomeText, FOLDER);
 				validate();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		};
 		msHomeBrowse.addSelectionListener(msHomeSelListener);
