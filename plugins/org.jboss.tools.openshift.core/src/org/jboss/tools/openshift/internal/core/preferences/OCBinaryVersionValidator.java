@@ -156,7 +156,7 @@ public class OCBinaryVersionValidator {
 	public static boolean isOcPathValid(Version version, String path) {
 		boolean result = true;
 		if (!Platform.OS_WIN32.equals(Platform.getOS()) && (version == null
-				|| (path.indexOf(' ') != (-1) && version.compareTo(OC_MINIMUM_VERSION_FOR_OC_WITH_SPACE) <= 0))) {
+				|| (path.indexOf(' ') != (-1) && version.compareTo(OC_MINIMUM_VERSION_FOR_OC_WITH_SPACE) < 0))) {
 			result = false;
 		}
 		return result;
