@@ -37,6 +37,7 @@ public class ServiceManagerEnvironment {
 
 	int openshiftPort = 8443;
 	String openshiftHost = "https://10.1.2.2";
+	String defaultUser = "openshift-dev";
 
 	private Map<String, String> env;
 
@@ -88,14 +89,23 @@ public class ServiceManagerEnvironment {
 		return authScheme;
 	}
 
+	public void setDefaultUsername(String user) {
+		defaultUser = user;
+	}
+	
 	public String getUsername() {
-		String user = env.containsKey(DOTCDK_AUTH_USERNAME) ? env.get(DOTCDK_AUTH_USERNAME) : "openshift-dev";
+		String user = env.containsKey(DOTCDK_AUTH_USERNAME) ? env.get(DOTCDK_AUTH_USERNAME) : defaultUser;
 		return user;
 	}
 
 	public String getPassword() {
 		String user = getUsername();
-		String defPass = "openshift-dev".equals(user) ? "devel" : null;
+		String defPass = null;
+		if( "openshift-dev".equals(user)) {
+			defPass = "devel";
+		} else {
+			defPass = "developer";
+		}
 		String pass = env.containsKey(DOTCDK_AUTH_PASS) ? env.get(DOTCDK_AUTH_PASS) : defPass;
 		return pass;
 	}
