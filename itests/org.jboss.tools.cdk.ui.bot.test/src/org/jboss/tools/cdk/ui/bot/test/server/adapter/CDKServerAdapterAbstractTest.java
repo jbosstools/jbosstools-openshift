@@ -26,6 +26,7 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.condition.ConsoleHasNoChange;
+import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
 import org.eclipse.reddeer.eclipse.ui.console.ConsoleView;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
@@ -38,15 +39,20 @@ import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.workbench.condition.EditorIsDirty;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.exception.WorkbenchLayerException;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
-import org.jboss.tools.cdk.reddeer.core.ServerOperable;
+import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.preferences.OpenShift3SSLCertificatePreferencePage;
 import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
+import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK2ServerEditor;
+import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK3ServerEditor;
+import org.jboss.tools.cdk.reddeer.server.ui.editor.CredentialsPart;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.MinishiftServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.launch.configuration.CDKLaunchConfigurationDialog;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDK32ServerWizardPage;
@@ -85,7 +91,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	
 	private static final Logger log = Logger.getLogger(CDKServerAdapterAbstractTest.class);
 	
-	public Server getCDEServer() {
+	public Server getCDKServer() {
 		return this.server;
 	}
 
@@ -97,14 +103,14 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		this.serversView = view;
 	}
 
-	protected void setCDEServer(Server server) {
+	protected void setCDKServer(Server server) {
 		this.server = (CDKServer)server;
 	}
 	
 	protected abstract String getServerAdapter();
 	
 	@BeforeClass
-	public static void setUpEnvironemnt() {
+	public static void setupCDKServerAdapterAbstractTest() {
 		log.info("Setting AUTOMATED_MODE of ErrorDialog to false, in order to pass some tests");
 		// switch off errordialog.automated_mode to verify error dialog
 		ErrorDialog.AUTOMATED_MODE = false;
@@ -112,7 +118,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	}
 	
 	@AfterClass
-	public static void tearDownEnvironment() {
+	public static void teardownCDKAbstractServerAdapterTest() {
 		CDKUtils.deleteAllCDKServerAdapters();
 		deleteCertificates();
 		if (USERNAME != null) { 
@@ -123,18 +129,18 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	}
 	
 	@Before
-	public void setUpServers() {
+	public void setupCDKServerAbstract() {
 		log.info("Open Servers view tab"); //$NON-NLS-1$
 		setServersView(new CDKServersView());
 		getServersView().open();
 		log.info("Getting server object from Servers View with name: " + getServerAdapter()); //$NON-NLS-1$
-		setCDEServer(getServersView().getServer(getServerAdapter()));
+		setCDKServer(getServersView().getServer(getServerAdapter()));
 		new WaitUntil(new JobIsRunning(), TimePeriod.DEFAULT, false);
 	}
 	
 	@After
-	public void tearDownServers() {
-		setCDEServer(null);
+	public void teardownCDKServerAbstract() {
+		setCDKServer(null);
 		getServersView().close();
 	}
 	
@@ -158,29 +164,50 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		addParamsToCDKLaunchConfig(server, "--skip-registration");
 	}
 	
+	protected void passCredentialsIntoEnvironment(boolean pass) {
+		getCDKServer().open();
+		CDK3ServerEditor editor = new CDK3ServerEditor(getCDKServer().getLabel().getName());
+		editor.getPassCredentialsCheckBox().toggle(pass);
+		new WaitUntil(new EditorIsDirty(editor), TimePeriod.MEDIUM, false);
+		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM);
+		try {
+			editor.save();
+		} catch (WorkbenchLayerException exc) {
+			String message = exc.getMessage().toLowerCase();
+			if (message.contains("save") && message.contains("not enabled")) {
+				log.info("There was nothing to save");
+			} else {
+				throw exc;
+			}
+		}
+	}
+	
 	/**
 	 * Starts server adapter defined in getServerAdapter abstract method and
 	 * checks server's state, method's parameter accepts lambda expression
 	 * that expects or consumes method to be run before cdk is started.
 	 * Was designed to set up server adapter launching arguments.
 	 */
-	protected void startServerAdapter(ServerOperable cond, boolean wait) {
+
+	protected void startServerAdapter(Runnable cond) {
+		startServerAdapter(cond, false);
+	}
+
+	protected void startServerAdapter(Runnable cond, boolean rethrow) {
 		log.info("Starting server adapter"); //$NON-NLS-1$
 		// Workaround for CDK-216
-		if (wait) {
-			new WaitUntil(new NeverFulfilledCondition(), TimePeriod.getCustom(90), false);
-		}
-		new ServerOperation(() -> getCDEServer().start(), cond);
+		new WaitUntil(new NeverFulfilledCondition(), TimePeriod.getCustom(120), false);
+		new ServerOperation(() -> getCDKServer().start(), cond, rethrow);
 		printCertificates();
 		checkServerIsAvailable();
-		assertEquals(ServerState.STARTED, getCDEServer().getLabel().getState());
+		assertEquals(ServerState.STARTED, getCDKServer().getLabel().getState());
 	}
 	
 	/**
 	 * Starts server adapter only if not running yet
 	 */
-	public void startServerAdapterIfNotRunning(ServerOperable cond, boolean wait) {
-		if (getCDEServer().getLabel().getState().equals(ServerState.STARTED)) {
+	public void startServerAdapterIfNotRunning(Runnable cond, boolean wait) {
+		if (getCDKServer().getLabel().getState().equals(ServerState.STARTED)) {
 			log.info("Server adapter " + getServerAdapter() + " is already started");
 		} else {
 			log.info("Server adapter " + getServerAdapter() + " is not running, starting");
@@ -194,8 +221,8 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 */
 	protected void restartServerAdapter() {
 		log.info("Restarting server adapter"); //$NON-NLS-1$
-		new ServerOperation(() -> getCDEServer().restart(), () -> {});
-		assertEquals(ServerState.STARTED, getCDEServer().getLabel().getState());
+		new ServerOperation(() -> getCDKServer().restart(), () -> {});
+		assertEquals(ServerState.STARTED, getCDKServer().getLabel().getState());
 	}
 	
 	/**
@@ -204,8 +231,8 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 */
 	protected void stopServerAdapter() {
 		log.info("Stopping server adapter"); //$NON-NLS-1$
-		new ServerOperation(() -> getCDEServer().stop(), () -> {});
-		assertEquals(ServerState.STOPPED, getCDEServer().getLabel().getState());
+		new ServerOperation(() -> getCDKServer().stop(), () -> {});
+		assertEquals(ServerState.STOPPED, getCDKServer().getLabel().getState());
 	}
 	
 	/**
@@ -230,7 +257,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 * Checks for given server adapter
 	 */
 	protected void checkServerIsAvailable() {
-		if(!getCDEServer().getLabel().getName().contains(getServerAdapter())) {
+		if(!getCDKServer().getLabel().getName().contains(getServerAdapter())) {
 			log.info("List of available servers: ");
 			for (Server serverItem : getServersView().getServers()) {
 				String serverName = serverItem.getLabel().getName();
@@ -304,27 +331,38 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 * @param hypervisor hypervisor to use
 	 * @param path path to minishift binary file
 	 * @param profile what profile to use
+	 * @param username redhat developers username
+	 * @param password user password
 	 */
-	public static void addNewCDK32Server(String serverAdapter, String hypervisor, String path, String profile) {
+	public static void addNewCDK32Server(String serverAdapter, String hypervisor, String path, String profile, String username, String password) {
 		NewCDKServerWizard dialog = setupFirstNewServerWizardPage(CDK32_SERVER_NAME, serverAdapter);
 		
 		// set second new server dialog page
 		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage();
-		containerPage.setCredentials(USERNAME, PASSWORD);
+		containerPage.setCredentials(username, password);
 		if (hypervisor != null && !hypervisor.isEmpty()) {
 			log.info("Setting hypervisor to " + hypervisor); //$NON-NLS-1$
 			containerPage.setHypervisor(hypervisor);
 		}
 		log.info("Setting minishift binary file folder to " + path); //$NON-NLS-1$
 		containerPage.setMinishiftBinary(path);
-		log.info("Setting minishift profile to " + profile); //$NON-NLS-1$
-		containerPage.setMinishiftProfile(profile);
+		if (!profile.isEmpty()) {
+			log.info("Setting minishift profile to " + profile); //$NON-NLS-1$
+			containerPage.setMinishiftProfile(profile);
+		} else {
+			log.info("Keeping minishift profile default: " + containerPage.getMinishiftProfile());
+		}
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.DEFAULT);
 		log.info("Finishing Add new server dialog"); //$NON-NLS-1$
 		if (!(new FinishButton().isEnabled())) {
 			log.error("Finish button was not enabled"); //$NON-NLS-1$
 		}
-		dialog.finish(TimePeriod.MEDIUM);
+		dialog.finish();
+	}
+	
+	public static void addNewCDK32Server(String serverAdapter, 
+			String hypervisor, String path, String profile) {
+		addNewCDK32Server(serverAdapter, hypervisor, path, profile, USERNAME, PASSWORD);
 	}
 	
 	/**
@@ -351,7 +389,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		if (!(new FinishButton().isEnabled())) {
 			log.error("Finish button was not enabled"); //$NON-NLS-1$
 		}
-		dialog.finish(TimePeriod.MEDIUM);
+		dialog.finish();
 	}
 
 	/**
@@ -374,7 +412,16 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		if (!(new FinishButton().isEnabled())) {
 			log.error("Finish button was not enabled"); //$NON-NLS-1$
 		}
-		dialog.finish(TimePeriod.MEDIUM);
+		dialog.finish();
+	}
+	
+	private static void setupNewServerWizardPage(NewMenuWizard dialog, String serverAdapter, String... serverPath) {
+		NewServerWizardPage page = new NewServerWizardPage(dialog);
+		// set first dialog page
+		page.selectType(serverPath);
+		page.setHostName(SERVER_HOST);
+		page.setName(serverAdapter);
+		dialog.next();
 	}
 	
 	private static NewCDKServerWizard setupFirstNewServerWizardPage(String serverName, String serverAdapter) {
@@ -519,25 +566,44 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 * Inner class representing server's operation to be called using lambda expression
 	 */
 	private class ServerOperation {
-		
+
 		/**
 		 * Call given void method (operation) on server and catch possible problems
+		 * 
+		 * @param operation action to be called on server
+		 * @param cond condition to be executed before operation action
+		 * @param rethrow boolean param distinguishing whether re-throw caught exception
 		 */
-		public ServerOperation(ServerOperable operation, ServerOperable cond) {
-			cond.operate();
+		public ServerOperation(Runnable operation, Runnable cond, boolean rethrow) {
+			cond.run();
 			try {
-				operation.operate();
+				operation.run();
 			} catch (ServersViewException serversExc) {
 				log.error(serversExc.getMessage());
 				serversExc.printStackTrace();
 			} catch (CDKServerException exc) {
-				String console = collectConsoleOutput(log, true);
-				fail(exc.getMessage() + "\r\n" + console);
+				String cause = exc.getMessage() + "\r\n" + collectConsoleOutput(log, true);
+				if (rethrow) {
+					throw new CDKServerException(cause);
+				} else {
+					fail(cause);
+				}
 			} catch (WaitTimeoutExpiredException waitExc) {
-				String console = collectConsoleOutput(log, true);
-				fail(waitExc.getMessage() + "\r\n" + console);
+				String cause = waitExc.getMessage() + "\r\n" + collectConsoleOutput(log, true);
+				if (rethrow) {
+					throw new WaitTimeoutExpiredException(cause);
+				} else {
+					fail(cause);
+				}
 			} 
 			collectConsoleOutput(log, false);
+		}
+		
+		/**
+		 * Call given void method (operation) on server and catch possible problems
+		 */
+		public ServerOperation(Runnable operation, Runnable cond) {
+			this(operation, cond, false);
 		}
 	}
 }

@@ -12,6 +12,7 @@ package org.jboss.tools.cdk.ui.bot.test;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32IntegrationTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKWrongCredentialsTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryFailureTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlValidatorTest;
@@ -37,7 +38,8 @@ import org.junit.runners.Suite;
 	CDKImageRegistryUrlDiscoveryTest.class,
 	CDKImageRegistryUrlDiscoveryFailureTest.class,
 	CDKImageRegistryUrlValidatorTest.class,
-	CDK32IntegrationTest.class
+	CDK32IntegrationTest.class,
+	CDKWrongCredentialsTest.class
 })
 /**
  * @author ondrej dockal

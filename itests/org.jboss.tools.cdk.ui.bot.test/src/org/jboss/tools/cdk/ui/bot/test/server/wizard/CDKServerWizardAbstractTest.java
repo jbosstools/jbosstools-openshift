@@ -15,9 +15,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.wait.TimePeriod;
@@ -35,9 +32,7 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.hamcrest.Matcher;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
-import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
@@ -89,22 +84,9 @@ public abstract class CDKServerWizardAbstractTest extends CDKAbstractTest {
 	
 	protected static final String EXECUTABLE_FILE = getProjectAbsolutePath("resources/" + (IS_WINDOWS ? "executable.bat" : "executable.sh"));		
 	
-	protected static final String MINISHIFT_VALIDATION_JOB = "Validate minishift location";
-	
 	private static Logger log = Logger.getLogger(CDKServerWizardAbstractTest.class);
 	
 	protected abstract String getServerAdapter();
-	
-	public static Matcher<?> getJobMatcher(String title) {
-		return new JobMatcher(new Job(title) {
-
-			@Override
-			protected IStatus run(IProgressMonitor arg0) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		});
-	}
 	
 	@After
 	public void tearDownAbstractServerWizard() {

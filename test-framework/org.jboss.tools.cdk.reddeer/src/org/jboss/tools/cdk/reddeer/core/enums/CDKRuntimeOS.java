@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.cdk.reddeer.core;
+package org.jboss.tools.cdk.reddeer.core.enums;
 
 /**
  * CDK runtime OS enum types

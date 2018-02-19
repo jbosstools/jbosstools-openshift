@@ -12,9 +12,8 @@ package org.jboss.tools.cdk.reddeer.server.ui;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.function.Consumer;
 
-import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
 import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
@@ -30,9 +29,12 @@ import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.cdk.reddeer.core.condition.MultipleWaitConditionHandler;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKServerAdapterType;
 import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
-import org.jboss.tools.cdk.reddeer.server.adapter.CDKServerAdapterType;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 
@@ -47,17 +49,33 @@ public class CDKServer extends DefaultServer {
 	
 	private static final String MULTIPLE_PROBLEMS_DIALOG = "Multiple problems have occurred";
 	
-	private static final String PROBLEM_DIALOG = "Problem Dialog";
+	private static final String PROBLEM_DIALOG = "Problem Occurred";
 	
 	private static Logger log = Logger.getLogger(CDKServer.class);
 	
 	private boolean certificateAccepted = false;
+	
+	private WaitCondition problemDialogWait = new ShellIsAvailable(PROBLEM_DIALOG);
+	private WaitCondition multipleDialogWait = new ShellIsAvailable(MULTIPLE_PROBLEMS_DIALOG);
+	private WaitCondition sslDialogWait = new ShellIsAvailable(SSL_DIALOG_NAME);
+	
+	private Map<WaitCondition, Consumer<Object>> waitConditionMatrix = new HashMap<WaitCondition, Consumer<Object>>();
 	
 	private final CDKServerAdapterType serverType;
 	
 	public CDKServer(TreeItem item) {
 		super(item);
 		this.serverType = CDKUtils.getCDKServerType(CDKUtils.getServerTypeIdFromItem(item));
+		fillUpMatrix();
+	}
+	
+	private void fillUpMatrix() {
+		waitConditionMatrix.put(problemDialogWait, 
+				(x) -> closeDialogAndThrowException((Shell) problemDialogWait.getResult()));
+		waitConditionMatrix.put(multipleDialogWait, 
+				(x) -> closeDialogAndThrowException((Shell) multipleDialogWait.getResult()));
+		waitConditionMatrix.put(sslDialogWait,
+				(x) -> confirmSSLCertificateDialog(sslDialogWait.getResult()));
 	}
 	
 	public void setCertificateAccepted(boolean accepted) {
@@ -71,6 +89,8 @@ public class CDKServer extends DefaultServer {
 	@Override
 	protected void operateServerState(String menuItem, final ServerState resultState) {
 		ServerState actualState = this.getLabel().getState();
+		MultipleWaitConditionHandler waitConditions = new MultipleWaitConditionHandler(
+				waitConditionMatrix, " one of given wait condition is fulfilled");
 		TimePeriod timeout = TimePeriod.VERY_LONG;
 		if (menuItem == "Restart") {
 			timeout = TimePeriod.getCustom(480);
@@ -84,16 +104,15 @@ public class CDKServer extends DefaultServer {
 		// we might expect that after the state is changed it should not go back into initial state
 		// or that problem dialog appears
 		// later on, we might get "Multiple problems have occurred" dialog
-		waitForProblemDialog(PROBLEM_DIALOG, menuItem, TimePeriod.DEFAULT);
+		waitForProblemDialog(waitConditions, menuItem, TimePeriod.DEFAULT);
 		checkInitialStateChange(actualState);
 		// decide if we wait for SSL acceptance dialog
 		if ((actualState == ServerState.STOPPING || actualState == ServerState.STOPPED) 
 				&& !getCertificatedAccepted()) {
-			new WaitUntil(new ProblemOrCertificateDialogIsThrown(
-					true, MULTIPLE_PROBLEMS_DIALOG, PROBLEM_DIALOG), TimePeriod.getCustom(900));
+			new WaitUntil(waitConditions, TimePeriod.getCustom(1020));
 		}
 		new WaitUntil(new ServerHasState(this, resultState), timeout);
-		waitForProblemDialog(MULTIPLE_PROBLEMS_DIALOG, menuItem, TimePeriod.DEFAULT);
+		waitForProblemDialog(waitConditions, menuItem, TimePeriod.DEFAULT);
 		new WaitWhile(new SystemJobIsRunning(new JobMatcher("Inspecting CDK environment")), TimePeriod.DEFAULT);
 		log.debug("Operate server's state finished, the result server's state is: '" + getLabel().getState() + "'");
 	}
@@ -102,19 +121,26 @@ public class CDKServer extends DefaultServer {
 		return this.serverType.serverType();
 	}
 	
-	private void waitForProblemDialog(String shellName, String menuItem, TimePeriod timeout) {
+	private void waitForProblemDialog(WaitCondition wait, String menuItem, TimePeriod timeout) {
+		log.info("Waiting for " + wait.description() + " to be fullfiled");
 		try {
-			new WaitUntil(new ShellIsAvailable(shellName), timeout);
-			processProblemDialog(shellName, "Problem occured when trying to " 
+			new WaitUntil(wait, timeout);
+			processProblemDialog((Shell) wait.getResult(), "Problem occured when trying to " 
 								+ menuItem + " CDK server adapter");
 		} catch (WaitTimeoutExpiredException exc) {
-			log.info(shellName + " dialog did not appear on CDK server " + menuItem);
+			log.info(wait.description() + " was not fulfilled during CDK server " + menuItem);
 		}
 	}
 	
-	private void processProblemDialog(String shellName, String excMessage) {
-		CDKUtils.captureScreenshot("CDEServer#BeforeClosingProblemDialog");
-		new OkButton(new DefaultShell(shellName)).click();
+	private void processProblemDialog(Shell shell, String excMessage) {
+		log.info("Processing passed shell dialog " + new DefaultShell(shell).getText());
+		new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
+		new WaitWhile(new JobIsRunning(), TimePeriod.DEFAULT, false);
+		DefaultShell shellDialog = new DefaultShell(shell);
+		log.info("Shell could have changed after getting another error");
+		log.info("Actual shell dialog name is " + shellDialog.getText());
+		CDKUtils.captureScreenshot("CDEServer#ProblemDialog#" + shellDialog.getText());
+		new OkButton(shellDialog).click();
 		throw new CDKServerException(excMessage);
 	}
 	
@@ -124,70 +150,36 @@ public class CDKServer extends DefaultServer {
 			String message = "Server's state went back to " + actualState;
 			throw new CDKServerException(message);	
 		} catch (WaitTimeoutExpiredException exc) {
-			log.info("Server's state changed and did not go back to " + actualState);
+			log.info("Server's state changed to " + this.getLabel().getState() +
+					" and did not go back to " + actualState);
 		}
 	}
 	
-	private class ProblemOrCertificateDialogIsThrown extends AbstractWaitCondition {
-		
-		private WaitCondition sslDialog;
-		private boolean expectDialog;
-		private Map<String, WaitCondition> problemDialogs = new HashMap<String, WaitCondition>();
-		
-		public ProblemOrCertificateDialogIsThrown(boolean expectDialog, String... dialogNames) {
-			this.expectDialog = expectDialog;
-			this.sslDialog = new ShellIsAvailable(SSL_DIALOG_NAME);
-			for (String dialog : dialogNames) {
-				problemDialogs.put(dialog, new ShellIsAvailable(dialog));
-			}
+	/**
+	 * Methods waits for SSL Certificate dialog shell to appear and then confirms dialog, 
+	 * it might happen that certificate is already in place and no dialog is shown,
+	 * then WaitTimeoutExpiredException is logged but not raised
+	 */
+	private void confirmSSLCertificateDialog(Shell shell) {
+		try {
+			DefaultShell certificateDialog = new DefaultShell(shell);
+			certificateDialog.setFocus();
+			log.info("SSL Certificate Dialog appeared during " + getLabel().getState().toString());
+			new PushButton(certificateDialog, "Yes").click();
+			new WaitWhile(new ShellIsAvailable(certificateDialog));
+			setCertificateAccepted(true);
+		} catch (WaitTimeoutExpiredException ex) {
+			String message ="WaitTimeoutExpiredException occured when handling Certificate dialog. "
+					+ "Dialog has not been shown";
+			log.error(message);
+			throw new CDKServerException(message, ex);
 		}
-
-		@Override
-		public boolean test() {
-			if (expectDialog && sslDialog.test()) {
-				confirmSSLCertificateDialog();
-				return true;
-			}
-			for (Entry<String, WaitCondition> dialogName : problemDialogs.entrySet()) {
-				if (dialogName.getValue().test()) {
-					closeDialogAndThrowException(dialogName.getKey());
-				}
-			}
-			return false;
-		}
-		
-		private void closeDialogAndThrowException(String dialog) {
-			log.error("Problems dialog appeared, throwing an exception");
-			processProblemDialog(dialog, dialog + 
-					" occured during server adapter state was " + getLabel().getState());			
-		}
-		
-		@Override
-		public String description() {
-			return expectDialog ? " appears either Untrusted SSL Certificate dialog "
-					+ "or Multiple problems have occured dialog ..." 
-					: " appears Multiple problems have occured dialog ...";
-		}
-		
-		/**
-		 * Methods waits for SSL Certificate dialog shell to appear and then confirms dialog, 
-		 * it might happen that certificate is already in place and no dialog is shown,
-		 * then WaitTimeoutExpiredException is logged but not raised
-		 */
-		private void confirmSSLCertificateDialog() {
-			try {
-				DefaultShell certificateDialog = new DefaultShell(SSL_DIALOG_NAME);
-				certificateDialog.setFocus();
-				log.info("SSL Certificate Dialog appeared during " + getLabel().getState().toString());
-				new PushButton(certificateDialog, "Yes").click();
-				new WaitWhile(new ShellIsAvailable(SSL_DIALOG_NAME));
-				setCertificateAccepted(true);
-			} catch (WaitTimeoutExpiredException ex) {
-				String message ="WaitTimeoutExpiredException occured when handling Certificate dialog. "
-						+ "Dialog has not been shown";
-				log.error(message);
-				throw new CDKServerException(message, ex);
-			}
-		}
+	}
+	
+	
+	private void closeDialogAndThrowException(Shell dialog) {
+		log.error("Problems dialog appeared, throwing an exception");
+		processProblemDialog(dialog, dialog + 
+				" occured during server adapter state was " + getLabel().getState());		
 	}
 }

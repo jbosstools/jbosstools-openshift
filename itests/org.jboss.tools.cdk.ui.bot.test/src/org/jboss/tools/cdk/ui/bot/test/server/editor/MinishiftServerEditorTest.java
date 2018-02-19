@@ -47,7 +47,6 @@ public class MinishiftServerEditorTest extends CDKServerEditorAbstractTest {
 	
 	@BeforeClass
 	public static void setupMinishiftServerEditorTest() {
-		checkMinishiftHypervisorParameters();
 		if (MINISHIFT == null) {
 			MINISHIFT_PATH = MOCK_MINISHIFT170;
 		} else {

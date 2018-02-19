@@ -102,7 +102,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 			addCDKServer();
 		} catch (CDKServerException exc) {
 			log.error(exc.getMessage());
-			fail("Fails to create " + getServerAdapter() + " Server via New Server Wizard due to " + exc.getMessage());
+			fail("Fails to create " + getServerAdapter() + " Server via New Server Wizard due to " + exc.getCause().getMessage());
 		}
 	}
 	

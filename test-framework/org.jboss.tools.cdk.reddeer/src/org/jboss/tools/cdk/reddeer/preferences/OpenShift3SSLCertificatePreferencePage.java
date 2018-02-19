@@ -35,6 +35,7 @@ public class OpenShift3SSLCertificatePreferencePage extends PreferencePage {
 	}
 	
 	public void deleteAll() {
+		log.info("Deleting all accepted Untrusted SSL Certificates used by Opneshift 3 tooling");
 		DefaultTable table = new DefaultTable();
 		List<TableItem> tableItems = table.getItems();
 		if (tableItems.isEmpty()) {

@@ -62,7 +62,7 @@ public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 
 		// just check that default domain is choosen correctly
 		assertTrue(containerPage.getDomain().equalsIgnoreCase(CREDENTIALS_DOMAIN));
-		assertTrue(containerPage.getMinshiftProfileLabeledText().getText().equals("minishift"));
+		assertTrue(containerPage.getMinishiftProfile().getText().equals("minishift"));
 		
 		// needs to activate validator
 		containerPage.setMinishiftBinary(EXISTING_PATH);
