@@ -78,7 +78,7 @@ public class NewApplicationWizardHandlingTest extends AbstractTest {
 				DatastoreOS3.PROJECT1_DISPLAYED_NAME, StringUtils.EMPTY, connectionReq.getConnection());
 		OpenShift3NativeProjectUtils.getOrCreateProject(DatastoreOS3.PROJECT2,
 				StringUtils.EMPTY, StringUtils.EMPTY, connectionReq.getConnection());
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer();
 	}
 	
 	@Test

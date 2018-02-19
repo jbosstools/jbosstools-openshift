@@ -87,7 +87,7 @@ public class CreateApplicationOnBuilderImageTest extends AbstractTest {
 	public void testCreateApplicationBasedOnBuilderImage() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer();
 
 		BuilderImageApplicationWizardHandlingTest.nextToBuildConfigurationWizardPage();
 
@@ -106,11 +106,11 @@ public class CreateApplicationOnBuilderImageTest extends AbstractTest {
 
 		CreateApplicationFromTemplateTest.importApplicationAndVerify(projectName);
 
-		OpenShiftProject project = explorer.getOpenShift3Connection().getProject();
+		OpenShiftProject project = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject();
 		project.refresh();
 
 		new WaitWhile(new JobIsRunning(), TimePeriod.getCustom(120));
-		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD_CONFIG), TimePeriod.LONG, false);
+		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD_CONFIG, connectionReq.getConnection()), TimePeriod.LONG, false);
 
 		List<OpenShiftResource> buildConfig = project.getOpenShiftResources(Resource.BUILD_CONFIG);
 		assertTrue("There should be precisely 1 build config for created application, but there is following amount"
@@ -174,13 +174,13 @@ public class CreateApplicationOnBuilderImageTest extends AbstractTest {
 
 	@Test
 	public void validateJBIDE22704FromShellMenu() {
-		new NewOpenShift3ApplicationWizard().openWizardFromShellMenu();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromShellMenu();
 		validateJBIDE22704();
 	}
 
 	@Test
 	public void validateJBIDE22704FromCentral() {
-		new NewOpenShift3ApplicationWizard().openWizardFromCentral();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromCentral();
 		validateJBIDE22704();
 	}
 
@@ -189,7 +189,7 @@ public class CreateApplicationOnBuilderImageTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.reopen();
 
-		OpenShift3Connection connection = explorer.getOpenShift3Connection();
+		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.getProject().delete();
 
 		ProjectExplorer projectExplorer = new ProjectExplorer();

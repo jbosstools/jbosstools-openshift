@@ -44,6 +44,7 @@ import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -65,6 +66,9 @@ public class ImportApplicationTest extends AbstractTest {
 	public static String PROJECT_NAME = "jboss-helloworld";
 	
 	private static final String GIT_REPO_DIRECTORY = "target/git_repo";
+	
+	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
 	
 	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;
@@ -91,9 +95,9 @@ public class ImportApplicationTest extends AbstractTest {
 		explorer.open();
 		
 		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD_CONFIG,(Matcher<String>) null, ResourceState.UNSPECIFIED,
-				projectReq.getProjectName()), TimePeriod.LONG);
+				projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.LONG);
 		
-		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getOpenShiftResources(Resource.BUILD_CONFIG).get(0).select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getOpenShiftResources(Resource.BUILD_CONFIG).get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.IMPORT_APPLICATION).select();
 		
 		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.IMPORT_APPLICATION), TimePeriod.LONG);

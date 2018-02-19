@@ -13,8 +13,11 @@ package org.jboss.tools.openshift.ui.bot.test;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.exception.CoreLayerException;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShift3Connection;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
@@ -28,13 +31,18 @@ import org.junit.runner.RunWith;
  */
 
 @RunWith(RedDeerSuite.class)
+@RequiredBasicConnection
 public abstract class AbstractBotTests {
+
+
+	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
 	
 	@AfterClass
 	public static void cleanUp() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
-		OpenShift3Connection connection = explorer.getOpenShift3Connection();
+		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
 
 		if (connection != null) {
 			for (OpenShiftProject project : connection.getAllProjects()) {

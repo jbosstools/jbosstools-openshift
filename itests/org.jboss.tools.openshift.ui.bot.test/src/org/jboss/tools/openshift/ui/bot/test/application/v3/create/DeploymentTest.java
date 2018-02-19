@@ -27,6 +27,7 @@ import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -46,6 +47,9 @@ import org.junit.runner.RunWith;
 public class DeploymentTest extends AbstractTest {
 
 	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
+	
+	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;
 
 	@Test
@@ -53,22 +57,22 @@ public class DeploymentTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 
 		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.UNSPECIFIED,
-				projectReq.getProjectName()), TimePeriod.DEFAULT, false);
+				projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.DEFAULT, false);
 
 		try {
-			new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.COMPLETE, projectReq.getProjectName()),
+			new WaitUntil(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.COMPLETE, projectReq.getProjectName(), connectionReq.getConnection()),
 					TimePeriod.getCustom(600), true);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("There should be a successful build of an application, but there is not.");
 		}
 
 		try {
-			new WaitUntil(new AmountOfResourcesExists(Resource.POD, 2, projectReq.getProjectName()), TimePeriod.getCustom(60), true);
+			new WaitUntil(new AmountOfResourcesExists(Resource.POD, 2, projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.getCustom(60), true);
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("There should be precisely 2 pods. One of the build and one of an running application.");
 		}
 
-		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getOpenShiftResources(Resource.ROUTE).get(0).select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getOpenShiftResources(Resource.ROUTE).get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.SHOW_IN_WEB_BROWSER).select();
 
 		try {

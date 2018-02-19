@@ -217,16 +217,15 @@ public class OpenShiftExplorerView extends WorkbenchView {
 	}
 
 	/**
-	 * Gets default OpenShift 3 connection, which has specified server and user name
-	 * in {@link DatastoreOS3} through system properties openshift.server and
-	 * openshift.username.
+	 * Gets default OpenShift 3 connection. OpenShift server and username/password
+	 * or token are specified in DatastoreOS3 through system properties
+	 * openshift.server, openshift.username, openshift.password and openshift.token.
+	 * 
+	 * @param connection
+	 *            connection to OpenShift
 	 * 
 	 * @return OpenShift 3 connection
 	 */
-	public OpenShift3Connection getOpenShift3Connection() {
-		return getOpenShift3Connection(DatastoreOS3.SERVER, DatastoreOS3.USERNAME);
-	}
-
 	public OpenShift3Connection getOpenShift3Connection(Connection connection) {
 		return new OpenShift3Connection(getConnectionItem(connection.getHost(), connection.getUsername()));
 	}
@@ -241,14 +240,13 @@ public class OpenShiftExplorerView extends WorkbenchView {
 		return new OpenShift3Connection(getConnectionItem(server, username));
 	}
 
-	public boolean hasOpenShift3Connection() {
-		return getConnectionItem(DatastoreOS3.SERVER, DatastoreOS3.USERNAME) != null;
-	}
-
 	private TreeItem getConnectionItem(String server, String username) {
 		open();
+		if (username == null) {
+			username = TreeViewerHandler.getInstance().getNonStyledText(new DefaultTree().getItems().get(0));
+		}
 		TreeItem connectionItem = treeViewerHandler.getTreeItem(new DefaultTree(), username);
-		if (server != null) {
+		if (server != null && DatastoreOS3.AUTH_METHOD.equals(AuthenticationMethod.OAUTH)) {
 			if (treeViewerHandler.getStyledTexts(connectionItem)[0].equals(server)) {
 				return connectionItem;
 			} else {

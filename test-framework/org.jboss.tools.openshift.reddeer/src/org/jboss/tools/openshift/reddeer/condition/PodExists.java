@@ -19,6 +19,7 @@ import org.eclipse.reddeer.common.util.ResultRunnable;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.swt.widgets.TreeItem;
 import org.hamcrest.Matcher;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.Service;
@@ -39,22 +40,23 @@ public class PodExists extends AbstractWaitCondition{
 	private Service service;
 	private Matcher<String>[] matchers;
 	private TreeItem serviceItem;
+
 	
 	@SuppressWarnings("unchecked")
-	public PodExists(String serviceName, String podName) {
-		this(serviceName, new WithTextMatcher(podName));
+	public PodExists(Connection connection, String serviceName, String podName) {
+		this(connection, serviceName, new WithTextMatcher(podName));
 	}
 	
 	@SuppressWarnings("unchecked")
-	public PodExists(String serviceName, Matcher<String>... podNameMatchers) {
-		this(DatastoreOS3.PROJECT1_DISPLAYED_NAME, serviceName, podNameMatchers);
+	public PodExists(Connection connection, String serviceName, Matcher<String>... podNameMatchers) {
+		this(connection, DatastoreOS3.PROJECT1_DISPLAYED_NAME, serviceName, podNameMatchers);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public PodExists(String project, String serviceName, Matcher<String>... podNameMatchers) {
+	public PodExists(Connection connection, String project, String serviceName, Matcher<String>... podNameMatchers) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		matchers = podNameMatchers;
-		service = explorer.getOpenShift3Connection().getProject(project).
+		service = explorer.getOpenShift3Connection(connection).getProject(project).
 				getService(serviceName);
 		service.refresh();
 		service.expand();

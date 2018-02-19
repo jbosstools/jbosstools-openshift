@@ -68,7 +68,7 @@ public class DeleteProjectTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
 
-		OpenShift3Connection connection = explorer.getOpenShift3Connection();
+		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.getProject(PROJECT_NAME).delete();
 
 		projectExists = false;
@@ -83,7 +83,7 @@ public class DeleteProjectTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
 
-		OpenShift3Connection connection = explorer.getOpenShift3Connection();
+		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.MANAGE_OS_PROJECTS).select();
 

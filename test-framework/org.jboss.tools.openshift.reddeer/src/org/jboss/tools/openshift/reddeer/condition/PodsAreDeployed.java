@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
 import org.jboss.tools.openshift.reddeer.view.resources.OpenShiftProject;
@@ -53,8 +54,8 @@ public class PodsAreDeployed extends AbstractWaitCondition {
 				podAmountValue);
 	}
 
-	public static int getNumberOfCurrentReplicas(String project, String replicationControllerName) {
-		return getReplicas(getReplicasInfo(project, replicationControllerName));
+	public static int getNumberOfCurrentReplicas(Connection connection, String project, String replicationControllerName) {
+		return getReplicas(getReplicasInfo(connection, project, replicationControllerName));
 	}
 
 	public static int getNumberOfCurrentReplicas(OpenShiftProject project, String replicationControllerName) {
@@ -69,8 +70,8 @@ public class PodsAreDeployed extends AbstractWaitCondition {
 		return getReplicasInfo(new OpenShiftExplorerView().getOpenShift3Connection(server, username).getProject(project), replicationControllerName);
 	}
 
-	public static String getReplicasInfo(String project, String replicationControllerName) { 
-		return getReplicasInfo(new OpenShiftExplorerView().getOpenShift3Connection().getProject(project), replicationControllerName);
+	public static String getReplicasInfo(Connection connection, String project, String replicationControllerName) { 
+		return getReplicasInfo(new OpenShiftExplorerView().getOpenShift3Connection(connection).getProject(project), replicationControllerName);
 	}
 
 	private static int getReplicas(String replicaInfo) {

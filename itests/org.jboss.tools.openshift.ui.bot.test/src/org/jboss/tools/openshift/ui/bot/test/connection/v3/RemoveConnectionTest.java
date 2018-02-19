@@ -14,6 +14,7 @@ import static org.junit.Assert.assertFalse;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -22,6 +23,7 @@ import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
@@ -37,13 +39,16 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 public class RemoveConnectionTest extends AbstractTest {
 	
+	@InjectRequirement
+	private OpenShiftConnectionRequirement connectionReq;
+	
 	private OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 	
 	@Test
 	public void testRemoveConnection() {
 		explorer.open();
 		
-		explorer.getOpenShift3Connection().select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.DELETE_CONNECTION).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.REMOVE_CONNECTION);
@@ -54,6 +59,6 @@ public class RemoveConnectionTest extends AbstractTest {
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		
 		assertFalse("Connection is still presented in OpenShift explorer",
-				explorer.connectionExists(DatastoreOS3.USERNAME, DatastoreOS3.SERVER));
+				explorer.connectionExists(connectionReq.getConnection().getUsername(), DatastoreOS3.SERVER));
 	}
 }

@@ -79,7 +79,7 @@ public class TemplateParametersTest extends AbstractTest {
 	public void openTemplateParametersWizardPage() {
 		OpenShift3NativeProjectUtils.getOrCreateProject(DatastoreOS3.PROJECT1,
 				DatastoreOS3.PROJECT1_DISPLAYED_NAME, StringUtils.EMPTY, connectionReq.getConnection());
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer();
 		new DefaultTree().selectItems(new DefaultTreeItem(OpenShiftLabel.Others.EAP_TEMPLATE));
 		
 		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.DEFAULT);

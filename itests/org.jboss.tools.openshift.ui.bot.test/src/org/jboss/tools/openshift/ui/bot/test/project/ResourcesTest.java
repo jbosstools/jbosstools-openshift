@@ -44,7 +44,7 @@ public class ResourcesTest extends AbstractTest {
 	public void testResourcesExistence() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
-		OpenShiftProject project = explorer.getOpenShift3Connection().getProject(DatastoreOS3.TEST_PROJECT);
+		OpenShiftProject project = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(DatastoreOS3.TEST_PROJECT);
 		project.expand();
 		TreeItem projectItem = project.getTreeItem();
 

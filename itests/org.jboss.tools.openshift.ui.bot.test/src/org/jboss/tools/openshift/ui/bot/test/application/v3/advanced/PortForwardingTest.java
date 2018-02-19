@@ -19,6 +19,8 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
+import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.api.Table;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
@@ -28,10 +30,12 @@ import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.ApplicationPodIsRunning;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -44,13 +48,19 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@OpenPerspective(value=JBossPerspective.class)
+@RunWith(RedDeerSuite.class)
 @OCBinary
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
 public class PortForwardingTest extends AbstractTest {
+	
+	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
 
 	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;
@@ -141,7 +151,7 @@ public class PortForwardingTest extends AbstractTest {
 	}
 	
 	private void openPortForwardingDialog() {
-		OpenShift3Connection openShift3Connection = new OpenShiftExplorerView().getOpenShift3Connection();
+		OpenShift3Connection openShift3Connection = new OpenShiftExplorerView().getOpenShift3Connection(connectionReq.getConnection());
 		ApplicationPodIsRunning applicationPodIsRunning = new ApplicationPodIsRunning(openShift3Connection.getProject(projectReq.getProjectName()));
 		new WaitUntil(applicationPodIsRunning, TimePeriod.LONG);
 		

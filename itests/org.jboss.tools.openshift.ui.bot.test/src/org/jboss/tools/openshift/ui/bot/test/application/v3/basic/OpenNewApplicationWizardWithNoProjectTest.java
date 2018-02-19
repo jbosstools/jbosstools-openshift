@@ -22,6 +22,7 @@ import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.eclipse.ui.views.log.LogMessage;
 import org.eclipse.reddeer.eclipse.ui.views.log.LogView;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
@@ -44,8 +45,8 @@ import org.eclipse.reddeer.workbench.impl.shell.WorkbenchShell;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
-import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.TestUtils;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
@@ -63,6 +64,9 @@ import org.junit.runner.RunWith;
 @CleanConnection
 public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 
+	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
+	
 	private String projectName;
 
 	@Before
@@ -85,7 +89,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		
 		for (String comboItem: new DefaultCombo(0).getItems()) {
-			if (comboItem.contains(DatastoreOS3.USERNAME) && comboItem.contains(DatastoreOS3.SERVER)) {
+			if (comboItem.contains(connectionReq.getUsername()) && comboItem.contains(connectionReq.getHost())) {
 				new DefaultCombo(0).setSelection(comboItem);
 				break;
 			}
@@ -122,7 +126,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		
 		for (String comboItem: new DefaultCombo(0).getItems()) {
-			if (comboItem.contains(DatastoreOS3.USERNAME) && comboItem.contains(DatastoreOS3.SERVER)) {
+			if (comboItem.contains(connectionReq.getUsername()) && comboItem.contains(connectionReq.getHost())) {
 				new DefaultCombo(0).setSelection(comboItem);
 				break;
 			}
@@ -153,7 +157,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		explorer.reopen();
 		
 		OpenShift3Connection connection = 
-				explorer.getOpenShift3Connection();
+				explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_OS3_APPLICATION).select();
 		
@@ -188,7 +192,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		explorer.reopen();
 		
 		OpenShift3Connection connection = 
-				explorer.getOpenShift3Connection();
+				explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_OS3_APPLICATION).select();;
 		
@@ -222,7 +226,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 	
 	@After
 	public void deleteTmpProject() {
-		OpenShift3Connection connection = new OpenShiftExplorerView().getOpenShift3Connection();
+		OpenShift3Connection connection = new OpenShiftExplorerView().getOpenShift3Connection(connectionReq.getConnection());
 		connection.refresh();
 		
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
@@ -237,7 +241,7 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
 		
-		OpenShift3Connection connection = explorer.getOpenShift3Connection();
+		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.createNewProject();
 		connection.createNewProject2();
 	}

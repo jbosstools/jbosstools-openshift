@@ -20,6 +20,7 @@ import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
@@ -35,6 +36,7 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -53,11 +55,14 @@ import org.junit.runner.RunWith;
 @RequiredBasicConnection
 public class HandleCustomTemplateTest extends AbstractTest {
 
+	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
+	
 	@Before
 	public void setUp() {
 		// If project does not exists, e.g. something went south in recreation earlier, create it
-		if (!new OpenShiftProjectExists(DatastoreOS3.PROJECT1_DISPLAYED_NAME).test()) {
-			new OpenShiftExplorerView().getOpenShift3Connection().createNewProject();
+		if (!new OpenShiftProjectExists(DatastoreOS3.PROJECT1_DISPLAYED_NAME, connectionReq.getConnection()).test()) {
+			new OpenShiftExplorerView().getOpenShift3Connection(connectionReq.getConnection()).createNewProject();
 		}
 	}
 	
@@ -69,7 +74,7 @@ public class HandleCustomTemplateTest extends AbstractTest {
 	}
 	
 	private void assertTemplateIsUsableInApplicationWizard() {
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer();
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer();
 		
 		try {
 			new DefaultTreeItem("helloworld-sample (instant-app) - " + DatastoreOS3.PROJECT1);
@@ -87,7 +92,7 @@ public class HandleCustomTemplateTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
 		
-		explorer.getOpenShift3Connection().getProject().select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject().select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_RESOURCE).select();
 		
 		new DefaultShell(OpenShiftLabel.Shell.NEW_RESOURCE);
@@ -106,7 +111,7 @@ public class HandleCustomTemplateTest extends AbstractTest {
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_RESOURCE));
 		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 		
-		List<OpenShiftResource> templates = explorer.getOpenShift3Connection().getProject().
+		List<OpenShiftResource> templates = explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject().
 				getOpenShiftResources(Resource.TEMPLATE);
 		assertTrue("There should be precisely 1 created template for the project.",
 				templates.size() > 0);
@@ -121,15 +126,15 @@ public class HandleCustomTemplateTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.reopen();
 		
-		OpenShift3Connection connection  = explorer.getOpenShift3Connection();
+		OpenShift3Connection connection  = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.getProject().delete();
 		
 		try {
-			new WaitWhile(new OpenShiftProjectExists());
+			new WaitWhile(new OpenShiftProjectExists(connectionReq.getConnection()));
 		} catch (WaitTimeoutExpiredException ex) {
 			connection.refresh();
 		
-			new WaitWhile(new OpenShiftProjectExists(), TimePeriod.getCustom(5));
+			new WaitWhile(new OpenShiftProjectExists(connectionReq.getConnection()), TimePeriod.getCustom(5));
 		}
 		
 		connection.createNewProject();

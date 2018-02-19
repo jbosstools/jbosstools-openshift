@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.ui.bot.test.application.v3.advanced;
 
 import static org.junit.Assert.assertTrue;
-
 import static org.junit.Assert.fail;
 
 import org.eclipse.reddeer.common.exception.RedDeerException;
@@ -35,6 +34,7 @@ import org.jboss.tools.openshift.reddeer.condition.OpenShiftProjectExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
@@ -61,6 +61,9 @@ import org.junit.runner.RunWith;
 		name = DatastoreOS3.TEST_PROJECT)
 @RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
 public class EditResourcesTest extends AbstractTest {
+
+	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
 	
 	@InjectRequirement
 	private OpenShiftProjectRequirement requiredProject;
@@ -141,7 +144,7 @@ public class EditResourcesTest extends AbstractTest {
 	
 	private OpenShiftResource getBuildConfig() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		return explorer.getOpenShift3Connection().getProject(DatastoreOS3.TEST_PROJECT).
+		return explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(DatastoreOS3.TEST_PROJECT).
 				getOpenShiftResources(Resource.BUILD_CONFIG).get(0);
 	}
 
@@ -181,15 +184,15 @@ public class EditResourcesTest extends AbstractTest {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.reopen();
 		
-		OpenShift3Connection connection  = explorer.getOpenShift3Connection();
+		OpenShift3Connection connection  = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.getProject().delete();
 		
 		try {
-			new WaitWhile(new OpenShiftProjectExists());
+			new WaitWhile(new OpenShiftProjectExists(connectionReq.getConnection()));
 		} catch (WaitTimeoutExpiredException ex) {
 			connection.refresh();
 		
-			new WaitWhile(new OpenShiftProjectExists(), TimePeriod.getCustom(5));
+			new WaitWhile(new OpenShiftProjectExists(connectionReq.getConnection()), TimePeriod.getCustom(5));
 		}
 		
 		connection.createNewProject();

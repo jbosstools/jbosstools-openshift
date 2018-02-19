@@ -107,7 +107,8 @@ public class DebuggingEAPAppTest extends AbstractTest {
 	private static OpenShiftProjectRequirement projectReq;
 
 	@InjectRequirement
-	private OpenShiftConnectionRequirement requiredConnection;
+	private static OpenShiftConnectionRequirement connectionReq;
+	
 	private static ServerAdapter serverAdapter;
 
 	@BeforeClass
@@ -390,7 +391,7 @@ public class DebuggingEAPAppTest extends AbstractTest {
 				try {
 					requestResponse = null;
 					URL url = new URL(String.format("http://eap-app-%s.%s.nip.io/HelloWorld",
-							projectReq.getProjectName(), getIpFromHostURL(requiredConnection.getHost())));
+							projectReq.getProjectName(), getIpFromHostURL(connectionReq.getHost())));
 					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 					connection.connect();
 					while (connection.getResponseCode() == 404 || connection.getResponseCode() == 503
@@ -436,8 +437,8 @@ public class DebuggingEAPAppTest extends AbstractTest {
 
 	private static void createServerAdapter() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).refresh();
-		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getServicesWithName("eap-app").get(0)
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).refresh();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getServicesWithName("eap-app").get(0)
 				.createServerAdapter();
 	}
 

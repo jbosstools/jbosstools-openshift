@@ -144,7 +144,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	@Test
 	public void createApplicationFromLocalWorkspaceTemplate() {
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
 		new PushButton(OpenShiftLabel.Button.BROWSE_WORKSPACE).click();
 
@@ -168,7 +168,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	@Test
 	public void createApplicationFromLocalFileSystemTemplate() {
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
 		new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).setText(
 				TESTS_PROJECT_LOCATION + File.separator + "eap64-basic-s2i.json");
@@ -182,7 +182,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	@Test
 	public void createApplicationFromTemplateProvidedByURL() {
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
 		new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).setText(URL);
 		
@@ -195,7 +195,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	@Test
 	public void testCreateApplicationFromServerTemplate() {
-		new NewOpenShift3ApplicationWizard().openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
+		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTree().selectItems(new DefaultTreeItem(OpenShiftLabel.Others.EAP_TEMPLATE));
 
 		completeApplicationCreationAndVerify(kitchensinkProject);
@@ -294,13 +294,13 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 	private void verifyCreatedApplication() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
-		OpenShiftProject project = explorer.getOpenShift3Connection()
+		OpenShiftProject project = explorer.getOpenShift3Connection(connectionReq.getConnection())
 				.getProject(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		project.refresh();
 
 		new WaitWhile(new JobIsRunning(), TimePeriod.getCustom(120));
 		new WaitUntil(new OpenShiftResourceExists(Resource.BUILD_CONFIG, (Matcher<String>) null,
-				ResourceState.UNSPECIFIED, DatastoreOS3.PROJECT1_DISPLAYED_NAME), TimePeriod.LONG, false);
+				ResourceState.UNSPECIFIED, DatastoreOS3.PROJECT1_DISPLAYED_NAME, connectionReq.getConnection()), TimePeriod.LONG, false);
 
 		List<OpenShiftResource> buildConfig = project.getOpenShiftResources(Resource.BUILD_CONFIG);
 		assertTrue("There should be precisely 1 build config for created application, but there is following amount"

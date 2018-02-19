@@ -34,6 +34,7 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.condition.TreeIsAvailable;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 
@@ -55,8 +56,8 @@ public class TemplatesCreator {
 	 * @param username user name
 	 * @param project project
 	 */
-	public TemplatesCreator() {
-		this(false);
+	public TemplatesCreator(Connection connection) {
+		this(connection, false);
 	}
 
 	/**
@@ -69,12 +70,12 @@ public class TemplatesCreator {
 	 * @param project project
 	 * @param openFromShellMenu open wizard from shell menu, if false, opens it from OpenShift explorer
 	 */
-	public TemplatesCreator(boolean openFromShellMenu) {
-		this(null, openFromShellMenu);
+	public TemplatesCreator(Connection connection, boolean openFromShellMenu) {
+		this(connection, null, openFromShellMenu);
 	}
 
-	public TemplatesCreator(String project, boolean openFromShellMenu) {
-		wizard = new NewOpenShift3ApplicationWizard();
+	public TemplatesCreator(Connection connection, String project, boolean openFromShellMenu) {
+		wizard = new NewOpenShift3ApplicationWizard(connection);
 		
 		if (openFromShellMenu) {
 			wizard.openWizardFromShellMenu(project);

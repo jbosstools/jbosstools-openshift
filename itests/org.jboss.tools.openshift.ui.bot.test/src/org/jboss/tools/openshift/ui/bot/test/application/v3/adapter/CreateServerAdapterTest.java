@@ -49,6 +49,7 @@ import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement.RequiredBasicConnection;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftResources;
@@ -84,13 +85,16 @@ public class CreateServerAdapterTest extends AbstractTest  {
 	private static final String GIT_REPO_DIRECTORY = "target/git_repo";
 
 	@InjectRequirement
+	private static OpenShiftConnectionRequirement connectionReq;
+	
+	@InjectRequirement
 	private static OpenShiftProjectRequirement projectReq;
 
 	@BeforeClass
 	public static void waitTillApplicationIsRunning() {
 		new WaitWhile(new OpenShiftResourceExists(Resource.BUILD, "eap-app-1", ResourceState.RUNNING,
-				projectReq.getProjectName()), TimePeriod.getCustom(600));
-		new WaitUntil(new AmountOfResourcesExists(Resource.POD, 2, projectReq.getProjectName()), TimePeriod.LONG,
+				projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.getCustom(600));
+		new WaitUntil(new AmountOfResourcesExists(Resource.POD, 2, projectReq.getProjectName(), connectionReq.getConnection()), TimePeriod.LONG,
 				false);
 
 		cloneGitRepoAndImportProject();
@@ -155,7 +159,7 @@ public class CreateServerAdapterTest extends AbstractTest  {
 	@Test
 	public void testCreateOpenShift3ServerAdapterViaOpenShiftExplorerView() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		explorer.getOpenShift3Connection().getProject(projectReq.getProjectName()).getService("eap-app").select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getService("eap-app").select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
 
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);

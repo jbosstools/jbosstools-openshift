@@ -41,6 +41,7 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.common.reddeer.utils.StackTraceUtils;
+import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.reddeer.enums.AuthenticationMethod;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
@@ -53,6 +54,7 @@ import org.jboss.tools.openshift.reddeer.wizard.v3.AuthenticationMethodSection;
 import org.jboss.tools.openshift.reddeer.wizard.v3.BasicAuthenticationSection;
 import org.jboss.tools.openshift.reddeer.wizard.v3.OpenShift3ConnectionWizard;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.AbstractTest;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -101,9 +103,9 @@ public class CreateNewConnectionTest extends AbstractTest {
 		
 		explorer.openConnectionShell();
 		try {
-			explorer.connectToOpenShift(DatastoreOS3.SERVER, null, DatastoreOS3.TOKEN, false, false, AuthenticationMethod.OAUTH, false);
+			explorer.connectToOpenShift(DatastoreOS3.SERVER, null, DatastoreOS3.TOKEN, false, false, AuthenticationMethod.OAUTH, true);
 		} catch (RedDeerException ex) {
-			fail("Creating an OpenShift v3 basic connection failed." + ex.getCause());
+			fail("Creating an OpenShift v3 OAuth connection failed." + ex.getCause());
 		}	
 		assertTrue("Connection does not exist in OpenShift Explorer view", 
 				explorer.connectionExists(DatastoreOS3.USERNAME));
@@ -124,6 +126,7 @@ public class CreateNewConnectionTest extends AbstractTest {
 	}
 	
 	@Test
+	@RunIf(conditionClass = ConnectionCredentialsExists.class)
 	public void invalidRegistryURLShouldReportErrorMessage() {
 		openConnectionWizardAndSetDefaultServer();
 		new LabeledCombo(OpenShiftLabel.TextLabels.PROTOCOL).setSelection(AuthenticationMethod.BASIC.toString());
@@ -149,6 +152,11 @@ public class CreateNewConnectionTest extends AbstractTest {
 		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER_TYPE)
 				.setSelection(OpenShiftLabel.Others.OPENSHIFT3);
 		new LabeledCombo(OpenShiftLabel.TextLabels.SERVER).setText(DatastoreOS3.SERVER);
+	}
+	
+	@AfterClass
+	public static void cleanUpAfterTest() {
+		ConnectionsRegistrySingleton.getInstance().clear();
 	}
 
 }

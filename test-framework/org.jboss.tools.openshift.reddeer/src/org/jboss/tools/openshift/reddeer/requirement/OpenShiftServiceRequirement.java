@@ -223,7 +223,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 		IReplicationController serviceRc = ResourceUtils.getReplicationControllerFor(service, rcs);
 		assertThat(serviceRc, not(nullValue()));
 		new WaitUntil(
-				new OpenShiftResourceExists(Resource.DEPLOYMENT, containsString(serviceRc.getName()), ResourceState.UNSPECIFIED, projectName)
+				new OpenShiftResourceExists(Resource.DEPLOYMENT, containsString(serviceRc.getName()), ResourceState.UNSPECIFIED, projectName, connection)
 				, TimePeriod.VERY_LONG);
 	}
 
