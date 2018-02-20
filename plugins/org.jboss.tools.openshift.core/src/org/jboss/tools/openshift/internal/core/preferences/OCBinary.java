@@ -114,7 +114,7 @@ public enum OCBinary {
 			Boolean override = (Boolean) c.getExtendedProperties().get(ICommonAttributes.OC_OVERRIDE_KEY);
 			if (Boolean.TRUE.equals(override)) {
 				String loc = (String) c.getExtendedProperties().get(ICommonAttributes.OC_LOCATION_KEY);
-				if (StringUtils.isEmpty(loc)) {
+				if (!StringUtils.isEmpty(loc)) {
 					return loc;
 				}
 			}
