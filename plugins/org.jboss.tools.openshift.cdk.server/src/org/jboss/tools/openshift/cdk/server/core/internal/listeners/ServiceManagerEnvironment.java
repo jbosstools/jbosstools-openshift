@@ -103,7 +103,7 @@ public class ServiceManagerEnvironment {
 		String defPass = null;
 		if( "openshift-dev".equals(user)) {
 			defPass = "devel";
-		} else {
+		} else if( "developer".equals(user)){
 			defPass = "developer";
 		}
 		String pass = env.containsKey(DOTCDK_AUTH_PASS) ? env.get(DOTCDK_AUTH_PASS) : defPass;
