@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2015 Red Hat, Inc. 
+ * Copyright (c) 2018 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -40,11 +40,8 @@ import org.jboss.tools.foundation.ui.credentials.ChooseCredentialComponent;
 import org.jboss.tools.foundation.ui.credentials.ICredentialCompositeListener;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 
-/*
- * I would love to remake this class to use a credentialing framework
- * So users can select the username and password from a central location
- */
 public class CDKCredentialSection extends ServerEditorSection {
+	private Section section;
 	private Button passCredentialsButton;
 	private SelectionListener passCredentialsListener;
 	private ChooseCredentialComponent credentialComposite;
@@ -64,19 +61,33 @@ public class CDKCredentialSection extends ServerEditorSection {
 	public void createSection(Composite parent) {
 		super.createSection(parent);
 		CDKServer cdkServer = (CDKServer) server.getOriginal().loadAdapter(CDKServer.class, new NullProgressMonitor());
-
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
+		Composite composite = createWidgets(parent, cdkServer, toolkit);
+		toolkit.paintBordersFor(composite);
+		section.setClient(composite);
+	}
 
-		Section section = toolkit.createSection(parent,
+	protected Composite createWidgets(Composite parent, CDKServer cdkServer, FormToolkit toolkit) {
+		Composite composite = initializeSectionWidget(parent, toolkit);
+		createChooseCredentialsWidgets(composite, toolkit);
+		createEnvironmentWidgets(composite, toolkit, cdkServer);
+		return composite;
+	}
+
+	protected Composite initializeSectionWidget(Composite parent, FormToolkit toolkit) {
+		section = toolkit.createSection(parent,
 				ExpandableComposite.TWISTIE | ExpandableComposite.EXPANDED | ExpandableComposite.TITLE_BAR);
 		section.setText("Credentials");
 		section.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_FILL));
 
 		Composite composite = toolkit.createComposite(section);
 		composite.setLayout(new GridLayout(3, false));
+		return composite;
+	}
 
+	protected void createChooseCredentialsWidgets(Composite composite, FormToolkit toolkit) {
 		passCredentialsButton = toolkit.createButton(composite, "Pass credentials to environment", SWT.CHECK);
-		passCredentialsButton.setSelection(cdkServer.getServer().getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false));
+		passCredentialsButton.setSelection(server.getAttribute(CDKServer.PROP_PASS_CREDENTIALS, false));
 		passCredentialsListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -92,7 +103,12 @@ public class CDKCredentialSection extends ServerEditorSection {
 				execute(new SetUsernameCommand(server));
 			}
 		});
+		GridDataFactory.generate(passCredentialsButton, new Point(3, 1));
+		credentialComposite.gridLayout(3);
 
+	}
+
+	protected void createEnvironmentWidgets(Composite composite, FormToolkit toolkit, CDKServer cdkServer) {
 		Label environmentVars = toolkit.createLabel(composite, "Environment Variables: ");
 
 		Label userEnvLabel = toolkit.createLabel(composite, "Username: ");
@@ -118,14 +134,9 @@ public class CDKCredentialSection extends ServerEditorSection {
 		envPassText.addModifyListener(envPassListener);
 
 		// Layout the widgets
-		GridDataFactory.generate(passCredentialsButton, new Point(3, 1));
-		credentialComposite.gridLayout(3);
 		GridDataFactory.generate(environmentVars, new Point(3, 1));
 		GridDataFactory.generate(envUserText, new Point(2, 1));
 		GridDataFactory.generate(envPassText, new Point(2, 1));
-
-		toolkit.paintBordersFor(composite);
-		section.setClient(composite);
 	}
 
 	private ChooseCredentialComponent createChooseCredentialComponent(Composite parent) {

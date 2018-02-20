@@ -23,6 +23,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.AbstractCDKPoller;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Poller;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPoller;
 
 public class CDK3ShutdownController extends AbstractCDKShutdownController {
@@ -57,13 +58,27 @@ public class CDK3ShutdownController extends AbstractCDKShutdownController {
 	}
 
 	protected String getShutdownArgs() {
+		IServer s = getServer();
+		CDKServer cdk = null;
+		if (s != null)
+			cdk = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
+
 		String profiles = CDK3LaunchController.getProfileString(getServer());
 		String cmd = profiles + "stop";
+
+		if (cdk != null) {
+			boolean skipUnregistration = cdk.skipUnregistration();
+			if (skipUnregistration) {
+				cmd += " --skip-unregistration";
+			}
+		}
+
 		return cmd;
 	}
 
 	protected Process call(IServer s, String cmd, String launchConfigName) throws CoreException, IOException {
-		return new CDKLaunchUtility().callMinishiftInteractive(getServer(), cmd, getServer().getName());
+		CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
+		return new CDKLaunchUtility().callMinishiftInteractive(getServer(), cmd, getServer().getName(), cdk.skipUnregistration());
 	}
 
 	@Override

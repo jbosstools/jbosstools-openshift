@@ -146,8 +146,8 @@ public class CDKLaunchController extends AbstractCDKLaunchController
 
 		CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		boolean passCredentials = cdkServer.passCredentials();
-
-		if (passCredentials) {
+		boolean skipReg = cdkServer.skipRegistration();
+		if (passCredentials && !skipReg) {
 			setBehaviourUserAndPassword(s, beh, cdkServer);
 		}
 
@@ -160,7 +160,8 @@ public class CDKLaunchController extends AbstractCDKLaunchController
 		}
 
 		String args = configuration.getAttribute(ATTR_ARGS, (String) null);
-		Process p = getProcess(s, beh, args);
+		CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
+		Process p = getProcess(s, beh, args, cdk.skipRegistration());
 		if (p == null) {
 			beh.setServerStopped();
 			throw new CoreException(
@@ -212,10 +213,11 @@ public class CDKLaunchController extends AbstractCDKLaunchController
 		beh.putSharedData(CDKServerBehaviour.PROP_CACHED_USER, user);
 	}
 
-	private Process getProcess(final IServer s, final ControllableServerBehavior beh, String args)
+	private Process getProcess(final IServer s, final ControllableServerBehavior beh, 
+			String args, boolean skipCreds)
 			throws CoreException {
 		try {
-			return new CDKLaunchUtility().callInteractive(s, args, getStartupLaunchName(s));
+			return new CDKLaunchUtility().callInteractive(s, args, getStartupLaunchName(s), skipCreds);
 		} catch (IOException ioe) {
 			CDKCoreActivator.pluginLog().logError(ioe);
 			beh.setServerStopped();

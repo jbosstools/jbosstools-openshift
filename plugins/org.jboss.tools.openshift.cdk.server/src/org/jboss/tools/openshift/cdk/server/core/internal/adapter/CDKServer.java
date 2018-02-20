@@ -44,6 +44,9 @@ public class CDKServer extends ServerDelegate {
 	public static final String PROP_USER_ENV_VAR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.env.user";
 	public static final String PROP_PASS_ENV_VAR = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.env.pass";
 
+	public static final String PROP_SKIP_REG = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.skip.registration";
+	public static final String PROP_SKIP_UNREG = "org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer.skip.unregistration";
+
 	public CDKServer() {
 	}
 
@@ -180,6 +183,14 @@ public class CDKServer extends ServerDelegate {
 
 	public String getPasswordEnvironmentKey() {
 		return getServer().getAttribute(CDKServer.PROP_PASS_ENV_VAR, CDKConstants.CDK_ENV_SUB_PASSWORD);
+	}
+
+	public boolean skipRegistration() {
+		return getServer().getAttribute(CDKServer.PROP_SKIP_REG, false);
+	}
+
+	public boolean skipUnregistration() {
+		return getServer().getAttribute(CDKServer.PROP_SKIP_UNREG, false);
 	}
 
 }

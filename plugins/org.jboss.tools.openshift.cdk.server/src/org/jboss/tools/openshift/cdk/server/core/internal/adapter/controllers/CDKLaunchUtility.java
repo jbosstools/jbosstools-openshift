@@ -49,23 +49,12 @@ import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookup
 import org.jboss.tools.openshift.internal.common.core.util.ThreadUtils;
 
 public class CDKLaunchUtility {
-	public ILaunchConfigurationWorkingCopy createExternalToolsLaunchConfig(IServer s, String args,
-			String launchConfigName) throws CoreException {
-		return setupLaunch(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
-	}
-
-	public ILaunchConfigurationWorkingCopy createExternalToolsVagrantLaunch(IServer s, String args,
-			String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
-		String commandLoc = VagrantBinaryUtility.getVagrantLocation();
-		return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
-	}
-
-	public ILaunchConfigurationWorkingCopy createExternalToolsMinishiftLaunch(IServer s, String args,
-			String launchConfigName, ILaunchConfiguration startupConfig) throws CoreException {
-		String commandLoc = MinishiftBinaryUtility.getMinishiftLocation();
-		return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
-	}
-
+	public static final int STARTUP = 0;
+	public static final int SHUTDOWN = 1;
+	public static final int OTHER = 2;
+	
+	
+	
 	private static final String[] getUserPass(IServer server) {
 		final CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		String user = cdkServer.getUsername();
@@ -79,12 +68,13 @@ public class CDKLaunchUtility {
 		return new String[] { user, pass };
 	}
 
-	private static Map<String, String> getEnvironment(IServer s, ILaunchConfiguration startupConfig)
+	private static Map<String, String> getEnvironment(IServer s, 
+			ILaunchConfiguration startupConfig, boolean skipCredentials)
 			throws CoreException {
 		final CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		// Set the environment flag
 		boolean passCredentials = cdkServer.passCredentials();
-		if (passCredentials) {
+		if (passCredentials && !skipCredentials) {
 			String[] userPass = getUserPass(s);
 			String userName = userPass[0];
 			String pass = userPass[1];
@@ -123,26 +113,13 @@ public class CDKLaunchUtility {
 		}
 	}
 
-	@Deprecated
-	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName,
-			ILaunchConfiguration startupConfig) throws CoreException {
-		String commandLoc = VagrantBinaryUtility.getVagrantLocation();
-		return setupLaunch(s, args, launchConfigName, startupConfig, commandLoc);
-	}
-
-	@Deprecated // Bad naming here
-	public ILaunchConfigurationWorkingCopy setupLaunch(IServer s, String args, String launchConfigName,
-			ILaunchConfiguration startupConfig, String commandLoc) throws CoreException {
-		return createExternalToolsLaunch(s, args, launchConfigName, startupConfig, commandLoc);
-	}
-
 	public ILaunchConfigurationWorkingCopy createExternalToolsLaunch(IServer s, String args, String launchConfigName,
-			ILaunchConfiguration startupConfig, String commandLoc) throws CoreException {
+			ILaunchConfiguration startupConfig, String commandLoc, boolean skipCredentials) throws CoreException {
 		ILaunchConfigurationWorkingCopy wc = findLaunchConfig(s, launchConfigName);
 		wc.setAttributes(startupConfig.getAttributes());
 		wc.setAttribute(ATTR_ARGS, args);
 		// Set the environment flag
-		Map<String, String> env = getEnvironment(s, startupConfig);
+		Map<String, String> env = getEnvironment(s, startupConfig, skipCredentials);
 		wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
 
 		if (commandLoc != null) {
@@ -200,39 +177,31 @@ public class CDKLaunchUtility {
 		CommandLocationLookupStrategy.get().ensureOnPath(env, new Path(rootCommand).removeLastSegments(1).toOSString());
 	}
 
-	public Process callInteractive(IServer s, String args, String launchConfigName) throws CoreException, IOException {
-		return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+	public Process callInteractive(IServer s, String args, String launchConfigName, boolean skipCredentials) throws CoreException, IOException {
+		return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()), skipCredentials);
 	}
 
-	public Process callInteractive(IServer s, String args, String launchConfigName, ILaunchConfiguration startupConfig)
+	public Process callInteractive(IServer s, String args, 
+			String launchConfigName, ILaunchConfiguration startupConfig, boolean skipCredentials)
 			throws CoreException, IOException {
-		Map<String, String> env = getEnvironment(s, startupConfig);
+		Map<String, String> env = getEnvironment(s, startupConfig, skipCredentials);
 		String vagrantcmdloc = VagrantBinaryUtility.getVagrantLocation(s);
 		File wd = CDKServerUtility.getWorkingDirectory(s);
 		Process p = callProcess(vagrantcmdloc, ArgsUtil.parse(args), wd, env, true);
 		return p;
 	}
 
-	public Process callMinishiftInteractive(IServer s, String args, String launchConfigName)
+	public Process callMinishiftInteractive(IServer s, String args, String launchConfigName, boolean skipCredentials)
 			throws CoreException, IOException {
-		return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+		return callInteractive(s, args, launchConfigName, s.getLaunchConfiguration(true, new NullProgressMonitor()), skipCredentials);
 	}
 
-	public Process callMinishiftConsole(IServer s, String args, String launchConfigName)
+	public Process callMinishiftConsole(IServer s, String args, String launchConfigName, boolean skipCredentials)
 			throws CoreException, IOException {
-		Map<String, String> env = getEnvironment(s, s.getLaunchConfiguration(true, new NullProgressMonitor()));
+		Map<String, String> env = getEnvironment(s, s.getLaunchConfiguration(true, new NullProgressMonitor()), skipCredentials);
 		String minishift = MinishiftBinaryUtility.getMinishiftLocation(s);
 		File wd = CDKServerUtility.getWorkingDirectory(s);
 		Process p = callProcess(minishift, ArgsUtil.parse(args), wd, env, false);
-		return p;
-	}
-
-	public Process callMinishiftInteractive(IServer s, String args, String launchConfigName,
-			ILaunchConfiguration startupConfig) throws CoreException, IOException {
-		Map<String, String> env = getEnvironment(s, startupConfig);
-		String minishiftCmdloc = MinishiftBinaryUtility.getMinishiftLocation(s);
-		File wd = JBossServerCorePlugin.getServerStateLocation(s).toFile();
-		Process p = callProcess(minishiftCmdloc, ArgsUtil.parse(args), wd, env, true);
 		return p;
 	}
 

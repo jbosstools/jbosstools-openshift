@@ -82,7 +82,7 @@ public class VagrantServiceManagerEnvironmentLoader extends ServiceManagerEnviro
 	}
 
 	protected Map<String, String> getEnv(IServer server) {
-		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server);
+		Map<String, String> env = CDKLaunchEnvironmentUtil.createEnvironment(server, false);
 		// Docs indicate any value here is fine, so no need to check for
 		// existing property
 		env.put("VAGRANT_NO_COLOR", "1");
