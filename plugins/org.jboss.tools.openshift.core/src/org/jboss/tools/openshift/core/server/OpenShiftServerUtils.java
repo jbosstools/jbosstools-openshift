@@ -45,6 +45,7 @@ import org.eclipse.wst.server.core.util.ProjectModule;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -159,15 +160,15 @@ public class OpenShiftServerUtils {
 
 	public static void updateServer(String serverName, String host, String connectionUrl, IResource resource,
 			String sourcePath, String podPath, IProject deployProject, String routeURL, String devmodeKey,
-			String debugPortKey, String debugPortValue, IServerWorkingCopy server) {
+			String debugPortKey, String debugPortValue, String profileId, IServerWorkingCopy server) {
 		String deployProjectName = ProjectUtils.getName(deployProject);
 		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(resource),
-				sourcePath, podPath, routeURL, devmodeKey, debugPortKey, debugPortValue, server);
+				sourcePath, podPath, routeURL, devmodeKey, debugPortKey, debugPortValue, profileId, server);
 	}
 
 	public static void updateServer(String serverName, String host, String connectionUrl, String deployProjectName,
 			String serviceId, String sourcePath, String podPath, String routeURL, String devmodeKey,
-			String debugPortKey, String debugPortValue, IServerWorkingCopy server) {
+			String debugPortKey, String debugPortValue, String profileId, IServerWorkingCopy server) {
 		updateServer(server);
 
 		server.setName(serverName);
@@ -182,6 +183,9 @@ public class OpenShiftServerUtils {
 		server.setAttribute(ATTR_DEVMODE_KEY, devmodeKey);
 		server.setAttribute(ATTR_DEBUG_PORT_KEY, debugPortKey);
 		server.setAttribute(ATTR_DEBUG_PORT_VALUE, debugPortValue);
+		if (!StringUtils.isEmpty(profileId)) {
+			ServerProfileModel.setProfile(server, profileId);
+		}
 	}
 
 	public static void updateServerAttribute(String attribute, String value, IServerAttributes server)
@@ -209,6 +213,7 @@ public class OpenShiftServerUtils {
 
 	private static void updateServer(IServerWorkingCopy server) {
 		server.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServer.OPENSHIFT3_MODE_ID);
+		server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
 		((ServerWorkingCopy) server).setAutoPublishSetting(Server.AUTO_PUBLISH_RESOURCE);
 		server.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, String.valueOf(Boolean.TRUE));
 		int webPort = 80;//TODO should we determine the webPort from the route?

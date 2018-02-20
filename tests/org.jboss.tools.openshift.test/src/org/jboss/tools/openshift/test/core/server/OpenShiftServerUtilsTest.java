@@ -20,6 +20,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +37,8 @@ import org.eclipse.wst.server.core.IServerAttributes;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
+import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
@@ -61,11 +65,11 @@ public class OpenShiftServerUtilsTest {
 	private IServerWorkingCopy serverWorkingCopy;
 
 	@Before
-	public void setUp() throws UnsupportedEncodingException, MalformedURLException {
+	public void setUp() throws UnsupportedEncodingException, MalformedURLException, CoreException {
 		this.connection = ResourceMocks.create3ProjectsConnection();
 		ConnectionsRegistrySingleton.getInstance().add(connection);
 
-		this.serverWorkingCopy = OpenShiftServerTestUtils.mockServerWorkingCopy();
+		this.serverWorkingCopy = spy(OpenShiftServerTestUtils.createOpenshift3ServerWorkingCopy("papa-smurf"));
 		this.server = OpenShiftServerTestUtils.mockServer(serverWorkingCopy, ResourceMocks.PROJECT2_SERVICES[1],
 				connection);
 
@@ -230,6 +234,74 @@ public class OpenShiftServerUtilsTest {
         // then
         Assert.assertEquals(WatchManager.KINDS.length, WatchManager.getInstance()._getWatches().size());
     }
+
+	@Test
+	public void shouldUpdateServer() throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		// given
+		String name = "gargamel";
+		String host = "smurf-village";
+		String connectionUrl = ConnectionURL.forURL("https://www.smurf.com/").toString();
+		String deployProjectName = "gargamel";
+		String sourcePath = "/jokeySmurf";
+		String podPath = "/surprise";
+		String serviceId = "magicCauldron";
+		String routeURL = connectionUrl + "/secretPath"; 
+		String devmodeKey = "papasmurf";
+		String debugPortKey = "magic";
+		String debugPortValue = "42";
+		String profileId = "azrael";
+		// when		
+		OpenShiftServerUtils.updateServer(
+				name,
+				host,
+				connectionUrl,
+				deployProjectName,
+				serviceId,
+				sourcePath,
+				podPath,
+				routeURL,
+				devmodeKey,
+				debugPortKey,
+				debugPortValue,
+				profileId,
+				serverWorkingCopy);
+		// then
+		verify(serverWorkingCopy, atLeastOnce()).setName(name);
+		verify(serverWorkingCopy, atLeastOnce()).setHost(host);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_CONNECTIONURL, connectionUrl);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_DEPLOYPROJECT, deployProjectName);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_SOURCE_PATH, sourcePath);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_POD_PATH, podPath);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_SERVICE, serviceId);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_ROUTE, routeURL);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_DEVMODE_KEY, devmodeKey);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_KEY, debugPortKey);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_DEBUG_PORT_VALUE, debugPortValue);
+		verify(serverWorkingCopy, atLeastOnce()).setAttribute(ServerProfileModel.SERVER_PROFILE_PROPERTY_KEY, profileId);
+	}
+
+	@Test
+	public void shouldNotUpdateServerProfileIfEmpty() throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		// given
+		String profileId = null;
+		// when		
+		OpenShiftServerUtils.updateServer(
+				"gargamel",
+				null,
+				null,
+				(String) null,
+				null,
+				null,
+				(String) null,
+				null,
+				null,
+				null,
+				null,
+				profileId,
+				serverWorkingCopy);
+		// then
+		verify(serverWorkingCopy, never()).setAttribute(ServerProfileModel.SERVER_PROFILE_PROPERTY_KEY, profileId);
+	}
 
 	private static IServer mockOS3Server(String name, String serviceName) {
 		IServer server = mockServer(name, OpenShiftServerUtils.getServerType());

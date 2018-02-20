@@ -24,7 +24,6 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
@@ -57,18 +56,19 @@ public class OpenShiftServerTestUtils {
 		IServerWorkingCopy workingCopy = createOpenshift3ServerWorkingCopy(name, profile, service, connection);
 		return workingCopy.save(false, null);
 	}
+	
+	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name) throws CoreException {
+		IServerType type = OpenShiftServerUtils.getServerType();
+		return type.createServer(name, null, null);
+	}
 
 	public static IServerWorkingCopy createOpenshift3ServerWorkingCopy(String name, String profile, IService service,
 			IOpenShiftConnection connection) throws CoreException, UnsupportedEncodingException, MalformedURLException {
-		IServerType type = OpenShiftServerUtils.getServerType();
-		IServerWorkingCopy wc = type.createServer(name, null, null);
+		IServerWorkingCopy wc = createOpenshift3ServerWorkingCopy(name);
 		String serviceId = service == null ? null : OpenShiftResourceUniqueId.get(service);
 		String connectionUrl = connection == null ? null : ConnectionURL.forConnection(connection).getUrl();
 		OpenShiftServerUtils.updateServer(name, "http://www.example.com", "dummy", connectionUrl, "dummy", serviceId,
-				"dummy", "dummy", "dummy", "dummy", "dummy", wc);
-		if (profile != null) {
-			ServerProfileModel.setProfile(wc, profile);
-		}
+				"dummy", "dummy", "dummy", "dummy", "dummy", profile, wc);
 		return wc;
 	}
 

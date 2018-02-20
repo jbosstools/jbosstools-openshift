@@ -437,20 +437,19 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		String devmodeKey = getDevmodeKey(useImageDevmodeKey, this.devmodeKey);
 		String debugPortKey = getDebugPortKey(useImageDebugPortKey, this.debugPortKey);
 		String debugPortValue = getDebugPortValue(useImageDebugPortValue, this.debugPortValue);
+		String profileId = getProfileId();
 
 		OpenShiftServerUtils.updateServer(serverName, host, connectionUrl, getResource(), sourcePath, podPath,
-				deployProject, routeURL, devmodeKey, debugPortKey, debugPortValue, server);
-		server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
-		ServerProfileModel.setProfile(server, getProfileId());
+				deployProject, routeURL, devmodeKey, debugPortKey, debugPortValue, profileId, server);
 
-		updateServer(connectionUrl, getResource(), sourcePath, routeURL, podPath, devmodeKey, debugPortKey,
+		updateServerProject(connectionUrl, getResource(), sourcePath, routeURL, podPath, devmodeKey, debugPortKey,
 				debugPortValue, deployProject);
 
 		updateModules(server);
 	}
 
 	// for testing purposes
-	protected void updateServer(String connectionUrl, IResource resource, String sourcePath, String routeURL,
+	protected void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String routeURL,
 			String podPath, String devmodeKey, String debugPortKey, String debugPortValue,
 			org.eclipse.core.resources.IProject deployProject) {
 		OpenShiftServerUtils.updateServerProject(connectionUrl, getResource(), sourcePath, podPath, routeURL,
