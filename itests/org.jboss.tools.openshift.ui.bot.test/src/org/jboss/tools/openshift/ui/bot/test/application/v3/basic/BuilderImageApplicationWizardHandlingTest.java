@@ -47,6 +47,7 @@ import org.jboss.tools.openshift.reddeer.wizard.page.EnvironmentVariableWizardPa
 import org.jboss.tools.openshift.reddeer.wizard.page.EnvironmentVariableWizardPage.EnvVar;
 import org.jboss.tools.openshift.reddeer.wizard.page.ResourceLabelsWizardPage;
 import org.jboss.tools.openshift.reddeer.wizard.v3.NewOpenShift3ApplicationWizard;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,7 +86,7 @@ public class BuilderImageApplicationWizardHandlingTest extends AbstractTest {
 	public void testCheckButtonsStateForBuildImage() {
 		selectBuilderImageAndAssertButtonsAvailability();
 		
-		new DefaultTreeItem(OpenShiftLabel.Others.EAP_TEMPLATE).select();
+		OpenShiftUtils.selectEAPTemplate();
 		
 		assertTrue("Next button should be enabled if EAP template was selected after build image.",
 				new NextButton().isEnabled());

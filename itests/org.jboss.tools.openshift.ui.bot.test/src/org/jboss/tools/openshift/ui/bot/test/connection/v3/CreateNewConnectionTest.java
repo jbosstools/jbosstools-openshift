@@ -113,7 +113,7 @@ public class CreateNewConnectionTest extends AbstractTest {
 	
 	@Test
 	@RunIf(conditionClass = ConnectionCredentialsExists.class)
-	public void shouldExtractTokenInBrowserWindowOAuth() {
+	public void shouldExtractTokenInBrowserWindow() {
 		openConnectionWizardAndSetDefaultServerOAuth();
 
 		String token = new AuthenticationTokenRetrival(DatastoreOS3.USERNAME, DatastoreOS3.PASSWORD).retrieveToken();

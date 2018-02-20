@@ -64,7 +64,7 @@ public class OpenShift3NativeProjectUtils {
 		request.setDescription(StringUtils.isEmpty(description) ? name : description);
 		
 		CreateProjectWaitCondition createProjectWaitCondition = new CreateProjectWaitCondition(connection, request);
-		new WaitUntil(createProjectWaitCondition, TimePeriod.LONG);
+		new WaitUntil(createProjectWaitCondition, TimePeriod.VERY_LONG);
 		IProject createdProject = createProjectWaitCondition.getProject();
 		
 		/**

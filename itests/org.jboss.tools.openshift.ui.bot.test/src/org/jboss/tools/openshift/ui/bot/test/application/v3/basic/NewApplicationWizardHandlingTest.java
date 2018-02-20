@@ -40,7 +40,6 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.tab.DefaultTabItem;
 import org.eclipse.reddeer.swt.impl.text.DefaultText;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
-import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
@@ -50,6 +49,7 @@ import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.v3.OpenShift3NativeProjectUtils;
 import org.jboss.tools.openshift.reddeer.wizard.v3.NewOpenShift3ApplicationWizard;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.jboss.tools.openshift.ui.bot.test.common.OpenshiftTestInFailureException;
 import org.junit.After;
 import org.junit.Before;
@@ -142,7 +142,7 @@ public class NewApplicationWizardHandlingTest extends AbstractTest {
 		assertDefinedResourcesButtonIsNotPresent();
 		
 		new DefaultTabItem(OpenShiftLabel.TextLabels.SERVER_TEMPLATE).activate();
-		new DefaultTree().selectItems(new DefaultTreeItem(OpenShiftLabel.Others.EAP_TEMPLATE));
+		OpenShiftUtils.selectEAPTemplate();
 		
 		assertTrue("Defines Resources button should be enabled if a server template is selected.", 
 				new PushButton(OpenShiftLabel.Button.DEFINED_RESOURCES).isEnabled());
@@ -189,8 +189,9 @@ public class NewApplicationWizardHandlingTest extends AbstractTest {
 		searchBar.setText("eap70-basic-s2i");
 		assertTrue("There should be precisely one tree item in a tree.",
 				new DefaultTree().getItems().size() == 1);
+		String templateLabel = new DefaultTree().getItems().get(0).getText();
 		assertTrue("There should be item representing basic EAP template in a tree but it is not there.",
-				new DefaultTree().getItems().get(0).getText().equals(OpenShiftLabel.Others.EAP_TEMPLATE));
+				templateLabel.equals(OpenShiftLabel.Others.EAP_TEMPLATE) || templateLabel.equals(OpenShiftLabel.Others.EAP_TEMPLATE_OLD));
 		
 		searchBar.setText("");
 		assertTrue("There should be more templates if search bar does not contain any search query", 
@@ -213,7 +214,7 @@ public class NewApplicationWizardHandlingTest extends AbstractTest {
 	@Test
 	public void testShowDefinedResourcesForServerTemplate() {
 		new DefaultTabItem(OpenShiftLabel.TextLabels.SERVER_TEMPLATE).activate();
-		new DefaultTree().selectItems(new DefaultTreeItem(OpenShiftLabel.Others.EAP_TEMPLATE));
+		OpenShiftUtils.selectEAPTemplate();
 		
 		verifyDefinedResourcesForTemplate();
 	}

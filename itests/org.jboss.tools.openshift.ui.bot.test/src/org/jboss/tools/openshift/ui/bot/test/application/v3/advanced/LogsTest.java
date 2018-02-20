@@ -27,7 +27,6 @@ import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequireme
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.hamcrest.core.StringStartsWith;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
-import org.jboss.tools.openshift.reddeer.condition.ConsoleHasSomeText;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
 import org.jboss.tools.openshift.reddeer.enums.Resource;
 import org.jboss.tools.openshift.reddeer.enums.ResourceState;
@@ -97,7 +96,7 @@ public class LogsTest extends AbstractTest {
 		pod.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.POD_LOG).select();
 
-		new WaitUntil(new ConsoleHasSomeText(), TimePeriod.DEFAULT);
+		new WaitUntil(new ConsoleHasText(), TimePeriod.DEFAULT);
 		new WaitUntil(new ConsoleHasNoChange(TimePeriod.getCustom(WAIT_CONSOLE_NO_CHANGE)), TimePeriod.VERY_LONG);
 
 		assertTrue("Console label is incorrect, it should contains project name and pod name.\n" + "but label is: " + consoleView.getConsoleLabel(),
@@ -118,7 +117,7 @@ public class LogsTest extends AbstractTest {
 		pod.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.BUILD_LOG).select();
 
-		new WaitUntil(new ConsoleHasSomeText(), TimePeriod.DEFAULT);
+		new WaitUntil(new ConsoleHasText(), TimePeriod.LONG);
 		new WaitUntil(new ConsoleHasNoChange(TimePeriod.getCustom(WAIT_CONSOLE_NO_CHANGE)), TimePeriod.VERY_LONG);
 
 		assertTrue("Console label is incorrect, it should contain project name and name of build pod.\n"

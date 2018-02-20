@@ -159,7 +159,8 @@ public class CreateServerAdapterTest extends AbstractTest  {
 	@Test
 	public void testCreateOpenShift3ServerAdapterViaOpenShiftExplorerView() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
-		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getService("eap-app").select();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).refresh();
+		explorer.getOpenShift3Connection(connectionReq.getConnection()).getProject(projectReq.getProjectName()).getServicesWithName("eap-app").get(0).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
 
 		new DefaultShell(OpenShiftLabel.Shell.SERVER_ADAPTER_SETTINGS);

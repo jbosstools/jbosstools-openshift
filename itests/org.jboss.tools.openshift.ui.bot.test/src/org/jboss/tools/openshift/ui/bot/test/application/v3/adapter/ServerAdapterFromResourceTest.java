@@ -183,6 +183,7 @@ public class ServerAdapterFromResourceTest extends AbstractTest  {
 	}
 	
 	private void newAdapterFromResource(Resource type, String name) {
+		project.refresh();
 		project.getOpenShiftResource(type, name).select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_ADAPTER_FROM_EXPLORER).select();
 		
