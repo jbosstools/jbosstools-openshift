@@ -23,6 +23,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourc
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.HandleCustomTemplateTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.ImportApplicationTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.InteligentDeleteResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.LogsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.OSExplorerResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.PortForwardingTest;
@@ -99,6 +100,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	
 	// Application handling
 	DeleteResourceTest.class, 
+	InteligentDeleteResourceTest.class,
 	OSExplorerResourceTest.class,
 	TriggerBuildTest.class, 
 	ImportApplicationTest.class,

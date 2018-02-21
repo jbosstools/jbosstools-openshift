@@ -22,6 +22,7 @@ import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
+import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.condition.ShellIsAvailable;
 import org.eclipse.reddeer.swt.impl.button.CancelButton;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
@@ -156,6 +157,7 @@ public class CreateResourcesTest extends AbstractTest  {
 		}
 
 		new DefaultShell(OpenShiftLabel.Shell.NEW_RESOURCE);
+		new WaitUntil(new ControlIsEnabled(new CancelButton()), TimePeriod.LONG);
 		new CancelButton().click();
 
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_RESOURCE));
