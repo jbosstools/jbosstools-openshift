@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * Copyright (c) 2015 Red Hat, Inc. 
+ * Copyright (c) 2015-2018 Red Hat, Inc. 
  * Distributed under license by Red Hat, Inc. All rights reserved. 
  * This program is made available under the terms of the 
  * Eclipse Public License v1.0 which accompanies this distribution, 
@@ -25,6 +25,7 @@ import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryVersionValidator.OCBinaryStatus;
 
 public enum OCBinary {
 
@@ -33,7 +34,7 @@ public enum OCBinary {
 	// The base name, without any suffixes applied
 	private static final String CMD_BASE_NAME = "oc";
 
-	// The default location on linux. 
+	// The default location on linux.
 	private static final String OC_DEFAULTLOCATION_LINUX = "/usr/bin/oc";
 
 	public static OCBinary getInstance() {
@@ -73,11 +74,11 @@ public enum OCBinary {
 
 	private CommandLocationBinary getLocationBinary() {
 		if (locationBinary == null) {
-			// CommandLocationBinary holds information for all platforms, 
-			// so we're just setting the name and default location for all platforms 
-			// where this we think we know this.  
+			// CommandLocationBinary holds information for all platforms,
+			// so we're just setting the name and default location for all platforms
+			// where this we think we know this.
 			// We also set the default platform to linux, so if the current platform
-			// has no custom logic, we can failover to linux logic. 
+			// has no custom logic, we can failover to linux logic.
 			locationBinary = new CommandLocationBinary(CMD_BASE_NAME);
 			locationBinary.addPlatformLocation(Platform.OS_LINUX, OC_DEFAULTLOCATION_LINUX);
 			locationBinary.setDefaultPlatform(Platform.OS_LINUX);
@@ -86,7 +87,7 @@ public enum OCBinary {
 	}
 
 	/**
-	 * Get the location of the workspace preference pointing to an oc install. 
+	 * Get the location of the workspace preference pointing to an oc install.
 	 * 
 	 * @return
 	 */
@@ -126,8 +127,10 @@ public enum OCBinary {
 	/**
 	 * Compute the error message for the OCBinary state and path.
 	 * 
-	 * @param valid if the oc binary is valid or not
-	 * @param location the location of the oc binary
+	 * @param valid
+	 *            if the oc binary is valid or not
+	 * @param location
+	 *            the location of the oc binary
 	 * @return the error message (may be null)
 	 */
 	public IStatus getStatus(IConnection connection, IProgressMonitor monitor) {
@@ -142,11 +145,21 @@ public enum OCBinary {
 		} else if (!new File(location).canExecute()) {
 			status = OpenShiftCoreActivator.statusFactory()
 					.errorStatus(NLS.bind("{0} does not have execute permissions.", location));
-		} else if (new OCBinaryVersionValidator(location).isCompatibleForPublishing(monitor)) {
-			status = Status.OK_STATUS;
 		} else {
-			status = OpenShiftCoreActivator.statusFactory()
-					.warningStatus(OpenShiftCoreMessages.OCBinaryLocationIncompatibleErrorMessage);
+			OCBinaryStatus ocStatus = new OCBinaryVersionValidator(location).getStatus(monitor);
+			switch (ocStatus) {
+			case OK:
+				status = Status.OK_STATUS;
+				break;
+			case OC_INCOMPATIBLE_FOR_RSYNC:
+				status = OpenShiftCoreActivator.statusFactory()
+						.warningStatus(OpenShiftCoreMessages.OCBinaryLocationIncompatibleErrorMessage);
+				break;
+			case OC_PATH_INCOMPATIBLE:
+				status = OpenShiftCoreActivator.statusFactory()
+						.warningStatus(NLS.bind(OpenShiftCoreMessages.OCBinaryLocationWithSpaceErrorMessage, location));
+				break;
+			}
 		}
 		return status;
 	}
