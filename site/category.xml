@@ -5,25 +5,27 @@
 	<category-def label="JBoss Tools OpenShift Nightly Build Update Site" name="site">
 		<description>JBoss Tools OpenShift Nightly Build Update Site: contains all features in this build.</description>
 	</category-def>
+	<feature id="org.jboss.tools.openshift.cdk.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.cdk.test.feature"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.egit.integration.feature"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.egit.integration.test.feature"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.cdk.test.feature"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.feature"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.test.feature"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.cdk.feature"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.js.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.integration.tests.feature"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.io.feature"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.io.test.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.js.feature"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.test.feature"><category name="site" /></feature>
 
 	<!-- Sources -->
+	<feature id="org.jboss.tools.openshift.cdk.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.cdk.test.feature.source"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.egit.integration.feature.source"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.egit.integration.test.feature.source"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.cdk.test.feature.source"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.feature.source"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.test.feature.source"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.cdk.feature.source"><category name="site" /></feature>
-	<feature id="org.jboss.tools.openshift.js.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.integration.tests.feature.source"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.io.feature.source"><category name="site" /></feature>
 	<feature id="org.jboss.tools.openshift.io.test.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.js.feature.source"><category name="site" /></feature>
+	<feature id="org.jboss.tools.openshift.test.feature.source"><category name="site" /></feature>
 
 </site>
