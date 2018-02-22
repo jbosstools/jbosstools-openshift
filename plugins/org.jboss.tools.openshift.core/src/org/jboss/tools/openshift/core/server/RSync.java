@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat Inc..
+ * Copyright (c) 2016-2018 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerConsoleWriter;
@@ -102,7 +103,7 @@ public class RSync {
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
 				final InputStream syncStream = rsyncable.sync(new PodPeer(podPath, pod), new LocalPeer(destinationPath),
-						OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
+						getOptions());
 				asyncWriteLogs(syncStream, consoleWriter);
 				try {
 					rsyncable.await();
@@ -116,6 +117,16 @@ public class RSync {
 		}, null);
 	}
 
+	protected OpenShiftBinaryOption[] getOptions() {
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			return new OpenShiftBinaryOption[] { OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER,
+					OpenShiftBinaryOption.SKIP_TLS_VERIFY, OpenShiftBinaryOption.NO_PERMS };
+		} else {
+			return new OpenShiftBinaryOption[] { OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER,
+					OpenShiftBinaryOption.SKIP_TLS_VERIFY };
+		}
+	}
+
 	private void syncDirectoryToPod(final IPod pod, final File source, final String podPath,
 			final IServerConsoleWriter consoleWriter) throws IOException {
 		String sourcePath = sanitizePath(source.getAbsolutePath());
@@ -123,7 +134,7 @@ public class RSync {
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
 				final InputStream syncStream = rsyncable.sync(new LocalPeer(sourcePath), new PodPeer(podPath, pod),
-						OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
+						getOptions());
 				asyncWriteLogs(syncStream, consoleWriter);
 				try {
 					rsyncable.await();
@@ -140,8 +151,10 @@ public class RSync {
 	 * Asynchronously writes the logs from the 'rsync' command, provided by the
 	 * given {@code syncStream} into the given {@code outputStream}.
 	 * 
-	 * @param syncStream the {@link InputStream} to read from
-	 * @param outputStream the {@link OutputStream} to write into
+	 * @param syncStream
+	 *            the {@link InputStream} to read from
+	 * @param outputStream
+	 *            the {@link OutputStream} to write into
 	 */
 	private void asyncWriteLogs(final InputStream syncStream, final IServerConsoleWriter consoleWriter) {
 		Executors.newSingleThreadExecutor().execute(() -> {
@@ -173,7 +186,7 @@ public class RSync {
 		if (path.endsWith(slash) || path.endsWith(slash + ".")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return path;
 		}
-		return path + slash; //$NON-NLS-1$
+		return path + slash; // $NON-NLS-1$
 	}
 
 }
