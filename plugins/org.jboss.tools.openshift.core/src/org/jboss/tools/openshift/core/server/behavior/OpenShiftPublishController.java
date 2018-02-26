@@ -51,19 +51,11 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		this.syncDownFailed = false;
 		IServer server = getServer();
 		this.rsync = createRsync(server, monitor);
-		final File localDirectory = getLocalFolder();
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
-				NLS.bind("Error while publishing server {0}.  Could not sync all pods to folder {1}", server.getName(),
-						localDirectory.getAbsolutePath()),
-				null);
-		rsync.syncPodsToDirectory(localDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
-		if (!status.isOK()) {
-			handleSyncDownFailure(status);
-		}
 
+		final File localDirectory = getLocalFolder();
 		final IProject deployProject = OpenShiftServerUtils.checkedGetDeployProject(server);
 		// If the magic project is *also* a module on the server, do nothing
-		if (!modulesIncludesMagicProject(getServer(), deployProject)) {
+		if (!modulesIncludesMagicProject(server, deployProject)) {
 			publishModule(monitor, deployProject, localDirectory);
 		}
 	}
@@ -81,30 +73,6 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 			publishModule(IServer.PUBLISH_FULL, ServerBehaviourDelegate.ADDED, new IModule[] { projectModule },
 					monitor);
 		}
-	}
-
-	protected void handleSyncDownFailure(final MultiStatus status) throws CoreException {
-		this.syncDownFailed = true;
-		if (isSyncDownFailureCritical()) {
-			clearRsync();
-			throw new CoreException(status);
-		}
-		OpenShiftCoreActivator.pluginLog().logWarning("Ignoring initial sync down error.", new CoreException(status));
-	}
-
-	protected boolean isSyncDownFailureCritical() {
-		return !isEapProfile();
-	}
-
-	@Override
-	protected boolean supportsJBoss7Markers() {
-		return isEapProfile();
-	}
-
-	protected boolean isEapProfile() {
-		// quick and dirty
-		String profile = ServerProfileModel.getProfile(getServer());
-		return OpenshiftEapProfileDetector.PROFILE.equals(profile);
 	}
 
 	private void publishMagicProjectSimpleCopy(IServer server, File localDeploymentDirectory) throws CoreException {
@@ -151,20 +119,41 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 
 		final File localFolder = getLocalFolder();
 		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
-		syncUp(localFolder, resource);
+		syncUp(localFolder, resource, getServer());
 
 		deleteDoDeployMarkers(localFolder);
 		loadPodPathIfEmpty(resource);
 	}
 
-	protected void syncUp(final File localFolder, final IResource resource) throws CoreException {
+	protected void syncUp(final File localFolder, final IResource resource, final IServer server) throws CoreException {
 		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
-				NLS.bind("Could not sync {0} to all pods running the service {1}", localFolder, resource.getName()),
+				NLS.bind("Error while publishing server {0}: Could not sync folder {1} to all pods", 
+						server.getName(), localFolder.getAbsolutePath()),
 				null);
 		rsync.syncDirectoryToPods(localFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
 		if (!status.isOK()) {
 			throw new CoreException(status);
 		}
+	}
+
+	protected void syncDown(final File localFolder, final IResource resource, final IServer server) throws CoreException {
+		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
+				NLS.bind("Error while publishing server {0}.  Could not sync all pods to folder {1}", 
+						server.getName(), localFolder.getAbsolutePath()),
+				null);
+		rsync.syncPodsToDirectory(localFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
+		if (!status.isOK()) {
+			handleSyncDownFailure(status);
+		}
+	}
+
+	protected void handleSyncDownFailure(final MultiStatus status) throws CoreException {
+		this.syncDownFailed = true;
+		if (isSyncDownFailureCritical()) {
+			clearRsync();
+			throw new CoreException(status);
+		}
+		OpenShiftCoreActivator.pluginLog().logWarning("Ignoring initial sync down error.", new CoreException(status));
 	}
 
 	protected void loadPodPathIfEmpty(final IResource resource) throws CoreException {
@@ -231,5 +220,20 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 
 	protected void clearRsync() {
 		this.rsync = null;
+	}
+
+	protected boolean isSyncDownFailureCritical() {
+		return !isEapProfile();
+	}
+
+	@Override
+	protected boolean supportsJBoss7Markers() {
+		return isEapProfile();
+	}
+
+	protected boolean isEapProfile() {
+		// quick and dirty
+		String profile = ServerProfileModel.getProfile(getServer());
+		return OpenshiftEapProfileDetector.PROFILE.equals(profile);
 	}
 }
