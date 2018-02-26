@@ -43,6 +43,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 public class CDK32LaunchControllerTest {
+	private static final String NAME = "cdk-test-123";
+	
+	
 	private class CDK3TestLaunchController extends CDK3LaunchController {
 		private IServer s23;
 		private CDKServer cdk;
@@ -62,25 +65,35 @@ public class CDK32LaunchControllerTest {
 	}
 
 	@Test
-	public void testInitialize() throws Exception {
+	public void testInitializeAndOverrides() throws Exception {
 
 		ILaunchConfigurationWorkingCopy wc = mock(ILaunchConfigurationWorkingCopy.class);
 		when(wc.getAttribute(any(String.class), any(String.class))).thenAnswer(AdditionalAnswers.returnsSecondArg());
 		String userName = "Drumpf";
 		IServer server = mockServer();
+		when(wc.getName()).thenReturn(NAME);
+
 		ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> valCaptor = ArgumentCaptor.forClass(String.class);
 
 		CDKServer cdkServer = (CDKServer) server.loadAdapter(CDKServer.class, new NullProgressMonitor());
 		CDK3TestLaunchController controller = new CDK3TestLaunchController(server, cdkServer);
 		controller.initialize(wc, userName, server);
-		verify(wc, Mockito.times(3)).setAttribute(keyCaptor.capture(), valCaptor.capture());
-		List<String> allKeys = keyCaptor.getAllValues();
+		verify(wc, Mockito.times(1)).setAttribute(keyCaptor.capture(), valCaptor.capture());
 		List<String> allVals = valCaptor.getAllValues();
 
 		assertTrue(allVals.get(0).replace("\\", "/").endsWith(".metadata/.plugins/org.jboss.ide.eclipse.as.core"));
-		assertTrue(allVals.get(1).endsWith("/home/user/apps/minishift"));
-		assertTrue(allVals.get(2).endsWith("--profile minishift start --vm-driver=virtualbox"));
+		
+		
+		ArgumentCaptor<String> keyCaptor2 = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<String> valCaptor2 = ArgumentCaptor.forClass(String.class);
+		controller.performOverrides(wc);
+		verify(wc, Mockito.times(4)).setAttribute(keyCaptor2.capture(), valCaptor2.capture());
+		allVals = valCaptor2.getAllValues();
+		assertTrue(allVals.get(0).replace("\\", "/").endsWith(".metadata/.plugins/org.jboss.ide.eclipse.as.core"));
+		assertTrue(allVals.get(1).replace("\\", "/").endsWith(".metadata/.plugins/org.jboss.ide.eclipse.as.core"));
+		assertTrue(allVals.get(2).endsWith("/home/user/apps/minishift"));
+		assertTrue(allVals.get(3).endsWith("--profile minishift start --vm-driver=virtualbox"));
 	}
 
 	@Test
@@ -88,7 +101,7 @@ public class CDK32LaunchControllerTest {
 
 		ILaunchConfigurationWorkingCopy wc = mock(ILaunchConfigurationWorkingCopy.class);
 		when(wc.getAttribute(any(String.class), any(String.class))).thenAnswer(AdditionalAnswers.returnsSecondArg());
-		when(wc.getName()).thenReturn("cdk-test-123");
+		when(wc.getName()).thenReturn(NAME);
 
 		String userName = "Drumpf";
 		IPath msHome = CDKTestActivator.getDefault().getStateLocation().append("test927");
@@ -128,7 +141,7 @@ public class CDK32LaunchControllerTest {
 		when(server.getAttribute(CDK32Server.PROFILE_ID, (String) null))
 				.thenReturn(CDK32Server.MINISHIFT_DEFAULT_PROFILE);
 		when(server.getAttribute(CDK3Server.MINISHIFT_FILE, (String) null)).thenReturn("/home/user/apps/minishift");
-		when(server.getName()).thenReturn("cdk-test-123");
+		when(server.getName()).thenReturn(NAME);
 
 		CDKServer cdk = mock(CDKServer.class);
 		when(server.loadAdapter(eq(CDKServer.class), any(IProgressMonitor.class))).thenReturn(cdk);
