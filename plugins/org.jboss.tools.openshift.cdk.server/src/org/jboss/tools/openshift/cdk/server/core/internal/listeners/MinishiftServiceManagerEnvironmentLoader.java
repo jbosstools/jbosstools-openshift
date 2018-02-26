@@ -68,7 +68,9 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 		}
 
 		try {
-			return new ServiceManagerEnvironment(merged);
+			ServiceManagerEnvironment env = new ServiceManagerEnvironment(merged);
+			env.setDefaultUsername(ServiceManagerEnvironment.DEFAULT_MINISHIFT_USER);
+			return env;
 		} catch (URISyntaxException urise) {
 			if (!suppressErrors) {
 				String msg = "Environment variable DOCKER_HOST is not a valid uri:  " + merged.get("DOCKER_HOST");
