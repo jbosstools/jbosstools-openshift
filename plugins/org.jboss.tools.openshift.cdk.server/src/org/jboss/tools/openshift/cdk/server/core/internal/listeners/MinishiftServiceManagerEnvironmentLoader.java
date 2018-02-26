@@ -69,7 +69,7 @@ public class MinishiftServiceManagerEnvironmentLoader extends ServiceManagerEnvi
 
 		try {
 			ServiceManagerEnvironment env = new ServiceManagerEnvironment(merged);
-			env.setDefaultUsername("developer");
+			env.setDefaultUsername(ServiceManagerEnvironment.DEFAULT_MINISHIFT_USER);
 			return env;
 		} catch (URISyntaxException urise) {
 			if (!suppressErrors) {

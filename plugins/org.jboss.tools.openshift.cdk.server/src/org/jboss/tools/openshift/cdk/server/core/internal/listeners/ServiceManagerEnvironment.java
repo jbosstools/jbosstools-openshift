@@ -35,9 +35,15 @@ public class ServiceManagerEnvironment {
 
 	private static final String HTTPS_SCHEMA = "https://";
 
+	public static final String DEFAULT_CDK_USER = "openshift-dev";
+	public static final String DEFAULT_CDK_PASS = "devel";
+	public static final String DEFAULT_MINISHIFT_USER = "developer";
+	public static final String DEFAULT_MINISHIFT_PASS= "developer";
+	
+	
 	int openshiftPort = 8443;
 	String openshiftHost = "https://10.1.2.2";
-	String defaultUser = "openshift-dev";
+	String defaultUser = DEFAULT_CDK_USER;
 
 	private Map<String, String> env;
 
@@ -101,10 +107,10 @@ public class ServiceManagerEnvironment {
 	public String getPassword() {
 		String user = getUsername();
 		String defPass = null;
-		if( "openshift-dev".equals(user)) {
-			defPass = "devel";
-		} else if( "developer".equals(user)){
-			defPass = "developer";
+		if(DEFAULT_CDK_USER.equals(user)) {
+			defPass = DEFAULT_CDK_PASS;
+		} else if( DEFAULT_MINISHIFT_USER.equals(user)){
+			defPass = DEFAULT_MINISHIFT_PASS;
 		}
 		String pass = env.containsKey(DOTCDK_AUTH_PASS) ? env.get(DOTCDK_AUTH_PASS) : defPass;
 		return pass;
