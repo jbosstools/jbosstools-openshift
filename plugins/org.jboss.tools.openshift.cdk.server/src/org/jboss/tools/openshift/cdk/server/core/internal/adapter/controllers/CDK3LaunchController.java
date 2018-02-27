@@ -80,23 +80,6 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 			env.put(userKey, userName);
 			wc.setAttribute(ENVIRONMENT_VARS_KEY, env);
 		}
-		String cmdLoc = server.getAttribute(CDK3Server.MINISHIFT_FILE, (String) null);
-		wc.setAttribute(ATTR_LOCATION, cmdLoc);
-
-		String profiles = getProfileString(server);
-		String defaultArgs = profiles + "start --vm-driver="
-				+ server.getAttribute(CDK3Server.PROP_HYPERVISOR, CDK3Server.getHypervisors()[0]);
-
-		String currentVal = wc.getAttribute(ATTR_ARGS, defaultArgs);
-
-		// Overrides
-		if (cdkServer.skipRegistration()) {
-			currentVal = ArgsUtil.setFlag(currentVal, "--skip-registration");
-		} else {
-			currentVal = ArgsUtil.clearFlag(currentVal, "--skip-registration");
-		}
-
-		wc.setAttribute(ATTR_ARGS, currentVal);
 	}
 
 	static String getProfileString(IServer server) {
@@ -160,6 +143,15 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		if (!StringUtils.isEmpty(profileName)) {
 			replaced = ArgsUtil.setArg(replaced, "--profile", null, profileName);
 		}
+		
+		// Registration
+		if (cdkServer.skipRegistration()) {
+			replaced = ArgsUtil.setFlag(replaced, "--skip-registration");
+		} else {
+			replaced = ArgsUtil.clearFlag(replaced, "--skip-registration");
+		}
+
+		
 		workingCopy.setAttribute(ATTR_ARGS, replaced);
 
 		// This is a bit of a hack for JBIDE-25350   - The launch config will APPEAR to be renamed, but, 
