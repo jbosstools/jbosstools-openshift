@@ -11,12 +11,15 @@
 package org.jboss.tools.openshift.internal.ui.handler;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobGroup;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -93,7 +96,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 	 * @param uiResources
 	 *            the UI resources to delete
 	 */
-	protected void deleteResources(final IResourceWrapper<?, ?>[] uiResources) {
+	protected JobGroup deleteResources(final IResourceWrapper<?, ?>[] uiResources) {
 		final JobGroup group = new JobGroup("Deleting OpenShift resources...", 1, uiResources.length) {
 
 			/*
@@ -107,6 +110,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 			}
 
 		};
+
 		try (Stream<IResourceWrapper<?, ?>> stream = Arrays.stream(uiResources)) {
 			stream.forEach(uiResource -> {
 				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(uiResource.getWrapped());
@@ -114,5 +118,6 @@ public class DeleteResourceHandler extends AbstractHandler {
 				job.schedule();
 			});
 		}
+		return group;
 	}
 }

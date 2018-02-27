@@ -332,4 +332,11 @@ public class WatchManager {
 		}
 
 	}
+	
+	/**
+	 * Use it for test purposes only
+	 */
+	public Map<?,?> _getWatches() {
+	    return this.watches;
+	}
 }
