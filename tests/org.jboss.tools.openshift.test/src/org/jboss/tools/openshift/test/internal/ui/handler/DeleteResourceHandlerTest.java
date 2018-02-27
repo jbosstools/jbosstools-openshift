@@ -1,10 +1,7 @@
 package org.jboss.tools.openshift.test.internal.ui.handler;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.core.runtime.jobs.JobGroup;
@@ -14,7 +11,6 @@ import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.ui.handler.DeleteResourceHandler;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.openshift.restclient.ResourceKind;

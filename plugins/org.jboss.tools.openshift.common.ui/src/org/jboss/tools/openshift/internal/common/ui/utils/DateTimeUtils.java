@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.common.ui.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -20,7 +19,6 @@ import java.util.TimeZone;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
-import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 
 public class DateTimeUtils {
 
