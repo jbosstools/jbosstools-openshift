@@ -57,7 +57,7 @@ public class DateTimeUtilsTest {
 	@Test
 	public void testFormatSince() {
 		String date = "2015-11-11T20:32:37Z";
-		assertEquals("11/11/15 3:32:37 PM EST", formatSince(date, TimeZone.getTimeZone("EST")));
+		assertEquals("11/11/15 3:32:37 PM -05:00", formatSince(date, TimeZone.getTimeZone("EST")));
 	}
 
 }

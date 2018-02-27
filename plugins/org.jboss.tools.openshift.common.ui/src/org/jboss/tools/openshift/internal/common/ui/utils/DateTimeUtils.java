@@ -10,9 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.utils;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -50,18 +52,12 @@ public class DateTimeUtils {
 	}
 
 	public static String formatSince(String value, TimeZone timezone) {
-		try {
-			Date date = parse(value);
-			DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.FULL);
-			if (timezone != null) {
-				formatter.setTimeZone(timezone);
-			}
-			return formatter.format(date);
-		} catch (ParseException e) {
-			OpenShiftCommonUIActivator.getDefault().getLogger()
-					.logWarning("Unable to parse format duration value: " + value, e);
+		DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
+		if (timezone != null) {
+		    dtf = dtf.withZone(timezone.toZoneId());
 		}
-		return value;
+		ZonedDateTime zonedDateTime = ZonedDateTime.parse(value, dtf);
+		return zonedDateTime.format(DateTimeFormatter.ofPattern("dd/MM/yy h:mm:ss a VV"));
 	}
 
 	public static Date parse(String value) throws ParseException {
