@@ -37,10 +37,20 @@ import com.openshift.restclient.model.IResource;
  */
 public class DeleteResourcesWizardModel extends ObservablePojo {
 
-	private static final String[] ALL_RESOURCE_KINDS = { ResourceKind.BUILD, ResourceKind.BUILD_CONFIG,
-			ResourceKind.DEPLOYMENT_CONFIG, ResourceKind.IMAGE_STREAM, ResourceKind.ROUTE, ResourceKind.TEMPLATE,
-			ResourceKind.POD, ResourceKind.PVC, ResourceKind.PERSISTENT_VOLUME, ResourceKind.REPLICATION_CONTROLLER,
-			ResourceKind.SERVICE, ResourceKind.SECRET, ResourceKind.CONFIG_MAP };
+	private static final String[] ALL_RESOURCE_KINDS = { 
+			ResourceKind.BUILD,
+			ResourceKind.BUILD_CONFIG,
+			ResourceKind.DEPLOYMENT_CONFIG,
+			ResourceKind.IMAGE_STREAM,
+			ResourceKind.ROUTE,
+			ResourceKind.TEMPLATE,
+			ResourceKind.POD,
+			ResourceKind.PVC,
+			ResourceKind.PERSISTENT_VOLUME,
+			ResourceKind.REPLICATION_CONTROLLER,
+			ResourceKind.SERVICE,
+			ResourceKind.SECRET,
+			ResourceKind.CONFIG_MAP };
 
 	public static final String PROP_LABEL_FILTER = "labelFilter";
 	public static final String PROP_ALL_RESOURCES = "allResources";

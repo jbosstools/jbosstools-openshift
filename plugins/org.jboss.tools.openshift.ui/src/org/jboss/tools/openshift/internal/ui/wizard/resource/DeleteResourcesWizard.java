@@ -123,32 +123,36 @@ public class DeleteResourcesWizard extends AbstractOpenShiftWizard<DeleteResourc
 			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(filterLabel);
 			Text filterText = UIUtils.createSearchText(parent);
 			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(filterText);
-			Binding filterTextBinding = ValueBindingBuilder.bind(WidgetProperties.text(SWT.Modify).observe(filterText))
-					.converting(new Converter(String.class, KeyValueFilter.class) {
+			Binding filterTextBinding = ValueBindingBuilder
+					.bind(WidgetProperties.text(SWT.Modify).observe(filterText))
+						.converting(new Converter(String.class, KeyValueFilter.class) {
 
-						@Override
-						public Object convert(Object fromObject) {
-							if (!(fromObject instanceof String)) {
-								return null;
-							}
-							try {
-								String filterText = (String) fromObject;
-								if (StringUtils.isEmpty(filterText)) {
-									return new KeyValueFilter();
+							@Override
+							public Object convert(Object fromObject) {
+								if (!(fromObject instanceof String)) {
+									return null;
 								}
-								List<KeyValueFilter> filters = KeyValueFilterFactory.create(filterText);
-								return filters.stream().findFirst().orElse(null);
-							} catch (PatternSyntaxException e) {
-								return null;
+								try {
+									String filterText = (String) fromObject;
+									if (StringUtils.isEmpty(filterText)) {
+										return new KeyValueFilter();
+									}
+									List<KeyValueFilter> filters = KeyValueFilterFactory.create(filterText);
+									return filters.stream().findFirst().orElse(null);
+								} catch (PatternSyntaxException e) {
+									return null;
+								}
 							}
-						}
-					}).validatingAfterConvert(value -> {
-						if (value == null) {
-							return ValidationStatus.error("Invalid filter expression provided. "
-									+ "Please either use plain text or conform to regular expression rules.");
-						}
-						return ValidationStatus.ok();
-					}).to(BeanProperties.value(DeleteResourcesWizardModel.PROP_LABEL_FILTER).observe(model)).in(dbc);
+						})
+						.validatingAfterConvert(value -> {
+							if (value == null) {
+								return ValidationStatus.error("Invalid filter expression provided. "
+										+ "Please either use plain text or conform to regular expression rules.");
+							}
+							return ValidationStatus.ok();
+						})
+					.to(BeanProperties.value(DeleteResourcesWizardModel.PROP_LABEL_FILTER).observe(model))
+					.in(dbc);
 			ControlDecorationSupport.create(filterTextBinding, SWT.LEFT | SWT.TOP, null);
 
 			// filler
@@ -219,11 +223,24 @@ public class DeleteResourcesWizard extends AbstractOpenShiftWizard<DeleteResourc
 			table.setLinesVisible(true);
 			table.setHeaderVisible(true);
 			TableViewer resourcesViewer = new TableViewerBuilder(table, tableContainer)
-					.column(resource -> ((IResource) resource).getName()).name("Name").align(SWT.LEFT).weight(1)
-					.minWidth(100).buildColumn().column(resource -> ((IResource) resource).getKind()).name("Type")
-					.align(SWT.LEFT).weight(1).minWidth(100).buildColumn()
-					.column(new LabelsCellLabelProvider(labelFilter)).name("Labels").align(SWT.LEFT).weight(2)
-					.minWidth(200).buildColumn().buildViewer();
+					.column(resource -> ((IResource) resource).getName())
+						.name("Name")
+						.align(SWT.LEFT)
+						.weight(2)
+						.minWidth(200).buildColumn()
+					.column(resource -> ((IResource) resource).getKind())
+						.name("Type")
+						.align(SWT.LEFT)
+						.weight(1)
+						.minWidth(100)
+						.buildColumn()
+					.column(new LabelsCellLabelProvider(labelFilter))
+						.name("Labels")
+						.align(SWT.LEFT)
+						.weight(3)
+						.minWidth(300)
+						.buildColumn()
+					.buildViewer();
 			resourcesViewer.setContentProvider(new ObservableListContentProvider());
 			resourcesViewer.setComparator(new ResourceKindAndNameViewerComparator());
 			resourcesViewer.setFilters(new ResourceLabelFilter(labelFilter));
@@ -277,6 +294,7 @@ public class DeleteResourcesWizard extends AbstractOpenShiftWizard<DeleteResourc
 				Map<String, String> filteredLabels = ResourceUtils.getMatchingLabels(filter, resource);
 				createCellLabel(filter, filteredLabels, cell);
 				((Table) cell.getControl()).getColumn(cell.getColumnIndex()).pack();
+				((Table) cell.getControl()).redraw();
 			}
 
 			private void createCellLabel(KeyValueFilter filter, Map<String, String> labels, ViewerCell cell) {

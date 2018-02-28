@@ -189,9 +189,7 @@ public class ResourceUtils {
 	 * @see IResource#getLabels()
 	 */
 	public static boolean hasMatchingLabels(KeyValueFilter filter, IResource resource) {
-		Map<String, String> labels = resource.getLabels();
-
-		if (filter == null && (labels == null || labels.isEmpty())) {
+		if (filter == null || filter.isEmpty()) {
 			return true;
 		}
 

@@ -9,6 +9,7 @@
 package org.jboss.tools.openshift.test.core.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.tools.openshift.internal.core.util.ResourceUtils.hasMatchingLabels;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.HashMap;
@@ -115,5 +116,24 @@ public class ResourceUtilsIsMatchingLabelsTest {
 		boolean isMatching = ResourceUtils.hasMatchingLabels(null, service);
 		// then
 		assertThat(isMatching).isTrue();
+	}
+	
+	@Test
+	public void filterWithoutKeyNorValueExpressionShouldBeEmpty() {
+		// given
+		KeyValueFilter filter = new KeyValueFilter();
+		// when
+		boolean empty = filter.isEmpty();
+		// then
+		assertThat(empty).isTrue();
+	}
+	
+	@Test
+	public void emptyLabelResourceHasMatchingLabelsIfFilterIsEmptyNull() {
+		// given
+		IService service = ResourceMocks.createResource(IService.class, ResourceKind.SERVICE, resource -> {
+			doReturn(new HashMap<String, String>()).when(resource).getLabels();
+		});
+		assertThat(hasMatchingLabels(new KeyValueFilter(), service)).isTrue();
 	}
 }

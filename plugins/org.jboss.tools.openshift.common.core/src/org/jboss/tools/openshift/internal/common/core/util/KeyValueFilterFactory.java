@@ -85,6 +85,11 @@ public class KeyValueFilterFactory {
 			}
 		}
 
+		public boolean isEmpty() {
+			return keyPattern == null 
+					&& valuePattern == null;
+		}
+		
 		public boolean matchesKey(String toMatch) {
 			if (null == keyPattern) {
 				return true;
