@@ -36,6 +36,7 @@ public class ProjectWrapperTest {
 		this.project = mock(IProject.class);
 		when(project.getNamespace()).thenReturn("namespace");
 		this.projectWrapper = new ProjectWrapper(connectionWrapper, project);
+		WatchManager.getInstance()._getWatches().clear();
 	}
 	
 	@After
