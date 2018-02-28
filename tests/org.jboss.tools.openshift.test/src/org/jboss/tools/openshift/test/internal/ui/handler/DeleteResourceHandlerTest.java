@@ -11,12 +11,18 @@ import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.internal.ui.handler.DeleteResourceHandler;
 import org.jboss.tools.openshift.internal.ui.models.IProjectWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
 
 public class DeleteResourceHandlerTest {
+    
+    @Before
+    public void init() {
+        WatchManager.getInstance()._getWatches().clear();
+    }
 
 	@Test
 	public void testStopWatchProject() throws Exception {
