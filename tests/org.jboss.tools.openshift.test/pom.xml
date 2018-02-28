@@ -11,56 +11,12 @@
 	<artifactId>org.jboss.tools.openshift.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
 
-	<properties>
-		<powermock.version>1.6.6</powermock.version>
-	</properties>
-
 	<build>
 		<resources>
 			<resource>
 				<directory>resources</directory>
 			</resource>
 		</resources>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>get-libs</id>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<phase>generate-resources</phase>
-					</execution>
-				</executions>
-				<configuration>
-					<skip>false</skip>
-					<includeScope>runtime</includeScope>
-					<outputDirectory>${basedir}/lib/</outputDirectory>
-					<!-- baseVersion is to avoid SNAPSHOT dependencies being copied with 
-						ever daily changing timestamp -->
-					<useBaseVersion>true</useBaseVersion>
-				</configuration>
-			</plugin>
-		</plugins>
 	</build>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4-rule-agent</artifactId>
-			<version>${powermock.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>${powermock.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<version>${powermock.version}</version>
-		</dependency>
-	</dependencies>
 </project>

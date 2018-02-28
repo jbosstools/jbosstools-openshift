@@ -38,9 +38,11 @@ import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.tools.openshift.internal.core.WatchManager;
 import org.jboss.tools.openshift.test.core.server.util.OpenShiftServerTestUtils;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,6 +74,7 @@ public class OpenShiftServerUtilsTest {
 	@After
 	public void tearDown() {
 		ConnectionsRegistrySingleton.getInstance().remove(connection);
+		WatchManager.getInstance()._getWatches().clear();
 	}
 
 	@Test
@@ -219,6 +222,14 @@ public class OpenShiftServerUtilsTest {
 		OpenShiftServerUtils.updateServerAttribute(null, "42", server);
 		// then
 	}
+	
+	@Test
+    public void getServiceShouldStartWatchingProjectIfServiceNotNull() {
+        // when
+        OpenShiftServerUtils.getResource(server, connection, new NullProgressMonitor());
+        // then
+        Assert.assertEquals(WatchManager.KINDS.length, WatchManager.getInstance()._getWatches().size());
+    }
 
 	private static IServer mockOS3Server(String name, String serviceName) {
 		IServer server = mockServer(name, OpenShiftServerUtils.getServerType());

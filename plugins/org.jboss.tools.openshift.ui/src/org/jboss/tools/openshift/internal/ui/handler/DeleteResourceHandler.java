@@ -93,7 +93,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 	 * @param uiResources
 	 *            the UI resources to delete
 	 */
-	protected void deleteResources(final IResourceWrapper<?, ?>[] uiResources) {
+	protected JobGroup deleteResources(final IResourceWrapper<?, ?>[] uiResources) {
 		final JobGroup group = new JobGroup("Deleting OpenShift resources...", 1, uiResources.length) {
 
 			/*
@@ -107,6 +107,7 @@ public class DeleteResourceHandler extends AbstractHandler {
 			}
 
 		};
+
 		try (Stream<IResourceWrapper<?, ?>> stream = Arrays.stream(uiResources)) {
 			stream.forEach(uiResource -> {
 				DeleteResourceJob job = OpenShiftJobs.createDeleteResourceJob(uiResource.getWrapped());
@@ -114,5 +115,6 @@ public class DeleteResourceHandler extends AbstractHandler {
 				job.schedule();
 			});
 		}
+		return group;
 	}
 }
