@@ -12,8 +12,11 @@ package org.jboss.tools.openshift.internal.common.ui.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -53,9 +56,11 @@ public class DateTimeUtils {
 		DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
 		if (timezone != null) {
 		    dtf = dtf.withZone(timezone.toZoneId());
+		} else {
+		    dtf = dtf.withZone(ZoneOffset.UTC);
 		}
 		ZonedDateTime zonedDateTime = ZonedDateTime.parse(value, dtf);
-		return zonedDateTime.format(DateTimeFormatter.ofPattern("dd/MM/yy h:mm:ss a VV"));
+        return zonedDateTime.format(DateTimeFormatter.ofPattern("dd/MM/yy h:mm:ss a VV"));
 	}
 
 	public static Date parse(String value) throws ParseException {
