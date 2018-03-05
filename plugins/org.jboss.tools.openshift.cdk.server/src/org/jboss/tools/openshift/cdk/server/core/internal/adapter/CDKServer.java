@@ -194,6 +194,7 @@ public class CDKServer extends ServerDelegate {
 		return getServer().getAttribute(CDKServer.PROP_SKIP_UNREG, false);
 	}
 	
+	@Override
 	public ServerPort[] getServerPorts() {
 		return new ServerPort[0];
 	}
