@@ -42,11 +42,10 @@ public class CDK32CredentialSection extends CDKCredentialSection {
 
 	protected void addRegistrationWidgets(Composite parent, CDKServer cdkServer, FormToolkit toolkit) {
 		Label registrationLbl = toolkit.createLabel(parent, "Registration: ");
-		toolkit.createLabel(parent, "");
 		regBtn = toolkit.createButton(parent, "Skip Registration when starting", SWT.CHECK);
 		toolkit.createLabel(parent, "");
 		unregBtn = toolkit.createButton(parent, "Skip Unregistration when stopping", SWT.CHECK);
-		GridDataFactory.generate(registrationLbl, new Point(3, 1));
+		GridDataFactory.generate(registrationLbl, new Point(1, 1));
 		GridDataFactory.defaultsFor(regBtn).span(new Point(2, 1)).applyTo(regBtn);
 		GridDataFactory.defaultsFor(unregBtn).span(new Point(2, 1)).applyTo(regBtn);
 
