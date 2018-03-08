@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.eclipse.wst.server.core.ServerPort;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.model.ServerDelegate;
 import org.jboss.ide.eclipse.as.core.util.ServerNamingUtility;
@@ -192,5 +193,11 @@ public class CDKServer extends ServerDelegate {
 	public boolean skipUnregistration() {
 		return getServer().getAttribute(CDKServer.PROP_SKIP_UNREG, false);
 	}
+	
+	@Override
+	public ServerPort[] getServerPorts() {
+		return new ServerPort[0];
+	}
+
 
 }
