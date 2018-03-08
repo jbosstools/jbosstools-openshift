@@ -289,7 +289,10 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 			@Override
 			public void onDebugChange(DebugContext context, IProgressMonitor monitor) throws CoreException {
-				DebugLaunchConfigs.get().terminateRemoteDebugger(getServer());
+				DebugLaunchConfigs configs = DebugLaunchConfigs.get();
+				if( configs != null ) {
+					configs.terminateRemoteDebugger(getServer());
+				}
 				unMapPortForwarding(context.getPod());
 			}
 
@@ -389,6 +392,9 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		monitor.subTask("Attaching remote debugger...");
 		ILaunch ret = null;
 		DebugLaunchConfigs launchConfigs = DebugLaunchConfigs.get();
+		if( launchConfigs == null ) {
+			throw toCoreException(NLS.bind("Could not modify launch config for server {0}", server.getName()));
+		}
 		ILaunchConfiguration debuggerLaunchConfig = launchConfigs.getRemoteDebuggerLaunchConfiguration(server);
 		ILaunchConfigurationWorkingCopy workingCopy = getLaunchConfigWorkingCopy(server, launchConfigs,
 				debuggerLaunchConfig);

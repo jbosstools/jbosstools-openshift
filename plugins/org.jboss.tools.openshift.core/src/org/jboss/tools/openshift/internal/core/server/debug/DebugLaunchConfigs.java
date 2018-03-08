@@ -41,12 +41,16 @@ public class DebugLaunchConfigs {
 	private ILaunchManager launchManager;
 
 	public static DebugLaunchConfigs get() {
-		return get(DebugPlugin.getDefault().getLaunchManager());
+		if( DebugPlugin.getDefault() != null ) 
+			return get(DebugPlugin.getDefault().getLaunchManager());
+		return null;
 	}
 
 	/** For testing purposes **/
 	public static DebugLaunchConfigs get(ILaunchManager launchManager) {
-		return new DebugLaunchConfigs(launchManager);
+		if( launchManager != null )
+			return new DebugLaunchConfigs(launchManager);
+		return null;
 	}
 
 	private DebugLaunchConfigs(ILaunchManager launchManager) {

@@ -44,7 +44,11 @@ public class OpenShiftShutdownController extends AbstractSubsystemController
 		OpenShiftServerBehaviour behavior = getBehavior();
 		behavior.setServerStopping();
 		try {
-			DebugLaunchConfigs.get().terminateRemoteDebugger(behavior.getServer());
+			DebugLaunchConfigs configs = DebugLaunchConfigs.get();
+			if( configs != null ) { 
+				configs.terminateRemoteDebugger(behavior.getServer());
+			}
+			// configs should only be null if workspace is shutting down, so set server to stopped anyway
 			behavior.setServerStopped();
 		} catch (CoreException ce) {
 			log(IStatus.ERROR, "Error shutting down server", ce);
