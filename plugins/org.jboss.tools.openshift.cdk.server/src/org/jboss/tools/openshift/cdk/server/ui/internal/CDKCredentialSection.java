@@ -110,12 +110,15 @@ public class CDKCredentialSection extends ServerEditorSection {
 
 	protected void createEnvironmentWidgets(Composite composite, FormToolkit toolkit, CDKServer cdkServer) {
 		Label environmentVars = toolkit.createLabel(composite, "Environment Variables: ");
+		toolkit.createLabel(composite, "");
 
-		Label userEnvLabel = toolkit.createLabel(composite, "Username: ");
-		envUserText = toolkit.createText(composite, cdkServer.getUserEnvironmentKey());
+		Composite nested = toolkit.createComposite(composite);
+		nested.setLayout(new GridLayout(3, false));
+		Label userEnvLabel = toolkit.createLabel(nested, "Username: ");
+		envUserText = toolkit.createText(nested, cdkServer.getUserEnvironmentKey(), SWT.SINGLE | SWT.BORDER);
 
-		Label passEnvLabel = toolkit.createLabel(composite, "Password: ");
-		envPassText = toolkit.createText(composite, cdkServer.getPasswordEnvironmentKey());
+		Label passEnvLabel = toolkit.createLabel(nested, "Password: ");
+		envPassText = toolkit.createText(nested, cdkServer.getPasswordEnvironmentKey(), SWT.SINGLE | SWT.BORDER);
 
 		envUserListener = new ModifyListener() {
 			@Override
@@ -135,6 +138,7 @@ public class CDKCredentialSection extends ServerEditorSection {
 
 		// Layout the widgets
 		GridDataFactory.generate(environmentVars, new Point(3, 1));
+		GridDataFactory.generate(nested, new Point(2, 1));
 		GridDataFactory.generate(envUserText, new Point(2, 1));
 		GridDataFactory.generate(envPassText, new Point(2, 1));
 	}
