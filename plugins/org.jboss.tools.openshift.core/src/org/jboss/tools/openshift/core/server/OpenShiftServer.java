@@ -20,14 +20,19 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.model.IURLProvider;
+import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.jboss.ide.eclipse.as.core.server.internal.DeployableServer;
 import org.jboss.ide.eclipse.as.core.server.internal.IExtendedPropertiesProvider;
 import org.jboss.ide.eclipse.as.core.server.internal.JBossServer;
 import org.jboss.ide.eclipse.as.core.server.internal.extendedproperties.ServerExtendedProperties;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.ide.eclipse.as.wtp.core.util.ServerModelUtilities;
+import org.jboss.tools.as.core.server.controllable.systems.IDeploymentOptionsController;
 import org.jboss.tools.jmx.core.IConnectionFacade;
 import org.jboss.tools.jmx.core.IConnectionWrapper;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 /**
  * @author Andre Dietisheim
@@ -92,4 +97,38 @@ public class OpenShiftServer extends DeployableServer
 		return (IConnectionWrapper) Platform.getAdapterManager().loadAdapter((OpenShiftServer) this,
 				IConnectionWrapper.class.getName());
 	}
+	
+	
+	@Override
+	public String getDeployFolder() {
+		try {
+			IDeploymentOptionsController deployOpts = (IDeploymentOptionsController)getControllableBehavior().getController(IDeploymentOptionsController.SYSTEM_ID);
+			return deployOpts.getDeploymentsRootFolder(true);
+		} catch(CoreException ce) {
+			OpenShiftCoreActivator.logError(ce.getMessage(), ce);
+			return super.getTempDeployFolder();
+		}
+	}
+	
+	@Override
+	public String getTempDeployFolder() {
+		try {
+			IDeploymentOptionsController deployOpts = (IDeploymentOptionsController)getControllableBehavior().getController(IDeploymentOptionsController.SYSTEM_ID);
+			return deployOpts.getDeploymentsTemporaryFolder(true);
+		} catch(CoreException ce) {
+			OpenShiftCoreActivator.logError(ce.getMessage(), ce);
+			return super.getTempDeployFolder();
+		}
+	}
+	
+	
+	private IControllableServerBehavior getControllableBehavior() {
+		if( getServer() != null ) {
+			ServerBehaviourDelegate del = (ServerBehaviourDelegate)getServer().loadAdapter(ServerBehaviourDelegate.class, null);
+			if( del instanceof ControllableServerBehavior)
+				return (IControllableServerBehavior)del;
+		}
+		return null;
+	}
+	
 }
