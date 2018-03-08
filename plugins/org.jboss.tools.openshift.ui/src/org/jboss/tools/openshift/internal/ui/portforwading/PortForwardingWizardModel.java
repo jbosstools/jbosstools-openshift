@@ -28,7 +28,7 @@ import org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils;
 import org.jboss.tools.openshift.internal.core.portforwarding.PortForwardingUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
-import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
+import com.openshift.restclient.capability.IBinaryCapability;
 import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.model.IPod;
 
@@ -109,8 +109,8 @@ public class PortForwardingWizardModel extends ObservablePojo {
 			ConsoleUtils.registerConsoleListener(consoleListener);
 			ConsoleUtils.displayConsoleView(console);
 			stream.println("Starting port-forwarding...");
-			final IPortForwardable portForwardable = PortForwardingUtils.startPortForwarding(this.pod, this.ports,
-					OpenShiftBinaryOption.SKIP_TLS_VERIFY);
+			final IPortForwardable portForwardable = 
+					PortForwardingUtils.startPortForwarding(this.pod, this.ports, IBinaryCapability.SKIP_TLS_VERIFY);
 			portForwardable.getPortPairs().stream().forEach(port -> stream.println(NLS.bind("{0} {1} -> {2}",
 					new Object[] { port.getName(), port.getLocalPort(), port.getRemotePort() })));
 			stream.println("done.");
