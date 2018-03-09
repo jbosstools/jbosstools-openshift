@@ -146,7 +146,7 @@ public class CDK3RuntimeDetector extends AbstractCDKRuntimeDetector {
 				return val;
 			}
 		} catch (IOException e) {
-			CDKCoreActivator.pluginLog().logError(e);
+			CDKCoreActivator.pluginLog().logError("Error parsing " + path, e);
 		}
 		return hyperV;
 	}
