@@ -32,6 +32,7 @@ import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
+import com.openshift.restclient.capability.IBinaryCapability;
 import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IRSyncable;
 import com.openshift.restclient.capability.resources.IRSyncable.LocalPeer;
@@ -119,11 +120,14 @@ public class RSync {
 
 	protected OpenShiftBinaryOption[] getOptions() {
 		if (Platform.OS_WIN32.equals(Platform.getOS())) {
-			return new OpenShiftBinaryOption[] { OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER,
-					OpenShiftBinaryOption.SKIP_TLS_VERIFY, OpenShiftBinaryOption.NO_PERMS };
+			return new OpenShiftBinaryOption[] {
+					IRSyncable.exclude(".git", ".npm"),
+					IRSyncable.NO_PERMS,
+					IBinaryCapability.SKIP_TLS_VERIFY };
 		} else {
-			return new OpenShiftBinaryOption[] { OpenShiftBinaryOption.EXCLUDE_GIT_FOLDER,
-					OpenShiftBinaryOption.SKIP_TLS_VERIFY };
+			return new OpenShiftBinaryOption[] {
+					IRSyncable.exclude(".git", ".npm"),
+					IRSyncable.SKIP_TLS_VERIFY };
 		}
 	}
 

@@ -57,7 +57,7 @@ import org.jboss.tools.openshift.internal.core.server.debug.IDebugListener;
 import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
-import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
+import com.openshift.restclient.capability.IBinaryCapability;
 import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
 import com.openshift.restclient.model.IPod;
@@ -362,7 +362,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 
 		if (mapPorts(podPorts, monitor)) {
-			PortForwardingUtils.startPortForwarding(pod, podPorts, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
+			PortForwardingUtils.startPortForwarding(pod, podPorts, IBinaryCapability.SKIP_TLS_VERIFY);
 			if (PortForwardingUtils.isPortForwardingStarted(pod)) {
 				return debugPort.get().getLocalPort();
 			}

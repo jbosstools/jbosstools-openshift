@@ -33,7 +33,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.capability.CapabilityVisitor;
-import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
+import com.openshift.restclient.capability.IBinaryCapability;
 import com.openshift.restclient.capability.resources.IPodLogRetrieval;
 import com.openshift.restclient.model.IPod;
 
@@ -164,7 +164,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 			final MessageConsoleStream os = console.newMessageStream();
 			os.setEncoding("UTF-8");
 			try {
-				final InputStream logs = capability.getLogs(true, key.container, OpenShiftBinaryOption.SKIP_TLS_VERIFY);
+				final InputStream logs = capability.getLogs(true, key.container, IBinaryCapability.SKIP_TLS_VERIFY);
 				byte[] data = new byte[256];
 				int read = 0;
 				while (running && (read = readSafely(logs, data)) != -1 && !os.isClosed()) {
