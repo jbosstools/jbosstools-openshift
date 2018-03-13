@@ -34,8 +34,6 @@ import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
-import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
-import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
@@ -46,6 +44,7 @@ import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.utils.v3.OpenShift3NativeProjectUtils;
 import org.jboss.tools.openshift.reddeer.wizard.page.ResourceLabelsWizardPage;
 import org.jboss.tools.openshift.reddeer.wizard.v3.NewOpenShift3ApplicationWizard;
+import org.jboss.tools.openshift.ui.bot.test.common.OpenShiftUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +66,7 @@ public class LabelsTest extends AbstractTest {
 		OpenShift3NativeProjectUtils.getOrCreateProject(DatastoreOS3.PROJECT1,
 				DatastoreOS3.PROJECT1_DISPLAYED_NAME, StringUtils.EMPTY, connectionReq.getConnection());
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer();
-		new DefaultTree().selectItems(new DefaultTreeItem(OpenShiftLabel.Others.EAP_TEMPLATE));
+		OpenShiftUtils.selectEAPTemplate();
 		
 		new WaitUntil(new ControlIsEnabled(new NextButton()), TimePeriod.DEFAULT);
 		

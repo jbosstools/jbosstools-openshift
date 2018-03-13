@@ -234,6 +234,9 @@ public class OpenNewApplicationWizardWithNoProjectTest extends AbstractTest {
 		if (connection.projectExists(projectName)) {
 			connection.getProject(projectName).delete();
 		}
+		
+		//Delete connection too
+		new OpenShiftExplorerView().getOpenShift3Connection(connectionReq.getConnection()).remove();
 	}
 	
 	@AfterClass

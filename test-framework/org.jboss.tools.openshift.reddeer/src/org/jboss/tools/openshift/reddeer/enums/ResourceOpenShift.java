@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -10,25 +10,34 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.enums;
 
-public enum ResourceState {
+/**
+ * Enum represents OpenShift resources
+ * 
+ * @author jkopriva@redhat.com
+ *
+ */
+public enum ResourceOpenShift {
 
-	UNSPECIFIED(""),
-	PENDING("Pending"),
-	RUNNING("Running"),
-	COMPLETE("Complete"),
-	SUCCEEDED("Succeeded"),
-	FAILED("Failed"),
-	IMAGE_PULL_BACK_OFF("ImagePullBackOff"),
-	ERROR_IMAGE_PULL("ErrImagePull");
+	BUILD_CONFIG("BuildConfig"),
+	BUILD("Build"),
+	DEPLOYMENT_CONFIG("DeploymentConfig"),
+	IMAGE_STREAM("ImageStream"),
+	POD("Pod"),
+	ROUTE("Route"),
+	SERVICE("Service"),
+	TEMPLATE("Template"),
+	DEPLOYMENT("Deployment"),
+	REPLICATION_CONTROLLER("ReplicationController");
 	
+	private final String text;
 	
-	private String state;
-	
-	private ResourceState(String state) {
-		this.state = state;
+	private ResourceOpenShift(String text) {
+		this.text = text;
 	}
 	
+	@Override
 	public String toString() {
-		return state;
+		return text;
 	}
+	
 }

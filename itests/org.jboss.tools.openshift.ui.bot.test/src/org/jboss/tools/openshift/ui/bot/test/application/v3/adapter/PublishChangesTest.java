@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2017 Red Hat, Inc.
+ * Copyright (c) 2007-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v 1.0 which accompanies this distribution,
@@ -41,6 +41,7 @@ import org.jboss.tools.openshift.reddeer.requirement.OpenShiftConnectionRequirem
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftConnectionRequirement.CleanConnection;
 import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
+import org.jboss.tools.openshift.reddeer.requirement.OpenShiftCommandLineToolsRequirement.OCBinary;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftProjectRequirement.RequiredProject;
 import org.jboss.tools.openshift.reddeer.requirement.OpenShiftServiceRequirement.RequiredService;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
@@ -58,6 +59,7 @@ import org.junit.runner.RunWith;
 
 @OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
+@OCBinary(cleanup=false, setOCInPrefs=true)
 @CleanOpenShiftExplorer
 @RequiredBasicConnection
 @CleanConnection
@@ -157,6 +159,7 @@ public class PublishChangesTest extends AbstractTest  {
 		} catch (OpenShiftToolsException ex) {
 			// do nothing, adapter does not exists
 		}
+		new ProjectExplorer().getProject(PROJECT_NAME).delete(false);
 		TestUtils.cleanupGitFolder(new File(GIT_REPO_DIRECTORY));
 	}
 }

@@ -54,6 +54,7 @@ public class OpenShiftLabel {
 		public static final String BUILD_LOG = "Build Log...";
 		public static final String CLONE_BUILD = "Clone Build";
 		public static final String DELETE_RESOURCE = "Delete";
+		public static final String DELETE_RESOURCES = "Delete Resources...";
 		public static final String POD_LOG = "Pod Log...";
 		public static final String[] NEW_RESOURCE = {"New", "Resource..."};
 		public static final String START_BUILD = "Start Build";
@@ -107,6 +108,7 @@ public class OpenShiftLabel {
 		public static final String COMMIT = "Commit Changes";
 		public static final String DELETE_APP = "Application removal";
 		public static final String DELETE_OS_PROJECT = "Delete OpenShift Project";
+		public static final String DELETE_OS_RESOURCES = "Delete OpenShift Resources";
 		public static final String DELETE_ADAPTER = "Delete Server";
 		public static final String DEPLOY_IMAGE_TO_OPENSHIFT = "Deploy Image to OpenShift";
 		public static final String EDIT_CARTRIDGES = "Edit Embedded Cartridges";
@@ -206,6 +208,7 @@ public class OpenShiftLabel {
 		public static final String CREATE_DOMAIN = "New...";
 		public static final String CREATE_SSH_KEY = "New...";
 		public static final String DEFINED_RESOURCES = "Defined Resources...";
+		public static final String DELETE = "Delete";
 		public static final String DESELECT_ALL = "Deselect all";
 		public static final String DISCOVER = "Discover...";
 		public static final String EDIT = "Edit...";
@@ -299,6 +302,9 @@ public class OpenShiftLabel {
 		// Ports
 		public static final String SERVICE_PORT = "Service port:";
 		public static final String POD_PORT = "Pod port:";
+		
+		//Delete related
+		public static final String LABEL_FILTER = "Label Filter:";
 	}
 	
 	/**
@@ -307,6 +313,7 @@ public class OpenShiftLabel {
 	public static class Others {
 		public static final String CONNECT_TOOL_ITEM = "Connection...";
 		public static final String EAP_TEMPLATE = "eap70-basic-s2i (eap, javaee, java, jboss) - openshift";
+		public static final String EAP_TEMPLATE_OLD = "eap70-basic-s2i (eap, javaee, java, jboss, xpaas) - openshift";
 		public static final String EAP_BUILDER_IMAGE = "jboss-eap70-openshift:1.5 (builder, eap, javaee, java, jboss) - openshift";
 		public static final String NODEJS_TEMPLATE = "nodejs-example (quickstart, nodejs) - openshift";
 		public static final String RED_HAT_CENTRAL = "Red Hat Central";

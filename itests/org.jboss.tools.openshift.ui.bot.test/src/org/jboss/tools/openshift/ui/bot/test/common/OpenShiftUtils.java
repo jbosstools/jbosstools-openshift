@@ -39,6 +39,8 @@ import org.eclipse.reddeer.swt.impl.button.NoButton;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
+import org.eclipse.reddeer.swt.impl.tree.DefaultTreeItem;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.internal.wizards.datatransfer.SmartImportJob;
@@ -214,6 +216,14 @@ public class OpenShiftUtils {
 		new WaitWhile(new JobIsRunning(), TimePeriod.VERY_LONG);
 
 	}
-
+	
+	public static void selectEAPTemplate () {
+		try {
+			new DefaultTree().selectItems(new DefaultTreeItem(OpenShiftLabel.Others.EAP_TEMPLATE));
+		} catch (CoreLayerException ex) {
+			//Select older EAP template(depends on OpenShift version)
+			new DefaultTree().selectItems(new DefaultTreeItem(OpenShiftLabel.Others.EAP_TEMPLATE_OLD));
+		}	
+	}
 
 }

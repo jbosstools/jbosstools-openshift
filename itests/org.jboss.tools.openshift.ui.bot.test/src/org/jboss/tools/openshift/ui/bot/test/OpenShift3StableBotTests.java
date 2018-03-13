@@ -14,9 +14,11 @@ import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.CreateServerAdapterTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplicationWizardGitTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ImportApplicationWizardTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.PublishChangesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapterWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.CreateResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourceLimitsTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.InteligentDeleteResourceTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.LabelsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.NewApplicationWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.TemplateParametersTest;
@@ -63,6 +65,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	DeleteProjectTest.class,
 	ResourcesTest.class,
 	ProjectPropertiesTest.class,
+	InteligentDeleteResourceTest.class,
 	
 	// Advanced application testing
 	DeployDockerImageTest.class,
@@ -84,6 +87,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	// Server adapter
 	ServerAdapterWizardHandlingTest.class,
 	CreateServerAdapterTest.class,
+	PublishChangesTest.class,
 	
 })
 public class OpenShift3StableBotTests extends AbstractBotTests {

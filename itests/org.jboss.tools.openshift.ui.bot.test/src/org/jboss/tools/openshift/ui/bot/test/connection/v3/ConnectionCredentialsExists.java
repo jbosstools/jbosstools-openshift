@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.ui.bot.test.connection.v3;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.reddeer.junit.execution.TestMethodShouldRun;
 import org.jboss.tools.openshift.reddeer.utils.DatastoreOS3;
 import org.junit.runners.model.FrameworkMethod;
@@ -24,10 +25,9 @@ public class ConnectionCredentialsExists implements TestMethodShouldRun {
 	@Override
 	public boolean shouldRun(FrameworkMethod method) {
 		if (method.getName().contains("OAuth")) {
-			return DatastoreOS3.TOKEN != null && !DatastoreOS3.TOKEN.isEmpty();
+			return StringUtils.isNotEmpty(DatastoreOS3.TOKEN);
 		} else {
-			return (DatastoreOS3.USERNAME != null && !DatastoreOS3.USERNAME.isEmpty()) 
-					&& (DatastoreOS3.PASSWORD != null && !DatastoreOS3.PASSWORD.isEmpty()); 
+			return (StringUtils.isNotEmpty(DatastoreOS3.USERNAME) && StringUtils.isNotEmpty(DatastoreOS3.SERVER)); 
 		}
 	}	
 }	
