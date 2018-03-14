@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -21,6 +22,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
+import org.jboss.tools.as.runtimes.integration.ui.composites.DownloadRuntimeHyperlinkComposite;
 import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
@@ -54,12 +56,33 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		Composite main = setupComposite(parent, handle, title, desc);
 		createCredentialWidgets(main);
 		createHypervisorWidgets(main);
+		createDownloadWidgets(main, handle);
 		createLocationWidgets(main, homeLabel);
 
 		validateAndPack(main);
 		return main;
 	}
 
+	
+	protected void createDownloadWidgets(Composite main, IWizardHandle handle) {
+		DownloadRuntimeHyperlinkComposite hyperlink = new DownloadRuntimeHyperlinkComposite(main, 
+				SWT.NONE, handle, getTaskModel()) {
+			
+			@Override
+			protected void postDownloadRuntimeUpdateWizard(String newHomeDir) {
+				handleDownloadedFile(newHomeDir);
+				getWizardHandle().update();
+			}
+		};
+		GridDataFactory.fillDefaults().span(3, 1).align(SWT.END, SWT.END).applyTo(hyperlink);
+	}
+	
+	protected void handleDownloadedFile(String newHome) {
+		if( !homeText.isDisposed()) {
+			homeText.setText(newHome);
+		}
+	}
+	
 	protected void createHypervisorWidgets(Composite main) {
 		// Point to file / folder to run
 		Label l = new Label(main, SWT.NONE);

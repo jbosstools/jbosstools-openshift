@@ -15,11 +15,11 @@ public class MinishiftVersionLoader {
 	public static String CDK_VERSION_KEY = "CDK";
 	public static String CDK_VERSION_KEY_OLD = "CDK Version";
 
-	public static MinishiftVersions getVersionProperties(String homeDir) {
+	public static MinishiftVersions getVersionProperties(String commandPath) {
 		Properties ret = new Properties();
 		try {
-			String[] lines = CDKLaunchUtility.call(homeDir, new String[] { "version" },
-					new File(homeDir).getParentFile(), new HashMap<String, String>(), 5000, false);
+			String[] lines = CDKLaunchUtility.call(commandPath, new String[] { "version" },
+					new File(commandPath).getParentFile(), new HashMap<String, String>(), 5000, false);
 
 			for (int i = 0; i < lines.length; i++) {
 				if (lines[i].trim().isEmpty())

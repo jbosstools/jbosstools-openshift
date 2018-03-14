@@ -20,17 +20,17 @@ public class CDKRuntimeDetectorTest extends TestCase {
 
 	@Test
 	public void testCDK30() {
-		testCDK("3.0.1", "org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector");
+		testCDK("3.0.1", "org.jboss.tools.openshift.cdk.server.core.internal.detection.UnifiedMinishiftRuntimeDetector");
 	}
 
 	@Test
 	public void testCDK31() {
-		testCDK("3.1.1", "org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector");
+		testCDK("3.1.1", "org.jboss.tools.openshift.cdk.server.core.internal.detection.UnifiedMinishiftRuntimeDetector");
 	}
 
 	@Test
 	public void testCDK32() {
-		testCDK("3.2.0-alpha.1-1", "org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK32RuntimeDetector");
+		testCDK("3.2.0-alpha.1-1", "org.jboss.tools.openshift.cdk.server.core.internal.detection.UnifiedMinishiftRuntimeDetector");
 	}
 
 	public void testCDK(String version, String detectorId) {
