@@ -390,6 +390,22 @@ public class OpenShiftServerUtils {
 	public static String getConnectionURL(IServerAttributes server) {
 		return getAttribute(ATTR_CONNECTIONURL, server);
 	}
+	
+	/**
+	 * Returns the unique id that's stored in the given server. Returns {@code null}
+	 * if it doesn't exist.
+	 * 
+	 * @param server
+	 * @return the uniqueId stored in the given server
+	 */
+	public static String getResourceUniqueId(IServerAttributes server) {
+		// TODO: implement override project settings with server settings
+		String uniqueId = getAttribute(ATTR_SERVICE, server);
+		if (StringUtils.isEmpty(uniqueId)) {
+			return null;
+		}
+		return uniqueId;
+	}
 
 	/**
 	 * Returns the OpenShift resource (service, replication controller) for the
@@ -406,14 +422,10 @@ public class OpenShiftServerUtils {
 	 * @return the OpenShift resource
 	 */
 	public static IResource getResource(IServerAttributes server, Connection connection, IProgressMonitor monitor) {
-		// TODO: implement override project settings with server settings
-		String uniqueId = getAttribute(ATTR_SERVICE, server);
-		if (StringUtils.isEmpty(uniqueId)) {
-			return null;
-		}
 		if (connection == null) {
 			return null;
 		}
+		String uniqueId = getResourceUniqueId(server);
 		String projectName = OpenShiftResourceUniqueId.getProjectName(uniqueId);
 		String kind = OpenShiftResourceUniqueId.getKind(uniqueId);
 		List<IResource> resources = connection.getResources(kind, projectName);
@@ -424,20 +436,33 @@ public class OpenShiftServerUtils {
 		return resource;
 	}
 
+	/**
+	 * Returns the resource that's associated (and stored) with the given server.
+	 * Returns {@code null} if it can't be found.
+	 * 
+	 * @param attributes
+	 * @param monitor
+	 * @return
+	 */
 	public static IResource getResource(IServerAttributes attributes, IProgressMonitor monitor) {
 		return getResource(attributes, getConnection(attributes), monitor);
 	}
 
-	public static IResource checkedGetResource(final IServer server, IProgressMonitor monitor) throws CoreException {
-		final IResource resource = getResource(server, monitor);
-		if (resource == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
-					NLS.bind("Server {0} could not determine the service to publish to.", server.getName())));
-		}
-		return resource;
-	}
-
 	/**
+	 * Returns the {@link IResource} that's stored in the given server. Throws a
+	 * {@link CoreException} if none was found.
+	 * 
+	 * @param server
+	 * @param connection
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 */
+	public static IResource getResourceChecked(IServerAttributes server, 
+			IProgressMonitor monitor) throws CoreException {
+		return getResourceChecked(server, getConnection(server), monitor);
+	}
+		/**
 	 * Returns the {@link IResource} that's stored in the given server. Throws a
 	 * {@link CoreException} if none was found.
 	 * 
@@ -451,11 +476,13 @@ public class OpenShiftServerUtils {
 			IProgressMonitor monitor) throws CoreException {
 		IResource resource = getResource(server, connection, monitor);
 		if (resource == null) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory()
-					.errorStatus(NLS.bind(
-							"Could not find the resource for server {0}."
-									+ " Your server adapter might refer to an inexistant resource.",
-							server == null ? "" : server.getName())));
+			String uniqueId = OpenShiftServerUtils.getResourceUniqueId(server);
+			String projectName = OpenShiftResourceUniqueId.getProjectName(uniqueId);
+			String resourceName = OpenShiftResourceUniqueId.getResourceName(uniqueId);
+			String resourceKind = OpenShiftResourceUniqueId.getKind(uniqueId);
+			throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(
+					NLS.bind("Could not publish server {0}: could not find {1} \"{2}\" in project \"{3}\".", 
+							new String[] { server.getName(), resourceKind, resourceName, projectName })));
 		}
 		return resource;
 	}
@@ -553,7 +580,7 @@ public class OpenShiftServerUtils {
 	 * @throws CoreException
 	 */
 	public static RSync createRSync(final IServer server, IProgressMonitor monitor) throws CoreException {
-		final IResource resource = checkedGetResource(server, monitor);
+		final IResource resource = getResourceChecked(server, monitor);
 		String podPath = getOrLoadPodPath(server, resource);
 
 		return createRSync(resource, podPath, server);

@@ -49,7 +49,7 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 
 	@Override
 	protected RSync createRsync(IServer server, final IProgressMonitor monitor) throws CoreException {
-		final IResource resource = OpenShiftServerUtils.checkedGetResource(server, monitor);
+		final IResource resource = OpenShiftServerUtils.getResourceChecked(server, monitor);
 		IPath podPath = new Path(OpenShiftServerUtils.getOrLoadPodPath(server, resource)).append(POD_BASE_PATH);
 
 		return OpenShiftServerUtils.createRSync(resource, podPath.toString(), server);
