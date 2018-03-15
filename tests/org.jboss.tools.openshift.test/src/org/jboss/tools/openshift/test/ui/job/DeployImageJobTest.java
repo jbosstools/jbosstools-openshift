@@ -196,7 +196,7 @@ public class DeployImageJobTest {
 		IImageStream is = whenStubbingTheImageStream();
 		assertNotNull("Exp. an IS to be returned", is);
 		assertEquals(IMAGE_STREAM_NAME, is.getName());
-		assertEquals(project.getName(), is.getNamespace());
+		assertEquals(project.getName(), is.getNamespaceName());
 		assertEquals(DOCKER_TAG, is.getDockerImageRepository());
 	}
 
@@ -206,7 +206,7 @@ public class DeployImageJobTest {
 		IImageStream is = whenStubbingTheImageStream(DOCKER_TAG_DIFF_REPO);
 		assertNotNull("Exp. an IS to be returned", is);
 		assertEquals(IMAGE_STREAM_NAME, is.getName());
-		assertEquals(ICommonAttributes.COMMON_NAMESPACE, is.getNamespace());
+		assertEquals(ICommonAttributes.COMMON_NAMESPACE, is.getNamespaceName());
 		assertEquals(DOCKER_TAG, is.getDockerImageRepository());
 	}
 
@@ -218,7 +218,7 @@ public class DeployImageJobTest {
 		IImageStream is = whenStubbingTheImageStream();
 		assertNotNull("Exp. an IS to be returned", is);
 		assertEquals(RESOURCE_NAME, is.getName());
-		assertEquals(project.getName(), is.getNamespace());
+		assertEquals(project.getName(), is.getNamespaceName());
 		assertEquals(1, is.getTags().size());
 		assertEquals(DOCKER_TAG.toString(), is.getTags().iterator().next().getFrom().getName());
 	}
@@ -238,7 +238,7 @@ public class DeployImageJobTest {
 
 	private IImageStream givenAnImageStreamTo(String namespace, DockerImageURI uri) {
 		IImageStream is = mock(IImageStream.class);
-		when(is.getNamespace()).thenReturn(namespace);
+		when(is.getNamespaceName()).thenReturn(namespace);
 		when(is.getName()).thenReturn(IMAGE_STREAM_NAME);
 		when(is.getDockerImageRepository()).thenReturn(uri);
 
@@ -290,7 +290,7 @@ public class DeployImageJobTest {
 		assertEquals(ResourceKind.IMAGE_STREAM_TAG, imageChangeTrigger.getKind());
 		assertEquals("Exp. the trigger to point to the imagestream name",
 				new DockerImageURI(null, null, is.getName(), DOCKER_TAG.getTag()), imageChangeTrigger.getFrom());
-		assertEquals("Exp. the trigger to point to the imagestream name", is.getNamespace(),
+		assertEquals("Exp. the trigger to point to the imagestream name", is.getNamespaceName(),
 				imageChangeTrigger.getNamespace());
 	}
 

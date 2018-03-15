@@ -92,7 +92,7 @@ public class CreateApplicationFromImageJobTest {
 	public void testStubDeploymentConfig() {
 		IImageStream is = mock(IImageStream.class);
 		when(is.getName()).thenReturn("aISname");
-		when(is.getNamespace()).thenReturn("anamespace");
+		when(is.getNamespaceName()).thenReturn("anamespace");
 
 		IDeploymentConfig stub = mock(IDeploymentConfig.class);
 		when(stub.getName()).thenReturn(APP_NAME);

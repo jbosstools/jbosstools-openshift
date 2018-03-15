@@ -481,7 +481,7 @@ public class ResourceMocks {
 	public static void mockGetResourceProperties(String name, IProject project, IResource resource) {
 		doReturn(name).when(resource).getName();
 		if (project != null) {
-			doReturn(project.getName()).when(resource).getNamespace();
+			doReturn(project.getName()).when(resource).getNamespaceName();
 			doReturn(project).when(resource).getProject();
 		}
 	}

@@ -219,7 +219,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 				, TimePeriod.VERY_LONG);
 
 		// wait for replication controller to appear in UI
-		List<IReplicationController> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespace());
+		List<IReplicationController> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespaceName());
 		IReplicationController serviceRc = ResourceUtils.getReplicationControllerFor(service, rcs);
 		assertThat(serviceRc, not(nullValue()));
 		new WaitUntil(
@@ -315,7 +315,7 @@ public class OpenShiftServiceRequirement implements Requirement<RequiredService>
 				|| connection == null) {
 			return null;
 		}
-		List<IReplicationController> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespace());
+		List<IReplicationController> rcs = connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespaceName());
 		IReplicationController rc = ResourceUtils.getReplicationControllerFor(service, rcs);
 		return rc;
 	}

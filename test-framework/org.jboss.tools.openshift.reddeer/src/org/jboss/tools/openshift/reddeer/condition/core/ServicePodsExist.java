@@ -62,7 +62,7 @@ public class ServicePodsExist extends AbstractWaitCondition {
 
 	private boolean hasDesiredReplicas(IService service) {
 		List<IReplicationController> allReplicationControllers = 
-				connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespace());
+				connection.getResources(ResourceKind.REPLICATION_CONTROLLER, service.getNamespaceName());
 		IReplicationController rc = ResourceUtils.getReplicationControllerFor(service, allReplicationControllers);
 		return rc != null 
 				&& rc.getDesiredReplicaCount() > 0;

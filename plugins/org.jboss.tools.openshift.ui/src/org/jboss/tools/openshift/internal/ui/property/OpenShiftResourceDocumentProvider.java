@@ -130,7 +130,7 @@ public class OpenShiftResourceDocumentProvider extends AbstractDocumentProvider 
 					}
 					IStatus error = OpenShiftUIActivator.statusFactory()
 							.errorStatus(NLS.bind("Could not update \"{0}\" for project \"{1}\" : {2}",
-									new String[] { resourceName, resource.getNamespace(), problem }), e);
+									new String[] { resourceName, resource.getNamespaceName(), problem }), e);
 					return error;
 				}
 				return Status.OK_STATUS;

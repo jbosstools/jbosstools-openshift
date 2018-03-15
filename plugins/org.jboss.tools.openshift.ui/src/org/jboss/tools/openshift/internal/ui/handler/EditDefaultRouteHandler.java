@@ -47,7 +47,7 @@ public class EditDefaultRouteHandler extends AbstractHandler {
 
 		IServiceWrapper service = UIUtils.getFirstElement(currentSelection, IServiceWrapper.class);
 		if (service != null) {
-			new RouteOpenerJob(service.getWrapped().getNamespace(), shell) {
+			new RouteOpenerJob(service.getWrapped().getNamespaceName(), shell) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					this.routes = service.getResourcesOfKind(ResourceKind.ROUTE).stream()

@@ -48,14 +48,14 @@ public class PortForwardingWizardModelTest {
 		Set<IPort> ports = new HashSet<>();
 		ports.add(port);
 
-		when(pod.getNamespace()).thenReturn("anamespace");
+		when(pod.getNamespaceName()).thenReturn("anamespace");
 		when(pod.getContainerPorts()).thenReturn(ports);
 		this.model = new PortForwardingWizardModel(pod);
 	}
 
 	@Test
 	public void testGetPodName() {
-		assertEquals(pod.getNamespace() + "\\" + pod.getName(), model.getPodName());
+		assertEquals(pod.getNamespaceName() + "\\" + pod.getName(), model.getPodName());
 	}
 
 	@Test

@@ -60,9 +60,9 @@ public class CreateResourceJob extends AbstractDelegatingMonitorJob {
 					if (resourceListener != null) {
 						Collection<IResource> resources;
 						if (resourceIn instanceof IList) {
-							resources = client.create((IList) resourceIn, project.getNamespace());
+							resources = client.create((IList) resourceIn, project.getNamespaceName());
 						} else {
-							resources = Collections.singletonList(client.create(resourceIn, project.getNamespace()));
+							resources = Collections.singletonList(client.create(resourceIn, project.getNamespaceName()));
 						}
 						resourceListener.accept(resources);
 					}

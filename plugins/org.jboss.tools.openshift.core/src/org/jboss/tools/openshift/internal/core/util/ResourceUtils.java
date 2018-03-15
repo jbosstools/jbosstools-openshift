@@ -1021,7 +1021,7 @@ public class ResourceUtils {
 		if (dcName != null) {
 			return getDeploymentConfigByName(dcName, service, connection);
 		} else {
-			String namespace = service.getNamespace();
+			String namespace = service.getNamespaceName();
 			IReplicationController rc = getReplicationControllerFor(service,
 					connection.getResources(ResourceKind.REPLICATION_CONTROLLER, namespace));
 			if (rc == null) {
@@ -1043,7 +1043,7 @@ public class ResourceUtils {
 		if (dcName != null) {
 			return getDeploymentConfigByName(dcName, rc, connection);
 		} else {
-			List<IDeploymentConfig> allDcs = connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, rc.getNamespace());
+			List<IDeploymentConfig> allDcs = connection.getResources(ResourceKind.DEPLOYMENT_CONFIG, rc.getNamespaceName());
 			return allDcs.stream().filter(dc -> ResourceUtils.areRelated(rc, dc))
 					// TODO: what if several dc are found?
 					.findFirst().orElse(null);
@@ -1055,7 +1055,7 @@ public class ResourceUtils {
 		if (StringUtils.isBlank(dcName) || resource == null) {
 			return null;
 		}
-		return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespace(), dcName);
+		return connection.getResource(ResourceKind.DEPLOYMENT_CONFIG, resource.getNamespaceName(), dcName);
 	}
 
 	/**

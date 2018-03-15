@@ -34,7 +34,7 @@ public class ProjectWrapperTest {
 		this.connectionWrapper = new ConnectionWrapper(mock(OpenshiftUIModel.class), connection);
 
 		this.project = mock(IProject.class);
-		when(project.getNamespace()).thenReturn("namespace");
+		when(project.getNamespaceName()).thenReturn("namespace");
 		this.projectWrapper = new ProjectWrapper(connectionWrapper, project);
 		WatchManager.getInstance()._getWatches().clear();
 	}

@@ -235,7 +235,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 			imageChangeTrigger.setContainerName(name);
 			imageChangeTrigger.setFrom(new DockerImageURI(null, null, is.getName(), imageUri.getTag()));
 			imageChangeTrigger.setKind(ResourceKind.IMAGE_STREAM_TAG);
-			imageChangeTrigger.setNamespace(is.getNamespace());
+			imageChangeTrigger.setNamespace(is.getNamespaceName());
 		}
 		return dc;
 	}

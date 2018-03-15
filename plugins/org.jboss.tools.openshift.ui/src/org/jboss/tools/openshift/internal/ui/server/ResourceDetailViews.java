@@ -104,7 +104,7 @@ public class ResourceDetailViews extends AbstractStackedDetailViews {
 			}
 
 			IResource resource = (IResource) value;
-			namespaceText.setText(resource.getNamespace());
+			namespaceText.setText(resource.getNamespaceName());
 			String labels = StringUtils.toString(resource.getLabels());
 			labels = org.apache.commons.lang.StringUtils.defaultString(labels); //replaces null by empty string
 			labelsText.setText(labels);

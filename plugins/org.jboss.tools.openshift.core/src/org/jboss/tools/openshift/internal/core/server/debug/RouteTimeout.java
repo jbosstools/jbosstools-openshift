@@ -121,13 +121,13 @@ public class RouteTimeout {
 		if (routeMonitor.isCanceled()) {
 			return null;
 		}
-		List<IService> services = connection.getResources(ResourceKind.SERVICE, resource.getNamespace());
+		List<IService> services = connection.getResources(ResourceKind.SERVICE, resource.getNamespaceName());
 		Collection<IService> matchingServices = ResourceUtils.getServicesFor(resource, services);
 		routeMonitor.worked(1);
 		if (routeMonitor.isCanceled()) {
 			return null;
 		}
-		List<IRoute> routes = connection.getResources(ResourceKind.ROUTE, resource.getNamespace());
+		List<IRoute> routes = connection.getResources(ResourceKind.ROUTE, resource.getNamespaceName());
 		// TODO: support multiple matching routes, for now only get first
 		Optional<IRoute> matchingRoute = matchingServices.stream()
 				.flatMap(service -> ResourceUtils.getRoutesFor(service, routes).stream()).findFirst();

@@ -72,7 +72,7 @@ public class BuildConfigDetailViews extends AbstractStackedDetailViews {
 			IBuildConfig buildConfig = (IBuildConfig) value;
 
 			nameText.setText(buildConfig.getName());
-			namespaceText.setText(buildConfig.getNamespace());
+			namespaceText.setText(buildConfig.getNamespaceName());
 			String labels = org.jboss.tools.openshift.common.core.utils.StringUtils.toString(buildConfig.getLabels());
 			labels = org.apache.commons.lang.StringUtils.defaultString(labels); //replaces null by empty string
 			labelsText.setText(labels);

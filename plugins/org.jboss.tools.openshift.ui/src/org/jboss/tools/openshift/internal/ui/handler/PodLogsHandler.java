@@ -116,7 +116,7 @@ public class PodLogsHandler extends AbstractOpenShiftCliHandler {
 		if (build != null) {
 			final String buildName = build.getName();
 			Connection connection = ConnectionsRegistryUtil.safeGetConnectionFor(build);
-			List<IPod> pods = connection.getResources(ResourceKind.POD, build.getNamespace());
+			List<IPod> pods = connection.getResources(ResourceKind.POD, build.getNamespaceName());
 			for (IPod pod : pods) {
 				if (buildName.equals(pod.getAnnotation(OpenShiftAPIAnnotations.BUILD_NAME))) {
 					return pod;

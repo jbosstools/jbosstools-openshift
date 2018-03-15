@@ -625,7 +625,7 @@ public class OpenShiftServerEditorSection extends ServerEditorSection {
 			if (initialModel.openshiftResource != null) {
 				String kind = nullSafe(initialModel.openshiftResource.getKind()) + ":";
 				resourceKindLabel.setText(kind);
-				String namespaceAndName = nullSafe(initialModel.openshiftResource.getNamespace()) + "/"
+				String namespaceAndName = nullSafe(initialModel.openshiftResource.getNamespaceName()) + "/"
 						+ nullSafe(initialModel.openshiftResource.getName());
 				resourceText.setText(namespaceAndName);
 			} else {

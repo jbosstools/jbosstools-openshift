@@ -93,7 +93,7 @@ public class CreateResourceJobTest {
 		resources.add(status);
 
 		when(resourceFactory.create(input)).thenReturn(resource);
-		when(client.create(resource, project.getNamespace())).thenReturn(status);
+		when(client.create(resource, project.getNamespaceName())).thenReturn(status);
 
 		IStatus result = job.runMe();
 
@@ -111,7 +111,7 @@ public class CreateResourceJobTest {
 		resources.add(resource);
 
 		when(resourceFactory.create(input)).thenReturn(resource);
-		when(client.create(resource, project.getNamespace())).thenReturn(resource);
+		when(client.create(resource, project.getNamespaceName())).thenReturn(resource);
 
 		IStatus result = job.runMe();
 

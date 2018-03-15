@@ -82,7 +82,7 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 			case NAME:
 				return resource.getName();
 			case NAMESPACE:
-				return resource.getNamespace();
+				return resource.getNamespaceName();
 			case CREATED:
 				return resource.getCreationTimeStamp();
 			case RESOURCE_VERSION:
