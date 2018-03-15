@@ -49,7 +49,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -293,7 +292,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		ocLocationValidity.setValue(ocLocationStatus);
 		if (ocLocationStatus.isOK()) {
 			ocVersionValidity.setValue(ValidationStatus.cancel("Verifying oc version..."));
-			OCVersionValidationJob job = new OCVersionValidationJob(model.getOcOverrideLocation());
+			OCVersionValidationJob job = new OCVersionValidationJob(location);
 			job.addJobChangeListener(new JobChangeAdapter() {
 
 				@Override

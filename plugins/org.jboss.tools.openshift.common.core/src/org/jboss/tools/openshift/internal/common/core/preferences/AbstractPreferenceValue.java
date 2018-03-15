@@ -21,17 +21,24 @@ public abstract class AbstractPreferenceValue<TYPE> {
 
 	private String pluginId;
 	private String prefsKey;
-
+	private String defVal;
+	
 	public AbstractPreferenceValue(String prefsKey, String pluginId) {
-		this.pluginId = pluginId;
-		this.prefsKey = prefsKey;
+		this(prefsKey, pluginId, "");
 	}
 
+	public AbstractPreferenceValue(String prefsKey, String pluginId, String defaultVal) {
+		this.pluginId = pluginId;
+		this.prefsKey = prefsKey;
+		this.defVal = defaultVal;
+	}
+
+	
 	public abstract TYPE get();
 
 	protected String doGet() {
 		Preferences prefs = getPreferences(pluginId);
-		return prefs.get(prefsKey, "");
+		return prefs.get(prefsKey, defVal);
 	}
 
 	public void clear() throws BackingStoreException {
