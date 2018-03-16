@@ -52,7 +52,7 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 
 			@Override
 			public IPath getFullPath() {
-				return new Path(input.getNamespace()).append(input.getKind()).append(input.getName() + ".json");
+				return new Path(input.getNamespaceName()).append(input.getKind()).append(input.getName() + ".json");
 			}
 
 			@Override
@@ -63,7 +63,7 @@ public class OpenShiftResourceInput implements IStorageEditorInput {
 
 			@Override
 			public String getName() {
-				StringBuilder sb = new StringBuilder().append("[").append(input.getNamespace()).append("] ")
+				StringBuilder sb = new StringBuilder().append("[").append(input.getNamespaceName()).append("] ")
 						.append(StringUtils.humanize(input.getKind())).append(" : ").append(input.getName())
 						.append(".json");
 				return sb.toString();

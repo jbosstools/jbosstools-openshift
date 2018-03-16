@@ -243,7 +243,7 @@ public class OpenShiftDebugMode {
 	protected IPod getExistingPod(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor) {
 		monitor.subTask(NLS.bind("Retrieving existing pod for deployment config {0}.", dc.getName()));
 
-		List<IPod> allPods = connection.getResources(ResourceKind.POD, dc.getNamespace());
+		List<IPod> allPods = connection.getResources(ResourceKind.POD, dc.getNamespaceName());
 		// TODO: support multiple pods
 		return ResourceUtils.getPodsFor(dc, allPods).stream().findFirst().orElse(null);
 

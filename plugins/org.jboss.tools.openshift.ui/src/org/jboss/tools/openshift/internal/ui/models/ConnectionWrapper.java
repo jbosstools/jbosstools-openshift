@@ -108,7 +108,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 					WatchManager.getInstance().startWatch(project, connection);
 					Collection<IResource> resources = new HashSet<>();
 					for (String kind : RESOURCE_KINDS) {
-						resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
+						resources.addAll(getWrapped().getResources(kind, project.getNamespaceName()));
 					}
 					resources.forEach(r -> resourceCache.add(r));
 					projectWrapper.initWithResources(resources);
@@ -187,7 +187,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 
 	private ProjectWrapper findProjectWrapper(IResource resource) {
 		synchronized (projects) {
-			return projects.get(resource.getNamespace());
+			return projects.get(resource.getNamespaceName());
 		}
 	}
 
@@ -225,7 +225,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 
 	protected void handleAdd(ProjectWrapper projectWrapper, IResource newResource) {
 		resourceCache.add(newResource);
-		Collection<IResource> resources = resourceCache.getResources(newResource.getProject().getNamespace());
+		Collection<IResource> resources = resourceCache.getResources(newResource.getProject().getNamespaceName());
 		// relying in IResource#equals() definition
 		projectWrapper.updateWithResources(resources);
 	}
@@ -239,7 +239,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 				fireChanged();
 			}
 		} else if (projectWrapper != null) {
-			Collection<IResource> resources = resourceCache.getResources(oldResource.getNamespace());
+			Collection<IResource> resources = resourceCache.getResources(oldResource.getNamespaceName());
 			projectWrapper.updateWithResources(resources);
 		}
 	}
@@ -247,7 +247,7 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 	protected void handleUpdate(ProjectWrapper projectWrapper, IResource newResource) {
 		resourceCache.remove(newResource);
 		resourceCache.add(newResource);
-		Collection<IResource> resources = resourceCache.getResources(newResource.getNamespace());
+		Collection<IResource> resources = resourceCache.getResources(newResource.getNamespaceName());
 		// relying in IResource#equals() definition
 		projectWrapper.updateWithResources(resources);
 	}
@@ -267,14 +267,14 @@ public class ConnectionWrapper extends AbstractOpenshiftUIElement<IOpenShiftConn
 	}
 
 	void refresh(ProjectWrapper projectWrapper) {
-		resourceCache.flush(projectWrapper.getWrapped().getNamespace());
+		resourceCache.flush(projectWrapper.getWrapped().getNamespaceName());
 		IProject project = projectWrapper.getWrapped();
 		IOpenShiftConnection connection = projectWrapper.getParent().getWrapped();
 		WatchManager.getInstance().stopWatch(project, connection);
 		WatchManager.getInstance().startWatch(project, connection);
 		Collection<IResource> resources = new HashSet<>();
 		for (String kind : RESOURCE_KINDS) {
-			resources.addAll(getWrapped().getResources(kind, project.getNamespace()));
+			resources.addAll(getWrapped().getResources(kind, project.getNamespaceName()));
 		}
 		resources.forEach(r -> resourceCache.add(r));
 		projectWrapper.updateWithResources(resources);

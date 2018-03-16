@@ -73,7 +73,7 @@ public class OpenInWebConsoleHandler extends AbstractHandler {
 
 	protected String getWebConsoleUrl(Connection connection, IResource resource) {
 		StringBuilder url = new StringBuilder(connection.getHost()).append("/console");
-		String projectName = resource == null ? null : resource.getNamespace();
+		String projectName = resource == null ? null : resource.getNamespaceName();
 		if (projectName != null) {
 			url.append("/project/").append(projectName);
 		}

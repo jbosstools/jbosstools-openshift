@@ -492,9 +492,9 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	@Override
 	public <T extends IResource> T refresh(IResource resource) {
 		try {
-			return client.get(resource.getKind(), resource.getName(), resource.getNamespace());
+			return client.get(resource.getKind(), resource.getName(), resource.getNamespaceName());
 		} catch (UnauthorizedException e) {
-			return retryGet(e, resource.getKind(), resource.getName(), resource.getNamespace());
+			return retryGet(e, resource.getKind(), resource.getName(), resource.getNamespaceName());
 		}
 	}
 

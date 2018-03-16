@@ -60,7 +60,7 @@ public class DeleteResourcesHandler extends AbstractHandler {
 					.cancelStatus(NLS.bind("Could not delete resources: No connection found for selected resource {0}",
 							selectedResource.getName()));
 		}
-		String namespace = selectedResource.getNamespace();
+		String namespace = selectedResource.getNamespaceName();
 		openDialog(connection, namespace, HandlerUtil.getActiveShell(event));
 
 		return null;

@@ -91,7 +91,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 
 	private String getMessageConsoleName() {
 		IPod pod = key.pod;
-		return NLS.bind("{0}\\{1}\\{2} log", new Object[] { pod.getNamespace(), pod.getName(), key.container });
+		return NLS.bind("{0}\\{1}\\{2} log", new Object[] { pod.getNamespaceName(), pod.getName(), key.container });
 	}
 
 	private static class Key {

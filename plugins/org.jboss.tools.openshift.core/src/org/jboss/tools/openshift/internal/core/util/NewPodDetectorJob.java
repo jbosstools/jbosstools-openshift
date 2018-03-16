@@ -100,7 +100,7 @@ public class NewPodDetectorJob extends Job {
 
 	private Collection<String> getOldPods(IReplicationController rc) {
 		Connection connection = ConnectionsRegistryUtil.getConnectionFor(rc);
-		List<IPod> allPods = connection.getResources(ResourceKind.POD, rc.getNamespace());
+		List<IPod> allPods = connection.getResources(ResourceKind.POD, rc.getNamespaceName());
 		return ResourceUtils.getPodsFor(rc, allPods).stream().filter(pod -> ResourceUtils.isRuntimePod(pod))
 				.map(p -> p.getName()).collect(Collectors.toList());
 	}

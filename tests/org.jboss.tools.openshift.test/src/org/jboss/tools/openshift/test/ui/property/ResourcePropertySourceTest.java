@@ -44,7 +44,7 @@ public class ResourcePropertySourceTest {
 		annotations.put("efg", "def");
 
 		when(resource.getName()).thenReturn("aname");
-		when(resource.getNamespace()).thenReturn("anamespace");
+		when(resource.getNamespaceName()).thenReturn("anamespace");
 		when(resource.getKind()).thenReturn("akind");
 		when(resource.getLabels()).thenReturn(labels);
 		when(resource.getAnnotations()).thenReturn(annotations);

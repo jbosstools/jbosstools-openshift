@@ -38,7 +38,7 @@ public class ConnectionWrapperTest {
 	public void prepareData() throws Exception {
 	    this.project = mock(IProject.class);
         when(project.getName()).thenReturn(NAMESPACE);
-        when(project.getNamespace()).thenReturn(NAMESPACE);
+        when(project.getNamespaceName()).thenReturn(NAMESPACE);
         
 		IOpenShiftConnection connection = mock(IOpenShiftConnection.class);
 		when(connection.isDefaultHost()).thenReturn(true);
@@ -55,7 +55,7 @@ public class ConnectionWrapperTest {
 
 		this.resource = mock(IBuildConfig.class);
 		when(this.resource.getKind()).thenReturn(ResourceKind.BUILD_CONFIG);
-		when(this.resource.getNamespace()).thenReturn(NAMESPACE);
+		when(this.resource.getNamespaceName()).thenReturn(NAMESPACE);
 		when(this.resource.getProject()).thenReturn(project);
 
 		this.watchListener = new WatchListenerTestable(WatchManager.getInstance(), project, connection, ResourceKind.BUILD_CONFIG, 0,

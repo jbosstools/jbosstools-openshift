@@ -66,7 +66,7 @@ public class SelectRouteDialog extends ElementListSelectionDialog {
 				message.append("Server: ").append(connection.getUsername()).append(" ").append(connection.getHost())
 						.append(StringUtils.getLineSeparator());
 			}
-			message.append("Project: ").append(route.getNamespace()).append(StringUtils.getLineSeparator());
+			message.append("Project: ").append(route.getNamespaceName()).append(StringUtils.getLineSeparator());
 			//Add more space between server/project info and instruction.
 			message.append(StringUtils.getLineSeparator());
 		}

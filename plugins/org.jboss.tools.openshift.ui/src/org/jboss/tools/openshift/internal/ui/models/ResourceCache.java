@@ -127,7 +127,7 @@ class ResourceCache {
 	}
 
 	public String getNamespace(IResource resource) {
-		return resource.getNamespace();
+		return resource.getNamespaceName();
 	}
 
 	public IResource getCachedVersion(IResource resource) {

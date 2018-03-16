@@ -67,7 +67,7 @@ public class OpenInWebConsoleHandlerTest {
 	public void test(DataPair dataPair) {
 		IResource resourceMock = dataPair.getResource();
 		if (resourceMock != null) {
-			when(resourceMock.getNamespace()).thenReturn("namespace");
+			when(resourceMock.getNamespaceName()).thenReturn("namespace");
 			when(resourceMock.getName()).thenReturn("qwerty");
 			when(resourceMock.getLabels()).thenReturn(new HashMap<String, String>() {
 				{

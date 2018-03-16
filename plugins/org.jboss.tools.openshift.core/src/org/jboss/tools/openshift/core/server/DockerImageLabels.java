@@ -146,7 +146,7 @@ public class DockerImageLabels {
 			return null;
 		}
 		DockerImageURI uri = trigger.getFrom();
-		return getImageStreamTag(uri, resource.getNamespace());
+		return getImageStreamTag(uri, resource.getNamespaceName());
 		//		String imageRef = getImageRef(dc, connection);
 		//		int imageDigestIndex = imageRef.indexOf(DOCKER_IMAGE_DIGEST_IDENTIFIER);
 		//		if (imageDigestIndex > 0) {
@@ -189,7 +189,7 @@ public class DockerImageLabels {
 		if (images.isEmpty()) {
 			throw new CoreException(OpenShiftCoreActivator.statusFactory()
 					.errorStatus(NLS.bind("No images found for deployment config {0} in project {1} on server {2}",
-							new Object[] { dc.getName(), dc.getNamespace(), connection.getHost() })));
+							new Object[] { dc.getName(), dc.getNamespaceName(), connection.getHost() })));
 		}
 		// TODO: handle if there are 2+ images
 		return images.iterator().next();

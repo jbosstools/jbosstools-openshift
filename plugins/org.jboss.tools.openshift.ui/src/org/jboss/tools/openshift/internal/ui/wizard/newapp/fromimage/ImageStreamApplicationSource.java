@@ -44,7 +44,7 @@ public class ImageStreamApplicationSource implements IApplicationSource {
 
 	@Override
 	public String getNamespace() {
-		return is.getNamespace();
+		return is.getNamespaceName();
 	}
 
 	@SuppressWarnings("unchecked")

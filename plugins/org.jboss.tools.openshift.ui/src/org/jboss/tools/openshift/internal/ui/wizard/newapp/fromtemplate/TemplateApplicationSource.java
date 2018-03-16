@@ -44,7 +44,7 @@ public class TemplateApplicationSource implements IApplicationSource {
 
 	@Override
 	public String getNamespace() {
-		return this.template.getNamespace();
+		return this.template.getNamespaceName();
 	}
 
 	@SuppressWarnings("unchecked")

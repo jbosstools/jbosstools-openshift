@@ -15,12 +15,12 @@ public class ResourceEquality {
 			return false;
 		}
 		IResource other = (IResource) right;
-		return thiz.getNamespace().equals(other.getNamespace()) && thiz.getKind().equals(other.getKind())
+		return thiz.getNamespaceName().equals(other.getNamespaceName()) && thiz.getKind().equals(other.getKind())
 				&& thiz.getName().equals(other.getName());
 	}
 
 	public static int hashCode(Object left) {
 		IResource thiz = (IResource) left;
-		return thiz.getName().hashCode() ^ thiz.getNamespace().hashCode();
+		return thiz.getName().hashCode() ^ thiz.getNamespaceName().hashCode();
 	}
 }

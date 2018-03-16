@@ -87,7 +87,7 @@ public class OpenshiftJMXConnectionProvider extends AbstractJBossJMXConnectionPr
 	protected String computeJolokiaURL(IServer server) {
 		IResource resource = OpenShiftServerUtils.getResource(server, new NullProgressMonitor());
 		if (resource != null) {
-			String projName = resource.getNamespace();
+			String projName = resource.getNamespaceName();
 			List<IPod> pods = ResourceUtils.getPodsFor(resource, resource.getProject().getResources(ResourceKind.POD));
 			if (!pods.isEmpty()) {
 				String podName = pods.get(0).getName();

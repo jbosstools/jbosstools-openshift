@@ -241,7 +241,7 @@ public class OpenShiftExplorerLabelProviderTest {
 
 		IProject project = givenAResource(IProject.class, ResourceKind.PROJECT);
 		when(project.getName()).thenReturn(displayName);
-		when(project.getNamespace()).thenReturn(namespace);
+		when(project.getNamespaceName()).thenReturn(namespace);
 
 		assertEquals(project.getName(), provider.getStyledText(project).getString());
 	}
@@ -253,7 +253,7 @@ public class OpenShiftExplorerLabelProviderTest {
 
 		IProject project = givenAResource(IProject.class, ResourceKind.PROJECT);
 		when(project.getDisplayName()).thenReturn(displayName);
-		when(project.getNamespace()).thenReturn(namespace);
+		when(project.getNamespaceName()).thenReturn(namespace);
 
 		assertEquals(project.getDisplayName() + " " + project.getName(), provider.getStyledText(project).getString());
 	}

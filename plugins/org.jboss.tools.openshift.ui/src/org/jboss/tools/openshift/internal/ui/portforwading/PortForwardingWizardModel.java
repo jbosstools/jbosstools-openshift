@@ -58,7 +58,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	}
 
 	public final String getPodName() {
-		return pod.getNamespace() + "\\" + pod.getName();
+		return pod.getNamespaceName() + "\\" + pod.getName();
 	}
 
 	public boolean getPortForwarding() {
@@ -152,7 +152,7 @@ public class PortForwardingWizardModel extends ObservablePojo {
 	}
 
 	private String getMessageConsoleName() {
-		return NLS.bind("Port forwarding to pod {0} ({1})", pod.getName(), pod.getNamespace());
+		return NLS.bind("Port forwarding to pod {0} ({1})", pod.getName(), pod.getNamespaceName());
 	}
 
 	/**

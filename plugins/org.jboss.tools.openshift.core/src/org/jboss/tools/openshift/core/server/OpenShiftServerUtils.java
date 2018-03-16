@@ -717,7 +717,7 @@ public class OpenShiftServerUtils {
 			return Collections.emptyList();
 		}
 		List<IPod> collection = new ArrayList<>();
-		List<IPod> pods = connection.getResources(ResourceKind.POD, resource.getNamespace());
+		List<IPod> pods = connection.getResources(ResourceKind.POD, resource.getNamespaceName());
 		List<IPod> servicePods = ResourceUtils.getPodsFor(resource, pods);
 		collection.addAll(pods);
 		collection.addAll(servicePods);

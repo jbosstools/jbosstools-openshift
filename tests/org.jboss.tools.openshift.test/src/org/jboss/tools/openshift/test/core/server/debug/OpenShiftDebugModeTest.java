@@ -656,12 +656,12 @@ public class OpenShiftDebugModeTest {
 		doReturn(selectors).when(dc).getReplicaSelector();
 		IService service1 = createService("service1", project, new HashMap<String, String>()); // doesnt match dc
 		IService service2 = createService("service2", project, selectors); // matches dc
-		when(connection.getResources(ResourceKind.SERVICE, project.getNamespace()))
+		when(connection.getResources(ResourceKind.SERVICE, project.getNamespaceName()))
 				.thenReturn(Arrays.asList(service1, service2));
 
 		IRoute route1 = createRoute("route1", project, "service42"); // matches inexistent service
 		IRoute route2 = createRoute("route2", project, "service2"); // matches service2
-		when(connection.getResources(ResourceKind.ROUTE, project.getNamespace()))
+		when(connection.getResources(ResourceKind.ROUTE, project.getNamespaceName()))
 				.thenReturn(Arrays.asList(route1, route2));
 		return route2;
 	}

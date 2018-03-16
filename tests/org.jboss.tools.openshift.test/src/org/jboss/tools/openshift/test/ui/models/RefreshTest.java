@@ -104,9 +104,7 @@ public class RefreshTest {
 		@SuppressWarnings("unchecked")
 		T instance = (T) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { klazz }, handler);
 		handler.stub((proxy, method, args) -> project).when(instance.getProject());
-		;
-		handler.stub((proxy, method, args) -> project.getNamespace()).when(instance.getNamespace());
-		;
+		handler.stub((proxy, method, args) -> project.getNamespaceName()).when(instance.getNamespaceName());
 		stubResource(handler, instance, kind, name, version);
 
 		return instance;
@@ -117,9 +115,7 @@ public class RefreshTest {
 		IProject instance = (IProject) Proxy.newProxyInstance(getClass().getClassLoader(),
 				new Class<?>[] { IProject.class }, handler);
 		handler.stub((proxy, method, args) -> instance).when(instance.getProject());
-		;
-		handler.stub((proxy, method, args) -> name).when(instance.getNamespace());
-		;
+		handler.stub((proxy, method, args) -> name).when(instance.getNamespaceName());
 		stubResource(handler, instance, ResourceKind.PROJECT, name, version);
 		return instance;
 	}
@@ -127,13 +123,10 @@ public class RefreshTest {
 	private <T extends IResource> void stubResource(StubInvocationHandler handler, T instance, String kind, String name,
 			int version) {
 		handler.stub((proxy, method, args) -> ResourceEquality.equals(proxy, args[0])).when(instance.equals(null));
-		;
 		handler.stub((proxy, method, args) -> ResourceEquality.hashCode(proxy)).when(instance.hashCode());
-		;
 		handler.stub((proxy, method, args) -> name).when(instance.getName());
 		handler.stub((proxy, method, args) -> kind).when(instance.getKind());
 		handler.stub((proxy, method, args) -> String.valueOf(version)).when(instance.getResourceVersion());
-		;
 	}
 
 	private class OpenshiftUIModelTestable extends OpenshiftUIModel {

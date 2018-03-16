@@ -63,7 +63,7 @@ public class ApplicationSourceTreeItems implements IModelFactory, ICommonAttribu
 	}
 
 	private Collection<IApplicationSource> loadImageStreams(IProject project, Connection conn) {
-		final Collection<IImageStream> streams = conn.getResources(ResourceKind.IMAGE_STREAM, project.getNamespace());
+		final Collection<IImageStream> streams = conn.getResources(ResourceKind.IMAGE_STREAM, project.getNamespaceName());
 		try {
 			if (StringUtils.isNotBlank(conn.getClusterNamespace())) {
 				Collection<IImageStream> commonStreams = conn.getResources(ResourceKind.IMAGE_STREAM,
