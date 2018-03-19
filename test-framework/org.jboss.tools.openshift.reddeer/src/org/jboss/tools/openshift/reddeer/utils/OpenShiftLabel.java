@@ -24,14 +24,14 @@ public class OpenShiftLabel {
 	public static class ContextMenu {
 		// General
 		public static final String DELETE = "Delete";
-		public static final String EDIT = "Edit...";
+		public static final String[] EDIT = { "Edit", "Resource..." };
 		public static final String PROPERTIES = "Properties";
 		public static final String REFRESH = "Refresh";
 		public static final String[] SHOW_IN_WEB_CONSOLE = {"Show In", "Web Console"};
 		public static final String[] SHOW_IN_WEB_BROWSER = {"Show In", "Web Browser"};
 		
 		// Connection related
-		public static final String EDIT_CONNECTION = "Edit Connection...";
+		public static final String[] EDIT_CONNECTION = { "Edit", "Connection..." };
 		public static final String MANAGE_SSH_KEYS = "Manage SSH Keys...";
 		public static final String MANAGE_DOMAINS = "Manage Domains...";
 		public static final String[] NEW_DOMAIN = {"New", "Domain..."};
@@ -45,9 +45,9 @@ public class OpenShiftLabel {
 		public static final String EDIT_DOMAIN = "Edit Domain...";
 		
 		// Project related
-		public static final String MANAGE_OS_PROJECTS = "Manage Projects...";
+		public static final String[] EDIT_OS_PROJECTS = {"Edit", "Projects..."};
 		public static final String DELETE_OS_PROJECT = "Delete";
-		public static final String DEPLOY_DOCKER_IMAGE = "Deploy Docker Image...";
+		public static final String[] DEPLOY_DOCKER_IMAGE = {"New", "Deploy Docker Image..."};
 		public static final String DEPLOY_TO_OPENSHIFT = "Deploy to OpenShift...";
 		
 		// Resource related
@@ -61,7 +61,7 @@ public class OpenShiftLabel {
 		public static final String[] SCALE_UP = {"Scale", "Up"};
 		public static final String[] SCALE_DOWN = {"Scale", "Down"};
 		public static final String[] SCALE_TO = {"Scale", "To..."};
-		public static final String EDIT_RESOURCE_LIMITS = "Edit Resource Limits...";
+		public static final String[] EDIT_RESOURCE_LIMITS = { "Edit", "Resource Limits..." };
 		
 		// Application related
 		public static final String APPLICATION_DETAILS = "Details...";
@@ -70,11 +70,10 @@ public class OpenShiftLabel {
 		public static final String DELETE_APPLICATION_VIA_ADAPTER = "Delete Application...";
 		public static final String EDIT_ENV_VARS = "Edit User Environment Variables...";
 		public static final String EMBED_CARTRIDGE = "Edit Embedded Cartridges...";
-		public static final String IMPORT_APPLICATION = "Import Application...";
+		public static final String IMPORT_APPLICATION = "Import OpenShift Application...";
 		public static final String[] NEW_OS2_APPLICATION = {"New", "Application..."};
 		public static final String[] NEW_OS3_APPLICATION = {"New", "Application..."};
-		public static final String[] NEW_SERVER = {"New", "Server"};	
-		public static final String[] NEW_SERVER_ADAPTER = {"New", "Server Adapter..."};
+		public static final String[] NEW_SERVER = {"New", "Server"};
 		public static final String NEW_ADAPTER_FROM_EXPLORER = "Server Adapter...";
 		public static final String PORT_FORWARD = "Port Forwarding...";		
 		public static final String RESTART_APPLICATION = "Restart Application";	

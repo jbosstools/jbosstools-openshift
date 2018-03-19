@@ -85,7 +85,7 @@ public class DeleteProjectTest extends AbstractTest {
 
 		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.select();
-		new ContextMenuItem(OpenShiftLabel.ContextMenu.MANAGE_OS_PROJECTS).select();
+		new ContextMenuItem(OpenShiftLabel.ContextMenu.EDIT_OS_PROJECTS).select();
 
 		new DefaultShell(OpenShiftLabel.Shell.MANAGE_OS_PROJECTS);
 		new DefaultTable().getItem(PROJECT_NAME).select();
