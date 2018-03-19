@@ -251,7 +251,7 @@
       <runtimeDetector
             class="org.jboss.tools.openshift.cdk.server.core.internal.detection.UnifiedMinishiftRuntimeDetector"
             enabled="true"
-            id="org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftRuntimeDetector"
+            id="org.jboss.tools.openshift.cdk.server.core.internal.detection.UnifiedMinishiftRuntimeDetector"
             name="%cdk.detector.3">
       </runtimeDetector>
    </extension>
