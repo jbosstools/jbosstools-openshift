@@ -24,6 +24,10 @@ public class StringPreferenceValue extends AbstractPreferenceValue<String> {
 		this.prefsKey = prefsKey;
 	}
 
+	public StringPreferenceValue(String prefsKey, String pluginId, String defVal) {
+		super(prefsKey, pluginId, defVal);
+	}
+
 	@Override
 	public String get() {
 		return doGet();

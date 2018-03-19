@@ -20,6 +20,7 @@ import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringPreferenceValue;
 import org.jboss.tools.openshift.internal.common.core.preferences.StringsPreferenceValue;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,8 +39,8 @@ public class OpenShiftCorePreferences implements IOpenShiftCoreConstants, IOpenS
 	private final StringsPreferenceValue connectionsPreferenceValue = new StringsPreferenceValue('|', CONNECTIONS,
 			OpenShiftCoreActivator.PLUGIN_ID);
 
-	private final StringPreferenceValue ocBinaryLocation = new StringPreferenceValue(OPENSHIFT_CLI_LOC,
-			OpenShiftCoreActivator.PLUGIN_ID);
+	private final StringPreferenceValue ocBinaryLocation = new StringPreferenceValue(
+			OPENSHIFT_CLI_LOC, OpenShiftCoreActivator.PLUGIN_ID, OCBinary.getInstance().getSystemPathLocation());
 
 	private OpenShiftCorePreferences() {
 	}
