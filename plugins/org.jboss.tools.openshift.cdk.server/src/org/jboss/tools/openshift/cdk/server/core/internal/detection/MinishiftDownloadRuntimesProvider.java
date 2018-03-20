@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.jdf.stacks.model.Stacks;
 import org.jboss.tools.as.runtimes.integration.util.AbstractStacksDownloadRuntimesProvider;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
@@ -52,6 +51,7 @@ public class MinishiftDownloadRuntimesProvider extends AbstractStacksDownloadRun
 		traverseStacks(stacks, list, "MINISHIFT", monitor);
 	}
 
+	@Override
 	protected void setDisclaimerData(DownloadRuntime dlrt, org.jboss.jdf.stacks.model.Runtime workingRT, String wtpRT, String category) {
 		dlrt.setDisclaimer(false);
 	}
