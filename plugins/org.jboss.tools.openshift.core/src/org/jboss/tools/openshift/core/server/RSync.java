@@ -20,7 +20,6 @@ import java.util.concurrent.Executors;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerConsoleWriter;
@@ -118,19 +117,6 @@ public class RSync {
 		}, null);
 	}
 
-	protected OpenShiftBinaryOption[] getOptions() {
-		if (Platform.OS_WIN32.equals(Platform.getOS())) {
-			return new OpenShiftBinaryOption[] {
-					IRSyncable.exclude(".git", ".npm"),
-					IRSyncable.NO_PERMS,
-					IBinaryCapability.SKIP_TLS_VERIFY };
-		} else {
-			return new OpenShiftBinaryOption[] {
-					IRSyncable.exclude(".git", ".npm"),
-					IRSyncable.SKIP_TLS_VERIFY };
-		}
-	}
-
 	private void syncDirectoryToPod(final IPod pod, final File source, final String podPath,
 			final IServerConsoleWriter consoleWriter) throws IOException {
 		String sourcePath = sanitizePath(source.getAbsolutePath());
@@ -149,6 +135,13 @@ public class RSync {
 				return rsyncable;
 			}
 		}, null);
+	}
+
+	protected OpenShiftBinaryOption[] getOptions() {
+		return new OpenShiftBinaryOption[] {
+				IRSyncable.exclude(".git", ".npm"),
+				IRSyncable.NO_PERMS,
+				IBinaryCapability.SKIP_TLS_VERIFY };
 	}
 
 	/**
