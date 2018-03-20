@@ -221,6 +221,8 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 			}
 		} catch (IOException e) {
 			CDKCoreActivator.pluginLog().logError("Error parsing " + path, e);
+		} catch(IllegalArgumentException iae) {
+			CDKCoreActivator.pluginLog().logError("Error parsing " + path, iae);
 		}
 		return hyperV;
 	}

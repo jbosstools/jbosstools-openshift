@@ -10,7 +10,20 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal.view;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -34,11 +47,15 @@ import org.eclipse.ui.views.IViewRegistry;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerEvent;
+import org.eclipse.wst.server.ui.internal.cnf.ServerActionProvider;
 import org.eclipse.wst.server.ui.internal.view.servers.AbstractServerAction;
 import org.jboss.ide.eclipse.as.core.server.UnitedServerListener;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ControllableServerBehavior;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKCoreActivator;
+import org.jboss.tools.openshift.cdk.server.core.internal.MinishiftBinaryUtility;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDKLaunchUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKDockerUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.CDKOpenshiftUtility;
 import org.jboss.tools.openshift.cdk.server.core.internal.listeners.ServiceManagerEnvironment;
@@ -48,6 +65,7 @@ public class CDKActionProvider extends CommonActionProvider {
 	private ICommonActionExtensionSite actionSite;
 	private ShowInViewAfterStartupAction showInOpenshiftViewAction;
 	private ShowInViewAfterStartupAction showInDockerViewAction;
+	private SetupCDKAction setupCDKAction;
 
 	private static final String DOCKER_VIEW_ID = "org.eclipse.linuxtools.docker.ui.dockerExplorerView";
 	private static final String OPENSHIFT_VIEW_ID = "org.jboss.tools.openshift.express.ui.explorer.expressConsoleView";
@@ -71,9 +89,74 @@ public class CDKActionProvider extends CommonActionProvider {
 					OPENSHIFT_VIEW_ID);
 			showInDockerViewAction = new ShowInDockerViewAfterStartupAction(wsSite.getSelectionProvider(),
 					DOCKER_VIEW_ID);
+			setupCDKAction = new SetupCDKAction(wsSite.getSelectionProvider());
 		}
 	}
 
+	
+	private class SetupCDKAction extends Action {
+		private ISelectionProvider sp;
+		public SetupCDKAction(ISelectionProvider sp) {
+			super("Setup CDK");
+			this.sp = sp;
+		}
+		public void run() {
+			IServer s = getServerFromSelection();
+			if( s != null && shouldRun(s)) {
+				run2(s);
+			}
+		}			
+		public boolean shouldRun() {
+			IServer s = getServerFromSelection();
+			if( s != null && shouldRun(s)) {
+				return true;
+			}
+			return false;
+		}
+		private void run2(IServer server) {
+			String cmd = MinishiftBinaryUtility.getMinishiftLocation(server);
+			CDK3Server cdk3 = (CDK3Server)server.loadAdapter(CDK3Server.class, new NullProgressMonitor());
+			String args = "setup-cdk";
+			try {
+				ILaunchConfiguration lc = server.getLaunchConfiguration(true, new NullProgressMonitor());
+				ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(server, 
+						args, new Path(cmd).lastSegment(), lc, cmd, true);
+				IProcess p = null;
+				ILaunch launch = null;
+				launch = lc2.launch("run", new NullProgressMonitor());
+				IProcess[] all = launch.getProcesses();
+				if (all.length > 0) {
+					p = all[0];
+				} 
+			} catch(CoreException ce) {
+				CDKCoreActivator.pluginLog().logError(ce);
+			}
+			
+			System.out.println("Running setup-cdk on server: " + cmd);
+		}
+		
+		private boolean shouldRun(IServer server) {
+			String typeId = server.getServerType().getId();
+			List<String> types = Arrays.asList(CDK3Server.MINISHIFT_BASED_CDKS);
+			if(types.contains(typeId)) {
+				if( !isCDKInitialized(server)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		private IServer getServerFromSelection() {
+			IStructuredSelection selection = (IStructuredSelection) sp.getSelection();
+			if (selection.getFirstElement() instanceof IServer) {
+				return (IServer) selection.getFirstElement();
+			}
+			return null;
+		}
+		
+		
+	}
+	
 	private static class ShowInOpenshiftViewAfterStartupAction extends ShowInViewAfterStartupAction {
 		public ShowInOpenshiftViewAfterStartupAction(ISelectionProvider sp, String viewId) {
 			super(sp, viewId);
@@ -110,6 +193,7 @@ public class CDKActionProvider extends CommonActionProvider {
 
 	}
 
+
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		ICommonViewerSite site = actionSite.getViewSite();
@@ -129,10 +213,32 @@ public class CDKActionProvider extends CommonActionProvider {
 						((MenuManager) quick).add(showInOpenshiftViewAction);
 					}
 				}
+				if( setupCDKAction.shouldRun()) {
+					menu.insertBefore(ServerActionProvider.TOP_SECTION_END_SEPARATOR, setupCDKAction);
+				}
 			}
 		}
 	}
 
+	
+	private boolean isCDKInitialized(IServer server) {
+		CDK3Server cdk3 = (CDK3Server)server.loadAdapter(CDK3Server.class, new NullProgressMonitor());
+		if( cdk3 != null ) {
+			String home = cdk3.getMinishiftHome();
+			File homeF = new File(home);
+			if( homeF.exists() && homeF.isDirectory()) {
+				File cdk = new File(homeF, "cdk");
+				File config = new File(homeF, "config");
+				File cache = new File(homeF, "cache");
+				File configJSON = new File(config, "config.json");
+				if( cdk.exists() && config.exists() && cache.exists() && configJSON.exists()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	private boolean acceptsServer(IServer s) {
 		// For now lets just do cdk servers, but we can change this if we wanted it extensible via an adapter?
 		if (s != null && s.getServerType() != null) {
