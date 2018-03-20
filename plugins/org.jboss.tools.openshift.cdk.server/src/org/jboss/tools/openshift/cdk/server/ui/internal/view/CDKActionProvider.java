@@ -27,7 +27,13 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -111,8 +117,28 @@ public class CDKActionProvider extends CommonActionProvider {
 		}
 
 		private void run2(IServer server) {
+			CDK3Server cdk3 = (CDK3Server) server.loadAdapter(CDK3Server.class, new NullProgressMonitor());
+			if (cdk3 != null) {
+				String home = cdk3.getMinishiftHome();
+				if( new File(home).exists()) {
+					Shell s = actionSite.getViewSite().getShell();
+					MessageBox messageBox = new MessageBox(s,SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+					
+					String msgText = "Setup CDK will delete all existing contents of {0}. Are you sure you want to continue?";
+					String msg = NLS.bind(msgText, home);
+					messageBox.setMessage(msg);
+					messageBox.setText("Warning: Folder already exists!");
+					
+					int ret = messageBox.open();
+					if( ret != SWT.OK) {
+						return;
+					}
+				}
+			}
+			
+			
 			String cmd = MinishiftBinaryUtility.getMinishiftLocation(server);
-			String args = "setup-cdk";
+			String args = "setup-cdk --force";
 			try {
 				ILaunchConfiguration lc = server.getLaunchConfiguration(true, new NullProgressMonitor());
 				ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(server, args,
