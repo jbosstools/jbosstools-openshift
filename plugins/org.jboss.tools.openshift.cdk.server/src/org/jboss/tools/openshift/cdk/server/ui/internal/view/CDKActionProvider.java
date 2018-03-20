@@ -89,47 +89,46 @@ public class CDKActionProvider extends CommonActionProvider {
 		}
 	}
 
-	
 	private class SetupCDKAction extends Action {
 		private ISelectionProvider sp;
+
 		public SetupCDKAction(ISelectionProvider sp) {
 			super("Setup CDK");
 			this.sp = sp;
 		}
-		
+
 		@Override
 		public void run() {
 			IServer s = getServerFromSelection();
-			if( s != null && shouldRun(s)) {
+			if (s != null && shouldRun(s)) {
 				run2(s);
 			}
-		}			
+		}
+
 		public boolean shouldRun() {
 			IServer s = getServerFromSelection();
-			return ( s != null && shouldRun(s));
+			return (s != null && shouldRun(s));
 		}
+
 		private void run2(IServer server) {
 			String cmd = MinishiftBinaryUtility.getMinishiftLocation(server);
 			String args = "setup-cdk";
 			try {
 				ILaunchConfiguration lc = server.getLaunchConfiguration(true, new NullProgressMonitor());
-				ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(server, 
-						args, new Path(cmd).lastSegment(), lc, cmd, true);
+				ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(server, args,
+						new Path(cmd).lastSegment(), lc, cmd, true);
 				lc2.launch("run", new NullProgressMonitor());
-			} catch(CoreException ce) {
+			} catch (CoreException ce) {
 				CDKCoreActivator.pluginLog().logError(ce);
 			}
 		}
-		
+
 		private boolean shouldRun(IServer server) {
 			String typeId = server.getServerType().getId();
 			List<String> types = Arrays.asList(CDK3Server.MINISHIFT_BASED_CDKS);
-			if(types.contains(typeId) && !isCDKInitialized(server)) {
-					return true;
-			}
-			return false;
+			return types.contains(typeId) && !isCDKInitialized(server);
 		}
-		
+
 		private IServer getServerFromSelection() {
 			IStructuredSelection selection = (IStructuredSelection) sp.getSelection();
 			if (selection.getFirstElement() instanceof IServer) {
@@ -137,10 +136,8 @@ public class CDKActionProvider extends CommonActionProvider {
 			}
 			return null;
 		}
-		
-		
 	}
-	
+
 	private static class ShowInOpenshiftViewAfterStartupAction extends ShowInViewAfterStartupAction {
 		public ShowInOpenshiftViewAfterStartupAction(ISelectionProvider sp, String viewId) {
 			super(sp, viewId);
@@ -177,7 +174,6 @@ public class CDKActionProvider extends CommonActionProvider {
 
 	}
 
-
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		ICommonViewerSite site = actionSite.getViewSite();
@@ -197,34 +193,34 @@ public class CDKActionProvider extends CommonActionProvider {
 						((MenuManager) quick).add(showInOpenshiftViewAction);
 					}
 				}
-				if( setupCDKAction.shouldRun()) {
+				if (setupCDKAction.shouldRun()) {
 					menu.insertBefore(ServerActionProvider.TOP_SECTION_END_SEPARATOR, setupCDKAction);
 				}
 			}
 		}
 	}
 
-	
 	private boolean isCDKInitialized(IServer server) {
-		CDK3Server cdk3 = (CDK3Server)server.loadAdapter(CDK3Server.class, new NullProgressMonitor());
-		if( cdk3 != null ) {
+		CDK3Server cdk3 = (CDK3Server) server.loadAdapter(CDK3Server.class, new NullProgressMonitor());
+		if (cdk3 != null) {
 			String home = cdk3.getMinishiftHome();
 			File homeF = new File(home);
-			if( homeF.exists() && homeF.isDirectory()) {
+			if (homeF.exists() && homeF.isDirectory()) {
 				File cdk = new File(homeF, "cdk");
 				File config = new File(homeF, "config");
 				File cache = new File(homeF, "cache");
 				File configJSON = new File(config, "config.json");
-				if( cdk.exists() && config.exists() && cache.exists() && configJSON.exists()) {
+				if (cdk.exists() && config.exists() && cache.exists() && configJSON.exists()) {
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-	
+
 	private boolean acceptsServer(IServer s) {
-		// For now lets just do cdk servers, but we can change this if we wanted it extensible via an adapter?
+		// For now lets just do cdk servers, but we can change this if we wanted it
+		// extensible via an adapter?
 		if (s != null && s.getServerType() != null) {
 			String typeId = s.getServerType().getId();
 			if (CDKServer.CDK_SERVER_TYPE.equals(typeId) || CDKServer.CDK_V3_SERVER_TYPE.equals(typeId)) {
