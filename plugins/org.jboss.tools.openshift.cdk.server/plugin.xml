@@ -32,7 +32,7 @@
             launchConfigId="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchType"
             launchModes="run"
             runtime="false"
-            runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type"
+            runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type.cdk.30"
             startBeforePublish="false"
             startTimeout="1800000"
             stopTimeout="900000"
@@ -48,7 +48,7 @@
             launchConfigId="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchType"
             launchModes="run"
             runtime="false"
-            runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type"
+            runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type.cdk.32"
             startBeforePublish="false"
             startTimeout="1800000"
             stopTimeout="900000"
@@ -64,7 +64,7 @@
             launchConfigId="org.jboss.tools.openshift.cdk.server.core.internal.behaviour.launchType"
             launchModes="run"
             runtime="false"
-            runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type"
+            runtimeTypeId="org.jboss.tools.openshift.cdk.server.runtime.type.minishift.17"
             startBeforePublish="false"
             startTimeout="1800000"
             stopTimeout="900000"
@@ -85,8 +85,40 @@
             vendor="%enterpriseProviderName"
             version="1.0">
       </runtimeType>
+      
+      <runtimeType
+            class="org.jboss.tools.openshift.cdk.server.core.internal.adapter.runtime.DummyServerRuntime"
+            description="A runtime representing a minishift 1.7+ container."
+            id="org.jboss.tools.openshift.cdk.server.runtime.type.minishift.17"
+            name="Minishift"
+            supportsManualCreation="false"
+            vendor="%enterpriseProviderName"
+            version="1.0">
+      </runtimeType>
+
+      <runtimeType
+            class="org.jboss.tools.openshift.cdk.server.core.internal.adapter.runtime.DummyServerRuntime"
+            description="A runtime representing a CDK 3.0+ container."
+            id="org.jboss.tools.openshift.cdk.server.runtime.type.cdk.30"
+            name="CDK 3.0+"
+            supportsManualCreation="false"
+            vendor="%enterpriseProviderName"
+            version="1.0">
+      </runtimeType>
+
+      <runtimeType
+            class="org.jboss.tools.openshift.cdk.server.core.internal.adapter.runtime.DummyServerRuntime"
+            description="A runtime representing a CDK 3.2+ container."
+            id="org.jboss.tools.openshift.cdk.server.runtime.type.cdk.32"
+            name="CDK 3.2+"
+            supportsManualCreation="false"
+            vendor="%enterpriseProviderName"
+            version="1.0">
+      </runtimeType>
+      
+      
 	</extension> 
-    
+
     
     <!-- Launch Configuration for the servers -->
 	<extension
@@ -217,16 +249,10 @@
             name="%cdk.detector.2x">
       </runtimeDetector>
       <runtimeDetector
-            class="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector"
+            class="org.jboss.tools.openshift.cdk.server.core.internal.detection.UnifiedMinishiftRuntimeDetector"
             enabled="true"
-            id="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector"
+            id="org.jboss.tools.openshift.cdk.server.core.internal.detection.UnifiedMinishiftRuntimeDetector"
             name="%cdk.detector.3">
-      </runtimeDetector>
-      <runtimeDetector
-            class="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK32RuntimeDetector"
-            enabled="true"
-            id="org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK32RuntimeDetector"
-            name="%cdk.detector.32">
       </runtimeDetector>
    </extension>
 
@@ -332,5 +358,14 @@
             weight="5">
       </registryProvider>
    </extension>
+
+
+   <extension
+         point="org.jboss.tools.runtime.core.downloadRuntimeProvider">
+      <provider
+            class="org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftDownloadRuntimesProvider">
+      </provider>
+   </extension>
+
 	
 </plugin>

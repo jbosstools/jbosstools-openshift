@@ -6,7 +6,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.openshift.cdk.server.core.internal.detection.CDK3RuntimeDetector;
+import org.jboss.tools.openshift.cdk.server.core.internal.detection.UnifiedMinishiftRuntimeDetector;
 import org.jboss.tools.runtime.core.model.IRuntimeDetectionResolution;
 import org.jboss.tools.runtime.core.model.IRuntimeDetectionResolutionProvider;
 import org.jboss.tools.runtime.core.model.RuntimeDefinition;
@@ -39,7 +39,7 @@ public class MissingMinishiftResolutionProvider implements IRuntimeDetectionReso
 		public void run(RuntimeDetectionProblem problem, RuntimeDefinition definition) {
 			File found = getFile(null, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 			if (found != null) {
-				definition.setProperty(CDK3RuntimeDetector.OVERRIDE_MINISHIFT_LOCATION, found.getAbsolutePath());
+				definition.setProperty(UnifiedMinishiftRuntimeDetector.OVERRIDE_MINISHIFT_LOCATION, found.getAbsolutePath());
 			}
 		}
 

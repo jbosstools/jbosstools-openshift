@@ -33,6 +33,7 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VersionUtil;
 import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader.MinishiftVersions;
 
 public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
@@ -55,6 +56,7 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		if (shouldCreateCredentialWidgets())
 			createCredentialWidgets(main);
 		createHypervisorWidgets(main);
+		createDownloadWidgets(main, handle);
 		createLocationWidgets(main, homeLabel);
 		createHomeWidgets(main);
 		createProfileWidgets(main);
@@ -117,15 +119,8 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		return isCDKVersionCompatible(versions);
 	}
 
-	protected String isCDKVersionCompatible(MinishiftVersions versions) {
-		String cdkVers = versions.getCDKVersion();
-		if (cdkVers != null) {
-			if (CDK32Server.matchesCDK32(cdkVers)) {
-				return null;
-			}
-			return "CDK version " + cdkVers + " is not compatible with this server adapter.";
-		}
-		return "Cannot determine CDK version.";
+	public static String isCDKVersionCompatible(MinishiftVersions versions) {
+		return VersionUtil.matchesCDK32(versions);
 	}
 
 	@Override

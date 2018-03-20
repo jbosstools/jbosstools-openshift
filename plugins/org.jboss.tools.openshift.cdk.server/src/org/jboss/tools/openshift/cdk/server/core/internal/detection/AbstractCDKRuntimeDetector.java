@@ -47,10 +47,22 @@ public abstract class AbstractCDKRuntimeDetector extends AbstractRuntimeDetector
 		return null;
 	}
 
+	/**
+	 * Subclasses should override
+	 * @param def
+	 * @return
+	 */
+	protected String getServerType(RuntimeDefinition def) {
+		return getServerType();
+	}
+
+	protected abstract String getServerType();
+
+
 	@Override
 	public boolean initializeRuntime(RuntimeDefinition runtimeDefinition) throws CoreException {
-		if (!exists(runtimeDefinition) && validate(runtimeDefinition.getLocation())) {
-			String serverTypeId = getServerType();
+		if (!exists(runtimeDefinition) && validate(runtimeDefinition)) {
+			String serverTypeId = getServerType(runtimeDefinition);
 			IServerType st = ServerCore.findServerType(serverTypeId);
 			String possibleId = runtimeDefinition.getName();
 			String suffixed = ServerNamingUtility.getDefaultServerName(possibleId);
@@ -93,8 +105,8 @@ public abstract class AbstractCDKRuntimeDetector extends AbstractRuntimeDetector
 
 	@Override
 	public boolean exists(RuntimeDefinition runtimeDefinition) {
-		if (validate(runtimeDefinition.getLocation())) {
-			IServer[] ofType = findServersOfType(getServerType());
+		if (validate(runtimeDefinition)) {
+			IServer[] ofType = findServersOfType(getServerType(runtimeDefinition));
 			for (int i = 0; i < ofType.length; i++) {
 				if (ofType[i] != null && matches(runtimeDefinition, ofType[i])) {
 					return true;
@@ -127,8 +139,15 @@ public abstract class AbstractCDKRuntimeDetector extends AbstractRuntimeDetector
 		return new File(home).equals(root);
 	}
 
+	protected boolean validate(RuntimeDefinition rd) {
+		return validate(rd.getLocation());
+	}
+	
 	protected boolean validate(File root) {
-		String[] required = getRequiredChildren();
+		return hasChildFiles(root, getRequiredChildren());
+	}
+
+	protected boolean hasChildFiles(File root, String[] required) {
 		for (int i = 0; i < required.length; i++) {
 			if (!(new File(root, required[i]).exists())) {
 				return false;
@@ -136,7 +155,7 @@ public abstract class AbstractCDKRuntimeDetector extends AbstractRuntimeDetector
 		}
 		return true;
 	}
-
+	
 	/*
 	 * Subclasses should override this
 	 * 
@@ -151,8 +170,6 @@ public abstract class AbstractCDKRuntimeDetector extends AbstractRuntimeDetector
 	}
 
 	protected abstract boolean matches(RuntimeDefinition def, IServer server);
-
-	protected abstract String getServerType();
 
 	protected abstract String[] getRequiredChildren();
 

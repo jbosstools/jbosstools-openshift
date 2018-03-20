@@ -10,9 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.ui.internal;
 
+import java.io.File;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
-import org.jboss.tools.openshift.cdk.server.core.internal.adapter.Minishift17Server;
+import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VersionUtil;
 import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader.MinishiftVersions;
 
 public class Minishift17ServerWizardFragment extends CDK32ServerWizardFragment {
@@ -36,18 +38,16 @@ public class Minishift17ServerWizardFragment extends CDK32ServerWizardFragment {
 	}
 
 	public static String isMinishiftVersionCompatible(MinishiftVersions versions) {
-		if( versions.getCDKVersion() != null ) {
-			return versions.getCDKVersion() + " is not compatible with this server adapter.";
+		return VersionUtil.matchesMinishift17(versions);
+	}
+	
+	@Override
+	protected void handleDownloadedFile(String newHome) {
+		if( !homeText.isDisposed()) {
+			File f = new File(newHome, "minishift");
+			f.setExecutable(true);
+			homeText.setText(f.getAbsolutePath());
 		}
-
-		String msVers = versions.getMinishiftVersion();
-		if (msVers != null) {
-			if (Minishift17Server.matchesMinishift17OrGreater(msVers)) {
-				return null;
-			}
-			return "Minishift version " + msVers + " is not compatible with this server adapter.";
-		}
-		return "Cannot determine Minishift version.";
 	}
 
 }
