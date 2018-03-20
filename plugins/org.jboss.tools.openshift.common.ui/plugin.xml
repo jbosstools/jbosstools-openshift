@@ -65,7 +65,9 @@
 		id="org.jboss.tools.openshift.ui.importApplicationWizard" 
 		name="ImportApplicationWizard" 
 		schema="schema/org.jboss.tools.openshift.ui.importApplicationWizard.exsd"/>
- <extension-point id="org.jboss.tools.openshift.ui.connectionEditor.advanced" name="connectionEditor.advanced" schema="schema/org.jboss.tools.openshift.ui.connectionEditor.advanced.exsd"/>
+ 	<extension-point id="org.jboss.tools.openshift.ui.connectionEditor.advanced"
+ 		name="connectionEditor.advanced"
+ 		schema="schema/org.jboss.tools.openshift.ui.connectionEditor.advanced.exsd"/>
 
     <!-- OpenShift Explorer view -->
     <extension
@@ -109,10 +111,16 @@
 					name="group.edit"
 					separator="true"/>
 				<insertionPoint
+					name="group.delete"
+					separator="true"/>
+				<insertionPoint
 					name="group.import"
 					separator="true"/>
 				<insertionPoint
-					name="group.modify"
+					name="group.refresh"
+					separator="true"/>
+				<insertionPoint
+					name="group.miscellaneous"
 					separator="true"/>
 				<insertionPoint
 					name="additions"
@@ -156,6 +164,18 @@
 	    	<menu
 	           id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.showIn"
 	           label="%openshift.menu.expressConsoleView.showIn">
+			</menu>
+		</menuContribution>
+	</extension>
+
+	<!-- openshift explorer: "Edit" submenu -->
+	<extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
+	    	<menu
+	           id="org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.edit"
+	           label="%openshift.menu.expressConsoleView.edit">
 			</menu>
 		</menuContribution>
 	</extension>
@@ -237,7 +257,31 @@
 			commandId="org.jboss.tools.openshift.common.ui.command.editconnection">
 		</handler>
 	</extension>
-	
+		<extension
+		point="org.eclipse.ui.menus">
+		<menuContribution
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.edit">
+			<command
+				commandId="org.jboss.tools.openshift.common.ui.command.editconnection"
+				icon="icons/openshift-edit.png"
+				tooltip="%openshift.command.connection.edit.tooltip"
+				label="%openshift.command.connection.edit">
+				mnemonic="E">
+				<visibleWhen>
+					<with variable="selection">
+						<and>
+							<count value="1" />
+							<iterate ifEmpty="false" operator="or">
+								<adapt
+									type="org.jboss.tools.openshift.common.core.connection.IConnection" />
+							</iterate>
+						</and>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
+	</extension>
+
 	<!-- Remove Connection -->
 	<extension
 		point="org.eclipse.ui.commands">
@@ -268,7 +312,7 @@
 	<extension
 		point="org.eclipse.ui.menus">
 		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
+			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.delete">
 			<command
 				commandId="org.eclipse.ui.edit.delete"
 				icon="icons/delete_edit.gif"
@@ -279,33 +323,11 @@
 						<and>
 							<iterate ifEmpty="false" operator="and">
 								<adapt type="org.jboss.tools.openshift.common.core.connection.IConnection" />
-	                    </iterate>
-					</and>
-                </with>
-			</visibleWhen>
-          </command>
-        </menuContribution>
-    </extension>
-	<extension
-		point="org.eclipse.ui.menus">
-		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleView.popup?after=group.edit">
-			<command
-				commandId="org.jboss.tools.openshift.common.ui.command.editconnection"
-				icon="icons/openshift-edit.png"
-				mnemonic="E">
-				<visibleWhen>
-					<with variable="selection">
-						<and>
-							<count value="1" />
-							<iterate ifEmpty="false" operator="or">
-								<adapt
-									type="org.jboss.tools.openshift.common.core.connection.IConnection" />
 							</iterate>
 						</and>
-					</with>
+                		</with>
 				</visibleWhen>
-			</command>
+          </command>
 		</menuContribution>
 	</extension>
 
