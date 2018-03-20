@@ -15,14 +15,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
@@ -100,6 +96,8 @@ public class CDKActionProvider extends CommonActionProvider {
 			super("Setup CDK");
 			this.sp = sp;
 		}
+		
+		@Override
 		public void run() {
 			IServer s = getServerFromSelection();
 			if( s != null && shouldRun(s)) {
@@ -108,40 +106,26 @@ public class CDKActionProvider extends CommonActionProvider {
 		}			
 		public boolean shouldRun() {
 			IServer s = getServerFromSelection();
-			if( s != null && shouldRun(s)) {
-				return true;
-			}
-			return false;
+			return ( s != null && shouldRun(s));
 		}
 		private void run2(IServer server) {
 			String cmd = MinishiftBinaryUtility.getMinishiftLocation(server);
-			CDK3Server cdk3 = (CDK3Server)server.loadAdapter(CDK3Server.class, new NullProgressMonitor());
 			String args = "setup-cdk";
 			try {
 				ILaunchConfiguration lc = server.getLaunchConfiguration(true, new NullProgressMonitor());
 				ILaunchConfigurationWorkingCopy lc2 = new CDKLaunchUtility().createExternalToolsLaunch(server, 
 						args, new Path(cmd).lastSegment(), lc, cmd, true);
-				IProcess p = null;
-				ILaunch launch = null;
-				launch = lc2.launch("run", new NullProgressMonitor());
-				IProcess[] all = launch.getProcesses();
-				if (all.length > 0) {
-					p = all[0];
-				} 
+				lc2.launch("run", new NullProgressMonitor());
 			} catch(CoreException ce) {
 				CDKCoreActivator.pluginLog().logError(ce);
 			}
-			
-			System.out.println("Running setup-cdk on server: " + cmd);
 		}
 		
 		private boolean shouldRun(IServer server) {
 			String typeId = server.getServerType().getId();
 			List<String> types = Arrays.asList(CDK3Server.MINISHIFT_BASED_CDKS);
-			if(types.contains(typeId)) {
-				if( !isCDKInitialized(server)) {
+			if(types.contains(typeId) && !isCDKInitialized(server)) {
 					return true;
-				}
 			}
 			return false;
 		}
