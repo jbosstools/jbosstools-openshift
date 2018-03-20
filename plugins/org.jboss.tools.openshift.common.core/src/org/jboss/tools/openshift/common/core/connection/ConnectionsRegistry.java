@@ -247,25 +247,7 @@ public class ConnectionsRegistry {
 	}
 
 	public void update(IConnection currentConnection, IConnection updatedConnection) {
-		ConnectionURL updatedConnectionUrl = null;
-		try {
-			updatedConnectionUrl = ConnectionURL.forConnection(updatedConnection);
-		} catch (UnsupportedEncodingException | MalformedURLException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not update connection {0}", updatedConnection.getHost()));
-		}
-		ConnectionURL oldConnectionUrl = null;
-		try {
-			oldConnectionUrl = ConnectionURL.forConnection(currentConnection);
-		} catch (UnsupportedEncodingException | MalformedURLException e) {
-			throw new OpenShiftCoreException(e,
-					NLS.bind("Could not update connection {0}", currentConnection.getHost()));
-		}
-		if (!oldConnectionUrl.equals(updatedConnectionUrl)) {
-			connectionsByUrl.remove(oldConnectionUrl);
-		}
-
-		// serious change = username changed
+		// serious change = username or url changed
 		boolean seriousChange = !updatedConnection.equals(currentConnection);
 		// change requiring refresh = password or token changed
 		boolean credentialsChange = !updatedConnection.credentialsEqual(currentConnection);
@@ -273,14 +255,13 @@ public class ConnectionsRegistry {
 		// in case of a serious change, we perform remove+add instead of just
 		// updating+emitting change event
 		// because the connection hashcode will change, refreshing it in the
-		// treeview will cause `widget is disposed` errors
+		// treeview will cause `widget is disposed` errors		
 		if (seriousChange) {
-			remove(currentConnection);
-		}
-		currentConnection.update(updatedConnection);
-		if (seriousChange) {
+		    remove(currentConnection);
+		    currentConnection.update(updatedConnection);
 			add(currentConnection);
 		} else if (credentialsChange) {
+		    currentConnection.update(updatedConnection);
 			// Property is defined in
 			// org.jboss.tools.openshift.core.connection.ConnectionProperties
 			fireChange(currentConnection, EventType.CHANGED, "openshift.resource.refresh", currentConnection,
