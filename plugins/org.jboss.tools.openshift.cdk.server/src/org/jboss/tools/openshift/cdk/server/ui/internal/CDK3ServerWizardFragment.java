@@ -215,8 +215,8 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		if (longValidation != null) {
 			longValidation.cancel();
 		}
-		File f = new File(homeDir);
-		if (!f.exists() || !f.canExecute()) {
+		File f = (homeDir == null ? null : new File(homeDir));
+		if (f == null || !f.exists() || !f.canExecute()) {
 			validate();
 			return;
 		}
