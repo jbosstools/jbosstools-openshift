@@ -28,6 +28,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader;
 import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader.MinishiftVersions;
+import org.jboss.tools.runtime.ui.wizard.DownloadRuntimesTaskWizard;
 
 public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 
@@ -73,6 +74,12 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 				handleDownloadedFile(newHomeDir);
 				getWizardHandle().update();
 			}
+
+			@Override
+			protected String getServerHomeFromTaskModel(DownloadRuntimesTaskWizard taskWizard) {
+				return (String)taskWizard.getTaskModel().getObject(DownloadRuntimesTaskWizard.UNZIPPED_SERVER_BIN);
+			}
+
 		};
 		GridDataFactory.fillDefaults().span(3, 1).align(SWT.END, SWT.END).applyTo(hyperlink);
 	}
@@ -215,8 +222,8 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		if (longValidation != null) {
 			longValidation.cancel();
 		}
-		File f = new File(homeDir);
-		if (!f.exists() || !f.canExecute()) {
+		File f = (homeDir == null ? null : new File(homeDir));
+		if (f == null || !f.exists() || !f.canExecute()) {
 			validate();
 			return;
 		}
