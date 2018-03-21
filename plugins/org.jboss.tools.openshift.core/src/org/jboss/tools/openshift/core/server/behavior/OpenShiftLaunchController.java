@@ -393,7 +393,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		ILaunch ret = null;
 		DebugLaunchConfigs launchConfigs = DebugLaunchConfigs.get();
 		if( launchConfigs == null ) {
-			throw toCoreException(NLS.bind("Could not modify launch config for server {0}", server.getName()));
+			throw toCoreException(NLS.bind("Could not get launch config for server {0} to attach remote debugger", server.getName()));
 		}
 		ILaunchConfiguration debuggerLaunchConfig = launchConfigs.getRemoteDebuggerLaunchConfiguration(server);
 		ILaunchConfigurationWorkingCopy workingCopy = getLaunchConfigWorkingCopy(server, launchConfigs,
