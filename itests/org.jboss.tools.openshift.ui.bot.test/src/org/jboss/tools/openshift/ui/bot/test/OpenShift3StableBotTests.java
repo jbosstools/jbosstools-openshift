@@ -31,6 +31,7 @@ import org.jboss.tools.openshift.ui.bot.test.connection.v3.OpenNewConnectionWiza
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.RemoveConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.StoreConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.integration.docker.DeployDockerImageTest;
+import org.jboss.tools.openshift.ui.bot.test.integration.docker.DeployVariousDockerImagesTest;
 import org.jboss.tools.openshift.ui.bot.test.project.CreateNewProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.project.DeleteProjectTest;
 import org.jboss.tools.openshift.ui.bot.test.project.LinkToCreateNewProjectTest;
@@ -69,6 +70,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	
 	// Advanced application testing
 	DeployDockerImageTest.class,
+	DeployVariousDockerImagesTest.class,
 	EditResourceLimitsTest.class,
 	
 	// Application wizard handling

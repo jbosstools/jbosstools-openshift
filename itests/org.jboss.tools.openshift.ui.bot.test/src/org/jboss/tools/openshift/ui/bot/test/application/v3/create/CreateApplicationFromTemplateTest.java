@@ -148,13 +148,13 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		new PushButton(OpenShiftLabel.Button.BROWSE_WORKSPACE).click();
 
 		new DefaultShell(OpenShiftLabel.Shell.SELECT_OPENSHIFT_TEMPLATE);
-		new DefaultTreeItem(TESTS_PROJECT, "eap64-basic-s2i.json").select();
+		new DefaultTreeItem(TESTS_PROJECT, "eap70-basic-s2i-helloworld.json").select();
 		new OkButton().click();
 
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		assertTrue("Template from workspace is not correctly shown in text field containing its path",
 				new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).getText().equals("${workspace_loc:"
-						+ File.separator + TESTS_PROJECT + File.separator + "eap64-basic-s2i.json}"));
+						+ File.separator + TESTS_PROJECT + File.separator + "eap70-basic-s2i-helloworld.json}"));
 
 		new WaitUntil(new ControlIsEnabled(new CancelButton()));
 
@@ -162,7 +162,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 //		assertTrue("Defined resource button should be enabled",
 //				new PushButton(OpenShiftLabel.Button.DEFINED_RESOURCES).isEnabled());
 
-		completeApplicationCreationAndVerify(helloworldProject);
+		completeApplicationCreationAndVerify(helloworldProject, 1);
 	}
 
 	@Test
@@ -170,13 +170,13 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		new DefaultTabItem(OpenShiftLabel.TextLabels.CUSTOM_TEMPLATE).activate();
 		new LabeledText(OpenShiftLabel.TextLabels.SELECT_LOCAL_TEMPLATE).setText(
-				TESTS_PROJECT_LOCATION + File.separator + "eap64-basic-s2i.json");
+				TESTS_PROJECT_LOCATION + File.separator + "eap70-basic-s2i-helloworld.json");
 
 //		TODO: Remove comment once JBIDE-24492 is resolved			
 //		assertTrue("Defined resource button should be enabled",
 //				new PushButton(OpenShiftLabel.Button.DEFINED_RESOURCES).isEnabled());
 
-		completeApplicationCreationAndVerify(helloworldProject);
+		completeApplicationCreationAndVerify(helloworldProject, 1);
 	}
 
 	@Test
@@ -189,7 +189,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 //		assertTrue("Defined resource button should be enabled",
 //				new PushButton(OpenShiftLabel.Button.DEFINED_RESOURCES).isEnabled());
 
-		completeApplicationCreationAndVerify(helloworldProject);
+		completeApplicationCreationAndVerify(helloworldProject, 1);
 	}
 
 	@Test
@@ -197,13 +197,13 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 		new NewOpenShift3ApplicationWizard(connectionReq.getConnection()).openWizardFromExplorer(DatastoreOS3.PROJECT1_DISPLAYED_NAME);
 		OpenShiftUtils.selectEAPTemplate();
 
-		completeApplicationCreationAndVerify(kitchensinkProject);
+		completeApplicationCreationAndVerify(kitchensinkProject, 2);
 	}
 
-	private void completeApplicationCreationAndVerify(String projectName) {
+	private void completeApplicationCreationAndVerify(String projectName, int numberOfExpectedServices) {
 		completeWizardAndVerify();
 		importApplicationAndVerify(projectName);
-		verifyCreatedApplication();
+		verifyCreatedApplication(numberOfExpectedServices);
 	}
 
 	private void completeWizardAndVerify() {
@@ -290,7 +290,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 				projectExplorer.containsProject(projectName));
 	}
 
-	private void verifyCreatedApplication() {
+	private void verifyCreatedApplication(int numberOfExpectedServices) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.open();
 		OpenShiftProject project = explorer.getOpenShift3Connection(connectionReq.getConnection())
@@ -322,8 +322,8 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 				routes.get(0).getName().equals(applicationName));
 
 		List<OpenShiftResource> services = project.getOpenShiftResources(Resource.SERVICE);
-		assertTrue("There should be precisely 1 service for created application, but there is following amount"
-				+ " of services: " + services.size(), services.size() == 1);
+		assertTrue("There should be precisely " + numberOfExpectedServices + " service(s) for created application, but there is following amount"
+				+ " of services: " + services.size(), services.size() == numberOfExpectedServices);
 	}
 
 	@After
