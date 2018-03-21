@@ -54,6 +54,27 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	
 	public static final String OVERRIDE_MINISHIFT_LOCATION = "OVERRIDE_MINISHIFT_LOCATION";
 
+	// Generated from whitelistGenerator.sh
+	private static final String[] WHITELIST_FILENAMES = new String[] {
+			"cdk-3.0-minishift-linux-amd64",
+			"cdk-3.0-minishift-darwin-amd64",
+			"cdk-3.0-minishift-windows-amd64.exe",
+			"cdk-3.1.0-1-minishift-linux-amd64",
+			"cdk-3.1.0-1-minishift-darwin-amd64",
+			"cdk-3.1.0-1-minishift-windows-amd64.exe",
+			"cdk-3.1.1-1-minishift-linux-amd64",
+			"cdk-3.1.1-1-minishift-darwin-amd64",
+			"cdk-3.1.1-1-minishift-windows-amd64.exe",
+			"cdk-3.2.0-1-minishift-linux-amd64",
+			"cdk-3.2.0-1-minishift-darwin-amd64",
+			"cdk-3.2.0-1-minishift-windows-amd64.exe",
+			"cdk-3.3.0-1-minishift-linux-amd64",
+			"cdk-3.3.0-1-minishift-darwin-amd64",
+			"cdk-3.3.0-1-minishift-windows-amd64.exe",
+	};
+	
+	
+	
 	@Override
 	public RuntimeDefinition getRuntimeDefinition(File root, IProgressMonitor monitor) {
 		if( isValidMinishiftHome(root)) {
@@ -67,11 +88,15 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	}
 
 	public RuntimeDefinition createBinaryDefinition(File root) {
+		File minishiftBin = getMinishiftBinary(root);
+		if( minishiftBin == null )
+			return null;
+		
+		
 		String baseName = null;
 		String type = null;
 		String serverType = null;
-
-		File minishiftBin = getMinishiftBinary(root);
+		
 		minishiftBin.setExecutable(true);
 		String minishiftPath = minishiftBin.getAbsolutePath();
 		MinishiftVersions minishiftVersionProps = MinishiftVersionLoader.getVersionProperties(minishiftPath);
@@ -122,13 +147,29 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	}
 	
 	private File getMinishiftBinary(File root) {
-		return new File(root, MINISHIFT);
+		File ms = new File(root, MINISHIFT);
+		if( ms.exists()) 
+			return ms;
+		return folderWhiteListBin(root);
+		
 	}
 	
 	private boolean folderContainsMinishiftBinary(File f) {
 		File bin = getMinishiftBinary(f);
-		return bin.exists() && bin.isFile();
+		return bin != null && bin.exists() && bin.isFile() && bin.canExecute();
 	}
+	
+	private File folderWhiteListBin(File folder) {
+		for( int i = 0; i < WHITELIST_FILENAMES.length; i++ ) {
+			File bin = new File(folder, WHITELIST_FILENAMES[i]);
+			if( bin.exists() && bin.isFile() && bin.canExecute()) {
+				return bin;
+			}
+		}
+		return null;
+	}
+
+	
 	private boolean isValidMinishiftHome(File f) {
 		return hasChildFiles(f, getRequiredMinishiftHomeChildren());
 	}
