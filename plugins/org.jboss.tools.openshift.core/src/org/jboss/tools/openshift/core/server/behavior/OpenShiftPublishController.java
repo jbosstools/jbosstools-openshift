@@ -126,22 +126,14 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	}
 
 	protected void syncUp(final File localFolder, final IResource resource, final IServer server) throws CoreException {
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
-				NLS.bind("Error while publishing server {0}: Could not sync folder {1} to all pods", 
-						server.getName(), localFolder.getAbsolutePath()),
-				null);
-		rsync.syncDirectoryToPods(localFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
+		MultiStatus status = rsync.syncDirectoryToPods(localFolder, ServerConsoleModel.getDefault().getConsoleWriter());
 		if (!status.isOK()) {
 			throw new CoreException(status);
 		}
 	}
 
 	protected void syncDown(final File localFolder, final IResource resource, final IServer server) throws CoreException {
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, 0,
-				NLS.bind("Error while publishing server {0}.  Could not sync all pods to folder {1}", 
-						server.getName(), localFolder.getAbsolutePath()),
-				null);
-		rsync.syncPodsToDirectory(localFolder, status, ServerConsoleModel.getDefault().getConsoleWriter());
+		MultiStatus status = rsync.syncPodsToDirectory(localFolder, ServerConsoleModel.getDefault().getConsoleWriter());
 		if (!status.isOK()) {
 			handleSyncDownFailure(status);
 		}
@@ -213,7 +205,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	protected RSync createRsync(final IServer server, final IProgressMonitor monitor) throws CoreException {
 		return OpenShiftServerUtils.createRSync(server, monitor);
 	}
-
+	
 	protected boolean hasRsync() {
 		return rsync != null;
 	}

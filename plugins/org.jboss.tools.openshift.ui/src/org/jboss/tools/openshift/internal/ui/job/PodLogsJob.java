@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.console.IConsole;
@@ -154,11 +153,11 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 
 		@Override
 		public void run() {
-			run(connection, null);
+			run(connection);
 		}
 
 		@Override
-		protected void runOCBinary(MultiStatus multiStatus) {
+		protected void runOCBinary() {
 			ConsoleUtils.registerConsoleListener(new ConsoleListener(this));
 			final MessageConsole console = showConsole();
 			final MessageConsoleStream os = console.newMessageStream();

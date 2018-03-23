@@ -15,9 +15,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.internal.v7.DeploymentMarkerUtils;
@@ -26,7 +24,6 @@ import org.jboss.ide.eclipse.as.wtp.core.console.ServerConsoleModel;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ISubsystemController;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.RSync;
-import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier implements ISubsystemController {
 
@@ -53,22 +50,29 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 				.forEach(p -> p.delete());
 	}
 
+	/**
+	 * RSyncs the pods to the local folder.
+	 * 
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 */
 	private MultiStatus syncDown(IProgressMonitor monitor) throws CoreException {
 		final RSync rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK,
-				NLS.bind("Could not sync all pods to folder {0}.", localDeploymentDirectory.getAbsolutePath()), null);
-		rsync.syncPodsToDirectory(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
-		return status;
+		return rsync.syncPodsToDirectory(localDeploymentDirectory, ServerConsoleModel.getDefault().getConsoleWriter());
 	}
 
+	/**
+	 * RSyncs the local folders to the pods.
+	 * 
+	 * @param monitor
+	 * @return
+	 * @throws CoreException
+	 */
 	protected MultiStatus syncUp(IProgressMonitor monitor) throws CoreException {
-		// do rsync local to remote
 		final RSync rsync = OpenShiftServerUtils.createRSync(getServer(), monitor);
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK,
-				NLS.bind("Could not sync folder {0} to all pods.", localDeploymentDirectory.getAbsolutePath()), null);
-		rsync.syncDirectoryToPods(localDeploymentDirectory, status, ServerConsoleModel.getDefault().getConsoleWriter());
-		return status;
+		return rsync.syncDirectoryToPods(localDeploymentDirectory, ServerConsoleModel.getDefault().getConsoleWriter());
 	}
 }
