@@ -46,19 +46,6 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 	}
 
 	@Override
-	public void publishFinish(IProgressMonitor monitor) throws CoreException {
-		if (!hasRsync()) {
-			return;
-		}
-
-		super.publishFinish(monitor);
-
-		final File localFolder = getLocalFolder();
-		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
-		syncUp(localFolder, resource, getServer());
-	}
-
-	@Override
 	protected RSync createRsync(IServer server, final IProgressMonitor monitor) throws CoreException {
 		final IResource resource = OpenShiftServerUtils.getResourceChecked(server, monitor);
 		IPath podPath = new Path(OpenShiftServerUtils.getOrLoadPodPath(server, resource)).append(POD_BASE_PATH);

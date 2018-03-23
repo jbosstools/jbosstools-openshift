@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.core.server.behavior;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
@@ -43,14 +42,9 @@ import com.openshift.restclient.model.IResource;
 
 public class OpenShiftPublishController extends StandardFileSystemPublishController implements IPublishController {
 
-	private RSync rsync = null;
-	protected boolean syncDownFailed = false;
-
 	@Override
 	public void publishStart(final IProgressMonitor monitor) throws CoreException {
-		this.syncDownFailed = false;
 		IServer server = getServer();
-		this.rsync = createRsync(server, monitor);
 
 		final File localDirectory = getLocalFolder();
 		final IProject deployProject = OpenShiftServerUtils.checkedGetDeployProject(server);
@@ -84,16 +78,16 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 					.errorStatus(NLS.bind("Server {0} could not determine the source to publish.", server.getName())));
 		}
 		File source = new File(sourcePath);
-		FileUtils.copyDir(source, localDeploymentDirectory, true, true, true, new FileFilter() {
-
-			@Override
-			public boolean accept(File file) {
+		FileUtils.copyDir(source, localDeploymentDirectory, true, true, true, file -> {
 				String filename = file.getName();
-				return !filename.endsWith(".git") && !filename.endsWith(".gitignore") && !filename.endsWith(".svn")
-						&& !filename.endsWith(".settings") && !filename.endsWith(".project")
+				return !filename.endsWith(".git") 
+						&& !filename.endsWith(".gitignore") 
+						&& !filename.endsWith(".svn")
+						&& !filename.endsWith(".settings") 
+						&& !filename.endsWith(".project")
 						&& !filename.endsWith(".classpath");
 			}
-		});
+		);
 	}
 
 	private boolean modulesIncludesMagicProject(IServer server, IProject deployProject) {
@@ -111,44 +105,25 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 
 	@Override
 	public void publishFinish(IProgressMonitor monitor) throws CoreException {
-		if (!hasRsync()) {
-			return;
-		}
-
 		super.publishFinish(monitor);
 
 		final File localFolder = getLocalFolder();
 		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
-		syncUp(localFolder, resource, getServer());
+		syncUp(localFolder, monitor);
 
 		deleteDoDeployMarkers(localFolder);
 		loadPodPathIfEmpty(resource);
 	}
 
-	protected void syncUp(final File localFolder, final IResource resource, final IServer server) throws CoreException {
+	protected void syncUp(final File localFolder, IProgressMonitor monitor) throws CoreException {
+		RSync rsync = createRsync(getServer(), monitor);
 		MultiStatus status = rsync.syncDirectoryToPods(localFolder, ServerConsoleModel.getDefault().getConsoleWriter());
 		if (!status.isOK()) {
 			throw new CoreException(status);
 		}
 	}
 
-	protected void syncDown(final File localFolder, final IResource resource, final IServer server) throws CoreException {
-		MultiStatus status = rsync.syncPodsToDirectory(localFolder, ServerConsoleModel.getDefault().getConsoleWriter());
-		if (!status.isOK()) {
-			handleSyncDownFailure(status);
-		}
-	}
-
-	protected void handleSyncDownFailure(final MultiStatus status) throws CoreException {
-		this.syncDownFailed = true;
-		if (isSyncDownFailureCritical()) {
-			clearRsync();
-			throw new CoreException(status);
-		}
-		OpenShiftCoreActivator.pluginLog().logWarning("Ignoring initial sync down error.", new CoreException(status));
-	}
-
-	protected void loadPodPathIfEmpty(final IResource resource) throws CoreException {
+	protected void loadPodPathIfEmpty(final IResource resource) {
 		// If the pod path is not set on the project yet, we can do that now
 		// to make future fetches faster
 		String podPath = OpenShiftServerUtils.getPodPath(getServer());
@@ -180,17 +155,9 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 
 	protected void deleteDoDeployMarkers(final File localFolder) {
 		// Remove all *.dodeploy files from this folder.
-		Stream.of(localFolder.listFiles()).filter(file -> file.getName().endsWith(DeploymentMarkerUtils.DO_DEPLOY))
-				.forEach(File::delete);
-	}
-
-	@Override
-	public int publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor) throws CoreException {
-		if (syncDownFailed) {
-			return super.publishModule(IServer.PUBLISH_CLEAN, deltaKind, module, monitor);
-		} else {
-			return super.publishModule(kind, deltaKind, module, monitor);
-		}
+		Stream.of(localFolder.listFiles())
+			.filter(file -> file.getName().endsWith(DeploymentMarkerUtils.DO_DEPLOY))
+			.forEach(File::delete);
 	}
 
 	@Override
@@ -204,14 +171,6 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 
 	protected RSync createRsync(final IServer server, final IProgressMonitor monitor) throws CoreException {
 		return OpenShiftServerUtils.createRSync(server, monitor);
-	}
-	
-	protected boolean hasRsync() {
-		return rsync != null;
-	}
-
-	protected void clearRsync() {
-		this.rsync = null;
 	}
 
 	protected boolean isSyncDownFailureCritical() {

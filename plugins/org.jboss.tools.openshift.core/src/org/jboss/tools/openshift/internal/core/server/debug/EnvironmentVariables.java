@@ -55,8 +55,11 @@ public class EnvironmentVariables {
 		if (dc == null || dc.getEnvironmentVariables() == null || StringUtils.isEmpty(key)) {
 			return null;
 		}
-		return dc.getEnvironmentVariables().stream().filter(ev -> key.equals(ev.getName())).findFirst()
-				.map(IEnvironmentVariable::getValue).orElse(null);
+		return dc.getEnvironmentVariables().stream()
+		    .filter(ev -> key.equals(ev.getName()))
+		    .findFirst()
+			.map(IEnvironmentVariable::getValue)
+			.orElse(null);
 	}
 
 	/**

@@ -30,7 +30,6 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 	@Override
 	protected int getRootModuleState(IServer server, IModule root, String deploymentName, IProgressMonitor monitor)
 			throws Exception {
-		// do rsync, remote to local, then...
 		syncDown(monitor);
 		return super.getRootModuleState(server, root, deploymentName, monitor);
 	}
@@ -46,8 +45,9 @@ public class OpenShiftEapModulesController extends JBoss7FSModuleStateVerifier i
 
 	private void deleteMarkers(String suffix) throws CoreException {
 		final File localDeploymentDirectory = new File(getDeploymentOptions().getDeploymentsRootFolder(true));
-		Stream.of(localDeploymentDirectory.listFiles()).filter(p -> p.getName().endsWith(suffix))
-				.forEach(p -> p.delete());
+		Stream.of(localDeploymentDirectory.listFiles())
+			.filter(file -> file.getName().endsWith(suffix))
+			.forEach(File::delete);
 	}
 
 	/**

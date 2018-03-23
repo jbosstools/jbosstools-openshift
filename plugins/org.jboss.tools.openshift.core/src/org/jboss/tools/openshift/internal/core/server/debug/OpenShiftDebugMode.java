@@ -207,7 +207,8 @@ public class OpenShiftDebugMode {
 
 	private boolean updateDc(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor)
 			throws CoreException {
-		boolean dcUpdated = updateDebugmode(dc, context, monitor) | updateDevmode(dc, context, monitor)
+		boolean dcUpdated = updateDebugmode(dc, context, monitor) 
+				| updateDevmode(dc, context, monitor)
 				| updateLifenessProbe(dc, context, monitor);
 
 		if (dcUpdated) {
