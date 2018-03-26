@@ -104,14 +104,16 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 		firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, oldSelectedAppSource, this.selectedAppSource);
 	}
 
-	private void updateLabels(IApplicationSource source) {
-		if (source != null && ResourceKind.TEMPLATE.equals(source.getKind())) {
-			ITemplate template = (ITemplate) source.getSource();
-			setLabels(template.getObjectLabels());
-			return;
-		}
-		setLabels(Collections.emptyMap());
-	}
+    private void updateLabels(IApplicationSource source) {
+        if (source != null) {
+            if (ResourceKind.TEMPLATE.equals(source.getKind())) {
+                ITemplate template = (ITemplate)source.getSource();
+                setLabels(template.getObjectLabels());
+            } else {
+                setLabels(Arrays.asList(new Label("app", source.getSource().getName())));
+            }
+        }
+    }
 
 	private void updateAppSourceStatus(IStatus appSourceStatus) {
 		firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = appSourceStatus);
