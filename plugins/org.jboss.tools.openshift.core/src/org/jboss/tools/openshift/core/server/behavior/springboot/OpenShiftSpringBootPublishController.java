@@ -48,18 +48,9 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 	@Override
 	protected RSync createRsync(IServer server, final IProgressMonitor monitor) throws CoreException {
 		final IResource resource = OpenShiftServerUtils.getResourceChecked(server, monitor);
-		IPath podPath = new Path(OpenShiftServerUtils.getOrLoadPodPath(server, resource)).append(POD_BASE_PATH);
+		String podDirectory = OpenShiftServerUtils.getOrLoadPodPath(server, resource, monitor);
+		IPath podPath = new Path(podDirectory).append(POD_BASE_PATH);
 		return OpenShiftServerUtils.createRSync(resource, podPath.toString(), server);
-	}
-
-	@Override
-	protected boolean treatAsBinaryModule(IModule[] module) {
-		return module.length == 1;
-	}
-
-	@Override
-	protected boolean forceZipModule(IModule[] moduleTree) {
-		return false;
 	}
 
 	@Override
@@ -124,6 +115,16 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 			return null;
 		}
 		return facade.getMavenProject(new NullProgressMonitor());
+	}
+
+	@Override
+	protected boolean treatAsBinaryModule(IModule[] module) {
+		return module.length == 1;
+	}
+
+	@Override
+	protected boolean forceZipModule(IModule[] moduleTree) {
+		return false;
 	}
 
 }

@@ -108,14 +108,13 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		super.publishFinish(monitor);
 
 		final File localFolder = getLocalFolder();
-		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
-		syncUp(localFolder, monitor);
+		syncDirectoryToPods(localFolder, monitor);
 
-		deleteDoDeployMarkers(localFolder);
+		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
 		loadPodPathIfEmpty(resource);
 	}
 
-	protected void syncUp(final File localFolder, IProgressMonitor monitor) throws CoreException {
+	protected void syncDirectoryToPods(final File localFolder, IProgressMonitor monitor) throws CoreException {
 		RSync rsync = createRsync(getServer(), monitor);
 		MultiStatus status = rsync.syncDirectoryToPods(localFolder, ServerConsoleModel.getDefault().getConsoleWriter());
 		if (!status.isOK()) {
