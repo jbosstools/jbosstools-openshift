@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.debug.core.DebugException;
@@ -38,11 +39,18 @@ import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 public class DebugLaunchConfigs {
 
+	public static final String LAUNCH_DEBUG_PORT_PROP = "LOCAL_DEBUG_PORT"; //$NON-NLS-1$ 
+
+	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
+	private static final int RECHECK_DELAY = 1000;
+	private static final int DEBUGGER_LAUNCHED_TIMEOUT = 60_000; //TODO Get from server settings?
+
 	private ILaunchManager launchManager;
 
 	public static DebugLaunchConfigs get() {
-		if( DebugPlugin.getDefault() != null ) 
+		if (DebugPlugin.getDefault() != null) {
 			return get(DebugPlugin.getDefault().getLaunchManager());
+		}
 		return null;
 	}
 
@@ -62,7 +70,8 @@ public class DebugLaunchConfigs {
 				.getLaunchConfigurationType(ID_REMOTE_JAVA_APPLICATION);
 		ILaunchConfiguration[] launchConfigs = launchManager.getLaunchConfigurations(launchConfigurationType);
 		String name = getRemoteDebuggerLaunchConfigurationName(server);
-		Optional<ILaunchConfiguration> maybeLaunch = Stream.of(launchConfigs).filter(lc -> name.equals(lc.getName()))
+		Optional<ILaunchConfiguration> maybeLaunch = Stream.of(launchConfigs)
+				.filter(lc -> name.equals(lc.getName()))
 				.findFirst();
 
 		return maybeLaunch.orElse(null);
@@ -100,8 +109,8 @@ public class DebugLaunchConfigs {
 	 * @
 	 */
 	public boolean isRunning(ILaunchConfiguration launchConfiguration) {
-		return getLaunches().filter(l -> !l.isTerminated() && launchMatches(l, launchConfiguration)).findFirst()
-				.isPresent();
+		return getLaunches()
+				.anyMatch(l -> !l.isTerminated() && launchMatches(l, launchConfiguration));
 	}
 
 	private boolean launchMatches(ILaunch l, ILaunchConfiguration launchConfiguration) {
@@ -118,8 +127,10 @@ public class DebugLaunchConfigs {
 			return;
 		}
 		List<IStatus> errors = new ArrayList<>();
-		getLaunches().filter(l -> launchConfig.equals(l.getLaunchConfiguration())).filter(l -> l.canTerminate())
-				.forEach(l -> terminate(l, errors));
+		getLaunches()
+			.filter(l -> launchConfig.equals(l.getLaunchConfiguration()))
+			.filter(ILaunch::canTerminate)
+			.forEach(l -> terminate(l, errors));
 
 		if (!errors.isEmpty()) {
 			MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.ERROR,
@@ -139,6 +150,49 @@ public class DebugLaunchConfigs {
 		} catch (DebugException e) {
 			errors.add(e.getStatus());
 		}
+	}
+
+	public ILaunchConfigurationWorkingCopy getLaunchConfigWorkingCopy(IServer server, ILaunchConfiguration debuggerLaunchConfig)
+			throws CoreException {
+		ILaunchConfigurationWorkingCopy workingCopy = null;
+		if (debuggerLaunchConfig == null) {
+			workingCopy = createRemoteDebuggerLaunchConfiguration(server);
+		} else {
+			if (isRunning(debuggerLaunchConfig)) {
+				return null;
+			}
+			workingCopy = debuggerLaunchConfig.getWorkingCopy();
+		}
+		return workingCopy;
+	}
+
+	public ILaunch lauchDebugger(ILaunchConfiguration debuggerLaunchConfig, int port, IProgressMonitor monitor) {
+		ILaunch launch = null;
+		int elapsed = 0;
+		boolean launched = false;
+		monitor.subTask("Waiting for remote debug port to become available...");
+		while (!launched && elapsed < DEBUGGER_LAUNCHED_TIMEOUT) {
+			try {
+				//TODO That's fugly. ideally we should see if socket on debug port is responsive instead
+				launch = debuggerLaunchConfig.launch(DEBUG_MODE, monitor);
+				launch.setAttribute(LAUNCH_DEBUG_PORT_PROP, Integer.toString(port));
+				launched = true;
+			} catch (Exception e) {
+				if (monitor.isCanceled()) {
+					break;
+				}
+				try {
+					Thread.sleep(RECHECK_DELAY);
+					elapsed += RECHECK_DELAY;
+				} catch (InterruptedException ie) {
+				}
+			}
+		}
+		return launch;
+	}
+	
+	public static boolean isDebugMode(String mode) {
+		return DEBUG_MODE.equals(mode);
 	}
 
 }

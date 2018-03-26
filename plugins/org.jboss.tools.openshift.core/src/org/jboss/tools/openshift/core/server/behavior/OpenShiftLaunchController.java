@@ -73,13 +73,10 @@ import com.openshift.restclient.model.IResource;
 public class OpenShiftLaunchController extends AbstractSubsystemController
 		implements ISubsystemController, ILaunchServerController {
 
-	private static final String LAUNCH_DEBUG_PORT_PROP = "LOCAL_DEBUG_PORT";
-	private static final int RECHECK_DELAY = 1000;
 	private static final int PUBLISH_DELAY = 3000;
-	private static final int DEBUGGER_LAUNCHED_TIMEOUT = 60_000; //TODO Get from server settings?
+	private static final int RECHECK_DELAY = 1000;
 	private static final long WAIT_FOR_DEPLOYMENTCONFIG_TIMEOUT = 3 * 60 * 1024;
 	private static final long WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT = 3 * 60 * 1024;
-	private static final String DEBUG_MODE = "debug"; //$NON-NLS-1$
 
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
@@ -92,7 +89,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 			if (waitForDeploymentConfigReady(beh.getServer(), monitor)) {
 				DebugContext context = createDebugContext(beh, monitor);
 				toggleDebugging(mode, beh, context, monitor);
-				if (!isDebugMode(mode)) {
+				if (!DebugLaunchConfigs.isDebugMode(mode)) {
 					// enable devmode if we're not in debug mode. Debug mode has dev mode enabled
 					// anyhow
 					enableDevMode(context);
@@ -169,7 +166,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 	protected void toggleDebugging(String mode, OpenShiftServerBehaviour beh, DebugContext context,
 			IProgressMonitor monitor) {
-		boolean enableDebugging = isDebugMode(mode);
+		boolean enableDebugging = DebugLaunchConfigs.isDebugMode(mode);
 		if (enableDebugging) {
 			startDebugging(beh, context, monitor);
 		} else { //run, profile
@@ -239,14 +236,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		return IServer.STATE_STARTED;
 	}
 
-	protected boolean isDebugMode() {
-		return isDebugMode(getServer().getMode());
-	}
-
-	protected boolean isDebugMode(String mode) {
-		return DEBUG_MODE.equals(mode);
-	}
-
 	private void setModulesPublishing() {
 		IModule[] modules = getServer().getModules();
 		for (int i = 0; i < modules.length; i++) {
@@ -255,7 +244,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	}
 
 	private void publishServer() {
-		new Job("Publishing server " + getServer().getName()) {
+		new Job(NLS.bind("Publishing server {0}", getServer().getName())) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				return getServer().publish(IServer.PUBLISH_INCREMENTAL, monitor);
@@ -392,12 +381,12 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		monitor.subTask("Attaching remote debugger...");
 		ILaunch ret = null;
 		DebugLaunchConfigs launchConfigs = DebugLaunchConfigs.get();
-		if( launchConfigs == null ) {
-			throw toCoreException(NLS.bind("Could not get launch config for server {0} to attach remote debugger", server.getName()));
+		if (launchConfigs == null) {
+			throw toCoreException(
+					NLS.bind("Could not get launch config for server {0} to attach remote debugger", server.getName()));
 		}
 		ILaunchConfiguration debuggerLaunchConfig = launchConfigs.getRemoteDebuggerLaunchConfiguration(server);
-		ILaunchConfigurationWorkingCopy workingCopy = getLaunchConfigWorkingCopy(server, launchConfigs,
-				debuggerLaunchConfig);
+		ILaunchConfigurationWorkingCopy workingCopy = launchConfigs.getLaunchConfigWorkingCopy(server, debuggerLaunchConfig);
 		if (workingCopy == null) {
 			throw toCoreException(NLS.bind("Could not modify launch config for server {0}", server.getName()));
 		}
@@ -405,7 +394,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		launchConfigs.setupRemoteDebuggerLaunchConfiguration(workingCopy, project, localDebugPort);
 		debuggerLaunchConfig = workingCopy.doSave();
 
-		ret = lauchDebugger(debuggerLaunchConfig, localDebugPort, monitor);
+		ret = launchConfigs.lauchDebugger(debuggerLaunchConfig, localDebugPort, monitor);
 		if (ret == null) {
 			throw toCoreException(
 					NLS.bind("Could not start remote debugger to (forwarded) port {0} on localhost", localDebugPort));
@@ -413,45 +402,6 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 		monitor.worked(10);
 		return ret;
-	}
-
-	private ILaunch lauchDebugger(ILaunchConfiguration debuggerLaunchConfig, int port, IProgressMonitor monitor) {
-		ILaunch launch = null;
-		int elapsed = 0;
-		boolean launched = false;
-		monitor.subTask("Waiting for remote debug port to become available...");
-		while (!launched && elapsed < DEBUGGER_LAUNCHED_TIMEOUT) {
-			try {
-				//TODO That's fugly. ideally we should see if socket on debug port is responsive instead
-				launch = debuggerLaunchConfig.launch(DEBUG_MODE, new NullProgressMonitor());
-				launch.setAttribute(LAUNCH_DEBUG_PORT_PROP, Integer.toString(port));
-				launched = true;
-			} catch (Exception e) {
-				if (monitor.isCanceled()) {
-					break;
-				}
-				try {
-					Thread.sleep(RECHECK_DELAY);
-					elapsed += RECHECK_DELAY;
-				} catch (InterruptedException ie) {
-				}
-			}
-		}
-		return launch;
-	}
-
-	private ILaunchConfigurationWorkingCopy getLaunchConfigWorkingCopy(IServer server, DebugLaunchConfigs launchConfigs,
-			ILaunchConfiguration debuggerLaunchConfig) throws CoreException {
-		ILaunchConfigurationWorkingCopy workingCopy;
-		if (debuggerLaunchConfig == null) {
-			workingCopy = launchConfigs.createRemoteDebuggerLaunchConfiguration(server);
-		} else {
-			if (launchConfigs.isRunning(debuggerLaunchConfig)) {
-				return null;
-			}
-			workingCopy = debuggerLaunchConfig.getWorkingCopy();
-		}
-		return workingCopy;
 	}
 
 	protected boolean overrideHotcodeReplace(IServer server, ILaunch launch) throws CoreException {
@@ -487,7 +437,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 				sleep(3000);
 
-				String portAttr = launch.getAttribute(LAUNCH_DEBUG_PORT_PROP);
+				String portAttr = launch.getAttribute(DebugLaunchConfigs.LAUNCH_DEBUG_PORT_PROP);
 				int port = DebugContext.NO_DEBUG_PORT;
 				try {
 					port = Integer.parseInt(portAttr);
