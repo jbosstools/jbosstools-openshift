@@ -257,7 +257,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 			@Override
 			public void onDebugChange(DebugContext context, IProgressMonitor monitor) throws CoreException {
-				int localPort = mapPortForwarding(context, monitor);
+				int localPort = startPortForwarding(context, monitor);
 				ILaunch debuggerLaunch = attachRemoteDebugger(behaviour.getServer(), localPort, monitor);
 				if (debuggerLaunch != null) {
 					overrideHotcodeReplace(behaviour.getServer(), debuggerLaunch);
@@ -319,14 +319,14 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	}
 
 	/**
-	 * Map the remote port to a local port. 
+	 * Maps the remote port to a local port. 
 	 * Return the local port in use, or -1 if failed
 	 * @param server
 	 * @param remotePort
 	 * @return the local debug port or -1 if port forwarding did not start or was cancelled.
 	 * @throws CoreException 
 	 */
-	protected int mapPortForwarding(final DebugContext context, final IProgressMonitor monitor) throws CoreException {
+	protected int startPortForwarding(final DebugContext context, final IProgressMonitor monitor) throws CoreException {
 		monitor.subTask("Starting port forwarding...");
 
 		IPod pod = context.getPod();
@@ -342,38 +342,27 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 					NLS.bind("No pod port to forward to specified in server adapter \"{0}\"", getServer().getName())));
 		}
 
-		Optional<PortPair> debugPort = podPorts.stream().filter(p -> remotePort == p.getRemotePort()).findFirst();
-		if (!debugPort.isPresent()) {
+		PortPair debugPort = PortForwardingUtils.getPortPairForRemote(remotePort, podPorts);
+		if (debugPort == null) {
 			throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
 					NLS.bind("Pod port specified in server adapter \"{0}\" is not present in pod \"{1}\"",
 							getServer().getName(), pod.getName())));
 		}
 
 		if (PortForwardingUtils.isPortForwardingStarted(pod)) {
-			return debugPort.get().getLocalPort();
+			return debugPort.getLocalPort();
 		}
 
-		if (mapPorts(podPorts, monitor)) {
+		if (PortForwardingUtils.setLocalPortsTo(podPorts, monitor)) {
 			PortForwardingUtils.startPortForwarding(pod, podPorts, IBinaryCapability.SKIP_TLS_VERIFY);
 			if (PortForwardingUtils.isPortForwardingStarted(pod)) {
-				return debugPort.get().getLocalPort();
+				return debugPort.getLocalPort();
 			}
 		}
 
 		throw new CoreException(StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID,
 				NLS.bind("Could not setup port forwarding to pod \"{0}\" in server adapter \"{1}\"", pod.getName(),
 						getServer().getName())));
-	}
-
-	private boolean mapPorts(Set<PortPair> podPorts, final IProgressMonitor monitor) {
-		for (IPortForwardable.PortPair port : podPorts) {
-			if (monitor.isCanceled()) {
-				return false;
-			}
-			port.setLocalPort(SocketUtil.findFreePort());
-			monitor.worked(1);
-		}
-		return true;
 	}
 
 	private ILaunch attachRemoteDebugger(IServer server, int localDebugPort, IProgressMonitor monitor)

@@ -33,7 +33,7 @@ public class OpenShiftNodejsLaunchController extends OpenShiftLaunchController i
 
 			@Override
 			public void onDebugChange(DebugContext debuggingContext, IProgressMonitor monitor) throws CoreException {
-				int localPort = mapPortForwarding(debuggingContext, monitor);
+				int localPort = startPortForwarding(debuggingContext, monitor);
 				NodeDebugLauncher.launch(beh.getServer(), localPort);
 			}
 

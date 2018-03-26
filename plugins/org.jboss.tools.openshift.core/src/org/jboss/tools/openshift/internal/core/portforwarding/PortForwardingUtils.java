@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.launching.SocketUtil;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
 
@@ -100,6 +102,23 @@ public class PortForwardingUtils {
 		return Collections.unmodifiableSet(ports);
 	}
 
+	/**
+	 * Returns the 1st port pair among the given ones, that matches the given remote
+	 * port
+	 * 
+	 * @param remotePort
+	 * @param portPairs
+	 * @return
+	 * 
+	 * @see PortPair#getRemotePort()
+	 */
+	public static PortPair getPortPairForRemote(int remotePort, Collection<PortPair> portPairs) {
+		return portPairs.stream()
+				.filter(p -> remotePort == p.getRemotePort())
+				.findFirst()
+				.orElse(null);
+	}
+	
 	/**
 	 * Starts port-forwarding for the given {@code pod}
 	 * 
@@ -203,4 +222,23 @@ public class PortForwardingUtils {
 		}
 		return false;
 	}
+	
+	/**
+	 * Finds and sets unused local ports to the given port pairs.
+	 * 
+	 * @param podPorts
+	 * @param monitor
+	 * @return true if the operation wasn't cancelled
+	 */
+	public static boolean setLocalPortsTo(Set<PortPair> podPorts, final IProgressMonitor monitor) {
+		for (IPortForwardable.PortPair port : podPorts) {
+			if (monitor.isCanceled()) {
+				return false;
+			}
+			port.setLocalPort(SocketUtil.findFreePort());
+			monitor.worked(1);
+		}
+		return true;
+	}
+
 }
