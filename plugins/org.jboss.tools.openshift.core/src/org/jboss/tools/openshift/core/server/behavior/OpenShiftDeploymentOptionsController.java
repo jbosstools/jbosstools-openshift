@@ -20,6 +20,7 @@ public class OpenShiftDeploymentOptionsController extends AbstractSubsystemContr
 		implements IDeploymentOptionsController {
 
 	public OpenShiftDeploymentOptionsController() {
+		// allow reflective instantiation
 	}
 
 	@Override

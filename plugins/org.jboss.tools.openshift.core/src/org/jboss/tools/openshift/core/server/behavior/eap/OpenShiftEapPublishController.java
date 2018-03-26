@@ -27,7 +27,7 @@ public class OpenShiftEapPublishController extends OpenShiftPublishController im
 	public void publishFinish(IProgressMonitor monitor) throws CoreException {
 		super.publishFinish(monitor);
 
-		deleteDoDeployMarkers(getLocalFolder());
+		deleteDoDeployMarkers(getDeploymentsRootFolder());
 	}
 
 	@Override

@@ -27,7 +27,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.RemotePath;
-import org.jboss.ide.eclipse.as.core.util.ServerUtil;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.RSync;
@@ -38,8 +37,9 @@ import com.openshift.restclient.model.IResource;
 
 public class OpenShiftSpringBootPublishController extends OpenShiftPublishController {
 
-	private static final String DEPLOY_LIBS_FOLDER = "libs";
-	private static final String POD_BASE_PATH = "/BOOT-INF/classes/";
+	private static final String ROOT_MODULE_FOLDER = "classes";
+	private static final String CHILD_MODULE_FOLDER = "lib";
+	private static final String POD_BASE_PATH = "/BOOT-INF";
 
 	public OpenShiftSpringBootPublishController() {
 		// keep for reflection instantiation
@@ -60,14 +60,14 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 		}
 
 		if (isRootModule(module)) {
-			return super.getModuleDeployRoot(module, isBinaryObject);
+			return super.getModuleDeployRoot(module, isBinaryObject).append(ROOT_MODULE_FOLDER);
 		} else {
-			IModule childModule = module[module.length - 1];	
-			return getChildModuleDeployPath(childModule);
+			return getChildModuleDeployPath(module);
 		}
 	}
 
-	private IPath getChildModuleDeployPath(IModule childModule) throws CoreException {
+	private IPath getChildModuleDeployPath(IModule[] module) throws CoreException {
+		IModule childModule = module[module.length - 1];
 		IPath finalName = getMavenFinalName(childModule);
 		if (finalName == null) {
 			IStatus status = StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
@@ -75,8 +75,9 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 			throw new CoreException(status);
 		}
 
-		File destination = ServerUtil.getServerStateLocation(getServer())
-				.append(DEPLOY_LIBS_FOLDER)
+		IPath deploymentRootFolder = new Path(getDeploymentOptions().getDeploymentsRootFolder(true));
+		File destination = deploymentRootFolder
+				.append(CHILD_MODULE_FOLDER)
 				.append(finalName)
 				.toFile();
 		destination.mkdirs();

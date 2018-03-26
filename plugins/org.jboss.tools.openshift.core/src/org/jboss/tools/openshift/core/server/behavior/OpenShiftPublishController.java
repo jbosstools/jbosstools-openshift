@@ -46,7 +46,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	public void publishStart(final IProgressMonitor monitor) throws CoreException {
 		IServer server = getServer();
 
-		final File localDirectory = getLocalFolder();
+		final File localDirectory = getDeploymentsRootFolder();
 		final IProject deployProject = OpenShiftServerUtils.checkedGetDeployProject(server);
 		// If the magic project is *also* a module on the server, do nothing
 		if (!modulesIncludesMagicProject(server, deployProject)) {
@@ -107,7 +107,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	public void publishFinish(IProgressMonitor monitor) throws CoreException {
 		super.publishFinish(monitor);
 
-		final File localFolder = getLocalFolder();
+		final File localFolder = getDeploymentsRootFolder();
 		syncDirectoryToPods(localFolder, monitor);
 
 		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
@@ -164,7 +164,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		// No-op for now, until other problems are fixed
 	}
 
-	protected File getLocalFolder() throws CoreException {
+	protected File getDeploymentsRootFolder() throws CoreException {
 		return new File(getDeploymentOptions().getDeploymentsRootFolder(true));
 	}
 
