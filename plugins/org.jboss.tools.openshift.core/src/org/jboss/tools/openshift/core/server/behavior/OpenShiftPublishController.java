@@ -111,7 +111,7 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		syncDirectoryToPods(localFolder, monitor);
 
 		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
-		loadPodPathIfEmpty(resource);
+		loadPodPathIfEmpty(resource, monitor);
 	}
 
 	protected void syncDirectoryToPods(final File localFolder, IProgressMonitor monitor) throws CoreException {
@@ -122,13 +122,13 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		}
 	}
 
-	protected void loadPodPathIfEmpty(final IResource resource) {
+	protected void loadPodPathIfEmpty(final IResource resource, IProgressMonitor monitor) {
 		// If the pod path is not set on the project yet, we can do that now
 		// to make future fetches faster
 		String podPath = OpenShiftServerUtils.getPodPath(getServer());
 		if (StringUtils.isEmpty(podPath)) {
 			// Pod path is empty
-			podPath = OpenShiftServerUtils.loadPodPath(resource, getServer());
+			podPath = OpenShiftServerUtils.loadPodPath(resource, getServer(), monitor);
 			if (!StringUtils.isEmpty(podPath)) {
 				fireUpdatePodPath(getServer(), podPath);
 			}

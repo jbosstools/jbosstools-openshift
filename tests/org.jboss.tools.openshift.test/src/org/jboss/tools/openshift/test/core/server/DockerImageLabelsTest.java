@@ -27,6 +27,8 @@ import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.DockerImageLabels;
 import org.jboss.tools.openshift.test.util.ResourceMocks;
@@ -83,14 +85,14 @@ public class DockerImageLabelsTest {
 		boolean available = labels.isAvailable();
 		// then
 		assertThat(available).isFalse();
-		verify(labels, never()).load();
+		verify(labels, never()).load(new NullProgressMonitor());
 	}
 
 	@Test
 	public void loadShouldReturnFalseGivenLoadFails() throws CoreException {
 		// given
 		// when
-		boolean success = labelsThatFailsToLoad.load();
+		boolean success = labelsThatFailsToLoad.load(new NullProgressMonitor());
 		// then
 		assertThat(success).isFalse();
 	}
@@ -99,9 +101,9 @@ public class DockerImageLabelsTest {
 	public void shouldNotBeAvailableGivenLoadFailsToLoadMetadata() throws CoreException {
 		// given
 		// when
-		labelsThatFailsToLoad.load();
+		labelsThatFailsToLoad.load(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
 		assertThat(labels.isAvailable()).isFalse();
 	}
 
@@ -109,9 +111,9 @@ public class DockerImageLabelsTest {
 	public void shouldTryToLoadGivenDevmodeKeyIsRequested() throws CoreException {
 		// given
 		// when
-		String devmodeKey = labelsThatFailsToLoad.getDevmodeKey();
+		String devmodeKey = labelsThatFailsToLoad.getDevmodeKey(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
 		assertThat(devmodeKey).isNull();
 	}
 
@@ -119,29 +121,29 @@ public class DockerImageLabelsTest {
 	public void shouldTryToLoadAgainGivenPriorLoadFailed() throws CoreException {
 		// given
 		// when
-		labelsThatFailsToLoad.getDevmodeKey();
-		labelsThatFailsToLoad.getDevmodeKey();
+		labelsThatFailsToLoad.getDevmodeKey(new NullProgressMonitor());
+		labelsThatFailsToLoad.getDevmodeKey(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(2)).load(any(IResource.class));
+		verify(labelsThatFailsToLoad, times(2)).load(any(IResource.class), new NullProgressMonitor());
 	}
 
 	@Test
 	public void shouldNotLoadAgainGivenPriorLoadSucceeded() throws CoreException {
 		// given
 		// when
-		labels.getDevmodeKey();
-		labels.getDevmodeKey();
+		labels.getDevmodeKey(new NullProgressMonitor());
+		labels.getDevmodeKey(new NullProgressMonitor());
 		// then
-		verify(labels, times(1)).load(any(IResource.class));
+		verify(labels, times(1)).load(any(IResource.class), new NullProgressMonitor());
 	}
 
 	@Test
 	public void shouldTryToLoadGivenDevmodePortKeyIsRequested() throws CoreException {
 		// given
 		// when
-		String devmodePortKey = labelsThatFailsToLoad.getDevmodePortKey();
+		String devmodePortKey = labelsThatFailsToLoad.getDevmodePortKey(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
 		assertThat(devmodePortKey).isNull();
 	}
 
@@ -149,9 +151,9 @@ public class DockerImageLabelsTest {
 	public void shouldTryToLoadGivenDevmodePortValueIsRequested() throws CoreException {
 		// given
 		// when
-		String devmodePortValue = labelsThatFailsToLoad.getDevmodePortValue();
+		String devmodePortValue = labelsThatFailsToLoad.getDevmodePortValue(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
 		assertThat(devmodePortValue).isNull();
 	}
 
@@ -159,9 +161,9 @@ public class DockerImageLabelsTest {
 	public void shouldTryToLoadGivenPodPathIsRequested() throws CoreException {
 		// given
 		// when
-		String podPath = labelsThatFailsToLoad.getPodPath();
+		String podPath = labelsThatFailsToLoad.getPodPath(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class));
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
 		assertThat(podPath).isNull();
 	}
 
@@ -172,8 +174,8 @@ public class DockerImageLabelsTest {
 		}
 
 		@Override
-		protected String load(IResource resource) {
-			return super.load(resource);
+		protected String load(IResource resource, IProgressMonitor monitor) {
+			return super.load(resource, monitor);
 		}
 
 	}

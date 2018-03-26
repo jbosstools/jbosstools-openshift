@@ -12,7 +12,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
@@ -72,48 +75,48 @@ public class DockerImageLabels {
 		this.connection = connection;
 	}
 
-	public String getDevmodeKey() {
-		if (!loadIfRequired()) {
+	public String getDevmodeKey(IProgressMonitor monitor) {
+		if (!loadIfRequired(monitor)) {
 			return null;
 		}
 		return devmodeMetadata.getEnablementKey();
 	}
 
-	public String getDevmodePortKey() {
-		if (!loadIfRequired()) {
+	public String getDevmodePortKey(IProgressMonitor monitor) {
+		if (!loadIfRequired(monitor)) {
 			return null;
 		}
 
 		return devmodeMetadata.getPortKey();
 	}
 
-	public String getDevmodePortValue() {
-		if (!loadIfRequired()) {
+	public String getDevmodePortValue(IProgressMonitor monitor) {
+		if (!loadIfRequired(monitor)) {
 			return null;
 		}
 		return devmodeMetadata.getPortValue();
 	}
 
-	public String getPodPath() {
-		if (!loadIfRequired()) {
+	public String getPodPath(IProgressMonitor monitor) {
+		if (!loadIfRequired(monitor)) {
 			return null;
 		}
 		return this.podPathMetadata.get();
 	}
 
-	public boolean load() {
-		return loadIfRequired();
+	public boolean load(IProgressMonitor monitor) {
+		return loadIfRequired(monitor);
 	}
 
 	private boolean isLoaded() {
 		return metadata != null;
 	}
 
-	protected boolean loadIfRequired() {
+	protected boolean loadIfRequired(IProgressMonitor monitor) {
 		if (isLoaded()) {
 			return true;
 		}
-		this.metadata = load(resource);
+		this.metadata = load(resource, monitor);
 		if (StringUtils.isEmpty(metadata)) {
 			return false;
 		}
@@ -130,12 +133,13 @@ public class DockerImageLabels {
 	 * Loads the docker image meta data for a given resource. The given resource is
 	 * used to infer a deployment config which then is used to determined the docker
 	 * image being used. The meta data of this docker image is then loaded.
+	 * @param monitor 
 	 * 
 	 * @param reosurce
 	 *            the openshift resource to load the image metadata for
 	 * @return
 	 */
-	protected String load(IResource resource) {
+	protected String load(IResource resource, IProgressMonitor monitor) {
 		IDeploymentConfig dc = ResourceUtils.getDeploymentConfigFor(resource, connection);
 		if (dc == null) {
 			return null;
@@ -146,7 +150,7 @@ public class DockerImageLabels {
 			return null;
 		}
 		DockerImageURI uri = trigger.getFrom();
-		return getImageStreamTag(uri, resource.getNamespaceName());
+		return getImageStreamTag(uri, resource.getNamespaceName(), monitor);
 		//		String imageRef = getImageRef(dc, connection);
 		//		int imageDigestIndex = imageRef.indexOf(DOCKER_IMAGE_DIGEST_IDENTIFIER);
 		//		if (imageDigestIndex > 0) {
@@ -166,6 +170,10 @@ public class DockerImageLabels {
 	}
 
 	private IDeploymentImageChangeTrigger getImageChangeTrigger(Collection<IDeploymentTrigger> triggers) {
+		if (CollectionUtils.isEmpty(triggers)) {
+			return null;
+		}
+
 		for (IDeploymentTrigger trigger : triggers) {
 			if (DeploymentTriggerType.IMAGE_CHANGE.equals(trigger.getType())) {
 				return (IDeploymentImageChangeTrigger) trigger;
@@ -174,12 +182,14 @@ public class DockerImageLabels {
 		return null;
 	}
 
-	private String getImageStreamTag(DockerImageURI uri, String namespace) {
+	private String getImageStreamTag(DockerImageURI uri, String namespace, IProgressMonitor monitor) {
+		SubMonitor subMonitor = SubMonitor.convert(monitor, NLS.bind("Loading imagestream tag {0}", uri.getName()), 1);
 		try {
 			IResource imageStreamTag = connection.getResource(ResourceKind.IMAGE_STREAM_TAG, namespace,
 					uri.getAbsoluteUri());
 			return imageStreamTag.toJson();
 		} catch (OpenShiftException e) {
+			subMonitor.done();
 			return null;
 		}
 	}

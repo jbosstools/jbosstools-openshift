@@ -146,7 +146,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	protected boolean waitForDockerImageLabelsReady(DockerImageLabels metadata, IProgressMonitor monitor) {
 		monitor.subTask("Waiting for docker image to become available...");
 		long timeout = System.currentTimeMillis() + WAIT_FOR_DOCKERIMAGELABELS_TIMEOUT;
-		while (!metadata.load()) {
+		while (!metadata.load(monitor)) {
 			if (!sleep(RECHECK_DELAY, timeout, monitor)) {
 				return false;
 			}
@@ -191,11 +191,11 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		DockerImageLabels imageLabels = getDockerImageLabels(beh, monitor);
 		IServer server = beh.getServer();
 		String devmodeKey = StringUtils.defaultIfBlank(OpenShiftServerUtils.getDevmodeKey(server),
-				imageLabels.getDevmodeKey());
+				imageLabels.getDevmodeKey(monitor));
 		String debugPortKey = StringUtils.defaultIfBlank(OpenShiftServerUtils.getDebugPortKey(server),
-				imageLabels.getDevmodePortKey());
+				imageLabels.getDevmodePortKey(monitor));
 		String debugPort = StringUtils.defaultIfBlank(OpenShiftServerUtils.getDebugPort(server),
-				imageLabels.getDevmodePortValue());
+				imageLabels.getDevmodePortValue(monitor));
 		return new DebugContext(beh.getServer(), devmodeKey, debugPortKey, debugPort);
 	}
 

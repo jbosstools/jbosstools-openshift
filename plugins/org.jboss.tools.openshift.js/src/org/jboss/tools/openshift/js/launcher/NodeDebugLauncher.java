@@ -95,9 +95,9 @@ public final class NodeDebugLauncher {
 		}
 	}
 
-	private static String getPodPath(IServer server, IProgressMonitor monitor) throws CoreException {
+	private static String getPodPath(IServer server, IProgressMonitor monitor) {
 		IResource resource = OpenShiftServerUtils.getResource(server, monitor);
-		return OpenShiftServerUtils.loadPodPath(resource, server);
+		return OpenShiftServerUtils.loadPodPath(resource, server, monitor);
 	}
 
 }

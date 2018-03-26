@@ -555,9 +555,9 @@ public class OpenShiftServerUtils {
 	 * @param server the server to derive the openshift connection from
 	 * @return
 	 */
-	public static String loadPodPath(IResource resource, IServer server) {
+	public static String loadPodPath(IResource resource, IServer server, IProgressMonitor monitor) {
 		DockerImageLabels metaData = DockerImageLabels.getInstance(resource, getBehaviour(server));
-		return metaData.getPodPath();
+		return metaData.getPodPath(monitor);
 	}
 
 	public static IControllableServerBehavior getBehaviour(IServer server) {
@@ -586,7 +586,7 @@ public class OpenShiftServerUtils {
 	 */
 	public static RSync createRSync(final IServer server, IProgressMonitor monitor) throws CoreException {
 		final IResource resource = getResourceChecked(server, monitor);
-		String podPath = getOrLoadPodPath(server, resource);
+		String podPath = getOrLoadPodPath(server, resource, monitor);
 
 		return createRSync(resource, podPath, server);
 	}
@@ -616,10 +616,10 @@ public class OpenShiftServerUtils {
 	 * @see #getPodPath(IServerAttributes)
 	 * @see DockerImageLabels#getPodPath()
 	 */
-	public static String getOrLoadPodPath(final IServer server, final IResource resource) throws CoreException {
+	public static String getOrLoadPodPath(final IServer server, final IResource resource, IProgressMonitor monitor) throws CoreException {
 		String podPath = getPodPath(server);
 		if (StringUtils.isEmpty(podPath)) {
-			podPath = loadPodPath(resource, server);
+			podPath = loadPodPath(resource, server, monitor);
 			if (StringUtils.isEmpty(podPath)) {
 				throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind(
 						"Server {0} could not determine the destination directory to publish to.", server.getName())));
