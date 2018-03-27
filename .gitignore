@@ -6,4 +6,5 @@ bin/
 .plugins/.project
 .recommenders
 .DS_Store
+.sonarlint/
 rebel.xml
