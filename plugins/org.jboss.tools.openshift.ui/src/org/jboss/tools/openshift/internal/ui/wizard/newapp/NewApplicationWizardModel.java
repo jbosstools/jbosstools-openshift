@@ -58,6 +58,8 @@ import com.openshift.restclient.model.template.ITemplate;
  *
  */
 public class NewApplicationWizardModel extends ResourceLabelsPageModel implements IApplicationSourceListPageModel {
+    
+    private static final String APP_LABEL_NAME = "app";
 
 	private Connection connection;
 	private IProject project;
@@ -109,7 +111,7 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
                 ITemplate template = (ITemplate)source.getSource();
                 setLabels(template.getObjectLabels());
             } else {
-                setLabels(Arrays.asList(new Label("app", source.getSource().getName())));
+                setLabels(Arrays.asList(new Label(APP_LABEL_NAME, source.getSource().getName())));
             }
         }
     }
