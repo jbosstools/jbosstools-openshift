@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -82,7 +83,10 @@ public class ConnectionPropertySource implements IPropertySource {
 		if (connection instanceof IOpenShiftConnection) {
 			Set<String> set = new TreeSet<>(((IOpenShiftConnection) connection).getExtendedProperties().keySet());
 			for (String name : set) {
-				descriptors.add(new UneditablePropertyDescriptor(name, toVisualPropertyName(name)));
+				String label = toVisualPropertyName(name);
+				if (StringUtils.isNotBlank(label)) {
+					descriptors.add(new UneditablePropertyDescriptor(name, label));
+				}
 			}
 		}
 		return descriptors.toArray(new IPropertyDescriptor[descriptors.size()]);
