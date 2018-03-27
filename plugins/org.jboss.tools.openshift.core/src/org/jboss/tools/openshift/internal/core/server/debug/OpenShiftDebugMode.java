@@ -13,6 +13,7 @@ package org.jboss.tools.openshift.internal.core.server.debug;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -144,6 +145,18 @@ public class OpenShiftDebugMode {
 	}
 
 	/**
+	 * Adds the given env vars to the 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public OpenShiftDebugMode putEnvVar(String key, String value) {
+		context.putEnvVar(key, value);
+
+		return this;
+	}
+	
+	/**
 	 * Sends the changes to the deployment config if required. Nothing is done if
 	 * the deployment config already is in the state that the context is in. If the
 	 * changes are sent the existing pods are killed and it waits until the new pods
@@ -209,7 +222,8 @@ public class OpenShiftDebugMode {
 			throws CoreException {
 		boolean dcUpdated = updateDebugmode(dc, context, monitor) 
 				| updateDevmode(dc, context, monitor)
-				| updateLifenessProbe(dc, context, monitor);
+				| updateLifenessProbe(dc, context, monitor)
+				| updateEnvVariables(dc, context, monitor);
 
 		if (dcUpdated) {
 			send(dc, connection, monitor);
@@ -365,6 +379,16 @@ public class OpenShiftDebugMode {
 		}
 	}
 
+	private boolean updateEnvVariables(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
+		if (context.hasEnvVariables()) {
+			for (Map.Entry<String, String> envVar : context.getEnvVars().entrySet()) {
+				dc.setEnvironmentVariable(envVar.getKey(), envVar.getValue());
+			}
+			return true;
+		}
+		return false;
+	}
+	
 	protected void safeSend(IResource resource, Connection connection, IProgressMonitor monitor) {
 		try {
 			send(resource, connection, monitor);

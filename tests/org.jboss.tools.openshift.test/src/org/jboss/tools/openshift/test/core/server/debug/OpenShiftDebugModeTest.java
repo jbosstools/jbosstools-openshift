@@ -666,6 +666,20 @@ public class OpenShiftDebugModeTest {
 		return route2;
 	}
 
+	@Test
+	public void shouldAddEnvVariableAndSendUpdatedDc()
+			throws CoreException, UnsupportedEncodingException, MalformedURLException {
+		// given
+		// when
+		debugMode.putEnvVar("smurf", "42");
+		debugMode.execute(new NullProgressMonitor());
+
+		// then
+		verify(dc, atLeastOnce()).setEnvironmentVariable("smurf", "42");
+		// send updated dc
+		verify(debugMode, times(1)).send(eq(dc), eq(connection), any(IProgressMonitor.class));
+	}
+	
 	private static Matcher<Set<IPort>> aSetThatContainsPort(final int port) {
 		return new TypeSafeMatcher<Set<IPort>>() {
 

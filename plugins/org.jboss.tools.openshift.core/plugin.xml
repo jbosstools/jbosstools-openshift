@@ -158,7 +158,7 @@
 			mappedId="shutdown.openshift.default"
 			serverTypes="org.jboss.tools.openshift.server.type">
 		</subsystemMapping>
-         
+
 		<subsystem
 			system="publish"
 			id="publish.rsync.filesystem"
@@ -265,8 +265,19 @@
             id="modules.state.openshift.springboot.fs"
             mappedId="modules.state.openshift.springboot.fs"
             serverTypes="org.jboss.tools.openshift.server.type" />
+		<subsystem
+			system="launch"
+			id="launch.openshift.springboot"
+			name="OpenShift SpringBoot Launch Controller"
+			class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootLaunchController" />
+		<subsystemMapping
+			id="launch.openshift.springboot"
+			mappedId="launch.openshift.springboot"
+			serverTypes="org.jboss.tools.openshift.server.type">
+		</subsystemMapping>
    	</extension>
 
+	<!-- profiles -->
    	<extension
 		point="org.jboss.ide.eclipse.as.wtp.core.serverProfile">
 
@@ -303,12 +314,14 @@
 				subsystem="moduleDeployPath.xmlprefs.openshift.eap"/>
 		</serverProfile>
 
-       <serverProfile
-             id="openshift3.springboot"
-             serverTypes="org.jboss.tools.openshift.server.type">
+	
+		<!-- springboot -->
+		<serverProfile
+			id="openshift3.springboot"
+			serverTypes="org.jboss.tools.openshift.server.type">
 			<description
 				description="A profile configured to publish to a local folder and rsync to a remote OpenShift pod based on SpringBoot starter."
-                name="openshift3.springboot" />
+				name="openshift3.springboot" />
 			<subsystem
 				system="publish"
 				subsystem="publish.rsync.filesystem.springboot"/>
@@ -318,16 +331,29 @@
 			<subsystem
 				system="moduleDeployPath"
 				subsystem="moduleDeployPath.xmlprefs.openshift"/>
+			<subsystem
+				system="launch"
+				subsystem="launch.openshift.springboot" />
 		</serverProfile>
    	</extension>
-    <extension
-          point="org.jboss.tools.jmx.core.MBeanServerConnectionProvider">
-       <connectionProvider
-             class="org.jboss.tools.openshift.core.server.OpenshiftJMXConnectionProvider">
-       </connectionProvider>
-    </extension>
     
-    
+    <!-- profile detectors -->
+	<extension
+       point="org.jboss.tools.openshift.core.serverAdapterProfileDetector">
+		<detector
+			class="org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector" />
+		<detector 
+			class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootProfileDetector" />
+	</extension>
+
+    <!-- mbean connection provider -->
+	<extension
+		point="org.jboss.tools.jmx.core.MBeanServerConnectionProvider">
+		<connectionProvider
+			class="org.jboss.tools.openshift.core.server.OpenshiftJMXConnectionProvider" />
+	</extension>
+
+    <!-- adapters -->
 	<extension
           point="org.eclipse.core.runtime.adapters">
        <factory
@@ -338,14 +364,5 @@
           </adapter>
        </factory>
     </extension>
- <extension
-       point="org.jboss.tools.openshift.core.serverAdapterProfileDetector">
-    <detector
-          class="org.jboss.tools.openshift.core.server.behavior.eap.OpenshiftEapProfileDetector">
-    </detector>
-    <detector
-          class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootProfileDetector">
-    </detector>
- </extension>
-    
+
 </plugin>

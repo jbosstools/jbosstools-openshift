@@ -14,7 +14,6 @@ import static org.jboss.tools.openshift.core.server.OpenShiftServerUtils.toCoreE
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -33,7 +32,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
-import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
@@ -58,7 +56,6 @@ import org.jboss.tools.openshift.internal.core.server.debug.OpenShiftDebugMode;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.capability.IBinaryCapability;
-import com.openshift.restclient.capability.resources.IPortForwardable;
 import com.openshift.restclient.capability.resources.IPortForwardable.PortPair;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IReplicationController;
@@ -88,13 +85,8 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		try {
 			if (waitForDeploymentConfigReady(beh.getServer(), monitor)) {
 				DebugContext context = createDebugContext(beh, monitor);
-				toggleDebugging(mode, beh, context, monitor);
-				if (!DebugLaunchConfigs.isDebugMode(mode)) {
-					// enable devmode if we're not in debug mode. Debug mode has dev mode enabled
-					// anyhow
-					enableDevMode(context);
-				}
-				new OpenShiftDebugMode(context).execute(monitor);
+				setMode(mode, context, beh, monitor);
+				updateOpenShift(context, monitor);
 			}
 		} catch (Exception e) {
 			mode = currentMode;
@@ -103,6 +95,19 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		} finally {
 			setServerState(beh, mode, monitor);
 		}
+	}
+
+	protected void setMode(String mode, DebugContext context, OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
+		toggleDebugging(mode, beh, context, monitor);
+		if (!DebugLaunchConfigs.isDebugMode(mode)) {
+			// enable devmode if we're not in debug mode. Debug mode has dev mode enabled
+			// anyhow
+			enableDevMode(context);
+		}
+	}
+
+	protected void updateOpenShift(DebugContext context, IProgressMonitor monitor) throws CoreException {
+		new OpenShiftDebugMode(context).execute(monitor);
 	}
 
 	protected void launchServerProcess(OpenShiftServerBehaviour beh, ILaunch launch, IProgressMonitor monitor) {
