@@ -20,7 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +58,8 @@ import com.openshift.restclient.model.template.ITemplate;
  *
  */
 public class NewApplicationWizardModel extends ResourceLabelsPageModel implements IApplicationSourceListPageModel {
+    
+    private static final String APP_LABEL_NAME = "app";
 
 	private Connection connection;
 	private IProject project;
@@ -104,14 +105,16 @@ public class NewApplicationWizardModel extends ResourceLabelsPageModel implement
 		firePropertyChange(PROPERTY_SELECTED_APP_SOURCE, oldSelectedAppSource, this.selectedAppSource);
 	}
 
-	private void updateLabels(IApplicationSource source) {
-		if (source != null && ResourceKind.TEMPLATE.equals(source.getKind())) {
-			ITemplate template = (ITemplate) source.getSource();
-			setLabels(template.getObjectLabels());
-			return;
-		}
-		setLabels(Collections.emptyMap());
-	}
+    private void updateLabels(IApplicationSource source) {
+        if (source != null) {
+            if (ResourceKind.TEMPLATE.equals(source.getKind())) {
+                ITemplate template = (ITemplate)source.getSource();
+                setLabels(template.getObjectLabels());
+            } else {
+                setLabels(Arrays.asList(new Label(APP_LABEL_NAME, source.getSource().getName())));
+            }
+        }
+    }
 
 	private void updateAppSourceStatus(IStatus appSourceStatus) {
 		firePropertyChange(PROPERTY_APP_SOURCE_STATUS, this.appSourceStatus, this.appSourceStatus = appSourceStatus);

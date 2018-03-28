@@ -17,8 +17,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -26,11 +26,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
+import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageModel.Label;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.IApplicationSource;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.NewApplicationWizardModel;
 import org.jboss.tools.openshift.internal.ui.wizard.newapp.fromtemplate.TemplateApplicationSource;
@@ -43,6 +45,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ResourceKind;
+import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.route.IRoute;
 import com.openshift.restclient.model.template.ITemplate;
@@ -65,6 +68,7 @@ public class NewApplicationWizardModelTest {
 	@Before
 	public void setup() throws Exception {
 		when(template.getKind()).thenReturn(ResourceKind.TEMPLATE);
+		when(template.getObjectLabels()).thenReturn(Collections.emptyMap());
 		when(project.getName()).thenReturn(String.valueOf(System.currentTimeMillis()));
 		createProjectTemplateItems();
 		TestableNewApplicationWizardModel model = new TestableNewApplicationWizardModel();
@@ -197,10 +201,11 @@ public class NewApplicationWizardModelTest {
 	@Test
 	public void setServerTemplateShouldSetUseLocalTemplateToFalse() {
 		// pre-conditions
-		IApplicationSource template = mock(IApplicationSource.class);
+		IApplicationSource source = mock(IApplicationSource.class);
+		when(source.getSource()).thenReturn(template);
 
 		// operations
-		model.setServerAppSource(template);
+		model.setServerAppSource(source);
 
 		// verification
 		assertThat(model.isUseLocalAppSource()).isFalse();
@@ -258,6 +263,22 @@ public class NewApplicationWizardModelTest {
 		assertFalse(model.getAppSourceStatus().isOK());
 		assertNull(model.getAppSourceStatus().getException());
 	}
+	
+	@Test
+    public void setDefaultAppLabelForImageBasedApplications() {
+        // pre-conditions
+        IApplicationSource source = mock(IApplicationSource.class);
+        when(source.getKind()).thenReturn(ResourceKind.IMAGE_STREAM);
+        IImageStream imageStream = mock(IImageStream.class);
+        when(source.getSource()).thenReturn(imageStream);
+        when(imageStream.getName()).thenReturn("my-image-stream");
+
+        // operations
+        model.setServerAppSource(source);
+
+        // verification
+        verify(model, Mockito.times(1)).setLabels(Arrays.asList(new Label("app", "my-image-stream")));
+    }
 
 	private IProject getProject(int i) {
 		assertThat(projectItems.size()).isGreaterThan(i + 1);
