@@ -77,7 +77,11 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 
 			@Override
 			protected String getServerHomeFromTaskModel(DownloadRuntimesTaskWizard taskWizard) {
-				return (String)taskWizard.getTaskModel().getObject(DownloadRuntimesTaskWizard.UNZIPPED_SERVER_BIN);
+				String ret = (String)taskWizard.getTaskModel().getObject(DownloadRuntimesTaskWizard.UNZIPPED_SERVER_BIN);
+				if( ret == null ) {
+					ret = (String)taskWizard.getTaskModel().getObject(DownloadRuntimesTaskWizard.UNZIPPED_SERVER_HOME_DIRECTORY);
+				}
+				return ret;
 			}
 
 		};
