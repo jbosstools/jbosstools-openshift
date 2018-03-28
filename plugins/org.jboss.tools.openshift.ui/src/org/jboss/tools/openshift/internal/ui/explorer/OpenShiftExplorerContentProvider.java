@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2017 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -14,12 +14,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistry;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
+import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider;
 import org.jboss.tools.openshift.internal.common.ui.explorer.BaseExplorerContentProvider.LoadingStub;
@@ -51,7 +54,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private OpenshiftUIModel model;
 	private IElementListener listener;
 	private StructuredViewer viewer;
-	private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs = new HashMap<Object, BaseExplorerContentProvider.LoadingStub>();
+	private Map<Object, BaseExplorerContentProvider.LoadingStub> stubs = new HashMap<>();
 
 	public OpenShiftExplorerContentProvider() {
 		this(OpenshiftUIModel.getInstance());
@@ -169,9 +172,7 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 				return stub.getChildren();
 			}
 		default:
-			connection.load(e -> {
-				handleLoadingException(connection, e);
-			});
+			connection.load(e -> handleLoadingException(connection, e));
 			return new Object[] { makeStub(connection) };
 		}
 	}
@@ -184,6 +185,11 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			Collection<IReplicationControllerWrapper> dcs = project
 					.getResourcesOfType(IReplicationControllerWrapper.class);
 			services.addAll(dcs);
+			Collection<IResourceWrapper<?, ?>> pods = project.getResourcesOfKind(ResourceKind.POD)
+					.stream()
+					.filter(wrapper -> ResourceUtils.isRuntimePod((IPod) wrapper.getWrapped()) && !((IPod)wrapper.getWrapped()).isAnnotatedWith(OpenShiftAPIAnnotations.DEPLOYMENT_NAME))
+					.collect(Collectors.toList());
+			services.addAll(pods);
 			return services.toArray();
 		case LOAD_STOPPED:
 			LoadingStub stub = removeStub(project);
