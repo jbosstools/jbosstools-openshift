@@ -11,10 +11,13 @@
 package org.jboss.tools.openshift.internal.core.server.debug;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +40,7 @@ import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
+import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IResource;
@@ -265,9 +269,8 @@ public class OpenShiftDebugMode {
 	}
 
 	private boolean updateDebugmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
-		monitor.subTask(
-				NLS.bind(context.isDebugEnabled() ? "Enabling" : "Disabling" + " debugging for deployment config {0}",
-						dc.getName()));
+		monitor.subTask(NLS.bind(
+				context.isDebugEnabled() ? "Enabling" : "Disabling" + " debugging for deployment config {0}", dc.getName()));
 
 		boolean needsUpdate = needsDebugUpdate(dc, context);
 		if (needsUpdate) {
@@ -349,7 +352,8 @@ public class OpenShiftDebugMode {
 	}
 
 	private boolean updateDevmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
-		monitor.subTask(NLS.bind("Enabling devmode for deployment config {0}", dc.getName()));
+		monitor.subTask(NLS.bind("Enabling/disabling devmode for deployment config {0}", dc.getName()));
+
 		boolean needsUpdate = needsDevmodeUpdate(dc, context);
 		if (needsUpdate) {
 			updateDevmodeEnvVar(context.isDevmodeEnabled(), dc, context);
@@ -380,11 +384,21 @@ public class OpenShiftDebugMode {
 	}
 
 	private boolean updateEnvVariables(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
+		monitor.subTask(NLS.bind("Setting env vars for deployment config {0}...", dc.getName()));
+
 		if (context.hasEnvVariables()) {
-			for (Map.Entry<String, String> envVar : context.getEnvVars().entrySet()) {
-				dc.setEnvironmentVariable(envVar.getKey(), envVar.getValue());
-			}
-			return true;
+			return 
+				context.getEnvVars().entrySet().stream()
+					.filter(entry -> dc.getEnvironmentVariables().stream()
+							.noneMatch(
+									var -> var.getName().equals(entry.getKey()) 
+											&& var.getValue().equals(entry.getValue())))
+					.map(entry -> {
+						dc.setEnvironmentVariable(entry.getKey(), entry.getValue());
+						return true;
+					})
+					.findAny()
+					.orElse(false);
 		}
 		return false;
 	}
@@ -417,17 +431,22 @@ public class OpenShiftDebugMode {
 	protected IPod waitForNewPod(IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
 		NewPodDetectorJob newPodDetector = new NewPodDetectorJob(dc);
 		newPodDetector.schedule();
-		return waitFor(newPodDetector, monitor);
+		return waitFor(newPodDetector, dc, monitor);
 	}
 
-	protected IPod waitFor(NewPodDetectorJob podDetector, IProgressMonitor monitor) throws CoreException {
+	protected IPod waitFor(NewPodDetectorJob podDetector, IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
 		try {
 			podDetector.join(NewPodDetectorJob.TIMEOUT, monitor);
 			IStatus result = podDetector.getResult();
 			if (result == null) {// timed out!
 				throw new CoreException(podDetector.getTimeOutStatus());
 			} else if (!result.isOK()) {
-				throw new CoreException(result);
+				if (IStatus.CANCEL == result.getSeverity()) {
+					throw new CoreException(StatusFactory.cancelStatus(OpenShiftCoreActivator.PLUGIN_ID, 
+							NLS.bind("Cancelled wait for new pod created from deployment config {0}...", dc.getName())));
+				} else {					
+					throw new CoreException(result);
+				}
 			}
 			return podDetector.getPod();
 		} catch (OperationCanceledException | InterruptedException e) {

@@ -24,7 +24,7 @@ public class OpenShiftSpringBootLaunchController extends OpenShiftLaunchControll
 	@Override
 	protected void setMode(String mode, DebugContext context, OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
 		super.setMode(mode, context, beh, monitor);
-		new OpenShiftDebugMode(context).putEnvVar("JAVA_CLASSPATH", "/deployments/BOOT-INF/lib");
+		new OpenShiftDebugMode(context).putEnvVar("JAVA_CLASSPATH", "/deployments/BOOT-INF/lib/");
 	}
 
 

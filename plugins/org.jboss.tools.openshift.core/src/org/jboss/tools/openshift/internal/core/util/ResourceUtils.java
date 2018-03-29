@@ -235,10 +235,8 @@ public class ResourceUtils {
 	}
 
 	private static boolean containsAll(String text, final Collection<String> items) {
-		final String _text = text.toLowerCase();
-		return items.stream().allMatch(it -> {
-			return _text.contains(it);
-		});
+		final String lowerCase = text.toLowerCase();
+		return items.stream().allMatch(lowerCase::contains);
 	}
 
 	private static boolean inCollection(String item, final Collection<String> texts) {

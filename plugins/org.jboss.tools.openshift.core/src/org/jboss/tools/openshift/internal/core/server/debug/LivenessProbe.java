@@ -49,7 +49,8 @@ public class LivenessProbe {
 	 * @throws CoreException 
 	 */
 	public boolean setInitialDelay(DebugContext context, IProgressMonitor monitor) throws CoreException {
-		monitor.subTask(NLS.bind("Setting liveness probe initial delay to {0}", INITIAL_DELAY));
+		monitor.subTask(NLS.bind(
+				"Setting liveness probe initial delay to {0} for deployment config {1}...", INITIAL_DELAY, dc.getName()));
 
 		IProbe probe = getLivenessProbe(dc);
 		if (probe == null) {
@@ -84,10 +85,10 @@ public class LivenessProbe {
 			return false;
 		}
 
-		monitor.subTask("Resetting liveness probe initial delay...");
+		monitor.subTask(NLS.bind("Resetting liveness probe initial delay for deployment config {0}...", dc.getName()));
 		probe.setInitialDelaySeconds(delay);
-		OpenShiftServerUtils.setLivenessProbeInitialDelay(OpenShiftServerUtils.VALUE_LIVENESSPROBE_NODELAY,
-				context.getServer());
+		OpenShiftServerUtils.setLivenessProbeInitialDelay(
+				OpenShiftServerUtils.VALUE_LIVENESSPROBE_NODELAY, context.getServer());
 		return true;
 	}
 
