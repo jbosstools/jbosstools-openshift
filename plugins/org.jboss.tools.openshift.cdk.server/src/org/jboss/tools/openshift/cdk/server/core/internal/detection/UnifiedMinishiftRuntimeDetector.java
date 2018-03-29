@@ -43,8 +43,8 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	private static final String VM_DRIVER = "vm-driver";
 	private static final String MINISHIFT = "minishift";
 	
-	public static final String CDK_RUNTIME_TYPE = "CDK 3";
-	public static final String CDK_32_RUNTIME_TYPE = "CDK 3.2";
+	public static final String CDK_RUNTIME_TYPE = "CDK 3.0+";
+	public static final String CDK_32_RUNTIME_TYPE = "CDK 3.2+";
 	public static final String MS_17_RUNTIME_TYPE = "Minishift 1.7+";
 	
 	
