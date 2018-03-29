@@ -138,9 +138,12 @@ public class KeyValueWizardPage<T extends IKeyValueItem> extends AbstractOpenShi
 
 		@Override
 		protected IStatus validate() {
-			String key = (String) keyTextObservable.getValue();
-			String value = (String) valueTextObservable.getValue();
-			if (initialKey != null && initialKey.equals(key) && initialValue != null && initialValue.equals(value)) {
+			String key = keyTextObservable.getValue();
+			String value = valueTextObservable.getValue();
+			if (initialKey != null 
+					&& initialKey.equals(key) 
+					&& initialValue != null
+					&& initialValue.equals(value)) {
 				return ValidationStatus.cancel("Provide new values.");
 			}
 			return ValidationStatus.ok();

@@ -61,12 +61,12 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageMo
 public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 
 	public static final String PAGE_NAME = "Resource Labels Page";
-	private static final String LABEL_KEY = "Label";
+	private static final String LABEL_KEY = "Key";
 	private static final String LABEL_GROUP = "Label";
 	private static final String RESOURCE_LABEL = "Resource Label";
 	private static final String PAGE_DESCRIPTION = "Add or edit the labels to be added to each resource. "
-			+ "Labels are used to organize, group, or select objects and resources, such as pods and services.  Some labels cannot be modified and therefore"
-			+ " cannot be edited or removed.";
+			+ "Labels are used to organize, group, or select objects and resources, such as pods and services. "
+			+ "Some labels cannot be modified and therefore cannot be edited or removed.";
 
 	private IResourceLabelsPageModel model;
 	private TableViewer viewer;
@@ -229,7 +229,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 					public String getValue(Label label) {
 						return label.getName();
 					}
-				})).name("Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
+				})).name(LABEL_KEY).align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
 				.<Label>column(new DelegatingStyledCellLabelProvider(new LabelTextProvider() {
 					@Override
 					public String getValue(Label label) {
