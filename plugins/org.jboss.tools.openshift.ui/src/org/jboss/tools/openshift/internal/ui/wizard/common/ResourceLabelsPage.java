@@ -61,11 +61,12 @@ import org.jboss.tools.openshift.internal.ui.wizard.common.IResourceLabelsPageMo
 public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 
 	public static final String PAGE_NAME = "Resource Labels Page";
-	private static final String LABEL = "Label";
+	private static final String LABEL_KEY = "Key";
+	private static final String LABEL_GROUP = "Label";
 	private static final String RESOURCE_LABEL = "Resource Label";
 	private static final String PAGE_DESCRIPTION = "Add or edit the labels to be added to each resource. "
-			+ "Labels are used to organize, group, or select objects and resources, such as pods and services.  Some labels cannot be modified and therefore"
-			+ " cannot be edited or removed.";
+			+ "Labels are used to organize, group, or select objects and resources, such as pods and services. "
+			+ "Some labels cannot be modified and therefore cannot be edited or removed.";
 
 	private IResourceLabelsPageModel model;
 	private TableViewer viewer;
@@ -82,15 +83,23 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 		lblLabel.setText("Labels");
 
 		Composite labelsGroup = new Composite(container, SWT.NONE);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(labelsGroup);
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(labelsGroup);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(labelsGroup);
+		GridLayoutFactory.fillDefaults()
+			.numColumns(2)
+			.applyTo(labelsGroup);
 
 		Composite tableContainer = new Composite(labelsGroup, SWT.NONE);
 
 		this.viewer = createTable(tableContainer);
-		GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
-		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(viewer))
-				.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model)).in(dbc);
+		GridDataFactory.fillDefaults()
+			.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true)
+			.applyTo(tableContainer);
+		ValueBindingBuilder
+			.bind(ViewerProperties.singleSelection().observe(viewer))
+			.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
+			.in(dbc);
 		viewer.setContentProvider(new ObservableListContentProvider());
 		viewer.setInput(BeanProperties.list(IResourceLabelsPageModel.PROPERTY_LABELS).observe(model));
 
@@ -101,21 +110,31 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 		UIUtils.setDefaultButtonWidth(addButton);
 
 		Button editExistingButton = new Button(labelsGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(editExistingButton);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL)
+			.applyTo(editExistingButton);
 		editExistingButton.setText("Edit...");
 		editExistingButton.addSelectionListener(onEdit());
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(editExistingButton)).notUpdatingParticipant()
-				.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
-				.converting(new IsNotNullOrReadOnlyBooleanConverter()).in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(editExistingButton))
+			.notUpdatingParticipant()
+			.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
+			.converting(new IsNotNullOrReadOnlyBooleanConverter())
+			.in(dbc);
 		UIUtils.setDefaultButtonWidth(editExistingButton);
 
 		Button removeButton = new Button(labelsGroup, SWT.PUSH);
-		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(removeButton);
+		GridDataFactory.fillDefaults()
+			.align(SWT.FILL, SWT.FILL)
+			.applyTo(removeButton);
 		removeButton.setText("Remove...");
 		removeButton.addSelectionListener(onRemove());
-		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(removeButton)).notUpdatingParticipant()
-				.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
-				.converting(new IsNotNullOrReadOnlyBooleanConverter()).in(dbc);
+		ValueBindingBuilder
+			.bind(WidgetProperties.enabled().observe(removeButton))
+			.notUpdatingParticipant()
+			.to(BeanProperties.value(IResourceLabelsPageModel.PROPERTY_SELECTED_LABEL).observe(model))
+			.converting(new IsNotNullOrReadOnlyBooleanConverter())
+			.in(dbc);
 		UIUtils.setDefaultButtonWidth(removeButton);
 	}
 
@@ -146,17 +165,23 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 	}
 
 	private void editLabel(Label label) {
-		if (label == null || isReadOnly(label)) {
+		if (label == null 
+				|| isReadOnly(label)) {
 			return;
 		}
 		Set<String> usedKeys = getUsedKeys();
 		usedKeys.remove(label.getKey());
-		IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<>(label).windowTitle(RESOURCE_LABEL)
-				.title("Edit Label").description("Edit the resource label.").keyLabel(LABEL)
+		IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<>(label)
+				.windowTitle(RESOURCE_LABEL)
+				.title("Edit Label")
+				.description("Edit the resource label.")
+				.keyLabel(LABEL_KEY)
 				.keyDescription(LabelKeyValidator.keyDescription)
 				.valueDescription(NLS.bind(LabelValueValidator.valueDescription, LabelValueValidator.defaultType))
-				.groupLabel(LABEL).keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels(), usedKeys))
-				.valueAfterConvertValidator(new LabelValueValidator()).build();
+				.groupLabel(LABEL_GROUP)
+				.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels(), usedKeys))
+				.valueAfterConvertValidator(new LabelValueValidator())
+				.build();
 		OkCancelButtonWizardDialog dialog = new OkCancelButtonWizardDialog(getShell(),
 				new KeyValueWizard<>(label, dialogModel));
 		if (OkCancelButtonWizardDialog.OK == dialog.open()) {
@@ -165,7 +190,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 	}
 
 	Set<String> getUsedKeys() {
-		return model.getLabels().stream().map(l -> l.getKey()).collect(Collectors.toSet());
+		return model.getLabels().stream().map(Label::getKey).collect(Collectors.toSet());
 	}
 
 	private SelectionListener onAdd() {
@@ -173,13 +198,17 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IKeyValueWizardModel<Label> dialogModel = new KeyValueWizardModelBuilder<Label>()
-						.windowTitle(RESOURCE_LABEL).title("Add Label").description("Add a resource label.")
-						.keyLabel(LABEL).keyDescription(LabelKeyValidator.keyDescription)
+						.windowTitle(RESOURCE_LABEL)
+						.title("Add Label")
+						.description("Add a resource label.")
+						.keyLabel(LABEL_KEY)
+						.keyDescription(LabelKeyValidator.keyDescription)
 						.valueDescription(
 								NLS.bind(LabelValueValidator.valueDescription, LabelValueValidator.defaultType))
-						.groupLabel(LABEL)
+						.groupLabel(LABEL_GROUP)
 						.keyAfterConvertValidator(new LabelKeyValidator(model.getReadOnlyLabels(), getUsedKeys()))
-						.valueAfterConvertValidator(new LabelValueValidator()).build();
+						.valueAfterConvertValidator(new LabelValueValidator())
+						.build();
 				OkCancelButtonWizardDialog dialog = new OkCancelButtonWizardDialog(getShell(),
 						new KeyValueWizard<>(UIUtils.getFirstElement(viewer.getSelection(), Label.class), dialogModel));
 				if (OkCancelButtonWizardDialog.OK == dialog.open()) {
@@ -200,7 +229,7 @@ public class ResourceLabelsPage extends AbstractOpenShiftWizardPage {
 					public String getValue(Label label) {
 						return label.getName();
 					}
-				})).name("Name").align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
+				})).name(LABEL_KEY).align(SWT.LEFT).weight(2).minWidth(100).buildColumn()
 				.<Label>column(new DelegatingStyledCellLabelProvider(new LabelTextProvider() {
 					@Override
 					public String getValue(Label label) {
