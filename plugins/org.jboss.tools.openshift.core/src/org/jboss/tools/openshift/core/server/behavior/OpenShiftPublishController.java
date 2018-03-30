@@ -31,7 +31,7 @@ import org.jboss.ide.eclipse.as.core.server.internal.v7.DeploymentMarkerUtils;
 import org.jboss.ide.eclipse.as.wtp.core.console.ServerConsoleModel;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IPublishController;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
-import org.jboss.tools.as.core.server.controllable.subsystems.internal.StandardFileSystemPublishController;
+import org.jboss.tools.as.core.server.controllable.subsystems.StandardFileSystemPublishController;
 import org.jboss.tools.common.util.FileUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
@@ -204,7 +204,6 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 	}
 
 	@Override
-	@SuppressWarnings("restriction")
 	public int publishModule(int kind, int deltaKind, IModule[] module, IProgressMonitor monitor) throws CoreException {
 		if (syncDownFailed) {
 			return super.publishModule(IServer.PUBLISH_CLEAN, deltaKind, module, monitor);
