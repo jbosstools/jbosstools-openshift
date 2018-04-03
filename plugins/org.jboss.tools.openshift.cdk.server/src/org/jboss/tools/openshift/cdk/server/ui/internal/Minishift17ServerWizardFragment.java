@@ -45,7 +45,8 @@ public class Minishift17ServerWizardFragment extends CDK32ServerWizardFragment {
 	protected void handleDownloadedFile(String newHome) {
 		if( !homeText.isDisposed()) {
 			File f = new File(newHome, "minishift");
-			f.setExecutable(true);
+			if( f.exists())
+				f.setExecutable(true);
 			homeText.setText(f.getAbsolutePath());
 		}
 	}
