@@ -156,7 +156,7 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	
 	private boolean folderContainsMinishiftBinary(File f) {
 		File bin = getMinishiftBinary(f);
-		return bin != null && bin.exists() && bin.isFile() && bin.canExecute();
+		return bin != null && bin.exists() && bin.isFile();
 	}
 	
 	private File folderWhiteListBin(File folder) {
@@ -271,9 +271,9 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	private String getMinishiftLoc(RuntimeDefinition runtimeDefinition) {
 		String fromDef = (String) runtimeDefinition.getProperty(OVERRIDE_MINISHIFT_LOCATION);
 		if (doesNotExist(fromDef)) {
-			return fromDef;
+			return MinishiftBinaryUtility.getMinishiftLocation();
 		}
-		return MinishiftBinaryUtility.getMinishiftLocation();
+		return fromDef;
 	}
 
 	@Override
