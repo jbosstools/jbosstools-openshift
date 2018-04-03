@@ -11,13 +11,9 @@
 package org.jboss.tools.openshift.internal.core.server.debug;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -40,7 +36,6 @@ import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IContainer;
 import com.openshift.restclient.model.IDeploymentConfig;
-import com.openshift.restclient.model.IEnvironmentVariable;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IPort;
 import com.openshift.restclient.model.IResource;
@@ -387,18 +382,15 @@ public class OpenShiftDebugMode {
 		monitor.subTask(NLS.bind("Setting env vars for deployment config {0}...", dc.getName()));
 
 		if (context.hasEnvVariables()) {
-			return 
-				context.getEnvVars().entrySet().stream()
-					.filter(entry -> dc.getEnvironmentVariables().stream()
-							.noneMatch(
-									var -> var.getName().equals(entry.getKey()) 
-											&& var.getValue().equals(entry.getValue())))
-					.map(entry -> {
+			return context.getEnvVars().entrySet().stream()
+				.filter(entry -> {
+					return dc.getEnvironmentVariables().stream()
+							.noneMatch( var -> var.getName().equals(entry.getKey()) 
+												&& var.getValue().equals(entry.getValue())); })
+				.peek(entry -> {
 						dc.setEnvironmentVariable(entry.getKey(), entry.getValue());
-						return true;
-					})
-					.findAny()
-					.orElse(false);
+				})
+				.count() > 0;
 		}
 		return false;
 	}

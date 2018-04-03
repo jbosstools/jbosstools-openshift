@@ -12,45 +12,30 @@ package org.jboss.tools.openshift.core.server.behavior.springboot;
 
 import java.io.File;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.maven.project.MavenProject;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.util.RemotePath;
-import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
-import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.RSync;
 import org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController;
-import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
-
-import com.openshift.restclient.model.IResource;
 
 public class OpenShiftSpringBootPublishController extends OpenShiftPublishController {
-
-	private static final String ROOT_MODULE_FOLDER = "classes";
-	private static final String CHILD_MODULE_FOLDER = "lib";
-	private static final String POD_BASE_PATH = "/BOOT-INF";
 
 	public OpenShiftSpringBootPublishController() {
 		// keep for reflection instantiation
 	}
 
 	@Override
-	protected RSync createRsync(IServer server, final IProgressMonitor monitor) throws CoreException {
-		final IResource resource = OpenShiftServerUtils.getResourceChecked(server, monitor);
-		String podDirectory = OpenShiftServerUtils.getOrLoadPodPath(server, resource, monitor);
-		IPath podPath = new Path(podDirectory).append(POD_BASE_PATH);
-		return OpenShiftServerUtils.createRSync(resource, podPath.toString(), server);
+	protected RSync createRsync(final IServer server, final IProgressMonitor monitor) throws CoreException {
+		return OpenShiftSpringBootPublishUtils.createRSync(server, monitor);
+	}
+	
+	@Override
+	protected File getDeploymentsRootFolder() throws CoreException {
+		return new File(super.getDeploymentsRootFolder(), OpenShiftSpringBootPublishUtils.BASE_PATH);
 	}
 
 	@Override
@@ -60,62 +45,29 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 		}
 
 		if (isRootModule(module)) {
-			return super.getModuleDeployRoot(module, isBinaryObject).append(ROOT_MODULE_FOLDER);
+			IModule rootModule = module[0];
+			return super.getModuleDeployRoot(module, isBinaryObject)
+					.append(OpenShiftSpringBootPublishUtils.getRootModuleDeployPath(rootModule));
 		} else {
-			return getChildModuleDeployPath(module);
+			IModule childModule = module[module.length - 1];
+			return getChildModuleDeployPath(childModule);
 		}
 	}
 
-	private IPath getChildModuleDeployPath(IModule[] module) throws CoreException {
-		IModule childModule = module[module.length - 1];
-		IPath finalName = getMavenFinalName(childModule);
-		if (finalName == null) {
-			IStatus status = StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, 
-					NLS.bind("Could not determine maven artifact final name for module {0}", childModule.getName()));
-			throw new CoreException(status);
-		}
+	private IPath getChildModuleDeployPath(IModule module) throws CoreException {
+		IPath localDestination = 
+				new Path(getDeploymentOptions().getDeploymentsRootFolder(true))
+					.append(OpenShiftSpringBootPublishUtils.getChildModuleDeployPath(module));
+		localDestination.toFile().mkdirs();
 
-		IPath deploymentRootFolder = new Path(getDeploymentOptions().getDeploymentsRootFolder(true));
-		File destination = deploymentRootFolder
-				.append(CHILD_MODULE_FOLDER)
-				.append(finalName)
-				.toFile();
-		destination.mkdirs();
 		return new RemotePath(
-				destination.getAbsolutePath(), 
+				localDestination.toString(), 
 				getDeploymentOptions().getPathSeparatorCharacter());
 	}
 
 	private boolean isRootModule(IModule[] module) {
 		return module != null
 				&& module.length == 1;
-	}
-	
-	private IPath getMavenFinalName(IModule module) throws CoreException {
-		if (module == null) {
-			return null;
-		}
-
-		MavenProject mavenProject = getMavenProject(module.getProject());
-		if (mavenProject != null) {
-			String finalName = mavenProject.getBuild().getFinalName();
-			String packaging = mavenProject.getPackaging();
-			if (StringUtils.isEmpty(finalName)
-					|| StringUtils.isEmpty(packaging)) {
-				return null;
-			}
-
-			return new Path(finalName + "." + packaging);
-		}
-		return null;
-	}
-
-	private MavenProject getMavenProject(IProject project) throws CoreException {
-		IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(project);
-		if (facade == null) {
-			return null;
-		}
-		return facade.getMavenProject(new NullProgressMonitor());
 	}
 
 	@Override
@@ -127,5 +79,5 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 	protected boolean forceZipModule(IModule[] moduleTree) {
 		return false;
 	}
-
+	
 }

@@ -97,7 +97,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 	}
 
-	protected void setMode(String mode, DebugContext context, OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
+	protected void setMode(String mode, DebugContext context, OpenShiftServerBehaviour beh, IProgressMonitor monitor) throws CoreException {
 		toggleDebugging(mode, beh, context, monitor);
 		if (!DebugLaunchConfigs.isDebugMode(mode)) {
 			// enable devmode if we're not in debug mode. Debug mode has dev mode enabled

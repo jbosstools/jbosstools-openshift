@@ -50,11 +50,11 @@ public class OpenShiftPublishController extends StandardFileSystemPublishControl
 		final IProject deployProject = OpenShiftServerUtils.checkedGetDeployProject(server);
 		// If the magic project is *also* a module on the server, do nothing
 		if (!modulesIncludesMagicProject(server, deployProject)) {
-			publishModule(monitor, deployProject, localDirectory);
+			publishRootModule(monitor, deployProject, localDirectory);
 		}
 	}
 
-	private void publishModule(final IProgressMonitor monitor, final IProject deployProject, final File localDirectory)
+	private void publishRootModule(final IProgressMonitor monitor, final IProject deployProject, final File localDirectory)
 			throws CoreException {
 		// The project not also a module, so let's see if there exists a module at all
 		IModule projectModule = OpenShiftServerUtils.findProjectModule(deployProject);
