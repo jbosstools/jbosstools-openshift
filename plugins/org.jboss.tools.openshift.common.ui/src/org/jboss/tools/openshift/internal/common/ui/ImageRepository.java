@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Red Hat Inc..
+ * Copyright (c) 2011-2018 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.common.ui;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
@@ -51,20 +50,26 @@ public class ImageRepository {
 	}
 
 	public ImageDescriptor create(String name) {
-		return create(imageRegistry, name);
+		return create(name, true);
 	}
 
-	private ImageDescriptor create(ImageRegistry registry, String name) {
-		return create(registry, name, getBaseUrl());
+	public ImageDescriptor create(String name, boolean register) {
+		return create(imageRegistry, name, register);
 	}
 
-	private ImageDescriptor create(ImageRegistry registry, String name, URL baseUrl) {
+	private ImageDescriptor create(ImageRegistry registry, String name, boolean register) {
+		return create(registry, name, getBaseUrl(), register);
+	}
+
+	private ImageDescriptor create(ImageRegistry registry, String name, URL baseUrl, boolean register) {
 		if (baseUrl == null) {
 			return null;
 		}
 
 		ImageDescriptor imageDescriptor = ImageDescriptor.createFromURL(createFileURL(name, baseUrl));
-		registry.put(name, imageDescriptor);
+		if (register) {
+			registry.put(name, imageDescriptor);
+		}
 		return imageDescriptor;
 	}
 
@@ -80,5 +85,9 @@ public class ImageRepository {
 
 	public Image getImage(String name) {
 		return imageRegistry.get(name);
+	}
+
+	public void create(String imagePath, Image image) {
+		imageRegistry.put(imagePath, image);
 	}
 }

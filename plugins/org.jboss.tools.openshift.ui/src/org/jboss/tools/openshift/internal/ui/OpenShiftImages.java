@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2017 Red Hat Inc..
+ * Copyright (c) 2015-2018 Red Hat Inc..
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.internal.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
@@ -77,10 +76,17 @@ public class OpenShiftImages {
 			name = name.substring(ICON_NAME_PREFIX.length());
 		}
 		final String imagePath = NLS.bind("apps/{0}.png", name);
-		if (!descriptorsByName.containsKey(name)) {
-			descriptorsByName.put(name, repo.create(imagePath));
+		ImageDescriptor desc = descriptorsByName.get(name);
+		if (desc == null) {
+			desc = repo.create(imagePath, false);
+			Image image = desc.createImage(false);
+			if (image == null) {
+				image = BLOCKS_IMG;
+			}
+			repo.create(imagePath, image);
+			descriptorsByName.put(name, desc);
 		}
-		return (Image) ObjectUtils.defaultIfNull(repo.getImage(imagePath), BLOCKS_IMG);
+		return repo.getImage(imagePath);
 	}
 
 }
