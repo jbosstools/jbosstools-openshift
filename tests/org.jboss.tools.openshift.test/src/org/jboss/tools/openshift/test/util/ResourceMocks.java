@@ -73,6 +73,7 @@ import com.openshift.restclient.model.build.ISourceBuildStrategy;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.probe.IProbe;
 import com.openshift.restclient.model.route.IRoute;
+import com.openshift.restclient.model.secret.ISecret;
 
 /**
  * @author Andre Dietisheim
@@ -402,6 +403,12 @@ public class ResourceMocks {
 		return createResource(IService.class, ResourceKind.SERVICE, service -> {
 			mockGetResourceProperties(name, project, service);
 			when(service.getSelector()).thenReturn(selectors);
+		});
+	}
+
+	public static ISecret createSecret(String name) {
+		return createResource(ISecret.class, ResourceKind.SERVICE, secret -> {
+			when(secret.getName()).thenReturn(name);
 		});
 	}
 
