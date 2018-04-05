@@ -60,10 +60,10 @@ public class DebugContext {
 	 * @return
 	 */
 	public DebugContext(IServer server, String devmodeKey, String debugPortKey, String debugPort) {
-		Assert.isNotNull(server);
-		Assert.isNotNull(devmodeKey);
-		Assert.isNotNull(debugPortKey);
-		Assert.isNotNull(debugPort);
+		Assert.isNotNull(server, "Could not find server to set dev mode / debugging on.");
+		Assert.isNotNull(devmodeKey, "Could not find key to enable dev mode with.");
+		Assert.isNotNull(debugPortKey, "Could not find key to enable debugging with.");
+		Assert.isNotNull(debugPort, "Could not find debugging port.");
 
 		this.server = server;
 		this.devmodeKey = devmodeKey;
