@@ -20,6 +20,7 @@ import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.eclipse.condition.ServerHasState;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.DefaultServer;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersViewEnums.ServerState;
@@ -70,7 +71,7 @@ public class CDKServer extends DefaultServer {
 		waitConditionMatrix.put(multipleDialogWait, 
 				(x) -> closeDialogAndThrowException((Shell) multipleDialogWait.getResult()));
 		waitConditionMatrix.put(sslDialogWait,
-				(x) -> confirmSSLCertificateDialog(sslDialogWait.getResult()));
+				(x) -> confirmSSLCertificateDialog((Shell) sslDialogWait.getResult()));
 	}
 	
 	public void setCertificateAccepted(boolean accepted) {
@@ -110,6 +111,16 @@ public class CDKServer extends DefaultServer {
 		waitForProblemDialog(waitConditions, menuItem, TimePeriod.DEFAULT);
 		new WaitWhile(new SystemJobIsRunning(new JobMatcher("Inspecting CDK environment")), TimePeriod.DEFAULT); 
 		log.debug("Operate server's state finished, the result server's state is: '" + getLabel().getState() + "'");  
+	}
+	
+	public void setupCDK() {
+		select();
+		log.info("Calling 'Setup CDK' menu item");
+		try {
+			new ContextMenuItem(CDKLabel.ServerContextMenu.SETUP_CDK).select();
+		} catch (CoreLayerException coreExc) {
+			throw new CDKServerException("Menu item 'Setup CDK' is not available");
+		}
 	}
 	
 	public String getServerType() {

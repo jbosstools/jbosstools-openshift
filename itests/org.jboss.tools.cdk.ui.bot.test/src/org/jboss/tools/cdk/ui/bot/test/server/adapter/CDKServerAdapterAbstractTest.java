@@ -46,6 +46,7 @@ import org.eclipse.reddeer.workbench.exception.WorkbenchLayerException;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
+import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.requirements.CleanDockerExplorerRequirement.CleanDockerExplorer;
 import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.RemoveCDKServers;
@@ -189,7 +190,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		CDK3ServerEditor editor = new CDK3ServerEditor(getCDKServer().getLabel().getName());
 		editor.getPassCredentialsCheckBox().toggle(pass);
 		new WaitUntil(new EditorIsDirty(editor), TimePeriod.MEDIUM, false);
-		new WaitWhile(new SystemJobIsRunning(getJobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM);
+		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM);
 		try {
 			editor.save();
 		} catch (WorkbenchLayerException exc) {

@@ -14,12 +14,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
-import org.eclipse.reddeer.common.util.Display;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
@@ -33,10 +30,9 @@ import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
-import org.eclipse.reddeer.workbench.handler.EditorHandler;
-import org.eclipse.ui.IEditorPart;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
+import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKPart;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.MinishiftServerEditor;
@@ -110,8 +106,8 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	protected void checkEditorStateAfterSave(String location, boolean canSave) {
 		LabeledText label = ((CDKPart) editor).getMinishiftBinaryLabel();
 		label.setText(location);
-		new WaitUntil(new SystemJobIsRunning(getJobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.SHORT, false);
-		new WaitWhile(new SystemJobIsRunning(getJobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
+		new WaitUntil(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.SHORT, false);
+		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
 		if (canSave) {
 			verifyEditorCanSave(location);
 		} else {
@@ -119,57 +115,10 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 		}
 	}
 
-	/**
-	 * We need to override save method from EditorHandler to be executed in async
-	 * thread in order to be able to work with message dialog from invalid server
-	 * editor location
-	 * 
-	 * @param editor
-	 *            IEditorPart to work with during saving
-	 */
-	protected void performSave(final IEditorPart editor) {
-		EditorHandler.getInstance().activate(editor);
-		Display.asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				editor.doSave(new NullProgressMonitor());
-
-			}
-		});
-		new WaitUntil(new WaitCondition() {
-
-			@Override
-			public boolean test() {
-				return !editor.isDirty();
-			}
-
-			@Override
-			public String description() {
-				return " editor is not dirty...";
-			}
-
-			@Override
-			public <T> T getResult() {
-				return null;
-			}
-
-			@Override
-			public String errorMessageWhile() {
-				return null;
-			}
-
-			@Override
-			public String errorMessageUntil() {
-				return null;
-			}
-		}, TimePeriod.MEDIUM);
-	}
-
 	private void verifyEditorCannotSave(String location) {
 		assertTrue(editor.isDirty());
 		try {
-			performSave(editor.getEditorPart());
+			CDKTestUtils.performSave(editor.getEditorPart());
 			new WaitWhile(new JobIsRunning());
 			fail("Editor was saved successfully while passing " + location + " but exception was expected");
 		} catch (WaitTimeoutExpiredException exc) {
@@ -182,7 +131,7 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	private void verifyEditorCanSave(String location) {
 		assertTrue(editor.isDirty());
 		try {
-			performSave(editor.getEditorPart());
+			CDKTestUtils.performSave(editor.getEditorPart());
 			log.info("Editor was saved as expected");
 		} catch (WaitTimeoutExpiredException exc) {
 			fail("Editor was not saved successfully and exception was thrown while passing " + location);
