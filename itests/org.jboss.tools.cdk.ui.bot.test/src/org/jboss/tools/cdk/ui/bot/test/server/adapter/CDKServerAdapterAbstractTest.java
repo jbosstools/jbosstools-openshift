@@ -14,6 +14,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -589,6 +591,22 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 			throw new OpenShiftToolsException("Could not find OpenShift connection for " + 
 					server + " and " + username);
 		}
+	}
+	
+	/**
+	 * Returns lists of filtered docker connections names 
+	 * @param view DockerExplorerView object
+	 * @param name string name parameter to filter docker connections
+	 * @return list of string of docker connections names fulfilling condition
+	 */
+	public List<String> getDockerConnectionCreatedByCDK(DockerExplorerView view, String name) {
+		List<String> list = new ArrayList<>();
+		for (String item : view.getDockerConnectionNames()) {
+			if (item.contains(name)) {
+				list.add(item);
+			}
+		}
+		return list;
 	}
 	
 	/**
