@@ -149,7 +149,7 @@ public class LabelsTest extends AbstractTest {
 	@Test 
 	public void testBasicLabelValidation() {
 		openResourceLabelShell();
-		LabeledText name = new LabeledText(OpenShiftLabel.TextLabels.LABEL);
+		LabeledText name = new LabeledText(OpenShiftLabel.TextLabels.KEY);
 		LabeledText value = new LabeledText(OpenShiftLabel.TextLabels.VALUE);
 		
 		assertFalse("OK button should be disable if there is no name nor value for a new label.",
@@ -230,7 +230,7 @@ public class LabelsTest extends AbstractTest {
 	}
 	
 	private void setInvalidName(String name) {
-		new LabeledText(OpenShiftLabel.TextLabels.LABEL).setText(name);
+		new LabeledText(OpenShiftLabel.TextLabels.KEY).setText(name);
 		assertFalse("OK button should be disable for invalid name, but it is not.",
 				buttonIsEnabled(new OkButton()));
 	}
@@ -242,7 +242,7 @@ public class LabelsTest extends AbstractTest {
 	}
 	
 	private void setValidLabel() {
-		new LabeledText(OpenShiftLabel.TextLabels.LABEL).setText("valid");
+		new LabeledText(OpenShiftLabel.TextLabels.KEY).setText("valid");
 		new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText("valid");
 		assertTrue("OK button should be enabled for valid name and value, but it is not.",
 				buttonIsEnabled(new OkButton()));

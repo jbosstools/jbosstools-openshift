@@ -41,7 +41,7 @@ public class ResourceLabelsWizardPage {
 		new PushButton(OpenShiftLabel.Button.ADD).click();
 		
 		new DefaultShell(OpenShiftLabel.Shell.RESOURCE_LABEL);
-		new LabeledText(OpenShiftLabel.TextLabels.LABEL).setText(name);
+		new LabeledText(OpenShiftLabel.TextLabels.KEY).setText(name);
 		new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText(value);
 		
 		new WaitUntil(new ControlIsEnabled(new OkButton()));
@@ -66,7 +66,7 @@ public class ResourceLabelsWizardPage {
 		new PushButton(OpenShiftLabel.Button.EDIT).click();
 		
 		new DefaultShell(OpenShiftLabel.Shell.RESOURCE_LABEL);
-		new LabeledText(OpenShiftLabel.TextLabels.LABEL).setText(newName);
+		new LabeledText(OpenShiftLabel.TextLabels.KEY).setText(newName);
 		new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText(newValue);
 		
 		new WaitUntil(new ControlIsEnabled(new OkButton()));

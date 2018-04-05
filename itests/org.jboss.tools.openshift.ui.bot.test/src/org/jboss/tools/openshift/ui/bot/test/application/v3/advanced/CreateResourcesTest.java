@@ -106,7 +106,7 @@ public class CreateResourcesTest extends AbstractTest  {
 		assertTrue("Hello service has not been created from file", explorer.getOpenShift3Connection(connectionReq.getConnection())
 				.getProject(testProject).getOpenShiftResource(Resource.SERVICE, SERVICE_NAME) != null);
 		assertTrue("Hello service is not visible in OpenShift Explorer view", explorer.getOpenShift3Connection(connectionReq.getConnection())
-				.getProject(testProject).getService(SERVICE_NAME).getTreeItem() != null);
+				.getProject(testProject).getServicesWithName(SERVICE_NAME).get(0) != null);
 
 		createResource(RESOURCES_LOCATION + File.separator + "hello-route.json");
 		refreshProject();

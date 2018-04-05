@@ -285,7 +285,7 @@ public class OpenShiftLabel {
 		public static final String GITHUB_WEBHOOK = "GitHub webhook:";
 		
 		// Labels
-		public static final String LABEL = "Label:";
+		public static final String KEY = "Key:";
 		public static final String OC_LOCATION = "'oc" + (TestUtils.getOS().contains("windows") ? ".exe" : "") + "' executable location";
 		public static final String VALUE = "Value:";
 		public static final String REMOTE_REQUEST_TIMEOUT = "Remote requests timeout (in seconds):";

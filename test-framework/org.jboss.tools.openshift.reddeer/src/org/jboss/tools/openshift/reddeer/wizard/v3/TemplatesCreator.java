@@ -37,6 +37,7 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.reddeer.condition.TreeIsAvailable;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
+import org.jboss.tools.openshift.reddeer.wizard.page.ResourceLabelsWizardPage;
 
 /**
  * Creator allows to create a new OpenShift 3 application in simplified way. It's required to provide mostly
@@ -254,16 +255,8 @@ public class TemplatesCreator {
 
 	private void createOpenShiftLabels(List<Label> labels) {
 		for (Label label: labels) {
-			new PushButton(OpenShiftLabel.Button.ADD).click();
-			
-			new DefaultShell(OpenShiftLabel.Shell.RESOURCE_LABEL);
-			new LabeledText(OpenShiftLabel.TextLabels.LABEL).setText(label.getName());
-			new LabeledText(OpenShiftLabel.TextLabels.VALUE).setText(label.getValue());
-			
-			new WaitUntil(new ControlIsEnabled(new OkButton()));
-			new OkButton().click();
-			
-			new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.RESOURCE_LABEL));
+			ResourceLabelsWizardPage labelsWizard = new ResourceLabelsWizardPage();
+			labelsWizard.createLabel(label.getName(), label.getValue());
 			
 			new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		}
