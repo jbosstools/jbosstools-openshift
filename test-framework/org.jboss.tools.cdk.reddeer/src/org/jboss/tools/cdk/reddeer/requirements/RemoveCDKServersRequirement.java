@@ -37,7 +37,7 @@ public class RemoveCDKServersRequirement implements Requirement<RemoveCDKServers
 
 	@Override
 	public void fulfill() {
-		log.info("Deleting all CDK/Minishift server adapters...");
+		log.info("Deleting all CDK/Minishift server adapters..."); 
 		CDKUtils.deleteAllCDKServerAdapters();
 	}
 

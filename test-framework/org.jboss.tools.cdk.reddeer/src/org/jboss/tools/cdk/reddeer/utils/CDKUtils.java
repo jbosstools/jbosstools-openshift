@@ -30,9 +30,11 @@ import org.jboss.tools.cdk.reddeer.core.enums.CDKServerAdapterType;
  * @author odockal
  *
  */
-public class CDKUtils {
+public final class CDKUtils {
 
 	private static final Logger log = Logger.getLogger(CDKUtils.class);
+
+	private CDKUtils() {}
 	
 	public static CDKServerAdapterType getCDKServerType(String serverType) {
 		for (CDKServerAdapterType type : CDKServerAdapterType.values()) {

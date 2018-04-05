@@ -28,12 +28,12 @@ public class OAuthauthenticationSection extends AuthenticationMethodSection {
 	}
 	
 	public void setToken(String token) {
-		new LabeledText("Token").setText(token);
+		new LabeledText("Token").setText(token); 
 	}
 	
 	public void setSaveToken(boolean checked) {
 		new CheckBox(getComposite(), 
-				"Save token (could trigger secure storage login)")
+				"Save token (could trigger secure storage login)") 
 				.toggle(checked);
 	}
 	

@@ -26,7 +26,7 @@ public class AuthenticationMethodSection {
 	private AuthenticationMethod method;
 	
 	public AuthenticationMethodSection(AuthenticationMethod auth) {
-		protocol = new LabeledCombo("Protocol:");
+		protocol = new LabeledCombo("Protocol:"); 
 		method = auth;
 		protocol.setSelection(method.toString());
 	}
@@ -36,7 +36,7 @@ public class AuthenticationMethodSection {
 	}
 	
 	public ReferencedComposite getComposite() {
-		return new DefaultGroup("Authentication");
+		return new DefaultGroup("Authentication"); 
 	}
 	
 	public void setMethod() {

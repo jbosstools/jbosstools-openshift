@@ -28,6 +28,7 @@ public class CleanOpenShiftExplorerRequirement implements Requirement<CleanOpenS
 	@Target(ElementType.TYPE)
 	public @interface CleanOpenShiftExplorer {
 		String connectionURL() default StringUtils.EMPTY;
+		boolean cleanup() default false;
 	}
 
 	@Override
@@ -42,11 +43,12 @@ public class CleanOpenShiftExplorerRequirement implements Requirement<CleanOpenS
 
 	@Override
 	public void cleanUp() {
-		// NOTHING TO DO
+		if (this.cleanOpenShiftExplorer.cleanup()) {
+			fulfill();
+		}
 	}
 
 	public CleanOpenShiftExplorer getDeclaration() {
-		// TODO Auto-generated method stub
 		return this.cleanOpenShiftExplorer;
 	}
 

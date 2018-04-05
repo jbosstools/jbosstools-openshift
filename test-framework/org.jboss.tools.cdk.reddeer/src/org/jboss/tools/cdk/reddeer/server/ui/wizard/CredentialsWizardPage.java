@@ -17,6 +17,7 @@ import org.eclipse.reddeer.swt.impl.button.CancelButton;
 import org.eclipse.reddeer.swt.impl.button.CheckBox;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
  * Credentials wizard page for new server
@@ -26,27 +27,27 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 public class CredentialsWizardPage {
 	
 	public void activate() {
-		new DefaultShell("Add a Credential");
+		new DefaultShell(CDKLabel.Shell.ADD_CREDENTIALS_DIALOG);
 	}
 	
 	public Text getDescriptionText() {
-		return new LabeledText("Add a Credential");
+		return new LabeledText(CDKLabel.Labels.ADD_CREDENTIAL);
 	}
 	
 	public void setUsername(String user) {
-		new LabeledText("Username: ").setText(user);
+		new LabeledText(CDKLabel.Labels.USERNAME).setText(user);
 	}
 	
 	public void togglePromptForPassword(boolean checked) {
-		new CheckBox("Always prompt for password").toggle(checked);
+		new CheckBox(CDKLabel.Buttons.ALWAYS_PROMPT_FOR_PASSWORD).toggle(checked);
 	}
 	
 	public void setPassword(String password) {
-		new LabeledText("Password: ").setText(password);
+		new LabeledText(CDKLabel.Labels.PASSWORD).setText(password);
 	}
 	
 	public void toggleShowPassword(boolean checked) {
-		new CheckBox("Show password").toggle(checked);
+		new CheckBox(CDKLabel.Buttons.SHOW_PASSWORD).toggle(checked);
 	}
 	
 	public void cancelAddingUser() {

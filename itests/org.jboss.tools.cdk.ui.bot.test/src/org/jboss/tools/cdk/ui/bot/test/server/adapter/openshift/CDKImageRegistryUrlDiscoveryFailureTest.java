@@ -21,6 +21,7 @@ import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.jboss.tools.openshift.reddeer.exception.OpenShiftToolsException;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,26 +38,30 @@ public class CDKImageRegistryUrlDiscoveryFailureTest extends CDKImageRegistryUrl
 		return SERVER_ADAPTER_32;
 	}
 	
+	@BeforeClass
+	public static void setupCDKImageRegistrUrlDiscovery() {
+		setupOCForWorkspace();
+	}
+	
 	/**
 	 * Covers JBIDE-25049
 	 */
 	@Test
 	public void testRegistryUrlNotFoundDialog() {
-		String shellTitle = OpenShiftLabel.Shell.REGISTRY_URL_NOT_FOUND;
-		wizard.getImageRegistryUrl().setText("");
+		wizard.getImageRegistryUrl().setText(""); 
 		wizard.finish();
 		stopServerAdapter();
-		wizard = connection.editConnection();
-		switchOffPasswordSaving();
+		wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
+		switchOffPasswordSaving(wizard);
 		try {
 			wizard.discover();
-			fail("Expected OpenshiftToolsException was not thrown, possibly no dialog is shown.");
+			fail("Expected OpenshiftToolsException was not thrown, possibly no dialog is shown."); 
 		} catch (OpenShiftToolsException osExc) {
 			// os exception was thrown with specific message
-			assertTrue("Registry URL not found dialog did not appear.", osExc.getMessage().contains(shellTitle));
+			assertTrue("Registry URL not found dialog did not appear.", osExc.getMessage().contains(OpenShiftLabel.Shell.REGISTRY_URL_NOT_FOUND)); 
 			// error dialog is still there
-			new WaitUntil(new ShellIsAvailable(shellTitle), TimePeriod.SHORT);
-			new DefaultShell(shellTitle);
+			new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.REGISTRY_URL_NOT_FOUND), TimePeriod.SHORT);
+			new DefaultShell(OpenShiftLabel.Shell.REGISTRY_URL_NOT_FOUND);
 			new OkButton().click();
 		}
 		wizard.cancel();

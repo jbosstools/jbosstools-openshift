@@ -21,6 +21,7 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKPart;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.Minishift17ServerEditor;
@@ -77,7 +78,7 @@ public class MinishiftServerEditorTest extends CDKServerEditorAbstractTest {
 	@Override
 	protected void setupServerWizardPage(NewMenuWizard dialog) {
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
-		page.selectType(SERVER_TYPE_GROUP, MINISHIFT_SERVER_NAME);
+		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.MINISHIFT_SERVER_NAME);
 		page.setName(SERVER_ADAPTER_MINISHIFT);
 		dialog.next();
 		NewMinishiftServerWizardPage containerPage = new NewMinishiftServerWizardPage();
@@ -85,7 +86,7 @@ public class MinishiftServerEditorTest extends CDKServerEditorAbstractTest {
 		containerPage.setHypervisor(hypervisor);
 		log.info("Setting binary to " + MINISHIFT_PATH);
 		containerPage.setMinishiftBinary(MINISHIFT_PATH);
-		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
+		new WaitWhile(new SystemJobIsRunning(getJobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
 	}
 
 	@Test
@@ -93,7 +94,7 @@ public class MinishiftServerEditorTest extends CDKServerEditorAbstractTest {
 		assertCDKServerWizardFinished();
 		setServerEditor();
 
-		assertTrue(((MinishiftServerEditor)editor).getHostnameLabel().getText().equalsIgnoreCase(SERVER_HOST));
+		assertTrue(((MinishiftServerEditor)editor).getHostnameLabel().getText().equalsIgnoreCase(CDKLabel.Server.SERVER_HOST));
 		assertTrue(
 				((Minishift17ServerEditor) editor).getHypervisorCombo().getSelection().equalsIgnoreCase(MINISHIFT_HYPERVISOR));
 		assertTrue(editor.getServernameLabel().getText().equals(getServerAdapter()));

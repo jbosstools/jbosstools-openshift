@@ -22,7 +22,7 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator extends AbstractUIPlugin {
 
-	public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui.bot.test"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.jboss.tools.openshift.ui.bot.test"; 
 
 	private static Activator plugin;
 

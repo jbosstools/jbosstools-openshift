@@ -18,6 +18,7 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.FinishButton;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewMinishiftServerWizardPage;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
@@ -51,7 +52,7 @@ public class MinishiftServerWizardTest extends CDKServerWizardAbstractTest {
 	
 	@Test
 	public void testMinishiftServerType() {
-		assertServerType(MINISHIFT_SERVER_NAME);
+		assertServerType(CDKLabel.Server.MINISHIFT_SERVER_NAME);
 	}
 	
 	@Test
@@ -59,12 +60,12 @@ public class MinishiftServerWizardTest extends CDKServerWizardAbstractTest {
 		NewCDKServerWizard dialog = (NewCDKServerWizard)CDKTestUtils.openNewServerWizardDialog();
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
 		
-		page.selectType(SERVER_TYPE_GROUP, MINISHIFT_SERVER_NAME);
+		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.MINISHIFT_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
 		NewMinishiftServerWizardPage containerPage = new NewMinishiftServerWizardPage();
 		
-		checkWizardPagewidget("Minishift Binary: ", MINISHIFT_SERVER_NAME);
+		checkWizardPagewidget("Minishift Binary: ", CDKLabel.Server.MINISHIFT_SERVER_NAME);
 		assertTrue(containerPage.getMinishiftProfile().getText().contains("minishift"));
 		
 		// checking of minishift binary validation

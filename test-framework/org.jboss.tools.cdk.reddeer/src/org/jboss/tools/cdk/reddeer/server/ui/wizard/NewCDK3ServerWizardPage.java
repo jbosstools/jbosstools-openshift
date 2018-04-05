@@ -13,12 +13,13 @@ package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 public class NewCDK3ServerWizardPage extends NewServerContainerWizardPage {
 
 	public LabeledText getMinishiftBinaryLabeledText() {
-		new DefaultShell(WIZARD_NAME);
-		return new LabeledText("Minishift Binary: ");	
+		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);
+		return new LabeledText(CDKLabel.Labels.MINISHIFT_BINARY);	
 	}
 	
 	public void setMinishiftBinary(final String binary) {
@@ -26,8 +27,8 @@ public class NewCDK3ServerWizardPage extends NewServerContainerWizardPage {
 	}
 	
 	public LabeledCombo getHypervisorCombo() {
-		new DefaultShell(WIZARD_NAME);
-		return new LabeledCombo("Hypervisor:");		
+		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);
+		return new LabeledCombo(CDKLabel.Labels.HYPERVISOR);	
 	}
 	
 	public void setHypervisor(final String text) {

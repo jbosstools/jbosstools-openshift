@@ -12,6 +12,7 @@ package org.jboss.tools.cdk.reddeer.server.ui.wizard;
 
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
  * New CDK 3.2+ server container wizard page
@@ -25,8 +26,8 @@ public class NewCDK32ServerWizardPage extends NewCDK3ServerWizardPage {
 	}
 	
 	public LabeledText getMinishiftProfile() {
-		new DefaultShell(WIZARD_NAME);
-		return new LabeledText("Minishift Profile:");
+		new DefaultShell(CDKLabel.Shell.NEW_SERVER_WIZARD);
+		return new LabeledText(CDKLabel.Labels.MINISHIFT_PROFILE);
 	}
 
 }

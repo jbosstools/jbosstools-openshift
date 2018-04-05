@@ -13,6 +13,9 @@ package org.jboss.tools.openshift.reddeer.view;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -257,4 +260,18 @@ public class OpenShiftExplorerView extends WorkbenchView {
 			return connectionItem;
 		}
 	}
+	
+	/**
+	 * Returns list of OpenShift3Connection instance available in Openshift Explorer
+	 * @return list of OpenShift3Connection
+	 */
+	public List<OpenShift3Connection> getOpenShift3Connections() {
+		open();
+		List<OpenShift3Connection> itemList = new ArrayList<>();
+		for (TreeItem item : new DefaultTree().getItems()) {
+			itemList.add(new OpenShift3Connection(item));
+		}
+		return itemList;
+	}
+	
 }

@@ -36,6 +36,7 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.EditorHandler;
 import org.eclipse.ui.IEditorPart;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDKPart;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.MinishiftServerEditor;
@@ -109,12 +110,12 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 	protected void checkEditorStateAfterSave(String location, boolean canSave) {
 		LabeledText label = ((CDKPart) editor).getMinishiftBinaryLabel();
 		label.setText(location);
-		new WaitUntil(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.SHORT, false);
-		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
+		new WaitUntil(new SystemJobIsRunning(getJobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.SHORT, false);
+		new WaitWhile(new SystemJobIsRunning(getJobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
 		if (canSave) {
-			verifyEditorCanSave();
+			verifyEditorCanSave(location);
 		} else {
-			verifyEditorCannotSave();
+			verifyEditorCannotSave(location);
 		}
 	}
 
@@ -165,37 +166,36 @@ public abstract class CDKServerEditorAbstractTest extends CDKServerWizardAbstrac
 		}, TimePeriod.MEDIUM);
 	}
 
-	private void verifyEditorCannotSave() {
+	private void verifyEditorCannotSave(String location) {
 		assertTrue(editor.isDirty());
 		try {
 			performSave(editor.getEditorPart());
 			new WaitWhile(new JobIsRunning());
-			fail("Editor was saved successfully but exception was expected");
+			fail("Editor was saved successfully while passing " + location + " but exception was expected");
 		} catch (WaitTimeoutExpiredException exc) {
 			log.info("WaitTimeoutExpiredException occured, editor was not saved as expected");
 		}
-		errorDialogAppeared();
+		errorDialogAppeared("Error Message Dialog did not appear while trying to save editor after passing " + location);
 		assertTrue(editor.isDirty());
 	}
 
-	private void verifyEditorCanSave() {
+	private void verifyEditorCanSave(String location) {
 		assertTrue(editor.isDirty());
 		try {
 			performSave(editor.getEditorPart());
 			log.info("Editor was saved as expected");
 		} catch (WaitTimeoutExpiredException exc) {
-			fail("Editor was not saved successfully and exception was thrown");
+			fail("Editor was not saved successfully and exception was thrown while passing " + location);
 		}
 		assertFalse(editor.isDirty());
 	}
 
-	private void errorDialogAppeared() {
+	private void errorDialogAppeared(String failMessage) {
 		try {
 			new WaitUntil(new ShellIsAvailable(new DefaultShell(getServerAdapter())), TimePeriod.MEDIUM);
-			log.info("Error Message Dialog appeared as expected");
 		} catch (WaitTimeoutExpiredException exc) {
 			log.error(exc.getMessage());
-			fail("Error Message Dialog did not appear while trying to save editor");
+			fail(failMessage);
 		}
 		new OkButton().click();
 	}

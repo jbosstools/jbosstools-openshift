@@ -17,6 +17,7 @@ import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.combo.LabeledCombo;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
  * Interface with default implementation of Credentials part of CDK server editor
@@ -28,27 +29,27 @@ public interface CredentialsPart {
 	public DefaultSection getCredentialsSection();
 
 	public default LabeledText getPasswordLabel() {
-		return new LabeledText(getCredentialsSection(), "Password: ");
+		return new LabeledText(getCredentialsSection(), CDKLabel.Labels.PASSWORD);
 	}
 	
 	public default LabeledText getUsernameLabel() {
-		return new LabeledText(getCredentialsSection(), "Username: ");
+		return new LabeledText(getCredentialsSection(), CDKLabel.Labels.USERNAME);
 	}
 	
 	public default Button getAddButton() {
-		return new PushButton(getCredentialsSection(), "Add...");
+		return new PushButton(getCredentialsSection(), CDKLabel.Buttons.ADD);
 	}
 	
 	public default Button getEditButton() {
-		return new PushButton(getCredentialsSection(), "Edit...");
+		return new PushButton(getCredentialsSection(), CDKLabel.Buttons.EDIT);
 	}
 	
 	public default Combo getDomainCombo() {
-		return new LabeledCombo(getCredentialsSection(), "Domain: ");
+		return new LabeledCombo(getCredentialsSection(), CDKLabel.Labels.DOMAIN);
 	}
 	
 	public default CheckBox getPassCredentialsCheckBox() {
-		return new CheckBox(getCredentialsSection(), "Pass credentials to environment");
+		return new CheckBox(getCredentialsSection(), CDKLabel.Buttons.PASS_CREDENTIALS_TO_ENV);
 	}
 	
 }

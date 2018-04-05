@@ -27,6 +27,7 @@ import org.eclipse.reddeer.eclipse.equinox.security.ui.storage.StoragePreference
 import org.eclipse.reddeer.junit.requirement.Requirement;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.requirements.DisableSecureStorageRequirement.DisableSecureStorage;
 
 /**
@@ -67,18 +68,18 @@ public class DisableSecureStorageRequirement implements Requirement<DisableSecur
         try {
 	        new WaitUntil(new WidgetIsFound(
 	        		org.eclipse.swt.custom.CLabel.class, 
-	        		new WithMnemonicTextMatcher("Secure Storage")), 
+	        		new WithMnemonicTextMatcher(CDKLabel.Labels.SECURE_STORAGE)),  
 	        		TimePeriod.DEFAULT);
-	        log.info("Getting master password providers");
+	        log.info("Getting master password providers"); 
 	        List<PasswordProvider> items = storagePage.getMasterPasswordProviders();
 	        for (PasswordProvider item : items) {
-	        	log.info("Uncheking table item: " + item.getDescription());
+	        	log.info("Uncheking table item: " + item.getDescription()); 
 	        	item.setEnabled(checked);
 	        }
 	        new WaitUntil(new JobIsRunning(), TimePeriod.DEFAULT, false);
 	        storagePage.apply();
         } catch (WaitTimeoutExpiredException exc) {
-        	log.error("Secure Storage preferences page has timed out");
+        	log.error("Secure Storage preferences page has timed out"); 
         	log.error(exc.getMessage());
         } finally {
 	        preferenceDialog.ok();

@@ -14,6 +14,7 @@ import org.eclipse.reddeer.swt.api.Button;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.uiforms.impl.section.DefaultSection;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
  * Class representing CDK 2.x Server Editor page
@@ -27,11 +28,11 @@ public class CDK2ServerEditor extends MinishiftServerEditor implements Credentia
 	}
 
 	public LabeledText getVagrantfileLocation() {
-		return new LabeledText(getCDKSection(), "Vagrantfile Location: ");
+		return new LabeledText(getCDKSection(), CDKLabel.Labels.VAGRANTFILE_LOCATION);
 	}
 	
 	public Button getVagrantfileBrowse() {
-		return new PushButton(getCDKSection(), "Browse...");
+		return new PushButton(getCDKSection(), CDKLabel.Buttons.BROWSE);
 	}
 
 	@Override

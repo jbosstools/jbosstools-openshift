@@ -11,6 +11,7 @@
 package org.jboss.tools.cdk.ui.bot.test.server.editor.launch;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.reddeer.common.logging.Logger;
@@ -24,6 +25,7 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.launch.configuration.CDKLaunchConfigurationDialog;
@@ -53,7 +55,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	
 	@BeforeClass
 	public static void setUpEnvironment() {
-		log.info("Checking given program arguments"); //$NON-NLS-1$
+		log.info("Checking given program arguments"); 
 		checkDevelopersParameters();
 		checkCDK32Parameters();
 	}
@@ -73,12 +75,12 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	
 	@AfterClass
 	public static void tearDownEnvironment() {
-		CDKTestUtils.removeAccessRedHatCredentials(CREDENTIALS_DOMAIN, USERNAME);
+		CDKTestUtils.removeAccessRedHatCredentials(CDKLabel.Others.CREDENTIALS_DOMAIN, USERNAME);
 	}
 	
 	@Override
 	protected String getServerAdapter() {
-		return "Container Development Environment 3.2";
+		return SERVER_ADAPTER_32;
 	}
 
 	@Override
@@ -94,7 +96,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 	@Override
 	protected void setupServerWizardPage(NewMenuWizard dialog) {
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
-		page.selectType(SERVER_TYPE_GROUP, CDK32_SERVER_NAME);
+		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.CDK32_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
 		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage();
@@ -106,7 +108,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		// here comes possibility to set profile while creating server adapter
 		log.info("Setting profile to: ");
 		containerPage.setMinishiftProfile("");
-		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
+		new WaitWhile(new SystemJobIsRunning(getJobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
 	}
 	
 	@Test
@@ -158,6 +160,29 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		performSave(editor.getEditorPart());
 		openLaunchConfiguration();
 		assertEquals(homePath + "Folder", launchDialog.getValueOfEnvVar("MINISHIFT_HOME"));
+	}
+	
+	/**
+	 * Covers JBIDE-25617
+	 */
+	@Test
+	public void testSkipRegistrationFlagPropagation() {
+		closeLaunchConfig();
+		editor.activate();
+		((CDK32ServerEditor) editor).getAddSkipRegistrationOnStartCheckBox().toggle(true);
+		performSave(editor.getEditorPart());
+		openLaunchConfiguration();
+		String arguments = launchDialog.getArguments().getText();
+		assertTrue("Launch config arguments are missing " + SKIP_REGISTRATION + " flag, arguments: " + arguments,
+				arguments.contains(SKIP_REGISTRATION));
+		closeLaunchConfig();
+		editor.activate();
+		((CDK32ServerEditor) editor).getAddSkipRegistrationOnStartCheckBox().toggle(false);
+		performSave(editor.getEditorPart());
+		openLaunchConfiguration();
+		arguments = launchDialog.getArguments().getText();
+		assertFalse("Launch config arguments should not contain " + SKIP_REGISTRATION + " flag, arguments: " + arguments,
+				arguments.contains(SKIP_REGISTRATION));
 	}
 	
 	/**

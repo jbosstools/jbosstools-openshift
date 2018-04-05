@@ -21,6 +21,7 @@ import org.eclipse.reddeer.eclipse.wst.server.ui.wizard.NewServerWizardPage;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CredentialsPart;
@@ -55,7 +56,7 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 	@Override
 	protected void setupServerWizardPage(NewMenuWizard dialog) {
 		NewServerWizardPage page = new NewServerWizardPage(dialog);
-		page.selectType(SERVER_TYPE_GROUP, CDK32_SERVER_NAME);
+		page.selectType(CDKLabel.Server.SERVER_TYPE_GROUP, CDKLabel.Server.CDK32_SERVER_NAME);
 		page.setName(getServerAdapter());
 		dialog.next();
 		NewCDK32ServerWizardPage containerPage = new NewCDK32ServerWizardPage();
@@ -66,8 +67,8 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 		containerPage.setMinishiftBinary(CDK32_MINISHIFT);
 		// here comes possibility to set profile while creating server adapter
 		log.info("Setting profile to: ");
-		containerPage.setMinishiftProfile("");
-		new WaitWhile(new SystemJobIsRunning(getJobMatcher(MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
+		containerPage.setMinishiftProfile(MINISHIFT_PROFILE);
+		new WaitWhile(new SystemJobIsRunning(getJobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
 	}
 	
 	@Override
@@ -91,14 +92,14 @@ public class CDK32ServerEditorTest extends CDKServerEditorAbstractTest {
 
 		assertTrue(((CredentialsPart) editor).getUsernameLabel().getText().equalsIgnoreCase("minishift_username"));
 		assertTrue(((CredentialsPart) editor).getPasswordLabel().getText().equalsIgnoreCase("minishift_password"));
-		assertTrue(((CredentialsPart) editor).getDomainCombo().getSelection().equalsIgnoreCase(CREDENTIALS_DOMAIN));
-		assertTrue(editor.getHostnameLabel().getText().equalsIgnoreCase(SERVER_HOST));
+		assertTrue(((CredentialsPart) editor).getDomainCombo().getSelection().equalsIgnoreCase(CDKLabel.Others.CREDENTIALS_DOMAIN));
+		assertTrue(editor.getHostnameLabel().getText().equalsIgnoreCase(CDKLabel.Server.SERVER_HOST));
 		assertTrue(
 				((CDK32ServerEditor) editor).getHypervisorCombo().getSelection().equalsIgnoreCase(MINISHIFT_HYPERVISOR));
 		assertTrue(editor.getServernameLabel().getText().equals(getServerAdapter()));
 		assertTrue(((CDK32ServerEditor) editor).getMinishiftBinaryLabel().getText().equals(CDK32_MINISHIFT));
 		assertTrue(((CDK32ServerEditor) editor).getMinishiftHomeLabel().getText().contains(".minishift"));
-		assertTrue(((CDK32ServerEditor) editor).getMinishiftProfile().getText().isEmpty());
+		assertTrue(((CDK32ServerEditor) editor).getMinishiftProfile().getText().equals(MINISHIFT_PROFILE));
 	}
 
 	@Test

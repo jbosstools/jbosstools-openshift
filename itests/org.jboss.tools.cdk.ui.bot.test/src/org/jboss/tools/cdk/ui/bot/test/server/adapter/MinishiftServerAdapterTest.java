@@ -35,7 +35,7 @@ public class MinishiftServerAdapterTest extends CDKServerAdapterAbstractTest {
 	@BeforeClass
 	public static void setupMinishiftServerAdapterTest() {
 		checkMinishiftParameters();
-		addNewMinishiftServer(SERVER_ADAPTER_MINISHIFT, MINISHIFT_HYPERVISOR, MINISHIFT, "");
+		addNewMinishiftServer(SERVER_ADAPTER_MINISHIFT, MINISHIFT_HYPERVISOR, MINISHIFT, MINISHIFT_PROFILE);
 	}
 	
 	@Test

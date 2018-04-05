@@ -23,6 +23,7 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.table.DefaultTable;
 import org.eclipse.reddeer.swt.impl.text.DefaultText;
 import org.eclipse.reddeer.swt.impl.text.LabeledText;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 
 /**
  * Class representing CDK server editor's Launch Configuration Dialog
@@ -42,24 +43,24 @@ public class CDKLaunchConfigurationDialog extends TitleAreaDialog {
 	}
 	
 	public CDKLaunchConfigurationDialog() {
-		this(new DefaultShell("Edit Configuration"));
+		this(new DefaultShell(CDKLabel.Shell.LAUNCH_CONFIG_DIALOG));
 	}
 	
 	public void ok() {
 		logger.info("Pressing OK button...");
-		Button ok = new PushButton(this, "OK");
+		Button ok = new PushButton(this, CDKLabel.Buttons.OK);
 		ok.click();
 	}
 	
 	public void cancel() {
 		logger.info("Pressing cancel button...");
-		Button cancel = new PushButton(this, "Cancel");
+		Button cancel = new PushButton(this, CDKLabel.Buttons.CANCEL);
 		cancel.click();
 	}
 	
 	public void apply() {
 		logger.info("Pressing apply button...");
-		Button apply = new PushButton(this, new WithTextMatcher("Apply"));
+		Button apply = new PushButton(this, new WithTextMatcher(CDKLabel.Buttons.APPLY));
 		if (apply.isEnabled()) {
 			apply.click();
 		}
@@ -67,14 +68,14 @@ public class CDKLaunchConfigurationDialog extends TitleAreaDialog {
 	
 	public void revert() {
 		logger.info("Pressing revert button...");
-		Button revert = new PushButton(this, new WithTextMatcher("Revert"));
+		Button revert = new PushButton(this, new WithTextMatcher(CDKLabel.Buttons.REVERT));
 		if (revert.isEnabled()) {
 			revert.click();
 		}
 	}
 	
 	public String getName() {
-		return new LabeledText("Name:").getText();
+		return new LabeledText(CDKLabel.Labels.NAME).getText();
 	}
 	
 	public DefaultCTabItem getTab(String tab) {
@@ -88,12 +89,12 @@ public class CDKLaunchConfigurationDialog extends TitleAreaDialog {
 	
 	public String getLocation() {
 		getTab("Main").activate();
-		return new DefaultText(getGroup("Location:")).getText();
+		return new DefaultText(getGroup(CDKLabel.Labels.LOCATION)).getText();
 	}
 	
 	public DefaultText getArguments() {
 		getTab("Main").activate();
-		return new DefaultText(getGroup("Arguments:"));
+		return new DefaultText(getGroup(CDKLabel.Labels.ARGUMENTS));
 	}
 	
 	public DefaultTable getEnvVariablesTable() {

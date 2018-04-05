@@ -31,7 +31,6 @@ import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.condition.WidgetIsFound;
 import org.eclipse.reddeer.core.matcher.WithMnemonicTextMatcher;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
-import org.eclipse.reddeer.eclipse.exception.EclipseLayerException;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
 import org.eclipse.reddeer.jface.exception.JFaceLayerException;
@@ -43,6 +42,7 @@ import org.eclipse.reddeer.swt.impl.clabel.DefaultCLabel;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
+import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKException;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
@@ -59,7 +59,7 @@ public class CDKTestUtils {
 	
 	public static String getSystemProperty(String systemProperty) {
 		String property = System.getProperty(systemProperty);
-		if (!(property == null || property.equals("") || property.startsWith("${"))) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (!(property == null || property.equals("") || property.startsWith("${"))) {  
 			return property;
 		}
 		return null;
@@ -69,44 +69,21 @@ public class CDKTestUtils {
 		for (String key : dict.keySet()) {
 			String value = dict.get(key);
 			if (value == null) {
-				throw new RedDeerException("Given key " + key + " value is null"); //$NON-NLS-1$
+				throw new RedDeerException("Given key " + key + " value is null");  
 			}
-			log.info("Given key " + key + " value is " + value);
+			log.info("Given key " + key + " value is " + value);  
 		}	
 	}
 	
-	public static void deleteCDEServer(String adapter) {
-		log.info("Deleting Container Development Environment server adapter: " + adapter); //$NON-NLS-1$
-		ServersView2 servers = new ServersView2();
-		servers.open();
-		try {
-			servers.getServer(adapter).delete(true);
-		} catch (EclipseLayerException exc) {
-			log.error(exc.getMessage());
-			exc.printStackTrace();
-		}
-	}
-	
 	public static List<Server> getAllServers() {
-		log.info("Collecting all server adapters");
+		log.info("Collecting all server adapters"); 
 		ServersView2 view = new ServersView2();
 		view.open();
 		return view.getServers();
 	}
 	
-	public static void deleteAllCDEServers(String name) {
-		log.info("Deleting all server containing '" + name + "' string");
-		for (Server server : getAllServers()) {
-			String label = server.getLabel().getName();
-			log.info("Working with " + label);
-			if (label.contains(name)) {
-				deleteCDEServer(label);
-			}
-		}
-	}
-	
 	public static NewCDKServerWizard openNewServerWizardDialog() {
-		log.info("Adding new Container Development Environment server adapter"); //$NON-NLS-1$
+		log.info("Adding new Container Development Environment server adapter"); 
 		// call new server dialog from servers view
 		CDKServersView view = new CDKServersView();
 		view.open();
@@ -125,16 +102,16 @@ public class CDKTestUtils {
 		
 		page.setOCLocation(ocPath);
 		try {
-			new WaitUntil(new ControlIsEnabled(new PushButton("Apply")), TimePeriod.DEFAULT);
+			new WaitUntil(new ControlIsEnabled(new PushButton(CDKLabel.Buttons.APPLY)), TimePeriod.DEFAULT); 
 		} catch (WaitTimeoutExpiredException exc) {
-			fail("WaitTimeoutExpiredException occured while processing oc binary on path " + ocPath);
+			fail("WaitTimeoutExpiredException occured while processing oc binary on path " + ocPath); 
 		}
 		page.apply();
 		dialog.cancel();
 	}
 	
 	public static String findFileOnPath(String path, String fileToFind) {
-		log.info("Searching for " + fileToFind + " on " + path);
+		log.info("Searching for " + fileToFind + " on " + path);  
 		File startPath = new File(path);
 		if (startPath.exists()) {
 			try {
@@ -142,17 +119,17 @@ public class CDKTestUtils {
 						(p, attrs) -> fileFitsCondition(p, attrs, p.getFileName().toString().equalsIgnoreCase(fileToFind)
 						&& attrs.isRegularFile()), FileVisitOption.FOLLOW_LINKS).findAny().get().toString();
 			} catch (NoSuchElementException noExc) {
-				throw new CDKException("There was not found any oc file in given path: " + path);
+				throw new CDKException("There was not found any oc file in given path: " + path); 
 			} catch (IOException e) {
-				throw new CDKException("Could not find oc on given path: " + path);
+				throw new CDKException("Could not find oc on given path: " + path); 
 			}
 		} else {
-			throw new CDKException("Given path " + path + " does not exist");
+			throw new CDKException("Given path " + path + " does not exist");  
 		}
 	}
 	
 	private static boolean fileFitsCondition(Path p, BasicFileAttributes attrs, boolean condition) {
-		log.debug("Actual path: \"" + p.getFileName().toString() + "\" and is regular file: " + attrs.isRegularFile());
+		log.debug("Actual path: \"" + p.getFileName().toString() + "\" and is regular file: " + attrs.isRegularFile());  
 		return condition;
 	}
 	
@@ -161,23 +138,23 @@ public class CDKTestUtils {
 		WorkbenchPreferenceDialog dialog = new WorkbenchPreferenceDialog();
 		dialog.open();
 		
-		dialog.select("JBoss Tools", "Credentials"); //$NON-NLS-1$ //$NON-NLS-2$
+		dialog.select("JBoss Tools", "Credentials");  
         try {
 	        new WaitUntil(new WidgetIsFound(
 	        		org.eclipse.swt.custom.CLabel.class, 
-	        		new WithMnemonicTextMatcher("Credentials")),
-	        		TimePeriod.MEDIUM); //$NON-NLS-1$
-	        new DefaultCLabel("Credentials"); //$NON-NLS-1$
+	        		new WithMnemonicTextMatcher("Credentials")), 
+	        		TimePeriod.MEDIUM);
+	        new DefaultCLabel("Credentials"); 
 	        DefaultTree tree = new DefaultTree(1);
 	        TreeItem item = TreeViewerHandler.getInstance().getTreeItem(tree, new String[]{domain, username});
 	        item.select();
-	        new PushButton(new WithTextMatcher("Remove User")).click(); //$NON-NLS-1$
+	        new PushButton(new WithTextMatcher(CDKLabel.Buttons.REMOVE_USER)).click(); 
 	        new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
         } catch (WaitTimeoutExpiredException exc) {
-        	log.error("JBoss Tools - Credentials preferences page has timed out"); //$NON-NLS-1$
+        	log.error("JBoss Tools - Credentials preferences page has timed out"); 
         	exc.printStackTrace();
         } catch (JFaceLayerException exc) {
-        	log.error("JBoss Tools - Credentials does not contain required username to be deleted"); //$NON-NLS-1$
+        	log.error("JBoss Tools - Credentials does not contain required username to be deleted"); 
         	exc.printStackTrace();
         } finally {
         	dialog.ok();
