@@ -72,7 +72,7 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		homeData.widthHint = 100;
 		Text msHomeText = new Text(main, SWT.SINGLE | SWT.BORDER);
 		msHomeText.setLayoutData(homeData);
-		String defMSHome = new Path(System.getProperty("user.home")).append(".minishift").toOSString();
+		String defMSHome = getDefaultMinishiftHome();
 		msHomeText.setText(defMSHome);
 		Button msHomeBrowse = new Button(main, SWT.PUSH);
 		msHomeBrowse.setText("Browse...");
@@ -93,6 +93,14 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		}; 
 		msHomeText.addModifyListener(msHomeModListener);
 	}	
+	
+	private String getDefaultMinishiftHome() {
+		String msHome = System.getenv(CDK32Server.ENV_MINISHIFT_HOME);
+		if( msHome == null || msHome.isEmpty() || !(new File(msHome).exists())) {
+			return new Path(System.getProperty("user.home")).append(".minishift").toOSString();
+		}
+		return msHome;
+	}
 	protected void createProfileWidgets(Composite main) {
 		// Point to file / folder to run
 		Label l = new Label(main, SWT.NONE);
