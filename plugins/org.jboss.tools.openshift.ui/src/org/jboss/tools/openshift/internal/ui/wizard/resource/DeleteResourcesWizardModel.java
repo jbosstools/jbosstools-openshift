@@ -23,13 +23,10 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.internal.common.core.util.KeyValueFilterFactory.KeyValueFilter;
 import org.jboss.tools.openshift.internal.core.job.DeleteResourcesJob;
-import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.ResourceForbiddenException;
-import com.openshift.restclient.model.IPod;
-import com.openshift.restclient.model.IReplicationController;
 import com.openshift.restclient.model.IResource;
 
 /**
@@ -142,25 +139,6 @@ public class DeleteResourcesWizardModel extends ObservablePojo {
 			return;
 		}
 
-		new DeleteResourcesJob(removeImplicitRemovals(resources)).schedule();
-	}
-
-	/**
-	 * Removes implicit resources from the given list of resources
-	 * 
-	 * @param resources
-	 * @return
-	 */
-	private List<IResource> removeImplicitRemovals(List<IResource> resources) {
-		return resources.stream()
-				// remove pods controlled by an rc, that's also to be removed
-				// it will by killed when rc is deleted
-				.filter(resource -> !(ResourceKind.POD.equals(resource.getKind())
-						&& ResourceUtils.hasRelatedPods((IPod) resource, resources)))
-				// remove rc created from a dc, that's also to be deleted
-				// it will by killed when dc is deleted
-				.filter(resource -> !(ResourceKind.REPLICATION_CONTROLLER.equals(resource.getKind())
-						&& ResourceUtils.hasRelatedDc((IReplicationController) resource, resources)))
-				.collect(Collectors.toList());
+		new DeleteResourcesJob(resources).schedule();
 	}
 }
