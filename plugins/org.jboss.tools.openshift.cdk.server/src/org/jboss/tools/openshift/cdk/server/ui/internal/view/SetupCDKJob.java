@@ -18,6 +18,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -80,14 +82,14 @@ public class SetupCDKJob extends Job {
 			Display.getDefault().syncExec(() -> {
 				if( shell == null )
 					shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				MessageBox messageBox = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+				
+				String title = "Warning: Folder already exists!";
 				String msgText = "Setup CDK will delete all existing contents of {0}. Are you sure you want to continue?";
 				String msg = NLS.bind(msgText, home);
-				messageBox.setMessage(msg);
-				messageBox.setText("Warning: Folder already exists!");
-				retmain[0] = messageBox.open();
+				MessageDialog messageDialog = new MessageDialog(shell, title, null, msg, MessageDialog.WARNING, new String[] {"OK", "Cancel"}, 0);
+				retmain[0] = messageDialog.open();
 			});
-			if (retmain[0] != SWT.OK) {
+			if (retmain[0] != IDialogConstants.OK_ID) {
 				return false;
 			}
 		}
