@@ -181,6 +181,20 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 
 	@Override
 	protected boolean matches(RuntimeDefinition def, IServer server) {
+		return minishiftFileMatches(def, server) && minishiftHomeMatches(def, server);
+	}
+	
+	private boolean minishiftHomeMatches(RuntimeDefinition def, IServer server) {
+		File loc = def.getLocation();
+		if( isValidMinishiftHome(loc)) {
+			String fromServer = server.getAttribute(CDK3Server.MINISHIFT_HOME, (String) null);
+			File fromServerFile = fromServer == null ? null : new File(fromServer);
+			return loc.equals(fromServerFile);
+		}
+		return false;
+	}
+	
+	private boolean minishiftFileMatches(RuntimeDefinition def, IServer server) {
 		String fromServer = server.getAttribute(CDK3Server.MINISHIFT_FILE, (String) null);
 		String fromProblemResolver = (String) def.getProperty(OVERRIDE_MINISHIFT_LOCATION);
 		String fromPath = MinishiftBinaryUtility.getMinishiftLocation();
