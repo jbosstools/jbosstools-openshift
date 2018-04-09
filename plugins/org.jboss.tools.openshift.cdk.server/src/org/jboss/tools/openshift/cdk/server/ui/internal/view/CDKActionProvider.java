@@ -23,16 +23,14 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -122,15 +120,14 @@ public class CDKActionProvider extends CommonActionProvider {
 				String home = cdk3.getMinishiftHome();
 				if( new File(home).exists()) {
 					Shell s = actionSite.getViewSite().getShell();
-					MessageBox messageBox = new MessageBox(s,SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
 					
 					String msgText = "Setup CDK will delete all existing contents of {0}. Are you sure you want to continue?";
 					String msg = NLS.bind(msgText, home);
-					messageBox.setMessage(msg);
-					messageBox.setText("Warning: Folder already exists!");
+					String title = "Warning: Folder already exists!";
+					MessageDialog messageDialog = new MessageDialog(s, title, null, msg, MessageDialog.WARNING, new String[] {"OK", "Cancel"}, 0);
 					
-					int ret = messageBox.open();
-					if( ret != SWT.OK) {
+					int ret = messageDialog.open();
+					if( ret != IDialogConstants.OK_ID) {
 						return;
 					}
 				}
