@@ -29,10 +29,11 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
@@ -224,20 +225,21 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 			retmain[0] = -1;
 			String home = cdk3.getMinishiftHome();
 			Display.getDefault().syncExec(() -> {
-				MessageBox messageBox = new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.ICON_WARNING | SWT.OK | SWT.CANCEL);
+				Shell sh = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				String msgText = "Your CDK installation has not been properly initialized. Would you like us to run setup-cdk for you?";
 				String msg = NLS.bind(msgText, home);
-				messageBox.setMessage(msg);
-				messageBox.setText("Warning: CDK has not been properly initialized!");
-				retmain[0] = messageBox.open();
+				MessageDialog messageDialog = new MessageDialog(sh, "Warning: CDK has not been properly initialized!", null, msg, MessageDialog.WARNING, 
+						new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
+				retmain[0] = messageDialog.open();
 			});
-			if( retmain[0] == SWT.OK) {
+			if( retmain[0] == IDialogConstants.OK_ID) {
 				Job j = new SetupCDKJob(s, null, true);
 				j.schedule();
 				
 				try {
 					j.join();
 				} catch (InterruptedException e) {
+					// Ignore and finish up ASAP
 				}
 			}
 			if( !cdk3.isCDKInitialized()) { 

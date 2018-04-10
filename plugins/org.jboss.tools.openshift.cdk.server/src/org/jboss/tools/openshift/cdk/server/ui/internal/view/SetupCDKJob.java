@@ -21,9 +21,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.server.core.IServer;
@@ -86,7 +84,8 @@ public class SetupCDKJob extends Job {
 				String title = "Warning: Folder already exists!";
 				String msgText = "Setup CDK will delete all existing contents of {0}. Are you sure you want to continue?";
 				String msg = NLS.bind(msgText, home);
-				MessageDialog messageDialog = new MessageDialog(shell, title, null, msg, MessageDialog.WARNING, new String[] {"OK", "Cancel"}, 0);
+				MessageDialog messageDialog = new MessageDialog(shell, title, null, msg, MessageDialog.WARNING, 
+						new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
 				retmain[0] = messageDialog.open();
 			});
 			if (retmain[0] != IDialogConstants.OK_ID) {
@@ -124,15 +123,14 @@ public class SetupCDKJob extends Job {
 
 		public void setLaunchAndWait(ILaunch launch) {
 			this.launch = launch;
-			this.myProcess = launch.getProcesses()[0];
+			this.myProcess = this.launch.getProcesses()[0];
 			synchronized (waiting) {
-				if( checkAllCachedEvents()) {
-					return;
-				}
-				try {
-					waiting.wait();
-				} catch (InterruptedException ie) {
-					// ignore
+				while( !checkAllCachedEvents()) {
+					try {
+						waiting.wait();
+					} catch (InterruptedException ie) {
+						// ignore
+					}
 				}
 			}
 		}

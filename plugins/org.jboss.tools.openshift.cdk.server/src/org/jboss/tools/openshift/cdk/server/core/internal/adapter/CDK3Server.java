@@ -12,9 +12,7 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 
 import java.io.File;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
