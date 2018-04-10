@@ -92,6 +92,8 @@ public class OpenShiftServerUtils {
 
 	public static final String ATTR_CONNECTIONURL = "org.jboss.tools.openshift.Connection";//$NON-NLS-1$
 
+	private static final int DEFAULT_AUTO_PUBLISH_DELAY = 2;
+
 	/** the OpensHift Server Type as defined in the plugin.xml. */
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.openshift.server.type";//$NON-NLS-1$
 
@@ -152,8 +154,11 @@ public class OpenShiftServerUtils {
 			return null;
 		}
 
-		String baseName = new StringBuilder(resource.getName()).append(" (").append(resource.getKind())
-				.append(") at OpenShift 3 (").append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
+		String baseName = new StringBuilder(resource.getName())
+				.append(" (")
+				.append(resource.getKind())
+				.append(") at OpenShift 3 (")
+				.append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
 				.append(")").toString();
 		return ServerUtils.getServerName(baseName);
 	}
@@ -222,6 +227,7 @@ public class OpenShiftServerUtils {
 		server.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, Boolean.FALSE.toString());
 		server.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 		server.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
+		server.setAttribute(Server.PROP_AUTO_PUBLISH_TIME, DEFAULT_AUTO_PUBLISH_DELAY);
 	}
 
 	public static void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath,
