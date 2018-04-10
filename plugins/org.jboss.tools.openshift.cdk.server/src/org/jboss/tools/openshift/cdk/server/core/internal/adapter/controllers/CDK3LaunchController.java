@@ -22,12 +22,19 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.Server;
@@ -48,6 +55,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServerBehaviour;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.MinishiftPoller;
+import org.jboss.tools.openshift.cdk.server.ui.internal.view.SetupCDKJob;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationLookupStrategy;
 
@@ -187,19 +195,16 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		}
 	}
 
-	@Override
-	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
-			throws CoreException {
+	private IServer launchGetServer(ILaunchConfiguration configuration) throws CoreException {
 		final IServer s = ServerUtil.getServer(configuration);
 		if (s == null) {
 			throw new CoreException(
 					CDKCoreActivator.statusFactory().errorStatus("Unable to locate server from launch configuration."));
 		}
-
-		final ControllableServerBehavior beh = (ControllableServerBehavior) JBossServerBehaviorUtils
-				.getControllableBehavior(configuration);
-		beh.setServerStarting();
-
+		return s;
+	}
+	
+	private String launchGetMinishiftBinary(IServer s, ControllableServerBehavior beh) throws CoreException {
 		String minishiftLoc = MinishiftBinaryUtility.getMinishiftLocation(s);
 		if (minishiftLoc == null || !(new File(minishiftLoc).exists())) {
 			beh.setServerStopped();
@@ -210,8 +215,77 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 					.errorStatus("Expected location of minishift command does not exist: " + minishiftLoc
 							+ "\nPlease set a correct value in the server editor."));
 		}
+		return minishiftLoc;
+	}
+	
+	private void launchCheckSetupCDK(IServer s, CDKServer cdkServer, ControllableServerBehavior beh) throws CoreException {
+		CDK3Server cdk3 = (CDK3Server)cdkServer;
+		if( !cdk3.isCDKInitialized()) {
+			int[] retmain = new int[1];
+			retmain[0] = -1;
+			String home = cdk3.getMinishiftHome();
+			Display.getDefault().syncExec(() -> {
+				Shell sh = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				String msgText = "Your CDK installation has not been properly initialized. Would you like us to run setup-cdk for you?";
+				String msg = NLS.bind(msgText, home);
+				MessageDialog messageDialog = new MessageDialog(sh, "Warning: CDK has not been properly initialized!", null, msg, MessageDialog.WARNING, 
+						new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
+				retmain[0] = messageDialog.open();
+			});
+			if( retmain[0] == IDialogConstants.OK_ID) {
+				Job j = new SetupCDKJob(s, null, true);
+				j.schedule();
+				
+				try {
+					j.join();
+				} catch (InterruptedException e) {
+					// Ignore and finish up ASAP
+				}
+			}
+			if( !cdk3.isCDKInitialized()) { 
+				beh.setServerStopped();
+				throw new CoreException(CDKCoreActivator.statusFactory().errorStatus(
+						"The server cannot be started until the CDK has been initialized."));
+			}
+		}
+	}
+	
+	private Process launchCreateProcess(IServer s, ControllableServerBehavior beh, 
+			String args, IDebugEventSetListener listener) throws CoreException {
 
+		Process p = null;
+		try {
+			CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
+			p = new CDKLaunchUtility().callMinishiftConsole(s, args, getStartupLaunchName(s), cdk.skipRegistration());
+		} catch (IOException ioe) {
+			CDKCoreActivator.pluginLog().logError(ioe);
+			beh.setServerStopped();
+			DebugPlugin.getDefault().removeDebugEventListener(listener);
+			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ioe.getMessage(), ioe));
+		}
+
+		if (p == null) {
+			beh.setServerStopped();
+			DebugPlugin.getDefault().removeDebugEventListener(listener);
+			throw new CoreException(
+					new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to minishift up has failed."));
+		}
+		return p;
+	}
+	
+	@Override
+	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
+			throws CoreException {
+		final IServer s = launchGetServer(configuration);
+		final ControllableServerBehavior beh = (ControllableServerBehavior) JBossServerBehaviorUtils
+				.getControllableBehavior(configuration);
+		beh.setServerStarting();
+		String minishiftLoc = launchGetMinishiftBinary(s, beh);
 		CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
+		if( cdkServer instanceof CDK3Server) {
+			launchCheckSetupCDK(s, cdkServer, beh);
+		}
+		
 		boolean passCredentials = cdkServer.passCredentials();
 		boolean skipReg = cdkServer.skipRegistration();
 		if (passCredentials && !skipReg) {
@@ -233,27 +307,9 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		DebugPlugin.getDefault().addDebugEventListener(debug);
 		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.DEBUG_LISTENER, debug);
 
-		Process p = null;
-		try {
-			CDKServer cdk = (CDKServer)getServer().loadAdapter(CDKServer.class, new NullProgressMonitor());
-			p = new CDKLaunchUtility().callMinishiftConsole(s, args, getStartupLaunchName(s), cdk.skipRegistration());
-		} catch (IOException ioe) {
-			CDKCoreActivator.pluginLog().logError(ioe);
-			beh.setServerStopped();
-			DebugPlugin.getDefault().removeDebugEventListener(debug);
-			throw new CoreException(new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, ioe.getMessage(), ioe));
-		}
-
-		if (p == null) {
-			beh.setServerStopped();
-			DebugPlugin.getDefault().removeDebugEventListener(debug);
-			throw new CoreException(
-					new Status(IStatus.ERROR, CDKCoreActivator.PLUGIN_ID, "Call to minishift up has failed."));
-		}
-
+		Process p = launchCreateProcess(s, beh, args, debug);
 		IProcess process = addProcessToLaunch(p, launch, s, false, minishiftLoc);
 		beh.putSharedData(AbstractStartJavaServerLaunchDelegate.PROCESS, process);
-
 	}
 
 	private void handleCredentialsDuringLaunch(IServer s, CDKServer cdkServer, ControllableServerBehavior beh)

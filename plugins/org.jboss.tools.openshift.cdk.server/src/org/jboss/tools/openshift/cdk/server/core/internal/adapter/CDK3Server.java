@@ -13,7 +13,6 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter;
 import java.io.File;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.wst.server.core.IServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
@@ -79,4 +78,23 @@ public class CDK3Server extends CDKServer {
 		return (version.startsWith("3.0.") || version.startsWith("3.1."));
 	}
 
+	/**
+	 * Subclasses may override if the structure of the minishift home folder changes in future versions
+	 * @return
+	 */
+	public boolean isCDKInitialized() {
+		String home = getMinishiftHome();
+		File homeF = new File(home);
+		if (homeF.exists() && homeF.isDirectory()) {
+			File cdk = new File(homeF, "cdk");
+			File config = new File(homeF, "config");
+			File cache = new File(homeF, "cache");
+			File configJSON = new File(config, "config.json");
+			if (cdk.exists() && config.exists() && cache.exists() && configJSON.exists()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
