@@ -120,8 +120,14 @@ public class CDKServerWizardFragment extends WizardFragment {
 		homeData.widthHint = 100;
 		homeText = new Text(main, SWT.BORDER);
 		homeText.setLayoutData(homeData);
+		
+		
 		browseButton = new Button(main, SWT.PUSH);
 		browseButton.setText("Browse...");
+		GridData browseData = new GridData();
+		browseData.grabExcessHorizontalSpace = true;
+		browseData.horizontalAlignment = SWT.FILL;
+		browseButton.setLayoutData(browseData);
 
 		homeText.addModifyListener(createHomeModifyListener());
 		browseButton.addSelectionListener(createBrowseListener());

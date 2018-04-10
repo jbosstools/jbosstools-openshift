@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
+import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VersionUtil;
@@ -76,6 +77,10 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 		msHomeText.setText(defMSHome);
 		Button msHomeBrowse = new Button(main, SWT.PUSH);
 		msHomeBrowse.setText("Browse...");
+		GridData browseData = new GridData();
+		browseData.grabExcessHorizontalSpace = true;
+		browseData.horizontalAlignment = SWT.FILL;
+		msHomeBrowse.setLayoutData(browseData);
 		
 		SelectionAdapter msHomeSelListener = new SelectionAdapter() {
 			@Override
@@ -97,7 +102,7 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 	private String getDefaultMinishiftHome() {
 		String msHome = System.getenv(CDK32Server.ENV_MINISHIFT_HOME);
 		if( msHome == null || msHome.isEmpty() || !(new File(msHome).exists())) {
-			return new Path(System.getProperty("user.home")).append(".minishift").toOSString();
+			return new Path(System.getProperty("user.home")).append(CDKConstants.CDK_RESOURCE_DOTMINISHIFT).toOSString();
 		}
 		return msHome;
 	}
