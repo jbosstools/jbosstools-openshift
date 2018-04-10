@@ -81,7 +81,7 @@ public class CDKServerWizardFragment extends WizardFragment {
 	protected Composite setupComposite(Composite parent, IWizardHandle handle, String title, String desc) {
 		// boilerplate
 		this.handle = handle;
-		Composite main = new Composite(parent, SWT.NONE);
+		Composite main = new Composite(parent, SWT.BORDER);
 		handle.setTitle(title);
 		handle.setDescription(desc);
 		handle.setImageDescriptor(getImageDescriptor());
@@ -120,8 +120,14 @@ public class CDKServerWizardFragment extends WizardFragment {
 		homeData.widthHint = 100;
 		homeText = new Text(main, SWT.BORDER);
 		homeText.setLayoutData(homeData);
+		
+		
 		browseButton = new Button(main, SWT.PUSH);
 		browseButton.setText("Browse...");
+		GridData browseData = new GridData();
+		browseData.grabExcessHorizontalSpace = true;
+		browseData.horizontalAlignment = SWT.FILL;
+		browseButton.setLayoutData(browseData);
 
 		homeText.addModifyListener(createHomeModifyListener());
 		browseButton.addSelectionListener(createBrowseListener());
