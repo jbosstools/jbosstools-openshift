@@ -20,6 +20,9 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.ChangeEvent;
+import org.eclipse.core.databinding.observable.IChangeListener;
+import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.IValueChangeListener;
 import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
@@ -65,6 +68,7 @@ import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.explorer.OpenShiftExplorerLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
+import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItem2ModelConverter;
 import org.jboss.tools.openshift.internal.ui.treeitem.ObservableTreeItemLabelProvider;
 import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
@@ -97,7 +101,8 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 		createProjectControls(parent, dbc);
 	}
 
-	private void createProjectControls(Composite parent, DataBindingContext dbc) {
+	@SuppressWarnings("unchecked")
+    private void createProjectControls(Composite parent, DataBindingContext dbc) {
 		Label projectLabel = new Label(parent, SWT.NONE);
 		projectLabel.setText("OpenShift project: ");
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).applyTo(projectLabel);
@@ -108,9 +113,18 @@ public class AbstractProjectPage<M extends IProjectPageModel<Connection>> extend
 		final OpenShiftExplorerLabelProvider labelProvider = new OpenShiftExplorerLabelProvider();
 		projectsViewer.setContentProvider(new ObservableListContentProvider());
 		projectsViewer.setLabelProvider(new ObservableTreeItemLabelProvider());
-		projectsViewer.setInput(BeanProperties.list(IProjectPageModel.PROPERTY_PROJECT_ITEMS).observe(model));
 		projectsViewer.setComparator(ProjectViewerComparator.createProjectTreeSorter(labelProvider));
 		model.setProjectsComparator(new ProjectViewerComparator(labelProvider).asItemComparator());
+		
+		IObservableList<ObservableTreeItem> projectItemsObservableList = BeanProperties.list(IProjectPageModel.PROPERTY_PROJECT_ITEMS).observe(model);
+		projectsViewer.setInput(projectItemsObservableList);
+		projectItemsObservableList.addChangeListener(new IChangeListener() {
+            
+            @Override
+            public void handleChange(ChangeEvent event) {
+                projectsViewer.setInput(projectItemsObservableList);
+            }
+        });
 
 		IObservableValue selectedProjectObservable = ViewerProperties.singleSelection().observe(projectsViewer);
 		Binding selectedProjectBinding = ValueBindingBuilder.bind(selectedProjectObservable)
