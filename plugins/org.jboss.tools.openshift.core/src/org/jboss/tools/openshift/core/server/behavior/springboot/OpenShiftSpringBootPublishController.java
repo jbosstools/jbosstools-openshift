@@ -45,20 +45,17 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 		}
 
 		if (isRootModule(module)) {
-			IModule rootModule = module[0];
 			return super.getModuleDeployRoot(module, isBinaryObject)
-					.append(OpenShiftSpringBootPublishUtils.getRootModuleDeployPath(rootModule));
+					.append(OpenShiftSpringBootPublishUtils.getRootModuleDeployPath());
 		} else {
-			IModule childModule = module[module.length - 1];
-			return getChildModuleDeployPath(childModule);
+			return getChildModuleDeployPath();
 		}
 	}
 
-	private IPath getChildModuleDeployPath(IModule module) throws CoreException {
+	private IPath getChildModuleDeployPath() throws CoreException {
 		IPath localDestination = 
 				new Path(getDeploymentOptions().getDeploymentsRootFolder(true))
-					.append(OpenShiftSpringBootPublishUtils.getChildModuleDeployPath(module));
-		localDestination.toFile().mkdirs();
+					.append(OpenShiftSpringBootPublishUtils.getChildModuleDeployPath());
 
 		return new RemotePath(
 				localDestination.toString(), 
@@ -79,5 +76,4 @@ public class OpenShiftSpringBootPublishController extends OpenShiftPublishContro
 	protected boolean forceZipModule(IModule[] moduleTree) {
 		return false;
 	}
-	
 }

@@ -265,16 +265,6 @@
             id="modules.state.openshift.springboot.fs"
             mappedId="modules.state.openshift.springboot.fs"
             serverTypes="org.jboss.tools.openshift.server.type" />
-		<subsystem
-			system="launch"
-			id="launch.openshift.springboot"
-			name="OpenShift SpringBoot Launch Controller"
-			class="org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootLaunchController" />
-		<subsystemMapping
-			id="launch.openshift.springboot"
-			mappedId="launch.openshift.springboot"
-			serverTypes="org.jboss.tools.openshift.server.type">
-		</subsystemMapping>
    	</extension>
 
 	<!-- profiles -->
