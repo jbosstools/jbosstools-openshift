@@ -12,6 +12,7 @@ package org.jboss.tools.cdk.ui.bot.test;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32IntegrationTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterProfilesTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKWrongCredentialsTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryFailureTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryTest;
@@ -58,6 +59,7 @@ import org.junit.runners.Suite;
 	CDKWrongCredentialsTest.class,
 	
 	// Integration test for creating/operating of CDK 3.2+ server adapter with multiple profiles set
+	CDK32ServerAdapterProfilesTest.class
 })
 /**
  * @author ondrej dockal
