@@ -15,11 +15,12 @@ import org.jboss.tools.stacks.core.model.StacksManager;
 import org.osgi.framework.Bundle;
 
 public class MinishiftDownloadRuntimesProvider extends AbstractStacksDownloadRuntimesProvider {
-
+	private static final String MINISHIFT_YAML_URL = "https://raw.githubusercontent.com/jboss-developer/jboss-stacks/1.0.0.Final/minishift.yaml";
+	private static final String BUNDLED_YAML = "resources/minishift.yaml";
+	
 	public MinishiftDownloadRuntimesProvider() {
 		// Zero-arg constructor for loading via extension pt
 	}
-	private static final String YAML_PATH = "resources/minishift.yaml";
 	private static class StacksManager2 extends StacksManager {
 		@Override
 		public Stacks getStacksFromFile(File f) throws IOException {
@@ -29,10 +30,30 @@ public class MinishiftDownloadRuntimesProvider extends AbstractStacksDownloadRun
 	
 	@Override
 	protected Stacks[] getStacks(IProgressMonitor monitor) {
+		Stacks[] ret = getWebStacks(monitor);
+		if( ret == null ) {
+			ret = getBundledStacks(monitor);
+		}
+		if( ret == null ) {
+			return new Stacks[0];
+		}
+		return ret;
+	}
+	
+	private Stacks[] getWebStacks(IProgressMonitor monitor) {
+		StacksManager mgr = new StacksManager();
+		Stacks s = mgr.getStacks(MINISHIFT_YAML_URL, monitor);
+		if( s != null ) {
+			return new Stacks[] {s};
+		}
+		CDKCoreActivator.pluginLog().logError("Can't access or parse  " + MINISHIFT_YAML_URL); //$NON-NLS-1$
+		return null;
+	}
+	private Stacks[] getBundledStacks(IProgressMonitor monitor) {
 		Bundle bundle = CDKCoreActivator.getDefault().getBundle();
 		URL url = null;
 		try {
-			URL inBundle = bundle.getEntry(YAML_PATH);
+			URL inBundle = bundle.getEntry(BUNDLED_YAML);
 			url = FileLocator.toFileURL(inBundle);
 			File f = new File(url.getPath());
 			StacksManager2 mgr = new StacksManager2();
