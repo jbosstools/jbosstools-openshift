@@ -154,12 +154,11 @@ public class SetupCDKJob extends Job {
 					if( myProcess != null ) {
 						for (int i = 0; i < size; i++) {
 							if (myProcess.equals(events[i].getSource()) && events[i].getKind() == DebugEvent.TERMINATE) {
-								waiting.notify();
+								waiting.notifyAll();
 							}
 						}
-					} else {
-						cachedDebugEvents.addAll(Arrays.asList(events));
-					}
+					} 
+					cachedDebugEvents.addAll(Arrays.asList(events));
 				}
 			}
 		}
