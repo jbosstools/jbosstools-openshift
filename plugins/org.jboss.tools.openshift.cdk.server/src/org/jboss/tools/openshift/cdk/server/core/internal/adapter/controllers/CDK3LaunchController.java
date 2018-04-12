@@ -12,7 +12,9 @@ package org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.externaltools.internal.IExternalToolConstants;
@@ -282,7 +284,7 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 		beh.setServerStarting();
 		String minishiftLoc = launchGetMinishiftBinary(s, beh);
 		CDKServer cdkServer = (CDKServer) s.loadAdapter(CDKServer.class, new NullProgressMonitor());
-		if( cdkServer instanceof CDK3Server) {
+		if( cdkServer instanceof CDK3Server && isCDKBasedServer(s)) {
 			launchCheckSetupCDK(s, cdkServer, beh);
 		}
 		
@@ -372,5 +374,11 @@ public class CDK3LaunchController extends AbstractCDKLaunchController
 			// Ignore and continue
 		}
 
+	}
+	
+	private boolean isCDKBasedServer(IServer server) {
+		String typeId = server.getServerType().getId();
+		List<String> types = Arrays.asList(CDK3Server.MINISHIFT_BASED_CDKS);
+		return types.contains(typeId);
 	}
 }
