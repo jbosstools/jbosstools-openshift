@@ -94,7 +94,7 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 		assertEquals("Expected only one Docker connection, got " + docCount, 1, docCount);
 		// second adapter start verification
 		startServerAdapter(getSecondCDKServer(), 
-				() -> { skipRegistration(getCDKServer());
+				() -> { skipRegistration(getSecondCDKServer());
 				}, false);
 		// check counts of connections
 		conCount = view.getOpenShift3Connections().size();
@@ -108,7 +108,7 @@ public class CDK32ServerAdapterProfilesTest extends CDKServerAdapterAbstractTest
 		for (OpenShift3Connection conn : view.getOpenShift3Connections()) {
 			testOpenshiftConnection(conn);
 		}
-		// adapters stoping verification
+		// adapters stopping verification
 		stopServerAdapter();
 		stopServerAdapter(getSecondCDKServer());
 	}

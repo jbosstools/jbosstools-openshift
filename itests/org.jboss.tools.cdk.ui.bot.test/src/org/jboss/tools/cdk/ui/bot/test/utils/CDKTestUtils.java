@@ -13,6 +13,7 @@ package org.jboss.tools.cdk.ui.bot.test.utils;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -22,9 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.reddeer.common.condition.WaitCondition;
 import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
+import org.eclipse.reddeer.common.util.Display;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
@@ -41,7 +45,9 @@ import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.clabel.DefaultCLabel;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
+import org.eclipse.reddeer.workbench.handler.EditorHandler;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
+import org.eclipse.ui.IEditorPart;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKException;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
@@ -90,6 +96,53 @@ public class CDKTestUtils {
 		NewCDKServerWizard dialog = view.newCDKServer();
 		new WaitWhile(new JobIsRunning(), TimePeriod.MEDIUM, false);
 		return dialog;
+	}
+	
+	/**
+	 * We need to override save method from EditorHandler to be executed in async
+	 * thread in order to be able to work with message dialog from invalid server
+	 * editor location
+	 * 
+	 * @param editor
+	 *            IEditorPart to work with during saving
+	 */
+	public static void performSave(final IEditorPart editor) {
+		EditorHandler.getInstance().activate(editor);
+		Display.asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				editor.doSave(new NullProgressMonitor());
+
+			}
+		});
+		new WaitUntil(new WaitCondition() {
+
+			@Override
+			public boolean test() {
+				return !editor.isDirty();
+			}
+
+			@Override
+			public String description() {
+				return " editor is not dirty...";
+			}
+
+			@Override
+			public <T> T getResult() {
+				return null;
+			}
+
+			@Override
+			public String errorMessageWhile() {
+				return null;
+			}
+
+			@Override
+			public String errorMessageUntil() {
+				return " editor is still dirty...";
+			}
+		}, TimePeriod.MEDIUM);
 	}
 	
 	
@@ -158,6 +211,39 @@ public class CDKTestUtils {
         	exc.printStackTrace();
         } finally {
         	dialog.ok();
+		}
+	}
+	
+	/**
+	 * Deletes given File object using Files.deleteIfExists(Path)
+	 * @param file file or directory to delete
+	 * @throws FileNotFoundException 
+	 */
+	public static void deleteRecursively(File file) throws FileNotFoundException {
+		if (file.exists()) {
+			if (file.isFile()) {
+				log.info("Deleting file " + file.getAbsolutePath());
+				file.delete();
+			} else {
+				if (file.listFiles().length >= 1) {
+					for(File contentFile : file.listFiles()) {
+						deleteRecursively(contentFile);
+					}
+				}
+				log.info("Deleting dir " + file.getAbsolutePath());
+				file.delete();
+			}
+		} else {
+			throw new FileNotFoundException("Given file " + file.getAbsolutePath() + " does not exists");
+		}
+	}
+	
+	public static void deleteFilesIfExist(File file) {
+		log.info("Deleting all content under file path " + file.getAbsolutePath());
+		try {
+			deleteRecursively(file);
+		} catch (FileNotFoundException e) {
+			log.error("Given path does not exists, do nothing");
 		}
 	}
 

@@ -26,6 +26,7 @@ import org.eclipse.reddeer.swt.impl.text.LabeledText;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
+import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.launch.configuration.CDKLaunchConfigurationDialog;
@@ -108,7 +109,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		// here comes possibility to set profile while creating server adapter
 		log.info("Setting profile to: ");
 		containerPage.setMinishiftProfile("");
-		new WaitWhile(new SystemJobIsRunning(getJobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
+		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
 	}
 	
 	@Test
@@ -125,7 +126,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		closeLaunchConfig();
 		editor.activate();
 		editor.getServernameLabel().setText(getServerAdapter() + "x");
-		performSave(editor.getEditorPart());
+		CDKTestUtils.performSave(editor.getEditorPart());
 		openLaunchConfiguration();
 		assertEquals(getServerAdapter() + "x", launchDialog.getName());
 	}
@@ -135,7 +136,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		closeLaunchConfig();
 		editor.activate();
 		((CDK32ServerEditor) editor).getMinishiftProfile().setText("test");
-		performSave(editor.getEditorPart());
+		CDKTestUtils.performSave(editor.getEditorPart());
 		openLaunchConfiguration();
 		assertTrue("Minishift profile was not changed to 'test'", launchDialog.getArguments().getText().contains("--profile test"));
 	}
@@ -145,7 +146,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		closeLaunchConfig();
 		editor.activate();
 		((CDK32ServerEditor) editor).getMinishiftBinaryLabel().setText(MOCK_CDK320);
-		performSave(editor.getEditorPart());
+		CDKTestUtils.performSave(editor.getEditorPart());
 		openLaunchConfiguration();
 		assertEquals("Minishift location was not changed to " + MOCK_CDK320, MOCK_CDK320, launchDialog.getLocation());
 	}
@@ -157,7 +158,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		LabeledText home =  ((CDK32ServerEditor) editor).getMinishiftHomeLabel();
 		String homePath = home.getText();
 		home.setText(homePath + "Folder");
-		performSave(editor.getEditorPart());
+		CDKTestUtils.performSave(editor.getEditorPart());
 		openLaunchConfiguration();
 		assertEquals(homePath + "Folder", launchDialog.getValueOfEnvVar("MINISHIFT_HOME"));
 	}
@@ -170,7 +171,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		closeLaunchConfig();
 		editor.activate();
 		((CDK32ServerEditor) editor).getAddSkipRegistrationOnStartCheckBox().toggle(true);
-		performSave(editor.getEditorPart());
+		CDKTestUtils.performSave(editor.getEditorPart());
 		openLaunchConfiguration();
 		String arguments = launchDialog.getArguments().getText();
 		assertTrue("Launch config arguments are missing " + SKIP_REGISTRATION + " flag, arguments: " + arguments,
@@ -178,7 +179,7 @@ public class CDKLaunchConfigurationTest extends CDKServerEditorAbstractTest {
 		closeLaunchConfig();
 		editor.activate();
 		((CDK32ServerEditor) editor).getAddSkipRegistrationOnStartCheckBox().toggle(false);
-		performSave(editor.getEditorPart());
+		CDKTestUtils.performSave(editor.getEditorPart());
 		openLaunchConfiguration();
 		arguments = launchDialog.getArguments().getText();
 		assertFalse("Launch config arguments should not contain " + SKIP_REGISTRATION + " flag, arguments: " + arguments,

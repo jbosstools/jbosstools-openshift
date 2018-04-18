@@ -14,13 +14,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.reddeer.common.exception.RedDeerException;
-import org.hamcrest.Matcher;
 import org.jboss.tools.cdk.reddeer.core.enums.CDKHypervisor;
-import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 
@@ -40,6 +35,12 @@ public abstract class CDKAbstractTest {
 	public static final String MINISHIFT_CONFIG_MINIMAL = " --disk-size 5GB --memory 2GB --cpus 1"; 
 	public static final String SKIP_REGISTRATION = "--skip-registration"; 
 	
+	// mock files
+	protected static final String MOCK_CDK320 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/cdk-3.2.0-mock" + (IS_WINDOWS ? ".bat" : ""));    
+	protected static final String MOCK_CDK311 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/cdk-3.1.1-mock" + (IS_WINDOWS ? ".bat" : ""));    
+	protected static final String MOCK_MINISHIFT131 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/minishift-1.3.1-mock" + (IS_WINDOWS ? ".bat" : ""));    
+	protected static final String MOCK_MINISHIFT170 = getProjectAbsolutePath("resources/cdk-files/" + FOLDER + "/minishift-1.7.0-mock" + (IS_WINDOWS ? ".bat" : ""));  
+	
 	// CDK Test suite parameters
 	public static final String MINISHIFT_PROFILE = "minishift";
 	public static final String USERNAME;
@@ -58,16 +59,6 @@ public abstract class CDKAbstractTest {
 		CDK32_MINISHIFT = CDKTestUtils.getSystemProperty("cdk32.minishift"); 
 		MINISHIFT_HYPERVISOR = CDKTestUtils.getSystemProperty("hypervisor"); 
 		DEFAULT_MINISHIFT_HOME = System.getProperty("user.home") + separator + ".minishift";  
-	}
-	
-	public static Matcher<?> getJobMatcher(String title) {
-		return new JobMatcher(new Job(title) {
-
-			@Override
-			protected IStatus run(IProgressMonitor arg0) {
-				return null;
-			}
-		});
 	}
 	
 	public static String assignMinishiftHypervisor() {

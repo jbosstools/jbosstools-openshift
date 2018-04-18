@@ -27,6 +27,7 @@ public class CDKLabel {
 		public static final String RESTART = "Restart";
 		public static final String STOP = "Stop";
 		public static final String [] NEW_SERVER = {"New", "Server"};
+		public static final String SETUP_CDK = "Setup CDK";
 	}
 	
 	public static class Shell {
@@ -37,6 +38,8 @@ public class CDKLabel {
 		public static final String ADD_CREDENTIALS_DIALOG = "Add a Credential";
 		public static final String SECURE_STORAGE_DIALOG = "Secure Storage Password";
 		public static final String NEW_SERVER_WIZARD = "New Server";
+		public static final String WARNING_FOLDER_EXISTS = "Warning: Folder already exists!";
+		public static final String WARNING_CDK_NOT_INICIALIZED = "Warning: CDK has not been properly initialized!";
 	}
 	
 	public static class Labels {

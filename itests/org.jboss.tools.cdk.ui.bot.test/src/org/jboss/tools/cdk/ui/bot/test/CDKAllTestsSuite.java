@@ -13,6 +13,7 @@ package org.jboss.tools.cdk.ui.bot.test;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32IntegrationTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDK32ServerAdapterProfilesTest;
+import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKServerAdapterSetupCDKTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.CDKWrongCredentialsTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryFailureTest;
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift.CDKImageRegistryUrlDiscoveryTest;
@@ -43,6 +44,9 @@ import org.junit.runners.Suite;
 	MinishiftServerEditorTest.class,
 	CDKLaunchConfigurationTest.class,
 	
+	// Setup CDK context menu item tests
+	CDKServerAdapterSetupCDKTest.class,
+		
 	// Integration tests dependent on CDK start up
 	
 	// Main integration test of devstudio and CDK, is using different profile for clear start
