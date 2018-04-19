@@ -48,7 +48,9 @@ public class NewOpenShift3ApplicationWizard extends AbstractOpenShiftApplication
 	public void openWizardFromExplorer(String project) {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.reopen();
-
+		
+		explorer.getOpenShift3Connection(this.connection).refresh();
+		
 		selectExplorerProject(project, explorer);
 	
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_OS3_APPLICATION).select();

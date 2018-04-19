@@ -25,6 +25,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.LabelsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.NewApplicationWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.TemplateParametersTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationFromTemplateTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.create.CreateApplicationOnBuilderImageTest;
 import org.jboss.tools.openshift.ui.bot.test.common.OCBinaryLocationTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionPropertiesTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionWizardHandlingTest;
@@ -84,6 +85,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	
 	// Creation of a new application
 	CreateApplicationFromTemplateTest.class,
+	CreateApplicationOnBuilderImageTest.class, 
 	
 	// Application handling
 	LogsTest.class,

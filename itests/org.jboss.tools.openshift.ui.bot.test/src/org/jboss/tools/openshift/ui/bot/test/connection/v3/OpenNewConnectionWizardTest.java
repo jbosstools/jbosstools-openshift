@@ -21,6 +21,7 @@ import org.eclipse.reddeer.swt.impl.link.DefaultLink;
 import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.toolbar.DefaultToolItem;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
+import org.jboss.tools.openshift.reddeer.requirement.CleanOpenShiftExplorerRequirement.CleanOpenShiftExplorer;
 import org.jboss.tools.openshift.reddeer.requirement.ConnectionUtils;
 import org.jboss.tools.openshift.reddeer.utils.OpenShiftLabel;
 import org.jboss.tools.openshift.reddeer.view.OpenShiftExplorerView;
@@ -38,6 +39,7 @@ import org.junit.runner.RunWith;
 
 @OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
+@CleanOpenShiftExplorer
 public class OpenNewConnectionWizardTest extends AbstractTest {
 	
 	OpenShiftExplorerView explorer = new OpenShiftExplorerView();
@@ -49,7 +51,7 @@ public class OpenNewConnectionWizardTest extends AbstractTest {
 		explorer.open();
 
 		// when
-		new DefaultLink(OpenShiftLabel.TextLabels.CREATE_CONNECTION).click();
+		new DefaultLink(OpenShiftLabel.TextLabels.NEW_CONNECTION_LINK).click();
 
 		// then
 		verifyNewConnectionWizardIsOpened();

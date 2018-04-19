@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard;
 
+import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
@@ -80,6 +81,7 @@ public abstract class AbstractOpenShiftApplicationWizard {
 	}
 
 	private void signToOpenShiftAndClickNext() {
+		processUntrustedSSLCertificate();
 		new DefaultShell(OpenShiftLabel.Shell.NEW_APP_WIZARD);
 		
 		selectConnection(username, server, new DefaultCombo(0));
@@ -113,15 +115,24 @@ public abstract class AbstractOpenShiftApplicationWizard {
 	/**
 	 * Opens a new OpenShift application wizard from JBoss Central.
 	 */
-	public void openWizardFromCentral() {
+	public void openWizardFromCentral() {		
 		new DefaultToolItem(new WorkbenchShell(), OpenShiftLabel.Others.RED_HAT_CENTRAL).click();
 		
 		new WaitUntil(new CentralIsLoaded());
 		
 		new InternalBrowser().execute(OpenShiftLabel.Others.OPENSHIFT_CENTRAL_SCRIPT);
+		
+		new WaitUntil(new JobIsRunning(), false);
 	
-		new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD),
+		try {
+			new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD),
 				TimePeriod.LONG);
+		}catch (WaitTimeoutExpiredException ex) {
+			//try to run script once again
+			new InternalBrowser().execute(OpenShiftLabel.Others.OPENSHIFT_CENTRAL_SCRIPT);
+			new WaitUntil(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_APP_WIZARD),
+					TimePeriod.LONG);
+		}
 		
 		signToOpenShiftAndClickNext();
 		
