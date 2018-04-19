@@ -63,7 +63,7 @@ import org.junit.runner.RunWith;
 @OCBinary(cleanup=false, setOCInPrefs=true)
 @RequiredBasicConnection
 @RequiredProject
-@RequiredService(service = "eap-app", template = "resources/eap64-basic-s2i.json")
+@RequiredService(service = "eap-app", template = "resources/eap70-basic-s2i-helloworld.json")
 public class ServerAdapterWizardHandlingTest extends AbstractTest  {
 	
 	private static final String PROJECT_NAME = "kitchensink";
