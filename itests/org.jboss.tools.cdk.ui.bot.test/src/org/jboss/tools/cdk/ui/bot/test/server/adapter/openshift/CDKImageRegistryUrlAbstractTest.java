@@ -69,7 +69,7 @@ public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAb
 	@Before
 	public void setupAdapter() {
 		startServerAdapterIfNotRunning(() -> {
-			skipRegistration(getCDKServer());
+			skipRegistrationViaFlag(getCDKServer(), true);
 		}, false);
 		wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		assertTrue(wizard.getAuthSection().getMethod().equals(AuthenticationMethod.BASIC));

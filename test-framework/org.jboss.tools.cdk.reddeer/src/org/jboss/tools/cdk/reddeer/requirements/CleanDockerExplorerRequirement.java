@@ -28,7 +28,7 @@ import org.jboss.tools.cdk.reddeer.requirements.CleanDockerExplorerRequirement.C
 
 /**
  * Requirement assuring that all Docker connections are removed from Docker Explorer.
- * @author odockal
+ * @author Ondrej Dockal, odockal@redhat.com
  *
  */
 public class CleanDockerExplorerRequirement implements Requirement<CleanDockerExplorer> {
@@ -42,7 +42,7 @@ public class CleanDockerExplorerRequirement implements Requirement<CleanDockerEx
 	public @interface CleanDockerExplorer {
 		/**
 		 * Decides if to remove all connections when {@link #cleanup()} is called.
-		 * @return boolean, default is true
+		 * @return boolean, default is false
 		 */
 		boolean cleanup() default false;
 	}
@@ -69,12 +69,20 @@ public class CleanDockerExplorerRequirement implements Requirement<CleanDockerEx
 		}
 	}
 	
+	/**
+	 * Opens DockerExplorer view
+	 */
 	public void initializeExplorer() {
 		new DockerExplorerView().open();
 	}
 	
+	/**
+	 * Obtains list of all docker connection found in Docker Explorer view
+	 * @return {@code}ArrayList{@code} list of DockerConnection objects or empty list if there is not any
+	 */
 	public List<DockerConnection> getDockerConnections() {
 		initializeExplorer();
+		log.info("Getting all available Docker connections..."); 
 		try {
 			return new DefaultTree().getItems().stream()
 					.map(x -> new DockerConnection(x))
@@ -85,8 +93,10 @@ public class CleanDockerExplorerRequirement implements Requirement<CleanDockerEx
 		return new ArrayList<>();
 	}
 	
+	/**
+	 * Removes all docker connections found
+	 */
 	public void removeAllDockerConnections() {
-		log.info("Getting all available Docker connections..."); 
 		List<DockerConnection> connections = getDockerConnections();
 		if (!connections.isEmpty()) {
 			connections.stream()

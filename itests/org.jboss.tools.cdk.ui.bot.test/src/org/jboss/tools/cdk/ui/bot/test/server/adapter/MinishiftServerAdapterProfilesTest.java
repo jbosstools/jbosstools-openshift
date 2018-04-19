@@ -87,15 +87,14 @@ public class MinishiftServerAdapterProfilesTest extends CDKServerAdapterAbstract
 	@Test
 	public void testMinishiftServerAdapterWithMultipleProfiles() {
 		// fisrt adapter start verification
-		startServerAdapter(() -> { skipRegistration(getCDKServer());}, false);
+		startServerAdapter(() -> {}, false);
 		int conCount = view.getOpenShift3Connections().size();
 		int docCount = getDockerConnectionCreatedByCDK(dockerView, DOCKER_DAEMON_CONNECTION).size();
 		assertEquals("Expected only one OS connection, got " + conCount, 1, conCount);
 		assertEquals("Expected only one Docker connection, got " + docCount, 1, docCount);
 		// second adapter start verification
 		startServerAdapter(getSecondCDKServer(), 
-				() -> { skipRegistration(getCDKServer());
-				}, false);
+				() -> {}, false);
 		// check counts of connections
 		conCount = view.getOpenShift3Connections().size();
 		docCount = getDockerConnectionCreatedByCDK(dockerView, DOCKER_DAEMON_CONNECTION).size();

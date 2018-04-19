@@ -13,6 +13,7 @@ package org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public class CDKImageRegistryUrlValidatorTest extends CDKImageRegistryUrlAbstrac
 		setupOCForWorkspace();
 		wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		assertStringContains(wizard.getConnectionMessage(), "OpenShift server"); 
-		assertTrue(wizard.getOCLocationLabel().getText().endsWith(IS_WINDOWS ? "oc.exe" : "oc"));  
+		assertTrue(wizard.getOCLocationLabel().getText().endsWith(CDKUtils.IS_WINDOWS ? "oc.exe" : "oc"));  
 	}
 	
 	/**

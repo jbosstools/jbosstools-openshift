@@ -11,38 +11,45 @@
 package org.jboss.tools.cdk.reddeer.core.enums;
 
 /**
- * CDK runtime OS enum types
+ * CDK runtime OS enum types used with minishift, ie. in url, folder names, etc.
+ * 
  * @author odockal
  *
  */
 public enum CDKRuntimeOS {
 
-	LINUX("linux", ""),
-	WINDOWS("win", ".exe"),
-	MAC("darwin", ""),
+	LINUX("linux", "linux", ""), 
+	WINDOWS("win", "windows", ".exe"), 
+	MAC("darwin", "darwin", ""), 
 	OTHER;
-	
+
 	String runtimeName;
+	String runtimeFullName;
 	String suffix;
-	
+
 	CDKRuntimeOS() {
 		this.runtimeName = System.getProperty("os.name");
 		this.suffix = "";
 	}
-	
-	CDKRuntimeOS(String name, String suffix) {
+
+	CDKRuntimeOS(String name, String runtimeFullName, String suffix) {
 		this.runtimeName = name;
+		this.runtimeFullName = runtimeFullName;
 		this.suffix = suffix;
 	}
-	
+
 	public String getRuntimeName() {
 		return this.runtimeName;
 	}
-	
+
+	public String getRuntimeFullName() {
+		return this.runtimeFullName;
+	}
+
 	public String getSuffix() {
 		return this.suffix;
 	}
-	
+
 	public static CDKRuntimeOS get() {
 		String baseOS = System.getProperty("os.name").toLowerCase();
 		if (baseOS.contains("linux")) {

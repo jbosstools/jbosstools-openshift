@@ -15,6 +15,7 @@ import org.jboss.tools.cdk.ui.bot.test.server.adapter.MinishiftServerAdapterProf
 import org.jboss.tools.cdk.ui.bot.test.server.adapter.MinishiftServerAdapterTest;
 import org.jboss.tools.cdk.ui.bot.test.server.editor.MinishiftServerEditorTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.MinishiftServerWizardTest;
+import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.MinishiftDownloadRuntimeTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -22,6 +23,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 	MinishiftServerWizardTest.class,
 	MinishiftServerEditorTest.class,
+  MinishiftDownloadRuntimeTest.class,
 	MinishiftServerAdapterTest.class,
 	MinishiftServerAdapterProfilesTest.class
 })

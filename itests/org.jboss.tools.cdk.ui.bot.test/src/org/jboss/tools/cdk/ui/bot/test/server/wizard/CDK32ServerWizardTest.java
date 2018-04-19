@@ -11,6 +11,8 @@
 package org.jboss.tools.cdk.ui.bot.test.server.wizard;
 
 import static org.junit.Assert.assertTrue;
+import static org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils.assertDiffMessage;
+import static org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils.assertSameMessage;
 
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -45,7 +47,7 @@ public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 	}
 	
 	@Test
-	public void testCDK3ServerType() {
+	public void testCDK32ServerType() {
 		assertServerType(CDKLabel.Server.CDK32_SERVER_NAME);
 	}
 	
@@ -69,28 +71,29 @@ public class CDK32ServerWizardTest extends CDKServerWizardAbstractTest {
 		containerPage.setMinishiftBinary(EXISTING_PATH);
 		
 		// first the credentials are checked
-		assertSameMessage(dialog, NO_USER);
+		assertSameMessage(dialog, CDKLabel.Messages.NO_USER);
 		containerPage.setCredentials(USERNAME, PASSWORD);
-		assertDiffMessage(dialog, NO_USER);
+		assertDiffMessage(dialog, CDKLabel.Messages.NO_USER);
 
 		// checking of minishift binary validation
 		// test that existing folder cannot be run
 		containerPage.setMinishiftBinary(EXISTING_PATH);
-		assertSameMessage(dialog, CANNOT_RUN_PROGRAM);
+		assertSameMessage(dialog, CDKLabel.Messages.CANNOT_RUN_PROGRAM);
 		containerPage.setMinishiftBinary(NON_EXECUTABLE_FILE);
-		assertSameMessage(dialog, NOT_EXECUTABLE);
+		assertSameMessage(dialog, CDKLabel.Messages.NOT_EXECUTABLE);
 		containerPage.setMinishiftBinary(NON_EXISTING_PATH);
-		assertSameMessage(dialog, DOES_NOT_EXIST);
+		assertSameMessage(dialog, CDKLabel.Messages.DOES_NOT_EXIST);
 		containerPage.setMinishiftBinary(EXECUTABLE_FILE);
-		assertSameMessage(dialog, CHECK_MINISHIFT_VERSION);
+		assertSameMessage(dialog, CDKLabel.Messages.CHECK_MINISHIFT_VERSION);
 		
 		// check compatibility of cdk version with server adapter
 		containerPage.setMinishiftBinary(MOCK_CDK311);
-		assertSameMessage(dialog, NOT_COMPATIBLE);
+		assertSameMessage(dialog, CDKLabel.Messages.NOT_COMPATIBLE);
 		
 		// Positive test of proper minishift binary
 		containerPage.setMinishiftBinary(CDK32_MINISHIFT);
-		assertDiffMessage(dialog, CHECK_MINISHIFT_VERSION);
+		assertDiffMessage(dialog, CDKLabel.Messages.CHECK_MINISHIFT_VERSION);
+		assertSameMessage(dialog, CDKLabel.Messages.SERVER_ADAPTER_REPRESENTING);
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.MEDIUM, false);
 		assertTrue("Expected Finish button is not enabled", dialog.isFinishEnabled());
 		dialog.cancel();

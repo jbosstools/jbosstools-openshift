@@ -69,7 +69,7 @@ public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstrac
 		stopServerAdapter();
 		// start server adapter -> should bring up the value of registry url in existing
 		// connection
-		startServerAdapter(() -> skipRegistration(getCDKServer()), false);
+		startServerAdapter(() -> skipRegistrationViaFlag(getCDKServer(), true), false);
 		wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		switchOffPasswordSaving(wizard);
 		checkImageRegistryUrl(wizard, OPENSHIFT_REGISTRY);
@@ -101,7 +101,7 @@ public class CDKImageRegistryUrlDiscoveryTest extends CDKImageRegistryUrlAbstrac
 		newWizard = null;
 		// stop and start server adapter
 		stopServerAdapter();
-		startServerAdapter(() -> skipRegistration(getCDKServer()), false);
+		startServerAdapter(() -> skipRegistrationViaFlag(getCDKServer(), true), false);
 		// check that both connections have filled image registry url
 		try {
 			wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
