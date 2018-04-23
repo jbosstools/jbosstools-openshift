@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.jboss.tools.cdk.ui.bot.test
 Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: Red Hat
 Require-Bundle: org.junit,
- org.eclipse.reddeer.go;bundle-version="[2.0.0,2.2.0)",
+ org.eclipse.reddeer.go;bundle-version="[2.0.0,3.0.0)",
  org.eclipse.wst.server.core;bundle-version="1.5.0",
  org.eclipse.wst.server.ui;bundle-version="1.5.200",
  org.eclipse.jdt.launching;bundle-version="3.7.0",
@@ -16,7 +16,7 @@ Require-Bundle: org.junit,
  org.eclipse.core.externaltools;bundle-version="1.0.300",
  org.eclipse.equinox.security;bundle-version="1.2.100",
  org.eclipse.debug.ui;bundle-version="3.11.0",
- org.eclipse.linuxtools.docker.core;bundle-version="[3.0.0,4.0.0)",
+ org.eclipse.linuxtools.docker.core;bundle-version="[4.0.0,5.0.0)",
  org.eclipse.linuxtools.docker.reddeer,
  org.eclipse.tm.terminal.view.core;bundle-version="4.0.0",
  org.eclipse.tm.terminal.view.ui;bundle-version="4.0.0",

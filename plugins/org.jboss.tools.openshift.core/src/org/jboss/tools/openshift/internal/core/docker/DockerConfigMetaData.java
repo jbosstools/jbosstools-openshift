@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import org.eclipse.linuxtools.docker.core.IDockerContainerConfig;
 import org.eclipse.linuxtools.docker.core.IDockerImageInfo;
+import org.eclipse.linuxtools.internal.docker.core.DockerContainerConfig;
 
 /**
  * Metadata about an image fetched from a docker connection.
@@ -84,7 +85,8 @@ public class DockerConfigMetaData implements IDockerImageMetadata {
 		if (info == null) {
 			return Collections.emptySet();
 		}
-		return select(info.config(), info.containerConfig(), IDockerContainerConfig::volumes, Collections::emptySet);
+		Function<IDockerContainerConfig, Map<String, Map>> f = IDockerContainerConfig::volumes; 
+		return select(info.config(), info.containerConfig(), f.andThen(Map::keySet), (Supplier<Set<String>>)Collections::emptySet);
 	}
 
 	@Override
