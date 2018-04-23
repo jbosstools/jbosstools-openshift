@@ -16,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,24 +57,8 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	public static final String OVERRIDE_MINISHIFT_LOCATION = "OVERRIDE_MINISHIFT_LOCATION";
 
 	// Generated from whitelistGenerator.sh
-	private static final String[] WHITELIST_FILENAMES = new String[] {
-			"cdk-3.0-minishift-linux-amd64",
-			"cdk-3.0-minishift-darwin-amd64",
-			"cdk-3.0-minishift-windows-amd64.exe",
-			"cdk-3.1.0-1-minishift-linux-amd64",
-			"cdk-3.1.0-1-minishift-darwin-amd64",
-			"cdk-3.1.0-1-minishift-windows-amd64.exe",
-			"cdk-3.1.1-1-minishift-linux-amd64",
-			"cdk-3.1.1-1-minishift-darwin-amd64",
-			"cdk-3.1.1-1-minishift-windows-amd64.exe",
-			"cdk-3.2.0-1-minishift-linux-amd64",
-			"cdk-3.2.0-1-minishift-darwin-amd64",
-			"cdk-3.2.0-1-minishift-windows-amd64.exe",
-			"cdk-3.3.0-1-minishift-linux-amd64",
-			"cdk-3.3.0-1-minishift-darwin-amd64",
-			"cdk-3.3.0-1-minishift-windows-amd64.exe",
-	};
 	
+	private static final Pattern WHITELIST_PATTERN = Pattern.compile("cdk-[0-9][.][0-9].*-minishift-(linux|darwin|windows)-amd64(.exe)?");
 	
 	
 	@Override
@@ -160,11 +146,12 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	}
 	
 	private File folderWhiteListBin(File folder) {
-		for( int i = 0; i < WHITELIST_FILENAMES.length; i++ ) {
-			File bin = new File(folder, WHITELIST_FILENAMES[i]);
-			if( bin.exists() && bin.isFile() && bin.canExecute()) {
-				return bin;
-			}
+		String[] children = folder.list();
+		for( int i = 0; i < children.length; i++ ) {
+		     Matcher m = WHITELIST_PATTERN.matcher(children[i]);
+		     if( m.matches()) {
+		    	 return new File(folder, children[i]);
+		     }
 		}
 		return null;
 	}
