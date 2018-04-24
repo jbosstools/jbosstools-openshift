@@ -23,6 +23,7 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Properties;
@@ -139,10 +140,14 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 		}
 	}
 	
-	private String copyOCFromExtractedFolder(File downloadedOCBinary) {
+	public static String copyOCFromExtractedFolder(File downloadedOCBinary) {
+		return copyOCFromExtractedFolder(downloadedOCBinary, OCBinaryFile.get().getFile().toPath());
+	}
+	
+	public static String copyOCFromExtractedFolder(File downloadedOCBinary, Path destination) {
 		try {
 			return Files.copy(Paths.get(downloadedOCBinary.getAbsolutePath()),
-					OCBinaryFile.get().getFile().toPath(),
+					destination,
 					StandardCopyOption.REPLACE_EXISTING).toAbsolutePath().toString();
 		} catch (IOException e) {
 			throw new OpenShiftToolsException(NLS.bind("Could not copy {0} to {1}:\n{2}", 
@@ -163,7 +168,7 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 		}
 	}
 	
-	private void deleteOnPathIfExists(String path) {
+	public static void deleteOnPathIfExists(String path) {
 		try {
 			URI uri = new File(path).toURI();
 			LOGGER.info("Going to delete URI resources on path: " + uri.getPath());
@@ -206,9 +211,13 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 		return OCBinaryFile.get().getFile().getAbsolutePath();
 	}
 	
-	private File downloadAndExtractOpenShiftClient(String url) {
+	public static File downloadAndExtractOpenShiftClient(String url) {
+		return downloadAndExtractOpenShiftClient(url, CLIENT_TOOLS_DESTINATION);
+	}
+	
+	public static File downloadAndExtractOpenShiftClient(String url, String destinationDirectory) {
 		LOGGER.info("Creating directory binaries");
-		File outputDirectory = new File(CLIENT_TOOLS_DESTINATION);
+		File outputDirectory = new File(destinationDirectory);
 		FileHelper.createDirectory(outputDirectory);
 
 		String fileName = downloadArchive(url);
@@ -223,35 +232,37 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 		return new File(extractedDirectory, OCBinaryFile.get().getName());
 	}
 
-	private String downloadArchive(String downloadLink) {
+	public static String downloadArchive(String downloadLink) {
 		if (StringUtils.isEmpty(downloadLink)) {
 			throw new OpenShiftToolsException("Cannot download OpenShift binary. No download known\n");
 		}
 
 		String fileName = null;
+		URL downloadUrl = null;
 		try {
-			URL downloadUrl = new URL(downloadLink);
+			downloadUrl = new URL(downloadLink);
 			fileName = getFileName(downloadUrl.getPath());
 			if (new File(fileName).exists()) {
 				LOGGER.info(fileName + " already exists, it will not be downloaded");
 				return fileName;
 			}
-			try (FileOutputStream fileOutputStream = new FileOutputStream(fileName);
-					ReadableByteChannel readableByteChannel = Channels.newChannel(downloadUrl.openStream())) {
-				LOGGER.info("Downloading OpenShift binary");
-				fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-			} catch (IOException ex) {
-				// clean up after unsuccessful downloading
-				deleteOnPathIfExists(fileName);
-				throw new OpenShiftToolsException("Cannot download OpenShift binary\n" + ex.getMessage());
-			}
+			
 		} catch (MalformedURLException e) {
 			throw new OpenShiftToolsException(NLS.bind("Could not download \"{0}\". Invalid url", downloadLink));
+		}
+		try (FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+				ReadableByteChannel readableByteChannel = Channels.newChannel(downloadUrl.openStream())) {
+			LOGGER.info("Downloading OpenShift binary");
+			fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+		} catch (IOException ex) {
+			// clean up after unsuccessful downloading
+			deleteOnPathIfExists(fileName);
+			throw new OpenShiftToolsException("Cannot download OpenShift binary\n" + ex.getMessage());
 		}
 		return fileName;
 	}
 
-	private String extractArchive(String fileName, File outputDirectory) {
+	public static String extractArchive(String fileName, File outputDirectory) {
 		if (StringUtils.isEmpty(fileName)) {
 			return null;
 		}
@@ -277,12 +288,12 @@ public class OpenShiftCommandLineToolsRequirement implements Requirement<OCBinar
 		return extractedDirectory;
 	}
 	
-	private String getFileName(String urlPath) {
+	public static String getFileName(String urlPath) {
 		String[] pathParts = urlPath.split("/");
 		return Paths.get(CLIENT_TOOLS_DESTINATION, pathParts[pathParts.length - 1]).toString();
 	}
 	
-	private String getDownloadLink(boolean newOC) {
+	public static String getDownloadLink(boolean newOC) {
 		if (Platform.OS_LINUX.equals(Platform.getOS())) {
 			return newOC ? ClientVersion.LINUX_LATEST.getDownloadLink() : ClientVersion.LINUX_1_1_64.getDownloadLink();
 		} else if (Platform.getOS().startsWith(Platform.OS_WIN32) && Platform.getOSArch().equals(Platform.ARCH_X86_64)){
