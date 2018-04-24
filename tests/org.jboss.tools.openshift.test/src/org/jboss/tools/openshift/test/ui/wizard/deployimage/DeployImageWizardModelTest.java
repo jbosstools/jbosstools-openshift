@@ -105,7 +105,7 @@ public class DeployImageWizardModelTest {
 		when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
 		when(dockerImageInfo.config().env()).thenReturn(Arrays.asList("foo1=bar1", "foo2=bar2"));
 		when(dockerImageInfo.config().exposedPorts()).thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
-		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptySet());
+		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptyMap());
 		when(dockerImageInfo.containerConfig()).thenReturn(null);
 		mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
 		// when
@@ -333,7 +333,7 @@ public class DeployImageWizardModelTest {
 		when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
 		when(dockerImageInfo.config().env()).thenReturn(Collections.emptyList());
 		when(dockerImageInfo.config().exposedPorts()).thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
-		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptySet());
+		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptyMap());
 		when(dockerImageInfo.containerConfig()).thenReturn(null);
 		mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
 		// when
@@ -355,7 +355,7 @@ public class DeployImageWizardModelTest {
 		when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
 		when(dockerImageInfo.config().env()).thenReturn(Collections.emptyList());
 		when(dockerImageInfo.config().exposedPorts()).thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
-		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptySet());
+		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptyMap());
 		when(dockerImageInfo.containerConfig()).thenReturn(null);
 		mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
 		// when
@@ -383,7 +383,7 @@ public class DeployImageWizardModelTest {
 		when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
 		when(dockerImageInfo.config().env()).thenReturn(Collections.emptyList());
 		when(dockerImageInfo.config().exposedPorts()).thenReturn(new HashSet<>(Arrays.asList("8080/tcp", "9990/tcp")));
-		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptySet());
+		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptyMap());
 		when(dockerImageInfo.containerConfig()).thenReturn(null);
 		mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
 		// when
@@ -415,7 +415,7 @@ public class DeployImageWizardModelTest {
 
 		when(dockerImageInfo.config().env()).thenReturn(Arrays.asList("V1=value1", "V2=value2"));
 		when(dockerImageInfo.config().exposedPorts()).thenReturn(Collections.emptySet());
-		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptySet());
+		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptyMap());
 		when(dockerImageInfo.containerConfig()).thenReturn(null);
 
 		// when
@@ -438,7 +438,7 @@ public class DeployImageWizardModelTest {
 		when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
 		when(dockerImageInfo.config().env()).thenReturn(Arrays.asList("V1=value1", "V2=value2"));
 		when(dockerImageInfo.config().exposedPorts()).thenReturn(Collections.emptySet());
-		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptySet());
+		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptyMap());
 		when(dockerImageInfo.containerConfig()).thenReturn(null);
 		mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
 		// when
@@ -459,7 +459,7 @@ public class DeployImageWizardModelTest {
 		when(dockerConnection.getImageInfo(WILDFLY_IMAGE_URI)).thenReturn(dockerImageInfo);
 		when(dockerImageInfo.config().env()).thenReturn(Arrays.asList("V1=value1", "V2="));
 		when(dockerImageInfo.config().exposedPorts()).thenReturn(Collections.emptySet());
-		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptySet());
+		when(dockerImageInfo.config().volumes()).thenReturn(Collections.emptyMap());
 		when(dockerImageInfo.containerConfig()).thenReturn(null);
 		mockSingleImage(dockerConnection, WILDFLY_IMAGE, LATEST_TAG);
 		// when
