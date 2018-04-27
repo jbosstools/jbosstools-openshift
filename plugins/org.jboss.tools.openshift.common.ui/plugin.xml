@@ -241,46 +241,6 @@
 			</command>
 		</menuContribution>
 	</extension>
-		
-	<!-- Edit Connection -->
-	<extension
-		point="org.eclipse.ui.commands">
-		<command
-			id="org.jboss.tools.openshift.common.ui.command.editconnection"
-			name="%openshift.command.connection.edit">
-		</command>
-	</extension>
-	<extension
-		point="org.eclipse.ui.handlers">
-		<handler
-			class="org.jboss.tools.openshift.internal.common.ui.command.EditConnectionHandler"
-			commandId="org.jboss.tools.openshift.common.ui.command.editconnection">
-		</handler>
-	</extension>
-		<extension
-		point="org.eclipse.ui.menus">
-		<menuContribution
-			locationURI="popup:org.jboss.tools.openshift.express.ui.explorer.expressConsoleViewPopup.edit">
-			<command
-				commandId="org.jboss.tools.openshift.common.ui.command.editconnection"
-				icon="icons/openshift-edit.png"
-				tooltip="%openshift.command.connection.edit.tooltip"
-				label="%openshift.command.connection.edit">
-				mnemonic="E">
-				<visibleWhen>
-					<with variable="selection">
-						<and>
-							<count value="1" />
-							<iterate ifEmpty="false" operator="or">
-								<adapt
-									type="org.jboss.tools.openshift.common.core.connection.IConnection" />
-							</iterate>
-						</and>
-					</with>
-				</visibleWhen>
-			</command>
-		</menuContribution>
-	</extension>
 
 	<!-- Remove Connection -->
 	<extension
