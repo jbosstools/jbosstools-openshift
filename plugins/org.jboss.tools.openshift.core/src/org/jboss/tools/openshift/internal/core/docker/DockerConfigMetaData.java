@@ -85,7 +85,7 @@ public class DockerConfigMetaData implements IDockerImageMetadata {
 			return Collections.emptySet();
 		}
 		Function<IDockerContainerConfig, Map<String, Map>> f = IDockerContainerConfig::volumes; 
-		return select(info.config(), info.containerConfig(), f.andThen(Map::keySet), Collections::emptySet);
+		return select(info.config(), info.containerConfig(), f.andThen(vols -> vols!=null?vols.keySet():null), Collections::emptySet);
 	}
 
 	@Override

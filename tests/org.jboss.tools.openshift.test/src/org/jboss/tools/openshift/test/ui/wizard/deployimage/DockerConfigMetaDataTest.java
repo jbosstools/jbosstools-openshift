@@ -17,7 +17,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,12 +33,15 @@ import static org.mockito.Mockito.doReturn;
 public class DockerConfigMetaDataTest {
 
 	private IDockerImageInfo imageInfo;
+	
+	private Map volumesParameters;
 
 	@Before
 	public void before() {
 		imageInfo = mock(IDockerImageInfo.class);
 		doReturn(null).when(imageInfo).config();
 		doReturn(null).when(imageInfo).containerConfig();
+		volumesParameters = new HashMap<>();
 	}
 
 	/**
@@ -48,7 +53,7 @@ public class DockerConfigMetaDataTest {
 	 * @return the mock object
 	 */
 	private IDockerContainerConfig createContainerConfig(Set<String> exposedPorts, List<String> envs,
-			Set<String> volumes) {
+			Map<String, Map> volumes) {
 		IDockerContainerConfig containerConfig = mock(IDockerContainerConfig.class);
 		doReturn(exposedPorts).when(containerConfig).exposedPorts();
 		doReturn(envs).when(containerConfig).env();
@@ -73,7 +78,7 @@ public class DockerConfigMetaDataTest {
 
 	@Test
 	public void checkThatContainerConfigVolumesAreReturnedWhenNoConfig() {
-		doReturn(createContainerConfig(null, null, Collections.singleton("Work"))).when(imageInfo).containerConfig();
+		doReturn(createContainerConfig(null, null, Collections.singletonMap("Work", volumesParameters))).when(imageInfo).containerConfig();
 		DockerConfigMetaData meta = new DockerConfigMetaData(imageInfo);
 		assertThat(meta.volumes()).isEqualTo(Collections.singleton("Work"));
 	}
@@ -98,7 +103,7 @@ public class DockerConfigMetaDataTest {
 	@Test
 	public void checkThatContainerConfigVolumesAreReturnedWhenEmptyConfig() {
 		doReturn(createContainerConfig(null, null, null)).when(imageInfo).config();
-		doReturn(createContainerConfig(null, null, Collections.singleton("Work"))).when(imageInfo).containerConfig();
+		doReturn(createContainerConfig(null, null, Collections.singletonMap("Work", volumesParameters))).when(imageInfo).containerConfig();
 		DockerConfigMetaData meta = new DockerConfigMetaData(imageInfo);
 		assertThat(meta.volumes()).isEqualTo(Collections.singleton("Work"));
 	}
@@ -122,8 +127,8 @@ public class DockerConfigMetaDataTest {
 
 	@Test
 	public void checkThatConfigVolumesAreReturnedWhenConfig() {
-		doReturn(createContainerConfig(null, null, Collections.singleton("Work1"))).when(imageInfo).config();
-		doReturn(createContainerConfig(null, null, Collections.singleton("Work2"))).when(imageInfo).containerConfig();
+		doReturn(createContainerConfig(null, null, Collections.singletonMap("Work1", volumesParameters))).when(imageInfo).config();
+		doReturn(createContainerConfig(null, null, Collections.singletonMap("Work2", volumesParameters))).when(imageInfo).containerConfig();
 		DockerConfigMetaData meta = new DockerConfigMetaData(imageInfo);
 		assertThat(meta.volumes()).isEqualTo(Collections.singleton("Work1"));
 	}
