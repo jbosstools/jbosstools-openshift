@@ -48,7 +48,7 @@ public class CDKLaunchControllerTest {
 		controller.initialize(wc, userName, server);
 
 		Map<String, String> env = Collections.singletonMap(CDKConstants.CDK_ENV_SUB_USERNAME, userName);
-		verify(wc).setAttribute(CDKLaunchController.FLAG_INITIALIZED, Boolean.TRUE);
+		verify(wc).setAttribute(CDKLaunchController.FLAG_INITIALIZED, true);
 		verify(wc).setAttribute(eq(IExternalLaunchConstants.ENVIRONMENT_VARS_KEY), eq(env));
 		verify(wc).setAttribute(IExternalLaunchConstants.ATTR_ARGS, "up --no-color");
 		verify(wc).setAttribute(eq(IExternalLaunchConstants.ATTR_LOCATION), anyString());
