@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2016 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -38,6 +38,7 @@ import org.eclipse.ui.views.properties.tabbed.ITabDescriptor;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
+import org.jboss.tools.openshift.internal.common.ui.explorer.DefaultPropertySheetPage;
 import org.jboss.tools.openshift.internal.common.ui.utils.DateTimeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.TableViewerBuilder;
@@ -98,12 +99,13 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 		tableContainer.setLayout(new FillLayout());
 		this.table = createTable(tableContainer);
 
-		details = new PropertySheetPage();
+		details = new DefaultPropertySheetPage();
 		details.createControl(container);
 		selectionProvider = new ISelectionProvider() {
 
 			@Override
 			public void setSelection(ISelection selection) {
+				//NOT-IMPLEMENTED
 			}
 
 			@Override
@@ -124,10 +126,10 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
-		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		TableViewerBuilder tableViewerBuilder = new TableViewerBuilder(table, tableContainer)
+		Table localTable = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		localTable.setLinesVisible(true);
+		localTable.setHeaderVisible(true);
+		TableViewerBuilder tableViewerBuilder = new TableViewerBuilder(localTable, tableContainer)
 				.contentProvider(new ResourceContainerContentProvider(resourceKind));
 
 		setSorter(tableViewerBuilder);
