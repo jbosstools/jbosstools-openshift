@@ -1482,7 +1482,7 @@
 							<count value="1" />
 							<iterate ifEmpty="false" operator="or">
 								<adapt
-									type="org.jboss.tools.openshift.common.core.connection.IConnection" />
+									type="org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper" />
 							</iterate>
 						</and>
 					</with>
