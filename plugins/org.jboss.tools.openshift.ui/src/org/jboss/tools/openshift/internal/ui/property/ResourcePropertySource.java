@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -15,12 +15,13 @@ import java.util.Map;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
+import org.jboss.tools.openshift.internal.common.ui.explorer.DefaultPropertySheetPage;
 
 import com.openshift.restclient.model.IResource;
 
 public class ResourcePropertySource<T extends IResource> implements IPropertySource {
 
-	private static final String BASIC = "Basic";
+	private static final String BASIC = DefaultPropertySheetPage.BASIC;
 	private static final String ANNOTATIONS = "Annotations";
 	private static final String LABELS = "Labels";
 
