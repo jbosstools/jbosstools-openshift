@@ -105,6 +105,7 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 
 			@Override
 			public void setSelection(ISelection selection) {
+				//NOT-IMPLEMENTED
 			}
 
 			@Override
@@ -125,10 +126,10 @@ public class OpenShiftResourcePropertySection extends AbstractPropertySection im
 	}
 
 	protected TableViewer createTable(Composite tableContainer) {
-		Table table = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
-		table.setLinesVisible(true);
-		table.setHeaderVisible(true);
-		TableViewerBuilder tableViewerBuilder = new TableViewerBuilder(table, tableContainer)
+		Table localTable = new Table(tableContainer, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		localTable.setLinesVisible(true);
+		localTable.setHeaderVisible(true);
+		TableViewerBuilder tableViewerBuilder = new TableViewerBuilder(localTable, tableContainer)
 				.contentProvider(new ResourceContainerContentProvider(resourceKind));
 
 		setSorter(tableViewerBuilder);

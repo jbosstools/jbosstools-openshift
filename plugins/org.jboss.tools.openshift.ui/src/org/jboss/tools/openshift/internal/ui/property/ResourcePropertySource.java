@@ -111,10 +111,12 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 
 	@Override
 	public void resetPropertyValue(Object id) {
+		//NOT-IMPLEMENTED
 	}
 
 	@Override
 	public void setPropertyValue(Object id, Object value) {
+		//NOT-IMPLEMENTED
 	}
 
 	public enum Ids {
