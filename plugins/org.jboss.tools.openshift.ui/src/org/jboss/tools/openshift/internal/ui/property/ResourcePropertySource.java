@@ -32,7 +32,7 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 	}
 
 	protected T getResource() {
-		return (T) resource;
+		return resource;
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class ResourcePropertySource<T extends IResource> implements IPropertySou
 	public void setPropertyValue(Object id, Object value) {
 	}
 
-	public static enum Ids {
+	public enum Ids {
 		KIND, NAME, NAMESPACE, CREATED, RESOURCE_VERSION
 	}
 }
