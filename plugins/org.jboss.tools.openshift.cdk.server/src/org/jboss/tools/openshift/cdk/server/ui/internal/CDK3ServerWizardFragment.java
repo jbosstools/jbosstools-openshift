@@ -12,6 +12,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -19,6 +20,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
@@ -28,6 +30,7 @@ import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader;
 import org.jboss.tools.openshift.cdk.server.core.internal.detection.MinishiftVersionLoader.MinishiftVersions;
+import org.jboss.tools.runtime.ui.RuntimeUIActivator;
 import org.jboss.tools.runtime.ui.wizard.DownloadRuntimesTaskWizard;
 
 public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
@@ -55,6 +58,7 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 			String homeLabel) {
 		// boilerplate
 		Composite main = setupComposite(parent, handle, title, desc);
+		addRegistrationLink(main);
 		createCredentialWidgets(main);
 		createHypervisorWidgets(main);
 		createDownloadWidgets(main, handle);
@@ -64,6 +68,16 @@ public class CDK3ServerWizardFragment extends CDKServerWizardFragment {
 		return main;
 	}
 
+	protected void addRegistrationLink(Composite main) {
+		Link l = new Link(main, SWT.WRAP);
+		l.setText("Register a Red Hat account <a>here</a> if you do not have one already.");
+		l.setLayoutData(GridDataFactory.fillDefaults().span(3, 1).create());
+		l.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				RuntimeUIActivator.getDefault().createRedHatAccount();
+			}
+		});
+	}
 	
 	protected void createDownloadWidgets(Composite main, IWizardHandle handle) {
 		DownloadRuntimeHyperlinkComposite hyperlink = new DownloadRuntimeHyperlinkComposite(main, 
