@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,22 +39,15 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 public class StyledTextUtils {
 
 	// Ex. "This is a text with a <a>link</a> in it"
-	private static Pattern LINK_REGEX = Pattern.compile("([^<]*)(<a>)?([^<]*)(<\\/a>)?(.*)");
+	private static final Pattern LINK_REGEX = Pattern.compile("([^<]*)(<a>)?([^<]*)(<\\/a>)?(.*)");
+	
+	// another pattern to detect links in text without markup
+	private static final Pattern HYPERLINK_DETECTOR = Pattern.compile("(http|ftp|https)://([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:/~+#-]*[\\w@?^=%&/~+#-])?");
 
 	private StyledTextUtils() {
 	}
 
-	/**
-	 * Configures the given styled text so that it looks and behaves as if it was a link widget. 
-	 * 
-	 * @param text
-	 * @param styledText
-	 * 
-	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=471717">Some link objects don't work on Mac</a>
-	 * @see <a href="https://issues.jboss.org/browse/JBIDE-20092">Connection wizard: hitting retrivial link with mouse does not do anything on OSX (hitting enter works)</a>
-	 */
-	public static StyledText emulateLinkWidget(String text, StyledText styledText) {
-		setLinkText(text, styledText);
+	private static void configureLinkWidget(StyledText styledText) {
 		setTransparent(styledText);
 		styledText.setEditable(false);
 		styledText.setCursor(new Cursor(styledText.getShell().getDisplay(), SWT.CURSOR_HAND));
@@ -74,7 +69,36 @@ public class StyledTextUtils {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+	}
 
+	/**
+	 * Configures the given styled text so that it looks and behaves as if it was a link widget. 
+	 * 
+	 * @param text
+	 * @param styledText
+	 * 
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=471717">Some link objects don't work on Mac</a>
+	 * @see <a href="https://issues.jboss.org/browse/JBIDE-20092">Connection wizard: hitting retrivial link with mouse does not do anything on OSX (hitting enter works)</a>
+	 */
+	public static StyledText emulateLinkWidget(String text, StyledText styledText) {
+		setLinkText(text, styledText);
+		configureLinkWidget(styledText);
+		return styledText;
+	}
+
+
+	/**
+	 * Configures the given styled text so that it looks and behaves as if it was a link widget. 
+	 * 
+	 * @param text
+	 * @param styledText
+	 * 
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=471717">Some link objects don't work on Mac</a>
+	 * @see <a href="https://issues.jboss.org/browse/JBIDE-20092">Connection wizard: hitting retrivial link with mouse does not do anything on OSX (hitting enter works)</a>
+	 */
+	public static StyledText emulateLinkWidgetNoMarkup(String text, StyledText styledText) {
+		setLinkTextNoMarkup(text, styledText);
+		configureLinkWidget(styledText);
 		return styledText;
 	}
 
@@ -89,6 +113,7 @@ public class StyledTextUtils {
 				StyleRange r = styledText.getStyleRangeAtOffset(offset);
 				if (event.type == SWT.MouseUp) {
 					if (r != null) {
+						r = (StyleRange) r.data;
 						listener.handleClick(r);
 					}
 				} else if (event.type == SWT.MouseMove) {
@@ -155,6 +180,28 @@ public class StyledTextUtils {
 		}
 	}
 
+	/**
+	 * Sets a given text (without link markers) to a given styled text.
+	 * Applies a link-styled alike style range to the text.
+	 * This is a  replacement for the link widget which is not clickable in on MacOS in certain circumstances.
+	 *
+	 * Ex. "This is a text with a link to http://jboss.org"
+	 *
+	 * @param text
+	 * @param styledText
+	 *
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=471717">Some link objects don't work on Mac</a>
+	 * @see <a href="https://issues.jboss.org/browse/JBIDE-20092">Connection wizard: hitting retrivial link with mouse does not do anything on OSX (hitting enter works)</a>
+	 */
+	public static void setLinkTextNoMarkup(String text, StyledText styledText) {
+		styledText.setText(text);
+		Matcher matcher = HYPERLINK_DETECTOR.matcher(text);
+		List<StyleRange> ranges = new ArrayList<>();
+		while (matcher.find()) {
+			styledText.setStyleRange(createLinkStyle(matcher.start(0), matcher.end(0), styledText.getShell()));
+		}
+	}
+
 	private static String removeLinkMarkers(Matcher matcher) {
 		StringBuffer buffer = new StringBuffer();
 		matcher.appendReplacement(buffer, "$1$3$5");
@@ -170,6 +217,7 @@ public class StyledTextUtils {
 		styleRange.fontStyle = SWT.UNDERLINE_LINK;
 		styleRange.underline = true;
 		styleRange.foreground = shell.getDisplay().getSystemColor(SWT.COLOR_LINK_FOREGROUND);
+		styleRange.data = styleRange;
 		return styleRange;
 	}
 
