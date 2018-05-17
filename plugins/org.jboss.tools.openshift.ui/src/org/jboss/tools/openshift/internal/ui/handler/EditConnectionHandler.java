@@ -8,11 +8,12 @@
  * Contributors:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.common.ui.command;
+package org.jboss.tools.openshift.internal.ui.handler;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -20,6 +21,7 @@ import org.jboss.tools.common.ui.WizardUtils;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
+import org.jboss.tools.openshift.internal.ui.models.ConnectionWrapper;
 
 /**
  * @author Andre Dietisheim
@@ -28,11 +30,16 @@ public class EditConnectionHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IConnection connection = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), IConnection.class);
-		return openConnectionWizard(connection, event);
+	    ConnectionWrapper connectionWrapper = UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event), ConnectionWrapper.class);
+        IConnection connection = connectionWrapper.getWrapped();
+	    IStatus status = openConnectionWizard(connection, event);
+        if (Status.OK_STATUS.equals(status)) {
+		    connectionWrapper.refresh();
+		}
+		return null;
 	}
 
-	protected Object openConnectionWizard(IConnection connection, ExecutionEvent event) {
+	protected IStatus openConnectionWizard(IConnection connection, ExecutionEvent event) {
 		final IWizard connectToOpenShiftWizard = new ConnectionWizard(connection,
 				ConnectionWizard.EDIT_CONNECTION_TITLE);
 		WizardUtils.openWizardDialog(connectToOpenShiftWizard, HandlerUtil.getActiveShell(event));
