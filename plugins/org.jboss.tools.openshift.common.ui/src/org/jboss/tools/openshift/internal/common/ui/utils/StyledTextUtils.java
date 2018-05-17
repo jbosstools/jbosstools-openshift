@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.utils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,8 +18,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
@@ -56,17 +54,13 @@ public class StyledTextUtils {
 		styledText.setCaret(null);
 		styledText.setSelectionBackground(styledText.getBackground()); //even with selection listener, prevent 'shimmering'
 		styledText.setSelectionForeground(styledText.getForeground()); //even with selection listener, prevent 'shimmering'
-		styledText.addSelectionListener(new SelectionListener() {
+		styledText.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Point s = styledText.getSelection();
 				if (s != null && s.x != s.y) {
 					styledText.setSelection(s.x, s.x);
 				}
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
 	}
@@ -196,7 +190,6 @@ public class StyledTextUtils {
 	public static void setLinkTextNoMarkup(String text, StyledText styledText) {
 		styledText.setText(text);
 		Matcher matcher = HYPERLINK_DETECTOR.matcher(text);
-		List<StyleRange> ranges = new ArrayList<>();
 		while (matcher.find()) {
 			styledText.setStyleRange(createLinkStyle(matcher.start(0), matcher.end(0), styledText.getShell()));
 		}
