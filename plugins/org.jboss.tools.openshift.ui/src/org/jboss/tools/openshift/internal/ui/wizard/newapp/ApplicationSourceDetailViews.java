@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Red Hat, Inc. Distributed under license by Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc. Distributed under license by Red Hat, Inc.
  * All rights reserved. This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -19,15 +19,18 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.core.OpenShiftAPIAnnotations;
 import org.jboss.tools.openshift.internal.common.ui.detailviews.AbstractStackedDetailViews;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.StyledTextUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftImages;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 /**
  * A details view of an application source
@@ -74,10 +77,19 @@ public class ApplicationSourceDetailViews extends AbstractStackedDetailViews {
 			txtDescription.setAlwaysShowScrollBars(false);
 			txtDescription.setWordWrap(true);
 			StyledTextUtils.setTransparent(txtDescription);
+			StyledTextUtils.emulateLinkAction(txtDescription, r -> onLinkClicked(r, txtDescription));
 			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).grab(true, true).span(3, 1)
 					.applyTo(txtDescription);
 
 			return container;
+		}
+
+		private void onLinkClicked(StyleRange r, StyledText styledText) {
+			String url = styledText.getText(r.start, r.start + r.length);
+			if (url.endsWith(".")) {
+				url = url.substring(0, url.length() - 1);
+			}
+			new BrowserUtility().checkedCreateExternalBrowser(url, OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 		}
 
 		@Override
@@ -88,12 +100,14 @@ public class ApplicationSourceDetailViews extends AbstractStackedDetailViews {
 				return;
 			}
 			IApplicationSource source = (IApplicationSource) value;
+			StringBuilder text = new StringBuilder();
 			if (source.isAnnotatedWith(OpenShiftAPIAnnotations.PROVIDER)) {
-				txtDescription
+				text
 						.append(NLS.bind("Provider: {0} \n", source.getAnnotation(OpenShiftAPIAnnotations.PROVIDER)));
 			}
 			Map<String, String> annotations = source.getAnnotations();
-			addTextFor(OpenShiftAPIAnnotations.DESCRIPTION, annotations, txtDescription);
+			addTextFor(OpenShiftAPIAnnotations.DESCRIPTION, annotations, text);
+			StyledTextUtils.emulateLinkWidgetNoMarkup(text.toString(), txtDescription);
 			updateImage(annotations.get(OpenShiftAPIAnnotations.ICON_CLASS));
 		}
 
@@ -102,7 +116,7 @@ public class ApplicationSourceDetailViews extends AbstractStackedDetailViews {
 			classIcon.setImage(image);
 		}
 
-		private void addTextFor(String annotation, Map<String, String> annotations, StyledText text) {
+		private void addTextFor(String annotation, Map<String, String> annotations, StringBuilder text) {
 			text.append((String) ObjectUtils.defaultIfNull(annotations.get(annotation), ""));
 		}
 
