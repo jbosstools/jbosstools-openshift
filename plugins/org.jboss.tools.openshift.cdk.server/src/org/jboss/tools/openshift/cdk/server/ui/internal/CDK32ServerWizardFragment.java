@@ -54,8 +54,10 @@ public class CDK32ServerWizardFragment extends CDK3ServerWizardFragment {
 			String homeLabel) {
 		// boilerplate
 		Composite main = setupComposite(parent, handle, title, desc);
-		if (shouldCreateCredentialWidgets())
+		if (shouldCreateCredentialWidgets()) {
+			addRegistrationLink(main);
 			createCredentialWidgets(main);
+		}
 		createHypervisorWidgets(main);
 		createDownloadWidgets(main, handle);
 		createLocationWidgets(main, homeLabel);
