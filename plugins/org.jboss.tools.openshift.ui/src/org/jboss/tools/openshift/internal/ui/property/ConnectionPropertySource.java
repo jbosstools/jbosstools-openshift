@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -26,7 +25,6 @@ import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryVersionValidator;
 
 public class ConnectionPropertySource implements IPropertySource {
 
@@ -34,7 +32,7 @@ public class ConnectionPropertySource implements IPropertySource {
 	private static final String USERNAME = "username";
 	private static final String OPENSHIFT_MASTER_VERSION = "openshift-version";
 	private static final String KUBERNETES_MASTER_VERSION = "kubernetes-version";
-	private static final String OC_VERSION = "oc-version";
+	private static final String OC_CLIENT = "oc-client";
 	private IConnection connection;
 
 	private ConnectionListener listener = new ConnectionListener();
@@ -84,7 +82,7 @@ public class ConnectionPropertySource implements IPropertySource {
 		descriptors.add(new UneditablePropertyDescriptor(USERNAME, "User Name"));
 		descriptors.add(new UneditablePropertyDescriptor(OPENSHIFT_MASTER_VERSION, "OpenShift Master Version"));
 		descriptors.add(new UneditablePropertyDescriptor(KUBERNETES_MASTER_VERSION, "Kubernetes Master Version"));
-		descriptors.add(new UneditablePropertyDescriptor(OC_VERSION, "OC Client Version"));
+		descriptors.add(new UneditablePropertyDescriptor(OC_CLIENT, "OC Client"));
 		if (connection instanceof IOpenShiftConnection) {
 			Set<String> set = new TreeSet<>(((IOpenShiftConnection) connection).getExtendedProperties().keySet());
 			for (String name : set) {
@@ -127,10 +125,8 @@ public class ConnectionPropertySource implements IPropertySource {
 			if (KUBERNETES_MASTER_VERSION.equals(id)) {
 				return openshiftConnection.getKubernetesMasterVersion();
 			}
-			if (OC_VERSION.equals(id)) {
-				String path = OCBinary.getInstance().getLocation(openshiftConnection);
-				OCBinaryVersionValidator validator = new OCBinaryVersionValidator(path);
-				return validator.getVersion(new NullProgressMonitor()).toString();
+			if (OC_CLIENT.equals(id)) {
+				return OCBinary.getInstance().getLocation(openshiftConnection);
 			}
 			Object result = openshiftConnection.getExtendedProperties().get(id);
 			return result == null ? "" : result.toString();
