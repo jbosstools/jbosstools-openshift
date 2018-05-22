@@ -172,11 +172,18 @@ public class UnifiedMinishiftRuntimeDetector extends AbstractCDKRuntimeDetector 
 	}
 	
 	private boolean minishiftHomeMatches(RuntimeDefinition def, IServer server) {
+		String serverMinishiftHome = server.getAttribute(CDK3Server.MINISHIFT_HOME, (String) null);
 		File loc = def.getLocation();
 		if( isValidMinishiftHome(loc)) {
-			String fromServer = server.getAttribute(CDK3Server.MINISHIFT_HOME, (String) null);
-			File fromServerFile = fromServer == null ? null : new File(fromServer);
+			File fromServerFile = serverMinishiftHome == null ? null : new File(serverMinishiftHome);
 			return loc.equals(fromServerFile);
+		} else if( folderContainsMinishiftBinary(loc)) {
+			// Check if the assumed minishift home that will be used on server creation matches the existing server
+			String folder = loc.getAbsolutePath();
+			File msHome = new File(folder, "MINISHIFT_HOME");
+			if(serverMinishiftHome != null && new File(serverMinishiftHome).equals(msHome)) {
+				return true;
+			}
 		}
 		return false;
 	}
