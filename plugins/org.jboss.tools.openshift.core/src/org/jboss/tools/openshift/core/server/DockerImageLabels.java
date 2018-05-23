@@ -9,35 +9,28 @@
 package org.jboss.tools.openshift.core.server;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.connection.Connection;
-import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 
 import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
-import com.openshift.restclient.capability.resources.IImageStreamImportCapability;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IDeploymentConfig;
-import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
 import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 import com.openshift.restclient.model.deploy.IDeploymentTrigger;
-import com.openshift.restclient.model.image.IImageStreamImport;
 
 public class DockerImageLabels {
 
-	//	private static final String DOCKER_IMAGE_DIGEST_IDENTIFIER = "sha256:";
 	private static final String SHARED_DATA_KEY = "DOCKER_IMAGE_LABELS";
 
 	private IResource resource;
@@ -151,22 +144,6 @@ public class DockerImageLabels {
 		}
 		DockerImageURI uri = trigger.getFrom();
 		return getImageStreamTag(uri, resource.getNamespaceName(), monitor);
-		//		String imageRef = getImageRef(dc, connection);
-		//		int imageDigestIndex = imageRef.indexOf(DOCKER_IMAGE_DIGEST_IDENTIFIER);
-		//		if (imageDigestIndex > 0) {
-		//			String imageDigest = imageRef.substring(imageDigestIndex);
-		//			return getImageStreamTag(imageDigest, imageRef, project.getName(), connection);
-		//		} else {
-		//			IImageStream imageStream = connection.getResource(ResourceKind.IMAGE_STREAM, project.getName(), imageRef);
-		//			if (	imageStream != null) {
-		////				DockerImageURI uri = imageStream.getDockerImageRepository();
-		////				return importImageStream(uri.getAbsoluteUri(), project);
-		//				IDockerImageMetadata metadata = DockerImageUtils.lookupImageMetadata(project, uri);
-		//				return metadata.toString();
-		//			} else {
-		//				return importImageStream(imageRef, project);
-		//			}
-		//		}
 	}
 
 	private IDeploymentImageChangeTrigger getImageChangeTrigger(Collection<IDeploymentTrigger> triggers) {
@@ -192,38 +169,5 @@ public class DockerImageLabels {
 			subMonitor.done();
 			return null;
 		}
-	}
-
-	private String getImageRef(IDeploymentConfig dc, Connection connection) throws CoreException {
-		Collection<String> images = dc.getImages();
-		if (images.isEmpty()) {
-			throw new CoreException(OpenShiftCoreActivator.statusFactory()
-					.errorStatus(NLS.bind("No images found for deployment config {0} in project {1} on server {2}",
-							new Object[] { dc.getName(), dc.getNamespaceName(), connection.getHost() })));
-		}
-		// TODO: handle if there are 2+ images
-		return images.iterator().next();
-	}
-
-	private String getImageStreamTag(String imageDigest, String imageRef, String namespace, Connection connection) {
-		List<IResource> imageStreamTags = connection.getResources(ResourceKind.IMAGE_STREAM_TAG, namespace);
-		IResource imageStreamTag = ResourceUtils.getImageStreamTagForDigest(imageDigest, imageStreamTags);
-		if (imageStreamTag == null) {
-			return null;
-		}
-		// load image stream tag individually to get full ContainerConfig metadata
-		imageStreamTag = connection.getResource(ResourceKind.IMAGE_STREAM_TAG, namespace, imageStreamTag.getName());
-		return imageStreamTag.toJson();
-	}
-
-	private String importImageStream(String imageRef, IProject project) {
-		IImageStreamImportCapability imageStreamImportCapability = project
-				.getCapability(IImageStreamImportCapability.class);
-		DockerImageURI uri = new DockerImageURI(imageRef);
-		IImageStreamImport imageStreamImport = imageStreamImportCapability.importImageMetadata(uri);
-		if (!ResourceUtils.isSuccessful(imageStreamImport)) {
-			return null;
-		}
-		return imageStreamImport.getImageJsonFor(uri);
 	}
 }

@@ -249,6 +249,7 @@ public class PodLogsJob extends AbstractDelegatingMonitorJob {
 
 		@Override
 		public void consolesAdded(IConsole[] consoles) {
+			// nothing to do
 		}
 	}
 }

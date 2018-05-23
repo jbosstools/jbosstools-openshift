@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
@@ -97,7 +98,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		}
 	}
 
-	protected void setMode(String mode, DebugContext context, OpenShiftServerBehaviour beh, IProgressMonitor monitor) throws CoreException {
+	protected void setMode(String mode, DebugContext context, OpenShiftServerBehaviour beh, IProgressMonitor monitor) {
 		toggleDebugging(mode, beh, context, monitor);
 		if (!DebugLaunchConfigs.isDebugMode(mode)) {
 			// enable devmode if we're not in debug mode. Debug mode has dev mode enabled
@@ -258,15 +259,14 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 	}
 
 	protected void startDebugging(OpenShiftServerBehaviour behaviour, DebugContext context, IProgressMonitor monitor) {
+		SubMonitor subMonitor = SubMonitor.convert(monitor, NLS.bind("Starting debugging for server {0}", behaviour.getServer().getName()), 1);
 		IDebugListener listener = new IDebugListener() {
 
 			@Override
 			public void onDebugChange(DebugContext context, IProgressMonitor monitor) throws CoreException {
 				int localPort = startPortForwarding(context, monitor);
 				ILaunch debuggerLaunch = attachRemoteDebugger(behaviour.getServer(), localPort, monitor);
-				if (debuggerLaunch != null) {
-					overrideHotcodeReplace(behaviour.getServer(), debuggerLaunch);
-				}
+				overrideHotcodeReplace(behaviour.getServer(), debuggerLaunch);
 			}
 
 			@Override
@@ -276,9 +276,11 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		};
 		context.setDebugListener(listener);
 		new OpenShiftDebugMode(context).enableDebugging();
+		subMonitor.done();
 	}
 
 	private void stopDebugging(DebugContext context, IProgressMonitor monitor) {
+		SubMonitor subMonitor = SubMonitor.convert(monitor, NLS.bind("Stopping debugging for server {0}", context.getServer().getName()), 1);
 		IDebugListener listener = new IDebugListener() {
 
 			@Override
@@ -292,10 +294,12 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 
 			@Override
 			public void onPodRestart(DebugContext debuggingContext, IProgressMonitor monitor) throws CoreException {
+				// nothing to do
 			}
 		};
 		context.setDebugListener(listener);
 		new OpenShiftDebugMode(context).disableDebugging();
+		subMonitor.done();
 	}
 
 	@Override
@@ -398,7 +402,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 		return ret;
 	}
 
-	protected boolean overrideHotcodeReplace(IServer server, ILaunch launch) throws CoreException {
+	protected boolean overrideHotcodeReplace(IServer server, ILaunch launch) {
 		IJavaHotCodeReplaceListener l = getHotCodeReplaceListener(server, launch);
 		IDebugTarget[] targets = launch.getDebugTargets();
 		if (targets != null && l != null) {
@@ -436,7 +440,7 @@ public class OpenShiftLaunchController extends AbstractSubsystemController
 				try {
 					port = Integer.parseInt(portAttr);
 				} catch (NumberFormatException nfe) {
-					// TODO 
+					// TODO: handle non numerical port value (named port) 
 				}
 				try {
 					ILaunch newLaunch = attachRemoteDebugger(server, port, new NullProgressMonitor());

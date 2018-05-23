@@ -71,6 +71,9 @@ import com.openshift.restclient.model.IResource;
  */
 public class OpenShiftServerUtils {
 
+	private OpenShiftServerUtils() {
+	}
+
 	private static final String LIVERELOAD_PORT_KEY = "port";//Key to the port # of the host the LiveReload server need to proxy
 
 	public static final String SERVER_PROJECT_QUALIFIER = "org.jboss.tools.openshift.core"; //$NON-NLS-1$
@@ -388,7 +391,9 @@ public class OpenShiftServerUtils {
 			if (connection == null) {
 				OpenShiftCoreActivator.pluginLog().logError(NLS.bind(
 						"Could not find an existing OpenShift connection to host {0} with user {1} for server {2}",
-						new String[] { connectionUrl.getHost(), connectionUrl.getUsername(), server.getName() }));
+						connectionUrl != null? 
+								new String[] { connectionUrl.getHost(), connectionUrl.getUsername(), server.getName() }
+								: new String[] { "<unknown host>", "<unknwon user>", server.getName() }));
 			}
 		} catch (UnsupportedEncodingException | MalformedURLException e) {
 			OpenShiftCoreActivator.pluginLog()

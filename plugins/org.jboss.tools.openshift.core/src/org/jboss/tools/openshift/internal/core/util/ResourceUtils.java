@@ -472,15 +472,18 @@ public class ResourceUtils {
 	 * @return
 	 */
 	public static String imageRef(IDeploymentImageChangeTrigger trigger) {
+		String ref = "";
 		if (trigger != null) {
 			switch (trigger.getKind()) {
 			case ResourceKind.IMAGE_STREAM_TAG:
 			case IMAGE_STREAM_IMAGE_KIND:
 			case DOCKER_IMAGE_KIND:
-				return trigger.getFrom().getNameAndTag();
+				ref = trigger.getFrom().getNameAndTag();
+				break;
+			default:
 			}
 		}
-		return "";
+		return ref;
 	}
 
 	/**
@@ -527,15 +530,18 @@ public class ResourceUtils {
 	 * @return the image referenced
 	 */
 	public static String imageRef(IBuild build) {
+		String ref = "";
 		if (build != null) {
 			switch (build.getOutputKind()) {
 			case ResourceKind.IMAGE_STREAM_TAG:
 			case IMAGE_STREAM_IMAGE_KIND:
 			case DOCKER_IMAGE_KIND:
-				return build.getOutputTo().getNameAndTag();
+				ref = build.getOutputTo().getNameAndTag();
+				break;
+			default:
 			}
 		}
-		return "";
+		return ref;
 	}
 
 	/**

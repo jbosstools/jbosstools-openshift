@@ -41,6 +41,9 @@ public class PortForwardingUtils {
 	/** Internal registry of {@link IPod}'s port-forwarding. */
 	private static final Map<IPod, IPortForwardable> REGISTRY = new HashMap<>();
 
+	private PortForwardingUtils() {
+	}
+
 	/**
 	 * Checks if the given port is already used
 	 * 

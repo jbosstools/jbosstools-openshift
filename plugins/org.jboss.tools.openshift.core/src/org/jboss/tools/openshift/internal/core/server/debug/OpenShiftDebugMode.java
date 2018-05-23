@@ -329,7 +329,8 @@ public class OpenShiftDebugMode {
 		}
 		PortSpecAdapter newPort = new PortSpecAdapter(DEBUG_PORT_NAME, DEBUG_PORT_PROTOCOL, debugPort);
 		// use bit-wise OR to avoid short-circuit
-		modified = modified | ports.add(newPort);
+		modified = modified 
+				| ports.add(newPort);
 		return modified;
 	}
 
@@ -383,13 +384,12 @@ public class OpenShiftDebugMode {
 
 		if (context.hasEnvVariables()) {
 			return context.getEnvVars().entrySet().stream()
-				.filter(entry -> {
-					return dc.getEnvironmentVariables().stream()
+				.filter(entry -> 
+					dc.getEnvironmentVariables().stream()
 							.noneMatch( var -> var.getName().equals(entry.getKey()) 
-												&& var.getValue().equals(entry.getValue())); })
-				.peek(entry -> {
-						dc.setEnvironmentVariable(entry.getKey(), entry.getValue());
-				})
+												&& var.getValue().equals(entry.getValue())))
+				.peek(entry -> 
+						dc.setEnvironmentVariable(entry.getKey(), entry.getValue()))
 				.count() > 0;
 		}
 		return false;
