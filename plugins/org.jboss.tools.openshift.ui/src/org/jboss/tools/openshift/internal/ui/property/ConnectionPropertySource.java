@@ -24,6 +24,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryList
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
 public class ConnectionPropertySource implements IPropertySource {
 
@@ -31,6 +32,7 @@ public class ConnectionPropertySource implements IPropertySource {
 	private static final String USERNAME = "username";
 	private static final String OPENSHIFT_MASTER_VERSION = "openshift-version";
 	private static final String KUBERNETES_MASTER_VERSION = "kubernetes-version";
+	private static final String OC_CLIENT = "oc-client";
 	private IConnection connection;
 
 	private ConnectionListener listener = new ConnectionListener();
@@ -80,6 +82,7 @@ public class ConnectionPropertySource implements IPropertySource {
 		descriptors.add(new UneditablePropertyDescriptor(USERNAME, "User Name"));
 		descriptors.add(new UneditablePropertyDescriptor(OPENSHIFT_MASTER_VERSION, "OpenShift Master Version"));
 		descriptors.add(new UneditablePropertyDescriptor(KUBERNETES_MASTER_VERSION, "Kubernetes Master Version"));
+		descriptors.add(new UneditablePropertyDescriptor(OC_CLIENT, "OC Client"));
 		if (connection instanceof IOpenShiftConnection) {
 			Set<String> set = new TreeSet<>(((IOpenShiftConnection) connection).getExtendedProperties().keySet());
 			for (String name : set) {
@@ -121,6 +124,9 @@ public class ConnectionPropertySource implements IPropertySource {
 			}
 			if (KUBERNETES_MASTER_VERSION.equals(id)) {
 				return openshiftConnection.getKubernetesMasterVersion();
+			}
+			if (OC_CLIENT.equals(id)) {
+				return OCBinary.getInstance().getLocation(openshiftConnection);
 			}
 			Object result = openshiftConnection.getExtendedProperties().get(id);
 			return result == null ? "" : result.toString();
