@@ -23,7 +23,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 	MinishiftServerWizardTest.class,
 	MinishiftServerEditorTest.class,
-  MinishiftDownloadRuntimeTest.class,
+	MinishiftDownloadRuntimeTest.class,
 	MinishiftServerAdapterTest.class,
 	MinishiftServerAdapterProfilesTest.class
 })

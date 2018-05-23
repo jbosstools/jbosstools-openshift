@@ -24,41 +24,35 @@ import org.junit.runners.Parameterized.UseParametersRunnerFactory;
 
 /**
  * Class covers runtime download test for Minishift 1.14, 1.15.1, 1.16.1, 1.17.0
+ * 
  * @author odockal
  *
  */
 @UseParametersRunnerFactory(ParameterizedRequirementsRunnerFactory.class)
 public class MinishiftDownloadRuntimeTest extends DownloadContainerRuntimeAbstractTest {
 
-  private CDKVersion version;
-  
-  private static final Logger log = Logger.getLogger(MinishiftDownloadRuntimeTest.class);
-  
-  public MinishiftDownloadRuntimeTest(CDKVersion version) {
-    this.version = version;
-  }
-  
-  @Parameters(name="{0}")
-  public static Collection<CDKVersion> data() {
-    return Arrays.asList(CDKVersion.MINISHIFT1140, CDKVersion.MINISHIFT1151, CDKVersion.MINISHIFT1161, CDKVersion.MINISHIFT1170);
-  }
-  
-  @Override
-  protected String getServerAdapter() {
-    return SERVER_ADAPTER_MINISHIFT;
-  }
-  
-  @Test
-  public void testDownloadingMinishiftRuntime() {
-    try {
-      downloadAndVerifyCDKRuntime(version, "", "");
-    } catch (AssertionError err) {
-      if (err.getMessage().contains(CDKLabel.Messages.DOES_NOT_EXIST) && CDKUtils.IS_WINDOWS) {
-        log.error("Skipped due to JBIDE-26014 on windows");
-      } else {
-        throw err;
-      }
-    }
-  }
-	
+	private CDKVersion version;
+
+	private static final Logger log = Logger.getLogger(MinishiftDownloadRuntimeTest.class);
+
+	public MinishiftDownloadRuntimeTest(CDKVersion version) {
+		this.version = version;
+	}
+
+	@Parameters(name = "{0}")
+	public static Collection<CDKVersion> data() {
+		return Arrays.asList(CDKVersion.MINISHIFT1140, CDKVersion.MINISHIFT1151, CDKVersion.MINISHIFT1161,
+				CDKVersion.MINISHIFT1170);
+	}
+
+	@Override
+	protected String getServerAdapter() {
+		return SERVER_ADAPTER_MINISHIFT;
+	}
+
+	@Test
+	public void testDownloadingMinishiftRuntime() {
+		downloadAndVerifyCDKRuntime(version, "", "");
+	}
+
 }
