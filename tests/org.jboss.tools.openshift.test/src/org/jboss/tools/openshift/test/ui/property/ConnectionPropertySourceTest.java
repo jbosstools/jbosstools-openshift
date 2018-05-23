@@ -41,7 +41,8 @@ public class ConnectionPropertySourceTest {
 		IPropertyDescriptor[] exp = new IPropertyDescriptor[] { new TextPropertyDescriptor("host", "Host"),
 				new TextPropertyDescriptor("username", "User Name"),
 				new TextPropertyDescriptor("openshift-version", "OpenShift Master Version"),
-				new TextPropertyDescriptor("kubernetes-version", "Kubernetes Master Version") };
+				new TextPropertyDescriptor("kubernetes-version", "Kubernetes Master Version"),
+				new TextPropertyDescriptor("oc-client", "OC Client")};
 		assertPropertyDescriptorsEquals(exp, source.getPropertyDescriptors());
 	}
 }
