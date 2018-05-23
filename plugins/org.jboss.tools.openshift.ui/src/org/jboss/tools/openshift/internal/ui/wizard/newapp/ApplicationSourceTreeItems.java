@@ -38,6 +38,7 @@ import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.image.ITagReference;
 import com.openshift.restclient.model.template.ITemplate;
+import com.openshift.restclient.utils.ResourceStatus;
 
 /**
  * @author Andre Dietisheim
@@ -56,7 +57,7 @@ public class ApplicationSourceTreeItems implements IModelFactory, ICommonAttribu
 		    List<IResource> projectResources = ((Connection) parent).getResources(ResourceKind.PROJECT);
 		    for (IResource projectResource: projectResources) {
 		        IProject project = (IProject)projectResource;
-		        if (!"Terminating".equals(project.getStatus())) {
+		        if (!ResourceStatus.TERMINATING.equals(project.getStatus())) {
 		            activeProjects.add((T)project);
 		        }
 		    }
