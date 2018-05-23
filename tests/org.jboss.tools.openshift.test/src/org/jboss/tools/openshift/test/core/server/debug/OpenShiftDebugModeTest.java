@@ -105,7 +105,7 @@ public class OpenShiftDebugModeTest {
 		this.project = createProject("someProject");
 		this.dc = createDeploymentConfig("someDc", project,
 				// no env var
-				null,
+				Collections.emptyList(),
 				// no containers
 				Collections.emptyList(), connection);
 		doReturn(true).when(connection).ownsResource(dc);

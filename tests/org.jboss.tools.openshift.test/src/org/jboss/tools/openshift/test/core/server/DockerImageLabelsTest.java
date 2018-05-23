@@ -46,7 +46,7 @@ import com.openshift.restclient.model.deploy.IDeploymentImageChangeTrigger;
 @RunWith(MockitoJUnitRunner.class)
 public class DockerImageLabelsTest {
 
-	private static final String NODEJS_IMAGESTREAM_TAG_URL = "/imageStreamTag_nodejs_latest.json";
+	private static final String NODEJS_IMAGESTREAM_TAG_URL = "/resources/imageStreamTag_nodejs_latest.json";
 
 	private Connection connection;
 	private IDeploymentConfig dc;
@@ -85,7 +85,7 @@ public class DockerImageLabelsTest {
 		boolean available = labels.isAvailable();
 		// then
 		assertThat(available).isFalse();
-		verify(labels, never()).load(new NullProgressMonitor());
+		verify(labels, never()).load(any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -103,7 +103,7 @@ public class DockerImageLabelsTest {
 		// when
 		labelsThatFailsToLoad.load(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), any(IProgressMonitor.class));
 		assertThat(labels.isAvailable()).isFalse();
 	}
 
@@ -113,7 +113,7 @@ public class DockerImageLabelsTest {
 		// when
 		String devmodeKey = labelsThatFailsToLoad.getDevmodeKey(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), any(IProgressMonitor.class));
 		assertThat(devmodeKey).isNull();
 	}
 
@@ -124,7 +124,7 @@ public class DockerImageLabelsTest {
 		labelsThatFailsToLoad.getDevmodeKey(new NullProgressMonitor());
 		labelsThatFailsToLoad.getDevmodeKey(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(2)).load(any(IResource.class), new NullProgressMonitor());
+		verify(labelsThatFailsToLoad, times(2)).load(any(IResource.class), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -134,7 +134,7 @@ public class DockerImageLabelsTest {
 		labels.getDevmodeKey(new NullProgressMonitor());
 		labels.getDevmodeKey(new NullProgressMonitor());
 		// then
-		verify(labels, times(1)).load(any(IResource.class), new NullProgressMonitor());
+		verify(labels, times(1)).load(any(IResource.class), any(IProgressMonitor.class));
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class DockerImageLabelsTest {
 		// when
 		String devmodePortKey = labelsThatFailsToLoad.getDevmodePortKey(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), any(IProgressMonitor.class));
 		assertThat(devmodePortKey).isNull();
 	}
 
@@ -153,7 +153,7 @@ public class DockerImageLabelsTest {
 		// when
 		String devmodePortValue = labelsThatFailsToLoad.getDevmodePortValue(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), any(IProgressMonitor.class));
 		assertThat(devmodePortValue).isNull();
 	}
 
@@ -163,7 +163,7 @@ public class DockerImageLabelsTest {
 		// when
 		String podPath = labelsThatFailsToLoad.getPodPath(new NullProgressMonitor());
 		// then
-		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), new NullProgressMonitor());
+		verify(labelsThatFailsToLoad, times(1)).load(any(IResource.class), any(IProgressMonitor.class));
 		assertThat(podPath).isNull();
 	}
 
