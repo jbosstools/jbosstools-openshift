@@ -35,8 +35,10 @@ import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.resources.IProjectTemplateList;
 import com.openshift.restclient.model.IImageStream;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.image.ITagReference;
 import com.openshift.restclient.model.template.ITemplate;
+import com.openshift.restclient.utils.ResourceStatus;
 
 /**
  * @author Andre Dietisheim
@@ -51,7 +53,15 @@ public class ApplicationSourceTreeItems implements IModelFactory, ICommonAttribu
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> List<T> createChildren(Object parent) {
 		if (parent instanceof Connection) {
-			return (List<T>) ((Connection) parent).getResources(ResourceKind.PROJECT);
+		    List<T> activeProjects = new ArrayList<>();
+		    List<IResource> projectResources = ((Connection) parent).getResources(ResourceKind.PROJECT);
+		    for (IResource projectResource: projectResources) {
+		        IProject project = (IProject)projectResource;
+		        if (!ResourceStatus.TERMINATING.equals(project.getStatus())) {
+		            activeProjects.add((T)project);
+		        }
+		    }
+			return activeProjects;
 		} else if (parent instanceof IProject) {
 			IProject project = (IProject) parent;
 			Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);
