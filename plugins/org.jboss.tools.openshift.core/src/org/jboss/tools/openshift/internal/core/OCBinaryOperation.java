@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.core;
 
-import org.eclipse.core.runtime.MultiStatus;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
@@ -23,12 +22,12 @@ import com.openshift.restclient.capability.IBinaryCapability;
  */
 public abstract class OCBinaryOperation {
 
-	public void run(IConnection connection, final MultiStatus status) {
+	public void run(IConnection connection) {
 		String oldLocation = OpenShiftContext.get().get(IBinaryCapability.OPENSHIFT_BINARY_LOCATION);
 		String location = OCBinary.getInstance().getLocation(connection);
 		OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, location);
 		try {
-			runOCBinary(status);
+			runOCBinary();
 		} finally {
 			if (!StringUtils.isEmpty(oldLocation)) {
 				OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, oldLocation);
@@ -36,6 +35,6 @@ public abstract class OCBinaryOperation {
 		}
 	}
 
-	protected abstract void runOCBinary(MultiStatus multiStatus);
+	protected abstract void runOCBinary();
 
 }

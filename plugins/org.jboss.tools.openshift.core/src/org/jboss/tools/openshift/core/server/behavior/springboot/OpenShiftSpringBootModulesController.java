@@ -24,8 +24,6 @@ public class OpenShiftSpringBootModulesController extends OpenShiftEapModulesCon
 
 	@Override
 	public int changeModuleStateTo(IModule[] module, int state, IProgressMonitor monitor) throws CoreException {
-		//		syncDown(monitor);
-		syncUp(monitor);
 		return state;
 	}
 }

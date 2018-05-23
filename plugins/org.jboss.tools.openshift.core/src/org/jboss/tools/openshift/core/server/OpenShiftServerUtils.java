@@ -45,6 +45,7 @@ import org.eclipse.wst.server.core.util.ProjectModule;
 import org.jboss.ide.eclipse.as.core.server.IDeployableServer;
 import org.jboss.ide.eclipse.as.core.util.IJBossToolingConstants;
 import org.jboss.ide.eclipse.as.wtp.core.server.behavior.IControllableServerBehavior;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
@@ -70,6 +71,9 @@ import com.openshift.restclient.model.IResource;
  */
 public class OpenShiftServerUtils {
 
+	private OpenShiftServerUtils() {
+	}
+
 	private static final String LIVERELOAD_PORT_KEY = "port";//Key to the port # of the host the LiveReload server need to proxy
 
 	public static final String SERVER_PROJECT_QUALIFIER = "org.jboss.tools.openshift.core"; //$NON-NLS-1$
@@ -90,6 +94,8 @@ public class OpenShiftServerUtils {
 	public static final String ATTR_OVERRIDE_PROJECT_SETTINGS = "org.jboss.tools.openshift.project.Override";//$NON-NLS-1$
 
 	public static final String ATTR_CONNECTIONURL = "org.jboss.tools.openshift.Connection";//$NON-NLS-1$
+
+	private static final int DEFAULT_AUTO_PUBLISH_DELAY = 2;
 
 	/** the OpensHift Server Type as defined in the plugin.xml. */
 	public static final String OPENSHIFT_SERVER_TYPE = "org.jboss.tools.openshift.openshift.server.type";//$NON-NLS-1$
@@ -151,23 +157,26 @@ public class OpenShiftServerUtils {
 			return null;
 		}
 
-		String baseName = new StringBuilder(resource.getName()).append(" (").append(resource.getKind())
-				.append(") at OpenShift 3 (").append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
+		String baseName = new StringBuilder(resource.getName())
+				.append(" (")
+				.append(resource.getKind())
+				.append(") at OpenShift 3 (")
+				.append(UrlUtils.cutPort(UrlUtils.cutScheme(connection.getHost())))
 				.append(")").toString();
 		return ServerUtils.getServerName(baseName);
 	}
 
 	public static void updateServer(String serverName, String host, String connectionUrl, IResource resource,
 			String sourcePath, String podPath, IProject deployProject, String routeURL, String devmodeKey,
-			String debugPortKey, String debugPortValue, IServerWorkingCopy server) {
+			String debugPortKey, String debugPortValue, String profileId, IServerWorkingCopy server) {
 		String deployProjectName = ProjectUtils.getName(deployProject);
 		updateServer(serverName, host, connectionUrl, deployProjectName, OpenShiftResourceUniqueId.get(resource),
-				sourcePath, podPath, routeURL, devmodeKey, debugPortKey, debugPortValue, server);
+				sourcePath, podPath, routeURL, devmodeKey, debugPortKey, debugPortValue, profileId, server);
 	}
 
 	public static void updateServer(String serverName, String host, String connectionUrl, String deployProjectName,
 			String serviceId, String sourcePath, String podPath, String routeURL, String devmodeKey,
-			String debugPortKey, String debugPortValue, IServerWorkingCopy server) {
+			String debugPortKey, String debugPortValue, String profileId, IServerWorkingCopy server) {
 		updateServer(server);
 
 		server.setName(serverName);
@@ -182,6 +191,9 @@ public class OpenShiftServerUtils {
 		server.setAttribute(ATTR_DEVMODE_KEY, devmodeKey);
 		server.setAttribute(ATTR_DEBUG_PORT_KEY, debugPortKey);
 		server.setAttribute(ATTR_DEBUG_PORT_VALUE, debugPortValue);
+		if (!StringUtils.isEmpty(profileId)) {
+			ServerProfileModel.setProfile(server, profileId);
+		}
 	}
 
 	public static void updateServerAttribute(String attribute, String value, IServerAttributes server)
@@ -209,6 +221,7 @@ public class OpenShiftServerUtils {
 
 	private static void updateServer(IServerWorkingCopy server) {
 		server.setAttribute(IDeployableServer.SERVER_MODE, OpenShiftServer.OPENSHIFT3_MODE_ID);
+		server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, true);
 		((ServerWorkingCopy) server).setAutoPublishSetting(Server.AUTO_PUBLISH_RESOURCE);
 		server.setAttribute(IJBossToolingConstants.IGNORE_LAUNCH_COMMANDS, String.valueOf(Boolean.TRUE));
 		int webPort = 80;//TODO should we determine the webPort from the route?
@@ -217,6 +230,7 @@ public class OpenShiftServerUtils {
 		server.setAttribute(IJBossToolingConstants.WEB_PORT_DETECT, Boolean.FALSE.toString());
 		server.setAttribute(IDeployableServer.DEPLOY_DIRECTORY_TYPE, IDeployableServer.DEPLOY_CUSTOM);
 		server.setAttribute(IDeployableServer.ZIP_DEPLOYMENTS_PREF, true);
+		server.setAttribute(Server.PROP_AUTO_PUBLISH_TIME, DEFAULT_AUTO_PUBLISH_DELAY);
 	}
 
 	public static void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String podPath,
@@ -377,7 +391,9 @@ public class OpenShiftServerUtils {
 			if (connection == null) {
 				OpenShiftCoreActivator.pluginLog().logError(NLS.bind(
 						"Could not find an existing OpenShift connection to host {0} with user {1} for server {2}",
-						new String[] { connectionUrl.getHost(), connectionUrl.getUsername(), server.getName() }));
+						connectionUrl != null? 
+								new String[] { connectionUrl.getHost(), connectionUrl.getUsername(), server.getName() }
+								: new String[] { "<unknown host>", "<unknwon user>", server.getName() }));
 			}
 		} catch (UnsupportedEncodingException | MalformedURLException e) {
 			OpenShiftCoreActivator.pluginLog()
@@ -550,9 +566,9 @@ public class OpenShiftServerUtils {
 	 * @param server the server to derive the openshift connection from
 	 * @return
 	 */
-	public static String loadPodPath(IResource resource, IServer server) {
+	public static String loadPodPath(IResource resource, IServer server, IProgressMonitor monitor) {
 		DockerImageLabels metaData = DockerImageLabels.getInstance(resource, getBehaviour(server));
-		return metaData.getPodPath();
+		return metaData.getPodPath(monitor);
 	}
 
 	public static IControllableServerBehavior getBehaviour(IServer server) {
@@ -581,7 +597,7 @@ public class OpenShiftServerUtils {
 	 */
 	public static RSync createRSync(final IServer server, IProgressMonitor monitor) throws CoreException {
 		final IResource resource = getResourceChecked(server, monitor);
-		String podPath = getOrLoadPodPath(server, resource);
+		String podPath = getOrLoadPodPath(server, resource, monitor);
 
 		return createRSync(resource, podPath, server);
 	}
@@ -611,10 +627,10 @@ public class OpenShiftServerUtils {
 	 * @see #getPodPath(IServerAttributes)
 	 * @see DockerImageLabels#getPodPath()
 	 */
-	public static String getOrLoadPodPath(final IServer server, final IResource resource) throws CoreException {
+	public static String getOrLoadPodPath(final IServer server, final IResource resource, IProgressMonitor monitor) throws CoreException {
 		String podPath = getPodPath(server);
 		if (StringUtils.isEmpty(podPath)) {
-			podPath = loadPodPath(resource, server);
+			podPath = loadPodPath(resource, server, monitor);
 			if (StringUtils.isEmpty(podPath)) {
 				throw new CoreException(OpenShiftCoreActivator.statusFactory().errorStatus(NLS.bind(
 						"Server {0} could not determine the destination directory to publish to.", server.getName())));

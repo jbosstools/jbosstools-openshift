@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.core.server.debug;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.wst.server.core.IServer;
@@ -39,6 +43,7 @@ public class DebugContext {
 	private int debugPort = NO_DEBUG_PORT;
 	private IDebugListener listener;
 	private IPod pod;
+	private Map<String, String> envVars = new HashMap<>();
 
 	public DebugContext(IServer server) {
 		this(server, DEFAULT_DEVMODE_KEY, DEFAULT_DEBUG_PORT_KEY, DEFAULT_DEBUG_PORT);
@@ -92,6 +97,18 @@ public class DebugContext {
 		this.devmodeEnabled = debugEnabled;
 	}
 
+	protected void putEnvVar(String key, String value) {
+		this.envVars.put(key, value);
+	}
+
+	Map<String, String> getEnvVars() {
+		return envVars;
+	}
+
+	boolean hasEnvVariables() {
+		return !MapUtils.isEmpty(envVars);
+	}
+
 	public int getDebugPort() {
 		return debugPort;
 	}
@@ -131,5 +148,4 @@ public class DebugContext {
 			return NO_DEBUG_PORT;
 		}
 	}
-
 }

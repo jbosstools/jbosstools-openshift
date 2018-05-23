@@ -20,8 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.IPageChangingListener;
-import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -43,6 +41,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
  * @author Andre Dietisheim
  */
 public class ServerSettingsWizardFragment extends WizardHandleAwareFragment implements ICompletable {
+
 	static final String IS_LOADING_SERVICES = "isLoadingServices";
 
 	private PropertyChangeListener connectionChangeListener = new PropertyChangeListener() {
@@ -141,7 +140,6 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		setHandle(handle);
 		this.serverSettingsWizardPage = createServerSettingsWizardPage(parent, handle);
 		updateWizardHandle(handle, this.serverSettingsWizardPage);
-		WizardFragmentUtils.getWizardDialog(handle).addPageChangingListener(onPageChanging());
 		return (Composite) this.serverSettingsWizardPage.getControl();
 	}
 
@@ -161,17 +159,6 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 		handle.setImageDescriptor(OpenShiftCommonImages.OPENSHIFT_LOGO_WHITE_MEDIUM);
 	}
 
-	private IPageChangingListener onPageChanging() {
-		return new IPageChangingListener() {
-			@Override
-			public void handlePageChanging(PageChangingEvent event) {
-				if (serverSettingsWizardPage != null) {
-					serverSettingsWizardPage.reloadServices();
-				}
-			}
-		};
-	}
-
 	protected ModifyListener onFilterTextModified(final TreeViewer applicationTemplatesViewer) {
 		return new ModifyListener() {
 
@@ -184,6 +171,7 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 	}
 
 	class ServerSettingsWizardPageWrapper extends ServerSettingsWizardPage {
+
 		private IWizardHandle wizardHandle;
 
 		private ServerSettingsWizardPageWrapper(final IWizardHandle wizardHandle, final TaskModel taskModel) {
@@ -218,10 +206,6 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			if (!isWizardDisposed()) {
 				wizardHandle.setMessage(newMessage, newType);
 			}
-		}
-
-		public void onPageWillGetDeactivated(Direction direction, PageChangingEvent event) {
-			onPageWillGetDeactivated(direction, event, null);
 		}
 
 		void reloadServices() {
@@ -263,6 +247,25 @@ public class ServerSettingsWizardFragment extends WizardHandleAwareFragment impl
 			model = null;
 		}
 
+		@Override
+		protected boolean isSelectedPage(Object selectedPage) {
+			return selectedPage == getFragmentPage();
+		}
+
+		@Override
+		public IWizardPage getNextPage() {
+	        return getWizard().getNextPage(getFragmentPage());
+		}
+
+		@Override
+		public IWizardPage getPreviousPage() {
+	        return getWizard().getPreviousPage(getFragmentPage());
+		}
+
+		private WizardPage getFragmentPage() {
+			return WizardFragmentUtils.getWizardPage(ServerSettingsWizardFragment.this.getWizardHandle());
+		}
+		
 	}
 
 }

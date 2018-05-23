@@ -418,7 +418,7 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_CONNECTIONURL, connectionURL);
-		verify(model, atLeastOnce()).updateServer(eq(connectionURL),
+		verify(model, atLeastOnce()).updateServerProject(eq(connectionURL),
 				any(com.openshift.restclient.model.IResource.class), anyString(), anyString(), anyString(), anyString(),
 				anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
@@ -432,7 +432,7 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(OpenShiftServerUtils.ATTR_DEPLOYPROJECT, deployProject.getName());
-		verify(model, atLeastOnce()).updateServer(anyString(), any(IService.class), anyString(), anyString(),
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), anyString(),
 				anyString(), anyString(), anyString(), anyString(), eq(deployProject));
 	}
 
@@ -445,7 +445,7 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_SOURCE_PATH), eq(sourcePath));
-		verify(model, atLeastOnce()).updateServer(anyString(), any(IService.class), eq(sourcePath), anyString(),
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), eq(sourcePath), anyString(),
 				anyString(), anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
@@ -459,7 +459,7 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_POD_PATH), anyString());
-		verify(model, atLeastOnce()).updateServer(anyString(), any(IService.class), anyString(), anyString(),
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), anyString(),
 				eq(podPath), anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
@@ -474,7 +474,7 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_POD_PATH), eq(""));
-		verify(model, atLeastOnce()).updateServer(anyString(), any(IService.class), anyString(), anyString(), eq(""),
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), anyString(), eq(""),
 				anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
@@ -488,7 +488,7 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_SERVICE), anyString());
-		verify(model, atLeastOnce()).updateServer(anyString(), eq(resource), anyString(), anyString(), anyString(),
+		verify(model, atLeastOnce()).updateServerProject(anyString(), eq(resource), anyString(), anyString(), anyString(),
 				anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
@@ -503,7 +503,7 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_ROUTE), eq(routeURL));
-		verify(model, atLeastOnce()).updateServer(anyString(), any(IService.class), anyString(), eq(routeURL),
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), eq(routeURL),
 				anyString(), anyString(), anyString(), anyString(), any(org.eclipse.core.resources.IProject.class));
 	}
 
@@ -517,7 +517,7 @@ public class ServerSettingsWizardPageModelTest {
 		model.updateServer();
 		// then
 		verify(server, atLeastOnce()).setAttribute(eq(OpenShiftServerUtils.ATTR_ROUTE), isNull(String.class));
-		verify(model, atLeastOnce()).updateServer(anyString(), any(IService.class), anyString(), anyString(),
+		verify(model, atLeastOnce()).updateServerProject(anyString(), any(IService.class), anyString(), anyString(),
 				anyString(), anyString(), anyString(), isNull(String.class),
 				any(org.eclipse.core.resources.IProject.class));
 	}
@@ -758,7 +758,7 @@ public class ServerSettingsWizardPageModelTest {
 		}
 
 		@Override
-		protected void updateServer(String connectionUrl, com.openshift.restclient.model.IResource resource,
+		protected void updateServerProject(String connectionUrl, com.openshift.restclient.model.IResource resource,
 				String sourcePath, String routeURL, String podPath, String devmodeKey, String debugPortKey,
 				String debugPortValue, org.eclipse.core.resources.IProject deployProject) {
 			//super.updateServerProject(connectionUrl, resource, sourcePath, podPath, routeURL, deployProject);

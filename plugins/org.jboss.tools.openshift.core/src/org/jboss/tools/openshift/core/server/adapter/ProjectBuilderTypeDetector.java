@@ -35,6 +35,7 @@ public class ProjectBuilderTypeDetector {
 			return "";
 		}
 	};
+
 	private Collection<IProjectBuilderType> detectors;
 
 	public ProjectBuilderTypeDetector() {
@@ -58,15 +59,19 @@ public class ProjectBuilderTypeDetector {
 		if (project == null) {
 			return UNKNOWN;
 		}
-		return detectors.stream().filter(d -> d.applies(project)).findFirst().orElse(UNKNOWN);
+		return detectors.stream()
+				.filter(d -> d.applies(project))
+				.findFirst()
+				.orElse(UNKNOWN);
 	}
 
 	public String findTemplateFilter(final IProject project) {
 		if (project == null) {
 			return null;
 		}
-		return identify(project).getTags(project);//that's a bit ugly but we'll prolly need to get specific tags 
-													//depending on some other project settings
+		//that's a bit ugly but we'll prolly need to get specific tags 
+		//depending on some other project settings
+		return identify(project).getTags(project);
 	}
 
 	private static class SimpleTypeDetector implements IProjectBuilderType {
@@ -76,7 +81,8 @@ public class ProjectBuilderTypeDetector {
 
 		SimpleTypeDetector(String type, String... files) {
 			this.type = type;
-			this.files = files == null ? Collections.emptyList() : Arrays.asList(files);
+			this.files = files == null ? 
+					Collections.emptyList() : Arrays.asList(files);
 		}
 
 		@Override
@@ -85,12 +91,14 @@ public class ProjectBuilderTypeDetector {
 		}
 
 		protected boolean hasAnyFile(final IProject project, Collection<String> files) {
-			return files.stream().filter(f -> project.getFile(f).exists()).findFirst().isPresent();
+			return files.stream()
+					.anyMatch(f -> project.getFile(f).exists());
 		}
 
 		@Override
 		public boolean applies(IProject project) {
-			return ProjectUtils.isAccessible(project) && hasAnyFile(project, files);
+			return ProjectUtils.isAccessible(project) 
+					&& hasAnyFile(project, files);
 		}
 
 		@Override

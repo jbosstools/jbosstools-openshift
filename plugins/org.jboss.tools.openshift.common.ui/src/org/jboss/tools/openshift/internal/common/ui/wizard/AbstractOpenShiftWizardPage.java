@@ -176,13 +176,17 @@ public abstract class AbstractOpenShiftWizardPage extends WizardPage {
 
 			@Override
 			public void pageChanged(PageChangedEvent event) {
-				if (event.getSelectedPage() == AbstractOpenShiftWizardPage.this) {
+				if (isSelectedPage(event.getSelectedPage())) {
 					onPageActivated(dbc);
 				} else {
 					onPageDeactivated(dbc);
 				}
 			}
 		};
+	}
+
+	protected boolean isSelectedPage(Object page) {
+		return page == this;
 	}
 
 	protected DataBindingContext getDatabindingContext() {

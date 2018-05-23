@@ -18,45 +18,62 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
-import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
+import org.jboss.ide.eclipse.as.core.util.RemotePath;
 import org.jboss.tools.openshift.core.server.RSync;
 import org.jboss.tools.openshift.core.server.behavior.OpenShiftPublishController;
 
-import com.openshift.restclient.model.IResource;
-
 public class OpenShiftSpringBootPublishController extends OpenShiftPublishController {
-
-	private static final String POD_BASE_PATH = "/BOOT-INF/classes/";
 
 	public OpenShiftSpringBootPublishController() {
 		// keep for reflection instantiation
 	}
 
 	@Override
-	public void publishFinish(IProgressMonitor monitor) throws CoreException {
-		if (!hasRsync()) {
-			return;
-		}
-
-		super.publishFinish(monitor);
-
-		final File localFolder = getLocalFolder();
-		final IResource resource = OpenShiftServerUtils.getResource(getServer(), monitor);
-		syncUp(localFolder, resource);
-
-		loadPodPathIfEmpty(resource);
+	protected RSync createRsync(final IServer server, final IProgressMonitor monitor) throws CoreException {
+		return OpenShiftSpringBootPublishUtils.createRSync(server, monitor);
+	}
+	
+	@Override
+	protected File getDeploymentsRootFolder() throws CoreException {
+		return new File(super.getDeploymentsRootFolder(), OpenShiftSpringBootPublishUtils.BASE_PATH);
 	}
 
 	@Override
-	protected RSync createRsync(IServer server, final IProgressMonitor monitor) throws CoreException {
-		final IResource resource = OpenShiftServerUtils.getResourceChecked(server, monitor);
-		IPath podPath = new Path(OpenShiftServerUtils.getOrLoadPodPath(server, resource)).append(POD_BASE_PATH);
+	protected IPath getModuleDeployRoot(IModule[] module, boolean isBinaryObject) throws CoreException {
+		if (module == null) {
+			return null;
+		}
 
-		return OpenShiftServerUtils.createRSync(resource, podPath.toString(), server);
+		if (isRootModule(module)) {
+			return super.getModuleDeployRoot(module, isBinaryObject)
+					.append(OpenShiftSpringBootPublishUtils.getRootModuleDeployPath());
+		} else {
+			return getChildModuleDeployPath();
+		}
+	}
+
+	private IPath getChildModuleDeployPath() throws CoreException {
+		IPath localDestination = 
+				new Path(getDeploymentOptions().getDeploymentsRootFolder(true))
+					.append(OpenShiftSpringBootPublishUtils.getChildModuleDeployPath());
+
+		return new RemotePath(
+				localDestination.toString(), 
+				getDeploymentOptions().getPathSeparatorCharacter());
+	}
+
+	private boolean isRootModule(IModule[] module) {
+		return module != null
+				&& module.length == 1;
 	}
 
 	@Override
 	protected boolean treatAsBinaryModule(IModule[] module) {
-		return true;
+		return module.length == 1;
+	}
+
+	@Override
+	protected boolean forceZipModule(IModule[] moduleTree) {
+		return false;
 	}
 }

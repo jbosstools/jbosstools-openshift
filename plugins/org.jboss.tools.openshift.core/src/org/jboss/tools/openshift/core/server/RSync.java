@@ -16,11 +16,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IServer;
 import org.jboss.ide.eclipse.as.core.server.IServerConsoleWriter;
 import org.jboss.tools.openshift.core.connection.Connection;
@@ -32,9 +34,9 @@ import com.openshift.restclient.OpenShiftException;
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.IBinaryCapability;
-import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
 import com.openshift.restclient.capability.resources.IRSyncable;
 import com.openshift.restclient.capability.resources.IRSyncable.LocalPeer;
+import com.openshift.restclient.capability.resources.IRSyncable.Peer;
 import com.openshift.restclient.capability.resources.IRSyncable.PodPeer;
 import com.openshift.restclient.model.IPod;
 import com.openshift.restclient.model.IResource;
@@ -55,55 +57,67 @@ public class RSync {
 		this.connection = OpenShiftServerUtils.getConnection(server);
 	}
 
-	public void syncPodsToDirectory(File localFolder, MultiStatus status, final IServerConsoleWriter consoleWriter) {
+	public MultiStatus syncPodsToDirectory(File localFolder, final IServerConsoleWriter consoleWriter) {
+		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK,
+				NLS.bind("Could not sync all pods to folder {0}.", localFolder.getAbsolutePath()), null);
 		new OCBinaryOperation() {
 			@Override
-			protected void runOCBinary(MultiStatus multiStatus) {
-				// If our local (deploy) folder is empty, sync all pods to this directory
-				for (IPod pod : ResourceUtils.getPodsFor(resource,
-						resource.getProject().getResources(ResourceKind.POD))) {
+			protected void runOCBinary() {
+				List<IPod> pods = ResourceUtils.getPodsFor(resource,
+						connection.getResources(ResourceKind.POD, resource.getNamespaceName()));
+				for (IPod pod : pods) {
 					try {
-						if (POD_STATUS_RUNNING.equals(pod.getStatus())) {
-							syncPodToDirectory(pod, podPath, localFolder, consoleWriter);
-						}
-					} catch (IOException | OpenShiftException e) {
+						syncPodToDirectory(pod, localFolder, podPath, consoleWriter);
+					} catch (OpenShiftException e) {
 						status.add(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, e.getMessage()));
 					}
 				}
 			}
-		}.run(connection, status);
+		}.run(connection);
+		return status;
 	}
 
-	// Sync the directory back to all pods
-	public void syncDirectoryToPods(File localFolder, MultiStatus status, final IServerConsoleWriter consoleWriter,
-			final OpenShiftBinaryOption... options) {
+	public MultiStatus syncDirectoryToPods(File localFolder, final IServerConsoleWriter consoleWriter) {
+		final MultiStatus status = new MultiStatus(OpenShiftCoreActivator.PLUGIN_ID, IStatus.OK,
+				NLS.bind("Could not sync folder {0} to all pods.", localFolder.getAbsolutePath()), null);
 		new OCBinaryOperation() {
 
 			@Override
-			protected void runOCBinary(MultiStatus multiStatus) {
-				for (IPod pod : ResourceUtils.getPodsFor(resource,
-						resource.getProject().getResources(ResourceKind.POD))) {
+			protected void runOCBinary() {
+				List<IPod> pods = ResourceUtils.getPodsFor(resource,
+						connection.getResources(ResourceKind.POD, resource.getNamespaceName()));
+				for (IPod pod : pods) {
 					try {
-						if (POD_STATUS_RUNNING.equals(pod.getStatus())) {
-							syncDirectoryToPod(pod, localFolder, podPath, consoleWriter);
-						}
-					} catch (IOException | OpenShiftException e) {
+						syncDirectoryToPod(pod, localFolder, podPath, consoleWriter);
+					} catch (OpenShiftException e) {
 						status.add(new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, e.getMessage()));
 					}
 				}
 			}
-		}.run(connection, status);
+		}.run(connection);
+		return status;
 	}
 
-	private void syncPodToDirectory(IPod pod, String podPath, File destination,
-			final IServerConsoleWriter consoleWriter) throws IOException {
-		destination.mkdirs();
-		String destinationPath = sanitizePath(destination.getAbsolutePath());
+	private void syncPodToDirectory(IPod pod, File localFolder, String podPath, final IServerConsoleWriter consoleWriter) {
+		localFolder.mkdirs();
+		sync(new PodPeer(podPath, pod), new LocalPeer(sanitizePath(localFolder.getAbsolutePath())), pod, consoleWriter);
+	}
+
+	private void syncDirectoryToPod(final IPod pod, final File localFolder, String podPath, final IServerConsoleWriter consoleWriter) {
+		sync(new LocalPeer(sanitizePath(localFolder.getAbsolutePath())), new PodPeer(podPath, pod), pod, consoleWriter);
+	}
+
+	private void sync(final Peer source, final Peer destination, final IPod pod, final IServerConsoleWriter consoleWriter) {
+		if (!POD_STATUS_RUNNING.equals(pod.getStatus())) {
+			return;
+		}
 		pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
 			@Override
 			public IRSyncable visit(IRSyncable rsyncable) {
-				final InputStream syncStream = rsyncable.sync(new PodPeer(podPath, pod), new LocalPeer(destinationPath),
-						getOptions());
+				final InputStream syncStream = rsyncable.sync(source, destination, 
+							IRSyncable.exclude(".git", ".npm"),
+							IRSyncable.NO_PERMS,
+							IBinaryCapability.SKIP_TLS_VERIFY);
 				asyncWriteLogs(syncStream, consoleWriter);
 				try {
 					rsyncable.await();
@@ -115,33 +129,6 @@ public class RSync {
 			}
 
 		}, null);
-	}
-
-	private void syncDirectoryToPod(final IPod pod, final File source, final String podPath,
-			final IServerConsoleWriter consoleWriter) throws IOException {
-		String sourcePath = sanitizePath(source.getAbsolutePath());
-		pod.accept(new CapabilityVisitor<IRSyncable, IRSyncable>() {
-			@Override
-			public IRSyncable visit(IRSyncable rsyncable) {
-				final InputStream syncStream = rsyncable.sync(new LocalPeer(sourcePath), new PodPeer(podPath, pod),
-						getOptions());
-				asyncWriteLogs(syncStream, consoleWriter);
-				try {
-					rsyncable.await();
-				} catch (InterruptedException e) {
-					OpenShiftCoreActivator.logError("Thread interrupted while running rsync", e);
-					Thread.currentThread().interrupt();
-				}
-				return rsyncable;
-			}
-		}, null);
-	}
-
-	protected OpenShiftBinaryOption[] getOptions() {
-		return new OpenShiftBinaryOption[] {
-				IRSyncable.exclude(".git", ".npm"),
-				IRSyncable.NO_PERMS,
-				IBinaryCapability.SKIP_TLS_VERIFY };
 	}
 
 	/**

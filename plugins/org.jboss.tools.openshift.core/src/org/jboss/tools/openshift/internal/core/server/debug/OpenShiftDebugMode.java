@@ -144,6 +144,18 @@ public class OpenShiftDebugMode {
 	}
 
 	/**
+	 * Adds the given env vars to the 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public OpenShiftDebugMode putEnvVar(String key, String value) {
+		context.putEnvVar(key, value);
+
+		return this;
+	}
+	
+	/**
 	 * Sends the changes to the deployment config if required. Nothing is done if
 	 * the deployment config already is in the state that the context is in. If the
 	 * changes are sent the existing pods are killed and it waits until the new pods
@@ -207,8 +219,10 @@ public class OpenShiftDebugMode {
 
 	private boolean updateDc(IDeploymentConfig dc, Connection connection, IProgressMonitor monitor)
 			throws CoreException {
-		boolean dcUpdated = updateDebugmode(dc, context, monitor) | updateDevmode(dc, context, monitor)
-				| updateLifenessProbe(dc, context, monitor);
+		boolean dcUpdated = updateDebugmode(dc, context, monitor) 
+				| updateDevmode(dc, context, monitor)
+				| updateLifenessProbe(dc, context, monitor)
+				| updateEnvVariables(dc, context, monitor);
 
 		if (dcUpdated) {
 			send(dc, connection, monitor);
@@ -250,9 +264,8 @@ public class OpenShiftDebugMode {
 	}
 
 	private boolean updateDebugmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
-		monitor.subTask(
-				NLS.bind(context.isDebugEnabled() ? "Enabling" : "Disabling" + " debugging for deployment config {0}",
-						dc.getName()));
+		monitor.subTask(NLS.bind(
+				context.isDebugEnabled() ? "Enabling" : "Disabling" + " debugging for deployment config {0}", dc.getName()));
 
 		boolean needsUpdate = needsDebugUpdate(dc, context);
 		if (needsUpdate) {
@@ -316,7 +329,8 @@ public class OpenShiftDebugMode {
 		}
 		PortSpecAdapter newPort = new PortSpecAdapter(DEBUG_PORT_NAME, DEBUG_PORT_PROTOCOL, debugPort);
 		// use bit-wise OR to avoid short-circuit
-		modified = modified | ports.add(newPort);
+		modified = modified 
+				| ports.add(newPort);
 		return modified;
 	}
 
@@ -334,7 +348,8 @@ public class OpenShiftDebugMode {
 	}
 
 	private boolean updateDevmode(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
-		monitor.subTask(NLS.bind("Enabling devmode for deployment config {0}", dc.getName()));
+		monitor.subTask(NLS.bind("Enabling/disabling devmode for deployment config {0}", dc.getName()));
+
 		boolean needsUpdate = needsDevmodeUpdate(dc, context);
 		if (needsUpdate) {
 			updateDevmodeEnvVar(context.isDevmodeEnabled(), dc, context);
@@ -364,6 +379,22 @@ public class OpenShiftDebugMode {
 		}
 	}
 
+	private boolean updateEnvVariables(IDeploymentConfig dc, DebugContext context, IProgressMonitor monitor) {
+		monitor.subTask(NLS.bind("Setting env vars for deployment config {0}...", dc.getName()));
+
+		if (context.hasEnvVariables()) {
+			return context.getEnvVars().entrySet().stream()
+				.filter(entry -> 
+					dc.getEnvironmentVariables().stream()
+							.noneMatch( var -> var.getName().equals(entry.getKey()) 
+												&& var.getValue().equals(entry.getValue())))
+				.peek(entry -> 
+						dc.setEnvironmentVariable(entry.getKey(), entry.getValue()))
+				.count() > 0;
+		}
+		return false;
+	}
+	
 	protected void safeSend(IResource resource, Connection connection, IProgressMonitor monitor) {
 		try {
 			send(resource, connection, monitor);
@@ -392,17 +423,22 @@ public class OpenShiftDebugMode {
 	protected IPod waitForNewPod(IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
 		NewPodDetectorJob newPodDetector = new NewPodDetectorJob(dc);
 		newPodDetector.schedule();
-		return waitFor(newPodDetector, monitor);
+		return waitFor(newPodDetector, dc, monitor);
 	}
 
-	protected IPod waitFor(NewPodDetectorJob podDetector, IProgressMonitor monitor) throws CoreException {
+	protected IPod waitFor(NewPodDetectorJob podDetector, IDeploymentConfig dc, IProgressMonitor monitor) throws CoreException {
 		try {
 			podDetector.join(NewPodDetectorJob.TIMEOUT, monitor);
 			IStatus result = podDetector.getResult();
 			if (result == null) {// timed out!
 				throw new CoreException(podDetector.getTimeOutStatus());
 			} else if (!result.isOK()) {
-				throw new CoreException(result);
+				if (IStatus.CANCEL == result.getSeverity()) {
+					throw new CoreException(StatusFactory.cancelStatus(OpenShiftCoreActivator.PLUGIN_ID, 
+							NLS.bind("Cancelled wait for new pod created from deployment config {0}...", dc.getName())));
+				} else {					
+					throw new CoreException(result);
+				}
 			}
 			return podDetector.getPod();
 		} catch (OperationCanceledException | InterruptedException e) {
