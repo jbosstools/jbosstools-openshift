@@ -54,13 +54,9 @@ public class ApplicationSourceTreeItems implements IModelFactory, ICommonAttribu
 	public <T> List<T> createChildren(Object parent) {
 		if (parent instanceof Connection) {
 		    List<T> activeProjects = new ArrayList<>();
-		    List<IResource> projectResources = ((Connection) parent).getResources(ResourceKind.PROJECT);
-		    for (IResource projectResource: projectResources) {
-		        IProject project = (IProject)projectResource;
-		        if (!ResourceStatus.TERMINATING.equals(project.getStatus())) {
-		            activeProjects.add((T)project);
-		        }
-		    }
+		    List<IProject> projectResources = ((Connection) parent).getActiveProjects();
+		    // T generic declaration if very inflexible. TODO: refactor to avoid creating new useless collections
+		    projectResources.forEach(p -> activeProjects.add((T)p));
 			return activeProjects;
 		} else if (parent instanceof IProject) {
 			IProject project = (IProject) parent;

@@ -55,7 +55,7 @@ public class NewProjectHandler extends AbstractHandler {
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT);
+				List<IProject> oldProjects = connection.getActiveProjects();
 				WizardUtils.openWizardDialog(new NewProjectWizard(connection, oldProjects), shell);
 			}
 		});
