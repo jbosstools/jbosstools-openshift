@@ -12,8 +12,6 @@ package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
 import java.util.List;
 
-import com.openshift.restclient.model.IServicePort;
-
 /**
  * 
  * @author jeff.cantrill
@@ -33,13 +31,15 @@ public interface IServiceAndRoutingPageModel {
 
 	void setAddRoute(boolean addRoute);
 
-	List<IServicePort> getServicePorts();
+	List<ServicePortAdapter> getServicePorts();
 
-	void setSelectedServicePort(IServicePort servicePort);
+	void addServicePort(ServicePortAdapter port);
 
-	IServicePort getSelectedServicePort();
+	void removeServicePort(ServicePortAdapter port);
 
-	void removeServicePort(IServicePort port);
+	void setSelectedServicePort(ServicePortAdapter servicePort);
+
+	ServicePortAdapter getSelectedServicePort();
 
 	/**
 	 * Resets the model to expose all of the
@@ -47,10 +47,6 @@ public interface IServiceAndRoutingPageModel {
 	 * image;
 	 */
 	void resetServicePorts();
-
-	void addServicePort(IServicePort port);
-
-	void updateServicePort(IServicePort source, IServicePort target);
 
 	/**
 	 * Return the host name used assigned to route.
@@ -71,12 +67,12 @@ public interface IServiceAndRoutingPageModel {
 	*  
 	* @param port the port to use
 	*/
-	void setRoutingPort(IServicePort port);
+	void setRoutingPort(ServicePortAdapter port);
 
 	/**
 	 * Return the port used for routing. May be null (round robin)
 	 * 
 	 * @return the routing port or null
 	 */
-	IServicePort getRoutingPort();
+	ServicePortAdapter getRoutingPort();
 }

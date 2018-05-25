@@ -45,7 +45,6 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.capability.resources.IImageStreamImportCapability;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.IProject;
-import com.openshift.restclient.model.IServicePort;
 import com.openshift.restclient.model.IStatus;
 import com.openshift.restclient.model.image.IImageStreamImport;
 
@@ -391,7 +390,7 @@ public class DeployImageWizardModelTest {
 		final boolean result = model.initializeContainerInfo();
 		// then
 		assertThat(result).isTrue();
-		IServicePort port = new ServicePortAdapter();
+		ServicePortAdapter port = new ServicePortAdapter();
 		port.setName("9000-tcp");
 		port.setProtocol("TCP");
 		port.setPort(9000);

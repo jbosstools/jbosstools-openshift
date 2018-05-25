@@ -22,24 +22,10 @@ import com.openshift.restclient.model.IServicePort;
  */
 public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 
-	/**
-	 * Name property
-	 */
 	public static final String NAME = "name";
-
-	/**
-	 * Port property
-	 */
 	public static final String PORT = "port";
-
-	/**
-	 * Target port property
-	 */
+	public static final String PROTOCOL = "protocol";
 	public static final String TARGET_PORT = "targetPort";
-
-	/**
-	 * Route port property
-	 */
 	public static final String ROUTE_PORT = "routePort";
 
 	private String name;
@@ -77,7 +63,7 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 
 	@Override
 	public void setName(String name) {
-		firePropertyChange("name", this.name, this.name = name);
+		firePropertyChange(NAME, this.name, this.name = name);
 	}
 
 	@Override
@@ -87,7 +73,8 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 
 	@Override
 	public void setPort(int port) {
-		firePropertyChange("port", this.port, this.port = port);
+		firePropertyChange(PORT, this.port, this.port = port);
+		firePropertyChange(NAME, this.name, this.name = port + "-tcp");
 	}
 
 	@Override
@@ -101,8 +88,8 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 	}
 
 	@Override
-	public void setTargetPort(String intOrString) {
-		firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(intOrString));
+	public void setTargetPort(String targetPort) {
+		firePropertyChange(TARGET_PORT, this.containerPort, this.containerPort = String.valueOf(targetPort));
 	}
 
 	@Override
@@ -112,7 +99,7 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 
 	@Override
 	public void setProtocol(String proto) {
-		firePropertyChange("protocol", this.protocol, this.protocol = proto);
+		firePropertyChange(PROTOCOL, this.protocol, this.protocol = proto);
 	}
 
 	/**
@@ -127,6 +114,15 @@ public class ServicePortAdapter extends ObservablePojo implements IServicePort {
 	 */
 	public void setRoutePort(boolean routePort) {
 		firePropertyChange(ROUTE_PORT, this.routePort, this.routePort = routePort);
+	}
+
+	
+	public void update(ServicePortAdapter port) {
+		setName(port.getName());
+		setPort(port.getPort());
+		setTargetPort(port.getTargetPort());
+		setProtocol(port.getProtocol());
+		setRoutePort(port.isRoutePort());
 	}
 
 	@Override
