@@ -28,6 +28,7 @@ import org.jboss.tools.openshift.internal.ui.wizard.project.NewProjectWizard;
 
 import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.model.IProject;
+import com.openshift.restclient.utils.ResourceStatus;
 
 /**
  * @author Fred Bricon
@@ -55,7 +56,8 @@ public class NewProjectHandler extends AbstractHandler {
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
-				List<IProject> oldProjects = connection.getActiveProjects();
+				List<IProject> oldProjects = connection.getResources(ResourceKind.PROJECT,
+				        resource -> !ResourceStatus.TERMINATING.equals(((IProject)resource).getStatus()));
 				WizardUtils.openWizardDialog(new NewProjectWizard(connection, oldProjects), shell);
 			}
 		});

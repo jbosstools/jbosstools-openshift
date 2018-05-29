@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ObjectUtils;
@@ -469,14 +470,9 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 		return getResources(kind, "");
 	}
 	
-	public List<IProject> getActiveProjects() {
-	    List<IResource> projects = getResources(ResourceKind.PROJECT);
-	    return projects
-                .stream()
-                .map(r -> (IProject)r)
-                .filter(
-                        p -> !ResourceStatus.TERMINATING.equals(p.getStatus()))
-                .collect(Collectors.toList());
+	public <T extends IResource> List<T> getResources(String kind, Predicate<? super IResource> filter) {
+	    List<T> resources = getResources(kind, "");
+	    return resources.stream().filter(filter).collect(Collectors.toList());
 	}
 
 	@Override
