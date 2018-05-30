@@ -71,8 +71,8 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 	private int replicas;
 	private boolean addRoute = true;
 	private String routeHostname;
-	List<IServicePort> servicePorts = new ArrayList<>();
-	IServicePort selectedServicePort = null;
+	private List<ServicePortAdapter> servicePorts = new ArrayList<>();
+	private ServicePortAdapter selectedServicePort = null;
 	private IDockerConnection dockerConnection;
 	private ArrayList<IServicePort> imagePorts;
 	private boolean originatedFromDockerExplorer;
@@ -82,7 +82,7 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 	private String targetRegistryLocation;
 	private String targetRegistryUsername;
 	private String targetRegistryPassword;
-	private IServicePort routingPort;
+	private ServicePortAdapter routingPort;
 
 	private static final DockerImage2OpenshiftResourceConverter dockerImage2OpenshiftResourceConverter = new DockerImage2OpenshiftResourceConverter();
 	private final List<String> imageNames = new ArrayList<>();
@@ -362,9 +362,11 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 	}
 
 	private void initExposedPorts() {
-		List<IPort> portSpecs = Collections.emptyList();
-		if (imageMeta != null && !CollectionUtils.isEmpty(imageMeta.exposedPorts())) {
-			portSpecs = imageMeta.exposedPorts().stream().map(spec -> new PortSpecAdapter(spec))
+		List<IPort> portSpecs = new ArrayList<>();
+		if (imageMeta != null 
+				&& !CollectionUtils.isEmpty(imageMeta.exposedPorts())) {
+			portSpecs = imageMeta.exposedPorts().stream()
+					.map(PortSpecAdapter::new)
 					.collect(Collectors.toList());
 		}
 		setPortSpecs(portSpecs);
@@ -426,7 +428,7 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 
 	private void setServicePortsFromPorts(List<IPort> portSpecs) {
 		this.imagePorts = new ArrayList<>(portSpecs.size());
-		List<IServicePort> servicePorts = new ArrayList<>(portSpecs.size());
+		List<ServicePortAdapter> servicePorts = new ArrayList<>(portSpecs.size());
 		for (IPort port : portSpecs) {
 			servicePorts.add(new ServicePortAdapter(port));
 			imagePorts.add(new ServicePortAdapter(port));
@@ -434,16 +436,14 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 		setServicePorts(servicePorts);
 	}
 
-	private void setServicePorts(List<IServicePort> servicePorts) {
-		if (servicePorts.size() > 0) {
-			ServicePortAdapter adapterPort = (ServicePortAdapter) servicePorts.get(0);
-			adapterPort.setRoutePort(true);
-			setRoutingPort(adapterPort);
-		} else {
-			setRoutingPort(null);
-		}
-		firePropertyChange(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS, this.servicePorts,
-				this.servicePorts = servicePorts);
+	private void setServicePorts(List<ServicePortAdapter> servicePorts) {
+		setRoutingPort(servicePorts);
+
+		List<ServicePortAdapter> old = new ArrayList<>(this.servicePorts);
+		this.servicePorts.clear();
+		this.servicePorts.addAll(servicePorts);
+		firePropertyChange(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS, old, this.servicePorts);
+
 	}
 
 	@Override
@@ -492,7 +492,7 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 	}
 
 	@Override
-	public List<IServicePort> getServicePorts() {
+	public List<ServicePortAdapter> getServicePorts() {
 		return servicePorts;
 	}
 
@@ -527,41 +527,23 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 	}
 
 	@Override
-	public void addServicePort(IServicePort port) {
+	public void addServicePort(ServicePortAdapter port) {
 		if (this.servicePorts.contains(port)) {
 			return;
 		}
-		List<IServicePort> old = new ArrayList<>(this.servicePorts);
 		this.servicePorts.add(port);
-		firePropertyChange(PROPERTY_SERVICE_PORTS, old, Collections.unmodifiableList(servicePorts));
-		if (port instanceof ServicePortAdapter && ((ServicePortAdapter) port).isRoutePort()) {
+		firePropertyChange(PROPERTY_SERVICE_PORTS, null, servicePorts);
+		if (port.isRoutePort()) {
 			setRoutingPort(port);
 		}
 	}
 
 	@Override
-	public void updateServicePort(IServicePort source, IServicePort target) {
-		final int pos = this.servicePorts.indexOf(source);
-		if (pos > -1) {
-			List<IServicePort> old = new ArrayList<>(this.servicePorts);
-			this.servicePorts.set(pos, target);
-			/**
-			 * databinding would not replace old object with a new one if only a
-			 * boolean property is modified. I could not understand why it is
-			 * so, but I found that when target port (String) and route port
-			 * (Boolean) are changed in Edit dialog together, everything works.
-			 * 
-			 * @see https://github.com/jbosstools/jbosstools-openshift/pull/1365
-			 */
-			String p = target.getTargetPort();
-			target.setTargetPort("dummy");
-			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, pos, old, Collections.unmodifiableList(servicePorts));
-			if (((ServicePortAdapter) target).isRoutePort()) {
-				setRoutingPort(target);
-			} else if (((ServicePortAdapter) source).isRoutePort() && !((ServicePortAdapter) target).isRoutePort()) {
-				setRoutingPort(null);
-			}
-			target.setTargetPort(p);
+	public void removeServicePort(ServicePortAdapter port) {
+		int index = servicePorts.indexOf(port);
+		if (index > -1) {
+			this.servicePorts.remove(port);
+			firePropertyChange(PROPERTY_SERVICE_PORTS, Collections.emptyList(), servicePorts);
 		}
 	}
 
@@ -584,24 +566,13 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 	}
 
 	@Override
-	public void setSelectedServicePort(IServicePort servicePort) {
-		firePropertyChange(PROPERTY_SELECTED_SERVICE_PORT, this.selectedServicePort,
-				this.selectedServicePort = servicePort);
+	public void setSelectedServicePort(ServicePortAdapter servicePort) {
+		firePropertyChange(PROPERTY_SELECTED_SERVICE_PORT, this.selectedServicePort, this.selectedServicePort = servicePort);
 	}
 
 	@Override
-	public IServicePort getSelectedServicePort() {
+	public ServicePortAdapter getSelectedServicePort() {
 		return selectedServicePort;
-	}
-
-	@Override
-	public void removeServicePort(IServicePort port) {
-		int index = servicePorts.indexOf(port);
-		if (index > -1) {
-			List<IServicePort> old = new ArrayList<>(servicePorts);
-			this.servicePorts.remove(port);
-			fireIndexedPropertyChange(PROPERTY_SERVICE_PORTS, index, old, Collections.unmodifiableList(servicePorts));
-		}
 	}
 
 	@Override
@@ -615,7 +586,8 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 		if (images != null) {
 			this.imageNames.addAll(dockerConnection.getImages().stream()
 					.filter(image -> !image.isDangling() && !image.isIntermediateImage())
-					.flatMap(image -> image.repoTags().stream()).sorted().collect(Collectors.toList()));
+					.flatMap(image -> image.repoTags().stream()).sorted()
+					.collect(Collectors.toList()));
 		}
 	}
 
@@ -646,21 +618,34 @@ public class DeployImageWizardModel extends ResourceLabelsPageModel
 
 	@Override
 	public void resetServicePorts() {
-		List<IServicePort> ports = imagePorts.stream().map(sp -> new ServicePortAdapter(sp))
+		List<ServicePortAdapter> ports = imagePorts.stream()
+				.map(ServicePortAdapter::new)
 				.collect(Collectors.toList());
 		setServicePorts(ports);
 	}
 
 	@Override
-	public void setRoutingPort(IServicePort port) {
+	public void setRoutingPort(ServicePortAdapter port) {
 		if (routingPort != null) {
-			((ServicePortAdapter) routingPort).setRoutePort(false);
+			// reset old port
+			routingPort.setRoutePort(false);
 		}
-		firePropertyChange(PROPERTY_ROUTING_PORT, routingPort, this.routingPort = port);
+		if (port != null) {
+			port.setRoutePort(true);
+		}
+		firePropertyChange(PROPERTY_ROUTING_PORT, this.routingPort, this.routingPort = port);
+	}
+
+	public void setRoutingPort(List<ServicePortAdapter> ports) {
+		ServicePortAdapter port = null;
+		if (!CollectionUtils.isEmpty(ports)) {
+			port = ports.get(0);
+		}
+		setRoutingPort(port);
 	}
 
 	@Override
-	public IServicePort getRoutingPort() {
+	public ServicePortAdapter getRoutingPort() {
 		return routingPort;
 	}
 
