@@ -53,15 +53,9 @@ public class ApplicationSourceTreeItems implements IModelFactory, ICommonAttribu
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> List<T> createChildren(Object parent) {
 		if (parent instanceof Connection) {
-		    List<T> activeProjects = new ArrayList<>();
-		    List<IResource> projectResources = ((Connection) parent).getResources(ResourceKind.PROJECT);
-		    for (IResource projectResource: projectResources) {
-		        IProject project = (IProject)projectResource;
-		        if (!ResourceStatus.TERMINATING.equals(project.getStatus())) {
-		            activeProjects.add((T)project);
-		        }
-		    }
-			return activeProjects;
+		    Connection connection = (Connection) parent;
+		    return (List)connection.getResources(ResourceKind.PROJECT,
+                    resource -> !ResourceStatus.TERMINATING.equals(((IProject)resource).getStatus()));
 		} else if (parent instanceof IProject) {
 			IProject project = (IProject) parent;
 			Connection conn = ConnectionsRegistryUtil.getConnectionFor(project);

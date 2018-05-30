@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.eclipse.core.runtime.Assert;
@@ -45,11 +47,14 @@ import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.OpenShiftException;
+import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.ICapability;
+import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IResourceBuilder;
+import com.openshift.restclient.utils.ResourceStatus;
 
 public class Connection extends ObservablePojo implements IRefreshable, IOpenShiftConnection {
 
@@ -463,6 +468,11 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	@Override
 	public <T extends IResource> List<T> getResources(String kind) {
 		return getResources(kind, "");
+	}
+	
+	public <T extends IResource> List<T> getResources(String kind, Predicate<? super IResource> filter) {
+	    List<T> resources = getResources(kind, "");
+	    return resources.stream().filter(filter).collect(Collectors.toList());
 	}
 
 	@Override
