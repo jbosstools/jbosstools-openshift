@@ -48,7 +48,7 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 	static final String PROPERTY_POD_PORT = "targetPort";
 
 	private final ServicePortAdapter model;
-	private final List<ServicePortAdapter> ports;
+	private final List<IServicePort> ports;
 
 	/**
 	 * Constructor
@@ -56,13 +56,12 @@ public class ServicePortDialog extends AbstractOpenShiftWizardPage {
 	 * @param message
 	 * @param ports
 	 */
-	public ServicePortDialog(final ServicePortAdapter model, final String message, final List<ServicePortAdapter> ports) {
+	public ServicePortDialog(final ServicePortAdapter model, final String message, final List<IServicePort> ports) {
 		super("Configure Service Ports", message, "", null);
 		this.model = model;
 		this.ports = ports;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doCreateControls(final Composite parent, final DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().margins(1, 1).applyTo(parent);

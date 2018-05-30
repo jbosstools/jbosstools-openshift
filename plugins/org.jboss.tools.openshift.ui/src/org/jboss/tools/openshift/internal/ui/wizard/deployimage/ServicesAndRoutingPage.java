@@ -10,15 +10,13 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.deployimage;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.DomainValidator;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.map.IObservableMap;
-import org.eclipse.core.databinding.observable.set.IObservableSet;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.property.Properties;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
@@ -31,8 +29,8 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.TableViewer;
@@ -46,12 +44,11 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.common.ui.databinding.ParametrizableWizardPageSupport;
 import org.jboss.tools.common.ui.databinding.ValueBindingBuilder;
@@ -77,9 +74,6 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 	private static final String PAGE_NAME = "Services && Routing Settings Page";
 	private static final String PAGE_TITLE = "Services && Routing Settings";
 	private static final String PAGE_DESCRIPTION = "";
-	private static final int NAME_COLUMN_INDEX = 0;
-	private static final int SERVICE_PORT_COLUMN_INDEX = 1;
-	private static final int POD_PORT_COLUMN_INDEX = 2;
 	private static final int ROUTE_PORT_COLUMN_INDEX = 3;
 	private IServiceAndRoutingPageModel model;
 
@@ -90,7 +84,6 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 		this.model = model;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doCreateControls(Composite parent, DataBindingContext dbc) {
 		GridLayoutFactory.fillDefaults().margins(10, 10).applyTo(parent);
@@ -126,27 +119,27 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 		ValueBindingBuilder.bind(routeHostnameObservable).converting(new TrimmingStringConverter())
 				.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTE_HOSTNAME).observe(model)).in(dbc);
 
-		final IObservableList<IServicePort> portsObservable = 
-				BeanProperties.list(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
-		final IObservableValue<IServicePort> routingPortObservable = 
-				BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_ROUTING_PORT).observe(model);
-
 		MultiValidator validator = new MultiValidator() {
 
 			@Override
 			protected IStatus validate() {
 				IStatus status = ValidationStatus.ok();
-
-				final boolean isAddRoute = addRouteModelObservable.getValue();
-				final String hostName = routeHostnameObservable.getValue();
-				final int numOfPorts = portsObservable.size();
-				final IServicePort routingPort = routingPortObservable.getValue();
+				boolean isAddRoute = addRouteModelObservable.getValue();
+				String hostName = routeHostnameObservable.getValue();
+				final IObservableList<IServicePort> portsObservable = BeanProperties
+						.list(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
+				final IServicePort routingPort = (IServicePort) BeanProperties
+						.value(IServiceAndRoutingPageModel.PROPERTY_ROUTING_PORT).observe(model).getValue();
 
 				if (isAddRoute) {
-					status = validateHostName(status, hostName);
-					if (!status.matches(IStatus.ERROR) 
-							&& isAddRoute 
-							&& (numOfPorts > 1)
+					if (StringUtils.isBlank(hostName)) {
+						status = ValidationStatus
+								.info(NLS.bind(OpenShiftUIMessages.EmptyHostNameErrorMessage, hostName));
+					} else if (!DomainValidator.getInstance(true).isValid(hostName)) {
+						status = ValidationStatus
+								.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, hostName));
+					}
+					if (!status.matches(IStatus.ERROR) && isAddRoute && (portsObservable.size() > 1)
 							&& (routingPort == null)) {
 						if (status.matches(IStatus.INFO)) {
 							status = ValidationStatus
@@ -155,17 +148,6 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 							status = ValidationStatus.info(OpenShiftUIMessages.RoundRobinRoutingMessage);
 						}
 					}
-				}
-				return status;
-			}
-
-			private IStatus validateHostName(IStatus status, final String hostName) {
-				if (StringUtils.isBlank(hostName)) {
-					status = ValidationStatus
-							.info(NLS.bind(OpenShiftUIMessages.EmptyHostNameErrorMessage, hostName));
-				} else if (!DomainValidator.getInstance(true).isValid(hostName)) {
-					status = ValidationStatus
-							.error(NLS.bind(OpenShiftUIMessages.InvalidHostNameErrorMessage, hostName));
 				}
 				return status;
 			}
@@ -182,28 +164,46 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 		Label label = new Label(container, SWT.NONE);
 		label.setText("Service Ports:");
 		label.setToolTipText("The exposed ports of the image.");
-		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).span(2, 1)
-			.applyTo(label);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(2, 1).applyTo(label);
 		Composite tableContainer = new Composite(container, SWT.NONE);
 
-		this.portsViewer = createTable(tableContainer);
+		IObservableList<IServicePort> portsObservable = BeanProperties
+				.list(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
+		portsViewer = createTable(tableContainer);
 
-		GridDataFactory.fillDefaults()
-			.span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true)
-			.applyTo(tableContainer);
+		ObservableListContentProvider contentProvider = new ObservableListContentProvider();
+		portsViewer.setContentProvider(contentProvider);
+		ObservableMapLabelProvider labelProvider = new ObservableMapLabelProvider(
+				Properties.observeEach(contentProvider.getKnownElements(),
+						BeanProperties.values(ServicePortAdapter.NAME, ServicePortAdapter.PORT,
+								ServicePortAdapter.TARGET_PORT,
+								/* ROUTE_PORT_COLUMN_INDEX = 3 */ ServicePortAdapter.ROUTE_PORT))) {
+			@Override
+			public Image getColumnImage(Object element, int columnIndex) {
+				if (columnIndex == ROUTE_PORT_COLUMN_INDEX) {
+					Object selected = attributeMaps[columnIndex].get(element);
+					return selected != null && (boolean) selected ? OpenShiftImages.CHECKED_IMG
+							: OpenShiftImages.UNCHECKED_IMG;
+				}
+				return null;
+			}
 
-		@SuppressWarnings("unchecked")
-		IObservableList<IServicePort> portsObservable = 
-				BeanProperties.list(IServiceAndRoutingPageModel.PROPERTY_SERVICE_PORTS).observe(model);
+			@Override
+			public String getColumnText(Object element, int columnIndex) {
+				if (columnIndex != ROUTE_PORT_COLUMN_INDEX) {
+					Object result = attributeMaps[columnIndex].get(element);
+					return result == null ? "" : result.toString(); //$NON-NLS-1$
+				}
+				return null;
+			}
+		};
+		portsViewer.setLabelProvider(labelProvider);
+		GridDataFactory.fillDefaults().span(1, 5).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(tableContainer);
+		ValueBindingBuilder.bind(ViewerProperties.singleSelection().observe(portsViewer))
+				.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
+				.in(dbc);
+
 		portsViewer.setInput(portsObservable);
-		@SuppressWarnings("unchecked")
-		IObservableValue<IServicePort> selectedServicePortObservable = 
-				BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model);
-		ValueBindingBuilder
-			.bind(ViewerProperties.singleSelection().observe(portsViewer))
-			.to(selectedServicePortObservable)
-			.in(dbc);
 		dbc.addValidationStatusProvider(new MultiValidator() {
 
 			@Override
@@ -222,13 +222,10 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).applyTo(btnEdit);
 		btnEdit.setText("Edit...");
 		btnEdit.setToolTipText("Edit a port to be exposed by the service.");
-		btnEdit.addSelectionListener(new EditServicePortHandler());
-		ValueBindingBuilder
-			.bind(WidgetProperties.enabled().observe(btnEdit))
-			.notUpdatingParticipant()
-			.to(selectedServicePortObservable)
-			.converting(new IsNotNull2BooleanConverter())
-			.in(dbc);
+		btnEdit.addSelectionListener(new EditHandler());
+		ValueBindingBuilder.bind(WidgetProperties.enabled().observe(btnEdit)).notUpdatingParticipant()
+				.to(BeanProperties.value(IServiceAndRoutingPageModel.PROPERTY_SELECTED_SERVICE_PORT).observe(model))
+				.converting(new IsNotNull2BooleanConverter()).in(dbc);
 		UIUtils.setDefaultButtonWidth(btnEdit);
 
 		Button btnReset = new Button(container, SWT.PUSH);
@@ -237,6 +234,7 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 		btnReset.setToolTipText("Resets the list of ports to the exposed ports of the image.");
 		btnReset.addSelectionListener(onReset());
 		UIUtils.setDefaultButtonWidth(btnReset);
+
 	}
 
 	private MouseListener onTableCellClicked() {
@@ -244,37 +242,22 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 
 			@Override
 			public void mouseUpCell(MouseEvent event) {
-				ServicePortAdapter port = getClickedPort(event);
-				if (port == null) {
-					return;
-				}
-				port.setRoutePort(true);
-				model.setRoutingPort(port);
-				model.setSelectedServicePort(port);
-			}
-
-			private ServicePortAdapter getClickedPort(MouseEvent event) {
-				TableItem item = getItem(event);
-				if (item == null) {
-					return null;
-				}
-				if (item.getData() instanceof ServicePortAdapter) {
-					return (ServicePortAdapter) item.getData();
-				}
-				return null;
-			}
-
-			private TableItem getItem(MouseEvent event) {
-				Point pt = new Point(event.x, event.y);
-				if (!(event.widget instanceof Table)) {
-					return null;
-				}
-				return ((Table) event.widget).getItem(pt);
+				IServicePort port = model.getSelectedServicePort();
+				ServicePortAdapter target = new ServicePortAdapter((ServicePortAdapter) port);
+				target.setRoutePort(!target.isRoutePort());
+				target.setName(NLS.bind("{0}-tcp", target.getPort()));
+				model.updateServicePort(port, target);
+				model.setSelectedServicePort(target);
+				Display.getDefault().asyncExec(() -> {
+					if (portsViewer != null && portsViewer.getTable() != null && !portsViewer.getTable().isDisposed()) {
+						portsViewer.refresh();
+					}
+				});
 			}
 		};
 	}
 
-	class EditServicePortHandler extends SelectionAdapter implements IDoubleClickListener {
+	class EditHandler extends SelectionAdapter implements IDoubleClickListener {
 
 		@Override
 		public void doubleClick(DoubleClickEvent event) {
@@ -288,11 +271,13 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 
 		public void handleEvent() {
 			String message = "Edit the port to be exposed by the service";
-			final ServicePortAdapter port = model.getSelectedServicePort();
+			final IServicePort port = model.getSelectedServicePort();
 			final ServicePortAdapter target = new ServicePortAdapter((ServicePortAdapter) port);
 			ServicePortDialog dialog = new ServicePortDialog(target, message, model.getServicePorts());
 			if (Window.OK == dialog.open()) {
-				port.update(target);
+				target.setName(NLS.bind("{0}-tcp", target.getPort()));
+				model.updateServicePort(port, target);
+				model.setSelectedServicePort(target);
 			}
 		}
 	}
@@ -302,96 +287,40 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 
-		TableViewer viewer = new TableViewerBuilder(table, tableContainer)
-			.column("Name")
-				.align(SWT.LEFT).weight(2).minWidth(50).buildColumn()
-			.column("Service Port")
-				.align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
-			.column("Pod Port")
-				.align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
-			.column("Used by route").align(SWT.LEFT).weight(1).buildColumn()
-				.buildViewer();
+		TableViewer viewer = new TableViewerBuilder(table, tableContainer).column("Name").align(SWT.LEFT).weight(2)
+				.minWidth(50).buildColumn().column("Service Port").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
+				.column("Pod Port").align(SWT.LEFT).weight(1).minWidth(25).buildColumn()
+				.column(new ColumnLabelProvider() {
+					@Override
+					public Image getImage(Object element) {
+						boolean selected = ((ServicePortAdapter) element).isRoutePort();
+						return selected ? OpenShiftImages.CHECKED_IMG : OpenShiftImages.UNCHECKED_IMG;
+					}
 
-		ObservableListContentProvider contentProvider = new ObservableListContentProvider();
-        viewer.setContentProvider(contentProvider);
+					@Override
+					public String getText(Object element) {
+						return null;
+					}
 
-        viewer.setLabelProvider(createLabelProvider(contentProvider));
-		viewer.setComparer(new InstanceComparer());
-		viewer.addDoubleClickListener(new EditServicePortHandler());
+				}).name("Used by route").align(SWT.LEFT).weight(1).buildColumn().buildViewer();
+		viewer.addDoubleClickListener(new EditHandler());
+		/*
+		 * required because otherwise values are cached and causes the ObservableMapLabelProvider
+		 * not to be updated because remove are not propagated.
+		 */
+		viewer.setComparer(new IElementComparer() {
+
+			@Override
+			public int hashCode(Object element) {
+				return System.identityHashCode(element);
+			}
+
+			@Override
+			public boolean equals(Object a, Object b) {
+				return a == b;
+			}
+		});
 		return viewer;
-	}
-
-	/**
-	 * Creates a label provider for the service ports table.
-	 * 
-	 * It's using an {@link ObservableMapLabelProvider} which is able listen to
-	 * changes in properties in a table item (bean). Thus there's no need to refresh
-	 * the table manually (or similar workarounds that manually fire list changes
-	 * when an item is updated).
-	 * 
-	 * <br>
-	 * <br>
-	 * - Warning: ObservableMapLabelProvider can only handle changes in existing
-	 * items. See the map change listener (that listens to changes in properties of
-	 * the table items:
-	 * 
-	 * <pre>
-	 * 	private IMapChangeListener mapChangeListener = new IMapChangeListener() {
-	 *
-	 *		public void handleMapChange(MapChangeEvent event) {
-	 *			Set affectedElements = event.diff.getChangedKeys();
-	 *			LabelProviderChangedEvent newEvent = new LabelProviderChangedEvent(
-	 *					ObservableMapLabelProvider.this, affectedElements.toArray());
-	 *			fireLabelProviderChanged(newEvent);
-	 *		}
-	 *  }
-	 * </pre>
-	 * 
-	 * 
-	 * 
-	 * @return
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private IBaseLabelProvider createLabelProvider(ObservableListContentProvider contentProvider) {
-		IObservableSet<ServicePortAdapter> knownElements = contentProvider.getKnownElements();
-		final IObservableMap name = BeanProperties.value(ServicePortAdapter.class, ServicePortAdapter.NAME)
-				.observeDetail(knownElements);
-		final IObservableMap port = BeanProperties.value(ServicePortAdapter.class, ServicePortAdapter.PORT)
-				.observeDetail(knownElements);
-		final IObservableMap targetPort = BeanProperties.value(ServicePortAdapter.class, ServicePortAdapter.TARGET_PORT)
-				.observeDetail(knownElements);
-		final IObservableMap routePort = BeanProperties.value(ServicePortAdapter.class, ServicePortAdapter.ROUTE_PORT)
-				.observeDetail(knownElements);
-		IObservableMap[] labelMaps = { name, port, targetPort, routePort };
-
-        return new ObservableMapLabelProvider(labelMaps) {
-
-			@Override
-			public String getColumnText(Object element, int columnIndex) {
-				Object label = null;
-				if (columnIndex == NAME_COLUMN_INDEX) {
-					label = name.get(element);
-				} else if (columnIndex == SERVICE_PORT_COLUMN_INDEX) {
-					label = port.get(element);
-				} else if (columnIndex == POD_PORT_COLUMN_INDEX) {
-					label = targetPort.get(element);
-				} else if (columnIndex == ROUTE_PORT_COLUMN_INDEX) {
-					// image column
-				}
-				return ObjectUtils.toString(label);
-			}
-
-			@Override
-			public Image getColumnImage(Object element, int columnIndex) {
-				if (columnIndex != ROUTE_PORT_COLUMN_INDEX) {
-					// image only in routing port column
-					return null;
-				}
-				boolean checked = Boolean.TRUE.equals(routePort.get(element));
-				return checked ? OpenShiftImages.CHECKED_IMG : OpenShiftImages.UNCHECKED_IMG;
-			}
-			
-        };
 	}
 
 	private SelectionListener onReset() {
@@ -409,32 +338,11 @@ public class ServicesAndRoutingPage extends AbstractOpenShiftWizardPage {
 	}
 
 	/**
-	 * Allow Finish for info status, disallow for error and cancel
+	 * Allow Finish for info statuses.
 	 */
 	@Override
 	protected void setupWizardPageSupport(DataBindingContext dbc) {
 		ParametrizableWizardPageSupport.create(IStatus.ERROR | IStatus.CANCEL, this, dbc);
-	}
-	
-	/**
-	 * ElementComparer that's based on instance equality.
-	 * 
-	 * Viewer item identity has to be based on instance equality (not logical
-	 * equality). This is because updates for existing items are misinterpreted as
-	 * new items (an updated item is equal in terms of instance identity while it's
-	 * not equal in terms of data within it)
-	 */
-	private static class InstanceComparer implements IElementComparer {
-
-		@Override
-		public boolean equals(Object thisElement, Object thatElement) {
-			return thisElement == thatElement;
-		}
-
-		@Override
-		public int hashCode(Object element) {
-			return System.identityHashCode(element);
-		}
 	}
 
 }

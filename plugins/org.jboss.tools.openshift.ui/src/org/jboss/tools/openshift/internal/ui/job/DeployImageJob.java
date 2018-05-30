@@ -318,7 +318,7 @@ public class DeployImageJob extends AbstractDelegatingMonitorJob implements IRes
 
 	private IService stubService(IResourceFactory factory, String name, String selectorKey, String selectorValue) {
 		IService service = factory.stub(ResourceKind.SERVICE, name, parameters.getProject().getName());
-		service.setPorts(new ArrayList<IServicePort>(parameters.getServicePorts()));
+		service.setPorts(parameters.getServicePorts());
 		service.setSelector(selectorKey, selectorValue);
 		return service;
 	}
