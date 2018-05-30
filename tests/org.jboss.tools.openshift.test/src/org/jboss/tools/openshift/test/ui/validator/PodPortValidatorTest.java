@@ -13,11 +13,12 @@ package org.jboss.tools.openshift.test.ui.validator;
 import java.util.Arrays;
 
 import org.jboss.tools.openshift.internal.ui.wizard.deployimage.PodPortValidator;
-import org.jboss.tools.openshift.internal.ui.wizard.deployimage.ServicePortAdapter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.openshift.restclient.model.IServicePort;
 
 /**
  * 
@@ -29,17 +30,14 @@ public class PodPortValidatorTest extends AbstractValidatorTest {
 	static final String CURRENT_VALUE = "999";
 
 	static PodPortValidator createPodPortValidator() {
-		ServicePortAdapter port1 = mockServicePort(1000, "3000");
-		ServicePortAdapter port2 = mockServicePort(2000, "home");
-
-		return new PodPortValidator(CURRENT_VALUE, Arrays.asList(port1, port2));
-	}
-
-	private static ServicePortAdapter mockServicePort(int port, String targetPort) {
-		ServicePortAdapter port1 = Mockito.mock(ServicePortAdapter.class);
+		IServicePort port1 = Mockito.mock(IServicePort.class);
 		Mockito.when(port1.getPort()).thenReturn(1000);
-		Mockito.when(port1.getTargetPort()).thenReturn(targetPort);
-		return port1;
+		Mockito.when(port1.getTargetPort()).thenReturn("3000");
+
+		IServicePort port2 = Mockito.mock(IServicePort.class);
+		Mockito.when(port2.getPort()).thenReturn(2000);
+		Mockito.when(port2.getTargetPort()).thenReturn("home");
+		return new PodPortValidator(CURRENT_VALUE, Arrays.asList(port1, port2));
 	}
 
 	public PodPortValidatorTest() {
