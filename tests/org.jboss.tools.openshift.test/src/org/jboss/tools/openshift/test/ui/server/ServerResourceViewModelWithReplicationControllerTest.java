@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.jboss.tools.openshift.common.core.connection.ConnectionsRegistrySingleton;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
@@ -69,7 +70,7 @@ public class ServerResourceViewModelWithReplicationControllerTest {
 		assertThat(connection).isEqualTo(this.connection);
 	}
 
-	@Test
+    @Test
 	public void shouldNotLoadResourcesBeforeBeingToldTo() {
 		// given
 		Connection connection = ResourceMocks.createConnection("http://10.1.2.2:8443", "dev@paas.redhat.com");
@@ -77,7 +78,7 @@ public class ServerResourceViewModelWithReplicationControllerTest {
 		// when
 		// then
 		verify(connection, never()).getResources(any());
-		verify(connection, never()).getResources(any(), any());
+		verify(connection, never()).getResources(any(), any(String.class));
 	}
 
 	@Test
