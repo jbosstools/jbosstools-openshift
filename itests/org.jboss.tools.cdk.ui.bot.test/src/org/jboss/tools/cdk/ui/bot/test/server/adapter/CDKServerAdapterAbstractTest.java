@@ -53,6 +53,7 @@ import org.jboss.tools.cdk.reddeer.requirements.RemoveCDKServersRequirement.Remo
 import org.jboss.tools.cdk.reddeer.server.exception.CDKServerException;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServer;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
+import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK32ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.CDK3ServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.MinishiftServerEditor;
 import org.jboss.tools.cdk.reddeer.server.ui.editor.launch.configuration.CDKLaunchConfigurationDialog;
@@ -180,6 +181,16 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 		}
 		launchConfig.ok();
 	} 
+	
+	protected void skipRegistrationViaFlag(Server server, boolean checked) {
+		server.open();
+		CDK32ServerEditor editor = new CDK32ServerEditor(server.getLabel().getName());
+		editor.getAddSkipRegistrationOnStartCheckBox().toggle(checked);
+		new WaitUntil(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.SHORT, false);
+		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
+		CDKTestUtils.performSave(editor.getEditorPart());
+		editor.close();
+	}
 	
 	protected void skipRegistration(Server server) {
 		addParamsToCDKLaunchConfig(server, SKIP_REGISTRATION); 

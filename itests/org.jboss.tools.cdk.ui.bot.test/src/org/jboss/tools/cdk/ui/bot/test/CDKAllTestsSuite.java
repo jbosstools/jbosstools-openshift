@@ -25,6 +25,11 @@ import org.jboss.tools.cdk.ui.bot.test.server.editor.launch.CDKLaunchConfigurati
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK32ServerWizardTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.CDK3ServerWizardTest;
 import org.jboss.tools.cdk.ui.bot.test.server.wizard.MinishiftServerWizardTest;
+import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.CDK32DownloadRuntimeTest;
+import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.CDK3DownloadRuntimeTest;
+import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.DownloadContainerRuntimeDefaultSettingsTest;
+import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.DownloadRuntimesWizardTest;
+import org.jboss.tools.cdk.ui.bot.test.server.wizard.download.MinishiftDownloadRuntimeTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -37,6 +42,13 @@ import org.junit.runners.Suite;
 	CDK3ServerWizardTest.class,
 	CDK32ServerWizardTest.class,
 	MinishiftServerWizardTest.class,
+	
+	// Downloading and installation of CDK/Minishift runtimes via new server wizard
+	CDK3DownloadRuntimeTest.class,
+	CDK32DownloadRuntimeTest.class,
+	MinishiftDownloadRuntimeTest.class,
+	DownloadContainerRuntimeDefaultSettingsTest.class,
+	DownloadRuntimesWizardTest.class,
 	
 	// Server editor tests by server adapter type
 	CDK3ServerEditorTest.class,

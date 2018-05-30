@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.ui.bot.test.utils;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -35,6 +37,7 @@ import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.condition.WidgetIsFound;
 import org.eclipse.reddeer.core.matcher.WithMnemonicTextMatcher;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
+import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.Server;
 import org.eclipse.reddeer.eclipse.wst.server.ui.cnf.ServersView2;
 import org.eclipse.reddeer.jface.exception.JFaceLayerException;
@@ -48,7 +51,9 @@ import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.EditorHandler;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.eclipse.ui.IEditorPart;
+import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
+import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKException;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
@@ -161,6 +166,21 @@ public class CDKTestUtils {
 		}
 		page.apply();
 		dialog.cancel();
+	}
+	
+	public static void assertSameMessage(final NewMenuWizard dialog, final String message) {
+		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
+		String description = dialog.getMessage();
+		assertTrue("Expected page description should contain text: '" + message + 
+				"' but has: '" + description + "'", 
+				description.contains(message));		
+	}
+	
+	public static void assertDiffMessage(final NewMenuWizard dialog, final String message) {
+		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
+		String description = dialog.getMessage();
+		assertFalse("Page descrition should not contain: '" + message + "'", 
+				description.contains(message));
 	}
 	
 	public static String findFileOnPath(String path, String fileToFind) {

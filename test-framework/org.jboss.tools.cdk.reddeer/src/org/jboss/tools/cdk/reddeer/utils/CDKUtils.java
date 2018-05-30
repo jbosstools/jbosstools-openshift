@@ -32,6 +32,10 @@ import org.jboss.tools.cdk.reddeer.core.enums.CDKServerAdapterType;
  */
 public final class CDKUtils {
 
+	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win"); 
+	
+	public static final boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux"); 
+	
 	private static final Logger log = Logger.getLogger(CDKUtils.class);
 
 	private CDKUtils() {}

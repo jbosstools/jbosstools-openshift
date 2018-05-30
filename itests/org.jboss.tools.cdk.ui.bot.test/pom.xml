@@ -38,15 +38,15 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>cdk32-all-tests</id>
+			<id>minishift-tests</id>
 			<properties>
-				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDK32AllTestsSuite</suiteClass>
+				<suiteClass>org.jboss.tools.cdk.ui.bot.test.MinishiftAllTestsSuite</suiteClass>
 			</properties>
 		</profile>
 		<profile>
-			<id>minishift-all-tests</id>
+			<id>ui-tests</id>
 			<properties>
-				<suiteClass>org.jboss.tools.cdk.ui.bot.test.MinishiftAllTestsSuite</suiteClass>
+				<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDKUITestsSuite</suiteClass>
 			</properties>
 		</profile>
 	</profiles>

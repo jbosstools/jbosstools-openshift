@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.cdk.reddeer.core.label;
 
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
+
 /**
  * Encapsulating class for statically accessed subclasses with labels
  * @author odockal
@@ -18,7 +20,7 @@ package org.jboss.tools.cdk.reddeer.core.label;
 public class CDKLabel {
 	
 	public static class Job {
-		public static final String MINISHIFT_VALIDATION_JOB = "Validate minishift location"; 	
+		public static final String MINISHIFT_VALIDATION_JOB = "Validate minishift location";
 		public static final String REFRESHING_SERVER_ADAPTER_LIST = "Refreshing server adapter list";
 	}
 	
@@ -40,6 +42,7 @@ public class CDKLabel {
 		public static final String NEW_SERVER_WIZARD = "New Server";
 		public static final String WARNING_FOLDER_EXISTS = "Warning: Folder already exists!";
 		public static final String WARNING_CDK_NOT_INICIALIZED = "Warning: CDK has not been properly initialized!";
+		public static final String DOWNLOAD_RUNTIMES = "Download Runtimes";
 	}
 	
 	public static class Labels {
@@ -59,6 +62,10 @@ public class CDKLabel {
 		public static final String ADD_CREDENTIAL = "Add a Credential";
 		public static final String FOLDER = "Folder: ";
 		public static final String SECURE_STORAGE = "Secure Storage";
+	}
+	
+	public static class Links {
+		public static final String DOWNLOAD_AND_INSTALL_RUNTIME = "Download and install runtime...";
 	}
 	
 	public static class Sections {
@@ -93,6 +100,18 @@ public class CDKLabel {
 		public static final String CDK3_SERVER_NAME = "Red Hat Container Development Kit 3"; 
 		public static final String CDK32_SERVER_NAME = "Red Hat Container Development Kit 3.2+"; 
 		public static final String MINISHIFT_SERVER_NAME = "Minishift 1.7+"; 
+	}
+	
+	public static class Messages {
+		// page description messages
+		
+		public static final String NO_USER = "Red Hat Access credentials"; 
+		public static final String DOES_NOT_EXIST = "does not exist"; 
+		public static final String CANNOT_RUN_PROGRAM = "Cannot run program"; 
+		public static final String NOT_EXECUTABLE = CDKUtils.IS_WINDOWS ? CANNOT_RUN_PROGRAM : "is not executable"; 
+		public static final String CHECK_MINISHIFT_VERSION = "Unknown error while checking minishift version"; 
+		public static final String NOT_COMPATIBLE = "is not compatible with this server adapter";
+		public static final String SERVER_ADAPTER_REPRESENTING = "server adapter representing";
 	}
 	
 	public static class Others {
