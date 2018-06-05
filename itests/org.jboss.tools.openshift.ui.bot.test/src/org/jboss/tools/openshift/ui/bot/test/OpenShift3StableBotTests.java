@@ -29,6 +29,7 @@ import org.jboss.tools.openshift.ui.bot.test.connection.v3.ConnectionWizardHandl
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.CreateNewConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.OpenNewConnectionWizardTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.RemoveConnectionTest;
+import org.jboss.tools.openshift.ui.bot.test.connection.v3.SetOCForNewConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.connection.v3.StoreConnectionTest;
 import org.jboss.tools.openshift.ui.bot.test.integration.docker.DeployDockerImageTest;
 import org.jboss.tools.openshift.ui.bot.test.integration.docker.DeployVariousDockerImagesTest;
@@ -50,6 +51,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(RedDeerSuite.class)
 @SuiteClasses({	
 	OCBinaryLocationTest.class,
+	SetOCForNewConnectionTest.class,
 	
 	// Connection
 	OpenNewConnectionWizardTest.class,

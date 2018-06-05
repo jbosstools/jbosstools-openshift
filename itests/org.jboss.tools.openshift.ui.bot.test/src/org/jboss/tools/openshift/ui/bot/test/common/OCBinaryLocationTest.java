@@ -35,7 +35,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(RedDeerSuite.class)
 @OpenPerspective(JBossPerspective.class)
-@OCBinary(cleanup=false, setOCInPrefs=true)
+@OCBinary(cleanup=true, setOCInPrefs=true)
 public class OCBinaryLocationTest extends AbstractTest {
 	
 	private WorkbenchPreferenceDialog dialog;

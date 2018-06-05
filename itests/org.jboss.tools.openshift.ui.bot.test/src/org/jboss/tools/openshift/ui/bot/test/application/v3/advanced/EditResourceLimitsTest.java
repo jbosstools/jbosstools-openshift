@@ -102,7 +102,7 @@ public class EditResourceLimitsTest extends AbstractTest {
 	}
 
 	public void testViaContextMenuOfService(int index, String defaultSuffix) {
-		Service service = project.getService(OpenShiftResources.NODEJS_SERVICE);
+		Service service = project.getServicesWithName(OpenShiftResources.NODEJS_SERVICE).get(0);
 		assertNotNull(service);
 		OpenShiftResource deploymentConfig = 
 				project.getOpenShiftResource(Resource.DEPLOYMENT_CONFIG, OpenShiftResources.NODEJS_APP_DEPLOYMENT_CONFIG);

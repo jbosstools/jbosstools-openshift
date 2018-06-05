@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.reddeer.wizard.v3;
 
-import static org.junit.Assert.fail;
-
-import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.common.matcher.WithClassNameMatcher;
@@ -170,7 +167,11 @@ public class OpenShift3ConnectionWizard {
 
 	public DefaultText getOCLocationLabel() {
 		openAdvancedSection();
-		return new DefaultText(4, new WithClassNameMatcher("org.eclipse.swt.widgets.Text"));
+		if (getAuthenticationMethod().getSelection().equals(AuthenticationMethod.OAUTH.toString())) {
+			return new DefaultText(3, new WithClassNameMatcher("org.eclipse.swt.widgets.Text"));
+		} else {
+			return new DefaultText(4, new WithClassNameMatcher("org.eclipse.swt.widgets.Text"));
+		}
 	}
 
 	public CheckBox getOverrideOCLocationButton() {
@@ -249,14 +250,19 @@ public class OpenShift3ConnectionWizard {
 	}
 	
 	public void finishAndHandleCertificate() {
+		finishAndHandleCertificate(false);
+	}
+	
+	public void finishAndHandleCertificate(boolean mustAcceptCert) {
 		new WaitUntil(new ControlIsEnabled(new FinishButton()), TimePeriod.LONG);
 
 		new FinishButton().click();
-		try {
-			new DefaultShell(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
-			new PushButton("Yes").click(); 
-		} catch (RedDeerException ex) {
-			fail("Aceptance of SSL certificate failed."); 
+		ShellIsAvailable shellCert = new ShellIsAvailable(OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE);
+		new WaitUntil(shellCert, TimePeriod.DEFAULT, false);
+		if (shellCert.getResult() != null) {
+			new PushButton("Yes").click();
+		} else if (mustAcceptCert) {
+			throw new OpenShiftToolsException("Expected " + OpenShiftLabel.Shell.UNTRUSTED_SSL_CERTIFICATE + " dialog was not offered");
 		}
 
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.NEW_CONNECTION), TimePeriod.LONG);
