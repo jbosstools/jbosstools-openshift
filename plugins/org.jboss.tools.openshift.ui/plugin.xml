@@ -750,7 +750,9 @@
                      mnemonic="B" />
             <command
                      commandId="org.jboss.tools.openshift.ui.command.editresource"
-                     style="push" />
+                     style="push"
+                     label="Edit Resource..."
+                     icon="icons/resource.gif"/>
             <command
                      commandId="org.eclipse.ui.edit.delete"
                      style="push" />
