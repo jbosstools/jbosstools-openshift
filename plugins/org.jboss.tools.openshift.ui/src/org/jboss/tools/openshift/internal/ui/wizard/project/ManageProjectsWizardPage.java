@@ -172,7 +172,7 @@ public class ManageProjectsWizardPage extends AbstractOpenShiftWizardPage {
 					return;
 				}
 				boolean confirm = MessageDialog.openConfirm(getShell(), OpenShiftUIMessages.ResourceDeletionDialogTitle,
-						NLS.bind(OpenShiftUIMessages.ResourceDeletionConfirmation, project.getName()));
+						NLS.bind(OpenShiftUIMessages.ProjectDeletionConfirmation, project.getName()));
 				if (!confirm) {
 					return;
 				}
