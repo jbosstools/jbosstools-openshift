@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.ui.wizard.AbstractOpenShiftWizard;
 import org.jboss.tools.openshift.core.connection.Connection;
+import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 
 import com.openshift.restclient.model.IProject;
 
@@ -30,10 +31,13 @@ public class ManageProjectsWizard extends AbstractOpenShiftWizard<ManageProjects
 		this(null, connection);
 	}
 
+	public ManageProjectsWizard(IProject project) {
+		this(project, ConnectionsRegistryUtil.getConnectionFor(project));
+	}
+
 	public ManageProjectsWizard(IProject project, Connection connection) {
 		super("OpenShift Projects", new ManageProjectsWizardPageModel(project, connection));
 		this.description = NLS.bind("Manage projects for connection {0}", connection.toString(), connection);
-		setNeedsProgressMonitor(true);
 	}
 
 	@Override

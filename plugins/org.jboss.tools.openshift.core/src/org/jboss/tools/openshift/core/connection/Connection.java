@@ -47,14 +47,11 @@ import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.ICapability;
-import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IResourceBuilder;
-import com.openshift.restclient.utils.ResourceStatus;
 
 public class Connection extends ObservablePojo implements IRefreshable, IOpenShiftConnection {
 
