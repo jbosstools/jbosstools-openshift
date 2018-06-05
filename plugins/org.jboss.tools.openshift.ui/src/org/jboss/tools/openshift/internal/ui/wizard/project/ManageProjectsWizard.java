@@ -31,10 +31,6 @@ public class ManageProjectsWizard extends AbstractOpenShiftWizard<ManageProjects
 		this(null, connection);
 	}
 
-	public ManageProjectsWizard(IProject project) {
-		this(project, ConnectionsRegistryUtil.getConnectionFor(project));
-	}
-
 	public ManageProjectsWizard(IProject project, Connection connection) {
 		super("OpenShift Projects", new ManageProjectsWizardPageModel(project, connection));
 		this.description = NLS.bind("Manage projects for connection {0}", connection.toString(), connection);
