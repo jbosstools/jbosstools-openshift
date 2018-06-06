@@ -11,7 +11,6 @@
 package org.jboss.tools.openshift.core.connection;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,14 +46,11 @@ import com.openshift.restclient.IResourceFactory;
 import com.openshift.restclient.ISSLCertificateCallback;
 import com.openshift.restclient.NotFoundException;
 import com.openshift.restclient.OpenShiftException;
-import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.authorization.IAuthorizationContext;
 import com.openshift.restclient.authorization.UnauthorizedException;
 import com.openshift.restclient.capability.ICapability;
-import com.openshift.restclient.model.IProject;
 import com.openshift.restclient.model.IResource;
 import com.openshift.restclient.model.IResourceBuilder;
-import com.openshift.restclient.utils.ResourceStatus;
 
 public class Connection extends ObservablePojo implements IRefreshable, IOpenShiftConnection {
 
@@ -72,9 +68,7 @@ public class Connection extends ObservablePojo implements IRefreshable, IOpenShi
 	private String authScheme;
 	private Map<String, Object> extendedProperties = new HashMap<>();
 
-	//TODO modify default client to take url and throw lib specific exception
-	public Connection(String url, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback)
-			throws MalformedURLException {
+	public Connection(String url, ICredentialsPrompter credentialsPrompter, ISSLCertificateCallback sslCertCallback) {
 		this(new ClientBuilder(url).sslCertificateCallback(sslCertCallback).build(), credentialsPrompter);
 	}
 

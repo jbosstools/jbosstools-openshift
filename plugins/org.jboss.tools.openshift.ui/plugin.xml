@@ -500,7 +500,9 @@
                         <iterate>
                             <or>
                                 <adapt
-                                       type="org.jboss.tools.openshift.core.connection.Connection"/>
+                                       type="com.openshift.restclient.model.IProject"/>
+                                <adapt
+                                       type="org.jboss.tools.openshift.core.connection.IOpenShiftConnection"/>
                             </or>
                         </iterate>
                     </and>
