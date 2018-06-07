@@ -49,6 +49,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DisposeUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.models.IReplicationControllerWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IResourceWrapper;
 import org.jboss.tools.openshift.internal.ui.models.IServiceWrapper;
 import org.jboss.tools.openshift.internal.ui.utils.ResourceWrapperUtils;
@@ -75,15 +76,15 @@ public class ScaleDeploymentHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IDeploymentConfig dc = getDeploymentConfig(getSelectedElement(event, IResourceWrapper.class));
-		if (dc == null) {
+	    IReplicationController rc = getReplicationController(getSelectedElement(event, IResourceWrapper.class));
+		if (rc == null) {
 			IResource resource = ResourceWrapperUtils
 					.getResource(UIUtils.getFirstElement(HandlerUtil.getCurrentSelection(event)));
 			return OpenShiftUIActivator.statusFactory()
-					.errorStatus(NLS.bind("Could not scale {0}: Could not find deployment config",
+					.errorStatus(NLS.bind("Could not scale {0}: Could not find replication controller",
 							resource == null ? "" : resource.getName()));
 		}
-		scaleUsing(event, dc, dc.getName());
+		scaleUsing(event, rc, rc.getName());
 		return null;
 	}
 
@@ -92,33 +93,33 @@ public class ScaleDeploymentHandler extends AbstractHandler {
 		return UIUtils.getFirstElement(selection, klass);
 	}
 
-	private IDeploymentConfig getDeploymentConfig(IResourceWrapper<?, ?> wrapper) {
+	private IReplicationController getReplicationController(IResourceWrapper<?, ?> wrapper) {
 		if (wrapper == null) {
 			return null;
 		}
 
-		IDeploymentConfig dc = null;
+		IReplicationController rc = null;
 		IResource wrapped = wrapper.getWrapped();
 		if (wrapper instanceof IServiceWrapper) {
 			// service selected
-			dc = getDeploymentConfig((IServiceWrapper) wrapper);
+		    rc = getDeploymentConfig((IServiceWrapper) wrapper);
 		} else if (wrapped instanceof IPod) {
 			// pod selected
-			dc = getDeploymentConfig((IPod) wrapped, wrapper);
+		    rc = getReplicationController((IPod) wrapped, wrapper);
 		} else if (wrapped instanceof IDeploymentConfig) {
 			// deployment config selected
 			// has to be tested before IReplicationController, IDeploymentConfig extends IReplicationController
-			dc = (IDeploymentConfig) wrapped;
+		    rc = (IDeploymentConfig) wrapped;
 		} else if (wrapped instanceof IReplicationController) {
 			// replication controller selected (deployment tab in properties)
 			// has to be tested after IDeploymentConfig, IDeploymentConfig extends IReplicationController
-			dc = getDeploymentConfig((IReplicationController) wrapped, wrapper);
+			rc = getDeploymentConfig((IReplicationController) wrapped, wrapper);
 		}
-		return dc;
+		return rc;
 	}
 
 	private IDeploymentConfig getDeploymentConfig(IReplicationController rc, IResourceWrapper<?, ?> wrapper) {
-		IDeploymentConfig dc = null;
+	    IDeploymentConfig dc = null;
 		IServiceWrapper service = ResourceWrapperUtils.getServiceWrapperFor(wrapper,
 				serviceWrapper -> ResourceUtils.areRelated(rc, (IService) serviceWrapper.getWrapped()));
 		if (service != null) {
@@ -128,14 +129,22 @@ public class ScaleDeploymentHandler extends AbstractHandler {
 		return dc;
 	}
 
-	private IDeploymentConfig getDeploymentConfig(IPod pod, IResourceWrapper<?, ?> wrapper) {
-		IDeploymentConfig dc = null;
+	private IReplicationController getReplicationController(IPod pod, IResourceWrapper<?, ?> wrapper) {
+	    IReplicationController rc = null;
 		if (!ResourceUtils.isBuildPod(pod)) {
 			IServiceWrapper service = ResourceWrapperUtils.getServiceWrapperFor(wrapper,
 					serviceWrapper -> ResourceUtils.areRelated(pod, (IService) serviceWrapper.getWrapped()));
-			dc = getDeploymentConfig(service);
+			if (service != null) {
+			    rc = getDeploymentConfig(service);
+			} else {
+			    if (wrapper.getParent() instanceof IReplicationControllerWrapper) {
+			        IReplicationControllerWrapper rcWrapper = (IReplicationControllerWrapper)wrapper.getParent();
+			        rc = rcWrapper.getWrapped();
+			    }
+			}
+			
 		}
-		return dc;
+		return rc;
 	}
 
 	private IDeploymentConfig getDeploymentConfig(IServiceWrapper service) {
