@@ -24,7 +24,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: jar
 Bundle-Localization: plugin
-Bundle-Vendor: JBoss by Red Hat
+Bundle-Vendor: Red Hat
 Export-Package: org.jboss.tools.openshift.reddeer.condition,
  org.jboss.tools.openshift.reddeer.condition.core,
  org.jboss.tools.openshift.reddeer.enums,
