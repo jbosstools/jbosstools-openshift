@@ -52,7 +52,7 @@ import org.junit.runner.RunWith;
 
 @OpenPerspective(value=JBossPerspective.class)
 @RunWith(RedDeerSuite.class)
-@OCBinary
+@OCBinary(setOCInPrefs=true)
 @RequiredBasicConnection
 @CleanConnection
 @RequiredProject
@@ -83,7 +83,7 @@ public class PortForwardingTest extends AbstractTest {
 		
 		startAllButton.click();
 		
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		new WaitWhile(new JobIsRunning(), false);
 		new WaitUntil(new ControlIsEnabled(okButton));
 
 		try {
@@ -91,7 +91,7 @@ public class PortForwardingTest extends AbstractTest {
 		} catch (WaitTimeoutExpiredException ex) {
 			fail("Button Start All should be disabled at this point.");
 		}
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		new WaitWhile(new JobIsRunning(), false);
 		new WaitWhile(new ControlIsEnabled(okButton), false);
 		stopAllButton = new PushButton(OpenShiftLabel.Button.STOP_ALL);
 		assertTrue("Button Stop All should be enabled at this point.", stopAllButton.isEnabled());
@@ -99,7 +99,7 @@ public class PortForwardingTest extends AbstractTest {
 		stopAllButton.click();
 		
 		
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		new WaitWhile(new JobIsRunning(), false);
 		new DefaultShell(OpenShiftLabel.Shell.APPLICATION_PORT_FORWARDING);
 		new WaitUntil(new ControlIsEnabled(okButton));
 
@@ -121,7 +121,7 @@ public class PortForwardingTest extends AbstractTest {
 				table.getItem("ping").getText(1).equals("8888"));
 		assertTrue("Default port should be used for http on first opening of Port forwarding dialog.", 
 				table.getItem("http").getText(1).equals("8080"));
-		new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
+		new WaitWhile(new JobIsRunning(), false);
 		checkBox.click();
 		
 		assertFalse("Free port port should be used for ping at this point.", 

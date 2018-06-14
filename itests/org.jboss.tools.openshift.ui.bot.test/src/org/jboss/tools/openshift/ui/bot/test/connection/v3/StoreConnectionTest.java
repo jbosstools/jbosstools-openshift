@@ -106,7 +106,7 @@ public class StoreConnectionTest extends AbstractTest {
 				return new BackButton().isEnabled();
 			}
 		};
-		new WaitUntil(backButtonIsEnabled);
+		new WaitUntil(backButtonIsEnabled, TimePeriod.LONG);
 		
 		new CancelButton().click();
 	}

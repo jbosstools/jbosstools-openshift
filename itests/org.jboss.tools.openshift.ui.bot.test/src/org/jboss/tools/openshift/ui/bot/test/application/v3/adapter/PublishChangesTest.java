@@ -154,6 +154,7 @@ public class PublishChangesTest extends AbstractTest  {
 	@AfterClass
 	public static void removeAdapterAndApplication() {
 		try {
+			OpenShiftUtils.killJobs();
 			new WaitWhile(new JobIsRunning(), TimePeriod.LONG);
 			new ServerAdapter(Version.OPENSHIFT3, "eap-app", "Service").delete();
 		} catch (OpenShiftToolsException ex) {

@@ -36,83 +36,69 @@ import org.junit.runner.RunWith;
 /**
  * @author mlabuda@redhat.com
  * @author adietish@redhat.com
+ * @contributor jkopriva@redhat.com
  */
 @OpenPerspective(JBossPerspective.class)
 @RequiredBasicConnection
 @RunWith(RedDeerSuite.class)
 public class ProjectNameValidationTest extends AbstractTest {
-	
+
 	@InjectRequirement
 	private OpenShiftConnectionRequirement connectionReq;
-	
-	public static final String PROJECT_NAME_FORMAT_ERROR = 
-			" Project name may only contain lower-case letters, numbers, and dashes. "
-					+ "It may not start or end with a dash";
-	
-	public static final String PROJECT_NAME_SHORT_ERROR = 
-			" Project name length must be between 2 and 63 characters";
-	
-	public static final String PROJECT_NAME_MAX_LENGTH_ERROR = 
-			" Maximum length allowed is 63 characters for project name";
-	
+
+	public static final String PROJECT_NAME_FORMAT_ERROR = " It may only contain lowercase letters, numbers, and dashes. It may not start or end with a dash.";
+
+	public static final String PROJECT_NAME_SHORT_ERROR = " Project name length must be between 2 and 63 characters";
+
+	public static final String PROJECT_NAME_MAX_LENGTH_ERROR = " Maximum length allowed is 63 characters for project name";
+
 	@Before
 	public void setUp() {
 		openNewProjectShell();
 	}
-	
+
 	@After
 	public void cleanUp() {
 		closeNewProjectShell();
 	}
-	
+
 	@Test
 	public void testShortProjectName() {
 		new LabeledText(OpenShiftLabel.TextLabels.PROJECT_NAME).setText("s");
 		new DefaultText(PROJECT_NAME_SHORT_ERROR);
 	}
-	
+
 	@Test
 	public void testInvalidProjectNameFormat() {
 		new LabeledText(OpenShiftLabel.TextLabels.PROJECT_NAME).setText("--");
 		new DefaultText(PROJECT_NAME_FORMAT_ERROR);
 	}
-	
+
 	@Test
 	public void testForbiddenCharactersInProjectName() {
 		new LabeledText(OpenShiftLabel.TextLabels.PROJECT_NAME).setText("AAA");
 		new DefaultText(PROJECT_NAME_FORMAT_ERROR);
 	}
-	
+
 	@Test
 	public void testLongProjectName() {
 		new LabeledText(OpenShiftLabel.TextLabels.PROJECT_NAME).setText(
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"0123456789" +
-				"01234");
+				"0123456789" + "0123456789" + "0123456789" + "0123456789" + "0123456789" + "0123456789" + "0123456789"
+						+ "0123456789" + "0123456789" + "0123456789" + "0123456789" + "0123456789" + "01234");
 		new DefaultText(PROJECT_NAME_MAX_LENGTH_ERROR);
 	}
-	
+
 	private void openNewProjectShell() {
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.reopen();
-		
+
 		OpenShift3Connection connection = explorer.getOpenShift3Connection(connectionReq.getConnection());
 		connection.select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.NEW_OS_PROJECT).select();
-		
+
 		new DefaultShell(OpenShiftLabel.Shell.CREATE_OS_PROJECT);
 	}
-	
+
 	private void closeNewProjectShell() {
 		new CancelButton().click();
 		new WaitWhile(new ShellIsAvailable(OpenShiftLabel.Shell.CREATE_OS_PROJECT), TimePeriod.LONG);

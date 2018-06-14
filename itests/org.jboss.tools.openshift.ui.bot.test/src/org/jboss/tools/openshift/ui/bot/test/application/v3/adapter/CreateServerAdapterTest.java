@@ -225,6 +225,8 @@ public class CreateServerAdapterTest extends AbstractTest  {
 			new ServerAdapter(Version.OPENSHIFT3, "eap-app", "Service").delete();
 		} catch (OpenShiftToolsException ex) {
 			// do nothing, adapter does not exists
+		} catch (WaitTimeoutExpiredException e) {
+			OpenShiftUtils.killJobs();
 		}
 	}
 }

@@ -56,8 +56,8 @@ public class AbstractDockerImageTest extends AbstractTest {
 
 	private static DockerExplorerView dockerExplorer;
 
-	private static final String connectionsURI = System.getProperty("openshift.server").replaceAll("\\:[0-9]*$",
-			":2376");
+	private static final String connectionsURI = System.getProperty("use.cdk").equals("true")?System.getProperty("openshift.server").replaceAll("\\:[0-9]*$",
+			":2376"):"http://127.0.0.1:2375";
 	private static final String pathToCertificate = System.getProperty("user.home") + "/.minishift/certs";
 	protected static String DOCKER_CONNECTION = connectionsURI;
 
@@ -74,7 +74,11 @@ public class AbstractDockerImageTest extends AbstractTest {
 				}
 			}
 		}
-		dockerExplorer.createDockerConnectionURI(connectionsURI, connectionsURI, pathToCertificate);
+		if (System.getProperty("use.cdk").equals("true")) {
+			dockerExplorer.createDockerConnectionURI(connectionsURI, connectionsURI, pathToCertificate);
+		}else {
+			dockerExplorer.createDockerConnectionURI(connectionsURI, connectionsURI, null);
+		}
 	}
 
 	/**
