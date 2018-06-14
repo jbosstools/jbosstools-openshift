@@ -19,6 +19,7 @@ import org.jboss.tools.openshift.ui.bot.test.application.v3.adapter.ServerAdapte
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.CreateResourcesTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.EditResourceLimitsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.InteligentDeleteResourceTest;
+import org.jboss.tools.openshift.ui.bot.test.application.v3.advanced.LogsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.LabelsTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.NewApplicationWizardHandlingTest;
 import org.jboss.tools.openshift.ui.bot.test.application.v3.basic.TemplateParametersTest;
@@ -84,6 +85,7 @@ import org.junit.runners.Suite.SuiteClasses;
 	CreateApplicationFromTemplateTest.class,
 	
 	// Application handling
+	LogsTest.class,
 	ImportApplicationWizardTest.class,
 	ImportApplicationWizardGitTest.class,
 	CreateResourcesTest.class,

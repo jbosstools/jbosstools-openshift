@@ -328,6 +328,7 @@ public class CreateApplicationFromTemplateTest extends AbstractTest {
 
 	@After
 	public void tearDown() {
+		OpenShiftUtils.killJobs();
 		OpenShiftExplorerView explorer = new OpenShiftExplorerView();
 		explorer.reopen();
 

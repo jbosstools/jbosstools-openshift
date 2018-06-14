@@ -119,6 +119,7 @@ public class OpenShiftLabel {
 		public static final String IMPORT = "Import";
 		public static final String IMPORT_APPLICATION_WIZARD = "Import OpenShift Application ";
 		public static final String IMPORT_APPLICATION = "Import OpenShift Application";
+		public static final String LOGS_UNAVAILABLE = "Logs Unavailable";
 		public static final String MANAGE_ENV_VARS = "Manage Application Environment Variable(s) for application ";
 		public static final String MARKERS = "Configure OpenShift Markers for project ";
 		public static final String NEW_APP_WIZARD = "New OpenShift Application";
