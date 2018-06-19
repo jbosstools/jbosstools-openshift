@@ -17,8 +17,6 @@ import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitWhile;
-import org.eclipse.reddeer.core.exception.CoreLayerException;
-import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.eclipse.ui.navigator.resources.ProjectExplorer;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
@@ -91,7 +89,7 @@ public class EditResourcesTest extends AbstractTest {
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.EDIT).select();
 		
 		try {
-			new TextEditor(new WithTextMatcher("*.eap-app.json"));
+			new TextEditor(BUILD_CONFIG_EDITOR);
 			// pass
 		} catch (RedDeerException ex) {
 			fail("Text editor to modify build config resource has not been opened.");
@@ -123,12 +121,11 @@ public class EditResourcesTest extends AbstractTest {
 		if (buildConfig == null) {
 			buildConfig = text;
 		}
-		
-		editor.setText(text.replace("\"namespace\" : \"" + DatastoreOS3.PROJECT1 + "\"",
-				"\"namespace\" : \"" + DatastoreOS3.PROJECT1 + "\"wtf"));		
+		text = text.replace(DatastoreOS3.TEST_PROJECT, DatastoreOS3.TEST_PROJECT + "1");
+		editor.setText(text);
 		try {
 			editor.save();
-		} catch (CoreLayerException ex) {
+		} catch (WaitTimeoutExpiredException ex) {
 			// ok
 		}
 		
@@ -151,9 +148,9 @@ public class EditResourcesTest extends AbstractTest {
 	private TextEditor getBuildConfigTextEditor() {
 		getBuildConfig().select();
 		new ContextMenuItem(OpenShiftLabel.ContextMenu.EDIT).select();
-		System.out.println("TESTING:" + "["+requiredProject.getProjectName() + "] Build Config : eap-app.json");
+		System.out.println("TESTING:" + BUILD_CONFIG_EDITOR);
 		
-		return new TextEditor("["+requiredProject.getProjectName() + "] Build Config : eap-app.json");
+		return new TextEditor(BUILD_CONFIG_EDITOR);
 	}
 	
 	@After
@@ -185,7 +182,7 @@ public class EditResourcesTest extends AbstractTest {
 		explorer.reopen();
 		
 		OpenShift3Connection connection  = explorer.getOpenShift3Connection(connectionReq.getConnection());
-		connection.getProject().delete();
+		connection.getProject(DatastoreOS3.TEST_PROJECT).delete();
 		
 		try {
 			new WaitWhile(new OpenShiftProjectExists(connectionReq.getConnection()));
