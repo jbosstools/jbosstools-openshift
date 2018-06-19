@@ -795,7 +795,9 @@
             <separator visible="true" name="org.jboss.tools.openshift.ui.separator2"/>
             <command
                      commandId="org.jboss.tools.openshift.ui.command.editresource"
-                     style="push" />
+                     style="push"
+                     label="Edit Resource..."
+                     icon="icons/resource.gif"/>
             <command
                      commandId="org.eclipse.ui.edit.delete"
                      style="push" />
@@ -867,7 +869,9 @@
             <separator visible="true" name="org.jboss.tools.openshift.ui.separator8"/>
             <command
                      commandId="org.jboss.tools.openshift.ui.command.editresource"
-                     style="push" />
+                     style="push"
+                     label="Edit Resource..."
+                     icon="icons/resource.gif"/>
             <command
                      commandId="org.eclipse.ui.edit.delete"
                      style="push" />
@@ -910,7 +914,9 @@
             <separator visible="true" name="org.jboss.tools.openshift.ui.separator1"/>
             <command
                      commandId="org.jboss.tools.openshift.ui.command.editresource"
-                     style="push" />
+                     style="push"
+                     label="Edit Resource..."
+                     icon="icons/resource.gif"/>
             <command
                      commandId="org.eclipse.ui.edit.delete"
                      style="push" />
@@ -975,7 +981,9 @@
             <separator visible="true" name="org.jboss.tools.openshift.ui.separator11"/>
             <command
                      commandId="org.jboss.tools.openshift.ui.command.editresource"
-                     style="push" />
+                     style="push"
+                     label="Edit Resource..."
+                     icon="icons/resource.gif"/>
             <command
                      commandId="org.eclipse.ui.edit.delete"
                      style="push" />
@@ -1005,7 +1013,9 @@
             <separator visible="true" name="org.jboss.tools.openshift.ui.separator12" />
             <command
                      commandId="org.jboss.tools.openshift.ui.command.editresource"
-                     style="push" />
+                     style="push"
+                     label="Edit Resource..."
+                     icon="icons/resource.gif"/>
             <command
                      commandId="org.eclipse.ui.edit.delete"
                      style="push" />
@@ -1035,7 +1045,9 @@
             <separator visible="true" name="org.jboss.tools.openshift.ui.separator13"/>
             <command
                      commandId="org.jboss.tools.openshift.ui.command.editresource"
-                     style="push" />
+                     style="push"
+                     label="Edit Resource..."
+                     icon="icons/resource.gif"/>
             <command
                      commandId="org.eclipse.ui.edit.delete"
                      style="push" />
@@ -1059,7 +1071,9 @@
             <separator visible="true" name="org.jboss.tools.openshift.ui.separator13"/>
             <command
                      commandId="org.jboss.tools.openshift.ui.command.editresource"
-                     style="push" />
+                     style="push"
+                     label="Edit Resource..."
+                     icon="icons/resource.gif"/>
             <command
                      commandId="org.eclipse.ui.edit.delete"
                      style="push" />
@@ -1085,9 +1099,10 @@
             </menu>
             <command
                      commandId="org.jboss.tools.openshift.ui.command.editresource"
-                     style="push">
-            </command>
-            <command
+                     style="push"
+                     label="Edit Resource..."
+                     icon="icons/resource.gif"/>
+$            <command
                      commandId="org.eclipse.ui.edit.delete"
                      style="push">
             </command>
