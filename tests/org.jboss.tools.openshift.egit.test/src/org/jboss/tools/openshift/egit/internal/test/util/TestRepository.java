@@ -113,8 +113,14 @@ public class TestRepository {
 	 */
 	public void initialCommit() throws NoHeadException, NoMessageException, UnmergedPathsException,
 			ConcurrentRefUpdateException, WrongRepositoryStateException, GitAPIException {
-		new Git(repository).commit().setAll(true).setAuthor(RawParseUtils.parsePersonIdent(DEFAULT_USER))
-				.setCommitter(RawParseUtils.parsePersonIdent(DEFAULT_USER)).setMessage("initial commit").call();
+		try (Git git = new Git(repository)) {
+			git.commit()
+				.setAll(true)
+				.setAuthor(RawParseUtils.parsePersonIdent(DEFAULT_USER))
+				.setCommitter(RawParseUtils.parsePersonIdent(DEFAULT_USER))
+				.setMessage("initial commit")
+			.call();
+		}
 	}
 
 	private String getWorkdirPrefix(Repository repository) {
@@ -275,12 +281,13 @@ public class TestRepository {
 	 */
 	public RevCommit commit(String message)
 			throws UnmergedPathException, JGitInternalException, UnmergedPathsException, GitAPIException {
-		Git git = new Git(repository);
-		CommitCommand commitCommand = git.commit();
-		commitCommand.setAuthor("J. Git", "j.git@egit.org");
-		commitCommand.setCommitter(commitCommand.getAuthor());
-		commitCommand.setMessage(message);
-		return commitCommand.call();
+		try (Git git = new Git(repository)) {
+			CommitCommand commitCommand = git.commit();
+			commitCommand.setAuthor("J. Git", "j.git@egit.org");
+			commitCommand.setCommitter(commitCommand.getAuthor());
+			commitCommand.setMessage(message);
+			return commitCommand.call();
+		}
 	}
 
 	public void add(IFile file) throws IOException, GitAPIException {
@@ -296,8 +303,8 @@ public class TestRepository {
 	 */
 	public void add(File file) throws IOException, GitAPIException {
 		String repoPath = getRepoRelativePath(file.getAbsolutePath());
-		try {
-			new Git(repository).add().addFilepattern(repoPath).call();
+		try (Git git = new Git(repository)){
+			git.add().addFilepattern(repoPath).call();
 		} catch (NoFilepatternException e) {
 			throw new IOException(e.getMessage());
 		}
@@ -474,11 +481,12 @@ public class TestRepository {
 		if (dc == null)
 			return true;
 
-		Ref ref = repository.getRef(Constants.HEAD);
-		RevCommit c = new RevWalk(repository).parseCommit(ref.getObjectId());
-		TreeWalk tw = TreeWalk.forPath(repository, path, c.getTree());
-
-		return tw == null || dc.getObjectId().equals(tw.getObjectId(0));
+		Ref ref = repository.findRef(Constants.HEAD);
+		try (RevWalk revWalk = new RevWalk(repository)) {
+			RevCommit c = revWalk.parseCommit(ref.getObjectId());
+			TreeWalk tw = TreeWalk.forPath(repository, path, c.getTree());
+			return tw == null || dc.getObjectId().equals(tw.getObjectId(0));
+		}
 	}
 
 	public long lastModifiedInIndex(String path) throws IOException {
