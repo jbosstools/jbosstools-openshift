@@ -15,6 +15,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.eclipse.reddeer.common.condition.AbstractWaitCondition;
+import org.eclipse.reddeer.common.exception.RedDeerException;
 import org.eclipse.reddeer.common.exception.WaitTimeoutExpiredException;
 import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
@@ -24,7 +26,9 @@ import org.eclipse.reddeer.eclipse.ui.console.ConsoleView;
 import org.eclipse.reddeer.junit.requirement.inject.InjectRequirement;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
 import org.eclipse.reddeer.requirements.openperspective.OpenPerspectiveRequirement.OpenPerspective;
+import org.eclipse.reddeer.swt.impl.button.OkButton;
 import org.eclipse.reddeer.swt.impl.menu.ContextMenuItem;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.hamcrest.core.StringStartsWith;
 import org.jboss.tools.common.reddeer.perspectives.JBossPerspective;
 import org.jboss.tools.openshift.reddeer.condition.OpenShiftResourceExists;
@@ -50,14 +54,14 @@ import org.junit.runner.RunWith;
 
 @RunWith(RedDeerSuite.class)
 @OpenPerspective(JBossPerspective.class)
-@OCBinary
+@OCBinary(setOCInPrefs=true)
 @RequiredBasicConnection()
 @CleanConnection
 @RequiredProject()
 @RequiredService(service=OpenShiftResources.EAP_SERVICE, template=OpenShiftResources.EAP_TEMPLATE, waitForBuild=false)
 public class LogsTest extends AbstractTest {
 
-	private static final int WAIT_CONSOLE_NO_CHANGE = 7;
+	private static final int WAIT_CONSOLE_NO_CHANGE = 10;
 	private static final int WAIT_CONSOLE_PUSH_SUCCESS = 600;
 
 	@InjectRequirement
@@ -92,16 +96,15 @@ public class LogsTest extends AbstractTest {
 		this.consoleView.open();
 		
 		OpenShiftResource pod  = OpenShiftUtils.getOpenShiftPod(requiredProject.getProjectName(),new StringStartsWith("eap-app-"), requiredConnection.getConnection());
-		String podName = pod.getName();
-		pod.select();
-		new ContextMenuItem(OpenShiftLabel.ContextMenu.POD_LOG).select();
+		String podName = pod.getName();	
+		waitForLog(pod, OpenShiftLabel.ContextMenu.POD_LOG);
 
 		new WaitUntil(new ConsoleHasText(), TimePeriod.DEFAULT);
 		new WaitUntil(new ConsoleHasNoChange(TimePeriod.getCustom(WAIT_CONSOLE_NO_CHANGE)), TimePeriod.VERY_LONG);
 
 		assertTrue("Console label is incorrect, it should contains project name and pod name.\n" + "but label is: " + consoleView.getConsoleLabel(),
 				consoleView.getConsoleLabel().contains(requiredProject.getProjectName() + "\\" + podName));
-		assertTrue("Console text should contain output from EAP runtime",
+		assertTrue("Console text should contain output from EAP runtime. Console output:" + consoleView.getConsoleText(),
 				consoleView.getConsoleText().contains("Admin console is not enabled"));
 	}
 
@@ -114,8 +117,7 @@ public class LogsTest extends AbstractTest {
 		
 		OpenShiftResource pod = OpenShiftUtils.getOpenShiftPod(requiredProject.getProjectName(), Resource.BUILD, new StringStartsWith("eap-app-"), requiredConnection.getConnection());
 		String podName = pod.getName();
-		pod.select();
-		new ContextMenuItem(OpenShiftLabel.ContextMenu.BUILD_LOG).select();
+		waitForLog(pod, OpenShiftLabel.ContextMenu.BUILD_LOG);
 
 		new WaitUntil(new ConsoleHasText(), TimePeriod.LONG);
 		new WaitUntil(new ConsoleHasNoChange(TimePeriod.getCustom(WAIT_CONSOLE_NO_CHANGE)), TimePeriod.VERY_LONG);
@@ -130,6 +132,27 @@ public class LogsTest extends AbstractTest {
 			fail("There should be output of succesful build in console log, but there is not.\n"
 					+ "Check whether output has not changed. Assumed output in the end of log is 'Push successful'");
 		}
+	}
+	
+	private void waitForLog(OpenShiftResource pod, String podLogContextMenuItem) {
+		new WaitUntil(
+				new AbstractWaitCondition() {
+
+					@Override
+					public boolean test() {
+						pod.select();
+						new ContextMenuItem(podLogContextMenuItem).select();
+						try {
+							new DefaultShell(OpenShiftLabel.Shell.LOGS_UNAVAILABLE);
+							new OkButton().click();
+							return false;
+						} catch (RedDeerException e) {
+							// catched intentionnally
+							System.err.println(e);
+						}
+						return true;
+					}}
+				, TimePeriod.VERY_LONG);
 	}
 
 
