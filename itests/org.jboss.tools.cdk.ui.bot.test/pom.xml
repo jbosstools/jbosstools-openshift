@@ -66,8 +66,9 @@
 				<configuration>
                     <appArgLine>-pluginCustomization ${requirementsDirectory}/pluginCustomization.ini</appArgLine>
 					<useUIThread>false</useUIThread>
-					<surefire.timeout>7200</surefire.timeout>
-					<forkedProcessTimeoutInSeconds>7200</forkedProcessTimeoutInSeconds>
+					<surefire.timeout>9600</surefire.timeout>
+					<surefire.itests.timeout>9600</surefire.itests.timeout>
+					<forkedProcessTimeoutInSeconds>9600</forkedProcessTimeoutInSeconds>
 					<testSuite>org.jboss.tools.cdk.ui.bot.test</testSuite>
 					<testClass>${suiteClass}</testClass>
 					<skip>${skipITests}</skip>
