@@ -137,7 +137,7 @@
                         <with
                               variable="selection">
                             <or>
-                                <iterate>
+                                <iterate ifEmpty="false">
                                     <adapt type="com.openshift.restclient.model.IResource" />
                                 </iterate>
                             </or>
@@ -162,7 +162,7 @@
                         <with
                               variable="selection">
                             <or>
-                                <iterate>
+                                <iterate ifEmpty="false">
                                     <adapt type="com.openshift.restclient.model.IResource" />
                                 </iterate>
                             </or>
@@ -1153,13 +1153,13 @@ $            <command
             <activeWhen>
                 <or>
                     <with variable="activePartId">
-                        <equals  value="org.eclipse.ui.views.PropertySheet" />
+                        <equals value="org.eclipse.ui.views.PropertySheet" />
                     </with>
                     <with
                           variable="selection">
-                        <iterate>
+                        <iterate ifEmpty="false">
                             <and>
-                                <adapt	type="com.openshift.restclient.model.IResource" />
+                                <adapt type="com.openshift.restclient.model.IResource" />
                             </and>
                         </iterate>
                     </with>
@@ -1176,9 +1176,9 @@ $            <command
                     </with>
                     <with
                           variable="selection">
-                        <iterate>
+                        <iterate ifEmpty="false">
                             <and>
-                                <adapt	type="com.openshift.restclient.model.IResource" />
+                                <adapt type="com.openshift.restclient.model.IResource" />
                             </and>
                         </iterate>
                     </with>
