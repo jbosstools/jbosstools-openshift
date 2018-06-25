@@ -47,7 +47,7 @@ public interface ICommonAttributes {
 		{
 			put(CLUSTER_NAMESPACE_KEY, "Cluster Namespace");
 			put(IMAGE_REGISTRY_URL_KEY, "Registry URL");
-			put(OC_LOCATION_KEY, "OC client path");
+			put(OC_LOCATION_KEY, "");
 			put(OC_OVERRIDE_KEY, "");
 		}
 	};
