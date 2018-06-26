@@ -12,6 +12,7 @@ package org.jboss.tools.openshift.cdk.server.ui.internal;
 
 import java.io.File;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.VersionUtil;
@@ -44,7 +45,8 @@ public class Minishift17ServerWizardFragment extends CDK32ServerWizardFragment {
 	@Override
 	protected void handleDownloadedFile(String newHome) {
 		if( !homeText.isDisposed()) {
-			File f = new File(newHome, "minishift");
+			String suffix = Platform.getOS().equals(Platform.OS_WIN32) ? "minishift.exe" : "minishift";
+			File f = new File(newHome, suffix);
 			if( f.exists())
 				f.setExecutable(true);
 			homeText.setText(f.getAbsolutePath());
