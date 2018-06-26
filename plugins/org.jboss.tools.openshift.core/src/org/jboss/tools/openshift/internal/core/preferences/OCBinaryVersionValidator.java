@@ -19,8 +19,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.osgi.framework.Version;
 
@@ -49,7 +53,23 @@ public class OCBinaryVersionValidator {
 	 */
 
 	public static enum OCBinaryStatus {
-		OK, OC_INCOMPATIBLE_FOR_RSYNC, OC_PATH_INCOMPATIBLE
+
+		OK(null),
+		OC_INCOMPATIBLE_FOR_RSYNC(OpenShiftCoreMessages.OCBinaryLocationIncompatibleErrorMessage),
+		/** @see <a href="https://issues.jboss.org/browse/JBIDE-25700">JBIDE-25700</> **/
+		OC_LINUX_RSYNC_PERM_ERRORS(OpenShiftCoreMessages.OCBinaryLinuxRSyncPermErrorMessage),
+		OC_PATH_INCOMPATIBLE(OpenShiftCoreMessages.OCBinaryLocationWithSpaceErrorMessage);
+
+		private String message;
+
+		private OCBinaryStatus(String message) {
+			this.message = message;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
 	}
 
 	private static final Pattern OC_VERSION_LINE_PATTERN = Pattern
@@ -58,6 +78,9 @@ public class OCBinaryVersionValidator {
 	private static final Version OC_MINIMUM_VERSION_FOR_RSYNC = Version.parseVersion("1.1.1");
 
 	private static final Version OC_MINIMUM_VERSION_FOR_OC_WITH_SPACE = Version.parseVersion("3.7.0");
+
+	/** @see <a href="https://issues.jboss.org/browse/JBIDE-25700">JBIDE-25700</> **/
+	private static final Version OC_MINIMUM_VERSION_FOR_LINUX_OC_PERMS = Version.parseVersion("3.11.0");
 
 	private String path;
 
@@ -77,8 +100,7 @@ public class OCBinaryVersionValidator {
 		Optional<Version> version = Optional.empty();
 		if (path != null) {
 			try {
-				ProcessBuilder builder = new ProcessBuilder(path, "version");
-				Process process = builder.start();
+				Process process = new ProcessBuilder(path, "version").start();
 				version = parseVersion(process, monitor);
 			} catch (IOException e) {
 				OpenShiftCoreActivator.logError(e.getLocalizedMessage(), e);
@@ -91,14 +113,16 @@ public class OCBinaryVersionValidator {
 		Optional<Version> version = Optional.empty();
 		String line = null;
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-			while (!monitor.isCanceled() && (!version.isPresent()) && ((line = reader.readLine()) != null)) {
+			while (!monitor.isCanceled() 
+					&& (!version.isPresent()) 
+					&& ((line = reader.readLine()) != null)) {
 				version = parseVersion(line);
 			}
 		}
 		return version;
 	}
 
-	public static Optional<Version> parseVersion(String line) {
+	protected Optional<Version> parseVersion(String line) {
 		if (StringUtils.isBlank(line)) {
 			return Optional.empty();
 		}
@@ -124,41 +148,53 @@ public class OCBinaryVersionValidator {
 		return Optional.ofNullable(version);
 	}
 
-	/**
-	 * Checks if the oc binary is compatible for rsync publishing.
-	 * 
-	 * @param monitor
-	 *            the progress monitor
-	 * 
-	 * @return true if the oc binary is compatible
-	 * @see https://issues.jboss.org/browse/JBIDE-21307
-	 * @see https://github.com/openshift/origin/issues/6109
-	 */
-	public boolean isCompatibleForPublishing(IProgressMonitor monitor) {
-		return getStatus(monitor) == OCBinaryStatus.OK;
+	public IStatus getValidationStatus(IProgressMonitor monitor) {
+		return getValidationStatus(getVersion(monitor), monitor);
+	}
+
+	public IStatus getValidationStatus(Version version, IProgressMonitor monitor) {
+		OCBinaryStatus status = getStatus(version, monitor);
+		String message = NLS.bind(status.getMessage(), path);
+		if (status == OCBinaryStatus.OK) {
+			return Status.OK_STATUS;
+		} else {
+			return StatusFactory.warningStatus(OpenShiftCoreActivator.PLUGIN_ID, message);
+		}
 	}
 
 	public OCBinaryStatus getStatus(IProgressMonitor monitor) {
+		return getStatus(getVersion(monitor), monitor);
+	}
+
+	public OCBinaryStatus getStatus(Version version, IProgressMonitor monitor) {
 		OCBinaryStatus status = OCBinaryStatus.OK;
-		Version version = getVersion(monitor);
 		if (!isCompatibleForPublishing(version)) {
 			status = OCBinaryStatus.OC_INCOMPATIBLE_FOR_RSYNC;
 		} else if (!isOcPathValid(version, path)) {
 			status = OCBinaryStatus.OC_PATH_INCOMPATIBLE;
+		} else if (!isCompatibleForLinuxRSyncPermissions(version)) {
+			status = OCBinaryStatus.OC_LINUX_RSYNC_PERM_ERRORS;
 		}
 		return status;
 	}
 
-	public static boolean isCompatibleForPublishing(Version version) {
-		return version != null && version.compareTo(OC_MINIMUM_VERSION_FOR_RSYNC) >= 0;
+	private boolean isCompatibleForPublishing(Version version) {
+		return version!= null
+				&& OC_MINIMUM_VERSION_FOR_RSYNC.compareTo(version) <= 0;
 	}
 
-	public static boolean isOcPathValid(Version version, String path) {
-		boolean result = true;
-		if (!Platform.OS_WIN32.equals(Platform.getOS()) && (version == null
-				|| (path.indexOf(' ') != (-1) && version.compareTo(OC_MINIMUM_VERSION_FOR_OC_WITH_SPACE) < 0))) {
-			result = false;
-		}
-		return result;
+	private boolean isOcPathValid(Version version, String path) {
+			return isPlatform(Platform.OS_WIN32)
+					|| !StringUtils.contains(path, ' ')
+					|| OC_MINIMUM_VERSION_FOR_OC_WITH_SPACE.compareTo(version) <= 0;
+	}
+
+	private boolean isCompatibleForLinuxRSyncPermissions(Version version) {
+		return !isPlatform(Platform.OS_LINUX)
+				|| OC_MINIMUM_VERSION_FOR_LINUX_OC_PERMS.compareTo(version) <= 0;
+	}
+
+	protected boolean isPlatform(String platform) {
+		return Platform.getOS().equals(platform);
 	}
 }

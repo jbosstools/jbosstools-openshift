@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.ui.preferences;
 
 import static org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants.DOWNLOAD_INSTRUCTIONS_URL;
 
-import java.io.File;
 import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
@@ -20,6 +19,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -56,7 +56,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	private Label ocVersionLabel;
 	private Composite ocMessageComposite;
 	private Label ocMessageLabel;
-	private UIUpdatingJob versionVerificationJob;
+	private Job versionVerificationJob;
 
 	public OpenShiftPreferencePage() {
 		super(GRID);
@@ -148,30 +148,22 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 		return valid;
 	}
 
-	private boolean validateLocation(String location) {
+	private boolean validateLocation(final String location) {
 		if (StringUtils.isBlank(location)) {
 			return true;
-		}
-		File file = new File(location);
-		// Error messages have to be set to field editor, not directly to the
-		// page.
-		if (!file.exists()) {
-			cliLocationEditor.setErrorMessage(NLS.bind("{0} was not found.", file));
-			return false;
-		}
-		if (!file.canExecute()) {
-			cliLocationEditor.setErrorMessage(NLS.bind("{0} does not have execute permissions.", file));
-			return false;
 		}
 		setValid(false);
 		ocVersionLabel.setText("Checking OpenShift client version...");
 		this.versionVerificationJob = new UIUpdatingJob("Checking oc binary...") {
 
-			private Version version;
-
+			private OCBinaryVersionValidator validator = new OCBinaryVersionValidator(location);
+			private Version version = Version.emptyVersion;
+			private IStatus status = Status.OK_STATUS;
+			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				version = new OCBinaryVersionValidator(location).getVersion(monitor);
+				this.version = validator.getVersion(monitor);
+				this.status = validator.getValidationStatus(version, monitor);
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
@@ -191,9 +183,8 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 						ocVersionLabel.setText(NLS.bind("Your OpenShift client version is {0}.{1}.{2}",
 								new Object[] { version.getMajor(), version.getMinor(), version.getMicro() }));
 					}
-					ocMessageLabel.setText(NLS.bind(
-							"OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
-					ocMessageComposite.setVisible(!OCBinaryVersionValidator.isCompatibleForPublishing(version));
+					ocMessageLabel.setText(status.getMessage());
+					ocMessageComposite.setVisible(!status.isOK());
 				}
 				return super.updateUI(monitor);
 			}

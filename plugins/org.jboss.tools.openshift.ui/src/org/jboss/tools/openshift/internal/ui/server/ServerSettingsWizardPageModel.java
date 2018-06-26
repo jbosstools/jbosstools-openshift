@@ -36,7 +36,6 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
-import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.ExtensionUtils;
@@ -452,7 +451,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	protected void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String routeURL,
 			String podPath, String devmodeKey, String debugPortKey, String debugPortValue,
 			org.eclipse.core.resources.IProject deployProject) {
-		OpenShiftServerUtils.updateServerProject(connectionUrl, getResource(), sourcePath, podPath, routeURL,
+		OpenShiftServerUtils.updateServerProject(connectionUrl, resource, sourcePath, podPath, routeURL,
 				devmodeKey, debugPortKey, debugPortValue, deployProject);
 	}
 

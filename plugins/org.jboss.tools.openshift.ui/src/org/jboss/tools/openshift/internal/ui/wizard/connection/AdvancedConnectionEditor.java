@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Red Hat, Inc.
+ * Copyright (c) 2016-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -91,12 +91,12 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	private ConnectionWizardPageModel pageModel;
 	private IObservableValue selectedConnection;
 	private IValueChangeListener connectionChangedListener;
-	private IObservableValue registryURLObservable;
+	private IObservableValue<String> registryURLObservable;
 	private IObservableValue clusterNamespaceObservable;
 	private IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider;
 	Map<String, Object> extendedProperties = null;
-	private IObservableValue<IStatus> ocLocationValidity = new WritableValue(Status.OK_STATUS, IStatus.class);
-	private IObservableValue<IStatus> ocVersionValidity = new WritableValue(Status.OK_STATUS, IStatus.class);
+	private IObservableValue<IStatus> ocLocationValidity = new WritableValue<>(Status.OK_STATUS, IStatus.class);
+	private IObservableValue<IStatus> ocVersionValidity = new WritableValue<>(Status.OK_STATUS, IStatus.class);
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -390,18 +390,9 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			this.version = new OCBinaryVersionValidator(location).getVersion(monitor);
-			if (Version.emptyVersion.equals(version)) {
-				this.ocVersionValidity = ValidationStatus.error("Could not determine your OpenShift client version");
-			} else if (!OCBinaryVersionValidator.isCompatibleForPublishing(version)) {
-				this.ocVersionValidity = ValidationStatus.error(NLS
-						.bind("OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
-			} else {
-				this.ocVersionValidity = ValidationStatus.ok();
-			}
-			if (monitor.isCanceled()) {
-				this.ocVersionValidity = ValidationStatus.cancel("OC version verification was cancelled.");
-			}
+			OCBinaryVersionValidator validator = new OCBinaryVersionValidator(location);
+			this.version = validator.getVersion(monitor);
+			this.ocVersionValidity = validator.getValidationStatus(version, monitor);
 			return Status.OK_STATUS;
 		}
 
@@ -410,7 +401,6 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
 		registryURLObservable.setValue(model.getRegistryURL());
 	}
