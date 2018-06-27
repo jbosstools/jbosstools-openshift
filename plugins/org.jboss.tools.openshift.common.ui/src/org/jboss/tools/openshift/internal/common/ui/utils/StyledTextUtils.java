@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.common.ui.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +30,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 
 /**
@@ -37,7 +38,7 @@ import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonImages;
 public class StyledTextUtils {
 
 	// Ex. "This is a text with a <a>link</a> in it"
-	private static final Pattern LINK_REGEX = Pattern.compile("([^<]*)(<a>)?([^<]*)(<\\/a>)?(.*)");
+	private static final Pattern LINK_REGEX = Pattern.compile("<a>([^<]*)<\\/a>");
 	
 	// another pattern to detect links in text without markup
 	private static final Pattern HYPERLINK_DETECTOR = Pattern.compile("(http|ftp|https)://([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:/~+#-]*[\\w@?^=%&/~+#-])?");
@@ -97,27 +98,23 @@ public class StyledTextUtils {
 	}
 
 	public static void emulateLinkAction(final StyledText styledText, EmulatedLinkClickListener listener) {
-		Listener mouseListener = new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				int offset = getOffsetAtEvent(styledText, event);
-				if (offset < 0) {
-					return;
+		Listener mouseListener = event -> {
+			int offset = getOffsetAtEvent(styledText, event);
+			if (offset < 0) {
+				return;
+			}
+			StyleRange r = styledText.getStyleRangeAtOffset(offset);
+			if (event.type == SWT.MouseUp) {
+				if (r != null) {
+					r = (StyleRange) r.data;
+					listener.handleClick(r);
 				}
-				StyleRange r = styledText.getStyleRangeAtOffset(offset);
-				if (event.type == SWT.MouseUp) {
-					if (r != null) {
-						r = (StyleRange) r.data;
-						listener.handleClick(r);
-					}
-				} else if (event.type == SWT.MouseMove) {
-					if (r != null) {
-						styledText.setCursor(styledText.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
-					} else {
-						styledText.setCursor(styledText.getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
-					}
+			} else if (event.type == SWT.MouseMove) {
+				if (r != null) {
+					styledText.setCursor(styledText.getDisplay().getSystemCursor(SWT.CURSOR_HAND));
+				} else {
+					styledText.setCursor(styledText.getDisplay().getSystemCursor(SWT.CURSOR_ARROW));
 				}
-
 			}
 		};
 		styledText.addListener(SWT.MouseMove, mouseListener);
@@ -157,21 +154,24 @@ public class StyledTextUtils {
 	 * @see <a href="https://issues.jboss.org/browse/JBIDE-20092">Connection wizard: hitting retrivial link with mouse does not do anything on OSX (hitting enter works)</a>
 	 */
 	public static void setLinkText(String text, StyledText styledText) {
+		StringBuffer sb = new StringBuffer();
+		List<StyleRange> styleRanges = new ArrayList<>();
 		Matcher matcher = LINK_REGEX.matcher(text);
-		if (!matcher.matches()) {
-			styledText.setText(text);
-			return;
+		while (matcher.find()) {
+			matcher.appendReplacement(sb, "$1");
+			int start = sb.length() - matcher.group(1).length();
+			int stop = sb.length();
+			styleRanges.add(createLinkStyle(start, stop, styledText.getShell()));
 		}
+		matcher.appendTail(sb);
 
-		if (StringUtils.isEmpty(matcher.group(2)) && StringUtils.isEmpty(matcher.group(4))) {
+		if (sb.length() == 0) {
 			styledText.setText(text);
 		} else {
-			styledText.setText(removeLinkMarkers(matcher));
-			int start = matcher.group(1).length();
-			int stop = start + matcher.group(3).length();
-			StyleRange linkStyle = createLinkStyle(start, stop, styledText.getShell());
-			styledText.setStyleRange(linkStyle);
+			styledText.setText(sb.toString());
+			styledText.setStyleRanges(styleRanges.toArray(new StyleRange[styleRanges.size()]));
 		}
+
 	}
 
 	/**
@@ -193,12 +193,6 @@ public class StyledTextUtils {
 		while (matcher.find()) {
 			styledText.setStyleRange(createLinkStyle(matcher.start(0), matcher.end(0), styledText.getShell()));
 		}
-	}
-
-	private static String removeLinkMarkers(Matcher matcher) {
-		StringBuffer buffer = new StringBuffer();
-		matcher.appendReplacement(buffer, "$1$3$5");
-		return buffer.toString();
 	}
 
 	public static StyleRange createLinkStyle(int start, int stop, Shell shell) {

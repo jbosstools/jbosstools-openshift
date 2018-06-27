@@ -126,7 +126,7 @@ public class ConnectionPropertySource implements IPropertySource {
 				return openshiftConnection.getKubernetesMasterVersion();
 			}
 			if (OC_CLIENT.equals(id)) {
-				return OCBinary.getInstance().getLocation(openshiftConnection);
+				return OCBinary.getInstance().getPath(openshiftConnection);
 			}
 			Object result = openshiftConnection.getExtendedProperties().get(id);
 			return result == null ? "" : result.toString();

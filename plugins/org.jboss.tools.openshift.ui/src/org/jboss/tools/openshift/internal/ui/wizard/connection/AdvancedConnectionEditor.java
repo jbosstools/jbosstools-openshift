@@ -78,7 +78,7 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryVersionValidator;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.validator.URLValidator;
 import org.osgi.framework.Version;
 
@@ -266,6 +266,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 						new RequiredControlDecorationUpdater());
 			}
 
+			@Override
 			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
 				return gridLayoutFactory.numColumns(3);
 			}
@@ -308,7 +309,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		IConnection tmp = pageModel.createConnection();
 		IStatus ret = RegistryProviderModel.getDefault().getRegistryURL(tmp);
 
-		String oldVal = (String) registryURLObservable.getValue();
+		String oldVal = registryURLObservable.getValue();
 		String newVal = ret.getMessage();
 		if (ret != null && ret.isOK()) {
 			// If they're equal, do nothing
@@ -318,7 +319,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				String msg = "Are you sure you want to change the registry URL from " + oldVal + " to " + newVal + "?";
 				MessageDialog dialog = new MessageDialog(shell, title, null, msg, MessageDialog.CONFIRM,
 						new String[] { "OK", "Cancel" }, 0);
-				String old = registryURLObservable.getValue().toString().trim();
+				String old = registryURLObservable.getValue().trim();
 				if (old.isEmpty() || dialog.open() == IDialogConstants.OK_ID) {
 					registryURLObservable.setValue(ret.getMessage());
 				}
@@ -390,9 +391,9 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			OCBinaryVersionValidator validator = new OCBinaryVersionValidator(location);
+			OCBinaryValidator validator = new OCBinaryValidator(location);
 			this.version = validator.getVersion(monitor);
-			this.ocVersionValidity = validator.getValidationStatus(version, monitor);
+			this.ocVersionValidity = validator.getStatus(version, false);
 			return Status.OK_STATUS;
 		}
 
