@@ -15,13 +15,14 @@
 	<properties>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
 		<suiteClass>org.jboss.tools.cdk.ui.bot.test.CDKAllTestsSuite</suiteClass>
-		<systemProperties>-Dvagrantfile=${vagrantfile} -Ddevelopers.username=${developers.username} -Ddevelopers.password=${developers.password} -Dminishift=${minishift} -Dcdk32.minishift=${cdk32.minishift} -Dcdk.minishift=${cdk.minishift} -Dhypervisor=${hypervisor}</systemProperties>
+		<systemProperties>-Drd.timePeriodFactor=${rd.timePeriodFactor} -Dvagrantfile=${vagrantfile} -Ddevelopers.username=${developers.username} -Ddevelopers.password=${developers.password} -Dminishift=${minishift} -Dcdk32.minishift=${cdk32.minishift} -Dcdk.minishift=${cdk.minishift} -Dhypervisor=${hypervisor}</systemProperties>
 		<developers.username></developers.username>
 		<vagrantfile></vagrantfile>
 		<minishift></minishift>
 		<cdk32.minishift></cdk32.minishift>
 		<cdk.minishift></cdk.minishift>
 		<hypervisor></hypervisor>
+		<rd.timePeriodFactor>1.0</rd.timePeriodFactor>
 	</properties>
 	
 	<profiles>
@@ -66,9 +67,9 @@
 				<configuration>
                     <appArgLine>-pluginCustomization ${requirementsDirectory}/pluginCustomization.ini</appArgLine>
 					<useUIThread>false</useUIThread>
-					<surefire.timeout>9600</surefire.timeout>
-					<surefire.itests.timeout>9600</surefire.itests.timeout>
-					<forkedProcessTimeoutInSeconds>9600</forkedProcessTimeoutInSeconds>
+					<surefire.timeout>10800</surefire.timeout>
+					<surefire.itests.timeout>10800</surefire.itests.timeout>
+					<forkedProcessTimeoutInSeconds>10800</forkedProcessTimeoutInSeconds>
 					<testSuite>org.jboss.tools.cdk.ui.bot.test</testSuite>
 					<testClass>${suiteClass}</testClass>
 					<skip>${skipITests}</skip>

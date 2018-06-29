@@ -35,7 +35,7 @@ public class CDK32DownloadRuntimeTest extends DownloadContainerRuntimeAbstractTe
   
   @Parameters(name="{0}")
   public static Collection<CDKVersion> data() {
-    return Arrays.asList(CDKVersion.CDK320, CDKVersion.CDK330, CDKVersion.CDK340);
+    return Arrays.asList(CDKVersion.CDK340, CDKVersion.CDK350);
   }
   
   @Override

@@ -43,6 +43,7 @@ import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.workbench.condition.EditorIsDirty;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.exception.WorkbenchLayerException;
+import org.eclipse.reddeer.workbench.handler.WorkbenchShellHandler;
 import org.eclipse.reddeer.workbench.ui.dialogs.WorkbenchPreferenceDialog;
 import org.jboss.tools.cdk.reddeer.core.condition.SystemJobIsRunning;
 import org.jboss.tools.cdk.reddeer.core.label.CDKLabel;
@@ -162,6 +163,9 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	
 	@After
 	public void tearDownServers() {
+		// cleaning up different possible opened dialog after test failure
+		// TODO: possibly will need to be implemented more specifically
+		WorkbenchShellHandler.getInstance().closeAllNonWorbenchShells();
 		setCDKServer(null);
 		getServersView().close();
 	}
@@ -231,14 +235,12 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	}
 	
 	protected void startServerAdapter(Server server, Runnable cond, boolean rethrow) {
-		log.info("Starting server adapter"); 
-		// Workaround for CDK-216
-		new WaitUntil(new NeverFulfilledCondition(), TimePeriod.getCustom(120), false);
+		log.info("Starting server adapter");
 		new ServerOperation(() -> server.start(), cond, rethrow);
 		printCertificates();
 		setCertificateAccepted(true);
 		checkServerIsAvailable();
-		assertEquals(ServerState.STARTED, getCDKServer().getLabel().getState());		
+		assertEquals(ServerState.STARTED, getCDKServer().getLabel().getState());
 	}
 	
 	/**
@@ -626,6 +628,7 @@ public abstract class CDKServerAdapterAbstractTest extends CDKAbstractTest {
 	 * @author odockal
 	 *
 	 */
+	@SuppressWarnings("unused")
 	private class NeverFulfilledCondition extends AbstractWaitCondition {
 
 		@Override

@@ -12,7 +12,9 @@ package org.jboss.tools.cdk.ui.bot.test.server.adapter.openshift;
 
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.reddeer.common.logging.Logger;
 import org.eclipse.reddeer.junit.runner.RedDeerSuite;
+import org.jboss.tools.cdk.reddeer.core.enums.CDKRuntimeOS;
 import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.cdk.ui.bot.test.utils.CDKTestUtils;
 import org.junit.After;
@@ -27,15 +29,21 @@ import org.junit.runner.RunWith;
 @RunWith(RedDeerSuite.class)
 public class CDKImageRegistryUrlValidatorTest extends CDKImageRegistryUrlAbstractTest {
 
-	public static final String OC_IS_NOT_SET = "The workspace setting for the OC binary is not set"; 
+	public static final String OC_IS_NOT_CONFIGURED = "OpenShift client oc not configured"; 
+	
+	public static final String OC_3_11_RSYNC_WARNING = "OpenShift client oc version 3.11 is required to avoid permission errors when rsync-ing from a Linux client";
+	
+	public static final String SIGN_TO_OPENSHIFT = "Please sign in to your OpenShift server";
+	
+	public static final Logger log = Logger.getLogger(CDKImageRegistryUrlValidatorTest.class);
 	
 	@Override
 	protected String getServerAdapter() {
 		return SERVER_ADAPTER_32;
 	}
 	
-	@After
-	public void tearDownCDKValidator() {
+	@After	
+	public void tearDownCDKValidator() {	
 		CDKTestUtils.setOCToPreferences(""); 
 	}
 	
@@ -44,11 +52,11 @@ public class CDKImageRegistryUrlValidatorTest extends CDKImageRegistryUrlAbstrac
 	 */
 	@Test
 	public void testSettingOCToWorkspace() {
-		assertStringContains(wizard.getConnectionMessage(), OC_IS_NOT_SET);
+		assertStringContains(wizard.getConnectionMessage(), OC_IS_NOT_CONFIGURED);
 		wizard.cancel();
 		setupOCForWorkspace();
 		wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
-		assertStringContains(wizard.getConnectionMessage(), "OpenShift server"); 
+		assertStringContains(wizard.getConnectionMessage(), CDKRuntimeOS.get() == CDKRuntimeOS.LINUX ? OC_3_11_RSYNC_WARNING : SIGN_TO_OPENSHIFT); 
 		assertTrue(wizard.getOCLocationLabel().getText().endsWith(CDKUtils.IS_WINDOWS ? "oc.exe" : "oc"));  
 	}
 	
@@ -61,7 +69,7 @@ public class CDKImageRegistryUrlValidatorTest extends CDKImageRegistryUrlAbstrac
 		setupOCForWorkspace();
 		wizard = getOpenshiftConnectionWizard(findOpenShiftConnection(null, OPENSHIFT_USERNAME));
 		// test default description
-		assertStringContains(wizard.getConnectionMessage(), "OpenShift server"); 
+		assertStringContains(wizard.getConnectionMessage(), CDKRuntimeOS.get() == CDKRuntimeOS.LINUX ? OC_3_11_RSYNC_WARNING : SIGN_TO_OPENSHIFT); 
 		// test wrong image url
 		wizard.getImageRegistryUrl().setText("foo.con"); 
 		assertStringContains(wizard.getConnectionMessage(), VALIDATION_MESSAGE);

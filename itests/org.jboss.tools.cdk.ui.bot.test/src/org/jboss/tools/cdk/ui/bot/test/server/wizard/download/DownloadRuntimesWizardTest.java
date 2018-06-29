@@ -28,7 +28,7 @@ import org.junit.Test;
  */
 public class DownloadRuntimesWizardTest extends DownloadContainerRuntimeAbstractTest {
 
-	private static final CDKVersion version = CDKVersion.CDK340;
+	private static final CDKVersion version = CDKVersion.CDK350;
 	
 	@Override
 	protected String getServerAdapter() {

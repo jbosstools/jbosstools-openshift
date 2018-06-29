@@ -35,6 +35,7 @@ import org.eclipse.reddeer.common.wait.TimePeriod;
 import org.eclipse.reddeer.common.wait.WaitUntil;
 import org.eclipse.reddeer.common.wait.WaitWhile;
 import org.eclipse.reddeer.core.condition.WidgetIsFound;
+import org.eclipse.reddeer.core.exception.CoreLayerException;
 import org.eclipse.reddeer.core.matcher.WithMnemonicTextMatcher;
 import org.eclipse.reddeer.core.matcher.WithTextMatcher;
 import org.eclipse.reddeer.eclipse.selectionwizard.NewMenuWizard;
@@ -46,6 +47,7 @@ import org.eclipse.reddeer.swt.api.TreeItem;
 import org.eclipse.reddeer.swt.condition.ControlIsEnabled;
 import org.eclipse.reddeer.swt.impl.button.PushButton;
 import org.eclipse.reddeer.swt.impl.clabel.DefaultCLabel;
+import org.eclipse.reddeer.swt.impl.shell.DefaultShell;
 import org.eclipse.reddeer.swt.impl.tree.DefaultTree;
 import org.eclipse.reddeer.workbench.core.condition.JobIsRunning;
 import org.eclipse.reddeer.workbench.handler.EditorHandler;
@@ -57,6 +59,7 @@ import org.jboss.tools.cdk.reddeer.core.matcher.JobMatcher;
 import org.jboss.tools.cdk.reddeer.server.exception.CDKException;
 import org.jboss.tools.cdk.reddeer.server.ui.CDKServersView;
 import org.jboss.tools.cdk.reddeer.server.ui.wizard.NewCDKServerWizard;
+import org.jboss.tools.cdk.reddeer.utils.CDKUtils;
 import org.jboss.tools.openshift.reddeer.preference.page.OpenShift3PreferencePage;
 
 /**
@@ -158,11 +161,23 @@ public class CDKTestUtils {
 		dialog.open();
 		dialog.select(page);
 		
+		// check for accidentally opened Could not accept changes dialog and close it
+		try {
+			new DefaultShell("Could Not Accept Changes ");
+			new PushButton("OK").click();
+		} catch (CoreLayerException exc) {
+			// no such shell exists which is ok
+			log.info("Could not accept changes dialog did not appered");
+		}
+		
 		page.setOCLocation(ocPath);
+		dialog.activate();
 		try {
 			new WaitUntil(new ControlIsEnabled(new PushButton(CDKLabel.Buttons.APPLY)), TimePeriod.DEFAULT); 
 		} catch (WaitTimeoutExpiredException exc) {
-			fail("WaitTimeoutExpiredException occured while processing oc binary on path " + ocPath); 
+			CDKUtils.captureScreenshot("SettingOCToPreferencesException");
+			dialog.cancel();
+			fail("WaitTimeoutExpiredException occured while processing oc binary on path " + ocPath);
 		}
 		page.apply();
 		dialog.cancel();

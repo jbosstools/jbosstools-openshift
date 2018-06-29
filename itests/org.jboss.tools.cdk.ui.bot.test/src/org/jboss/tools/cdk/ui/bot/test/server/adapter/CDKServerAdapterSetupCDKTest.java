@@ -211,7 +211,12 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 			if (shell.getResult() != null) {
 				fail("Starting minishift server adapter is not supposed to configure CDK");
 			}
-			handleWarningDialog(CDKLabel.Shell.PROBLEM_DIALOG, OkButton.class);
+			// on mac there is problem dialog thrown, yet no setup is available
+			ShellIsAvailable dialog = new ShellIsAvailable(CDKLabel.Shell.PROBLEM_DIALOG);
+			new WaitUntil(dialog, false);
+			if (dialog.getResult() != null) {
+				handleWarningDialog(CDKLabel.Shell.PROBLEM_DIALOG, OkButton.class);
+			}
 			new WaitUntil(new JobIsRunning(), TimePeriod.MEDIUM, false);
 			new WaitWhile(new JobIsRunning(), TimePeriod.MEDIUM, false);
 			assertEquals(ServerState.STOPPED, getMinishiftServer().getLabel().getState());
@@ -221,11 +226,12 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 	}
 	
 	private void confirmOverwritingOfSetupCDK(String filePath, String shellName) {
+		SystemJobIsRunning runningJob = new SystemJobIsRunning(new JobMatcher("Setup CDK"));
 		log.info("Confirming overwriting of minishift home content at " + filePath);
 		handleWarningDialog(shellName, OkButton.class);
-		new WaitUntil(new SystemJobIsRunning(new JobMatcher("Setup CDK")), TimePeriod.MEDIUM);
-		new WaitUntil(new ConsoleHasNoChange(TimePeriod.MEDIUM), TimePeriod.getCustom(20));
-		new WaitWhile(new SystemJobIsRunning(new JobMatcher("Setup CDK")), TimePeriod.MEDIUM);
+		new WaitUntil(runningJob, TimePeriod.MEDIUM);
+		new WaitWhile(runningJob, TimePeriod.getCustom(30));
+		new WaitUntil(new ConsoleHasNoChange(TimePeriod.MEDIUM), TimePeriod.DEFAULT);
 		checkConsoleOutput(filePath);
 	}
 
@@ -237,7 +243,7 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 	
 	private void handleWarningDialog(String shellName, Class<? extends Button> button) {
 		ShellIsAvailable dialog = new ShellIsAvailable(shellName);
-		new WaitUntil(dialog, TimePeriod.MEDIUM);
+		new WaitUntil(dialog);
 		Button but;
 		try {
 			but = button.newInstance();
@@ -277,7 +283,7 @@ public class CDKServerAdapterSetupCDKTest extends CDKServerAdapterAbstractTest {
 	private void changeMinishiftHomeTo(String changeTo) {
 		log.info("Change minishift home from " + ((CDKPart)editor).getMinishiftHomeLabel().getText() + " to " + changeTo);
 		((CDKPart)editor).getMinishiftHomeLabel().setText(changeTo);
-		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.MEDIUM, false);
+		new WaitWhile(new SystemJobIsRunning(new JobMatcher(CDKLabel.Job.MINISHIFT_VALIDATION_JOB)), TimePeriod.DEFAULT, false);
 		CDKTestUtils.performSave(editor.getEditorPart());		
 	}
 	

@@ -50,6 +50,8 @@ public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAb
 	
 	public static final String VALIDATION_MESSAGE = "Please provide a valid image registry (HTTP/S) URL"; 
 	
+	public static final String VALIDATION_MESSAGE_OC311 = "OpenShift client oc version 3.11 is required";
+	
 	protected static final String OPENSHIFT_REGISTRY = getMinishiftOpenshiftRegistry();
 
 	@BeforeClass
@@ -62,7 +64,7 @@ public abstract class CDKImageRegistryUrlAbstractTest extends CDKServerAdapterAb
 	
 	@AfterClass
 	public static void tearDownCDKImageResgitryUrlAbstract() {
-		CDKTestUtils.setOCToPreferences(""); 
+		CDKTestUtils.setOCToPreferences("");
 		stopRunningServerAdapters();
 	}
 

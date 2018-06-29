@@ -26,13 +26,15 @@ public enum CDKVersion {
 	CDK320 	("CDK", "3.2.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.2.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
 	CDK330 	("CDK", "3.3.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.3.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
 	CDK340 	("CDK", "3.4.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.4.0-2-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
+	CDK350 	("CDK", "3.5.0", CDKLabel.Server.CDK32_SERVER_NAME, "cdk-3.5.0-1-minishift-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64" + CDKRuntimeOS.get().getSuffix()),
 	MINISHIFT1140 ("Minishift", "1.14.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.14.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
 	MINISHIFT1151 ("Minishift", "1.15.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.15.1-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
 	MINISHIFT1161 ("Minishift", "1.16.1", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.16.1-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
 	MINISHIFT1170 ("Minishift", "1.17.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.17.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
 	MINISHIFT1180 ("Minishift", "1.18.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.18.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
 	MINISHIFT1190 ("Minishift", "1.19.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.19.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
-	MINISHIFT1200 ("Minishift", "1.20.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.20.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64");
+	MINISHIFT1200 ("Minishift", "1.20.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.20.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64"),
+	MINISHIFT1210 ("Minishift", "1.21.0", CDKLabel.Server.MINISHIFT_SERVER_NAME, "minishift-1.21.0-" + CDKRuntimeOS.get().getRuntimeFullName() + "-amd64");
 	
 	private final String type;
 	private final String version;

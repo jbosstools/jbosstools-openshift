@@ -65,7 +65,10 @@ public class DownloadContainerRuntimeAbstractTest extends CDKServerWizardAbstrac
 	
 	@After
 	public void afterDownloadRuntime() {
-    CDKTestUtils.deleteFilesIfExist(new File(RUNTIMES_DIRECTORY));
+		if (dialog.isOpen()) {
+			dialog.cancel();
+		}
+		CDKTestUtils.deleteFilesIfExist(new File(RUNTIMES_DIRECTORY));
 	}
 	
 	public NewCDK3ServerWizardPage chooseCDKWizardPage(CDKVersion version) {
