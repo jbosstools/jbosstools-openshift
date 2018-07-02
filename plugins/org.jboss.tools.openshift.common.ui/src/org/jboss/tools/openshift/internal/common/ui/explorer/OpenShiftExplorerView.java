@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011-2015 Red Hat, Inc.
+ * Copyright (c) 2011-2018 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -121,12 +122,23 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 	private Control createExplanationPane(Control connectionsPane, PageBook pageBook, FormToolkit kit) {
 		Form form = kit.createForm(pageBook);
 		Composite composite = form.getBody();
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(composite);
 
+		Label label = new Label(composite, SWT.NONE);
+		label.setText("No connections to OpenShift are available");
+		label.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL).grab(true, false).applyTo(label);
+		
+		label = new Label(composite, SWT.NONE);
+		label.setText("Create a new connection using the Connection Wizard.");
+		label.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL).grab(true, false).applyTo(label);
+		
 		Link link = new Link(composite, SWT.NONE);
-		link.setText("No connections are available. Create a new connection with the <a>New Connection Wizard...</a>");
+		//link.setText("No connections are available. Create a new connection with the <a>New Connection Wizard...</a>");
+		link.setText("<a>New Connection</a>");
 		link.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.FILL).grab(true, false).applyTo(link);
+		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL).grab(true, false).applyTo(link);
 		link.addSelectionListener(onExplanationClicked(connectionsPane, link));
 		return form;
 	}
