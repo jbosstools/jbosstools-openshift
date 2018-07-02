@@ -135,7 +135,6 @@ public class OpenShiftExplorerView extends CommonNavigator implements IConnectio
 		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL).grab(true, false).applyTo(label);
 		
 		Link link = new Link(composite, SWT.NONE);
-		//link.setText("No connections are available. Create a new connection with the <a>New Connection Wizard...</a>");
 		link.setText("<a>New Connection</a>");
 		link.setBackground(pageBook.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.FILL).grab(true, false).applyTo(link);
