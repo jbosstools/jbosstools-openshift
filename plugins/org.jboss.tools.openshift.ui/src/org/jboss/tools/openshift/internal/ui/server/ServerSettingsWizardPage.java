@@ -42,7 +42,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -76,6 +75,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -118,6 +118,7 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.core.util.RSyncValidator;
 import org.jboss.tools.openshift.internal.core.util.RSyncValidator.RsyncStatus;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -187,7 +188,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				"Create an OpenShift 3 Server Adapter by selecting the project, resource and folders used for file synchronization.",
 				"Create an OpenShift 3 Server Adapter", wizard);
 		this.model = new ServerSettingsWizardPageModel(resource, route, deployProject, connection, server,
-				OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()),
+				Status.OK_STATUS,
 				RSyncValidator.get().getStatus());
 	}
 
@@ -308,12 +309,14 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 	@SuppressWarnings("unchecked")
 	private void createOCWarningControls(Composite container, ServerSettingsWizardPageModel model,
 			DataBindingContext dbc) {
-		Composite composite = new Composite(container, SWT.NONE);
-		GridDataFactory.fillDefaults().applyTo(composite);
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
+		Composite warningComposite = new Composite(container, SWT.NONE);
+		GridDataFactory.fillDefaults().applyTo(warningComposite);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(warningComposite);
 
-		ValueBindingBuilder.bind(WidgetProperties.visible().observe(composite))
-				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model))
+		IObservableValue<IStatus> ocBinaryStatus = 
+				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model);
+		ValueBindingBuilder.bind(WidgetProperties.visible().observe(warningComposite))
+				.to(ocBinaryStatus)
 				.converting(new Converter(IStatus.class, Boolean.class) {
 
 					@Override
@@ -323,9 +326,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 				}).in(dbc);
 
-		Label label = new Label(composite, SWT.NONE);
-		ValueBindingBuilder.bind(WidgetProperties.image().observe(label))
-				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model))
+		Label icon = new Label(warningComposite, SWT.NONE);
+		ValueBindingBuilder.bind(WidgetProperties.image().observe(icon))
+				.to(ocBinaryStatus)
 				.converting(new Converter(IStatus.class, Image.class) {
 
 					@Override
@@ -341,9 +344,9 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 					}
 				}).in(dbc);
 
-		Link link = new Link(composite, SWT.WRAP);
+		Link link = new Link(warningComposite, SWT.WRAP);
 		ValueBindingBuilder.bind(WidgetProperties.text().observe(link))
-				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model))
+				.to(ocBinaryStatus)
 				.converting(new Converter(IStatus.class, String.class) {
 					@Override
 					public Object convert(Object fromObject) {
@@ -360,11 +363,12 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 					int rc = PreferencesUtil.createPreferenceDialogOn(getShell(), OPEN_SHIFT_PREFERENCE_PAGE_ID,
 							new String[] { OPEN_SHIFT_PREFERENCE_PAGE_ID }, null).open();
 					if (rc == Dialog.OK) {
-						new Job("Checking oc binary") {
+						new Job("Checking oc binary...") {
 
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
-								IStatus stat = OCBinary.getInstance().getStatus(model.getConnection(), monitor);
+								String path = OCBinary.getInstance().getPath(model.getConnection());
+								IStatus stat = new OCBinaryValidator(path).getStatus(monitor, false);
 								model.setOCBinaryStatus(stat);
 								return stat;
 							}
@@ -378,9 +382,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 			@Override
 			protected IStatus validate() {
-				IObservableValue<IStatus> observable = BeanProperties
-						.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model);
-				Status status = (Status) observable.getValue();
+				IStatus status = ocBinaryStatus.getValue();
 				switch (status.getSeverity()) {
 				case IStatus.ERROR:
 					return OpenShiftUIActivator.statusFactory().errorStatus(OpenShiftUIMessages.OCBinaryErrorMessage);
@@ -392,8 +394,17 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			}
 		};
 		dbc.addValidationStatusProvider(validator);
-		BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_OC_BINARY_STATUS).observe(model)
-				.addValueChangeListener(event -> getShell().pack());
+		ocBinaryStatus.addValueChangeListener(event -> layoutWarningComposite(event.diff.getNewValue(), warningComposite));
+		layoutWarningComposite(ocBinaryStatus.getValue(), warningComposite);
+		
+	}
+
+	private void layoutWarningComposite(IStatus status, Composite warningComposite) {
+		Object layoutData = warningComposite.getLayoutData();
+		if (layoutData instanceof GridData) {
+			((GridData) layoutData).exclude = status.isOK();
+		}
+		warningComposite.getParent().layout(true, true);
 	}
 
 	private void createRSyncControls(Composite container, ServerSettingsWizardPageModel model, DataBindingContext dbc) {
@@ -402,8 +413,10 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		GridDataFactory.fillDefaults().applyTo(composite);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
 
+		IObservableValue<RsyncStatus> rsyncStatus = 
+				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.visible().observe(composite))
-				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model))
+				.to(rsyncStatus)
 				.converting(new Converter(RsyncStatus.class, Boolean.class) {
 
 					@Override
@@ -415,7 +428,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 		Label label = new Label(composite, SWT.NONE);
 		ValueBindingBuilder.bind(WidgetProperties.image().observe(label))
-				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model))
+				.to(rsyncStatus)
 				.converting(new Converter(RsyncStatus.class, Image.class) {
 
 					@Override
@@ -430,7 +443,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				}).in(dbc);
 		Link link = new Link(composite, SWT.WRAP);
 		ValueBindingBuilder.bind(WidgetProperties.text().observe(link))
-				.to(BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model))
+				.to(rsyncStatus)
 				.converting(new Converter(RsyncStatus.class, String.class) {
 
 					@Override
@@ -467,8 +480,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 			@Override
 			protected IStatus validate() {
-				RsyncStatus status = (RsyncStatus) BeanProperties
-						.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model).getValue();
+				RsyncStatus status = rsyncStatus.getValue();
 
 				switch (status) {
 				case OK:
@@ -479,7 +491,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 			}
 		};
 		dbc.addValidationStatusProvider(validator);
-		BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model)
+		rsyncStatus
 				.addValueChangeListener(event -> getShell().pack());
 
 	}

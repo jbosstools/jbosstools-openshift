@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2017-2018 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.openshift.core.connection.registry;
 
 import java.util.ArrayList;
@@ -17,6 +27,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 public class RegistryProviderModel {
+
 	private static RegistryProviderModel model = new RegistryProviderModel();
 
 	public static RegistryProviderModel getDefault() {
@@ -25,7 +36,7 @@ public class RegistryProviderModel {
 
 	private ProviderPair[] registryProviders = null;
 
-	public RegistryProviderModel() {
+	private RegistryProviderModel() {
 		// Nothing needs to be done to initialize
 	}
 
@@ -36,7 +47,7 @@ public class RegistryProviderModel {
 	 * @return
 	 */
 	public IStatus getRegistryURL(IConnection c) {
-		if( c == null ) {
+		if (c == null) {
 			return new Status(IStatus.ERROR, OpenShiftCoreActivator.PLUGIN_ID, 
 					"Unable to discover a registry URL for connection 'null'", null);
 		}
