@@ -50,6 +50,7 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private static final List<String> TERMINATED_STATUS = Arrays.asList("Complete", "Failed", "Error", "Cancelled");
+	private static String DEPLOYMENT_LABEL = "deployment";
 
 	private OpenshiftUIModel model;
 	private IElementListener listener;
@@ -187,8 +188,9 @@ public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 			services.addAll(dcs);
 			Collection<IResourceWrapper<?, ?>> pods = project.getResourcesOfKind(ResourceKind.POD)
 					.stream()
-					.filter(wrapper -> ResourceUtils.isRuntimePod((IPod) wrapper.getWrapped()) && !((IPod)wrapper.getWrapped()).isAnnotatedWith(OpenShiftAPIAnnotations.DEPLOYMENT_NAME))
-					.collect(Collectors.toList());
+                    .filter(wrapper -> ResourceUtils.isRuntimePod((IPod)wrapper.getWrapped())
+                            && !((IPod)wrapper.getWrapped()).getLabels().containsKey(DEPLOYMENT_LABEL))
+                    .collect(Collectors.toList());
 			services.addAll(pods);
 			return services.toArray();
 		case LOAD_STOPPED:
