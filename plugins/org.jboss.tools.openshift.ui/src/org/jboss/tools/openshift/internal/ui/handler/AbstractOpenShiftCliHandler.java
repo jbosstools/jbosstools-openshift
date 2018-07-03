@@ -46,7 +46,7 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		String location = OCBinary.getInstance().getLocation(getConnection(event));
+		String location = OCBinary.getInstance().getPath(getConnection(event));
 		if (StringUtils.isBlank(location)) {
 
 			final MessageDialog dialog = new MessageDialog(HandlerUtil.getActiveShell(event),

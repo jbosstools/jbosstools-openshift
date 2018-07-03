@@ -187,7 +187,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 
 	private void validateOCLocation() {
 		if (selectedConnection != null) {
-			String ocValString = OCBinary.getInstance().getLocation(selectedConnection);
+			String ocValString = OCBinary.getInstance().getPath(selectedConnection);
 			if (StringUtils.isEmpty(ocValString)) {
 				ocLocationDecorator.show();
 				ocLocationDecorator.setImage(FieldDecorationRegistry.getDefault()
@@ -241,7 +241,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 				imageRegistryValLbl.setText("");
 				clusterNamespaceValLbl.setText("");
 			}
-			String ocValString = OCBinary.getInstance().getLocation(con);
+			String ocValString = OCBinary.getInstance().getPath(con);
 			if (ocValString == null)
 				ocValString = "";
 			ocLocationValLbl.setText(ocValString);
