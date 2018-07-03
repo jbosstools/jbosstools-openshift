@@ -50,7 +50,7 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class OpenShiftExplorerContentProvider implements ITreeContentProvider {
 	private static final List<String> TERMINATED_STATUS = Arrays.asList("Complete", "Failed", "Error", "Cancelled");
-	private static String DEPLOYMENT_LABEL = "deployment";
+	private static final String DEPLOYMENT_LABEL = "deployment";
 
 	private OpenshiftUIModel model;
 	private IElementListener listener;
