@@ -42,12 +42,14 @@ import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
 import org.jboss.tools.openshift.internal.core.util.RSyncValidator;
+import org.jboss.tools.openshift.internal.core.util.RSyncValidator.RsyncStatus;
 import org.jboss.tools.openshift.internal.common.core.UsageStats;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.jboss.tools.openshift.internal.ui.job.IResourcesModelJob;
 import org.jboss.tools.openshift.internal.ui.job.RefreshResourcesJob;
@@ -307,10 +309,10 @@ public class NewApplicationWizard extends Wizard implements IWorkbenchWizard, IC
 					IService service, IRoute route) {
 				try {
 					IServerWorkingCopy server = OpenShiftServerUtils.create(OpenShiftResourceUniqueId.get(service));
+					IStatus ocStatus = new OCBinaryValidator(OCBinary.getInstance().getPath(connection)).getStatus(new NullProgressMonitor());
+					RsyncStatus rsyncStatus = RSyncValidator.get().getStatus();
 					ServerSettingsWizardPageModel serverModel = new ServerSettingsWizardPageModel(service, route,
-							project, connection, server,
-							OCBinary.getInstance().getStatus(connection, new NullProgressMonitor()),
-							RSyncValidator.get().getStatus());
+							project, connection, server, ocStatus, rsyncStatus);
 					serverModel.loadResources();
 					serverModel.updateServer();
 					server.setAttribute(OpenShiftServerUtils.SERVER_START_ON_CREATION, false);
