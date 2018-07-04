@@ -68,6 +68,21 @@ public class DeleteResourcesJob extends AbstractDeleteResourceJob {
 	 */
 	public static class ResourcesRemovalOrdering implements Comparator<IResource> {
 		
+		private enum ResourceKindWeight {
+			DC(ResourceKind.DEPLOYMENT_CONFIG, 1), 
+			RC(ResourceKind.REPLICATION_CONTROLLER, 2),
+			POD(ResourceKind.POD, 3), 
+			DEFAULT("", 4);
+
+			private String resourceKind;
+			private int weight;
+
+			ResourceKindWeight(String resourceKind, int weight) {
+				this.resourceKind = resourceKind;
+				this.weight = weight;
+			}
+		}
+
 		private static final int HIGHER_PRIO = -1;
 		private static final int LOWER_PRIO = 1;
 		private static final int EQUAL_PRIO = 0;
@@ -87,29 +102,18 @@ public class DeleteResourcesJob extends AbstractDeleteResourceJob {
 			}
 			// now null-safe
 
-			switch(resource1.getKind()) {
-				case ResourceKind.DEPLOYMENT_CONFIG:
-					// dc should be remove before everthing else
-					return HIGHER_PRIO;
-				case ResourceKind.REPLICATION_CONTROLLER:
-					// rc should be removed after dc but before everything else
-					if (ResourceKind.DEPLOYMENT_CONFIG.equals(resource2.getKind())) {
-						return LOWER_PRIO;
-					} 
-					return HIGHER_PRIO;
-				case ResourceKind.POD:
-					// pod should be removed after dc and rc 
-					if (ResourceKind.DEPLOYMENT_CONFIG.equals(resource2.getKind())
-						|| ResourceKind.REPLICATION_CONTROLLER.equals(resource2.getKind())) {
-							return LOWER_PRIO;
-					}
-					return HIGHER_PRIO;
-				default:
-					return LOWER_PRIO;
+			return getWeight(resource1) - getWeight(resource2);
+		}
+
+		private int getWeight(IResource resource) {
+			for (ResourceKindWeight resourceKindWeight : ResourceKindWeight.values()) {
+				if (resourceKindWeight.resourceKind.equals(resource.getKind())) {
+					return resourceKindWeight.weight;
+				}
 			}
+
+			return ResourceKindWeight.DEFAULT.weight;
 		}
 	}
-
-	
 
 }
