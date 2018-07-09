@@ -30,6 +30,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -55,6 +56,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 	private Label ocVersionLabel;
 	private Composite ocMessageComposite;
 	private Link ocMessageLabel;
+	private Label ocMessageIcon;
 
 	public OpenShiftPreferencePage() {
 		super(GRID);
@@ -95,14 +97,13 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 			.applyTo(ocMessageComposite);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(ocMessageComposite);
 
-		Label label = new Label(ocMessageComposite, SWT.NONE);
-		label.setImage(JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+		this.ocMessageIcon = new Label(ocMessageComposite, SWT.NONE);
 		GridDataFactory.fillDefaults()
-			.align(SWT.BEGINNING, SWT.TOP).applyTo(label);
+			.align(SWT.BEGINNING, SWT.CENTER).applyTo(ocMessageIcon);
 
 		this.ocMessageLabel = new Link(ocMessageComposite, SWT.WRAP);
 		GridDataFactory.fillDefaults()
-			.align(SWT.FILL, SWT.FILL).grab(true, true)
+			.align(SWT.FILL, SWT.FILL).grab(true, false).indent(0, 10)
 			.applyTo(ocMessageLabel);
 		ocMessageLabel.addListener(SWT.Selection, event -> {
 			if (event.text.startsWith("download")) {
@@ -190,11 +191,27 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 						&& !monitor.isCanceled()) {
 					ocVersionLabel.setText(getOcVersionMessage());
 					ocMessageLabel.setText(removePreferencesLink(status.getMessage()));
+					ocMessageIcon.setImage(getMessageTypeIcon(status));
 					ocMessageComposite.setVisible(!status.isOK());
+					ocMessageComposite.layout(true);
 					// only disable "Apply" if we have an error, not when we have a warning
-					setValid(status.getSeverity() != IStatus.ERROR);
+//					setValid(status.getSeverity() != IStatus.ERROR);
+					setValid(true);
 				}
 				return super.updateUI(monitor);
+			}
+
+			private Image getMessageTypeIcon(IStatus status) {
+				switch(status.getSeverity()) {
+				case Status.WARNING:
+					return Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
+				case Status.ERROR:
+					return Dialog.getImage(Dialog.DLG_IMG_MESSAGE_ERROR);
+				case Status.INFO:
+					return Dialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO);
+				default:
+					return null;
+				}
 			}
 
 			/**
@@ -249,7 +266,7 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 				ocMessageComposite.setVisible(false);
 				validateLocation(newCheckedValue);
 				this.lastCheckedValue = newCheckedValue;
-				return false;
+				return true;
 			} else {
 				return isValid();
 			}

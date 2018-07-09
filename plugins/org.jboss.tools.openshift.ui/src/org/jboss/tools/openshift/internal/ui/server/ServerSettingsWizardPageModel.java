@@ -37,6 +37,7 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.ExtensionUtils;
@@ -48,6 +49,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.adapter.IOpenshiftServerAdapterProfileDetector;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.core.util.RSyncValidator.RsyncStatus;
@@ -623,8 +625,14 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	}
 
 	protected IStatus validateOCBinary(Connection connection) {
-		return new OCBinaryValidator(
+		IStatus status = new OCBinaryValidator(
 				OCBinary.getInstance().getPath(connection)).getStatus(new NullProgressMonitor());
+		// turn non-ok status into errors 
+		if (status.isOK()) {
+			return status;
+		} else {
+			return StatusFactory.errorStatus(OpenShiftCoreActivator.PLUGIN_ID, status.getMessage());
+		}
 	}
 
 	private void updateRsyncStatus(RsyncStatus rsyncStatus) {
