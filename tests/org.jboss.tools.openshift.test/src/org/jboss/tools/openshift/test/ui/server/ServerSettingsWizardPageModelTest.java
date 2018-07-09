@@ -745,7 +745,7 @@ public class ServerSettingsWizardPageModelTest {
 	@Test
 	public void shouldUpdateOCStatusWhenLoading() throws Exception {
 		// given
-		ServerSettingsWizardPageModel model = 
+		TestableServerSettingsWizardPageModel model = 
 				spy(new TestableServerSettingsWizardPageModel(null, null, null, connection, server));
 		// when
 		model.loadResources();
@@ -794,6 +794,11 @@ public class ServerSettingsWizardPageModelTest {
 		@Override
 		public String getProfileId() {
 			return super.getProfileId();
+		}
+
+		@Override
+		public void setOCBinaryStatus(IStatus ocBinaryStatus) {
+			super.setOCBinaryStatus(ocBinaryStatus);
 		}
 	}
 
