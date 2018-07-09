@@ -10,12 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.internal.ui.wizard.connection;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
@@ -45,7 +43,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -289,20 +286,16 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	}
 
 	private void updateOcObservables(String location, boolean override) {
-		IStatus ocLocationStatus = validateOCLocation(location, override);
-		ocLocationValidity.setValue(ocLocationStatus);
-		if (ocLocationStatus.isOK()) {
-			ocVersionValidity.setValue(ValidationStatus.cancel("Verifying oc version..."));
-			OCVersionValidationJob job = new OCVersionValidationJob(location);
-			job.addJobChangeListener(new JobChangeAdapter() {
+		ocVersionValidity.setValue(ValidationStatus.cancel("Verifying oc version..."));
+		OCValidationJob job = new OCValidationJob(location);
+		job.addJobChangeListener(new JobChangeAdapter() {
 
-				@Override
-				public void done(IJobChangeEvent event) {
-					ocVersionValidity.getRealm().exec(() -> ocVersionValidity.setValue(job.getOCVersionValidity()));
-				}
-			});
-			job.schedule();
-		}
+			@Override
+			public void done(IJobChangeEvent event) {
+				ocVersionValidity.getRealm().exec(() -> ocVersionValidity.setValue(job.getOCVersionValidity()));
+			}
+		});
+		job.schedule();
 	}
 
 	private void discoverRegistryPressed(Shell shell) {
@@ -341,50 +334,13 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		return s1.equals(s2);
 	}
 
-	private IStatus validateOCLocation(String location, boolean override) {
-		IStatus validity = ValidationStatus.ok();
-		if (StringUtils.isBlank(location)) {
-			if (override)
-				validity = ValidationStatus.error("Please provide a location for the OC binary.");
-			else {
-				validity = ValidationStatus.error(
-						"The workspace setting for the OC binary is not set. Please update the workspace setting or override the location here in the 'Advanced' section.");
-			}
-		} else {
-			File file = new File(location);
-			// Error messages have to be set to field editor, not directly to
-			// the page.
-			if (override) {
-				if (!file.exists()) {
-					validity = ValidationStatus.error((NLS.bind("{0} was not found.", file)));
-				} else if (file.isDirectory()) {
-					validity = ValidationStatus.error((NLS.bind("OC Location must be a file.", file)));
-				} else if (!file.canExecute()) {
-					validity = ValidationStatus.error(NLS.bind("{0} does not have execute permissions.", file));
-				}
-			} else {
-				if (!file.exists()) {
-					validity = ValidationStatus
-							.error((NLS.bind("Workspace setting for OC binary location was not found: {0}", file)));
-				} else if (file.isDirectory()) {
-					validity = ValidationStatus
-							.error((NLS.bind("Workspace setting for OC binary location is not a file: {0}", file)));
-				} else if (!file.canExecute()) {
-					validity = ValidationStatus.error(NLS.bind(
-							"Workspace setting for OC binary location does not have execute permissions: {0}", file));
-				}
-			}
-		}
-		return validity;
-	}
-
-	private class OCVersionValidationJob extends Job {
+	private class OCValidationJob extends Job {
 
 		private Version version;
 		private String location;
 		private IStatus ocVersionValidity = ValidationStatus.cancel("OC version not verified yet.");
 
-		public OCVersionValidationJob(String location) {
+		public OCValidationJob(String location) {
 			super("Checking oc binary...");
 			this.location = location;
 		}
