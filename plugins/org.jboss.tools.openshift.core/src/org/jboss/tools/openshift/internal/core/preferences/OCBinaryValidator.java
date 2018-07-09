@@ -68,21 +68,21 @@ public class OCBinaryValidator {
 	private String path;
 
 	private List<OCBinaryRequirement> requirements = Arrays.asList(
-			new OCBinaryRequirement(IStatus.ERROR, OpenShiftCoreMessages.NoOCBinaryLocationErrorMessage) {
+			new OCBinaryRequirement(IStatus.WARNING, OpenShiftCoreMessages.NoOCBinaryLocationErrorMessage) {
 
 				@Override
 				protected boolean isFullfilled(Version version, String path) {
 					return !StringUtils.isEmpty(path);
 				}
 			},
-			new OCBinaryRequirement(IStatus.ERROR, OpenShiftCoreMessages.OCBinaryLocationDontExistsErrorMessage) {
+			new OCBinaryRequirement(IStatus.WARNING, OpenShiftCoreMessages.OCBinaryLocationDontExistsErrorMessage) {
 
 				@Override
 				protected boolean isFullfilled(Version version, String path) {
 					return existsAndIsExecutable(new File(path));
 				}
 			},
-			new OCBinaryRequirement(IStatus.ERROR, OpenShiftCoreMessages.OCBinaryLocationIncompatibleErrorMessage) {
+			new OCBinaryRequirement(IStatus.WARNING, OpenShiftCoreMessages.OCBinaryLocationIncompatibleErrorMessage) {
 				@Override
 				protected boolean isFullfilled(Version version, String path) {
 					return version!= null

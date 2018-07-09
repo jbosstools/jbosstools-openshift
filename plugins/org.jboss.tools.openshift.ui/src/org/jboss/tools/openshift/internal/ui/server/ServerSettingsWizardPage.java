@@ -117,12 +117,9 @@ import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
 import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWizardPage;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.core.util.RSyncValidator;
 import org.jboss.tools.openshift.internal.core.util.RSyncValidator.RsyncStatus;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
-import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog.RouteLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
@@ -367,10 +364,8 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
-								String path = OCBinary.getInstance().getPath(model.getConnection());
-								IStatus stat = new OCBinaryValidator(path).getStatus(monitor, false);
-								model.setOCBinaryStatus(stat);
-								return stat;
+								model.validateOCBinary(monitor);
+								return Status.OK_STATUS;
 							}
 						}.schedule();
 					}
@@ -385,12 +380,12 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				IStatus status = ocBinaryStatus.getValue();
 				switch (status.getSeverity()) {
 				case IStatus.ERROR:
-					return OpenShiftUIActivator.statusFactory().errorStatus(OpenShiftUIMessages.OCBinaryErrorMessage);
 				case IStatus.WARNING:
-					return OpenShiftUIActivator.statusFactory()
-							.warningStatus(OpenShiftUIMessages.OCBinaryWarningMessage);
+				case IStatus.INFO:
+					return ValidationStatus.CANCEL_STATUS;
+				default:
+					return status;
 				}
-				return status;
 			}
 		};
 		dbc.addValidationStatusProvider(validator);
@@ -413,6 +408,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		GridDataFactory.fillDefaults().applyTo(composite);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
 
+		@SuppressWarnings("unchecked")
 		IObservableValue<RsyncStatus> rsyncStatus = 
 				BeanProperties.value(ServerSettingsWizardPageModel.PROPERTY_RSYNC_STATUS).observe(model);
 		ValueBindingBuilder.bind(WidgetProperties.visible().observe(composite))
