@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -39,6 +38,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
+import org.jboss.tools.openshift.internal.common.ui.databinding.Status2IconConverter;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
@@ -191,27 +191,14 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 						&& !monitor.isCanceled()) {
 					ocVersionLabel.setText(getOcVersionMessage());
 					ocMessageLabel.setText(removePreferencesLink(status.getMessage()));
-					ocMessageIcon.setImage(getMessageTypeIcon(status));
+					Image messageIcon = (Image) new Status2IconConverter().convert(status);
+					ocMessageIcon.setImage(messageIcon);
 					ocMessageComposite.setVisible(!status.isOK());
 					ocMessageComposite.layout(true);
-					// only disable "Apply" if we have an error, not when we have a warning
-//					setValid(status.getSeverity() != IStatus.ERROR);
+					// always have page valid so that user can always leave the page
 					setValid(true);
 				}
 				return super.updateUI(monitor);
-			}
-
-			private Image getMessageTypeIcon(IStatus status) {
-				switch(status.getSeverity()) {
-				case Status.WARNING:
-					return Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
-				case Status.ERROR:
-					return Dialog.getImage(Dialog.DLG_IMG_MESSAGE_ERROR);
-				case Status.INFO:
-					return Dialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO);
-				default:
-					return null;
-				}
 			}
 
 			/**

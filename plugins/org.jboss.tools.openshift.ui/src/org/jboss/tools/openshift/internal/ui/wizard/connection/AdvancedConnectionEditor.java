@@ -282,10 +282,10 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		} else {
 			location = OpenShiftCorePreferences.INSTANCE.getOCBinaryLocation();
 		}
-		updateOcObservables(location, override);
+		updateOcObservables(location);
 	}
 
-	private void updateOcObservables(String location, boolean override) {
+	private void updateOcObservables(String location) {
 		ocVersionValidity.setValue(ValidationStatus.cancel("Verifying oc version..."));
 		OCValidationJob job = new OCValidationJob(location);
 		job.addJobChangeListener(new JobChangeAdapter() {
