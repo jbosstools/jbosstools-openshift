@@ -1130,6 +1130,15 @@ public class ResourceUtils {
 					}
 				}).orElse(null);
 	}
+	
+	public static IResource getResourceOfType(Class<? extends IResource> type, Collection<IResource> resources) {
+		for (IResource resource : resources) {
+			if (type.isInstance(resource)) {
+				return resource;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Extracts the last segment of an URI, stripped from .git suffixes

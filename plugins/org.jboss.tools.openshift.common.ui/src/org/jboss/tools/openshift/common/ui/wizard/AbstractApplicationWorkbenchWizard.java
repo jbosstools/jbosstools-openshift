@@ -30,7 +30,7 @@ import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIActivator;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardModel;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPage;
-import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
+import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizardPageModel;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAware;
 import org.jboss.tools.openshift.internal.common.ui.wizard.IConnectionAwareWizard;
 
@@ -52,13 +52,9 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 		}
 
 		@Override
-		public boolean isPageComplete() {
-			return false;
-		}
-
-		@Override
 		public boolean canFlipToNextPage() {
-			return DataBindingUtils.isValid(getDatabindingContext()) && hasWizard(getModel().getConnectionFactory());
+			return isPageComplete() 
+					&& hasWizard(getModel().getConnectionFactory(), getModel());
 		}
 
 		@Override
@@ -66,8 +62,9 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 			IWizardPage page = null;
 			if (isConnected() && wizard != null) {
 				page = wizard.getStartingPage();
-			} else if (DataBindingUtils.isValid(getDatabindingContext())) {
-				if (connect()) {
+			} else {
+				if (isPageComplete()
+						&& connect()) {
 					IConnection connection = getConnection();
 					this.wizard = getWizard(connection);
 					if (wizard != null) {
@@ -84,8 +81,8 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 				return null;
 			}
 
-			IConnectionAwareWizard<IConnection> wizard = AbstractApplicationWorkbenchWizard.this
-					.getWizard(connection.getClass());
+			IConnectionAwareWizard<IConnection> wizard = 
+					AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
 			if (wizard == null) {
 				return null;
 			}
@@ -106,11 +103,12 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 			}
 		}
 
-		private boolean hasWizard(IConnectionFactory factory) {
-			if (factory == null) {
+		private boolean hasWizard(IConnectionFactory factory, ConnectionWizardPageModel model) {
+			if (factory == null
+					|| model == null) {
 				return false;
 			}
-			String host = getModel().getHost();
+			String host = model.getHost();
 			if (StringUtils.isEmpty(host)) {
 				return false;
 			}
@@ -121,7 +119,7 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 			IWizard wizard = AbstractApplicationWorkbenchWizard.this.getWizard(connection.getClass());
 			if (wizard == null) {
 				setErrorMessage(NLS.bind("No wizard for {0} connections present.",
-						getModel().getConnectionFactory().getName()));
+						model.getConnectionFactory().getName()));
 			}
 			return wizard != null;
 		}
@@ -133,6 +131,7 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 	private Map<Class<IConnection>, IConnectionAwareWizard<IConnection>> wizardsByConnection;
 	private IWorkbench workbench;
 	private IStructuredSelection selection;
+	private DelegatingConnectionWizardPage connectionPage;
 
 	protected AbstractApplicationWorkbenchWizard(String title) {
 		setWindowTitle(title);
@@ -180,13 +179,31 @@ public abstract class AbstractApplicationWorkbenchWizard extends Wizard implemen
 	}
 
 	@Override
+	public boolean canFinish() {
+		if (connectionPage == null) {
+			return false;
+		}
+		
+		IConnection connection = connectionPage.getConnection();
+		if (connection == null) {
+			return false;
+		}
+		IConnectionAwareWizard<IConnection> wizard = getWizard(connection.getClass());
+		if (wizard == null) {
+			return false;
+		}
+
+		return wizard.canFinish();
+	}
+
+	@Override
 	public boolean performFinish() {
 		return false;
 	}
 
 	@Override
 	public void addPages() {
-		addPage(new DelegatingConnectionWizardPage(this,
+		addPage(this.connectionPage = new DelegatingConnectionWizardPage(this,
 				new ConnectionWizardModel(ConnectionsRegistrySingleton.getInstance().getRecentConnection(), null)));
 	}
 

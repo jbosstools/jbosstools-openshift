@@ -113,6 +113,7 @@ import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSup
 import org.jboss.tools.openshift.internal.common.ui.databinding.FormPresenterSupport.IFormPresenter;
 import org.jboss.tools.openshift.internal.common.ui.databinding.NumericValidator;
 import org.jboss.tools.openshift.internal.common.ui.databinding.RequiredControlDecorationUpdater;
+import org.jboss.tools.openshift.internal.common.ui.databinding.Status2IconConverter;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
@@ -120,6 +121,7 @@ import org.jboss.tools.openshift.internal.common.ui.wizard.AbstractOpenShiftWiza
 import org.jboss.tools.openshift.internal.core.util.RSyncValidator;
 import org.jboss.tools.openshift.internal.core.util.RSyncValidator.RsyncStatus;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
+import org.jboss.tools.openshift.internal.ui.OpenShiftUIMessages;
 import org.jboss.tools.openshift.internal.ui.comparators.ProjectViewerComparator;
 import org.jboss.tools.openshift.internal.ui.dialog.SelectRouteDialog.RouteLabelProvider;
 import org.jboss.tools.openshift.internal.ui.treeitem.Model2ObservableTreeItemConverter;
@@ -326,30 +328,13 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		Label icon = new Label(warningComposite, SWT.NONE);
 		ValueBindingBuilder.bind(WidgetProperties.image().observe(icon))
 				.to(ocBinaryStatus)
-				.converting(new Converter(IStatus.class, Image.class) {
-
-					@Override
-					public Object convert(Object fromObject) {
-						switch (((IStatus) fromObject).getSeverity()) {
-						case IStatus.WARNING:
-							return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
-						case IStatus.ERROR:
-							return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_ERROR);
-						default:
-							return null;
-						}
-					}
-				}).in(dbc);
+				.converting(new Status2IconConverter())
+				.in(dbc);
 
 		Link link = new Link(warningComposite, SWT.WRAP);
 		ValueBindingBuilder.bind(WidgetProperties.text().observe(link))
 				.to(ocBinaryStatus)
-				.converting(new Converter(IStatus.class, String.class) {
-					@Override
-					public Object convert(Object fromObject) {
-						return ((IStatus) fromObject).getMessage();
-					}
-				}).in(dbc);
+				.in(dbc);
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -380,9 +365,10 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 				IStatus status = ocBinaryStatus.getValue();
 				switch (status.getSeverity()) {
 				case IStatus.ERROR:
+					return OpenShiftUIActivator.statusFactory().errorStatus(OpenShiftUIMessages.OCBinaryErrorMessage);
 				case IStatus.WARNING:
-				case IStatus.INFO:
-					return ValidationStatus.CANCEL_STATUS;
+					return OpenShiftUIActivator.statusFactory()
+							.warningStatus(OpenShiftUIMessages.OCBinaryWarningMessage);
 				default:
 					return status;
 				}
