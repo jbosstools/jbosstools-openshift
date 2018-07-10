@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016-2018 Red Hat, Inc.
+ * Copyright (c) 2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -78,7 +78,7 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
+import org.jboss.tools.openshift.internal.core.preferences.OCBinaryVersionValidator;
 import org.jboss.tools.openshift.internal.ui.validator.URLValidator;
 import org.osgi.framework.Version;
 
@@ -91,12 +91,12 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 	private ConnectionWizardPageModel pageModel;
 	private IObservableValue selectedConnection;
 	private IValueChangeListener connectionChangedListener;
-	private IObservableValue<String> registryURLObservable;
+	private IObservableValue registryURLObservable;
 	private IObservableValue clusterNamespaceObservable;
 	private IConnectionAdvancedPropertiesProvider connectionAdvancedPropertiesProvider;
 	Map<String, Object> extendedProperties = null;
-	private IObservableValue<IStatus> ocLocationValidity = new WritableValue<>(Status.OK_STATUS, IStatus.class);
-	private IObservableValue<IStatus> ocVersionValidity = new WritableValue<>(Status.OK_STATUS, IStatus.class);
+	private IObservableValue<IStatus> ocLocationValidity = new WritableValue(Status.OK_STATUS, IStatus.class);
+	private IObservableValue<IStatus> ocVersionValidity = new WritableValue(Status.OK_STATUS, IStatus.class);
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -266,7 +266,6 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 						new RequiredControlDecorationUpdater());
 			}
 
-			@Override
 			protected GridLayoutFactory adjustAdvancedCompositeLayout(GridLayoutFactory gridLayoutFactory) {
 				return gridLayoutFactory.numColumns(3);
 			}
@@ -309,7 +308,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		IConnection tmp = pageModel.createConnection();
 		IStatus ret = RegistryProviderModel.getDefault().getRegistryURL(tmp);
 
-		String oldVal = registryURLObservable.getValue();
+		String oldVal = (String) registryURLObservable.getValue();
 		String newVal = ret.getMessage();
 		if (ret != null && ret.isOK()) {
 			// If they're equal, do nothing
@@ -319,7 +318,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 				String msg = "Are you sure you want to change the registry URL from " + oldVal + " to " + newVal + "?";
 				MessageDialog dialog = new MessageDialog(shell, title, null, msg, MessageDialog.CONFIRM,
 						new String[] { "OK", "Cancel" }, 0);
-				String old = registryURLObservable.getValue().trim();
+				String old = registryURLObservable.getValue().toString().trim();
 				if (old.isEmpty() || dialog.open() == IDialogConstants.OK_ID) {
 					registryURLObservable.setValue(ret.getMessage());
 				}
@@ -391,9 +390,18 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			OCBinaryValidator validator = new OCBinaryValidator(location);
-			this.version = validator.getVersion(monitor);
-			this.ocVersionValidity = validator.getStatus(version, false);
+			this.version = new OCBinaryVersionValidator(location).getVersion(monitor);
+			if (Version.emptyVersion.equals(version)) {
+				this.ocVersionValidity = ValidationStatus.error("Could not determine your OpenShift client version");
+			} else if (!OCBinaryVersionValidator.isCompatibleForPublishing(version)) {
+				this.ocVersionValidity = ValidationStatus.error(NLS
+						.bind("OpenShift client version 1.1.1 or higher is required to avoid rsync issues.", version));
+			} else {
+				this.ocVersionValidity = ValidationStatus.ok();
+			}
+			if (monitor.isCanceled()) {
+				this.ocVersionValidity = ValidationStatus.cancel("OC version verification was cancelled.");
+			}
 			return Status.OK_STATUS;
 		}
 
@@ -402,6 +410,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
 		registryURLObservable.setValue(model.getRegistryURL());
 	}

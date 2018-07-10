@@ -608,7 +608,7 @@ public class OpenShiftServerUtils {
 		assertLegal(server != null, "Could not determine the server to use.");
 		assertLegal(
 				OCBinary.getInstance() != null
-						&& !StringUtils.isBlank(OCBinary.getInstance().getPath(getConnection(server))),
+						&& !StringUtils.isBlank(OCBinary.getInstance().getLocation(getConnection(server))),
 				"Binary for oc-tools could not be found."
 						+ " Please open the OpenShift 3 Preference Page and set the location of the oc binary.");
 

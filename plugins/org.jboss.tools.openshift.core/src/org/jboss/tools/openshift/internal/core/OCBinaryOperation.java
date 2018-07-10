@@ -24,7 +24,7 @@ public abstract class OCBinaryOperation {
 
 	public void run(IConnection connection) {
 		String oldLocation = OpenShiftContext.get().get(IBinaryCapability.OPENSHIFT_BINARY_LOCATION);
-		String location = OCBinary.getInstance().getPath(connection);
+		String location = OCBinary.getInstance().getLocation(connection);
 		OpenShiftContext.get().put(IBinaryCapability.OPENSHIFT_BINARY_LOCATION, location);
 		try {
 			runOCBinary();

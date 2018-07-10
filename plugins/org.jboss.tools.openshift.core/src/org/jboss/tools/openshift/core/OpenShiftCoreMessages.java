@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2018 Red Hat, Inc.
+ * Copyright (c) 2016 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,16 +13,11 @@ package org.jboss.tools.openshift.core;
 import org.eclipse.osgi.util.NLS;
 
 public class OpenShiftCoreMessages extends NLS {
-	
 	private static final String BUNDLE_NAME = "org.jboss.tools.openshift.core.OpenShiftCoreMessages"; //$NON-NLS-1$
-
 	public static String DebugOnOpenshift;
 	public static String ProfileOnOpenshift;
 	public static String RunOnOpenshift;
-	public static String OCBinaryPreferencesLink;
-	public static String OCBinaryPreferencesDeactivatedLink;
 	public static String OCBinaryLocationIncompatibleErrorMessage;
-	public static String OCBinaryLinuxRSyncPermErrorMessage;
 	public static String OCBinaryLocationWithSpaceErrorMessage;
 	public static String OCBinaryLocationDontExistsErrorMessage;
 	public static String NoOCBinaryLocationErrorMessage;
