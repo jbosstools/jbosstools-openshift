@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -37,6 +36,7 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.jboss.ide.eclipse.as.wtp.core.server.behavior.ServerProfileModel;
 import org.jboss.tools.openshift.common.core.connection.ConnectionURL;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.ExtensionUtils;
@@ -48,8 +48,6 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerBehaviour;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.core.server.adapter.IOpenshiftServerAdapterProfileDetector;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.core.util.RSyncValidator.RsyncStatus;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
@@ -103,7 +101,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	private boolean isLoaded = false;
 	private Map<IProject, List<IBuildConfig>> buildConfigsByProject;
 	private boolean useInferredPodPath = true;
-	private IStatus ocBinaryStatus;
+	private IStatus ocBinaryStatus = Status.OK_STATUS;
 	protected boolean useImageDevmodeKey = true;
 	protected String devmodeKey;
 	protected boolean useImageDebugPortKey = true;
@@ -114,7 +112,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 
 	protected ServerSettingsWizardPageModel(IResource resource, IRoute route,
 			org.eclipse.core.resources.IProject deployProject, Connection connection, IServerWorkingCopy server) {
-		this(resource, route, deployProject, connection, server, ValidationStatus.cancel("oc binary not verified"), RsyncStatus.OK);
+		this(resource, route, deployProject, connection, server, Status.OK_STATUS, RsyncStatus.OK);
 	}
 
 	public ServerSettingsWizardPageModel(IResource resource, IRoute route,
@@ -155,7 +153,8 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		updateRoute(route, newRoutes, resource);
 		updateSelectDefaultRoute(isSelectDefaultRoute);
 		updateOCBinaryStatus(ocBinaryStatus);
-		firePropertyChange(PROPERTY_USE_INFERRED_POD_PATH, this.useInferredPodPath, this.useInferredPodPath = useInferredPodPath);
+		firePropertyChange(PROPERTY_USE_INFERRED_POD_PATH, this.useInferredPodPath,
+				this.useInferredPodPath = useInferredPodPath);
 		firePropertyChange(PROPERTY_POD_PATH, this.podPath, this.podPath = podPath);
 		updateDevmode(useImageDevmodeKey, devmodeKey);
 		updateDebugPort(useImageDebugPortKey, debugPortKey, useImageDebugPortValue, debugPortValue);
@@ -180,8 +179,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	protected org.eclipse.core.resources.IProject updateDeployProject(
 			org.eclipse.core.resources.IProject newDeployProject, List<org.eclipse.core.resources.IProject> projects,
 			IResource resource) {
-		if (newDeployProject == null 
-				|| !projects.contains(newDeployProject)) {
+		if (newDeployProject == null || !projects.contains(newDeployProject)) {
 			newDeployProject = getDeployProject(resource);
 			if (newDeployProject == null) {
 				newDeployProject = getProjectOrDefault(newDeployProject, projects);
@@ -364,7 +362,6 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		setBuildConfigs(loadBuildConfigs(openshiftProjects, newConnection));
 		setProjects(loadProjects());
 		setRoutes(loadRoutes(getResourceItems()));
-		setOCBinaryStatus(validateOCBinary(newConnection));
 
 		this.isLoaded = true;
 
@@ -407,7 +404,8 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 		}
 
 		return projects.stream().collect(Collectors.toMap(project -> project, project -> {
-			return connection.getResources(ResourceKind.BUILD_CONFIG, project.getName());
+			List<IBuildConfig> buildConfigs = connection.getResources(ResourceKind.BUILD_CONFIG, project.getName());
+			return buildConfigs;
 		}));
 	}
 
@@ -416,7 +414,8 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	}
 
 	protected List<org.eclipse.core.resources.IProject> loadProjects() {
-		return ProjectUtils.getAllAccessibleProjects();
+		List<org.eclipse.core.resources.IProject> p = ProjectUtils.getAllAccessibleProjects();
+		return p;
 	}
 
 	protected Map<IProject, List<IRoute>> loadRoutes(List<ObservableTreeItem> serviceItems) {
@@ -453,7 +452,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 	protected void updateServerProject(String connectionUrl, IResource resource, String sourcePath, String routeURL,
 			String podPath, String devmodeKey, String debugPortKey, String debugPortValue,
 			org.eclipse.core.resources.IProject deployProject) {
-		OpenShiftServerUtils.updateServerProject(connectionUrl, resource, sourcePath, podPath, routeURL,
+		OpenShiftServerUtils.updateServerProject(connectionUrl, getResource(), sourcePath, podPath, routeURL,
 				devmodeKey, debugPortKey, debugPortValue, deployProject);
 	}
 
@@ -622,11 +621,6 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 				this.rsyncStatus);
 	}
 
-	protected IStatus validateOCBinary(Connection connection) {
-		return new OCBinaryValidator(
-				OCBinary.getInstance().getPath(connection)).getStatus(new NullProgressMonitor());
-	}
-
 	private void updateRsyncStatus(RsyncStatus rsyncStatus) {
 		firePropertyChange(PROPERTY_RSYNC_STATUS, this.rsyncStatus, this.rsyncStatus = rsyncStatus);
 	}
@@ -641,6 +635,7 @@ public class ServerSettingsWizardPageModel extends ServerResourceViewModel imple
 				this.routesByProject, this.ocBinaryStatus, this.useImageDevmodeKey, this.devmodeKey,
 				this.useImageDebugPortKey, this.debugPortKey, this.useImageDebugPortValue, this.debugPortValue,
 				rsyncStatus);
+
 	}
 
 	private void updateDevmode(boolean useImageDevmodeKey, String devmodeKey) {
