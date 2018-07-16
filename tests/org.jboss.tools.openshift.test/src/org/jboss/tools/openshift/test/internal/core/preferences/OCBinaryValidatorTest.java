@@ -22,7 +22,7 @@ import java.util.Optional;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
+import org.jboss.tools.openshift.internal.core.OCBinaryValidator;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Version;

@@ -75,7 +75,7 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryValidator;
+import org.jboss.tools.openshift.internal.core.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.validator.URLValidator;
 import org.osgi.framework.Version;
 

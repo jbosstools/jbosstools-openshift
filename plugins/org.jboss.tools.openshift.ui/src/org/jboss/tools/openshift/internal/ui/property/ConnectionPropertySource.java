@@ -24,7 +24,7 @@ import org.jboss.tools.openshift.common.core.connection.IConnectionsRegistryList
 import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.common.ui.utils.OpenShiftUIUtils;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.OCBinary;
 
 public class ConnectionPropertySource implements IPropertySource {
 
