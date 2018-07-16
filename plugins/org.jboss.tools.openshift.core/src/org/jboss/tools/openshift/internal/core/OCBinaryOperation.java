@@ -12,7 +12,6 @@ package org.jboss.tools.openshift.internal.core;
 
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 
 import com.openshift.restclient.OpenShiftContext;
 import com.openshift.restclient.capability.IBinaryCapability;

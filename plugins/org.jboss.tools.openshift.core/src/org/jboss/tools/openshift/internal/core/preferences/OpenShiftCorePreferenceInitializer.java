@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
+import org.jboss.tools.openshift.internal.core.OCBinary;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 
 public class OpenShiftCorePreferenceInitializer extends AbstractPreferenceInitializer {
