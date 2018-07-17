@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.core;
+package org.jboss.tools.openshift.internal.core.ocbinary;
 
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.openshift.common.core.connection.IConnection;

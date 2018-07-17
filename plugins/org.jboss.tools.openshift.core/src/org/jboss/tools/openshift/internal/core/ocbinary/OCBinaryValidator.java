@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.core;
+package org.jboss.tools.openshift.internal.core.ocbinary;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.foundation.core.plugin.log.StatusFactory;
+import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.osgi.framework.Version;
 
 public class OCBinaryValidator {

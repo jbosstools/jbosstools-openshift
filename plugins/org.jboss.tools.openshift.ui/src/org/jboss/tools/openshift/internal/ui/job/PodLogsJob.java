@@ -27,7 +27,7 @@ import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
 import org.jboss.tools.openshift.internal.common.core.job.AbstractDelegatingMonitorJob;
 import org.jboss.tools.openshift.internal.common.ui.console.ConsoleUtils;
-import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryOperation;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.OpenShiftException;

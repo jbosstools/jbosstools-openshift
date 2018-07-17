@@ -73,7 +73,7 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.core.OCBinaryValidationJob;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryValidationJob;
 import org.jboss.tools.openshift.internal.ui.validator.URLValidator;
 
 @SuppressWarnings("rawtypes")

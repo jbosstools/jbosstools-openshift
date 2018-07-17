@@ -39,9 +39,9 @@ import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.internal.common.core.job.JobChainBuilder;
-import org.jboss.tools.openshift.internal.core.OCBinary;
-import org.jboss.tools.openshift.internal.core.OCBinaryValidationJob;
-import org.jboss.tools.openshift.internal.core.OCBinaryValidator;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinary;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryValidationJob;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 /**
@@ -59,7 +59,7 @@ public abstract class AbstractOpenShiftCliHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		OCBinaryValidationJob validationJob = new OCBinaryValidationJob(
 				OCBinary.getInstance().getPath(getConnection(event)), 
-				true, 
+				true,
 				OCBinaryValidator.NON_RSYNC_REQUIREMENTS);
 		new JobChainBuilder(validationJob)
 			.runWhenSuccessfullyDone(new UIJob(HandlerUtil.getActiveShell(event).getDisplay(), "") {

@@ -40,8 +40,8 @@ import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.preferences.IOpenShiftCoreConstants;
 import org.jboss.tools.openshift.internal.common.ui.databinding.Status2IconConverter;
 import org.jboss.tools.openshift.internal.common.ui.job.UIUpdatingJob;
-import org.jboss.tools.openshift.internal.core.OCBinary;
-import org.jboss.tools.openshift.internal.core.OCBinaryValidator;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinary;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryValidator;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 import org.osgi.framework.Version;
 

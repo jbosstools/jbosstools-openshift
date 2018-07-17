@@ -25,7 +25,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.jboss.tools.openshift.core.connection.ConnectionsRegistryUtil;
-import org.jboss.tools.openshift.internal.core.OCBinaryOperation;
+import org.jboss.tools.openshift.internal.core.ocbinary.OCBinaryOperation;
 
 import com.openshift.restclient.capability.CapabilityVisitor;
 import com.openshift.restclient.capability.IBinaryCapability.OpenShiftBinaryOption;
