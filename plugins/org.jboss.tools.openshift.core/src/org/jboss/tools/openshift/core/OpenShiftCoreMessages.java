@@ -21,11 +21,13 @@ public class OpenShiftCoreMessages extends NLS {
 	public static String RunOnOpenshift;
 	public static String OCBinaryPreferencesLink;
 	public static String OCBinaryPreferencesDeactivatedLink;
+	public static String OCBinaryDownloadDeactivatedLink;
 	public static String OCBinaryLocationIncompatibleErrorMessage;
 	public static String OCBinaryLinuxRSyncPermErrorMessage;
-	public static String OCBinaryLocationWithSpaceErrorMessage;
+	public static String OCBinaryLocationRSyncWithSpaceErrorMessage;
 	public static String OCBinaryLocationDontExistsErrorMessage;
 	public static String NoOCBinaryLocationErrorMessage;
+	public static String OCBinaryNotRecognized;
 	public static String RsyncNotFoundMessage;
 	public static String RsyncFstabNotFoundMessage;
 	public static String RsyncFstabNotFoundDetailedMessage;

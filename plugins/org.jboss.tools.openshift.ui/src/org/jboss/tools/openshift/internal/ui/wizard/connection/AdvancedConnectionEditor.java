@@ -28,12 +28,10 @@ import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -75,9 +73,8 @@ import org.jboss.tools.openshift.internal.common.ui.detailviews.BaseDetailsView;
 import org.jboss.tools.openshift.internal.common.ui.utils.DataBindingUtils;
 import org.jboss.tools.openshift.internal.common.ui.utils.DialogAdvancedPart;
 import org.jboss.tools.openshift.internal.common.ui.utils.UIUtils;
-import org.jboss.tools.openshift.internal.core.OCBinaryValidator;
+import org.jboss.tools.openshift.internal.core.OCBinaryValidationJob;
 import org.jboss.tools.openshift.internal.ui.validator.URLValidator;
-import org.osgi.framework.Version;
 
 @SuppressWarnings("rawtypes")
 public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvancedConnectionPropertiesEditor {
@@ -287,7 +284,7 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 
 	private void updateOcObservables(String location) {
 		ocVersionValidity.setValue(ValidationStatus.cancel("Verifying oc version..."));
-		OCValidationJob job = new OCValidationJob(location);
+		OCBinaryValidationJob job = new OCBinaryValidationJob(location);
 		job.addJobChangeListener(new JobChangeAdapter() {
 
 			@Override
@@ -332,30 +329,6 @@ public class AdvancedConnectionEditor extends BaseDetailsView implements IAdvanc
 		if (s1 == null)
 			return false;
 		return s1.equals(s2);
-	}
-
-	private class OCValidationJob extends Job {
-
-		private Version version;
-		private String location;
-		private IStatus ocVersionValidity = ValidationStatus.cancel("OC version not verified yet.");
-
-		public OCValidationJob(String location) {
-			super("Checking oc binary...");
-			this.location = location;
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			OCBinaryValidator validator = new OCBinaryValidator(location);
-			this.version = validator.getVersion(monitor);
-			this.ocVersionValidity = validator.getStatus(version, false);
-			return Status.OK_STATUS;
-		}
-
-		public IStatus getOCVersionValidity() {
-			return ocVersionValidity;
-		}
 	}
 
 	protected void onSelectedConnectionChanged(IObservableValue selectedConnection) {
