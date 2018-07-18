@@ -56,9 +56,9 @@ import org.jboss.tools.openshift.common.core.utils.UrlUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.util.OpenShiftResourceUniqueId;
+import org.jboss.tools.openshift.internal.core.OCBinary;
 import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
 import org.jboss.tools.openshift.internal.core.WatchManager;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
 import org.jboss.tools.openshift.internal.core.util.ResourceUtils;
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -608,7 +608,7 @@ public class OpenShiftServerUtils {
 		assertLegal(server != null, "Could not determine the server to use.");
 		assertLegal(
 				OCBinary.getInstance() != null
-						&& !StringUtils.isBlank(OCBinary.getInstance().getLocation(getConnection(server))),
+						&& !StringUtils.isBlank(OCBinary.getInstance().getPath(getConnection(server))),
 				"Binary for oc-tools could not be found."
 						+ " Please open the OpenShift 3 Preference Page and set the location of the oc binary.");
 

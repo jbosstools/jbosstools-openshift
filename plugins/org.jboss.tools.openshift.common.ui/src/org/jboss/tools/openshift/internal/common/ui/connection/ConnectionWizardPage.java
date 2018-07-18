@@ -16,8 +16,6 @@ import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.observable.value.IValueChangeListener;
-import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -126,13 +124,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 		IObservableValue userdocUrlObservable = BeanProperties.value(ConnectionWizardPageModel.PROPERTY_USERDOCURL)
 				.observe(pageModel);
 		StyledTextUtils.emulateLinkAction(userdocLink, r -> onUserdocLinkClicked(userdocUrlObservable));
-		userdocUrlObservable.addValueChangeListener(new IValueChangeListener() {
-
-			@Override
-			public void handleValueChange(ValueChangeEvent event) {
-				showHideUserdocLink();
-			}
-		});
+		userdocUrlObservable.addValueChangeListener(event -> showHideUserdocLink());
 
 		IObservableValue connectionFactoryObservable = BeanProperties
 				.value(ConnectionWizardPageModel.PROPERTY_CONNECTION_FACTORY).observe(pageModel);
@@ -356,7 +348,7 @@ public class ConnectionWizardPage extends AbstractOpenShiftWizardPage {
 	}
 
 	public boolean isConnected() {
-		return getModel().isConnected();
+		return pageModel.isConnected();
 	}
 
 	public boolean connect() {

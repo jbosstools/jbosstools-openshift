@@ -8,24 +8,15 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.openshift.internal.core.preferences;
+package org.jboss.tools.openshift.internal.core;
 
-import java.io.File;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.osgi.util.NLS;
 import org.jboss.tools.openshift.common.core.connection.IConnection;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.core.ICommonAttributes;
-import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.core.preferences.OpenShiftCorePreferences;
 import org.jboss.tools.openshift.internal.common.core.util.CommandLocationBinary;
-import org.jboss.tools.openshift.internal.core.OpenShiftCoreActivator;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinaryVersionValidator.OCBinaryStatus;
 
 public enum OCBinary {
 
@@ -109,7 +100,7 @@ public enum OCBinary {
 	 * @return returns the location from the given connection, workspace preferences
 	 *         or from the path.
 	 */
-	public String getLocation(IConnection connection) {
+	public String getPath(IConnection connection) {
 		if (connection instanceof IOpenShiftConnection) {
 			IOpenShiftConnection c = (IOpenShiftConnection) connection;
 			Boolean override = (Boolean) c.getExtendedProperties().get(ICommonAttributes.OC_OVERRIDE_KEY);
@@ -122,45 +113,5 @@ public enum OCBinary {
 		}
 
 		return getWorkspaceLocation();
-	}
-
-	/**
-	 * Compute the error message for the OCBinary state and path.
-	 * 
-	 * @param valid
-	 *            if the oc binary is valid or not
-	 * @param location
-	 *            the location of the oc binary
-	 * @return the error message (may be null)
-	 */
-	public IStatus getStatus(IConnection connection, IProgressMonitor monitor) {
-		String location = getLocation(connection);
-		IStatus status = null;
-		if (location == null) {
-			status = OpenShiftCoreActivator.statusFactory()
-					.errorStatus(OpenShiftCoreMessages.NoOCBinaryLocationErrorMessage);
-		} else if (!new File(location).exists()) {
-			status = OpenShiftCoreActivator.statusFactory()
-					.errorStatus(NLS.bind(OpenShiftCoreMessages.OCBinaryLocationDontExistsErrorMessage, location));
-		} else if (!new File(location).canExecute()) {
-			status = OpenShiftCoreActivator.statusFactory()
-					.errorStatus(NLS.bind("{0} does not have execute permissions.", location));
-		} else {
-			OCBinaryStatus ocStatus = new OCBinaryVersionValidator(location).getStatus(monitor);
-			switch (ocStatus) {
-			case OK:
-				status = Status.OK_STATUS;
-				break;
-			case OC_INCOMPATIBLE_FOR_RSYNC:
-				status = OpenShiftCoreActivator.statusFactory()
-						.warningStatus(OpenShiftCoreMessages.OCBinaryLocationIncompatibleErrorMessage);
-				break;
-			case OC_PATH_INCOMPATIBLE:
-				status = OpenShiftCoreActivator.statusFactory()
-						.warningStatus(NLS.bind(OpenShiftCoreMessages.OCBinaryLocationWithSpaceErrorMessage, location));
-				break;
-			}
-		}
-		return status;
 	}
 }

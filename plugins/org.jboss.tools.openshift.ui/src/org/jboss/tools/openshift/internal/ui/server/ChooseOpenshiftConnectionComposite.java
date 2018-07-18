@@ -44,7 +44,7 @@ import org.jboss.tools.openshift.core.ICommonAttributes;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.connection.IOpenShiftConnection;
 import org.jboss.tools.openshift.internal.common.ui.connection.ConnectionWizard;
-import org.jboss.tools.openshift.internal.core.preferences.OCBinary;
+import org.jboss.tools.openshift.internal.core.OCBinary;
 import org.jboss.tools.openshift.internal.ui.OpenShiftUIActivator;
 
 import com.openshift.restclient.OpenShiftException;
@@ -187,7 +187,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 
 	private void validateOCLocation() {
 		if (selectedConnection != null) {
-			String ocValString = OCBinary.getInstance().getLocation(selectedConnection);
+			String ocValString = OCBinary.getInstance().getPath(selectedConnection);
 			if (StringUtils.isEmpty(ocValString)) {
 				ocLocationDecorator.show();
 				ocLocationDecorator.setImage(FieldDecorationRegistry.getDefault()
@@ -241,7 +241,7 @@ public class ChooseOpenshiftConnectionComposite extends Composite {
 				imageRegistryValLbl.setText("");
 				clusterNamespaceValLbl.setText("");
 			}
-			String ocValString = OCBinary.getInstance().getLocation(con);
+			String ocValString = OCBinary.getInstance().getPath(con);
 			if (ocValString == null)
 				ocValString = "";
 			ocLocationValLbl.setText(ocValString);
