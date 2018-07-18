@@ -152,17 +152,16 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 
 	@Override
 	public boolean performOk() {
-		boolean valid = false;
 		if (cliLocationEditor.getStringValue()
 				.equals(getPreferenceStore().getDefaultString(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC))) {
 			// super implementation changes instance value, we need it clean.
 			getPreferenceStore().setToDefault(IOpenShiftCoreConstants.OPENSHIFT_CLI_LOC);
 		} else {
-			valid = super.performOk();
+			super.performOk();
 		}
 		validateLocation(cliLocationEditor.getStringValue());
-		setValid(valid);
-		return valid;
+		// always have page valid so that user can always leave the page
+		return true;
 	}
 
 	private void validateLocation(final String location) {
@@ -195,10 +194,10 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 					ocMessageIcon.setImage(messageIcon);
 					ocMessageComposite.setVisible(!status.isOK());
 					ocMessageComposite.layout(true);
-					// always have page valid so that user can always leave the page
 					setValid(true);
 				}
-				return super.updateUI(monitor);
+				// always have page valid so that user can always leave the page
+				return Status.OK_STATUS;
 			}
 
 			/**
@@ -253,10 +252,9 @@ public class OpenShiftPreferencePage extends FieldEditorPreferencePage implement
 				ocMessageComposite.setVisible(false);
 				validateLocation(newCheckedValue);
 				this.lastCheckedValue = newCheckedValue;
-				return true;
-			} else {
-				return isValid();
-			}
+			} 
+			// always have page valid so that user can always leave the page
+			return true;
 		}
 	}
 }
