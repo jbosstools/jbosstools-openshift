@@ -103,6 +103,7 @@ import org.jboss.tools.openshift.common.core.OpenShiftCoreException;
 import org.jboss.tools.openshift.common.core.utils.ProjectUtils;
 import org.jboss.tools.openshift.common.core.utils.StringUtils;
 import org.jboss.tools.openshift.common.core.utils.VariablesHelper;
+import org.jboss.tools.openshift.core.OpenShiftCoreMessages;
 import org.jboss.tools.openshift.core.connection.Connection;
 import org.jboss.tools.openshift.core.server.OpenShiftServerUtils;
 import org.jboss.tools.openshift.internal.common.ui.OpenShiftCommonUIMessages;
@@ -140,7 +141,6 @@ import com.openshift.restclient.model.route.IRoute;
  */
 public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implements ICompletable {
 	private static final int LINK_DEFAULT_WIDTH = 600;
-	private static final String DOWNLOAD_LINK_TEXT = "download";
 	private static final String REFRESH_LINK_TEXT = "refresh";
 	private static final int RESOURCE_PANEL_WIDTH = 800;
 	private static final int RESOURCE_TREE_WIDTH = 400;
@@ -338,7 +338,7 @@ public class ServerSettingsWizardPage extends AbstractOpenShiftWizardPage implem
 		link.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (DOWNLOAD_LINK_TEXT.equals(e.text)) {
+				if (OpenShiftCoreMessages.OCBinaryDownloadDeactivatedLink.equals(e.text)) {
 					new BrowserUtility().checkedCreateExternalBrowser(DOWNLOAD_INSTRUCTIONS_URL,
 							OpenShiftUIActivator.PLUGIN_ID, OpenShiftUIActivator.getDefault().getLog());
 				} else {
