@@ -13,16 +13,17 @@ package org.jboss.tools.openshift.test.core.server.behavior.springboot;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.eclipse.m2e.core.project.IProjectConfigurationManager;
+import org.eclipse.m2e.core.project.MavenUpdateRequest;
+import org.eclipse.ui.PartInitException;
 import org.jboss.tools.openshift.core.server.behavior.springboot.OpenShiftSpringBootProfileDetector;
 import org.jboss.tools.test.util.JobUtils;
 import org.jboss.tools.test.util.TestProjectProvider;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class OpenShiftSpringBootProfileDetectorTest {
@@ -37,7 +38,6 @@ public class OpenShiftSpringBootProfileDetectorTest {
 		this.project = createSpringBootProject();
 	}
 
-	@Ignore("Works in Eclipse but not in Maven")
 	@Test
 	public void shouldDetectSpringBootProject() {
 		assertThat(new OpenShiftSpringBootProfileDetector().detect(null, null, project))
@@ -46,15 +46,18 @@ public class OpenShiftSpringBootProfileDetectorTest {
 				.isTrue();
 	}
 
+	@SuppressWarnings("restriction")
 	protected IProject createSpringBootProject() throws CoreException, InterruptedException {
 		TestProjectProvider projectProvider = new TestProjectProvider(CONTAINING_PLUGIN, null, SPRING_BOOT_PROJECT_NAME,
-				true);
-		IProject project = projectProvider.getProject();
-		project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+				false);
 		JobUtils.waitForIdle();
-		JavaCore.create(project);
-		JobUtils.waitForIdle();
-		return project;
+		IProject project = projectProvider.getProject();	
+        MavenPluginActivator mavenPlugin = MavenPluginActivator.getDefault();
+        IProjectConfigurationManager configurationManager = mavenPlugin.getProjectConfigurationManager();
+        MavenUpdateRequest request = new MavenUpdateRequest(project, false, true);
+        configurationManager.updateProjectConfiguration(request, new NullProgressMonitor());
+        JobUtils.waitForIdle();
+        return project;
 	}
 
 	@After
