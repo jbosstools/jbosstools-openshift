@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.openshift.cdk.server.test.internal;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -29,14 +29,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
-import org.eclipse.wst.server.core.ServerUtil;
 import org.jboss.tools.openshift.cdk.server.core.internal.CDKConstants;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK32Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDK3Server;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.CDKServer;
 import org.jboss.tools.openshift.cdk.server.core.internal.adapter.controllers.CDK3LaunchController;
 import org.jboss.tools.openshift.cdk.server.test.CDKTestActivator;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
